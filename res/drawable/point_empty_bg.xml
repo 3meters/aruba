@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:shape="oval">
+	<gradient
+		android:angle="315"
+		android:type="linear"
+		android:startColor="@color/point_searching_start"
+		android:endColor="@color/point_searching_end" />
+	<stroke
+		android:width="2px"
+		android:color="@color/point_searching_outline" />		
+</shape>

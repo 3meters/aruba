@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent"
+	android:orientation="vertical">
+	<include
+		layout="@layout/temp_application_header" />
+	<LinearLayout
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
+		android:gravity="center"
+		style="@style/LayoutOuter">
+		<!--
+			Reward Payoffs <TableLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_marginTop="5dp"
+			android:layout_marginBottom="5dp" android:layout_marginLeft="10dp" android:layout_marginRight="10dp"> <TableRow> <TextView android:text="Reward
+			Savings" style="@style/Dashboard_Text_Body" android:textStyle="bold" android:gravity="left" android:layout_weight="1" /> <TextView
+			android:text="$154.80" style="@style/Dashboard_Text_Body" android:textStyle="bold" android:gravity="right" android:layout_weight="1" /> </TableRow>
+			<TableRow android:background="@android:color/transparent"> <TextView android:text="Cash Back" style="@style/Dashboard_Text_Body"
+			android:gravity="left" android:layout_weight="1" /> <TextView android:text="$13.10" style="@style/Dashboard_Text_Body" android:gravity="right"
+			android:layout_weight="1" /> </TableRow> </TableLayout>
+		-->
+
+		<!-- Reward Payoffs -->
+		<TableLayout
+			android:layout_height="fill_parent"
+			android:layout_width="fill_parent"
+			android:layout_gravity="center"
+			android:gravity="center">
+			<TableRow
+				android:gravity="center_horizontal">
+				<LinearLayout
+					android:id="@+id/User_Info"
+					style="@style/Dashboard_Icon_Container"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:orientation="vertical"
+					android:paddingBottom="15dp"
+					android:gravity="center">
+					<FrameLayout
+						android:layout_height="wrap_content"
+						android:layout_width="wrap_content">
+						<ImageView
+							android:id="@+id/User_Placeholder"
+							android:layout_height="75dp"
+							android:layout_width="75dp"
+							android:scaleType="centerInside"
+							android:minHeight="75dp"
+							android:maxHeight="75dp"
+							android:minWidth="75dp"
+							android:maxWidth="75dp"
+							android:padding="0px"
+							android:background="@color/picture_border"
+							android:src="@drawable/icon_placeholder_generic" />
+						<ImageView
+							android:id="@+id/User_Picture"
+							android:scaleType="centerCrop"
+							android:minHeight="75dp"
+							android:maxHeight="75dp"
+							android:minWidth="75dp"
+							android:maxWidth="75dp"
+							style="@style/Dashboard_Picture" />
+					</FrameLayout>
+					<TextView
+						android:id="@+id/User_Name"
+						android:text="Profile"
+						android:maxLines="2"
+						android:maxWidth="120dp"
+						android:ellipsize="end"
+						style="@style/Dashboard_Text_Body" />
+				</LinearLayout>
+			</TableRow>
+			<TableRow
+				android:gravity="center_horizontal">
+				<LinearLayout
+					style="@style/Dashboard_Icon_Container"
+					android:gravity="center">
+					<Button
+						android:id="@+id/Button_Friends"
+						style="@style/Dashboard_Icon"
+						android:tag="FriendsList"
+						android:background="@drawable/button_selector"
+						android:text="Friends"
+						android:drawableTop="@drawable/ic_dash_blue_friends_white"
+						android:drawablePadding="-5dp" />
+				</LinearLayout>
+				<LinearLayout
+					style="@style/Dashboard_Icon_Container"
+					android:gravity="center">
+					<Button
+						android:id="@+id/Button_Radar"
+						style="@style/Dashboard_Icon"
+						android:tag="Radar"
+						android:background="@drawable/button_selector"
+						android:text="Radar"
+						android:drawableTop="@drawable/ic_dash_blue_radar3_white"
+						android:drawablePadding="0dp" />
+				</LinearLayout>
+			</TableRow>
+			<TableRow
+				android:gravity="center_horizontal">
+				<LinearLayout
+					style="@style/Dashboard_Icon_Container"
+					android:gravity="center">
+					<Button
+						android:id="@+id/Button_Eggs"
+						style="@style/Dashboard_Icon"
+						android:tag="EggsMineList"
+						android:background="@drawable/button_selector"
+						android:text="My Eggs"
+						android:drawableTop="@drawable/ic_dash_blue_eggs_white"
+						android:drawablePadding="0dp" />
+				</LinearLayout>
+			</TableRow>
+		</TableLayout>
+	</LinearLayout>
+</LinearLayout>

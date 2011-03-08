@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/ListItem_Row"
+	style="@style/ListItem_Row">
+	<TableRow>
+		<TextView
+			android:id="@+id/ListItem_Body"
+			style="@style/ListItem_Body" />
+	</TableRow>
+</TableLayout>

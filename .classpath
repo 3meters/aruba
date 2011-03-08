@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="lib" path="C:/Users/Jayma/Desktop/Ripple/Android/packages/google-gson-1.5/gson-1.5.jar" sourcepath="C:/Users/Jayma/Desktop/Ripple/Android/packages/google-gson-1.5/gson-1.5-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Jayma/Desktop/Ripple/Android/packages/google-gson-1.5/gson-1.5-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Jayma/Desktop/Ripple/Android/google-collect/google-collect-1.0-rc2.jar"/>
+	<classpathentry kind="lib" path="D:/Files/Ripple/Code/RippleClient/3metersSdk/bin/3meters-sdk-widgets-1.0.0.jar" sourcepath="D:/Files/Ripple/Code/RippleClient/3metersSdk/bin/3meters-sdk-widgets-1.0.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

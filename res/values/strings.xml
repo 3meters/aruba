@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string
+		name="app_name">Ripple</string>
+	<string
+		name="application_title">Ripple</string>
+	<string
+		name="alert_dialog_wifidisabled">Wifi is currently disabled. Do you want to enable it now?</string>
+	<string
+		name="alert_dialog_yes">Yes</string>
+	<string
+		name="alert_dialog_no">No</string>
+	<string
+		name="alert_toast_networkmissing">No network service at this time. Please try again later.</string>
+	<string
+		name="eggs_drop_intro_empty">This spot is out of eggs! Be the one to drop a basket and start an egg hunt.</string>
+	<string
+		name="eggs_drop_intro">When this spot is out of eggs you can start a new egg hunt by dropping a new basket of eggs!</string>
+	<string
+		name="eggs_drop_message_label">Include a personal message:</string>
+	<string
+		name="eggs_drop_message_value">Live long and prosper.</string>
+	<string
+		name="test_text">The ladies of Assassins Creed: Brotherhood have both bark and bite. If you played Assassins Creed II, then you already know Caterina Sforza,
+		the comely Italian countess with a soft spot for sly, rugged assassins. Shes not the only female character with an important role to play in
+		Brotherhood, however.</string>
+</resources>

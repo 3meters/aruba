@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="wrap_content"
+	android:layout_width="wrap_content"
+	android:orientation="vertical">
+	<TextView
+		android:id="@+id/TileTitle"
+		android:text="Ripple Title"
+		android:textSize="14sp"
+		android:textColor="@color/badge_text"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent" />
+	<FrameLayout
+		android:id="@+id/TileBody"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent">
+		<ImageView
+			android:id="@+id/ImageLayer"
+			android:layout_gravity="top"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent" />
+		<TextView
+			android:id="@+id/TextLayer"
+			android:textSize="14sp"
+			android:padding="8px"
+			android:textColor="@color/badge_text"
+			android:gravity="top|left"
+			android:layout_height="250px"
+			android:layout_width="fill_parent" />
+	</FrameLayout>
+</LinearLayout>

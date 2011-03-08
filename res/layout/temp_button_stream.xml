@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="wrap_content"
+	android:layout_width="wrap_content"
+	android:gravity="bottom"
+	android:clipChildren="false"
+	android:clickable="true"
+	android:onClick="onStreamButtonClick">
+	<Button
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/StreamButton"
+		android:text="Stream"
+		android:textSize="@dimen/menuitem_text"
+		android:textColor="#ffffffff"
+		android:height="72dp"
+		android:width="80dp"
+		android:gravity="center"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_marginTop="5dp"
+		android:layout_marginRight="5dp"
+		android:background="@drawable/button_selector"
+		android:clickable="true"
+		android:onClick="onStreamButtonClick" />
+	<TextView
+		android:id="@+id/StreamBadge"
+		android:text="10"
+		android:textSize="14sp"
+		android:textColor="@color/badge_text"
+		android:layout_marginTop="2dp"
+		android:layout_marginRight="2dp"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_alignParentRight="true"
+		android:gravity="center"
+		android:height="24dp"
+		android:width="24dp"
+		android:clickable="true"
+		android:onClick="onStreamButtonClick" />
+</RelativeLayout>
