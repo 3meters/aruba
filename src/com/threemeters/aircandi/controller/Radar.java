@@ -46,8 +46,8 @@ import android.widget.AdapterView.OnItemClickListener;
 
 import com.facebook.android.BaseRequestListener;
 import com.threemeters.aircandi.model.UserFb;
-import com.threemeters.aircandi.ripple.utilities.DateUtils;
-import com.threemeters.aircandi.ripple.utilities.Utilities;
+import com.threemeters.aircandi.utilities.DateUtils;
+import com.threemeters.aircandi.utilities.Utilities;
 import com.threemeters.sdk.android.core.BaseModifyListener;
 import com.threemeters.sdk.android.core.BaseQueryListener;
 import com.threemeters.sdk.android.core.Entity;
@@ -57,6 +57,7 @@ import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
 import com.threemeters.sdk.android.core.RippleService.GsonType;
 import com.threemeters.sdk.android.core.RippleService.QueryFormat;
+import com.threemeters.sdk.android.widgets.ImageCache;
 import com.threemeters.sdk.android.widgets.RippleView;
 
 public class Radar extends AircandiActivity {

@@ -22,14 +22,15 @@ import android.widget.Toast;
 
 import com.threemeters.aircandi.model.FriendsFb;
 import com.threemeters.aircandi.model.UserFb;
-import com.threemeters.aircandi.ripple.utilities.DateUtils;
-import com.threemeters.aircandi.ripple.utilities.Utilities;
+import com.threemeters.aircandi.utilities.DateUtils;
+import com.threemeters.aircandi.utilities.Utilities;
 import com.threemeters.sdk.android.core.BaseQueryListener;
 import com.threemeters.sdk.android.core.RippleRunner;
 import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
 import com.threemeters.sdk.android.core.RippleService.GsonType;
 import com.threemeters.sdk.android.core.RippleService.QueryFormat;
+import com.threemeters.sdk.android.widgets.ImageCache;
 
 public class FriendsList extends AircandiActivity
 {

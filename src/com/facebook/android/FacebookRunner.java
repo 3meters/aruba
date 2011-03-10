@@ -27,7 +27,7 @@ import android.os.Bundle;
 
 import com.facebook.android.Facebook.DialogListener;
 import com.threemeters.aircandi.controller.Aircandi;
-import com.threemeters.aircandi.ripple.utilities.Utilities;
+import com.threemeters.aircandi.utilities.Utilities;
 
 /**
  * A sample implementation of asynchronous API requests. This class provides the ability to execute API methods and have

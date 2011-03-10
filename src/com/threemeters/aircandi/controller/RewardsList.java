@@ -27,13 +27,14 @@ import android.widget.Toast;
 
 import com.threemeters.aircandi.model.PromotionsAtPoint;
 import com.threemeters.aircandi.model.Theme;
-import com.threemeters.aircandi.ripple.utilities.Utilities;
+import com.threemeters.aircandi.utilities.Utilities;
 import com.threemeters.sdk.android.core.BaseQueryListener;
 import com.threemeters.sdk.android.core.RippleRunner;
 import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
 import com.threemeters.sdk.android.core.RippleService.GsonType;
 import com.threemeters.sdk.android.core.RippleService.QueryFormat;
+import com.threemeters.sdk.android.widgets.ImageCache;
 
 public class RewardsList extends AircandiActivity
 {

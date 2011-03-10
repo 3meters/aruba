@@ -27,7 +27,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.webkit.CookieSyncManager;
 
-import com.threemeters.aircandi.ripple.utilities.Utilities;
+import com.threemeters.aircandi.utilities.Utilities;
 
 /**
  * Main Facebook object for interacting with the Facebook developer API. Provides methods to log in and log out a user,

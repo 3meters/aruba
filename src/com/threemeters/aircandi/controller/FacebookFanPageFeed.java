@@ -12,7 +12,7 @@ import android.webkit.WebView;
 
 import com.threemeters.aircandi.model.PostFb;
 import com.threemeters.aircandi.model.PostsFb;
-import com.threemeters.aircandi.ripple.utilities.DateUtils;
+import com.threemeters.aircandi.utilities.DateUtils;
 import com.threemeters.sdk.android.core.BaseQueryListener;
 import com.threemeters.sdk.android.core.RippleRunner;
 import com.threemeters.sdk.android.core.RippleService;

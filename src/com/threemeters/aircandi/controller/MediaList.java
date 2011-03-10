@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.threemeters.aircandi.model.Message;
 import com.threemeters.aircandi.model.Resource;
-import com.threemeters.aircandi.ripple.utilities.DateUtils;
+import com.threemeters.aircandi.utilities.DateUtils;
 import com.threemeters.sdk.android.core.BaseModifyListener;
 import com.threemeters.sdk.android.core.BaseQueryListener;
 import com.threemeters.sdk.android.core.Query;

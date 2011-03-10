@@ -1,4 +1,4 @@
-package com.threemeters.aircandi.ripple.utilities;
+package com.threemeters.aircandi.utilities;
 
 import java.io.IOException;
 import java.io.InputStream;

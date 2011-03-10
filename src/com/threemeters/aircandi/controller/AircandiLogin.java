@@ -12,7 +12,7 @@ import com.facebook.android.DialogError;
 import com.facebook.android.FacebookError;
 import com.facebook.android.FacebookRunner;
 import com.facebook.android.Facebook.DialogListener;
-import com.threemeters.aircandi.ripple.utilities.Utilities;
+import com.threemeters.aircandi.utilities.Utilities;
 import com.threemeters.sdk.android.core.RippleService;
 
 public class AircandiLogin extends Activity

@@ -10,7 +10,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.threemeters.aircandi.model.Post;
-import com.threemeters.aircandi.ripple.utilities.DateUtils;
+import com.threemeters.aircandi.utilities.DateUtils;
 import com.threemeters.sdk.android.core.BaseModifyListener;
 import com.threemeters.sdk.android.core.RippleRunner;
 

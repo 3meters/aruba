@@ -38,7 +38,7 @@ import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
-import com.threemeters.aircandi.ripple.utilities.Utilities;
+import com.threemeters.aircandi.utilities.Utilities;
 import com.threemeters.sdk.android.core.RippleService;
 
 /**

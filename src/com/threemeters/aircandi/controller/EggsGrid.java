@@ -33,11 +33,12 @@ import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.threemeters.aircandi.model.Egg;
-import com.threemeters.aircandi.ripple.utilities.DateUtils;
+import com.threemeters.aircandi.utilities.DateUtils;
 import com.threemeters.sdk.android.core.BaseQueryListener;
 import com.threemeters.sdk.android.core.RippleRunner;
 import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.RippleService.QueryFormat;
+import com.threemeters.sdk.android.widgets.ImageCache;
 
 public class EggsGrid extends AircandiActivity
 {
