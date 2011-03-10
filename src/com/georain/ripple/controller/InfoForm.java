@@ -2,9 +2,10 @@ package com.georain.ripple.controller;
 
 import android.os.Bundle;
 import android.webkit.WebView;
+
 import com.georain.ripple.model.Post;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.GsonType;
+import com.threemeters.sdk.android.core.RippleService;
+import com.threemeters.sdk.android.core.RippleService.GsonType;
 
 public class InfoForm extends RippleActivity {
 	

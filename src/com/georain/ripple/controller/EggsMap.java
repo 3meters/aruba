@@ -3,6 +3,7 @@ package com.georain.ripple.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -15,11 +16,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TableRow;
 import android.widget.Toast;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.Basket;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.QueryFormat;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -27,6 +25,10 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class EggsMap extends MapActivity
 {

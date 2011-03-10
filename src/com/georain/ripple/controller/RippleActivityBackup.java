@@ -13,14 +13,15 @@ import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.facebook.android.BaseRequestListener;
 import com.georain.ripple.model.FriendsFb;
 import com.georain.ripple.model.Post;
-import com.georain.ripple.model.RippleService;
 import com.georain.ripple.model.UserFb;
-import com.georain.ripple.model.RippleService.GsonType;
 import com.threemeters.sdk.android.core.Entity;
+import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.RippleService.GsonType;
 
 public abstract class RippleActivityBackup extends Activity
 {
@@ -212,7 +213,7 @@ public abstract class RippleActivityBackup extends Activity
 		// Hide the sign out option if we don't have a current session
 		if (!FacebookService.facebookRunner.isSessionValid())
 		{
-			MenuItem item = (MenuItem) menu.findItem(R.id.signout);
+			MenuItem item = menu.findItem(R.id.signout);
 			item.setVisible(false);
 		}
 		return true;
@@ -224,7 +225,7 @@ public abstract class RippleActivityBackup extends Activity
 		// Hide the sign out option if we don't have a current session
 		if (!FacebookService.facebookRunner.isSessionValid())
 		{
-			MenuItem item = (MenuItem) menu.findItem(R.id.signout);
+			MenuItem item = menu.findItem(R.id.signout);
 			item.setVisible(false);
 		}
 		return true;

@@ -2,6 +2,7 @@ package com.georain.ripple.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,13 +15,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.Post;
-import com.georain.ripple.model.Query;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.GsonType;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.Query;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.RippleService.GsonType;
 
 public class NotesList extends RippleActivity
 {
@@ -109,6 +111,7 @@ public class NotesList extends RippleActivity
 		loadData();
 	}	
 
+	@Override
 	public void onItemClick(View view)
 	{
 		ViewHolder holder = (ViewHolder) view.getTag();
@@ -165,7 +168,7 @@ public class NotesList extends RippleActivity
 
 		public ListAdapter(Context context, int textViewResourceId, ArrayList<Object> items) {
 			super(context, textViewResourceId, items);
-			this.items = (ArrayList<Object>) items;
+			this.items = items;
 		}
 
 		@Override

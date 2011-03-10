@@ -1,20 +1,23 @@
 package com.georain.ripple.controller;
 
 import java.io.IOException;
+
 import org.apache.http.client.ClientProtocolException;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.georain.ripple.model.BaseQueryListener;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService.QueryFormat;
+
+import com.georain.ripple.utilities.Utilities;
+import com.threemeters.sdk.android.core.BaseQueryListener;
 import com.threemeters.sdk.android.core.Entity;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class PointEditor extends RippleActivity
 {
@@ -57,7 +60,7 @@ public class PointEditor extends RippleActivity
 		else
 		{
 			RippleUI.showToastNotification(this, "No current point", Toast.LENGTH_SHORT);
-			Log.d("Ripple", "PointEditor: no current point.");
+			Utilities.Log("Ripple", "PointEditor: no current point.");
 		}
 	}
 

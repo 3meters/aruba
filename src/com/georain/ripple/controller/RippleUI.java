@@ -2,11 +2,10 @@ package com.georain.ripple.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import org.apache.http.client.ClientProtocolException;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.QueryFormat;
+
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -18,8 +17,10 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
-import android.view.Display;
 import android.widget.Toast;
+
+import com.threemeters.sdk.android.core.RippleService;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class RippleUI
 {

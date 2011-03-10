@@ -26,7 +26,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
@@ -46,17 +45,18 @@ import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.facebook.android.BaseRequestListener;
-import com.georain.ripple.model.BaseModifyListener;
-import com.georain.ripple.model.BaseQueryListener;
-import com.georain.ripple.model.Query;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
 import com.georain.ripple.model.UserFb;
-import com.georain.ripple.model.RippleService.GsonType;
-import com.georain.ripple.model.RippleService.QueryFormat;
 import com.georain.ripple.utilities.DateUtils;
+import com.georain.ripple.utilities.Utilities;
+import com.threemeters.sdk.android.core.BaseModifyListener;
+import com.threemeters.sdk.android.core.BaseQueryListener;
 import com.threemeters.sdk.android.core.Entity;
+import com.threemeters.sdk.android.core.Query;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.RippleService.GsonType;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 import com.threemeters.sdk.android.widgets.RippleView;
 
 public class Radar extends RippleActivity {
@@ -143,7 +143,7 @@ public class Radar extends RippleActivity {
 				return;
 			}
 
-			Log.d("Ripple", "Radar: starting facebook graph request for user");
+			Utilities.Log("Ripple", "Radar: starting facebook graph request for user");
 			FacebookService.facebookRunner.request("me", new UserRequestListener());
 		}
 
@@ -218,6 +218,7 @@ public class Radar extends RippleActivity {
 	}
 
 
+	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 
 		super.onConfigurationChanged(newConfig);
@@ -242,7 +243,7 @@ public class Radar extends RippleActivity {
 		public void onComplete(final String response) {
 
 			// Process the response here: executed in background thread
-			Log.d("Ripple", "Radar: returning facebook graph request for user");
+			Utilities.Log("Ripple", "Radar: returning facebook graph request for user");
 			setCurrentUser(RippleService.getGson(GsonType.Internal).fromJson(response, UserFb.class));
 
 			// Once we have a current user, we launch our first wifi scan (which
@@ -261,7 +262,7 @@ public class Radar extends RippleActivity {
 			// Make sure they are in the Ripple service
 			RippleRunner rippleRunner = new RippleRunner();
 			Query query = new Query("Users").filter("Id eq '" + getCurrentUser().id + "'");
-			Log.d("Ripple", "Radar: starting ripple query to see if a facebook user '" + getCurrentUser().id
+			Utilities.Log("Ripple", "Radar: starting ripple query to see if a facebook user '" + getCurrentUser().id
 							+ "' already exists in ripple");
 			rippleRunner.select(query, UserFb.class, new UserQueryListener());
 		}
@@ -276,11 +277,11 @@ public class Radar extends RippleActivity {
 			// We need to insert if we don't have them yet
 			RippleRunner rippleRunner = new RippleRunner();
 			if (users == null || users.size() == 0) {
-				Log.d("Ripple", "Radar: starting ripple insert for '" + getCurrentUser().id + "'");
+				Utilities.Log("Ripple", "Radar: starting ripple insert for '" + getCurrentUser().id + "'");
 				rippleRunner.insert(getCurrentUser(), "Users", new UserReadyListener());
 			}
 			else {
-				Log.d("Ripple", "Radar: starting ripple update for '" + getCurrentUser().id + "'");
+				Utilities.Log("Ripple", "Radar: starting ripple update for '" + getCurrentUser().id + "'");
 				rippleRunner.update(getCurrentUser(), getCurrentUser().getUriOdata(), new UserReadyListener());
 			}
 		}
@@ -291,7 +292,7 @@ public class Radar extends RippleActivity {
 		public void onComplete() {
 
 			// Post the processed result back to the UI thread
-			Log.d("Ripple", "Radar: user '" + getCurrentUser().id + "' has been inserted or updated");
+			Utilities.Log("Ripple", "Radar: user '" + getCurrentUser().id + "' has been inserted or updated");
 		}
 	}
 
@@ -412,8 +413,8 @@ public class Radar extends RippleActivity {
 
 				// Get the latest scan results
 				wifiList_ = wifiManager_.getScanResults();
-				Log.d("Ripple", "Radar: received: " + intent.getAction().toString());
-				Log.d("Ripple", "Radar: starting AsyncTask to rebuild points (includes calls to ripple service)");
+				Utilities.Log("Ripple", "Radar: received: " + intent.getAction().toString());
+				Utilities.Log("Ripple", "Radar: starting AsyncTask to rebuild points (includes calls to ripple service)");
 				new RebuildPointsTask().execute(pointList_, wifiList_);
 			}
 		}
@@ -452,7 +453,7 @@ public class Radar extends RippleActivity {
 				return;
 			}
 
-			Log.d("Ripple", "Radar: returning AsyncTask to rebuild points");
+			Utilities.Log("Ripple", "Radar: returning AsyncTask to rebuild points");
 			updatePointCollection(pointListNew);
 
 			// Let the tagexplorerradar ui know that there are fresh results to process
@@ -820,7 +821,7 @@ public class Radar extends RippleActivity {
 
 			wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
 			wifiList_ = wifiManager_.getScanResults();
-			Log.d("Ripple", "Radar: requesting wifi scan");
+			Utilities.Log("Ripple", "Radar: requesting wifi scan");
 			wifiManager_.startScan();
 		}
 		else if (wifiManager_.getWifiState() == WifiManager.WIFI_STATE_ENABLING)

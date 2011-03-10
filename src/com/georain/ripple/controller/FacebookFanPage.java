@@ -2,7 +2,6 @@ package com.georain.ripple.controller;
 
 import android.app.TabActivity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;

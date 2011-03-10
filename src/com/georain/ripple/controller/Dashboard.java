@@ -2,13 +2,13 @@ package com.georain.ripple.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -17,17 +17,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.facebook.android.BaseRequestListener;
 import com.facebook.android.FacebookRunner;
-import com.georain.ripple.model.BaseModifyListener;
-import com.georain.ripple.model.BaseQueryListener;
-import com.georain.ripple.model.Query;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
 import com.georain.ripple.model.UserFb;
-import com.georain.ripple.model.RippleService.GsonType;
 import com.georain.ripple.utilities.DateUtils;
+import com.georain.ripple.utilities.Utilities;
+import com.threemeters.sdk.android.core.BaseModifyListener;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.Query;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.RippleService.GsonType;
 
 public class Dashboard extends RippleActivity
 {
@@ -50,9 +52,9 @@ public class Dashboard extends RippleActivity
 		// Make sure we are signed in with a valid token before we do anything else
 		if (FacebookService.facebookRunner == null)
 		{
-			Log.d("Ripple", "Radar: Creating new facebook and facebook runner classes using application context");
+			Utilities.Log("Ripple", "Radar: Creating new facebook and facebook runner classes using application context");
 			FacebookService.facebookRunner = new FacebookRunner(Dashboard.this, getApplicationContext());
-			Log.d("Ripple", "Radar: Attempting to restore facebook credentials from shared preferences");
+			Utilities.Log("Ripple", "Radar: Attempting to restore facebook credentials from shared preferences");
 			FacebookService.facebookRunner.restoreCredentials(getApplicationContext(), FacebookService.facebookRunner.facebook);
 		}
 
@@ -60,13 +62,13 @@ public class Dashboard extends RippleActivity
 		// is running so we always check them and route back to the sign in if they need to be refreshed.
 		if (!FacebookService.facebookRunner.facebook.isSessionValid())
 		{
-			Log.d("Ripple", "Radar: Current facebook credentials from shared prefs are not valid so starting RippleLogin activity");
+			Utilities.Log("Ripple", "Radar: Current facebook credentials from shared prefs are not valid so starting RippleLogin activity");
 			Intent intent = new Intent(getApplicationContext(), RippleLogin.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 			startActivity(intent);
 			return;
 		}
-		Log.d("Ripple", "Radar: Current facebook credentials from shared prefs appear to be valid");
+		Utilities.Log("Ripple", "Radar: Current facebook credentials from shared prefs appear to be valid");
 
 		// We'll use these later when we get called back
 		mUserPicture = (ImageView) findViewById(R.id.User_Picture);
@@ -228,7 +230,7 @@ public class Dashboard extends RippleActivity
 		Bitmap bitmap = mImageCache.get(getCurrentUser().id);
 		if (bitmap != null)
 		{
-			Log.d("Ripple", "Radar: cache hit for image '" + userId + "'");
+			Utilities.Log("Ripple", "Radar: cache hit for image '" + userId + "'");
 			getCurrentUser().picture_bitmap = bitmap;
 			showUserPicture();
 			stopProgress();
@@ -256,7 +258,7 @@ public class Dashboard extends RippleActivity
 		protected Bitmap doInBackground(String... params)
 		{
 			// We are on the background thread
-			Log.d("DashboardActivity", "Getting image for " + params[0]);
+			Utilities.Log("DashboardActivity", "Getting image for " + params[0]);
 			Bitmap bitmap = null;
 			bitmap = FacebookService.getFacebookPicture(params[0], params[1]);
 			if (bitmap != null)

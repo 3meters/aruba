@@ -2,12 +2,15 @@ package com.georain.ripple.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import org.apache.http.client.ClientProtocolException;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
 import com.facebook.android.FacebookRunner;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.QueryFormat;
+import com.threemeters.sdk.android.core.RippleService;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class FacebookService
 {

@@ -4,15 +4,16 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.facebook.android.DialogError;
 import com.facebook.android.FacebookError;
 import com.facebook.android.FacebookRunner;
 import com.facebook.android.Facebook.DialogListener;
-import com.georain.ripple.model.RippleService;
+import com.georain.ripple.utilities.Utilities;
+import com.threemeters.sdk.android.core.RippleService;
 
 public class RippleLogin extends Activity
 {
@@ -26,7 +27,7 @@ public class RippleLogin extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.ripple_login);
 
-		Log.d("Ripple", "RippleLogin: Creating new facebook and facebook runner classes using RippleLogin context");
+		Utilities.Log("Ripple", "RippleLogin: Creating new facebook and facebook runner classes using RippleLogin context");
 		FacebookService.facebookRunner = new FacebookRunner(RippleLogin.this, getApplicationContext());
 
 		mSigninButton = (TextView) findViewById(R.id.Signin_Button);
@@ -41,7 +42,7 @@ public class RippleLogin extends Activity
 			RippleUI.showToastNotification(RippleLogin.this, R.string.alert_toast_networkmissing, Toast.LENGTH_SHORT);
 			return;
 		}
-		Log.d("Ripple", "RippleLogin: Calling facebook.authorize and waiting for a callback");
+		Utilities.Log("Ripple", "RippleLogin: Calling facebook.authorize and waiting for a callback");
 		FacebookService.facebookRunner.authorize(new LoginDialogListener());
 	}
 
@@ -52,7 +53,7 @@ public class RippleLogin extends Activity
 			RippleLogin.this.runOnUiThread(new Runnable() {
 				public void run()
 				{
-					Log.d("Ripple", "RippleLogin: Received callback from facebook.authorize");
+					Utilities.Log("Ripple", "RippleLogin: Received callback from facebook.authorize");
 					RippleUI.showToastNotification(RippleLogin.this, "Signed in!", Toast.LENGTH_SHORT);
 					Intent intent = new Intent(getApplicationContext(), Dashboard.class);
 					startActivity(intent);

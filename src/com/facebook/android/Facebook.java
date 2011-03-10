@@ -19,13 +19,15 @@ package com.facebook.android;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.webkit.CookieSyncManager;
+
+import com.georain.ripple.utilities.Utilities;
 
 /**
  * Main Facebook object for interacting with the Facebook developer API. Provides methods to log in and log out a user,
@@ -98,7 +100,7 @@ public class Facebook
 				setAccessExpiresIn(values.getString(EXPIRES));
 				if (isSessionValid())
 				{
-					Log.d("Facebook-authorize", "Login Success! access_token=" + getAccessToken() + " expires=" + getAccessExpires());
+					Utilities.Log("Facebook-authorize", "Login Success! access_token=" + getAccessToken() + " expires=" + getAccessExpires());
 					listener.onComplete(values);
 				}
 				else
@@ -109,19 +111,19 @@ public class Facebook
 
 			public void onError(DialogError error)
 			{
-				Log.d("Facebook-authorize", "Login failed: " + error);
+				Utilities.Log("Facebook-authorize", "Login failed: " + error);
 				listener.onError(error);
 			}
 
 			public void onFacebookError(FacebookError error)
 			{
-				Log.d("Facebook-authorize", "Login failed: " + error);
+				Utilities.Log("Facebook-authorize", "Login failed: " + error);
 				listener.onFacebookError(error);
 			}
 
 			public void onCancel()
 			{
-				Log.d("Facebook-authorize", "Login cancelled");
+				Utilities.Log("Facebook-authorize", "Login cancelled");
 				listener.onCancel();
 			}
 		});

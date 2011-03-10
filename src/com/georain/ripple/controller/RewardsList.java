@@ -3,14 +3,13 @@ package com.georain.ripple.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,14 +24,16 @@ import android.widget.ListView;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.PromotionsAtPoint;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
 import com.georain.ripple.model.Theme;
-import com.georain.ripple.model.RippleService.GsonType;
-import com.georain.ripple.model.RippleService.QueryFormat;
+import com.georain.ripple.utilities.Utilities;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.RippleService.GsonType;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class RewardsList extends RippleActivity
 {
@@ -291,7 +292,7 @@ public class RewardsList extends RippleActivity
 
 		public ListAdapter(Context context, int textViewResourceId, List<Object> items) {
 			super(context, textViewResourceId, items);
-			this.items = (List<Object>) items;
+			this.items = items;
 		}
 
 		@Override
@@ -310,7 +311,7 @@ public class RewardsList extends RippleActivity
 				}
 				catch (Exception e)
 				{
-					Log.d("Ripple", e.getMessage());
+					Utilities.Log("Ripple", e.getMessage());
 				}
 				holder = new ViewHolder();
 				holder.itemIcon = (ImageView) view.findViewById(R.id.ListItem_Icon);
@@ -383,12 +384,12 @@ public class RewardsList extends RippleActivity
 		{
 			// We are on the background thread
 			holder = params[0];
-			Log.d("Ripple", "RewardsList: starting AsyncTask to get image (from cache or service) for " + holder.itemIconUrl);
+			Utilities.Log("Ripple", "RewardsList: starting AsyncTask to get image (from cache or service) for " + holder.itemIconUrl);
 			Bitmap bitmap = null;
 			bitmap = mImageCache.get(holder.itemIconUrl);
 			if (bitmap == null)
 			{
-				Log.d("Ripple", "RewardsList: cache miss: get image from facebook '" + holder.itemIconUrl + "'");
+				Utilities.Log("Ripple", "RewardsList: cache miss: get image from facebook '" + holder.itemIconUrl + "'");
 				bitmap = RippleUI.getImage(holder.itemIconUrl);
 				if (bitmap != null)
 				{
@@ -398,7 +399,7 @@ public class RewardsList extends RippleActivity
 			}
 			else
 			{
-				Log.d("Ripple", "RewardsList: cache hit for image '" + holder.itemIconUrl + "'");
+				Utilities.Log("Ripple", "RewardsList: cache hit for image '" + holder.itemIconUrl + "'");
 			}
 			return bitmap;
 		}
@@ -408,7 +409,7 @@ public class RewardsList extends RippleActivity
 		{
 			// We are on the UI thread
 			super.onPostExecute(bitmap);
-			Log.d("Ripple", "RewardsList: returning AsyncTask to get image (from cache or service) for " + holder.itemIconUrl);
+			Utilities.Log("Ripple", "RewardsList: returning AsyncTask to get image (from cache or service) for " + holder.itemIconUrl);
 			holder.itemIcon.setImageBitmap(bitmap);
 		}
 	}

@@ -2,32 +2,26 @@ package com.georain.ripple.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import android.content.Context;
+
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.georain.ripple.model.BaseModifyListener;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.Message;
-import com.georain.ripple.model.Post;
-import com.georain.ripple.model.Query;
 import com.georain.ripple.model.Resource;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.GsonType;
 import com.georain.ripple.utilities.DateUtils;
+import com.threemeters.sdk.android.core.BaseModifyListener;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.Query;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.RippleService.GsonType;
 
 public class MediaList extends RippleActivity
 {

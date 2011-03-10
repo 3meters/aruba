@@ -5,11 +5,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.PageFb;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.QueryFormat;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class FacebookFanPageInfo extends RippleActivity
 {

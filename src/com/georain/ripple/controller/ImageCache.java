@@ -22,11 +22,13 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
-import android.util.Log;
+
+import com.georain.ripple.utilities.Utilities;
 import com.google.common.collect.MapMaker;
 
 /**
@@ -135,7 +137,7 @@ public class ImageCache implements Map<String, Bitmap>
 			image.compress(compressedImageFormat, cachedImageQuality, ostream);
 			ostream.close();
 			
-			Log.d("Ripple", "Imagecache: Image '" + imageUrl + "' cached as:  '" + imageFile.getName() + "' " + imageFile.length() + " bytes");
+			Utilities.Log("Ripple", "Imagecache: Image '" + imageUrl + "' cached as:  '" + imageFile.getName() + "' " + imageFile.length() + " bytes");
 
 		}
 		catch (FileNotFoundException e)

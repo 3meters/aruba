@@ -2,12 +2,12 @@ package com.georain.ripple.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,13 +18,15 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.EggSetByUser;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.GsonType;
-import com.georain.ripple.model.RippleService.QueryFormat;
+import com.georain.ripple.utilities.Utilities;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.RippleService.GsonType;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class EggsMineList extends RippleActivity
 {
@@ -163,7 +165,7 @@ public class EggsMineList extends RippleActivity
 
 		public ListAdapter(Context context, int textViewResourceId, ArrayList<Object> items) {
 			super(context, textViewResourceId, items);
-			this.items = (ArrayList<Object>) items;
+			this.items = items;
 		}
 
 		@Override
@@ -205,7 +207,7 @@ public class EggsMineList extends RippleActivity
 
 				if (holder.itemIcon != null)
 				{
-					Log.d("Ripple", "EggMineList: getting image for " + itemData.eggSetName);
+					Utilities.Log("Ripple", "EggMineList: getting image for " + itemData.eggSetName);
 					Bitmap bitmap = mImageCache.get(itemData.eggSetResourceId);
 					if (bitmap != null)
 						holder.itemIcon.setImageBitmap(bitmap);

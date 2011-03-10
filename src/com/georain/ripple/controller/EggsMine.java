@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -25,14 +26,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-import com.georain.ripple.controller.EggsGrid.GetImageTask;
-import com.georain.ripple.controller.RippleActivity.ImageHolder;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.Egg;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.QueryFormat;
 import com.georain.ripple.utilities.DateUtils;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class EggsMine extends RippleActivity
 {

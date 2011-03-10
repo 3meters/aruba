@@ -16,7 +16,6 @@
 
 package com.facebook.android;
 
-import android.R;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -28,7 +27,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -38,7 +36,9 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.facebook.android.Facebook.DialogListener;
+import com.georain.ripple.utilities.Utilities;
 
 public class FbDialog extends Dialog
 {
@@ -117,7 +117,7 @@ public class FbDialog extends Dialog
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url)
 		{
-			Log.d("Facebook-WebView", "Redirect URL: " + url);
+			Utilities.Log("Facebook-WebView", "Redirect URL: " + url);
 			// Jayma:replace if (url.startsWith(Facebook.REDIRECT_URI))
 			// Jayma:retrying if (url.startsWith(Facebook.REDIRECT_URI))
 			if (url.startsWith(Facebook.REDIRECT_URI))
@@ -161,7 +161,7 @@ public class FbDialog extends Dialog
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon)
 		{
-			Log.d("Facebook-WebView", "Webview loading URL: " + url);
+			Utilities.Log("Facebook-WebView", "Webview loading URL: " + url);
 			super.onPageStarted(view, url, favicon);
 			mSpinner.show();
 		}

@@ -2,18 +2,21 @@ package com.georain.ripple.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
 import org.apache.http.client.ClientProtocolException;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Toast;
-import com.georain.ripple.model.BaseModifyListener;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.Post;
-import com.georain.ripple.model.Query;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
+import com.threemeters.sdk.android.core.BaseModifyListener;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.Query;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
 
 public class NoteForm extends RippleActivity
 {

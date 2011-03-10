@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -30,12 +31,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.Egg;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.QueryFormat;
 import com.georain.ripple.utilities.DateUtils;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class EggsGrid extends RippleActivity
 {

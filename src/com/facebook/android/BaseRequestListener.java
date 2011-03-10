@@ -3,6 +3,7 @@ package com.facebook.android;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+
 import android.util.Log;
 
 import com.facebook.android.FacebookRunner.RequestListener;

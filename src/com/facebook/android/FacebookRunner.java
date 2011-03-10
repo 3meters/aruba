@@ -19,12 +19,14 @@ package com.facebook.android;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.util.Log;
+
 import com.facebook.android.Facebook.DialogListener;
+import com.georain.ripple.utilities.Utilities;
 
 /**
  * A sample implementation of asynchronous API requests. This class provides the ability to execute API methods and have
@@ -147,7 +149,7 @@ public class FacebookRunner
 					}
 					// Make sure we have cleared out token and expires info that is cached in
 					// shared preferences
-					clear(mContextCredentials);
+					clearCredentials(mContextCredentials);
 					listener.onComplete(response);
 				}
 				catch (FileNotFoundException e)
@@ -250,7 +252,7 @@ public class FacebookRunner
 			{
 				try
 				{
-					Log.d("Ripple", "FacebookRunner: starting thread for facebook graph request: '" + graphPath + "'");
+					Utilities.Log("Ripple", "FacebookRunner: starting thread for facebook graph request: '" + graphPath + "'");
 					String resp = facebook.request(graphPath, parameters, httpMethod);
 					listener.onComplete(resp);
 				}
@@ -291,7 +293,7 @@ public class FacebookRunner
 		return facebook.isSessionValid();
 	}
 
-	private void clear(Context contextCredentials)
+	private void clearCredentials(Context contextCredentials)
 	{
 		Editor editor = contextCredentials.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
 		editor.clear();

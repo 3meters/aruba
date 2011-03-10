@@ -1,7 +1,9 @@
 package com.georain.ripple.controller;
 
 import java.util.ArrayList;
+
 import android.graphics.drawable.Drawable;
+
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 

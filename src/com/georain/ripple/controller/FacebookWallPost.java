@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
+
 import com.facebook.android.DialogError;
 import com.facebook.android.FacebookError;
 import com.facebook.android.Facebook.DialogListener;
@@ -30,6 +31,7 @@ public class FacebookWallPost extends Activity
 		}
 	}
 
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		if (resultCode == RESULT_OK)

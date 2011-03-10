@@ -1,15 +1,18 @@
 package com.georain.ripple.controller;
 
 import java.io.IOException;
+
 import org.apache.http.client.ClientProtocolException;
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.georain.ripple.model.BaseModifyListener;
+
 import com.georain.ripple.model.Post;
-import com.georain.ripple.model.RippleRunner;
 import com.georain.ripple.utilities.DateUtils;
+import com.threemeters.sdk.android.core.BaseModifyListener;
+import com.threemeters.sdk.android.core.RippleRunner;
 
 public class NoteEditor extends RippleActivity
 {

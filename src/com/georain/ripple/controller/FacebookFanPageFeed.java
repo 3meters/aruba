@@ -3,18 +3,20 @@ package com.georain.ripple.controller;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.PostFb;
 import com.georain.ripple.model.PostsFb;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
-import com.georain.ripple.model.RippleService.QueryFormat;
 import com.georain.ripple.utilities.DateUtils;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class FacebookFanPageFeed extends RippleActivity
 {

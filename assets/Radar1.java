@@ -172,7 +172,7 @@ public class Radar1 extends RippleActivity
 				return;
 			}
 
-			Log.d("Ripple", "Radar: starting facebook graph request for user");
+			Utilities.Log("Ripple", "Radar: starting facebook graph request for user");
 			FacebookService.facebookRunner.request("me", new UserRequestListener());
 		}
 		else
@@ -211,7 +211,7 @@ public class Radar1 extends RippleActivity
 		public void onComplete(final String response)
 		{
 			// Process the response here: executed in background thread
-			Log.d("Ripple", "Radar: returning facebook graph request for user");
+			Utilities.Log("Ripple", "Radar: returning facebook graph request for user");
 			setCurrentUser(RippleService.getGson(GsonType.Internal).fromJson(response, UserFb.class));
 
 			// Once we have a current user, we launch our first wifi scan (which leads to data requests)
@@ -230,7 +230,7 @@ public class Radar1 extends RippleActivity
 			// Make sure they are in the Ripple service
 			RippleRunner rippleRunner = new RippleRunner();
 			Query query = new Query("Users").filter("Id eq '" + getCurrentUser().id + "'");
-			Log.d("Ripple", "Radar: starting ripple query to see if a facebook user '" + getCurrentUser().id + "' already exists in ripple");
+			Utilities.Log("Ripple", "Radar: starting ripple query to see if a facebook user '" + getCurrentUser().id + "' already exists in ripple");
 			rippleRunner.select(query, UserFb.class, new UserQueryListener());
 		}
 	}
@@ -245,12 +245,12 @@ public class Radar1 extends RippleActivity
 			RippleRunner rippleRunner = new RippleRunner();
 			if (users == null || users.size() == 0)
 			{
-				Log.d("Ripple", "Radar: starting ripple insert for '" + getCurrentUser().id + "'");
+				Utilities.Log("Ripple", "Radar: starting ripple insert for '" + getCurrentUser().id + "'");
 				rippleRunner.insert(getCurrentUser(), "Users", new UserReadyListener());
 			}
 			else
 			{
-				Log.d("Ripple", "Radar: starting ripple update for '" + getCurrentUser().id + "'");
+				Utilities.Log("Ripple", "Radar: starting ripple update for '" + getCurrentUser().id + "'");
 				rippleRunner.update(getCurrentUser(), getCurrentUser().getUriOdata(), new UserReadyListener());
 			}
 		}
@@ -261,7 +261,7 @@ public class Radar1 extends RippleActivity
 		public void onComplete()
 		{
 			// Post the processed result back to the UI thread
-			Log.d("Ripple", "Radar: user '" + getCurrentUser().id + "' has been inserted or updated");
+			Utilities.Log("Ripple", "Radar: user '" + getCurrentUser().id + "' has been inserted or updated");
 			Radar1.this.runOnUiThread(new Runnable() {
 				public void run()
 				{
@@ -281,7 +281,7 @@ public class Radar1 extends RippleActivity
 		Bitmap bitmap = mImageCache.get(getCurrentUser().id);
 		if (bitmap != null)
 		{
-			Log.d("Ripple", "Radar: cache hit for image '" + userId + "'");
+			Utilities.Log("Ripple", "Radar: cache hit for image '" + userId + "'");
 			getCurrentUser().picture_bitmap = bitmap;
 			showUserPicture();
 		}
@@ -312,7 +312,7 @@ public class Radar1 extends RippleActivity
 		{
 			// We are on the background thread
 			userId = params[0];
-			Log.d("Ripple", "Radar: starting AsyncTask to get image (from cache or service) for " + userId);
+			Utilities.Log("Ripple", "Radar: starting AsyncTask to get image (from cache or service) for " + userId);
 			Bitmap bitmap = null;
 			bitmap = FacebookService.getFacebookPicture(params[0], params[1]);
 			bitmap = RippleUI.cropToSquare(bitmap);
@@ -325,7 +325,7 @@ public class Radar1 extends RippleActivity
 		{
 			// We are on the UI thread
 			super.onPostExecute(bitmap);
-			Log.d("Ripple", "Radar: returning AsyncTask to get image (from cache or service) for " + userId);
+			Utilities.Log("Ripple", "Radar: returning AsyncTask to get image (from cache or service) for " + userId);
 			getCurrentUser().picture_bitmap = bitmap;
 			showUserPicture();
 		}
@@ -453,7 +453,7 @@ public class Radar1 extends RippleActivity
 
 					if (pointRow.isTagged)
 					{
-						Log.d("Ripple", "PointClick: " + pointRow.label + "is a ripple point");
+						Utilities.Log("Ripple", "PointClick: " + pointRow.label + "is a ripple point");
 						viewPointRow.getBackground().mutate().setColorFilter(null);
 						viewPointRow.getBackground().mutate().setColorFilter(getResources().getColor(R.color.point_ripple_filter),
 								PorterDuff.Mode.MULTIPLY);
@@ -544,8 +544,8 @@ public class Radar1 extends RippleActivity
 
 				// Get the latest scan results
 				mWifiList = mWifiManager.getScanResults();
-				Log.d("Ripple", "Radar: received: " + intent.getAction().toString());
-				Log.d("Ripple", "Radar: starting AsyncTask to rebuild points (includes calls to ripple service)");
+				Utilities.Log("Ripple", "Radar: received: " + intent.getAction().toString());
+				Utilities.Log("Ripple", "Radar: starting AsyncTask to rebuild points (includes calls to ripple service)");
 				RebuildPointsTask task = new RebuildPointsTask();
 				task.execute(mPointList, mWifiList);
 			}
@@ -586,7 +586,7 @@ public class Radar1 extends RippleActivity
 				stopProgress();
 				return;
 			}
-			Log.d("Ripple", "Radar: returning AsyncTask to rebuild points");
+			Utilities.Log("Ripple", "Radar: returning AsyncTask to rebuild points");
 			updatePointCollection(pointListNew);
 
 			// Let the radar ui know that there are fresh results to process
@@ -847,7 +847,7 @@ public class Radar1 extends RippleActivity
 		{
 			// We are on the UI thread
 			super.onPostExecute(tableRows);
-			Log.d("Ripple", "Radar: returning AsyncTask to build point table rows");
+			Utilities.Log("Ripple", "Radar: returning AsyncTask to build point table rows");
 			drawUi(tableRows);
 		}
 	}
@@ -1057,7 +1057,7 @@ public class Radar1 extends RippleActivity
 	{
 		if (mLayoutLocked && !mFirstRun)
 		{
-			Log.d("Ripple", "Radar: layout locked to skipping drawUi()");
+			Utilities.Log("Ripple", "Radar: layout locked to skipping drawUi()");
 			return;
 		}
 
@@ -1357,7 +1357,7 @@ public class Radar1 extends RippleActivity
 
 			wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
 			mWifiList = mWifiManager.getScanResults();
-			Log.d("Ripple", "Radar: requesting wifi scan");
+			Utilities.Log("Ripple", "Radar: requesting wifi scan");
 			mWifiManager.startScan();
 		}
 		else if (mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLING)

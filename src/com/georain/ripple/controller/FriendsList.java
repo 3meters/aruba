@@ -3,12 +3,12 @@ package com.georain.ripple.controller;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,15 +19,17 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.georain.ripple.model.BaseQueryListener;
+
 import com.georain.ripple.model.FriendsFb;
-import com.georain.ripple.model.RippleRunner;
-import com.georain.ripple.model.RippleService;
 import com.georain.ripple.model.UserFb;
-import com.georain.ripple.model.RippleService.GsonType;
-import com.georain.ripple.model.RippleService.QueryFormat;
 import com.georain.ripple.utilities.DateUtils;
+import com.georain.ripple.utilities.Utilities;
+import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.RippleRunner;
+import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.RippleService.GsonType;
+import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 
 public class FriendsList extends RippleActivity
 {
@@ -171,7 +173,7 @@ public class FriendsList extends RippleActivity
 
 		public ListAdapter(Context context, int textViewResourceId, List<UserFb> items) {
 			super(context, textViewResourceId, items);
-			this.items = (List<UserFb>) items;
+			this.items = items;
 		}
 
 		@Override
@@ -179,7 +181,7 @@ public class FriendsList extends RippleActivity
 		{
 			View view = convertView;
 			ViewHolder holder;
-			UserFb itemData = (UserFb) items.get(position);
+			UserFb itemData = items.get(position);
 
 			if (view == null)
 			{
@@ -218,7 +220,7 @@ public class FriendsList extends RippleActivity
 					Bitmap bitmap = mImageCache.get(itemData.id);
 					if (bitmap != null)
 					{
-						Log.d("Ripple", "FriendsList: cache hit for image '" + itemData.id + "'");
+						Utilities.Log("Ripple", "FriendsList: cache hit for image '" + itemData.id + "'");
 						holder.itemIcon.setImageBitmap(bitmap);
 					}
 					else
@@ -239,21 +241,21 @@ public class FriendsList extends RippleActivity
 		protected Bitmap doInBackground(ViewHolder... params)
 		{
 			// We are on the background thread
-			Log.d("Ripple", "FriendsList: starting AsyncTask to get image (from cache or service) for " + userId);
+			Utilities.Log("Ripple", "FriendsList: starting AsyncTask to get image (from cache or service) for " + userId);
 			holder = params[0];
 			userId = params[0].userId;
 			Bitmap bitmap = null;
 			bitmap = mImageCache.get(params[0].userId);
 			if (bitmap == null)
 			{
-				Log.d("Ripple", "FriendsList: cache miss: get image from facebook '" + params[0].userId + "'");
+				Utilities.Log("Ripple", "FriendsList: cache miss: get image from facebook '" + params[0].userId + "'");
 				bitmap = FacebookService.getFacebookPicture(params[0].userId, params[0].imageFormat);
 				bitmap = RippleUI.cropToSquare(bitmap);
 				mImageCache.put(params[0].userId, bitmap);
 			}
 			else
 			{
-				Log.d("Ripple", "FriendsList: cache hit for image '" + params[0].userId + "'");
+				Utilities.Log("Ripple", "FriendsList: cache hit for image '" + params[0].userId + "'");
 			}
 			return bitmap;
 		}
@@ -263,7 +265,7 @@ public class FriendsList extends RippleActivity
 		{
 			// We are on the UI thread
 			super.onPostExecute(bitmap);
-			Log.d("Ripple", "FriendsList: returning AsyncTask to get image (from cache or service) for " + userId);
+			Utilities.Log("Ripple", "FriendsList: returning AsyncTask to get image (from cache or service) for " + userId);
 			holder.itemIcon.setImageBitmap(bitmap);
 		}
 	}
