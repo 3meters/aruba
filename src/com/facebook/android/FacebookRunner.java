@@ -26,7 +26,8 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 
 import com.facebook.android.Facebook.DialogListener;
-import com.georain.ripple.utilities.Utilities;
+import com.threemeters.aircandi.controller.Aircandi;
+import com.threemeters.aircandi.ripple.utilities.Utilities;
 
 /**
  * A sample implementation of asynchronous API requests. This class provides the ability to execute API methods and have
@@ -252,7 +253,7 @@ public class FacebookRunner
 			{
 				try
 				{
-					Utilities.Log("Ripple", "FacebookRunner: starting thread for facebook graph request: '" + graphPath + "'");
+					Utilities.Log(Aircandi.APP_NAME, "FacebookRunner: starting thread for facebook graph request: '" + graphPath + "'");
 					String resp = facebook.request(graphPath, parameters, httpMethod);
 					listener.onComplete(resp);
 				}

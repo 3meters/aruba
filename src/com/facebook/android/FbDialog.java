@@ -38,7 +38,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.facebook.android.Facebook.DialogListener;
-import com.georain.ripple.utilities.Utilities;
+import com.threemeters.aircandi.ripple.utilities.Utilities;
 
 public class FbDialog extends Dialog
 {
@@ -87,7 +87,7 @@ public class FbDialog extends Dialog
 	private void setUpTitle()
 	{
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		Drawable icon = getContext().getResources().getDrawable(com.georain.ripple.controller.R.drawable.icon_facebook);
+		Drawable icon = getContext().getResources().getDrawable(com.threemeters.aircandi.controller.R.drawable.icon_facebook);
 		mTitle = new TextView(getContext());
 		mTitle.setText("Facebook");
 		mTitle.setTextColor(Color.WHITE);

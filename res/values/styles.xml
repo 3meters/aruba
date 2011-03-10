@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<style
-		name="RippleTheme" parent="@android:style/Theme">
+		name="AircandiTheme" parent="@android:style/Theme">
 		<item name="android:windowNoTitle">true</item>	
 		<item name="android:windowBackground">@drawable/wallpaper7</item>
 		<item name="android:windowContentOverlay">@null</item>
 	</style>
 	
 	<style
-		name="RippleTheme.NoWallpaper">
+		name="AircandiTheme.NoWallpaper">
 		<item name="android:windowNoTitle">true</item>	
 		<item name="android:windowBackground">@drawable/wallpaper_bg</item>
 	</style>
