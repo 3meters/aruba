@@ -68,7 +68,7 @@ public class FacebookFanPageInfo extends AircandiActivity
 		String html = "";
 		html += "<html>";
 		html += "<head>";
-		html += "<link href='" + Aircandi.URL_RIPPLEZANIA + "styles/rippleclient.css' rel='stylesheet' type='text/css' />";
+		html += "<link href='" + Aircandi.URL_AIRCANDI_SERVICE + "styles/rippleclient.css' rel='stylesheet' type='text/css' />";
 		
 		html += "</head>";
 		html += "<body>";

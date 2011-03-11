@@ -214,7 +214,7 @@ public class EggsMineList extends AircandiActivity
 						holder.itemIcon.setImageBitmap(bitmap);
 					else
 					{
-						String url = Aircandi.URL_RIPPLEMEDIA + "images/eggs/" + itemData.eggSetResourceId;
+						String url = Aircandi.URL_AIRCANDI_MEDIA + "images/eggs/" + itemData.eggSetResourceId;
 						holder.itemIconUrl = url;
 						new GetImageTask().execute(holder); // Will set the picture when finished
 					}

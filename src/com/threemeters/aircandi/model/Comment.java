@@ -2,7 +2,7 @@ package com.threemeters.aircandi.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.threemeters.aircandi.controller.Aircandi;
+import com.threemeters.sdk.android.core.RippleService;
 
 /**
  * @author Jayma
@@ -39,7 +39,7 @@ public class Comment {
 	
 	public String getUriOdata()
 	{
-		String root = Aircandi.URL_RIPPLESERVICE_ODATA;
+		String root = RippleService.URL_RIPPLESERVICE_ODATA;
 		String entity = "Comments";
 		String uri = root + entity + "(guid'" + this.commentId + "')";
 		return uri;

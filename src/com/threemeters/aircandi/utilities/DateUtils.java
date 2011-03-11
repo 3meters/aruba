@@ -46,6 +46,7 @@ public class DateUtils
 		int hours = (int) ((diff / 1000) / (60 * 60));
 		int days = (int) ((diff / 1000) / (60 * 60 * 24));
 		int hoursPart = hours - (days * 24);
+		@SuppressWarnings("unused")
 		int minutesPart = minutes - (hours * 60);
 
 		String interval = "";

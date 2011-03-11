@@ -9,6 +9,6 @@ public class Utilities {
 	public static void Log(String tag, String message) {
 
 		if (Aircandi.MODE_DEBUG)
-			Utilities.Log(tag, message);
+			Log.d(tag, message);
 	}
 }

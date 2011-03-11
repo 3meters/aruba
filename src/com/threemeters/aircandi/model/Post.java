@@ -3,6 +3,7 @@ package com.threemeters.aircandi.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.threemeters.aircandi.controller.Aircandi;
+import com.threemeters.sdk.android.core.RippleService;
 
 /**
  * @author Jayma
@@ -37,12 +38,12 @@ public class Post
 	
 	public String 	getPermaLink()
 	{
-		return String.format("{0}post.aspx?id={1}", Aircandi.URL_RIPPLEBLOGSERVICE, this.postId);
+		return String.format("{0}post.aspx?id={1}", Aircandi.URL_AIRCANDI_BLOG, this.postId);
 	}
 
 	public String getUriOdata()
 	{
-		String root = Aircandi.URL_RIPPLESERVICE_ODATA;
+		String root = RippleService.URL_RIPPLESERVICE_ODATA;
 		String entity = "Posts";
 		String uri = root + entity + "(guid'" + this.postId + "')";
 		return uri;

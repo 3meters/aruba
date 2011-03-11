@@ -1,6 +1,7 @@
 package com.threemeters.aircandi.model;
 
 import java.util.Date;
+
 import com.google.gson.annotations.Expose;
 
 public class FriendAtPoint

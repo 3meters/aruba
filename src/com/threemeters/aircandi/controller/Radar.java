@@ -323,7 +323,7 @@ public class Radar extends AircandiActivity {
 
 		try {
 			if (streamName.toLowerCase().equals("audio")) {
-				mediaPlayer_.setDataSource(Aircandi.URL_RIPPLEMEDIA + "3meters_audio/cezanne.mp3");
+				mediaPlayer_.setDataSource(RippleService.URL_RIPPLEMEDIA + "3meters_audio/cezanne.mp3");
 				mediaPlayer_.prepare();
 				mediaPlayer_.start();
 			}
@@ -564,7 +564,7 @@ public class Radar extends AircandiActivity {
 							entity.isServiceVerified = true;
 							entity.levelDb = levelDb;
 							entity.isNew = true;
-							entity.imageUrl = Aircandi.URL_RIPPLEMEDIA + "3meters_images/" + entity.pointResourceId;
+							entity.imageUrl = RippleService.URL_RIPPLEMEDIA + "3meters_images/" + entity.pointResourceId;
 							entity.discoveryTime = DateUtils.nowDate();
 							entity.addScanPass(levelDb);
 

@@ -169,7 +169,7 @@ public class EggsMine extends AircandiActivity
 			mEggDetailImage.setImageBitmap(bitmap);
 		else
 		{
-			String url = Aircandi.URL_RIPPLEMEDIA + "images/eggs/" + eggResourceId;
+			String url = Aircandi.URL_AIRCANDI_MEDIA + "images/eggs/" + eggResourceId;
 			ImageHolder imageHolder = new ImageHolder();
 			imageHolder.imageId = eggResourceId;
 			imageHolder.imageView = mEggDetailImage;
@@ -392,7 +392,7 @@ public class EggsMine extends AircandiActivity
 				imageView.setImageBitmap(bitmap);
 			else
 			{
-				String url = Aircandi.URL_RIPPLEMEDIA + "images/eggs/" + eggResourceId;
+				String url = Aircandi.URL_AIRCANDI_MEDIA + "images/eggs/" + eggResourceId;
 				ImageHolder imageHolder = new ImageHolder();
 				imageHolder.imageId = eggResourceId;
 				imageHolder.imageView = imageView;

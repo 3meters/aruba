@@ -75,7 +75,7 @@ public class FacebookFanPageFeed extends AircandiActivity
 		html += "<html>";
 		html += "<head>";
 		html += "<meta http-equiv='content-type' content='text/html; charset=utf-8'>";
-		html += "<link href='" + Aircandi.URL_RIPPLEZANIA + "styles/rippleclient.css' rel='stylesheet' type='text/css' />";
+		html += "<link href='" + Aircandi.URL_AIRCANDI_SERVICE + "styles/rippleclient.css' rel='stylesheet' type='text/css' />";
 		html += "</head>";
 		html += "<body>";
 

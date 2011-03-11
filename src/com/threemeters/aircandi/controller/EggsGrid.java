@@ -245,7 +245,7 @@ public class EggsGrid extends AircandiActivity
 			mEggDetailImage.setImageBitmap(bitmap);
 		else
 		{
-			String url = Aircandi.URL_RIPPLEMEDIA + "images/eggs/" + eggResourceId;
+			String url = Aircandi.URL_AIRCANDI_MEDIA + "images/eggs/" + eggResourceId;
 			ImageHolder imageHolder = new ImageHolder();
 			imageHolder.imageId = eggResourceId;
 			imageHolder.imageView = mEggDetailImage;
@@ -286,7 +286,7 @@ public class EggsGrid extends AircandiActivity
 			mEggDetailImage.setImageBitmap(bitmap);
 		else
 		{
-			String url = Aircandi.URL_RIPPLEMEDIA + "images/eggs/" + eggResourceId;
+			String url = Aircandi.URL_AIRCANDI_MEDIA + "images/eggs/" + eggResourceId;
 			ImageHolder imageHolder = new ImageHolder();
 			imageHolder.imageId = eggResourceId;
 			imageHolder.imageView = mEggDetailImage;
@@ -693,7 +693,7 @@ public class EggsGrid extends AircandiActivity
 				imageHolder.imageView.setImageBitmap(bitmap);
 			else
 			{
-				String url = Aircandi.URL_RIPPLEMEDIA + "images/eggs/" + eggResourceId;
+				String url = Aircandi.URL_AIRCANDI_MEDIA + "images/eggs/" + eggResourceId;
 				imageHolder.imageId = eggResourceId;
 				imageHolder.imageUrl = url;
 				new GetImageTask().execute(imageHolder);

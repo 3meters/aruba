@@ -20,13 +20,12 @@ public class Aircandi extends Application {
 	public Location				currentLocation;
 	public static final int		TWO_MINUTES				= 1000 * 60 * 2;
 	public static final int		FIVE_MINUTES			= 1000 * 60 * 5;
-	public static final String	URL_RIPPLESERVICE_ODATA	= "http://dev.georain.com/ripodata.svc/";
-	public static final String	URL_RIPPLESERVICE		= "http://dev.georain.com/riplogic.asmx/";
-	public static final String	URL_RIPPLEMEDIA			= "https://s3.amazonaws.com/";
-	public static final String	URL_RIPPLEZANIA			= "http://devzania.georain.com/";
-	public static final String	URL_RIPPLEBLOGSERVICE	= "http://devblog.georain.com/";
+	public static final String	URL_AIRCANDI_SERVICE	= "http://dev.aircandi.com/";
+	public static final String	URL_AIRCANDI_BLOG		= "http://devblog.georain.com/";
+	public static final String	URL_AIRCANDI_MEDIA		= "https://s3.amazonaws.com/";
+
 	public static final boolean	MODE_DEBUG				= true;
-	public static final String 	APP_NAME				= "Aircandi";
+	public static final String	APP_NAME				= "Aircandi";
 
 
 	public Aircandi() {
@@ -39,6 +38,7 @@ public class Aircandi extends Application {
 
 		super.onCreate();
 	}
+
 
 	/**
 	 * Callback interface for Aircandi async requests.

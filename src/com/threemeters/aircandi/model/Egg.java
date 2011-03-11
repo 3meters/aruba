@@ -1,8 +1,9 @@
 package com.threemeters.aircandi.model;
 
 import android.graphics.Bitmap;
+
 import com.google.gson.annotations.Expose;
-import com.threemeters.aircandi.controller.Aircandi;
+import com.threemeters.sdk.android.core.RippleService;
 
 /**
  * @author Jayma
@@ -80,7 +81,7 @@ public class Egg
 
 	public String getUriOdata()
 	{
-		String root = Aircandi.URL_RIPPLESERVICE_ODATA;
+		String root = RippleService.URL_RIPPLESERVICE_ODATA;
 		String entity = "Eggs";
 		String uri = root + entity + "(guid'" + this.eggId + "')";
 		return uri;
