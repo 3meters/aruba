@@ -27,7 +27,7 @@ public class Promotion
 
 	public String getUriOdata()
 	{
-		String root = RippleService.URL_RIPPLESERVICE_ODATA;
+		String root = RippleService.URL_RIPPLE_SERVICE_ODATA;
 		String entity = "Promotions";
 		String uri = root + entity + "(guid'" + this.promotionId + "')";
 		return uri;

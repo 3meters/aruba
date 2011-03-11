@@ -46,7 +46,7 @@ public class Message
 	
 	public String getUriOdata()
 	{
-		String root = RippleService.URL_RIPPLESERVICE_ODATA;
+		String root = RippleService.URL_RIPPLE_SERVICE_ODATA;
 		String entity = "Messages";
 		String uri = root + entity + "(guid'" + this.messageId + "')";
 		return uri;

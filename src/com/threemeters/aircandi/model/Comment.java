@@ -39,7 +39,7 @@ public class Comment {
 	
 	public String getUriOdata()
 	{
-		String root = RippleService.URL_RIPPLESERVICE_ODATA;
+		String root = RippleService.URL_RIPPLE_SERVICE_ODATA;
 		String entity = "Comments";
 		String uri = root + entity + "(guid'" + this.commentId + "')";
 		return uri;

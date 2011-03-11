@@ -9,7 +9,7 @@ import android.util.Log;
 import com.facebook.android.FacebookRunner.RequestListener;
 
 /**
- * Skeleton base class for RequestListeners, providing default error 
+ * Skeleton base class for RequestListeners,  providing default error 
  * handling. Applications should handle these error conditions.
  *
  */

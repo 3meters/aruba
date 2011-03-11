@@ -27,7 +27,7 @@ public class Coupon
 
 	public String getUriOdata()
 	{
-		String root = RippleService.URL_RIPPLESERVICE_ODATA;
+		String root = RippleService.URL_RIPPLE_SERVICE_ODATA;
 		String entity = "Coupons";
 		String uri = root + entity + "(guid'" + this.couponId + "')";
 		return uri;

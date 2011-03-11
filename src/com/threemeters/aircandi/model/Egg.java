@@ -81,7 +81,7 @@ public class Egg
 
 	public String getUriOdata()
 	{
-		String root = RippleService.URL_RIPPLESERVICE_ODATA;
+		String root = RippleService.URL_RIPPLE_SERVICE_ODATA;
 		String entity = "Eggs";
 		String uri = root + entity + "(guid'" + this.eggId + "')";
 		return uri;

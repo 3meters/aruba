@@ -9,6 +9,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Jayma/Desktop/Ripple/Android/google-collect/google-collect-1.0-rc2.jar"/>
-	<classpathentry kind="lib" path="D:/Files/Ripple/Code/RippleClient/3metersSdk/bin/3meters-sdk-widgets-1.0.0.jar" sourcepath="D:/Files/Ripple/Code/RippleClient/3metersSdk/bin/3meters-sdk-widgets-1.0.0.jar"/>
+	<classpathentry kind="lib" path="D:/Files/Ripple/Code/Ripple Sdk/3metersSdk/bin/3meters-sdk-widgets-1.0.0.jar" sourcepath="D:/Files/Ripple/Code/Ripple Sdk/3metersSdk/bin/3meters-sdk-widgets-1.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
