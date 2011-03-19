@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import com.facebook.android.BaseRequestListener;
 import com.facebook.android.FacebookRunner;
-import com.threemeters.aircandi.model.UserFb;
 import com.threemeters.aircandi.utilities.DateUtils;
 import com.threemeters.aircandi.utilities.Utilities;
 import com.threemeters.sdk.android.core.BaseModifyListener;
@@ -29,21 +28,23 @@ import com.threemeters.sdk.android.core.Query;
 import com.threemeters.sdk.android.core.RippleRunner;
 import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.UserFb;
 import com.threemeters.sdk.android.core.RippleService.GsonType;
 import com.threemeters.sdk.android.widgets.ImageCache;
 
-public class Dashboard extends AircandiActivity
-{
+public class Dashboard extends AircandiActivity {
+
 	protected ImageView		mUserPicture;
 	protected TextView		mUserName;
 	protected LinearLayout	mUserInfo;
 	protected Bitmap		mUserBitmap	= null;
 	protected ImageCache	mImageCache;
 
+
 	/** Called when the activity is first created. */
 	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
+	public void onCreate(Bundle savedInstanceState) {
+
 		setContentView(R.layout.dashboard);
 		super.onCreate(savedInstanceState);
 
@@ -51,25 +52,28 @@ public class Dashboard extends AircandiActivity
 		PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
 		// Make sure we are signed in with a valid token before we do anything else
-		if (FacebookService.facebookRunner == null)
-		{
-			Utilities.Log(Aircandi.APP_NAME, "Radar: Creating new facebook and facebook runner classes using application context");
+		if (FacebookService.facebookRunner == null) {
+			Utilities.Log(Aircandi.APP_NAME, "Dashboard",
+					"Creating new facebook and facebook runner classes using application context");
 			FacebookService.facebookRunner = new FacebookRunner(Dashboard.this, getApplicationContext());
-			Utilities.Log(Aircandi.APP_NAME, "Radar: Attempting to restore facebook credentials from shared preferences");
-			FacebookService.facebookRunner.restoreCredentials(getApplicationContext(), FacebookService.facebookRunner.facebook);
+			Utilities.Log(Aircandi.APP_NAME, "Dashboard",
+					"Attempting to restore facebook credentials from shared preferences");
+			FacebookService.facebookRunner.restoreCredentials(getApplicationContext(),
+					FacebookService.facebookRunner.facebook);
 		}
 
 		// There is a chance that our credentials could get invalidated while the application
 		// is running so we always check them and route back to the sign in if they need to be refreshed.
-		if (!FacebookService.facebookRunner.facebook.isSessionValid())
-		{
-			Utilities.Log(Aircandi.APP_NAME, "Radar: Current facebook credentials from shared prefs are not valid so starting AircandiLogin activity");
+		if (!FacebookService.facebookRunner.facebook.isSessionValid()) {
+			Utilities.Log(Aircandi.APP_NAME, "Dashboard",
+					"Current facebook credentials from shared prefs are not valid so starting AircandiLogin activity");
 			Intent intent = new Intent(getApplicationContext(), AircandiLogin.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 			startActivity(intent);
 			return;
 		}
-		Utilities.Log(Aircandi.APP_NAME, "Radar: Current facebook credentials from shared prefs appear to be valid");
+		Utilities.Log(Aircandi.APP_NAME, "Dashboard",
+				"Current facebook credentials from shared prefs appear to be valid");
 
 		// We'll use these later when we get called back
 		mUserPicture = (ImageView) findViewById(R.id.User_Picture);
@@ -88,8 +92,9 @@ public class Dashboard extends AircandiActivity
 		theming();
 	}
 
-	public void ensureCurrentUser()
-	{
+
+	public void ensureCurrentUser() {
+
 		// If we don't have a current user object, we create one.
 		startProgress();
 		if (getCurrentUser() == null)
@@ -98,27 +103,33 @@ public class Dashboard extends AircandiActivity
 			showUserInfo();
 	}
 
-	public void theming()
-	{
+
+	public void theming() {
+
 		Button btn = (Button) findViewById(R.id.Button_Radar);
-		btn.getBackground().mutate().setColorFilter(getResources().getColor(R.color.button_color_filter), PorterDuff.Mode.MULTIPLY);
+		btn.getBackground().mutate().setColorFilter(getResources().getColor(R.color.button_color_filter),
+				PorterDuff.Mode.MULTIPLY);
 		btn = (Button) findViewById(R.id.Button_Friends);
-		btn.getBackground().mutate().setColorFilter(getResources().getColor(R.color.button_color_filter), PorterDuff.Mode.MULTIPLY);
+		btn.getBackground().mutate().setColorFilter(getResources().getColor(R.color.button_color_filter),
+				PorterDuff.Mode.MULTIPLY);
 		btn = (Button) findViewById(R.id.Button_Eggs);
-		btn.getBackground().mutate().setColorFilter(getResources().getColor(R.color.button_color_filter), PorterDuff.Mode.MULTIPLY);
+		btn.getBackground().mutate().setColorFilter(getResources().getColor(R.color.button_color_filter),
+				PorterDuff.Mode.MULTIPLY);
 	}
+
 
 	// For this activity, refresh means rescan and reload point data from the service
 	@Override
-	public void onRefreshClick(View view)
-	{
+	public void onRefreshClick(View view) {
+
 		startProgress();
 		AircandiUI.showToastNotification(Dashboard.this, "Configuring for current user...", Toast.LENGTH_SHORT);
 		ensureCurrentUser();
 	}
 
-	public void enableUI(Boolean state)
-	{
+
+	public void enableUI(Boolean state) {
+
 		Button btn = (Button) findViewById(R.id.Button_Radar);
 		btn.setEnabled(state);
 		btn = (Button) findViewById(R.id.Button_Friends);
@@ -127,10 +138,11 @@ public class Dashboard extends AircandiActivity
 		btn.setEnabled(state);
 	}
 
-	public class UserRequestListener extends BaseRequestListener
-	{
-		public void onComplete(final String response)
-		{
+
+	public class UserRequestListener extends BaseRequestListener {
+
+		public void onComplete(final String response) {
+
 			// Process the response here: executed in background thread
 			setCurrentUser(RippleService.getGson(GsonType.Internal).fromJson(response, UserFb.class));
 
@@ -144,14 +156,16 @@ public class Dashboard extends AircandiActivity
 			rippleRunner.select(query, UserFb.class, new UserQueryListener());
 		}
 
+
 		@Override
-		public void onIOException(IOException e)
-		{
+		public void onIOException(IOException e) {
+
 			// TODO Auto-generated method stub
 			super.onIOException(e);
 			Dashboard.this.runOnUiThread(new Runnable() {
-				public void run()
-				{
+
+				public void run() {
+
 					AircandiUI.showToastNotification(Dashboard.this, "Network error", Toast.LENGTH_SHORT);
 					setCurrentUser(null);
 					enableUI(false);
@@ -161,10 +175,10 @@ public class Dashboard extends AircandiActivity
 		}
 	}
 
-	public class UserQueryListener extends BaseQueryListener
-	{
-		public void onComplete(String response)
-		{
+	public class UserQueryListener extends BaseQueryListener {
+
+		public void onComplete(String response) {
+
 			ArrayList<Object> users = RippleService.convertJsonToObjects(response, UserFb.class);
 
 			// We need to insert if we don't have them yet
@@ -175,14 +189,16 @@ public class Dashboard extends AircandiActivity
 				rippleRunner.update(getCurrentUser(), getCurrentUser().getUriOdata(), new UserReadyListener());
 		}
 
+
 		@Override
-		public void onIOException(IOException e)
-		{
+		public void onIOException(IOException e) {
+
 			// TODO Auto-generated method stub
 			super.onIOException(e);
 			Dashboard.this.runOnUiThread(new Runnable() {
-				public void run()
-				{
+
+				public void run() {
+
 					AircandiUI.showToastNotification(Dashboard.this, "Network error", Toast.LENGTH_SHORT);
 					setCurrentUser(null);
 					enableUI(false);
@@ -192,27 +208,30 @@ public class Dashboard extends AircandiActivity
 		}
 	}
 
-	public class UserReadyListener extends BaseModifyListener
-	{
-		public void onComplete()
-		{
+	public class UserReadyListener extends BaseModifyListener {
+
+		public void onComplete() {
+
 			// Post the processed result back to the UI thread
 			Dashboard.this.runOnUiThread(new Runnable() {
-				public void run()
-				{
+
+				public void run() {
+
 					showUserInfo();
 				}
 			});
 		}
 
+
 		@Override
-		public void onIOException(IOException e)
-		{
+		public void onIOException(IOException e) {
+
 			// TODO Auto-generated method stub
 			super.onIOException(e);
 			Dashboard.this.runOnUiThread(new Runnable() {
-				public void run()
-				{
+
+				public void run() {
+
 					AircandiUI.showToastNotification(Dashboard.this, "Network error", Toast.LENGTH_SHORT);
 					setCurrentUser(null);
 					enableUI(false);
@@ -222,16 +241,16 @@ public class Dashboard extends AircandiActivity
 		}
 	}
 
-	public void showUserInfo()
-	{
+
+	public void showUserInfo() {
+
 		// Get their picture
 		String userId = getCurrentUser().id;
 		String imageFormat = "large";
 		mUserName.setText(getCurrentUser().name);
 		Bitmap bitmap = mImageCache.get(getCurrentUser().id);
-		if (bitmap != null)
-		{
-			Utilities.Log(Aircandi.APP_NAME, "Radar: cache hit for image '" + userId + "'");
+		if (bitmap != null) {
+			Utilities.Log(Aircandi.APP_NAME, "Dashboard", "Cache hit for image '" + userId + "'");
 			getCurrentUser().picture_bitmap = bitmap;
 			showUserPicture();
 			stopProgress();
@@ -241,8 +260,9 @@ public class Dashboard extends AircandiActivity
 		enableUI(true);
 	}
 
-	public void showUserPicture()
-	{
+
+	public void showUserPicture() {
+
 		mUserPicture.setImageBitmap(getCurrentUser().picture_bitmap);
 		mUserPicture.setBackgroundColor(0xffffffff);
 		mUserPicture.setAdjustViewBounds(true);
@@ -253,50 +273,49 @@ public class Dashboard extends AircandiActivity
 		stopProgress();
 	}
 
-	class GetFacebookImageTask extends AsyncTask<String, Void, Bitmap>
-	{
+
+	class GetFacebookImageTask extends AsyncTask<String, Void, Bitmap> {
+
 		@Override
-		protected Bitmap doInBackground(String... params)
-		{
+		protected Bitmap doInBackground(String... params) {
+
 			// We are on the background thread
-			Utilities.Log("DashboardActivity", "Getting image for " + params[0]);
+			Utilities.Log(Aircandi.APP_NAME, "Dashboard", "Getting facebook image for " + params[0]);
 			Bitmap bitmap = null;
 			bitmap = FacebookService.getFacebookPicture(params[0], params[1]);
-			if (bitmap != null)
-			{
+			if (bitmap != null) {
 				bitmap = AircandiUI.cropToSquare(bitmap);
 				mImageCache.put(params[0], bitmap);
 			}
 			return bitmap;
 		}
 
+
 		@Override
-		protected void onPostExecute(Bitmap bitmap)
-		{
+		protected void onPostExecute(Bitmap bitmap) {
+
 			// We are on the UI thread
 			super.onPostExecute(bitmap);
-			if (bitmap != null)
-			{
+			if (bitmap != null) {
 				getCurrentUser().picture_bitmap = bitmap;
 				showUserPicture();
 			}
 		}
 	}
 
-	public void onSpotClick(View view)
-	{
+
+	public void onSpotClick(View view) {
+
 		// We always clear any current point when task flow start from the dashboard
 		setCurrentEntity(null);
 		((Aircandi) getApplicationContext()).currentEntityX = null;
 
-		try
-		{
+		try {
 			String target = (String) view.getTag();
 			Class activityClass = Class.forName(this.getPackageName() + "." + target);
 			Intent intent = new Intent(this, activityClass);
 
-			if (activityClass == FriendsList.class)
-			{
+			if (activityClass == FriendsList.class) {
 				Stream stream = new Stream();
 				stream.showHeader = true;
 				stream.showFooter = false;
@@ -306,8 +325,7 @@ public class Dashboard extends AircandiActivity
 				String jsonStream = RippleService.getGson(GsonType.Internal).toJson(stream);
 				intent.putExtra("stream", jsonStream);
 			}
-			if (activityClass == EggsMineList.class)
-			{
+			if (activityClass == EggsMineList.class) {
 				Stream stream = new Stream();
 				stream.showHeader = true;
 				stream.showFooter = false;
@@ -322,8 +340,7 @@ public class Dashboard extends AircandiActivity
 
 			startActivity(intent);
 		}
-		catch (ClassNotFoundException e)
-		{
+		catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}

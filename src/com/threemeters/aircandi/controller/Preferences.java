@@ -8,12 +8,12 @@ public class Preferences extends PreferenceActivity {
 
 	SharedPreferences			prefs;
 
-	public static final String	PREF_RIPPLE_SPOTS_ONLY	= "Pref_Ripple_Spots_Only";
-	public static final String	PREF_DISPLAY_EXTRAS		= "Pref_Display_Extras";
-	public static final String	PREF_LEVEL_CUTOFF		= "Pref_Level_Cutoff";
-	public static final String	PREF_AUTOSCAN			= "Pref_Autoscan";
-	public static final String	PREF_AUTOSCAN_INTERVAL	= "Pref_Autoscan_Interval";
-	public static final String	PREF_SHOW_CONFIG_MENU	= "Pref_Show_Config_Menu";
+	public static final String	PREF_TAGS_WITH_ENTITIES_ONLY	= "Pref_Tags_With_Entities_Only";
+	public static final String	PREF_DISPLAY_EXTRAS				= "Pref_Display_Extras";
+	public static final String	PREF_TAG_LEVEL_CUTOFF			= "Pref_Tag_Level_Cutoff";
+	public static final String	PREF_AUTOSCAN					= "Pref_Autoscan";
+	public static final String	PREF_AUTOSCAN_INTERVAL			= "Pref_Autoscan_Interval";
+	public static final String	PREF_SHOW_CONFIG_MENU			= "Pref_Show_Config_Menu";
 
 
 	@Override

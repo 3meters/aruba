@@ -62,7 +62,7 @@ public class PointEditor extends AircandiActivity
 		else
 		{
 			AircandiUI.showToastNotification(this, "No current point", Toast.LENGTH_SHORT);
-			Utilities.Log(Aircandi.APP_NAME, "PointEditor: no current point.");
+			Utilities.Log(Aircandi.APP_NAME, "PointEditor", "No current point.");
 		}
 	}
 

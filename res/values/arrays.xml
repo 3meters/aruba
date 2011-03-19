@@ -4,15 +4,15 @@
 	<string-array name="displayextras_list_preference">
 		<item>None</item>
 		<item>Level</item>
-		<item>Bssid</item>
+		<item>Tag</item>
 		<item>Time</item>
 	</string-array>
 	
 	<string-array name="displayextrasvalues_list_preference">
-		<item>none</item>
-		<item>level</item>
-		<item>bssid</item>
-		<item>time</item>
+		<item>None</item>
+		<item>Level</item>
+		<item>Tag</item>
+		<item>Time</item>
 	</string-array>
 
 </resources>

@@ -23,10 +23,10 @@ import android.widget.Toast;
 import com.facebook.android.BaseRequestListener;
 import com.threemeters.aircandi.model.FriendsFb;
 import com.threemeters.aircandi.model.Post;
-import com.threemeters.aircandi.model.UserFb;
 import com.threemeters.sdk.android.core.Entity;
 import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.UserFb;
 import com.threemeters.sdk.android.core.RippleService.GsonType;
 
 public abstract class AircandiActivity extends Activity

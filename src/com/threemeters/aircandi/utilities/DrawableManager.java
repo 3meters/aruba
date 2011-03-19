@@ -10,6 +10,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import com.threemeters.aircandi.controller.Aircandi;
+
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -33,12 +35,12 @@ public class DrawableManager {
 			return (Drawable) drawableMap.get(urlString);
 		}
 
-		Utilities.Log(this.getClass().getSimpleName(), "image url:" + urlString);
+		Utilities.Log(Aircandi.APP_NAME, this.getClass().getSimpleName(), "Image url:" + urlString);
 		try {
 			InputStream is = fetch(urlString);
 			Drawable drawable = Drawable.createFromStream(is, "src");
 			drawableMap.put(urlString, drawable);
-			Utilities.Log(this.getClass().getSimpleName(), "got a thumbnail drawable: " + drawable.getBounds()
+			Utilities.Log(Aircandi.APP_NAME, this.getClass().getSimpleName(), "got a thumbnail drawable: " + drawable.getBounds()
 													+ ", "
 													+ drawable.getIntrinsicHeight()
 													+ ","

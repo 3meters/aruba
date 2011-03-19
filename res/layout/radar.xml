@@ -16,19 +16,12 @@
 		android:layout_height="fill_parent"
 		android:layout_width="fill_parent"
 		android:paddingTop="8dp"
+		android:gravity="center_vertical"
 		android:layout_below="@id/AppHeader">
-		<FrameLayout
-			android:id="@+id/flowframe"
+		<com.threemeters.sdk.android.widgets.RippleView
+			android:id="@+id/RippleView"
 			android:layout_height="wrap_content"
-			android:layout_width="fill_parent"
-			android:gravity="clip_vertical"
-			android:layout_gravity="center">
-			<com.threemeters.sdk.android.widgets.RippleView
-				android:id="@+id/RippleView"
-				android:layout_height="wrap_content"
-				android:layout_width="fill_parent"
-				android:gravity="clip_vertical" />
-		</FrameLayout>
+			android:layout_width="fill_parent" />
 		<FrameLayout
 			android:id="@+id/detailframe"
 			android:layout_height="fill_parent"

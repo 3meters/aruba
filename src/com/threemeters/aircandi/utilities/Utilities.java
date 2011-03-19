@@ -6,9 +6,9 @@ import android.util.Log;
 
 public class Utilities {
 
-	public static void Log(String tag, String message) {
+	public static void Log(String tag, String task, String message) {
 
 		if (Aircandi.MODE_DEBUG)
-			Log.d(tag, message);
+			Log.d(tag, task + ": " + message);
 	}
 }

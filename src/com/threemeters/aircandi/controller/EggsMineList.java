@@ -208,7 +208,7 @@ public class EggsMineList extends AircandiActivity
 
 				if (holder.itemIcon != null)
 				{
-					Utilities.Log(Aircandi.APP_NAME, "EggMineList: getting image for " + itemData.eggSetName);
+					Utilities.Log(Aircandi.APP_NAME, "EggMineList", "Getting image for " + itemData.eggSetName);
 					Bitmap bitmap = mImageCache.get(itemData.eggSetResourceId);
 					if (bitmap != null)
 						holder.itemIcon.setImageBitmap(bitmap);

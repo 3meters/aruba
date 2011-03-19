@@ -312,7 +312,7 @@ public class RewardsList extends AircandiActivity
 				}
 				catch (Exception e)
 				{
-					Utilities.Log(Aircandi.APP_NAME, e.getMessage());
+					Utilities.Log(Aircandi.APP_NAME, "RewardsList", e.getMessage());
 				}
 				holder = new ViewHolder();
 				holder.itemIcon = (ImageView) view.findViewById(R.id.ListItem_Icon);
@@ -385,12 +385,12 @@ public class RewardsList extends AircandiActivity
 		{
 			// We are on the background thread
 			holder = params[0];
-			Utilities.Log(Aircandi.APP_NAME, "RewardsList: starting AsyncTask to get image (from cache or service) for " + holder.itemIconUrl);
+			Utilities.Log(Aircandi.APP_NAME, "RewardsList", "Starting AsyncTask to get image (from cache or service) for " + holder.itemIconUrl);
 			Bitmap bitmap = null;
 			bitmap = mImageCache.get(holder.itemIconUrl);
 			if (bitmap == null)
 			{
-				Utilities.Log(Aircandi.APP_NAME, "RewardsList: cache miss: get image from facebook '" + holder.itemIconUrl + "'");
+				Utilities.Log(Aircandi.APP_NAME, "RewardsList", "Cache miss: get image from facebook '" + holder.itemIconUrl + "'");
 				bitmap = AircandiUI.getImage(holder.itemIconUrl);
 				if (bitmap != null)
 				{
@@ -400,7 +400,7 @@ public class RewardsList extends AircandiActivity
 			}
 			else
 			{
-				Utilities.Log(Aircandi.APP_NAME, "RewardsList: cache hit for image '" + holder.itemIconUrl + "'");
+				Utilities.Log(Aircandi.APP_NAME, "RewardsList", "Cache hit for image '" + holder.itemIconUrl + "'");
 			}
 			return bitmap;
 		}
@@ -410,7 +410,7 @@ public class RewardsList extends AircandiActivity
 		{
 			// We are on the UI thread
 			super.onPostExecute(bitmap);
-			Utilities.Log(Aircandi.APP_NAME, "RewardsList: returning AsyncTask to get image (from cache or service) for " + holder.itemIconUrl);
+			Utilities.Log(Aircandi.APP_NAME, "RewardsList", "Returning AsyncTask to get image (from cache or service) for " + holder.itemIconUrl);
 			holder.itemIcon.setImageBitmap(bitmap);
 		}
 	}

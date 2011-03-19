@@ -1,6 +1,7 @@
 package com.threemeters.aircandi.model;
 
 import com.google.gson.annotations.Expose;
+import com.threemeters.sdk.android.core.UserFb;
 
 public class PostFb
 {

@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.webkit.CookieSyncManager;
 
+import com.threemeters.aircandi.controller.Aircandi;
 import com.threemeters.aircandi.utilities.Utilities;
 
 /**
@@ -100,7 +101,7 @@ public class Facebook
 				setAccessExpiresIn(values.getString(EXPIRES));
 				if (isSessionValid())
 				{
-					Utilities.Log("Facebook-authorize", "Login Success! access_token=" + getAccessToken() + " expires=" + getAccessExpires());
+					Utilities.Log(Aircandi.APP_NAME, "Facebook", "Login Success! access_token=" + getAccessToken() + " expires=" + getAccessExpires());
 					listener.onComplete(values);
 				}
 				else
@@ -111,19 +112,19 @@ public class Facebook
 
 			public void onError(DialogError error)
 			{
-				Utilities.Log("Facebook-authorize", "Login failed: " + error);
+				Utilities.Log(Aircandi.APP_NAME, "Facebook", "Login failed: " + error);
 				listener.onError(error);
 			}
 
 			public void onFacebookError(FacebookError error)
 			{
-				Utilities.Log("Facebook-authorize", "Login failed: " + error);
+				Utilities.Log(Aircandi.APP_NAME, "Facebook", "Login failed: " + error);
 				listener.onFacebookError(error);
 			}
 
 			public void onCancel()
 			{
-				Utilities.Log("Facebook-authorize", "Login cancelled");
+				Utilities.Log(Aircandi.APP_NAME, "Facebook", "Login cancelled");
 				listener.onCancel();
 			}
 		});

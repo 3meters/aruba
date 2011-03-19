@@ -8,8 +8,8 @@ import android.util.Log;
 
 import com.threemeters.aircandi.model.FriendsFb;
 import com.threemeters.aircandi.model.Post;
-import com.threemeters.aircandi.model.UserFb;
 import com.threemeters.sdk.android.core.Entity;
+import com.threemeters.sdk.android.core.UserFb;
 
 public class Aircandi extends Application {
 

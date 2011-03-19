@@ -38,6 +38,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.facebook.android.Facebook.DialogListener;
+import com.threemeters.aircandi.controller.Aircandi;
 import com.threemeters.aircandi.utilities.Utilities;
 
 public class FbDialog extends Dialog
@@ -117,7 +118,7 @@ public class FbDialog extends Dialog
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url)
 		{
-			Utilities.Log("Facebook-WebView", "Redirect URL: " + url);
+			Utilities.Log(Aircandi.APP_NAME, "Facebook", "WebView redirect URL: " + url);
 			// Jayma:replace if (url.startsWith(Facebook.REDIRECT_URI))
 			// Jayma:retrying if (url.startsWith(Facebook.REDIRECT_URI))
 			if (url.startsWith(Facebook.REDIRECT_URI))
@@ -161,7 +162,7 @@ public class FbDialog extends Dialog
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon)
 		{
-			Utilities.Log("Facebook-WebView", "Webview loading URL: " + url);
+			Utilities.Log(Aircandi.APP_NAME, "Facebook", "WebView loading URL: " + url);
 			super.onPageStarted(view, url, favicon);
 			mSpinner.show();
 		}

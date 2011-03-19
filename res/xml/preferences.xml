@@ -4,26 +4,26 @@
 	<PreferenceCategory
 		android:title="Finder preferences">
 		<CheckBoxPreference
-			android:id="@+id/Pref_Ripple_Spots_Only"
-			android:key="Pref_Ripple_Spots_Only"
+			android:id="@+id/Pref_Tags_With_Entities_Only"
+			android:key="Pref_Tags_With_Entities_Only"
 			android:defaultValue="true"
 			android:title="Ripple spots only"
-			android:summary="Only show registered ripple spots" />
+			android:summary="Only show tagged entities" />
 		<ListPreference
 			android:id="@+id/Pref_Display_Extras"
 			android:key="Pref_Display_Extras"
-			android:defaultValue="none"
+			android:defaultValue="None"
 			android:title="Display extras"
-			android:summary="Show extra info in the spot caption"
+			android:summary="Show extra info in the entity title"
 			android:entries="@array/displayextras_list_preference"
 			android:entryValues="@array/displayextrasvalues_list_preference"
 			android:dialogTitle="Select extra" />
 		<EditTextPreference
-			android:id="@+id/Pref_Level_Cutoff"
-			android:key="Pref_Level_Cutoff"
+			android:id="@+id/Pref_Tag_Level_Cutoff"
+			android:key="Pref_Tag_Level_Cutoff"
 			android:defaultValue="-100"
-			android:title="Level cutoff"
-			android:summary="Minimum average signal level required for display"
+			android:title="Tag Level cutoff"
+			android:summary="Minimum average signal level required for tag display"
 			android:dialogTitle="Enter signal level" />
 		<CheckBoxPreference
 			android:id="@+id/Pref_Autoscan"

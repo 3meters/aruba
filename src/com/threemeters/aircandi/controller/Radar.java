@@ -1,26 +1,16 @@
 package com.threemeters.aircandi.controller;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import org.apache.http.client.ClientProtocolException;
-
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.MediaPlayer;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
-import android.net.wifi.WifiManager.WifiLock;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,7 +23,6 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -42,23 +31,27 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
 import com.facebook.android.BaseRequestListener;
-import com.threemeters.aircandi.model.UserFb;
 import com.threemeters.aircandi.utilities.DateUtils;
 import com.threemeters.aircandi.utilities.Utilities;
 import com.threemeters.sdk.android.core.BaseModifyListener;
 import com.threemeters.sdk.android.core.BaseQueryListener;
+import com.threemeters.sdk.android.core.BaseTagScanListener;
 import com.threemeters.sdk.android.core.Entity;
 import com.threemeters.sdk.android.core.Query;
+import com.threemeters.sdk.android.core.RippleError;
 import com.threemeters.sdk.android.core.RippleRunner;
 import com.threemeters.sdk.android.core.RippleService;
 import com.threemeters.sdk.android.core.Stream;
+import com.threemeters.sdk.android.core.TagExplorer;
+import com.threemeters.sdk.android.core.UserFb;
 import com.threemeters.sdk.android.core.RippleService.GsonType;
-import com.threemeters.sdk.android.core.RippleService.QueryFormat;
 import com.threemeters.sdk.android.widgets.ImageCache;
+import com.threemeters.sdk.android.widgets.RippleAdapterView;
 import com.threemeters.sdk.android.widgets.RippleView;
+import com.threemeters.sdk.android.widgets.RippleAdapterView.OnItemClickListener;
+import com.threemeters.sdk.android.widgets.RippleView.DisplayExtra;
 
 public class Radar extends AircandiActivity {
 
@@ -83,41 +76,37 @@ public class Radar extends AircandiActivity {
 	}
 
 
-	public Boolean				isSuspended_			= false;
+	private Boolean				prefAutoscan_				= true;
+	private int					prefAutoscanInterval_		= 5000;
+	private int					prefTagLevelCutoff_			= -100;
+	private boolean				prefTagsWithEntitiesOnly_	= true;
+	private DisplayExtra		prefDisplayExtras_			= DisplayExtra.None;
 
-	private Boolean				prefAutoscan_			= true;
-	private int					prefAutoscanInterval_	= 5000;
+	@SuppressWarnings("unused")
+	private ArrayList<Entity>	entityList_					= new ArrayList<Entity>();
+	private ArrayList<Entity>	entityListFiltered_			= new ArrayList<Entity>();
 
-	private ArrayList<Entity>	entityList_				= new ArrayList<Entity>();
-	private ArrayList<Entity>	entityListFiltered_		= new ArrayList<Entity>();
-
-	private Context				context_;
-	private Boolean				isReadyToRun_			= false;
-	private Handler				handler_				= new Handler();
+	private Boolean				isReadyToRun_				= false;
+	private Handler				handler_					= new Handler();
 	private CxMediaPlayer		mediaPlayerX_;
 	private MediaPlayer			mediaPlayer_;
 
 	private RippleView			rippleView_;
 	protected ImageCache		imageCache_;
 	private LinearLayout		container_;
-	private FrameLayout			rippleViewFrame_;
+	private RippleView			rippleViewFrame_;
 	private FrameLayout			detailViewFrame_;
-	private boolean				isDetailVisible_		= false;
+	private boolean				isDetailVisible_			= false;
 
-	private Boolean				scanRequestActive_		= false;
-	private Boolean				scanRequestProcessing_	= false;
-	private boolean				userRefusedWifiEnable_	= false;
-	private List<ScanResult>	wifiList_;
-	private WifiManager			wifiManager_;
-	private WifiLock			wifiLock_;
-	private WifiReceiver		wifiReceiver_			= new WifiReceiver();
-	private Runnable			wifiScanTask_			= new Runnable() {
+	private boolean				userRefusedWifiEnable_		= false;
+	private TagExplorer			tagExplorer_;
+	private Runnable			tagScanTask_				= new Runnable() {
 
-															public void run() {
+																public void run() {
 
-																wifiScan(false);
-															}
-														};
+																	scanForTags(false);
+																}
+															};
 
 
 	/** Called when the activity is first created. */
@@ -129,9 +118,6 @@ public class Radar extends AircandiActivity {
 		isReadyToRun_ = false;
 		setContentView(R.layout.radar);
 		super.onCreate(savedInstanceState);
-
-		// We stash some preference settings
-		loadPreferences();
 
 		// Image cache
 		imageCache_ = new ImageCache(getApplicationContext(), "aircandi", 100, 16);
@@ -145,12 +131,10 @@ public class Radar extends AircandiActivity {
 				return;
 			}
 
-			Utilities.Log(Aircandi.APP_NAME, "Radar: starting facebook graph request for user");
+			Utilities.Log(Aircandi.APP_NAME, "Radar", "Starting facebook graph request for user");
 			FacebookService.facebookRunner.request("me", new UserRequestListener());
 		}
 
-		// Stashing
-		wifiManager_ = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		mediaPlayer_ = new MediaPlayer();
 		mediaPlayerX_ = new CxMediaPlayer(this);
 
@@ -158,14 +142,26 @@ public class Radar extends AircandiActivity {
 		container_ = (LinearLayout) findViewById(R.id.container);
 		container_.setPersistentDrawingCache(ViewGroup.PERSISTENT_ANIMATION_CACHE);
 
-		rippleViewFrame_ = (FrameLayout) findViewById(R.id.flowframe);
+		rippleViewFrame_ = (RippleView) findViewById(R.id.RippleView);
 		detailViewFrame_ = (FrameLayout) findViewById(R.id.detailframe);
 
+		// Ripple sdk components
+		tagExplorer_ = new TagExplorer(this);
+
+		if (!tagExplorer_.isWifiEnabled()) {
+			this.wifiAskToEnable();
+			if (userRefusedWifiEnable_)
+				return;
+		}
+
 		rippleView_ = (RippleView) findViewById(R.id.RippleView);
+		rippleView_.setScale(1.0f);
+		rippleView_.setSpacing(-25);
 		rippleView_.setDataSource(entityListFiltered_);
+		
 		rippleView_.setOnItemClickListener(new OnItemClickListener() {
 
-			public void onItemClick(AdapterView parent, View v, int position, long id) {
+			public void onItemClick(RippleAdapterView parent, View v, int position, long id) {
 
 				Entity entity = entityListFiltered_.get(position);
 				setCurrentEntity(entity);
@@ -174,8 +170,7 @@ public class Radar extends AircandiActivity {
 				new ShowDetailsTask().execute(detailViewFrame_);
 
 				if (entity.pointResourceId != null && entity.pointResourceId != "")
-					((ImageView) detailViewFrame_.findViewById(R.id.Image)).setImageBitmap(imageCache_
-							.get(entity.pointResourceId));
+					((ImageView) detailViewFrame_.findViewById(R.id.Image)).setImageBitmap(rippleView_.getImageCache().get(entity.pointResourceId));
 
 				((TextView) detailViewFrame_.findViewById(R.id.Title)).setText(entity.title);
 				((TextView) detailViewFrame_.findViewById(R.id.Subtitle)).setText(Html.fromHtml(entity.subtitle));
@@ -183,6 +178,7 @@ public class Radar extends AircandiActivity {
 
 				applyRotation(position, 0, 90);
 			}
+
 		});
 
 		isReadyToRun_ = true;
@@ -247,19 +243,13 @@ public class Radar extends AircandiActivity {
 		public void onComplete(final String response) {
 
 			// Process the response here: executed in background thread
-			Utilities.Log(Aircandi.APP_NAME, "Radar: returning facebook graph request for user");
+			Utilities.Log(Aircandi.APP_NAME, "Radar", "Returning facebook graph request for user");
 			setCurrentUser(RippleService.getGson(GsonType.Internal).fromJson(response, UserFb.class));
 
 			// Once we have a current user, we launch our first wifi scan (which
 			// leads to data requests). Other calls to start wifi scans are in Resume, manual refresh,
 			// and autoscan (setup at the end of processing a previous wifi scan).
-
-			// Turn on our receiver that it listens for wifi scan results
-			registerReceiver(wifiReceiver_, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-			
-			// Launch an asychronous task to perform a wifi scan.
-			handler_.removeCallbacks(wifiScanTask_);
-			handler_.post(wifiScanTask_);
+			tagExplorer_.scanForTags(new TagScanListener(), getCurrentUser());
 
 			// Update the user with the most current facebook token
 			getCurrentUser().token = FacebookService.facebookRunner.facebook.getAccessToken();
@@ -268,8 +258,8 @@ public class Radar extends AircandiActivity {
 			// Make sure the current user is registered in the Aircandi service
 			RippleRunner rippleRunner = new RippleRunner();
 			Query query = new Query("Users").filter("Id eq '" + getCurrentUser().id + "'");
-			Utilities.Log(Aircandi.APP_NAME,
-					"Radar: starting ripple query to see if a facebook user '" + getCurrentUser().id
+			Utilities.Log(Aircandi.APP_NAME, "Radar",
+					"Starting ripple query to see if a facebook user '" + getCurrentUser().id
 							+ "' already exists in ripple");
 			rippleRunner.select(query, UserFb.class, new UserQueryListener());
 		}
@@ -285,11 +275,11 @@ public class Radar extends AircandiActivity {
 			// Update makes sure we have the latest access token stored with the service for later use.
 			RippleRunner rippleRunner = new RippleRunner();
 			if (users == null || users.size() == 0) {
-				Utilities.Log(Aircandi.APP_NAME, "Radar: starting ripple insert for '" + getCurrentUser().id + "'");
+				Utilities.Log(Aircandi.APP_NAME, "Radar", "Starting ripple insert for '" + getCurrentUser().id + "'");
 				rippleRunner.insert(getCurrentUser(), "Users", new UserReadyListener());
 			}
 			else {
-				Utilities.Log(Aircandi.APP_NAME, "Radar: starting ripple update for '" + getCurrentUser().id + "'");
+				Utilities.Log(Aircandi.APP_NAME, "Radar", "Starting ripple update for '" + getCurrentUser().id + "'");
 				rippleRunner.update(getCurrentUser(), getCurrentUser().getUriOdata(), new UserReadyListener());
 			}
 		}
@@ -301,7 +291,8 @@ public class Radar extends AircandiActivity {
 
 			// This is where to start any post processing needed on the UI thread.
 			// For now, we just log the completion of the interaction with the Aircandi service.
-			Utilities.Log(Aircandi.APP_NAME, "Radar: user '" + getCurrentUser().id + "' has been inserted or updated");
+			Utilities
+					.Log(Aircandi.APP_NAME, "Radar", "User '" + getCurrentUser().id + "' has been inserted or updated");
 		}
 	}
 
@@ -388,7 +379,8 @@ public class Radar extends AircandiActivity {
 	public void onRefreshClick(View view) {
 
 		// For this activity, refresh means rescan and reload point data from the service
-		wifiScan(true);
+		if (isReadyToRun_)
+			scanForTags(true);
 	}
 
 
@@ -405,74 +397,37 @@ public class Radar extends AircandiActivity {
 	// ENTITY routines
 	// ==========================================================================
 
-	class WifiReceiver extends BroadcastReceiver {
+	private void scanForTags(Boolean showProgress) {
 
-		@Override
-		public void onReceive(final Context context, Intent intent) {
+		if (showProgress)
+			startProgress();
 
-			// We might be getting called back but the user has signed out so there is no
-			// current user. In that case, we should just exit.
-			if (getCurrentUser() == null)
-				return;
+		Utilities.Log(Aircandi.APP_NAME, "Radar", "Calling Ripple.TagExplorer to scan for tags");
+		tagExplorer_.scanForTags(new TagScanListener(), getCurrentUser());
 
-			// We only process scan results we have requested
-			if (scanRequestActive_ && !scanRequestProcessing_) {
-				scanRequestActive_ = false;
-				scanRequestProcessing_ = true;
-
-				// Get the latest scan results
-				wifiList_ = wifiManager_.getScanResults();
-				Utilities.Log(Aircandi.APP_NAME, "Radar: received: " + intent.getAction().toString());
-				Utilities.Log(Aircandi.APP_NAME,
-						"Radar: starting AsyncTask to rebuild entities (includes calls to ripple service)");
-				
-				// Start asych task to process the results of the just completed wifi scan.
-				new RebuildEntitiesTask().execute(entityList_, wifiList_);
-			}
+		// Show search message if there aren't any current points
+		TextView message = (TextView) findViewById(R.id.Radar_Message);
+		if (message != null) {
+			message.setVisibility(View.VISIBLE);
+			message.setText("Searching for\ntags...");
 		}
 	}
 
-	class RebuildEntitiesTask extends AsyncTask<Object, Void, ArrayList<Entity>> {
 
-		IOException	exception	= null;
-
+	public class TagScanListener extends BaseTagScanListener {
 
 		@Override
-		protected ArrayList<Entity> doInBackground(Object... params) {
+		public void onComplete(ArrayList<Entity> entities) {
 
-			// We are on the background thread
-			ArrayList<Entity> entityListNew = null;
-			try {
-				entityListNew = lookupEntities((List<Entity>) params[0], (List<ScanResult>) params[1]);
-			}
-			catch (IOException e) {
-				exception = e;
-				e.printStackTrace();
-			}
-			return entityListNew;
-		}
+			Utilities.Log(Aircandi.APP_NAME, "Radar", "Tag scan results returned from Ripple.TagExplorer");
+			Utilities.Log(Aircandi.APP_NAME, "Radar", "Entity count: " + String.valueOf(entities.size()));
 
-
-		@Override
-		protected void onPostExecute(ArrayList<Entity> pointListNew) {
-
-			// We are on the UI thread
-			super.onPostExecute(pointListNew);
-
-			if (exception != null) {
-				AircandiUI.showToastNotification(Radar.this, "Network error", Toast.LENGTH_SHORT);
-				stopProgress();
-				return;
-			}
-
-			Utilities.Log(Aircandi.APP_NAME, "Radar: returning AsyncTask to rebuild points");
-			updatePointCollection(pointListNew);
-
-			// Let the tagexplorerradar ui know that there are fresh results to process
 			try {
 
-				// Refresh the RippleView to reflect any updates to the collection of entities
-				rippleView_.refresh();
+				// Replace the collection
+				entityListFiltered_ = entities;
+				Utilities.Log(Aircandi.APP_NAME, "Radar", "Setting RippleView dataSource property");
+				rippleView_.setDataSource(entityListFiltered_);
 
 				// Scanning is complete so change the heading back to normal
 				// Show search message if there aren't any current points
@@ -481,181 +436,41 @@ public class Radar extends AircandiActivity {
 					message.setVisibility(View.GONE);
 				}
 
+				// Refresh the RippleView to reflect any updates to the collection of entities
+				Utilities.Log(Aircandi.APP_NAME, "Radar", "Refreshing RippleView");
+				rippleView_.refresh();
+
 				stopProgress();
 
 				// Schedule the next wifi scan run
-				scanRequestProcessing_ = false;
 				if (prefAutoscan_) {
-					handler_.removeCallbacks(wifiScanTask_);
-					handler_.postDelayed(wifiScanTask_, prefAutoscanInterval_);
+					handler_.removeCallbacks(tagScanTask_);
+					handler_.postDelayed(tagScanTask_, prefAutoscanInterval_);
 				}
 			}
-			catch (Exception e) {
-				AircandiUI.showToastNotification(context_, "Radar callback failed.", Toast.LENGTH_SHORT);
-			}
-		}
-	}
-
-
-	public ArrayList<Entity> lookupEntities(List<Entity> entityList, List<ScanResult> scanList) throws IOException {
-
-		ArrayList<Entity> entityListNew = new ArrayList<Entity>();
-
-		// Walk all the wifi scan hits
-		for (int i = 0; i < scanList.size(); i++) {
-			
-			ScanResult scanResult = scanList.get(i);
-			String tagId = scanResult.BSSID;
-			String label = scanResult.SSID;
-			String ssid = scanResult.SSID;
-			int levelDb = scanResult.level;
-
-			// Check to see if this wifi point is already being tracked. Every wifi point (tagged or not) has an 
-			// associated entity. For untagged wifi points the entity is a default null type reserved just for 
-			// them and gives us a way to represent them for interaction when needed.
-			//
-			// Jayma: As this code is currently written, we won't catch cases where a tracked raw wifi point has been
-			// externally modified unless the tracked entities are cleared before this method is called.
-			
-			ArrayList<Entity> entitiesExisting = null;
-			if (entityList != null)
-				entitiesExisting = getEntitiesByTagId(entityList, tagId);
-
-			// Any entities already being tracked are carried forward
-			if (entitiesExisting != null && entitiesExisting.size() != 0) {
-				for (Entity entity : entitiesExisting) {
-					entity.isNew = false;
-					entity.addScanPass(levelDb);
-					entityListNew.add(entity);
-				}
-			}
-			else {
-				
-				// Call the ripple service to see if this wifi point has been tagged with any entities.
-				// If call comes back null then there was a network or service problem.
-				// The user got a toast notification from the service and we will still display
-				// the point as raw wifi only. We are making synchronous calls inside 
-				// an asynchronous thread.
-				
-				RippleService ripple = new RippleService();
-
-				String response;
-				try {
-					
-					// New way to get entity data
-					Bundle parameters = new Bundle();
-					parameters.putString("userId", getCurrentUser().id);
-					parameters.putString("bssid", tagId);
-					response = ripple.webMethod("GetEntitiesForTag", parameters, QueryFormat.Json);
-
-					ArrayList<Object> entities = RippleService.convertJsonToObjects(response, Entity.class);
-
-					if (entities == null || entities.size() == 0) {
-						
-						// Get a fake entity to represent the untagged wifi point
-						Entity entity = Entity.getEntityStub(label, tagId, ssid, levelDb, DateUtils.nowDate(), (entities != null), true);
-						entityListNew.add(entity);
-					}
-					else {
-						for (Object obj : entities) {
-							Entity entity = (Entity) obj;
-
-							entity.isTagged = true;
-							entity.isServiceVerified = true;
-							entity.levelDb = levelDb;
-							entity.isNew = true;
-							entity.imageUrl = Aircandi.URL_AIRCANDI_MEDIA + "3meters_images/" + entity.pointResourceId;
-							entity.discoveryTime = DateUtils.nowDate();
-							entity.addScanPass(levelDb);
-
-							entityListNew.add(entity);
-						}
-					}
-				}
-				catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-					throw e;
-				}
-				catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			catch (Exception exception) {
+				AircandiUI.showToastNotification(Radar.this, "Unknown error", Toast.LENGTH_SHORT);
 			}
 		}
 
-		// We need to move over any points in the previous pointList that were
-		// not in the current scanList
-		for (Entity point : entityList)
-			if (getEntitiesByTagId(entityListNew, point.tagId) == null) {
-				point.scanMisses++;
-				if (point.scanMisses < 3)
-					entityListNew.add(point);
-			}
 
-		// Replace the core point list
-		return entityListNew;
-	}
+		public void onIOException(IOException exception) {
 
-
-	public void updatePointCollection(ArrayList<Entity> pointListNew) {
-
-		/**
-		 * This is called whenever we get the results of a new wifi scan. We need to merge any changes together with our
-		 * existing collection of points to reflect the current state of affairs.
-		 */
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		Boolean prefRippleSpotsOnly = prefs.getBoolean(Preferences.PREF_RIPPLE_SPOTS_ONLY, false);
-		Integer prefLevelCutoff = Integer.parseInt(prefs.getString(Preferences.PREF_LEVEL_CUTOFF, "-100"));
-
-		if (pointListNew == null)
-			return;
-
-		entityList_.clear();
-		entityListFiltered_.clear();
-
-		for (Entity point : pointListNew) {
-			entityList_.add(point);
-
-			// Restore the current entity even if it might be filtered out based
-			// on other criteria.
-			// This is done so it isn't yanked out from under the user when they
-			// come back from a downstream operation.
-			// We wouldn't have to do this if we didn't always refresh when the
-			// activity is resumed but we refresh
-			// because downstream operations could have dirtied our current
-			// state.
-			if (getCurrentEntity() != null && getCurrentEntity().tagId.equals(point.tagId)
-				&& getCurrentEntity().label.equals(point.label))
-				entityListFiltered_.add(getCurrentEntity());
-			else {
-				// Filtering
-				if (prefRippleSpotsOnly && !point.isTagged)
-					continue;
-
-				if (point.isTagged && point.getAvgPointLevel() < point.signalThreshold) {
-					point.isHidden = true;
-					continue;
-				}
-
-				int avgPointLevel = point.getAvgPointLevel();
-				if (avgPointLevel < prefLevelCutoff) {
-					point.isHidden = true;
-					continue;
-				}
-
-				if (point.isHidden)
-					point.isNew = true;
-				point.isHidden = false;
-				entityListFiltered_.add(point);
-			}
+			Utilities.Log(RippleService.APP_NAME, "Radar", exception.getMessage());
+			AircandiUI.showToastNotification(Radar.this, "Network error", Toast.LENGTH_SHORT);
+			stopProgress();
+			exception.printStackTrace();
 		}
 
-		// Sort the point collection by point type and how recently discovered
-		Collections.sort(entityListFiltered_, new SortByDiscoveryTime());
+
+		@Override
+		public void onTagExplorerError(RippleError error) {
+
+			AircandiUI.showToastNotification(Radar.this, error.getMessage(), Toast.LENGTH_SHORT);
+			Utilities.Log(RippleService.APP_NAME, "Radar", error.getMessage());
+			stopProgress();
+		}
+
 	}
 
 
@@ -772,54 +587,8 @@ public class Radar extends AircandiActivity {
 
 	private void wifiEnable() {
 
-		wifiManager_.setWifiEnabled(true);
+		tagExplorer_.enableWifi();
 		AircandiUI.showToastNotification(this, "Wifi enabling...", Toast.LENGTH_LONG);
-	}
-
-
-	private void wifiLockAcquire(int lockType) {
-
-		if (wifiLock_ == null) {
-			wifiLock_ = wifiManager_.createWifiLock(lockType, "Aircandi");
-			wifiLock_.setReferenceCounted(false);
-		}
-		if (!wifiLock_.isHeld())
-			wifiLock_.acquire();
-	}
-
-
-	private void wifiReleaseLock() {
-
-		if (wifiLock_.isHeld())
-			wifiLock_.release();
-	}
-
-
-	private void wifiScan(boolean showProgress) {
-
-		if (wifiManager_.isWifiEnabled()) {
-			scanRequestActive_ = true;
-			if (showProgress)
-				startProgress();
-
-			// Show search message if there aren't any current points
-			TextView message = (TextView) findViewById(R.id.Radar_Message);
-			if (message != null) {
-				message.setVisibility(View.VISIBLE);
-				message.setText("Searching for\nspots...");
-			}
-
-			wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
-			wifiList_ = wifiManager_.getScanResults();
-			Utilities.Log(Aircandi.APP_NAME, "Radar: requesting wifi scan");
-			wifiManager_.startScan();
-		}
-		else if (wifiManager_.getWifiState() == WifiManager.WIFI_STATE_ENABLING)
-			AircandiUI.showToastNotification(this, "Wifi still enabling...", Toast.LENGTH_SHORT);
-		else if (!userRefusedWifiEnable_)
-			wifiAskToEnable();
-		else
-			AircandiUI.showToastNotification(this, "Wifi is disabled.", Toast.LENGTH_SHORT);
 	}
 
 
@@ -935,16 +704,31 @@ public class Radar extends AircandiActivity {
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		if (prefs != null) {
-			Integer.parseInt(prefs.getString(Preferences.PREF_LEVEL_CUTOFF, "-100"));
-			this.setPrefAutoscan(prefs.getBoolean(Preferences.PREF_AUTOSCAN, true));
-			prefAutoscanInterval_ = Integer.parseInt(prefs.getString(Preferences.PREF_AUTOSCAN_INTERVAL, "5000"));
+			this.prefAutoscan_ = prefs.getBoolean(Preferences.PREF_AUTOSCAN, true);
+			this.prefAutoscanInterval_ = Integer.parseInt(prefs.getString(Preferences.PREF_AUTOSCAN_INTERVAL, "5000"));
+			this.prefTagLevelCutoff_ = Integer.parseInt(prefs.getString(Preferences.PREF_TAG_LEVEL_CUTOFF, "-100"));
+			this.prefTagsWithEntitiesOnly_ = prefs.getBoolean(Preferences.PREF_TAGS_WITH_ENTITIES_ONLY, true);
+			this.prefDisplayExtras_ = DisplayExtra.valueOf(prefs.getString(Preferences.PREF_DISPLAY_EXTRAS, "None"));
 		}
 	}
 
 
-	public void setPrefAutoscan(Boolean prefAutoScan) {
+	private void configureTagExplorer() {
 
-		this.prefAutoscan_ = prefAutoScan;
+		if (tagExplorer_ != null) {
+			tagExplorer_.setPrefAutoscan(prefAutoscan_);
+			tagExplorer_.setPrefAutoscanInterval(prefAutoscanInterval_);
+			tagExplorer_.setPrefTagLevelCutoff(prefTagLevelCutoff_);
+			tagExplorer_.setPrefTagsWithEntitiesOnly(prefTagsWithEntitiesOnly_);
+		}
+	}
+
+
+	private void configureRippleView() {
+
+		if (rippleView_ != null) {
+			rippleView_.setPrefDisplayExtras(prefDisplayExtras_);
+		}
 	}
 
 
@@ -954,13 +738,10 @@ public class Radar extends AircandiActivity {
 
 		try {
 			super.onDestroy();
-			// We are aggressive about hold our wifi lock so we need to be sure
-			// it gets released when we are destroyed.
-			wifiReleaseLock();
+			tagExplorer_.onDestroy();
 			mediaPlayerX_.Release();
 		}
 		catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -971,22 +752,11 @@ public class Radar extends AircandiActivity {
 
 		try {
 			super.onPause();
-
-			// Start blocking the processing of any scan messages even
-			// if we have an active request
-			scanRequestActive_ = false;
-			if (wifiReceiver_ != null)
-				getApplicationContext().unregisterReceiver(wifiReceiver_);
-
-			// Make sure we don't get called back by a running scan task
-			handler_.removeCallbacks(wifiScanTask_);
-
-			// So we don't leave the UI in the middle of processing
+			tagExplorer_.onPause();
 			stopProgress();
 		}
-		catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		catch (Exception exception) {
+			exception.printStackTrace();
 		}
 	}
 
@@ -995,73 +765,23 @@ public class Radar extends AircandiActivity {
 	protected void onResume() {
 
 		super.onResume();
+		tagExplorer_.onResume();
 
-		// OnResume gets called even if we bailed early to get signed in so we
-		// use a flag to track whether we are completely ready for full
-		// operations.
-		// We also don't want to launch a wifi scan (which leads to user
-		// specific data operations) until
-		// we have a current user. The very first wifi scan request gets kicked
-		// off
-		// at the end of the code that establishes a current user.
+		// OnResume gets called after OnCreate (always) and whenever the activity is
+		// being brought back to the foreground. Because code in OnCreate could have
+		// determined that we aren't ready to roll, isReadyToRun is used to indicate
+		// that prep work is complete.
+
+		// This is also called when the user jumps out and back from setting preferences
+		// so we need to refresh the places where they get used.
+
 		if (isReadyToRun_ && getCurrentUser() != null) {
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-			if (prefs != null) {
-				Integer.parseInt(prefs.getString(Preferences.PREF_LEVEL_CUTOFF, "-100"));
-				this.setPrefAutoscan(prefs.getBoolean(Preferences.PREF_AUTOSCAN, true));
-				prefAutoscanInterval_ = Integer.parseInt(prefs.getString(Preferences.PREF_AUTOSCAN_INTERVAL, "5000"));
-			}
+			loadPreferences();
+			configureTagExplorer();
+			configureRippleView();
 
 			// We always try to kick off a scan when radar is started or resumed
-			registerReceiver(wifiReceiver_, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-			handler_.removeCallbacks(wifiScanTask_);
-			handler_.post(wifiScanTask_);
+			scanForTags(true);
 		}
 	}
-
-
-	class SortBySpotLevelDb implements Comparator<Entity> {
-
-		@Override
-		public int compare(Entity object1, Entity object2) {
-
-			if (object1.isTagged && !object2.isTagged)
-				return -1;
-			else if (object2.isTagged && !object1.isTagged)
-				return 1;
-			else
-				return object2.getAvgPointLevel() - object1.getAvgPointLevel();
-		}
-	}
-
-	class SortByDiscoveryTime implements Comparator<Entity> {
-
-		@Override
-		public int compare(Entity object1, Entity object2) {
-
-			if (object1.isTagged && !object2.isTagged)
-				return -1;
-			else if (object2.isTagged && !object1.isTagged)
-				return 1;
-			else {
-				if ((object2.discoveryTime.getTime() / 100) - (object1.discoveryTime.getTime() / 100) < 0)
-					return -1;
-				else if ((object2.discoveryTime.getTime() / 100) - (object1.discoveryTime.getTime() / 100) > 0)
-					return 1;
-				else {
-					if (object2.label.compareToIgnoreCase(object1.label) < 0)
-						return 1;
-					else if (object2.label.compareToIgnoreCase(object1.label) > 0)
-						return -1;
-					else
-						return 0;
-				}
-			}
-		}
-	}
-
-	public enum WifiAction {
-		Enabled, Enabling, Disabled, EnableAndRetry
-	}
-
 }
