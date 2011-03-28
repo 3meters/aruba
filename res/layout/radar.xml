@@ -12,18 +12,19 @@
 			layout="@layout/temp_application_header" />
 	</LinearLayout>
 	<LinearLayout
-		android:id="@+id/container"
+		android:id="@+id/RippleContainer"
 		android:layout_height="fill_parent"
 		android:layout_width="fill_parent"
 		android:paddingTop="8dp"
 		android:gravity="center_vertical"
+		android:clipChildren="false"
 		android:layout_below="@id/AppHeader">
 		<com.threemeters.sdk.android.widgets.RippleView
 			android:id="@+id/RippleView"
 			android:layout_height="wrap_content"
 			android:layout_width="fill_parent" />
 		<FrameLayout
-			android:id="@+id/detailframe"
+			android:id="@+id/EntitySummaryView"
 			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
 			android:clickable="true"

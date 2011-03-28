@@ -14,6 +14,9 @@ public class Preferences extends PreferenceActivity {
 	public static final String	PREF_AUTOSCAN					= "Pref_Autoscan";
 	public static final String	PREF_AUTOSCAN_INTERVAL			= "Pref_Autoscan_Interval";
 	public static final String	PREF_SHOW_CONFIG_MENU			= "Pref_Show_Config_Menu";
+	public static final String	PREF_TILE_SCALE					= "Pref_Tile_Scale";
+	public static final	String	PREF_TILE_ROTATE				= "Pref_Tile_Rotate";
+	public static final	String	PREF_SOUND_EFFECTS				= "Pref_Sound_Effects";
 
 
 	@Override

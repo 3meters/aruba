@@ -40,6 +40,27 @@
 			android:title="Autoscan interval"
 			android:summary="Interval in milliseconds between autoscans"
 			android:dialogTitle="Enter autoscan interval" />
+		<ListPreference
+			android:id="@+id/Pref_Tile_Scale"
+			android:key="Pref_Tile_Scale"
+			android:defaultValue="1.0"
+			android:title="Scale"
+			android:summary="Scaling for tiles"
+			android:entries="@array/tile_scale_list_preference"
+			android:entryValues="@array/tile_scale_list_preference"
+			android:dialogTitle="Select scale (1.0 is normal)" />
+		<CheckBoxPreference
+			android:id="@+id/Pref_Tile_Rotate"
+			android:key="Pref_Tile_Rotate"
+			android:defaultValue="true"
+			android:title="Tile View"
+			android:summary="Use flow for tiles" />
+		<CheckBoxPreference
+			android:id="@+id/Pref_Sound_Effects"
+			android:key="Pref_Sound_Effects"
+			android:defaultValue="true"
+			android:title="Sounds"
+			android:summary="Play sound notifications and effects" />
 	</PreferenceCategory>
 	<PreferenceCategory
 		android:title="Development preferences">

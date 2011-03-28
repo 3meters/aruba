@@ -8,6 +8,14 @@
 		<item>Time</item>
 	</string-array>
 	
+	<string-array name="tile_scale_list_preference">
+		<item>0.50</item>
+		<item>0.75</item>
+		<item>1.0</item>
+		<item>1.25</item>
+		<item>1.50</item>
+	</string-array>
+	
 	<string-array name="displayextrasvalues_list_preference">
 		<item>None</item>
 		<item>Level</item>

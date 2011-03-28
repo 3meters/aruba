@@ -51,7 +51,9 @@ import com.threemeters.sdk.android.widgets.ImageCache;
 import com.threemeters.sdk.android.widgets.RippleAdapterView;
 import com.threemeters.sdk.android.widgets.RippleView;
 import com.threemeters.sdk.android.widgets.RippleAdapterView.OnItemClickListener;
+import com.threemeters.sdk.android.widgets.RippleAdapterView.OnItemSelectedListener;
 import com.threemeters.sdk.android.widgets.RippleView.DisplayExtra;
+import com.threemeters.sdk.android.widgets.RippleView.SoundNotification;
 
 public class Radar extends AircandiActivity {
 
@@ -81,6 +83,9 @@ public class Radar extends AircandiActivity {
 	private int					prefTagLevelCutoff_			= -100;
 	private boolean				prefTagsWithEntitiesOnly_	= true;
 	private DisplayExtra		prefDisplayExtras_			= DisplayExtra.None;
+	private float				prefTileScale_				= 1.0f;
+	private boolean				prefTileRotate_	;
+	private boolean				prefSoundEffects_;
 
 	@SuppressWarnings("unused")
 	private ArrayList<Entity>	entityList_					= new ArrayList<Entity>();
@@ -88,14 +93,13 @@ public class Radar extends AircandiActivity {
 
 	private Boolean				isReadyToRun_				= false;
 	private Handler				handler_					= new Handler();
-	private CxMediaPlayer		mediaPlayerX_;
+	private CxMediaPlayer		soundEffects_;
 	private MediaPlayer			mediaPlayer_;
 
 	private RippleView			rippleView_;
 	protected ImageCache		imageCache_;
-	private LinearLayout		container_;
-	private RippleView			rippleViewFrame_;
-	private FrameLayout			detailViewFrame_;
+	private LinearLayout		rippleContainer_;
+	private FrameLayout			entitySummaryView_;
 	private boolean				isDetailVisible_			= false;
 
 	private boolean				userRefusedWifiEnable_		= false;
@@ -136,14 +140,13 @@ public class Radar extends AircandiActivity {
 		}
 
 		mediaPlayer_ = new MediaPlayer();
-		mediaPlayerX_ = new CxMediaPlayer(this);
+		soundEffects_ = new CxMediaPlayer(this);
 
 		// Ui Hookup
-		container_ = (LinearLayout) findViewById(R.id.container);
-		container_.setPersistentDrawingCache(ViewGroup.PERSISTENT_ANIMATION_CACHE);
+		rippleContainer_ = (LinearLayout) findViewById(R.id.RippleContainer);
+		rippleContainer_.setPersistentDrawingCache(ViewGroup.PERSISTENT_ANIMATION_CACHE);
 
-		rippleViewFrame_ = (RippleView) findViewById(R.id.RippleView);
-		detailViewFrame_ = (FrameLayout) findViewById(R.id.detailframe);
+		entitySummaryView_ = (FrameLayout) findViewById(R.id.EntitySummaryView);
 
 		// Ripple sdk components
 		tagExplorer_ = new TagExplorer(this);
@@ -154,11 +157,30 @@ public class Radar extends AircandiActivity {
 				return;
 		}
 
+		// Property settings get overridden once we retrieve preferences
 		rippleView_ = (RippleView) findViewById(R.id.RippleView);
-		rippleView_.setScale(1.0f);
-		rippleView_.setSpacing(-25);
 		rippleView_.setDataSource(entityListFiltered_);
-		
+		rippleView_.setEnableRotation(true);
+		rippleView_.setScale(1.0f);
+		rippleView_.getMediaPlayer().putSound(SoundNotification.EntityNew,
+				rippleView_.getMediaPlayer().getSoundPool().load(this, R.raw.notification1, 1));
+		rippleView_.setSoundsEnabled(true);
+		rippleView_.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(final RippleAdapterView<?> parent, final View view, final int position,
+					final long id) {
+
+				@SuppressWarnings("unused")
+				Entity entity = (Entity) view.getTag();
+			}
+
+
+			@Override
+			public void onNothingSelected(final RippleAdapterView<?> arg0) {
+
+			}
+		});
 		rippleView_.setOnItemClickListener(new OnItemClickListener() {
 
 			public void onItemClick(RippleAdapterView parent, View v, int position, long id) {
@@ -167,14 +189,16 @@ public class Radar extends AircandiActivity {
 				setCurrentEntity(entity);
 				isDetailVisible_ = true;
 
-				new ShowDetailsTask().execute(detailViewFrame_);
+				new ShowDetailsTask().execute(entitySummaryView_);
 
 				if (entity.pointResourceId != null && entity.pointResourceId != "")
-					((ImageView) detailViewFrame_.findViewById(R.id.Image)).setImageBitmap(rippleView_.getImageCache().get(entity.pointResourceId));
+					((ImageView) entitySummaryView_.findViewById(R.id.Image)).setImageBitmap(rippleView_
+							.getImageCache().get(entity.pointResourceId));
 
-				((TextView) detailViewFrame_.findViewById(R.id.Title)).setText(entity.title);
-				((TextView) detailViewFrame_.findViewById(R.id.Subtitle)).setText(Html.fromHtml(entity.subtitle));
-				((TextView) detailViewFrame_.findViewById(R.id.Description)).setText(Html.fromHtml(entity.description));
+				((TextView) entitySummaryView_.findViewById(R.id.Title)).setText(entity.title);
+				((TextView) entitySummaryView_.findViewById(R.id.Subtitle)).setText(Html.fromHtml(entity.subtitle));
+				((TextView) entitySummaryView_.findViewById(R.id.Description)).setText(Html
+						.fromHtml(entity.description));
 
 				applyRotation(position, 0, 90);
 			}
@@ -606,8 +630,8 @@ public class Radar extends AircandiActivity {
 	private void applyRotation(int position, float start, float end) {
 
 		// Find the center of the container
-		final float centerX = container_.getWidth() / 2.0f;
-		final float centerY = container_.getHeight() / 2.0f;
+		final float centerX = rippleContainer_.getWidth() / 2.0f;
+		final float centerY = rippleContainer_.getHeight() / 2.0f;
 
 		// Create a new 3D rotation with the supplied parameter
 		// The animation listener is used to trigger the next animation
@@ -617,7 +641,7 @@ public class Radar extends AircandiActivity {
 		rotation.setInterpolator(new AccelerateInterpolator());
 		rotation.setAnimationListener(new DisplayNextView(position));
 
-		container_.startAnimation(rotation);
+		rippleContainer_.startAnimation(rotation);
 	}
 
 
@@ -643,7 +667,7 @@ public class Radar extends AircandiActivity {
 
 		public void onAnimationEnd(Animation animation) {
 
-			container_.post(new SwapViews(mPosition));
+			rippleContainer_.post(new SwapViews(mPosition));
 		}
 
 
@@ -668,21 +692,21 @@ public class Radar extends AircandiActivity {
 
 		public void run() {
 
-			final float centerX = container_.getWidth() / 2.0f;
-			final float centerY = container_.getHeight() / 2.0f;
+			final float centerX = rippleContainer_.getWidth() / 2.0f;
+			final float centerY = rippleContainer_.getHeight() / 2.0f;
 			Rotate3dAnimation rotation;
 
 			if (mPosition > -1) {
-				rippleViewFrame_.setVisibility(View.GONE);
-				detailViewFrame_.setVisibility(View.VISIBLE);
-				detailViewFrame_.requestFocus();
+				rippleView_.setVisibility(View.GONE);
+				entitySummaryView_.setVisibility(View.VISIBLE);
+				entitySummaryView_.requestFocus();
 
 				rotation = new Rotate3dAnimation(270, 360, centerX, centerY, 310.0f, false);
 			}
 			else {
-				detailViewFrame_.setVisibility(View.GONE);
-				rippleViewFrame_.setVisibility(View.VISIBLE);
-				rippleViewFrame_.requestFocus();
+				entitySummaryView_.setVisibility(View.GONE);
+				rippleView_.setVisibility(View.VISIBLE);
+				rippleView_.requestFocus();
 
 				rotation = new Rotate3dAnimation(90, 0, centerX, centerY, 310.0f, false);
 			}
@@ -691,7 +715,7 @@ public class Radar extends AircandiActivity {
 			rotation.setFillAfter(true);
 			rotation.setInterpolator(new DecelerateInterpolator());
 
-			container_.startAnimation(rotation);
+			rippleContainer_.startAnimation(rotation);
 		}
 	}
 
@@ -709,6 +733,9 @@ public class Radar extends AircandiActivity {
 			this.prefTagLevelCutoff_ = Integer.parseInt(prefs.getString(Preferences.PREF_TAG_LEVEL_CUTOFF, "-100"));
 			this.prefTagsWithEntitiesOnly_ = prefs.getBoolean(Preferences.PREF_TAGS_WITH_ENTITIES_ONLY, true);
 			this.prefDisplayExtras_ = DisplayExtra.valueOf(prefs.getString(Preferences.PREF_DISPLAY_EXTRAS, "None"));
+			this.prefTileScale_ = Float.parseFloat(prefs.getString(Preferences.PREF_TILE_SCALE, "1.0"));
+			this.prefTileRotate_ = prefs.getBoolean(Preferences.PREF_TILE_ROTATE, true);
+			this.prefSoundEffects_ = prefs.getBoolean(Preferences.PREF_SOUND_EFFECTS, true);
 		}
 	}
 
@@ -728,6 +755,9 @@ public class Radar extends AircandiActivity {
 
 		if (rippleView_ != null) {
 			rippleView_.setPrefDisplayExtras(prefDisplayExtras_);
+			rippleView_.setScale(prefTileScale_);
+			rippleView_.setEnableRotation(prefTileRotate_);
+			rippleView_.setSoundsEnabled(prefSoundEffects_);
 		}
 	}
 
@@ -739,7 +769,7 @@ public class Radar extends AircandiActivity {
 		try {
 			super.onDestroy();
 			tagExplorer_.onDestroy();
-			mediaPlayerX_.Release();
+			soundEffects_.Release();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
