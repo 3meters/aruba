@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.threemeters.aircandi.controller"
+	package="com.proxibase.aircandi.controller"
 	android:installLocation="auto"
 	android:versionName="0.1"
 	android:versionCode="1">
@@ -14,133 +14,21 @@
 		android:largeScreens="true"
 		android:anyDensity="true" />
 	<application
-		android:name=".Aircandi"
+		android:name="Aircandi"
 		android:label="@string/app_name"
 		android:debuggable="true"
 		android:theme="@style/AircandiTheme"
 		android:icon="@drawable/icon_aircandi">
 		<activity
-			android:name=".Dashboard"
+			android:name=".Tricorder"
 			android:label="@string/app_name"
-			android:screenOrientation="portrait">
+			android:configChanges="orientation">
 			<intent-filter>
 				<action
 					android:name="android.intent.action.MAIN" />
 				<category
 					android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
-		</activity>
-		<activity
-			android:name=".AircandiLogin"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".FacebookLogin"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait"
-			android:theme="@android:style/Theme.Dialog" />
-		<activity
-			android:name=".FacebookWallPost"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait"/>
-		<activity
-			android:name=".FacebookFanPage"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait"/>
-		<activity
-			android:name=".FacebookFanPageInfo"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait"/>
-		<activity
-			android:name=".FacebookFanPageFeed"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait"/>
-		<activity
-			android:name=".Radar"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".RewardsList"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".Eggs"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".EggsGrid"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".EggsDrop"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait"
-			android:theme="@android:style/Theme.Dialog">
-		</activity>
-		<activity
-			android:name=".EggsMine"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".EggsMineList"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".EggsMap"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".RewardForm"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".RewardCouponForm"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".CouponEditor"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".ReviewsList"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".ReviewForm"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".RewardAlertsList"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".FriendsList"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".FriendForm"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:name=".CouponsList"
-			android:label="@string/app_name"
-			android:screenOrientation="portrait">
 		</activity>
 		<activity
 			android:name=".MediaList"
@@ -173,32 +61,12 @@
 			android:configChanges="orientation">
 		</activity>
 		<activity
-			android:name=".SearchList"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".SearchMap"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
 			android:name=".PointEditor"
 			android:label="@string/app_name"
 			android:configChanges="orientation">
 		</activity>
 		<activity
-			android:name=".ShareForm"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".PhotoForm"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".Preferences"
+			android:name="Preferences"
 			android:theme="@android:style/Theme.Black"
 			android:label="@string/app_name"
 			android:configChanges="orientation">
