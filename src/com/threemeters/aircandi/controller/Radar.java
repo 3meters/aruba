@@ -1,6 +1,7 @@
 package com.threemeters.aircandi.controller;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.media.AsyncPlayer;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,6 +43,7 @@ import com.threemeters.sdk.android.core.BaseModifyListener;
 import com.threemeters.sdk.android.core.BaseQueryListener;
 import com.threemeters.sdk.android.core.BaseTagScanListener;
 import com.threemeters.sdk.android.core.Entity;
+import com.threemeters.sdk.android.core.LinkedTreeList;
 import com.threemeters.sdk.android.core.Query;
 import com.threemeters.sdk.android.core.RippleError;
 import com.threemeters.sdk.android.core.RippleRunner;
@@ -50,11 +55,14 @@ import com.threemeters.sdk.android.core.RippleService.GsonType;
 import com.threemeters.sdk.android.widgets.ImageCache;
 import com.threemeters.sdk.android.widgets.RippleAdapterView;
 import com.threemeters.sdk.android.widgets.RippleView;
-import com.threemeters.sdk.android.widgets.RippleAdapterView.OnItemClickListener;
-import com.threemeters.sdk.android.widgets.RippleAdapterView.OnItemSelectedListener;
 import com.threemeters.sdk.android.widgets.RippleView.DisplayExtra;
+import com.threemeters.sdk.android.widgets.RippleView.GroupBy;
+import com.threemeters.sdk.android.widgets.RippleView.OnEntityClickListener;
+import com.threemeters.sdk.android.widgets.RippleView.OnEntitySelectedListener;
+import com.threemeters.sdk.android.widgets.RippleView.SortProperty;
 import com.threemeters.sdk.android.widgets.RippleView.SoundNotification;
 
+@SuppressWarnings("unused")
 public class Radar extends AircandiActivity {
 
 	public static ArrayList<Entity> getEntitiesByTagId(List<Entity> entityList, String tagId) {
@@ -78,39 +86,38 @@ public class Radar extends AircandiActivity {
 	}
 
 
-	private Boolean				prefAutoscan_				= true;
-	private int					prefAutoscanInterval_		= 5000;
-	private int					prefTagLevelCutoff_			= -100;
-	private boolean				prefTagsWithEntitiesOnly_	= true;
-	private DisplayExtra		prefDisplayExtras_			= DisplayExtra.None;
-	private float				prefTileScale_				= 1.0f;
-	private boolean				prefTileRotate_	;
-	private boolean				prefSoundEffects_;
+	private Boolean			prefAutoscan_				= true;
+	private int				prefAutoscanInterval_		= 5000;
+	private int				prefTagLevelCutoff_			= -100;
+	private boolean			prefTagsWithEntitiesOnly_	= true;
+	private DisplayExtra	prefDisplayExtras_			= DisplayExtra.None;
+	private float			prefTileScale_				= 1.0f;
+	private boolean			prefTileRotate_;
+	private boolean			prefSoundEffects_;
 
-	@SuppressWarnings("unused")
-	private ArrayList<Entity>	entityList_					= new ArrayList<Entity>();
-	private ArrayList<Entity>	entityListFiltered_			= new ArrayList<Entity>();
+	private List<Entity>	entityList_;
+	private List<Entity>	entityListFiltered_;
 
-	private Boolean				isReadyToRun_				= false;
-	private Handler				handler_					= new Handler();
-	private CxMediaPlayer		soundEffects_;
-	private MediaPlayer			mediaPlayer_;
+	private Boolean			isReadyToRun_				= false;
+	private Handler			handler_					= new Handler();
+	private CxMediaPlayer	soundEffects_;
+	private MediaPlayer		mediaPlayer_;
 
-	private RippleView			rippleView_;
-	protected ImageCache		imageCache_;
-	private LinearLayout		rippleContainer_;
-	private FrameLayout			entitySummaryView_;
-	private boolean				isDetailVisible_			= false;
+	private RippleView		rippleView_;
+	protected ImageCache	imageCache_;
+	private LinearLayout	rippleContainer_;
+	private FrameLayout		entitySummaryView_;
+	private boolean			isDetailVisible_			= false;
 
-	private boolean				userRefusedWifiEnable_		= false;
-	private TagExplorer			tagExplorer_;
-	private Runnable			tagScanTask_				= new Runnable() {
+	private boolean			userRefusedWifiEnable_		= false;
+	private TagExplorer		tagExplorer_;
+	private Runnable		tagScanTask_				= new Runnable() {
 
-																public void run() {
+															public void run() {
 
-																	scanForTags(false);
-																}
-															};
+																scanForTags(false);
+															}
+														};
 
 
 	/** Called when the activity is first created. */
@@ -144,7 +151,7 @@ public class Radar extends AircandiActivity {
 
 		// Ui Hookup
 		rippleContainer_ = (LinearLayout) findViewById(R.id.RippleContainer);
-		rippleContainer_.setPersistentDrawingCache(ViewGroup.PERSISTENT_ANIMATION_CACHE);
+		// rippleContainer_.setPersistentDrawingCache(ViewGroup.PERSISTENT_ANIMATION_CACHE);
 
 		entitySummaryView_ = (FrameLayout) findViewById(R.id.EntitySummaryView);
 
@@ -162,30 +169,30 @@ public class Radar extends AircandiActivity {
 		rippleView_.setDataSource(entityListFiltered_);
 		rippleView_.setEnableRotation(true);
 		rippleView_.setScale(1.0f);
+		rippleView_.setGroupByLevelOne(GroupBy.EntityType);
+		rippleView_.setSortLevelOne(SortProperty.DiscoveryTime);
 		rippleView_.getMediaPlayer().putSound(SoundNotification.EntityNew,
 				rippleView_.getMediaPlayer().getSoundPool().load(this, R.raw.notification1, 1));
 		rippleView_.setSoundsEnabled(true);
-		rippleView_.setOnItemSelectedListener(new OnItemSelectedListener() {
+		rippleView_.setOnEntitySelectedListener(new OnEntitySelectedListener() {
 
 			@Override
-			public void onItemSelected(final RippleAdapterView<?> parent, final View view, final int position,
-					final long id) {
+			public void onEntitySelected(Entity entity) {
 
-				@SuppressWarnings("unused")
-				Entity entity = (Entity) view.getTag();
+				Utilities.Log(RippleService.APP_NAME, "RippleView", entity.label + " selected");
+
 			}
 
 
 			@Override
-			public void onNothingSelected(final RippleAdapterView<?> arg0) {
+			public void onNothingSelected() {
 
 			}
 		});
-		rippleView_.setOnItemClickListener(new OnItemClickListener() {
+		rippleView_.setOnEntityClickListener(new OnEntityClickListener() {
 
-			public void onItemClick(RippleAdapterView parent, View v, int position, long id) {
+			public void onEntityClick(Entity entity) {
 
-				Entity entity = entityListFiltered_.get(position);
 				setCurrentEntity(entity);
 				isDetailVisible_ = true;
 
@@ -200,7 +207,7 @@ public class Radar extends AircandiActivity {
 				((TextView) entitySummaryView_.findViewById(R.id.Description)).setText(Html
 						.fromHtml(entity.description));
 
-				applyRotation(position, 0, 90);
+				applyRotation(rippleContainer_, 0, 90);
 			}
 
 		});
@@ -285,7 +292,7 @@ public class Radar extends AircandiActivity {
 			Utilities.Log(Aircandi.APP_NAME, "Radar",
 					"Starting ripple query to see if a facebook user '" + getCurrentUser().id
 							+ "' already exists in ripple");
-			rippleRunner.select(query, UserFb.class, new UserQueryListener());
+			rippleRunner.select(query, UserFb.class, "", new UserQueryListener());
 		}
 	}
 
@@ -293,14 +300,14 @@ public class Radar extends AircandiActivity {
 
 		public void onComplete(String response) {
 
-			ArrayList<Object> users = RippleService.convertJsonToObjects(response, UserFb.class);
+			List<Object> users = RippleService.convertJsonToObjects(response, UserFb.class);
 
 			// We need to insert if we don't have them yet or update if we do.
 			// Update makes sure we have the latest access token stored with the service for later use.
 			RippleRunner rippleRunner = new RippleRunner();
 			if (users == null || users.size() == 0) {
 				Utilities.Log(Aircandi.APP_NAME, "Radar", "Starting ripple insert for '" + getCurrentUser().id + "'");
-				rippleRunner.insert(getCurrentUser(), "Users", new UserReadyListener());
+				rippleRunner.insert(getCurrentUser(), "Users", "", new UserReadyListener());
 			}
 			else {
 				Utilities.Log(Aircandi.APP_NAME, "Radar", "Starting ripple update for '" + getCurrentUser().id + "'");
@@ -338,9 +345,31 @@ public class Radar extends AircandiActivity {
 
 		try {
 			if (streamName.toLowerCase().equals("audio")) {
-				mediaPlayer_.setDataSource(Aircandi.URL_AIRCANDI_MEDIA + "3meters_audio/cezanne.mp3");
+				String audioFile = "";
+				if (stream.entityResourceId.contains("hopper_house"))
+					audioFile = "hopper_house_by_the_railroad.mp3";
+				else if (stream.entityResourceId.contains("klimt_hope"))
+					audioFile = "klimt_hope.mp3";
+				else if (stream.entityResourceId.contains("monet_japanese"))
+					audioFile = "monet_japanese_footbridge.mp3";
+				else if (stream.entityResourceId.contains("starry_night"))
+					audioFile = "vangogh_starry_night.mp3";
+				else if (stream.entityResourceId.contains("cezanne"))
+					audioFile = "cezanne2.mp3";
+				// MediaPlayer mediaPlayer = new MediaPlayer();
+				// Uri uri = Uri.parse(Aircandi.URL_AIRCANDI_MEDIA + "audio.3meters.com/signsoflove.mp3");
+
+				Uri uri = Uri.parse("http://dev.aircandi.com/media/" + audioFile);
+				mediaPlayer_.setDataSource(Radar.this, uri);
+				mediaPlayer_.setAudioStreamType(AudioManager.STREAM_MUSIC);
 				mediaPlayer_.prepare();
 				mediaPlayer_.start();
+
+				// Uri url = Uri.parse("http://dev.aircandi.com/media/cezanne2.mp3");
+				// AsyncPlayer player = new AsyncPlayer("Aircandi");
+				// player.stop();
+				// player.play(Radar.this, url, false, AudioManager.STREAM_MUSIC);
+
 			}
 			else if (streamName.toLowerCase().equals("video")) {
 				// String movieUrl = Aircandi.URL_RIPPLEMEDIA +
@@ -379,8 +408,13 @@ public class Radar extends AircandiActivity {
 		catch (IllegalStateException e) {
 			e.printStackTrace();
 		}
-		catch (IOException e) {
-			e.printStackTrace();
+		catch (SecurityException exception) {
+			// TODO Auto-generated catch block
+			exception.printStackTrace();
+		}
+		catch (IOException exception) {
+			// TODO Auto-generated catch block
+			exception.printStackTrace();
 		}
 	}
 
@@ -389,10 +423,14 @@ public class Radar extends AircandiActivity {
 	public void onBackPressed() {
 
 		if (!isDetailVisible_)
-			super.onBackPressed();
+		{
+			if (!rippleView_.navigateUp())
+				super.onBackPressed();
+		}
 		else {
 			mediaPlayer_.stop();
-			applyRotation(-1, 360, 270);
+			mediaPlayer_.reset();
+			applyRotation(rippleContainer_, 360, 270);
 			setCurrentEntity(null);
 			isDetailVisible_ = false;
 		}
@@ -411,7 +449,8 @@ public class Radar extends AircandiActivity {
 	public void onDetailsClick(View v) {
 
 		mediaPlayer_.stop();
-		applyRotation(-1, 360, 270);
+		mediaPlayer_.reset();
+		applyRotation(rippleContainer_, 360, 270);
 		setCurrentEntity(null);
 		isDetailVisible_ = false;
 	}
@@ -448,11 +487,6 @@ public class Radar extends AircandiActivity {
 
 			try {
 
-				// Replace the collection
-				entityListFiltered_ = entities;
-				Utilities.Log(Aircandi.APP_NAME, "Radar", "Setting RippleView dataSource property");
-				rippleView_.setDataSource(entityListFiltered_);
-
 				// Scanning is complete so change the heading back to normal
 				// Show search message if there aren't any current points
 				TextView message = (TextView) findViewById(R.id.Radar_Message);
@@ -460,9 +494,18 @@ public class Radar extends AircandiActivity {
 					message.setVisibility(View.GONE);
 				}
 
-				// Refresh the RippleView to reflect any updates to the collection of entities
-				Utilities.Log(Aircandi.APP_NAME, "Radar", "Refreshing RippleView");
-				rippleView_.refresh();
+				// Refresh the RippleView to reflect any updates to the collection of entities.
+				// If using autoscan, we skip a refresh if the user is doing some scrolling because
+				// layout can make the UI jerky.
+				if (!prefAutoscan_ || rippleView_.isMotionless()) {
+					Utilities.Log(Aircandi.APP_NAME, "Radar", "Refreshing RippleView");
+					// Replace the collection
+					entityListFiltered_ = (ArrayList<Entity>) entities.clone();
+					rippleView_.setDataSource(entityListFiltered_);
+					rippleView_.refresh();
+				}
+				else
+					Utilities.Log(Aircandi.APP_NAME, "Radar", "UI *busy* so skipping RippleView refresh");
 
 				stopProgress();
 
@@ -627,11 +670,13 @@ public class Radar extends AircandiActivity {
 	 * @param start the start angle at which the rotation must begin
 	 * @param end the end angle of the rotation
 	 */
-	private void applyRotation(int position, float start, float end) {
+	private void applyRotation(View view, float start, float end) {
+		
+		boolean rotateRight = (end - start > 0);
 
 		// Find the center of the container
-		final float centerX = rippleContainer_.getWidth() / 2.0f;
-		final float centerY = rippleContainer_.getHeight() / 2.0f;
+		final float centerX = view.getWidth() / 2.0f;
+		final float centerY = view.getHeight() / 2.0f;
 
 		// Create a new 3D rotation with the supplied parameter
 		// The animation listener is used to trigger the next animation
@@ -639,9 +684,9 @@ public class Radar extends AircandiActivity {
 		rotation.setDuration(500);
 		rotation.setFillAfter(true);
 		rotation.setInterpolator(new AccelerateInterpolator());
-		rotation.setAnimationListener(new DisplayNextView(position));
+		rotation.setAnimationListener(new DisplayNextView(rotateRight));
 
-		rippleContainer_.startAnimation(rotation);
+		view.startAnimation(rotation);
 	}
 
 
@@ -651,12 +696,12 @@ public class Radar extends AircandiActivity {
 	 */
 	private final class DisplayNextView implements Animation.AnimationListener {
 
-		private final int	mPosition;
+		private final boolean rotateRight_;
 
 
-		private DisplayNextView(int position) {
+		private DisplayNextView(boolean rotateRight) {
 
-			mPosition = position;
+			rotateRight_ = rotateRight;
 		}
 
 
@@ -667,7 +712,7 @@ public class Radar extends AircandiActivity {
 
 		public void onAnimationEnd(Animation animation) {
 
-			rippleContainer_.post(new SwapViews(mPosition));
+			rippleContainer_.post(new SwapViews(rotateRight_));
 		}
 
 
@@ -681,12 +726,12 @@ public class Radar extends AircandiActivity {
 	 */
 	private final class SwapViews implements Runnable {
 
-		private final int	mPosition;
+		private boolean rotateRight_; 
 
 
-		public SwapViews(int position) {
+		public SwapViews(boolean rotateRight) {
 
-			mPosition = position;
+			rotateRight_ = rotateRight;
 		}
 
 
@@ -696,7 +741,7 @@ public class Radar extends AircandiActivity {
 			final float centerY = rippleContainer_.getHeight() / 2.0f;
 			Rotate3dAnimation rotation;
 
-			if (mPosition > -1) {
+			if (rotateRight_) {
 				rippleView_.setVisibility(View.GONE);
 				entitySummaryView_.setVisibility(View.VISIBLE);
 				entitySummaryView_.requestFocus();

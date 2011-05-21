@@ -102,13 +102,13 @@ public class PointEditor extends AircandiActivity
 //				parameters.putString("ssid", mEntity.ssid);
 				parameters.putString("label", mEntity.label);
 				parameters.putString("userId", getCurrentUser().id);
-				ripple.post("InsertPoint", parameters, QueryFormat.Json, new QueryListener());
+				ripple.post("InsertPoint", parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE, new QueryListener());
 			}
 			else
 			{
 				mEntity.isTagged = false;
 				parameters.putString("entityId", mEntity.entityId);
-				ripple.post("DeletePoint", parameters, QueryFormat.Json, new QueryListener());
+				ripple.post("DeletePoint", parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE, new QueryListener());
 			}
 		}
 		else if (changedLabel)
@@ -116,7 +116,7 @@ public class PointEditor extends AircandiActivity
 			Bundle parameters = new Bundle();
 			parameters.putString("entityId", mEntity.entityId);
 			parameters.putString("label", mEntity.label);
-			ripple.post("UpdatePoint", parameters, QueryFormat.Json, new QueryListener());
+			ripple.post("UpdatePoint", parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE, new QueryListener());
 		}
 	}
 

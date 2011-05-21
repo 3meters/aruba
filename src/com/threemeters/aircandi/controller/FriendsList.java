@@ -81,7 +81,7 @@ public class FriendsList extends AircandiActivity
 			method = "GetFriendsAtPoint";
 		}
 
-		ripple.post(method, parameters, QueryFormat.Json, new FriendsQueryListener());
+		ripple.post(method, parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE, new FriendsQueryListener());
 	}
 
 	public class FriendsQueryListener extends BaseQueryListener

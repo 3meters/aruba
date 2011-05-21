@@ -62,7 +62,7 @@ public class NoteEditor extends AircandiActivity
 			mPost.entityId = getCurrentEntity().entityId;
 			mPost.isPublished = true;
 			mPost.isCommentEnabled = true;
-			ripple.insert(mPost, "Posts", new NoteModifyListener()); // Insert
+			ripple.insert(mPost, "Posts", "", new NoteModifyListener()); // Insert
 		}
 	}
 	

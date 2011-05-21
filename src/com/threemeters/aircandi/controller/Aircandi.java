@@ -18,14 +18,15 @@ public class Aircandi extends Application {
 	public Entity				currentEntityX;
 	public Post					currentPostX;
 	public Location				currentLocation;
-	public static final int		TWO_MINUTES				= 1000 * 60 * 2;
-	public static final int		FIVE_MINUTES			= 1000 * 60 * 5;
-	public static final String	URL_AIRCANDI_SERVICE	= "http://dev.aircandi.com/";
-	public static final String	URL_AIRCANDI_BLOG		= "http://devblog.georain.com/";
-	public static final String	URL_AIRCANDI_MEDIA		= "https://s3.amazonaws.com/";
+	public static final int		TWO_MINUTES					= 1000 * 60 * 2;
+	public static final int		FIVE_MINUTES				= 1000 * 60 * 5;
+	public static final String	URL_AIRCANDI_SERVICE_ODATA	= "http://dev.aircandi.com/airodata.svc/";
+	public static final String	URL_AIRCANDI_SERVICE		= "http://dev.aircandi.com/airlogic.asmx/";
+	public static final String	URL_AIRCANDI_BLOG			= "http://devblog.proxibase.com/";
+	public static final String	URL_AIRCANDI_MEDIA			= "https://s3.amazonaws.com/";
 
-	public static final boolean	MODE_DEBUG				= true;
-	public static final String	APP_NAME				= "Aircandi";
+	public static final boolean	MODE_DEBUG					= true;
+	public static final String	APP_NAME					= "Aircandi";
 
 
 	public Aircandi() {

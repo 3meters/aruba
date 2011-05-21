@@ -51,7 +51,7 @@ public class FacebookFanPageInfo extends AircandiActivity
 		parameters.putString("userId", getCurrentUser() != null ? getCurrentUser().id : "");
 		parameters.putString("friendId", mFriendId);
 
-		ripple.post(method, parameters, QueryFormat.Json, new InfoQueryListener());
+		ripple.post(method, parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE, new InfoQueryListener());
 	}
 
 	// For this activity, refresh means rescan and reload point data from the service

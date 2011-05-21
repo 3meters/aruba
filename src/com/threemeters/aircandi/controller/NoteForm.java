@@ -2,6 +2,7 @@ package com.threemeters.aircandi.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.client.ClientProtocolException;
 
@@ -102,7 +103,7 @@ public class NoteForm extends AircandiActivity
 				startProgress();
 				Query query = new Query("Posts").filter("PostId eq guid'" + getCurrentPost().postId + "'");
 				RippleRunner ripple = new RippleRunner();
-				ripple.select(query, Post.class, new NoteQueryListener());
+				ripple.select(query, Post.class, "", new NoteQueryListener());
 			}
 		}
 	}
@@ -111,7 +112,7 @@ public class NoteForm extends AircandiActivity
 	{
 		public void onComplete(String response)
 		{
-			ArrayList<Object> posts = RippleService.convertJsonToObjects(response, Post.class);
+			List<Object> posts = RippleService.convertJsonToObjects(response, Post.class);
 			if (posts != null && posts.size() > 0)
 			{
 				setCurrentPost((Post) posts.get(0));

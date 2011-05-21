@@ -38,7 +38,7 @@ import com.threemeters.sdk.android.widgets.ImageCache;
 
 public class RewardsList extends AircandiActivity
 {
-	private ArrayList<Object>	mListItems		= null;
+	private List<Object>	mListItems		= null;
 	private Object				mPointTheme		= null;
 	private Boolean				mHasPointTheme	= false;
 	private Class				mClass			= PromotionsAtPoint.class;
@@ -92,7 +92,7 @@ public class RewardsList extends AircandiActivity
 		parameters.putString("entityId", getCurrentEntity().entityId);
 		parameters.putString("userId", getCurrentUser().id);
 
-		ripple.post(method, parameters, QueryFormat.Json, new ListQueryListener());
+		ripple.post(method, parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE, new ListQueryListener());
 	}
 
 	public void loadTheme()
@@ -102,7 +102,7 @@ public class RewardsList extends AircandiActivity
 
 		String method = "GetTheme";
 		parameters.putString("themeId", getCurrentEntity().themeId);
-		ripple.post(method, parameters, QueryFormat.Json, new ThemeQueryListener());
+		ripple.post(method, parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE, new ThemeQueryListener());
 	}
 
 	public void theming()
@@ -258,7 +258,7 @@ public class RewardsList extends AircandiActivity
 		parameters.putString("entityId", getCurrentEntity().entityId);
 		parameters.putString("userId", getCurrentUser().id);
 
-		ripple.post(method, parameters, QueryFormat.Json, new InsertUserInPromotionListener());
+		ripple.post(method, parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE, new InsertUserInPromotionListener());
 	}
 
 	@Override

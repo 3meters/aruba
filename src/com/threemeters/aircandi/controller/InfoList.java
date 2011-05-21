@@ -2,6 +2,7 @@ package com.threemeters.aircandi.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -36,7 +37,7 @@ import com.threemeters.sdk.android.core.RippleService.GsonType;
 public class InfoList extends AircandiActivity
 {
 	private Class				mClass	= Post.class;
-	private ArrayList<Object>	mListItems;
+	private List<Object>	mListItems;
 	private RelativeLayout		mDetailFrame;
 	private ScrollView			mTileFrame;
 	private LinearLayout		mContainer;
@@ -95,7 +96,7 @@ public class InfoList extends AircandiActivity
 			if (mListItems == null)
 			{
 				RippleRunner ripple = new RippleRunner();
-				ripple.select(query, mClass, new ListQueryListener());
+				ripple.select(query, mClass, "", new ListQueryListener());
 			}
 			else
 			{
@@ -444,9 +445,9 @@ public class InfoList extends AircandiActivity
 
 	private class ListAdapter extends ArrayAdapter<Object>
 	{
-		private ArrayList<Object>	items;
+		private List<Object>	items;
 
-		public ListAdapter(Context context, int textViewResourceId, ArrayList<Object> items) {
+		public ListAdapter(Context context, int textViewResourceId, List<Object> items) {
 			super(context, textViewResourceId, items);
 			this.items = items;
 		}

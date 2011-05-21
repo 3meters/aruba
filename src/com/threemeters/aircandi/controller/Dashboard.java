@@ -2,6 +2,7 @@ package com.threemeters.aircandi.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -153,7 +154,7 @@ public class Dashboard extends AircandiActivity {
 			// Make sure they are in the Aircandi service
 			RippleRunner rippleRunner = new RippleRunner();
 			Query query = new Query("Users").filter("Id eq '" + getCurrentUser().id + "'");
-			rippleRunner.select(query, UserFb.class, new UserQueryListener());
+			rippleRunner.select(query, UserFb.class, "", new UserQueryListener());
 		}
 
 
@@ -179,12 +180,12 @@ public class Dashboard extends AircandiActivity {
 
 		public void onComplete(String response) {
 
-			ArrayList<Object> users = RippleService.convertJsonToObjects(response, UserFb.class);
+			List<Object> users = RippleService.convertJsonToObjects(response, UserFb.class);
 
 			// We need to insert if we don't have them yet
 			RippleRunner rippleRunner = new RippleRunner();
 			if (users == null || users.size() == 0)
-				rippleRunner.insert(getCurrentUser(), "Users", new UserReadyListener());
+				rippleRunner.insert(getCurrentUser(), "Users", "", new UserReadyListener());
 			else
 				rippleRunner.update(getCurrentUser(), getCurrentUser().getUriOdata(), new UserReadyListener());
 		}
@@ -325,16 +326,16 @@ public class Dashboard extends AircandiActivity {
 				String jsonStream = RippleService.getGson(GsonType.Internal).toJson(stream);
 				intent.putExtra("stream", jsonStream);
 			}
-			if (activityClass == EggsMineList.class) {
-				Stream stream = new Stream();
-				stream.showHeader = true;
-				stream.showFooter = false;
-				stream.headerTitle = "Egg Collection By Sets";
-				stream.headerIconResource = "none";
-				stream.layoutTemplate = "list_standard";
-				String jsonStream = RippleService.getGson(GsonType.Internal).toJson(stream);
-				intent.putExtra("stream", jsonStream);
-			}
+//			if (activityClass == EggsMineList.class) {
+//				Stream stream = new Stream();
+//				stream.showHeader = true;
+//				stream.showFooter = false;
+//				stream.headerTitle = "Egg Collection By Sets";
+//				stream.headerIconResource = "none";
+//				stream.layoutTemplate = "list_standard";
+//				String jsonStream = RippleService.getGson(GsonType.Internal).toJson(stream);
+//				intent.putExtra("stream", jsonStream);
+//			}
 			if (activityClass == RewardsList.class)
 				return;
 
