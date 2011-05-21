@@ -62,7 +62,7 @@ import com.proxibase.sdk.android.widgets.RippleView.SortProperty;
 import com.proxibase.sdk.android.widgets.RippleView.SoundNotification;
 
 @SuppressWarnings("unused")
-public class Tricorder extends AircandiActivity {
+public class TricorderGL extends AircandiActivity {
 
 	public static ArrayList<Entity> getEntitiesByTagId(List<Entity> entityList, String tagId) {
 
@@ -102,7 +102,7 @@ public class Tricorder extends AircandiActivity {
 	private CxMediaPlayer	soundEffects_;
 	private MediaPlayer		mediaPlayer_;
 
-	private RippleView		rippleView_;
+	private ProxiView		proxiView_;
 	protected ImageCache	imageCache_;
 	private LinearLayout	rippleContainer_;
 	private FrameLayout		entitySummaryView_;
@@ -126,19 +126,16 @@ public class Tricorder extends AircandiActivity {
 
 		// Start normal processing
 		isReadyToRun_ = false;
-		setContentView(R.layout.tricorder);
+		setContentView(R.layout.tricorder_gl);
 		super.onCreate(savedInstanceState);
 
 		// Image cache
 		imageCache_ = new ImageCache(getApplicationContext(), "aircandi", 100, 16);
-
 		mediaPlayer_ = new MediaPlayer();
 		soundEffects_ = new CxMediaPlayer(this);
 
 		// Ui Hookup
 		rippleContainer_ = (LinearLayout) findViewById(R.id.RippleContainer);
-		// rippleContainer_.setPersistentDrawingCache(ViewGroup.PERSISTENT_ANIMATION_CACHE);
-
 		entitySummaryView_ = (FrameLayout) findViewById(R.id.EntitySummaryView);
 
 		// Ripple sdk components
@@ -151,53 +148,7 @@ public class Tricorder extends AircandiActivity {
 		}
 
 		// Property settings get overridden once we retrieve preferences
-		rippleView_ = (RippleView) findViewById(R.id.RippleView);
-		rippleView_.setDataSource(entityListFiltered_);
-		rippleView_.setEnableRotation(true);
-		rippleView_.setScale(1.0f);
-		rippleView_.setGroupByLevelOne(GroupBy.EntityType);
-		rippleView_.setSortLevelOne(SortProperty.DiscoveryTime);
-		rippleView_.getMediaPlayer().putSound(SoundNotification.EntityNew,
-				rippleView_.getMediaPlayer().getSoundPool().load(this, R.raw.notification1, 1));
-		rippleView_.setSoundsEnabled(true);
-		rippleView_.setOnEntitySelectedListener(new OnEntitySelectedListener() {
-
-			@Override
-			public void onEntitySelected(Entity entity) {
-
-				Utilities.Log(ProxibaseService.APP_NAME, "RippleView", entity.label + " selected");
-
-			}
-
-
-			@Override
-			public void onNothingSelected() {
-
-			}
-		});
-		rippleView_.setOnEntityClickListener(new OnEntityClickListener() {
-
-			public void onEntityClick(Entity entity) {
-
-				setCurrentEntity(entity);
-				isDetailVisible_ = true;
-
-				new ShowDetailsTask().execute(entitySummaryView_);
-
-				if (entity.pointResourceId != null && entity.pointResourceId != "")
-					((ImageView) entitySummaryView_.findViewById(R.id.Image)).setImageBitmap(rippleView_
-							.getImageCache().get(entity.pointResourceId));
-
-				((TextView) entitySummaryView_.findViewById(R.id.Title)).setText(entity.title);
-				((TextView) entitySummaryView_.findViewById(R.id.Subtitle)).setText(Html.fromHtml(entity.subtitle));
-				((TextView) entitySummaryView_.findViewById(R.id.Description)).setText(Html
-						.fromHtml(entity.description));
-
-				applyRotation(rippleContainer_, 0, 90);
-			}
-
-		});
-
+		proxiView_ = (ProxiView) findViewById(R.id.ProxiView);
 		isReadyToRun_ = true;
 	}
 
@@ -216,7 +167,7 @@ public class Tricorder extends AircandiActivity {
 			Display getOrient = getWindowManager().getDefaultDisplay();
 			if (getOrient.getRotation() == Surface.ROTATION_90 || getOrient.getRotation() == Surface.ROTATION_270)
 				landscape = true;
-			TableLayout table = configureMenus(getCurrentEntity(), landscape, Tricorder.this);
+			TableLayout table = configureMenus(getCurrentEntity(), landscape, TricorderGL.this);
 
 			return table;
 		}
@@ -243,7 +194,7 @@ public class Tricorder extends AircandiActivity {
 			Display getOrient = getWindowManager().getDefaultDisplay();
 			if (getOrient.getRotation() == Surface.ROTATION_90 || getOrient.getRotation() == Surface.ROTATION_270)
 				landscape = true;
-			TableLayout table = configureMenus(getCurrentEntity(), landscape, Tricorder.this);
+			TableLayout table = configureMenus(getCurrentEntity(), landscape, TricorderGL.this);
 			FrameLayout frame = (FrameLayout) findViewById(R.id.frameMenu);
 			frame.removeAllViews();
 			frame.addView(table);
@@ -283,7 +234,7 @@ public class Tricorder extends AircandiActivity {
 				// Uri uri = Uri.parse(Aircandi.URL_AIRCANDI_MEDIA + "audio.3meters.com/signsoflove.mp3");
 
 				Uri uri = Uri.parse("http://dev.aircandi.com/media/" + audioFile);
-				mediaPlayer_.setDataSource(Tricorder.this, uri);
+				mediaPlayer_.setDataSource(TricorderGL.this, uri);
 				mediaPlayer_.setAudioStreamType(AudioManager.STREAM_MUSIC);
 				mediaPlayer_.prepare();
 				mediaPlayer_.start();
@@ -346,8 +297,6 @@ public class Tricorder extends AircandiActivity {
 	public void onBackPressed() {
 
 		if (!isDetailVisible_) {
-			if (!rippleView_.navigateUp())
-				super.onBackPressed();
 		}
 		else {
 			mediaPlayer_.stop();
@@ -419,12 +368,10 @@ public class Tricorder extends AircandiActivity {
 				// Refresh the RippleView to reflect any updates to the collection of entities.
 				// If using autoscan, we skip a refresh if the user is doing some scrolling because
 				// layout can make the UI jerky.
-				if (!prefAutoscan_ || rippleView_.isMotionless()) {
+				if (!prefAutoscan_) {
 					Utilities.Log(Aircandi.APP_NAME, "Radar", "Refreshing RippleView");
 					// Replace the collection
 					entityListFiltered_ = (ArrayList<Entity>) entities.clone();
-					rippleView_.setDataSource(entityListFiltered_);
-					rippleView_.refresh();
 				}
 				else
 					Utilities.Log(Aircandi.APP_NAME, "Radar", "UI *busy* so skipping RippleView refresh");
@@ -438,7 +385,7 @@ public class Tricorder extends AircandiActivity {
 				}
 			}
 			catch (Exception exception) {
-				AircandiUI.showToastNotification(Tricorder.this, "Unknown error", Toast.LENGTH_SHORT);
+				AircandiUI.showToastNotification(TricorderGL.this, "Unknown error", Toast.LENGTH_SHORT);
 			}
 		}
 
@@ -446,7 +393,7 @@ public class Tricorder extends AircandiActivity {
 		public void onIOException(IOException exception) {
 
 			Utilities.Log(ProxibaseService.APP_NAME, "Radar", exception.getMessage());
-			AircandiUI.showToastNotification(Tricorder.this, "Network error", Toast.LENGTH_SHORT);
+			AircandiUI.showToastNotification(TricorderGL.this, "Network error", Toast.LENGTH_SHORT);
 			stopProgress();
 			exception.printStackTrace();
 		}
@@ -455,7 +402,7 @@ public class Tricorder extends AircandiActivity {
 		@Override
 		public void onTagExplorerError(ProxibaseError error) {
 
-			AircandiUI.showToastNotification(Tricorder.this, error.getMessage(), Toast.LENGTH_SHORT);
+			AircandiUI.showToastNotification(TricorderGL.this, error.getMessage(), Toast.LENGTH_SHORT);
 			Utilities.Log(ProxibaseService.APP_NAME, "Radar", error.getMessage());
 			stopProgress();
 		}
@@ -664,7 +611,7 @@ public class Tricorder extends AircandiActivity {
 			Rotate3dAnimation rotation;
 
 			if (rotateRight_) {
-				rippleView_.setVisibility(View.GONE);
+				proxiView_.setVisibility(View.GONE);
 				entitySummaryView_.setVisibility(View.VISIBLE);
 				entitySummaryView_.requestFocus();
 
@@ -672,8 +619,8 @@ public class Tricorder extends AircandiActivity {
 			}
 			else {
 				entitySummaryView_.setVisibility(View.GONE);
-				rippleView_.setVisibility(View.VISIBLE);
-				rippleView_.requestFocus();
+				proxiView_.setVisibility(View.VISIBLE);
+				proxiView_.requestFocus();
 
 				rotation = new Rotate3dAnimation(90, 0, centerX, centerY, 310.0f, false);
 			}
@@ -714,17 +661,6 @@ public class Tricorder extends AircandiActivity {
 			tagExplorer_.setPrefAutoscanInterval(prefAutoscanInterval_);
 			tagExplorer_.setPrefTagLevelCutoff(prefTagLevelCutoff_);
 			tagExplorer_.setPrefTagsWithEntitiesOnly(prefTagsWithEntitiesOnly_);
-		}
-	}
-
-
-	private void configureRippleView() {
-
-		if (rippleView_ != null) {
-			rippleView_.setPrefDisplayExtras(prefDisplayExtras_);
-			rippleView_.setScale(prefTileScale_);
-			rippleView_.setEnableRotation(prefTileRotate_);
-			rippleView_.setSoundsEnabled(prefSoundEffects_);
 		}
 	}
 
@@ -775,7 +711,7 @@ public class Tricorder extends AircandiActivity {
 		if (isReadyToRun_) {
 			loadPreferences();
 			configureTagExplorer();
-			configureRippleView();
+			//configureRippleView();
 
 			// We always try to kick off a scan when radar is started or resumed
 			scanForTags(true);
