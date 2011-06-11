@@ -59,7 +59,7 @@ public class NoteEditor extends AircandiActivity
 			mPost.dateCreated = DateUtils.nowString();
 			mPost.dateModified = DateUtils.nowString();
 			mPost.authorId = "Anonymous";
-			mPost.entityId = getCurrentEntity().entityId;
+			mPost.entityId = getCurrentEntity().entity.entityId;
 			mPost.isPublished = true;
 			mPost.isCommentEnabled = true;
 			ripple.insert(mPost, "Posts", "", new NoteModifyListener()); // Insert

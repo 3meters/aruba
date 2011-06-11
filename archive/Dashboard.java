@@ -107,7 +107,7 @@ public class Dashboard extends AircandiActivity {
 
 	public void theming() {
 
-		Button btn = (Button) findViewById(R.id.Button_Radar);
+		Button btn = (Button) findViewById(R.id.Button_Tricorder);
 		btn.getBackground().mutate().setColorFilter(getResources().getColor(R.color.button_color_filter),
 				PorterDuff.Mode.MULTIPLY);
 		btn = (Button) findViewById(R.id.Button_Friends);
@@ -131,7 +131,7 @@ public class Dashboard extends AircandiActivity {
 
 	public void enableUI(Boolean state) {
 
-		Button btn = (Button) findViewById(R.id.Button_Radar);
+		Button btn = (Button) findViewById(R.id.Button_Tricorder);
 		btn.setEnabled(state);
 		btn = (Button) findViewById(R.id.Button_Friends);
 		btn.setEnabled(state);

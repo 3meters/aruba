@@ -55,7 +55,7 @@ public class NotesList extends AircandiActivity
 
 	public void loadData()
 	{
-		Query query = new Query("Posts").filter("entityId eq guid'" + getCurrentEntity().entityId + "' and Author eq '" + "Anonymous" + "'");
+		Query query = new Query("Posts").filter("entityId eq guid'" + getCurrentEntity().entity.entityId + "' and Author eq '" + "Anonymous" + "'");
 
 		if (getCurrentEntity() != null)
 			if (mListItems == null)

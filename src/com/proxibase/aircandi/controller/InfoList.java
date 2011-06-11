@@ -90,7 +90,7 @@ public class InfoList extends AircandiActivity
 	{
 		// Query query = new Query("Posts").filter("entityId eq guid'" + getCurrentEntity().entityId +
 		// "' and Author eq '" + getCurrentEntity().tagId + "'");
-		Query query = new Query("Posts").filter("EntityId eq guid'" + getCurrentEntity().entityId + "' and Author eq '00:00:00:00:00:00'");
+		Query query = new Query("Posts").filter("EntityId eq guid'" + getCurrentEntity().entity.entityId + "' and Author eq '00:00:00:00:00:00'");
 		if (getCurrentEntity() != null)
 			if (mListItems == null)
 			{

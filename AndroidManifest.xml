@@ -20,7 +20,7 @@
 		android:theme="@style/AircandiTheme"
 		android:icon="@drawable/icon_aircandi">
 		<activity
-			android:name=".TricorderGL"
+			android:name=".TricorderAE"
 			android:label="@string/app_name"
 			android:configChanges="orientation">
 			<intent-filter>

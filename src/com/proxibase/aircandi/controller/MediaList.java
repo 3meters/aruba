@@ -1,7 +1,6 @@
 package com.proxibase.aircandi.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
@@ -15,9 +14,9 @@ import android.widget.Toast;
 
 import com.proxibase.aircandi.model.Resource;
 import com.proxibase.sdk.android.core.BaseQueryListener;
-import com.proxibase.sdk.android.core.Query;
 import com.proxibase.sdk.android.core.ProxibaseRunner;
 import com.proxibase.sdk.android.core.ProxibaseService;
+import com.proxibase.sdk.android.core.Query;
 import com.proxibase.sdk.android.core.Stream;
 import com.proxibase.sdk.android.core.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.core.ProxibaseService.QueryFormat;
@@ -57,7 +56,7 @@ public class MediaList extends AircandiActivity {
 	public void loadData() {
 
 		// Get the point we are rooted on
-		Query query = new Query("Resources").filter("EntityId eq guid'" + getCurrentEntity().entityId + "'");
+		Query query = new Query("Resources").filter("EntityId eq guid'" + getCurrentEntity().entity.entityId + "'");
 		if (getCurrentEntity() != null)
 			if (mListItems == null) {
 				startProgress();
@@ -132,7 +131,7 @@ public class MediaList extends AircandiActivity {
 		parameters.putString("parameter2", "");
 		parameters.putString("parameter3", "");
 		parameters.putString("priority", "1");
-		parameters.putString("targetId", getCurrentEntity().entityId);
+		parameters.putString("targetId", getCurrentEntity().entity.entityId);
 		parameters.putString("sourceId", "111111111");
 
 		ProxibaseRunner.post(method, parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE,
@@ -166,7 +165,7 @@ public class MediaList extends AircandiActivity {
 		parameters.putString("parameter2", resource.title);
 		parameters.putString("parameter3", resource.artist);
 		parameters.putString("priority", "2");
-		parameters.putString("targetId", getCurrentEntity().entityId);
+		parameters.putString("targetId", getCurrentEntity().entity.entityId);
 		parameters.putString("sourceId", "111111111");
 
 		ProxibaseRunner.post(method, parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE,

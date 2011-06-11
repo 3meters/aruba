@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.proxibase.aircandi.utilities.Utilities;
 import com.proxibase.sdk.android.core.BaseQueryListener;
 import com.proxibase.sdk.android.core.Entity;
+import com.proxibase.sdk.android.core.ProxiEntity;
 import com.proxibase.sdk.android.core.ProxibaseRunner;
 import com.proxibase.sdk.android.core.ProxibaseService.QueryFormat;
 
@@ -29,7 +30,7 @@ public class PointEditor extends AircandiActivity
 	private EditText	mEditLabel;
 	private CheckBox	mChkIsRipplePoint;
 	private Button		mBtnSave;
-	private Entity		mEntity;
+	private ProxiEntity		mEntity;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -40,8 +41,6 @@ public class PointEditor extends AircandiActivity
 
 		// Get the point we are rooted on
 		mEntity = getCurrentEntity();
-		mEntity.isDirty = true;
-		mEntity.isSelected = false;
 		if (mEntity != null)
 		{
 			mTextBssid = (TextView) findViewById(R.id.TextBssid);
@@ -53,9 +52,9 @@ public class PointEditor extends AircandiActivity
 
 //			mTextSsid.setText(mEntity.ssid);
 //			mTextBssid.setText(mEntity.bssid);
-			mTextLevel.setText(Integer.toString(mEntity.levelDb));
-			mEditLabel.setText(mEntity.label);
-			mChkIsRipplePoint.setChecked(mEntity.isTagged);
+			mTextLevel.setText(Integer.toString(mEntity.beacon.levelDb));
+			mEditLabel.setText(mEntity.entity.label);
+			mChkIsRipplePoint.setChecked(!mEntity.beacon.isLocalOnly);
 
 			mBtnSave.setTag(mEntity);
 		}
@@ -77,7 +76,7 @@ public class PointEditor extends AircandiActivity
 		Boolean changedLabel = false;
 		Boolean changedRipplePoint = false;
 
-		if (!mEntity.label.equals(mEditLabel.getEditableText().toString()))
+		if (!mEntity.entity.label.equals(mEditLabel.getEditableText().toString()))
 			changedLabel = true;
 		if (mEntity.isTagged != mChkIsRipplePoint.isChecked())
 			changedRipplePoint = true;

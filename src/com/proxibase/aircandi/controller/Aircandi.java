@@ -7,11 +7,11 @@ import android.location.Location;
 import android.util.Log;
 
 import com.proxibase.aircandi.model.Post;
-import com.proxibase.sdk.android.core.Entity;
+import com.proxibase.sdk.android.core.proxi.ProxiEntity;
 
 public class Aircandi extends Application {
 
-	public Entity				currentEntityX;
+	public ProxiEntity			currentEntityX;
 	public Post					currentPostX;
 	public Location				currentLocation;
 	public static final int		TWO_MINUTES					= 1000 * 60 * 2;

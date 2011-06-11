@@ -21,7 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.model.Post;
-import com.proxibase.sdk.android.core.Entity;
+import com.proxibase.sdk.android.core.proxi.ProxiEntity;
 import com.proxibase.sdk.android.core.ProxibaseService;
 import com.proxibase.sdk.android.core.Stream;
 import com.proxibase.sdk.android.core.ProxibaseService.GsonType;
@@ -146,7 +146,7 @@ public abstract class AircandiActivity extends Activity {
 
 	public void onHomeClick(View view) {
 
-		Intent intent = new Intent(this, Tricorder.class);
+		Intent intent = new Intent(this, TricorderAE.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(intent);
@@ -291,13 +291,13 @@ public abstract class AircandiActivity extends Activity {
 	}
 
 
-	protected void setCurrentEntity(Entity currentEntity) {
+	protected void setCurrentEntity(ProxiEntity currentEntity) {
 
 		((Aircandi) getApplicationContext()).currentEntityX = currentEntity;
 	}
 
 
-	protected Entity getCurrentEntity() {
+	protected ProxiEntity getCurrentEntity() {
 
 		return ((Aircandi) getApplicationContext()).currentEntityX;
 	}

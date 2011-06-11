@@ -88,11 +88,11 @@
 					style="@style/Dashboard_Icon_Container"
 					android:gravity="center">
 					<Button
-						android:id="@+id/Button_Radar"
+						android:id="@+id/Button_Tricorder"
 						style="@style/Dashboard_Icon"
-						android:tag="Radar"
+						android:tag="Tricorder"
 						android:background="@drawable/button_selector"
-						android:text="Radar"
+						android:text="Tricorder"
 						android:drawableTop="@drawable/ic_dash_blue_radar3_white"
 						android:drawablePadding="0dp" />
 				</LinearLayout>
