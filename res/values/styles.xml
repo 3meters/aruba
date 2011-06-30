@@ -94,8 +94,7 @@
 	</style>
 	
 	<style
-		name="Application_Title">
-		<item name="android:text">@string/application_title</item>		
+		name="Application_Title">		
 		<item name="android:textSize">@dimen/application_titlebar_text</item>		
 		<item name="android:textColor">@color/application_titlebar_text</item>		
 		<item name="android:textStyle">normal</item>
