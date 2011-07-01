@@ -4,8 +4,8 @@ import java.util.Observable;
 
 import org.anddev.andengine.entity.IEntity;
 
+import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.views.CandiView.OnCandiViewSingleTapListener;
-import com.proxibase.aircandi.models.IModel;
 
 public interface IView extends IEntity {
 

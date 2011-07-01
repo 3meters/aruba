@@ -23,11 +23,11 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 
 import com.proxibase.aircandi.candi.models.BaseModel;
+import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.controllers.Aircandi;
-import com.proxibase.aircandi.models.IModel;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.Utilities;
 

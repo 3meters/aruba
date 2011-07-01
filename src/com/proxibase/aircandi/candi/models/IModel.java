@@ -1,10 +1,9 @@
-package com.proxibase.aircandi.models;
+package com.proxibase.aircandi.candi.models;
 
 import java.util.LinkedList;
 
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 
-import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.utils.CandiList;
 
 public interface IModel {

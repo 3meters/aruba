@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 
-import com.proxibase.aircandi.models.IModel;
 import com.proxibase.aircandi.utils.CandiList;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.ProxiEntity;

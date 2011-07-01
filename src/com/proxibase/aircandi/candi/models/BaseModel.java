@@ -5,7 +5,6 @@ import java.util.Observable;
 
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 
-import com.proxibase.aircandi.models.IModel;
 import com.proxibase.aircandi.utils.CandiList;
 
 public abstract class BaseModel extends Observable implements IModel {

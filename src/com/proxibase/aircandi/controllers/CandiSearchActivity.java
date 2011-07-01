@@ -65,11 +65,11 @@ import android.widget.Toast;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
+import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.models.CandiModel.DisplayExtra;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.ICandiListener;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
-import com.proxibase.aircandi.models.IModel;
 import com.proxibase.aircandi.utils.ImageCache;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Utilities;
