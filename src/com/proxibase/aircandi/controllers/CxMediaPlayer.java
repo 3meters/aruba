@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controller;
+package com.proxibase.aircandi.controllers;
 
 import java.util.HashMap;
 import java.util.Map;

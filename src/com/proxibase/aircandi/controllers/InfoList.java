@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controller;
+package com.proxibase.aircandi.controllers;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,13 +25,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.model.Post;
-import com.proxibase.sdk.android.core.BaseQueryListener;
-import com.proxibase.sdk.android.core.Query;
-import com.proxibase.sdk.android.core.ProxibaseRunner;
-import com.proxibase.sdk.android.core.ProxibaseService;
-import com.proxibase.sdk.android.core.Stream;
-import com.proxibase.sdk.android.core.ProxibaseService.GsonType;
+import com.proxibase.aircandi.models.Post;
+import com.proxibase.sdk.android.proxi.consumer.Stream;
+import com.proxibase.sdk.android.proxi.service.ProxibaseRunner;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.Query;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.BaseQueryListener;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
 public class InfoList extends AircandiActivity
 {
@@ -90,7 +90,7 @@ public class InfoList extends AircandiActivity
 	{
 		// Query query = new Query("Posts").filter("entityId eq guid'" + getCurrentEntity().entityId +
 		// "' and Author eq '" + getCurrentEntity().tagId + "'");
-		Query query = new Query("Posts").filter("EntityId eq guid'" + getCurrentEntity().entity.entityId + "' and Author eq '00:00:00:00:00:00'");
+		Query query = new Query("Posts").filter("EntityId eq guid'" + getCurrentEntity().getProxiEntity().entityId + "' and Author eq '00:00:00:00:00:00'");
 		if (getCurrentEntity() != null)
 			if (mListItems == null)
 			{

@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controller;
+package com.proxibase.aircandi.controllers;
 
 import java.util.Calendar;
 
@@ -6,36 +6,32 @@ import android.app.Application;
 import android.location.Location;
 import android.util.Log;
 
-import com.proxibase.aircandi.model.Post;
-import com.proxibase.sdk.android.core.proxi.ProxiEntity;
+import com.proxibase.aircandi.candi.models.CandiModel;
+import com.proxibase.aircandi.models.Post;
 
 public class Aircandi extends Application {
 
-	public ProxiEntity			currentEntityX;
-	public Post					currentPostX;
-	public Location				currentLocation;
-	public static final int		TWO_MINUTES					= 1000 * 60 * 2;
-	public static final int		FIVE_MINUTES				= 1000 * 60 * 5;
-	public static final String	URL_AIRCANDI_SERVICE_ODATA	= "http://dev.aircandi.com/airodata.svc/";
-	public static final String	URL_AIRCANDI_SERVICE		= "http://dev.aircandi.com/airlogic.asmx/";
-	public static final String	URL_AIRCANDI_BLOG			= "http://devblog.proxibase.com/";
-	public static final String	URL_AIRCANDI_MEDIA			= "https://s3.amazonaws.com/";
+	public Post							currentPostX;
+	public Location						currentLocation;
+	public CandiModel					currentCandiModel;
+	public static final int				TWO_MINUTES					= 1000 * 60 * 2;
+	public static final int				FIVE_MINUTES				= 1000 * 60 * 5;
+	public static final String			URL_AIRCANDI_SERVICE_ODATA	= "http://dev.aircandi.com/airodata.svc/";
+	public static final String			URL_AIRCANDI_SERVICE		= "http://dev.aircandi.com/airlogic.asmx/";
+	public static final String			URL_AIRCANDI_BLOG			= "http://devblog.proxibase.com/";
+	public static final String			URL_AIRCANDI_MEDIA			= "https://s3.amazonaws.com/";
 
-	public static final boolean	MODE_DEBUG					= true;
-	public static final String	APP_NAME					= "Aircandi";
-
+	public static final boolean			MODE_DEBUG					= true;
+	public static final String			APP_NAME					= "Aircandi";
 
 	public Aircandi() {
-
 	}
-
 
 	@Override
 	public void onCreate() {
 
 		super.onCreate();
 	}
-
 
 	/**
 	 * Callback interface for Aircandi async requests.
@@ -48,7 +44,6 @@ public class Aircandi extends Application {
 		 */
 		public void onComplete(String response);
 
-
 		public void onException(Exception e);
 	}
 
@@ -60,7 +55,6 @@ public class Aircandi extends Application {
 			e.printStackTrace();
 		}
 	}
-
 
 	/**
 	 * Determines whether one Location reading is better than the current Location fix *
@@ -113,14 +107,12 @@ public class Aircandi extends Application {
 		return false;
 	}
 
-
 	public static long locationFixAge(Location location) {
 
 		Calendar cal = Calendar.getInstance();
 		long timeDelta = cal.getTimeInMillis() - location.getTime();
 		return timeDelta;
 	}
-
 
 	/** Checks whether two providers are the same */
 	private static boolean isSameProvider(String provider1, String provider2) {

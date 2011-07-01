@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controller;
+package com.proxibase.aircandi.controllers;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,12 +11,12 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.model.Post;
-import com.proxibase.sdk.android.core.BaseModifyListener;
-import com.proxibase.sdk.android.core.BaseQueryListener;
-import com.proxibase.sdk.android.core.Query;
-import com.proxibase.sdk.android.core.ProxibaseRunner;
-import com.proxibase.sdk.android.core.ProxibaseService;
+import com.proxibase.aircandi.models.Post;
+import com.proxibase.sdk.android.proxi.service.ProxibaseRunner;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.Query;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.BaseModifyListener;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.BaseQueryListener;
 
 public class NoteForm extends AircandiActivity
 {

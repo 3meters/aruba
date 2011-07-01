@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controller;
+package com.proxibase.aircandi.controllers;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -20,11 +20,11 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.model.Post;
-import com.proxibase.sdk.android.core.proxi.ProxiEntity;
-import com.proxibase.sdk.android.core.ProxibaseService;
-import com.proxibase.sdk.android.core.Stream;
-import com.proxibase.sdk.android.core.ProxibaseService.GsonType;
+import com.proxibase.aircandi.candi.models.CandiModel;
+import com.proxibase.aircandi.models.Post;
+import com.proxibase.sdk.android.proxi.consumer.Stream;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
 public abstract class AircandiActivity extends Activity {
 
@@ -146,7 +146,7 @@ public abstract class AircandiActivity extends Activity {
 
 	public void onHomeClick(View view) {
 
-		Intent intent = new Intent(this, TricorderAE.class);
+		Intent intent = new Intent(this, CandiSearchActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(intent);
@@ -291,15 +291,15 @@ public abstract class AircandiActivity extends Activity {
 	}
 
 
-	protected void setCurrentEntity(ProxiEntity currentEntity) {
+	protected void setCurrentEntity(CandiModel currentEntity) {
 
-		((Aircandi) getApplicationContext()).currentEntityX = currentEntity;
+		((Aircandi) getApplicationContext()).currentCandiModel = currentEntity;
 	}
 
 
-	protected ProxiEntity getCurrentEntity() {
+	protected CandiModel getCurrentEntity() {
 
-		return ((Aircandi) getApplicationContext()).currentEntityX;
+		return ((Aircandi) getApplicationContext()).currentCandiModel;
 	}
 
 

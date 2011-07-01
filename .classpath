@@ -8,8 +8,8 @@
 			<attribute name="javadoc_location" value="jar:file:/D:/Files/Proxibase/Android/packages/google-gson-1.7.1/gson-1.7.1-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="D:/Files/Proxibase/Android/google-collect/google-collect-1.0-rc2.jar"/>
+	<classpathentry kind="lib" path="D:/Files/Proxibase/Code/Guava/bin/guava.jar"/>
 	<classpathentry kind="lib" path="D:/Files/Proxibase/Code/Andengine/bin/andengine.jar" sourcepath="D:/Files/Proxibase/Code/Andengine/bin/andengine.jar"/>
-	<classpathentry kind="lib" path="D:/Files/Proxibase/Code/Proxibase Sdk/android/bin/proxibase-sdk-widgets-1.0.0.jar"/>
+	<classpathentry kind="lib" path="D:/Files/Proxibase/Code/Proxibase Sdk/android/bin/proxibase.jar" sourcepath="D:/Files/Proxibase/Code/Proxibase Sdk/android/bin/proxibase.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

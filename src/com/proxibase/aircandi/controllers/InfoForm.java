@@ -1,11 +1,11 @@
-package com.proxibase.aircandi.controller;
+package com.proxibase.aircandi.controllers;
 
 import android.os.Bundle;
 import android.webkit.WebView;
 
-import com.proxibase.aircandi.model.Post;
-import com.proxibase.sdk.android.core.ProxibaseService;
-import com.proxibase.sdk.android.core.ProxibaseService.GsonType;
+import com.proxibase.aircandi.models.Post;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
 public class InfoForm extends AircandiActivity {
 	

@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controller;
+package com.proxibase.aircandi.controllers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,9 +19,6 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
 import android.widget.Toast;
 
-import com.proxibase.sdk.android.core.ProxibaseService;
-import com.proxibase.sdk.android.core.ProxibaseService.QueryFormat;
-
 public class AircandiUI
 {
 	public static void showToastNotification(Context context, String message, int duration)
@@ -39,10 +36,10 @@ public class AircandiUI
 
 	public static Bitmap getImage(String url)
 	{
-		ProxibaseService ripple = new ProxibaseService();
+		com.proxibase.sdk.android.proxi.service.ProxibaseService ripple = new com.proxibase.sdk.android.proxi.service.ProxibaseService();
 		try
 		{
-			InputStream stream = ripple.getStream(url, QueryFormat.Xml);
+			InputStream stream = ripple.getStream(url, com.proxibase.sdk.android.proxi.service.ProxibaseService.QueryFormat.Xml);
 			Bitmap bm = BitmapFactory.decodeStream(stream);
 			return bm;
 		}

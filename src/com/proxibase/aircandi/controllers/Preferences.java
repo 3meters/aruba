@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controller;
+package com.proxibase.aircandi.controllers;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

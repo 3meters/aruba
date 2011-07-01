@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.proxibase.aircandi.controller;
+package com.proxibase.aircandi.controllers;
 
 import android.graphics.Camera;
 import android.graphics.Matrix;

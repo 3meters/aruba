@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controller;
+package com.proxibase.aircandi.controllers;
 
 import java.io.IOException;
 
@@ -9,10 +9,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.model.Post;
-import com.proxibase.aircandi.utilities.DateUtils;
-import com.proxibase.sdk.android.core.BaseModifyListener;
-import com.proxibase.sdk.android.core.ProxibaseRunner;
+import com.proxibase.aircandi.models.Post;
+import com.proxibase.aircandi.utils.DateUtils;
+import com.proxibase.sdk.android.proxi.service.ProxibaseRunner;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.BaseModifyListener;
 
 public class NoteEditor extends AircandiActivity
 {
@@ -59,7 +59,7 @@ public class NoteEditor extends AircandiActivity
 			mPost.dateCreated = DateUtils.nowString();
 			mPost.dateModified = DateUtils.nowString();
 			mPost.authorId = "Anonymous";
-			mPost.entityId = getCurrentEntity().entity.entityId;
+			mPost.entityId = getCurrentEntity().getProxiEntity().entityId;
 			mPost.isPublished = true;
 			mPost.isCommentEnabled = true;
 			ripple.insert(mPost, "Posts", "", new NoteModifyListener()); // Insert
