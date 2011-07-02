@@ -1108,10 +1108,18 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.settings :
-				startActivity(new Intent(this, Preferences.class));
+				startActivityForResult(new Intent(this, Preferences.class), 0);
 				return (true);
 			default :
 				return (super.onOptionsItemSelected(item));
 		}
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		super.onActivityResult(requestCode, resultCode, data);
+//		loadPreferences();
+//		loadPreferencesProxiExplorer();
 	}
 }

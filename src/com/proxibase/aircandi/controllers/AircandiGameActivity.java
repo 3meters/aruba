@@ -8,9 +8,6 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.location.Location;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -188,39 +185,6 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 
 		AircandiUI.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
 		return;
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.main_menu, menu);
-
-		// Hide the sign out option if we don't have a current session
-		MenuItem item = menu.findItem(R.id.signout);
-		item.setVisible(false);
-		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-
-		// Hide the sign out option if we don't have a current session
-		MenuItem item = menu.findItem(R.id.signout);
-		item.setVisible(false);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		switch (item.getItemId()) {
-			case R.id.settings :
-				startActivity(new Intent(this, Preferences.class));
-				return (true);
-			default :
-				return (super.onOptionsItemSelected(item));
-		}
 	}
 
 	protected void startTitlebarProgress() {
