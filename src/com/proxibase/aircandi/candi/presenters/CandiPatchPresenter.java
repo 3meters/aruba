@@ -134,7 +134,7 @@ public class CandiPatchPresenter implements Observer {
 
 		// Origin
 		mCandiPatchModel.setOriginX((int) ((this.mCamera.getWidth() - CandiConstants.CANDI_VIEW_WIDTH) * 0.5f));
-		mCandiPatchModel.setOriginY((int) ((this.mCamera.getHeight() - CandiConstants.CANDI_VIEW_HEIGHT) * 0.5f));
+		mCandiPatchModel.setOriginY((int) ((this.mCamera.getHeight() - CandiConstants.CANDI_VIEW_HEIGHT) * 0.5f) - 25);
 
 		// Zone for inactive candi
 		mCandiPatchModel.setZoneInactive(new ZoneModel(0, mCandiPatchModel));
@@ -196,9 +196,10 @@ public class CandiPatchPresenter implements Observer {
 			mCameraTargetSprite.setVisible(false);
 			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mCameraTargetSprite);
 
-			// Jayma: hack until I can figure out a better way to do this.
+			// Jayma: hack until I can figure out a better way to do this. This will only work
+			// for a device that has an 800x480 screen.
 			if (mCandiActivity.getScreenOrientation() == ScreenOrientation.LANDSCAPE)
-				scene.setPosition(160, -50);
+				scene.setPosition(160, 0);
 
 			// Tie camera position to target position
 			mCamera.setChaseEntity(mCameraTargetSprite);
