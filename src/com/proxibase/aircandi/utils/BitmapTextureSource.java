@@ -3,6 +3,7 @@ package com.proxibase.aircandi.utils;
 import org.anddev.andengine.opengl.texture.source.ITextureSource;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 
 public class BitmapTextureSource implements ITextureSource {
 
@@ -10,7 +11,6 @@ public class BitmapTextureSource implements ITextureSource {
 	private int		mWidth;
 
 	private Bitmap	mBitmap;
-
 
 	public BitmapTextureSource(Bitmap bitmap) {
 
@@ -23,16 +23,13 @@ public class BitmapTextureSource implements ITextureSource {
 			mHeight = 0;
 			mWidth = 0;
 		}
-
 	}
-
 
 	@Override
 	public BitmapTextureSource clone() {
 
 		return null;
 	}
-
 
 	@Override
 	public int getHeight() {
@@ -41,7 +38,6 @@ public class BitmapTextureSource implements ITextureSource {
 		return mHeight;
 	}
 
-
 	@Override
 	public int getWidth() {
 
@@ -49,9 +45,8 @@ public class BitmapTextureSource implements ITextureSource {
 		return mWidth;
 	}
 
-
 	@Override
-	public Bitmap onLoadBitmap() {
+	public Bitmap onLoadBitmap(Config pBitmapConfig) {
 
 		// TODO Auto-generated method stub
 		return mBitmap;
