@@ -8,6 +8,7 @@ import org.anddev.andengine.opengl.buffer.BufferObjectManager;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.util.GLHelper;
 
+import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.controllers.Aircandi;
 import com.proxibase.aircandi.utils.Utilities;
 
@@ -36,6 +37,21 @@ public class CandiSprite extends Sprite {
 			pGL.glRotatef(rotation, 0, 1, 0);
 			pGL.glTranslatef(-rotationCenterX, -rotationCenterY, 0);
 		}
+	}
+
+	public boolean isVisibleToCamera(Camera camera) {
+		return !isCulled(camera);
+	}
+
+	@Override
+	public boolean isCulled(Camera pCamera) {
+		final float[] coordinates = this.convertLocalToSceneCoordinates(this.mX, this.mY);
+		final float x = coordinates[CandiConstants.VERTEX_INDEX_X];
+		final float y = coordinates[CandiConstants.VERTEX_INDEX_Y];
+		return x > pCamera.getMaxX() || 
+			y > pCamera.getMaxY() || 
+			x + this.getWidth() < pCamera.getMinX() || 
+			y + this.getHeight() < pCamera.getMinY();
 	}
 
 	@Override
