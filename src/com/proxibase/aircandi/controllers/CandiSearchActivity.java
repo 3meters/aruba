@@ -26,14 +26,18 @@ import org.anddev.andengine.util.modifier.ease.EaseCubicIn;
 import org.anddev.andengine.util.modifier.ease.EaseCubicOut;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -44,16 +48,20 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Animation.AnimationListener;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -62,6 +70,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.FrameLayout.LayoutParams;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
@@ -69,12 +78,14 @@ import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.models.CandiModel.DisplayExtra;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.ICandiListener;
+import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.TextureReset;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.utils.ImageCache;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Utilities;
 import com.proxibase.sdk.android.proxi.consumer.ProxiEntity;
 import com.proxibase.sdk.android.proxi.consumer.ProxiExplorer;
+import com.proxibase.sdk.android.proxi.consumer.ProxiHandler;
 import com.proxibase.sdk.android.proxi.consumer.Stream;
 import com.proxibase.sdk.android.proxi.consumer.ProxiExplorer.BaseBeaconScanListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseError;
@@ -103,6 +114,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private ProxiExplorer		mProxiExplorer;
 	private List<ProxiEntity>	mProxiEntities;
+	private ProxiAppManager		mProxiAppManager;
 
 	private RenderSurfaceView	mCandiPatchSurfaceView;
 	private CandiPatchModel		mCandiPatchModel;
@@ -110,7 +122,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	protected ImageView			mProgressIndicator;
 	protected ImageView			mButtonRefresh;
-	private LinearLayout		mCandiContainer;
+	private FrameLayout			mCandiContainer;
 	private FrameLayout			mCandiSummaryView;
 	private FrameLayout			mCandiSearchView;
 
@@ -150,7 +162,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mSoundEffects = new CxMediaPlayer(this);
 
 		// Ui Hookup
-		mCandiContainer = (LinearLayout) findViewById(R.id.CandiContainer);
+		mCandiContainer = (FrameLayout) findViewById(R.id.CandiContainer);
 		mCandiSummaryView = (FrameLayout) findViewById(R.id.CandiSummaryView);
 		mCandiSearchView = (FrameLayout) findViewById(R.id.CandiSearchView);
 		mProgressIndicator = (ImageView) findViewById(R.id.Application_ProgressIndicator);
@@ -170,6 +182,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		// Candi patch
 		mCandiPatchModel = new CandiPatchModel();
+
+		// Proxi activities
+		mProxiAppManager = new ProxiAppManager(this);
 
 		// Use a surface format with an Alpha channel
 		super.mRenderSurfaceView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
@@ -198,7 +213,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	public void onStreamButtonClick(View view) {
 
 		Stream stream = (Stream) view.getTag();
-		String fullyQualifiedClass = "com.proxibase.aircandi.controller." + stream.streamClass;
+		String fullyQualifiedClass = "com.proxibase.aircandi.controllers." + stream.streamClass;
 		String streamName = stream.streamName.toLowerCase();
 
 		if (stream.streamClass.toLowerCase().equals("list")) {
@@ -247,8 +262,11 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				Class clazz = Class.forName(fullyQualifiedClass, false, this.getClass().getClassLoader());
 
 				Intent intent = new Intent(this, clazz);
-				String jsonStream = ProxibaseService.getGson(GsonType.Internal).toJson(stream);
-				intent.putExtra("stream", jsonStream);
+				String jsonStream = ProxibaseService.getGson(GsonType.ProxibaseService).toJson(stream);
+				String jsonProxiEntity = ProxibaseService.getGson(GsonType.ProxibaseService).toJson(
+						mCandiPatchModel.getCandiModelSelected().getProxiEntity());
+				intent.putExtra("Stream", jsonStream);
+				intent.putExtra("ProxiEntity", jsonProxiEntity);
 
 				if (streamName.toLowerCase().equals("friends"))
 					intent.putExtra("FriendsFilter", "FriendsByPoint");
@@ -375,6 +393,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				// Schedule the next wifi scan run
 				if (mPrefAutoscan) {
 					mHandler.postDelayed(new Runnable() {
+
 						public void run() {
 							scanForBeacons(false, false);
 						}
@@ -475,12 +494,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 
 			@Override
-			public void onAnimationRepeat(Animation animation) {
-			}
+			public void onAnimationRepeat(Animation animation) {}
 
 			@Override
-			public void onAnimationStart(Animation animation) {
-			}
+			public void onAnimationStart(Animation animation) {}
 		});
 
 		mCandiContainer.startAnimation(rotation);
@@ -532,6 +549,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						});
 
 					}
+
+					@Override
+					public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
 
 				}, new RotationAtModifier(1f, 0, 90, rotationX, rotationY, EaseCubicIn.getInstance()), new ScaleAtModifier(1f, 1, 0.3f, rotationX,
 						rotationY, EaseCubicIn.getInstance()), new AlphaModifier(1f, 1.0f, 0.0f, EaseCircularIn.getInstance())));
@@ -681,13 +701,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		Camera camera = new Camera(0, 0, dm.widthPixels, dm.heightPixels - CandiConstants.CANDI_TITLEBAR_HEIGHT) {
 
 			@Override
-			public void onApplyMatrix(GL10 pGL) {
+			public void onApplySceneMatrix(GL10 pGL) {
 				// Gets called for every engine update
 				mCandiPatchPresenter.setFrustum(pGL);
 			}
 
 			@Override
-			public void onApplyPositionIndependentMatrix(GL10 pGL) {
+			public void onApplySceneBackgroundMatrix(GL10 pGL) {
 				mCandiPatchPresenter.setFrustum(pGL);
 			}
 
@@ -727,8 +747,27 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 			@Override
 			public void onSingleTap(CandiModel candi) {
-				mCandiPatchPresenter.mIgnoreInput = true;
-				showCandiSummary(candi);
+
+				ProxiHandler proxiHandler = candi.getProxiEntity().proxiHandler;
+				boolean startedProxiHandler = mProxiAppManager.startProxiHandler(proxiHandler.getProxiHandlerAction(), candi.getProxiEntity());
+				if (!startedProxiHandler) {
+					if (mProxiAppManager.getProxiHandlers().containsKey(proxiHandler.getProxiHandlerAction())) {
+						ProxiHandler proxiHandlerTracked = (ProxiHandler) mProxiAppManager.getProxiHandlers().get(
+								proxiHandler.getProxiHandlerAction());
+						if (!proxiHandlerTracked.isSuppressInstallPrompt()) {
+							showInstallDialogNew(candi);
+							proxiHandlerTracked.setSuppressInstallPrompt(true);
+						}
+						else {
+							showCandiSummary(candi);
+						}
+					}
+					else {
+						showInstallDialogNew(candi);
+						proxiHandler.setSuppressInstallPrompt(true);
+						mProxiAppManager.getProxiHandlers().put(proxiHandler.getProxiHandlerAction(), proxiHandler);
+					}
+				}
 			}
 		});
 
@@ -736,7 +775,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	@Override
-	public void onGameResumed() {
+	public void onResumeGame() {
 		/*
 		 * Last event to be fired when bringing everything up to speed.
 		 */
@@ -747,7 +786,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	@Override
-	public void onGamePaused() {
+	public void onPauseGame() {
 		Utilities.Log(Aircandi.APP_NAME, COMPONENT_NAME, "Activity.onGamePaused called");
 	}
 
@@ -858,6 +897,52 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 	}
 
+	private void showInstallDialogNew(final CandiModel candi) {
+
+		this.runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				final Dialog dialog = new Dialog(CandiSearchActivity.this, R.style.AircandiDialogTheme);
+				final RelativeLayout installDialog = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_dialog_install, null);
+				dialog.setContentView(installDialog, new FrameLayout.LayoutParams(400, 300, Gravity.CENTER));
+				dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+				dialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.dialog_bg));
+
+				((Button) installDialog.findViewById(R.id.CancelButton)).setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						dialog.dismiss();
+						if (mCandiPatchModel.getCandiModels().size() > 0) {
+							mCandiPatchPresenter.resetSharedTextures();
+							mCandiPatchPresenter.resetTextures(TextureReset.VisibleOnly);
+							new Thread(new Runnable() {
+
+								@Override
+								public void run() {
+									mCandiPatchPresenter.resetTextures(TextureReset.NonVisibleOnly);
+								}
+							}).start();
+						}
+					}
+				});
+				((Button) installDialog.findViewById(R.id.InstallButton)).setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						Intent goToMarket = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(candi.getProxiEntity().proxiHandler
+								.getProxiHandlerInstall()));
+						startActivityForResult(goToMarket, 99);
+						dialog.dismiss();
+					}
+				});
+				dialog.show();
+
+			}
+		});
+	}
+
 	// ==========================================================================
 	// WIFI routines
 	// ==========================================================================
@@ -920,8 +1005,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			loadPreferencesProxiExplorer();
 
 			if (mCandiPatchModel.getCandiModels().size() > 0) {
-				mCandiPatchPresenter.resetTextures();
-				mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent(), true);
+				mCandiPatchPresenter.resetSharedTextures();
+				mCandiPatchPresenter.resetTextures(TextureReset.All);
+				mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent(), false);
 				mEngine.getScene().registerEntityModifier(new AlphaModifier(1f, 0.0f, 1.0f, EaseCircularIn.getInstance()));
 			}
 		}
@@ -1114,12 +1200,16 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				return (super.onOptionsItemSelected(item));
 		}
 	}
-	
+
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data)
-	{
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		/*
+		 * Called before onResume.
+		 */
 		super.onActivityResult(requestCode, resultCode, data);
-//		loadPreferences();
-//		loadPreferencesProxiExplorer();
+		if (requestCode == 99)
+			AircandiUI.showToastNotification(this, "Returned from Market with resultCode: " + String.valueOf(resultCode), Toast.LENGTH_SHORT);
+		// loadPreferences();
+		// loadPreferencesProxiExplorer();
 	}
 }
