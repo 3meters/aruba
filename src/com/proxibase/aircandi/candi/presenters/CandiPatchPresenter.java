@@ -70,6 +70,10 @@ import com.proxibase.sdk.android.util.UtilitiesUI;
 
 public class CandiPatchPresenter implements Observer {
 
+	public static enum TextureReset {
+		All, VisibleOnly, NonVisibleOnly
+	}
+
 	private static String		COMPONENT_NAME			= "CandiPatchPresenter";
 
 	public CandiPatchModel		mCandiPatchModel;
@@ -648,17 +652,29 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	public void resetTextures() {
-		mTexture.clearTextureSources();
-		loadTextureSources();
-
+	public void resetTextures(TextureReset textureReset) {
 		// Candi views
-		for (CandiView candiView : mCandiViews)
+		for (final CandiView candiView : mCandiViews) {
+			if (textureReset == TextureReset.VisibleOnly && !candiView.isVisibleToCamera(this.mCamera))
+				continue;
+			else if (textureReset == TextureReset.NonVisibleOnly && candiView.isVisibleToCamera(this.mCamera))
+				continue;
 			candiView.resetTextures();
+		}
 
 		// Zone views
-		for (ZoneView zoneView : mZoneViews)
+		for (final ZoneView zoneView : mZoneViews) {
+			if (textureReset == TextureReset.VisibleOnly && !zoneView.isVisibleToCamera(this.mCamera))
+				continue;
+			else if (textureReset == TextureReset.NonVisibleOnly && zoneView.isVisibleToCamera(this.mCamera))
+				continue;
 			zoneView.resetTextures();
+		}
+	}
+
+	public void resetSharedTextures() {
+		mTexture.clearTextureSources();
+		loadTextureSources();
 	}
 
 	public void loadTextures() {
@@ -671,7 +687,7 @@ public class CandiPatchPresenter implements Observer {
 		Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/generic10.png");
 		ImageManager.getImageManager().getImageCache().put("tile_untagged.png", bitmap);
 
-		// Scene progress sprite
+		// Textures that are shared by zone views
 		Bitmap bitmapZoneBody = ImageManager.loadBitmapFromAssets("gfx/zone_orange_30.png");
 		if (bitmapZoneBody != null) {
 			mZoneBodyTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(bitmapZoneBody), 0, 0);
@@ -679,6 +695,7 @@ public class CandiPatchPresenter implements Observer {
 			mZoneReflectionTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(reflectionBitmap), 0, 256);
 		}
 
+		// Scene progress sprite
 		mPlaceholderTextureRegion = TextureRegionFactory.createFromAsset(mTexture, mContext, "gfx/trans_30.png", 256, 0);
 		mProgressTextureRegion = TextureRegionFactory.createTiledFromAsset(mTexture, mContext, "gfx/busyspritesIV.png", 256, 256, 4, 2);
 	}
@@ -807,6 +824,12 @@ public class CandiPatchPresenter implements Observer {
 				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
 					mCandiPatchModel.setCandiModelFocused(getNearestZone(mCameraTargetSprite.getX()).getCandiesCurrent().get(0));
 					mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX()), 0.5f);
+				}
+
+				@Override
+				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+				// TODO Auto-generated method stub
+
 				}
 
 			}, EaseExponentialOut.getInstance()));
