@@ -4,6 +4,7 @@ import java.util.Observable;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.opengl.buffer.BufferObjectManager;
@@ -68,14 +69,34 @@ public class ZoneView extends BaseView {
 		this.sortChildren();
 	}
 
+	@Override
+	public boolean isVisibleToCamera(final Camera camera) {
+
+		if (super.isVisibleToCamera(camera))
+			return true;
+		else {
+			if (mBodySprite != null && mBodySprite.isVisibleToCamera(camera))
+				return true;
+			if (mReflectionSprite != null && mReflectionSprite.isVisibleToCamera(camera))
+				return true;
+		}
+		return false;
+	}
+
 	protected void doModifiers() {
 		if (!mZoneModel.getModifiers().isEmpty()) {
 			IEntityModifier modifier = mZoneModel.getModifiers().pop();
-			modifier.setModifierListener(new IModifierListener<IEntity>() {
+			modifier.addModifierListener(new IModifierListener<IEntity>() {
 
 				@Override
 				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
 					doModifiers();
+				}
+
+				@Override
+				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+				// TODO Auto-generated method stub
+
 				}
 			});
 			this.registerEntityModifier(modifier);

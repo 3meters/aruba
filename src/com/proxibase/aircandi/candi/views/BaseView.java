@@ -5,6 +5,7 @@ import java.util.Observer;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.opengl.buffer.BufferObjectManager;
 import org.anddev.andengine.opengl.texture.Texture;
@@ -64,6 +65,10 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTitleSprite.setAlpha(0);
 		mTitleSprite.setZIndex(0);
 		this.attachChild(mTitleSprite);
+	}
+
+	protected boolean isVisibleToCamera(final Camera camera) {
+		return (mTitleSprite != null && mTitleSprite.isVisibleToCamera(camera));
 	}
 
 	@Override
@@ -155,6 +160,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public interface OnViewTexturesLoadedListener {
+
 		void onTexturesLoaded(IView candiView);
 	}
 

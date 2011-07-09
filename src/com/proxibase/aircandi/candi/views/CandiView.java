@@ -4,6 +4,7 @@ import java.util.Observable;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.DelayModifier;
@@ -241,14 +242,36 @@ public class CandiView extends BaseView {
 		}
 	}
 
+	@Override
+	public boolean isVisibleToCamera(final Camera camera) {
+
+		if (super.isVisibleToCamera(camera))
+			return true;
+		else {
+			if (mBodySprite != null && mBodySprite.isVisibleToCamera(camera))
+				return true;
+			if (mReflectionSprite != null && mReflectionSprite.isVisibleToCamera(camera))
+				return true;
+			if (mPlaceholderSprite != null && mPlaceholderSprite.isVisibleToCamera(camera))
+				return true;
+		}
+		return false;
+	}
+
 	private void doModifiers() {
 		if (!mCandiModel.getModifiers().isEmpty()) {
 			IEntityModifier modifier = mCandiModel.getModifiers().pop();
-			modifier.setModifierListener(new IModifierListener<IEntity>() {
+			modifier.addModifierListener(new IModifierListener<IEntity>() {
 
 				@Override
 				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
 					doModifiers();
+				}
+
+				@Override
+				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+				// TODO Auto-generated method stub
+
 				}
 			});
 			this.registerEntityModifier(modifier);
@@ -515,10 +538,12 @@ public class CandiView extends BaseView {
 	}
 
 	public interface OnCandiViewSingleTapListener {
+
 		void onCandiViewSingleTap(IView candiView);
 	}
 
 	public interface OnFetchTexturesListener {
+
 		void onFetchEnd();
 	}
 }
