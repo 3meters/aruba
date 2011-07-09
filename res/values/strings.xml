@@ -24,4 +24,10 @@
 		name="test_text">The ladies of Assassins Creed: Brotherhood have both bark and bite. If you played Assassins Creed II, then you already know Caterina Sforza,
 		the comely Italian countess with a soft spot for sly, rugged assassins. Shes not the only female character with an important role to play in
 		Brotherhood, however.</string>
+	<string
+		name="dialog_install_message"> A custom application is available for this candi.</string>
+	<string
+		name="dialog_install_ok"> Install</string>
+	<string
+		name="dialog_install_cancel"> No Thanks</string>
 </resources>

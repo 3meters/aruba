@@ -8,6 +8,15 @@
 	</style>
 	
 	<style
+		name="AircandiDialogTheme" parent="@android:style/Theme.Dialog">
+		<item name="android:windowIsTranslucent">true</item>    
+		<item name="android:windowContentOverlay">@null</item>    
+		<item name="android:windowNoTitle">true</item>    
+		<item name="android:windowIsFloating">true</item>    
+		<item name="android:windowBackground">@android:color/transparent</item>	
+	</style>
+	
+	<style
 		name="AircandiTheme.NoWallpaper">
 		<item name="android:windowNoTitle">true</item>	
 		<item name="android:windowBackground">@drawable/wallpaper_bg</item>

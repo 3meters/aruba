@@ -11,7 +11,7 @@
 		<include
 			layout="@layout/temp_application_header" />
 	</LinearLayout>
-	<LinearLayout
+	<FrameLayout
 		android:id="@+id/CandiContainer"
 		android:layout_height="fill_parent"
 		android:layout_width="fill_parent"
@@ -26,30 +26,6 @@
 				android:id="@+id/ProxiView"
 				android:layout_height="fill_parent"
 				android:layout_width="fill_parent" />
-			<LinearLayout
-				android:id="@+id/CandiButtons"
-				android:layout_height="fill_parent"
-				android:layout_width="fill_parent"
-				android:visibility="gone"
-				android:orientation="horizontal"
-				android:background="#00000000"
-				android:padding="20dp">
-				<Button
-					android:id="@+id/CandiBackButton"
-					android:text="Back"
-					android:textSize="@dimen/menuitem_text"
-					android:textColor="#ffffffff"
-					android:height="72dp"
-					android:width="80dp"
-					android:gravity="center"
-					android:layout_height="wrap_content"
-					android:layout_width="wrap_content"
-					android:layout_gravity="bottom"
-					android:background="@drawable/button_selector"
-					android:visibility="gone"
-					android:clickable="true"
-					android:onClick="onSearchClick" />
-			</LinearLayout>
 		</FrameLayout>
 		<FrameLayout
 			android:id="@+id/CandiSummaryView"
@@ -159,5 +135,5 @@
 				</LinearLayout>
 			</LinearLayout>
 		</FrameLayout>
-	</LinearLayout>
+	</FrameLayout>
 </RelativeLayout>
