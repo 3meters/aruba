@@ -6,9 +6,11 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
@@ -16,12 +18,12 @@ import com.proxibase.sdk.android.proxi.consumer.ProxiEntity;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
-public class ProxiAppManager {
+public class ProxiHandlerManager {
 
 	private Activity	mActivity;
 	private HashMap		mProxiHandlers	= new HashMap();
 
-	public ProxiAppManager(Activity activity) {
+	public ProxiHandlerManager(Activity activity) {
 		mActivity = activity;
 	}
 
@@ -29,10 +31,9 @@ public class ProxiAppManager {
 
 		Intent intent = new Intent();
 		intent.setAction(proxiHandlerAction);
-		// intent.addCategory("com.aircandi.intent.category.PROXIHANDLER");
 
-		PackageManager pm = mActivity.getPackageManager();
-		List<ResolveInfo> list = pm.queryIntentActivities(intent, 0);
+		PackageManager packageManager = mActivity.getPackageManager();
+		List<ResolveInfo> list = packageManager.queryIntentActivities(intent, 0);
 
 		if (list.size() == 0)
 			return false;
@@ -44,9 +45,25 @@ public class ProxiAppManager {
 		// activity on top. Note that we need to also supply an animation
 		// (here just doing nothing for the same amount of time) for the
 		// old activity to prevent it from going away too soon.
-		mActivity.overridePendingTransition(R.anim.fade_in_normal, R.anim.fade_out_normal);
+		mActivity.overridePendingTransition(R.anim.summary_in, R.anim.hold);
+		//mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
 		return true;
 	}
+	
+	public String getPublicName(String packageName) {
+
+		PackageManager packageManager = mActivity.getPackageManager();
+		try {
+			ApplicationInfo info = packageManager.getApplicationInfo(packageName, 0);
+			String publicName = (String) info.loadLabel(packageManager);
+			return publicName;
+		}
+		catch (NameNotFoundException exception) {
+			exception.printStackTrace();
+			return "";
+		}
+	}
+	
 
 	public void installProxiHandler() {}
 

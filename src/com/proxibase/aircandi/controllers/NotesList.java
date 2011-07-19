@@ -155,7 +155,7 @@ public class NotesList extends AircandiActivity
 			listView.setAdapter(adapter);
 			listView.setClickable(true);
 
-			Animation animation = AnimationUtils.loadAnimation(this, R.anim.fade_in_normal);
+			Animation animation = AnimationUtils.loadAnimation(this, R.anim.fade_in_medium);
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			listView.startAnimation(animation);

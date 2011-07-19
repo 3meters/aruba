@@ -1,20 +1,5 @@
 package com.proxibase.aircandi.utils;
 
-/* Copyright (c) 2009 Matthias Käppler
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,8 +14,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 
 import com.google.common.collect.MapMaker;
-import com.proxibase.aircandi.controllers.Aircandi;
-import com.proxibase.sdk.android.util.Utilities;
 
 /**
  * <p>
@@ -46,30 +29,29 @@ import com.proxibase.sdk.android.util.Utilities;
  * <p>
  * Pushes to the cache are always write-through (i.e., the image will be stored both on disk and in memory).
  * </p>
- * 
- * @author Matthias Kaeppler
  */
+
 public class ImageCache implements Map<String, Bitmap> {
 
-	private int					cachedImageQuality		= 75;
-
-	// private int firstLevelCacheSize = 10;
-
-	private String				secondLevelCacheDir;
-
-	private Map<String, Bitmap>	cache;
-
-	private CompressFormat		compressedImageFormat	= CompressFormat.PNG;
-
+	private int					mCachedImageQuality		= 75;
+	private String				mSecondLevelCacheDir;
+	private Map<String, Bitmap>	mCache;
+	private CompressFormat		mCompressedImageFormat	= CompressFormat.PNG;
 
 	public ImageCache(Context context, String cacheSubDirectory, int initialCapacity, int concurrencyLevel) {
-
-		this.cache = new MapMaker().initialCapacity(initialCapacity).concurrencyLevel(concurrencyLevel).weakValues()
-				.makeMap();
-		this.secondLevelCacheDir = context.getApplicationContext().getCacheDir() + "/imagecache/" + cacheSubDirectory;
-		new File(secondLevelCacheDir).mkdirs();
+		this.mCache = new MapMaker().initialCapacity(initialCapacity).concurrencyLevel(concurrencyLevel).weakValues().makeMap();
+		this.mSecondLevelCacheDir = context.getApplicationContext().getCacheDir() + cacheSubDirectory;
+		makeCacheDirectory();
 	}
 
+	public boolean cacheDirectoryExists() {
+		boolean exists = (new File(mSecondLevelCacheDir)).exists();
+		return exists;
+	}
+
+	public void makeCacheDirectory() {
+		new File(mSecondLevelCacheDir).mkdirs();
+	}
 
 	/**
 	 * The image format that should be used when caching images on disk. The default value is {@link CompressFormat#PNG}
@@ -78,37 +60,29 @@ public class ImageCache implements Map<String, Bitmap> {
 	 * @param compressedImageFormat the {@link CompressFormat}
 	 */
 	public void setCompressedImageFormat(CompressFormat compressedImageFormat) {
-
-		this.compressedImageFormat = compressedImageFormat;
+		this.mCompressedImageFormat = compressedImageFormat;
 	}
-
 
 	public CompressFormat getCompressedImageFormat() {
-
-		return compressedImageFormat;
+		return mCompressedImageFormat;
 	}
-
 
 	/**
 	 * @param cachedImageQuality the quality of images being compressed and written to disk (2nd level cache) as a
 	 *            number in [0..100]
 	 */
 	public void setCachedImageQuality(int cachedImageQuality) {
-
-		this.cachedImageQuality = cachedImageQuality;
+		this.mCachedImageQuality = cachedImageQuality;
 	}
-
 
 	public int getCachedImageQuality() {
-
-		return cachedImageQuality;
+		return mCachedImageQuality;
 	}
-
 
 	public synchronized Bitmap get(Object key) {
 
 		String imageUrl = (String) key;
-		Bitmap bitmap = cache.get(imageUrl);
+		Bitmap bitmap = mCache.get(imageUrl);
 
 		if (bitmap != null) {
 			// 1st level cache hit (memory)
@@ -123,7 +97,7 @@ public class ImageCache implements Map<String, Bitmap> {
 				// treat decoding errors as a cache miss
 				return null;
 			}
-			cache.put(imageUrl, bitmap);
+			mCache.put(imageUrl, bitmap);
 			return bitmap;
 		}
 
@@ -131,110 +105,81 @@ public class ImageCache implements Map<String, Bitmap> {
 		return null;
 	}
 
-
 	public Bitmap put(String imageUrl, Bitmap image) {
-
+		/*
+		 * Write bitmap to disk cache and then memory cache
+		 */
 		File imageFile = getImageFile(imageUrl);
 		try {
-			
-			// Write bitmap to disk cache
 			imageFile.createNewFile();
 			FileOutputStream ostream = new FileOutputStream(imageFile);
-			image.compress(compressedImageFormat, cachedImageQuality, ostream);
+			image.compress(mCompressedImageFormat, mCachedImageQuality, ostream);
 			ostream.close();
-
-			Utilities.Log(Aircandi.APP_NAME, "Imagecache", "Image '" + imageUrl
-																+ "' cached as: '"
-																+ imageFile.getName()
-																+ "' "
-																+ imageFile.length()
-																+ " bytes");
-
 		}
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		catch (IOException e) {
+			// If the cache has been cleared then our directory structure is gone too.
+			if (!cacheDirectoryExists())
+				makeCacheDirectory();
 			e.printStackTrace();
 		}
 
-		// Write file to memory cache
-		return cache.put(imageUrl, image);
+		// Write file to memory cache as well
+		return mCache.put(imageUrl, image);
 	}
 
-
 	public void putAll(Map<? extends String, ? extends Bitmap> t) {
-
 		throw new UnsupportedOperationException();
 	}
 
-
 	public boolean containsKey(Object key) {
 
-		if (cache.containsKey(key))
+		if (mCache.containsKey(key))
 			return true;
-		else
-		{
-			File imageFile = getImageFile((String)key);
+		else {
+			File imageFile = getImageFile((String) key);
 			if (imageFile.exists())
 				return true;
 		}
-		
 		return false;
 	}
 
-
 	public boolean containsValue(Object value) {
-
-		return cache.containsValue(value);
+		return mCache.containsValue(value);
 	}
-
 
 	public Bitmap remove(Object key) {
-
-		return cache.remove(key);
+		return mCache.remove(key);
 	}
-
 
 	public Set<String> keySet() {
-
-		return cache.keySet();
+		return mCache.keySet();
 	}
-
 
 	public Set<java.util.Map.Entry<String, Bitmap>> entrySet() {
-
-		return cache.entrySet();
+		return mCache.entrySet();
 	}
-
 
 	public int size() {
-
-		return cache.size();
+		return mCache.size();
 	}
-
 
 	public boolean isEmpty() {
-
-		return cache.isEmpty();
+		return mCache.isEmpty();
 	}
-
 
 	public void clear() {
-
-		cache.clear();
+		mCache.clear();
 	}
-
 
 	public Collection<Bitmap> values() {
-
-		return cache.values();
+		return mCache.values();
 	}
 
-
 	private File getImageFile(String imageUrl) {
-
-		String fileName = Integer.toHexString(imageUrl.hashCode()) + "." + compressedImageFormat.name();
-		return new File(secondLevelCacheDir + "/" + fileName);
+		String fileName = Integer.toHexString(imageUrl.hashCode()) + "." + mCompressedImageFormat.name();
+		return new File(mSecondLevelCacheDir + "/" + fileName);
 	}
 }

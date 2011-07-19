@@ -16,6 +16,7 @@ public abstract class BaseModel extends Observable implements IModel {
 	private boolean							mVisibleCurrent	= false;
 	private boolean							mVisibleNext	= false;
 	private boolean							mGrouped		= false;
+	private boolean							mZoomed 		= false;
 	private String							mTitleText		= "Title";
 
 	public BaseModel() {
@@ -120,6 +121,14 @@ public abstract class BaseModel extends Observable implements IModel {
 
 	public void setRoot(boolean root) {
 		this.mRoot = root;
+	}
+	public void setZoomed(boolean zoomed) {
+		this.mZoomed = zoomed;
+		this.setChanged();
+	}
+
+	public boolean isZoomed() {
+		return mZoomed;
 	}
 
 }

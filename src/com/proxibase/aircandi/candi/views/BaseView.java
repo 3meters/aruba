@@ -19,9 +19,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.Bitmap.Config;
+import android.text.DynamicLayout;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.TextUtils;
 
 import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.models.IModel;
@@ -60,7 +62,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	private void construct() {
-		mTitleSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (mTitleTextureRegion.getHeight() + 5), mTitleTextureRegion);
+		mTitleSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (mTitleTextureRegion.getHeight() + CandiConstants.CANDI_VIEW_TITLE_SPACER_HEIGHT), mTitleTextureRegion);
 		mTitleSprite.setBlendFunction(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		mTitleSprite.setAlpha(0);
 		mTitleSprite.setZIndex(0);
@@ -86,7 +88,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 			mTitleTexture.clearTextureSources();
 			Bitmap bitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBaseModel.getTitleText());
 			mTitleTextureRegion = TextureRegionFactory.createFromSource(mTitleTexture, new BitmapTextureSource(bitmap), 0, 0);
-			mTitleSprite.setPosition(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (bitmap.getHeight() + 5));
+			mTitleSprite.setPosition(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (bitmap.getHeight() + CandiConstants.CANDI_VIEW_TITLE_SPACER_HEIGHT));
 		}
 	}
 
@@ -101,14 +103,32 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		tp.setTypeface(Typeface.SANS_SERIF);
 		tp.setAntiAlias(true);
 
+		DynamicLayout textLayout = new DynamicLayout(text, text, tp, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false, TextUtils.TruncateAt.END, CandiConstants.CANDI_VIEW_WIDTH);
+		int cappedHeight = textLayout.getHeight() > CandiConstants.CANDI_VIEW_TITLE_HEIGHT ? CandiConstants.CANDI_VIEW_TITLE_HEIGHT : textLayout.getHeight();
+		Bitmap bitmap = Bitmap.createBitmap(width, cappedHeight, Config.ARGB_8888);
+		Canvas canvas = new Canvas(bitmap);
+		textLayout.draw(canvas);
+
+		return bitmap;
+	}
+
+	@SuppressWarnings("unused")
+	private Bitmap makeTextBitmapStatic(int width, int height, CharSequence text) {
+		final TextPaint tp = new TextPaint();
+		tp.setTextSize(CandiConstants.CANDI_VIEW_FONT_SIZE);
+		tp.setColor(Color.WHITE);
+		tp.setTypeface(Typeface.SANS_SERIF);
+		tp.setAntiAlias(true);
+
 		StaticLayout sl = new StaticLayout(text, tp, width, Layout.Alignment.ALIGN_NORMAL, 0.95f, 0.0f, false);
-		Bitmap bitmap = Bitmap.createBitmap(width, sl.getHeight(), Config.ARGB_8888);
+		int cappedHeight = sl.getHeight() > CandiConstants.CANDI_VIEW_TITLE_HEIGHT ? CandiConstants.CANDI_VIEW_TITLE_HEIGHT : sl.getHeight();
+		Bitmap bitmap = Bitmap.createBitmap(width, cappedHeight, Config.ARGB_8888);
 		Canvas canvas = new Canvas(bitmap);
 		sl.draw(canvas);
 
 		return bitmap;
 	}
-
+	
 	public void unloadResources() {
 		/*
 		 * Completely remove all resources associated with this sprite.

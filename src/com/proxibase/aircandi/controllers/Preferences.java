@@ -10,6 +10,7 @@ public class Preferences extends PreferenceActivity {
 
 	public static final String	PREF_TAGS_WITH_ENTITIES_ONLY	= "Pref_Tags_With_Entities_Only";
 	public static final String	PREF_DISPLAY_EXTRAS				= "Pref_Display_Extras";
+	public static final String	PREF_ENTITY_FENCING				= "Pref_Entity_Fencing";
 	public static final String	PREF_TAG_LEVEL_CUTOFF			= "Pref_Tag_Level_Cutoff";
 	public static final String	PREF_AUTOSCAN					= "Pref_Autoscan";
 	public static final String	PREF_AUTOSCAN_INTERVAL			= "Pref_Autoscan_Interval";

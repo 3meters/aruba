@@ -18,19 +18,25 @@
 			android:entries="@array/displayextras_list_preference"
 			android:entryValues="@array/displayextrasvalues_list_preference"
 			android:dialogTitle="Select extra" />
+		<CheckBoxPreference
+			android:id="@+id/Pref_Entity_Fencing"
+			android:key="Pref_Entity_Fencing"
+			android:defaultValue="true"
+			android:title="Entity fencing"
+			android:summary="Use fence settings to filter proxi entities" />
 		<EditTextPreference
 			android:id="@+id/Pref_Tag_Level_Cutoff"
 			android:key="Pref_Tag_Level_Cutoff"
 			android:defaultValue="-100"
-			android:title="Tag Level cutoff"
-			android:summary="Minimum average signal level required for tag display"
+			android:title="Beacon level cutoff"
+			android:summary="Minimum average signal level required for beacon display"
 			android:dialogTitle="Enter signal level" />
 		<CheckBoxPreference
 			android:id="@+id/Pref_Autoscan"
 			android:key="Pref_Autoscan"
 			android:defaultValue="true"
 			android:title="Autoscan"
-			android:summary="Scan for ripple spots at regular intervals" />
+			android:summary="Scan for candi at regular intervals" />
 		<EditTextPreference
 			android:id="@+id/Pref_Autoscan_Interval"
 			android:key="Pref_Autoscan_Interval"
@@ -45,7 +51,7 @@
 			android:key="Pref_Tile_Scale"
 			android:defaultValue="1.0"
 			android:title="Scale"
-			android:summary="Scaling for tiles"
+			android:summary="Scaling for candies"
 			android:entries="@array/tile_scale_list_preference"
 			android:entryValues="@array/tile_scale_list_preference"
 			android:dialogTitle="Select scale (1.0 is normal)" />

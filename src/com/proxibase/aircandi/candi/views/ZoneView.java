@@ -168,5 +168,5 @@ public class ZoneView extends BaseView {
 	}
 
 	@Override
-	public void setSingleTapListener(com.proxibase.aircandi.candi.views.CandiView.OnCandiViewSingleTapListener listener) {}
+	public void setSingleTapListener(com.proxibase.aircandi.candi.views.CandiView.OnCandiViewTouchListener listener) {}
 }

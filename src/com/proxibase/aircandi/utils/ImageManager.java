@@ -42,16 +42,13 @@ public class ImageManager {
 	/**
 	 * Designed as a singleton. The private Constructor prevents any other class from instantiating.
 	 */
-
 	private ImageManager() {}
 
 	public ImageCache getImageCache() {
-
 		return mImageCache;
 	}
 
 	public void setImageCache(ImageCache mImageCache) {
-
 		this.mImageCache = mImageCache;
 	}
 
@@ -60,7 +57,6 @@ public class ImageManager {
 	}
 
 	public boolean hasImage(String key) {
-
 		return mImageCache.containsKey(key);
 	}
 
@@ -72,19 +68,8 @@ public class ImageManager {
 		return mContext;
 	}
 
-	public void fetchImageAsynch(String key, String url) {
-		ImageRequest imageRequest = new ImageRequest();
-		imageRequest.imageId = key;
-		imageRequest.imageUrl = url;
-		imageRequest.imageShape = "square";
-		imageRequest.showReflection = true;
-		new GetImageTask().execute(imageRequest);
-
-	}
-
 	public void fetchImageAsynch(ImageRequest imageRequest) {
 		new GetImageTask().execute(imageRequest);
-
 	}
 
 	public static Bitmap loadBitmapFromAssets(final String assetPath) {
@@ -117,28 +102,30 @@ public class ImageManager {
 			Bitmap bitmap = UtilitiesUI.getImage(mImageRequest.imageUrl);
 			if (bitmap != null) {
 
+				Utilities.Log(Aircandi.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageId + "'");
+				
+				// Scale if needed
 				if (mImageRequest.widthMinimum > 0 && bitmap.getWidth() < mImageRequest.widthMinimum) {
 					float scalingRatio = (float) mImageRequest.widthMinimum / (float) bitmap.getWidth();
 					float newHeight = (float) bitmap.getHeight() * scalingRatio;
 					bitmap = Bitmap.createScaledBitmap(bitmap, mImageRequest.widthMinimum, (int) (newHeight), true);
 				}
 
+				// Crop if requested
 				if (mImageRequest.imageShape.equals("square")) {
 					bitmap = UtilitiesUI.cropToSquare(bitmap);
 				}
 
-				// Create reflection
+				// Stuff it into the disk and memory caches. Overwrites if it already exists.
+				mImageCache.put(mImageRequest.imageId, bitmap);
+
+				// Create reflection if requested
 				if (mImageRequest.showReflection) {
 					final Bitmap bitmapReflection = UtilitiesUI.getReflection(bitmap);
-					Utilities.Log(Aircandi.APP_NAME, "ImageManager",
-							"Image download, cropping and reflection completed for image '" + mImageRequest.imageId + "'");
-					mImageCache.put(mImageRequest.imageId, bitmap);
 					mImageCache.put(mImageRequest.imageId + ".reflection", bitmapReflection);
-					return bitmap;
 				}
-				else {
-					return bitmap;
-				}
+				
+				return bitmap;
 			}
 			else {
 				Utilities.Log(Aircandi.APP_NAME, "ImageManager", "Image download failed for image '" + mImageRequest.imageId + "'");
@@ -153,8 +140,8 @@ public class ImageManager {
 			super.onPostExecute(bitmap);
 
 			if (bitmap != null) {
-				if (mImageRequest.mImageReadyListener != null)
-					mImageRequest.mImageReadyListener.onImageReady(bitmap);
+				if (mImageRequest.imageReadyListener != null)
+					mImageRequest.imageReadyListener.onImageReady(bitmap);
 				else if (mImageReadyListener != null) {
 					mImageReadyListener.onImageReady(bitmap);
 				}
@@ -163,19 +150,15 @@ public class ImageManager {
 	}
 
 	public void setOnImageReadyListener(OnImageReadyListener listener) {
-
 		mImageReadyListener = listener;
 	}
 
 	public final OnImageReadyListener getOnImageReadyListener() {
-
 		return mImageReadyListener;
 	}
 
 	public interface OnImageReadyListener {
-
 		void onImageReady(Bitmap bitmap);
-
 	}
 
 	public static class ImageRequest {
@@ -185,7 +168,7 @@ public class ImageManager {
 		public String				imageShape			= "native";
 		public int					widthMinimum;
 		public boolean				showReflection		= false;
-		public OnImageReadyListener	mImageReadyListener	= null;
+		public OnImageReadyListener	imageReadyListener	= null;
 	}
 
 }

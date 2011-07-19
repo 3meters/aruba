@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 
+import org.anddev.andengine.util.Transformation;
+
 import com.proxibase.aircandi.utils.CandiList;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.ProxiEntity;
@@ -209,7 +211,7 @@ public class CandiPatchModel extends Observable {
 				if (mCandiModelFocused.getZoneCurrent().getZoneIndex() != mCandiModelFocused.getZoneNext().getZoneIndex()) {
 
 					// Moved zones because current zone transitioned to unused.
-					if (mCandiModelFocused.getZoneCurrent().getZoneIndex() > this.getZonesOccupiedNextCount()) {
+					if (mCandiModelFocused.getZoneCurrent().getZoneIndex() + 1 > this.getZonesOccupiedNextCount()) {
 					}
 					else {
 						ZoneModel zoneNextOld = mCandiModelFocused.getZoneNext();
@@ -303,50 +305,53 @@ public class CandiPatchModel extends Observable {
 	}
 
 	private void doUpdateCandiModel(CandiModel candiModelUpdate) {
-	
+
 		if (mCandiModels.containsKey(candiModelUpdate.getProxiEntity().entityId)) {
-	
+
 			CandiModel candiModelManaged = mCandiModels.getByKey(candiModelUpdate.getProxiEntity().entityId);
-	
+
 			if (candiModelUpdate.getProxiEntity().isHidden)
 				candiModelManaged.setVisibleNext(false);
 			else
 				candiModelManaged.setVisibleNext(true);
-	
+
+			if (candiModelManaged.isVisibleCurrent())
+				candiModelManaged.setRookie(false);
+
 			candiModelManaged.setDisplayExtra(candiModelUpdate.getDisplayExtra());
-	
+
 			Beacon beaconManaged = candiModelManaged.getProxiEntity().beacon;
 			Beacon beaconUpdate = candiModelUpdate.getProxiEntity().beacon;
-	
+
 			beaconManaged.detectedLastPass = beaconUpdate.detectedLastPass;
 			beaconManaged.levelDb = beaconUpdate.levelDb;
 			beaconManaged.scanMisses = beaconUpdate.scanMisses;
 			beaconManaged.scanPasses = beaconUpdate.scanPasses;
-	
+
 			// If transitioning from hidden to visible, it might not have a zone yet
 			if (candiModelManaged.isVisibleNext() && candiModelManaged.getZoneCurrent().isInactive()) {
-	
+
 				ZoneModel zoneTarget = null;
 				for (ZoneModel zone : mZoneModels)
 					if (zone.getCandiesCurrent().size() == 0) {
 						zoneTarget = zone;
 						break;
 					}
-	
+
 				if (zoneTarget == null) {
 					zoneTarget = new ZoneModel(mZoneModels.size(), this);
 					zoneTarget.setVisibleCurrent(false);
 					zoneTarget.setVisibleNext(true);
 					mZoneModels.add(zoneTarget);
 				}
-	
+
 				zoneTarget.getCandiesCurrent().add(candiModelManaged);
 				zoneTarget.getCandiesNext().add(candiModelManaged);
-	
+
 				candiModelManaged.setZoneCurrent(zoneTarget);
 				candiModelManaged.setZoneNext(zoneTarget);
 			}
-	
+
 			candiModelManaged.setChanged();
 		}
 	}

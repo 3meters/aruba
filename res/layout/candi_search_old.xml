@@ -11,8 +11,8 @@
 		<include
 			layout="@layout/temp_application_header" />
 	</LinearLayout>
-	<ViewFlipper
-		android:id="@+id/CandiFlipper"
+	<FrameLayout
+		android:id="@+id/CandiContainer"
 		android:layout_height="fill_parent"
 		android:layout_width="fill_parent"
 		android:gravity="center_vertical"
@@ -21,7 +21,7 @@
 		<org.anddev.andengine.opengl.view.RenderSurfaceView
 			android:id="@+id/RenderSurfaceView"
 			android:layout_height="fill_parent"
-			android:layout_width="fill_parent" />
+			android:layout_width="fill_parent"/>
 		<FrameLayout
 			android:id="@+id/CandiSummaryView"
 			android:layout_height="fill_parent"
@@ -131,5 +131,5 @@
 				</LinearLayout>
 			</LinearLayout>
 		</FrameLayout>
-	</ViewFlipper>
+	</FrameLayout>
 </RelativeLayout>

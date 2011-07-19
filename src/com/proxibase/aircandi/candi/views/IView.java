@@ -5,7 +5,7 @@ import java.util.Observable;
 import org.anddev.andengine.entity.IEntity;
 
 import com.proxibase.aircandi.candi.models.IModel;
-import com.proxibase.aircandi.candi.views.CandiView.OnCandiViewSingleTapListener;
+import com.proxibase.aircandi.candi.views.CandiView.OnCandiViewTouchListener;
 
 public interface IView extends IEntity {
 
@@ -13,7 +13,7 @@ public interface IView extends IEntity {
 
 	public void initialize();
 
-	public void setSingleTapListener(OnCandiViewSingleTapListener listener);
+	public void setSingleTapListener(OnCandiViewTouchListener listener);
 
 	public IModel getModel();
 

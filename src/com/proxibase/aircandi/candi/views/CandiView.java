@@ -23,6 +23,10 @@ import org.anddev.andengine.util.modifier.IModifier.IModifierListener;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.GestureDetector.OnDoubleTapListener;
+import android.view.GestureDetector.OnGestureListener;
 
 import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.models.CandiModel;
@@ -40,7 +44,7 @@ import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.OnImageReadyListener;
 import com.proxibase.sdk.android.util.UtilitiesUI;
 
-public class CandiView extends BaseView {
+public class CandiView extends BaseView implements OnGestureListener, OnDoubleTapListener {
 
 	private CandiModel						mCandiModel;
 
@@ -59,13 +63,12 @@ public class CandiView extends BaseView {
 	private CandiSprite						mPlaceholderSprite;
 
 	private OnViewTexturesLoadedListener	mTexturesLoadedListener;
-	private OnCandiViewSingleTapListener	mSingleTapListener;
+	private OnCandiViewTouchListener		mTouchListener;
 
-	private float							mTouchStartX;
-	private float							mTouchStartY;
-	private boolean							mTouchGrabbed;
 	private boolean							mBodyOnly	= false;
 	private float							mBodyTop	= CandiConstants.CANDI_VIEW_TITLE_HEIGHT;
+
+	private GestureDetector					mGestureDetector;
 
 	public CandiView(CandiModel candiModel, CandiPatchPresenter candiPatchPresenter) {
 		super((BaseModel) candiModel, candiPatchPresenter);
@@ -96,6 +99,7 @@ public class CandiView extends BaseView {
 	public void initialize() {
 		super.initialize();
 
+		mGestureDetector = new GestureDetector(mCandiPatchPresenter.mCandiActivity, this);
 		makeProgressSprites();
 		loadBodyTextureSources();
 		construct();
@@ -169,39 +173,7 @@ public class CandiView extends BaseView {
 
 			@Override
 			public boolean onAreaTouched(final TouchEvent sceneTouchEvent, final float touchAreaLocalX, final float touchAreaLocalY) {
-
-				// If we return true, the event won't make it to the scene touch handler
-				if (sceneTouchEvent.isActionDown()) {
-					mTouchStartX = sceneTouchEvent.getX();
-					mTouchStartY = sceneTouchEvent.getY();
-					mTouchGrabbed = true;
-				}
-
-				if (sceneTouchEvent.isActionMove()) {
-				}
-
-				if (sceneTouchEvent.isActionUp()) {
-					if (mTouchGrabbed) {
-
-						final int deltaX = (int) (mTouchStartX - sceneTouchEvent.getX());
-						final int deltaY = (int) (mTouchStartY - sceneTouchEvent.getY());
-						int distance = (deltaX * deltaX) + (deltaY * deltaY);
-
-						// Treat it as a single tap
-						if (distance < mCandiPatchPresenter.mTouchSlopSquare) {
-
-							if (mSingleTapListener != null) {
-								CandiView candiView = (CandiView) this.getParent();
-								mSingleTapListener.onCandiViewSingleTap(candiView);
-							}
-							mTouchGrabbed = false;
-							return true;
-						}
-					}
-					mTouchGrabbed = false;
-				}
-
-				return false;
+				return mGestureDetector.onTouchEvent(sceneTouchEvent.getMotionEvent());
 			}
 
 		};
@@ -361,7 +333,7 @@ public class CandiView extends BaseView {
 				mTitleSprite.registerEntityModifier(new AlphaModifier(duration, 0.0f, 1.0f));
 			}
 			else {
-				mTitleSprite.setAlpha(1);
+				// mTitleSprite.setAlpha(1);
 			}
 
 			if (mBodySprite != null) {
@@ -452,7 +424,7 @@ public class CandiView extends BaseView {
 			imageRequest.imageShape = "square";
 			imageRequest.widthMinimum = 250;
 			imageRequest.showReflection = true;
-			imageRequest.mImageReadyListener = new OnImageReadyListener() {
+			imageRequest.imageReadyListener = new OnImageReadyListener() {
 
 				@Override
 				public void onImageReady(Bitmap bitmap) {
@@ -528,8 +500,8 @@ public class CandiView extends BaseView {
 		this.mTexturesLoadedListener = texturesLoadedListener;
 	}
 
-	public void setSingleTapListener(OnCandiViewSingleTapListener listener) {
-		mSingleTapListener = listener;
+	public void setSingleTapListener(OnCandiViewTouchListener listener) {
+		mTouchListener = listener;
 	}
 
 	@Override
@@ -537,13 +509,71 @@ public class CandiView extends BaseView {
 		return this.mCandiModel;
 	}
 
-	public interface OnCandiViewSingleTapListener {
+	public interface OnCandiViewTouchListener {
 
 		void onCandiViewSingleTap(IView candiView);
+
+		void onCandiViewDoubleTap(IView candiView);
+
+		void onCandiViewLongPress(IView candiView);
 	}
 
 	public interface OnFetchTexturesListener {
 
 		void onFetchEnd();
 	}
+
+	@Override
+	public boolean onDoubleTap(MotionEvent e) {
+		if (mTouchListener != null) {
+			mTouchListener.onCandiViewDoubleTap(this);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean onDoubleTapEvent(MotionEvent e) {
+		return false;
+	}
+
+	@Override
+	public boolean onSingleTapConfirmed(MotionEvent e) {
+		if (mTouchListener != null) {
+			mTouchListener.onCandiViewSingleTap(this);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean onDown(MotionEvent e) {
+		return false;
+	}
+
+	@Override
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+		return false;
+	}
+
+	@Override
+	public void onLongPress(MotionEvent e) {
+		if (mTouchListener != null) {
+			mTouchListener.onCandiViewLongPress(this);
+		}
+	}
+
+	@Override
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+		return false;
+	}
+
+	@Override
+	public void onShowPress(MotionEvent e) {}
+
+	@Override
+	public boolean onSingleTapUp(MotionEvent e) {
+		return false;
+	}
+
 }

@@ -16,19 +16,31 @@
 	<application
 		android:name="Aircandi"
 		android:label="@string/app_name"
-		android:debuggable="true"
+		android:icon="@drawable/icon_aircandi"
 		android:theme="@style/AircandiTheme"
-		android:icon="@drawable/icon_aircandi">
+		android:debuggable="true">
 		<activity
 			android:name="CandiSearchActivity"
 			android:label="@string/app_name"
-			android:screenOrientation="sensor"
-			android:configChanges="orientation">
+			android:configChanges="orientation|keyboardHidden"
+			>
 			<intent-filter>
 				<action
 					android:name="android.intent.action.MAIN" />
 				<category
 					android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity
+			android:name="CandiSummary"
+			android:label="@string/app_name">
+			<intent-filter>
+				<action
+					android:name="com.aircandi.intent.action.SHOWPROXIENTITY" />
+				<category
+					android:name="android.intent.category.DEFAULT" />
+				<category
+					android:name="com.aircandi.intent.category.PROXIHANDLER" />
 			</intent-filter>
 		</activity>
 		<activity

@@ -3,7 +3,7 @@ package com.proxibase.aircandi.candi.views;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.views.BaseView.OnViewTexturesLoadedListener;
-import com.proxibase.aircandi.candi.views.CandiView.OnCandiViewSingleTapListener;
+import com.proxibase.aircandi.candi.views.CandiView.OnCandiViewTouchListener;
 
 
 public class CandiViewBuilder {
@@ -14,7 +14,7 @@ public class CandiViewBuilder {
 	 * NOTE: Loading a texture can fail if two requests are hitting the same physical asset.
 	 */
 	public static CandiView createCandiView(final CandiModel candiModel, final CandiPatchPresenter candiPatchPresenter,
-			OnCandiViewSingleTapListener singleTapListener) {
+			OnCandiViewTouchListener singleTapListener) {
 
 		final CandiView candiView = new CandiView(candiModel, candiPatchPresenter);
 

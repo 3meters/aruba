@@ -29,6 +29,10 @@ public class ZoneModel extends BaseModel {
 	}
 
 	private void initialize() {
+		updateCoordinates();
+	}
+
+	public void updateCoordinates() {
 		mX = mCandiPatchModel.getOriginX() + ((CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING) * mZoneIndex);
 		mY = mCandiPatchModel.getOriginY();
 		mCenterX = mX + (CandiConstants.CANDI_VIEW_WIDTH * 0.5f);
@@ -77,8 +81,13 @@ public class ZoneModel extends BaseModel {
 	}
 
 	public float getX() {
-
-		return this.mX;
+//		if (mCandiPatchModel.getTransformation() != null) {
+//			float[] coordinates = { this.mX, this.mY };
+//			mCandiPatchModel.getTransformation().transform(coordinates);
+//			return coordinates[CandiConstants.VERTEX_INDEX_X];
+//		}
+//		else
+			return this.mX;
 	}
 
 	@Override

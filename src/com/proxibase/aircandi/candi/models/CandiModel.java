@@ -32,6 +32,7 @@ public class CandiModel extends BaseModel {
 	private boolean			mTitleOnly			= false;
 	private boolean			mBodyOnly			= false;
 	private boolean			mTouchAreaActive	= true;
+	private boolean			mRookie				= true;
 	private String			mBodyImageId		= "";
 	private String			mBodyImageUrl		= "";
 
@@ -85,14 +86,15 @@ public class CandiModel extends BaseModel {
 	@Override
 	public String getTitleText() {
 		String title = super.getTitleText();
+
 		if (mDisplayExtra == DisplayExtra.Level) {
-			title += String.valueOf(getProxiEntity().beacon.getAvgBeaconLevel());
+			title += " " + String.valueOf(getProxiEntity().beacon.getAvgBeaconLevel());
 		}
 		else if (mDisplayExtra == DisplayExtra.Tag) {
-			title += String.valueOf(getProxiEntity().beacon.beaconId);
+			title += " " + String.valueOf(getProxiEntity().beacon.beaconId);
 		}
 		else if (mDisplayExtra == DisplayExtra.Time) {
-			title += String.valueOf(getProxiEntity().beacon.discoveryTime.getTime() / 100);
+			title += " " + String.valueOf(getProxiEntity().beacon.discoveryTime.getTime() / 100);
 		}
 		return title;
 	}
@@ -195,5 +197,13 @@ public class CandiModel extends BaseModel {
 		int result = 100;
 		result = 31 * result + this.mProxiEntity.entityId.hashCode();
 		return result;
+	}
+
+	public void setRookie(boolean rookie) {
+		this.mRookie = rookie;
+	}
+
+	public boolean isRookie() {
+		return mRookie;
 	}
 }

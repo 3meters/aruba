@@ -30,4 +30,6 @@
 		name="dialog_install_ok"> Install</string>
 	<string
 		name="dialog_install_cancel"> No Thanks</string>
+	<string
+		name="toast_package_installed"> has been installed. Tap the candi to launch.</string>
 </resources>
