@@ -14,7 +14,7 @@
 		android:largeScreens="true"
 		android:anyDensity="true" />
 	<application
-		android:name="Aircandi"
+		android:name="com.proxibase.aircandi.activities.Aircandi"
 		android:label="@string/app_name"
 		android:icon="@drawable/icon_aircandi"
 		android:theme="@style/AircandiTheme"
@@ -32,11 +32,11 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name="CandiSummary"
+			android:name="com.proxibase.aircandi.candi.handlers.CandiSummary"
 			android:label="@string/app_name">
 			<intent-filter>
 				<action
-					android:name="com.aircandi.intent.action.SHOWPROXIENTITY" />
+					android:name="com.aircandi.intent.action.SHOWEntityProxy" />
 				<category
 					android:name="android.intent.category.DEFAULT" />
 				<category
@@ -79,7 +79,7 @@
 			android:configChanges="orientation">
 		</activity>
 		<activity
-			android:name="com.proxibase.aircandi.controllers.Preferences"
+			android:name="com.proxibase.aircandi.activities.Preferences"
 			android:theme="@android:style/Theme.Black"
 			android:label="@string/app_name"
 			android:configChanges="orientation">
