@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi.utils;
 
 import android.graphics.Camera;
 import android.graphics.Matrix;

@@ -28,6 +28,8 @@ import android.widget.Toast;
 import com.proxibase.aircandi.activities.R;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.models.Post;
+import com.proxibase.aircandi.utils.AircandiUI;
+import com.proxibase.aircandi.utils.Rotate3dAnimation;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.service.ProxibaseRunner;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;

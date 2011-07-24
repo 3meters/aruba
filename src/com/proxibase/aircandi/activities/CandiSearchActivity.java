@@ -81,8 +81,11 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.ICandiListene
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.TextureReset;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.candi.views.CandiView;
+import com.proxibase.aircandi.utils.AircandiUI;
 import com.proxibase.aircandi.utils.ImageCache;
 import com.proxibase.aircandi.utils.ImageManager;
+import com.proxibase.aircandi.utils.ProxiHandlerManager;
+import com.proxibase.aircandi.utils.Rotate3dAnimation;
 import com.proxibase.aircandi.utils.Utilities;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.EntityHandler;

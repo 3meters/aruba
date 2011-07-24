@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

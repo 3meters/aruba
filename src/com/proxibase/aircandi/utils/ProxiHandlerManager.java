@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +14,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
+import com.proxibase.aircandi.activities.R;
+import com.proxibase.aircandi.activities.R.anim;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
