@@ -340,7 +340,7 @@ public class TricorderGL extends AircandiActivity {
 		if (showProgress)
 			startProgress();
 
-		Utilities.Log(Aircandi.APP_NAME, "Tricorder", "Calling Ripple.ProxiExplorer to scan for tags");
+		Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Calling Ripple.ProxiExplorer to scan for tags");
 		proxiExplorer_.scanForTags(new TagScanListener());
 
 		// Show search message if there aren't any current points
@@ -357,8 +357,8 @@ public class TricorderGL extends AircandiActivity {
 		@Override
 		public void onComplete(ArrayList<Entity> entities) {
 
-			Utilities.Log(Aircandi.APP_NAME, "Tricorder", "Tag scan results returned from Ripple.ProxiExplorer");
-			Utilities.Log(Aircandi.APP_NAME, "Tricorder", "Entity count: " + String.valueOf(entities.size()));
+			Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Tag scan results returned from Ripple.ProxiExplorer");
+			Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Entity count: " + String.valueOf(entities.size()));
 
 			try {
 
@@ -373,12 +373,12 @@ public class TricorderGL extends AircandiActivity {
 				// If using autoscan, we skip a refresh if the user is doing some scrolling because
 				// layout can make the UI jerky.
 				if (!prefAutoscan_) {
-					Utilities.Log(Aircandi.APP_NAME, "Tricorder", "Refreshing RippleView");
+					Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Refreshing RippleView");
 					// Replace the collection
 					entityListFiltered_ = (ArrayList<Entity>) entities.clone();
 				}
 				else
-					Utilities.Log(Aircandi.APP_NAME, "Tricorder", "UI *busy* so skipping RippleView refresh");
+					Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "UI *busy* so skipping RippleView refresh");
 
 				stopProgress();
 

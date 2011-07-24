@@ -153,7 +153,7 @@ public final class Util {
 		if (method.equals("GET")) {
 			url = url + "?" + encodeUrl(params);
 		}
-		Utilities.Log(Aircandi.APP_NAME, "Facebook", "Open Url: " + url);
+		Utilities.Log(CandiConstants.APP_NAME, "Facebook", "Open Url: " + url);
 
 		HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
 		conn.setRequestProperty("User-Agent", System.getProperties().getProperty("http.agent") + " FacebookAndroidSDK");

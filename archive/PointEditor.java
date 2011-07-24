@@ -16,7 +16,7 @@ import android.widget.Toast;
 import com.proxibase.aircandi.utilities.Utilities;
 import com.proxibase.sdk.android.core.BaseQueryListener;
 import com.proxibase.sdk.android.core.Entity;
-import com.proxibase.sdk.android.core.ProxiEntity;
+import com.proxibase.sdk.android.core.EntityProxy;
 import com.proxibase.sdk.android.core.ProxibaseRunner;
 import com.proxibase.sdk.android.core.ProxibaseService.QueryFormat;
 
@@ -30,7 +30,7 @@ public class PointEditor extends AircandiActivity
 	private EditText	mEditLabel;
 	private CheckBox	mChkIsRipplePoint;
 	private Button		mBtnSave;
-	private ProxiEntity		mEntity;
+	private EntityProxy		mEntity;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -61,7 +61,7 @@ public class PointEditor extends AircandiActivity
 		else
 		{
 			AircandiUI.showToastNotification(this, "No current point", Toast.LENGTH_SHORT);
-			Utilities.Log(Aircandi.APP_NAME, "PointEditor", "No current point.");
+			Utilities.Log(CandiConstants.APP_NAME, "PointEditor", "No current point.");
 		}
 	}
 

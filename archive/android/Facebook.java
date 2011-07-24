@@ -101,7 +101,7 @@ public class Facebook
 				setAccessExpiresIn(values.getString(EXPIRES));
 				if (isSessionValid())
 				{
-					Utilities.Log(Aircandi.APP_NAME, "Facebook", "Login Success! access_token=" + getAccessToken() + " expires=" + getAccessExpires());
+					Utilities.Log(CandiConstants.APP_NAME, "Facebook", "Login Success! access_token=" + getAccessToken() + " expires=" + getAccessExpires());
 					listener.onComplete(values);
 				}
 				else
@@ -112,19 +112,19 @@ public class Facebook
 
 			public void onError(DialogError error)
 			{
-				Utilities.Log(Aircandi.APP_NAME, "Facebook", "Login failed: " + error);
+				Utilities.Log(CandiConstants.APP_NAME, "Facebook", "Login failed: " + error);
 				listener.onError(error);
 			}
 
 			public void onFacebookError(FacebookError error)
 			{
-				Utilities.Log(Aircandi.APP_NAME, "Facebook", "Login failed: " + error);
+				Utilities.Log(CandiConstants.APP_NAME, "Facebook", "Login failed: " + error);
 				listener.onFacebookError(error);
 			}
 
 			public void onCancel()
 			{
-				Utilities.Log(Aircandi.APP_NAME, "Facebook", "Login cancelled");
+				Utilities.Log(CandiConstants.APP_NAME, "Facebook", "Login cancelled");
 				listener.onCancel();
 			}
 		});

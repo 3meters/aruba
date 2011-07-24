@@ -253,7 +253,7 @@ public class FacebookRunner
 			{
 				try
 				{
-					Utilities.Log(Aircandi.APP_NAME, "FacebookRunner", "Starting thread for facebook graph request: '" + graphPath + "'");
+					Utilities.Log(CandiConstants.APP_NAME, "FacebookRunner", "Starting thread for facebook graph request: '" + graphPath + "'");
 					String resp = facebook.request(graphPath, parameters, httpMethod);
 					listener.onComplete(resp);
 				}

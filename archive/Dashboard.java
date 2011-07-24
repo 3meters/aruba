@@ -54,10 +54,10 @@ public class Dashboard extends AircandiActivity {
 
 		// Make sure we are signed in with a valid token before we do anything else
 		if (FacebookService.facebookRunner == null) {
-			Utilities.Log(Aircandi.APP_NAME, "Dashboard",
+			Utilities.Log(CandiConstants.APP_NAME, "Dashboard",
 					"Creating new facebook and facebook runner classes using application context");
 			FacebookService.facebookRunner = new FacebookRunner(Dashboard.this, getApplicationContext());
-			Utilities.Log(Aircandi.APP_NAME, "Dashboard",
+			Utilities.Log(CandiConstants.APP_NAME, "Dashboard",
 					"Attempting to restore facebook credentials from shared preferences");
 			FacebookService.facebookRunner.restoreCredentials(getApplicationContext(),
 					FacebookService.facebookRunner.facebook);
@@ -66,14 +66,14 @@ public class Dashboard extends AircandiActivity {
 		// There is a chance that our credentials could get invalidated while the application
 		// is running so we always check them and route back to the sign in if they need to be refreshed.
 		if (!FacebookService.facebookRunner.facebook.isSessionValid()) {
-			Utilities.Log(Aircandi.APP_NAME, "Dashboard",
+			Utilities.Log(CandiConstants.APP_NAME, "Dashboard",
 					"Current facebook credentials from shared prefs are not valid so starting AircandiLogin activity");
 			Intent intent = new Intent(getApplicationContext(), AircandiLogin.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 			startActivity(intent);
 			return;
 		}
-		Utilities.Log(Aircandi.APP_NAME, "Dashboard",
+		Utilities.Log(CandiConstants.APP_NAME, "Dashboard",
 				"Current facebook credentials from shared prefs appear to be valid");
 
 		// We'll use these later when we get called back
@@ -251,7 +251,7 @@ public class Dashboard extends AircandiActivity {
 		mUserName.setText(getCurrentUser().name);
 		Bitmap bitmap = mImageCache.get(getCurrentUser().id);
 		if (bitmap != null) {
-			Utilities.Log(Aircandi.APP_NAME, "Dashboard", "Cache hit for image '" + userId + "'");
+			Utilities.Log(CandiConstants.APP_NAME, "Dashboard", "Cache hit for image '" + userId + "'");
 			getCurrentUser().picture_bitmap = bitmap;
 			showUserPicture();
 			stopProgress();
@@ -281,7 +281,7 @@ public class Dashboard extends AircandiActivity {
 		protected Bitmap doInBackground(String... params) {
 
 			// We are on the background thread
-			Utilities.Log(Aircandi.APP_NAME, "Dashboard", "Getting facebook image for " + params[0]);
+			Utilities.Log(CandiConstants.APP_NAME, "Dashboard", "Getting facebook image for " + params[0]);
 			Bitmap bitmap = null;
 			bitmap = FacebookService.getFacebookPicture(params[0], params[1]);
 			if (bitmap != null) {

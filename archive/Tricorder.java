@@ -387,7 +387,7 @@ public class Tricorder extends AircandiActivity {
 		if (showProgress)
 			startProgress();
 
-		Utilities.Log(Aircandi.APP_NAME, "Tricorder", "Calling Ripple.ProxiExplorer to scan for tags");
+		Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Calling Ripple.ProxiExplorer to scan for tags");
 		proxiExplorer_.scanForTags(new TagScanListener());
 
 		// Show search message if there aren't any current points
@@ -402,10 +402,10 @@ public class Tricorder extends AircandiActivity {
 	public class TagScanListener extends BaseBeaconScanListener {
 
 		@Override
-		public void onComplete(ArrayList<ProxiEntity> entities) {
+		public void onComplete(ArrayList<EntityProxy> entities) {
 
-			Utilities.Log(Aircandi.APP_NAME, "Tricorder", "Tag scan results returned from Ripple.ProxiExplorer");
-			Utilities.Log(Aircandi.APP_NAME, "Tricorder", "Entity count: " + String.valueOf(entities.size()));
+			Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Tag scan results returned from Ripple.ProxiExplorer");
+			Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Entity count: " + String.valueOf(entities.size()));
 
 			try {
 
@@ -420,14 +420,14 @@ public class Tricorder extends AircandiActivity {
 				// If using autoscan, we skip a refresh if the user is doing some scrolling because
 				// layout can make the UI jerky.
 				if (!prefAutoscan_ || rippleView_.isMotionless()) {
-					Utilities.Log(Aircandi.APP_NAME, "Tricorder", "Refreshing RippleView");
+					Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Refreshing RippleView");
 					// Replace the collection
 					entityListFiltered_ = (ArrayList<Entity>) entities.clone();
 					rippleView_.setDataSource(entityListFiltered_);
 					rippleView_.refresh();
 				}
 				else
-					Utilities.Log(Aircandi.APP_NAME, "Tricorder", "UI *busy* so skipping RippleView refresh");
+					Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "UI *busy* so skipping RippleView refresh");
 
 				stopProgress();
 

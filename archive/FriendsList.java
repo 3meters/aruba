@@ -221,7 +221,7 @@ public class FriendsList extends AircandiActivity
 					Bitmap bitmap = mImageCache.get(itemData.id);
 					if (bitmap != null)
 					{
-						Utilities.Log(Aircandi.APP_NAME, "FriendsList", "Cache hit for image '" + itemData.id + "'");
+						Utilities.Log(CandiConstants.APP_NAME, "FriendsList", "Cache hit for image '" + itemData.id + "'");
 						holder.itemIcon.setImageBitmap(bitmap);
 					}
 					else
@@ -242,21 +242,21 @@ public class FriendsList extends AircandiActivity
 		protected Bitmap doInBackground(ViewHolder... params)
 		{
 			// We are on the background thread
-			Utilities.Log(Aircandi.APP_NAME, "FriendsList", "Starting AsyncTask to get image (from cache or service) for " + userId);
+			Utilities.Log(CandiConstants.APP_NAME, "FriendsList", "Starting AsyncTask to get image (from cache or service) for " + userId);
 			holder = params[0];
 			userId = params[0].userId;
 			Bitmap bitmap = null;
 			bitmap = mImageCache.get(params[0].userId);
 			if (bitmap == null)
 			{
-				Utilities.Log(Aircandi.APP_NAME, "FriendsList", "Cache miss: get image from facebook '" + params[0].userId + "'");
+				Utilities.Log(CandiConstants.APP_NAME, "FriendsList", "Cache miss: get image from facebook '" + params[0].userId + "'");
 				bitmap = FacebookService.getFacebookPicture(params[0].userId, params[0].imageFormat);
 				bitmap = AircandiUI.cropToSquare(bitmap);
 				mImageCache.put(params[0].userId, bitmap);
 			}
 			else
 			{
-				Utilities.Log(Aircandi.APP_NAME, "FriendsList", "Cache hit for image '" + params[0].userId + "'");
+				Utilities.Log(CandiConstants.APP_NAME, "FriendsList", "Cache hit for image '" + params[0].userId + "'");
 			}
 			return bitmap;
 		}
@@ -266,7 +266,7 @@ public class FriendsList extends AircandiActivity
 		{
 			// We are on the UI thread
 			super.onPostExecute(bitmap);
-			Utilities.Log(Aircandi.APP_NAME, "FriendsList", "Returning AsyncTask to get image (from cache or service) for " + userId);
+			Utilities.Log(CandiConstants.APP_NAME, "FriendsList", "Returning AsyncTask to get image (from cache or service) for " + userId);
 			holder.itemIcon.setImageBitmap(bitmap);
 		}
 	}
