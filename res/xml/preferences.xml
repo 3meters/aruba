@@ -2,13 +2,29 @@
 <PreferenceScreen
 	xmlns:android="http://schemas.android.com/apk/res/android">
 	<PreferenceCategory
-		android:title="Finder preferences">
+		android:title="Beacon preferences">
 		<CheckBoxPreference
-			android:id="@+id/Pref_Tags_With_Entities_Only"
-			android:key="Pref_Tags_With_Entities_Only"
+			android:id="@+id/Pref_Beacon_With_Entities_Only"
+			android:key="Pref_Beacon_With_Entities_Only"
 			android:defaultValue="true"
-			android:title="Ripple spots only"
-			android:summary="Only show tagged entities" />
+			android:title="Active beacons only"
+			android:summary="Only show beacons with active content" />
+		<EditTextPreference
+			android:id="@+id/Pref_Beacon_Level_Cutoff_Unregistered"
+			android:key="Pref_Beacon_Level_Cutoff_Unregistered"
+			android:defaultValue="-80"
+			android:title="Empty beacons level"
+			android:summary="Minimum average signal level required for unregistered beacon display"
+			android:dialogTitle="Enter signal level" />
+		<CheckBoxPreference
+			android:id="@+id/Pref_Beacon_Show_Hidden"
+			android:key="Pref_Beacon_Show_Hidden"
+			android:defaultValue="false"
+			android:title="Hidden beacons"
+			android:summary="Show hidden beacons" />
+	</PreferenceCategory>
+	<PreferenceCategory
+		android:title="Finder preferences">
 		<ListPreference
 			android:id="@+id/Pref_Display_Extras"
 			android:key="Pref_Display_Extras"
@@ -24,13 +40,6 @@
 			android:defaultValue="true"
 			android:title="Entity fencing"
 			android:summary="Use fence settings to filter proxi entities" />
-		<EditTextPreference
-			android:id="@+id/Pref_Tag_Level_Cutoff"
-			android:key="Pref_Tag_Level_Cutoff"
-			android:defaultValue="-100"
-			android:title="Beacon level cutoff"
-			android:summary="Minimum average signal level required for beacon display"
-			android:dialogTitle="Enter signal level" />
 		<CheckBoxPreference
 			android:id="@+id/Pref_Autoscan"
 			android:key="Pref_Autoscan"
