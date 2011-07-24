@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,8 +12,11 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.controllers.R;
 import com.proxibase.aircandi.models.Resource;
-import com.proxibase.sdk.android.proxi.consumer.Stream;
+import com.proxibase.sdk.android.proxi.consumer.Command;
+import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.service.ProxibaseRunner;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.Query;
@@ -23,11 +26,11 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.QueryFormat;
 
 public class MediaList extends AircandiActivity {
 
-	private Class				mClass		= Resource.class;
+	private Class			mClass		= Resource.class;
 	private List<Object>	mListItems	= null;
 	@SuppressWarnings("unused")
-	private Resource			mCurrentResource;
-
+	private Resource		mCurrentResource;
+	private EntityProxy		mEntityProxy;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -35,19 +38,21 @@ public class MediaList extends AircandiActivity {
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			String jsonStream = extras.getString("stream");
+			String jsonStream = extras.getString("Stream");
+			String jsonEntityProxy = extras.getString("EntityProxy");
+			
+			if (jsonEntityProxy != "")
+				mEntityProxy = ProxibaseService.getGson(GsonType.ProxibaseService).fromJson(jsonEntityProxy, EntityProxy.class);
+			
 			if (jsonStream != "")
-				mStream = ProxibaseService.getGson(GsonType.Internal).fromJson(
-						getIntent().getExtras().getString("stream"), Stream.class);
+				mCommand = ProxibaseService.getGson(GsonType.ProxibaseService).fromJson(jsonStream, Command.class);
 		}
 
-		int layoutResourceId = this.getResources().getIdentifier(mStream.layoutTemplate, "layout",
-				this.getPackageName());
-		setContentView(layoutResourceId);
+//		int layoutResourceId = this.getResources().getIdentifier(mCommand.layoutTemplate, "layout", this.getPackageName());
+//		setContentView(layoutResourceId);
 		super.onCreate(savedInstanceState);
 		loadData();
 	}
-
 
 	// ----------------------------------------------------------------------------------
 	// Data query
@@ -56,8 +61,8 @@ public class MediaList extends AircandiActivity {
 	public void loadData() {
 
 		// Get the point we are rooted on
-		Query query = new Query("Resources").filter("EntityId eq guid'" + getCurrentEntity().getProxiEntity().entityId + "'");
-		if (getCurrentEntity() != null)
+		Query query = new Query("Resources").filter("EntityId eq guid'" + mEntityProxy.entityProxyId + "'");
+		if (mEntityProxy != null)
 			if (mListItems == null) {
 				startProgress();
 				ProxibaseRunner ripple = new ProxibaseRunner();
@@ -68,7 +73,6 @@ public class MediaList extends AircandiActivity {
 				stopProgress();
 			}
 	}
-
 
 	public class ListQueryListener extends BaseQueryListener {
 
@@ -87,7 +91,6 @@ public class MediaList extends AircandiActivity {
 			});
 		}
 
-
 		@Override
 		public void onIOException(IOException e) {
 
@@ -104,7 +107,6 @@ public class MediaList extends AircandiActivity {
 		}
 	}
 
-
 	// ----------------------------------------------------------------------------------
 	// Event handlers
 	// ----------------------------------------------------------------------------------
@@ -114,7 +116,6 @@ public class MediaList extends AircandiActivity {
 		loadTiles(false);
 	}
 
-
 	public void onCommandClick(View view) {
 
 		startProgress();
@@ -122,7 +123,7 @@ public class MediaList extends AircandiActivity {
 
 		AircandiUI.showToastNotification(this, "Sending " + command + " command", Toast.LENGTH_SHORT);
 		ProxibaseRunner ProxibaseRunner = new ProxibaseRunner();
-		
+
 		Bundle parameters = new Bundle();
 
 		String method = "InsertMessage";
@@ -131,21 +132,18 @@ public class MediaList extends AircandiActivity {
 		parameters.putString("parameter2", "");
 		parameters.putString("parameter3", "");
 		parameters.putString("priority", "1");
-		parameters.putString("targetId", getCurrentEntity().getProxiEntity().entityId);
+		parameters.putString("targetId", getCurrentEntity().getEntityProxy().entityProxyId);
 		parameters.putString("sourceId", "111111111");
 
-		ProxibaseRunner.post(method, parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE,
-				new MessageSendListener());
+		ProxibaseRunner.post(method, parameters, QueryFormat.Json, CandiConstants.URL_AIRCANDI_SERVICE, new MessageSendListener());
 
 	}
-
 
 	@Override
 	public void onItemButtonClick(View view) {
 
 		return;
 	}
-
 
 	@Override
 	public void onItemClick(View view) {
@@ -165,14 +163,12 @@ public class MediaList extends AircandiActivity {
 		parameters.putString("parameter2", resource.title);
 		parameters.putString("parameter3", resource.artist);
 		parameters.putString("priority", "2");
-		parameters.putString("targetId", getCurrentEntity().getProxiEntity().entityId);
+		parameters.putString("targetId", getCurrentEntity().getEntityProxy().entityProxyId);
 		parameters.putString("sourceId", "111111111");
 
-		ProxibaseRunner.post(method, parameters, QueryFormat.Json, Aircandi.URL_AIRCANDI_SERVICE,
-				new MessageSendListener());
+		ProxibaseRunner.post(method, parameters, QueryFormat.Json, CandiConstants.URL_AIRCANDI_SERVICE, new MessageSendListener());
 
 	}
-
 
 	public class MessageSendListener extends BaseQueryListener {
 
@@ -189,7 +185,6 @@ public class MediaList extends AircandiActivity {
 			});
 		}
 	}
-
 
 	// ----------------------------------------------------------------------------------
 	// Tile binding
@@ -214,8 +209,7 @@ public class MediaList extends AircandiActivity {
 				Resource resource = (Resource) mListItems.get(i);
 
 				// Make a tile and configure it
-				RelativeLayout tile = (RelativeLayout) this.getLayoutInflater().inflate(
-						R.layout.temp_listitem_tile_half, null);
+				RelativeLayout tile = (RelativeLayout) this.getLayoutInflater().inflate(R.layout.temp_listitem_tile_half, null);
 				((TextView) tile.findViewById(R.id.Title)).setText(resource.title);
 				((TextView) tile.findViewById(R.id.Description)).setText(resource.artist);
 

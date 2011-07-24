@@ -1,7 +1,9 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.proxibase.aircandi.controllers.R;
 
 import android.app.Activity;
 import android.media.AudioManager;

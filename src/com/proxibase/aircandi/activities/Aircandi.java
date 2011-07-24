@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import java.util.Calendar;
 
@@ -7,6 +7,7 @@ import android.location.Location;
 import android.util.Log;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
+import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.models.Post;
 
 public class Aircandi extends Application {
@@ -14,15 +15,6 @@ public class Aircandi extends Application {
 	public Post							currentPostX;
 	public Location						currentLocation;
 	public CandiModel					currentCandiModel;
-	public static final int				TWO_MINUTES					= 1000 * 60 * 2;
-	public static final int				FIVE_MINUTES				= 1000 * 60 * 5;
-	public static final String			URL_AIRCANDI_SERVICE_ODATA	= "http://dev.aircandi.com/airodata.svc/";
-	public static final String			URL_AIRCANDI_SERVICE		= "http://dev.aircandi.com/airlogic.asmx/";
-	public static final String			URL_AIRCANDI_BLOG			= "http://devblog.proxibase.com/";
-	public static final String			URL_AIRCANDI_MEDIA			= "https://s3.amazonaws.com/";
-
-	public static final boolean			MODE_DEBUG					= true;
-	public static final String			APP_NAME					= "Aircandi";
 
 	public Aircandi() {
 	}
@@ -71,8 +63,8 @@ public class Aircandi extends Application {
 
 		// Check whether the new location fix is newer or older
 		long timeDelta = location.getTime() - currentBestLocation.getTime();
-		boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
-		boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
+		boolean isSignificantlyNewer = timeDelta > CandiConstants.TWO_MINUTES;
+		boolean isSignificantlyOlder = timeDelta < -CandiConstants.TWO_MINUTES;
 		boolean isNewer = timeDelta > 0;
 
 		// If it's been more than two minutes since the current location, use the new location

@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -15,14 +15,14 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
+import com.proxibase.aircandi.controllers.R;
 import com.proxibase.aircandi.models.Post;
-import com.proxibase.sdk.android.proxi.consumer.Stream;
+import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
@@ -30,7 +30,7 @@ public abstract class AircandiActivity extends Activity {
 
 	protected ImageView	mProgressIndicator;
 	protected ImageView	mButtonRefresh;
-	protected Stream	mStream;
+	protected Command	mCommand;
 
 
 	@Override
@@ -62,23 +62,23 @@ public abstract class AircandiActivity extends Activity {
 
 		// If mStream wasn't set by a sub class then check to see if there is something
 		// we can do to create it.
-		if (mStream == null) {
+		if (mCommand == null) {
 			if (getIntent() != null && getIntent().getExtras() != null) {
 				String jsonStream = getIntent().getExtras().getString("stream");
 				if (jsonStream != null && !jsonStream.equals(""))
-					mStream = ProxibaseService.getGson(GsonType.Internal).fromJson(
-							getIntent().getExtras().getString("stream"), Stream.class);
+					mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(
+							getIntent().getExtras().getString("command"), Command.class);
 			}
 		}
 
 		configureAppHeader();
 
-		if (mStream != null) {
+		if (mCommand != null) {
 			// Configure the activity header
-			configureHeader(mStream);
+			configureHeader(mCommand);
 
 			// Configure the activity footer
-			configureFooter(mStream);
+			configureFooter(mCommand);
 		}
 	}
 
@@ -102,41 +102,41 @@ public abstract class AircandiActivity extends Activity {
 	}
 
 
-	private void configureHeader(Stream stream) {
+	private void configureHeader(Command command) {
 
-		if (stream.showHeader) {
-			// Title
-			TextView title = (TextView) findViewById(R.id.Activity_Title);
-			if (title != null)
-				title.setText(stream.headerTitle);
-
-			// Icon
-			ImageView icon = (ImageView) findViewById(R.id.Activity_Icon);
-			if (icon != null)
-				if (!stream.headerIconResource.equals("none"))
-					icon.setBackgroundResource(this.getResources().getIdentifier(stream.headerIconResource, "drawable",
-							this.getPackageName()));
-				else
-					icon.setVisibility(View.GONE);
-		}
-		else {
-			TableLayout activityHeader = (TableLayout) findViewById(R.id.Activity_Header);
-			if (activityHeader != null)
-				activityHeader.setVisibility(View.GONE);
-		}
+//		if (command.showHeader) {
+//			// Title
+//			TextView title = (TextView) findViewById(R.id.Activity_Title);
+//			if (title != null)
+//				title.setText(command.headerTitle);
+//
+//			// Icon
+//			ImageView icon = (ImageView) findViewById(R.id.Activity_Icon);
+//			if (icon != null)
+//				if (!command.headerIconResource.equals("none"))
+//					icon.setBackgroundResource(this.getResources().getIdentifier(command.headerIconResource, "drawable",
+//							this.getPackageName()));
+//				else
+//					icon.setVisibility(View.GONE);
+//		}
+//		else {
+//			TableLayout activityHeader = (TableLayout) findViewById(R.id.Activity_Header);
+//			if (activityHeader != null)
+//				activityHeader.setVisibility(View.GONE);
+//		}
 	}
 
 
-	private void configureFooter(Stream stream) {
+	private void configureFooter(Command command) {
 
-		if (stream.showFooter) {
-		}
-		else {
-			// Layout might have a default footer in it or it might not
-			TableLayout activityFooter = (TableLayout) findViewById(R.id.Activity_Footer);
-			if (activityFooter != null)
-				activityFooter.setVisibility(View.GONE);
-		}
+//		if (command.showFooter) {
+//		}
+//		else {
+//			// Layout might have a default footer in it or it might not
+//			TableLayout activityFooter = (TableLayout) findViewById(R.id.Activity_Footer);
+//			if (activityFooter != null)
+//				activityFooter.setVisibility(View.GONE);
+//		}
 	}
 
 

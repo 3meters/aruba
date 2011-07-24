@@ -1,8 +1,9 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import android.os.Bundle;
 import android.webkit.WebView;
 
+import com.proxibase.aircandi.controllers.R;
 import com.proxibase.aircandi.models.Post;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;

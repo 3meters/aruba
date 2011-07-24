@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,8 +25,10 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.controllers.R;
 import com.proxibase.aircandi.models.Post;
-import com.proxibase.sdk.android.proxi.consumer.Stream;
+import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.service.ProxibaseRunner;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.Query;
@@ -50,11 +52,11 @@ public class InfoList extends AircandiActivity
 		{
 			String jsonStream = extras.getString("stream");
 			if (jsonStream != "")
-				mStream = ProxibaseService.getGson(GsonType.Internal).fromJson(getIntent().getExtras().getString("stream"), Stream.class);
+				mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(getIntent().getExtras().getString("stream"), Command.class);
 		}
 
-		int layoutResourceId = this.getResources().getIdentifier(mStream.layoutTemplate, "layout", this.getPackageName());
-		setContentView(layoutResourceId);
+//		int layoutResourceId = this.getResources().getIdentifier(mCommand.layoutTemplate, "layout", this.getPackageName());
+//		setContentView(layoutResourceId);
 		super.onCreate(savedInstanceState);
 		mDetailFrame = (RelativeLayout) findViewById(R.id.DetailFrame);
 		mTileFrame = (ScrollView) findViewById(R.id.TileFrame);
@@ -90,7 +92,7 @@ public class InfoList extends AircandiActivity
 	{
 		// Query query = new Query("Posts").filter("entityId eq guid'" + getCurrentEntity().entityId +
 		// "' and Author eq '" + getCurrentEntity().tagId + "'");
-		Query query = new Query("Posts").filter("EntityId eq guid'" + getCurrentEntity().getProxiEntity().entityId + "' and Author eq '00:00:00:00:00:00'");
+		Query query = new Query("Posts").filter("EntityId eq guid'" + getCurrentEntity().getEntityProxy().entityProxyId + "' and Author eq '00:00:00:00:00:00'");
 		if (getCurrentEntity() != null)
 			if (mListItems == null)
 			{
@@ -227,7 +229,7 @@ public class InfoList extends AircandiActivity
 		html += "<html>";
 		html += "<head>";
 		html += "<meta http-equiv='content-type' content='text/html; charset=utf-8'>";
-		html += "<link href='" + Aircandi.URL_AIRCANDI_SERVICE + "styles/infoitem.css' rel='stylesheet' type='text/css' />";
+		html += "<link href='" + CandiConstants.URL_AIRCANDI_SERVICE + "styles/infoitem.css' rel='stylesheet' type='text/css' />";
 		html += "</head>";
 		html += "<body>";
 		// html += "<h2>" + post.title + "</h2>";
@@ -281,7 +283,7 @@ public class InfoList extends AircandiActivity
 			listView.setAdapter(adapter);
 			listView.setClickable(true);
 
-			Animation animation = AnimationUtils.loadAnimation(this, R.anim.fade_in_normal);
+			Animation animation = AnimationUtils.loadAnimation(this, R.anim.fade_in_medium);
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			listView.startAnimation(animation);

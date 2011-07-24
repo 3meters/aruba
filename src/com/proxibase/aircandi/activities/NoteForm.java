@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,6 +11,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.controllers.R;
 import com.proxibase.aircandi.models.Post;
 import com.proxibase.sdk.android.proxi.service.ProxibaseRunner;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;

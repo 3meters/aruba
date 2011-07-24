@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import org.anddev.andengine.ui.activity.LayoutGameActivity;
 
@@ -8,22 +8,19 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.location.Location;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
+import com.proxibase.aircandi.controllers.R;
 import com.proxibase.aircandi.models.Post;
-import com.proxibase.sdk.android.proxi.consumer.Stream;
+import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
@@ -37,7 +34,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	protected ImageView				mButtonRefresh;
 	protected TextView				mContextButton;
 	protected ContextButtonState	mContextButtonState	= ContextButtonState.Default;
-	protected Stream				mStream;
+	protected Command				mCommand;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -71,22 +68,22 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 
 		// If mStream wasn't set by a sub class then check to see if there is something
 		// we can do to create it.
-		if (mStream == null) {
+		if (mCommand == null) {
 			if (getIntent() != null && getIntent().getExtras() != null) {
 				String jsonStream = getIntent().getExtras().getString("stream");
 				if (jsonStream != null && !jsonStream.equals(""))
-					mStream = ProxibaseService.getGson(GsonType.Internal).fromJson(getIntent().getExtras().getString("stream"), Stream.class);
+					mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(getIntent().getExtras().getString("stream"), Command.class);
 			}
 		}
 
 		configureAppHeader();
 
-		if (mStream != null) {
+		if (mCommand != null) {
 			// Configure the activity header
-			configureHeader(mStream);
+			configureHeader(mCommand);
 
 			// Configure the activity footer
-			configureFooter(mStream);
+			configureFooter(mCommand);
 		}
 	}
 
@@ -108,39 +105,39 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 		}
 	}
 
-	private void configureHeader(Stream stream) {
+	private void configureHeader(Command command) {
 
-		if (stream.showHeader) {
-			// Title
-			TextView title = (TextView) findViewById(R.id.Activity_Title);
-			if (title != null)
-				title.setText(stream.headerTitle);
-
-			// Icon
-			ImageView icon = (ImageView) findViewById(R.id.Activity_Icon);
-			if (icon != null)
-				if (!stream.headerIconResource.equals("none"))
-					icon.setBackgroundResource(this.getResources().getIdentifier(stream.headerIconResource, "drawable", this.getPackageName()));
-				else
-					icon.setVisibility(View.GONE);
-		}
-		else {
-			TableLayout activityHeader = (TableLayout) findViewById(R.id.Activity_Header);
-			if (activityHeader != null)
-				activityHeader.setVisibility(View.GONE);
-		}
+//		if (command.showHeader) {
+//			// Title
+//			TextView title = (TextView) findViewById(R.id.Activity_Title);
+//			if (title != null)
+//				title.setText(command.headerTitle);
+//
+//			// Icon
+//			ImageView icon = (ImageView) findViewById(R.id.Activity_Icon);
+//			if (icon != null)
+//				if (!command.headerIconResource.equals("none"))
+//					icon.setBackgroundResource(this.getResources().getIdentifier(command.headerIconResource, "drawable", this.getPackageName()));
+//				else
+//					icon.setVisibility(View.GONE);
+//		}
+//		else {
+//			TableLayout activityHeader = (TableLayout) findViewById(R.id.Activity_Header);
+//			if (activityHeader != null)
+//				activityHeader.setVisibility(View.GONE);
+//		}
 	}
 
-	private void configureFooter(Stream stream) {
+	private void configureFooter(Command command) {
 
-		if (stream.showFooter) {
-		}
-		else {
-			// Layout might have a default footer in it or it might not
-			TableLayout activityFooter = (TableLayout) findViewById(R.id.Activity_Footer);
-			if (activityFooter != null)
-				activityFooter.setVisibility(View.GONE);
-		}
+//		if (command.showFooter) {
+//		}
+//		else {
+//			// Layout might have a default footer in it or it might not
+//			TableLayout activityFooter = (TableLayout) findViewById(R.id.Activity_Footer);
+//			if (activityFooter != null)
+//				activityFooter.setVisibility(View.GONE);
+//		}
 	}
 
 	/*
@@ -188,39 +185,6 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 
 		AircandiUI.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
 		return;
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.main_menu, menu);
-
-		// Hide the sign out option if we don't have a current session
-		MenuItem item = menu.findItem(R.id.signout);
-		item.setVisible(false);
-		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-
-		// Hide the sign out option if we don't have a current session
-		MenuItem item = menu.findItem(R.id.signout);
-		item.setVisible(false);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		switch (item.getItemId()) {
-			case R.id.settings :
-				startActivity(new Intent(this, Preferences.class));
-				return (true);
-			default :
-				return (super.onOptionsItemSelected(item));
-		}
 	}
 
 	protected void startTitlebarProgress() {

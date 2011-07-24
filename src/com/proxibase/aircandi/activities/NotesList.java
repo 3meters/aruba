@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,8 +16,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.controllers.R;
 import com.proxibase.aircandi.models.Post;
-import com.proxibase.sdk.android.proxi.consumer.Stream;
+import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.service.ProxibaseRunner;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.Query;
@@ -38,13 +39,13 @@ public class NotesList extends AircandiActivity
 		Bundle extras = getIntent().getExtras();
 		if (extras != null)
 		{
-			String jsonStream = extras.getString("stream");
-			if (jsonStream != "")
-				mStream = ProxibaseService.getGson(GsonType.Internal).fromJson(getIntent().getExtras().getString("stream"), Stream.class);
+			String jsonCommand = extras.getString("command");
+			if (jsonCommand != "")
+				mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(getIntent().getExtras().getString("stream"), Command.class);
 		}
 
-		int layoutResourceId = this.getResources().getIdentifier(mStream.layoutTemplate, "layout", this.getPackageName());
-		setContentView(layoutResourceId);
+		//int layoutResourceId = this.getResources().getIdentifier(mCommand.layoutTemplate, "layout", this.getPackageName());
+		//setContentView(layoutResourceId);
 		super.onCreate(savedInstanceState);
 		loadData();
 	}
@@ -55,7 +56,7 @@ public class NotesList extends AircandiActivity
 
 	public void loadData()
 	{
-		Query query = new Query("Posts").filter("entityId eq guid'" + getCurrentEntity().getProxiEntity().entityId + "' and Author eq '" + "Anonymous" + "'");
+		Query query = new Query("Posts").filter("entityId eq guid'" + getCurrentEntity().getEntityProxy().entityProxyId + "' and Author eq '" + "Anonymous" + "'");
 
 		if (getCurrentEntity() != null)
 			if (mListItems == null)
@@ -155,7 +156,7 @@ public class NotesList extends AircandiActivity
 			listView.setAdapter(adapter);
 			listView.setClickable(true);
 
-			Animation animation = AnimationUtils.loadAnimation(this, R.anim.fade_in_normal);
+			Animation animation = AnimationUtils.loadAnimation(this, R.anim.fade_in_medium);
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			listView.startAnimation(animation);
