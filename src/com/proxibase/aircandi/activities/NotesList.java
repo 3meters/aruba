@@ -16,7 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.controllers.R;
+import com.proxibase.aircandi.activities.R;
 import com.proxibase.aircandi.models.Post;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.service.ProxibaseRunner;

@@ -70,6 +70,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.proxibase.aircandi.activities.R;
 import com.proxibase.aircandi.candi.camera.ChaseCamera;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
@@ -80,7 +81,6 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.ICandiListene
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.TextureReset;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.candi.views.CandiView;
-import com.proxibase.aircandi.controllers.R;
 import com.proxibase.aircandi.utils.ImageCache;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Utilities;
@@ -232,7 +232,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private void onCommandButtonClick(View view) {
 
 		Command command = (Command) view.getTag();
-		String fullyQualifiedClass = "com.proxibase.aircandi.controllers." + command.type;
+		String fullyQualifiedClass = "com.proxibase.aircandi.activities." + command.type;
 		String commandName = command.name.toLowerCase();
 
 		if (command.type.toLowerCase().equals("list")) {

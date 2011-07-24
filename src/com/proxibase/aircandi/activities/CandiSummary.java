@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,11 +21,12 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.proxibase.aircandi.activities.R;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.OnImageReadyListener;
-import com.proxibase.sdk.android.proxi.consumer.ProxiEntity;
-import com.proxibase.sdk.android.proxi.consumer.Stream;
+import com.proxibase.sdk.android.proxi.consumer.Command;
+import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.util.ProxiConstants;
@@ -36,13 +37,13 @@ public class CandiSummary extends Activity {
 	private FrameLayout	mCandiSummaryView;
 	private ImageView	mProgressIndicator;
 	private ImageView	mButtonRefresh;
-	private ProxiEntity	mProxiEntity;
+	private EntityProxy	mEntityProxy;
 	private TextView	mContextButton;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		
+
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
@@ -69,10 +70,10 @@ public class CandiSummary extends Activity {
 			String jsonStream = extras.getString("ProxiEntity");
 			if (jsonStream != "") {
 				showBackButton(true);
-				mProxiEntity = ProxibaseService.getGson(GsonType.ProxibaseService).fromJson(getIntent().getExtras().getString("ProxiEntity"),
-						ProxiEntity.class);
+				mEntityProxy = ProxibaseService.getGson(GsonType.ProxibaseService).fromJson(getIntent().getExtras().getString("EntityProxy"),
+						EntityProxy.class);
 			}
-			setupSummary(mProxiEntity);
+			setupSummary(mEntityProxy);
 		}
 	}
 
@@ -94,25 +95,25 @@ public class CandiSummary extends Activity {
 		doBackPressed();
 	}
 
-	private void setupSummary(final ProxiEntity proxiEntity) {
+	private void setupSummary(final EntityProxy entityProxy) {
 
 		new BuildMenuTask().execute(mCandiSummaryView);
 
-		if (proxiEntity.pointResourceId != null && proxiEntity.pointResourceId != "") {
-			if (ImageManager.getImageManager().hasImage(proxiEntity.pointResourceId)) {
-				Bitmap bitmap = ImageManager.getImageManager().getImage(proxiEntity.pointResourceId);
+		if (entityProxy.imageUri != null && entityProxy.imageUri != "") {
+			if (ImageManager.getImageManager().hasImage(entityProxy.imageUri)) {
+				Bitmap bitmap = ImageManager.getImageManager().getImage(entityProxy.imageUri);
 				if (bitmap != null)
 					((ImageView) mCandiSummaryView.findViewById(R.id.Image)).setImageBitmap(bitmap);
 
-				if (ImageManager.getImageManager().hasImage(proxiEntity.pointResourceId + ".reflection")) {
-					bitmap = ImageManager.getImageManager().getImage(proxiEntity.pointResourceId + ".reflection");
+				if (ImageManager.getImageManager().hasImage(entityProxy.imageUri + ".reflection")) {
+					bitmap = ImageManager.getImageManager().getImage(entityProxy.imageUri + ".reflection");
 					((ImageView) mCandiSummaryView.findViewById(R.id.ImageReflection)).setImageBitmap(bitmap);
 				}
 			}
 			else {
 				ImageRequest imageRequest = new ImageManager.ImageRequest();
-				imageRequest.imageId = proxiEntity.pointResourceId;
-				imageRequest.imageUrl = ProxiConstants.URL_PROXIBASE_MEDIA + "3meters_images/" + proxiEntity.pointResourceId;
+				imageRequest.imageId = entityProxy.imageUri;
+				imageRequest.imageUrl = ProxiConstants.URL_PROXIBASE_MEDIA + "3meters_images/" + entityProxy.imageUri;
 				imageRequest.imageShape = "square";
 				imageRequest.widthMinimum = 80;
 				imageRequest.showReflection = false;
@@ -120,8 +121,8 @@ public class CandiSummary extends Activity {
 
 					@Override
 					public void onImageReady(Bitmap bitmap) {
-						Utilities.Log("Graffiti", "setupSummary", "Image fetched: " + proxiEntity.pointResourceId);
-						Bitmap bitmapNew = ImageManager.getImageManager().getImage(proxiEntity.pointResourceId);
+						Utilities.Log("Graffiti", "setupSummary", "Image fetched: " + entityProxy.imageUri);
+						Bitmap bitmapNew = ImageManager.getImageManager().getImage(entityProxy.imageUri);
 						((ImageView) mCandiSummaryView.findViewById(R.id.Image)).setImageBitmap(bitmapNew);
 						Animation animation = AnimationUtils.loadAnimation(CandiSummary.this, R.anim.fade_in_medium);
 						animation.setFillEnabled(true);
@@ -131,14 +132,14 @@ public class CandiSummary extends Activity {
 
 					}
 				};
-				Utilities.Log("Graffiti", "setupSummary", "Fetching Image: " + proxiEntity.pointResourceId);
+				Utilities.Log("Graffiti", "setupSummary", "Fetching Image: " + entityProxy.imageUri);
 				ImageManager.getImageManager().fetchImageAsynch(imageRequest);
 			}
 		}
 
-		((TextView) mCandiSummaryView.findViewById(R.id.Title)).setText(proxiEntity.title);
-		((TextView) mCandiSummaryView.findViewById(R.id.Subtitle)).setText(Html.fromHtml(proxiEntity.subtitle));
-		((TextView) mCandiSummaryView.findViewById(R.id.Description)).setText(Html.fromHtml(proxiEntity.description));
+		((TextView) mCandiSummaryView.findViewById(R.id.Title)).setText(entityProxy.title);
+		((TextView) mCandiSummaryView.findViewById(R.id.Subtitle)).setText(Html.fromHtml(entityProxy.subtitle));
+		((TextView) mCandiSummaryView.findViewById(R.id.Description)).setText(Html.fromHtml(entityProxy.description));
 	}
 
 	class BuildMenuTask extends AsyncTask<FrameLayout, Void, TableLayout> {
@@ -154,7 +155,7 @@ public class CandiSummary extends Activity {
 			Display getOrient = getWindowManager().getDefaultDisplay();
 			if (getOrient.getRotation() == Surface.ROTATION_90 || getOrient.getRotation() == Surface.ROTATION_270)
 				landscape = true;
-			TableLayout table = configureMenus(mProxiEntity, landscape, CandiSummary.this);
+			TableLayout table = configureMenus(mEntityProxy, landscape, CandiSummary.this);
 
 			return table;
 		}
@@ -170,10 +171,10 @@ public class CandiSummary extends Activity {
 		}
 	}
 
-	private TableLayout configureMenus(ProxiEntity proxiEntity, boolean landscape, Context context) {
+	private TableLayout configureMenus(EntityProxy entityProxy, boolean landscape, Context context) {
 
 		Boolean needMoreButton = false;
-		if (proxiEntity.streams.size() > 6)
+		if (entityProxy.commands.size() > 6)
 			needMoreButton = true;
 
 		// Get the table we use for grouping and clear it
@@ -188,30 +189,22 @@ public class CandiSummary extends Activity {
 		// Loop the streams
 		Integer streamCount = 0;
 		RelativeLayout streamButtonContainer;
-		for (Stream stream : proxiEntity.streams) {
+		for (Command command : entityProxy.commands) {
 			// Make a button and configure it
 			streamButtonContainer = (RelativeLayout) this.getLayoutInflater().inflate(R.layout.temp_button_stream, null);
 
 			final TextView streamButton = (TextView) streamButtonContainer.findViewById(R.id.StreamButton);
 			final TextView streamBadge = (TextView) streamButtonContainer.findViewById(R.id.StreamBadge);
-			streamButtonContainer.setTag(stream);
+			streamButtonContainer.setTag(command);
 			if (needMoreButton && streamCount == 5) {
 				streamButton.setText("More...");
-				streamButton.setTag(stream);
+				streamButton.setTag(command);
 			}
 			else {
-				streamButton.setText(stream.streamLabel);
-				streamButton.setTag(stream);
-				if (stream.itemCount > 0) {
-					if (stream.streamName.toLowerCase().equals("eggs"))
-						streamBadge.setVisibility(View.INVISIBLE);
-					else {
-						streamBadge.setText(String.valueOf(stream.itemCount));
-						streamBadge.setTag(stream);
-					}
-				}
-				else
-					streamBadge.setVisibility(View.INVISIBLE);
+				streamButton.setText(command.label);
+				streamButton.setTag(command);
+				streamBadge.setTag(command);
+				streamBadge.setVisibility(View.INVISIBLE);
 			}
 
 			// Add button to row
@@ -273,7 +266,7 @@ public class CandiSummary extends Activity {
 		super.onBackPressed();
 		overridePendingTransition(R.anim.fade_in_medium, R.anim.summary_out);
 
-		//overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		// overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
 	}
 
 }

@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.controllers.R;
+import com.proxibase.aircandi.activities.R;
 import com.proxibase.aircandi.models.Post;
 import com.proxibase.aircandi.utils.DateUtils;
 import com.proxibase.sdk.android.proxi.service.ProxibaseRunner;

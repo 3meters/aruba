@@ -1,6 +1,6 @@
 package com.proxibase.aircandi.activities;
 
-import com.proxibase.aircandi.controllers.R;
+import com.proxibase.aircandi.activities.R;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

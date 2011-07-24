@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.controllers;
+package com.proxibase.aircandi.activities;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.proxibase.sdk.android.proxi.consumer.ProxiEntity;
+import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
@@ -27,7 +27,7 @@ public class ProxiHandlerManager {
 		mActivity = activity;
 	}
 
-	public boolean startProxiHandler(String proxiHandlerAction, ProxiEntity proxiEntity) {
+	public boolean startProxiHandler(String proxiHandlerAction, EntityProxy proxiEntity) {
 
 		Intent intent = new Intent();
 		intent.setAction(proxiHandlerAction);
