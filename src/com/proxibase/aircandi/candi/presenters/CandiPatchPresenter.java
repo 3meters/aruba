@@ -45,6 +45,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.GestureDetector.SimpleOnGestureListener;
 
+import com.proxibase.aircandi.activities.CandiSearchActivity;
 import com.proxibase.aircandi.candi.camera.ChaseCamera;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiModelBuilder;
@@ -65,12 +66,10 @@ import com.proxibase.aircandi.candi.views.CandiViewBuilder;
 import com.proxibase.aircandi.candi.views.IView;
 import com.proxibase.aircandi.candi.views.ZoneView;
 import com.proxibase.aircandi.candi.views.ZoneViewBuilder;
-import com.proxibase.aircandi.controllers.Aircandi;
-import com.proxibase.aircandi.controllers.CandiSearchActivity;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Utilities;
-import com.proxibase.sdk.android.proxi.consumer.ProxiEntity;
+import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.util.UtilitiesUI;
 
 public class CandiPatchPresenter implements Observer {
@@ -165,7 +164,7 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	public Scene initScene() {
-		Utilities.Log(Aircandi.APP_NAME, COMPONENT_NAME, "initScene called");
+		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "initScene called");
 
 		final CandiScene scene = new CandiScene(3) {
 
@@ -256,7 +255,7 @@ public class CandiPatchPresenter implements Observer {
 					}
 
 					if (pSceneTouchEvent.isActionUp()) {
-						Utilities.Log(Aircandi.APP_NAME, "Tricorder", "MoveEntityNearest: From Scene Touch");
+						Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "MoveEntityNearest: From Scene Touch");
 						ZoneModel nearestZone = getNearestZone(mCameraTargetSprite.getX(), false);
 						if (nearestZone != null) {
 							mCandiPatchModel.setCandiModelFocused(nearestZone.getCandiesCurrent().get(0));
@@ -290,16 +289,16 @@ public class CandiPatchPresenter implements Observer {
 
 	@Override
 	public void update(Observable observable, Object data) {
-		Utilities.Log(Aircandi.APP_NAME, "CandiPatchPresenter", "Update call from observable: " + observable.toString());
+		Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "Update call from observable: " + observable.toString());
 	}
 
-	public void updateCandiData(List<ProxiEntity> proxiEntities, boolean fullUpdate) {
+	public void updateCandiData(List<EntityProxy> proxiEntities, boolean fullUpdate) {
 		/*
 		 * Primary entry point from the host activity. This is a primary trigger
 		 * that should update the model and ripple to the views.
 		 */
 		if (fullUpdate) {
-			Utilities.Log(Aircandi.APP_NAME, COMPONENT_NAME, "Performing full update...");
+			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Performing full update...");
 			mFullUpdateInProgress = true;
 			mCandiViews.clear();
 			mZoneViews.clear();
@@ -311,14 +310,14 @@ public class CandiPatchPresenter implements Observer {
 
 		}
 
-		for (ProxiEntity proxiEntity : proxiEntities) {
+		for (EntityProxy entityProxy : proxiEntities) {
 
-			CandiModel candiModel = CandiModelBuilder.createCandiModel(proxiEntity);
+			CandiModel candiModel = CandiModelBuilder.createCandiModel(entityProxy);
 			candiModel.setDisplayExtra(mDisplayExtras);
 
 			if (mCandiPatchModel.containsCandiModel(candiModel)) {
 				mCandiPatchModel.updateCandiModel(candiModel);
-				candiModel = mCandiPatchModel.getCandiModels().getByKey(candiModel.getProxiEntity().entityId);
+				candiModel = mCandiPatchModel.getCandiModels().getByKey(candiModel.getEntityProxy().entityProxyId);
 				ensureCandiView(candiModel);
 			}
 			else {
@@ -335,7 +334,7 @@ public class CandiPatchPresenter implements Observer {
 		// Re-root on the current group if it still exists
 		if (!fullUpdate && rootPrevious != null && !rootPrevious.isSuperRoot()) {
 			for (CandiModel candiModel : mCandiPatchModel.getCandiRootNext().getChildren())
-				if (candiModel.getProxiEntity().entityType.equals(rootPrevious.getProxiEntity().entityType)) {
+				if (candiModel.getEntityProxy().entityType.equals(rootPrevious.getEntityProxy().entityType)) {
 					if (candiModel.isVisibleNext()) {
 						navigateModel(candiModel, false);
 					}
@@ -392,9 +391,9 @@ public class CandiPatchPresenter implements Observer {
 
 	private IView ensureCandiView(CandiModel candiModel) {
 
-		if (!candiModel.getProxiEntity().isHidden && candiModel.countObservers() == 0) {
+		if (!candiModel.getEntityProxy().isHidden && candiModel.countObservers() == 0) {
 
-			Utilities.Log(Aircandi.APP_NAME, COMPONENT_NAME, "Making CandiView: " + candiModel.getProxiEntity().label);
+			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Making CandiView: " + candiModel.getEntityProxy().label);
 
 			// Create view for model
 			CandiView candiView = CandiViewBuilder.createCandiView(candiModel, CandiPatchPresenter.this, new CandiView.OnCandiViewTouchListener() {
@@ -434,7 +433,7 @@ public class CandiPatchPresenter implements Observer {
 
 	private void doCandiViewSingleTap(IView candiView) {
 		final CandiModel candiModel = (CandiModel) candiView.getModel();
-		Utilities.Log(Aircandi.APP_NAME, "CandiPatchPresenter", "SingleTap triggered: " + candiModel.getProxiEntity().label);
+		Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "SingleTap triggered: " + candiModel.getEntityProxy().label);
 
 		if (!mIgnoreInput) {
 			mCandiPatchModel.setCandiModelFocused(candiModel);
@@ -477,7 +476,7 @@ public class CandiPatchPresenter implements Observer {
 
 	private void doCandiViewDoubleTap(IView candiView) {
 		final CandiModel candiModel = (CandiModel) candiView.getModel();
-		Utilities.Log(Aircandi.APP_NAME, "CandiPatchPresenter", "DoubleTap triggered: " + candiModel.getProxiEntity().label);
+		Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "DoubleTap triggered: " + candiModel.getEntityProxy().label);
 
 		float fromScale = mCameraTargetSprite.getScaleX();
 		float toScale = 1;
@@ -498,7 +497,7 @@ public class CandiPatchPresenter implements Observer {
 	private IView ensureZoneView(ZoneModel zoneModel) {
 
 		if (zoneModel.isVisibleNext() && zoneModel.countObservers() == 0) {
-			Utilities.Log(Aircandi.APP_NAME, COMPONENT_NAME, "Making ZoneView: " + zoneModel.getTitleText());
+			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Making ZoneView: " + zoneModel.getTitleText());
 
 			// Create view for model
 			ZoneView zoneView = ZoneViewBuilder.createZoneView(zoneModel, CandiPatchPresenter.this);
@@ -527,7 +526,7 @@ public class CandiPatchPresenter implements Observer {
 
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
 			if (zoneModel.getCandiesNext().size() > 1)
-				zoneModel.setTitleText(zoneModel.getCandiesNext().get(0).getProxiEntity().entityTypeLabel);
+				zoneModel.setTitleText(zoneModel.getCandiesNext().get(0).getEntityProxy().entityHandler.label);
 
 			Transition transition = zoneModel.getTransition();
 			if (transition == Transition.FadeIn)
@@ -552,14 +551,14 @@ public class CandiPatchPresenter implements Observer {
 						Position positionNext = candiModelCurrent.getZoneNext().getChildPositionNext(candiModelCurrent);
 
 						if (transition == Transition.FadeOut) {
-							Utilities.Log(Aircandi.APP_NAME, "CandiPatchPresenter", "FadeOut " + candiModelCurrent.getTitleText());
+							Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "FadeOut " + candiModelCurrent.getTitleText());
 							candiModelCurrent.getModifiers().addLast(new AlphaModifier(1.0f, 1.0f, 0.0f));
 							needDelay = true;
 						}
 						else if (transition == Transition.Move) {
 
 							candiModelCurrent.setBodyOnly(positionNext.scale != 1);
-							Utilities.Log(Aircandi.APP_NAME, "CandiPatchPresenter", "Move " + candiModelCurrent.getTitleText()
+							Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "Move " + candiModelCurrent.getTitleText()
 																					+ " from: "
 																					+ String.valueOf(positionCurrent.x)
 																					+ ","
@@ -587,7 +586,7 @@ public class CandiPatchPresenter implements Observer {
 						else if (transition == Transition.Shift) {
 
 							candiModelCurrent.setBodyOnly(positionNext.scale != 1);
-							Utilities.Log(Aircandi.APP_NAME, "CandiPatchPresenter", "Shift " + candiModelCurrent.getTitleText()
+							Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "Shift " + candiModelCurrent.getTitleText()
 																					+ " from: "
 																					+ String.valueOf(positionCurrent.x)
 																					+ ","
@@ -624,7 +623,7 @@ public class CandiPatchPresenter implements Observer {
 						Position positionNext = candiModelNext.getZoneNext().getChildPositionNext(candiModelNext);
 
 						if (transition == Transition.FadeIn) {
-							Utilities.Log(Aircandi.APP_NAME, "CandiPatchPresenter", "FadeIn " + candiModelNext.getTitleText());
+							Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "FadeIn " + candiModelNext.getTitleText());
 
 							CandiView candiView = (CandiView) getViewForModel(candiModelNext);
 							candiModelNext.setBodyOnly(positionNext.scale != 1);
@@ -641,7 +640,7 @@ public class CandiPatchPresenter implements Observer {
 
 							candiModelNext.setBodyOnly(positionNext.scale != 1);
 
-							Utilities.Log(Aircandi.APP_NAME, "CandiPatchPresenter", "Move " + candiModelNext.getTitleText()
+							Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "Move " + candiModelNext.getTitleText()
 																					+ " from: "
 																					+ String.valueOf(positionCurrent.x)
 																					+ ","
@@ -904,7 +903,7 @@ public class CandiPatchPresenter implements Observer {
 
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
-			Utilities.Log(Aircandi.APP_NAME, "CandiPatchPresenter", "Detected double tap");
+			Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "Detected double tap");
 			return false;
 		}
 

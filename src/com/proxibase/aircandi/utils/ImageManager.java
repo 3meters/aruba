@@ -12,7 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.Config;
 import android.os.AsyncTask;
 
-import com.proxibase.aircandi.controllers.Aircandi;
+import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.sdk.android.util.UtilitiesUI;
 
 /*
@@ -102,7 +102,7 @@ public class ImageManager {
 			Bitmap bitmap = UtilitiesUI.getImage(mImageRequest.imageUrl);
 			if (bitmap != null) {
 
-				Utilities.Log(Aircandi.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageId + "'");
+				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageId + "'");
 				
 				// Scale if needed
 				if (mImageRequest.widthMinimum > 0 && bitmap.getWidth() < mImageRequest.widthMinimum) {
@@ -128,7 +128,7 @@ public class ImageManager {
 				return bitmap;
 			}
 			else {
-				Utilities.Log(Aircandi.APP_NAME, "ImageManager", "Image download failed for image '" + mImageRequest.imageId + "'");
+				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download failed for image '" + mImageRequest.imageId + "'");
 				return null;
 			}
 		}

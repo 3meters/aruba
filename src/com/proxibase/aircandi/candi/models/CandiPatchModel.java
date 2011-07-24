@@ -7,11 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 
-import org.anddev.andengine.util.Transformation;
-
 import com.proxibase.aircandi.utils.CandiList;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
-import com.proxibase.sdk.android.proxi.consumer.ProxiEntity;
+import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 /**
  * @author Jayma
@@ -90,7 +88,7 @@ public class CandiPatchModel extends Observable {
 		mCandiModels.add(candiModel);
 
 		// Only assign to a zone if the model is visible
-		if (candiModel.getProxiEntity().isHidden) {
+		if (candiModel.getEntityProxy().isHidden) {
 			candiModel.setVisibleCurrent(false);
 			candiModel.setVisibleNext(false);
 		}
@@ -150,7 +148,7 @@ public class CandiPatchModel extends Observable {
 		else {
 			// Restore 'normal' visibility
 			for (CandiModel candiModel : mCandiModels)
-				if (candiModel.getProxiEntity().isHidden) {
+				if (candiModel.getEntityProxy().isHidden) {
 					candiModel.setVisibleNext(false);
 					candiModel.setTouchAreaActive(false);
 				}
@@ -266,10 +264,12 @@ public class CandiPatchModel extends Observable {
 
 			// We have an active group
 			if (candiGroup != null)
-				if (candiModel.getProxiEntity().entityType.equals(candiGroup.getProxiEntity().entityType)) {
+				if (candiModel.getEntityProxy().entityType.equals(candiGroup.getEntityProxy().entityType)) {
 					candiModel.setGrouped(true);
 					candiModel.setParent(candiGroup);
 					candiGroup.getChildren().add(candiModel);
+					if (i == candiModelCount - 1)
+						candiRoot.getChildren().add(candiGroup);
 					continue;
 				}
 				else {
@@ -281,13 +281,13 @@ public class CandiPatchModel extends Observable {
 			if (i + 1 < candiModelCount) {
 
 				// Activate a new group if this one and the next on are the same type
-				if (candiModel.getProxiEntity().entityType.equals(mCandiModels.get(i + 1).getProxiEntity().entityType)) {
+				if (candiModel.getEntityProxy().entityType.equals(mCandiModels.get(i + 1).getEntityProxy().entityType)) {
 
-					ProxiEntity proxiEntity = new ProxiEntity();
-					proxiEntity.entityType = candiModel.getProxiEntity().entityType;
-					proxiEntity.label = candiModel.getProxiEntity().entityTypeLabel;
+					EntityProxy entityProxy = new EntityProxy();
+					entityProxy.entityType = candiModel.getEntityProxy().entityType;
+					entityProxy.label = candiModel.getEntityProxy().entityHandler.label;
 
-					candiGroup = CandiModelBuilder.createCandiModel(proxiEntity);
+					candiGroup = CandiModelBuilder.createCandiModel(entityProxy);
 					candiGroup.setParent(candiRoot);
 					candiModel.setGrouped(true);
 					candiModel.setParent(candiGroup);
@@ -306,11 +306,11 @@ public class CandiPatchModel extends Observable {
 
 	private void doUpdateCandiModel(CandiModel candiModelUpdate) {
 
-		if (mCandiModels.containsKey(candiModelUpdate.getProxiEntity().entityId)) {
+		if (mCandiModels.containsKey(candiModelUpdate.getEntityProxy().entityProxyId)) {
 
-			CandiModel candiModelManaged = mCandiModels.getByKey(candiModelUpdate.getProxiEntity().entityId);
+			CandiModel candiModelManaged = mCandiModels.getByKey(candiModelUpdate.getEntityProxy().entityProxyId);
 
-			if (candiModelUpdate.getProxiEntity().isHidden)
+			if (candiModelUpdate.getEntityProxy().isHidden)
 				candiModelManaged.setVisibleNext(false);
 			else
 				candiModelManaged.setVisibleNext(true);
@@ -320,8 +320,8 @@ public class CandiPatchModel extends Observable {
 
 			candiModelManaged.setDisplayExtra(candiModelUpdate.getDisplayExtra());
 
-			Beacon beaconManaged = candiModelManaged.getProxiEntity().beacon;
-			Beacon beaconUpdate = candiModelUpdate.getProxiEntity().beacon;
+			Beacon beaconManaged = candiModelManaged.getEntityProxy().beacon;
+			Beacon beaconUpdate = candiModelUpdate.getEntityProxy().beacon;
 
 			beaconManaged.detectedLastPass = beaconUpdate.detectedLastPass;
 			beaconManaged.levelDb = beaconUpdate.levelDb;
@@ -378,7 +378,7 @@ public class CandiPatchModel extends Observable {
 	}
 
 	public boolean containsCandiModel(CandiModel candiModel) {
-		boolean contains = mCandiModels.containsKey(candiModel.getProxiEntity().entityId);
+		boolean contains = mCandiModels.containsKey(candiModel.getEntityProxy().entityProxyId);
 		return contains;
 	}
 
@@ -463,12 +463,12 @@ public class CandiPatchModel extends Observable {
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {
 
-			if (!object1.getProxiEntity().beacon.isLocalOnly && object2.getProxiEntity().beacon.isLocalOnly)
+			if (!object1.getEntityProxy().beacon.isLocalOnly && object2.getEntityProxy().beacon.isLocalOnly)
 				return -1;
-			else if (!object2.getProxiEntity().beacon.isLocalOnly && object1.getProxiEntity().beacon.isLocalOnly)
+			else if (!object2.getEntityProxy().beacon.isLocalOnly && object1.getEntityProxy().beacon.isLocalOnly)
 				return 1;
 			else
-				return object2.getProxiEntity().beacon.getAvgBeaconLevel() - object1.getProxiEntity().beacon.getAvgBeaconLevel();
+				return object2.getEntityProxy().beacon.getAvgBeaconLevel() - object1.getEntityProxy().beacon.getAvgBeaconLevel();
 		}
 	}
 
@@ -477,19 +477,19 @@ public class CandiPatchModel extends Observable {
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {
 
-			if (!object1.getProxiEntity().beacon.isLocalOnly && object2.getProxiEntity().beacon.isLocalOnly)
+			if (!object1.getEntityProxy().beacon.isLocalOnly && object2.getEntityProxy().beacon.isLocalOnly)
 				return -1;
-			else if (!object2.getProxiEntity().beacon.isLocalOnly && object1.getProxiEntity().beacon.isLocalOnly)
+			else if (!object2.getEntityProxy().beacon.isLocalOnly && object1.getEntityProxy().beacon.isLocalOnly)
 				return 1;
 			else {
-				if ((object2.getProxiEntity().discoveryTime.getTime() / 100) - (object1.getProxiEntity().discoveryTime.getTime() / 100) < 0)
+				if ((object2.getEntityProxy().discoveryTime.getTime() / 100) - (object1.getEntityProxy().discoveryTime.getTime() / 100) < 0)
 					return -1;
-				else if ((object2.getProxiEntity().discoveryTime.getTime() / 100) - (object1.getProxiEntity().discoveryTime.getTime() / 100) > 0)
+				else if ((object2.getEntityProxy().discoveryTime.getTime() / 100) - (object1.getEntityProxy().discoveryTime.getTime() / 100) > 0)
 					return 1;
 				else {
-					if (object2.getProxiEntity().label.compareToIgnoreCase(object1.getProxiEntity().label) < 0)
+					if (object2.getEntityProxy().label.compareToIgnoreCase(object1.getEntityProxy().label) < 0)
 						return 1;
-					else if (object2.getProxiEntity().label.compareToIgnoreCase(object1.getProxiEntity().label) > 0)
+					else if (object2.getEntityProxy().label.compareToIgnoreCase(object1.getEntityProxy().label) > 0)
 						return -1;
 					else
 						return 0;
@@ -503,19 +503,19 @@ public class CandiPatchModel extends Observable {
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {
 
-			if (!object1.getProxiEntity().beacon.isLocalOnly && object2.getProxiEntity().beacon.isLocalOnly)
+			if (!object1.getEntityProxy().beacon.isLocalOnly && object2.getEntityProxy().beacon.isLocalOnly)
 				return -1;
-			else if (!object2.getProxiEntity().beacon.isLocalOnly && object1.getProxiEntity().beacon.isLocalOnly)
+			else if (!object2.getEntityProxy().beacon.isLocalOnly && object1.getEntityProxy().beacon.isLocalOnly)
 				return 1;
 			else {
-				if ((object2.getProxiEntity().visibleTime.getTime() / 100) - (object1.getProxiEntity().visibleTime.getTime() / 100) < 0)
+				if ((object2.getEntityProxy().visibleTime.getTime() / 100) - (object1.getEntityProxy().visibleTime.getTime() / 100) < 0)
 					return -1;
-				else if ((object2.getProxiEntity().visibleTime.getTime() / 100) - (object1.getProxiEntity().visibleTime.getTime() / 100) > 0)
+				else if ((object2.getEntityProxy().visibleTime.getTime() / 100) - (object1.getEntityProxy().visibleTime.getTime() / 100) > 0)
 					return 1;
 				else {
-					if (object2.getProxiEntity().label.compareToIgnoreCase(object1.getProxiEntity().label) < 0)
+					if (object2.getEntityProxy().label.compareToIgnoreCase(object1.getEntityProxy().label) < 0)
 						return 1;
-					else if (object2.getProxiEntity().label.compareToIgnoreCase(object1.getProxiEntity().label) > 0)
+					else if (object2.getEntityProxy().label.compareToIgnoreCase(object1.getEntityProxy().label) > 0)
 						return -1;
 					else
 						return 0;
@@ -529,7 +529,7 @@ public class CandiPatchModel extends Observable {
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {
 
-			return object1.getProxiEntity().entityType.compareToIgnoreCase(object2.getProxiEntity().entityType);
+			return object1.getEntityProxy().entityType.compareToIgnoreCase(object2.getEntityProxy().entityType);
 		}
 	}
 

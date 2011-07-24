@@ -22,4 +22,15 @@ public interface CandiConstants {
 	public static final int		VERTEX_INDEX_Y					= 1;
 	public static final String	PATH_IMAGECACHE					= "/imagecache/aircandi";
 	public static final long	TOUCH_MAX_TIME					= 500;
+
+	public static final int		TWO_MINUTES						= 1000 * 60 * 2;
+	public static final int		FIVE_MINUTES					= 1000 * 60 * 5;
+	public static final String	URL_AIRCANDI_SERVICE_ODATA		= "http://dev.aircandi.com/airodata.svc/";
+	public static final String	URL_AIRCANDI_SERVICE			= "http://dev.aircandi.com/airlogic.asmx/";
+	public static final String	URL_AIRCANDI_BLOG				= "http://devblog.proxibase.com/";
+	public static final String	URL_AIRCANDI_MEDIA				= "https://s3.amazonaws.com/";
+
+	public static final boolean	MODE_DEBUG						= true;
+	public static final String	APP_NAME						= "Aircandi";
+
 }

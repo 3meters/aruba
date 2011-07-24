@@ -8,7 +8,6 @@ import org.anddev.andengine.opengl.buffer.BufferObjectManager;
 import org.anddev.andengine.opengl.util.GLHelper;
 
 import com.proxibase.aircandi.candi.utils.CandiConstants;
-import com.proxibase.aircandi.controllers.Aircandi;
 import com.proxibase.aircandi.utils.Utilities;
 
 public class CandiRectangle extends Rectangle {
@@ -26,7 +25,7 @@ public class CandiRectangle extends Rectangle {
 		final float rotation = this.mRotation;
 
 		if (rotation != 0) {
-			Utilities.Log(Aircandi.APP_NAME, "Tricorder", "Sprite: rotation = " + String.valueOf(rotation));
+			Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Sprite: rotation = " + String.valueOf(rotation));
 
 			final float rotationCenterX = this.mRotationCenterX;
 			final float rotationCenterY = this.mRotationCenterY;

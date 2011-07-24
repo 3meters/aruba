@@ -30,7 +30,6 @@ import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
-import com.proxibase.aircandi.controllers.Aircandi;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.Utilities;
 
@@ -167,7 +166,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		final float rotation = this.mRotation;
 
 		if (rotation != 0) {
-			Utilities.Log(Aircandi.APP_NAME, "Tricorder", "Sprite: rotation = " + String.valueOf(rotation));
+			Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Sprite: rotation = " + String.valueOf(rotation));
 
 			final float rotationCenterX = this.mRotationCenterX;
 			final float rotationCenterY = this.mRotationCenterY;

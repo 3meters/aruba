@@ -2,7 +2,7 @@ package com.proxibase.aircandi.models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.proxibase.aircandi.controllers.Aircandi;
+import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
 /**
@@ -38,7 +38,7 @@ public class Post
 	
 	public String 	getPermaLink()
 	{
-		return String.format("{0}post.aspx?id={1}", Aircandi.URL_AIRCANDI_BLOG, this.postId);
+		return String.format("{0}post.aspx?id={1}", CandiConstants.URL_AIRCANDI_BLOG, this.postId);
 	}
 
 	public String getUriOdata()

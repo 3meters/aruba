@@ -10,13 +10,13 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import com.proxibase.aircandi.controllers.Aircandi;
-
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.widget.ImageView;
+
+import com.proxibase.aircandi.candi.utils.CandiConstants;
 
 public class DrawableManager {
 
@@ -35,12 +35,12 @@ public class DrawableManager {
 			return (Drawable) drawableMap.get(urlString);
 		}
 
-		Utilities.Log(Aircandi.APP_NAME, this.getClass().getSimpleName(), "Image url:" + urlString);
+		Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Image url:" + urlString);
 		try {
 			InputStream is = fetch(urlString);
 			Drawable drawable = Drawable.createFromStream(is, "src");
 			drawableMap.put(urlString, drawable);
-			Utilities.Log(Aircandi.APP_NAME, this.getClass().getSimpleName(), "got a thumbnail drawable: " + drawable.getBounds()
+			Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "got a thumbnail drawable: " + drawable.getBounds()
 													+ ", "
 													+ drawable.getIntrinsicHeight()
 													+ ","

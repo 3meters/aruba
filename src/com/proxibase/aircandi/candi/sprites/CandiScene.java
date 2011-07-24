@@ -8,6 +8,7 @@ import com.proxibase.aircandi.candi.views.BaseView;
 
 public class CandiScene extends Scene {
 
+	@SuppressWarnings("deprecation")
 	public CandiScene(int pLayerCount) {
 		super(pLayerCount);
 	}

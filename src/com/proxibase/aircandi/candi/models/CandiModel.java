@@ -6,7 +6,7 @@ import org.anddev.andengine.entity.modifier.IEntityModifier;
 
 import com.proxibase.aircandi.candi.models.ZoneModel.Position;
 import com.proxibase.aircandi.utils.CandiList;
-import com.proxibase.sdk.android.proxi.consumer.ProxiEntity;
+import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 /**
  * @author Jayma
@@ -25,7 +25,7 @@ public class CandiModel extends BaseModel {
 		None, Level, Tag, Time
 	}
 
-	private ProxiEntity		mProxiEntity		= null;
+	private EntityProxy		mEntityProxy		= null;
 	private ZoneModel		mZoneNext			= null;
 	private ZoneModel		mZoneCurrent		= null;
 	private DisplayExtra	mDisplayExtra		= DisplayExtra.None;
@@ -37,15 +37,15 @@ public class CandiModel extends BaseModel {
 	private String			mBodyImageUrl		= "";
 
 	public CandiModel() {
-		this(new ProxiEntity());
+		this(new EntityProxy());
 	}
 
-	public CandiModel(ProxiEntity entity) {
+	public CandiModel(EntityProxy entityProxy) {
 		super();
-		this.setProxiEntity(entity);
-		this.setTitleText(entity.label);
-		this.setBodyImageId(entity.pointResourceId);
-		this.setBodyImageUrl(entity.imageUrl);
+		this.setEntityProxy(entityProxy);
+		this.setTitleText(entityProxy.label);
+		this.setBodyImageId(entityProxy.imageUri);
+		this.setBodyImageUrl(entityProxy.imageUri);
 	}
 
 	public Transition getTransition() {
@@ -75,8 +75,8 @@ public class CandiModel extends BaseModel {
 		mZoneCurrent = mZoneNext;
 	}
 
-	public ProxiEntity getProxiEntity() {
-		return this.mProxiEntity;
+	public EntityProxy getEntityProxy() {
+		return this.mEntityProxy;
 	}
 
 	public DisplayExtra getDisplayExtra() {
@@ -88,13 +88,13 @@ public class CandiModel extends BaseModel {
 		String title = super.getTitleText();
 
 		if (mDisplayExtra == DisplayExtra.Level) {
-			title += " " + String.valueOf(getProxiEntity().beacon.getAvgBeaconLevel());
+			title += " " + String.valueOf(getEntityProxy().beacon.getAvgBeaconLevel());
 		}
 		else if (mDisplayExtra == DisplayExtra.Tag) {
-			title += " " + String.valueOf(getProxiEntity().beacon.beaconId);
+			title += " " + String.valueOf(getEntityProxy().beacon.beaconId);
 		}
 		else if (mDisplayExtra == DisplayExtra.Time) {
-			title += " " + String.valueOf(getProxiEntity().beacon.discoveryTime.getTime() / 100);
+			title += " " + String.valueOf(getEntityProxy().beacon.discoveryTime.getTime() / 100);
 		}
 		return title;
 	}
@@ -136,8 +136,8 @@ public class CandiModel extends BaseModel {
 		this.mModifiers = modifiers;
 	}
 
-	public void setProxiEntity(ProxiEntity proxiEntity) {
-		this.mProxiEntity = proxiEntity;
+	public void setEntityProxy(EntityProxy entityProxy) {
+		this.mEntityProxy = entityProxy;
 		super.setChanged();
 	}
 
@@ -187,7 +187,7 @@ public class CandiModel extends BaseModel {
 		}
 		CandiModel that = (CandiModel) other;
 
-		return this.mProxiEntity.entityId.equals(that.mProxiEntity.entityId);
+		return this.mEntityProxy.entityProxyId.equals(that.mEntityProxy.entityProxyId);
 
 	}
 
@@ -195,7 +195,7 @@ public class CandiModel extends BaseModel {
 	public int hashCode() {
 
 		int result = 100;
-		result = 31 * result + this.mProxiEntity.entityId.hashCode();
+		result = 31 * result + this.mEntityProxy.entityProxyId.hashCode();
 		return result;
 	}
 

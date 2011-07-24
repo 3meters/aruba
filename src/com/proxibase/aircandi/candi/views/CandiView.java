@@ -36,7 +36,6 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiAnimatedSprite;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
-import com.proxibase.aircandi.controllers.Aircandi;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Utilities;
@@ -417,7 +416,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 	protected void loadBodyTextureSources() {
 		if (!ImageManager.getImageManager().hasImage(mCandiModel.getBodyImageId())) {
 
-			Utilities.Log(Aircandi.APP_NAME, "CandiView", "Image cache miss - start network fetch: " + mCandiModel.getBodyImageId());
+			Utilities.Log(CandiConstants.APP_NAME, "CandiView", "Image cache miss - start network fetch: " + mCandiModel.getBodyImageId());
 			ImageRequest imageRequest = new ImageManager.ImageRequest();
 			imageRequest.imageId = mCandiModel.getBodyImageId();
 			imageRequest.imageUrl = mCandiModel.getBodyImageUrl();
@@ -429,7 +428,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 				@Override
 				public void onImageReady(Bitmap bitmap) {
 
-					Utilities.Log(Aircandi.APP_NAME, "CandiView", "Image fetched: " + mCandiModel.getBodyImageId());
+					Utilities.Log(CandiConstants.APP_NAME, "CandiView", "Image fetched: " + mCandiModel.getBodyImageId());
 					updateBodySprite(bitmap);
 					swapImageForPlaceholder();
 				}
@@ -440,7 +439,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 		}
 		else {
 
-			Utilities.Log(Aircandi.APP_NAME, "CandiView", "Image cache hit: " + mCandiModel.getBodyImageId());
+			Utilities.Log(CandiConstants.APP_NAME, "CandiView", "Image cache hit: " + mCandiModel.getBodyImageId());
 			Bitmap bitmap = ImageManager.getImageManager().getImage(mCandiModel.getBodyImageId());
 
 			if (bitmap != null) {
@@ -472,7 +471,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 		 * Completely remove all resources associated with this sprite.
 		 * This should only be called from the engine update thread.
 		 */
-		Utilities.Log(Aircandi.APP_NAME, "ProxiTile", "Unloading resources: " + mCandiModel.getProxiEntity().label);
+		Utilities.Log(CandiConstants.APP_NAME, "ProxiTile", "Unloading resources: " + mCandiModel.getEntityProxy().label);
 
 		if (mProgressSprite != null)
 			mProgressSprite.removeResources();
