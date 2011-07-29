@@ -12,7 +12,7 @@ import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.utils.Utilities;
 
 public class CandiSprite extends Sprite {
-
+	
 	public CandiSprite(final float x, final float y, final TextureRegion textureRegion) {
 		super(x, y, textureRegion);
 	}
@@ -54,10 +54,10 @@ public class CandiSprite extends Sprite {
 	}
 
 	@Override
-	public void setAlpha(float alpha) {
+	public void setAlpha(float alpha) {		
 		super.setAlpha(alpha);
 		super.setColor(alpha, alpha, alpha);
-
+		
 		for (int i = 0; i < getChildCount(); i++) {
 			getChild(i).setAlpha(alpha);
 			getChild(i).setColor(alpha, alpha, alpha);

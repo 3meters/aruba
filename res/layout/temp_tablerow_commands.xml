@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableRow
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/Stream_Button_Container"
+	android:id="@+id/Command_Button_Container"
 	android:layout_height="wrap_content"
 	android:background="@android:color/transparent">
 </TableRow>

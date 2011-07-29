@@ -18,7 +18,7 @@ import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 public class CandiModel extends BaseModel {
 
 	public static enum Transition {
-		None, FadeIn, FadeOut, Move, Shift
+		None, FadeIn, FadeOut, OverflowIn, OverflowOut, Move, Shift
 	}
 
 	public static enum DisplayExtra {
@@ -35,6 +35,8 @@ public class CandiModel extends BaseModel {
 	private boolean			mRookie				= true;
 	private String			mBodyImageId		= "";
 	private String			mBodyImageUrl		= "";
+	private boolean			mOverflowCurrent	= false;
+	private boolean			mOverflowNext		= false;
 
 	public CandiModel() {
 		this(new EntityProxy());
@@ -51,10 +53,12 @@ public class CandiModel extends BaseModel {
 	public Transition getTransition() {
 
 		Transition transition = Transition.None;
-		if (!this.isVisibleCurrent() && this.isVisibleNext())
+		if ((!this.isVisibleCurrent() || this.isOverflowCurrent()) && (this.isVisibleNext() && !this.isOverflowNext())) {
 			transition = Transition.FadeIn;
-		else if (this.isVisibleCurrent() && !this.isVisibleNext())
+		}
+		else if ((this.isVisibleCurrent() && !this.isOverflowCurrent()) && (!this.isVisibleNext() || this.isOverflowNext())) {
 			transition = Transition.FadeOut;
+		}
 		else if (this.isVisibleNext()) {
 			if (this.mZoneCurrent.getZoneIndex() != this.mZoneNext.getZoneIndex())
 				transition = Transition.Move;
@@ -73,6 +77,7 @@ public class CandiModel extends BaseModel {
 		super.shiftToNext();
 
 		mZoneCurrent = mZoneNext;
+		mOverflowCurrent = mOverflowNext;
 	}
 
 	public EntityProxy getEntityProxy() {
@@ -205,5 +210,21 @@ public class CandiModel extends BaseModel {
 
 	public boolean isRookie() {
 		return mRookie;
+	}
+
+	public void setOverflowCurrent(boolean overflowCurrent) {
+		this.mOverflowCurrent = overflowCurrent;
+	}
+
+	public boolean isOverflowCurrent() {
+		return mOverflowCurrent;
+	}
+
+	public void setOverflowNext(boolean overflowNext) {
+		this.mOverflowNext = overflowNext;
+	}
+
+	public boolean isOverflowNext() {
+		return mOverflowNext;
 	}
 }

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent">
+	<LinearLayout
+		android:id="@+id/AppHeader"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_alignParentTop="true">
+		<include
+			layout="@layout/temp_application_header" />
+	</LinearLayout>
+	<LinearLayout
+		android:id="@+id/CandiContainer"
+		android:layout_height="fill_parent"
+		android:layout_width="fill_parent"
+		android:gravity="center_vertical"
+		android:clipChildren="false"
+		android:clickable="true"
+		android:onClick="onSummaryViewClick"
+		android:layout_below="@id/AppHeader">
+		<FrameLayout
+			android:id="@+id/CandiSummaryView"
+			android:layout_height="fill_parent"
+			android:layout_width="fill_parent"
+			android:paddingLeft="8dp"
+			android:paddingRight="8dp"
+			android:clickable="true"
+			android:onClick="onSummaryViewClick"
+			android:visibility="visible">
+			<LinearLayout
+				android:layout_height="fill_parent"
+				android:layout_width="fill_parent"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<LinearLayout
+					android:layout_height="fill_parent"
+					android:layout_width="wrap_content"
+					android:layout_weight="0"
+					android:orientation="vertical">
+					<ImageView
+						android:id="@+id/Image"
+						android:layout_gravity="top"
+						android:layout_height="wrap_content"
+						android:layout_width="80dp"
+						android:width="80dp"
+						android:paddingTop="10dp"
+						android:maxWidth="80dp"
+						android:layout_weight="0"
+						android:adjustViewBounds="true"
+						android:clickable="true"
+						android:onClick="onSummaryViewClick"
+						android:scaleType="centerInside" />
+					<ImageView
+						android:id="@+id/ImageReflection"
+						android:layout_gravity="top"
+						android:layout_height="wrap_content"
+						android:layout_width="80dp"
+						android:width="80dp"
+						android:maxWidth="80dp"
+						android:layout_weight="0"
+						android:adjustViewBounds="true"
+						android:scaleType="centerInside"
+						android:clickable="true"
+						android:onClick="onSummaryViewClick" />
+				</LinearLayout>
+				<LinearLayout
+					android:layout_height="fill_parent"
+					android:layout_width="fill_parent"
+					android:layout_weight="1"
+					android:paddingLeft="10dp"
+					android:paddingRight="5dp"
+					android:paddingBottom="10dp"
+					android:orientation="vertical">
+					<TableLayout
+						android:id="@+id/TableLayout0"
+						android:layout_height="wrap_content"
+						android:layout_width="fill_parent"
+						android:padding="6dp"
+						android:layout_margin="6dp"
+						android:layout_alignParentTop="true"
+						android:layout_marginBottom="6dp"
+						android:stretchColumns="1">
+						<TableRow>
+							<TextView
+								android:id="@+id/LabelClaimedByName"
+								android:text="Claimed By:"
+								style="@style/Form_Label" />
+							<TextView
+								android:id="@+id/TextClaimedByName"
+								style="@style/Form_Value" />
+						</TableRow>
+						<TableRow>
+							<TextView
+								android:id="@+id/LabelBssid"
+								android:text="Bssid:"
+								style="@style/Form_Label" />
+							<TextView
+								android:id="@+id/TextBssid"
+								style="@style/Form_Value" />
+						</TableRow>
+						<TableRow>
+							<TextView
+								android:id="@+id/LabelSsid"
+								android:text="Ssid:"
+								style="@style/Form_Label" />
+							<TextView
+								android:id="@+id/TextSsid"
+								style="@style/Form_Value" />
+						</TableRow>
+						<TableRow>
+							<TextView
+								android:id="@+id/LabelSsid"
+								android:text="Level:"
+								style="@style/Form_Label" />
+							<TextView
+								android:id="@+id/TextLevel"
+								style="@style/Form_Value" />
+						</TableRow>
+						<TableRow>
+							<TextView
+								android:id="@+id/LabelName"
+								android:text="Name:"
+								style="@style/Form_Label" />
+							<EditText
+								android:id="@+id/EditLabel"
+								style="@style/Form_Input" />
+						</TableRow>
+					</TableLayout>
+					<LinearLayout
+						android:layout_width="fill_parent"
+						android:layout_height="wrap_content"
+						android:orientation="horizontal">
+						<Button
+							android:id="@+id/SaveButton"
+							android:layout_height="wrap_content"
+							android:layout_width="wrap_content"
+							android:text="Save"
+							android:textSize="@dimen/menuitem_text"
+							android:textColor="#ffffffff"
+							android:height="72dp"
+							android:width="80dp"
+							android:gravity="center"
+							android:layout_marginTop="5dp"
+							android:layout_marginRight="5dp"
+							android:background="@drawable/button_selector"
+							android:clickable="true"
+							android:onClick="onCommandButtonClick" />
+						<Button
+							android:id="@+id/CancelButton"
+							android:layout_height="wrap_content"
+							android:layout_width="wrap_content"
+							android:text="Cancel"
+							android:textSize="@dimen/menuitem_text"
+							android:textColor="#ffffffff"
+							android:height="72dp"
+							android:width="80dp"
+							android:gravity="center"
+							android:layout_marginTop="5dp"
+							android:layout_marginRight="5dp"
+							android:background="@drawable/button_selector"
+							android:clickable="true"
+							android:onClick="onCommandButtonClick" />
+					</LinearLayout>
+				</LinearLayout>
+			</LinearLayout>
+		</FrameLayout>
+	</LinearLayout>
+</RelativeLayout>

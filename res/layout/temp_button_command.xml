@@ -6,10 +6,10 @@
 	android:gravity="bottom"
 	android:clipChildren="false"
 	android:clickable="true"
-	android:onClick="onStreamButtonClick">
+	android:onClick="onCommandButtonClick">
 	<Button
 		xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/StreamButton"
+		android:id="@+id/CommandButton"
 		android:text="Stream"
 		android:textSize="@dimen/menuitem_text"
 		android:textColor="#ffffffff"
@@ -22,9 +22,9 @@
 		android:layout_marginRight="5dp"
 		android:background="@drawable/button_selector"
 		android:clickable="true"
-		android:onClick="onStreamButtonClick" />
+		android:onClick="onCommandButtonClick" />
 	<TextView
-		android:id="@+id/StreamBadge"
+		android:id="@+id/CommandBadge"
 		android:text="10"
 		android:textSize="14sp"
 		android:textColor="@color/badge_text"
@@ -37,5 +37,5 @@
 		android:height="24dp"
 		android:width="24dp"
 		android:clickable="true"
-		android:onClick="onStreamButtonClick" />
+		android:onClick="onCommandButtonClick" />
 </RelativeLayout>

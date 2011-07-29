@@ -44,37 +44,7 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".MediaList"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".InfoList"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".InfoForm"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".NotesList"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".NoteForm"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".NoteEditor"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".PointEditor"
+			android:name=".Claim"
 			android:label="@string/app_name"
 			android:configChanges="orientation">
 		</activity>

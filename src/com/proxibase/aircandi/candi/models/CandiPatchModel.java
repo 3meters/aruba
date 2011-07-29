@@ -244,6 +244,14 @@ public class CandiPatchModel extends Observable {
 				zoneModel.setVisibleNext(true);
 		}
 
+		// Check to see if any zones have overflow
+		for (CandiModel candiModel : mCandiModels) {
+			if (candiModel.getZoneNext().getCandiIndexNext(candiModel) > (ZoneModel.ZONE_CHILDREN_MAX_VISIBLE - 1))
+				candiModel.setOverflowNext(true);
+			else
+				candiModel.setOverflowNext(false);
+		}
+
 		super.setChanged();
 	}
 

@@ -11,6 +11,7 @@ import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveYModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.buffer.BufferObjectManager;
 import org.anddev.andengine.opengl.texture.Texture;
@@ -36,12 +37,12 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiAnimatedSprite;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.utils.AircandiUI;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Utilities;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.OnImageReadyListener;
-import com.proxibase.sdk.android.util.UtilitiesUI;
 
 public class CandiView extends BaseView implements OnGestureListener, OnDoubleTapListener {
 
@@ -64,7 +65,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 	private OnViewTexturesLoadedListener	mTexturesLoadedListener;
 	private OnCandiViewTouchListener		mTouchListener;
 
-	private boolean							mBodyOnly	= false;
+	private boolean							mCollapsed	= false;
 	private float							mBodyTop	= CandiConstants.CANDI_VIEW_TITLE_HEIGHT;
 
 	private GestureDetector					mGestureDetector;
@@ -81,8 +82,12 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 
 		updateTouchArea(mCandiModel.isTouchAreaActive());
 
-		if (mCandiModel.isBodyOnly() != this.mBodyOnly)
-			showBodyOnly(mCandiModel.isBodyOnly(), true, 1);
+		if (mCandiModel.isBodyOnly() != this.mCollapsed) {
+			if (mCandiModel.isBodyOnly())
+				this.showCollapsedAnimated(1);
+			else
+				this.showExpandedAnimated(1);
+		}
 
 		if (mCandiModel.isVisibleNext()) {
 			Transition transition = this.mCandiModel.getTransition();
@@ -196,13 +201,13 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 				makeBodySprite();
 		}
 
-		Bitmap reflectionBitmap = ImageManager.getImageManager().getImage(mCandiModel.getBodyImageId() + ".reflection");
+		Bitmap reflectionBitmap = ImageManager.getInstanceOf().getImage(mCandiModel.getBodyImageId() + ".reflection");
 
 		if (reflectionBitmap == null) {
-			Bitmap sourceBitmap = ImageManager.getImageManager().getImage(mCandiModel.getBodyImageId());
+			Bitmap sourceBitmap = ImageManager.getInstanceOf().getImage(mCandiModel.getBodyImageId());
 			if (sourceBitmap != null) {
-				reflectionBitmap = UtilitiesUI.getReflection(sourceBitmap);
-				ImageManager.getImageManager().getImageCache().put(mCandiModel.getBodyImageId() + ".reflection", reflectionBitmap);
+				reflectionBitmap = AircandiUI.getReflection(sourceBitmap);
+				ImageManager.getInstanceOf().getImageCache().put(mCandiModel.getBodyImageId() + ".reflection", reflectionBitmap);
 			}
 		}
 		if (reflectionBitmap != null) {
@@ -265,113 +270,135 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 		showProgress();
 	}
 
-	public void showBodyOnly(final boolean showBodyOnly, boolean animate, float duration) {
+	public void showCollapsed() {
 
-		mBodyOnly = showBodyOnly;
-		boolean okToAnimate = (animate && this.mCandiModel.isVisibleNext());
-
-		if (showBodyOnly) {
-			/*
-			 * Show body only
-			 */
-			mBodyTop = 0;
-			if (okToAnimate) {
-				mTitleSprite.registerEntityModifier(new AlphaModifier(duration, 1.0f, 0.0f));
+		mTitleSprite.setAlpha(0);
+		mTitleSprite.setVisible(false);
+		if (mBodySprite != null) {
+			mBodySprite.setPosition(0, 0);
+			if (mReflectionSprite != null) {
+				Position position = this.mCandiModel.getZoneNext().getChildPositionNext(this.mCandiModel);
+				mReflectionSprite.setPosition(0, CandiConstants.CANDI_VIEW_BODY_HEIGHT);
+				this.showReflection(position.rowLast, false, 0);
 			}
-			else {
-				mTitleSprite.setAlpha(0);
+		}
+		if (mPlaceholderSprite != null) {
+			mPlaceholderSprite.setPosition(0, 0);
+			mProgressSprite.setPosition((mPlaceholderSprite.getWidth() - mProgressTextureRegion.getTileWidth()) * 0.5f, (mPlaceholderSprite
+					.getHeight() - mProgressTextureRegion.getTileHeight()) * 0.5f);
+		}
+		this.mCollapsed = true;
+	}
+
+	public void showExpanded() {
+
+		mTitleSprite.setAlpha(1);
+		mTitleSprite.setVisible(true);
+		if (mBodySprite != null) {
+			mBodySprite.setPosition(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT);
+			if (mReflectionSprite != null) {
+				Position position = this.mCandiModel.getZoneNext().getChildPositionNext(this.mCandiModel);
+				mReflectionSprite.setPosition(0, CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT);
+				this.showReflection(position.rowLast, false, 0);
+			}
+		}
+		if (mPlaceholderSprite != null) {
+			mPlaceholderSprite.setPosition(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT);
+			mProgressSprite.setPosition((mPlaceholderSprite.getWidth() - mProgressTextureRegion.getTileWidth()) * 0.5f, ((mPlaceholderSprite
+					.getHeight() + CandiConstants.CANDI_VIEW_TITLE_HEIGHT) - mProgressTextureRegion.getTileHeight()) * 0.5f);
+		}
+		this.mCollapsed = false;
+	}
+
+	public void showCollapsedAnimated(float duration) {
+		if (!this.mCandiModel.isVisibleNext())
+			showCollapsed();
+
+		mTitleSprite.registerEntityModifier(new AlphaModifier(duration, 1.0f, 0.0f, new IEntityModifierListener() {
+
+			@Override
+			public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+				mTitleSprite.setVisible(false);
 			}
 
-			if (mBodySprite != null) {
-				if (okToAnimate) {
-					mBodySprite.registerEntityModifier(new MoveYModifier(duration, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBodyTop));
+			@Override
+			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+		}));
+
+		if (mBodySprite != null) {
+			mBodySprite.registerEntityModifier(new MoveYModifier(duration, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0));
+			if (mReflectionSprite != null) {
+				Position position = this.mCandiModel.getZoneNext().getChildPositionNext(this.mCandiModel);
+				this.showReflection(position.rowLast, true, 1);
+				if (!position.rowLast) {
+					mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new DelayModifier(0.5f), new MoveYModifier(0.5f,
+							CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT, CandiConstants.CANDI_VIEW_BODY_HEIGHT)));
 				}
 				else {
-					mBodySprite.setPosition(0, mBodyTop);
-				}
-
-				if (mReflectionSprite != null) {
-					Position position = this.mCandiModel.getZoneNext().getChildPositionNext(this.mCandiModel);
-					if (okToAnimate) {
-						if (!position.rowLast) {
-							mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new AlphaModifier(0.5f, 1.0f, 0f), new MoveYModifier(
-									0.1f, CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT,
-									CandiConstants.CANDI_VIEW_BODY_HEIGHT)));
-						}
-						else {
-							mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new DelayModifier(0.5f), new MoveYModifier(0.1f,
-									CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT,
-									CandiConstants.CANDI_VIEW_BODY_HEIGHT)));
-						}
-					}
-					else {
-						mReflectionSprite.setPosition(0, CandiConstants.CANDI_VIEW_BODY_HEIGHT);
-						if (!position.rowLast)
-							mReflectionSprite.setVisible(false);
-					}
-				}
-			}
-			if (mPlaceholderSprite != null) {
-				if (okToAnimate) {
-					mPlaceholderSprite.registerEntityModifier(new MoveYModifier(duration, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBodyTop));
-				}
-				else {
-					mPlaceholderSprite.setPosition(0, mBodyTop);
-					mProgressSprite.setPosition((mPlaceholderSprite.getWidth() - mProgressTextureRegion.getTileWidth()) * 0.5f, (mPlaceholderSprite
-							.getHeight() - mProgressTextureRegion.getTileHeight()) * 0.5f);
+					mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new DelayModifier(0.5f), new MoveYModifier(0.5f,
+							CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT, CandiConstants.CANDI_VIEW_BODY_HEIGHT)));
 				}
 			}
 		}
-		else {
-			/*
-			 * Show body, title and reflection
-			 */
-			mBodyTop = CandiConstants.CANDI_VIEW_TITLE_HEIGHT;
+		if (mPlaceholderSprite != null) {
+			mPlaceholderSprite.registerEntityModifier(new MoveYModifier(duration, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0));
+		}
+		this.mCollapsed = true;
+	}
 
-			if (okToAnimate) {
-				mTitleSprite.registerEntityModifier(new AlphaModifier(duration, 0.0f, 1.0f));
+	public void showExpandedAnimated(float duration) {
+		if (!this.mCandiModel.isVisibleNext())
+			showExpanded();
+
+		mTitleSprite.setVisible(true);
+		mTitleSprite.registerEntityModifier(new AlphaModifier(duration, 0.0f, 1.0f));
+
+		if (mBodySprite != null) {
+			mBodySprite.registerEntityModifier(new MoveYModifier(duration, 0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT));
+			if (mReflectionSprite != null) {
+				Position position = this.mCandiModel.getZoneNext().getChildPositionNext(this.mCandiModel);
+				this.showReflection(position.rowLast, true, 1);
+				if (position.rowLast) {
+					mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new MoveYModifier(duration * 0.5f,
+							CandiConstants.CANDI_VIEW_BODY_HEIGHT, CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT)));
+				}
+			}
+		}
+		if (mPlaceholderSprite != null) {
+			mPlaceholderSprite.registerEntityModifier(new MoveYModifier(duration, 0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT));
+		}
+		this.mCollapsed = false;
+	}
+
+	public void showReflection(boolean makeVisible, boolean animate, float duration) {
+		if (mReflectionSprite == null)
+			return;
+
+		if (!animate) {
+			mReflectionSprite.setAlpha(makeVisible ? 1 : 0);
+			mReflectionSprite.setVisible(makeVisible);
+		}
+		else {
+			if (makeVisible) {
+				if (!mReflectionSprite.isVisible()) {
+					mReflectionSprite.setAlpha(0);
+					mReflectionSprite.setVisible(true);
+					mReflectionSprite
+							.registerEntityModifier(new SequenceEntityModifier(new DelayModifier(0.5f), new AlphaModifier(0.5f, 0.0f, 1.0f)));
+				}
 			}
 			else {
-				// mTitleSprite.setAlpha(1);
-			}
+				mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new DelayModifier(0.0f), new AlphaModifier(0.4f, 1.0f, 0.0f,
+						new IEntityModifierListener() {
 
-			if (mBodySprite != null) {
+							@Override
+							public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+								mReflectionSprite.setVisible(false);
+							}
 
-				if (okToAnimate) {
-					mBodySprite.registerEntityModifier(new MoveYModifier(duration, 0, mBodyTop));
-				}
-				else {
-					mBodySprite.setPosition(0, mBodyTop);
-				}
-
-				if (mReflectionSprite != null) {
-					Position position = this.mCandiModel.getZoneCurrent().getChildPositionCurrent(this.mCandiModel);
-					if (okToAnimate) {
-						if (!position.rowLast) {
-							mReflectionSprite.registerEntityModifier(new AlphaModifier(duration, 0.0f, 1.0f));
-							mReflectionSprite.setPosition(0, mBodyTop + CandiConstants.CANDI_VIEW_BODY_HEIGHT);
-						}
-						else {
-							mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new MoveYModifier(duration * 0.5f,
-									CandiConstants.CANDI_VIEW_BODY_HEIGHT,
-									CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT)));
-						}
-					}
-					else
-						mReflectionSprite.setPosition(0, mBodyTop + CandiConstants.CANDI_VIEW_BODY_HEIGHT);
-					mReflectionSprite.setVisible(true);
-				}
-			}
-			if (mPlaceholderSprite != null) {
-
-				if (okToAnimate) {
-					mPlaceholderSprite.registerEntityModifier(new MoveYModifier(duration, 0, mBodyTop));
-				}
-				else {
-					mPlaceholderSprite.setPosition(0, mBodyTop);
-					mProgressSprite.setPosition((mPlaceholderSprite.getWidth() - mProgressTextureRegion.getTileWidth()) * 0.5f, ((mPlaceholderSprite
-							.getHeight() + mBodyTop) - mProgressTextureRegion.getTileHeight()) * 0.5f);
-				}
+							@Override
+							public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+						})));
 			}
 		}
 	}
@@ -414,7 +441,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 	}
 
 	protected void loadBodyTextureSources() {
-		if (!ImageManager.getImageManager().hasImage(mCandiModel.getBodyImageId())) {
+		if (!ImageManager.getInstanceOf().hasImage(mCandiModel.getBodyImageId())) {
 
 			Utilities.Log(CandiConstants.APP_NAME, "CandiView", "Image cache miss - start network fetch: " + mCandiModel.getBodyImageId());
 			ImageRequest imageRequest = new ImageManager.ImageRequest();
@@ -435,12 +462,12 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 			};
 
 			showPlaceholder();
-			ImageManager.getImageManager().fetchImageAsynch(imageRequest);
+			ImageManager.getInstanceOf().fetchImageAsynch(imageRequest);
 		}
 		else {
 
 			Utilities.Log(CandiConstants.APP_NAME, "CandiView", "Image cache hit: " + mCandiModel.getBodyImageId());
-			Bitmap bitmap = ImageManager.getImageManager().getImage(mCandiModel.getBodyImageId());
+			Bitmap bitmap = ImageManager.getInstanceOf().getImage(mCandiModel.getBodyImageId());
 
 			if (bitmap != null) {
 				Bitmap bitmapCopy = bitmap.copy(Config.ARGB_8888, false); // Prevent recycle of cached bitmap
@@ -448,12 +475,12 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 			}
 
 			// Reflection
-			Bitmap reflectionBitmap = ImageManager.getImageManager().getImage(mCandiModel.getBodyImageId() + ".reflection");
+			Bitmap reflectionBitmap = ImageManager.getInstanceOf().getImage(mCandiModel.getBodyImageId() + ".reflection");
 			if (reflectionBitmap == null) {
-				Bitmap sourceBitmap = ImageManager.getImageManager().getImage(mCandiModel.getBodyImageId());
+				Bitmap sourceBitmap = ImageManager.getInstanceOf().getImage(mCandiModel.getBodyImageId());
 				if (sourceBitmap != null) {
-					reflectionBitmap = UtilitiesUI.getReflection(sourceBitmap);
-					ImageManager.getImageManager().getImageCache().put(mCandiModel.getBodyImageId() + ".reflection", reflectionBitmap);
+					reflectionBitmap = AircandiUI.getReflection(sourceBitmap);
+					ImageManager.getInstanceOf().getImageCache().put(mCandiModel.getBodyImageId() + ".reflection", reflectionBitmap);
 				}
 			}
 

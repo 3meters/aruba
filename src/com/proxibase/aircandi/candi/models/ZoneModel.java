@@ -9,17 +9,19 @@ import com.proxibase.aircandi.candi.utils.CandiConstants;
 
 public class ZoneModel extends BaseModel {
 
-	private List<CandiModel>	mCandiesCurrent		= new ArrayList<CandiModel>();
-	private List<CandiModel>	mCandiesNext		= new ArrayList<CandiModel>();
+	public static int			ZONE_CHILDREN_MAX_VISIBLE	= 9;
+
+	private List<CandiModel>	mCandiesCurrent				= new ArrayList<CandiModel>();
+	private List<CandiModel>	mCandiesNext				= new ArrayList<CandiModel>();
 	private int					mZoneIndex;
-	private CandiPatchModel		mCandiPatchModel	= null;
+	private CandiPatchModel		mCandiPatchModel			= null;
 	private float				mX;
 	private float				mY;
 	private float				mCenterX;
 	private float				mCenterY;
-	private String				mBodyImageId		= "";
-	private String				mBodyImageUrl		= "";
-	private boolean				mInactive			= false;
+	private String				mBodyImageId				= "";
+	private String				mBodyImageUrl				= "";
+	private boolean				mInactive					= false;
 
 	public ZoneModel(int zoneIndex, CandiPatchModel candiPatchModel) {
 
@@ -46,7 +48,29 @@ public class ZoneModel extends BaseModel {
 		for (CandiModel candiModel : mCandiesNext)
 			mCandiesCurrent.add(candiModel);
 	}
+	
+	public int getCandiIndexCurrent(CandiModel candiModelTarget)
+	{
+		int index = 0;
+		for (IModel candiModel : mCandiesCurrent) {
+			if (candiModel == candiModelTarget)
+				break;
+			index++;
+		}
+		return index;
+	}
 
+	public int getCandiIndexNext(CandiModel candiModelTarget)
+	{
+		int index = 0;
+		for (IModel candiModel : mCandiesNext) {
+			if (candiModel == candiModelTarget)
+				break;
+			index++;
+		}
+		return index;
+	}
+	
 	public Transition getTransition() {
 
 		if (!this.isVisibleCurrent() && this.isVisibleNext())
@@ -81,13 +105,7 @@ public class ZoneModel extends BaseModel {
 	}
 
 	public float getX() {
-//		if (mCandiPatchModel.getTransformation() != null) {
-//			float[] coordinates = { this.mX, this.mY };
-//			mCandiPatchModel.getTransformation().transform(coordinates);
-//			return coordinates[CandiConstants.VERTEX_INDEX_X];
-//		}
-//		else
-			return this.mX;
+		return this.mX;
 	}
 
 	@Override
@@ -114,7 +132,7 @@ public class ZoneModel extends BaseModel {
 		if (!mCandiesCurrent.contains(candiModelTarget))
 			throw new NoSuchElementException();
 
-		Position position = getChildPosition(candiModelTarget, mCandiesCurrent);
+		Position position = doChildPosition(candiModelTarget, mCandiesCurrent);
 		position.scale = this.getChildScaleCurrent();
 		return position;
 	}
@@ -129,12 +147,12 @@ public class ZoneModel extends BaseModel {
 		if (!mCandiesNext.contains(candiModelTarget))
 			throw new NoSuchElementException();
 
-		Position position = getChildPosition(candiModelTarget, mCandiesNext);
+		Position position = doChildPosition(candiModelTarget, mCandiesNext);
 		position.scale = this.getChildScaleNext();
 		return position;
 	}
 
-	private Position getChildPosition(IModel candiModelTarget, List<CandiModel> candiModels) {
+	private Position doChildPosition(IModel candiModelTarget, List<CandiModel> candiModels) {
 		Position position = new Position();
 
 		double index = 0;
@@ -163,6 +181,9 @@ public class ZoneModel extends BaseModel {
 			columns = 2;
 			rows = 2;
 		}
+
+		if (index > ZONE_CHILDREN_MAX_VISIBLE - 1)
+			index = ZONE_CHILDREN_MAX_VISIBLE - 1;
 
 		position.x = (float) (mX + ((index % columns) * offsetX));
 		position.col = (int) (index % columns) + 1;

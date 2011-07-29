@@ -304,7 +304,7 @@ public class InfoList extends AircandiActivity
 			final TableLayout table = new TableLayout(InfoList.this);
 
 			// Make the first row
-			TableRow tableRow = (TableRow) this.getLayoutInflater().inflate(R.layout.temp_tablerow_streams, null);
+			TableRow tableRow = (TableRow) this.getLayoutInflater().inflate(R.layout.temp_tablerow_commands, null);
 			final TableRow.LayoutParams rowLp = new TableRow.LayoutParams();
 			rowLp.setMargins(0, 0, 8, 8);
 			TableLayout.LayoutParams tableLp;
@@ -336,7 +336,7 @@ public class InfoList extends AircandiActivity
 					tableLp = new TableLayout.LayoutParams();
 					tableLp.setMargins(0, 0, 0, 0);
 					table.addView(tableRow, tableLp);
-					tableRow = (TableRow) this.getLayoutInflater().inflate(R.layout.temp_tablerow_streams, null);
+					tableRow = (TableRow) this.getLayoutInflater().inflate(R.layout.temp_tablerow_commands, null);
 				}
 			}
 

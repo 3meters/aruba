@@ -22,6 +22,7 @@ import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.models.Post;
 import com.proxibase.aircandi.utils.AircandiUI;
 import com.proxibase.sdk.android.proxi.consumer.Command;
+import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
@@ -36,6 +37,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	protected TextView				mContextButton;
 	protected ContextButtonState	mContextButtonState	= ContextButtonState.Default;
 	protected Command				mCommand;
+	protected User					mUser;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

@@ -13,7 +13,6 @@ import android.graphics.Bitmap.Config;
 import android.os.AsyncTask;
 
 import com.proxibase.aircandi.candi.utils.CandiConstants;
-import com.proxibase.sdk.android.util.UtilitiesUI;
 
 /*
  * TODO: ImageCache uses weak references by default. Should investigate the possible benefits 
@@ -27,7 +26,7 @@ public class ImageManager {
 	private OnImageReadyListener	mImageReadyListener;
 	private static Context			mContext;
 
-	public static synchronized ImageManager getImageManager() {
+	public static synchronized ImageManager getInstanceOf() {
 
 		if (singletonObject == null) {
 			singletonObject = new ImageManager();
@@ -99,7 +98,7 @@ public class ImageManager {
 
 			// We are on the background thread
 			mImageRequest = params[0];
-			Bitmap bitmap = UtilitiesUI.getImage(mImageRequest.imageUrl);
+			Bitmap bitmap = AircandiUI.getImage(mImageRequest.imageUrl);
 			if (bitmap != null) {
 
 				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageId + "'");
@@ -113,7 +112,7 @@ public class ImageManager {
 
 				// Crop if requested
 				if (mImageRequest.imageShape.equals("square")) {
-					bitmap = UtilitiesUI.cropToSquare(bitmap);
+					bitmap = AircandiUI.cropToSquare(bitmap);
 				}
 
 				// Stuff it into the disk and memory caches. Overwrites if it already exists.
@@ -121,7 +120,7 @@ public class ImageManager {
 
 				// Create reflection if requested
 				if (mImageRequest.showReflection) {
-					final Bitmap bitmapReflection = UtilitiesUI.getReflection(bitmap);
+					final Bitmap bitmapReflection = AircandiUI.getReflection(bitmap);
 					mImageCache.put(mImageRequest.imageId + ".reflection", bitmapReflection);
 				}
 				

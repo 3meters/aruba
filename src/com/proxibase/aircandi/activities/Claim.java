@@ -1,12 +1,14 @@
 package com.proxibase.aircandi.activities;
 
-import android.app.Activity;
+import java.io.IOException;
+
+import org.apache.http.client.ClientProtocolException;
+
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
@@ -14,31 +16,35 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.proxibase.aircandi.activities.R;
+import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.utils.AircandiUI;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.OnImageReadyListener;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.SimpleQueryListener;
 import com.proxibase.sdk.android.util.ProxiConstants;
 import com.proxibase.sdk.android.util.Utilities;
 
-public class CandiSummary extends Activity {
+public class Claim extends AircandiActivity {
 
-	private FrameLayout	mCandiSummaryView;
-	private ImageView	mProgressIndicator;
-	private ImageView	mButtonRefresh;
-	private EntityProxy	mEntityProxy;
-	private TextView	mContextButton;
+	private TextView	mTextClaimedByName;
+	private TextView	mTextBssid;
+	private TextView	mTextSsid;
+	private TextView	mTextLevel;
+	private EditText	mEditLabel;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -48,66 +54,132 @@ public class CandiSummary extends Activity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.candi_summary);
+		setContentView(R.layout.claim);
 
 		// Ui Hookup
-		mCandiSummaryView = (FrameLayout) findViewById(R.id.CandiSummaryView);
+		if (super.mEntityProxy != null)
+			setupLayout(mEntityProxy);
+	}
 
-		mProgressIndicator = (ImageView) findViewById(R.id.Application_ProgressIndicator);
-		if (mProgressIndicator != null)
-			mProgressIndicator.setVisibility(View.INVISIBLE);
+	public void onSaveClick(View view) {
+		startTitlebarProgress();
+		processClaim();
+	}
 
-		mButtonRefresh = (ImageView) findViewById(R.id.Application_Button_Refresh);
-		if (mButtonRefresh != null)
-			mButtonRefresh.setVisibility(View.VISIBLE);
+	public void onCancelClick(View view) {
+		super.doBackPressed();
+	}
 
-		mContextButton = (TextView) findViewById(R.id.Context_Button);
-		if (mContextButton != null)
-			mContextButton.setVisibility(View.VISIBLE);
+	public void processClaim() {
 
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			String jsonStream = extras.getString("ProxiEntity");
-			if (jsonStream != "") {
-				showBackButton(true);
-				mEntityProxy = ProxibaseService.getGson(GsonType.ProxibaseService).fromJson(getIntent().getExtras().getString("EntityProxy"),
-						EntityProxy.class);
+		Boolean changedLabel = false;
+		Boolean changedRipplePoint = false;
+
+		if (!mEntityProxy.label.equals(mEditLabel.getEditableText().toString()))
+			changedLabel = true;
+
+		if (!changedLabel)
+			return;
+
+		// Grab the values that might have been updated
+		mEntityProxy.label = mEntityProxy.beacon.label = mEditLabel.getEditableText().toString();
+
+		// A ripple point is getting turned off so delete it from the service
+		if (changedRipplePoint) {
+			Bundle parameters = new Bundle();
+			if (mEntityProxy.beacon.isLocalOnly) {
+				mEntityProxy.beacon.isLocalOnly = true;
+				// parameters.putString("bssid", mEntity.bssid);
+				// parameters.putString("ssid", mEntity.ssid);
+				parameters.putString("label", mEntityProxy.label);
+				parameters.putString("userId", "11111111");
+				ProxibaseService.getInstanceOf().postAsync("InsertPoint", parameters, ResponseFormat.Json, CandiConstants.URL_AIRCANDI_SERVICE, new MyQueryListener());
 			}
-			setupSummary(mEntityProxy);
+			else {
+				mEntityProxy.beacon.isLocalOnly = false;
+				parameters.putString("entityId", mEntityProxy.entityProxyId);
+				ProxibaseService.getInstanceOf().postAsync("DeletePoint", parameters, ResponseFormat.Json, CandiConstants.URL_AIRCANDI_SERVICE, new MyQueryListener());
+			}
+		}
+		else if (changedLabel) {
+			Bundle parameters = new Bundle();
+			parameters.putString("entityId", mEntityProxy.entityProxyId);
+			parameters.putString("label", mEntityProxy.label);
+			ProxibaseService.getInstanceOf().postAsync("UpdatePoint", parameters, ResponseFormat.Json, CandiConstants.URL_AIRCANDI_SERVICE, new MyQueryListener());
 		}
 	}
 
-	public void showBackButton(boolean show) {
+	public class MyQueryListener extends SimpleQueryListener {
 
-		if (show) {
-			mContextButton.setText("Back");
-			mContextButton.setOnClickListener(new View.OnClickListener() {
+		public void onComplete(String response) {
+			// Post the processed result back to the UI thread
+			Claim.this.runOnUiThread(new Runnable() {
 
-				@Override
-				public void onClick(View v) {
-					doBackPressed();
+				public void run() {
+					stopTitlebarProgress();
+					AircandiUI.showToastNotification(Claim.this, "Saved", Toast.LENGTH_SHORT);
+					Intent intent = new Intent(Claim.this, CandiSearchActivity.class);
+					startActivity(intent);
+				}
+			});
+		}
+
+		@Override
+		public void onClientProtocolException(ClientProtocolException e) {
+			super.onClientProtocolException(e);
+			// Post the processed result back to the UI thread
+			Claim.this.runOnUiThread(new Runnable() {
+
+				public void run() {
+					stopTitlebarProgress();
+					AircandiUI.showToastNotification(Claim.this, "Failed to insert or modify point", Toast.LENGTH_SHORT);
+				}
+			});
+		}
+
+		@Override
+		public void onIOException(IOException e) {
+			super.onIOException(e);
+			// Post the processed result back to the UI thread
+			Claim.this.runOnUiThread(new Runnable() {
+
+				public void run() {
+					stopTitlebarProgress();
+					AircandiUI.showToastNotification(Claim.this, "Network error, failed to insert or modify point", Toast.LENGTH_SHORT);
 				}
 			});
 		}
 	}
 
-	public void onSummaryViewClick(View v) {
-		doBackPressed();
-	}
+	private void setupLayout(final EntityProxy entityProxy) {
 
-	private void setupSummary(final EntityProxy entityProxy) {
+		if (entityProxy != null) {
+			mTextClaimedByName = (TextView) findViewById(R.id.TextClaimedByName);
+			mTextBssid = (TextView) findViewById(R.id.TextBssid);
+			mTextSsid = (TextView) findViewById(R.id.TextSsid);
+			mTextLevel = (TextView) findViewById(R.id.TextLevel);
+			mEditLabel = (EditText) findViewById(R.id.EditLabel);
 
-		new BuildMenuTask().execute(mCandiSummaryView);
+			mTextClaimedByName.setText(mUser.name);
+			mTextBssid.setText(entityProxy.beacon.beaconId);
+			mTextSsid.setText(entityProxy.beacon.label);
+			mTextLevel.setText(Integer.toString(entityProxy.beacon.levelDb));
+			mEditLabel.setText(entityProxy.beacon.label);
+		}
+		else {
+			AircandiUI.showToastNotification(this, "EntityProxy is null.", Toast.LENGTH_SHORT);
+			Utilities.Log(CandiConstants.APP_NAME, "Claim", "EntityProxy is null.");
+		}
 
 		if (entityProxy.imageUri != null && entityProxy.imageUri != "") {
 			if (ImageManager.getInstanceOf().hasImage(entityProxy.imageUri)) {
 				Bitmap bitmap = ImageManager.getInstanceOf().getImage(entityProxy.imageUri);
 				if (bitmap != null)
-					((ImageView) mCandiSummaryView.findViewById(R.id.Image)).setImageBitmap(bitmap);
+					((ImageView) findViewById(R.id.Image)).setImageBitmap(bitmap);
 
 				if (ImageManager.getInstanceOf().hasImage(entityProxy.imageUri + ".reflection")) {
 					bitmap = ImageManager.getInstanceOf().getImage(entityProxy.imageUri + ".reflection");
-					((ImageView) mCandiSummaryView.findViewById(R.id.ImageReflection)).setImageBitmap(bitmap);
+					((ImageView) findViewById(R.id.ImageReflection)).setImageBitmap(bitmap);
 				}
 			}
 			else {
@@ -123,23 +195,19 @@ public class CandiSummary extends Activity {
 					public void onImageReady(Bitmap bitmap) {
 						Utilities.Log("Graffiti", "setupSummary", "Image fetched: " + entityProxy.imageUri);
 						Bitmap bitmapNew = ImageManager.getInstanceOf().getImage(entityProxy.imageUri);
-						((ImageView) mCandiSummaryView.findViewById(R.id.Image)).setImageBitmap(bitmapNew);
-						Animation animation = AnimationUtils.loadAnimation(CandiSummary.this, R.anim.fade_in_medium);
+						((ImageView) findViewById(R.id.Image)).setImageBitmap(bitmapNew);
+						Animation animation = AnimationUtils.loadAnimation(Claim.this, R.anim.fade_in_medium);
 						animation.setFillEnabled(true);
 						animation.setFillAfter(true);
 						animation.setStartOffset(500);
-						((ImageView) mCandiSummaryView.findViewById(R.id.Image)).startAnimation(animation);
+						((ImageView) findViewById(R.id.Image)).startAnimation(animation);
 
 					}
 				};
-				Utilities.Log("Graffiti", "setupSummary", "Fetching Image: " + entityProxy.imageUri);
+				Utilities.Log(CandiConstants.APP_NAME, "Claim", "Fetching Image: " + entityProxy.imageUri);
 				ImageManager.getInstanceOf().fetchImageAsynch(imageRequest);
 			}
 		}
-
-		((TextView) mCandiSummaryView.findViewById(R.id.Title)).setText(entityProxy.title);
-		((TextView) mCandiSummaryView.findViewById(R.id.Subtitle)).setText(Html.fromHtml(entityProxy.subtitle));
-		((TextView) mCandiSummaryView.findViewById(R.id.Description)).setText(Html.fromHtml(entityProxy.description));
 	}
 
 	class BuildMenuTask extends AsyncTask<FrameLayout, Void, TableLayout> {
@@ -155,7 +223,7 @@ public class CandiSummary extends Activity {
 			Display getOrient = getWindowManager().getDefaultDisplay();
 			if (getOrient.getRotation() == Surface.ROTATION_90 || getOrient.getRotation() == Surface.ROTATION_270)
 				landscape = true;
-			TableLayout table = configureMenus(mEntityProxy, landscape, CandiSummary.this);
+			TableLayout table = configureMenus(mEntityProxy, landscape, Claim.this);
 
 			return table;
 		}
@@ -233,40 +301,6 @@ public class CandiSummary extends Activity {
 			table.addView(tableRow, tableLp);
 		}
 		return table;
-	}
-
-	protected void startTitlebarProgress() {
-		if (mProgressIndicator != null) {
-			mProgressIndicator.setVisibility(View.VISIBLE);
-			mButtonRefresh.setVisibility(View.INVISIBLE);
-			mProgressIndicator.bringToFront();
-			AnimationDrawable animation = (AnimationDrawable) mProgressIndicator.getBackground();
-			animation.start();
-			mProgressIndicator.invalidate();
-		}
-	}
-
-	protected void stopTitlebarProgress() {
-		if (mProgressIndicator != null) {
-			mProgressIndicator.setAnimation(null);
-			mButtonRefresh.setVisibility(View.VISIBLE);
-			mButtonRefresh.bringToFront();
-			mProgressIndicator.setVisibility(View.INVISIBLE);
-		}
-	}
-
-	@Override
-	public void onBackPressed() {
-		Utilities.Log("Graffiti", "onBackPressed", "Back pressed");
-		doBackPressed();
-	}
-
-	public void doBackPressed() {
-		startTitlebarProgress();
-		super.onBackPressed();
-		overridePendingTransition(R.anim.fade_in_medium, R.anim.summary_out);
-
-		// overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
 	}
 
 }
