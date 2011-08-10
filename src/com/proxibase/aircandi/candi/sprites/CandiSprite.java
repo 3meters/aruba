@@ -9,7 +9,6 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.util.GLHelper;
 
 import com.proxibase.aircandi.candi.utils.CandiConstants;
-import com.proxibase.aircandi.utils.Utilities;
 
 public class CandiSprite extends Sprite {
 	
@@ -26,8 +25,6 @@ public class CandiSprite extends Sprite {
 		final float rotation = this.mRotation;
 
 		if (rotation != 0) {
-			Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Sprite: rotation = " + String.valueOf(rotation));
-
 			final float rotationCenterX = this.mRotationCenterX;
 			final float rotationCenterY = this.mRotationCenterY;
 

@@ -10,4 +10,4 @@
 	android:interpolator="@android:anim/accelerate_interpolator"
 	android:fromXDelta="0"
 	android:toXDelta="0"
-	android:duration="@android:integer/config_longAnimTime" />
+	android:duration="500" />

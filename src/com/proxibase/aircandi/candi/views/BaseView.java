@@ -31,7 +31,6 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
-import com.proxibase.aircandi.utils.Utilities;
 
 public abstract class BaseView extends Entity implements Observer, IView {
 
@@ -57,6 +56,10 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 	@Override
 	public void update(Observable observable, Object data) {
+		/*
+		 * Any requested display extras are added to the title text by
+		 * the getTitleText() method.
+		 */
 		updateTitleSprite(mBaseModel.getTitleText());
 	}
 
@@ -166,8 +169,6 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		final float rotation = this.mRotation;
 
 		if (rotation != 0) {
-			Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "Sprite: rotation = " + String.valueOf(rotation));
-
 			final float rotationCenterX = this.mRotationCenterX;
 			final float rotationCenterY = this.mRotationCenterY;
 

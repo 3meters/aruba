@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <color name="application_titlebar_text">@color/theme_text_reverse</color>
+    <color name="application_titlebar_text">@color/theme_text</color>
     <color name="application_titlebar_start">@color/theme_widget_start</color>
     <color name="application_titlebar_end">@color/theme_widget_end</color>
     <color name="application_titlebar_separator_start">@color/theme_light</color>
@@ -24,6 +24,7 @@
     
     <color name="form_label_text">@color/theme_text</color>
     <color name="form_value_text">@color/theme_text</color>
+    <color name="form_input_text">@color/theme_text_reverse</color>
     <color name="form_button_text">@color/theme_text</color>
     
     <color name="button_text">@color/theme_text</color>
@@ -107,7 +108,7 @@
      
     <color name="theme_text">@color/theme_white</color>
     <color name="theme_text_inactive">@color/theme_primary_dark</color>
-    <color name="theme_text_reverse">@color/theme_white</color>
+    <color name="theme_text_reverse">@color/theme_black</color>
     <color name="theme_text_shadow">@color/theme_black</color>
     <color name="theme_widget_start">#33ffffff</color>
     <color name="theme_widget_end">#33ffffff</color>

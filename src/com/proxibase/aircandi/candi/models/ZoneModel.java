@@ -10,9 +10,12 @@ import com.proxibase.aircandi.candi.utils.CandiConstants;
 public class ZoneModel extends BaseModel {
 
 	public static int			ZONE_CHILDREN_MAX_VISIBLE	= 9;
+	public static int			ZONE_CHILDREN_MAX_VISIBLE_WITH_PRIMARY	= 6;
 
 	private List<CandiModel>	mCandiesCurrent				= new ArrayList<CandiModel>();
 	private List<CandiModel>	mCandiesNext				= new ArrayList<CandiModel>();
+	private CandiModel			mCandiModelPrimaryCurrent;
+	private CandiModel			mCandiModelPrimaryNext;
 	private int					mZoneIndex;
 	private CandiPatchModel		mCandiPatchModel			= null;
 	private float				mX;
@@ -47,10 +50,10 @@ public class ZoneModel extends BaseModel {
 		mCandiesCurrent.clear();
 		for (CandiModel candiModel : mCandiesNext)
 			mCandiesCurrent.add(candiModel);
+		setCandiModelPrimaryCurrent(mCandiModelPrimaryNext);
 	}
-	
-	public int getCandiIndexCurrent(CandiModel candiModelTarget)
-	{
+
+	public int getCandiIndexCurrent(CandiModel candiModelTarget) {
 		int index = 0;
 		for (IModel candiModel : mCandiesCurrent) {
 			if (candiModel == candiModelTarget)
@@ -60,8 +63,7 @@ public class ZoneModel extends BaseModel {
 		return index;
 	}
 
-	public int getCandiIndexNext(CandiModel candiModelTarget)
-	{
+	public int getCandiIndexNext(CandiModel candiModelTarget) {
 		int index = 0;
 		for (IModel candiModel : mCandiesNext) {
 			if (candiModel == candiModelTarget)
@@ -70,7 +72,7 @@ public class ZoneModel extends BaseModel {
 		}
 		return index;
 	}
-	
+
 	public Transition getTransition() {
 
 		if (!this.isVisibleCurrent() && this.isVisibleNext())
@@ -132,8 +134,8 @@ public class ZoneModel extends BaseModel {
 		if (!mCandiesCurrent.contains(candiModelTarget))
 			throw new NoSuchElementException();
 
-		Position position = doChildPosition(candiModelTarget, mCandiesCurrent);
-		position.scale = this.getChildScaleCurrent();
+		Position position = doChildPosition(candiModelTarget, mCandiesCurrent, mCandiModelPrimaryCurrent);
+		position.scale = this.getChildScaleCurrent(candiModelTarget, mCandiModelPrimaryCurrent);
 		return position;
 	}
 
@@ -147,12 +149,12 @@ public class ZoneModel extends BaseModel {
 		if (!mCandiesNext.contains(candiModelTarget))
 			throw new NoSuchElementException();
 
-		Position position = doChildPosition(candiModelTarget, mCandiesNext);
-		position.scale = this.getChildScaleNext();
+		Position position = doChildPosition(candiModelTarget, mCandiesNext, mCandiModelPrimaryNext);
+		position.scale = this.getChildScaleNext(candiModelTarget, mCandiModelPrimaryNext);
 		return position;
 	}
 
-	private Position doChildPosition(IModel candiModelTarget, List<CandiModel> candiModels) {
+	private Position doChildPosition(IModel candiModelTarget, List<CandiModel> candiModels, IModel candiModelPrimary) {
 		Position position = new Position();
 
 		double index = 0;
@@ -167,73 +169,143 @@ public class ZoneModel extends BaseModel {
 		double columns = 1;
 		double rows = 1;
 
-		int candiesCount = candiModels.size();
-
-		if (candiesCount > 4) {
-			offsetX = CandiConstants.CANDI_VIEW_WIDTH / 3;
-			offsetY = CandiConstants.CANDI_VIEW_BODY_HEIGHT / 3;
-			columns = 3;
-			rows = 3;
-		}
-		else if (candiesCount > 1) {
-			offsetX = CandiConstants.CANDI_VIEW_WIDTH / 2;
-			offsetY = CandiConstants.CANDI_VIEW_BODY_HEIGHT / 2;
-			columns = 2;
-			rows = 2;
-		}
-
 		if (index > ZONE_CHILDREN_MAX_VISIBLE - 1)
 			index = ZONE_CHILDREN_MAX_VISIBLE - 1;
 
-		position.x = (float) (mX + ((index % columns) * offsetX));
-		position.col = (int) (index % columns) + 1;
-		if (position.col == columns)
-			position.colLast = true;
-		else if (position.col == 1)
-			position.colFirst = true;
+		if (candiModelPrimary != null)
+			if (candiModelTarget == candiModelPrimary) {
+				/*
+				 * Showing a collection with a primary and this is the primary
+				 */
+				position.x = mX;
+				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + mY);
+				position.col = 1;
+				position.row = 1;
+				position.colFirst = true;
+				position.colLast = false;
+				position.rowFirst = true;
+				position.rowLast = false;
+			}
+			else {
+				/*
+				 * Showing a collection with a primary
+				 */
+				if (index > 5)
+					index = 5;
+				offsetX = CandiConstants.CANDI_VIEW_WIDTH / 3;
+				offsetY = CandiConstants.CANDI_VIEW_BODY_HEIGHT / 3;
+				columns = 3;
+				rows = 3;
 
-		if (candiesCount == 1)
-			position.y = (float) (mY + ((Math.floor(index / rows)) * offsetY));
-		else
-			position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + mY + ((Math.floor(index / rows)) * offsetY));
-		position.row = (int) Math.floor(index / rows) + 1;
+				if (index == 1)
+					index = 2;
+				else if (index >= 2)
+					index += 3;
 
-		if (position.row == rows)
-			position.rowLast = true;
-		else if (position.row == 1)
-			position.rowFirst = true;
+				position.x = (float) (mX + ((index % columns) * offsetX));
+				position.col = (int) (index % columns) + 1;
+				if (position.col == columns)
+					position.colLast = true;
+				else if (position.col == 1)
+					position.colFirst = true;
+
+				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + mY + ((Math.floor(index / rows)) * offsetY));
+				position.row = (int) Math.floor(index / rows) + 1;
+
+				if (position.row == rows)
+					position.rowLast = true;
+				else if (position.row == 1)
+					position.rowFirst = true;
+			}
+		else {
+			/*
+			 * Showing a collection without a primary
+			 */
+			int candiesCount = candiModels.size();
+
+			if (candiesCount > 4) {
+				offsetX = CandiConstants.CANDI_VIEW_WIDTH / 3;
+				offsetY = CandiConstants.CANDI_VIEW_BODY_HEIGHT / 3;
+				columns = 3;
+				rows = 3;
+			}
+			else if (candiesCount > 1) {
+				offsetX = CandiConstants.CANDI_VIEW_WIDTH / 2;
+				offsetY = CandiConstants.CANDI_VIEW_BODY_HEIGHT / 2;
+				columns = 2;
+				rows = 2;
+			}
+
+			position.x = (float) (mX + ((index % columns) * offsetX));
+			position.col = (int) (index % columns) + 1;
+			if (position.col == columns)
+				position.colLast = true;
+			else if (position.col == 1)
+				position.colFirst = true;
+
+			if (candiesCount == 1)
+				position.y = (float) (mY + ((Math.floor(index / rows)) * offsetY));
+			else
+				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + mY + ((Math.floor(index / rows)) * offsetY));
+			position.row = (int) Math.floor(index / rows) + 1;
+
+			if (position.row == rows)
+				position.rowLast = true;
+			else if (position.row == 1)
+				position.rowFirst = true;
+		}
 
 		return position;
 
 	}
 
-	public float getChildScaleCurrent() {
+	public float getChildScaleCurrent(IModel candiModelTarget, IModel candiModelPrimary) {
 		if (this.mInactive)
 			return 1.0f;
 
 		float scale = 1.0f;
-		int candiesCount = mCandiesCurrent.size();
-		if (candiesCount > 1) {
-			scale = 0.5f;
+
+		if (candiModelPrimary != null) {
+			if (candiModelTarget == candiModelPrimary)
+				scale = 0.65f;
+			else
+				scale = 0.32f;
 		}
-		if (candiesCount > 4) {
-			scale = 0.32f;
+		else {
+			int candiesCount = mCandiesCurrent.size();
+			if (candiesCount > 1) {
+				scale = 0.5f;
+			}
+			if (candiesCount > 4) {
+				scale = 0.32f;
+			}
 		}
+
 		return scale;
 	}
 
-	public float getChildScaleNext() {
+	public float getChildScaleNext(IModel candiModelTarget, IModel candiModelPrimary) {
 		if (this.mInactive)
 			return 1.0f;
 
 		float scale = 1.0f;
-		int candiesCount = mCandiesNext.size();
-		if (candiesCount > 1) {
-			scale = 0.5f;
+
+		if (candiModelPrimary != null) {
+			if (candiModelTarget == candiModelPrimary)
+				scale = 0.65f;
+			else
+				scale = 0.32f;
 		}
-		if (candiesCount > 4) {
-			scale = 0.32f;
+		else {
+			int candiesCount = mCandiesNext.size();
+			if (candiesCount > 1) {
+				scale = 0.5f;
+			}
+			if (candiesCount > 4) {
+				scale = 0.32f;
+			}
 		}
+
 		return scale;
 	}
 
@@ -356,5 +428,22 @@ public class ZoneModel extends BaseModel {
 	public boolean isInactive() {
 		return mInactive;
 	}
+
+	public void setCandiModelPrimaryCurrent(CandiModel candiModelPrimaryCurrent) {
+		this.mCandiModelPrimaryCurrent = candiModelPrimaryCurrent;
+	}
+
+	public CandiModel getCandiModelPrimaryCurrent() {
+		return mCandiModelPrimaryCurrent;
+	}
+
+	public CandiModel getCandiModelPrimaryNext() {
+		return this.mCandiModelPrimaryNext;
+	}
+
+	public void setCandiModelPrimaryNext(CandiModel candiModelPrimaryNext) {
+		this.mCandiModelPrimaryNext = candiModelPrimaryNext;
+	}
+
 
 }

@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 
 import com.proxibase.aircandi.candi.models.ZoneModel.Position;
-import com.proxibase.aircandi.utils.CandiList;
+import com.proxibase.aircandi.utils.ImageManager.ImageFormat;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 /**
@@ -25,7 +25,12 @@ public class CandiModel extends BaseModel {
 		None, Level, Tag, Time
 	}
 
+	public static enum ReasonInactive {
+		New, Navigation, Hidden, None
+	}
+
 	private EntityProxy		mEntityProxy		= null;
+	private String			mModelId;
 	private ZoneModel		mZoneNext			= null;
 	private ZoneModel		mZoneCurrent		= null;
 	private DisplayExtra	mDisplayExtra		= DisplayExtra.None;
@@ -34,29 +39,30 @@ public class CandiModel extends BaseModel {
 	private boolean			mTouchAreaActive	= true;
 	private boolean			mRookie				= true;
 	private String			mBodyImageId		= "";
-	private String			mBodyImageUrl		= "";
+	private String			mBodyImageUri		= "";
+	private ImageFormat		mBodyImageFormat;
 	private boolean			mOverflowCurrent	= false;
 	private boolean			mOverflowNext		= false;
+	private ReasonInactive	mReasonInactive		= ReasonInactive.None;
 
-	public CandiModel() {
-		this(new EntityProxy());
-	}
-
-	public CandiModel(EntityProxy entityProxy) {
-		super();
-		this.setEntityProxy(entityProxy);
-		this.setTitleText(entityProxy.label);
-		this.setBodyImageId(entityProxy.imageUri);
-		this.setBodyImageUrl(entityProxy.imageUri);
+	public CandiModel(ModelType modelType, String modelId) {
+		super(modelType);
+		this.setModelId(modelId);
 	}
 
 	public Transition getTransition() {
 
 		Transition transition = Transition.None;
-		if ((!this.isVisibleCurrent() || this.isOverflowCurrent()) && (this.isVisibleNext() && !this.isOverflowNext())) {
+		if (this.isVisibleCurrent() && this.isOverflowNext()) {
+			transition = Transition.FadeOut;
+		}
+		else if (!this.isVisibleCurrent() && !this.isOverflowNext()) {
 			transition = Transition.FadeIn;
 		}
-		else if ((this.isVisibleCurrent() && !this.isOverflowCurrent()) && (!this.isVisibleNext() || this.isOverflowNext())) {
+		else if (!this.isVisibleCurrent() && this.isVisibleNext()) {
+			transition = Transition.FadeIn;
+		}
+		else if (this.isVisibleCurrent() && !this.isVisibleNext()) {
 			transition = Transition.FadeOut;
 		}
 		else if (this.isVisibleNext()) {
@@ -88,6 +94,10 @@ public class CandiModel extends BaseModel {
 		return mDisplayExtra;
 	}
 
+	public String getModelId() {
+		return mModelId;
+	}
+
 	@Override
 	public String getTitleText() {
 		String title = super.getTitleText();
@@ -96,7 +106,7 @@ public class CandiModel extends BaseModel {
 			title += " " + String.valueOf(getEntityProxy().beacon.getAvgBeaconLevel());
 		}
 		else if (mDisplayExtra == DisplayExtra.Tag) {
-			title += " " + String.valueOf(getEntityProxy().beacon.beaconId);
+			title += " " + String.valueOf(getEntityProxy().beacon.id);
 		}
 		else if (mDisplayExtra == DisplayExtra.Time) {
 			title += " " + String.valueOf(getEntityProxy().beacon.discoveryTime.getTime() / 100);
@@ -116,8 +126,12 @@ public class CandiModel extends BaseModel {
 		return this.mBodyImageId;
 	}
 
-	public String getBodyImageUrl() {
-		return this.mBodyImageUrl;
+	public String getBodyImageUri() {
+		return this.mBodyImageUri;
+	}
+
+	public ImageFormat getBodyImageFormat() {
+		return mBodyImageFormat;
 	}
 
 	public boolean isTitleOnly() {
@@ -146,10 +160,6 @@ public class CandiModel extends BaseModel {
 		super.setChanged();
 	}
 
-	public void setChildren(CandiList<CandiModel> children) {
-		this.mChildren = children;
-	}
-
 	public void setZoneNext(ZoneModel zoneNext) {
 		this.mZoneNext = zoneNext;
 		super.setChanged();
@@ -160,25 +170,45 @@ public class CandiModel extends BaseModel {
 		super.setChanged();
 	}
 
+	public void setBodyOnly(boolean bodyOnly) {
+		this.mBodyOnly = bodyOnly;
+		super.setChanged();
+	}
+
 	public void setBodyImageId(String bodyImageId) {
 		this.mBodyImageId = bodyImageId;
 	}
 
-	public void setBodyImageUrl(String bodyImageUrl) {
-		this.mBodyImageUrl = bodyImageUrl;
+	public void setBodyImageUri(String bodyImageUri) {
+		this.mBodyImageUri = bodyImageUri;
+	}
+
+	public void setBodyImageFormat(ImageFormat bodyImageFormat) {
+		this.mBodyImageFormat = bodyImageFormat;
 	}
 
 	public void setTitleOnly(boolean titleOnly) {
 		this.mTitleOnly = titleOnly;
 	}
 
-	public void setBodyOnly(boolean bodyOnly) {
-		this.mBodyOnly = bodyOnly;
-		super.setChanged();
-	}
-
 	public void setTouchAreaActive(boolean touchAreaActive) {
 		this.mTouchAreaActive = touchAreaActive;
+	}
+
+	public void setModelId(String modelId) {
+		this.mModelId = modelId;
+	}
+
+	public void setOverflowNext(boolean overflowNext) {
+		this.mOverflowNext = overflowNext;
+	}
+
+	public void setRookie(boolean rookie) {
+		this.mRookie = rookie;
+	}
+
+	public void setOverflowCurrent(boolean overflowCurrent) {
+		this.mOverflowCurrent = overflowCurrent;
 	}
 
 	@Override
@@ -192,39 +222,33 @@ public class CandiModel extends BaseModel {
 		}
 		CandiModel that = (CandiModel) other;
 
-		return this.mEntityProxy.entityProxyId.equals(that.mEntityProxy.entityProxyId);
-
+		return this.mModelId.equals(that.mModelId);
 	}
 
 	@Override
 	public int hashCode() {
-
 		int result = 100;
-		result = 31 * result + this.mEntityProxy.entityProxyId.hashCode();
+		result = 31 * result + this.mModelId.hashCode();
 		return result;
-	}
-
-	public void setRookie(boolean rookie) {
-		this.mRookie = rookie;
 	}
 
 	public boolean isRookie() {
 		return mRookie;
 	}
 
-	public void setOverflowCurrent(boolean overflowCurrent) {
-		this.mOverflowCurrent = overflowCurrent;
-	}
-
 	public boolean isOverflowCurrent() {
 		return mOverflowCurrent;
 	}
 
-	public void setOverflowNext(boolean overflowNext) {
-		this.mOverflowNext = overflowNext;
-	}
-
 	public boolean isOverflowNext() {
 		return mOverflowNext;
+	}
+
+	public void setReasonInactive(ReasonInactive reasonInactive) {
+		this.mReasonInactive = reasonInactive;
+	}
+
+	public ReasonInactive getReasonInactive() {
+		return mReasonInactive;
 	}
 }

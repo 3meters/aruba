@@ -16,17 +16,17 @@ public interface IModel {
 
 	public LinkedList<IEntityModifier> getModifiers();
 
-	public CandiList<CandiModel> getChildren();
+	public CandiList<IModel> getChildren();
 
 	public void setVisibleCurrent(boolean visibleCurrent);
 
 	public void setVisibleNext(boolean visibleNext);
 
+	public boolean isVisibleCurrent();
+
+	public boolean isVisibleNext();
+
 	public String getTitleText();
-
-	public void setGrouped(boolean grouped);
-
-	public boolean isGrouped();
 
 	public IModel getParent();
 

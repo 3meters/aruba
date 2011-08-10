@@ -24,7 +24,7 @@ import android.widget.TextView;
 import com.proxibase.aircandi.activities.R;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.OnImageReadyListener;
+import com.proxibase.aircandi.utils.ImageManager.IImageReadyListener;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -100,29 +100,29 @@ public class CandiSummary extends Activity {
 		new BuildMenuTask().execute(mCandiSummaryView);
 
 		if (entityProxy.imageUri != null && entityProxy.imageUri != "") {
-			if (ImageManager.getInstanceOf().hasImage(entityProxy.imageUri)) {
-				Bitmap bitmap = ImageManager.getInstanceOf().getImage(entityProxy.imageUri);
+			if (ImageManager.getInstance().hasImage(entityProxy.imageUri)) {
+				Bitmap bitmap = ImageManager.getInstance().getImage(entityProxy.imageUri);
 				if (bitmap != null)
 					((ImageView) mCandiSummaryView.findViewById(R.id.Image)).setImageBitmap(bitmap);
 
-				if (ImageManager.getInstanceOf().hasImage(entityProxy.imageUri + ".reflection")) {
-					bitmap = ImageManager.getInstanceOf().getImage(entityProxy.imageUri + ".reflection");
+				if (ImageManager.getInstance().hasImage(entityProxy.imageUri + ".reflection")) {
+					bitmap = ImageManager.getInstance().getImage(entityProxy.imageUri + ".reflection");
 					((ImageView) mCandiSummaryView.findViewById(R.id.ImageReflection)).setImageBitmap(bitmap);
 				}
 			}
 			else {
 				ImageRequest imageRequest = new ImageManager.ImageRequest();
 				imageRequest.imageId = entityProxy.imageUri;
-				imageRequest.imageUrl = ProxiConstants.URL_PROXIBASE_MEDIA + "3meters_images/" + entityProxy.imageUri;
+				imageRequest.imageUri = ProxiConstants.URL_PROXIBASE_MEDIA + "3meters_images/" + entityProxy.imageUri;
 				imageRequest.imageShape = "square";
 				imageRequest.widthMinimum = 80;
 				imageRequest.showReflection = false;
-				imageRequest.imageReadyListener = new OnImageReadyListener() {
+				imageRequest.imageReadyListener = new IImageReadyListener() {
 
 					@Override
 					public void onImageReady(Bitmap bitmap) {
 						Utilities.Log("Graffiti", "setupSummary", "Image fetched: " + entityProxy.imageUri);
-						Bitmap bitmapNew = ImageManager.getInstanceOf().getImage(entityProxy.imageUri);
+						Bitmap bitmapNew = ImageManager.getInstance().getImage(entityProxy.imageUri);
 						((ImageView) mCandiSummaryView.findViewById(R.id.Image)).setImageBitmap(bitmapNew);
 						Animation animation = AnimationUtils.loadAnimation(CandiSummary.this, R.anim.fade_in_medium);
 						animation.setFillEnabled(true);
@@ -133,7 +133,7 @@ public class CandiSummary extends Activity {
 					}
 				};
 				Utilities.Log("Graffiti", "setupSummary", "Fetching Image: " + entityProxy.imageUri);
-				ImageManager.getInstanceOf().fetchImageAsynch(imageRequest);
+				ImageManager.getInstance().fetchImageAsynch(imageRequest);
 			}
 		}
 

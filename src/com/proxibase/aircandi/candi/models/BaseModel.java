@@ -9,18 +9,22 @@ import com.proxibase.aircandi.utils.CandiList;
 
 public abstract class BaseModel extends Observable implements IModel {
 
-	protected CandiList<CandiModel>			mChildren		= new CandiList<CandiModel>();
+	protected CandiList<IModel>				mChildren		= new CandiList<IModel>();
 	protected IModel						mParent			= null;
 	protected boolean						mRoot			= false;
 	protected LinkedList<IEntityModifier>	mModifiers		= new LinkedList<IEntityModifier>();
 	private boolean							mVisibleCurrent	= false;
 	private boolean							mVisibleNext	= false;
-	private boolean							mGrouped		= false;
-	private boolean							mZoomed 		= false;
+	private boolean							mZoomed			= false;
 	private String							mTitleText		= "Title";
+	private ModelType						mModelType		= ModelType.Entity;
 
 	public BaseModel() {
-		super();
+		this(ModelType.Entity);
+	}
+
+	public BaseModel(ModelType modelType) {
+		this.mModelType = modelType;
 	}
 
 	public void update() {
@@ -53,28 +57,16 @@ public abstract class BaseModel extends Observable implements IModel {
 		return this.mModifiers;
 	}
 
-	public CandiList<CandiModel> getChildren() {
+	public CandiList<IModel> getChildren() {
 		return this.mChildren;
 	}
 
 	public boolean isVisibleCurrent() {
-		if (this.mChildren.size() == 0)
-			return this.mVisibleCurrent;
-		else
-			for (CandiModel candiChild : this.mChildren)
-				if (candiChild.isVisibleCurrent())
-					return true;
-		return false;
+		return this.mVisibleCurrent;
 	}
 
 	public boolean isVisibleNext() {
-		if (this.mChildren.size() == 0)
-			return this.mVisibleNext;
-		else
-			for (CandiModel candiChild : this.mChildren)
-				if (candiChild.isVisibleNext())
-					return true;
-		return false;
+		return this.mVisibleNext;
 	}
 
 	public void setVisibleCurrent(boolean visibleCurrent) {
@@ -99,12 +91,23 @@ public abstract class BaseModel extends Observable implements IModel {
 		this.setChanged();
 	}
 
-	public void setGrouped(boolean grouped) {
-		this.mGrouped = grouped;
+	public boolean hasChildren() {
+		for (IModel model : this.mChildren)
+			if (model.isVisible())
+				return true;
+
+		return false;
 	}
 
-	public boolean isGrouped() {
-		return mGrouped;
+	public boolean hasSibling() {
+		if (mParent == null)
+			return false;
+
+		for (IModel model : mParent.getChildren())
+			if (model.isVisible() && !model.equals(this))
+				return true;
+
+		return false;
 	}
 
 	public IModel getParent() {
@@ -122,6 +125,7 @@ public abstract class BaseModel extends Observable implements IModel {
 	public void setRoot(boolean root) {
 		this.mRoot = root;
 	}
+
 	public void setZoomed(boolean zoomed) {
 		this.mZoomed = zoomed;
 		this.setChanged();
@@ -131,4 +135,15 @@ public abstract class BaseModel extends Observable implements IModel {
 		return mZoomed;
 	}
 
+	public void setModelType(ModelType modelType) {
+		this.mModelType = modelType;
+	}
+
+	public ModelType getModelType() {
+		return mModelType;
+	}
+
+	public enum ModelType {
+		Root, Entity
+	}
 }

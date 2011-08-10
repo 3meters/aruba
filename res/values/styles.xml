@@ -121,6 +121,22 @@
 	</style>
 	
 	<style
+		name="Application_Footer">		
+		<item name="android:textSize">@dimen/application_titlebar_text</item>		
+		<item name="android:textColor">@color/application_titlebar_text</item>		
+		<item name="android:textStyle">normal</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_gravity">left|center_vertical</item>
+		<item name="android:layout_weight">1</item>
+		<item name="android:paddingTop">6dp</item>	
+		<item name="android:paddingBottom">6dp</item>	
+		<item name="android:paddingLeft">6dp</item>
+		<item name="android:gravity">left|center_vertical</item>
+		<item name="android:background">@drawable/application_button_selector</item>
+	</style>
+	
+	<style
 		name="Application_Button">
 		<item name="android:layout_width">@dimen/application_button_width</item>
 		<item name="android:layout_height">wrap_content</item>
@@ -341,7 +357,7 @@
 	<style
 		name="Form_Value">
 		<item name="android:textSize">@dimen/form_value_text</item>		
-		<item name="android:textColor">@color/form_value_text</item>		
+		<item name="android:textColor">@color/form_value_text</item>	
 		<item name="android:gravity">left|center_vertical</item>	
 		<item name="android:layout_height">wrap_content</item>	
 		<item name="android:layout_width">wrap_content</item>	
@@ -351,7 +367,7 @@
 	<style
 		name="Form_Input">
 		<item name="android:textSize">@dimen/form_value_text</item>		
-		<item name="android:textColor">@color/form_value_text</item>		
+		<item name="android:textColor">@color/form_input_text</item>		
 		<item name="android:gravity">left|center_vertical</item>	
 		<item name="android:layout_height">wrap_content</item>	
 		<item name="android:layout_width">wrap_content</item>	

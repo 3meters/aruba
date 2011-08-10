@@ -61,7 +61,7 @@ public class AircandiUI {
 
 	public static Bitmap getImage(String url) {
 		try {
-			InputStream stream = ProxibaseService.getInstanceOf().getAsStream(url, ResponseFormat.Xml);
+			InputStream stream = ProxibaseService.getInstance().selectAsStream(url, ResponseFormat.Xml);
 			Bitmap bm = BitmapFactory.decodeStream(stream);
 			return bm;
 		}

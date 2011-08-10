@@ -17,9 +17,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.activities.R;
 import com.proxibase.aircandi.candi.models.CandiModel;
-import com.proxibase.aircandi.models.Post;
 import com.proxibase.aircandi.utils.AircandiUI;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.User;
@@ -110,37 +108,38 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 
 	private void configureHeader(Command command) {
 
-//		if (command.showHeader) {
-//			// Title
-//			TextView title = (TextView) findViewById(R.id.Activity_Title);
-//			if (title != null)
-//				title.setText(command.headerTitle);
-//
-//			// Icon
-//			ImageView icon = (ImageView) findViewById(R.id.Activity_Icon);
-//			if (icon != null)
-//				if (!command.headerIconResource.equals("none"))
-//					icon.setBackgroundResource(this.getResources().getIdentifier(command.headerIconResource, "drawable", this.getPackageName()));
-//				else
-//					icon.setVisibility(View.GONE);
-//		}
-//		else {
-//			TableLayout activityHeader = (TableLayout) findViewById(R.id.Activity_Header);
-//			if (activityHeader != null)
-//				activityHeader.setVisibility(View.GONE);
-//		}
+	// if (command.showHeader) {
+	// // Title
+	// TextView title = (TextView) findViewById(R.id.Activity_Title);
+	// if (title != null)
+	// title.setText(command.headerTitle);
+	//
+	// // Icon
+	// ImageView icon = (ImageView) findViewById(R.id.Activity_Icon);
+	// if (icon != null)
+	// if (!command.headerIconResource.equals("none"))
+	// icon.setBackgroundResource(this.getResources().getIdentifier(command.headerIconResource, "drawable",
+	// this.getPackageName()));
+	// else
+	// icon.setVisibility(View.GONE);
+	// }
+	// else {
+	// TableLayout activityHeader = (TableLayout) findViewById(R.id.Activity_Header);
+	// if (activityHeader != null)
+	// activityHeader.setVisibility(View.GONE);
+	// }
 	}
 
 	private void configureFooter(Command command) {
 
-//		if (command.showFooter) {
-//		}
-//		else {
-//			// Layout might have a default footer in it or it might not
-//			TableLayout activityFooter = (TableLayout) findViewById(R.id.Activity_Footer);
-//			if (activityFooter != null)
-//				activityFooter.setVisibility(View.GONE);
-//		}
+	// if (command.showFooter) {
+	// }
+	// else {
+	// // Layout might have a default footer in it or it might not
+	// TableLayout activityFooter = (TableLayout) findViewById(R.id.Activity_Footer);
+	// if (activityFooter != null)
+	// activityFooter.setVisibility(View.GONE);
+	// }
 	}
 
 	/*
@@ -214,43 +213,27 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 
 	@Override
 	protected void onPause() {
-
 		super.onPause();
 	}
 
 	@Override
 	protected void onResume() {
-
 		super.onResume();
 	}
 
 	protected void setCurrentLocation(Location currentLocation) {
-
 		((Aircandi) getApplicationContext()).currentLocation = currentLocation;
 	}
 
 	protected Location getCurrentLocation() {
-
 		return ((Aircandi) getApplicationContext()).currentLocation;
 	}
 
-	protected void setCurrentPost(Post post) {
-
-		((Aircandi) getApplicationContext()).currentPostX = post;
-	}
-
-	protected Post getCurrentPost() {
-
-		return ((Aircandi) getApplicationContext()).currentPostX;
-	}
-
 	protected void setCurrentCandiModel(CandiModel currentCandiModel) {
-
 		((Aircandi) getApplicationContext()).currentCandiModel = currentCandiModel;
 	}
 
 	protected CandiModel getCurrentCandiModel() {
-
 		return ((Aircandi) getApplicationContext()).currentCandiModel;
 	}
 

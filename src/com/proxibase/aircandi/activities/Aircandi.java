@@ -8,11 +8,9 @@ import android.util.Log;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
-import com.proxibase.aircandi.models.Post;
 
 public class Aircandi extends Application {
 
-	public Post							currentPostX;
 	public Location						currentLocation;
 	public CandiModel					currentCandiModel;
 

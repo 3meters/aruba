@@ -23,7 +23,6 @@ import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.util.Utilities;
 
 public abstract class AircandiActivity extends Activity {
 
@@ -33,28 +32,38 @@ public abstract class AircandiActivity extends Activity {
 	protected EntityProxy	mEntityProxy;
 	protected Command		mCommand;
 	protected User			mUser;
+	protected ActivityMode 	mActivityMode = ActivityMode.None;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		super.setContentView(this.getLayoutID());
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			String json = extras.getString("EntityProxy");
 			if (json != null && !json.equals("")) {
-				mEntityProxy = ProxibaseService.getGson(GsonType.ProxibaseService).fromJson(json, EntityProxy.class);
+				mEntityProxy = ProxibaseService.getGson(GsonType.Internal).fromJson(json, EntityProxy.class);
 			}
 			json = extras.getString("Command");
 			if (json != null && !json.equals("")) {
-				mCommand = ProxibaseService.getGson(GsonType.ProxibaseService).fromJson(json, Command.class);
+				mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Command.class);
+				if (mCommand.verb.toLowerCase().equals("new"))
+					mActivityMode = ActivityMode.New;
+				else if (mCommand.verb.toLowerCase().equals("edit"))
+					mActivityMode = ActivityMode.Edit;
 			}
 			json = extras.getString("User");
 			if (json != null && !json.equals("")) {
-				mUser = ProxibaseService.getGson(GsonType.ProxibaseService).fromJson(json, User.class);
+				mUser = ProxibaseService.getGson(GsonType.Internal).fromJson(json, User.class);
 			}
 		}
 
 		configure();
+	}
+
+	protected int getLayoutID() {
+		return 0;
 	}
 
 	private void configure() {
@@ -76,7 +85,6 @@ public abstract class AircandiActivity extends Activity {
 	}
 
 	public void showBackButton(boolean show) {
-
 		if (show) {
 			mContextButton.setText("Back");
 			mContextButton.setOnClickListener(new View.OnClickListener() {
@@ -109,12 +117,16 @@ public abstract class AircandiActivity extends Activity {
 		}
 	}
 
+	@Override
+	public void onBackPressed() {
+		doBackPressed();
+	}
+
 	public void doBackPressed() {
 		startTitlebarProgress();
+		setResult(Activity.RESULT_OK);
 		super.onBackPressed();
-		overridePendingTransition(R.anim.fade_in_medium, R.anim.summary_out);
-
-		// overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 	}
 
 	@Override
@@ -123,12 +135,6 @@ public abstract class AircandiActivity extends Activity {
 		super.onAttachedToWindow();
 		Window window = getWindow();
 		window.setFormat(PixelFormat.RGBA_8888);
-	}
-
-	@Override
-	public void onBackPressed() {
-		Utilities.Log("Graffiti", "onBackPressed", "Back pressed");
-		doBackPressed();
 	}
 
 	public void onHomeClick(View view) {
@@ -216,5 +222,9 @@ public abstract class AircandiActivity extends Activity {
 		public Object		data;
 		public String		userId;
 		public String		imageFormat	= "large";
+	}
+
+	public static enum ActivityMode {
+		New, Edit, None
 	}
 }

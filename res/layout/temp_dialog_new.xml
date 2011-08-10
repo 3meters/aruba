@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="match_parent"
+	android:layout_width="match_parent"
+	android:layout_gravity="center"
+	android:padding="25dp">
+	<TextView
+		android:id="@+id/DialogMessage"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_alignParentTop="true"
+		android:text="Share some candi and make your mark"
+		android:textSize="@dimen/heading_text"
+		android:textColor="#ffffffff"
+		android:gravity="center" />
+	<LinearLayout
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:gravity="center"
+		android:orientation="horizontal"
+		android:layout_below="@+id/DialogMessage">
+		<TableLayout
+			android:layout_height="wrap_content"
+			android:layout_width="match_parent">
+			<TableRow
+				android:paddingTop="5dp"
+				android:paddingBottom="5dp">
+				<Button
+					android:id="@+id/NewPhotoButton"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="left"
+					android:height="72dp"
+					android:width="80dp"
+					android:layout_marginRight="5dp"
+					android:background="@drawable/button_selector"
+					android:text="Photo"
+					android:textColor="#ffffffff"
+					android:textSize="@dimen/menuitem_text" />
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Drop some photo candi to share the fun or help others with the names of your favorite people." android:ellipsize="none" android:lines="4"/>
+			</TableRow>
+			<TableRow>
+				<Button
+					android:id="@+id/NewCommentButton"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="left"
+					android:height="72dp"
+					android:width="80dp"
+					android:layout_marginRight="5dp"
+					android:background="@drawable/button_selector"
+					android:text="Comment"
+					android:textColor="#ffffffff"
+					android:textSize="@dimen/menuitem_text" />
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="match_parent"
+					android:text="Drop some photo candi to share the fun or help others with the names of your favorite people." />
+			</TableRow>
+		</TableLayout>
+	</LinearLayout>
+</RelativeLayout>

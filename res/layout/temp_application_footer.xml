@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<TableLayout
+		style="@style/Application_Row">
+		<TableRow
+			android:id="@+id/Texture_Row">
+			<TextView
+				android:id="@+id/Context_Button"
+				android:minWidth="500dp"
+				style="@style/Application_Footer" />
+			<View
+				style="@style/Application_Button_Separator" />
+			<ImageView
+				android:id="@+id/Application_Button_Search"
+				style="@style/Application_Button"
+				android:src="@drawable/eggs_mini_cluster2"
+				android:onClick="onNewCandiClick" />
+		</TableRow>
+	</TableLayout>
+</merge>

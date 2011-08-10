@@ -8,9 +8,7 @@ public class CandiList<T> extends ArrayList<T> {
 
 	private static final long	serialVersionUID	= -2567383399125318333L;
 
-	public CandiList() {
-
-	}
+	public CandiList() {}
 
 	public CandiList(final int capacity) {
 
@@ -21,7 +19,7 @@ public class CandiList<T> extends ArrayList<T> {
 
 		for (int i = 0; i < this.size(); i++) {
 			CandiModel candiModel = (CandiModel) this.get(i);
-			if (candiModel.getEntityProxy().entityProxyId.equals(key))
+			if (candiModel.getModelId().equals(key))
 				return true;
 		}
 		return false;
@@ -31,7 +29,7 @@ public class CandiList<T> extends ArrayList<T> {
 
 		for (int i = 0; i < this.size(); i++) {
 			CandiModel candiModel = (CandiModel) this.get(i);
-			if (candiModel.getEntityProxy().entityProxyId.equals(key))
+			if (candiModel.getModelId().equals(key))
 				return candiModel;
 		}
 		return null;

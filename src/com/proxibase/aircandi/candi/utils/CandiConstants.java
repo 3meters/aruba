@@ -32,5 +32,12 @@ public interface CandiConstants {
 
 	public static final boolean	MODE_DEBUG						= true;
 	public static final String	APP_NAME						= "Aircandi";
+	public static final String	TYPE_CANDI_CLAIM				= "com.proxibase.aircandi.candi.claim";
+	public static final String	TYPE_CANDI_PHOTO				= "com.proxibase.aircandi.candi.photo";
+	public static final String	TYPE_CANDI_WEB					= "com.proxibase.aircandi.candi.web";
+	public static final String	TYPE_CANDI_BEACON				= "com.proxibase.aircandi.candi.beacon";
+	public static final int		ACTIVITY_ENTITY_HANDLER			= 100;
+	public static final int		ACTIVITY_MARKET					= 200;
+	public static final float	SWIPE_SMALL_FLING				= 100;
 
 }
