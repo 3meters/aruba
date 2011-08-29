@@ -5,12 +5,11 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.views.BaseView.OnViewTexturesLoadedListener;
 import com.proxibase.aircandi.candi.views.CandiView.OnCandiViewTouchListener;
 
-
 public class CandiViewBuilder {
+
 	/*
 	 * The job of the factory is to preconfigure resources and setup external references for
 	 * a new instance of ProxiTile.
-	 * 
 	 * NOTE: Loading a texture can fail if two requests are hitting the same physical asset.
 	 */
 	public static CandiView createCandiView(final CandiModel candiModel, final CandiPatchPresenter candiPatchPresenter,
@@ -29,6 +28,7 @@ public class CandiViewBuilder {
 
 		// Get textures loaded and then initialize
 		candiView.setTexturesLoadedListener(new OnViewTexturesLoadedListener() {
+
 			@Override
 			public void onTexturesLoaded(IView candiView) {
 				candiView.initialize();

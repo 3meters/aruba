@@ -1,14 +1,13 @@
 package com.proxibase.aircandi.utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.http.client.ClientProtocolException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
-import com.proxibase.sdk.android.proxi.service.ProxibaseService;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
 import android.content.Context;
 import android.content.res.XmlResourceParser;
@@ -21,32 +20,26 @@ import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
-import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Xml;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
-import android.view.animation.AnticipateInterpolator;
-import android.view.animation.AnticipateOvershootInterpolator;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.CycleInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Toast;
-import android.widget.ViewAnimator;
+
+import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
 public class AircandiUI {
+	
+	private static Paint mPaint = new Paint();
+	private static LinearGradient mShader = new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x70ffffff, 0x00ffffff, TileMode.CLAMP);
 
 	public static void showToastNotification(Context context, String message, int duration) {
 		CharSequence text = message;
@@ -60,9 +53,17 @@ public class AircandiUI {
 	}
 
 	public static Bitmap getImage(String url) {
+		InputStream stream = null;
 		try {
-			InputStream stream = ProxibaseService.getInstance().selectAsStream(url, ResponseFormat.Xml);
-			Bitmap bm = BitmapFactory.decodeStream(stream);
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+
+			stream = ProxibaseService.getInstance().selectAsStream(url, ResponseFormat.Xml);
+			Bitmap bm = BitmapFactory.decodeStream(stream, null, options);
+
+			if (bm == null || !bm.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString()))
+				throw new IllegalArgumentException("Downloaded image could not be decoded using the default config: actual=" + bm.getConfig().name());
+
 			return bm;
 		}
 		catch (ClientProtocolException e) {
@@ -71,7 +72,64 @@ public class AircandiUI {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+		finally {
+			try {
+				stream.close();
+			}
+			catch (IOException exception) {
+				exception.printStackTrace();
+			}
+		}
 		return null;
+	}
+
+	public static byte[] getImageAsBytes(String url) {
+		InputStream stream = null;
+		try {
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+
+			stream = ProxibaseService.getInstance().selectAsStream(url, ResponseFormat.Xml);
+			
+			byte[] imageBytes = getBytes(stream);
+			return imageBytes;
+		}
+		catch (ClientProtocolException e) {
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		finally {
+			try {
+				stream.close();
+			}
+			catch (IOException exception) {
+				exception.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	public static byte[] getBytes(InputStream inputStream) throws IOException {
+
+		int len;
+		int size = 1024;
+		byte[] buf;
+
+		if (inputStream instanceof ByteArrayInputStream) {
+			size = inputStream.available();
+			buf = new byte[size];
+			len = inputStream.read(buf, 0, size);
+		}
+		else {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			buf = new byte[size];
+			while ((len = inputStream.read(buf, 0, size)) != -1)
+				bos.write(buf, 0, len);
+			buf = bos.toByteArray();
+		}
+		return buf;
 	}
 
 	public static Bitmap cropToSquare(Bitmap bitmap) {
@@ -81,6 +139,7 @@ public class AircandiUI {
 		int yStart = 0;
 		int xEnd = width;
 		int yEnd = height;
+
 		if (height > width) {
 			int diff = height - width;
 			yStart = yStart + (diff / 2);
@@ -96,10 +155,10 @@ public class AircandiUI {
 		return croppedBitmap;
 	}
 
-	public static Bitmap getReflection(Bitmap originalImage) {
+	public static Bitmap getReflection(Bitmap originalBitmap) {
 
-		int width = originalImage.getWidth();
-		int height = originalImage.getHeight();
+		int width = originalBitmap.getWidth();
+		int height = originalBitmap.getHeight();
 
 		// This will not scale but will flip on the Y axis
 		Matrix matrix = new Matrix();
@@ -107,10 +166,10 @@ public class AircandiUI {
 
 		// Create a Bitmap with the flip matrix applied to it.
 		// We only want the bottom half of the image
-		Bitmap reflectionImage = Bitmap.createBitmap(originalImage, 0, height / 2, width, height / 2, matrix, false);
+		Bitmap reflectionImage = Bitmap.createBitmap(originalBitmap, 0, height / 2, width, height / 2, matrix, false);
 
 		// Create a new bitmap with same width but taller to fit reflection
-		Bitmap reflectionBitmap = Bitmap.createBitmap(width, (height / 2), Config.ARGB_8888);
+		Bitmap reflectionBitmap = Bitmap.createBitmap(width, (height / 2), CandiConstants.IMAGE_CONFIG_DEFAULT);
 
 		// Create a new Canvas with the bitmap that's big enough for
 		// the image plus gap plus reflection
@@ -119,41 +178,22 @@ public class AircandiUI {
 		// Draw in the reflection
 		canvas.drawBitmap(reflectionImage, 0, 0, null);
 
-		// Create a shader that is a linear gradient that covers the reflection
-		Paint paint = new Paint();
-		LinearGradient shader = new LinearGradient(0, 0, 0, reflectionBitmap.getHeight(), 0x70ffffff, 0x00ffffff, TileMode.CLAMP);
-
 		// Set the paint to use this shader (linear gradient)
-		paint.setShader(shader);
+		mPaint.setShader(mShader);
 
 		// Set the Transfer mode to be porter duff and destination in
-		paint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
+		mPaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
 
 		// Draw a rectangle using the paint with our linear gradient
-		canvas.drawRect(0, 0, width, reflectionBitmap.getHeight(), paint);
+		canvas.drawRect(0, 0, width, reflectionBitmap.getHeight(), mPaint);
+
+		// Release
+		reflectionImage.recycle();
+		reflectionImage = null;
+		canvas = null;
 
 		// Stash the image with reflection
 		return reflectionBitmap;
-	}
-
-	public static int gradient(int startColor, int endColor, float index) {
-		// index should be a desired percentage of the linear transform from
-		// start color to end color
-
-		float indexRedSteps = Math.abs(Color.red(startColor) - Color.red(endColor)) * index;
-		float indexGreenSteps = Math.abs(Color.green(startColor) - Color.green(endColor)) * index;
-		float indexBlueSteps = Math.abs(Color.blue(startColor) - Color.blue(endColor)) * index;
-
-		float gradientRed = Color.red(startColor) > Color.red(endColor)	? Color.red(startColor) - indexRedSteps
-																		: Color.red(startColor) + indexRedSteps;
-		float gradientGreen = Color.green(startColor) > Color.green(endColor)	? Color.green(startColor) - indexGreenSteps
-																				: Color.green(startColor) + indexGreenSteps;
-		float gradientBlue = Color.blue(startColor) > Color.blue(endColor)	? Color.blue(startColor) - indexBlueSteps
-																			: Color.blue(startColor) + indexBlueSteps;
-
-		int gradientColor = Color.argb(255, (int) gradientRed, (int) gradientGreen, (int) gradientBlue);
-
-		return gradientColor;
 	}
 
 	public static int hexToColor(String hex) {
@@ -249,187 +289,5 @@ public class AircandiUI {
 
 		return anim;
 
-	}
-
-	/**
-	 * Returns the current animation time in milliseconds. This time should be used when invoking
-	 * {@link Animation#setStartTime(long)}. Refer to {@link android.os.SystemClock} for more
-	 * information about the different available clocks. The clock used by this method is <em>not</em> the "wall" clock
-	 * (it is not {@link System#currentTimeMillis}).
-	 * 
-	 * @return the current animation time in milliseconds
-	 * @see android.os.SystemClock
-	 */
-	public static long currentAnimationTimeMillis() {
-		return SystemClock.uptimeMillis();
-	}
-
-	/**
-	 * Loads an {@link Interpolator} object from a resource
-	 * 
-	 * @param context Application context used to access resources
-	 * @param id The resource id of the animation to load
-	 * @return The animation object reference by the specified id
-	 * @throws NotFoundException
-	 */
-	public static Interpolator loadInterpolator(Context context, int id) throws NotFoundException {
-		XmlResourceParser parser = null;
-		try {
-			parser = context.getResources().getAnimation(id);
-			return createInterpolatorFromXml(context, parser);
-		}
-		catch (XmlPullParserException ex) {
-			NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(id));
-			rnf.initCause(ex);
-			throw rnf;
-		}
-		catch (IOException ex) {
-			NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(id));
-			rnf.initCause(ex);
-			throw rnf;
-		}
-		finally {
-			if (parser != null)
-				parser.close();
-		}
-
-	}
-
-	private static Interpolator createInterpolatorFromXml(Context c, XmlPullParser parser) throws XmlPullParserException, IOException {
-
-		Interpolator interpolator = null;
-
-		// Make sure we are on a start tag.
-		int type;
-		int depth = parser.getDepth();
-
-		while (((type = parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
-
-			if (type != XmlPullParser.START_TAG) {
-				continue;
-			}
-
-			AttributeSet attrs = Xml.asAttributeSet(parser);
-
-			String name = parser.getName();
-
-			if (name.equals("linearInterpolator")) {
-				interpolator = new LinearInterpolator(c, attrs);
-			}
-			else if (name.equals("accelerateInterpolator")) {
-				interpolator = new AccelerateInterpolator(c, attrs);
-			}
-			else if (name.equals("decelerateInterpolator")) {
-				interpolator = new DecelerateInterpolator(c, attrs);
-			}
-			else if (name.equals("accelerateDecelerateInterpolator")) {
-				interpolator = new AccelerateDecelerateInterpolator(c, attrs);
-			}
-			else if (name.equals("cycleInterpolator")) {
-				interpolator = new CycleInterpolator(c, attrs);
-			}
-			else if (name.equals("anticipateInterpolator")) {
-				interpolator = new AnticipateInterpolator(c, attrs);
-			}
-			else if (name.equals("overshootInterpolator")) {
-				interpolator = new OvershootInterpolator(c, attrs);
-			}
-			else if (name.equals("anticipateOvershootInterpolator")) {
-				interpolator = new AnticipateOvershootInterpolator(c, attrs);
-			}
-			else if (name.equals("bounceInterpolator")) {
-				interpolator = new BounceInterpolator(c, attrs);
-			}
-			else {
-				throw new RuntimeException("Unknown interpolator name: " + parser.getName());
-			}
-
-		}
-
-		return interpolator;
-
-	}
-
-	public static Animation getAnimationFade(long duration, float fromAlpha, float toAlpha) {
-
-		// Alpha animation
-		Animation animation = new AlphaAnimation(fromAlpha, toAlpha);
-		animation.setDuration(duration);
-		animation.setInterpolator(new AccelerateInterpolator());
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		return animation;
-	}
-
-	public static Animation getAnimationMove(long duration, float fromXDelta, float toXDelta, float fromYDelta, float toYDelta) {
-
-		// Alpha animation
-		Animation animation = new TranslateAnimation(fromXDelta, toXDelta, fromYDelta, toYDelta);
-		animation.setDuration(duration);
-		animation.setInterpolator(new AccelerateInterpolator());
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		return animation;
-	}
-
-	public static Animation getAnimationZoom(long duration, float fromScale, float toScale) {
-
-		// Scaling animation
-		Animation animation = new ScaleAnimation(fromScale, toScale, fromScale, toScale, Animation.RELATIVE_TO_SELF, 0.5f,
-				Animation.RELATIVE_TO_SELF, 0.5f) {};
-		animation.setInterpolator(new DecelerateInterpolator());
-		animation.setDuration(duration);
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		return animation;
-	}
-
-	public static AnimationSet getAnimIn() {
-		final AnimationSet setIn = new AnimationSet(true);
-		setIn.addAnimation(AircandiUI.getAnimationFade(1000, 0.0f, 1.0f));
-		setIn.addAnimation(AircandiUI.getAnimationZoom(700, 0.8f, 1.0f));
-		setIn.setFillEnabled(true);
-		setIn.setFillAfter(true);
-		return setIn;
-	}
-
-	public static AnimationSet getAnimOut() {
-		final AnimationSet setOut = new AnimationSet(true);
-		setOut.addAnimation(AircandiUI.getAnimationFade(1000, 1.0f, 0.0f));
-		setOut.addAnimation(AircandiUI.getAnimationZoom(700, 1.0f, 0.8f));
-		setOut.setFillEnabled(true);
-		setOut.setFillAfter(true);
-		return setOut;
-	}
-
-	/**
-	 * This class listens for the end of the first half of the animation. It then posts a new action that effectively
-	 * swaps the views when the container is rotated 90 degrees and thus invisible.
-	 */
-	@SuppressWarnings("unused")
-	private final class TileFlip implements Animation.AnimationListener {
-
-		private final ViewAnimator	viewFlipper_;
-
-		private TileFlip(ViewAnimator viewFlipper) {
-
-			viewFlipper_ = viewFlipper;
-		}
-
-		public void onAnimationStart(Animation animation) {
-
-		}
-
-		public void onAnimationEnd(Animation animation) {
-
-		// invalidate();
-
-		// ImageView imageView = (ImageView) viewFlipper_.getCurrentView();
-		// invalidateDrawable(imageView.getDrawable());
-		}
-
-		public void onAnimationRepeat(Animation animation) {
-
-		}
 	}
 }

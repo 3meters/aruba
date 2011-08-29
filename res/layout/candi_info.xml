@@ -24,20 +24,24 @@
 			android:id="@+id/CandiSummaryView"
 			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
-			android:paddingLeft="8dp"
-			android:paddingRight="8dp"
 			android:clickable="true"
+			android:focusable="true"
 			android:onClick="onSummaryViewClick"
-			android:visibility="visible">
+			android:paddingLeft="8dp"
+			android:paddingRight="8dp">
 			<LinearLayout
 				android:layout_height="fill_parent"
 				android:layout_width="fill_parent"
 				android:gravity="center_vertical"
+				android:clickable="true"
+				android:onClick="onSummaryViewClick"
 				android:orientation="horizontal">
 				<LinearLayout
 					android:layout_height="fill_parent"
 					android:layout_width="wrap_content"
 					android:layout_weight="0"
+					android:clickable="true"
+					android:onClick="onSummaryViewClick"
 					android:orientation="vertical">
 					<ImageView
 						android:id="@+id/Image"
@@ -49,9 +53,9 @@
 						android:maxWidth="80dp"
 						android:layout_weight="0"
 						android:adjustViewBounds="true"
+						android:scaleType="centerInside"
 						android:clickable="true"
-						android:onClick="onSummaryViewClick"
-						android:scaleType="centerInside" />
+						android:onClick="onSummaryViewClick" />
 					<ImageView
 						android:id="@+id/ImageReflection"
 						android:layout_gravity="top"
@@ -72,6 +76,8 @@
 					android:paddingLeft="10dp"
 					android:paddingRight="5dp"
 					android:paddingBottom="10dp"
+					android:clickable="true"
+					android:onClick="onSummaryViewClick"
 					android:orientation="vertical">
 					<TextView
 						android:id="@+id/Title"
@@ -98,6 +104,8 @@
 						android:layout_width="fill_parent"
 						android:layout_weight="1"
 						android:fillViewport="true"
+						android:clickable="true"
+						android:onClick="onSummaryViewClick"
 						android:layout_below="@id/Subtitle">
 						<TextView
 							android:id="@+id/Description"
@@ -113,6 +121,8 @@
 						android:id="@+id/frameMenu"
 						android:layout_width="fill_parent"
 						android:layout_height="wrap_content"
+						android:clickable="true"
+						android:onClick="onSummaryViewClick"
 						android:layout_alignParentBottom="true">
 					</FrameLayout>
 				</LinearLayout>

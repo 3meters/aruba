@@ -4,23 +4,21 @@ import com.google.gson.annotations.Expose;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
-/**
- * Entity as described by the proxi protocol standards.
- * 
- * @author Jayma
- */
-public class ClaimEntity extends BaseEntity {
+public class PostEntity extends BaseEntity {
 
 	// Annotation syntax: @Expose (serialize = false, deserialize = false)
 	@Expose
-	public String	claimedById;
+	public String	photoImageUri;
 	@Expose
-	public String	claimedDate;
+	public boolean	locked;
 	@Expose
 	public Metadata	__metadata	= new Metadata();
 
-	public ClaimEntity() {
-		__metadata.type = "Aircandi.Claim";
+	// Client only fields
+	public SubType	subType;
+
+	public PostEntity() {
+		__metadata.type = "Aircandi.Post";
 	}
 
 	@Override
@@ -28,7 +26,7 @@ public class ClaimEntity extends BaseEntity {
 		EntityProxy entityProxy = new EntityProxy();
 		entityProxy.beaconId = beaconId;
 		entityProxy.entityUri = getEntryUri();
-		entityProxy.entityType = CandiConstants.TYPE_CANDI_CLAIM;
+		entityProxy.entityType = CandiConstants.TYPE_CANDI_POST;
 		entityProxy.label = label;
 		entityProxy.title = title;
 		entityProxy.subtitle = subtitle;

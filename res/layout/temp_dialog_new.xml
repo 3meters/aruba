@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="match_parent"
-	android:layout_width="match_parent"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent"
 	android:layout_gravity="center"
 	android:padding="25dp">
 	<TextView
@@ -22,12 +22,12 @@
 		android:layout_below="@+id/DialogMessage">
 		<TableLayout
 			android:layout_height="wrap_content"
-			android:layout_width="match_parent">
+			android:layout_width="fill_parent">
 			<TableRow
 				android:paddingTop="5dp"
 				android:paddingBottom="5dp">
 				<Button
-					android:id="@+id/NewPhotoButton"
+					android:id="@+id/NewTopicButton"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:layout_gravity="left"
@@ -35,17 +35,20 @@
 					android:width="80dp"
 					android:layout_marginRight="5dp"
 					android:background="@drawable/button_selector"
-					android:text="Photo"
+					android:text="New\r\nTopic"
 					android:textColor="#ffffffff"
 					android:textSize="@dimen/menuitem_text" />
 				<TextView
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="Drop some photo candi to share the fun or help others with the names of your favorite people." android:ellipsize="none" android:lines="4"/>
+					android:textColor="#ffffffff"
+					android:textSize="@dimen/menuitem_text"
+					android:text="Leave a new topic here\nto share with others."
+					android:ellipsize="none"
+					android:lines="4"
+					android:width="200dp" android:layout_height="fill_parent" android:gravity="center_vertical"/>
 			</TableRow>
 			<TableRow>
 				<Button
-					android:id="@+id/NewCommentButton"
+					android:id="@+id/ExtendTopicButton"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:layout_gravity="left"
@@ -53,13 +56,15 @@
 					android:width="80dp"
 					android:layout_marginRight="5dp"
 					android:background="@drawable/button_selector"
-					android:text="Comment"
+					android:text="Add To\r\nTopic"
 					android:textColor="#ffffffff"
 					android:textSize="@dimen/menuitem_text" />
 				<TextView
-					android:layout_width="wrap_content"
-					android:layout_height="match_parent"
-					android:text="Drop some photo candi to share the fun or help others with the names of your favorite people." />
+					android:layout_height="fill_parent"
+					android:textColor="#ffffffff"
+					android:textSize="@dimen/menuitem_text"
+					android:text="Add photos, comments,\nand more to this topic."
+					android:width="200dp" android:gravity="center_vertical|clip_vertical"/>
 			</TableRow>
 		</TableLayout>
 	</LinearLayout>

@@ -34,6 +34,6 @@ public interface IModel {
 
 	public boolean isSuperRoot();
 
-	public void setRoot(boolean root);
+	public void setSuperRoot(boolean root);
 
 }

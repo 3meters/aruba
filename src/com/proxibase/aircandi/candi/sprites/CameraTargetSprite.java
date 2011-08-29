@@ -10,8 +10,6 @@ import org.anddev.andengine.util.modifier.ease.EaseExponentialInOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import com.proxibase.aircandi.candi.models.ZoneModel;
-import com.proxibase.aircandi.candi.utils.CandiConstants;
-import com.proxibase.aircandi.utils.Utilities;
 
 public class CameraTargetSprite extends CandiRectangle {
 
@@ -34,8 +32,6 @@ public class CameraTargetSprite extends CandiRectangle {
 
 		if (easeFunction == null)
 			easeFunction = EaseExponentialInOut.getInstance();
-
-		Utilities.Log(CandiConstants.APP_NAME, "CameraSprite", "MoveToZone: Setting focus to zone: " + String.valueOf(targetZone.getZoneIndex()));
 
 		SequenceEntityModifier modSequence = new SequenceEntityModifier(new IEntityModifierListener() {
 

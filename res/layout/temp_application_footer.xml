@@ -6,7 +6,7 @@
 		<TableRow
 			android:id="@+id/Texture_Row">
 			<TextView
-				android:id="@+id/Context_Button"
+				android:id="@+id/FooterText"
 				android:minWidth="500dp"
 				style="@style/Application_Footer" />
 			<View
@@ -14,7 +14,7 @@
 			<ImageView
 				android:id="@+id/Application_Button_Search"
 				style="@style/Application_Button"
-				android:src="@drawable/eggs_mini_cluster2"
+				android:src="@drawable/icon_new"
 				android:onClick="onNewCandiClick" />
 		</TableRow>
 	</TableLayout>

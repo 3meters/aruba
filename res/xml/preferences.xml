@@ -2,48 +2,11 @@
 <PreferenceScreen
 	xmlns:android="http://schemas.android.com/apk/res/android">
 	<PreferenceCategory
-		android:title="Beacon preferences">
-		<CheckBoxPreference
-			android:id="@+id/Pref_Beacon_With_Entities_Only"
-			android:key="Pref_Beacon_With_Entities_Only"
-			android:defaultValue="true"
-			android:title="Active beacons only"
-			android:summary="Only show beacons with active content" />
-		<EditTextPreference
-			android:id="@+id/Pref_Beacon_Level_Cutoff_Unregistered"
-			android:key="Pref_Beacon_Level_Cutoff_Unregistered"
-			android:defaultValue="-80"
-			android:title="Empty beacons level"
-			android:summary="Minimum average signal level required for unregistered beacon display"
-			android:dialogTitle="Enter signal level" />
-		<CheckBoxPreference
-			android:id="@+id/Pref_Beacon_Show_Hidden"
-			android:key="Pref_Beacon_Show_Hidden"
-			android:defaultValue="false"
-			android:title="Hidden beacons"
-			android:summary="Show hidden beacons" />
-	</PreferenceCategory>
-	<PreferenceCategory
-		android:title="Finder preferences">
-		<ListPreference
-			android:id="@+id/Pref_Display_Extras"
-			android:key="Pref_Display_Extras"
-			android:defaultValue="None"
-			android:title="Display extras"
-			android:summary="Show extra info in the entity title"
-			android:entries="@array/displayextras_list_preference"
-			android:entryValues="@array/displayextrasvalues_list_preference"
-			android:dialogTitle="Select extra" />
-		<CheckBoxPreference
-			android:id="@+id/Pref_Entity_Fencing"
-			android:key="Pref_Entity_Fencing"
-			android:defaultValue="true"
-			android:title="Entity fencing"
-			android:summary="Use fence settings to filter proxi entities" />
+		android:title="Search preferences">
 		<CheckBoxPreference
 			android:id="@+id/Pref_Autoscan"
 			android:key="Pref_Autoscan"
-			android:defaultValue="true"
+			android:defaultValue="false"
 			android:title="Autoscan"
 			android:summary="Scan for candi at regular intervals" />
 		<EditTextPreference
@@ -55,21 +18,6 @@
 			android:title="Autoscan interval"
 			android:summary="Interval in milliseconds between autoscans"
 			android:dialogTitle="Enter autoscan interval" />
-		<ListPreference
-			android:id="@+id/Pref_Tile_Scale"
-			android:key="Pref_Tile_Scale"
-			android:defaultValue="1.0"
-			android:title="Scale"
-			android:summary="Scaling for candies"
-			android:entries="@array/tile_scale_list_preference"
-			android:entryValues="@array/tile_scale_list_preference"
-			android:dialogTitle="Select scale (1.0 is normal)" />
-		<CheckBoxPreference
-			android:id="@+id/Pref_Tile_Rotate"
-			android:key="Pref_Tile_Rotate"
-			android:defaultValue="true"
-			android:title="Tile View"
-			android:summary="Use flow for tiles" />
 		<CheckBoxPreference
 			android:id="@+id/Pref_Sound_Effects"
 			android:key="Pref_Sound_Effects"
@@ -80,10 +28,31 @@
 	<PreferenceCategory
 		android:title="Development preferences">
 		<CheckBoxPreference
-			android:id="@+id/Pref_Show_Config_Menu"
-			android:key="Pref_Show_Config_Menu"
+			android:id="@+id/Pref_Demo_Mode"
+			android:key="Pref_Demo_Mode"
+			android:defaultValue="false"
+			android:title="Demo Mode"
+			android:summary="Add special beacons with demo entities" />
+		<CheckBoxPreference
+			android:id="@+id/Pref_Entity_Fencing"
+			android:key="Pref_Entity_Fencing"
 			android:defaultValue="true"
-			android:title="Configuration menu item"
-			android:summary="Show menu option for configuring spots" />
+			android:title="Entity fencing"
+			android:summary="Use fence settings to filter entities" />
+		<ListPreference
+			android:id="@+id/Pref_Display_Extras"
+			android:key="Pref_Display_Extras"
+			android:defaultValue="None"
+			android:title="Display extras"
+			android:summary="Show extra info in the entity title"
+			android:entries="@array/displayextras_list_preference"
+			android:entryValues="@array/displayextrasvalues_list_preference"
+			android:dialogTitle="Select extra" />
+		<CheckBoxPreference
+			android:id="@+id/Pref_Show_Memory"
+			android:key="Pref_Show_Memory"
+			android:defaultValue="false"
+			android:title="Memory Consumption"
+			android:summary="Show memory usage in footer" />
 	</PreferenceCategory>
 </PreferenceScreen>

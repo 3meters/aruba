@@ -32,4 +32,16 @@
 		name="dialog_install_cancel"> No Thanks</string>
 	<string
 		name="toast_package_installed"> has been installed. Tap the candi to launch.</string>
+	<string name="spinner_photo_topic_prompt">Topic</string>
+		
+	<string name="EXTRA_VERB">com.proxibase.aircandi.EXTRA_VERB</string>
+	<string name="EXTRA_RESULT_VERB">com.proxibase.aircandi.EXTRA_RESULT_VERB</string>
+	<string name="EXTRA_PARENT_ENTITY_ID">com.proxibase.aircandi.EXTRA_PARENT_ENTITY_ID</string>
+	<string name="EXTRA_BEACON">com.proxibase.aircandi.EXTRA_BEACON</string>
+	<string name="EXTRA_ENTITY">com.proxibase.aircandi.EXTRA_ENTITY</string>
+	<string name="EXTRA_USER">com.proxibase.aircandi.EXTRA_USER</string>
+	<string name="EXTRA_BEACON_DIRTY">com.proxibase.aircandi.EXTRA_BEACON_DIRTY</string>
+	<string name="EXTRA_ENTITY_DIRTY">com.proxibase.aircandi.EXTRA_ENTITY_DIRTY</string>
+	<string name="EXTRA_SUBTYPE">com.proxibase.aircandi.EXTRA_SUBTYPE</string>
+	<string name="TopicLocked">Locked</string>
 </resources>

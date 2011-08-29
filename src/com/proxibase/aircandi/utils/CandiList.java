@@ -19,7 +19,7 @@ public class CandiList<T> extends ArrayList<T> {
 
 		for (int i = 0; i < this.size(); i++) {
 			CandiModel candiModel = (CandiModel) this.get(i);
-			if (candiModel.getModelId().equals(key))
+			if (String.valueOf(candiModel.getModelId()).equals(key))
 				return true;
 		}
 		return false;
@@ -29,7 +29,7 @@ public class CandiList<T> extends ArrayList<T> {
 
 		for (int i = 0; i < this.size(); i++) {
 			CandiModel candiModel = (CandiModel) this.get(i);
-			if (candiModel.getModelId().equals(key))
+			if (String.valueOf(candiModel.getModelId()).equals(key))
 				return candiModel;
 		}
 		return null;

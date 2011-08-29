@@ -4,9 +4,9 @@
     <color name="application_titlebar_text">@color/theme_text</color>
     <color name="application_titlebar_start">@color/theme_widget_start</color>
     <color name="application_titlebar_end">@color/theme_widget_end</color>
-    <color name="application_titlebar_separator_start">@color/theme_light</color>
-    <color name="application_titlebar_separator_center">@color/theme_light</color>
-    <color name="application_titlebar_separator_end">@color/theme_light</color>
+    <color name="application_titlebar_separator_start">@color/theme_white</color>
+    <color name="application_titlebar_separator_center">@color/theme_white</color>
+    <color name="application_titlebar_separator_end">@color/theme_white</color>
     
     <color name="activity_title_text">@color/theme_text</color>
     <color name="activity_button_text">@color/theme_text</color>

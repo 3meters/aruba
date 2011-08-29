@@ -85,7 +85,7 @@ public class ZoneView extends BaseView {
 
 	protected void doModifiers() {
 		if (!mZoneModel.getModifiers().isEmpty()) {
-			IEntityModifier modifier = mZoneModel.getModifiers().pop();
+			IEntityModifier modifier = mZoneModel.getModifiers().removeFirst();
 			modifier.addModifierListener(new IModifierListener<IEntity>() {
 
 				@Override

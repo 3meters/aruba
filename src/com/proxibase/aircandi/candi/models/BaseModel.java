@@ -13,8 +13,8 @@ public abstract class BaseModel extends Observable implements IModel {
 	protected IModel						mParent			= null;
 	protected boolean						mRoot			= false;
 	protected LinkedList<IEntityModifier>	mModifiers		= new LinkedList<IEntityModifier>();
-	private boolean							mVisibleCurrent	= false;
-	private boolean							mVisibleNext	= false;
+	protected boolean						mVisibleCurrent	= false;
+	protected boolean						mVisibleNext	= false;
 	private boolean							mZoomed			= false;
 	private String							mTitleText		= "Title";
 	private ModelType						mModelType		= ModelType.Entity;
@@ -91,9 +91,17 @@ public abstract class BaseModel extends Observable implements IModel {
 		this.setChanged();
 	}
 
-	public boolean hasChildren() {
+	public boolean hasVisibleChildrenNext() {
 		for (IModel model : this.mChildren)
-			if (model.isVisible())
+			if (model.isVisibleNext())
+				return true;
+
+		return false;
+	}
+
+	public boolean hasVisibleChildrenCurrent() {
+		for (IModel model : this.mChildren)
+			if (model.isVisibleCurrent())
 				return true;
 
 		return false;
@@ -122,7 +130,7 @@ public abstract class BaseModel extends Observable implements IModel {
 		return this.mRoot;
 	}
 
-	public void setRoot(boolean root) {
+	public void setSuperRoot(boolean root) {
 		this.mRoot = root;
 	}
 

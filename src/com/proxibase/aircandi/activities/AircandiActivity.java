@@ -2,7 +2,6 @@ package com.proxibase.aircandi.activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
@@ -11,14 +10,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.models.BaseEntity.SubType;
 import com.proxibase.aircandi.utils.AircandiUI;
-import com.proxibase.sdk.android.proxi.consumer.Command;
+import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -29,37 +27,47 @@ public abstract class AircandiActivity extends Activity {
 	protected ImageView		mProgressIndicator;
 	protected ImageView		mButtonRefresh;
 	protected TextView		mContextButton;
+
+	protected Verb			mVerb;
+	protected SubType		mSubType;
+	protected Integer		mParentEntityId;
+	protected Beacon		mBeacon;
+	protected Boolean		mBeaconUnregistered;
 	protected EntityProxy	mEntityProxy;
-	protected Command		mCommand;
 	protected User			mUser;
-	protected ActivityMode 	mActivityMode = ActivityMode.None;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		super.setContentView(this.getLayoutID());
 
+		unpackIntent(getIntent());
+		configure();
+	}
+
+	private void unpackIntent(Intent intent) {
+
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			String json = extras.getString("EntityProxy");
+			mVerb = (Verb) extras.get(getString(R.string.EXTRA_VERB));
+			mSubType = (SubType) extras.get(getString(R.string.EXTRA_SUBTYPE));
+			mParentEntityId = extras.getInt(getString(R.string.EXTRA_PARENT_ENTITY_ID));
+
+			String json = extras.getString(getString(R.string.EXTRA_ENTITY));
 			if (json != null && !json.equals("")) {
 				mEntityProxy = ProxibaseService.getGson(GsonType.Internal).fromJson(json, EntityProxy.class);
 			}
-			json = extras.getString("Command");
+
+			json = extras.getString(getString(R.string.EXTRA_BEACON));
 			if (json != null && !json.equals("")) {
-				mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Command.class);
-				if (mCommand.verb.toLowerCase().equals("new"))
-					mActivityMode = ActivityMode.New;
-				else if (mCommand.verb.toLowerCase().equals("edit"))
-					mActivityMode = ActivityMode.Edit;
+				mBeacon = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Beacon.class);
 			}
-			json = extras.getString("User");
+
+			json = extras.getString(getString(R.string.EXTRA_USER));
 			if (json != null && !json.equals("")) {
 				mUser = ProxibaseService.getGson(GsonType.Internal).fromJson(json, User.class);
 			}
 		}
-
-		configure();
 	}
 
 	protected int getLayoutID() {
@@ -80,8 +88,9 @@ public abstract class AircandiActivity extends Activity {
 		if (mContextButton != null)
 			mContextButton.setVisibility(View.VISIBLE);
 
-		if (mEntityProxy != null)
+		if (mEntityProxy != null && mContextButton != null)
 			showBackButton(true);
+
 	}
 
 	public void showBackButton(boolean show) {
@@ -198,33 +207,7 @@ public abstract class AircandiActivity extends Activity {
 		super.onResume();
 	}
 
-	public static class ImageHolder {
-
-		public ImageView	imageView;
-		public String		imageUrl;
-		public String		imageId;
-		public String		imageShape		= "native";
-		public Bitmap		image;
-		public boolean		showReflection	= false;
-		public Object		data;
-		public Object		containerView;
-	}
-
-	public static class ViewHolder {
-
-		public ImageView	itemIcon;
-		public TextView		itemTitle;
-		public TextView		itemBody;
-		public Button		itemButton;
-		public LinearLayout	itemSidebarContainer;
-		public TextView		itemSidebarText;
-		public String		itemIconUrl;
-		public Object		data;
-		public String		userId;
-		public String		imageFormat	= "large";
-	}
-
-	public static enum ActivityMode {
-		New, Edit, None
+	public static enum Verb {
+		New, Edit, Delete
 	}
 }

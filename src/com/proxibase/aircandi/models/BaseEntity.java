@@ -9,9 +9,13 @@ public class BaseEntity extends AircandiEntity {
 
 	// Annotation syntax: @Expose (serialize = false, deserialize = false)
 	@Expose
-	public int		entityId;
+	public int		id;
 	@Expose
-	public String	entityType	= "";
+	public Integer	parentEntityId;
+	@Expose
+	public String	entityUri;
+	@Expose
+	public String	entityType;
 	@Expose
 	public String	beaconId;
 	@Expose
@@ -25,6 +29,8 @@ public class BaseEntity extends AircandiEntity {
 	@Expose
 	public String	imageUri;
 	@Expose
+	public String	imageFormat;
+	@Expose
 	public Float	signalFence	= -200f;
 	@Expose
 	public Float	createdLatitude;
@@ -34,15 +40,14 @@ public class BaseEntity extends AircandiEntity {
 	public String	createdById;
 	@Expose
 	public String	createdDate;
-
-	// For client use only
-	public boolean	dataBound	= true;
+	@Expose
+	public boolean	enabled;
 
 	public BaseEntity() {}
-	
+
 	@Override
 	public String getId() {
-		return String.valueOf(this.entityId);
+		return String.valueOf(this.id);
 	}
 
 	@Override
@@ -53,5 +58,9 @@ public class BaseEntity extends AircandiEntity {
 	@Override
 	public String getIdType() {
 		return "";
+	}
+
+	public enum SubType {
+		Topic, Comment
 	}
 }

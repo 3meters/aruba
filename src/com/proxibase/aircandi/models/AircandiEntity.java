@@ -24,7 +24,7 @@ public class AircandiEntity {
 	public String getEntryUri() {
 		String root = mServiceUri;
 		String entity = this.getCollection();
-		String uri = root + entity + "(" + this.getIdType() + "'" + this.getId() + "')";
+		String uri = root + entity + "(" + this.getId() + ")";
 		return uri;
 	}
 

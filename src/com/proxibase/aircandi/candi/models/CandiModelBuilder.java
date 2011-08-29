@@ -6,7 +6,7 @@ import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 public class CandiModelBuilder {
 
-	public static CandiModel newCandiModel(ModelType modelType, String modelId, EntityProxy entity) {
+	public static CandiModel newCandiModel(ModelType modelType, int modelId, EntityProxy entity) {
 		/*
 		 * The job of the builder is to handle any external initialization required 
 		 * by the component at creation time.

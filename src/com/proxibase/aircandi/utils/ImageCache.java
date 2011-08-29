@@ -1,10 +1,11 @@
 package com.proxibase.aircandi.utils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 
 import com.google.common.collect.MapMaker;
+import com.proxibase.aircandi.candi.utils.CandiConstants;
 
 /**
  * <p>
@@ -33,15 +35,19 @@ import com.google.common.collect.MapMaker;
 
 public class ImageCache implements Map<String, Bitmap> {
 
-	private int					mCachedImageQuality		= 75;
-	private String				mSecondLevelCacheDir;
-	private Map<String, Bitmap>	mCache;
-	private CompressFormat		mCompressedImageFormat	= CompressFormat.PNG;
+	private int						mCachedImageQuality		= 100;
+	private String					mSecondLevelCacheDir;
+	private Map<String, Bitmap>		mCache;
+	private CompressFormat			mCompressedImageFormat	= CompressFormat.PNG;
+	private BitmapFactory.Options	mOptions;
+	private boolean					mFileCacheOnly			= false;
 
 	public ImageCache(Context context, String cacheSubDirectory, int initialCapacity, int concurrencyLevel) {
 		this.mCache = new MapMaker().initialCapacity(initialCapacity).concurrencyLevel(concurrencyLevel).weakValues().makeMap();
 		this.mSecondLevelCacheDir = context.getApplicationContext().getCacheDir() + cacheSubDirectory;
 		makeCacheDirectory();
+		mOptions = new BitmapFactory.Options();
+		mOptions.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
 	}
 
 	public boolean cacheDirectoryExists() {
@@ -79,25 +85,39 @@ public class ImageCache implements Map<String, Bitmap> {
 		return mCachedImageQuality;
 	}
 
+	public void recycleBitmaps() {
+		final Enumeration<String> strEnum = Collections.enumeration(mCache.keySet());
+		while (strEnum.hasMoreElements()) {
+			mCache.get(strEnum.nextElement()).recycle();
+		}
+	}
+
 	public synchronized Bitmap get(Object key) {
 
 		String imageUrl = (String) key;
-		Bitmap bitmap = mCache.get(imageUrl);
 
-		if (bitmap != null) {
+		if (!mFileCacheOnly) {
+			Bitmap bitmap = mCache.get(imageUrl);
+
 			// 1st level cache hit (memory)
-			return bitmap;
+			if (bitmap != null) {
+				return mCache.get(imageUrl);
+			}
 		}
 
 		File imageFile = getImageFile(imageUrl);
 		if (imageFile.exists()) {
+
 			// 2nd level cache hit (disk)
-			bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+			Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), mOptions);
+
+			// treat decoding errors as a cache miss
 			if (bitmap == null) {
-				// treat decoding errors as a cache miss
 				return null;
 			}
-			mCache.put(imageUrl, bitmap);
+			if (!mFileCacheOnly)
+				mCache.put(imageUrl, bitmap);
+
 			return bitmap;
 		}
 
@@ -110,24 +130,30 @@ public class ImageCache implements Map<String, Bitmap> {
 		 * Write bitmap to disk cache and then memory cache
 		 */
 		File imageFile = getImageFile(imageUrl);
+		FileOutputStream ostream = null;
 		try {
 			imageFile.createNewFile();
-			FileOutputStream ostream = new FileOutputStream(imageFile);
+			ostream = new FileOutputStream(imageFile);
 			image.compress(mCompressedImageFormat, mCachedImageQuality, ostream);
-			ostream.close();
-		}
-		catch (FileNotFoundException e) {
-			e.printStackTrace();
 		}
 		catch (IOException e) {
-			// If the cache has been cleared then our directory structure is gone too.
-			if (!cacheDirectoryExists())
-				makeCacheDirectory();
 			e.printStackTrace();
+		}
+		finally {
+			try {
+				ostream.close();
+			}
+			catch (IOException exception) {
+				exception.printStackTrace();
+			}
 		}
 
 		// Write file to memory cache as well
-		return mCache.put(imageUrl, image);
+		if (!mFileCacheOnly) {
+			mCache.put(imageUrl, image);
+		}
+
+		return image;
 	}
 
 	public void putAll(Map<? extends String, ? extends Bitmap> t) {
@@ -136,14 +162,24 @@ public class ImageCache implements Map<String, Bitmap> {
 
 	public boolean containsKey(Object key) {
 
-		if (mCache.containsKey(key))
-			return true;
-		else {
+		if (mFileCacheOnly) {
 			File imageFile = getImageFile((String) key);
-			if (imageFile.exists())
+			if (imageFile.exists()) {
 				return true;
+			}
+			return false;
 		}
-		return false;
+		else {
+			if (mCache.containsKey(key))
+				return true;
+			else {
+				File imageFile = getImageFile((String) key);
+				if (imageFile.exists()) {
+					return true;
+				}
+				return false;
+			}
+		}
 	}
 
 	public boolean containsValue(Object value) {
@@ -181,5 +217,13 @@ public class ImageCache implements Map<String, Bitmap> {
 	private File getImageFile(String imageUrl) {
 		String fileName = Integer.toHexString(imageUrl.hashCode()) + "." + mCompressedImageFormat.name();
 		return new File(mSecondLevelCacheDir + "/" + fileName);
+	}
+
+	public void setFileCacheOnly(boolean fileCacheOnly) {
+		this.mFileCacheOnly = fileCacheOnly;
+	}
+
+	public boolean isFileCacheOnly() {
+		return mFileCacheOnly;
 	}
 }

@@ -8,15 +8,23 @@ import java.util.regex.Pattern;
 
 public class DateUtils
 {
-	public static final String	DATE_FORMAT_NOW	= "yyyy-MM-dd HH:mm:ss";
+	public static final String	DATE_NOW_FORMAT	= "yyyy-MM-dd HH:mm:ss";
+	public static final String 	DATE_NOW_FORMAT_FILENAME = "yyyyMMdd_HHmmss";
 
 	public static String nowString()
 	{
 		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_NOW_FORMAT);
 		return sdf.format(cal.getTime());
 	}
 
+	public static String nowString(String pattern)
+	{
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+		return sdf.format(cal.getTime());
+	}
+	
 	public static Date nowDate()
 	{
 		Calendar cal = Calendar.getInstance();

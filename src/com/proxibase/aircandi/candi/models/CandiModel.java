@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 
 import com.proxibase.aircandi.candi.models.ZoneModel.Position;
+import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
 import com.proxibase.aircandi.utils.ImageManager.ImageFormat;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
@@ -18,7 +19,7 @@ import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 public class CandiModel extends BaseModel {
 
 	public static enum Transition {
-		None, FadeIn, FadeOut, OverflowIn, OverflowOut, Move, Shift
+		None, FadeIn, FadeOut, OverflowIn, OverflowOut, Move, Shift, In, Out
 	}
 
 	public static enum DisplayExtra {
@@ -26,13 +27,17 @@ public class CandiModel extends BaseModel {
 	}
 
 	public static enum ReasonInactive {
-		New, Navigation, Hidden, None
+		New, Navigation, Hidden, None, Deleting
 	}
 
 	private EntityProxy		mEntityProxy		= null;
-	private String			mModelId;
+	private int				mModelId;
 	private ZoneModel		mZoneNext			= null;
 	private ZoneModel		mZoneCurrent		= null;
+	private ZoneStatus		mZoneStatusCurrent	= ZoneStatus.Normal;
+	private ZoneStatus		mZoneStatusNext		= ZoneStatus.Normal;
+	private Position		mPositionCurrent	= null;
+	private Position		mPositionNext		= null;
 	private DisplayExtra	mDisplayExtra		= DisplayExtra.None;
 	private boolean			mTitleOnly			= false;
 	private boolean			mBodyOnly			= false;
@@ -45,18 +50,25 @@ public class CandiModel extends BaseModel {
 	private boolean			mOverflowNext		= false;
 	private ReasonInactive	mReasonInactive		= ReasonInactive.None;
 
-	public CandiModel(ModelType modelType, String modelId) {
+	public CandiModel(ModelType modelType, int modelId) {
 		super(modelType);
 		this.setModelId(modelId);
 	}
 
 	public Transition getTransition() {
+		/*
+		 * If OverflowNext is true then VisibleNext was set to false
+		 * But if OverflowNext = false then VisibleNext can be true or false
+		 */
 
 		Transition transition = Transition.None;
-		if (this.isVisibleCurrent() && this.isOverflowNext()) {
+		if (this.mReasonInactive == ReasonInactive.Deleting) {
+			transition = Transition.Out;
+		}
+		else if (this.isVisibleCurrent() && this.isOverflowNext()) {
 			transition = Transition.FadeOut;
 		}
-		else if (!this.isVisibleCurrent() && !this.isOverflowNext()) {
+		else if (!this.isVisibleCurrent() && this.isVisibleNext() && !this.isOverflowNext()) {
 			transition = Transition.FadeIn;
 		}
 		else if (!this.isVisibleCurrent() && this.isVisibleNext()) {
@@ -69,11 +81,12 @@ public class CandiModel extends BaseModel {
 			if (this.mZoneCurrent.getZoneIndex() != this.mZoneNext.getZoneIndex())
 				transition = Transition.Move;
 			else {
-				Position positionCurrent = getZoneCurrent().getChildPositionCurrent(this);
-				Position positionNext = getZoneNext().getChildPositionNext(this);
-				if (!positionNext.equals(positionCurrent))
+				if (!mPositionNext.equals(mPositionCurrent))
 					transition = Transition.Shift;
 			}
+		}
+		else if (mOverflowNext && !mVisibleCurrent && !mVisibleNext) {
+			transition = Transition.FadeOut;
 		}
 		return transition;
 	}
@@ -83,7 +96,20 @@ public class CandiModel extends BaseModel {
 		super.shiftToNext();
 
 		mZoneCurrent = mZoneNext;
+
+		Position positionCurrent = this.getPositionCurrent();
+		positionCurrent.x = mPositionNext.x;
+		positionCurrent.y = mPositionNext.y;
+		positionCurrent.scale = mPositionNext.scale;
+		positionCurrent.col = mPositionNext.col;
+		positionCurrent.row = mPositionNext.row;
+		positionCurrent.colFirst = mPositionNext.colFirst;
+		positionCurrent.colLast = mPositionNext.colLast;
+		positionCurrent.rowFirst = mPositionNext.rowFirst;
+		positionCurrent.rowLast = mPositionNext.rowLast;
+
 		mOverflowCurrent = mOverflowNext;
+		mZoneStatusCurrent = mZoneStatusNext;
 	}
 
 	public EntityProxy getEntityProxy() {
@@ -94,7 +120,7 @@ public class CandiModel extends BaseModel {
 		return mDisplayExtra;
 	}
 
-	public String getModelId() {
+	public int getModelId() {
 		return mModelId;
 	}
 
@@ -195,7 +221,7 @@ public class CandiModel extends BaseModel {
 		this.mTouchAreaActive = touchAreaActive;
 	}
 
-	public void setModelId(String modelId) {
+	public void setModelId(int modelId) {
 		this.mModelId = modelId;
 	}
 
@@ -222,13 +248,13 @@ public class CandiModel extends BaseModel {
 		}
 		CandiModel that = (CandiModel) other;
 
-		return this.mModelId.equals(that.mModelId);
+		return this.mModelId == that.mModelId;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = 100;
-		result = 31 * result + this.mModelId.hashCode();
+		result = 31 * result + String.valueOf(this.mModelId).hashCode();
 		return result;
 	}
 
@@ -250,5 +276,41 @@ public class CandiModel extends BaseModel {
 
 	public ReasonInactive getReasonInactive() {
 		return mReasonInactive;
+	}
+
+	public void setZoneStatusCurrent(ZoneStatus zoneStatusCurrent) {
+		this.mZoneStatusCurrent = zoneStatusCurrent;
+	}
+
+	public ZoneStatus getZoneStatusCurrent() {
+		return mZoneStatusCurrent;
+	}
+
+	public void setZoneStatusNext(ZoneStatus zoneStatusNext) {
+		this.mZoneStatusNext = zoneStatusNext;
+	}
+
+	public ZoneStatus getZoneStatusNext() {
+		return mZoneStatusNext;
+	}
+
+	public void setPositionCurrent(Position positionCurrent) {
+		this.mPositionCurrent = positionCurrent;
+	}
+
+	public Position getPositionCurrent() {
+		if (mPositionCurrent == null)
+			mPositionCurrent = new Position();
+		return mPositionCurrent;
+	}
+
+	public void setPositionNext(Position positionNext) {
+		this.mPositionNext = positionNext;
+	}
+
+	public Position getPositionNext() {
+		if (mPositionNext == null)
+			mPositionNext = new Position();
+		return mPositionNext;
 	}
 }

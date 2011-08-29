@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="lib" path="D:/Files/Proxibase/Android/packages/google-gson-1.7.1/gson-1.7.1.jar" sourcepath="D:/Files/Proxibase/Android/packages/google-gson-1.7.1/gson-1.7.1-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/D:/Files/Proxibase/Android/packages/google-gson-1.7.1/gson-1.7.1-javadoc.jar!/"/>
@@ -11,5 +10,11 @@
 	<classpathentry kind="lib" path="D:/Files/Proxibase/Code/Guava/bin/guava.jar"/>
 	<classpathentry kind="lib" path="D:/Files/Proxibase/Android/andengine/latest/bin/andengine.jar" sourcepath="D:/Files/Proxibase/Android/andengine/latest/bin/andengine.jar"/>
 	<classpathentry kind="lib" path="D:/Files/Proxibase/Code/Proxibase Sdk/android/bin/proxibase.jar"/>
+	<classpathentry kind="lib" path="D:/Files/Proxibase/Android/amazonaws/aws-android-sdk-0.2.1/lib/aws-android-sdk-0.2.1-debug.jar" sourcepath="D:/Files/Proxibase/Android/amazonaws/aws-android-sdk-0.2.1/src">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Users/Jayma/Desktop/Proxibase/Android/amazonaws/aws-android-sdk-0.2.1/documentation/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
