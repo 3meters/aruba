@@ -80,7 +80,7 @@ public class ImageManager {
 	}
 
 	public void setImageCache(ImageCache mImageCache) {
-		this.mImageCache = mImageCache;
+		mImageCache = mImageCache;
 	}
 
 	public Bitmap getImage(String key) {
@@ -93,10 +93,6 @@ public class ImageManager {
 
 	public void setContext(Context context) {
 		mContext = context;
-	}
-
-	public Context getContext() {
-		return mContext;
 	}
 
 	public void fetchImageAsynch(ImageRequest imageRequest) {
@@ -115,13 +111,213 @@ public class ImageManager {
 		}
 	}
 
-	public void startWebViewProcessing() {
-		mWebView.setPictureListener(null);
-		ImageRequest imageRequest = (ImageRequest) mWebViewQueue.poll();
-		if (imageRequest != null) {
-			mWebViewProcessing = true;
-			new GetImageHtmlTask().execute(imageRequest);
+	public class GetImageBinaryTask extends AsyncTask<ImageRequest, Void, Bitmap> {
+	
+		ImageRequest	mImageRequest;
+	
+		@Override
+		protected Bitmap doInBackground(final ImageRequest... params) {
+	
+			// We are on the background thread
+			mImageRequest = params[0];
+			Bitmap bitmap = AircandiUI.getImage(mImageRequest.imageUri);
+	
+			if (bitmap != null) {
+	
+				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageId + "'");
+	
+				// Crop if requested
+				Bitmap bitmapCropped;
+				if (mImageRequest.imageShape.equals("square")) {
+					bitmapCropped = AircandiUI.cropToSquare(bitmap);
+				}
+				else {
+					bitmapCropped = bitmap;
+				}
+	
+				// Scale if needed
+				Bitmap bitmapCroppedScaled;
+				if (mImageRequest.widthMinimum > 0 && bitmapCropped.getWidth() != mImageRequest.widthMinimum) {
+					float scalingRatio = (float) mImageRequest.widthMinimum / (float) bitmapCropped.getWidth();
+					float newHeight = (float) bitmapCropped.getHeight() * scalingRatio;
+					bitmapCroppedScaled = Bitmap.createScaledBitmap(bitmapCropped, mImageRequest.widthMinimum, (int) (newHeight), true);
+				}
+				else {
+					bitmapCroppedScaled = bitmapCropped;
+				}
+	
+				// Make sure the bitmap format is right
+				Bitmap bitmapFinal;
+				if (!bitmapCroppedScaled.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString())) {
+					bitmapFinal = bitmapCroppedScaled.copy(CandiConstants.IMAGE_CONFIG_DEFAULT, false);
+				}
+				else {
+					bitmapFinal = bitmapCroppedScaled;
+				}
+	
+				// Stuff it into the disk and memory caches. Overwrites if it already exists.
+				if (bitmapFinal.isRecycled())
+					throw new IllegalArgumentException("bitmapFinal has been recycled");
+				mImageCache.put(mImageRequest.imageId, bitmapFinal);
+	
+				// Create reflection if requested
+				if (mImageRequest.showReflection) {
+					final Bitmap bitmapReflection = AircandiUI.getReflection(bitmapFinal);
+					mImageCache.put(mImageRequest.imageId + ".reflection", bitmapReflection);
+					if (mImageCache.isFileCacheOnly())
+						bitmapReflection.recycle();
+				}
+	
+				return bitmapFinal;
+			}
+			else {
+				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download failed for image '" + mImageRequest.imageId + "'");
+				return null;
+			}
 		}
+	
+		@Override
+		protected void onPostExecute(final Bitmap bitmap) {
+	
+			// We are on the main thread
+			super.onPostExecute(bitmap);
+	
+			if (bitmap != null) {
+				if (mImageRequest.imageReadyListener != null)
+					mImageRequest.imageReadyListener.onImageReady(bitmap);
+				else if (mImageReadyListener != null) {
+					mImageReadyListener.onImageReady(bitmap);
+				}
+			}
+		}
+	}
+
+	public class GetImageHtmlTask extends AsyncTask<ImageRequest, Void, Bitmap> {
+	
+		ImageRequest	mImageRequest;
+	
+		@Override
+		protected Bitmap doInBackground(final ImageRequest... params) {
+	
+			// We are on the background thread
+			mImageRequest = params[0];
+			String webViewContent = "";
+			final AtomicBoolean ready = new AtomicBoolean(false);
+	
+			webViewContent = ProxibaseService.getInstance().selectAsString(mImageRequest.imageUri, ResponseFormat.Html);
+			mWebView.setWebViewClient(new WebViewClient() {
+	
+				@Override
+				public void onPageFinished(WebView view, String url) {
+					ready.set(true);
+				}
+	
+			});
+			mWebView.setPictureListener(new PictureListener() {
+	
+				@Override
+				public void onNewPicture(WebView view, Picture picture) {
+	
+					if (ready.get()) {
+						Bitmap bitmap = Bitmap.createBitmap(250, 250, CandiConstants.IMAGE_CONFIG_DEFAULT);
+						Canvas canvas = new Canvas(bitmap);
+						picture.draw(canvas);
+	
+						if (bitmap != null) {
+	
+							// Stuff it into the disk and memory caches. Overwrites if it already exists.
+							mImageCache.put(mImageRequest.imageId, bitmap);
+	
+							// Create reflection if requested
+							if (mImageRequest.showReflection) {
+								Bitmap bitmapReflection = AircandiUI.getReflection(bitmap);
+								mImageCache.put(mImageRequest.imageId + ".reflection", bitmapReflection);
+								if (mImageCache.isFileCacheOnly()) {
+									bitmapReflection.recycle();
+									bitmapReflection = null;
+								}
+							}
+	
+							// Ready to return to original requestor
+							if (mImageRequest.imageReadyListener != null)
+								mImageRequest.imageReadyListener.onImageReady(bitmap);
+							else if (mImageReadyListener != null) {
+								mImageReadyListener.onImageReady(bitmap);
+							}
+						}
+	
+						// Release
+						canvas = null;
+						mWebViewProcessing = false;
+						startWebViewProcessing();
+					}
+				}
+			});
+	
+			mWebView.loadDataWithBaseURL(mImageRequest.imageUri, webViewContent, "text/html", "utf-8", null);
+			return null;
+		}
+	}
+
+	public Bitmap loadBitmapFromDevice(final Uri imageUri, String imageWidthMax) {
+	
+		String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
+		String imageOrientation = "";
+		@SuppressWarnings("unused")
+		String imagePath = "";
+		File imageFile = null;
+	
+		Cursor cursor = mContext.getContentResolver().query(imageUri, projection, null, null, null);
+	
+		if (cursor != null) {
+			/*
+			 * Means the image is in the media store
+			 */
+			String imageData = "";
+			if (cursor.moveToFirst()) {
+				int dataColumn = cursor.getColumnIndex(Images.Media.DATA);
+				int orientationColumn = cursor.getColumnIndex(Images.Media.ORIENTATION);
+				imageData = cursor.getString(dataColumn);
+				imageOrientation = cursor.getString(orientationColumn);
+			}
+	
+			imageFile = new File(imageData);
+			imagePath = imageData;
+		}
+		else {
+			/*
+			 * The image is in the local file system
+			 */
+			imagePath = imageUri.toString().replace("file://", "");
+			imageFile = new File(imageUri.toString().replace("file://", ""));
+		}
+	
+		byte[] imageBytes = new byte[(int) imageFile.length()];
+	
+		DataInputStream in = null;
+	
+		try {
+			in = new DataInputStream(new FileInputStream(imageFile));
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		try {
+			in.readFully(imageBytes);
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			in.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+	
+		imageOrientation = getExifOrientation(imageUri.getPath(), imageOrientation);
+		Bitmap bitmap = bitmapForByteArray(imageBytes, imageWidthMax, imageOrientation);
+		return bitmap;
 	}
 
 	public static Bitmap loadBitmapFromAssets(final String assetPath) {
@@ -256,134 +452,6 @@ public class ImageManager {
 		}
 	}
 
-	public Bitmap loadBitmapFromDevice(final Uri imageUri, String imageWidthMax) {
-
-		String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
-		String imageOrientation = "";
-		@SuppressWarnings("unused")
-		String imagePath = "";
-		File imageFile = null;
-
-		Cursor cursor = mContext.getContentResolver().query(imageUri, projection, null, null, null);
-
-		if (cursor != null) {
-			/*
-			 * Means the image is in the media store
-			 */
-			String imageData = "";
-			if (cursor.moveToFirst()) {
-				int dataColumn = cursor.getColumnIndex(Images.Media.DATA);
-				int orientationColumn = cursor.getColumnIndex(Images.Media.ORIENTATION);
-				imageData = cursor.getString(dataColumn);
-				imageOrientation = cursor.getString(orientationColumn);
-			}
-
-			imageFile = new File(imageData);
-			imagePath = imageData;
-		}
-		else {
-			/*
-			 * The image is in the local file system
-			 */
-			imagePath = imageUri.toString().replace("file://", "");
-			imageFile = new File(imageUri.toString().replace("file://", ""));
-		}
-
-		byte[] imageBytes = new byte[(int) imageFile.length()];
-
-		DataInputStream in = null;
-
-		try {
-			in = new DataInputStream(new FileInputStream(imageFile));
-		}
-		catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		try {
-			in.readFully(imageBytes);
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		try {
-			in.close();
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		imageOrientation = getExifOrientation(imageUri.getPath(), imageOrientation);
-		Bitmap bitmap = this.bitmapForByteArray(imageBytes, imageWidthMax, imageOrientation);
-		return bitmap;
-	}
-
-	public class GetImageHtmlTask extends AsyncTask<ImageRequest, Void, Bitmap> {
-
-		ImageRequest	mImageRequest;
-
-		@Override
-		protected Bitmap doInBackground(final ImageRequest... params) {
-
-			// We are on the background thread
-			mImageRequest = params[0];
-			String webViewContent = "";
-			final AtomicBoolean ready = new AtomicBoolean(false);
-
-			webViewContent = ProxibaseService.getInstance().selectAsString(mImageRequest.imageUri, ResponseFormat.Html);
-			mWebView.setWebViewClient(new WebViewClient() {
-
-				@Override
-				public void onPageFinished(WebView view, String url) {
-					ready.set(true);
-				}
-
-			});
-			mWebView.setPictureListener(new PictureListener() {
-
-				@Override
-				public void onNewPicture(WebView view, Picture picture) {
-
-					if (ready.get()) {
-						Bitmap bitmap = Bitmap.createBitmap(250, 250, CandiConstants.IMAGE_CONFIG_DEFAULT);
-						Canvas canvas = new Canvas(bitmap);
-						picture.draw(canvas);
-
-						if (bitmap != null) {
-
-							// Stuff it into the disk and memory caches. Overwrites if it already exists.
-							mImageCache.put(mImageRequest.imageId, bitmap);
-
-							// Create reflection if requested
-							if (mImageRequest.showReflection) {
-								Bitmap bitmapReflection = AircandiUI.getReflection(bitmap);
-								mImageCache.put(mImageRequest.imageId + ".reflection", bitmapReflection);
-								if (mImageCache.isFileCacheOnly()) {
-									bitmapReflection.recycle();
-									bitmapReflection = null;
-								}
-							}
-
-							// Ready to return to original requestor
-							if (mImageRequest.imageReadyListener != null)
-								mImageRequest.imageReadyListener.onImageReady(bitmap);
-							else if (mImageReadyListener != null) {
-								mImageReadyListener.onImageReady(bitmap);
-							}
-						}
-
-						// Release
-						canvas = null;
-						mWebViewProcessing = false;
-						startWebViewProcessing();
-					}
-				}
-			});
-
-			mWebView.loadDataWithBaseURL(mImageRequest.imageUri, webViewContent, "text/html", "utf-8", null);
-			return null;
-		}
-	}
-
 	public String getExifOrientation(String imagePath, String imageOrientation) {
 		/*
 		 * Return image EXIF orientation using reflection (if Android 2.0 or higher)
@@ -456,7 +524,9 @@ public class ImageManager {
 	}
 
 	public boolean hasImageCaptureBug() {
-		// list of known devices that have the bug
+		/*
+		 *  list of known devices that have the bug.
+		 */
 		ArrayList<String> devices = new ArrayList<String>();
 		devices.add("android-devphone1/dream_devphone/dream");
 		devices.add("google/soju/crespo");
@@ -468,97 +538,29 @@ public class ImageManager {
 		return devices.contains(android.os.Build.BRAND + "/" + android.os.Build.PRODUCT + "/" + android.os.Build.DEVICE);
 	}
 
-	public class GetImageBinaryTask extends AsyncTask<ImageRequest, Void, Bitmap> {
-
-		ImageRequest	mImageRequest;
-
-		@Override
-		protected Bitmap doInBackground(final ImageRequest... params) {
-
-			// We are on the background thread
-			mImageRequest = params[0];
-			Bitmap bitmap = AircandiUI.getImage(mImageRequest.imageUri);
-
-			if (bitmap != null) {
-
-				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageId + "'");
-
-				// Crop if requested
-				Bitmap bitmapCropped;
-				if (mImageRequest.imageShape.equals("square")) {
-					bitmapCropped = AircandiUI.cropToSquare(bitmap);
-				}
-				else {
-					bitmapCropped = bitmap;
-				}
-
-				// Scale if needed
-				Bitmap bitmapCroppedScaled;
-				if (mImageRequest.widthMinimum > 0 && bitmapCropped.getWidth() != mImageRequest.widthMinimum) {
-					float scalingRatio = (float) mImageRequest.widthMinimum / (float) bitmapCropped.getWidth();
-					float newHeight = (float) bitmapCropped.getHeight() * scalingRatio;
-					bitmapCroppedScaled = Bitmap.createScaledBitmap(bitmapCropped, mImageRequest.widthMinimum, (int) (newHeight), true);
-				}
-				else {
-					bitmapCroppedScaled = bitmapCropped;
-				}
-
-				// Make sure the bitmap format is right
-				Bitmap bitmapFinal;
-				if (!bitmapCroppedScaled.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString())) {
-					bitmapFinal = bitmapCroppedScaled.copy(CandiConstants.IMAGE_CONFIG_DEFAULT, false);
-				}
-				else {
-					bitmapFinal = bitmapCroppedScaled;
-				}
-
-				// Stuff it into the disk and memory caches. Overwrites if it already exists.
-				if (bitmapFinal.isRecycled())
-					throw new IllegalArgumentException("bitmapFinal has been recycled");
-				mImageCache.put(mImageRequest.imageId, bitmapFinal);
-
-				// Create reflection if requested
-				if (mImageRequest.showReflection) {
-					final Bitmap bitmapReflection = AircandiUI.getReflection(bitmapFinal);
-					mImageCache.put(mImageRequest.imageId + ".reflection", bitmapReflection);
-					if (mImageCache.isFileCacheOnly())
-						bitmapReflection.recycle();
-				}
-
-				return bitmapFinal;
-			}
-			else {
-				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download failed for image '" + mImageRequest.imageId + "'");
-				return null;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(final Bitmap bitmap) {
-
-			// We are on the main thread
-			super.onPostExecute(bitmap);
-
-			if (bitmap != null) {
-				if (mImageRequest.imageReadyListener != null)
-					mImageRequest.imageReadyListener.onImageReady(bitmap);
-				else if (mImageReadyListener != null) {
-					mImageReadyListener.onImageReady(bitmap);
-				}
-			}
-		}
+	public static ImageRequest createImageRequest(String imageUri, ImageFormat imageFormat, String imageShape, int minWidth, boolean makeReflection, IImageReadyListener imageReadyListener) {
+		ImageRequest imageRequest = new ImageRequest();
+		imageRequest.imageId = imageUri;
+		imageRequest.imageUri = imageUri;
+		imageRequest.imageFormat = imageFormat;
+		imageRequest.imageShape = imageShape;
+		imageRequest.widthMinimum = minWidth;
+		imageRequest.showReflection = makeReflection;
+		imageRequest.imageReadyListener = imageReadyListener;
+		return imageRequest;
 	}
 
-	public void setOnImageReadyListener(IImageReadyListener listener) {
-		mImageReadyListener = listener;
-	}
-
-	public final IImageReadyListener getOnImageReadyListener() {
-		return mImageReadyListener;
+	public void startWebViewProcessing() {
+		mWebView.setPictureListener(null);
+		ImageRequest imageRequest = (ImageRequest) mWebViewQueue.poll();
+		if (imageRequest != null) {
+			mWebViewProcessing = true;
+			new GetImageHtmlTask().execute(imageRequest);
+		}
 	}
 
 	public void setWebView(WebView webView) {
-		this.mWebView = webView;
+		mWebView = webView;
 	}
 
 	public WebView getWebView() {
@@ -583,18 +585,6 @@ public class ImageManager {
 		public int					widthMinimum;
 		public boolean				showReflection		= false;
 		public IImageReadyListener	imageReadyListener	= null;
-	}
-
-	public static ImageRequest createImageRequest(String imageUri, ImageFormat imageFormat, String imageShape, int minWidth, boolean makeReflection, IImageReadyListener imageReadyListener) {
-		ImageRequest imageRequest = new ImageRequest();
-		imageRequest.imageId = imageUri;
-		imageRequest.imageUri = imageUri;
-		imageRequest.imageFormat = imageFormat;
-		imageRequest.imageShape = imageShape;
-		imageRequest.widthMinimum = minWidth;
-		imageRequest.showReflection = makeReflection;
-		imageRequest.imageReadyListener = imageReadyListener;
-		return imageRequest;
 	}
 
 	public enum ImageFormat {

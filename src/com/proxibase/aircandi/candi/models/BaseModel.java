@@ -24,7 +24,7 @@ public abstract class BaseModel extends Observable implements IModel {
 	}
 
 	public BaseModel(ModelType modelType) {
-		this.mModelType = modelType;
+		mModelType = modelType;
 	}
 
 	public void update() {
@@ -32,7 +32,7 @@ public abstract class BaseModel extends Observable implements IModel {
 		 * The super class only updates observers if hasChanged == true.
 		 * Super class also handles clearChanged.
 		 */
-		this.notifyObservers();
+		notifyObservers();
 	}
 
 	public boolean isVisible() {
@@ -54,29 +54,29 @@ public abstract class BaseModel extends Observable implements IModel {
 	}
 
 	public LinkedList<IEntityModifier> getModifiers() {
-		return this.mModifiers;
+		return mModifiers;
 	}
 
 	public CandiList<IModel> getChildren() {
-		return this.mChildren;
+		return mChildren;
 	}
 
 	public boolean isVisibleCurrent() {
-		return this.mVisibleCurrent;
+		return mVisibleCurrent;
 	}
 
 	public boolean isVisibleNext() {
-		return this.mVisibleNext;
+		return mVisibleNext;
 	}
 
 	public void setVisibleCurrent(boolean visibleCurrent) {
-		this.mVisibleCurrent = visibleCurrent;
-		this.setChanged();
+		mVisibleCurrent = visibleCurrent;
+		setChanged();
 	}
 
 	public void setVisibleNext(boolean visibleNext) {
-		this.mVisibleNext = visibleNext;
-		this.setChanged();
+		mVisibleNext = visibleNext;
+		setChanged();
 	}
 
 	public String getTitleText() {
@@ -87,12 +87,12 @@ public abstract class BaseModel extends Observable implements IModel {
 
 	public void setTitleText(String titleText) {
 
-		this.mTitleText = titleText;
-		this.setChanged();
+		mTitleText = titleText;
+		setChanged();
 	}
 
 	public boolean hasVisibleChildrenNext() {
-		for (IModel model : this.mChildren)
+		for (IModel model : mChildren)
 			if (model.isVisibleNext())
 				return true;
 
@@ -100,7 +100,7 @@ public abstract class BaseModel extends Observable implements IModel {
 	}
 
 	public boolean hasVisibleChildrenCurrent() {
-		for (IModel model : this.mChildren)
+		for (IModel model : mChildren)
 			if (model.isVisibleCurrent())
 				return true;
 
@@ -119,24 +119,24 @@ public abstract class BaseModel extends Observable implements IModel {
 	}
 
 	public IModel getParent() {
-		return this.mParent;
+		return mParent;
 	}
 
 	public void setParent(IModel parent) {
-		this.mParent = parent;
+		mParent = parent;
 	}
 
 	public boolean isSuperRoot() {
-		return this.mRoot;
+		return mRoot;
 	}
 
 	public void setSuperRoot(boolean root) {
-		this.mRoot = root;
+		mRoot = root;
 	}
 
 	public void setZoomed(boolean zoomed) {
-		this.mZoomed = zoomed;
-		this.setChanged();
+		mZoomed = zoomed;
+		setChanged();
 	}
 
 	public boolean isZoomed() {
@@ -144,7 +144,7 @@ public abstract class BaseModel extends Observable implements IModel {
 	}
 
 	public void setModelType(ModelType modelType) {
-		this.mModelType = modelType;
+		mModelType = modelType;
 	}
 
 	public ModelType getModelType() {

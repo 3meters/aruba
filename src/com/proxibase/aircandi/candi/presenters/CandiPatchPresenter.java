@@ -49,7 +49,7 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import com.proxibase.aircandi.activities.CandiSearchActivity;
 import com.proxibase.aircandi.candi.camera.ChaseCamera;
 import com.proxibase.aircandi.candi.models.CandiModel;
-import com.proxibase.aircandi.candi.models.CandiModelBuilder;
+import com.proxibase.aircandi.candi.models.CandiModelFactory;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
 import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.models.ZoneModel;
@@ -66,10 +66,10 @@ import com.proxibase.aircandi.candi.sprites.CameraTargetSprite.MoveListener;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.candi.views.BaseView;
 import com.proxibase.aircandi.candi.views.CandiView;
-import com.proxibase.aircandi.candi.views.CandiViewBuilder;
+import com.proxibase.aircandi.candi.views.CandiViewFactory;
 import com.proxibase.aircandi.candi.views.IView;
 import com.proxibase.aircandi.candi.views.ZoneView;
-import com.proxibase.aircandi.candi.views.ZoneViewBuilder;
+import com.proxibase.aircandi.candi.views.ZoneViewFactory;
 import com.proxibase.aircandi.utils.AircandiUI;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.ImageManager;
@@ -128,12 +128,12 @@ public class CandiPatchPresenter implements Observer {
 
 	public CandiPatchPresenter(Context context, Activity activity, Engine engine, RenderSurfaceView renderSurfaceView, CandiPatchModel candiPatchModel) {
 
-		this.mCandiPatchModel = candiPatchModel;
-		this.mContext = context;
-		this.mEngine = engine;
-		this.mCamera = (ChaseCamera) engine.getCamera();
-		this.mRenderSurfaceView = renderSurfaceView;
-		this.mCandiActivity = (CandiSearchActivity) activity;
+		mCandiPatchModel = candiPatchModel;
+		mContext = context;
+		mEngine = engine;
+		mCamera = (ChaseCamera) engine.getCamera();
+		mRenderSurfaceView = renderSurfaceView;
+		mCandiActivity = (CandiSearchActivity) activity;
 
 		initialize();
 	}
@@ -170,11 +170,11 @@ public class CandiPatchPresenter implements Observer {
 				/* Disable culling so we can see the backside of this sprite. */
 				GLHelper.disableCulling(pGL);
 
-				final float rotation = this.mRotation;
+				final float rotation = mRotation;
 
 				if (rotation != 0) {
-					final float rotationCenterX = this.mRotationCenterX;
-					final float rotationCenterY = this.mRotationCenterY;
+					final float rotationCenterX = mRotationCenterX;
+					final float rotationCenterY = mRotationCenterY;
 
 					pGL.glTranslatef(rotationCenterX, rotationCenterY, 0);
 					// Note we are applying rotation around the y-axis and not the z-axis anymore!
@@ -278,8 +278,8 @@ public class CandiPatchPresenter implements Observer {
 			});
 		}
 
-		this.mEngine.registerUpdateHandler(new FPSLogger());
-		this.mScene = scene;
+		mEngine.registerUpdateHandler(new FPSLogger());
+		mScene = scene;
 		return scene;
 	}
 
@@ -308,7 +308,7 @@ public class CandiPatchPresenter implements Observer {
 			clearZoneLayer();
 			mEngine.getScene().clearTouchAreas();
 			mCandiPatchModel.reset(); // Clears zone and candi model collections
-			this.initialize(); // Reloads shared textures
+			initialize(); // Reloads shared textures
 		}
 
 		else {
@@ -362,7 +362,7 @@ public class CandiPatchPresenter implements Observer {
 				ensureCandiView(candiModel);
 			}
 			else {
-				candiModel = CandiModelBuilder.newCandiModel(ModelType.Entity, entity.id, entity);
+				candiModel = CandiModelFactory.newCandiModel(ModelType.Entity, entity.id, entity);
 				candiModel.setDisplayExtra(mDisplayExtras);
 				mCandiPatchModel.addCandiModel(candiModel);
 				candiModel.setParent(candiRootNext);
@@ -380,7 +380,7 @@ public class CandiPatchPresenter implements Observer {
 					ensureCandiView(childCandiModel);
 				}
 				else {
-					childCandiModel = CandiModelBuilder.newCandiModel(ModelType.Entity, childEntity.id, childEntity);
+					childCandiModel = CandiModelFactory.newCandiModel(ModelType.Entity, childEntity.id, childEntity);
 					childCandiModel.setDisplayExtra(mDisplayExtras);
 					mCandiPatchModel.addCandiModel(childCandiModel);
 					candiModel.getChildren().add(childCandiModel);
@@ -468,7 +468,7 @@ public class CandiPatchPresenter implements Observer {
 		if (!candiModel.getEntityProxy().isHidden && candiModel.countObservers() == 0) {
 
 			// Create candi view for model
-			CandiView candiView = CandiViewBuilder.createCandiView(candiModel, CandiPatchPresenter.this, new CandiView.OnCandiViewTouchListener() {
+			CandiView candiView = CandiViewFactory.createCandiView(candiModel, CandiPatchPresenter.this, new CandiView.OnCandiViewTouchListener() {
 
 				@Override
 				public void onCandiViewSingleTap(final IView candiView) {
@@ -578,7 +578,7 @@ public class CandiPatchPresenter implements Observer {
 		if (zoneModel.isVisibleNext() && zoneModel.countObservers() == 0) {
 
 			// Create view for model
-			ZoneView zoneView = ZoneViewBuilder.createZoneView(zoneModel, CandiPatchPresenter.this);
+			ZoneView zoneView = ZoneViewFactory.createZoneView(zoneModel, CandiPatchPresenter.this);
 
 			// Track in our collection
 			mZoneViews.add(zoneView);
@@ -751,8 +751,8 @@ public class CandiPatchPresenter implements Observer {
 	public void removeCandiModel(CandiModel candiModel) {
 
 		// Remove associated candi view
-		final CandiView candiView = (CandiView) this.getViewForModel(candiModel);
-		this.mCandiViews.remove(candiView);
+		final CandiView candiView = (CandiView) getViewForModel(candiModel);
+		mCandiViews.remove(candiView);
 		mEngine.runOnUpdateThread(new Runnable() {
 
 			@Override
@@ -765,8 +765,8 @@ public class CandiPatchPresenter implements Observer {
 		// Repeat for all children
 		for (IModel childCandiModel : candiModel.getChildren()) {
 			childCandiModel = (CandiModel) childCandiModel;
-			final CandiView childCandiView = (CandiView) this.getViewForModel(childCandiModel);
-			this.mCandiViews.remove(childCandiView);
+			final CandiView childCandiView = (CandiView) getViewForModel(childCandiModel);
+			mCandiViews.remove(childCandiView);
 			mEngine.runOnUpdateThread(new Runnable() {
 
 				@Override
@@ -841,10 +841,10 @@ public class CandiPatchPresenter implements Observer {
 	public void resetTextures(TextureReset textureReset) {
 		// Candi views
 		for (final CandiView candiView : mCandiViews) {
-			if (textureReset == TextureReset.VisibleOnly && !candiView.isVisibleToCamera(this.mCamera)) {
+			if (textureReset == TextureReset.VisibleOnly && !candiView.isVisibleToCamera(mCamera)) {
 				continue;
 			}
-			else if (textureReset == TextureReset.NonVisibleOnly && candiView.isVisibleToCamera(this.mCamera)) {
+			else if (textureReset == TextureReset.NonVisibleOnly && candiView.isVisibleToCamera(mCamera)) {
 				continue;
 			}
 			candiView.resetTextures();
@@ -852,9 +852,9 @@ public class CandiPatchPresenter implements Observer {
 
 		// Zone views
 		for (final ZoneView zoneView : mZoneViews) {
-			if (textureReset == TextureReset.VisibleOnly && !zoneView.isVisibleToCamera(this.mCamera))
+			if (textureReset == TextureReset.VisibleOnly && !zoneView.isVisibleToCamera(mCamera))
 				continue;
-			else if (textureReset == TextureReset.NonVisibleOnly && zoneView.isVisibleToCamera(this.mCamera))
+			else if (textureReset == TextureReset.NonVisibleOnly && zoneView.isVisibleToCamera(mCamera))
 				continue;
 			zoneView.resetTextures();
 		}
@@ -993,7 +993,7 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	public void setCameraTarget(CameraTargetSprite mCameraTarget) {
-		this.mCameraTargetSprite = mCameraTarget;
+		mCameraTargetSprite = mCameraTarget;
 	}
 
 	public void setCandiListener(ICandiListener listener) {
@@ -1001,7 +1001,7 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	public Engine getEngine() {
-		return this.mEngine;
+		return mEngine;
 	}
 
 	public BaseView getViewForModel(IModel candiModel) {
@@ -1011,16 +1011,12 @@ public class CandiPatchPresenter implements Observer {
 		return null;
 	}
 
-	public boolean isFullUpdateInProgress() {
-		return this.mFullUpdateInProgress;
-	}
-
 	public void setFullUpdateInProgress(boolean fullUpdateInProgress) {
-		this.mFullUpdateInProgress = fullUpdateInProgress;
+		mFullUpdateInProgress = fullUpdateInProgress;
 	}
 
 	public void setScene(Scene scene) {
-		this.mScene = scene;
+		mScene = scene;
 	}
 
 	public Scene getScene() {
@@ -1028,15 +1024,15 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	public boolean isIgnoreInput() {
-		return this.mIgnoreInput;
+		return mIgnoreInput;
 	}
 
 	public void setIgnoreInput(boolean ignoreInput) {
-		this.mIgnoreInput = ignoreInput;
+		mIgnoreInput = ignoreInput;
 	}
 
 	public ChaseCamera getCamera() {
-		return this.mCamera;
+		return mCamera;
 	}
 
 	public interface ICandiListener {

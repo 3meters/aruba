@@ -6,7 +6,7 @@ import com.proxibase.aircandi.candi.views.BaseView.OnViewTexturesLoadedListener;
 
 
 
-public class ZoneViewBuilder {
+public class ZoneViewFactory {
 	/*
 	 * The job of the builder is to preconfigure resources and setup external references for
 	 * a new instance of a view.

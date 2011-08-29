@@ -28,7 +28,7 @@ public class ZoneModel extends BaseModel {
 
 		mCandiPatchModel = candiPatchModel;
 		mZoneIndex = zoneIndex;
-		this.initialize();
+		initialize();
 	}
 
 	private void initialize() {
@@ -72,10 +72,10 @@ public class ZoneModel extends BaseModel {
 
 	public Transition getTransition() {
 
-		if (!this.isVisibleCurrent() && this.isVisibleNext())
+		if (!isVisibleCurrent() && isVisibleNext())
 			return Transition.FadeIn;
 
-		if (this.isVisibleCurrent() && !this.isVisibleNext())
+		if (isVisibleCurrent() && !isVisibleNext())
 			return Transition.FadeOut;
 
 		return Transition.None;
@@ -104,12 +104,12 @@ public class ZoneModel extends BaseModel {
 	}
 
 	public float getX() {
-		return this.mX;
+		return mX;
 	}
 
 	@Override
 	public boolean isVisibleCurrent() {
-		if (this.mInactive || this.mCandiesCurrent.size() == 0)
+		if (mInactive || mCandiesCurrent.size() == 0)
 			return false;
 		else
 			return super.isVisibleCurrent();
@@ -117,7 +117,7 @@ public class ZoneModel extends BaseModel {
 
 	@Override
 	public boolean isVisibleNext() {
-		if (this.mInactive || this.mCandiesNext.size() == 0)
+		if (mInactive || mCandiesNext.size() == 0)
 			return false;
 		else
 			return super.isVisibleNext();
@@ -125,7 +125,7 @@ public class ZoneModel extends BaseModel {
 
 	public Position getChildPositionCurrent(CandiModel candiModelTarget) throws NoSuchElementException {
 
-		if (this.mInactive)
+		if (mInactive)
 			return new Position();
 
 		if (!mCandiesCurrent.contains(candiModelTarget))
@@ -133,13 +133,13 @@ public class ZoneModel extends BaseModel {
 
 		Position position = doChildPosition(candiModelTarget, candiModelTarget.getPositionCurrent(), mCandiesCurrent, candiModelTarget
 				.getZoneStatusCurrent());
-		position.scale = this.getChildScaleCurrent(candiModelTarget);
+		position.scale = getChildScaleCurrent(candiModelTarget);
 		return position;
 	}
 
 	public Position getChildPositionNext(CandiModel candiModelTarget) throws NoSuchElementException {
 
-		if (this.mInactive)
+		if (mInactive)
 			return new Position();
 
 		// TODO: Candies that have been temporarily hidden because of a root change won't show up
@@ -148,7 +148,7 @@ public class ZoneModel extends BaseModel {
 			throw new NoSuchElementException();
 
 		Position position = doChildPosition(candiModelTarget, candiModelTarget.getPositionNext(), mCandiesNext, candiModelTarget.getZoneStatusNext());
-		position.scale = this.getChildScaleNext(candiModelTarget);
+		position.scale = getChildScaleNext(candiModelTarget);
 		return position;
 	}
 
@@ -270,7 +270,7 @@ public class ZoneModel extends BaseModel {
 	}
 
 	public float getChildScaleCurrent(CandiModel candiModelTarget) {
-		if (this.mInactive)
+		if (mInactive)
 			return 1.0f;
 
 		float scale = 1.0f;
@@ -295,7 +295,7 @@ public class ZoneModel extends BaseModel {
 	}
 
 	public float getChildScaleNext(CandiModel candiModelTarget) {
-		if (this.mInactive)
+		if (mInactive)
 			return 1.0f;
 
 		float scale = 1.0f;
@@ -320,77 +320,77 @@ public class ZoneModel extends BaseModel {
 
 	public float getY() {
 
-		return this.mY;
+		return mY;
 	}
 
 	public float getCenterX() {
 
-		return this.mCenterX;
+		return mCenterX;
 	}
 
 	public float getCenterY() {
 
-		return this.mCenterY;
+		return mCenterY;
 	}
 
 	public void setX(float x) {
 
-		this.mX = x;
+		mX = x;
 	}
 
 	public void setY(float y) {
 
-		this.mY = y;
+		mY = y;
 	}
 
 	public void setCenterX(float centerX) {
 
-		this.mCenterX = centerX;
+		mCenterX = centerX;
 	}
 
 	public void setCenterY(float centerY) {
 
-		this.mCenterY = centerY;
+		mCenterY = centerY;
 	}
 
 	public String getBodyImageId() {
-		return this.mBodyImageId;
+		return mBodyImageId;
 	}
 
 	public String getBodyImageUrl() {
-		return this.mBodyImageUrl;
+		return mBodyImageUrl;
 	}
 
 	public void setBodyImageId(String bodyImageId) {
-		this.mBodyImageId = bodyImageId;
+		mBodyImageId = bodyImageId;
 	}
 
 	public void setBodyImageUrl(String bodyImageUrl) {
-		this.mBodyImageUrl = bodyImageUrl;
+		mBodyImageUrl = bodyImageUrl;
 	}
 
 	public List<CandiModel> getCandiesCurrent() {
-		return this.mCandiesCurrent;
+		return mCandiesCurrent;
 	}
 
 	public List<CandiModel> getCandiesNext() {
-		return this.mCandiesNext;
+		return mCandiesNext;
 	}
 
 	public void setCandiesCurrent(List<CandiModel> candiesCurrent) {
-		this.mCandiesCurrent = candiesCurrent;
+		mCandiesCurrent = candiesCurrent;
 	}
 
 	public void setCandiesNext(List<CandiModel> candiesNext) {
-		this.mCandiesNext = candiesNext;
+		mCandiesNext = candiesNext;
 	}
 
 	public int getZoneIndex() {
-		return this.mZoneIndex;
+		return mZoneIndex;
 	}
 
 	public void setZoneIndex(int zoneIndex) {
-		this.mZoneIndex = zoneIndex;
+		mZoneIndex = zoneIndex;
 	}
 
 	public static class Position {
@@ -442,7 +442,7 @@ public class ZoneModel extends BaseModel {
 	}
 
 	public void setInactive(boolean inactive) {
-		this.mInactive = inactive;
+		mInactive = inactive;
 	}
 
 	public boolean isInactive() {

@@ -41,7 +41,7 @@ public class CandiModel extends BaseModel {
 	private DisplayExtra	mDisplayExtra		= DisplayExtra.None;
 	private boolean			mTitleOnly			= false;
 	private boolean			mBodyOnly			= false;
-	private boolean			mTouchAreaActive	= true;
+	private boolean			mTouchAreaActive	= false;
 	private boolean			mRookie				= true;
 	private String			mBodyImageId		= "";
 	private String			mBodyImageUri		= "";
@@ -52,7 +52,7 @@ public class CandiModel extends BaseModel {
 
 	public CandiModel(ModelType modelType, int modelId) {
 		super(modelType);
-		this.setModelId(modelId);
+		setModelId(modelId);
 	}
 
 	public Transition getTransition() {
@@ -62,23 +62,23 @@ public class CandiModel extends BaseModel {
 		 */
 
 		Transition transition = Transition.None;
-		if (this.mReasonInactive == ReasonInactive.Deleting) {
+		if (mReasonInactive == ReasonInactive.Deleting) {
 			transition = Transition.Out;
 		}
-		else if (this.isVisibleCurrent() && this.isOverflowNext()) {
+		else if (isVisibleCurrent() && isOverflowNext()) {
 			transition = Transition.FadeOut;
 		}
-		else if (!this.isVisibleCurrent() && this.isVisibleNext() && !this.isOverflowNext()) {
+		else if (!isVisibleCurrent() && isVisibleNext() && !isOverflowNext()) {
 			transition = Transition.FadeIn;
 		}
-		else if (!this.isVisibleCurrent() && this.isVisibleNext()) {
+		else if (!isVisibleCurrent() && isVisibleNext()) {
 			transition = Transition.FadeIn;
 		}
-		else if (this.isVisibleCurrent() && !this.isVisibleNext()) {
+		else if (isVisibleCurrent() && !isVisibleNext()) {
 			transition = Transition.FadeOut;
 		}
-		else if (this.isVisibleNext()) {
-			if (this.mZoneCurrent.getZoneIndex() != this.mZoneNext.getZoneIndex())
+		else if (isVisibleNext()) {
+			if (mZoneCurrent.getZoneIndex() != mZoneNext.getZoneIndex())
 				transition = Transition.Move;
 			else {
 				if (!mPositionNext.equals(mPositionCurrent))
@@ -97,7 +97,7 @@ public class CandiModel extends BaseModel {
 
 		mZoneCurrent = mZoneNext;
 
-		Position positionCurrent = this.getPositionCurrent();
+		Position positionCurrent = getPositionCurrent();
 		positionCurrent.x = mPositionNext.x;
 		positionCurrent.y = mPositionNext.y;
 		positionCurrent.scale = mPositionNext.scale;
@@ -113,7 +113,7 @@ public class CandiModel extends BaseModel {
 	}
 
 	public EntityProxy getEntityProxy() {
-		return this.mEntityProxy;
+		return mEntityProxy;
 	}
 
 	public DisplayExtra getDisplayExtra() {
@@ -141,19 +141,19 @@ public class CandiModel extends BaseModel {
 	}
 
 	public ZoneModel getZoneNext() {
-		return this.mZoneNext;
+		return mZoneNext;
 	}
 
 	public ZoneModel getZoneCurrent() {
-		return this.mZoneCurrent;
+		return mZoneCurrent;
 	}
 
 	public String getBodyImageId() {
-		return this.mBodyImageId;
+		return mBodyImageId;
 	}
 
 	public String getBodyImageUri() {
-		return this.mBodyImageUri;
+		return mBodyImageUri;
 	}
 
 	public ImageFormat getBodyImageFormat() {
@@ -173,68 +173,68 @@ public class CandiModel extends BaseModel {
 	}
 
 	public void setDisplayExtra(DisplayExtra displayExtra) {
-		this.mDisplayExtra = displayExtra;
+		mDisplayExtra = displayExtra;
 		super.setChanged();
 	}
 
 	public void setModifiers(LinkedList<IEntityModifier> modifiers) {
-		this.mModifiers = modifiers;
+		mModifiers = modifiers;
 	}
 
 	public void setEntityProxy(EntityProxy entityProxy) {
-		this.mEntityProxy = entityProxy;
+		mEntityProxy = entityProxy;
 		super.setChanged();
 	}
 
 	public void setZoneNext(ZoneModel zoneNext) {
-		this.mZoneNext = zoneNext;
+		mZoneNext = zoneNext;
 		super.setChanged();
 	}
 
 	public void setZoneCurrent(ZoneModel zoneCurrent) {
-		this.mZoneCurrent = zoneCurrent;
+		mZoneCurrent = zoneCurrent;
 		super.setChanged();
 	}
 
 	public void setBodyOnly(boolean bodyOnly) {
-		this.mBodyOnly = bodyOnly;
+		mBodyOnly = bodyOnly;
 		super.setChanged();
 	}
 
 	public void setBodyImageId(String bodyImageId) {
-		this.mBodyImageId = bodyImageId;
+		mBodyImageId = bodyImageId;
 	}
 
 	public void setBodyImageUri(String bodyImageUri) {
-		this.mBodyImageUri = bodyImageUri;
+		mBodyImageUri = bodyImageUri;
 	}
 
 	public void setBodyImageFormat(ImageFormat bodyImageFormat) {
-		this.mBodyImageFormat = bodyImageFormat;
+		mBodyImageFormat = bodyImageFormat;
 	}
 
 	public void setTitleOnly(boolean titleOnly) {
-		this.mTitleOnly = titleOnly;
+		mTitleOnly = titleOnly;
 	}
 
 	public void setTouchAreaActive(boolean touchAreaActive) {
-		this.mTouchAreaActive = touchAreaActive;
+		mTouchAreaActive = touchAreaActive;
 	}
 
 	public void setModelId(int modelId) {
-		this.mModelId = modelId;
+		mModelId = modelId;
 	}
 
 	public void setOverflowNext(boolean overflowNext) {
-		this.mOverflowNext = overflowNext;
+		mOverflowNext = overflowNext;
 	}
 
 	public void setRookie(boolean rookie) {
-		this.mRookie = rookie;
+		mRookie = rookie;
 	}
 
 	public void setOverflowCurrent(boolean overflowCurrent) {
-		this.mOverflowCurrent = overflowCurrent;
+		mOverflowCurrent = overflowCurrent;
 	}
 
 	@Override
@@ -248,13 +248,13 @@ public class CandiModel extends BaseModel {
 		}
 		CandiModel that = (CandiModel) other;
 
-		return this.mModelId == that.mModelId;
+		return mModelId == that.mModelId;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = 100;
-		result = 31 * result + String.valueOf(this.mModelId).hashCode();
+		result = 31 * result + String.valueOf(mModelId).hashCode();
 		return result;
 	}
 
@@ -271,7 +271,7 @@ public class CandiModel extends BaseModel {
 	}
 
 	public void setReasonInactive(ReasonInactive reasonInactive) {
-		this.mReasonInactive = reasonInactive;
+		mReasonInactive = reasonInactive;
 	}
 
 	public ReasonInactive getReasonInactive() {
@@ -279,7 +279,7 @@ public class CandiModel extends BaseModel {
 	}
 
 	public void setZoneStatusCurrent(ZoneStatus zoneStatusCurrent) {
-		this.mZoneStatusCurrent = zoneStatusCurrent;
+		mZoneStatusCurrent = zoneStatusCurrent;
 	}
 
 	public ZoneStatus getZoneStatusCurrent() {
@@ -287,7 +287,7 @@ public class CandiModel extends BaseModel {
 	}
 
 	public void setZoneStatusNext(ZoneStatus zoneStatusNext) {
-		this.mZoneStatusNext = zoneStatusNext;
+		mZoneStatusNext = zoneStatusNext;
 	}
 
 	public ZoneStatus getZoneStatusNext() {
@@ -295,7 +295,7 @@ public class CandiModel extends BaseModel {
 	}
 
 	public void setPositionCurrent(Position positionCurrent) {
-		this.mPositionCurrent = positionCurrent;
+		mPositionCurrent = positionCurrent;
 	}
 
 	public Position getPositionCurrent() {
@@ -305,7 +305,7 @@ public class CandiModel extends BaseModel {
 	}
 
 	public void setPositionNext(Position positionNext) {
-		this.mPositionNext = positionNext;
+		mPositionNext = positionNext;
 	}
 
 	public Position getPositionNext() {

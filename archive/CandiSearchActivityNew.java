@@ -281,7 +281,7 @@ public class CandiSearchActivityNew extends AircandiGameActivity {
 		// For this activity, refresh means rescan and reload entity data from the service
 		if (mReadyToRun) {
 			CandiView candiView = (CandiView) mCandiPatchPresenter.getViewForModel(mCandiPatchModel.getCandiModelFocused());
-			candiView.refreshBodyTextureSources();
+			candiView.loadBodyTextureSources(false);
 			scanForBeacons(false, true);
 		}
 	}
@@ -364,7 +364,7 @@ public class CandiSearchActivityNew extends AircandiGameActivity {
 						public void run() {
 							CandiView candiView = (CandiView) mCandiPatchPresenter.getViewForModel(mCandiPatchModel.getCandiModelFocused());
 							if (candiView != null) {
-								candiView.refreshBodyTextureSources();
+								candiView.loadBodyTextureSources(false);
 							}
 							scanForBeacons(false, false);
 						}

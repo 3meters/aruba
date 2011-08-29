@@ -60,18 +60,18 @@ public class CandiPatchModel extends Observable {
 	}
 
 	public void reset() {
-		this.mZoneModels.clear();
-		this.mCandiModels.clear();
-		this.mCandiModelFocused = null;
-		this.mCandiModelSelected = null;
-		this.mCandiRootCurrent = null;
-		this.mCandiRootNext = null;
+		mZoneModels.clear();
+		mCandiModels.clear();
+		mCandiModelFocused = null;
+		mCandiModelSelected = null;
+		mCandiRootCurrent = null;
+		mCandiRootNext = null;
 		super.setChanged();
 	}
 
 	public void shiftToNext() {
 
-		this.mCandiRootCurrent = this.mCandiRootNext;
+		mCandiRootCurrent = mCandiRootNext;
 
 		mZoneInactive.shiftToNext();
 
@@ -127,19 +127,22 @@ public class CandiPatchModel extends Observable {
 			zoneModel.setVisibleNext(false);
 		}
 
+		// Clear touch areas
+		for (CandiModel candiModel : mCandiModels) {
+			candiModel.setTouchAreaActive(false);
+		}
+
 		// Manage visibility
 		if (!mCandiRootNext.isSuperRoot()) {
 			for (CandiModel candiModel : mCandiModels)
 				if (candiModel.getReasonInactive() == ReasonInactive.Deleting) {
 					candiModel.setVisibleNext(false);
-					candiModel.setTouchAreaActive(false);
 					candiModel.setZoneNext(mZoneInactive);
 					mZoneInactive.getCandiesNext().add(candiModel);
 				}
 				else {
 					if (!mCandiRootNext.getChildren().containsKey(String.valueOf(candiModel.getModelId()))) {
 						candiModel.setVisibleNext(false);
-						candiModel.setTouchAreaActive(false);
 						candiModel.setReasonInactive(ReasonInactive.Navigation);
 						candiModel.setZoneNext(mZoneInactive);
 						mZoneInactive.getCandiesNext().add(candiModel);
@@ -148,7 +151,6 @@ public class CandiPatchModel extends Observable {
 						candiModel.setReasonInactive(ReasonInactive.None);
 						if (candiModel.getEntityProxy().isHidden) {
 							candiModel.setVisibleNext(false);
-							candiModel.setTouchAreaActive(false);
 						}
 						else {
 							candiModel.setVisibleNext(true);
@@ -162,7 +164,6 @@ public class CandiPatchModel extends Observable {
 			for (CandiModel candiModel : mCandiModels) {
 				if (candiModel.getReasonInactive() == ReasonInactive.Deleting) {
 					candiModel.setVisibleNext(false);
-					candiModel.setTouchAreaActive(false);
 					candiModel.setZoneNext(mZoneInactive);
 					mZoneInactive.getCandiesNext().add(candiModel);
 				}
@@ -171,7 +172,6 @@ public class CandiPatchModel extends Observable {
 						candiModel.setReasonInactive(ReasonInactive.None);
 						if (candiModel.getEntityProxy().isHidden) {
 							candiModel.setVisibleNext(false);
-							candiModel.setTouchAreaActive(false);
 						}
 						else {
 							candiModel.setVisibleNext(true);
@@ -270,7 +270,7 @@ public class CandiPatchModel extends Observable {
 				if (mCandiModelFocused.getZoneCurrent().getZoneIndex() != mCandiModelFocused.getZoneNext().getZoneIndex()) {
 
 					// Moved zones because current zone transitioned to unused.
-					if (mCandiModelFocused.getZoneCurrent().getZoneIndex() + 1 > this.getZonesOccupiedNextCount()) {
+					if (mCandiModelFocused.getZoneCurrent().getZoneIndex() + 1 > getZonesOccupiedNextCount()) {
 					}
 					else {
 						ZoneModel zoneNextOld = mCandiModelFocused.getZoneNext();
@@ -315,11 +315,10 @@ public class CandiPatchModel extends Observable {
 					maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE_WITH_PRIMARY;
 
 				if (candiModel.getZoneNext().getCandiIndexNext(candiModel) > (maxVisible - 1)) {
-					
+
 					candiModel.setOverflowNext(true);
 					candiModel.setVisibleNext(false);
 					candiModel.setTouchAreaActive(false);
-					
 					candiModel.setReasonInactive(ReasonInactive.Navigation);
 					candiModel.setZoneNext(mZoneInactive);
 					mZoneInactive.getCandiesNext().add(candiModel);
@@ -448,71 +447,71 @@ public class CandiPatchModel extends Observable {
 	}
 
 	public CandiList<CandiModel> getCandiModels() {
-		return this.mCandiModels;
+		return mCandiModels;
 	}
 
 	public List<ZoneModel> getZones() {
-		return this.mZoneModels;
+		return mZoneModels;
 	}
 
 	public CandiModel getCandiModelFocused() {
-		return this.mCandiModelFocused;
+		return mCandiModelFocused;
 	}
 
 	public CandiModel getCandiModelSelected() {
-		return this.mCandiModelSelected;
+		return mCandiModelSelected;
 	}
 
 	public IModel getCandiRootCurrent() {
-		return this.mCandiRootCurrent;
+		return mCandiRootCurrent;
 	}
 
 	public IModel getCandiRootNext() {
-		return this.mCandiRootNext;
+		return mCandiRootNext;
 	}
 
 	public float getOriginX() {
-		return this.mOriginX;
+		return mOriginX;
 	}
 
 	public float getOriginY() {
-		return this.mOriginY;
+		return mOriginY;
 	}
 
 	public void setCandiModelFocused(CandiModel candiFocused) {
-		this.mCandiModelFocused = candiFocused;
+		mCandiModelFocused = candiFocused;
 		super.setChanged();
 	}
 
 	public void setCandiModelSelected(CandiModel candiSelected) {
-		this.mCandiModelSelected = candiSelected;
+		mCandiModelSelected = candiSelected;
 		super.setChanged();
 	}
 
 	public void setOriginX(float originX) {
-		this.mOriginX = originX;
+		mOriginX = originX;
 		super.setChanged();
 	}
 
 	public void setOriginY(float originY) {
-		this.mOriginY = originY;
+		mOriginY = originY;
 		super.setChanged();
 	}
 
 	public void setCandiRootCurrent(IModel candiRootCurrent) {
-		this.mCandiRootCurrent = candiRootCurrent;
+		mCandiRootCurrent = candiRootCurrent;
 	}
 
 	public void setCandiRootNext(IModel candiRootNext) {
-		this.mCandiRootNext = candiRootNext;
+		mCandiRootNext = candiRootNext;
 	}
 
 	public ZoneModel getZoneInactive() {
-		return this.mZoneInactive;
+		return mZoneInactive;
 	}
 
 	public void setZoneInactive(ZoneModel zoneInactive) {
-		this.mZoneInactive = zoneInactive;
+		mZoneInactive = zoneInactive;
 	}
 
 	class SortEntitiesByTagLevelDb implements Comparator<CandiModel> {

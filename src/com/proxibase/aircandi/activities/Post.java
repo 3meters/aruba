@@ -480,7 +480,7 @@ public class Post extends AircandiActivity {
 
 	private void showAddPhotoDialog() {
 
-		this.runOnUiThread(new Runnable() {
+		runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {

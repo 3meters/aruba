@@ -5,7 +5,7 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.views.BaseView.OnViewTexturesLoadedListener;
 import com.proxibase.aircandi.candi.views.CandiView.OnCandiViewTouchListener;
 
-public class CandiViewBuilder {
+public class CandiViewFactory {
 
 	/*
 	 * The job of the factory is to preconfigure resources and setup external references for

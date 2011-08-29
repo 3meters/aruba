@@ -45,13 +45,13 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	public BaseView(BaseModel baseModel, CandiPatchPresenter candiPatchPresenter) {
 		super();
 
-		this.mBaseModel = baseModel;
-		this.mCandiPatchPresenter = candiPatchPresenter;
+		mBaseModel = baseModel;
+		mCandiPatchPresenter = candiPatchPresenter;
 	}
 
 	public void initialize() {
 		loadTextureSources();
-		this.construct();
+		construct();
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTitleSprite.setBlendFunction(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		mTitleSprite.setAlpha(0);
 		mTitleSprite.setZIndex(0);
-		this.attachChild(mTitleSprite);
+		attachChild(mTitleSprite);
 	}
 
 	protected boolean isVisibleToCamera(final Camera camera) {
@@ -107,7 +107,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public IModel getModel() {
-		return this.mBaseModel;
+		return mBaseModel;
 	}
 
 	private Bitmap makeTextBitmap(int width, int height, CharSequence text) {
@@ -190,11 +190,11 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		// Disable culling so we can see the backside of this sprite.
 		GLHelper.disableCulling(pGL);
 
-		final float rotation = this.mRotation;
+		final float rotation = mRotation;
 
 		if (rotation != 0) {
-			final float rotationCenterX = this.mRotationCenterX;
-			final float rotationCenterY = this.mRotationCenterY;
+			final float rotationCenterX = mRotationCenterX;
+			final float rotationCenterY = mRotationCenterY;
 
 			pGL.glTranslatef(rotationCenterX, rotationCenterY, 0);
 			// Note we are applying rotation around the y-axis and not the z-axis anymore!

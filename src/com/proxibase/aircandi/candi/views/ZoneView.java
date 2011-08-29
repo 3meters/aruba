@@ -31,7 +31,7 @@ public class ZoneView extends BaseView {
 
 	public ZoneView(ZoneModel zoneModel, CandiPatchPresenter candiPatchPresenter) {
 		super((BaseModel) zoneModel, candiPatchPresenter);
-		this.mZoneModel = zoneModel;
+		mZoneModel = zoneModel;
 	}
 
 	@Override
@@ -39,10 +39,10 @@ public class ZoneView extends BaseView {
 		super.update(observable, data);
 
 		if (mZoneModel.isVisibleNext()) {
-			Transition transition = this.mZoneModel.getTransition();
+			Transition transition = mZoneModel.getTransition();
 			if (transition == Transition.FadeIn)
-				this.setAlpha(0);
-			this.setVisible(true);
+				setAlpha(0);
+			setVisible(true);
 		}
 
 		doModifiers();
@@ -66,7 +66,7 @@ public class ZoneView extends BaseView {
 			makeReflectionSprite();
 
 		// ZOrder sort
-		this.sortChildren();
+		sortChildren();
 	}
 
 	@Override
@@ -99,12 +99,12 @@ public class ZoneView extends BaseView {
 
 				}
 			});
-			this.registerEntityModifier(modifier);
+			registerEntityModifier(modifier);
 		}
 	}
 
 	public void setTexturesLoadedListener(OnViewTexturesLoadedListener texturesLoadedListener) {
-		this.mTexturesLoadedListener = texturesLoadedListener;
+		mTexturesLoadedListener = texturesLoadedListener;
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class ZoneView extends BaseView {
 
 	@Override
 	public ZoneModel getModel() {
-		return this.mZoneModel;
+		return mZoneModel;
 	}
 
 	private void makeBodySprite() {
@@ -155,7 +155,7 @@ public class ZoneView extends BaseView {
 		mBodySprite.setBlendFunction(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		mBodySprite.setAlpha(0);
 		mBodySprite.setZIndex(0);
-		this.attachChild(mBodySprite);
+		attachChild(mBodySprite);
 	}
 
 	private void makeReflectionSprite() {
@@ -164,7 +164,7 @@ public class ZoneView extends BaseView {
 		mReflectionSprite.setBlendFunction(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		mReflectionSprite.setAlpha(0);
 		mReflectionSprite.setZIndex(0);
-		this.attachChild(mReflectionSprite);
+		attachChild(mReflectionSprite);
 	}
 
 	@Override

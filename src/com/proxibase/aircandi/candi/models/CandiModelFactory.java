@@ -4,7 +4,7 @@ import com.proxibase.aircandi.candi.models.BaseModel.ModelType;
 import com.proxibase.aircandi.utils.ImageManager.ImageFormat;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
-public class CandiModelBuilder {
+public class CandiModelFactory {
 
 	public static CandiModel newCandiModel(ModelType modelType, int modelId, EntityProxy entity) {
 		/*
