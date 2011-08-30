@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	style="@style/LayoutOuter">
+	<include
+		layout="@layout/temp_application_header" />
+
+	<!-- Body -->
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+		
+		<WebView
+			android:id="@+id/WebView"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent">
+		</WebView>
+
+		<!-- Custom footer -->
+		<TableLayout
+			android:id="@+id/Activity_Custom_Footer"
+			android:layout_alignParentBottom="true"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent">
+			<View
+				style="@style/Activity_Header_Separator" />
+			<TableRow
+				android:id="@+id/Activity_Footer_Row"
+				android:layout_height="@dimen/activity_row_height"
+				android:layout_width="fill_parent"
+				android:gravity="center"
+				style="@style/Activity_Row">
+				<Button
+					android:id="@+id/BtnEdit"
+					android:text="Edit"
+					style="@style/Activity_Button"
+					android:tag="edit"
+					android:onClick="onActivityButtonClick" />
+				<Button
+					android:id="@+id/BtnSave"
+					android:text="Delete"
+					style="@style/Activity_Button"
+					android:tag="delete"
+					android:onClick="onActivityButtonClick" />
+			</TableRow>
+		</TableLayout>
+	</RelativeLayout>
+</LinearLayout>

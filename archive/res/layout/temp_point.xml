@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="wrap_content"
+	android:layout_width="wrap_content"
+	android:orientation="vertical">
+	<TextView
+		android:id="@+id/Title"
+		android:text="Ripple Title"
+		android:textSize="14sp"
+		android:textColor="@color/badge_text"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent" />
+	<FrameLayout
+		android:id="@+id/ImageFrame"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content">
+		<ImageView
+			android:id="@+id/Image"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content" />
+	</FrameLayout>
+</LinearLayout>

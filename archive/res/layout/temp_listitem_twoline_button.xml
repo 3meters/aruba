@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/ListItem_Row"
+	android:layout_height="wrap_content"
+	android:layout_width="fill_parent"
+	android:paddingLeft="5dp"
+	android:paddingTop="1dp"
+	android:paddingBottom="10dp"
+	android:background="@drawable/listitem_bg_selector"
+	android:minHeight="45dp"
+	android:shrinkColumns="0"
+	android:stretchColumns="0"
+	android:clickable="true"
+	android:onClick="onItemClick">
+	<TableRow>
+		<TextView
+			android:id="@+id/ListItem_Title"
+			android:text="Title"
+			android:textSize="@dimen/listitem_title_text"
+			android:textColor="@color/listitem_title_text"
+			android:layout_span="2"
+			android:textStyle="bold" />
+	</TableRow>
+	<TableRow>
+		<TextView
+			android:id="@+id/ListItem_Body"
+			android:layout_height="fill_parent"
+			android:layout_width="wrap_content"
+			android:text="Body text."
+			android:textSize="@dimen/listitem_body_text"
+			android:textColor="@color/listitem_body_text" />
+		<Button
+			android:id="@+id/ListItem_Button"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:text="Activate"
+			android:minWidth="80dp"
+			android:maxHeight="40dp"
+			android:background="@drawable/button_wp_small"
+			android:clickable="true"
+			android:onClick="onItemButtonClick" />
+	</TableRow>
+</TableLayout>

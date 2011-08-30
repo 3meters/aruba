@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/LayoutOuter"
+	android:orientation="vertical"
+	style="@style/LayoutOuter">
+	<LinearLayout
+		android:id="@+id/Egg_Dropper_Row"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:gravity="center_vertical"
+		android:background="@color/theme_white"
+		android:padding="8dp"
+		android:visibility="gone"
+		android:orientation="horizontal">
+		<ImageView
+			android:id="@+id/EggDrop_Icon"
+			android:scaleType="fitCenter"
+			android:layout_gravity="center_vertical"
+			android:layout_height="60dp"
+			android:layout_width="60dp"
+			android:adjustViewBounds="true"
+			android:src="@drawable/icon_placeholder_generic"
+			style="@style/ListItem_Icon" />
+		<TextView
+			android:id="@+id/EggDrop_Text"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:paddingLeft="5dp"
+			style="@style/Normal_Text"
+			android:text="Be the next egg dropper" />
+	</LinearLayout>
+	<View
+		style="@style/Activity_Header_Separator" />
+	<GridView
+		android:id="@+id/gridview"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:verticalSpacing="8dp"
+		android:paddingLeft="20dp"
+		android:horizontalSpacing="5dp"
+		android:stretchMode="columnWidth"
+		android:numColumns="4"
+		android:columnWidth="100dp"
+		android:gravity="center"
+		style="@style/Grid" />
+
+	<!-- Custom footer -->
+	<View
+		style="@style/Activity_Header_Separator" />
+	<RelativeLayout
+		android:id="@+id/Egg_Detail_Row"
+		android:layout_height="165dp"
+		android:layout_width="fill_parent"
+		android:gravity="center_vertical"
+		android:padding="8dp"
+		android:visibility="gone"
+		android:orientation="vertical"
+		style="@style/Activity_Row">
+		<LinearLayout
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:layout_alignParentTop="true"
+			android:gravity="center_vertical"
+			android:paddingTop="0dp"
+			android:paddingRight="4dp"
+			android:paddingLeft="4dp"
+			android:orientation="horizontal">
+			<ImageView
+				android:id="@+id/Egg_Detail_Image"
+				android:layout_gravity="center_vertical"
+				android:layout_height="wrap_content"
+				android:layout_width="80px"
+				android:height="100px"
+				android:width="80px"
+				android:padding="4px"
+				android:maxWidth="80px"
+				android:layout_weight="0"
+				android:adjustViewBounds="true"
+				android:visibility="invisible"
+				android:background="@drawable/egg_frame_bg"
+				android:scaleType="centerInside" />
+			<LinearLayout
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_weight="1"
+				android:orientation="vertical">
+				<TextView
+					android:id="@+id/Egg_Detail_Title"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:textStyle="bold"
+					android:paddingLeft="10dp"
+					android:paddingRight="5dp"
+					android:layout_marginBottom="-3dp"
+					style="@style/Normal_Text" />
+				<TextView
+					android:id="@+id/Egg_Detail_Desc"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:paddingLeft="10dp"
+					android:paddingRight="5dp"
+					style="@style/Normal_Text" />
+				<TextView
+					android:id="@+id/Egg_Detail_Message"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:paddingLeft="10dp"
+					android:paddingRight="5dp"
+					style="@style/Normal_Text" />
+				<TextView
+					android:id="@+id/Egg_Detail_Finder"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:paddingLeft="10dp"
+					android:paddingRight="5dp"
+					style="@style/Small_Text" />
+			</LinearLayout>
+		</LinearLayout>
+		<LinearLayout
+			android:id="@+id/Egg_Detail_Button_Row"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:layout_alignParentBottom="true"
+			android:gravity="right|bottom"
+			android:paddingTop="4dp"
+			android:paddingRight="4dp"
+			android:paddingLeft="4dp"
+			android:orientation="horizontal">
+			<Button
+				android:id="@+id/Egg_Detail_Take_Button"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_gravity="right|center_vertical"
+				android:visibility="invisible"
+				android:layout_weight="0"
+				android:text="Unwrap It!"
+				style="@style/Activity_Button"
+				android:onClick="onTakeEggClick" />
+			<Button
+				android:id="@+id/Egg_Detail_Keep_Button"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_gravity="right|center_vertical"
+				android:visibility="invisible"
+				android:layout_weight="0"
+				android:text="Keep"
+				style="@style/Activity_Button"
+				android:onClick="onKeepEggClick" />
+			<Button
+				android:id="@+id/Egg_Detail_Discard_Button"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_gravity="right|center_vertical"
+				android:visibility="invisible"
+				android:layout_weight="0"
+				android:text="Discard"
+				style="@style/Activity_Button"
+				android:onClick="onDiscardEggClick" />
+		</LinearLayout>
+	</RelativeLayout>
+	<RelativeLayout
+		android:id="@+id/Egg_Drop_Row"
+		android:layout_height="240dp"
+		android:layout_width="fill_parent"
+		android:gravity="center_vertical"
+		android:padding="8dp"
+		android:visibility="gone"
+		android:orientation="vertical"
+		style="@style/Activity_Row">
+		<LinearLayout
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:layout_alignParentTop="true"
+			android:gravity="center_vertical"
+			android:paddingTop="0dp"
+			android:paddingRight="4dp"
+			android:paddingLeft="4dp"
+			android:orientation="horizontal">
+			<ImageView
+				android:id="@+id/Egg_Drop_Image"
+				android:layout_gravity="top"
+				android:layout_height="wrap_content"
+				android:layout_width="80px"
+				android:height="100px"
+				android:width="80px"
+				android:padding="4px"
+				android:maxWidth="80px"
+				android:layout_weight="0"
+				android:adjustViewBounds="true"
+				android:visibility="visible"
+				android:src="@drawable/egg13"
+				android:background="@drawable/egg_frame_bg"
+				android:scaleType="centerInside" />
+			<LinearLayout
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_weight="1"
+				android:orientation="vertical">
+				<TextView
+					android:id="@+id/Egg_Drop_Title"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:textStyle="bold"
+					android:text="Drop Some Eggs!"
+					android:paddingLeft="10dp"
+					android:paddingRight="5dp"
+					android:layout_marginBottom="-3dp"
+					style="@style/Normal_Text" />
+				<TextView
+					android:id="@+id/Egg_Drop_Intro"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:text="@string/eggs_drop_intro_empty"
+					android:paddingLeft="10dp"
+					android:paddingRight="5dp"
+					android:paddingBottom="5dp"
+					style="@style/Normal_Text" />
+				<TextView
+					android:id="@+id/Eggs_Drop_Message_Label"
+					android:text="@string/eggs_drop_message_label"
+					android:layout_height="wrap_content"
+					android:layout_width="fill_parent"
+					android:paddingLeft="10dp"
+					android:paddingRight="5dp"
+					android:paddingBottom="5dp"
+					android:textStyle="normal"
+					android:gravity="top|left"
+					style="@style/Normal_Text" />
+				<EditText
+					android:id="@+id/Eggs_Drop_Message_Edit"
+					android:text="@string/eggs_drop_message_value"
+					android:layout_height="wrap_content"
+					android:layout_width="fill_parent"
+					android:layout_marginLeft="5dp"
+					android:paddingLeft="10dp"
+					android:paddingRight="5dp"
+					android:lines="2"
+					android:gravity="top|left"
+					style="@style/Normal_Text" />
+			</LinearLayout>
+		</LinearLayout>
+		<LinearLayout
+			android:id="@+id/Egg_Detail_Button_Row"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:layout_alignParentBottom="true"
+			android:gravity="right|bottom"
+			android:paddingTop="4dp"
+			android:paddingRight="4dp"
+			android:paddingLeft="4dp"
+			android:orientation="horizontal">
+			<Button
+				android:id="@+id/Egg_Detail_Discard_Button"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_gravity="right|center_vertical"
+				android:visibility="visible"
+				android:layout_weight="0"
+				android:text="Drop Basket!"
+				style="@style/Activity_Button"
+				android:onClick="onBasketDropClick" />
+		</LinearLayout>
+	</RelativeLayout>
+</LinearLayout>

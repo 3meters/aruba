@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/Activity_Header"
+	android:layout_height="wrap_content"
+	android:layout_width="fill_parent">
+	<TableRow
+		android:id="@+id/Activity_Header_Row"
+		android:layout_height="fill_parent"
+		android:layout_width="fill_parent"
+		android:gravity="center_vertical"
+		android:paddingRight="6dp"
+		android:paddingLeft="6dp"
+		style="@style/Activity_Row">
+		<TextView
+			android:id="@+id/Activity_Title"
+			android:layout_height="@dimen/activity_row_height"
+			android:layout_width="wrap_content"
+			android:layout_weight="1"
+			android:layout_gravity="left|center_vertical"
+			android:gravity="center_vertical"
+			style="@style/Activity_Title" />
+		<TextView
+			android:id="@+id/Activity_Header_Button1"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_gravity="right|center_vertical"
+			android:gravity="center_vertical"
+			android:layout_weight="0"
+			android:text="Empty"
+			android:clickable="true"
+			android:onClick="onActivityButtonClick"
+			style="@style/Activity_Button" />
+	</TableRow>
+	<View style="@style/Activity_Header_Separator" />
+</TableLayout>

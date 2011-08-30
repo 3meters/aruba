@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent"
+	android:orientation="vertical">
+	<LinearLayout
+		android:id="@+id/AppHeader"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent">
+		<include
+			layout="@layout/temp_application_header" />
+	</LinearLayout>
+	<ScrollView
+		android:id="@+id/TileFrame"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_weight="1">
+		<LinearLayout
+			android:id="@+id/ActHeader"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:orientation="vertical">
+			<TableLayout
+				xmlns:android="http://schemas.android.com/apk/res/android"
+				android:id="@+id/Activity_Header"
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent">
+				<TableRow
+					android:id="@+id/Activity_Header_Row"
+					android:layout_height="fill_parent"
+					android:layout_width="fill_parent"
+					android:gravity="center_vertical"
+					android:paddingRight="6dp"
+					android:paddingLeft="6dp"
+					style="@style/Activity_Row">
+					<LinearLayout
+						android:layout_height="wrap_content"
+						android:layout_width="wrap_content">
+						<ImageView
+							android:id="@+id/Activity_Icon"
+							android:layout_height="@dimen/activity_icon_height"
+							android:layout_width="@dimen/activity_icon_width"
+							android:layout_gravity="left|center_vertical"
+							android:src="@drawable/mediaplayer3"
+							style="@style/Activity_Icon" />
+					</LinearLayout>
+					<TextView
+						android:id="@+id/Activity_Title"
+						android:layout_height="@dimen/activity_row_height"
+						android:layout_width="wrap_content"
+						android:layout_weight="1"
+						android:textSize="30dp"
+						android:layout_gravity="left|center_vertical"
+						android:gravity="center_vertical"
+						style="@style/Activity_Title" />
+				</TableRow>
+			</TableLayout>
+			<FrameLayout
+				android:id="@+id/TileContainer"
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent"
+				android:paddingTop="8dp">
+			</FrameLayout>
+		</LinearLayout>
+	</ScrollView>
+
+	<!-- Custom footer -->
+	<LinearLayout
+		android:id="@+id/Container"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:orientation="vertical">
+		<TableLayout
+			android:id="@+id/Activity_Custom_Footer"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent">
+			<View
+				style="@style/Activity_Header_Separator" />
+			<TableRow
+				android:id="@+id/Activity_Footer_Row"
+				android:layout_height="@dimen/activity_row_height"
+				android:layout_width="fill_parent"
+				android:gravity="center"
+				style="@style/Activity_Row">
+				<Button
+					android:id="@+id/BtnPause"
+					android:textSize="@dimen/menuitem_text"
+					android:textColor="#ffffffff"
+					android:height="72dp"
+					android:width="80dp"
+					android:layout_margin="5dp"
+					android:tag="pause"
+					android:text="Pause"
+					android:background="@drawable/button_selector"
+					android:onClick="onCommandClick" />
+				<Button
+					android:id="@+id/BtnResume"
+					android:textSize="@dimen/menuitem_text"
+					android:textColor="#ffffffff"
+					android:height="72dp"
+					android:width="80dp"
+					android:layout_margin="5dp"
+					android:tag="resume"
+					android:text="Resume"
+					android:background="@drawable/button_selector"
+					android:onClick="onCommandClick" />
+				<Button
+					android:id="@+id/BtnStop"
+					android:textSize="@dimen/menuitem_text"
+					android:textColor="#ffffffff"
+					android:height="72dp"
+					android:width="80dp"
+					android:layout_margin="5dp"
+					android:tag="stop"
+					android:text="Stop"
+					android:background="@drawable/button_selector"
+					android:onClick="onCommandClick" />
+			</TableRow>
+		</TableLayout>
+	</LinearLayout>
+</LinearLayout>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	style="@style/LayoutOuter">
+	<include layout="@layout/temp_application_header" />
+	
+	<!-- Body -->
+	
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+		<ScrollView
+			android:id="@+id/main"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:scrollbars="none">
+			<RelativeLayout
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:padding="5dp">
+				<EditText
+					android:id="@+id/Note_Title"
+					android:minHeight="40dp"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:background="@android:drawable/editbox_background"
+					android:autoText="true"
+					android:capitalize="sentences"
+					android:hint="Title"
+					android:layout_marginBottom="5dp" />
+				<EditText
+					android:id="@+id/Note_Body"
+					android:layout_below="@id/Note_Title"
+					android:gravity="top"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:background="@android:drawable/editbox_background"
+					android:minLines="5"
+					android:autoText="true"
+					android:capitalize="sentences"
+					android:layout_marginBottom="5dp"
+					android:hint="Content" />
+			</RelativeLayout>
+		</ScrollView>
+		
+		<!-- Custom footer -->
+		
+		<TableLayout
+			android:id="@+id/Activity_Custom_Footer"
+			android:layout_alignParentBottom="true"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent">
+			<View
+				style="@style/Activity_Header_Separator" />
+			<TableRow
+				android:id="@+id/Activity_Footer_Row"
+				android:layout_height="@dimen/activity_row_height"
+				android:layout_width="fill_parent"
+				android:gravity="center"
+				style="@style/Activity_Row">
+				<Button
+					android:id="@+id/BtnSave"
+					android:text="Save"
+					style="@style/Activity_Button"
+					android:onClick="onSaveClick" />
+				<Button
+					android:id="@+id/BtnCancel"
+					android:text="Cancel"
+					style="@style/Activity_Button"
+					android:onClick="onCancelClick" />
+			</TableRow>
+		</TableLayout>
+	</RelativeLayout>
+</LinearLayout>
