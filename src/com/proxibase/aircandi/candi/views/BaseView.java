@@ -27,7 +27,7 @@ import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 

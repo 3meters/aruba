@@ -15,7 +15,7 @@ import com.proxibase.aircandi.candi.models.ZoneModel;
 import com.proxibase.aircandi.candi.models.CandiModel.Transition;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 
 public class ZoneView extends BaseView {
 

@@ -2,7 +2,7 @@ package com.proxibase.aircandi.utils;
 
 import android.util.Log;
 
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 
 public class Utilities {
 

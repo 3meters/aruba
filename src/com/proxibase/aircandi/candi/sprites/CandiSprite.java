@@ -8,7 +8,7 @@ import org.anddev.andengine.opengl.buffer.BufferObjectManager;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.util.GLHelper;
 
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 
 public class CandiSprite extends Sprite {
 	

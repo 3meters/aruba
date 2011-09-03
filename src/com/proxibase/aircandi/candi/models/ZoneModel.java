@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.proxibase.aircandi.candi.models.CandiModel.Transition;
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 
 public class ZoneModel extends BaseModel {
 

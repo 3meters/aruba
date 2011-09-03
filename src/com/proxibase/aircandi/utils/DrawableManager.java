@@ -16,7 +16,7 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 
 public class DrawableManager {
 

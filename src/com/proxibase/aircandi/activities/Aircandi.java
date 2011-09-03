@@ -7,7 +7,7 @@ import android.location.Location;
 import android.util.Log;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 
 public class Aircandi extends Application {
 

@@ -7,7 +7,7 @@ import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.opengl.buffer.BufferObjectManager;
 import org.anddev.andengine.opengl.util.GLHelper;
 
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 
 public class CandiRectangle extends Rectangle {
 

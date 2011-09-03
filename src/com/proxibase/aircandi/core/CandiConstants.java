@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.candi.utils;
+package com.proxibase.aircandi.core;
 
 import javax.microedition.khronos.opengles.GL10;
 

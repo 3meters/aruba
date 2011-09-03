@@ -34,7 +34,7 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.BaseEntity.SubType;
 import com.proxibase.aircandi.utils.AircandiUI;
 import com.proxibase.aircandi.utils.ImageManager;

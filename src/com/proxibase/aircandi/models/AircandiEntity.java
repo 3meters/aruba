@@ -6,7 +6,7 @@ import java.net.URISyntaxException;
 import org.apache.http.client.ClientProtocolException;
 
 import com.google.gson.annotations.Expose;
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.service.ProxibaseError;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;

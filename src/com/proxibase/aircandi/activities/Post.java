@@ -36,7 +36,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PostEntity;
 import com.proxibase.aircandi.models.BaseEntity.SubType;
 import com.proxibase.aircandi.utils.AircandiUI;

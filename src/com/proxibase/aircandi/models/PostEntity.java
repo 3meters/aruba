@@ -1,7 +1,7 @@
 package com.proxibase.aircandi.models;
 
 import com.google.gson.annotations.Expose;
-import com.proxibase.aircandi.candi.utils.CandiConstants;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 public class PostEntity extends BaseEntity {
