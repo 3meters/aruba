@@ -45,6 +45,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -140,6 +141,18 @@ import com.proxibase.sdk.android.util.ProxiConstants;
  *   reloaded could prioritize textures that are currently visible to the camera.
  */
 
+/*
+ * Library Notes
+ * 
+ * - AWS: We'd like to link to s3 and core libraries to reduce our footprint but there
+ * 	 is a known issue in the AWS SDK for Android 2.1. Check next release to see if we can
+ *   make the switch. We could also do the work to call AWS without their libraries which
+ *   should give us the biggest savings.
+ *   
+ * - Gson and Guava: We could reduce our size by making the libraries included with Android
+ *   work instead of pulling in Gson (which in turn has a dependency on Guava).
+ */
+
 @SuppressWarnings("unused")
 public class CandiSearchActivity extends AircandiGameActivity {
 
@@ -187,6 +200,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private ScreenOrientation			mScreenOrientation		= ScreenOrientation.PORTRAIT;
 	private PackageReceiver				mPackageReceiver		= new PackageReceiver();
 	private boolean						mIgnoreInput			= false;
+	private boolean						mUsingEmulator			= false;
 
 	private boolean						mUserRefusedWifiEnable	= false;
 	private int							mRenderMode;
@@ -226,6 +240,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mCandiFlipper = (ViewFlipper) findViewById(R.id.CandiFlipper);
 		mCandiFlipper.setInAnimation(this, R.anim.summary_in);
 		mCandiFlipper.setOutAnimation(this, R.anim.summary_out);
+		
 		mWebView = (WebView) findViewById(R.id.WebView);
 		mWebView.getSettings().setUserAgentString(USER_AGENT);
 		mWebView.getSettings().setJavaScriptEnabled(true);
@@ -241,15 +256,24 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mButtonRefresh = (ImageView) findViewById(R.id.Application_Button_Refresh);
 		if (mButtonRefresh != null)
 			mButtonRefresh.setVisibility(View.VISIBLE);
+		
+		// Check for emulator
+		if (Build.PRODUCT.equals("google_sdk") || Build.PRODUCT.equals("sdk"))
+			mUsingEmulator = true;
 
 		// Proxibase sdk components
-		ProxiExplorer.getInstance().setContext(this);
-		if (!ProxiExplorer.getInstance().isWifiEnabled()) {
-			wifiAskToEnable();
-			if (mUserRefusedWifiEnable)
-				return;
+		ProxiExplorer.getInstance().setContext(this.getApplicationContext());
+		ProxiExplorer.getInstance().setUsingEmulator(mUsingEmulator);
+		ProxiExplorer.getInstance().initialize();
+		if (!ProxiExplorer.getInstance().isUsingEmulator()) {
+			if (!ProxiExplorer.getInstance().isWifiEnabled()) {
+				wifiAskToEnable();
+				if (mUserRefusedWifiEnable)
+					return;
+			}
 		}
-
+		
+		
 		// AWS Credentials
 		startGetCredentials();
 

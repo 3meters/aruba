@@ -8,19 +8,9 @@
     <color name="application_titlebar_separator_center">@color/theme_white</color>
     <color name="application_titlebar_separator_end">@color/theme_white</color>
     
-    <color name="activity_title_text">@color/theme_text</color>
-    <color name="activity_button_text">@color/theme_text</color>
-    <color name="activity_header_start">@color/theme_tint</color>
-    <color name="activity_header_end">@color/theme_tint2</color>
-    <color name="activity_separator_start">@color/theme_light</color>
-    <color name="activity_separator_end">@color/theme_light</color>
-    
     <color name="menu_title_text">@color/theme_text</color>
     <color name="normal_text">@color/theme_text</color>
     <color name="normal_text_reversed">@color/theme_white</color>
-    
-    <color name="listitem_title_text">@color/theme_text</color>
-    <color name="listitem_body_text">@color/theme_text</color>
     
     <color name="form_label_text">@color/theme_text</color>
     <color name="form_value_text">@color/theme_text</color>
@@ -33,24 +23,10 @@
     <color name="button_outline">@color/theme_primary_dark</color>
     <color name="button_color_filter">@color/theme_tint</color>
     
-    <color name="tab_active_text">@color/theme_tint2</color>
-    <color name="tab_active_start">@color/theme_tint2</color>
-    <color name="tab_active_end">@color/theme_white</color>
-    <color name="tab_inactive_text">@color/theme_lightest</color>
-    <color name="tab_inactive_start">@color/theme_lightest</color>
-    <color name="tab_inactive_end">@color/theme_tint2</color>
-    
     <color name="window_wallpaper_start">@color/theme_white</color>
     <color name="window_wallpaper_end">@color/theme_white</color>
     
-    <color name="point_ripple_text">@color/theme_text</color>
-    <color name="point_ripple_filter">@color/theme_tint2</color>
-    <color name="point_ripple_filter_selected">@color/theme_primary_highlight_soft</color>
-    
     <color name="badge_text">@color/theme_text_reverse</color>
-    <color name="badge_start">@color/theme_lightest</color>
-    <color name="badge_end">@color/theme_secondaryb_medium</color>
-    <color name="badge_outline">@color/theme_white</color>
     
     <color name="listitem_start">@android:color/transparent</color>
     <color name="listitem_end">@android:color/transparent</color>
@@ -58,21 +34,6 @@
     <color name="picture_border">@color/theme_white</color>
     
     <!-- Special -->
-
-    <color name="button_facebook_start">#75A1F9</color>
-    <color name="button_facebook_end">#547ED3</color>
-    <color name="button_facebook_outline">@android:color/transparent</color>
-    <color name="button_reward_filter">#C7F2BF</color>
-    <color name="point_searching_start">#11000000</color>
-    <color name="point_searching_end">#33000000</color>
-    <color name="point_searching_outline">#11000000</color>
-    
-    <color name="signin_title_text">@color/theme_primary_highlight</color>
-    <color name="signin_title_text_shadow">@color/theme_black</color>
-    
-    <color name="signin_tagline_text">@color/theme_black</color>
-    <color name="signin_tagline_text_shadow">@android:color/transparent</color>
-
 
     <!-- Gradients -->
     

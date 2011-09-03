@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TextView
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/Tricorder_Message"
-	android:text="No spots\nclose by"
-	android:clickable="false"
-	style="@style/Spot.Empty" />

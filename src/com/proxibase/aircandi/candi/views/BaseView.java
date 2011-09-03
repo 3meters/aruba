@@ -9,7 +9,6 @@ import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.opengl.buffer.BufferObjectManager;
 import org.anddev.andengine.opengl.texture.Texture;
-import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.opengl.util.GLHelper;
@@ -67,7 +66,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTitleSprite = new CandiSprite(0,
 				CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (mTitleTextureRegion.getHeight() + CandiConstants.CANDI_VIEW_TITLE_SPACER_HEIGHT),
 				mTitleTextureRegion);
-		mTitleSprite.setBlendFunction(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		mTitleSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mTitleSprite.setAlpha(0);
 		mTitleSprite.setZIndex(0);
 		attachChild(mTitleSprite);
@@ -167,7 +166,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public void loadTextures() {
-		mTitleTexture = new Texture(256, 128, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+		mTitleTexture = new Texture(256, 128, CandiConstants.GL_TEXTURE_OPTION);
 		mCandiPatchPresenter.getEngine().getTextureManager().loadTextures(mTitleTexture);
 	}
 

@@ -41,6 +41,8 @@ public class BaseEntity extends AircandiEntity {
 	@Expose
 	public String	createdDate;
 	@Expose
+	public Integer	visibility;
+	@Expose
 	public boolean	enabled;
 
 	public BaseEntity() {}

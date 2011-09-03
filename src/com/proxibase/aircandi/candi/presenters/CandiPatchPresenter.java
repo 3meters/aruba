@@ -25,7 +25,6 @@ import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.Texture;
-import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
@@ -196,6 +195,7 @@ public class CandiPatchPresenter implements Observer {
 			// Progress sprite
 			mProgressSprite = new CandiAnimatedSprite(0, 0, mProgressTextureRegion);
 			mProgressSprite.setPosition(centerX, centerY);
+			mProgressSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 			mProgressSprite.animate(150, true);
 			mProgressSprite.setVisible(true);
 			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mProgressSprite);
@@ -204,7 +204,7 @@ public class CandiPatchPresenter implements Observer {
 			mCameraTargetSprite = new CameraTargetSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, CandiConstants.CANDI_VIEW_WIDTH,
 					CandiConstants.CANDI_VIEW_BODY_HEIGHT);
 			mCameraTargetSprite.setColor(1, 0, 0, 0.2f);
-			mCameraTargetSprite.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+			mCameraTargetSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 			mCameraTargetSprite.setVisible(false);
 			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mCameraTargetSprite);
 
@@ -866,7 +866,7 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	public void loadTextures() {
-		mTexture = new Texture(512, 512, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+		mTexture = new Texture(512, 512, CandiConstants.GL_TEXTURE_OPTION);
 		mEngine.getTextureManager().loadTexture(mTexture);
 	}
 
@@ -952,9 +952,6 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	private void setCameraBoundaries(Scene scene) {
-		// float[] coordinates = scene.convertLocalToSceneCoordinates(mCandiPatchModel.getOriginX(),
-		// mCandiPatchModel.getOriginY());
-		// mBoundsMinX = coordinates[CandiConstants.VERTEX_INDEX_X];
 		mBoundsMinX = 125;
 		mBoundsMaxX = (mBoundsMinX + (mCandiPatchModel.getZonesOccupiedNextCount() - 1) * (CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING));
 	}
@@ -979,7 +976,7 @@ public class CandiPatchPresenter implements Observer {
 		 * on slot #2. Touch areas track with the camera so they will be messed up. So
 		 * we still set the camera target sprite as the chase entity for the
 		 * camera.
-		 * :
+		 * |
 		 * Because the y axis is reversed, we need to subtract to move down.
 		 */
 

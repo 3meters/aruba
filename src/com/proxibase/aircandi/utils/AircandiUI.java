@@ -53,17 +53,25 @@ public class AircandiUI {
 	}
 
 	public static Bitmap getImage(String url) {
-		InputStream stream = null;
+		InputStream inputStream = null;
 		try {
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
 
-			stream = ProxibaseService.getInstance().selectAsStream(url, ResponseFormat.Xml);
-			Bitmap bm = BitmapFactory.decodeStream(stream, null, options);
-
-			if (bm == null || !bm.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString()))
-				throw new IllegalArgumentException("Downloaded image could not be decoded using the default config: actual=" + bm.getConfig().name());
-
+			inputStream = ProxibaseService.getInstance().selectAsStream(url, ResponseFormat.Xml);
+			
+			if (inputStream == null)
+				throw new IllegalStateException("Null stream returned when downloading an image");
+			
+			/*
+			 * We convert the stream to a byte array for decoding because of a bug 
+			 * in pre 2.3 versions of android.
+			 */
+			byte[] imageBytes = getBytes(inputStream);
+			Bitmap bm = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
+			if (bm == null)
+				throw new IllegalStateException("Stream could not be decoded to a bitmap: " + url);
+			
 			return bm;
 		}
 		catch (ClientProtocolException e) {
@@ -74,7 +82,7 @@ public class AircandiUI {
 		}
 		finally {
 			try {
-				stream.close();
+				inputStream.close();
 			}
 			catch (IOException exception) {
 				exception.printStackTrace();

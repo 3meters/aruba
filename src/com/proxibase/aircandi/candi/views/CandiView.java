@@ -153,7 +153,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 		// Placeholder
 		mPlaceholderTextureRegion = mCandiPatchPresenter.mPlaceholderTextureRegion.clone();
 		mPlaceholderSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mPlaceholderTextureRegion);
-		mPlaceholderSprite.setBlendFunction(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		mPlaceholderSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mPlaceholderSprite.setAlpha(0);
 		mPlaceholderSprite.setVisible(false);
 		mPlaceholderSprite.setZIndex(-10);
@@ -165,6 +165,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 		float progressY = CandiConstants.CANDI_VIEW_TITLE_HEIGHT + (mPlaceholderSprite.getHeight() * 0.5f)
 							- (mProgressTextureRegion.getTileHeight() * 0.5f);
 		mProgressSprite = new CandiAnimatedSprite(progressX, progressY, mProgressTextureRegion);
+		mProgressSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mProgressSprite.setAlpha(0);
 		mProgressSprite.animate(150, true);
 		mProgressSprite.setVisible(false);
@@ -175,7 +176,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 	private void makeReflectionSprite() {
 		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT,
 				mReflectionTextureRegion);
-		mReflectionSprite.setBlendFunction(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		mReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mReflectionSprite.setAlpha(0);
 		mReflectionSprite.setVisible(false);
 		mReflectionSprite.setZIndex(0);
@@ -191,7 +192,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 			}
 
 		};
-		mBodySprite.setBlendFunction(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		mBodySprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mBodySprite.setAlpha(0);
 		mBodySprite.setVisible(false);
 		mBodySprite.setZIndex(0);
@@ -289,14 +290,15 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 		}
 	}
 
-	private void showProgress() {
-		mProgressSprite.setVisible(true);
-		mProgressSprite.animate(150, true);
-	}
-
-	private void hideProgress() {
-		mProgressSprite.setVisible(false);
-		mProgressSprite.stopAnimation();
+	private void progressVisible(boolean visible) {
+		if (visible) {
+			mProgressSprite.setVisible(true);
+			mProgressSprite.animate(150, true);
+		}
+		else {
+			mProgressSprite.setVisible(false);
+			mProgressSprite.stopAnimation();
+		}
 	}
 
 	private void showPlaceholder() {
@@ -305,7 +307,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 		if (mBodySprite != null)
 			mBodySprite.setVisible(false);
 		mPlaceholderSprite.setVisible(true);
-		showProgress();
+		progressVisible(true);
 	}
 
 	public void showCollapsed() {
@@ -448,14 +450,26 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 	}
 
 	private void swapImageForPlaceholder() {
-		hideProgress();
+		progressVisible(false);
 		if (mCandiModel.isVisibleCurrent()) {
-			mPlaceholderSprite.registerEntityModifier(new AlphaModifier(CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 1.0f, 0.0f));
+			mPlaceholderSprite.registerEntityModifier(new AlphaModifier(CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 1.0f, 0.0f,
+					new IEntityModifierListener() {
+
+						@Override
+						public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+							mPlaceholderSprite.setVisible(false);
+						}
+
+						@Override
+						public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+					}));
+
 			mBodySprite.registerEntityModifier(new AlphaModifier(CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 0.0f, 1.0f));
 			mReflectionSprite.registerEntityModifier(new AlphaModifier(CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 0.0f, 1.0f));
 		}
 		else {
 			mPlaceholderSprite.setAlpha(0);
+			mPlaceholderSprite.setVisible(false);
 		}
 	}
 
@@ -474,9 +488,9 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 	public void loadTextures() {
 		super.loadTextures();
 
-		mReflectionTexture = new Texture(256, 128, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+		mReflectionTexture = new Texture(256, 128, CandiConstants.GL_TEXTURE_OPTION);
 		mCandiPatchPresenter.getEngine().getTextureManager().loadTexture(mReflectionTexture);
-		mBodyTexture = new Texture(256, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+		mBodyTexture = new Texture(256, 256, CandiConstants.GL_TEXTURE_OPTION);
 		mCandiPatchPresenter.getEngine().getTextureManager().loadTexture(mBodyTexture);
 
 		if (mTexturesLoadedListener != null)

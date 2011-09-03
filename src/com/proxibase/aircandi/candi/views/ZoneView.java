@@ -2,8 +2,6 @@ package com.proxibase.aircandi.candi.views;
 
 import java.util.Observable;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -152,7 +150,7 @@ public class ZoneView extends BaseView {
 
 	private void makeBodySprite() {
 		mBodySprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBodyTextureRegion);
-		mBodySprite.setBlendFunction(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		mBodySprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mBodySprite.setAlpha(0);
 		mBodySprite.setZIndex(0);
 		attachChild(mBodySprite);
@@ -161,7 +159,7 @@ public class ZoneView extends BaseView {
 	private void makeReflectionSprite() {
 		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT,
 				mReflectionTextureRegion);
-		mReflectionSprite.setBlendFunction(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		mReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mReflectionSprite.setAlpha(0);
 		mReflectionSprite.setZIndex(0);
 		attachChild(mReflectionSprite);

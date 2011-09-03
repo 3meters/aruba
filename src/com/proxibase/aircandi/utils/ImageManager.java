@@ -79,8 +79,8 @@ public class ImageManager {
 		return mImageCache;
 	}
 
-	public void setImageCache(ImageCache mImageCache) {
-		mImageCache = mImageCache;
+	public void setImageCache(ImageCache imageCache) {
+		mImageCache = imageCache;
 	}
 
 	public Bitmap getImage(String key) {
