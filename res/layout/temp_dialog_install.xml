@@ -1,53 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="200dp"
-	android:layout_width="300dp"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent"
 	android:layout_gravity="center"
 	android:padding="25dp">
 	<TextView
-		android:id="@+id/DialogMessage"
+		android:id="@+id/txt_dialog_message"
 		android:layout_height="wrap_content"
 		android:layout_width="wrap_content"
 		android:layout_alignParentTop="true"
+		android:layout_centerHorizontal="true"
 		android:text="@string/dialog_install_message"
-		android:textSize="@dimen/heading_text"
-		android:textColor="#ffffffff"
+		style="@style/txt_dialog"
 		android:gravity="center" />
 	<LinearLayout
+		android:id="@+id/group_install"
 		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:layout_alignParentBottom="true"
-		android:gravity="center"
+		android:layout_width="wrap_content"
+		android:layout_below="@id/txt_dialog_message"
+		android:layout_centerHorizontal="true"
 		android:orientation="horizontal">
-		<LinearLayout
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:orientation="horizontal">
-			<Button
-				android:id="@+id/InstallButton"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="left"
-				android:height="72dp"
-				android:width="80dp"
-				android:layout_marginRight="5dp"
-				android:background="@drawable/button_selector"
-				android:text="@string/dialog_install_ok"
-				android:textColor="#ffffffff"
-				android:textSize="@dimen/menuitem_text" />
-			<Button
-				android:id="@+id/CancelButton"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="right"
-				android:height="72dp"
-				android:width="80dp"
-				android:layout_marginLeft="5dp"
-				android:background="@drawable/button_selector"
-				android:text="@string/dialog_install_cancel"
-				android:textColor="#ffffffff"
-				android:textSize="@dimen/menuitem_text" />
-		</LinearLayout>
+		<Button
+			android:id="@+id/btn_install_ok"
+			style="@style/btn_dialog"
+			android:text="@string/dialog_install_ok" />
+		<Button
+			android:id="@+id/btn_install_cancel"
+			style="@style/btn_dialog"
+			android:text="@string/dialog_install_cancel" />
 	</LinearLayout>
 </RelativeLayout>

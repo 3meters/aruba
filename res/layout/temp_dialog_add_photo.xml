@@ -3,40 +3,22 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_height="fill_parent"
 	android:layout_width="fill_parent"
-	android:layout_gravity="center"
+	android:gravity="center"
 	android:padding="25dp">
-	<LinearLayout
-		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:gravity="center"
-		android:orientation="horizontal"
-		android:layout_below="@+id/DialogMessage">
-		<TableLayout
-			android:layout_height="wrap_content"
-			android:layout_width="fill_parent">
-			<TableRow
-				android:paddingTop="5dp"
-				android:paddingBottom="5dp" android:gravity="center">
-				<Button
-					android:id="@+id/SelectPhotoButton"
-					android:layout_width="fill_parent"
-					android:height="72dp"
-					android:width="200dp"
-					android:background="@drawable/button_selector"
-					android:text="Select a photo from gallery"
-					android:textColor="#ffffffff"
-					android:textSize="@dimen/menuitem_text" android:ellipsize="end" android:lines="3" android:padding="10dp"/>
-			</TableRow>
-			<TableRow android:gravity="center">
-				<Button
-					android:id="@+id/TakePhotoButton"
-					android:layout_width="fill_parent"
-					android:height="72dp"
-					android:background="@drawable/button_selector"
-					android:text="Take a new photo"
-					android:textColor="#ffffffff"
-					android:textSize="@dimen/menuitem_text" />
-			</TableRow>
-		</TableLayout>
-	</LinearLayout>
+	<Button
+		android:id="@+id/btn_select_photo"
+		android:text="@string/dialog_select_photo_button"
+		android:layout_marginBottom="10dp"
+		style="@style/btn_dialog_wide" />
+	<Button
+		android:id="@+id/btn_take_photo"
+		android:layout_below="@id/btn_select_photo"
+		android:text="@string/dialog_take_photo_button"
+		android:layout_marginBottom="10dp"
+		style="@style/btn_dialog_wide" />
+	<Button
+		android:id="@+id/btn_use_profile_photo"
+		android:layout_below="@id/btn_take_photo"
+		android:text="@string/dialog_profile_photo_button"
+		style="@style/btn_dialog_wide" />
 </RelativeLayout>

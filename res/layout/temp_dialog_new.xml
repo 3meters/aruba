@@ -6,66 +6,52 @@
 	android:layout_gravity="center"
 	android:padding="25dp">
 	<TextView
-		android:id="@+id/DialogMessage"
+		android:id="@+id/txt_dialog_message"
 		android:layout_height="wrap_content"
 		android:layout_width="wrap_content"
 		android:layout_alignParentTop="true"
-		android:text="Share some candi and make your mark"
-		android:textSize="@dimen/heading_text"
-		android:textColor="#ffffffff"
+		android:layout_centerHorizontal="true"
+		android:paddingBottom="10dp"
+		android:text="@string/dialog_new_message"
+		style="@style/txt_dialog"
 		android:gravity="center" />
 	<LinearLayout
+		android:id="@+id/group_new_topic"
 		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:gravity="center"
-		android:orientation="horizontal"
-		android:layout_below="@+id/DialogMessage">
-		<TableLayout
-			android:layout_height="wrap_content"
-			android:layout_width="fill_parent">
-			<TableRow
-				android:paddingTop="5dp"
-				android:paddingBottom="5dp">
-				<Button
-					android:id="@+id/NewTopicButton"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="left"
-					android:height="72dp"
-					android:width="80dp"
-					android:layout_marginRight="5dp"
-					android:background="@drawable/button_selector"
-					android:text="New\r\nTopic"
-					android:textColor="#ffffffff"
-					android:textSize="@dimen/menuitem_text" />
-				<TextView
-					android:textColor="#ffffffff"
-					android:textSize="@dimen/menuitem_text"
-					android:text="Leave a new topic here\nto share with others."
-					android:ellipsize="none"
-					android:lines="4"
-					android:width="200dp" android:layout_height="fill_parent" android:gravity="center_vertical"/>
-			</TableRow>
-			<TableRow>
-				<Button
-					android:id="@+id/ExtendTopicButton"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="left"
-					android:height="72dp"
-					android:width="80dp"
-					android:layout_marginRight="5dp"
-					android:background="@drawable/button_selector"
-					android:text="Add To\r\nTopic"
-					android:textColor="#ffffffff"
-					android:textSize="@dimen/menuitem_text" />
-				<TextView
-					android:layout_height="fill_parent"
-					android:textColor="#ffffffff"
-					android:textSize="@dimen/menuitem_text"
-					android:text="Add photos, comments,\nand more to this topic."
-					android:width="200dp" android:gravity="center_vertical|clip_vertical"/>
-			</TableRow>
-		</TableLayout>
+		android:layout_width="wrap_content"
+		android:layout_below="@id/txt_dialog_message"
+		android:layout_centerHorizontal="true"
+		android:paddingBottom="10dp"
+		android:orientation="horizontal">
+		<Button
+			android:id="@+id/btn_new_topic"
+			style="@style/btn_dialog"
+			android:text="@string/dialog_new_topic_button" />
+		<TextView
+			android:id="@+id/txt_new_topic"
+			style="@style/txt_dialog"
+			android:text="@string/dialog_new_topic_label"
+			android:ellipsize="none"
+			android:lines="4"
+			android:paddingLeft="10dp"
+			android:width="200dp"
+			android:gravity="center_vertical" />
+	</LinearLayout>
+	<LinearLayout
+		android:id="@+id/group_new_comment"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_below="@id/group_new_topic"
+		android:layout_centerHorizontal="true"
+		android:orientation="horizontal">
+		<Button
+			android:id="@+id/btn_new_comment"
+			style="@style/btn_dialog"
+			android:text="@string/dialog_new_comment_button" />
+		<TextView
+			style="@style/txt_dialog"
+			android:text="@string/dialog_new_comment_label"
+			android:paddingLeft="10dp"
+			android:width="200dp" />
 	</LinearLayout>
 </RelativeLayout>

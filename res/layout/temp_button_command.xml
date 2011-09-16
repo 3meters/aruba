@@ -8,20 +8,8 @@
 	android:clickable="true"
 	android:onClick="onCommandButtonClick">
 	<Button
-		xmlns:android="http://schemas.android.com/apk/res/android"
 		android:id="@+id/CommandButton"
-		android:text="Stream"
-		android:textSize="@dimen/menuitem_text"
-		android:textColor="#ffffffff"
-		android:height="72dp"
-		android:width="80dp"
-		android:gravity="center"
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		android:layout_marginTop="5dp"
-		android:layout_marginRight="5dp"
-		android:background="@drawable/button_selector"
-		android:clickable="true"
+		style="@style/btn_candiinfo"
 		android:onClick="onCommandButtonClick" />
 	<TextView
 		android:id="@+id/CommandBadge"

@@ -1,90 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+	<!-- Themes -->
+	
 	<style
-		name="AircandiTheme" parent="@android:style/Theme">
+		name="aircandi_theme.midnight" parent="android:Theme.NoTitleBar">
 		<item name="android:windowNoTitle">true</item>	
-		<item name="android:windowBackground">@drawable/wallpaper7</item>
 		<item name="android:windowContentOverlay">@null</item>
+		<item name="textColorFocused">@color/pager_indicator_text_focused_dark</item>
+		<item name="textColorUnfocused">@color/pager_indicator_text_unfocused_dark</item>
+		<item name="android:textColorHint">@color/edittext_color_hint_dark</item>
+		<item name="textureBodyZone">gfx/trans_30_dark.png</item>
+		<item name="textureBusyIndicator">gfx/busyspritesIV_dark.png</item>
+		<item name="textColorTitle">#ffffffff</item>
+		<item name="textColorButton">#ffffffff</item>
+		<item name="textColorButtonHeader">#ffffffff</item>
+		<item name="backgroundHeader">@drawable/app_header_bg_dark</item>
+		<item name="backgroundButton">@drawable/button_selector_dark</item>
+		<item name="actionStripBackground">@drawable/action_strip_bg_dark</item>
+		<item name="iconActions">@drawable/icon_actions_dark</item>
+		<item name="iconRefresh">@drawable/icon_refresh_dark</item>
+		<item name="iconNew">@drawable/icon_new_dark</item>
+		<item name="iconBack">@drawable/icon_back_dark</item>
+		<item name="pagerNotch">@drawable/indicator_current_dark</item>
+		<item name="pagerBorder">#33ffffff</item>
+		<item name="backgroundCandiInfo">@android:color/transparent</item>
 	</style>
 	
 	<style
-		name="AircandiDialogTheme" parent="@android:style/Theme.Dialog">
+		name="aircandi_theme.snow" parent="@android:style/Theme.Light.NoTitleBar">
+		<item name="android:windowNoTitle">true</item>	
+		<item name="android:windowContentOverlay">@null</item>
+		<item name="textColorFocused">@color/pager_indicator_text_focused_light</item>
+		<item name="textColorUnfocused">@color/pager_indicator_text_unfocused_light</item>
+		<item name="android:textColorHint">@color/edittext_color_hint_light</item>
+		<item name="textureBodyZone">gfx/trans_30_light.png</item>
+		<item name="textureBusyIndicator">gfx/busyspritesIV_light.png</item>
+		<item name="textColorTitle">#ff000000</item>
+		<item name="textColorButton">#ff000000</item>
+		<item name="textColorButtonHeader">#ff000000</item>
+		<item name="backgroundHeader">@drawable/app_header_bg_light</item>
+		<item name="backgroundButton">@drawable/button_selector_light</item>
+		<item name="actionStripBackground">@drawable/action_strip_bg_light</item>
+		<item name="iconActions">@drawable/icon_actions_light</item>
+		<item name="iconRefresh">@drawable/icon_refresh_light</item>
+		<item name="iconNew">@drawable/icon_new_light</item>
+		<item name="iconBack">@drawable/icon_back_light</item>
+		<item name="pagerNotch">@drawable/indicator_current_light</item>
+		<item name="pagerBorder">#44000000</item>
+		<item name="backgroundCandiInfo">@android:color/transparent</item>
+	</style>
+	
+	<style
+		name="aircandi_theme.blueray" parent="aircandi_theme.midnight">
+		<item name="android:windowBackground">@drawable/wallpaper7</item>
+	</style>
+	
+	<style
+		name="aircandi_theme.smolder" parent="aircandi_theme.midnight">
+		<item name="android:windowBackground">@drawable/wallpaper15</item>
+	</style>
+	
+	<style
+		name="aircandi_theme.serene" parent="aircandi_theme.snow">
+		<item name="android:windowBackground">@drawable/wallpaper_lake</item>
+		<item name="textColorFocused">@android:color/white</item>
+		<item name="textColorUnfocused">@color/gray_lightest</item>
+		<item name="textColorButtonHeader">#ffffffff</item>
+		<item name="iconActions">@drawable/icon_actions_dark</item>
+		<item name="iconRefresh">@drawable/icon_refresh_dark</item>
+		<item name="iconNew">@drawable/icon_new_dark</item>
+		<item name="iconBack">@drawable/icon_back_dark</item>
+		<item name="backgroundCandiInfo">#99ffffff</item>
+	</style>
+	
+	<style
+		name="aircandi_theme_dialog" parent="@android:style/Theme.Dialog">
 		<item name="android:windowIsTranslucent">true</item>    
 		<item name="android:windowContentOverlay">@null</item>    
 		<item name="android:windowNoTitle">true</item>    
 		<item name="android:windowIsFloating">true</item>    
 		<item name="android:windowBackground">@android:color/transparent</item>	
+		<item name="android:textColor">@android:color/white</item>    
 	</style>
 	
-	<style
-		name="AircandiTheme.NoWallpaper">
-		<item name="android:windowNoTitle">true</item>	
-		<item name="android:windowBackground">@drawable/wallpaper_bg</item>
-	</style>
+	<!-- CandiSearch/Activity Header -->
 	
 	<style
-		name="Application_Row">
-		<item name="android:layout_height">wrap_content</item>
+		name="app_header">
+		<item name="android:layout_height">40dp</item>
 		<item name="android:layout_width">fill_parent</item>
-		<item name="android:stretchColumns">0</item>
-		<item name="android:background">@drawable/application_header_bg</item>		
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>		
+		<item name="android:background">?attr/backgroundHeader</item>		
 	</style>
 	
-	<style
-		name="Application_Title">		
-		<item name="android:textSize">@dimen/application_titlebar_text</item>		
-		<item name="android:textColor">@color/application_titlebar_text</item>		
-		<item name="android:textStyle">normal</item>
-		<item name="android:layout_height">wrap_content</item>
+	<style name="txt_header">
+		<item name="android:layout_height">fill_parent</item>	
 		<item name="android:layout_width">fill_parent</item>
-		<item name="android:layout_gravity">left|center_vertical</item>
-		<item name="android:layout_weight">1</item>
-		<item name="android:paddingTop">6dp</item>	
-		<item name="android:paddingBottom">6dp</item>	
-		<item name="android:paddingLeft">6dp</item>
-		<item name="android:gravity">left|center_vertical</item>
-		<item name="android:background">@drawable/application_button_selector</item>
-		<item name="android:clickable">true</item>
-		<item name="android:onClick">onHomeClick</item>
+		<item name="android:paddingLeft">10dp</item>
+		<item name="android:gravity">center_vertical</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>	
+		<item name="android:background">@drawable/button_nooutline_selector</item>		
 	</style>
 	
-	<style
-		name="Application_Footer">		
-		<item name="android:textSize">@dimen/application_titlebar_text</item>		
-		<item name="android:textColor">@color/application_titlebar_text</item>		
-		<item name="android:textStyle">normal</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:layout_width">fill_parent</item>
-		<item name="android:layout_gravity">left|center_vertical</item>
-		<item name="android:layout_weight">1</item>
-		<item name="android:paddingTop">6dp</item>	
-		<item name="android:paddingBottom">6dp</item>	
-		<item name="android:paddingLeft">6dp</item>
-		<item name="android:gravity">left|center_vertical</item>
-		<item name="android:background">@drawable/application_button_selector</item>
-	</style>
-	
-	<style
-		name="Application_Button">
-		<item name="android:layout_width">@dimen/application_button_width</item>
-		<item name="android:layout_height">wrap_content</item>
+	<style name="btn_back">
+		<item name="android:layout_height">fill_parent</item>	
+		<item name="android:layout_width">wrap_content</item>
 		<item name="android:layout_gravity">center</item>
-		<item name="android:gravity">center</item>
-		<item name="android:minWidth">80dp</item>
-		<item name="android:paddingTop">10dp</item>	
-		<item name="android:paddingBottom">10dp</item>	
-		<item name="android:background">@drawable/application_button_selector</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:singleLine">true</item>
+		<item name="android:gravity">center_vertical|left</item>
+		<item name="android:drawableLeft">?attr/iconBack</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>	
+		<item name="android:background">@drawable/button_nooutline_selector</item>	
+		<item name="android:textColor">?attr/textColorButtonHeader</item>				
 	</style>
 	
 	<style
-		name="Application_Button_Separator">
+		name="app_button">
+		<item name="android:layout_width">50dp</item>
+		<item name="android:layout_height">fill_parent</item>
+		<item name="android:gravity">center</item>
+		<item name="android:background">@drawable/app_button_selector</item>
+	</style>
+	
+	<style
+		name="app_button_image">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+	</style>
+	
+	<style
+		name="app_button_wrap" parent="app_button">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:minWidth">0dp</item>
+	</style>
+	
+	<style
+		name="line_vertical">
 		<item name="android:layout_height">fill_parent</item>
 		<item name="android:layout_width">@dimen/application_button_separator_width</item>
-		<item name="android:background">@drawable/application_header_separator</item>
+		<item name="android:background">@drawable/app_header_separator</item>
 	</style>
 	
 	<style
-		name="Application_Progress">
+		name="action_strip">
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:background">?attr/actionStripBackground</item>		
+	</style>
+	
+	<style
+		name="line_horizontal">
+		<item name="android:layout_height">1px</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:background">@drawable/app_header_separator</item>
+	</style>
+	
+	<style
+		name="application_progress">
 		<item name="android:layout_width">22dp</item>
 		<item name="android:layout_height">22dp</item>
 		<item name="android:layout_gravity">center</item>
@@ -94,43 +168,154 @@
 		<item name="android:maxWidth">22dp</item>
 		<item name="android:background">@android:color/transparent</item>
 	</style>
+
+	<!-- CandiSearch -->
 	
-	<style
-		name="Normal_Text"
-		parent="@android:style/TextAppearance">
-		<item name="android:textSize">@dimen/normal_text</item>
-		<item name="android:textColor">@color/normal_text</item>
+	<style name="btn_dialog">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">wrap_content</item>	
+		<item name="android:height">72dp</item>
+		<item name="android:width">80dp</item>
+		<item name="android:background">?attr/backgroundButton</item>
+		<item name="android:padding">5dp</item>
+		<item name="android:gravity">center</item>
+		<item name="android:textColor">?attr/textColorButton</item>
+	</style>
+	
+	<style name="btn_dialog_wide" parent="btn_dialog">
+		<item name="android:width">200dp</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:lines">3</item>
+	</style>
+	
+	<style name="txt_dialog">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>	
+	</style>
+	
+	<!-- CandiInfo -->
+	
+	<style name="btn_candiinfo" parent="android:Widget.Button">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">wrap_content</item>	
+		<item name="android:textColor">?attr/textColorButton</item>	
+		<item name="android:background">?attr/backgroundButton</item>		
+		<item name="android:height">72dp</item>
+		<item name="android:width">80dp</item>
+	</style>
+	
+	<style name="txt_candiinfo">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>	
+	</style>
+	
+	<style name="txt_candiinfo_title" parent="txt_candiinfo">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>	
+		<item name="android:textStyle">bold</item>
+	</style>
+	
+	<style name="txt_candiinfo_subtitle" parent="txt_candiinfo">
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>	
+		<item name="android:textStyle">italic</item>
+	</style>
+	
+	<style name="list_candiinfo_image">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">60dp</item>
+		<item name="android:scaleType">fitCenter</item>
+		<item name="android:adjustViewBounds">true</item>
 	</style>
 	
 	<style
-		name="Small_Text"
-		parent="@android:style/TextAppearance">
-		<item name="android:textSize">@dimen/small_text</item>
-		<item name="android:textColor">@color/normal_text</item>
+		name="list_button">
+		<item name="android:layout_width">40dp</item>
+		<item name="android:layout_height">40dp</item>
+		<item name="android:gravity">center</item>
+		<item name="android:background">@drawable/app_button_selector</item>
 	</style>
 	
-	<style
-		name="Normal_Text_Reversed"
-		parent="@android:style/TextAppearance">
-		<item name="android:textSize">@dimen/normal_text</item>
-		<item name="android:textColor">@color/normal_text_reversed</item>
+	<style name="list_candiinfo_title" parent="txt_candiinfo">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:textStyle">bold</item>
 	</style>
 	
-	<style
-		name="Small_Text_Reversed"
-		parent="@android:style/TextAppearance">
-		<item name="android:textSize">@dimen/small_text</item>
-		<item name="android:textColor">@color/normal_text_reversed</item>
+	<style name="list_candiinfo_subtitle" parent="txt_candiinfo">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:textStyle">italic</item>
 	</style>
 	
-	<style
-		name="Form_Input">
-		<item name="android:textSize">@dimen/form_value_text</item>		
-		<item name="android:textColor">@color/form_input_text</item>		
-		<item name="android:gravity">left|center_vertical</item>	
+	<style name="list_candiinfo_content" parent="txt_candiinfo">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">fill_parent</item>
+	</style>
+	
+	<!-- CandiInfo: Pager Indicator -->
+	
+	<style name="txt_pager_indicator">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:singleLine">true</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:maxWidth">100dp</item>
+	</style>
+	
+	<!-- Candi Dialogs -->
+	
+	<!-- Candi Forms -->
+	
+	<style name="section_header_form" parent="android:Widget.TextView">
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_marginBottom">5dp</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>		
+		<item name="android:background">@drawable/section_header_bg</item>		
+	</style>
+	
+	<style name="edittext_form" parent="android:Widget.EditText">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">wrap_content</item>	
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+	</style>
+
+	<style name="btn_form" parent="android:Widget.Button">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">wrap_content</item>	
+		<item name="android:height">72dp</item>
+		<item name="android:width">80dp</item>
+	</style>
+	
+	<style name="chk_form" parent="android:Widget.CompoundButton.CheckBox">
 		<item name="android:layout_height">wrap_content</item>	
 		<item name="android:layout_width">wrap_content</item>	
 	</style>
 	
+	<style name="spinner_form" parent="android:Widget.Spinner">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">wrap_content</item>	
+	</style>
+	
+	<style name="img_photo">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">wrap_content</item>	
+		<item name="android:adjustViewBounds">true</item>
+		<item name="android:background">#cfff</item>
+		<item name="android:focusable">true</item>
+		<item name="android:focusableInTouchMode">true</item>
+		<item name="android:maxWidth">150dp</item>
+		<item name="android:padding">3dp</item>
+		<item name="android:scaleType">centerInside</item>
+	</style>
+	
+	<style name="activity_footer_form" parent="android:Widget.TextView">
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:paddingTop">5dp</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>		
+		<item name="android:background">@drawable/app_header_bg_dark</item>		
+	</style>
 	
 </resources>

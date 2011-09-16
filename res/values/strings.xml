@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string
-		name="app_name">Aircandi</string>
-	<string
-		name="alert_dialog_wifidisabled">Wifi is currently disabled. Do you want to enable it now?</string>
-	<string
-		name="alert_dialog_yes">Yes</string>
-	<string
-		name="alert_dialog_no">No</string>
-	<string
-		name="alert_toast_networkmissing">No network service at this time. Please try again later.</string>
-	<string
-		name="test_text">The ladies of Assassins Creed: Brotherhood have both bark and bite. If you played Assassins Creed II, then you already know Caterina Sforza,
-		the comely Italian countess with a soft spot for sly, rugged assassins. Shes not the only female character with an important role to play in
-		Brotherhood, however.</string>
-	<string
-		name="dialog_install_message"> A custom application is available for this candi.</string>
-	<string
-		name="dialog_install_ok"> Install</string>
-	<string
-		name="dialog_install_cancel"> No Thanks</string>
-	<string
-		name="toast_package_installed"> has been installed. Tap the candi to launch.</string>
-	<string name="spinner_photo_topic_prompt">Topic</string>
+	<string name="app_name">Aircandi</string>
+	
+	<string name="alert_dialog_wifidisabled">Wifi is currently disabled. Do you want to enable it now?</string>
+	<string name="alert_dialog_yes">Yes</string>
+	<string name="alert_dialog_no">No</string>
+	<string name="alert_toast_networkmissing">No network service at this time. Please try again later.</string>
+		
+	<string name="dialog_install_message"> A custom application is available for this candi.</string>
+	<string name="dialog_install_ok"> Install</string>
+	<string name="dialog_install_cancel"> No Thanks</string>
+	<string name="dialog_install_toast_package_installed"> has been installed. Tap the candi to launch.</string>
+	
+	<string name="dialog_select_photo_button">Select a photo from your gallery</string>
+	<string name="dialog_take_photo_button">Take a new photo</string>
+	<string name="dialog_profile_photo_button">Use your profile photo</string>
+	
+	<string name="dialog_new_message">Share some candi and make your mark</string>
+	<string name="dialog_new_topic_button">New\r\nTopic</string>
+	<string name="dialog_new_topic_label">Leave a new topic here\nto share with others.</string>
+	<string name="dialog_new_comment_button">Comment</string>
+	<string name="dialog_new_comment_label">Add a comment to this topic.</string>
 		
 	<string name="EXTRA_VERB">com.proxibase.aircandi.EXTRA_VERB</string>
 	<string name="EXTRA_RESULT_VERB">com.proxibase.aircandi.EXTRA_RESULT_VERB</string>
@@ -33,5 +31,31 @@
 	<string name="EXTRA_BEACON_DIRTY">com.proxibase.aircandi.EXTRA_BEACON_DIRTY</string>
 	<string name="EXTRA_ENTITY_DIRTY">com.proxibase.aircandi.EXTRA_ENTITY_DIRTY</string>
 	<string name="EXTRA_SUBTYPE">com.proxibase.aircandi.EXTRA_SUBTYPE</string>
-	<string name="TopicLocked">Locked</string>
+	
+	<string name="menu_settings_title">Settings</string>
+	<string name="menu_signout_title">Sign out</string>
+	
+	<string name="search_back_button">Back</string>
+	
+	<string name="post_locked">Locked</string>
+	<string name="post_visibility">Visibility</string>
+	<string name="post_password_hint">Password (optional)</string>
+	<string name="post_public_image_section_header">Display Image</string>
+	<string name="post_public_image_change_button">Change</string>
+	<string name="post_media_section_header">Media</string>
+	<string name="post_media_add_button">Add</string>
+	<string name="post_media_clear_button">Clear</string>
+	<string name="post_settings_section_header">Settings</string>
+	<string name="post_save_button">Save</string>
+	<string name="post_delete_button">Delete</string>
+	<string name="post_cancel_button">Cancel</string>
+	<string name="post_title_hint">Title</string>
+	<string name="post_content_hint">Content</string>
+	<string name="post_delete_failed_toast">Delete failed</string>
+	<string name="post_delete_success_toast">Deleted</string>
+	<string name="post_update_failed_toast">Save failed</string>
+	<string name="post_update_success_toast">Saved</string>
+	<string name="post_insert_failed_toast">Save failed</string>
+	<string name="post_insert_success_toast">Saved</string>
+	<string name="post_back_button">Back</string>
 </resources>

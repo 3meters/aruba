@@ -4,9 +4,9 @@
 	<item
 		android:id="@+id/settings"
 		android:icon="@drawable/icon_settings"
-		android:title="Settings" />
+		android:title="@string/menu_settings_title" />
 	<item
 		android:id="@+id/signout"
 		android:icon="@drawable/icon_signout"
-		android:title="Sign out" />
+		android:title="@string/menu_signout_title" />
 </menu>

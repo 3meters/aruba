@@ -7,6 +7,17 @@
     <color name="application_titlebar_separator_start">@color/theme_white</color>
     <color name="application_titlebar_separator_center">@color/theme_white</color>
     <color name="application_titlebar_separator_end">@color/theme_white</color>
+
+    <color name="section_header_start">#33ffffff</color>
+    <color name="section_header_end">#00ffffff</color>
+    
+    <color name="pager_indicator_text_unfocused_dark">#ffcccccc</color>
+    <color name="pager_indicator_text_unfocused_light">#ff666666</color>
+    <color name="pager_indicator_text_focused_dark">#ffffaa00</color>
+    <color name="pager_indicator_text_focused_light">#ffffaa00</color>
+
+    <color name="edittext_color_hint_dark">#FFA01C</color>
+    <color name="edittext_color_hint_light">#FFA01C</color>
     
     <color name="menu_title_text">@color/theme_text</color>
     <color name="normal_text">@color/theme_text</color>
@@ -34,7 +45,14 @@
     <color name="picture_border">@color/theme_white</color>
     
     <!-- Special -->
-
+    
+    <color name="gray_lightest">#ffdddddd</color>
+    <color name="gray_light">#ffbbbbbb</color>
+    <color name="gray_medium">#ff999999</color>
+    <color name="gray_dark">#ff777777</color>
+    <color name="gray_darkest">#ff555555</color>
+    <color name="orange">#ffffaa00</color>
+    
     <!-- Gradients -->
     
     <!-- Theme Colors -->

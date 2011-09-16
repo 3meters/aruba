@@ -4,150 +4,79 @@
 	android:layout_height="fill_parent"
 	android:layout_width="fill_parent">
 	<LinearLayout
-		android:id="@+id/AppHeader"
+		android:id="@+id/activity_header"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_alignParentTop="true">
 		<include
-			layout="@layout/temp_application_header" />
+			layout="@layout/temp_candi_search_header" />
+	</LinearLayout>
+	<LinearLayout
+		android:id="@+id/action_strip"
+		android:layout_below="@id/activity_header"
+		android:layout_alignParentRight="true"
+		android:visibility="gone"
+		android:orientation="horizontal"
+		android:padding="10dp"
+		android:layout_marginTop="5dp"
+		style="@style/action_strip">
+		<Button
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/CommandButton"
+			android:layout_marginRight="10dp"
+			android:text="Edit"
+			style="@style/btn_candiinfo"
+			android:onClick="onCommandButtonClick" />
+		<Button
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/CommandButton"
+			android:text="Comment"
+			style="@style/btn_candiinfo"
+			android:onClick="onCommandButtonClick" />
 	</LinearLayout>
 	<FrameLayout
 		android:layout_height="fill_parent"
 		android:layout_width="fill_parent"
-		android:layout_below="@id/AppHeader">
+		android:layout_below="@+id/activity_header">
 		<WebView
-			android:id="@+id/WebView"
+			android:id="@+id/webview"
 			android:visibility="invisible"
 			android:layout_width="250dp"
-			android:layout_height="250dp" 
-			android:scrollbars="none"/>
+			android:layout_height="250dp"
+			android:scrollbars="none" />
 		<ViewFlipper
-			android:id="@+id/CandiFlipper"
+			android:id="@+id/flipper_candi"
 			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
 			android:gravity="center_vertical"
 			android:clipChildren="false">
 			<org.anddev.andengine.opengl.view.RenderSurfaceView
-				android:id="@+id/RenderSurfaceView"
+				android:id="@+id/view_rendersurface"
 				android:layout_height="fill_parent"
 				android:layout_width="fill_parent" />
-			<FrameLayout
-				android:id="@+id/CandiSummaryView"
+			<LinearLayout
+				android:id="@+id/view_candi_info"
 				android:layout_height="fill_parent"
 				android:layout_width="fill_parent"
-				android:clickable="true"
-				android:focusable="true"
-				android:onClick="onSummaryViewClick"
-				android:paddingLeft="8dp"
-				android:paddingRight="8dp"
-				android:visibility="gone">
-				<LinearLayout
+				android:orientation="vertical">
+				<com.proxibase.aircandi.widgets.ViewPagerIndicator
+					android:id="@+id/pager_indicator"
+					android:layout_height="wrap_content"
+					android:layout_width="fill_parent">
+				</com.proxibase.aircandi.widgets.ViewPagerIndicator>
+				<android.support.v4.view.ViewPager
+					android:id="@+id/pager"
 					android:layout_height="fill_parent"
-					android:layout_width="fill_parent"
-					android:gravity="center_vertical"
-					android:clickable="true"
-					android:onClick="onSummaryViewClick"
-					android:orientation="horizontal">
-					<LinearLayout
-						android:layout_height="fill_parent"
-						android:layout_width="wrap_content"
-						android:layout_weight="0"
-						android:clickable="true"
-						android:onClick="onSummaryViewClick"
-						android:orientation="vertical">
-						<ImageView
-							android:id="@+id/Image"
-							android:layout_gravity="top"
-							android:layout_height="wrap_content"
-							android:layout_width="80dp"
-							android:width="80dp"
-							android:paddingTop="10dp"
-							android:maxWidth="80dp"
-							android:layout_weight="0"
-							android:adjustViewBounds="true"
-							android:scaleType="centerInside"
-							android:clickable="true"
-							android:onClick="onSummaryViewClick" />
-						<ImageView
-							android:id="@+id/ImageReflection"
-							android:layout_gravity="top"
-							android:layout_height="wrap_content"
-							android:layout_width="80dp"
-							android:width="80dp"
-							android:maxWidth="80dp"
-							android:layout_weight="0"
-							android:adjustViewBounds="true"
-							android:scaleType="centerInside"
-							android:clickable="true"
-							android:onClick="onSummaryViewClick" />
-					</LinearLayout>
-					<LinearLayout
-						android:layout_height="fill_parent"
-						android:layout_width="fill_parent"
-						android:layout_weight="1"
-						android:paddingLeft="10dp"
-						android:paddingRight="5dp"
-						android:paddingBottom="10dp"
-						android:clickable="true"
-						android:onClick="onSummaryViewClick"
-						android:orientation="vertical">
-						<TextView
-							android:id="@+id/Title"
-							android:layout_height="wrap_content"
-							android:layout_width="fill_parent"
-							android:layout_alignParentTop="true"
-							android:textStyle="bold"
-							android:layout_marginBottom="-3dp"
-							android:text="Mona Lisa"
-							android:clickable="true"
-							android:onClick="onSummaryViewClick"
-							style="@style/Normal_Text_Reversed" />
-						<TextView
-							android:id="@+id/Subtitle"
-							android:layout_height="wrap_content"
-							android:layout_width="fill_parent"
-							android:layout_below="@id/Title"
-							android:text="by Leonardo daVinci"
-							android:clickable="true"
-							android:onClick="onSummaryViewClick"
-							style="@style/Normal_Text_Reversed" />
-						<ScrollView
-							android:layout_height="wrap_content"
-							android:layout_width="fill_parent"
-							android:layout_weight="1"
-							android:fillViewport="true"
-							android:clickable="true"
-							android:onClick="onSummaryViewClick"
-							android:layout_below="@id/Subtitle">
-							<TextView
-								android:id="@+id/Description"
-								android:layout_height="fill_parent"
-								android:layout_width="fill_parent"
-								android:text="@string/test_text"
-								android:layout_marginBottom="5dp"
-								android:clickable="true"
-								android:onClick="onSummaryViewClick"
-								style="@style/Normal_Text_Reversed" />
-						</ScrollView>
-						<FrameLayout
-							android:id="@+id/frameMenu"
-							android:layout_width="fill_parent"
-							android:layout_height="wrap_content"
-							android:clickable="true"
-							android:onClick="onSummaryViewClick"
-							android:layout_alignParentBottom="true">
-						</FrameLayout>
-					</LinearLayout>
-				</LinearLayout>
-			</FrameLayout>
+					android:layout_width="fill_parent" />
+			</LinearLayout>
 		</ViewFlipper>
 	</FrameLayout>
 	<LinearLayout
-		android:id="@+id/AppFooter"
+		android:id="@+id/activity_footer"
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_alignParentBottom="true">
 		<include
-			layout="@layout/temp_application_footer" />
+			layout="@layout/temp_activity_footer" />
 	</LinearLayout>
 </RelativeLayout>
