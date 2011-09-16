@@ -41,7 +41,7 @@ public class Aircandi extends Application {
 
 		public void onException(Exception e) {
 
-			Log.e("Aircandi", e.getMessage());
+			Log.e(CandiConstants.APP_NAME, e.getMessage());
 			e.printStackTrace();
 		}
 	}

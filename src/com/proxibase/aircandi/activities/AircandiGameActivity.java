@@ -3,16 +3,18 @@ package com.proxibase.aircandi.activities;
 import org.anddev.andengine.ui.activity.LayoutGameActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.utils.AircandiUI;
+import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -26,14 +28,16 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 
 	protected ImageView				mProgressIndicator;
 	protected ImageView				mButtonRefresh;
-	protected TextView				mContextButton;
+	protected Button				mContextButton;
 	protected ContextButtonState	mContextButtonState	= ContextButtonState.Default;
 	protected Command				mCommand;
 	protected User					mUser;
+	protected String					mPrefTheme;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
+		setTheme();
 		super.onCreate(savedInstanceState);
 		configure();
 	}
@@ -49,17 +53,17 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	private void configure() {
 
 		// Get view references
-		mProgressIndicator = (ImageView) findViewById(R.id.Application_ProgressIndicator);
+		mProgressIndicator = (ImageView) findViewById(R.id.img_progress_indicator);
 		if (mProgressIndicator != null)
 			mProgressIndicator.setVisibility(View.INVISIBLE);
 
-		mButtonRefresh = (ImageView) findViewById(R.id.Application_Button_Refresh);
+		mButtonRefresh = (ImageView) findViewById(R.id.img_refresh_button);
 		if (mButtonRefresh != null)
 			mButtonRefresh.setVisibility(View.VISIBLE);
 
-		mContextButton = (TextView) findViewById(R.id.Context_Button);
+		mContextButton = (Button) findViewById(R.id.btn_context);
 		if (mContextButton != null)
-			mContextButton.setVisibility(View.VISIBLE);
+			mContextButton.setVisibility(View.INVISIBLE);
 
 		// If mStream wasn't set by a sub class then check to see if there is something
 		// we can do to create it.
@@ -69,6 +73,15 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 				if (jsonStream != null && !jsonStream.equals(""))
 					mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(getIntent().getExtras().getString("stream"), Command.class);
 			}
+		}
+	}
+
+	private void setTheme() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		if (prefs != null) {
+			mPrefTheme = prefs.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
+			int themeResourceId = getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", getPackageName());
+			this.setTheme(themeResourceId);
 		}
 	}
 
@@ -85,16 +98,17 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	}
 
 	public void onSearchClick(View view) {
-		AircandiUI.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
+		ImageUtils.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
 		return;
 	}
 
-	protected void startTitlebarProgress() {
+	protected void startTitlebarProgress(boolean oneShot) {
 		if (mProgressIndicator != null) {
 			mProgressIndicator.setVisibility(View.VISIBLE);
 			mButtonRefresh.setVisibility(View.INVISIBLE);
 			mProgressIndicator.bringToFront();
 			AnimationDrawable rippleAnimation = (AnimationDrawable) mProgressIndicator.getBackground();
+			rippleAnimation.setOneShot(oneShot);
 			rippleAnimation.start();
 			mProgressIndicator.invalidate();
 		}

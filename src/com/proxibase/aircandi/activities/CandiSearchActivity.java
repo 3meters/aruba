@@ -27,7 +27,6 @@ import org.anddev.andengine.util.modifier.ease.EaseCircularOut;
 import org.anddev.andengine.util.modifier.ease.EaseCubicIn;
 import org.anddev.andengine.util.modifier.ease.EaseCubicOut;
 import org.anddev.andengine.util.modifier.ease.EaseLinear;
-import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -39,27 +38,34 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -69,16 +75,22 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Animation.AnimationListener;
 import android.webkit.WebView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.gson.ExclusionStrategy;
@@ -95,27 +107,34 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.ICandiListener;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.TextureReset;
 import com.proxibase.aircandi.candi.views.CandiView;
+import com.proxibase.aircandi.candi.views.ZoneView;
+import com.proxibase.aircandi.core.AircandiException;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.BaseEntity.SubType;
-import com.proxibase.aircandi.utils.AircandiUI;
+import com.proxibase.aircandi.utils.AnimUtils;
+import com.proxibase.aircandi.utils.CandiList;
 import com.proxibase.aircandi.utils.ImageCache;
 import com.proxibase.aircandi.utils.ImageManager;
+import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.ProxiHandlerManager;
 import com.proxibase.aircandi.utils.Rotate3dAnimation;
 import com.proxibase.aircandi.utils.Utilities;
 import com.proxibase.aircandi.utils.ImageManager.IImageReadyListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
+import com.proxibase.aircandi.widgets.HorizontalListView;
+import com.proxibase.aircandi.widgets.ViewPagerIndicator;
+import com.proxibase.aircandi.widgets.ViewPagerIndicator.PageInfoProvider;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.consumer.ProxiExplorer;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.consumer.ProxiExplorer.IEntityProcessListener;
-import com.proxibase.sdk.android.proxi.service.ProxibaseError;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.Query;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.util.ProxiConstants;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
 /*
  * Texture Notes
@@ -130,27 +149,39 @@ import com.proxibase.sdk.android.util.ProxiConstants;
  *   been recycled. The andengine code recycles bitmaps by default once they have been used
  *   to load a texture into hardware. The sprites just show up as invisible.
  *   
- * - Texture performance: For now, I have disabled bitmap recycling in the texture code which
- *   is pretty evil since we will be keeping around the same bits in both hardware and memory.
- *   Before release, I need to see if there is a way to efficiently recycle but restore a
- *   real bitmap when the engine tries to reload the texture. 
+ * - To simplify the reloading of textures, we allow the engine to try and use the recyled 
+ *   bitmap but intervene to detect that the bitmap has been recycled and pull it again from
+ *   the file cache. We have disabled the memory cache since the hardware is acting like our
+ *   memory cache. If the bitmap isn't in the file cache, we return null to the engine and
+ *   start the async process to fetch the bitmap and create a new BitmapTextureSource.
  *   
  * - Texture behavior: There is hesitation when transitioning from candi detail to candi
- *   search after returning from another activity because the textures are getting reloaded.
- *   It might be possible to improve this if performance work to control how textures are 
- *   reloaded could prioritize textures that are currently visible to the camera.
+ *   search after returning from another activity because all the textures are getting reloaded
+ *   from the file cache. It might be possible to improve this if performance work to control 
+ *   how textures are reloaded could prioritize textures that are currently visible to the camera.
  */
 
 /*
  * Library Notes
  * 
- * - AWS: We'd like to link to s3 and core libraries to reduce our footprint but there
- * 	 is a known issue in the AWS SDK for Android 2.1. Check next release to see if we can
- *   make the switch. We could also do the work to call AWS without their libraries which
- *   should give us the biggest savings.
+ * - AWS: We are using the minimum libraries: core and S3. We could do the work to call 
+ *   AWS without their libraries which should give us the biggest savings.
  *   
  * - Gson and Guava: We could reduce our size by making the libraries included with Android
  *   work instead of pulling in Gson (which in turn has a dependency on Guava).
+ */
+
+/*
+ * Threading Notes
+ * 
+ * - AsyncTasks: AsyncTask uses a static internal work queue with a hard-coded limit of 10
+ *   elements. Once we have 10 tasks going concurrently, task 11 causes a RejectedExecutionException.
+ *   
+ *   ThreadPoolExecutor is a way to get more control over thread pooling but it requires Android 
+ *   version 11/3.0 (we currently target 7/2.1 and higher).
+ *   
+ *   AsyncTasks are hard-coded with a low priority and continue their work even if the activity 
+ *   is paused.
  */
 
 @SuppressWarnings("unused")
@@ -160,8 +191,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		Fade, CrossFade, CrossFadeFlipper, RotateScene, RotateCandi
 	}
 
+	public enum PagerView {
+		CandiInfo, CandiList
+	}
+
+	public enum Theme {
+		Blueray, Midnight, Serene, Smolder, Snow
+	}
+
 	private static String				COMPONENT_NAME			= "CandiSearch";
-	private static String				USER_AGENT				= "Mozilla/5.0 (Linux; U; Android 2.2.1; fr-ch; A43 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 
 	private Boolean						mPrefAutoscan			= false;
 	private int							mPrefAutoscanInterval	= 5000;
@@ -173,6 +211,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private Boolean						mReadyToRun				= false;
 	private Handler						mHandler				= new Handler();
+	private LayoutInflater				mInflater;
 	private Boolean						mCredentialsFound		= false;
 	public static BasicAWSCredentials	mAwsCredentials			= null;
 
@@ -186,10 +225,18 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	protected ImageView					mProgressIndicator;
 	protected ImageView					mButtonRefresh;
-	private ViewFlipper					mCandiFlipper;
 	private RenderSurfaceView			mCandiSurfaceView;
-	private FrameLayout					mCandiInfoView;
+	private View						mCandiInfoView;
+
+	private ViewPager					mCandiPager;
+	private ViewPagerIndicator			mCandiPagerIndicator;
+	private CandiPagerAdapter			mCandiPagerAdapter;
+
 	public WebView						mWebView;
+
+	private ViewFlipper					mCandiFlipper;
+
+	private DisplayMetrics				mDisplayMetrics;
 
 	private boolean						mCandiInfoVisible		= false;
 	private boolean						mCandiActivityActive	= false;
@@ -236,27 +283,28 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		// Start normal processing
 		mReadyToRun = false;
 
+		// User
+		mUser = loadUser("Jay Massena");
+
+		// Tools
+		LayoutInflater mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 		// Ui Hookup
-		mCandiFlipper = (ViewFlipper) findViewById(R.id.CandiFlipper);
-		mCandiFlipper.setInAnimation(this, R.anim.summary_in);
-		mCandiFlipper.setOutAnimation(this, R.anim.summary_out);
-		
-		mWebView = (WebView) findViewById(R.id.WebView);
-		mWebView.getSettings().setUserAgentString(USER_AGENT);
+		mCandiFlipper = (ViewFlipper) findViewById(R.id.flipper_candi);
+		mCandiPager = (ViewPager) findViewById(R.id.pager);
+		mCandiPager.setAdapter(new CandiPagerAdapter());
+		mCandiPager.setOnPageChangeListener(mCandiPagerIndicator);
+
+		mCandiPagerIndicator = (ViewPagerIndicator) findViewById(R.id.pager_indicator);
+		mCandiPagerIndicator.bindToView((View) mInflater.inflate(R.layout.temp_page_indicator, null));
+		mCandiPagerIndicator.initialize(1, 2, (PageInfoProvider) mCandiPager.getAdapter());
+		mCandiPager.setOnPageChangeListener(mCandiPagerIndicator);
+
+		mWebView = (WebView) findViewById(R.id.webview);
+		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
 		mWebView.getSettings().setJavaScriptEnabled(true);
 		mWebView.setBackgroundColor(0x00000000); // Transparent
 
-		mCandiInfoView = (FrameLayout) findViewById(R.id.CandiSummaryView);
-		mCandiInfoView.setFocusable(true);
-
-		mProgressIndicator = (ImageView) findViewById(R.id.Application_ProgressIndicator);
-		if (mProgressIndicator != null)
-			mProgressIndicator.setVisibility(View.INVISIBLE);
-
-		mButtonRefresh = (ImageView) findViewById(R.id.Application_Button_Refresh);
-		if (mButtonRefresh != null)
-			mButtonRefresh.setVisibility(View.VISIBLE);
-		
 		// Check for emulator
 		if (Build.PRODUCT.equals("google_sdk") || Build.PRODUCT.equals("sdk"))
 			mUsingEmulator = true;
@@ -264,6 +312,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		// Proxibase sdk components
 		ProxiExplorer.getInstance().setContext(this.getApplicationContext());
 		ProxiExplorer.getInstance().setUsingEmulator(mUsingEmulator);
+		ProxiExplorer.getInstance().setUser(mUser);
 		ProxiExplorer.getInstance().initialize();
 		if (!ProxiExplorer.getInstance().isUsingEmulator()) {
 			if (!ProxiExplorer.getInstance().isWifiEnabled()) {
@@ -272,8 +321,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					return;
 			}
 		}
-		
-		
+
+		// Display metrics (used for conversions)
+		mDisplayMetrics = getResources().getDisplayMetrics();
+
 		// AWS Credentials
 		startGetCredentials();
 
@@ -290,15 +341,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mProxiHandlerManager = new ProxiHandlerManager(this);
 
 		// Property settings get overridden once we retrieve preferences
-		mCandiSurfaceView = (RenderSurfaceView) findViewById(R.id.RenderSurfaceView);
+		mCandiSurfaceView = (RenderSurfaceView) findViewById(R.id.view_rendersurface);
 		mCandiSurfaceView.requestFocus();
 		mCandiSurfaceView.setFocusableInTouchMode(true);
+		mCandiInfoView = (View) findViewById(R.id.view_candi_info);
 
 		// Animation
 		mRotate3dAnimation = new Rotate3dAnimation();
-
-		// User
-		mUser = loadUser("Jay Massena");
 
 		// Memory info
 		updateMemoryUsed();
@@ -309,22 +358,20 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private User loadUser(String userName) {
 		try {
 			Query query = new Query("Users").filter("Name eq '" + userName + "'");
-			String jsonResponse = ProxibaseService.getInstance().selectUsingQuery(query, User.class, CandiConstants.URL_AIRCANDI_SERVICE_ODATA);
+			String jsonResponse = (String) ProxibaseService.getInstance().selectUsingQuery(query, CandiConstants.URL_AIRCANDI_SERVICE_ODATA);
 			mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class);
 			return mUser;
 		}
-		catch (ClientProtocolException exception) {
-			exception.printStackTrace();
-		}
-		catch (IOException exception) {
+		catch (ProxibaseException exception) {
+			// TODO Auto-generated catch block
 			exception.printStackTrace();
 		}
 		return null;
 	}
 
-	// ==========================================================================
+	// --------------------------------------------------------------------------------------------
 	// EVENT routines
-	// ==========================================================================
+	// --------------------------------------------------------------------------------------------
 
 	public void onCommandButtonClick(View view) {
 
@@ -333,14 +380,14 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		String commandName = command.name.toLowerCase();
 
 		if (command.type.toLowerCase().equals("list")) {
-			AircandiUI.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
+			ImageUtils.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
 			return;
 		}
 
 		try {
 
 			if (command.verb.toLowerCase().equals("edit")) {
-				EntityProxy entityProxy = mCandiPatchModel.getCandiModelSelected().getEntityProxy();
+				EntityProxy entityProxy = command.entity;
 				SubType subType = entityProxy.entityType.equals(CandiConstants.TYPE_CANDI_TOPIC) ? SubType.Topic : SubType.Comment;
 				Intent intent = buildIntent(Verb.Edit, entityProxy, subType, 0, null, mUser, Post.class);
 				startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
@@ -459,26 +506,49 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		scanForBeacons(false, true);
 	}
 
-	public void onSummaryViewClick(View v) {
+	public void onInfoViewClick(View v) {
 		hideCandiInfo(AnimType.RotateCandi);
 		mCandiInfoVisible = false;
 	}
 
-	public void onHomeClick(View view) {
-		Intent intent = new Intent(this, CandiSearchActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		startActivity(intent);
+	public void onHomeClick(View view) {}
+
+	public void onActionsClick(View view) {
+
+		View frame = (View) this.findViewById(R.id.action_strip);
+		if (frame.getVisibility() != View.VISIBLE) {
+			Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.slide_in_right);
+			animation.setFillEnabled(true);
+			animation.setFillAfter(true);
+			frame.startAnimation(animation);
+			frame.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_out_shortest);
+			animation.setFillEnabled(true);
+			animation.setFillAfter(true);
+			frame.startAnimation(animation);
+			frame.setVisibility(View.GONE);
+		}
+		// Intent intent = new Intent(this, CandiSearchActivity.class);
+		// intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		// intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		// startActivity(intent);
 	}
 
-	public void onSearchClick(View view) {
-
+	private void debugOutput() {
 		// Logging
 		IEntity layer = mEngine.getScene().getChild(CandiConstants.LAYER_CANDI);
+		Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "Current Position for scene: " + String.valueOf(layer.getX())
+																		+ ","
+																		+ String.valueOf(layer.getY()));
 		int childCount = layer.getChildCount();
 		for (int i = childCount - 1; i >= 0; i--) {
 			IEntity child = layer.getChild(i);
 			if (child instanceof CandiView) {
+
+				child.setPosition(child.getX() + 100, child.getY());
 
 				// TODO: Should we null this so the GC can collect them.
 				final CandiView candiView = (CandiView) child;
@@ -489,8 +559,21 @@ public class CandiSearchActivity extends AircandiGameActivity {
 																				+ String.valueOf(candiView.getY()));
 
 			}
+			if (child instanceof ZoneView) {
+				child.setPosition(child.getX() + 100, child.getY());
+			}
 		}
-		AircandiUI.showToastNotification(this, "Debug output has been logged...", Toast.LENGTH_SHORT);
+
+		layer = mEngine.getScene().getChild(CandiConstants.LAYER_ZONES);
+		childCount = layer.getChildCount();
+		for (int i = childCount - 1; i >= 0; i--) {
+			IEntity child = layer.getChild(i);
+			if (child instanceof ZoneView) {
+				child.setPosition(child.getX() + 100, child.getY());
+			}
+		}
+
+		ImageUtils.showToastNotification(this, "Debug output has been logged...", Toast.LENGTH_SHORT);
 		return;
 	}
 
@@ -498,14 +581,35 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		showTopicDialog();
 	}
 
-	// ==========================================================================
+	private void doCandiSingleTap(final CandiModel candiModel) {
+
+		/*
+		 * This event bubbles up from user interaction with CandiViews. This
+		 * can get called from threads other than the main UI thread.
+		 */
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				/*
+				 * When starting from a candi in search view we always target
+				 * the first CandiInfo view in the flipper.
+				 */
+				mCandiPatchModel.setCandiModelSelected(candiModel);
+				mCandiPager.setCurrentItem(PagerView.CandiInfo.ordinal());
+				showCandiInfo(candiModel, AnimType.RotateCandi);
+			}
+		});
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// ENTITY routines
-	// ==========================================================================
+	// --------------------------------------------------------------------------------------------
 
 	private void scanForBeacons(final Boolean fullUpdate, Boolean showProgress) {
 
 		if (showProgress)
-			startTitlebarProgress();
+			startTitlebarProgress(true);
 
 		if (fullUpdate && mCandiPatchPresenter != null) {
 			mCandiPatchPresenter.setFullUpdateInProgress(true);
@@ -563,15 +667,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 			public void onIOException(IOException exception) {
 				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
-				AircandiUI.showToastNotification(CandiSearchActivity.this, "Network error", Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(CandiSearchActivity.this, "Network error", Toast.LENGTH_SHORT);
 				stopTitlebarProgress();
 				exception.printStackTrace();
 			}
 
 			@Override
-			public void onProxiExplorerError(ProxibaseError error) {
-				AircandiUI.showToastNotification(CandiSearchActivity.this, error.getMessage(), Toast.LENGTH_SHORT);
-				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, error.getMessage());
+			public void onProxiExplorerError(ProxibaseException exception) {
+				ImageUtils.showToastNotification(CandiSearchActivity.this, exception.getMessage(), Toast.LENGTH_SHORT);
+				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
 				stopTitlebarProgress();
 			}
 		});
@@ -579,7 +683,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private void updateMemoryUsed() {
 		if (mPrefShowMemory) {
-			TextView textView = (TextView) findViewById(R.id.FooterText);
+			TextView textView = (TextView) findViewById(R.id.txt_footer);
 			if (textView != null) {
 				float usedMegs = (float) ((float) Debug.getNativeHeapAllocatedSize() / 1048576f);
 				String usedMegsString = String.format("Memory Used: %2.2f MB", usedMegs);
@@ -591,7 +695,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private void refreshEntities(Boolean showProgress) {
 
 		if (showProgress)
-			startTitlebarProgress();
+			startTitlebarProgress(true);
 
 		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Calling Proxibase.ProxiExplorer to refresh entities");
 
@@ -619,15 +723,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 			public void onIOException(IOException exception) {
 				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
-				AircandiUI.showToastNotification(CandiSearchActivity.this, "Network error", Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(CandiSearchActivity.this, "Network error", Toast.LENGTH_SHORT);
 				stopTitlebarProgress();
 				exception.printStackTrace();
 			}
 
 			@Override
-			public void onProxiExplorerError(ProxibaseError error) {
-				AircandiUI.showToastNotification(CandiSearchActivity.this, error.getMessage(), Toast.LENGTH_SHORT);
-				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, error.getMessage());
+			public void onProxiExplorerError(ProxibaseException exception) {
+				ImageUtils.showToastNotification(CandiSearchActivity.this, exception.getMessage(), Toast.LENGTH_SHORT);
+				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
 				stopTitlebarProgress();
 			}
 		});
@@ -643,32 +747,41 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		ImageManager.getInstance().getImageCache().recycleBitmaps();
 	}
 
-	// ==========================================================================
+	// --------------------------------------------------------------------------------------------
 	// UI routines
-	// ==========================================================================
+	// --------------------------------------------------------------------------------------------
 
 	private void showCandiInfo(final CandiModel candiModel, AnimType animType) {
 
-		mCandiPatchModel.setCandiModelSelected(candiModel);
 		mCandiInfoVisible = true;
-		buildCandiInfo(candiModel);
-		footerVisible(false);
 
 		if (animType == AnimType.CrossFadeFlipper) {
 			mCandiSurfaceView.setVisibility(View.GONE);
+			mCandiFlipper.clearAnimation();
+			mCandiFlipper.setInAnimation(this, android.R.anim.slide_in_left);
+			mCandiFlipper.setOutAnimation(this, android.R.anim.slide_out_right);
 			mCandiFlipper.showNext();
-			updateCandiBackButton();
+			updateCandiBackButton(null);
 			mCandiPatchPresenter.setIgnoreInput(false);
 			mIgnoreInput = false;
 		}
 		else if (animType == AnimType.CrossFade) {
 			mCandiInfoView.setVisibility(View.VISIBLE);
-			mCandiInfoView.startAnimation(AircandiUI.loadAnimation(this, R.anim.fade_in_medium));
+			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(this, R.anim.fade_in_medium));
 			hideGLSurfaceView(CandiConstants.DURATION_CANDIINFO_SHOW);
-			updateCandiBackButton();
+			updateCandiBackButton(null);
 			mCandiPatchPresenter.setIgnoreInput(false);
 		}
-		else {
+		else if (animType == AnimType.RotateCandi) {
+
+			footerVisible(false);
+			if (mCandiPatchModel.getCandiModelSelected() != null && mCandiPatchModel.getCandiModelSelected().hasVisibleChildrenCurrent()) {
+				mCandiPagerIndicator.setVisibility(View.VISIBLE);
+				mCandiPagerIndicator.initialize(1, 2, (PageInfoProvider) mCandiPager.getAdapter());
+			}
+			else {
+				mCandiPagerIndicator.setVisibility(View.GONE);
+			}
 
 			float rotationX = mCandiPatchModel.getCandiModelSelected().getZoneCurrent().getCenterX();
 			float rotationY = mCandiPatchModel.getCandiModelSelected().getZoneCurrent().getCenterY();
@@ -725,11 +838,12 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							mRotate3dAnimation.setAnimationListener(null);
 
 							mCandiFlipper.clearAnimation();
+							mCandiFlipper.setDisplayedChild(1);
 							mCandiFlipper.startAnimation(mRotate3dAnimation);
 
 							mCandiSurfaceView.setVisibility(View.GONE);
 							mCandiInfoView.setVisibility(View.VISIBLE);
-							updateCandiBackButton();
+							updateCandiBackButton(null);
 							mCandiPatchPresenter.setIgnoreInput(false);
 						}
 					});
@@ -754,7 +868,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		if (animType == AnimType.Fade) {
 			mCandiInfoView.setVisibility(View.GONE);
-			mCandiInfoView.startAnimation(AircandiUI.loadAnimation(this, R.anim.fade_out_short));
+			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(this, R.anim.fade_out_short));
 			// mCandiSurfaceView.setVisibility(View.VISIBLE);
 			mCandiPatchPresenter.setIgnoreInput(false);
 			mIgnoreInput = false;
@@ -762,7 +876,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		else if (animType == AnimType.CrossFadeFlipper) {
 			mCandiFlipper.showNext();
 			mCandiSurfaceView.setVisibility(View.VISIBLE);
-			updateCandiBackButton();
+			updateCandiBackButton(!mCandiPatchModel.getCandiRootCurrent().isSuperRoot()	? mCandiPatchModel.getCandiRootCurrent().getTitleText()
+																						: null);
 			footerVisible(true);
 			mCandiPatchPresenter.setIgnoreInput(false);
 			mIgnoreInput = false;
@@ -770,14 +885,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		else if (animType == AnimType.CrossFade) {
 
 			mCandiInfoView.setVisibility(View.GONE);
-			mCandiInfoView.startAnimation(AircandiUI.loadAnimation(this, R.anim.fade_out_short));
+			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(this, R.anim.fade_out_short));
 			showGLSurfaceView(CandiConstants.DURATION_CANDIINFO_HIDE);
 			mEngine.getScene().clearEntityModifiers();
 			mEngine.getScene()
 					.registerEntityModifier(new AlphaModifier(CandiConstants.DURATION_CANDIINFO_HIDE, 0.0f, 1.0f, EaseLinear.getInstance()));
 			mCandiInfoVisible = false;
 			mCandiPatchModel.setCandiModelSelected(null);
-			updateCandiBackButton();
+			updateCandiBackButton(!mCandiPatchModel.getCandiRootCurrent().isSuperRoot()	? mCandiPatchModel.getCandiRootCurrent().getTitleText()
+																						: null);
 			mCandiPatchPresenter.setIgnoreInput(false);
 			footerVisible(true);
 			CandiSearchActivity.this.mIgnoreInput = false;
@@ -811,6 +927,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 							mCandiFlipper.clearAnimation();
 							mCandiInfoView.setVisibility(View.GONE);
+							mCandiPagerIndicator.setVisibility(View.GONE);
 							mCandiSurfaceView.setVisibility(View.VISIBLE);
 							footerVisible(true);
 
@@ -837,7 +954,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 									rotationY, EaseCubicOut.getInstance()), new AlphaModifier(duration, alphaFrom, alphaTo, EaseCircularOut
 									.getInstance())));
 
-							updateCandiBackButton();
+							updateCandiBackButton(!mCandiPatchModel.getCandiRootCurrent().isSuperRoot() ? mCandiPatchModel.getCandiRootCurrent()
+									.getTitleText() : null);
 							mCandiPatchModel.setCandiModelSelected(null);
 							mCandiPatchPresenter.setIgnoreInput(false);
 							CandiSearchActivity.this.mIgnoreInput = false;
@@ -857,29 +975,46 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 	}
 
-	private void buildCandiInfo(final CandiModel candiModel) {
+	private FrameLayout buildCandiInfo(final CandiModel candiModel, final FrameLayout candiInfoView) {
 
-		new BuildMenuTask().execute(mCandiInfoView);
+		/*
+		 * Build menus
+		 */
+		Display getOrient = getWindowManager().getDefaultDisplay();
+		boolean landscape = (getOrient.getOrientation() == Surface.ROTATION_90 || getOrient.getOrientation() == Surface.ROTATION_270);
+		TableLayout table = configureMenus(mCandiPatchModel.getCandiModelSelected(), landscape, CandiSearchActivity.this);
+		LinearLayout frame = (LinearLayout) candiInfoView.findViewById(R.id.frame_menu);
+		frame.removeAllViews();
+		if (table != null) {
+			frame.addView(table);
+		}
+		/*
+		 * Update any UI indicators related to child candies
+		 */
+		if (candiModel.hasVisibleChildrenCurrent()) {
+		}
+		else {
+		}
 
-		if (candiModel.getEntityProxy().imageUri != null && candiModel.getEntityProxy().imageUri != "") {
+		if (candiModel.getEntityProxy().imageUri != null && !candiModel.getEntityProxy().imageUri.equals("")) {
 			if (ImageManager.getInstance().hasImage(candiModel.getEntityProxy().imageUri)) {
 				Bitmap bitmap = ImageManager.getInstance().getImage(candiModel.getEntityProxy().imageUri);
-				((ImageView) mCandiInfoView.findViewById(R.id.Image)).setImageBitmap(bitmap);
+				((ImageView) candiInfoView.findViewById(R.id.img_public)).setImageBitmap(bitmap);
 				if (ImageManager.getInstance().hasImage(candiModel.getEntityProxy().imageUri + ".reflection")) {
 					bitmap = ImageManager.getInstance().getImage(candiModel.getEntityProxy().imageUri + ".reflection");
-					((ImageView) mCandiInfoView.findViewById(R.id.ImageReflection)).setImageBitmap(bitmap);
+					((ImageView) candiInfoView.findViewById(R.id.img_public_reflection)).setImageBitmap(bitmap);
 				}
 			}
 			else {
-				Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets("gfx/trans_30.png");
-				((ImageView) mCandiInfoView.findViewById(R.id.Image)).setImageBitmap(zoneBodyBitmap);
-				((ImageView) mCandiInfoView.findViewById(R.id.ImageReflection)).setImageBitmap(null);
+				Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets(mCandiPatchPresenter.getStyleTextureBodyZone());
+				((ImageView) candiInfoView.findViewById(R.id.img_public)).setImageBitmap(zoneBodyBitmap);
+				((ImageView) candiInfoView.findViewById(R.id.img_public_reflection)).setImageBitmap(null);
 				ImageRequest imageRequest = new ImageManager.ImageRequest();
 				imageRequest.imageId = candiModel.getBodyImageId();
 				imageRequest.imageUri = candiModel.getBodyImageUri();
 				imageRequest.imageFormat = candiModel.getBodyImageFormat();
 				imageRequest.imageShape = "square";
-				imageRequest.widthMinimum = 250;
+				imageRequest.widthMinimum = CandiConstants.IMAGE_WIDTH_MAX;
 				imageRequest.showReflection = true;
 				imageRequest.imageReadyListener = new IImageReadyListener() {
 
@@ -887,33 +1022,49 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					public void onImageReady(Bitmap bitmap) {
 						Bitmap bitmapNew = ImageManager.getInstance().getImage(candiModel.getBodyImageUri());
 						if (bitmapNew != null) {
-							((ImageView) mCandiInfoView.findViewById(R.id.Image)).setImageBitmap(bitmapNew);
+							((ImageView) candiInfoView.findViewById(R.id.img_public)).setImageBitmap(bitmapNew);
 							Bitmap bitmapReflection = ImageManager.getInstance().getImage(candiModel.getBodyImageUri() + ".reflection");
 							if (bitmapReflection != null)
-								((ImageView) mCandiInfoView.findViewById(R.id.ImageReflection)).setImageBitmap(bitmapReflection);
+								((ImageView) candiInfoView.findViewById(R.id.img_public_reflection)).setImageBitmap(bitmapReflection);
 
 							Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_medium);
 							animation.setFillEnabled(true);
 							animation.setFillAfter(true);
-							((ImageView) findViewById(R.id.Image)).startAnimation(animation);
-							((ImageView) findViewById(R.id.ImageReflection)).startAnimation(animation);
+							((ImageView) findViewById(R.id.img_public)).startAnimation(animation);
+							((ImageView) findViewById(R.id.img_public_reflection)).startAnimation(animation);
 						}
 
 					}
+
+					@Override
+					public void onProxibaseException(ProxibaseException exception) {
+						if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
+							Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+							((ImageView) candiInfoView.findViewById(R.id.img_public)).setImageBitmap(zoneBodyBitmap);
+						}
+					}
 				};
 				Utilities.Log(CandiConstants.APP_NAME, "buildCandiDetailView", "Fetching Image: " + candiModel.getBodyImageUri());
-				ImageManager.getInstance().fetchImageAsynch(imageRequest);
+				try {
+					ImageManager.getInstance().fetchImageAsynch(imageRequest);
+				}
+				catch (AircandiException exception) {
+					// TODO: We might have hit the thread limit for asynctasks
+					exception.printStackTrace();
+				}
 			}
 		}
 
-		((TextView) mCandiInfoView.findViewById(R.id.Subtitle)).setText("");
-		((TextView) mCandiInfoView.findViewById(R.id.Description)).setText("");
+		((TextView) candiInfoView.findViewById(R.id.txt_subtitle)).setText("");
+		((TextView) candiInfoView.findViewById(R.id.txt_content)).setText("");
 
-		((TextView) mCandiInfoView.findViewById(R.id.Title)).setText(candiModel.getEntityProxy().title);
+		((TextView) candiInfoView.findViewById(R.id.txt_title)).setText(candiModel.getEntityProxy().title);
 		if (candiModel.getEntityProxy().subtitle != null)
-			((TextView) mCandiInfoView.findViewById(R.id.Subtitle)).setText(Html.fromHtml(candiModel.getEntityProxy().subtitle));
+			((TextView) candiInfoView.findViewById(R.id.txt_subtitle)).setText(Html.fromHtml(candiModel.getEntityProxy().subtitle));
 		if (candiModel.getEntityProxy().description != null)
-			((TextView) mCandiInfoView.findViewById(R.id.Description)).setText(Html.fromHtml(candiModel.getEntityProxy().description));
+			((TextView) candiInfoView.findViewById(R.id.txt_content)).setText(Html.fromHtml(candiModel.getEntityProxy().description));
+
+		return candiInfoView;
 	}
 
 	private void hideGLSurfaceView(float duration) {
@@ -957,21 +1108,21 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, animationResource);
 		animation.setFillEnabled(true);
 		animation.setFillAfter(true);
-		((LinearLayout) findViewById(R.id.AppFooter)).startAnimation(animation);
+		((LinearLayout) findViewById(R.id.activity_footer)).startAnimation(animation);
 	}
 
-	public void updateCandiBackButton() {
+	public void updateCandiBackButton(String backButtonText) {
 
 		boolean visible = (mCandiInfoVisible || !mCandiPatchModel.getCandiRootCurrent().isSuperRoot());
 
 		if (visible) {
-			mContextButton.setText("Back");
+			mContextButton.setText(backButtonText != null ? backButtonText : getString(R.string.search_back_button));
 			mContextButton.setOnClickListener(new View.OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
 					if (mCandiInfoVisible) {
-						onSummaryViewClick(v);
+						onInfoViewClick(v);
 					}
 					else {
 						if (mCandiPatchModel.getCandiRootCurrent().getParent() != null)
@@ -981,11 +1132,12 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			});
 
 			if (mContextButtonState == ContextButtonState.Default) {
-				Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_medium);
+				Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_short);
 				animation.setFillEnabled(true);
 				animation.setFillAfter(true);
-				animation.setStartOffset(500);
+				animation.setStartOffset(250);
 				mContextButton.startAnimation(animation);
+				mContextButton.setVisibility(View.VISIBLE);
 			}
 
 			if (mCandiInfoVisible)
@@ -1004,144 +1156,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			});
 
 			if (mContextButtonState != ContextButtonState.Default) {
-				Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_out_medium);
+				Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_out_short);
 				animation.setFillEnabled(true);
 				animation.setFillAfter(true);
 				mContextButton.startAnimation(animation);
 			}
 			mContextButtonState = ContextButtonState.Default;
 		}
-	}
-
-	private void showInstallDialog(final CandiModel candi) {
-
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				final Dialog dialog = new Dialog(CandiSearchActivity.this, R.style.AircandiDialogTheme);
-				final RelativeLayout installDialog = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_dialog_install, null);
-				dialog.setContentView(installDialog, new FrameLayout.LayoutParams(400, 300, Gravity.CENTER));
-				dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-				dialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.dialog_bg));
-
-				((Button) installDialog.findViewById(R.id.InstallButton)).setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						Intent goToMarket = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(candi.getEntityProxy().entityHandler.code));
-						startActivityForResult(goToMarket, CandiConstants.ACTIVITY_MARKET);
-						dialog.dismiss();
-					}
-				});
-				((Button) installDialog.findViewById(R.id.CancelButton)).setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						dialog.dismiss();
-						if (!mEngine.isRunning()) {
-							if (mCandiPatchModel.getCandiModels().size() > 0) {
-								mCandiPatchPresenter.resetSharedTextures();
-								mCandiPatchPresenter.resetTextures(TextureReset.VisibleOnly);
-								new Thread(new Runnable() {
-
-									@Override
-									public void run() {
-										mCandiPatchPresenter.resetTextures(TextureReset.NonVisibleOnly);
-									}
-								}).start();
-							}
-						}
-					}
-				});
-				dialog.show();
-
-			}
-		});
-	}
-
-	private void showTopicDialog() {
-
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				final Dialog dialog = new Dialog(CandiSearchActivity.this, R.style.AircandiDialogTheme);
-				final RelativeLayout installDialog = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_dialog_new, null);
-				dialog.setContentView(installDialog, new FrameLayout.LayoutParams(dialog.getWindow().getWindowManager().getDefaultDisplay()
-						.getWidth() - 40, LayoutParams.FILL_PARENT, Gravity.CENTER));
-				dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-				dialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.dialog_bg));
-
-				((Button) installDialog.findViewById(R.id.NewTopicButton)).setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-
-						Intent intent = buildIntent(Verb.New, null, SubType.Topic, 0, ProxiExplorer.getInstance().getStrongestBeacon(), mUser,
-								Post.class);
-						startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-						dialog.dismiss();
-					}
-				});
-
-				((Button) installDialog.findViewById(R.id.ExtendTopicButton)).setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-
-						// We always use the first candi in a zone
-						EntityProxy parentEntityProxy = mCandiPatchModel.getCandiModelFocused().getZoneCurrent().getCandiesCurrent().get(0)
-								.getEntityProxy();
-						Intent intent = buildIntent(Verb.New, null, SubType.Comment, parentEntityProxy.id, parentEntityProxy.beacon, mUser,
-								Post.class);
-						startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-						dialog.dismiss();
-					}
-				});
-				dialog.show();
-
-			}
-		});
-	}
-
-	private void doCandiSingleTap(final CandiModel candiModel) {
-		// EntityHandler entityHandler = candiModel.getEntityProxy().entityHandler;
-		// boolean startedProxiHandler = mProxiHandlerManager.startProxiHandler(entityHandler.action,
-		// candiModel.getEntityProxy());
-		// if (!startedProxiHandler) {
-		// if (mProxiHandlerManager.getProxiHandlers().containsKey(entityHandler.action)) {
-		// EntityHandler proxiHandlerTracked = (EntityHandler)
-		// mProxiHandlerManager.getProxiHandlers().get(entityHandler.action);
-		// if (!proxiHandlerTracked.isSuppressInstallPrompt()) {
-		// showInstallDialog(candiModel);
-		// proxiHandlerTracked.setSuppressInstallPrompt(true);
-		// }
-		// else {
-		// // Fall back to our built-in candi viewer
-		// showCandiDetailView(candiModel);
-		// mProxiAppManager.startProxiHandler("com.aircandi.intent.action.SHOWEntityProxy",
-		// candiModel.getEntityProxy());
-		// }
-		// }
-		// else {
-		// showInstallDialog(candiModel);
-		// entityHandler.setSuppressInstallPrompt(true);
-		// mProxiHandlerManager.getProxiHandlers().put(entityHandler.action, entityHandler);
-		// }
-		// }
-
-		// This can get called from threads other than the main UI thread
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				showCandiInfo(candiModel, AnimType.RotateCandi);
-			}
-		});
 	}
 
 	private TableLayout configureMenus(CandiModel candi, boolean landscape, Context context) {
@@ -1176,6 +1197,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					continue;
 
 			// Make a button and configure it
+			command.entity = candi.getEntityProxy();
 			commandButtonContainer = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_button_command, null);
 
 			final TextView commandButton = (TextView) commandButtonContainer.findViewById(R.id.CommandButton);
@@ -1249,7 +1271,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 			// We are on the UI thread
 			super.onPostExecute(table);
-			FrameLayout frame = (FrameLayout) findViewById(R.id.frameMenu);
+			FrameLayout frame = (FrameLayout) findViewById(R.id.frame_menu);
 			frame.removeAllViews();
 			if (table != null) {
 				frame.addView(table);
@@ -1272,15 +1294,142 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		public void onReceive(final Context context, Intent intent) {
 			if (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)) {
 				String publicName = mProxiHandlerManager.getPublicName(intent.getData().getEncodedSchemeSpecificPart());
-				AircandiUI
-						.showToastNotification(CandiSearchActivity.this, publicName + getText(R.string.toast_package_installed), Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(CandiSearchActivity.this, publicName + getText(R.string.dialog_install_toast_package_installed),
+						Toast.LENGTH_SHORT);
 			}
 		}
 	}
 
-	// ==========================================================================
+	private void checkEntityHandler() {
+	// EntityHandler entityHandler = candiModel.getEntityProxy().entityHandler;
+	// boolean startedProxiHandler = mProxiHandlerManager.startProxiHandler(entityHandler.action,
+	// candiModel.getEntityProxy());
+	// if (!startedProxiHandler) {
+	// if (mProxiHandlerManager.getProxiHandlers().containsKey(entityHandler.action)) {
+	// EntityHandler proxiHandlerTracked = (EntityHandler)
+	// mProxiHandlerManager.getProxiHandlers().get(entityHandler.action);
+	// if (!proxiHandlerTracked.isSuppressInstallPrompt()) {
+	// showInstallDialog(candiModel);
+	// proxiHandlerTracked.setSuppressInstallPrompt(true);
+	// }
+	// else {
+	// // Fall back to our built-in candi viewer
+	// showCandiDetailView(candiModel);
+	// mProxiAppManager.startProxiHandler("com.aircandi.intent.action.SHOWEntityProxy",
+	// candiModel.getEntityProxy());
+	// }
+	// }
+	// else {
+	// showInstallDialog(candiModel);
+	// entityHandler.setSuppressInstallPrompt(true);
+	// mProxiHandlerManager.getProxiHandlers().put(entityHandler.action, entityHandler);
+	// }
+	// }
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Dialogs routines
+	// --------------------------------------------------------------------------------------------
+
+	private void showInstallDialog(final CandiModel candi) {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				final Dialog dialog = new Dialog(CandiSearchActivity.this, R.style.aircandi_theme_dialog);
+				final RelativeLayout installDialog = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_dialog_install, null);
+				dialog.setContentView(installDialog, new FrameLayout.LayoutParams(400, 300, Gravity.CENTER));
+				dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+				dialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.dialog_bg));
+
+				((Button) installDialog.findViewById(R.id.btn_install_ok)).setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						Intent goToMarket = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(candi.getEntityProxy().entityHandler.code));
+						startActivityForResult(goToMarket, CandiConstants.ACTIVITY_MARKET);
+						dialog.dismiss();
+					}
+				});
+				((Button) installDialog.findViewById(R.id.btn_install_cancel)).setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						dialog.dismiss();
+						if (!mEngine.isRunning()) {
+							if (mCandiPatchModel.getCandiModels().size() > 0) {
+								mCandiPatchPresenter.resetSharedTextures();
+								mCandiPatchPresenter.resetTextures(TextureReset.VisibleOnly);
+								new Thread(new Runnable() {
+
+									@Override
+									public void run() {
+										mCandiPatchPresenter.resetTextures(TextureReset.NonVisibleOnly);
+									}
+								}).start();
+							}
+						}
+					}
+				});
+				dialog.show();
+
+			}
+		});
+	}
+
+	private void showTopicDialog() {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				final Dialog dialog = new Dialog(CandiSearchActivity.this, R.style.aircandi_theme_dialog);
+				final RelativeLayout installDialog = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_dialog_new, null);
+				dialog.setContentView(installDialog, new FrameLayout.LayoutParams(dialog.getWindow().getWindowManager().getDefaultDisplay()
+						.getWidth() - 40, LayoutParams.FILL_PARENT, Gravity.CENTER));
+				dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+
+				dialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.dialog_bg));
+
+				((Button) installDialog.findViewById(R.id.btn_new_topic)).setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+
+						Intent intent = buildIntent(Verb.New, null, SubType.Topic, 0, ProxiExplorer.getInstance().getStrongestBeacon(), mUser,
+								Post.class);
+						startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
+						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+						dialog.dismiss();
+					}
+				});
+
+				((Button) installDialog.findViewById(R.id.btn_new_comment)).setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+
+						// We always use the first candi in a zone
+						EntityProxy parentEntityProxy = mCandiPatchModel.getCandiModelFocused().getZoneCurrent().getCandiesCurrent().get(0)
+								.getEntityProxy();
+						Intent intent = buildIntent(Verb.New, null, SubType.Comment, parentEntityProxy.id, parentEntityProxy.beacon, mUser,
+								Post.class);
+						startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
+						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+						dialog.dismiss();
+					}
+				});
+				dialog.show();
+
+			}
+		});
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// ENGINE routines
-	// ==========================================================================
+	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected int getLayoutID() {
@@ -1289,7 +1438,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	@Override
 	protected int getRenderSurfaceViewID() {
-		return R.id.RenderSurfaceView;
+		return R.id.view_rendersurface;
 	}
 
 	@Override
@@ -1421,9 +1570,203 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 	}
 
-	// ==========================================================================
+	// --------------------------------------------------------------------------------------------
+	// Candi Paging routines
+	// --------------------------------------------------------------------------------------------
+
+	private class CandiPagerAdapter extends PagerAdapter implements ViewPagerIndicator.PageInfoProvider {
+
+		@Override
+		public int getCount() {
+			if (mCandiPatchModel.getCandiModelSelected() == null) {
+				return 0;
+			}
+			else {
+				return mCandiPatchModel.getCandiModelSelected().hasVisibleChildrenCurrent() ? 2 : 1;
+			}
+		}
+
+		@Override
+		public void startUpdate(View arg0) {}
+
+		@Override
+		public Object instantiateItem(View collection, int position) {
+
+			LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			if (position == PagerView.CandiInfo.ordinal()) {
+				FrameLayout candiInfoView = (FrameLayout) inflater.inflate(R.layout.temp_candi_info, null);
+				candiInfoView = buildCandiInfo(mCandiPatchModel.getCandiModelSelected(), candiInfoView);
+				((ViewPager) collection).addView(candiInfoView, 0);
+				return candiInfoView;
+			}
+			else if (position == PagerView.CandiList.ordinal()) {
+				FrameLayout candiInfoView = (FrameLayout) inflater.inflate(R.layout.temp_candi_list, null);
+				ListView candiListView = (ListView) candiInfoView.findViewById(R.id.list_candi_children);
+				ListAdapter adapter = new ListAdapter(CandiSearchActivity.this, R.id.item_content, mCandiPatchModel.getCandiModelSelected()
+						.getChildren());
+				candiListView.setAdapter(adapter);
+				candiListView.setClickable(true);
+				((ViewPager) collection).addView(candiInfoView, 0);
+				return candiInfoView;
+			}
+			return null;
+		}
+
+		public int getItemPosition(Object object) {
+			return POSITION_NONE;
+		}
+
+		@Override
+		public void destroyItem(View collection, int position, Object view) {
+			((ViewPager) collection).removeView((FrameLayout) view);
+		}
+
+		@Override
+		public boolean isViewFromObject(View view, Object object) {
+			return view == ((FrameLayout) object);
+		}
+
+		@Override
+		public void finishUpdate(View arg0) {}
+
+		@Override
+		public Parcelable saveState() {
+			return null;
+		}
+
+		@Override
+		public void restoreState(Parcelable state, ClassLoader loader) {}
+
+		@Override
+		public String getTitle(int position) {
+			if (position == PagerView.CandiInfo.ordinal()) {
+				if (mCandiPatchModel == null || mCandiPatchModel.getCandiModelSelected() == null) {
+					return "TOPIC";
+				}
+				else {
+					return "TOPIC";
+					// return mCandiPatchModel.getCandiModelSelected().getEntityProxy().title;
+				}
+			}
+			if (position == PagerView.CandiList.ordinal()) {
+				return "COMMENTS";
+			}
+			return null;
+		}
+	}
+
+	private class ListAdapter extends ArrayAdapter<IModel> {
+
+		@Override
+		public IModel getItem(int position) {
+			return items.get(position);
+		}
+
+		private List<IModel>	items;
+
+		public ListAdapter(Context context, int textViewResourceId, List<IModel> items) {
+			super(context, textViewResourceId, items);
+			this.items = items;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view = convertView;
+			ViewHolder holder;
+			CandiModel itemData = (CandiModel) items.get(position);
+
+			if (view == null) {
+				LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				view = inflater.inflate(R.layout.temp_listitem_twoline_icon, null);
+				holder = new ViewHolder();
+				holder.itemIcon = (ImageView) view.findViewById(R.id.item_image);
+				holder.itemTitle = (TextView) view.findViewById(R.id.item_title);
+				holder.itemSubtitle = (TextView) view.findViewById(R.id.item_subtitle);
+				holder.itemBody = (TextView) view.findViewById(R.id.item_content);
+				holder.itemActionButton = (LinearLayout) view.findViewById(R.id.item_action_button);
+				view.setTag(holder);
+			}
+			else {
+				holder = (ViewHolder) view.getTag();
+			}
+
+			if (itemData != null) {
+				EntityProxy entityProxy = (EntityProxy) itemData.getEntityProxy();
+				holder.data = itemData;
+				if (holder.itemTitle != null) {
+					if (entityProxy.title != null && !entityProxy.title.equals("")) {
+						holder.itemTitle.setText(entityProxy.title);
+					}
+					else {
+						holder.itemTitle.setVisibility(View.GONE);
+					}
+				}
+
+				if (holder.itemSubtitle != null) {
+					if (entityProxy.subtitle != null && !entityProxy.subtitle.equals("")) {
+						holder.itemSubtitle.setText(entityProxy.subtitle);
+					}
+					else {
+						holder.itemSubtitle.setVisibility(View.GONE);
+					}
+				}
+
+				if (holder.itemBody != null) {
+					if (entityProxy.description != null && !entityProxy.description.equals("")) {
+						holder.itemBody.setText(entityProxy.description);
+					}
+					else {
+						holder.itemBody.setVisibility(View.GONE);
+					}
+					// if (itemData.getEntityProxy().createdDate != "") {
+					// Date hookupDate = DateUtils.wcfToDate(itemData.getEntityProxy().createdDate);
+					// holder.itemBody.setText("Created " + DateUtils.intervalSince(hookupDate, DateUtils.nowDate()));
+					// }
+					// else
+				}
+
+				if (holder.itemIcon != null) {
+					Bitmap bitmap = ImageManager.getInstance().getImage(itemData.getEntityProxy().imageUri);
+					if (bitmap != null) {
+						holder.itemIcon.setImageBitmap(bitmap);
+					}
+					else {
+						// new GetFacebookImageTask().execute(holder); // Will set the picture when finished
+					}
+				}
+
+				// Loop the streams
+				for (Command command : entityProxy.commands) {
+					if (command.name.toLowerCase().equals("edit")) {
+						if (entityProxy.createdById != null && !entityProxy.createdById.equals(mUser.id)) {
+							holder.itemActionButton.setVisibility(View.GONE);
+						}
+						else {
+							command.entity = entityProxy;
+							holder.itemActionButton.setVisibility(View.VISIBLE);
+							holder.itemActionButton.setTag(command);
+						}
+					}
+				}
+
+			}
+			return view;
+		}
+	}
+
+	private class ViewHolder {
+
+		public ImageView	itemIcon;
+		public TextView		itemTitle;
+		public TextView		itemSubtitle;
+		public TextView		itemBody;
+		public LinearLayout	itemActionButton;
+		public Object		data;
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// WIFI routines
-	// ==========================================================================
+	// --------------------------------------------------------------------------------------------
 
 	private void wifiAskToEnable() {
 
@@ -1451,13 +1794,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	private void wifiEnable() {
-		AircandiUI.showToastNotification(this, "Wifi enabling...", Toast.LENGTH_LONG);
+		ImageUtils.showToastNotification(this, "Wifi enabling...", Toast.LENGTH_LONG);
 		ProxiExplorer.getInstance().enableWifi();
 	}
 
-	// ==========================================================================
+	// --------------------------------------------------------------------------------------------
 	// MISC routines
-	// ==========================================================================
+	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected void onResume() {
@@ -1535,7 +1878,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	@Override
 	// Don't count on this always getting called when this activity is killed
 	protected void onDestroy() {
-		recycleBitmaps();
+		// recycleBitmaps();
 		super.onDestroy();
 
 		try {
@@ -1575,19 +1918,19 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		if (beacon != null) {
 			String jsonBeacon = gson.toJson(beacon);
-			if (jsonBeacon != "")
+			if (!jsonBeacon.equals(""))
 				intent.putExtra(getString(R.string.EXTRA_BEACON), jsonBeacon);
 		}
 
 		if (entityProxy != null) {
 			String jsonEntityProxy = gson.toJson(entityProxy);
-			if (jsonEntityProxy != "")
+			if (!jsonEntityProxy.equals(""))
 				intent.putExtra(getString(R.string.EXTRA_ENTITY), jsonEntityProxy);
 		}
 
 		if (user != null) {
 			String jsonUser = ProxibaseService.getGson(GsonType.Internal).toJson(user);
-			if (jsonUser != "")
+			if (!jsonUser.equals(""))
 				intent.putExtra(getString(R.string.EXTRA_USER), jsonUser);
 		}
 
@@ -1595,8 +1938,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	private void recycleBitmaps() {
-		recycleImageViewDrawable(R.id.Image);
-		recycleImageViewDrawable(R.id.ImageReflection);
+		recycleImageViewDrawable(R.id.img_public);
+		recycleImageViewDrawable(R.id.img_public_reflection);
 	}
 
 	private void recycleImageViewDrawable(int resourceId) {
@@ -1625,7 +1968,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		super.onConfigurationChanged(newConfig);
 		if (mCandiInfoVisible) {
 			TableLayout table = configureMenus(mCandiPatchModel.getCandiModelFocused(), landscape, CandiSearchActivity.this);
-			FrameLayout frame = (FrameLayout) findViewById(R.id.frameMenu);
+			FrameLayout frame = (FrameLayout) findViewById(R.id.frame_menu);
 			frame.removeAllViews();
 			frame.addView(table);
 		}
@@ -1663,8 +2006,18 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				updateMemoryUsed();
 			}
 			else {
-				TextView textView = (TextView) findViewById(R.id.FooterText);
+				TextView textView = (TextView) findViewById(R.id.txt_footer);
 				textView.setText("");
+			}
+			if (!mPrefTheme.equals(prefs.getString(Preferences.PREF_THEME, "aircandi_theme.blueray"))) {
+				prefChangeThatRequiresRefresh = false;
+				mPrefTheme = prefs.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
+				int themeResourceId = this.getResources().getIdentifier(mPrefTheme, "style", "com.proxibase.aircandi.activities");
+				this.setTheme(themeResourceId);
+				Intent intent = new Intent(this, CandiSearchActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
 			}
 		}
 		return prefChangeThatRequiresRefresh;
@@ -1673,26 +2026,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private void loadPreferencesProxiExplorer() {
 		ProxiExplorer.getInstance().setPrefEntityFencing(mPrefEntityFencing);
 		ProxiExplorer.getInstance().setPrefDemoMode(mPrefDemoMode);
-	}
-
-	protected void startTitlebarProgress() {
-		if (mProgressIndicator != null) {
-			mProgressIndicator.setVisibility(View.VISIBLE);
-			mButtonRefresh.setVisibility(View.INVISIBLE);
-			mProgressIndicator.bringToFront();
-			AnimationDrawable animation = (AnimationDrawable) mProgressIndicator.getBackground();
-			animation.start();
-			mProgressIndicator.invalidate();
-		}
-	}
-
-	protected void stopTitlebarProgress() {
-		if (mProgressIndicator != null) {
-			mProgressIndicator.setAnimation(null);
-			mButtonRefresh.setVisibility(View.VISIBLE);
-			mButtonRefresh.bringToFront();
-			mProgressIndicator.setVisibility(View.INVISIBLE);
-		}
 	}
 
 	private void startGetCredentials() {
@@ -1776,6 +2109,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * get a zero result code whether the user decided to start an install
 		 * or not.
 		 */
+		startTitlebarProgress(true);
 		mCandiSurfaceView.setVisibility(View.VISIBLE);
 		if (requestCode == CandiConstants.ACTIVITY_ENTITY_HANDLER) {
 			if (resultCode == Activity.RESULT_FIRST_USER) {
@@ -1792,13 +2126,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							for (Beacon beacon : ProxiExplorer.getInstance().getBeacons()) {
 								if (beacon.id.equals(dirtyBeaconId)) {
 									beacon.isDirty = true;
-									startTitlebarProgress();
 									List<EntityProxy> freshEntityProxies = ProxiExplorer.getInstance().refreshEntities();
 									doEntitiesUpdate(freshEntityProxies, false);
-									stopTitlebarProgress();
 								}
 							}
-							return;
 						}
 						/*
 						 * New comment was inserted or
@@ -1809,7 +2140,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 								if (entityProxy.id.equals(dirtyEntityId)) {
 									entityProxy.isDirty = true;
 
-									startTitlebarProgress();
 									List<EntityProxy> freshEntityProxies = ProxiExplorer.getInstance().refreshEntities();
 									doEntitiesUpdate(freshEntityProxies, false);
 
@@ -1818,7 +2148,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 										if (mCandiInfoVisible && freshEntityProxy.id
 													.equals(mCandiPatchModel.getCandiModelSelected().getEntityProxy().id)) {
 											if (resultVerb == Verb.Edit) {
-												buildCandiInfo(mCandiPatchModel.getCandiModelSelected());
+												// buildCandiInfo(mCandiPatchModel.getCandiModelSelected());
 												CandiView candiView = (CandiView) mCandiPatchPresenter.getViewForModel(mCandiPatchModel
 														.getCandiModelSelected());
 												candiView.loadBodyTextureSources(false, true);
@@ -1831,10 +2161,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 											hideCandiInfo(AnimType.CrossFade);
 										}
 									}
-									stopTitlebarProgress();
 								}
 							}
-							return;
 						}
 					}
 				}
@@ -1844,5 +2172,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 		else if (requestCode == CandiConstants.ACTIVITY_MARKET) {
 		}
+		stopTitlebarProgress();
+		return;
 	}
 }

@@ -2,20 +2,22 @@ package com.proxibase.aircandi.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.models.BaseEntity.SubType;
-import com.proxibase.aircandi.utils.AircandiUI;
+import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.consumer.User;
@@ -26,7 +28,7 @@ public abstract class AircandiActivity extends Activity {
 
 	protected ImageView		mProgressIndicator;
 	protected ImageView		mButtonRefresh;
-	protected TextView		mContextButton;
+	protected Button		mContextButton;
 
 	protected Verb			mVerb;
 	protected SubType		mSubType;
@@ -35,9 +37,16 @@ public abstract class AircandiActivity extends Activity {
 	protected Boolean		mBeaconUnregistered;
 	protected EntityProxy	mEntityProxy;
 	protected User			mUser;
+	protected String		mPrefTheme;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		/*
+		 * Theme has to be set before any UI is constructed. We also
+		 * have to do it for each activity so they pickup our custom
+		 * style attributes.
+		 */
+		setTheme();
 		super.onCreate(savedInstanceState);
 		super.setContentView(this.getLayoutID());
 
@@ -70,32 +79,42 @@ public abstract class AircandiActivity extends Activity {
 		}
 	}
 
+	private void setTheme() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		if (prefs != null) {
+			mPrefTheme = prefs.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
+			int themeResourceId = getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", getPackageName());
+			this.setTheme(themeResourceId);
+		}
+	}
+
 	protected int getLayoutID() {
 		return 0;
 	}
 
 	private void configure() {
 
-		mProgressIndicator = (ImageView) findViewById(R.id.Application_ProgressIndicator);
+		mProgressIndicator = (ImageView) findViewById(R.id.img_progress_indicator);
 		if (mProgressIndicator != null)
 			mProgressIndicator.setVisibility(View.INVISIBLE);
 
-		mButtonRefresh = (ImageView) findViewById(R.id.Application_Button_Refresh);
+		mButtonRefresh = (ImageView) findViewById(R.id.img_refresh_button);
 		if (mButtonRefresh != null)
 			mButtonRefresh.setVisibility(View.VISIBLE);
 
-		mContextButton = (TextView) findViewById(R.id.Context_Button);
+		mContextButton = (Button) findViewById(R.id.btn_context);
 		if (mContextButton != null)
-			mContextButton.setVisibility(View.VISIBLE);
+			mContextButton.setVisibility(View.INVISIBLE);
 
-		if (mEntityProxy != null && mContextButton != null)
-			showBackButton(true);
+		if ((mVerb == Verb.New || mEntityProxy != null) && mContextButton != null)
+			showBackButton(true, getString(R.string.post_back_button));
 
 	}
 
-	public void showBackButton(boolean show) {
+	public void showBackButton(boolean show, String backButtonText) {
 		if (show) {
-			mContextButton.setText("Back");
+			mContextButton.setVisibility(View.VISIBLE);
+			mContextButton.setText(backButtonText);
 			mContextButton.setOnClickListener(new View.OnClickListener() {
 
 				@Override
@@ -160,7 +179,7 @@ public abstract class AircandiActivity extends Activity {
 
 	// Titlebar search
 	public void onSearchClick(View view) {
-		AircandiUI.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
+		ImageUtils.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
 		return;
 	}
 
