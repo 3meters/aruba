@@ -47,10 +47,10 @@ public class ProxiHandlerManager {
 		// (here just doing nothing for the same amount of time) for the
 		// old activity to prevent it from going away too soon.
 		mActivity.overridePendingTransition(R.anim.summary_in, R.anim.hold);
-		//mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		// mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
 		return true;
 	}
-	
+
 	public String getPublicName(String packageName) {
 
 		PackageManager packageManager = mActivity.getPackageManager();
@@ -61,18 +61,17 @@ public class ProxiHandlerManager {
 		}
 		catch (NameNotFoundException exception) {
 			exception.printStackTrace();
-			return "";
+			return null;
 		}
 	}
-	
 
 	public void installProxiHandler() {}
 
 	class PInfo {
 
-		private String		appname		= "";
-		private String		pname		= "";
-		private String		versionName	= "";
+		private String		appname;
+		private String		pname;
+		private String		versionName;
 		private int			versionCode	= 0;
 		@SuppressWarnings("unused")
 		private Drawable	icon;

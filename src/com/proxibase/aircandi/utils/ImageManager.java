@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.anddev.andengine.util.StreamUtils;
@@ -35,9 +36,13 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebView.PictureListener;
 
+import com.proxibase.aircandi.core.AircandiException;
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.aircandi.core.AircandiException.CandiErrorCode;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
 /*
  * TODO: ImageCache uses weak references by default. Should investigate the possible benefits 
@@ -47,8 +52,6 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 public class ImageManager {
 
 	private static ImageManager					singletonObject;
-	@SuppressWarnings("unused")
-	private static String						USER_AGENT			= "Mozilla/5.0 (Linux; U; Android 2.2.1; fr-ch; A43 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 	private ImageCache							mImageCache;
 	private WebView								mWebView;
 	private Queue								mWebViewQueue		= new LinkedList<ImageRequest>();
@@ -83,6 +86,21 @@ public class ImageManager {
 		mImageCache = imageCache;
 	}
 
+	public static Bitmap fetchImage(String url) throws ProxibaseException {
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+		/*
+		 * We request a byte array for decoding because of a bug
+		 * in pre 2.3 versions of android.
+		 */
+		byte[] imageBytes = (byte[]) ProxibaseService.getInstance().select(url, ResponseFormat.Bytes);
+		Bitmap bm = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
+		if (bm == null)
+			throw new IllegalStateException("Stream could not be decoded to a bitmap: " + url);
+
+		return bm;
+	}
+
 	public Bitmap getImage(String key) {
 		return mImageCache.get(key);
 	}
@@ -95,46 +113,59 @@ public class ImageManager {
 		mContext = context;
 	}
 
-	public void fetchImageAsynch(ImageRequest imageRequest) {
-		
+	public void fetchImageAsynch(ImageRequest imageRequest) throws AircandiException {
+
 		// Make sure the cache directory is intact
 		if (!mImageCache.cacheDirectoryExists())
 			mImageCache.makeCacheDirectory();
-		
+
 		if (imageRequest.imageFormat == ImageFormat.Html) {
 			mWebViewQueue.offer(imageRequest);
 			if (!mWebViewProcessing)
 				startWebViewProcessing();
 		}
 		else if (imageRequest.imageFormat == ImageFormat.Binary) {
-			new GetImageBinaryTask().execute(imageRequest);
+			try {
+				new GetImageBinaryTask().execute(imageRequest);
+			}
+			catch (RejectedExecutionException exception) {
+				throw new AircandiException(exception.getMessage(), CandiErrorCode.RejectedExecutionException, exception);
+			}
 		}
 	}
 
 	public class GetImageBinaryTask extends AsyncTask<ImageRequest, Void, Bitmap> {
-	
-		ImageRequest	mImageRequest;
-	
+
+		ImageRequest		mImageRequest;
+		ProxibaseException	mProxibaseException;
+
 		@Override
 		protected Bitmap doInBackground(final ImageRequest... params) {
-	
+
 			// We are on the background thread
 			mImageRequest = params[0];
-			Bitmap bitmap = AircandiUI.getImage(mImageRequest.imageUri);
-	
+			Bitmap bitmap = null;
+			try {
+				bitmap = fetchImage(mImageRequest.imageUri);
+			}
+			catch (ProxibaseException exception) {
+				mProxibaseException = exception;
+				return null;
+			}
+
 			if (bitmap != null) {
-	
+
 				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageId + "'");
-	
+
 				// Crop if requested
 				Bitmap bitmapCropped;
 				if (mImageRequest.imageShape.equals("square")) {
-					bitmapCropped = AircandiUI.cropToSquare(bitmap);
+					bitmapCropped = ImageUtils.cropToSquare(bitmap);
 				}
 				else {
 					bitmapCropped = bitmap;
 				}
-	
+
 				// Scale if needed
 				Bitmap bitmapCroppedScaled;
 				if (mImageRequest.widthMinimum > 0 && bitmapCropped.getWidth() != mImageRequest.widthMinimum) {
@@ -145,7 +176,7 @@ public class ImageManager {
 				else {
 					bitmapCroppedScaled = bitmapCropped;
 				}
-	
+
 				// Make sure the bitmap format is right
 				Bitmap bitmapFinal;
 				if (!bitmapCroppedScaled.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString())) {
@@ -154,20 +185,20 @@ public class ImageManager {
 				else {
 					bitmapFinal = bitmapCroppedScaled;
 				}
-	
+
 				// Stuff it into the disk and memory caches. Overwrites if it already exists.
 				if (bitmapFinal.isRecycled())
 					throw new IllegalArgumentException("bitmapFinal has been recycled");
 				mImageCache.put(mImageRequest.imageId, bitmapFinal);
-	
+
 				// Create reflection if requested
 				if (mImageRequest.showReflection) {
-					final Bitmap bitmapReflection = AircandiUI.getReflection(bitmapFinal);
+					final Bitmap bitmapReflection = ImageUtils.getReflection(bitmapFinal);
 					mImageCache.put(mImageRequest.imageId + ".reflection", bitmapReflection);
 					if (mImageCache.isFileCacheOnly())
 						bitmapReflection.recycle();
 				}
-	
+
 				return bitmapFinal;
 			}
 			else {
@@ -175,69 +206,85 @@ public class ImageManager {
 				return null;
 			}
 		}
-	
+
 		@Override
 		protected void onPostExecute(final Bitmap bitmap) {
-	
+
 			// We are on the main thread
 			super.onPostExecute(bitmap);
-	
-			if (bitmap != null) {
+
+			if (mProxibaseException != null) {
 				if (mImageRequest.imageReadyListener != null)
-					mImageRequest.imageReadyListener.onImageReady(bitmap);
+					mImageRequest.imageReadyListener.onProxibaseException(mProxibaseException);
 				else if (mImageReadyListener != null) {
-					mImageReadyListener.onImageReady(bitmap);
+					mImageReadyListener.onProxibaseException(mProxibaseException);
+				}
+			}
+			else {
+				if (bitmap != null) {
+					if (mImageRequest.imageReadyListener != null)
+						mImageRequest.imageReadyListener.onImageReady(bitmap);
+					else if (mImageReadyListener != null) {
+						mImageReadyListener.onImageReady(bitmap);
+					}
 				}
 			}
 		}
 	}
 
 	public class GetImageHtmlTask extends AsyncTask<ImageRequest, Void, Bitmap> {
-	
-		ImageRequest	mImageRequest;
-	
+
+		ImageRequest		mImageRequest;
+		ProxibaseException	mProxibaseException;
+
 		@Override
 		protected Bitmap doInBackground(final ImageRequest... params) {
-	
+
 			// We are on the background thread
 			mImageRequest = params[0];
 			String webViewContent = "";
 			final AtomicBoolean ready = new AtomicBoolean(false);
-	
-			webViewContent = ProxibaseService.getInstance().selectAsString(mImageRequest.imageUri, ResponseFormat.Html);
+
+			try {
+				webViewContent = (String) ProxibaseService.getInstance().select(mImageRequest.imageUri, ResponseFormat.Html);
+			}
+			catch (ProxibaseException exception) {
+				mProxibaseException = exception;
+				return null;
+			}
 			mWebView.setWebViewClient(new WebViewClient() {
-	
+
 				@Override
 				public void onPageFinished(WebView view, String url) {
 					ready.set(true);
 				}
-	
+
 			});
 			mWebView.setPictureListener(new PictureListener() {
-	
+
 				@Override
 				public void onNewPicture(WebView view, Picture picture) {
-	
+
 					if (ready.get()) {
 						Bitmap bitmap = Bitmap.createBitmap(250, 250, CandiConstants.IMAGE_CONFIG_DEFAULT);
 						Canvas canvas = new Canvas(bitmap);
 						picture.draw(canvas);
-	
+
 						if (bitmap != null) {
-	
+
 							// Stuff it into the disk and memory caches. Overwrites if it already exists.
 							mImageCache.put(mImageRequest.imageId, bitmap);
-	
+
 							// Create reflection if requested
 							if (mImageRequest.showReflection) {
-								Bitmap bitmapReflection = AircandiUI.getReflection(bitmap);
+								Bitmap bitmapReflection = ImageUtils.getReflection(bitmap);
 								mImageCache.put(mImageRequest.imageId + ".reflection", bitmapReflection);
 								if (mImageCache.isFileCacheOnly()) {
 									bitmapReflection.recycle();
 									bitmapReflection = null;
 								}
 							}
-	
+
 							// Ready to return to original requestor
 							if (mImageRequest.imageReadyListener != null)
 								mImageRequest.imageReadyListener.onImageReady(bitmap);
@@ -245,30 +292,36 @@ public class ImageManager {
 								mImageReadyListener.onImageReady(bitmap);
 							}
 						}
-	
+
 						// Release
 						canvas = null;
 						mWebViewProcessing = false;
-						startWebViewProcessing();
+						try {
+							startWebViewProcessing();
+						}
+						catch (AircandiException exception) {
+							// TODO: We might have hit the thread limit for AsyncTasks
+							exception.printStackTrace();
+						}
 					}
 				}
 			});
-	
+
 			mWebView.loadDataWithBaseURL(mImageRequest.imageUri, webViewContent, "text/html", "utf-8", null);
 			return null;
 		}
 	}
 
-	public Bitmap loadBitmapFromDevice(final Uri imageUri, String imageWidthMax) {
-	
+	public Bitmap loadBitmapFromDevice(final Uri imageUri, String imageWidthMax) throws ProxibaseException {
+
 		String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
 		String imageOrientation = "";
 		@SuppressWarnings("unused")
 		String imagePath = "";
 		File imageFile = null;
-	
+
 		Cursor cursor = mContext.getContentResolver().query(imageUri, projection, null, null, null);
-	
+
 		if (cursor != null) {
 			/*
 			 * Means the image is in the media store
@@ -280,7 +333,7 @@ public class ImageManager {
 				imageData = cursor.getString(dataColumn);
 				imageOrientation = cursor.getString(orientationColumn);
 			}
-	
+
 			imageFile = new File(imageData);
 			imagePath = imageData;
 		}
@@ -291,30 +344,30 @@ public class ImageManager {
 			imagePath = imageUri.toString().replace("file://", "");
 			imageFile = new File(imageUri.toString().replace("file://", ""));
 		}
-	
+
 		byte[] imageBytes = new byte[(int) imageFile.length()];
-	
+
 		DataInputStream in = null;
-	
+
 		try {
 			in = new DataInputStream(new FileInputStream(imageFile));
 		}
-		catch (FileNotFoundException e) {
-			e.printStackTrace();
+		catch (FileNotFoundException exception) {
+			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.FileNotFoundException, exception);
 		}
 		try {
 			in.readFully(imageBytes);
 		}
-		catch (IOException e) {
-			e.printStackTrace();
+		catch (IOException exception) {
+			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
 		}
 		try {
 			in.close();
 		}
-		catch (IOException e) {
-			e.printStackTrace();
+		catch (IOException exception) {
+			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
 		}
-	
+
 		imageOrientation = getExifOrientation(imageUri.getPath(), imageOrientation);
 		Bitmap bitmap = bitmapForByteArray(imageBytes, imageWidthMax, imageOrientation);
 		return bitmap;
@@ -338,7 +391,7 @@ public class ImageManager {
 		}
 	}
 
-	public Bitmap bitmapForByteArray(byte[] imageBytes, String imageWidthMax, String imageOrientation) {
+	private Bitmap bitmapForByteArray(byte[] imageBytes, String imageWidthMax, String imageOrientation) {
 
 		BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 		bitmapOptions.inJustDecodeBounds = true;
@@ -452,7 +505,7 @@ public class ImageManager {
 		}
 	}
 
-	public String getExifOrientation(String imagePath, String imageOrientation) {
+	private String getExifOrientation(String imagePath, String imageOrientation) {
 		/*
 		 * Return image EXIF orientation using reflection (if Android 2.0 or higher)
 		 * http://developer.android.com/resources/articles/backward-compatibility.html
@@ -525,7 +578,7 @@ public class ImageManager {
 
 	public boolean hasImageCaptureBug() {
 		/*
-		 *  list of known devices that have the bug.
+		 * list of known devices that have the bug.
 		 */
 		ArrayList<String> devices = new ArrayList<String>();
 		devices.add("android-devphone1/dream_devphone/dream");
@@ -538,7 +591,8 @@ public class ImageManager {
 		return devices.contains(android.os.Build.BRAND + "/" + android.os.Build.PRODUCT + "/" + android.os.Build.DEVICE);
 	}
 
-	public static ImageRequest createImageRequest(String imageUri, ImageFormat imageFormat, String imageShape, int minWidth, boolean makeReflection, IImageReadyListener imageReadyListener) {
+	public static ImageRequest imageRequestFactory(String imageUri, ImageFormat imageFormat, String imageShape, int minWidth, boolean makeReflection,
+			IImageReadyListener imageReadyListener) {
 		ImageRequest imageRequest = new ImageRequest();
 		imageRequest.imageId = imageUri;
 		imageRequest.imageUri = imageUri;
@@ -550,12 +604,18 @@ public class ImageManager {
 		return imageRequest;
 	}
 
-	public void startWebViewProcessing() {
+	public void startWebViewProcessing() throws AircandiException {
 		mWebView.setPictureListener(null);
 		ImageRequest imageRequest = (ImageRequest) mWebViewQueue.poll();
 		if (imageRequest != null) {
 			mWebViewProcessing = true;
-			new GetImageHtmlTask().execute(imageRequest);
+			try {
+				new GetImageHtmlTask().execute(imageRequest);
+			}
+			catch (RejectedExecutionException exception) {
+				exception.printStackTrace();
+				throw new AircandiException(exception.getMessage(), CandiErrorCode.RejectedExecutionException, exception);
+			}
 		}
 	}
 
@@ -574,6 +634,8 @@ public class ImageManager {
 	public interface IImageReadyListener {
 
 		void onImageReady(Bitmap bitmap);
+
+		void onProxibaseException(ProxibaseException exception);
 	}
 
 	public static class ImageRequest {
