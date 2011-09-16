@@ -36,14 +36,17 @@ import com.proxibase.aircandi.candi.models.ZoneModel.Position;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiAnimatedSprite;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
+import com.proxibase.aircandi.core.AircandiException;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.AircandiUI;
+import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Utilities;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.utils.ImageManager.IImageReadyListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
 @SuppressWarnings("unused")
 public class CandiView extends BaseView implements OnGestureListener, OnDoubleTapListener {
@@ -148,6 +151,15 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 		});
 	}
 
+	@Override
+	public void setZIndex(final int pZIndex) {
+		super.setZIndex(pZIndex);
+		if (this.mBodySprite != null)
+			this.mBodySprite.setZIndex(pZIndex);
+		if (this.mReflectionSprite != null)
+			this.mReflectionSprite.setZIndex(pZIndex);
+	}
+	
 	private void makeProgressSprites() {
 
 		// Placeholder
@@ -229,7 +241,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 		Bitmap reflectionBitmap = ImageManager.getInstance().getImage(mCandiModel.getBodyImageId() + ".reflection");
 		if (reflectionBitmap == null) {
 			if (bodyBitmap != null) {
-				reflectionBitmap = AircandiUI.getReflection(bodyBitmap);
+				reflectionBitmap = ImageUtils.getReflection(bodyBitmap);
 				ImageManager.getInstance().getImageCache().put(mCandiModel.getBodyImageId() + ".reflection", reflectionBitmap);
 			}
 		}
@@ -502,7 +514,7 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 		if (forceRefetch || !ImageManager.getInstance().hasImage(mCandiModel.getBodyImageId())) {
 			if (!mActiveImageRequest) {
 				mActiveImageRequest = true;
-				ImageRequest imageRequest = ImageManager.createImageRequest(mCandiModel.getBodyImageUri(), mCandiModel.getBodyImageFormat(),
+				ImageRequest imageRequest = ImageManager.imageRequestFactory(mCandiModel.getBodyImageUri(), mCandiModel.getBodyImageFormat(),
 						"square", 250, true, new IImageReadyListener() {
 
 							@Override
@@ -523,12 +535,39 @@ public class CandiView extends BaseView implements OnGestureListener, OnDoubleTa
 								}
 								mActiveImageRequest = false;
 							}
+
+							@Override
+							public void onProxibaseException(ProxibaseException exception) {
+								if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
+									Bitmap bodyBitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+									updateBodyTextures(bodyBitmap);
+
+									if (showPlaceholder) {
+										if (mCollapsed) {
+											showCollapsed();
+											mBodySprite.setVisible(true);
+										}
+										else {
+											showExpanded();
+											mBodySprite.setVisible(true);
+										}
+										swapImageForPlaceholder();
+									}
+									mActiveImageRequest = false;
+								}
+							}
 						});
 
 				if (showPlaceholder) {
 					showPlaceholder();
 				}
-				ImageManager.getInstance().fetchImageAsynch(imageRequest);
+				try {
+					ImageManager.getInstance().fetchImageAsynch(imageRequest);
+				}
+				catch (AircandiException exception) {
+					// TODO: We might have hit the thread limit for AsyncTasks
+					exception.printStackTrace();
+				}
 			}
 		}
 		else {

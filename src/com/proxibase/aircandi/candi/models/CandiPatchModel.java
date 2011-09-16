@@ -183,7 +183,19 @@ public class CandiPatchModel extends Observable {
 		}
 
 		// Assign to zones
+		int focusedZoneIndex = 0;
+		if (mCandiModelFocused != null) {
+			focusedZoneIndex = mCandiModelFocused.getZoneCurrent().getZoneIndex();
+		}
+
+		int visibleCandiNext = ((CandiModel) mCandiRootNext).visibleChildrenNext();
+
 		int zoneIndex = 0;
+		if (visibleCandiNext < (focusedZoneIndex + 1)) {
+			zoneIndex = (focusedZoneIndex + 1) - visibleCandiNext;
+			zoneIndex++;
+		}
+
 		for (IModel model : mCandiRootNext.getChildren()) {
 
 			CandiModel candiModel = (CandiModel) model;
@@ -269,32 +281,27 @@ public class CandiPatchModel extends Observable {
 			if (!mCandiModelFocused.getZoneCurrent().isInactive() && !mCandiModelFocused.getZoneNext().isInactive())
 				if (mCandiModelFocused.getZoneCurrent().getZoneIndex() != mCandiModelFocused.getZoneNext().getZoneIndex()) {
 
-					// Moved zones because current zone transitioned to unused.
-					if (mCandiModelFocused.getZoneCurrent().getZoneIndex() + 1 > getZonesOccupiedNextCount()) {
+					ZoneModel zoneNextOld = mCandiModelFocused.getZoneNext();
+					ZoneModel zoneNextNew = mZoneModels.get(mCandiModelFocused.getZoneCurrent().getZoneIndex());
+					ArrayList<CandiModel> candiModelsTemp = new ArrayList<CandiModel>();
+
+					// Move out the old tenants
+					for (CandiModel modelTemp : zoneNextNew.getCandiesNext()) {
+						candiModelsTemp.add(modelTemp);
 					}
-					else {
-						ZoneModel zoneNextOld = mCandiModelFocused.getZoneNext();
-						ZoneModel zoneNextNew = mZoneModels.get(mCandiModelFocused.getZoneCurrent().getZoneIndex());
-						ArrayList<CandiModel> candiModelsTemp = new ArrayList<CandiModel>();
+					zoneNextNew.getCandiesNext().clear();
 
-						// Move out the old tenants
-						for (CandiModel modelTemp : zoneNextNew.getCandiesNext()) {
-							candiModelsTemp.add(modelTemp);
-						}
-						zoneNextNew.getCandiesNext().clear();
+					// Move in the new
+					for (CandiModel modelTemp : zoneNextOld.getCandiesNext()) {
+						zoneNextNew.getCandiesNext().add(modelTemp);
+						modelTemp.setZoneNext(zoneNextNew);
+					}
+					zoneNextOld.getCandiesNext().clear();
 
-						// Move in the new
-						for (CandiModel modelTemp : zoneNextOld.getCandiesNext()) {
-							zoneNextNew.getCandiesNext().add(modelTemp);
-							modelTemp.setZoneNext(zoneNextNew);
-						}
-						zoneNextOld.getCandiesNext().clear();
-
-						// Move old tenents into vacated zone
-						for (CandiModel modelTemp : candiModelsTemp) {
-							zoneNextOld.getCandiesNext().add(modelTemp);
-							modelTemp.setZoneNext(zoneNextOld);
-						}
+					// Move old tenents into vacated zone
+					for (CandiModel modelTemp : candiModelsTemp) {
+						zoneNextOld.getCandiesNext().add(modelTemp);
+						modelTemp.setZoneNext(zoneNextOld);
 					}
 				}
 		}
@@ -315,7 +322,6 @@ public class CandiPatchModel extends Observable {
 					maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE_WITH_PRIMARY;
 
 				if (candiModel.getZoneNext().getCandiIndexNext(candiModel) > (maxVisible - 1)) {
-
 					candiModel.setOverflowNext(true);
 					candiModel.setVisibleNext(false);
 					candiModel.setTouchAreaActive(false);

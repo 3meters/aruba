@@ -1,5 +1,7 @@
 package com.proxibase.aircandi.candi.views;
 
+import android.graphics.Color;
+
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.views.BaseView.OnViewTexturesLoadedListener;
@@ -16,6 +18,8 @@ public class CandiViewFactory {
 			OnCandiViewTouchListener singleTapListener) {
 
 		final CandiView candiView = new CandiView(candiModel, candiPatchPresenter);
+		
+		candiView.setTitleTextColor(Color.parseColor(candiPatchPresenter.getStyleTextColorTitle()));
 
 		// We start out hidden
 		candiView.setAlpha(0);

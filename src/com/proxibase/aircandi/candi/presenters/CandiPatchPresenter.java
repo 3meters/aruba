@@ -40,12 +40,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.opengl.GLU;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.GestureDetector.SimpleOnGestureListener;
 
 import com.proxibase.aircandi.activities.CandiSearchActivity;
+import com.proxibase.aircandi.activities.R;
 import com.proxibase.aircandi.candi.camera.ChaseCamera;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiModelFactory;
@@ -69,9 +71,9 @@ import com.proxibase.aircandi.candi.views.IView;
 import com.proxibase.aircandi.candi.views.ZoneView;
 import com.proxibase.aircandi.candi.views.ZoneViewFactory;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.AircandiUI;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.ImageManager;
+import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Utilities;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
@@ -120,6 +122,10 @@ public class CandiPatchPresenter implements Observer {
 	protected float				mTouchStartY;
 	protected boolean			mTouchGrabbed;
 
+	private String				mStyleTextureBodyZone;
+	private String				mStyleTextureBusyIndicator;
+	private String				mStyleTextColorTitle;
+
 	private IEaseFunction		mEaseSlottingMinor		= EaseQuartOut.getInstance();
 	private IEaseFunction		mEaseSlottingMajor		= EaseQuartOut.getInstance();
 	private IEaseFunction		mEaseBounceBack			= EaseQuartOut.getInstance();
@@ -153,9 +159,36 @@ public class CandiPatchPresenter implements Observer {
 		mCandiPatchModel.setOriginX(0);
 		mCandiPatchModel.setOriginY(0);
 
+		// Resource references per theme
+		loadStyles();
+
 		// Textures
 		loadTextures();
 		loadTextureSources();
+	}
+
+	private void loadStyles() {
+		TypedValue resourceName = new TypedValue();
+		if (mContext.getTheme().resolveAttribute(R.attr.textureBodyZone, resourceName, true)) {
+			mStyleTextureBodyZone = (String) resourceName.coerceToString();
+		}
+		else {
+			throw new IllegalStateException("Placeholder texture was not found in the current theme");
+		}
+
+		if (mContext.getTheme().resolveAttribute(R.attr.textureBusyIndicator, resourceName, true)) {
+			mStyleTextureBusyIndicator = (String) resourceName.coerceToString();
+		}
+		else {
+			throw new IllegalStateException("Busy indicator texture was not found in the current theme");
+		}
+
+		if (mContext.getTheme().resolveAttribute(R.attr.textColorTitle, resourceName, true)) {
+			mStyleTextColorTitle = (String) resourceName.coerceToString();
+		}
+		else {
+			throw new IllegalStateException("Text color title was not found in the current theme");
+		}
 	}
 
 	public Scene initializeScene() {
@@ -426,9 +459,12 @@ public class CandiPatchPresenter implements Observer {
 		}
 		else {
 			if (mCandiPatchModel.getCandiModelFocused() == null) {
-				mCandiPatchModel.setCandiModelFocused(getNearestZone(mCameraTargetSprite.getX(), false).getCandiesCurrent().get(0));
-				mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
-						mEaseSlottingMinor);
+				ZoneModel zoneModel = getNearestZone(mCameraTargetSprite.getX(), false);
+				if (zoneModel != null && zoneModel.getCandiesCurrent().size() > 0) {
+					mCandiPatchModel.setCandiModelFocused(getNearestZone(mCameraTargetSprite.getX(), false).getCandiesCurrent().get(0));
+					mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
+							mEaseSlottingMinor);
+				}
 			}
 		}
 	}
@@ -458,7 +494,7 @@ public class CandiPatchPresenter implements Observer {
 		mCandiPatchModel.shiftToNext();
 
 		// Back button needs updating
-		mCandiActivity.updateCandiBackButton();
+		mCandiActivity.updateCandiBackButton(candiRoot.getTitleText());
 	}
 
 	private IView ensureCandiView(CandiModel candiModel) {
@@ -599,9 +635,9 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	private void doTransitions() {
-
-		// Configure zones
-
+		/*
+		 * Zone transitions
+		 */
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
 			if (zoneModel.getCandiesNext().size() > 1) {
 				for (CandiModel candiModel : zoneModel.getCandiesNext()) {
@@ -618,9 +654,32 @@ public class CandiPatchPresenter implements Observer {
 			else if (transition == Transition.FadeOut)
 				zoneModel.getModifiers().addLast(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f));
 		}
+		/*
+		 * Ensure that the candi with focus always draws front-most
+		 */
+		if (mCandiPatchModel.getCandiModelFocused() != null) {
 
-		// Configure candi
+			CandiView candiView = (CandiView) getViewForModel(mCandiPatchModel.getCandiModelFocused());
+			IEntity layer = mEngine.getScene().getChild(CandiConstants.LAYER_CANDI);
 
+			int childCount = layer.getChildCount();
+			for (int i = 0; i < childCount; i++) {
+				IEntity child = layer.getChild(i);
+				if (child instanceof CandiView) {
+					if (child.equals(candiView)) {
+						child.setZIndex(childCount);
+					}
+					else {
+						child.setZIndex(i);
+					}
+				}
+			}
+
+			layer.sortChildren();
+		}
+		/*
+		 * Candi transitions
+		 */
 		for (ZoneModel zone : mCandiPatchModel.getZones()) {
 			boolean needDelay = false;
 			if (zone.isOccupiedCurrent()) {
@@ -638,6 +697,17 @@ public class CandiPatchPresenter implements Observer {
 						}
 						else if (transition == Transition.FadeOut) {
 							candiModelCurrent.getModifiers().addLast(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f));
+							needDelay = true;
+						}
+						else if (transition == Transition.OverflowOut) {
+							Position positionNextFocus = mCandiPatchModel.getCandiModelFocused().getPositionNext();
+							candiModelCurrent.getModifiers().addLast(
+									new ParallelEntityModifier(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f),
+											new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.scale,
+													positionNextFocus.scale, EaseQuartInOut.getInstance()), new MoveModifier(
+													CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.x, positionNextFocus.x,
+													positionCurrent.y, positionNextFocus.y, EaseQuartInOut.getInstance())));
+
 							needDelay = true;
 						}
 						else if (transition == Transition.Move) {
@@ -662,7 +732,6 @@ public class CandiPatchPresenter implements Observer {
 							 * A shift can mean a move within a zone and can mean expand/collapse
 							 */
 							if (positionCurrent.scale == positionNext.scale) {
-
 								CandiView candiView = (CandiView) getViewForModel(candiModelCurrent);
 								candiView.reflectionVisible(positionNext.rowLast, true, CandiConstants.DURATION_TRANSITIONS_FADE);
 								candiModelCurrent.getModifiers().addLast(
@@ -694,6 +763,30 @@ public class CandiPatchPresenter implements Observer {
 						if (transition == Transition.FadeOut) {
 							CandiView candiView = (CandiView) getViewForModel(candiModelNext);
 							candiView.setVisible(false);
+						}
+						else if (transition == Transition.OverflowIn) {
+
+							CandiView candiView = (CandiView) getViewForModel(candiModelNext);
+							if (positionNext.scale != SCALE_NORMAL) {
+								candiModelNext.setBodyOnly(true);
+							}
+							else {
+								candiModelNext.setBodyOnly(false);
+							}
+							candiView.setScale(positionNext.scale);
+							candiView.setPosition(positionNext.x, positionNext.y);
+
+							if (needDelay)
+								candiModelNext.getModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
+
+							Position positionCurrentFocus = mCandiPatchModel.getCandiModelFocused().getPositionCurrent();
+
+							candiModelNext.getModifiers().addLast(
+									new ParallelEntityModifier(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f),
+											new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrentFocus.scale,
+													positionNext.scale, EaseQuartInOut.getInstance()), new MoveModifier(
+													CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrentFocus.x, positionNext.x,
+													positionCurrentFocus.y, positionNext.y, EaseQuartInOut.getInstance())));
 						}
 						else if (transition == Transition.FadeIn) {
 
@@ -736,7 +829,9 @@ public class CandiPatchPresenter implements Observer {
 				}
 			}
 		}
-		// If current focus is going away, move camera target to another entity before other moves/shows happen.
+		/*
+		 * If current focus is going away, move camera target to another entity before other moves/shows happen.
+		 */
 		if (mCandiPatchModel.getCandiModelFocused() != null && mCandiPatchModel.getCandiModelFocused().getZoneCurrent().getZoneIndex() + 1 > mCandiPatchModel
 					.getZonesOccupiedNextCount()) {
 			ZoneModel zoneModel = getZoneContainsCandiNext(mCandiPatchModel.getCandiModelFocused());
@@ -873,15 +968,15 @@ public class CandiPatchPresenter implements Observer {
 	public void loadTextureSources() {
 
 		// Textures that are shared by zone views
-		Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets("gfx/trans_30.png");
+		Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets(mStyleTextureBodyZone);
 		if (zoneBodyBitmap != null) {
-			Bitmap zoneReflectionBitmap = AircandiUI.getReflection(zoneBodyBitmap);
+			Bitmap zoneReflectionBitmap = ImageUtils.getReflection(zoneBodyBitmap);
 
 			mZoneBodyTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(zoneBodyBitmap, new IBitmapAdapter() {
 
 				@Override
 				public Bitmap reloadBitmap() {
-					Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets("gfx/trans_30.png");
+					Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets(mStyleTextureBodyZone);
 					return zoneBodyBitmap;
 				}
 			}), 0, 0);
@@ -891,9 +986,9 @@ public class CandiPatchPresenter implements Observer {
 
 						@Override
 						public Bitmap reloadBitmap() {
-							Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets("gfx/trans_30.png");
+							Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets(mStyleTextureBodyZone);
 							if (zoneBodyBitmap != null) {
-								Bitmap zoneReflectionBitmap = AircandiUI.getReflection(zoneBodyBitmap);
+								Bitmap zoneReflectionBitmap = ImageUtils.getReflection(zoneBodyBitmap);
 								return zoneReflectionBitmap;
 							}
 							return null;
@@ -902,8 +997,8 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		// Scene progress sprite
-		mPlaceholderTextureRegion = TextureRegionFactory.createFromAsset(mTexture, mContext, "gfx/trans_30.png", 256, 0);
-		mProgressTextureRegion = TextureRegionFactory.createTiledFromAsset(mTexture, mContext, "gfx/busyspritesIV.png", 256, 256, 4, 2);
+		mPlaceholderTextureRegion = TextureRegionFactory.createFromAsset(mTexture, mContext, mStyleTextureBodyZone, 256, 0);
+		mProgressTextureRegion = TextureRegionFactory.createTiledFromAsset(mTexture, mContext, mStyleTextureBusyIndicator, 256, 256, 4, 2);
 	}
 
 	private ZoneModel getNearestZone(float nearestToX, boolean requireOccupiedNext) {
@@ -952,8 +1047,19 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	private void setCameraBoundaries(Scene scene) {
-		mBoundsMinX = 125;
-		mBoundsMaxX = (mBoundsMinX + (mCandiPatchModel.getZonesOccupiedNextCount() - 1) * (CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING));
+
+		// Find first occupied zone
+		ZoneModel firstOccupiedZone = null;
+		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
+			if (zoneModel.getCandiesNext().size() > 0) {
+				firstOccupiedZone = zoneModel;
+				break;
+			}
+		}
+		if (firstOccupiedZone != null) {
+			mBoundsMinX = firstOccupiedZone.getX();
+			mBoundsMaxX = (mBoundsMinX + (mCandiPatchModel.getZonesOccupiedNextCount() - 1) * (CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING));
+		}
 	}
 
 	public void setFrustum(GL10 pGL) {
@@ -1020,6 +1126,10 @@ public class CandiPatchPresenter implements Observer {
 		return mScene;
 	}
 
+	public void shiftScene(float shiftX, float shiftY) {
+		mScene.setPosition(shiftX, shiftY);
+	}
+
 	public boolean isIgnoreInput() {
 		return mIgnoreInput;
 	}
@@ -1030,6 +1140,18 @@ public class CandiPatchPresenter implements Observer {
 
 	public ChaseCamera getCamera() {
 		return mCamera;
+	}
+
+	public String getStyleTextureBodyZone() {
+		return this.mStyleTextureBodyZone;
+	}
+
+	public String getStyleTextureBusyIndicator() {
+		return this.mStyleTextureBusyIndicator;
+	}
+
+	public String getStyleTextColorTitle() {
+		return mStyleTextColorTitle;
 	}
 
 	public interface ICandiListener {

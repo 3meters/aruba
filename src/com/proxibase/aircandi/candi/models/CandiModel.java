@@ -43,8 +43,8 @@ public class CandiModel extends BaseModel {
 	private boolean			mBodyOnly			= false;
 	private boolean			mTouchAreaActive	= false;
 	private boolean			mRookie				= true;
-	private String			mBodyImageId		= "";
-	private String			mBodyImageUri		= "";
+	private String			mBodyImageId		;
+	private String			mBodyImageUri		;
 	private ImageFormat		mBodyImageFormat;
 	private boolean			mOverflowCurrent	= false;
 	private boolean			mOverflowNext		= false;
@@ -66,7 +66,10 @@ public class CandiModel extends BaseModel {
 			transition = Transition.Out;
 		}
 		else if (isVisibleCurrent() && isOverflowNext()) {
-			transition = Transition.FadeOut;
+			transition = Transition.OverflowOut;
+		}
+		else if (!isVisibleCurrent() && isVisibleNext() && isOverflowCurrent()) {
+			transition = Transition.OverflowIn;
 		}
 		else if (!isVisibleCurrent() && isVisibleNext() && !isOverflowNext()) {
 			transition = Transition.FadeIn;

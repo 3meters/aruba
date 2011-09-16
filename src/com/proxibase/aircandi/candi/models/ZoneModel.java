@@ -3,6 +3,7 @@ package com.proxibase.aircandi.candi.models;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 import com.proxibase.aircandi.candi.models.CandiModel.Transition;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -20,8 +21,8 @@ public class ZoneModel extends BaseModel {
 	private float				mY;
 	private float				mCenterX;
 	private float				mCenterY;
-	private String				mBodyImageId							= "";
-	private String				mBodyImageUrl							= "";
+	private String				mBodyImageId;
+	private String				mBodyImageUrl;
 	private boolean				mInactive								= false;
 
 	public ZoneModel(int zoneIndex, CandiPatchModel candiPatchModel) {
@@ -233,24 +234,32 @@ public class ZoneModel extends BaseModel {
 				position.rowLast = false;
 			}
 			else if (candiModelZoneStatus == ZoneStatus.Secondary) {
-				/*
-				 * Showing a collection with a primary
-				 */
-				if (index > 5)
+				
+				Random rand = new Random(candiModelTarget.getParent().hashCode());
+				int[] candies = {2,5,6,7,8};
+
+				for (int i = 0; i < candies.length; i++)
+				{
+					int randomPosition = rand.nextInt(candies.length);
+					int temp = candies[i];
+					candies[i] = candies[randomPosition];
+					candies[randomPosition] = temp;
+				}
+				
+				if (index >= 5) {
 					index = 5;
+				}
+				
+				index = candies[(int) (index - 1)];
+
 				offsetX = CandiConstants.CANDI_VIEW_WIDTH / 3;
 				offsetY = CandiConstants.CANDI_VIEW_BODY_HEIGHT / 3;
 				columns = 3;
 				rows = 3;
 
-				if (index == 1)
-					index = 2;
-				else if (index >= 2)
-					index += 3;
-
 				position.x = (float) (mX + ((index % columns) * offsetX));
 				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + mY + ((Math.floor(index / rows)) * offsetY));
-				
+
 				position.col = (int) (index % columns) + 1;
 				if (position.col == columns)
 					position.colLast = true;

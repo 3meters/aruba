@@ -107,6 +107,26 @@ public abstract class BaseModel extends Observable implements IModel {
 		return false;
 	}
 
+	public int visibleChildrenNext() {
+		int visibleCount = 0;
+		for (IModel model : mChildren) {
+			if (model.isVisibleNext()) {
+				visibleCount++;
+			}
+		}
+		return visibleCount;
+	}
+
+	public int visibleChildrenCurrent() {
+		int visibleCount = 0;
+		for (IModel model : mChildren) {
+			if (model.isVisibleCurrent()) {
+				visibleCount++;
+			}
+		}
+		return visibleCount;
+	}
+
 	public boolean hasSibling() {
 		if (mParent == null)
 			return false;

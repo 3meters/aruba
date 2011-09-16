@@ -15,7 +15,6 @@ import org.anddev.andengine.opengl.util.GLHelper;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.DynamicLayout;
 import android.text.Layout;
@@ -40,6 +39,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	private TextureRegion			mTitleTextureRegion;
 	protected CandiSprite			mTitleSprite;
 	protected String				mTitleText;
+	private int						mTitleTextColor;
 
 	public BaseView(BaseModel baseModel, CandiPatchPresenter candiPatchPresenter) {
 		super();
@@ -69,7 +69,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTitleSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mTitleSprite.setAlpha(0);
 		mTitleSprite.setZIndex(0);
-		attachChild(mTitleSprite);
+		attachChild(mTitleSprite);		
 	}
 
 	protected boolean isVisibleToCamera(final Camera camera) {
@@ -83,6 +83,12 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		for (int i = 0; i < getChildCount(); i++) {
 			getChild(i).setAlpha(alpha);
 		}
+	}
+
+	@Override
+	public void setZIndex(final int pZIndex) {
+		super.setZIndex(pZIndex);
+		this.mTitleSprite.setZIndex(pZIndex);
 	}
 
 	protected void updateTitleSprite(String titleText) {
@@ -112,9 +118,11 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	private Bitmap makeTextBitmap(int width, int height, CharSequence text) {
 		final TextPaint tp = new TextPaint();
 		tp.setTextSize(CandiConstants.CANDI_VIEW_FONT_SIZE);
-		tp.setColor(Color.WHITE);
+		tp.setColor(mTitleTextColor);
 		tp.setTypeface(Typeface.SANS_SERIF);
 		tp.setAntiAlias(true);
+		//tp.setXfermode(new PorterDuffXfermode(Mode.DARKEN));
+		//tp.setShadowLayer(1f, 1, 1, Color.parseColor("#ffffff"));
 
 		DynamicLayout textLayout = new DynamicLayout(text, text, tp, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false,
 				TextUtils.TruncateAt.END, CandiConstants.CANDI_VIEW_WIDTH);
@@ -132,7 +140,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	private Bitmap makeTextBitmapStatic(int width, int height, CharSequence text) {
 		final TextPaint tp = new TextPaint();
 		tp.setTextSize(CandiConstants.CANDI_VIEW_FONT_SIZE);
-		tp.setColor(Color.WHITE);
+		tp.setColor(mTitleTextColor);
 		tp.setTypeface(Typeface.SANS_SERIF);
 		tp.setAntiAlias(true);
 
@@ -200,6 +208,14 @@ public abstract class BaseView extends Entity implements Observer, IView {
 			pGL.glRotatef(rotation, 0, 1, 0);
 			pGL.glTranslatef(-rotationCenterX, -rotationCenterY, 0);
 		}
+	}
+
+	public void setTitleTextColor(int titleTextColor) {
+		this.mTitleTextColor = titleTextColor;
+	}
+
+	public int getTitleTextColor() {
+		return mTitleTextColor;
 	}
 
 	public interface OnViewTexturesLoadedListener {
