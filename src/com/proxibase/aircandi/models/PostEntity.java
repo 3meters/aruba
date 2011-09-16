@@ -1,5 +1,7 @@
 package com.proxibase.aircandi.models;
 
+import android.graphics.Bitmap;
+
 import com.google.gson.annotations.Expose;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
@@ -8,14 +10,19 @@ public class PostEntity extends BaseEntity {
 
 	// Annotation syntax: @Expose (serialize = false, deserialize = false)
 	@Expose
-	public String	photoImageUri;
+	public String		mediaUri;
 	@Expose
-	public boolean	locked;
+	public String		mediaFormat;
 	@Expose
-	public Metadata	__metadata	= new Metadata();
+	public boolean		locked;
+	@Expose
+	public Metadata		__metadata	= new Metadata();
 
-	// Client only fields
-	public SubType	subType;
+	/*
+	 * For client use only
+	 */
+	public SubType		subType;
+	public Bitmap 		mediaBitmap;
 
 	public PostEntity() {
 		__metadata.type = "Aircandi.Post";

@@ -1,16 +1,11 @@
 package com.proxibase.aircandi.models;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import org.apache.http.client.ClientProtocolException;
-
 import com.google.gson.annotations.Expose;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
-import com.proxibase.sdk.android.proxi.service.ProxibaseError;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.SimpleModifyListener;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.IQueryListener;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 
 /**
  * Bound by default to the aircandi odata service.
@@ -28,16 +23,16 @@ public class AircandiEntity {
 		return uri;
 	}
 
-	public void insertAsync(SimpleModifyListener modifyListener) {
-		ProxibaseService.getInstance().insertAsync(this, getCollection(), mServiceUri, modifyListener);
+	public void insertAsync(IQueryListener listener) {
+		ProxibaseService.getInstance().insertAsync(this, getCollection(), mServiceUri, listener);
 	}
 
-	public void updateAsync(SimpleModifyListener modifyListener) {
-		ProxibaseService.getInstance().updateAsync(this, this.getEntryUri(), modifyListener);
+	public void updateAsync(IQueryListener listener) {
+		ProxibaseService.getInstance().updateAsync(this, this.getEntryUri(), listener);
 	}
 
-	public void deleteAsync(SimpleModifyListener modifyListener) {
-		ProxibaseService.getInstance().deleteAsync(this.getEntryUri(), modifyListener);
+	public void deleteAsync(IQueryListener listener) {
+		ProxibaseService.getInstance().deleteAsync(this.getEntryUri(), listener);
 	}
 
 	public String insert() {
@@ -45,19 +40,10 @@ public class AircandiEntity {
 			String response = ProxibaseService.getInstance().insert(this, getCollection(), mServiceUri);
 			return response;
 		}
-		catch (ClientProtocolException exception) {
+		catch (ProxibaseException exception) {
 			exception.printStackTrace();
 		}
-		catch (URISyntaxException exception) {
-			exception.printStackTrace();
-		}
-		catch (IOException exception) {
-			exception.printStackTrace();
-		}
-		catch (ProxibaseError exception) {
-			exception.printStackTrace();
-		}
-		return "";
+		return null;
 	}
 
 	public boolean update() {
@@ -65,16 +51,7 @@ public class AircandiEntity {
 			ProxibaseService.getInstance().update(this, this.getEntryUri());
 			return true;
 		}
-		catch (ClientProtocolException exception) {
-			exception.printStackTrace();
-		}
-		catch (URISyntaxException exception) {
-			exception.printStackTrace();
-		}
-		catch (IOException exception) {
-			exception.printStackTrace();
-		}
-		catch (ProxibaseError exception) {
+		catch (ProxibaseException exception) {
 			exception.printStackTrace();
 		}
 		return false;
@@ -85,16 +62,7 @@ public class AircandiEntity {
 			ProxibaseService.getInstance().delete(this.getEntryUri());
 			return true;
 		}
-		catch (ClientProtocolException exception) {
-			exception.printStackTrace();
-		}
-		catch (URISyntaxException exception) {
-			exception.printStackTrace();
-		}
-		catch (IOException exception) {
-			exception.printStackTrace();
-		}
-		catch (ProxibaseError exception) {
+		catch (ProxibaseException exception) {
 			exception.printStackTrace();
 		}
 		return false;
@@ -105,11 +73,11 @@ public class AircandiEntity {
 	}
 
 	protected String getId() {
-		return "";
+		return null;
 	}
 
 	protected String getCollection() {
-		return "";
+		return null;
 	}
 
 	/**
@@ -119,7 +87,7 @@ public class AircandiEntity {
 	 * @return
 	 */
 	protected String getIdType() {
-		return "";
+		return null;
 	}
 
 	public void setServiceUri(String serviceUri) {
