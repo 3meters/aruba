@@ -404,7 +404,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			if (command.verb.toLowerCase().equals("edit")) {
 				EntityProxy entityProxy = command.entity;
 				SubType subType = entityProxy.entityType.equals(CandiConstants.TYPE_CANDI_TOPIC) ? SubType.Topic : SubType.Comment;
-				Intent intent = buildIntent(Verb.Edit, entityProxy, subType, 0, null, mUser, Post.class);
+				Intent intent = buildIntent(Verb.Edit, entityProxy, subType, 0, null, mUser, Entity.class);
 				startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
 				overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 				return;
@@ -1482,7 +1482,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					public void onClick(DialogInterface dialog, int item) {
 						if (item == 0) {
 							Intent intent = buildIntent(Verb.New, null, SubType.Topic, 0, ProxiExplorer.getInstance().getStrongestBeacon(), mUser,
-									Post.class);
+									Entity.class);
 							startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
 							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 							dialog.dismiss();
@@ -1492,7 +1492,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							EntityProxy parentEntityProxy = mCandiPatchModel.getCandiModelFocused().getZoneCurrent().getCandiesCurrent().get(0)
 									.getEntityProxy();
 							Intent intent = buildIntent(Verb.New, null, SubType.Comment, parentEntityProxy.id, parentEntityProxy.beacon, mUser,
-									Post.class);
+									Entity.class);
 							startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
 							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 							dialog.dismiss();
