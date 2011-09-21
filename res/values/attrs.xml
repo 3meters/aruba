@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<declare-styleable name="ViewPagerIndicator">
+		<attr name="textColorFocused" format="string"/>
+		<attr name="textColorUnfocused" format="string"/>
+		<attr name="pagerNotch" format="string"/>		
+		<attr name="pagerBorder" format="color"/>		
+	</declare-styleable>
+	<declare-styleable name="CandiSearch">
+		<attr name="textureBodyZone" format="string"/>
+		<attr name="textureBusyIndicator" format="string"/>
+		<attr name="textColorTitle" format="string"/>
+		<attr name="textColorButton" format="color"/>
+		<attr name="textColorButtonHeader" format="color"/>
+		<attr name="actionStripBackground" format="string"/>
+		<attr name="backgroundHeader" format="string"/>
+		<attr name="backgroundButton" format="string"/>
+		<attr name="backgroundCandiInfo" format="color"/>
+		<attr name="iconActions" format="string"/>		
+		<attr name="iconRefresh" format="string"/>		
+		<attr name="iconNew" format="string"/>		
+		<attr name="iconBack" format="string"/>		
+		<attr name="logo" format="string"/>		
+	</declare-styleable>
+	<declare-styleable name="CandiInfo">
+		<attr name="ruleColor" format="color"/>
+	</declare-styleable>
+</resources>

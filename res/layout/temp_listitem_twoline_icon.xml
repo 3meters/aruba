@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/item_row"
+	android:layout_height="wrap_content"
+	android:layout_width="fill_parent"
+	android:paddingBottom="10dp">
+	<View
+		android:background="?attr/ruleColor"
+		android:layout_height="1px"
+		android:layout_width="fill_parent"
+		android:layout_alignParentTop="true" />
+	<ImageView
+		android:id="@+id/item_image"
+		android:layout_alignParentTop="true"
+		android:paddingTop="5dp"
+		android:layout_marginRight="10dp"
+		style="@style/list_candiinfo_image" />
+	<TextView
+		android:id="@+id/item_title"
+		android:layout_toRightOf="@id/item_image"
+		android:layout_alignParentTop="true"
+		android:layout_alignWithParentIfMissing="true"
+		style="@style/list_candiinfo_title" />
+	<TextView
+		android:id="@+id/item_subtitle"
+		android:layout_below="@+id/item_title"
+		android:layout_toRightOf="@id/item_image"
+		android:layout_alignWithParentIfMissing="true"
+		style="@style/list_candiinfo_subtitle" />
+	<LinearLayout
+		android:id="@+id/item_action_button"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentRight="true"
+		style="@style/list_button"
+		android:clickable="true"
+		android:onClick="onItemMoreButtonClick">
+		<ImageView
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:src="?attr/iconActions" />
+	</LinearLayout>
+	<TextView
+		android:id="@+id/item_content"
+		android:layout_toRightOf="@id/item_image"
+		android:layout_below="@+id/item_subtitle"
+		android:layout_alignWithParentIfMissing="true"
+		style="@style/list_candiinfo_content" />
+</RelativeLayout>

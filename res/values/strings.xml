@@ -7,6 +7,14 @@
 	<string name="alert_dialog_no">No</string>
 	<string name="alert_toast_networkmissing">No network service at this time. Please try again later.</string>
 		
+	<string name="test_long_text">The ladies of Assassins Creed: Brotherhood have both bark and bite. If you played Assassins Creed II, then you already know Caterina Sforza,
+		the comely Italian countess with a soft spot for sly, rugged assassins. Shes not the only female character with an important role to play in
+		Brotherhood, however. The ladies of Assassins Creed: Brotherhood have both bark and bite. If you played Assassins Creed II, then you already know Caterina Sforza,
+		the comely Italian countess with a soft spot for sly, rugged assassins. Shes not the only female character with an important role to play in
+		Brotherhood, however. The ladies of Assassins Creed: Brotherhood have both bark and bite. If you played Assassins Creed II, then you already know Caterina Sforza,
+		the comely Italian countess with a soft spot for sly, rugged assassins. Shes not the only female character with an important role to play in
+		Brotherhood, however. </string>
+	
 	<string name="dialog_install_message"> A custom application is available for this candi.</string>
 	<string name="dialog_install_ok"> Install</string>
 	<string name="dialog_install_cancel"> No Thanks</string>
@@ -22,6 +30,11 @@
 	<string name="dialog_new_comment_button">Comment</string>
 	<string name="dialog_new_comment_label">Add a comment to this topic.</string>
 		
+	<string name="menu_refresh_title">Refresh Options</string>
+	<string name="menu_refresh_current">Refresh</string>
+	<string name="menu_refresh_all">Refresh All</string>
+
+
 	<string name="EXTRA_VERB">com.proxibase.aircandi.EXTRA_VERB</string>
 	<string name="EXTRA_RESULT_VERB">com.proxibase.aircandi.EXTRA_RESULT_VERB</string>
 	<string name="EXTRA_PARENT_ENTITY_ID">com.proxibase.aircandi.EXTRA_PARENT_ENTITY_ID</string>
@@ -58,4 +71,20 @@
 	<string name="post_insert_failed_toast">Save failed</string>
 	<string name="post_insert_success_toast">Saved</string>
 	<string name="post_back_button">Back</string>
+	
+    <!-- Shown as a toast when the user taps on a Fast-Track icon, and no application
+         was found that could perform the selected action -->
+    <string name="quickcontact_missing_app">No application found to handle this action</string>
+
+    <!-- Shown as the checkbox label that, when checked, will store remember the
+         selected choice and shortcut to it in the future.  For example, this would
+         make a selected phone number the default. -->
+    <string name="quickcontact_remember_choice">Remember this choice</string>
+
+    <!-- Shown as the header name for a person when the name is missing or unknown. -->
+    <string name="quickcontact_missing_name">Unknown</string>
+
+    <!-- Text that is shown in the Badge, when there is no data to display -->
+    <string name="quickcontact_no_data">No data</string>
+	
 </resources>

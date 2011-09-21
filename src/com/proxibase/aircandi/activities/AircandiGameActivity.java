@@ -29,6 +29,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	protected ImageView				mProgressIndicator;
 	protected ImageView				mButtonRefresh;
 	protected Button				mContextButton;
+	protected ImageView				mLogo;
 	protected ContextButtonState	mContextButtonState	= ContextButtonState.Default;
 	protected Command				mCommand;
 	protected User					mUser;
@@ -63,7 +64,11 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 
 		mContextButton = (Button) findViewById(R.id.btn_context);
 		if (mContextButton != null)
-			mContextButton.setVisibility(View.INVISIBLE);
+			mContextButton.setVisibility(View.GONE);
+
+		mLogo = (ImageView) findViewById(R.id.btn_logo);
+		if (mLogo != null)
+			mLogo.setVisibility(View.VISIBLE);
 
 		// If mStream wasn't set by a sub class then check to see if there is something
 		// we can do to create it.

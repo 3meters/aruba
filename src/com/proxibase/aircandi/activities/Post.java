@@ -7,28 +7,23 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import android.app.Activity;
-import android.app.Dialog;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.DialogInterface.OnDismissListener;
+import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -313,7 +308,7 @@ public class Post extends AircandiActivity {
 	public void takePhoto() {
 		Intent takePictureFromCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		if (ImageManager.getInstance().hasImageCaptureBug()) {
-			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File("/sdcard/tmp")));
+			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File("/sdcard/tmp/foo.jpeg")));
 		}
 		else
 			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
@@ -778,49 +773,99 @@ public class Post extends AircandiActivity {
 
 			@Override
 			public void run() {
-				final Dialog dialog = new Dialog(Post.this, R.style.aircandi_theme_dialog);
-				final RelativeLayout dialogLayout = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_dialog_add_photo, null);
-				dialog.setContentView(dialogLayout, new FrameLayout.LayoutParams(
-						dialog.getWindow().getWindowManager().getDefaultDisplay().getWidth() - 40, LayoutParams.FILL_PARENT, Gravity.CENTER));
-				dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-				dialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.dialog_bg));
-
-				dialog.setOnDismissListener(new OnDismissListener() {
+				
+				final CharSequence[] items = { "Select a photo from your gallery", "Take a new photo", "Use your profile photo" };
+				AlertDialog.Builder builder = new AlertDialog.Builder(Post.this);
+				builder.setTitle("Select photo...");
+				builder.setCancelable(true);
+				builder.setOnCancelListener(new OnCancelListener(){
 
 					@Override
-					public void onDismiss(DialogInterface dialog) {
+					public void onCancel(DialogInterface dialog) {
+						mProcessing = false;
+					}});
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
 						mProcessing = false;
 					}
 				});
+				builder.setItems(items, new DialogInterface.OnClickListener() {
 
-				((Button) dialogLayout.findViewById(R.id.btn_select_photo)).setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						pickPhoto();
-						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-						dialog.dismiss();
+					public void onClick(DialogInterface dialog, int item) {
+						if (item == 0) {
+							pickPhoto();
+							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+							mProcessing = false;
+							dialog.dismiss();
+						}
+						else if (item == 1) {
+							takePhoto();
+							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+							mProcessing = false;
+							dialog.dismiss();
+						}
+						else if (item == 2) {
+							useProfilePhoto();
+							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+							mProcessing = false;
+							dialog.dismiss();
+						}
+						else {
+							mProcessing = false;
+							Toast.makeText(getApplicationContext(), "Not implemented yet.", Toast.LENGTH_SHORT).show();
+						}
 					}
 				});
-				((Button) dialogLayout.findViewById(R.id.btn_take_photo)).setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						takePhoto();
-						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-						dialog.dismiss();
-					}
-				});
-				((Button) dialogLayout.findViewById(R.id.btn_use_profile_photo)).setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						useProfilePhoto();
-						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-						dialog.dismiss();
-					}
-				});
-				dialog.show();
+				AlertDialog alert = builder.create();
+				alert.show();
+				
+				
+				
+//				final Dialog dialog = new Dialog(Post.this, R.style.aircandi_theme_dialog);
+//				final RelativeLayout dialogLayout = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_dialog_add_photo, null);
+//				dialog.setContentView(dialogLayout, new FrameLayout.LayoutParams(
+//						dialog.getWindow().getWindowManager().getDefaultDisplay().getWidth() - 40, LayoutParams.FILL_PARENT, Gravity.CENTER));
+//				dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+//				dialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.dialog_bg));
+//
+//				dialog.setOnDismissListener(new OnDismissListener() {
+//
+//					@Override
+//					public void onDismiss(DialogInterface dialog) {
+//						mProcessing = false;
+//					}
+//				});
+//
+//				((Button) dialogLayout.findViewById(R.id.btn_select_photo)).setOnClickListener(new OnClickListener() {
+//
+//					@Override
+//					public void onClick(View v) {
+//						pickPhoto();
+//						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+//						dialog.dismiss();
+//					}
+//				});
+//				((Button) dialogLayout.findViewById(R.id.btn_take_photo)).setOnClickListener(new OnClickListener() {
+//
+//					@Override
+//					public void onClick(View v) {
+//						takePhoto();
+//						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+//						dialog.dismiss();
+//					}
+//				});
+//				((Button) dialogLayout.findViewById(R.id.btn_use_profile_photo)).setOnClickListener(new OnClickListener() {
+//
+//					@Override
+//					public void onClick(View v) {
+//						useProfilePhoto();
+//						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+//						dialog.dismiss();
+//					}
+//				});
+//				dialog.show();
 
 			}
 		});
@@ -889,7 +934,7 @@ public class Post extends AircandiActivity {
 			if (resultCode == Activity.RESULT_OK) {
 				Uri imageUri = null;
 				if (ImageManager.getInstance().hasImageCaptureBug()) {
-					File imageFile = new File("/sdcard/tmp");
+					File imageFile = new File("/sdcard/tmp/foo.jpeg");
 					try {
 						imageUri = Uri.parse(android.provider.MediaStore.Images.Media.insertImage(getContentResolver(), imageFile.getAbsolutePath(),
 								null, null));

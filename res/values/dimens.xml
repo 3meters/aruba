@@ -3,5 +3,8 @@
 
 	<!-- Item sizing -->
 	<dimen name="application_button_separator_width">1px</dimen>
+    <dimen name="quickcontact_shadow_horiz">30dip</dimen>
+    <dimen name="quickcontact_shadow_vert">37dip</dimen>
+    <dimen name="quickcontact_shadow_touch">20dip</dimen>
 
 </resources>

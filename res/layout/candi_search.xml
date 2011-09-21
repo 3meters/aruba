@@ -11,29 +11,6 @@
 		<include
 			layout="@layout/temp_candi_search_header" />
 	</LinearLayout>
-	<LinearLayout
-		android:id="@+id/action_strip"
-		android:layout_below="@id/activity_header"
-		android:layout_alignParentRight="true"
-		android:visibility="gone"
-		android:orientation="horizontal"
-		android:padding="10dp"
-		android:layout_marginTop="5dp"
-		style="@style/action_strip">
-		<Button
-			xmlns:android="http://schemas.android.com/apk/res/android"
-			android:id="@+id/CommandButton"
-			android:layout_marginRight="10dp"
-			android:text="Edit"
-			style="@style/btn_candiinfo"
-			android:onClick="onCommandButtonClick" />
-		<Button
-			xmlns:android="http://schemas.android.com/apk/res/android"
-			android:id="@+id/CommandButton"
-			android:text="Comment"
-			style="@style/btn_candiinfo"
-			android:onClick="onCommandButtonClick" />
-	</LinearLayout>
 	<FrameLayout
 		android:layout_height="fill_parent"
 		android:layout_width="fill_parent"

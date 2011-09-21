@@ -16,7 +16,7 @@
 		android:name="com.proxibase.aircandi.activities.Aircandi"
 		android:label="@string/app_name"
 		android:icon="@drawable/icon_aircandi"
-		android:theme="@style/aircandi_theme.snow"
+		android:theme="@style/aircandi_theme.midnight"
 		android:debuggable="true">
 		<activity
 			android:name="CandiSearchActivity"

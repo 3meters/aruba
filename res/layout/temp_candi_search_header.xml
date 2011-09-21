@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<RelativeLayout
+		style="@style/app_header">
+		<ViewSwitcher
+			android:id="@+id/view_switcher"
+			android:layout_height="fill_parent"
+			android:layout_width="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_toLeftOf="@+id/group_refresh">
+			<ImageView
+				android:id="@+id/btn_logo"
+				android:layout_height="fill_parent"
+				android:layout_width="wrap_content"
+				android:adjustViewBounds="true"
+				android:padding="6dp"
+				android:src="?attr/logo"
+				android:scaleType="fitCenter" />
+			<Button
+				android:id="@+id/btn_context"
+				android:layout_height="fill_parent"
+				android:layout_width="fill_parent"
+				android:paddingLeft="10dp"
+				android:paddingRight="10dp"
+				android:drawablePadding="5dp"
+				style="@style/btn_back" />
+		</ViewSwitcher>
+		<View
+			android:layout_height="fill_parent"
+			android:layout_width="@dimen/application_button_separator_width"
+			android:layout_toLeftOf="@+id/group_refresh"
+			style="@style/line_vertical" />
+		<RelativeLayout
+			android:id="@+id/group_refresh"
+			android:layout_height="fill_parent"
+			android:layout_width="50dp"
+			android:layout_toLeftOf="@+id/img_action_button"
+			style="@style/app_button"
+			android:clickable="true"
+			android:onClick="onRefreshClick">
+			<ImageView
+				android:id="@+id/img_progress_indicator"
+				android:layout_height="22dp"
+				android:layout_width="22dp"
+				android:layout_centerInParent="true"
+				style="@style/application_progress"
+				android:scaleType="fitCenter"
+				android:visibility="invisible"
+				android:adjustViewBounds="true"
+				android:background="@drawable/busy_anim" />
+			<ImageView
+				android:id="@+id/img_refresh_button"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_centerInParent="true"
+				android:src="?attr/iconRefresh" />
+		</RelativeLayout>
+		<View
+			android:layout_height="fill_parent"
+			android:layout_width="@dimen/application_button_separator_width"
+			android:layout_toLeftOf="@+id/img_action_button"
+			style="@style/line_vertical" />
+		<LinearLayout
+			android:id="@+id/img_action_button"
+			android:layout_height="fill_parent"
+			android:layout_width="50dp"
+			android:layout_alignParentRight="true"
+			style="@style/app_button"
+			android:clickable="true"
+			android:onClick="onActionsClick">
+			<ImageView
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:src="?attr/iconActions" />
+		</LinearLayout>
+	</RelativeLayout>
+</merge>

@@ -7,9 +7,9 @@
 		name="aircandi_theme.midnight" parent="android:Theme.NoTitleBar">
 		<item name="android:windowNoTitle">true</item>	
 		<item name="android:windowContentOverlay">@null</item>
+		<item name="android:textColorHint">@color/edittext_color_hint_dark</item>
 		<item name="textColorFocused">@color/pager_indicator_text_focused_dark</item>
 		<item name="textColorUnfocused">@color/pager_indicator_text_unfocused_dark</item>
-		<item name="android:textColorHint">@color/edittext_color_hint_dark</item>
 		<item name="textureBodyZone">gfx/trans_30_dark.png</item>
 		<item name="textureBusyIndicator">gfx/busyspritesIV_dark.png</item>
 		<item name="textColorTitle">#ffffffff</item>
@@ -17,7 +17,6 @@
 		<item name="textColorButtonHeader">#ffffffff</item>
 		<item name="backgroundHeader">@drawable/app_header_bg_dark</item>
 		<item name="backgroundButton">@drawable/button_selector_dark</item>
-		<item name="actionStripBackground">@drawable/action_strip_bg_dark</item>
 		<item name="iconActions">@drawable/icon_actions_dark</item>
 		<item name="iconRefresh">@drawable/icon_refresh_dark</item>
 		<item name="iconNew">@drawable/icon_new_dark</item>
@@ -25,15 +24,18 @@
 		<item name="pagerNotch">@drawable/indicator_current_dark</item>
 		<item name="pagerBorder">#33ffffff</item>
 		<item name="backgroundCandiInfo">@android:color/transparent</item>
+		<item name="actionStripBackground">@drawable/actionstrip_background_dark</item>
+		<item name="ruleColor">#33ffffff</item>
+		<item name="logo">@drawable/logo_bitmap_dark</item>
 	</style>
 	
 	<style
 		name="aircandi_theme.snow" parent="@android:style/Theme.Light.NoTitleBar">
 		<item name="android:windowNoTitle">true</item>	
 		<item name="android:windowContentOverlay">@null</item>
+		<item name="android:textColorHint">@color/edittext_color_hint_light</item>
 		<item name="textColorFocused">@color/pager_indicator_text_focused_light</item>
 		<item name="textColorUnfocused">@color/pager_indicator_text_unfocused_light</item>
-		<item name="android:textColorHint">@color/edittext_color_hint_light</item>
 		<item name="textureBodyZone">gfx/trans_30_light.png</item>
 		<item name="textureBusyIndicator">gfx/busyspritesIV_light.png</item>
 		<item name="textColorTitle">#ff000000</item>
@@ -41,7 +43,6 @@
 		<item name="textColorButtonHeader">#ff000000</item>
 		<item name="backgroundHeader">@drawable/app_header_bg_light</item>
 		<item name="backgroundButton">@drawable/button_selector_light</item>
-		<item name="actionStripBackground">@drawable/action_strip_bg_light</item>
 		<item name="iconActions">@drawable/icon_actions_light</item>
 		<item name="iconRefresh">@drawable/icon_refresh_light</item>
 		<item name="iconNew">@drawable/icon_new_light</item>
@@ -49,11 +50,15 @@
 		<item name="pagerNotch">@drawable/indicator_current_light</item>
 		<item name="pagerBorder">#44000000</item>
 		<item name="backgroundCandiInfo">@android:color/transparent</item>
+		<item name="actionStripBackground">@drawable/actionstrip_background_light</item>
+		<item name="ruleColor">#44000000</item>
+		<item name="logo">@drawable/logo_bitmap_light</item>
 	</style>
 	
 	<style
 		name="aircandi_theme.blueray" parent="aircandi_theme.midnight">
 		<item name="android:windowBackground">@drawable/wallpaper7</item>
+		<item name="actionStripBackground">@drawable/actionstrip_background_blueray</item>
 	</style>
 	
 	<style
@@ -72,6 +77,8 @@
 		<item name="iconNew">@drawable/icon_new_dark</item>
 		<item name="iconBack">@drawable/icon_back_dark</item>
 		<item name="backgroundCandiInfo">#99ffffff</item>
+		<item name="actionStripBackground">@drawable/actionstrip_background_serene</item>
+		<item name="logo">@drawable/logo_bitmap_dark</item>
 	</style>
 	
 	<style
@@ -80,7 +87,7 @@
 		<item name="android:windowContentOverlay">@null</item>    
 		<item name="android:windowNoTitle">true</item>    
 		<item name="android:windowIsFloating">true</item>    
-		<item name="android:windowBackground">@android:color/transparent</item>	
+		<item name="android:windowBackground">@drawable/dialog_bg</item>	
 		<item name="android:textColor">@android:color/white</item>    
 	</style>
 	
@@ -94,6 +101,14 @@
 		<item name="android:background">?attr/backgroundHeader</item>		
 	</style>
 	
+	<style
+		name="app_footer">
+		<item name="android:layout_height">40dp</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>		
+		<item name="android:background">@android:color/transparent</item>		
+	</style>
+	
 	<style name="txt_header">
 		<item name="android:layout_height">fill_parent</item>	
 		<item name="android:layout_width">fill_parent</item>
@@ -104,9 +119,7 @@
 	</style>
 	
 	<style name="btn_back">
-		<item name="android:layout_height">fill_parent</item>	
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_gravity">center</item>
+		<item name="android:layout_gravity">center_vertical|left</item>
 		<item name="android:ellipsize">end</item>
 		<item name="android:singleLine">true</item>
 		<item name="android:gravity">center_vertical|left</item>
@@ -116,18 +129,23 @@
 		<item name="android:textColor">?attr/textColorButtonHeader</item>				
 	</style>
 	
-	<style
-		name="app_button">
-		<item name="android:layout_width">50dp</item>
-		<item name="android:layout_height">fill_parent</item>
-		<item name="android:gravity">center</item>
-		<item name="android:background">@drawable/app_button_selector</item>
+	<style name="btn_logo">
+		<item name="android:layout_height">fill_parent</item>	
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_gravity">center</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:singleLine">true</item>
+		<item name="android:gravity">center_vertical|left</item>
+		<item name="android:drawableLeft">@drawable/logo_candi</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>	
+		<item name="android:background">@drawable/button_nooutline_selector</item>	
+		<item name="android:textColor">?attr/textColorButtonHeader</item>				
 	</style>
 	
 	<style
-		name="app_button_image">
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
+		name="app_button">
+		<item name="android:gravity">center</item>
+		<item name="android:background">@drawable/app_button_selector</item>
 	</style>
 	
 	<style
@@ -138,16 +156,7 @@
 	
 	<style
 		name="line_vertical">
-		<item name="android:layout_height">fill_parent</item>
-		<item name="android:layout_width">@dimen/application_button_separator_width</item>
 		<item name="android:background">@drawable/app_header_separator</item>
-	</style>
-	
-	<style
-		name="action_strip">
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:background">?attr/actionStripBackground</item>		
 	</style>
 	
 	<style
@@ -159,8 +168,6 @@
 	
 	<style
 		name="application_progress">
-		<item name="android:layout_width">22dp</item>
-		<item name="android:layout_height">22dp</item>
 		<item name="android:layout_gravity">center</item>
 		<item name="android:minHeight">22dp</item>
 		<item name="android:minWidth">22dp</item>
@@ -169,7 +176,7 @@
 		<item name="android:background">@android:color/transparent</item>
 	</style>
 
-	<!-- CandiSearch -->
+	<!-- Dialogs -->
 	
 	<style name="btn_dialog">
 		<item name="android:layout_height">wrap_content</item>	
@@ -192,6 +199,18 @@
 		<item name="android:layout_height">wrap_content</item>	
 		<item name="android:layout_width">wrap_content</item>
 		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>	
+	</style>
+	
+	<!-- ActionStrip -->
+	
+	<style name="btn_actionstrip" parent="android:Widget.Button">
+		<item name="android:layout_height">wrap_content</item>	
+		<item name="android:layout_width">wrap_content</item>	
+		<item name="android:textColor">?attr/textColorButton</item>	
+		<item name="android:background">@drawable/button_nooutline_selector</item>		
+		<item name="android:minWidth">50dp</item>
+		<item name="android:padding">5dp</item>
+		<item name="android:height">50dp</item>
 	</style>
 	
 	<!-- CandiInfo -->
@@ -219,6 +238,10 @@
 	<style name="txt_candiinfo_subtitle" parent="txt_candiinfo">
 		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>	
 		<item name="android:textStyle">italic</item>
+	</style>
+	
+	<style name="list_candiinfo" parent="@android:style/Widget.ListView">
+		<item name="android:listSelector">@drawable/button_nooutline_selector</item>	
 	</style>
 	
 	<style name="list_candiinfo_image">
@@ -264,6 +287,50 @@
 	</style>
 	
 	<!-- Candi Dialogs -->
+    <style name="FullyTranslucent" parent="android:Theme.Translucent.NoTitleBar">
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+	
+	
+    <style name="FullyTranslucent.QuickContact">
+        <!-- This is a hack because we want to be able to animate away the
+             QuickContact window, and we close its containing activity at the
+             same time.  So put in a dummy animation so this guy sticks around
+             while the fast track window is animating. -->
+        <item name="android:windowAnimationStyle">@style/DummyAnimation</item>
+    </style>
+
+    <style name="QuickContact">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <!-- TODO: create our own animation style in framework -->
+        <!--
+        <item name="android:windowAnimationStyle">@*android:style/Animation.ZoomButtons</item>
+        -->
+    </style>
+
+    <style name="QuickContactAboveAnimation">
+        <item name="android:windowEnterAnimation">@anim/quickcontact_above_enter</item>
+        <item name="android:windowExitAnimation">@anim/quickcontact_above_exit</item>
+    </style>
+
+    <style name="QuickContactBelowAnimation">
+        <item name="android:windowEnterAnimation">@anim/quickcontact_below_enter</item>
+        <item name="android:windowExitAnimation">@anim/quickcontact_below_exit</item>
+    </style>
+
+    <style name="ContactsSearchAnimation">
+        <item name="android:windowEnterAnimation">@anim/search_bar_enter</item>
+        <item name="android:windowExitAnimation">@anim/search_bar_exit</item>
+    </style>
+
+    <style name="DummyAnimation">
+        <item name="android:windowExitAnimation">@anim/dummy_animation</item>
+    </style>
+	
 	
 	<!-- Candi Forms -->
 	

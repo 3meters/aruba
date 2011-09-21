@@ -13,7 +13,6 @@
 		android:layout_centerHorizontal="true"
 		android:paddingBottom="10dp"
 		android:text="@string/dialog_new_message"
-		style="@style/txt_dialog"
 		android:gravity="center" />
 	<LinearLayout
 		android:id="@+id/group_new_topic"
@@ -25,11 +24,13 @@
 		android:orientation="horizontal">
 		<Button
 			android:id="@+id/btn_new_topic"
-			style="@style/btn_dialog"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
 			android:text="@string/dialog_new_topic_button" />
 		<TextView
 			android:id="@+id/txt_new_topic"
-			style="@style/txt_dialog"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
 			android:text="@string/dialog_new_topic_label"
 			android:ellipsize="none"
 			android:lines="4"
@@ -46,10 +47,12 @@
 		android:orientation="horizontal">
 		<Button
 			android:id="@+id/btn_new_comment"
-			style="@style/btn_dialog"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
 			android:text="@string/dialog_new_comment_button" />
 		<TextView
-			style="@style/txt_dialog"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
 			android:text="@string/dialog_new_comment_label"
 			android:paddingLeft="10dp"
 			android:width="200dp" />

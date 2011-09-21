@@ -38,10 +38,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -52,11 +51,13 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract.QuickContact;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -67,6 +68,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.AccelerateInterpolator;
@@ -75,22 +77,21 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Animation.AnimationListener;
 import android.webkit.WebView;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.QuickContactBadge;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
-import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ViewSwitcher;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.gson.ExclusionStrategy;
@@ -112,7 +113,6 @@ import com.proxibase.aircandi.core.AircandiException;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.BaseEntity.SubType;
 import com.proxibase.aircandi.utils.AnimUtils;
-import com.proxibase.aircandi.utils.CandiList;
 import com.proxibase.aircandi.utils.ImageCache;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
@@ -121,7 +121,7 @@ import com.proxibase.aircandi.utils.Rotate3dAnimation;
 import com.proxibase.aircandi.utils.Utilities;
 import com.proxibase.aircandi.utils.ImageManager.IImageReadyListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.widgets.HorizontalListView;
+import com.proxibase.aircandi.widgets.QuickContactWindow;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator.PageInfoProvider;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
@@ -199,6 +199,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		Blueray, Midnight, Serene, Smolder, Snow
 	}
 
+	public enum ContextMenuItem {
+		RefreshCurrent, RefreshAll
+	}
+
 	private static String				COMPONENT_NAME			= "CandiSearch";
 
 	private Boolean						mPrefAutoscan			= false;
@@ -235,10 +239,12 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	public WebView						mWebView;
 
 	private ViewFlipper					mCandiFlipper;
+	private ViewSwitcher				mViewSwitcher;
 
 	private DisplayMetrics				mDisplayMetrics;
 
 	private boolean						mCandiInfoVisible		= false;
+	private QuickContactWindow			mQuickContactWindow;
 	private boolean						mCandiActivityActive	= false;
 	private AnimType					mAnimTypeCandiInfo		= AnimType.RotateCandi;
 	private Sound						mCandiAlertSound;
@@ -291,6 +297,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		// Ui Hookup
 		mCandiFlipper = (ViewFlipper) findViewById(R.id.flipper_candi);
+		mViewSwitcher = (ViewSwitcher) findViewById(R.id.view_switcher);
+		mViewSwitcher.setInAnimation(this, R.anim.fade_in_short);
+		mViewSwitcher.setOutAnimation(this, R.anim.fade_out_short);
 		mCandiPager = (ViewPager) findViewById(R.id.pager);
 		mCandiPager.setAdapter(new CandiPagerAdapter());
 		mCandiPager.setOnPageChangeListener(mCandiPagerIndicator);
@@ -304,6 +313,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
 		mWebView.getSettings().setJavaScriptEnabled(true);
 		mWebView.setBackgroundColor(0x00000000); // Transparent
+
+		View view = findViewById(R.id.group_refresh);
+		registerForContextMenu(view);
 
 		// Check for emulator
 		if (Build.PRODUCT.equals("google_sdk") || Build.PRODUCT.equals("sdk"))
@@ -386,6 +398,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		try {
 
+			if (command.verb.toLowerCase().equals("new")) {
+				showTopicDialog();
+			}
 			if (command.verb.toLowerCase().equals("edit")) {
 				EntityProxy entityProxy = command.entity;
 				SubType subType = entityProxy.entityType.equals(CandiConstants.TYPE_CANDI_TOPIC) ? SubType.Topic : SubType.Comment;
@@ -476,7 +491,26 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 	}
 
-	@Override
+	public void onItemMoreButtonClick(View view) {
+
+		CandiModel candiModel = (CandiModel) view.getTag();
+		if (mQuickContactWindow == null)
+			mQuickContactWindow = new QuickContactWindow(this);
+
+		if (mQuickContactWindow.isShowing()) {
+			mQuickContactWindow.dismiss();
+			return;
+		}
+
+		int[] coordinates = { 0, 0 };
+
+		view.getLocationInWindow(coordinates);
+		final Rect rect = new Rect(coordinates[0], coordinates[1], coordinates[0] + view.getWidth(), coordinates[1] + view.getHeight());
+		View content = configureActionButtons(candiModel, CandiSearchActivity.this);
+
+		mQuickContactWindow.show(rect, content, view);
+	}
+
 	public void onBackPressed() {
 		if (!mCandiInfoVisible) {
 			if (mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
@@ -484,6 +518,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 		}
 		else {
+			if (mQuickContactWindow != null && mQuickContactWindow.isShowing())
+				mQuickContactWindow.dismiss();
 			hideCandiInfo(AnimType.RotateCandi);
 			mCandiInfoVisible = false;
 		}
@@ -515,26 +551,20 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	public void onActionsClick(View view) {
 
-		View frame = (View) this.findViewById(R.id.action_strip);
-		if (frame.getVisibility() != View.VISIBLE) {
-			Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.slide_in_right);
-			animation.setFillEnabled(true);
-			animation.setFillAfter(true);
-			frame.startAnimation(animation);
-			frame.setVisibility(View.VISIBLE);
+		if (mQuickContactWindow == null)
+			mQuickContactWindow = new QuickContactWindow(this);
+
+		if (mQuickContactWindow.isShowing()) {
+			mQuickContactWindow.dismiss();
+			return;
 		}
-		else
-		{
-			Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_out_shortest);
-			animation.setFillEnabled(true);
-			animation.setFillAfter(true);
-			frame.startAnimation(animation);
-			frame.setVisibility(View.GONE);
-		}
-		// Intent intent = new Intent(this, CandiSearchActivity.class);
-		// intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		// intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		// startActivity(intent);
+
+		int[] coordinates = { 0, 0 };
+		view.getLocationInWindow(coordinates);
+		final Rect rect = new Rect(coordinates[0], coordinates[1], coordinates[0] + view.getWidth(), coordinates[1] + view.getHeight());
+		View content = configureActionButtons(CandiSearchActivity.this);
+
+		mQuickContactWindow.show(rect, content, view);
 	}
 
 	private void debugOutput() {
@@ -1108,7 +1138,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, animationResource);
 		animation.setFillEnabled(true);
 		animation.setFillAfter(true);
-		((LinearLayout) findViewById(R.id.activity_footer)).startAnimation(animation);
+		View footer = findViewById(R.id.activity_footer);
+		footer.startAnimation(animation);
 	}
 
 	public void updateCandiBackButton(String backButtonText) {
@@ -1116,6 +1147,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		boolean visible = (mCandiInfoVisible || !mCandiPatchModel.getCandiRootCurrent().isSuperRoot());
 
 		if (visible) {
+			mLogo.setVisibility(View.GONE);
 			mContextButton.setText(backButtonText != null ? backButtonText : getString(R.string.search_back_button));
 			mContextButton.setOnClickListener(new View.OnClickListener() {
 
@@ -1132,12 +1164,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			});
 
 			if (mContextButtonState == ContextButtonState.Default) {
-				Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_short);
-				animation.setFillEnabled(true);
-				animation.setFillAfter(true);
-				animation.setStartOffset(250);
-				mContextButton.startAnimation(animation);
-				mContextButton.setVisibility(View.VISIBLE);
+				mViewSwitcher.setDisplayedChild(1);
 			}
 
 			if (mCandiInfoVisible)
@@ -1156,10 +1183,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			});
 
 			if (mContextButtonState != ContextButtonState.Default) {
-				Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_out_short);
-				animation.setFillEnabled(true);
-				animation.setFillAfter(true);
-				mContextButton.startAnimation(animation);
+				mViewSwitcher.setDisplayedChild(0);
 			}
 			mContextButtonState = ContextButtonState.Default;
 		}
@@ -1240,6 +1264,65 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			table.addView(tableRow, tableLp);
 		}
 		return table;
+	}
+
+	private View configureActionButtons(Context context) {
+		return configureActionButtons(null, context);
+	}
+
+	private View configureActionButtons(CandiModel candi, Context context) {
+
+		ViewGroup viewGroup = null;
+
+		if (candi == null) {
+			viewGroup = new LinearLayout(context);
+			Button commandButton = (Button) getLayoutInflater().inflate(R.layout.temp_actionstrip_button, null);
+			commandButton.setText("New Candi");
+			Drawable icon = getResources().getDrawable(R.drawable.icon_new2_dark);
+			icon.setBounds(0, 0, 30, 30);
+			commandButton.setCompoundDrawables(null, icon, null, null);
+			Command command = new Command();
+			command.verb = "new";
+			command.name = "aircandi.newcandi";
+			command.type = "action";
+			commandButton.setTag(command);
+			viewGroup.addView(commandButton);
+		}
+		else {
+			if (candi.getEntityProxy().commands == null || candi.getEntityProxy().commands.size() == 0)
+				return null;
+
+			// Get the table we use for grouping and clear it
+			viewGroup = new LinearLayout(context);
+
+			// Loop the commands
+			for (Command command : candi.getEntityProxy().commands) {
+				/*
+				 * TODO: This is a temporary hack. The service shouldn't pass commands
+				 * that this user doesn't have sufficient permissions for.
+				 */
+				if (command.name.toLowerCase().equals("aircandi.edit"))
+					if (candi.getEntityProxy().createdById != null && !candi.getEntityProxy().createdById.equals(mUser.id))
+						continue;
+
+				// Make a button and configure it
+				command.entity = candi.getEntityProxy();
+				Button commandButton = (Button) getLayoutInflater().inflate(R.layout.temp_actionstrip_button, null);
+				commandButton.setText(command.label);
+				
+				Drawable icon = getResources().getDrawable(R.drawable.icon_new_dark);
+				if (command.name.toLowerCase().equals("edit")) {
+					icon = getResources().getDrawable(R.drawable.icon_edit_dark);
+				}
+				icon.setBounds(0, 0, 30, 30);
+				commandButton.setCompoundDrawables(null, icon, null, null);
+
+				commandButton.setTag(command);
+				viewGroup.addView(commandButton);
+			}
+		}
+
+		return viewGroup;
 	}
 
 	class BuildMenuTask extends AsyncTask<FrameLayout, Void, TableLayout> {
@@ -1385,44 +1468,42 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			@Override
 			public void run() {
 
-				final Dialog dialog = new Dialog(CandiSearchActivity.this, R.style.aircandi_theme_dialog);
-				final RelativeLayout installDialog = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_dialog_new, null);
-				dialog.setContentView(installDialog, new FrameLayout.LayoutParams(dialog.getWindow().getWindowManager().getDefaultDisplay()
-						.getWidth() - 40, LayoutParams.FILL_PARENT, Gravity.CENTER));
-				dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-				dialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.dialog_bg));
-
-				((Button) installDialog.findViewById(R.id.btn_new_topic)).setOnClickListener(new OnClickListener() {
+				final CharSequence[] items = { "Topic", "Comment", "Photo Album", "Fortune Cookie", "Critter" };
+				AlertDialog.Builder builder = new AlertDialog.Builder(CandiSearchActivity.this);
+				builder.setTitle("Create new...");
+				builder.setCancelable(true);
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
 					@Override
-					public void onClick(View v) {
+					public void onClick(DialogInterface dialog, int which) {}
+				});
+				builder.setItems(items, new DialogInterface.OnClickListener() {
 
-						Intent intent = buildIntent(Verb.New, null, SubType.Topic, 0, ProxiExplorer.getInstance().getStrongestBeacon(), mUser,
-								Post.class);
-						startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-						dialog.dismiss();
+					public void onClick(DialogInterface dialog, int item) {
+						if (item == 0) {
+							Intent intent = buildIntent(Verb.New, null, SubType.Topic, 0, ProxiExplorer.getInstance().getStrongestBeacon(), mUser,
+									Post.class);
+							startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
+							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+							dialog.dismiss();
+						}
+						else if (item == 1) {
+							// We always use the first candi in a zone
+							EntityProxy parentEntityProxy = mCandiPatchModel.getCandiModelFocused().getZoneCurrent().getCandiesCurrent().get(0)
+									.getEntityProxy();
+							Intent intent = buildIntent(Verb.New, null, SubType.Comment, parentEntityProxy.id, parentEntityProxy.beacon, mUser,
+									Post.class);
+							startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
+							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+							dialog.dismiss();
+						}
+						else {
+							Toast.makeText(getApplicationContext(), "Not implemented yet.", Toast.LENGTH_SHORT).show();
+						}
 					}
 				});
-
-				((Button) installDialog.findViewById(R.id.btn_new_comment)).setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-
-						// We always use the first candi in a zone
-						EntityProxy parentEntityProxy = mCandiPatchModel.getCandiModelFocused().getZoneCurrent().getCandiesCurrent().get(0)
-								.getEntityProxy();
-						Intent intent = buildIntent(Verb.New, null, SubType.Comment, parentEntityProxy.id, parentEntityProxy.beacon, mUser,
-								Post.class);
-						startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-						overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-						dialog.dismiss();
-					}
-				});
-				dialog.show();
-
+				AlertDialog alert = builder.create();
+				alert.show();
 			}
 		});
 	}
@@ -1430,21 +1511,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	// --------------------------------------------------------------------------------------------
 	// ENGINE routines
 	// --------------------------------------------------------------------------------------------
-
-	@Override
-	protected int getLayoutID() {
-		return R.layout.candi_search;
-	}
-
-	@Override
-	protected int getRenderSurfaceViewID() {
-		return R.id.view_rendersurface;
-	}
-
-	@Override
-	public void onLoadComplete() {
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onLoadComplete called");
-	}
 
 	@Override
 	public Engine onLoadEngine() {
@@ -1525,6 +1591,11 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	@Override
+	public void onLoadComplete() {
+		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onLoadComplete called");
+	}
+
+	@Override
 	public void onResumeGame() {
 		/*
 		 * This gets called anytime the game surface gains window focus. The game
@@ -1548,6 +1619,16 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	public void onUnloadResources() {
 		super.onUnloadResources();
 		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onUnloadResources called");
+	}
+
+	@Override
+	protected int getLayoutID() {
+		return R.layout.candi_search;
+	}
+
+	@Override
+	protected int getRenderSurfaceViewID() {
+		return R.id.view_rendersurface;
 	}
 
 	@Override
@@ -1600,7 +1681,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				return candiInfoView;
 			}
 			else if (position == PagerView.CandiList.ordinal()) {
-				FrameLayout candiInfoView = (FrameLayout) inflater.inflate(R.layout.temp_candi_list, null);
+				View candiInfoView = (View) inflater.inflate(R.layout.temp_candi_list, null);
 				ListView candiListView = (ListView) candiInfoView.findViewById(R.id.list_candi_children);
 				ListAdapter adapter = new ListAdapter(CandiSearchActivity.this, R.id.item_content, mCandiPatchModel.getCandiModelSelected()
 						.getChildren());
@@ -1618,12 +1699,12 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		@Override
 		public void destroyItem(View collection, int position, Object view) {
-			((ViewPager) collection).removeView((FrameLayout) view);
+			((ViewPager) collection).removeView((View) view);
 		}
 
 		@Override
 		public boolean isViewFromObject(View view, Object object) {
-			return view == ((FrameLayout) object);
+			return view == ((View) object);
 		}
 
 		@Override
@@ -1683,7 +1764,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				holder.itemTitle = (TextView) view.findViewById(R.id.item_title);
 				holder.itemSubtitle = (TextView) view.findViewById(R.id.item_subtitle);
 				holder.itemBody = (TextView) view.findViewById(R.id.item_content);
-				holder.itemActionButton = (LinearLayout) view.findViewById(R.id.item_action_button);
+				holder.itemActionButton = (View) view.findViewById(R.id.item_action_button);
 				view.setTag(holder);
 			}
 			else {
@@ -1744,7 +1825,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						else {
 							command.entity = entityProxy;
 							holder.itemActionButton.setVisibility(View.VISIBLE);
-							holder.itemActionButton.setTag(command);
+							holder.itemActionButton.setTag(itemData);
 						}
 					}
 				}
@@ -1752,6 +1833,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 			return view;
 		}
+
+		public boolean areAllItemsEnabled() {
+			return false;
+		}
+
+		public boolean isEnabled(int position) {
+			return false;
+		}
+
 	}
 
 	private class ViewHolder {
@@ -1760,7 +1850,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		public TextView		itemTitle;
 		public TextView		itemSubtitle;
 		public TextView		itemBody;
-		public LinearLayout	itemActionButton;
+		public View			itemActionButton;
 		public Object		data;
 	}
 
@@ -1979,9 +2069,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		boolean prefChangeThatRequiresRefresh = false;
 
 		if (prefs != null) {
-			if (mPrefAutoscan != prefs.getBoolean(Preferences.PREF_AUTOSCAN, true)) {
+			if (mPrefAutoscan != prefs.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
 				prefChangeThatRequiresRefresh = true;
-				mPrefAutoscan = prefs.getBoolean(Preferences.PREF_AUTOSCAN, true);
+				mPrefAutoscan = prefs.getBoolean(Preferences.PREF_AUTOSCAN, false);
 			}
 			if (mPrefDisplayExtras != DisplayExtra.valueOf(prefs.getString(Preferences.PREF_DISPLAY_EXTRAS, "None"))) {
 				prefChangeThatRequiresRefresh = true;
@@ -1996,7 +2086,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				mPrefEntityFencing = prefs.getBoolean(Preferences.PREF_ENTITY_FENCING, true);
 			}
 
-			mPrefShowMemory = prefs.getBoolean(Preferences.PREF_SHOW_MEMORY, true);
+			mPrefShowMemory = prefs.getBoolean(Preferences.PREF_SHOW_MEMORY, false);
 			mPrefSoundEffects = prefs.getBoolean(Preferences.PREF_SOUND_EFFECTS, true);
 
 			if (mCandiPatchPresenter != null)
@@ -2063,6 +2153,30 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	@Override
+	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, view, menuInfo);
+		menu.setHeaderTitle(getString(R.string.menu_refresh_title));
+		menu.add(0, ContextMenuItem.RefreshCurrent.ordinal(), 1, getString(R.string.menu_refresh_current));
+		menu.add(0, ContextMenuItem.RefreshAll.ordinal(), 2, getString(R.string.menu_refresh_all));
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		if (item.getItemId() == ContextMenuItem.RefreshCurrent.ordinal()) {
+			doRefresh();
+		}
+		else if (item.getItemId() == ContextMenuItem.RefreshAll.ordinal()) {
+			Intent intent = new Intent(this, CandiSearchActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(intent);
+		}
+		else {
+			return false;
+		}
+		return true;
+	}
+
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
@@ -2072,7 +2186,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		return true;
 	}
 
-	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		// Hide the sign out option if we don't have a current session
 		MenuItem item = menu.findItem(R.id.signout);

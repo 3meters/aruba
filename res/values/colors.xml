@@ -7,7 +7,19 @@
     <color name="application_titlebar_separator_start">@color/theme_white</color>
     <color name="application_titlebar_separator_center">@color/theme_white</color>
     <color name="application_titlebar_separator_end">@color/theme_white</color>
-
+    
+    <color name="quickcontact_disambig">#f2f2f2</color>
+    <color name="quickcontact_disambig_divider">#afafaf</color>
+    
+    <color name="actionstrip_background_fill_dark">#dd000000</color>
+    <color name="actionstrip_background_stroke_dark">#ccaaaaaa</color>
+    <color name="actionstrip_background_fill_light">#eed6d6d6</color>
+    <color name="actionstrip_background_stroke_light">#eeaaaaaa</color>
+    <color name="actionstrip_background_fill_blueray">#ee3064A8</color>
+    <color name="actionstrip_background_stroke_blueray">#eeffffff</color>
+    <color name="actionstrip_background_fill_serene">#ee54ADD3</color>
+    <color name="actionstrip_background_stroke_serene">#eeffffff</color>
+    
     <color name="section_header_start">#33ffffff</color>
     <color name="section_header_end">#00ffffff</color>
     

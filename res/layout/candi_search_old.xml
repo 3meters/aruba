@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent">
+	<LinearLayout
+		android:id="@+id/activity_header"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_alignParentTop="true">
+		<include
+			layout="@layout/temp_candi_search_header" />
+	</LinearLayout>
+	<FrameLayout
+		android:layout_height="fill_parent"
+		android:layout_width="fill_parent"
+		android:layout_below="@id/activity_header">
+		<WebView
+			android:id="@+id/webview"
+			android:visibility="invisible"
+			android:layout_width="250dp"
+			android:layout_height="250dp"
+			android:scrollbars="none" />
+		<ViewFlipper
+			android:id="@+id/flipper_candi"
+			android:layout_height="fill_parent"
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+			android:clipChildren="false">
+			<org.anddev.andengine.opengl.view.RenderSurfaceView
+				android:id="@+id/view_rendersurface"
+				android:layout_height="fill_parent"
+				android:layout_width="fill_parent" />
+			<RelativeLayout
+				android:id="@+id/view_candi_info"
+				android:layout_height="fill_parent"
+				android:layout_width="fill_parent"
+				android:focusable="true"
+				android:clickable="true"
+				android:onClick="onInfoViewClick">
+				<include
+					layout="@layout/temp_candi_info" />
+			</RelativeLayout>
+			<RelativeLayout
+				android:id="@+id/view_candi_info_two"
+				android:layout_height="fill_parent"
+				android:layout_width="fill_parent"
+				android:focusable="true"
+				android:clickable="true"
+				android:onClick="onInfoViewClick">
+				<include
+					layout="@layout/temp_candi_info" />
+			</RelativeLayout>
+			<ListView
+				android:id="@+id/list_candi_children"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:paddingLeft="20dp"
+				android:cacheColorHint="#00000000" />
+		</ViewFlipper>
+	</FrameLayout>
+	<LinearLayout
+		android:id="@+id/activity_footer"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_alignParentBottom="true">
+		<include
+			layout="@layout/temp_activity_footer" />
+	</LinearLayout>
+</RelativeLayout>

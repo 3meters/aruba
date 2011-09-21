@@ -578,7 +578,11 @@ public class ImageManager {
 
 	public boolean hasImageCaptureBug() {
 		/*
-		 * list of known devices that have the bug.
+		 * List of known devices that have the bug where the
+		 * OK button does nothing when using MediaStore.ACTION_IMAGE_CAPTURE intent.
+		 * http://code.google.com/p/android/issues/detail?id=1480
+		 * 
+		 * Nexus S fingerprint: google/soju/crespo
 		 */
 		ArrayList<String> devices = new ArrayList<String>();
 		devices.add("android-devphone1/dream_devphone/dream");

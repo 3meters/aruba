@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="wrap_content"
+	android:layout_width="wrap_content"
+	android:padding="5dp"
+	android:orientation="vertical">
+	<ImageView
+		android:id="@+id/item_image"
+		android:layout_weight=".9"
+		style="@style/list_candiinfo_image" />
+	<TextView
+		android:id="@+id/item_title"
+		android:layout_weight=".1"
+		style="@style/list_candiinfo_title" />
+</LinearLayout>

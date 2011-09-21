@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/pager_indicator"
+	android:layout_height="wrap_content"
+	android:layout_width="fill_parent"
+	android:orientation="vertical">
+	<RelativeLayout
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:paddingLeft="5dp"
+		android:paddingRight="5dp">
+		<com.proxibase.aircandi.widgets.PagerTextView
+			android:id="@+id/txt_pager_indicator_previous"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_alignParentLeft="true"
+			style="@style/txt_pager_indicator"
+			android:text="Previous" />
+		<com.proxibase.aircandi.widgets.PagerTextView
+			android:id="@+id/txt_pager_indicator_current"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_centerInParent="true"
+			style="@style/txt_pager_indicator"
+			android:text="Current" />
+		<com.proxibase.aircandi.widgets.PagerTextView
+			android:id="@+id/txt_pager_indicator_next"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_marginRight="-3dp"
+			android:layout_alignParentRight="true"
+			style="@style/txt_pager_indicator"
+			android:text="Next" />
+	</RelativeLayout>
+	<RelativeLayout
+		android:id="@+id/indicator_notch"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent">
+		<View
+			android:background="?attr/ruleColor"
+			android:layout_height="1px"
+			android:layout_width="fill_parent"
+			android:layout_alignBottom="@id/indicator_notch" />
+		<ImageView
+			android:id="@id/indicator_notch"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_alignParentTop="true"
+			android:layout_centerInParent="true"
+			android:src="?attr/pagerNotch" />
+	</RelativeLayout>
+</LinearLayout>
