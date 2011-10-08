@@ -47,6 +47,11 @@
 			android:configChanges="orientation">
 		</activity>
 		<activity
+			android:name=".Comment"
+			android:label="@string/app_name"
+			android:configChanges="orientation">
+		</activity>
+		<activity
 			android:name="com.proxibase.aircandi.activities.Preferences"
 			android:theme="@android:style/Theme"
 			android:label="@string/app_name"

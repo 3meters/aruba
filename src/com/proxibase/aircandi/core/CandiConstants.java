@@ -9,12 +9,14 @@ import android.graphics.Bitmap.Config;
 public interface CandiConstants {
 
 	public static final boolean			MODE_DEBUG						= true;
+	public static final boolean			DEBUG_TRACE						= false;
 	public static final String			APP_NAME						= "Aircandi";
 
 	public static final int				LAYER_GENERAL					= 0;
 	public static final int				LAYER_ZONES						= 1;
 	public static final int				LAYER_CANDI						= 2;
 
+	public static final float			CANDI_VIEW_HALO					= 2.0f;																																	
 	public static final int				CANDI_VIEW_WIDTH				= 250;
 	public static final int				CANDI_VIEW_SPACING				= 20;
 	public static final int				CANDI_VIEW_BODY_HEIGHT			= 250;
@@ -45,15 +47,17 @@ public interface CandiConstants {
 	public static final int				IMAGE_BYTES_MAX					= 500000;
 	public static final Config			IMAGE_CONFIG_DEFAULT			= Config.ARGB_8888;
 
+	public static final String			URL_PROXIBASE					= "https://api.proxibase.com/";
+
 	public static final String			URL_AIRCANDI_SERVICE_ODATA		= "http://dev.aircandi.com/airodata.svc/";
 	public static final String			URL_AIRCANDI_SERVICE			= "http://dev.aircandi.com/airlogic.asmx/";
 	public static final String			URL_AIRCANDI_BLOG				= "http://devblog.proxibase.com/";
 	public static final String			URL_AIRCANDI_MEDIA				= "https://s3.amazonaws.com/";
 	public static final String			S3_BUCKET_IMAGES				= "3meters_images";
 
-	public static final String			TYPE_CANDI_TOPIC				= "com.proxibase.aircandi.candi.topic";
 	public static final String			TYPE_CANDI_WEB					= "com.proxibase.aircandi.candi.web";
 	public static final String			TYPE_CANDI_POST					= "com.proxibase.aircandi.candi.post";
+	public static final String			TYPE_CANDI_COMMENT				= "com.proxibase.aircandi.candi.comment";
 
 	public static final int				ACTIVITY_ENTITY_HANDLER			= 100;
 	public static final int				ACTIVITY_MARKET					= 200;
@@ -66,7 +70,7 @@ public interface CandiConstants {
 	public static final int				VISIBILITY_PASSWORD_PROTECTED	= 1;
 	public static final int				VISIBILITY_PUBLIC				= 2;
 
-	public static final float			DURATION_MULTIPLIER				= 1.0f;
+	public static final float			DURATION_MULTIPLIER				= 0.8f;
 	public static final float			DURATION_ZOOM					= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_BOUNCEBACK				= 1.0f * DURATION_MULTIPLIER;
 	public static final float			DURATION_SLOTTING_MAJOR			= 0.5f * DURATION_MULTIPLIER;
@@ -78,8 +82,10 @@ public interface CandiConstants {
 	public static final float			DURATION_REFLECTION_HIDESHOW	= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_PLACEHOLDER_HIDESHOW	= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_FADE		= 0.8f * DURATION_MULTIPLIER;
+	public static final float			DURATION_TRANSITIONS_FADE_TEST	= 5.0f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_MOVE		= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_DELAY		= 0.5f * DURATION_MULTIPLIER;
+	public static final boolean			TRANSITIONS_ACTIVE				= false;
 
 	public static final int				GL_BLEND_FUNCTION_SOURCE		= GL10.GL_ONE;
 	public static final int				GL_BLEND_FUNCTION_DESTINATION	= GL10.GL_ONE_MINUS_SRC_ALPHA;

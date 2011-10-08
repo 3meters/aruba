@@ -33,7 +33,7 @@ public class CameraTargetSprite extends CandiRectangle {
 		if (easeFunction == null)
 			easeFunction = EaseExponentialInOut.getInstance();
 
-		SequenceEntityModifier modSequence = new SequenceEntityModifier(new IEntityModifierListener() {
+		SequenceEntityModifier modifier = new SequenceEntityModifier(new IEntityModifierListener() {
 
 			@Override
 			public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
@@ -45,10 +45,10 @@ public class CameraTargetSprite extends CandiRectangle {
 			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
 		},
 
-		new DelayModifier(0), new MoveXModifier(duration, this.getX(), targetZone.getX(), easeFunction));
+		new DelayModifier(0), new MoveXModifier(duration, this.getX(), targetZone.getViewStateCurrent().getX(), easeFunction));
 
-		this.registerEntityModifier(modSequence);
-		float distanceMoved = Math.abs(this.getX() - targetZone.getX());
+		this.registerEntityModifier(modifier);
+		float distanceMoved = Math.abs(this.getX() - targetZone.getViewStateCurrent().getX());
 		return distanceMoved;
 	}
 

@@ -6,11 +6,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 
+import com.proxibase.aircandi.candi.models.BaseModel.UpdateType;
 import com.proxibase.aircandi.candi.models.CandiModel.DisplayExtra;
 import com.proxibase.aircandi.candi.models.CandiModel.ReasonInactive;
+import com.proxibase.aircandi.candi.models.ZoneModel.Position;
+import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
+import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.utils.CandiList;
-import com.proxibase.aircandi.utils.ImageManager.ImageFormat;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 /**
@@ -33,8 +37,10 @@ public class CandiPatchModel extends Observable {
 	private IModel						mCandiRootNext;
 	private float						mOriginX;
 	private float						mOriginY;
+	private int							mScreenWidth;
 
 	public CandiPatchModel() {
+		// New zones start out not visible with alpha = 0
 		mZoneInactive = new ZoneModel(0, this);
 		mZoneInactive.setInactive(true);
 	}
@@ -49,7 +55,7 @@ public class CandiPatchModel extends Observable {
 
 		// The super class only updates observers if hasChanged == true.
 		// Super class also handles clearChanged.
-		super.notifyObservers();
+		super.notifyObservers(UpdateType.Epoch);
 
 		// Each submodel will notify it's observers only if it has been flagged as changed.
 		for (IModel candi : mCandiModels)
@@ -93,20 +99,20 @@ public class CandiPatchModel extends Observable {
 
 		// Only assign to a zone if the model is visible
 		if (candiModel.getEntityProxy().isHidden) {
-			candiModel.setVisibleCurrent(false);
-			candiModel.setVisibleNext(false);
+			candiModel.getViewStateCurrent().setVisible(false);
+			candiModel.getViewStateNext().setVisible(false);
 		}
 		else {
-			candiModel.setVisibleCurrent(false);
-			candiModel.setVisibleNext(true);
+			candiModel.getViewStateCurrent().setVisible(false);
+			candiModel.getViewStateNext().setVisible(true);
 		}
 
 		candiModel.setReasonInactive(ReasonInactive.New);
 		mZoneInactive.getCandiesCurrent().add(candiModel);
 		mZoneInactive.getCandiesNext().add(candiModel);
 
-		candiModel.setZoneCurrent(mZoneInactive);
-		candiModel.setZoneNext(mZoneInactive);
+		candiModel.getZoneStateCurrent().setZone(mZoneInactive);
+		candiModel.getZoneStateNext().setZone(mZoneInactive);
 
 		super.setChanged();
 	}
@@ -115,232 +121,6 @@ public class CandiPatchModel extends Observable {
 	 * Updates if the model exists but never fails
 	 */
 	public CandiModel updateCandiModel(EntityProxy entityProxy, DisplayExtra displayExtra) {
-		return doUpdateCandiModel(entityProxy, displayExtra);
-	}
-
-	public void updateZones() {
-
-		// Reset zones
-		mZoneInactive.getCandiesNext().clear();
-		for (ZoneModel zoneModel : mZoneModels) {
-			zoneModel.getCandiesNext().clear();
-			zoneModel.setVisibleNext(false);
-		}
-
-		// Clear touch areas
-		for (CandiModel candiModel : mCandiModels) {
-			candiModel.setTouchAreaActive(false);
-		}
-
-		// Manage visibility
-		if (!mCandiRootNext.isSuperRoot()) {
-			for (CandiModel candiModel : mCandiModels)
-				if (candiModel.getReasonInactive() == ReasonInactive.Deleting) {
-					candiModel.setVisibleNext(false);
-					candiModel.setZoneNext(mZoneInactive);
-					mZoneInactive.getCandiesNext().add(candiModel);
-				}
-				else {
-					if (!mCandiRootNext.getChildren().containsKey(String.valueOf(candiModel.getModelId()))) {
-						candiModel.setVisibleNext(false);
-						candiModel.setReasonInactive(ReasonInactive.Navigation);
-						candiModel.setZoneNext(mZoneInactive);
-						mZoneInactive.getCandiesNext().add(candiModel);
-					}
-					else {
-						candiModel.setReasonInactive(ReasonInactive.None);
-						if (candiModel.getEntityProxy().isHidden) {
-							candiModel.setVisibleNext(false);
-						}
-						else {
-							candiModel.setVisibleNext(true);
-							candiModel.setTouchAreaActive(true);
-						}
-					}
-				}
-		}
-		else {
-			// Restore 'normal' visibility
-			for (CandiModel candiModel : mCandiModels) {
-				if (candiModel.getReasonInactive() == ReasonInactive.Deleting) {
-					candiModel.setVisibleNext(false);
-					candiModel.setZoneNext(mZoneInactive);
-					mZoneInactive.getCandiesNext().add(candiModel);
-				}
-				else {
-					if (candiModel.getReasonInactive() != ReasonInactive.Deleting) {
-						candiModel.setReasonInactive(ReasonInactive.None);
-						if (candiModel.getEntityProxy().isHidden) {
-							candiModel.setVisibleNext(false);
-						}
-						else {
-							candiModel.setVisibleNext(true);
-							candiModel.setTouchAreaActive(true);
-						}
-					}
-				}
-			}
-		}
-
-		// Assign to zones
-		int focusedZoneIndex = 0;
-		if (mCandiModelFocused != null) {
-			focusedZoneIndex = mCandiModelFocused.getZoneCurrent().getZoneIndex();
-		}
-
-		int visibleCandiNext = ((CandiModel) mCandiRootNext).visibleChildrenNext();
-
-		int zoneIndex = 0;
-		if (visibleCandiNext < (focusedZoneIndex + 1)) {
-			zoneIndex = (focusedZoneIndex + 1) - visibleCandiNext;
-			zoneIndex++;
-		}
-
-		for (IModel model : mCandiRootNext.getChildren()) {
-
-			CandiModel candiModel = (CandiModel) model;
-
-			if (candiModel.isVisibleNext()) {
-
-				candiModel.setReasonInactive(ReasonInactive.None);
-				if (mZoneModels.size() < zoneIndex + 1)
-					mZoneModels.add(new ZoneModel(zoneIndex, this));
-
-				ZoneModel zone = mZoneModels.get(zoneIndex);
-
-				if (!candiModel.hasVisibleChildrenNext()) {
-					zone.getCandiesNext().add(candiModel);
-					candiModel.setZoneStatusNext(ZoneStatus.Normal);
-					candiModel.setZoneNext(zone);
-					candiModel.setChanged();
-
-					/*
-					 * Still might have children that will be hidden and
-					 * should be assigned to the inactive zone
-					 */
-					for (IModel childModel : candiModel.getChildren()) {
-						CandiModel childCandiModel = (CandiModel) childModel;
-						childCandiModel.setReasonInactive(ReasonInactive.Hidden);
-						childCandiModel.setZoneNext(mZoneInactive);
-						childCandiModel.setZoneStatusNext(ZoneStatus.Normal);
-						mZoneInactive.getCandiesNext().add(childCandiModel);
-						childCandiModel.setChanged();
-					}
-				}
-				else {
-					zone.getCandiesNext().add(candiModel);
-					candiModel.setZoneNext(zone);
-					candiModel.setChanged();
-					candiModel.setZoneStatusNext(ZoneStatus.Primary);
-
-					/*
-					 * We might have children that are hidden even though
-					 * the parent isn't.
-					 */
-					for (IModel childModel : candiModel.getChildren()) {
-						CandiModel childCandiModel = (CandiModel) childModel;
-
-						if (childCandiModel.isVisibleNext()) {
-							zone.getCandiesNext().add(childCandiModel);
-							childCandiModel.setZoneStatusNext(ZoneStatus.Secondary);
-							childCandiModel.setZoneNext(zone);
-							childCandiModel.setChanged();
-						}
-						else {
-							childCandiModel.setReasonInactive(ReasonInactive.Hidden);
-							childCandiModel.setZoneNext(mZoneInactive);
-							childCandiModel.setZoneStatusNext(ZoneStatus.Normal);
-							mZoneInactive.getCandiesNext().add(childCandiModel);
-							childCandiModel.setChanged();
-						}
-					}
-				}
-				zoneIndex++;
-			}
-			else {
-				// Candi models that won't be visible are assigned to the special inactive zone
-				candiModel.setReasonInactive(ReasonInactive.Hidden);
-				candiModel.setZoneNext(mZoneInactive);
-				candiModel.setZoneStatusNext(ZoneStatus.Normal);
-				mZoneInactive.getCandiesNext().add(candiModel);
-				candiModel.setChanged();
-
-				for (IModel childModel : candiModel.getChildren()) {
-					CandiModel childCandiModel = (CandiModel) childModel;
-					mZoneInactive.getCandiesNext().add(childCandiModel);
-					childCandiModel.setZoneNext(mZoneInactive);
-					childCandiModel.setZoneStatusNext(ZoneStatus.Normal);
-					childCandiModel.setChanged();
-				}
-			}
-		}
-
-		// If needed, move the candi model with the current focus back to the
-		// slot the user is currently looking at.
-		if (mCandiModelFocused != null) {
-			if (!mCandiModelFocused.getZoneCurrent().isInactive() && !mCandiModelFocused.getZoneNext().isInactive())
-				if (mCandiModelFocused.getZoneCurrent().getZoneIndex() != mCandiModelFocused.getZoneNext().getZoneIndex()) {
-
-					ZoneModel zoneNextOld = mCandiModelFocused.getZoneNext();
-					ZoneModel zoneNextNew = mZoneModels.get(mCandiModelFocused.getZoneCurrent().getZoneIndex());
-					ArrayList<CandiModel> candiModelsTemp = new ArrayList<CandiModel>();
-
-					// Move out the old tenants
-					for (CandiModel modelTemp : zoneNextNew.getCandiesNext()) {
-						candiModelsTemp.add(modelTemp);
-					}
-					zoneNextNew.getCandiesNext().clear();
-
-					// Move in the new
-					for (CandiModel modelTemp : zoneNextOld.getCandiesNext()) {
-						zoneNextNew.getCandiesNext().add(modelTemp);
-						modelTemp.setZoneNext(zoneNextNew);
-					}
-					zoneNextOld.getCandiesNext().clear();
-
-					// Move old tenents into vacated zone
-					for (CandiModel modelTemp : candiModelsTemp) {
-						zoneNextOld.getCandiesNext().add(modelTemp);
-						modelTemp.setZoneNext(zoneNextOld);
-					}
-				}
-		}
-
-		// Show zone UI if we have multiple candies
-		for (ZoneModel zoneModel : mZoneModels) {
-			if (zoneModel.getCandiesNext().size() > 1)
-				zoneModel.setVisibleNext(true);
-		}
-
-		// Check to see if any zones have overflow
-		for (CandiModel candiModel : mCandiModels) {
-			candiModel.setOverflowNext(false);
-			if (!candiModel.getZoneNext().isInactive()) {
-
-				int maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE;
-				if (candiModel.getZoneNext().getCandiesNext().get(0).getZoneStatusNext() != ZoneStatus.Normal)
-					maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE_WITH_PRIMARY;
-
-				if (candiModel.getZoneNext().getCandiIndexNext(candiModel) > (maxVisible - 1)) {
-					candiModel.setOverflowNext(true);
-					candiModel.setVisibleNext(false);
-					candiModel.setTouchAreaActive(false);
-					candiModel.setReasonInactive(ReasonInactive.Navigation);
-					candiModel.setZoneNext(mZoneInactive);
-					mZoneInactive.getCandiesNext().add(candiModel);
-				}
-			}
-		}
-
-		// Assign next positions
-		for (CandiModel candiModel : mCandiModels) {
-			candiModel.setPositionNext(candiModel.getZoneNext().getChildPositionNext(candiModel));
-		}
-
-		super.setChanged();
-	}
-
-	private CandiModel doUpdateCandiModel(EntityProxy entityProxy, DisplayExtra displayExtra) {
 		/*
 		 * This only gets called when doing a partial update and a candi model already exists. A partial
 		 * update only pulls in entities for new beacons but does not pick up service side changes for the
@@ -359,24 +139,23 @@ public class CandiPatchModel extends Observable {
 		CandiModel candiModelManaged = mCandiModels.getByKey(String.valueOf(entityProxy.id));
 		candiModelManaged.setEntityProxy(entityProxy);
 		candiModelManaged.setTitleText(entityProxy.label);
-		candiModelManaged.setBodyImageId(entityProxy.imageUri);
 		candiModelManaged.setBodyImageUri(entityProxy.imageUri);
 		candiModelManaged.setBodyImageFormat(entityProxy.imageFormat.equals("html") ? ImageFormat.Html : ImageFormat.Binary);
 
 		if (candiModelManaged.getReasonInactive() != ReasonInactive.Navigation) {
 			if (entityProxy.isHidden)
-				candiModelManaged.setVisibleNext(false);
+				candiModelManaged.getViewStateNext().setVisible(false);
 			else
-				candiModelManaged.setVisibleNext(true);
+				candiModelManaged.getViewStateNext().setVisible(true);
 		}
 
-		if (candiModelManaged.isVisibleCurrent())
+		if (candiModelManaged.getViewStateCurrent().isVisible())
 			candiModelManaged.setRookie(false);
 
 		candiModelManaged.setDisplayExtra(displayExtra);
 
 		// If transitioning from hidden to visible, it might not have a zone yet
-		if (candiModelManaged.isVisibleNext() && candiModelManaged.getZoneCurrent().isInactive()) {
+		if (candiModelManaged.getViewStateNext().isVisible() && candiModelManaged.getZoneStateCurrent().getZone().isInactive()) {
 
 			ZoneModel zoneTarget = null;
 			for (ZoneModel zone : mZoneModels)
@@ -387,20 +166,296 @@ public class CandiPatchModel extends Observable {
 
 			if (zoneTarget == null) {
 				zoneTarget = new ZoneModel(mZoneModels.size(), this);
-				zoneTarget.setVisibleCurrent(false);
-				zoneTarget.setVisibleNext(true);
+				zoneTarget.getViewStateCurrent().setVisible(false).setAlpha(0);
+				zoneTarget.getViewStateNext().setVisible(true).setAlpha(1);
 				mZoneModels.add(zoneTarget);
 			}
 
 			zoneTarget.getCandiesCurrent().add(candiModelManaged);
 			zoneTarget.getCandiesNext().add(candiModelManaged);
 
-			candiModelManaged.setZoneCurrent(zoneTarget);
-			candiModelManaged.setZoneNext(zoneTarget);
+			candiModelManaged.getZoneStateCurrent().setZone(zoneTarget);
+			candiModelManaged.getZoneStateNext().setZone(zoneTarget);
 		}
 
 		candiModelManaged.setChanged();
 		return candiModelManaged;
+	}
+
+	public void updateVisibilityNext() {
+		// Reset inactive zone
+		mZoneInactive.getCandiesNext().clear();
+
+		// Manage visibility and touch areas
+		for (CandiModel candiModel : mCandiModels) {
+			candiModel.setTouchAreaActive(false);
+			if (candiModel.getReasonInactive() == ReasonInactive.Deleting) {
+				/*
+				 * Assign candies being deleted to the inactive zone
+				 */
+				candiModel.getViewStateNext().setVisible(false);
+				candiModel.getZoneStateNext().setZone(mZoneInactive);
+				mZoneInactive.getCandiesNext().add(candiModel);
+			}
+			else {
+				boolean underNextRoot = mCandiRootNext.getChildren().containsKey(String.valueOf(candiModel.getModelId())) || mCandiRootNext
+												.getChildren().containsKey(String.valueOf(((CandiModel) candiModel.getParent()).getModelId()));
+				if (!underNextRoot) {
+					/*
+					 * Assign candies being hidden because of navigation to the inactive zone
+					 */
+					candiModel.getViewStateNext().setVisible(false);
+					candiModel.setReasonInactive(ReasonInactive.Navigation);
+					candiModel.getZoneStateNext().setZone(mZoneInactive);
+					mZoneInactive.getCandiesNext().add(candiModel);
+
+					// Include any children
+					for (IModel childModel : candiModel.getChildren()) {
+						CandiModel childCandiModel = (CandiModel) childModel;
+						mZoneInactive.getCandiesNext().add(childCandiModel);
+						childCandiModel.getZoneStateNext().setZone(mZoneInactive);
+						childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
+						childCandiModel.setChanged();
+					}
+				}
+				else {
+					if (candiModel.getReasonInactive() != ReasonInactive.Deleting) {
+
+						candiModel.setReasonInactive(ReasonInactive.None);
+						if (candiModel.getEntityProxy().isHidden) {
+							/*
+							 * Candi models that won't be visible next are assigned to the special
+							 * inactive zone including their children.
+							 */
+							candiModel.getViewStateNext().setVisible(false);
+							candiModel.setReasonInactive(ReasonInactive.Hidden);
+							candiModel.getZoneStateNext().setZone(mZoneInactive);
+							candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
+							mZoneInactive.getCandiesNext().add(candiModel);
+							candiModel.setChanged();
+
+							for (IModel childModel : candiModel.getChildren()) {
+								CandiModel childCandiModel = (CandiModel) childModel;
+								mZoneInactive.getCandiesNext().add(childCandiModel);
+								childCandiModel.getZoneStateNext().setZone(mZoneInactive);
+								childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
+								childCandiModel.setChanged();
+							}
+
+						}
+						else {
+							candiModel.getViewStateNext().setVisible(true);
+							candiModel.setReasonInactive(ReasonInactive.None);
+							candiModel.setTouchAreaActive(true);
+
+							for (IModel childModel : candiModel.getChildren()) {
+								CandiModel childCandiModel = (CandiModel) childModel;
+
+								if (childCandiModel.getEntityProxy().isHidden) {
+									/*
+									 * Parent is visible but the child is hidden so we assign it to
+									 * the special inactive zone.
+									 */
+									childCandiModel.setReasonInactive(ReasonInactive.Hidden);
+									childCandiModel.getZoneStateNext().setZone(mZoneInactive);
+									childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
+									mZoneInactive.getCandiesNext().add(childCandiModel);
+									childCandiModel.setChanged();
+								}
+								else {
+									childCandiModel.setReasonInactive(ReasonInactive.None);
+									childCandiModel.getViewStateNext().setVisible(true);
+									childCandiModel.setTouchAreaActive(true);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void updateZonesNext() {
+
+		// Reset zones
+		for (ZoneModel zoneModel : mZoneModels) {
+			zoneModel.getCandiesNext().clear();
+			zoneModel.getViewStateNext().setVisible(false).setAlpha(0);
+		}
+
+		/*
+		 * Assign to zones
+		 */
+		int focusedZoneIndex = 0;
+		if (mCandiModelFocused != null) {
+			focusedZoneIndex = mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex();
+		}
+
+		int visibleCandiNext = ((CandiModel) mCandiRootNext).visibleChildrenNext();
+
+		int zoneIndex = 0;
+		if (visibleCandiNext < (focusedZoneIndex + 1)) {
+			zoneIndex = (focusedZoneIndex + 1) - visibleCandiNext;
+			zoneIndex++;
+		}
+
+		for (IModel model : mCandiRootNext.getChildren()) {
+
+			CandiModel candiModel = (CandiModel) model;
+			if (candiModel.getViewStateNext().isVisible()) {
+
+				// Allocate new zone if needed
+				if (mZoneModels.size() < zoneIndex + 1)
+					mZoneModels.add(new ZoneModel(zoneIndex, this));
+
+				// Hookup
+				ZoneModel zone = mZoneModels.get(zoneIndex);
+				zone.getCandiesNext().add(candiModel);
+				candiModel.getZoneStateNext().setZone(zone);
+				candiModel.setChanged();
+
+				// Hookup any children
+				if (!candiModel.hasVisibleChildrenNext()) {
+					candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
+				}
+				else {
+					candiModel.getZoneStateNext().setStatus(ZoneStatus.Primary);
+					/*
+					 * We might have children that are hidden even though
+					 * the parent isn't.
+					 */
+					for (IModel childModel : candiModel.getChildren()) {
+						CandiModel childCandiModel = (CandiModel) childModel;
+
+						if (childCandiModel.getViewStateNext().isVisible()) {
+							zone.getCandiesNext().add(childCandiModel);
+							childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Secondary);
+							childCandiModel.getZoneStateNext().setZone(zone);
+							childCandiModel.setChanged();
+						}
+					}
+				}
+				zoneIndex++;
+			}
+		}
+
+		// If needed, move the candi model with the current focus back to the
+		// slot the user is currently looking at.
+		if (mCandiModelFocused != null) {
+			if (!mCandiModelFocused.getZoneStateCurrent().getZone().isInactive() && !mCandiModelFocused.getZoneStateNext().getZone().isInactive())
+				if (mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex() != mCandiModelFocused.getZoneStateNext().getZone()
+						.getZoneIndex()) {
+
+					ZoneModel zoneNextOld = mCandiModelFocused.getZoneStateNext().getZone();
+					ZoneModel zoneNextNew = mZoneModels.get(mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex());
+					ArrayList<CandiModel> candiModelsTemp = new ArrayList<CandiModel>();
+
+					// Move out the old tenants
+					for (CandiModel modelTemp : zoneNextNew.getCandiesNext()) {
+						candiModelsTemp.add(modelTemp);
+					}
+					zoneNextNew.getCandiesNext().clear();
+
+					// Move in the new
+					for (CandiModel modelTemp : zoneNextOld.getCandiesNext()) {
+						zoneNextNew.getCandiesNext().add(modelTemp);
+						modelTemp.getZoneStateNext().setZone(zoneNextNew);
+					}
+					zoneNextOld.getCandiesNext().clear();
+
+					// Move old tenents into vacated zone
+					for (CandiModel modelTemp : candiModelsTemp) {
+						zoneNextOld.getCandiesNext().add(modelTemp);
+						modelTemp.getZoneStateNext().setZone(zoneNextOld);
+					}
+				}
+		}
+
+		// Show zone UI if we have multiple candies
+		for (ZoneModel zoneModel : mZoneModels) {
+			if (zoneModel.getCandiesNext().size() >= 1) {
+
+				// Show zone ui
+				if (zoneModel.getCandiesNext().size() == 1) {
+					if (zoneModel.getCandiesNext().get(0).countObservers() == 0) {
+						zoneModel.getViewStateNext().setVisible(true).setAlpha(1);
+					}
+				}
+				else {
+					zoneModel.getViewStateNext().setVisible(true).setAlpha(1);
+				}
+			}
+		}
+
+		// Check to see if any zones have overflow
+		for (CandiModel candiModel : mCandiModels) {
+			candiModel.getZoneStateNext().setOverflow(false);
+			if (!candiModel.getZoneStateNext().getZone().isInactive()) {
+
+				int maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE;
+				if (candiModel.getZoneStateNext().getZone().getCandiesNext().get(0).getZoneStateNext().getStatus() != ZoneStatus.Normal)
+					maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE_WITH_PRIMARY;
+
+				if (candiModel.getZoneStateNext().getZone().getCandiIndexNext(candiModel) > (maxVisible - 1)) {
+					/*
+					 * Overflow get assigned to the inactive zone too.
+					 */
+					candiModel.getZoneStateNext().setOverflow(true);
+					candiModel.getViewStateNext().setVisible(false);
+					candiModel.setTouchAreaActive(false);
+					candiModel.setReasonInactive(ReasonInactive.Navigation);
+					candiModel.getZoneStateNext().setZone(mZoneInactive);
+					mZoneInactive.getCandiesNext().add(candiModel);
+				}
+			}
+		}
+		setChanged();
+	}
+
+	public void updatePositionsNext() {
+		// Assign next positions
+		for (CandiModel candiModel : mCandiModels) {
+			Position positionNext = candiModel.getZoneStateNext().getZone().getChildPositionNext(candiModel);
+			candiModel.getZoneStateNext().setAlignment(positionNext.rowLast ? ZoneAlignment.Bottom : ZoneAlignment.None);
+			candiModel.getViewStateNext().setX(positionNext.x);
+			candiModel.getViewStateNext().setY(positionNext.y);
+			candiModel.getViewStateNext().setScale(positionNext.scale);
+		}
+	}
+
+	public void updateMiscNext() {
+		/*
+		 * Zone titling
+		 */
+		for (ZoneModel zoneModel : mZoneModels) {
+			if (zoneModel.getCandiesNext().size() > 1) {
+				for (CandiModel candiModel : zoneModel.getCandiesNext()) {
+					if (candiModel.getZoneStateNext().getStatus() == ZoneStatus.Primary) {
+						zoneModel.setTitleText(candiModel.getTitleText());
+						break;
+					}
+				}
+			}
+			else if (zoneModel.getCandiesNext().size() == 1) {
+				zoneModel.setTitleText(zoneModel.getCandiesNext().get(0).getTitleText());
+			}
+		}
+
+		for (IModel model : mCandiRootNext.getChildren()) {
+			CandiModel candiModel = (CandiModel) model;
+			if (candiModel.getViewStateNext().isVisible()) {
+				candiModel.getViewStateNext().setHasReflection(candiModel.getZoneStateNext().getAlignment() == ZoneAlignment.Bottom);
+				candiModel.getViewStateNext().setCollapsed(candiModel.getViewStateNext().getScale() != CandiPatchPresenter.SCALE_NORMAL);
+
+				// Include any children
+				for (IModel childModel : candiModel.getChildren()) {
+					CandiModel childCandiModel = (CandiModel) childModel;
+					childCandiModel.getViewStateNext().setHasReflection(childCandiModel.getZoneStateNext().getAlignment() == ZoneAlignment.Bottom);
+					childCandiModel.getViewStateNext()
+							.setCollapsed(childCandiModel.getViewStateNext().getScale() != CandiPatchPresenter.SCALE_NORMAL);
+				}
+			}
+		}
 	}
 
 	public void sortCandiModels() {
@@ -512,12 +567,12 @@ public class CandiPatchModel extends Observable {
 		mCandiRootNext = candiRootNext;
 	}
 
-	public ZoneModel getZoneInactive() {
-		return mZoneInactive;
+	public void setScreenWidth(int screenWidth) {
+		this.mScreenWidth = screenWidth;
 	}
 
-	public void setZoneInactive(ZoneModel zoneInactive) {
-		mZoneInactive = zoneInactive;
+	public int getScreenWidth() {
+		return mScreenWidth;
 	}
 
 	class SortEntitiesByTagLevelDb implements Comparator<CandiModel> {

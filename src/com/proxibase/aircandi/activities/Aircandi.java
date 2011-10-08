@@ -4,15 +4,12 @@ import java.util.Calendar;
 
 import android.app.Application;
 import android.location.Location;
-import android.util.Log;
 
-import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.core.CandiConstants;
 
 public class Aircandi extends Application {
 
 	public Location						currentLocation;
-	public CandiModel					currentCandiModel;
 
 	public Aircandi() {
 	}
@@ -21,29 +18,6 @@ public class Aircandi extends Application {
 	public void onCreate() {
 
 		super.onCreate();
-	}
-
-	/**
-	 * Callback interface for Aircandi async requests.
-	 */
-	public static interface Listener {
-
-		/**
-		 * Called when an AsyncTask completes with the given response. Executed by a background thread: do not update
-		 * the UI in this method.
-		 */
-		public void onComplete(String response);
-
-		public void onException(Exception e);
-	}
-
-	public abstract class BaseListener implements Listener {
-
-		public void onException(Exception e) {
-
-			Log.e(CandiConstants.APP_NAME, e.getMessage());
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -98,7 +72,6 @@ public class Aircandi extends Application {
 	}
 
 	public static long locationFixAge(Location location) {
-
 		Calendar cal = Calendar.getInstance();
 		long timeDelta = cal.getTimeInMillis() - location.getTime();
 		return timeDelta;
@@ -106,11 +79,9 @@ public class Aircandi extends Application {
 
 	/** Checks whether two providers are the same */
 	private static boolean isSameProvider(String provider1, String provider2) {
-
 		if (provider1 == null) {
 			return provider2 == null;
 		}
 		return provider1.equals(provider2);
 	}
-
 }

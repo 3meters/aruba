@@ -4,7 +4,10 @@ import static org.anddev.andengine.util.constants.Constants.VERTEX_INDEX_X;
 import static org.anddev.andengine.util.constants.Constants.VERTEX_INDEX_Y;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -35,10 +38,12 @@ import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 import org.anddev.andengine.util.modifier.ease.EaseQuartInOut;
 import org.anddev.andengine.util.modifier.ease.EaseQuartOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
+import org.anddev.andengine.util.pool.GenericPool;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.opengl.GLU;
 import android.util.TypedValue;
 import android.view.GestureDetector;
@@ -49,29 +54,31 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import com.proxibase.aircandi.activities.CandiSearchActivity;
 import com.proxibase.aircandi.activities.R;
 import com.proxibase.aircandi.candi.camera.ChaseCamera;
+import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiModelFactory;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
 import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.models.ZoneModel;
-import com.proxibase.aircandi.candi.models.BaseModel.ModelType;
+import com.proxibase.aircandi.candi.models.BaseModel.UpdateType;
+import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
 import com.proxibase.aircandi.candi.models.CandiModel.DisplayExtra;
 import com.proxibase.aircandi.candi.models.CandiModel.ReasonInactive;
 import com.proxibase.aircandi.candi.models.CandiModel.Transition;
-import com.proxibase.aircandi.candi.models.ZoneModel.Position;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
+import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
 import com.proxibase.aircandi.candi.sprites.CameraTargetSprite;
 import com.proxibase.aircandi.candi.sprites.CandiAnimatedSprite;
 import com.proxibase.aircandi.candi.sprites.CandiScene;
 import com.proxibase.aircandi.candi.sprites.CameraTargetSprite.MoveListener;
-import com.proxibase.aircandi.candi.views.BaseView;
 import com.proxibase.aircandi.candi.views.CandiView;
-import com.proxibase.aircandi.candi.views.CandiViewFactory;
 import com.proxibase.aircandi.candi.views.IView;
 import com.proxibase.aircandi.candi.views.ZoneView;
 import com.proxibase.aircandi.candi.views.ZoneViewFactory;
+import com.proxibase.aircandi.candi.views.IView.ViewTouchListener;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
+import com.proxibase.aircandi.utils.CandiList;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Utilities;
@@ -80,16 +87,13 @@ import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 public class CandiPatchPresenter implements Observer {
 
-	public static enum TextureReset {
-		All, VisibleOnly, NonVisibleOnly
-	}
-
 	private static String		COMPONENT_NAME			= "CandiPatchPresenter";
-	private static float		SCALE_NORMAL			= 1;
+	public static float			SCALE_NORMAL			= 1;
 
 	public CandiPatchModel		mCandiPatchModel;
-	private List<CandiView>		mCandiViews				= new ArrayList<CandiView>();
+	private HashMap				mCandiViewsHash			= new HashMap();
 	private List<ZoneView>		mZoneViews				= new ArrayList<ZoneView>();
+	private CandiViewPool		mCandiViewPool;
 
 	private GestureDetector		mGestureDetector;
 	private boolean				mIgnoreInput			= false;
@@ -112,6 +116,7 @@ public class CandiPatchPresenter implements Observer {
 
 	public CandiSearchActivity	mCandiActivity;
 	private RenderSurfaceView	mRenderSurfaceView;
+	private ManageViewsThread	mManageViewsThread;
 	public DisplayExtra			mDisplayExtras;
 	public boolean				mFullUpdateInProgress	= true;
 
@@ -131,6 +136,10 @@ public class CandiPatchPresenter implements Observer {
 	private IEaseFunction		mEaseBounceBack			= EaseQuartOut.getInstance();
 	private IEaseFunction		mEaseFling				= EaseExponentialOut.getInstance();
 
+	// --------------------------------------------------------------------------------------------
+	// Initialization
+	// --------------------------------------------------------------------------------------------
+
 	public CandiPatchPresenter(Context context, Activity activity, Engine engine, RenderSurfaceView renderSurfaceView, CandiPatchModel candiPatchModel) {
 
 		mCandiPatchModel = candiPatchModel;
@@ -146,7 +155,7 @@ public class CandiPatchPresenter implements Observer {
 	private void initialize() {
 
 		// Gestures
-		mGestureDetector = new GestureDetector(mContext, new CandiPatchSurfaceGestureDetector());
+		mGestureDetector = new GestureDetector(mContext, new SingleTapGestureDetector());
 		final ViewConfiguration configuration = ViewConfiguration.get(mContext);
 
 		int touchSlop = configuration.getScaledTouchSlop();
@@ -154,6 +163,9 @@ public class CandiPatchPresenter implements Observer {
 
 		mTouchSlopSquare = (touchSlop * touchSlop) / 4;
 		mDoubleTapSlopSquare = doubleTapSlop * doubleTapSlop;
+
+		// Pooling
+		mCandiViewPool = new CandiViewPool();
 
 		// Origin
 		mCandiPatchModel.setOriginX(0);
@@ -165,30 +177,6 @@ public class CandiPatchPresenter implements Observer {
 		// Textures
 		loadTextures();
 		loadTextureSources();
-	}
-
-	private void loadStyles() {
-		TypedValue resourceName = new TypedValue();
-		if (mContext.getTheme().resolveAttribute(R.attr.textureBodyZone, resourceName, true)) {
-			mStyleTextureBodyZone = (String) resourceName.coerceToString();
-		}
-		else {
-			throw new IllegalStateException("Placeholder texture was not found in the current theme");
-		}
-
-		if (mContext.getTheme().resolveAttribute(R.attr.textureBusyIndicator, resourceName, true)) {
-			mStyleTextureBusyIndicator = (String) resourceName.coerceToString();
-		}
-		else {
-			throw new IllegalStateException("Busy indicator texture was not found in the current theme");
-		}
-
-		if (mContext.getTheme().resolveAttribute(R.attr.textColorTitle, resourceName, true)) {
-			mStyleTextColorTitle = (String) resourceName.coerceToString();
-		}
-		else {
-			throw new IllegalStateException("Text color title was not found in the current theme");
-		}
 	}
 
 	public Scene initializeScene() {
@@ -249,7 +237,6 @@ public class CandiPatchPresenter implements Observer {
 
 				@Override
 				public void onUpdate(float pSecondsElapsed) {
-
 					// TODO: Implement a way to only render when needed for animations, movement, etc.
 					mRenderSurfaceView.requestRender();
 				}
@@ -284,12 +271,19 @@ public class CandiPatchPresenter implements Observer {
 					}
 
 					if (pSceneTouchEvent.isActionUp()) {
-						Utilities.Log(CandiConstants.APP_NAME, "Tricorder", "MoveEntityNearest: From Scene Touch");
 						ZoneModel nearestZone = getNearestZone(mCameraTargetSprite.getX(), false);
 						if (nearestZone != null) {
+							Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "MoveNearestZone: From Scene Touch");
 							mCandiPatchModel.setCandiModelFocused(nearestZone.getCandiesCurrent().get(0));
 							mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
-									mEaseSlottingMinor);
+									mEaseSlottingMinor, new MoveListener() {
+
+										@Override
+										public void onMoveFinished() {
+											manageViews();
+										}
+									});
+
 						}
 						return true;
 					}
@@ -313,11 +307,37 @@ public class CandiPatchPresenter implements Observer {
 
 		mEngine.registerUpdateHandler(new FPSLogger());
 		mScene = scene;
+
 		return scene;
 	}
 
-	@Override
-	public void update(Observable observable, Object data) {}
+	private void loadStyles() {
+		TypedValue resourceName = new TypedValue();
+		if (mContext.getTheme().resolveAttribute(R.attr.textureBodyZone, resourceName, true)) {
+			mStyleTextureBodyZone = (String) resourceName.coerceToString();
+		}
+		else {
+			throw new IllegalStateException("Placeholder texture was not found in the current theme");
+		}
+
+		if (mContext.getTheme().resolveAttribute(R.attr.textureBusyIndicator, resourceName, true)) {
+			mStyleTextureBusyIndicator = (String) resourceName.coerceToString();
+		}
+		else {
+			throw new IllegalStateException("Busy indicator texture was not found in the current theme");
+		}
+
+		if (mContext.getTheme().resolveAttribute(R.attr.textColorTitle, resourceName, true)) {
+			mStyleTextColorTitle = (String) resourceName.coerceToString();
+		}
+		else {
+			throw new IllegalStateException("Text color title was not found in the current theme");
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Primary
+	// --------------------------------------------------------------------------------------------
 
 	public void updateCandiData(List<EntityProxy> proxiEntities, boolean fullUpdate) {
 		/*
@@ -335,7 +355,7 @@ public class CandiPatchPresenter implements Observer {
 			 * Creates new root candi model
 			 */
 			mFullUpdateInProgress = true;
-			mCandiViews.clear();
+			getCandiViewsHash().clear();
 			mZoneViews.clear();
 			clearCandiLayer();
 			clearZoneLayer();
@@ -361,11 +381,12 @@ public class CandiPatchPresenter implements Observer {
 						break;
 					}
 					else {
-						for (EntityProxy childEntity : entity.children)
+						for (EntityProxy childEntity : entity.children) {
 							if (childEntity.id.equals(candiModel.getEntityProxy().id)) {
 								orphaned = false;
 								break;
 							}
+						}
 					}
 				}
 				if (orphaned) {
@@ -375,7 +396,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		CandiModel candiRootPrev = (CandiModel) mCandiPatchModel.getCandiRootCurrent();
-		CandiModel candiRootNext = new CandiModel(ModelType.Root, -1);
+		CandiModel candiRootNext = new CandiModel(-1, mCandiPatchModel);
 		candiRootNext.setSuperRoot(true);
 
 		// Strip linkages
@@ -392,15 +413,13 @@ public class CandiPatchPresenter implements Observer {
 				candiModel = mCandiPatchModel.updateCandiModel(entity, mDisplayExtras);
 				candiModel.setParent(candiRootNext);
 				candiRootNext.getChildren().add(candiModel);
-				ensureCandiView(candiModel);
 			}
 			else {
-				candiModel = CandiModelFactory.newCandiModel(ModelType.Entity, entity.id, entity);
+				candiModel = CandiModelFactory.newCandiModel(entity.id, entity, mCandiPatchModel);
 				candiModel.setDisplayExtra(mDisplayExtras);
 				mCandiPatchModel.addCandiModel(candiModel);
 				candiModel.setParent(candiRootNext);
 				candiRootNext.getChildren().add(candiModel);
-				ensureCandiView(candiModel);
 			}
 
 			for (EntityProxy childEntity : entity.children) {
@@ -410,15 +429,13 @@ public class CandiPatchPresenter implements Observer {
 					childCandiModel = mCandiPatchModel.updateCandiModel(childEntity, mDisplayExtras);
 					candiModel.getChildren().add(childCandiModel);
 					childCandiModel.setParent(candiModel);
-					ensureCandiView(childCandiModel);
 				}
 				else {
-					childCandiModel = CandiModelFactory.newCandiModel(ModelType.Entity, childEntity.id, childEntity);
+					childCandiModel = CandiModelFactory.newCandiModel(childEntity.id, childEntity, mCandiPatchModel);
 					childCandiModel.setDisplayExtra(mDisplayExtras);
 					mCandiPatchModel.addCandiModel(childCandiModel);
 					candiModel.getChildren().add(childCandiModel);
 					childCandiModel.setParent(candiModel);
-					ensureCandiView(childCandiModel);
 				}
 			}
 		}
@@ -469,23 +486,31 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	public void navigateModel(IModel candiRoot) {
+	public void navigateModel(IModel candiRootNext) {
 
-		mCandiPatchModel.setCandiRootNext(candiRoot);
+		long startTime = System.nanoTime();
+		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Navigate started...");
 
-		// Rebuild zone assignments
-		mCandiPatchModel.updateZones();
+		mCandiPatchModel.setCandiRootNext(candiRootNext);
+
+		// Updates
+		mCandiPatchModel.updateVisibilityNext();
+		mCandiPatchModel.updateZonesNext();
+		mCandiPatchModel.updatePositionsNext();
+		mCandiPatchModel.updateMiscNext();
 
 		// Make sure zones have a view
 		for (ZoneModel zone : mCandiPatchModel.getZones()) {
 			ensureZoneView(zone);
 		}
 
-		// Reset camera boundaries
-		setCameraBoundaries(mScene);
-
 		// Handle transitions and animations
-		doTransitions();
+		if (CandiConstants.TRANSITIONS_ACTIVE) {
+			doTransitionAnimations();
+		}
+
+		// Candies come and go so make sure our zone positioning is correct
+		ensureZoneFocus();
 
 		// Trigger observer updates
 		mCandiPatchModel.update();
@@ -493,29 +518,44 @@ public class CandiPatchPresenter implements Observer {
 		// Copy next to current across the model and child models
 		mCandiPatchModel.shiftToNext();
 
+		// Reset camera boundaries
+		setCameraBoundaries(mScene);
+
+		// Now that all the view entities have updated we can do global operations like z sorting.
+		IEntity layer = mEngine.getScene().getChild(CandiConstants.LAYER_CANDI);
+		layer.sortChildren();
+
 		// Back button needs updating
-		mCandiActivity.updateCandiBackButton(candiRoot.getTitleText());
+		mCandiActivity.updateCandiBackButton(candiRootNext.getTitleText());
+
+		// Good opportunity to manage views
+		manageViews();
+
+		long estimatedTime = System.nanoTime() - startTime;
+		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Navigate finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
 	}
 
-	private IView ensureCandiView(CandiModel candiModel) {
+	@SuppressWarnings("unused")
+	private IView ensureCandiView(final CandiModel candiModel) {
 
 		// We use the observer count as an indication of whether this candi model
 		// already has a candi view.
-		if (!candiModel.getEntityProxy().isHidden && candiModel.countObservers() == 0) {
+		if (!mCandiViewsHash.containsKey(candiModel.getModelIdAsString()) && !candiModel.getEntityProxy().isHidden) {
 
-			// Create candi view for model
-			CandiView candiView = CandiViewFactory.createCandiView(candiModel, CandiPatchPresenter.this, new CandiView.OnCandiViewTouchListener() {
+			if (candiModel.countObservers() > 0)
+				throw new IllegalStateException("CandiModel has an observer but CandiViewHash is empty");
+
+			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "ensureCandiView: " + candiModel.getTitleText());
+
+			final CandiView candiView = new CandiView(CandiPatchPresenter.this);
+			candiView.setAlpha(0);
+			candiView.setTitleTextColor(Color.parseColor(getStyleTextColorTitle()));
+			mEngine.getScene().getChild(CandiConstants.LAYER_CANDI).attachChild(candiView);
+
+			candiView.setViewTouchListener(new ViewTouchListener() {
 
 				@Override
-				public void onCandiViewSingleTap(final IView candiView) {
-					if (!mIgnoreInput) {
-						mIgnoreInput = true;
-						doCandiViewSingleTap(candiView);
-					}
-				}
-
-				@Override
-				public void onCandiViewDoubleTap(IView candiView) {
+				public void onViewDoubleTap(IView view) {
 					if (!mIgnoreInput) {
 						mIgnoreInput = true;
 						doCandiViewDoubleTap(candiView);
@@ -523,20 +563,24 @@ public class CandiPatchPresenter implements Observer {
 				}
 
 				@Override
-				public void onCandiViewLongPress(IView candiView) {}
+				public void onViewLongPress(IView view) {}
+
+				@Override
+				public void onViewSingleTap(IView view) {
+					if (!mIgnoreInput) {
+						mIgnoreInput = true;
+						doCandiViewSingleTap(candiView);
+					}
+				}
 			});
 
-			// Track in our collection
-			mCandiViews.add(candiView);
-
-			// Bind candi view to model as observer
+			candiView.setModel(candiModel);
 			candiModel.addObserver(candiView);
+			mCandiViewsHash.put(String.valueOf(candiModel.getModelId()), candiView);
 
-			// Set initial view position
-			candiView.setPosition(candiModel.getZoneCurrent().getX(), candiModel.getZoneCurrent().getY());
-
-			// Add candi view to scene (starts out hidden using transparency).
-			mEngine.getScene().getChild(CandiConstants.LAYER_CANDI).attachChild(candiView);
+			candiView.progressVisible(true);
+			candiView.loadHardwareTextures();
+			candiView.initialize();
 
 			return candiView;
 		}
@@ -544,22 +588,205 @@ public class CandiPatchPresenter implements Observer {
 		return null;
 	}
 
+	private IView ensureZoneView(ZoneModel zoneModel) {
+
+		if (zoneModel.getViewStateNext().isVisible() && zoneModel.countObservers() == 0) {
+
+			// Create view for model
+			ZoneView zoneView = ZoneViewFactory.createZoneView(zoneModel, CandiPatchPresenter.this);
+
+			// Track in our collection
+			mZoneViews.add(zoneView);
+
+			// Bind view to model as observer
+			zoneModel.addObserver(zoneView);
+
+			// Set initial view position
+			zoneView.setPosition(zoneModel.getViewStateCurrent().getX(), zoneModel.getViewStateCurrent().getY());
+
+			// Add view to scene (starts out hidden using transparency).
+			mEngine.getScene().getChild(CandiConstants.LAYER_ZONES).attachChild(zoneView);
+
+			return zoneView;
+		}
+
+		return null;
+	}
+
+	@Override
+	public void update(Observable observable, Object data) {}
+
+	public class CandiViewPool extends GenericPool<CandiView> {
+
+		@Override
+		protected void onHandleObtainItem(CandiView item) {
+			item.setIgnoreUpdate(false);
+		}
+
+		@Override
+		protected void onHandleRecycleItem(CandiView item) {
+			item.reset();
+			item.setIgnoreUpdate(true);
+		}
+
+		@Override
+		protected CandiView onAllocatePoolItem() {
+			/*
+			 * Create a candi view and do all the configuration that isn't model specific.
+			 */
+			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "New CandiView allocated");
+
+			final CandiView candiView = new CandiView(CandiPatchPresenter.this);
+
+			candiView.setTitleTextColor(Color.parseColor(getStyleTextColorTitle()));
+			mEngine.getScene().getChild(CandiConstants.LAYER_CANDI).attachChild(candiView);
+
+			mCandiActivity.runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					candiView.setGestureDetector(new GestureDetector(mCandiActivity, candiView));
+
+				}
+			});
+
+			candiView.setViewTouchListener(new ViewTouchListener() {
+
+				@Override
+				public void onViewDoubleTap(IView view) {
+					if (!mIgnoreInput) {
+						mIgnoreInput = true;
+						doCandiViewDoubleTap(candiView);
+					}
+				}
+
+				@Override
+				public void onViewLongPress(IView view) {}
+
+				@Override
+				public void onViewSingleTap(IView view) {
+					if (!mIgnoreInput) {
+						mIgnoreInput = true;
+						doCandiViewSingleTap(candiView);
+					}
+				}
+			});
+
+			return candiView;
+		}
+	}
+
+	public void getCandiViewFromPool(final CandiModel candiModel) {
+		/*
+		 * CandiView has been pre-configured except for anything that is model specific.
+		 */
+		final CandiView candiView = mCandiViewPool.obtainPoolItem();
+
+		candiView.setModel(candiModel);
+		candiModel.addObserver(candiView);
+		getCandiViewsHash().put(String.valueOf(candiModel.getModelId()), candiView);
+
+		if (candiView.isHardwareTexturesInitialized()) {
+			candiView.initializeModel();
+		}
+		else {
+			candiView.loadHardwareTextures();
+			candiView.initialize();
+		}
+
+		// Hide zone ui
+		ZoneModel zoneModel = candiModel.getZoneStateCurrent().getZone();
+		if (!zoneModel.isInactive() && candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Normal) {
+			zoneModel.getModifiers().addLast(new CandiAlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f));
+			zoneModel.setChanged();
+			zoneModel.update();
+		}
+
+		// Have to call candiView directly because candimodel doesn't think anything has changed.
+		candiView.update(null, UpdateType.Reuse);
+	}
+
+	public void sendCandiViewToPool(CandiModel candiModel) {
+		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, candiModel.getTitleText() + ": CandiView recycled to the pool");
+
+		String modelId = String.valueOf(candiModel.getModelId());
+		CandiView candiView = (CandiView) getCandiViewsHash().get(modelId);
+
+		// Show zone ui
+		final ZoneModel zoneModel = candiModel.getZoneStateCurrent().getZone();
+		if (!zoneModel.isInactive()) {
+			
+			// Doing both current/next because this isn't part of a double buffer epoch pass
+			zoneModel.getViewStateCurrent().setAlpha(1);
+			zoneModel.getViewStateNext().setAlpha(1);
+			zoneModel.getViewStateCurrent().setVisible(true);
+			zoneModel.getViewStateNext().setVisible(true);
+			zoneModel.setChanged();
+			zoneModel.notifyObservers(UpdateType.Reuse);
+		}
+
+		candiModel.deleteObservers();
+		getCandiViewsHash().remove(modelId);
+		if (candiView != null) {
+			mCandiViewPool.recyclePoolItem(candiView);
+		}
+	}
+
+	public class ManageViewsThread extends Thread {
+
+		@Override
+		public void run() {
+			CandiList candiModels = mCandiPatchModel.getCandiModels();
+			int countCandiModels = candiModels.size();
+
+			for (int i = 0; i < countCandiModels; i++) {
+
+				final CandiModel candiModel = (CandiModel) candiModels.get(i);
+
+				if (!candiModel.getViewStateCurrent().isVisible()) {
+					continue;
+				}
+
+				final ViewState viewState = ((BaseModel) candiModels.get(i)).getViewStateCurrent();
+				boolean isVisibleToCamera = viewState.isWithinHalo(mCamera);
+
+				if (isVisibleToCamera && !mCandiViewsHash.containsKey(candiModel.getModelIdAsString())) {
+					getCandiViewFromPool(candiModel);
+				}
+				else if (!isVisibleToCamera && mCandiViewsHash.containsKey(candiModel.getModelIdAsString())) {
+					sendCandiViewToPool(candiModel);
+				}
+			}
+		}
+	};
+
+	public void manageViews() {
+		mManageViewsThread = new ManageViewsThread();
+		mManageViewsThread.setPriority(Thread.MIN_PRIORITY);
+		mManageViewsThread.setName("ViewManager");
+		mManageViewsThread.start();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Event handlers
+	// --------------------------------------------------------------------------------------------
+
 	private void doCandiViewSingleTap(IView candiView) {
 		final CandiModel candiModel = (CandiModel) candiView.getModel();
 		Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "SingleTap triggered: " + candiModel.getEntityProxy().label);
 
 		mCandiPatchModel.setCandiModelFocused(candiModel);
-		float distanceToMove = Math.abs(mCameraTargetSprite.getX() - candiModel.getZoneCurrent().getX());
+		float distanceToMove = Math.abs(mCameraTargetSprite.getX() - candiModel.getZoneStateCurrent().getZone().getViewStateCurrent().getX());
 
 		if (distanceToMove != 0) {
 
 			mCameraTargetSprite.clearEntityModifiers();
-			mCameraTargetSprite.moveToZone(candiModel.getZoneCurrent(), CandiConstants.DURATION_SLOTTING_MAJOR, mEaseSlottingMajor,
+			mCameraTargetSprite.moveToZone(candiModel.getZoneStateCurrent().getZone(), CandiConstants.DURATION_SLOTTING_MAJOR, mEaseSlottingMajor,
 					new MoveListener() {
 
 						@Override
 						public void onMoveFinished() {
-							if (candiModel.getZoneStatusCurrent() == ZoneStatus.Secondary) {
+							if (candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Secondary) {
 								mCandiActivity.runOnUiThread(new Runnable() {
 
 									@Override
@@ -577,7 +804,7 @@ public class CandiPatchPresenter implements Observer {
 					});
 		}
 		else {
-			if (candiModel.getZoneStatusCurrent() == ZoneStatus.Secondary) {
+			if (candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Secondary) {
 				navigateModel(candiModel.getParent());
 				mIgnoreInput = false;
 			}
@@ -609,45 +836,15 @@ public class CandiPatchPresenter implements Observer {
 		mIgnoreInput = false;
 	}
 
-	private IView ensureZoneView(ZoneModel zoneModel) {
+	// --------------------------------------------------------------------------------------------
+	// Animation
+	// --------------------------------------------------------------------------------------------
 
-		if (zoneModel.isVisibleNext() && zoneModel.countObservers() == 0) {
-
-			// Create view for model
-			ZoneView zoneView = ZoneViewFactory.createZoneView(zoneModel, CandiPatchPresenter.this);
-
-			// Track in our collection
-			mZoneViews.add(zoneView);
-
-			// Bind view to model as observer
-			zoneModel.addObserver(zoneView);
-
-			// Set initial view position
-			zoneView.setPosition(zoneModel.getX(), zoneModel.getY());
-
-			// Add view to scene (starts out hidden using transparency).
-			mEngine.getScene().getChild(CandiConstants.LAYER_ZONES).attachChild(zoneView);
-
-			return zoneView;
-		}
-
-		return null;
-	}
-
-	private void doTransitions() {
+	private void doTransitionAnimations() {
 		/*
 		 * Zone transitions
 		 */
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
-			if (zoneModel.getCandiesNext().size() > 1) {
-				for (CandiModel candiModel : zoneModel.getCandiesNext()) {
-					if (candiModel.getZoneStatusNext() == ZoneStatus.Primary) {
-						zoneModel.setTitleText(candiModel.getTitleText());
-						break;
-					}
-				}
-			}
-
 			Transition transition = zoneModel.getTransition();
 			if (transition == Transition.FadeIn)
 				zoneModel.getModifiers().addLast(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f));
@@ -656,26 +853,20 @@ public class CandiPatchPresenter implements Observer {
 		}
 		/*
 		 * Ensure that the candi with focus always draws front-most
+		 * during animations.
 		 */
 		if (mCandiPatchModel.getCandiModelFocused() != null) {
-
-			CandiView candiView = (CandiView) getViewForModel(mCandiPatchModel.getCandiModelFocused());
-			IEntity layer = mEngine.getScene().getChild(CandiConstants.LAYER_CANDI);
-
-			int childCount = layer.getChildCount();
+			CandiModel candiModel = mCandiPatchModel.getCandiModelFocused();
+			int childCount = mCandiPatchModel.getCandiModels().size();
 			for (int i = 0; i < childCount; i++) {
-				IEntity child = layer.getChild(i);
-				if (child instanceof CandiView) {
-					if (child.equals(candiView)) {
-						child.setZIndex(childCount);
-					}
-					else {
-						child.setZIndex(i);
-					}
+				CandiModel candiModelTemp = mCandiPatchModel.getCandiModels().get(i);
+				if (candiModelTemp.equals(candiModel)) {
+					candiModelTemp.getViewStateNext().setZIndex(childCount);
+				}
+				else {
+					candiModelTemp.getViewStateNext().setZIndex(i);
 				}
 			}
-
-			layer.sortChildren();
 		}
 		/*
 		 * Candi transitions
@@ -684,67 +875,48 @@ public class CandiPatchPresenter implements Observer {
 			boolean needDelay = false;
 			if (zone.isOccupiedCurrent()) {
 
-				for (CandiModel candiModelCurrent : zone.getCandiesCurrent()) {
-					if (candiModelCurrent.getModifiers().isEmpty()) {
+				for (CandiModel candiModel : zone.getCandiesCurrent()) {
+					if (candiModel.getModifiers().isEmpty()) {
 
-						Transition transition = candiModelCurrent.getTransition();
-						Position positionCurrent = candiModelCurrent.getPositionCurrent();
-						Position positionNext = candiModelCurrent.getPositionNext();
+						Transition transition = candiModel.getTransition();
+						ViewState viewStateCurrent = candiModel.getViewStateCurrent();
+						ViewState viewStateNext = candiModel.getViewStateNext();
 
 						if (transition == Transition.Out) {
-							candiModelCurrent.getModifiers().addLast(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f));
+							candiModel.getModifiers().addLast(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f));
 							needDelay = true;
 						}
 						else if (transition == Transition.FadeOut) {
-							candiModelCurrent.getModifiers().addLast(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f));
+							candiModel.getModifiers().addLast(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f));
 							needDelay = true;
 						}
 						else if (transition == Transition.OverflowOut) {
-							Position positionNextFocus = mCandiPatchModel.getCandiModelFocused().getPositionNext();
-							candiModelCurrent.getModifiers().addLast(
+							ViewState viewStateNextFocus = mCandiPatchModel.getCandiModelFocused().getViewStateNext();
+							candiModel.getModifiers().addLast(
 									new ParallelEntityModifier(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f),
-											new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.scale,
-													positionNextFocus.scale, EaseQuartInOut.getInstance()), new MoveModifier(
-													CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.x, positionNextFocus.x,
-													positionCurrent.y, positionNextFocus.y, EaseQuartInOut.getInstance())));
+											new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrent.getScale(),
+													viewStateNextFocus.getScale(), EaseQuartInOut.getInstance()), new MoveModifier(
+													CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrent.getX(), viewStateNextFocus.getX(),
+													viewStateCurrent.getY(), viewStateNextFocus.getY(), EaseQuartInOut.getInstance())));
 
 							needDelay = true;
 						}
-						else if (transition == Transition.Move) {
+						else if (transition == Transition.Move || transition == Transition.Shift) {
 
-							candiModelCurrent.setBodyOnly(positionNext.scale != SCALE_NORMAL);
-							if (candiModelCurrent.getPositionCurrent().scale == positionNext.scale) {
-								candiModelCurrent.getModifiers().addLast(
-										new MoveModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.x, positionNext.x,
-												positionCurrent.y, positionNext.y, EaseQuartInOut.getInstance()));
+							if (viewStateCurrent.getScale() == viewStateNext.getScale()) {
+								candiModel.getModifiers().addLast(
+										new MoveModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrent.getX(), viewStateNext.getX(),
+												viewStateCurrent.getY(), viewStateNext.getY(), EaseQuartInOut.getInstance()));
 							}
 							else {
-								candiModelCurrent.getModifiers().addLast(
-										new ParallelEntityModifier(new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.scale,
-												positionNext.scale, EaseQuartInOut.getInstance()), new MoveModifier(
-												CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.x, positionNext.x, positionCurrent.y,
-												positionNext.y, EaseQuartInOut.getInstance())));
+								candiModel.getModifiers().addLast(
+										new ParallelEntityModifier(new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrent
+												.getScale(), viewStateNext.getScale(), EaseQuartInOut.getInstance()), new MoveModifier(
+												CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrent.getX(), viewStateNext.getX(),
+												viewStateCurrent.getY(), viewStateNext.getY(), EaseQuartInOut.getInstance())));
 							}
-							needDelay = true;
-						}
-						else if (transition == Transition.Shift) {
-							/*
-							 * A shift can mean a move within a zone and can mean expand/collapse
-							 */
-							if (positionCurrent.scale == positionNext.scale) {
-								CandiView candiView = (CandiView) getViewForModel(candiModelCurrent);
-								candiView.reflectionVisible(positionNext.rowLast, true, CandiConstants.DURATION_TRANSITIONS_FADE);
-								candiModelCurrent.getModifiers().addLast(
-										new MoveModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.x, positionNext.x,
-												positionCurrent.y, positionNext.y, EaseQuartInOut.getInstance()));
-							}
-							else {
-								candiModelCurrent.setBodyOnly(positionNext.scale != SCALE_NORMAL);
-								candiModelCurrent.getModifiers().addLast(
-										new ParallelEntityModifier(new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.scale,
-												positionNext.scale, EaseQuartInOut.getInstance()), new MoveModifier(
-												CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.x, positionNext.x, positionCurrent.y,
-												positionNext.y, EaseQuartInOut.getInstance())));
+							if (transition == Transition.Move) {
+								needDelay = true;
 							}
 						}
 					}
@@ -753,86 +925,67 @@ public class CandiPatchPresenter implements Observer {
 
 			if (zone.isOccupiedNext()) {
 
-				for (CandiModel candiModelNext : zone.getCandiesNext()) {
-					if (candiModelNext.getModifiers().isEmpty()) {
+				for (CandiModel candiModel : zone.getCandiesNext()) {
+					if (candiModel.getModifiers().isEmpty()) {
 
-						Transition transition = candiModelNext.getTransition();
-						Position positionCurrent = candiModelNext.getPositionCurrent();
-						Position positionNext = candiModelNext.getPositionNext();
+						Transition transition = candiModel.getTransition();
+						ViewState viewStateCurrent = candiModel.getViewStateCurrent();
+						ViewState viewStateNext = candiModel.getViewStateNext();
 
 						if (transition == Transition.FadeOut) {
-							CandiView candiView = (CandiView) getViewForModel(candiModelNext);
-							candiView.setVisible(false);
+							// viewStateNext.setVisible(false);
 						}
 						else if (transition == Transition.OverflowIn) {
 
-							CandiView candiView = (CandiView) getViewForModel(candiModelNext);
-							if (positionNext.scale != SCALE_NORMAL) {
-								candiModelNext.setBodyOnly(true);
-							}
-							else {
-								candiModelNext.setBodyOnly(false);
-							}
-							candiView.setScale(positionNext.scale);
-							candiView.setPosition(positionNext.x, positionNext.y);
-
 							if (needDelay)
-								candiModelNext.getModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
+								candiModel.getModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
 
-							Position positionCurrentFocus = mCandiPatchModel.getCandiModelFocused().getPositionCurrent();
+							ViewState viewStateCurrentFocus = mCandiPatchModel.getCandiModelFocused().getViewStateCurrent();
 
-							candiModelNext.getModifiers().addLast(
+							candiModel.getModifiers().addLast(
 									new ParallelEntityModifier(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f),
-											new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrentFocus.scale,
-													positionNext.scale, EaseQuartInOut.getInstance()), new MoveModifier(
-													CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrentFocus.x, positionNext.x,
-													positionCurrentFocus.y, positionNext.y, EaseQuartInOut.getInstance())));
+											new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrentFocus.getScale(),
+													viewStateNext.getScale(), EaseQuartInOut.getInstance()), new MoveModifier(
+													CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrentFocus.getX(), viewStateNext.getX(),
+													viewStateCurrentFocus.getY(), viewStateNext.getY(), EaseQuartInOut.getInstance())));
 						}
 						else if (transition == Transition.FadeIn) {
 
-							CandiView candiView = (CandiView) getViewForModel(candiModelNext);
-							if (positionNext.scale != SCALE_NORMAL) {
-								candiModelNext.setBodyOnly(true);
-							}
-							else {
-								candiModelNext.setBodyOnly(false);
-							}
-							candiView.setScale(positionNext.scale);
-							candiView.setPosition(positionNext.x, positionNext.y);
-
 							if (needDelay)
-								candiModelNext.getModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
+								candiModel.getModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
 
-							candiModelNext.getModifiers().addLast(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f));
+							candiModel.getModifiers().addLast(new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f));
 						}
 						else if (transition == Transition.Move) {
 
-							candiModelNext.setBodyOnly(positionNext.scale != SCALE_NORMAL);
-
 							if (needDelay)
-								candiModelNext.getModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
+								candiModel.getModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
 
-							if (positionCurrent.scale == positionNext.scale) {
-								candiModelNext.getModifiers().addLast(
-										new MoveModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.x, positionNext.x,
-												positionCurrent.y, positionNext.y, EaseQuartInOut.getInstance()));
+							if (viewStateCurrent.getScale() == viewStateNext.getScale()) {
+								candiModel.getModifiers().addLast(
+										new MoveModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrent.getX(), viewStateNext.getX(),
+												viewStateCurrent.getY(), viewStateNext.getY(), EaseQuartInOut.getInstance()));
 							}
 							else {
-								candiModelNext.getModifiers().addLast(
-										new ParallelEntityModifier(new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.scale,
-												positionNext.scale, EaseQuartInOut.getInstance()), new MoveModifier(
-												CandiConstants.DURATION_TRANSITIONS_MOVE, positionCurrent.x, positionNext.x, positionCurrent.y,
-												positionNext.y, EaseQuartInOut.getInstance())));
+								candiModel.getModifiers().addLast(
+										new ParallelEntityModifier(new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrent
+												.getScale(), viewStateNext.getScale(), EaseQuartInOut.getInstance()), new MoveModifier(
+												CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrent.getX(), viewStateNext.getX(),
+												viewStateCurrent.getY(), viewStateNext.getY(), EaseQuartInOut.getInstance())));
 							}
 						}
 					}
 				}
 			}
 		}
+	}
+
+	private void ensureZoneFocus() {
 		/*
-		 * If current focus is going away, move camera target to another entity before other moves/shows happen.
+		 * If candi with current focus is going away, move camera target
+		 * to another entity before other moves/shows happen.
 		 */
-		if (mCandiPatchModel.getCandiModelFocused() != null && mCandiPatchModel.getCandiModelFocused().getZoneCurrent().getZoneIndex() + 1 > mCandiPatchModel
+		if (mCandiPatchModel.getCandiModelFocused() != null && mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone().getZoneIndex() + 1 > mCandiPatchModel
 					.getZonesOccupiedNextCount()) {
 			ZoneModel zoneModel = getZoneContainsCandiNext(mCandiPatchModel.getCandiModelFocused());
 			if (zoneModel != null)
@@ -843,11 +996,64 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
+	private void setCameraBoundaries(Scene scene) {
+
+		// Find first occupied zone
+		ZoneModel firstOccupiedZone = null;
+		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
+			if (zoneModel.getCandiesCurrent().size() > 0) {
+				firstOccupiedZone = zoneModel;
+				break;
+			}
+		}
+		if (firstOccupiedZone != null) {
+			mBoundsMinX = firstOccupiedZone.getViewStateCurrent().getX();
+			mBoundsMaxX = (mBoundsMinX + (mCandiPatchModel.getZonesOccupiedCurrentCount() - 1) * (CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING));
+		}
+	}
+
+	public void setFrustum(GL10 pGL) {
+
+		// Set field of view to 60 degrees
+		float fov_degrees = 60;
+		float fov_radians = fov_degrees / 180 * (float) Math.PI;
+
+		// Set aspect ratio and distance of the screen
+		float aspect = mCamera.getWidth() / mCamera.getHeight();
+		float camZ = mCamera.getHeight() / 2 / (float) Math.tan(fov_radians / 2);
+
+		// Set projection
+		GLHelper.setProjectionIdentityMatrix(pGL);
+		GLU.gluPerspective(pGL, fov_degrees, aspect, camZ / 10, camZ * 10);
+
+		/*
+		 * The logic here positions the viewer but does not position the camera.
+		 * That means we could be looking at slot #5 but the camera is still sitting
+		 * on slot #2. Touch areas track with the camera so they will be messed up. So
+		 * we still set the camera target sprite as the chase entity for the
+		 * camera.
+		 * |
+		 * Because the y axis is reversed, we need to subtract to move down.
+		 */
+
+		final float[] centerCoordinates = mCameraTargetSprite.getSceneCenterCoordinates();
+		float targetX = centerCoordinates[VERTEX_INDEX_X];
+		float targetY = -centerCoordinates[VERTEX_INDEX_Y];
+
+		GLU.gluLookAt(pGL, targetX, targetY, camZ, targetX, targetY, 0, 0, 1, 0); // move camera back
+		pGL.glScalef(1, -1, 1); // reverse y-axis
+		pGL.glTranslatef(0f, 0, 0); // origin at top left
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Textures
+	// --------------------------------------------------------------------------------------------
+
 	public void removeCandiModel(CandiModel candiModel) {
 
 		// Remove associated candi view
-		final CandiView candiView = (CandiView) getViewForModel(candiModel);
-		mCandiViews.remove(candiView);
+		final CandiView candiView = (CandiView) getCandiViewsHash().get(String.valueOf(candiModel.getModelId()));
+		getCandiViewsHash().remove(String.valueOf(candiModel.getModelId()));
 		mEngine.runOnUpdateThread(new Runnable() {
 
 			@Override
@@ -858,10 +1064,10 @@ public class CandiPatchPresenter implements Observer {
 		});
 
 		// Repeat for all children
-		for (IModel childCandiModel : candiModel.getChildren()) {
-			childCandiModel = (CandiModel) childCandiModel;
-			final CandiView childCandiView = (CandiView) getViewForModel(childCandiModel);
-			mCandiViews.remove(childCandiView);
+		for (IModel childModel : candiModel.getChildren()) {
+			CandiModel childCandiModel = (CandiModel) childModel;
+			final CandiView childCandiView = (CandiView) getCandiViewsHash().get(String.valueOf(childCandiModel.getModelId()));
+			getCandiViewsHash().remove(String.valueOf(childCandiModel.getModelId()));
 			mEngine.runOnUpdateThread(new Runnable() {
 
 				@Override
@@ -933,32 +1139,9 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	public void resetTextures(TextureReset textureReset) {
-		// Candi views
-		for (final CandiView candiView : mCandiViews) {
-			if (textureReset == TextureReset.VisibleOnly && !candiView.isVisibleToCamera(mCamera)) {
-				continue;
-			}
-			else if (textureReset == TextureReset.NonVisibleOnly && candiView.isVisibleToCamera(mCamera)) {
-				continue;
-			}
-			candiView.resetTextures();
-		}
-
-		// Zone views
-		for (final ZoneView zoneView : mZoneViews) {
-			if (textureReset == TextureReset.VisibleOnly && !zoneView.isVisibleToCamera(mCamera))
-				continue;
-			else if (textureReset == TextureReset.NonVisibleOnly && zoneView.isVisibleToCamera(mCamera))
-				continue;
-			zoneView.resetTextures();
-		}
-	}
-
-	public void resetSharedTextures() {
-		mTexture.clearTextureSources();
-		loadTextureSources();
-	}
+	// --------------------------------------------------------------------------------------------
+	// Textures
+	// --------------------------------------------------------------------------------------------
 
 	public void loadTextures() {
 		mTexture = new Texture(512, 512, CandiConstants.GL_TEXTURE_OPTION);
@@ -1001,6 +1184,40 @@ public class CandiPatchPresenter implements Observer {
 		mProgressTextureRegion = TextureRegionFactory.createTiledFromAsset(mTexture, mContext, mStyleTextureBusyIndicator, 256, 256, 4, 2);
 	}
 
+	public void resetTextures(TextureReset textureReset) {
+		// Candi views
+		Iterator it = getCandiViewsHash().entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry) it.next();
+			CandiView candiView = (CandiView) entry.getValue();
+			if (textureReset == TextureReset.VisibleOnly && !candiView.getModel().getViewStateCurrent().isVisibleToCamera(mCamera)) {
+				continue;
+			}
+			else if (textureReset == TextureReset.NonVisibleOnly && candiView.getModel().getViewStateCurrent().isVisibleToCamera(mCamera)) {
+				continue;
+			}
+			candiView.resetTextureSources();
+		}
+
+		// Zone views
+		for (final ZoneView zoneView : mZoneViews) {
+			if (textureReset == TextureReset.VisibleOnly && !zoneView.isVisibleToCamera(mCamera))
+				continue;
+			else if (textureReset == TextureReset.NonVisibleOnly && zoneView.isVisibleToCamera(mCamera))
+				continue;
+			zoneView.resetTextureSources();
+		}
+	}
+
+	public void resetSharedTextures() {
+		mTexture.clearTextureSources();
+		loadTextureSources();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Utility routines
+	// --------------------------------------------------------------------------------------------
+
 	private ZoneModel getNearestZone(float nearestToX, boolean requireOccupiedNext) {
 		if (mCandiPatchModel.getZonesOccupiedNextCount() == 0)
 			return null;
@@ -1012,7 +1229,7 @@ public class CandiPatchPresenter implements Observer {
 			if (requireOccupiedNext && !zone.isOccupiedNext())
 				continue;
 			if (zone.getCandiesCurrent().size() > 0) {
-				float distance = Math.abs(zone.getX() - nearestToX);
+				float distance = Math.abs(zone.getViewStateCurrent().getX() - nearestToX);
 				if (distance < smallestDistance) {
 					nearestIndex = zone.getZoneIndex();
 					smallestDistance = distance;
@@ -1046,54 +1263,13 @@ public class CandiPatchPresenter implements Observer {
 		return null;
 	}
 
-	private void setCameraBoundaries(Scene scene) {
-
-		// Find first occupied zone
-		ZoneModel firstOccupiedZone = null;
-		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
-			if (zoneModel.getCandiesNext().size() > 0) {
-				firstOccupiedZone = zoneModel;
-				break;
-			}
-		}
-		if (firstOccupiedZone != null) {
-			mBoundsMinX = firstOccupiedZone.getX();
-			mBoundsMaxX = (mBoundsMinX + (mCandiPatchModel.getZonesOccupiedNextCount() - 1) * (CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING));
-		}
+	public void shiftScene(float shiftX, float shiftY) {
+		mScene.setPosition(shiftX, shiftY);
 	}
 
-	public void setFrustum(GL10 pGL) {
-
-		// Set field of view to 60 degrees
-		float fov_degrees = 60;
-		float fov_radians = fov_degrees / 180 * (float) Math.PI;
-
-		// Set aspect ratio and distance of the screen
-		float aspect = mCamera.getWidth() / mCamera.getHeight();
-		float camZ = mCamera.getHeight() / 2 / (float) Math.tan(fov_radians / 2);
-
-		// Set projection
-		GLHelper.setProjectionIdentityMatrix(pGL);
-		GLU.gluPerspective(pGL, fov_degrees, aspect, camZ / 10, camZ * 10);
-
-		/*
-		 * The logic here positions the viewer but does not position the camera.
-		 * That means we could be looking at slot #5 but the camera is still sitting
-		 * on slot #2. Touch areas track with the camera so they will be messed up. So
-		 * we still set the camera target sprite as the chase entity for the
-		 * camera.
-		 * |
-		 * Because the y axis is reversed, we need to subtract to move down.
-		 */
-
-		final float[] centerCoordinates = mCameraTargetSprite.getSceneCenterCoordinates();
-		float targetX = centerCoordinates[VERTEX_INDEX_X];
-		float targetY = -centerCoordinates[VERTEX_INDEX_Y];
-
-		GLU.gluLookAt(pGL, targetX, targetY, camZ, targetX, targetY, 0, 0, 1, 0); // move camera back
-		pGL.glScalef(1, -1, 1); // reverse y-axis
-		pGL.glTranslatef(0f, 0, 0); // origin at top left
-	}
+	// --------------------------------------------------------------------------------------------
+	// Setters/Getters
+	// --------------------------------------------------------------------------------------------
 
 	public void setCameraTarget(CameraTargetSprite mCameraTarget) {
 		mCameraTargetSprite = mCameraTarget;
@@ -1107,13 +1283,6 @@ public class CandiPatchPresenter implements Observer {
 		return mEngine;
 	}
 
-	public BaseView getViewForModel(IModel candiModel) {
-		for (CandiView candiView : mCandiViews)
-			if (candiView.getModel() == candiModel)
-				return candiView;
-		return null;
-	}
-
 	public void setFullUpdateInProgress(boolean fullUpdateInProgress) {
 		mFullUpdateInProgress = fullUpdateInProgress;
 	}
@@ -1124,10 +1293,6 @@ public class CandiPatchPresenter implements Observer {
 
 	public Scene getScene() {
 		return mScene;
-	}
-
-	public void shiftScene(float shiftX, float shiftY) {
-		mScene.setPosition(shiftX, shiftY);
 	}
 
 	public boolean isIgnoreInput() {
@@ -1154,6 +1319,26 @@ public class CandiPatchPresenter implements Observer {
 		return mStyleTextColorTitle;
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Inner classes/interfaces
+	// --------------------------------------------------------------------------------------------
+
+	public void setCandiViewsHash(HashMap candiViewsHash) {
+		this.mCandiViewsHash = candiViewsHash;
+	}
+
+	public HashMap getCandiViewsHash() {
+		return mCandiViewsHash;
+	}
+
+	public void setContext(Context context) {
+		this.mContext = context;
+	}
+
+	public Context getContext() {
+		return mContext;
+	}
+
 	public interface ICandiListener {
 
 		void onSelected(IModel candi);
@@ -1166,7 +1351,100 @@ public class CandiPatchPresenter implements Observer {
 		void onMoveFinished();
 	}
 
-	class CandiPatchSurfaceGestureDetector extends SimpleOnGestureListener {
+	class SingleTapGestureDetector implements GestureDetector.OnGestureListener {
+
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+			/*
+			 * This gets called because the gesture detector thinks its has a fling gesture
+			 */
+
+			// Test for swipe that is too vertical to trigger a fling
+			if (Math.abs(e1.getY() - e2.getY()) > CandiConstants.SWIPE_MAX_OFF_PATH) {
+				return false;
+			}
+
+			// Check to see if we are at a boundary
+			float cameraTargetX = mCameraTargetSprite.getX() + 125;
+			if (cameraTargetX <= mBoundsMinX || cameraTargetX >= mBoundsMaxX) {
+				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "MoveNearestZone: At boundary");
+
+				mCameraTargetSprite
+						.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_BOUNCEBACK, mEaseBounceBack);
+				return false;
+			}
+
+			// The velocity units are in pixels per second.
+			final float distanceTimeFactor = 0.8f;
+			final float totalDx = (distanceTimeFactor * velocityX / 2);
+			boolean smallFling = (Math.abs(totalDx) <= CandiConstants.SWIPE_SMALL_FLING);
+
+			// Cap the distance we travel so we don't race past our boundaries
+			float targetX = mCameraTargetSprite.getX() - totalDx;
+
+			if (smallFling) {
+				ZoneModel targetZoneModel = mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone();
+				ZoneModel nextZoneModel = mCandiPatchModel.getZoneNeighbor(targetZoneModel, totalDx < 0 ? true : false);
+				if (nextZoneModel != null)
+					targetX = mCameraTargetSprite.getX() - nextZoneModel.getViewStateCurrent().getX();
+			}
+
+			if (targetX > mBoundsMaxX - 50) {
+				targetX = mBoundsMaxX - 50;
+			}
+			else if (targetX < mBoundsMinX) {
+				targetX = mBoundsMinX - 150;
+			}
+
+			mCameraTargetSprite.registerEntityModifier(new MoveModifier(distanceTimeFactor, mCameraTargetSprite.getX(), targetX, mCameraTargetSprite
+					.getY(), mCameraTargetSprite.getY(), new IEntityModifierListener() {
+
+				@Override
+				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+					Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "MoveNearestZone: Settling after fling");
+					mCandiPatchModel.setCandiModelFocused(getNearestZone(mCameraTargetSprite.getX(), false).getCandiesCurrent().get(0));
+
+					mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
+							mEaseSlottingMinor, new MoveListener() {
+
+								@Override
+								public void onMoveFinished() {
+									manageViews();
+								}
+							});
+				}
+
+				@Override
+				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+
+			}, mEaseFling));
+
+			return true;
+		}
+
+		@Override
+		public boolean onDown(MotionEvent e) {
+			return false;
+		}
+
+		@Override
+		public void onLongPress(MotionEvent e) {}
+
+		@Override
+		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+			return false;
+		}
+
+		@Override
+		public void onShowPress(MotionEvent e) {}
+
+		@Override
+		public boolean onSingleTapUp(MotionEvent e) {
+			return false;
+		}
+	}
+
+	class DoubleTapGestureDetector extends SimpleOnGestureListener {
 
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
@@ -1201,10 +1479,10 @@ public class CandiPatchPresenter implements Observer {
 			float targetX = mCameraTargetSprite.getX() - totalDx;
 
 			if (smallFling) {
-				ZoneModel targetZoneModel = mCandiPatchModel.getCandiModelFocused().getZoneCurrent();
+				ZoneModel targetZoneModel = mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone();
 				ZoneModel nextZoneModel = mCandiPatchModel.getZoneNeighbor(targetZoneModel, totalDx < 0 ? true : false);
 				if (nextZoneModel != null)
-					targetX = mCameraTargetSprite.getX() - nextZoneModel.getX();
+					targetX = mCameraTargetSprite.getX() - nextZoneModel.getViewStateCurrent().getX();
 			}
 
 			if (targetX > mBoundsMaxX - 50) {
@@ -1233,4 +1511,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
+	public static enum TextureReset {
+		All, VisibleOnly, NonVisibleOnly
+	}
 }

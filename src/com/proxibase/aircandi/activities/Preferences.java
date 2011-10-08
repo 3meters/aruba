@@ -18,6 +18,7 @@ public class Preferences extends PreferenceActivity {
 	public static final String	PREF_SHOW_MEMORY		= "Pref_Show_Memory";
 	public static final String	PREF_SOUND_EFFECTS		= "Pref_Sound_Effects";
 	public static final String	PREF_THEME				= "Pref_Theme";
+	public static final String	PREF_FULLSCREEN			= "Pref_Fullscreen";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

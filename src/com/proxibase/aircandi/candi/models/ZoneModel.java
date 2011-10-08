@@ -16,13 +16,7 @@ public class ZoneModel extends BaseModel {
 	private List<CandiModel>	mCandiesCurrent							= new ArrayList<CandiModel>();
 	private List<CandiModel>	mCandiesNext							= new ArrayList<CandiModel>();
 	private int					mZoneIndex;
-	private CandiPatchModel		mCandiPatchModel						= null;
-	private float				mX;
-	private float				mY;
-	private float				mCenterX;
-	private float				mCenterY;
-	private String				mBodyImageId;
-	private String				mBodyImageUrl;
+	private String				mBodyImageUri;
 	private boolean				mInactive								= false;
 
 	public ZoneModel(int zoneIndex, CandiPatchModel candiPatchModel) {
@@ -33,22 +27,21 @@ public class ZoneModel extends BaseModel {
 	}
 
 	private void initialize() {
-		updateCoordinates();
-	}
-
-	public void updateCoordinates() {
-		mX = mCandiPatchModel.getOriginX() + ((CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING) * mZoneIndex);
-		mY = mCandiPatchModel.getOriginY();
-		mCenterX = mX + (CandiConstants.CANDI_VIEW_WIDTH * 0.5f);
-		mCenterY = mY + (CandiConstants.CANDI_VIEW_BODY_HEIGHT * 0.5f);
+		/*
+		 * Zones have a locked in position right from the beginning
+		 */
+		mViewStateCurrent.setX(mCandiPatchModel.getOriginX() + ((CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING) * mZoneIndex));
+		mViewStateCurrent.setY(mCandiPatchModel.getOriginY());
+		mViewStateCurrent.setWidth(CandiConstants.CANDI_VIEW_WIDTH);
+		mViewStateCurrent.setWidth(CandiConstants.CANDI_VIEW_BODY_HEIGHT);
 	}
 
 	public void shiftToNext() {
-		super.shiftToNext();
-
+		mViewStateCurrent.setVisible(mViewStateNext.isVisible());
 		mCandiesCurrent.clear();
-		for (CandiModel candiModel : mCandiesNext)
+		for (CandiModel candiModel : mCandiesNext) {
 			mCandiesCurrent.add(candiModel);
+		}
 	}
 
 	public int getCandiIndexCurrent(CandiModel candiModelTarget) {
@@ -72,13 +65,9 @@ public class ZoneModel extends BaseModel {
 	}
 
 	public Transition getTransition() {
-
-		if (!isVisibleCurrent() && isVisibleNext())
-			return Transition.FadeIn;
-
-		if (isVisibleCurrent() && !isVisibleNext())
-			return Transition.FadeOut;
-
+		if (mViewStateCurrent.isVisible() != mViewStateNext.isVisible()) {
+			return mViewStateNext.isVisible() ? Transition.FadeIn : Transition.FadeOut;
+		}
 		return Transition.None;
 	}
 
@@ -104,39 +93,20 @@ public class ZoneModel extends BaseModel {
 			return null;
 	}
 
-	public float getX() {
-		return mX;
-	}
-
-	@Override
-	public boolean isVisibleCurrent() {
-		if (mInactive || mCandiesCurrent.size() == 0)
-			return false;
-		else
-			return super.isVisibleCurrent();
-	}
-
-	@Override
-	public boolean isVisibleNext() {
-		if (mInactive || mCandiesNext.size() == 0)
-			return false;
-		else
-			return super.isVisibleNext();
-	}
-
-	public Position getChildPositionCurrent(CandiModel candiModelTarget) throws NoSuchElementException {
-
-		if (mInactive)
-			return new Position();
-
-		if (!mCandiesCurrent.contains(candiModelTarget))
-			throw new NoSuchElementException();
-
-		Position position = doChildPosition(candiModelTarget, candiModelTarget.getPositionCurrent(), mCandiesCurrent, candiModelTarget
-				.getZoneStatusCurrent());
-		position.scale = getChildScaleCurrent(candiModelTarget);
-		return position;
-	}
+	// public Position getChildPositionCurrent(CandiModel candiModelTarget) throws NoSuchElementException {
+	//
+	// if (mInactive)
+	// return new Position();
+	//
+	// if (!mCandiesCurrent.contains(candiModelTarget))
+	// throw new NoSuchElementException();
+	//
+	// Position position = doChildPosition(candiModelTarget, candiModelTarget.getPositionCurrent(), mCandiesCurrent,
+	// candiModelTarget
+	// .getZoneStatusCurrent());
+	// position.scale = getChildScaleCurrent(candiModelTarget);
+	// return position;
+	// }
 
 	public Position getChildPositionNext(CandiModel candiModelTarget) throws NoSuchElementException {
 
@@ -148,12 +118,12 @@ public class ZoneModel extends BaseModel {
 		if (!mCandiesNext.contains(candiModelTarget))
 			throw new NoSuchElementException();
 
-		Position position = doChildPosition(candiModelTarget, candiModelTarget.getPositionNext(), mCandiesNext, candiModelTarget.getZoneStatusNext());
+		Position position = doChildPosition(candiModelTarget, mCandiesNext, candiModelTarget.getZoneStateNext().getStatus());
 		position.scale = getChildScaleNext(candiModelTarget);
 		return position;
 	}
 
-	private Position doChildPosition(CandiModel candiModelTarget, Position position, List<CandiModel> candiModels, ZoneStatus candiModelZoneStatus) {
+	private Position doChildPosition(CandiModel candiModelTarget, List<CandiModel> candiModels, ZoneStatus candiModelZoneStatus) {
 
 		double index = 0;
 		for (IModel candiModel : candiModels) {
@@ -166,6 +136,7 @@ public class ZoneModel extends BaseModel {
 		double offsetY = 0;
 		double columns = 1;
 		double rows = 1;
+		Position position = new Position();
 		position.rowLast = false;
 		position.rowFirst = false;
 		position.colFirst = false;
@@ -194,12 +165,12 @@ public class ZoneModel extends BaseModel {
 			}
 
 			// X,Y position
-			position.x = (float) (mX + ((index % columns) * offsetX));
+			position.x = (float) (this.getViewStateCurrent().getX() + ((index % columns) * offsetX));
 			if (candiesCount == 1) {
-				position.y = (float) (mY + ((Math.floor(index / rows)) * offsetY));
+				position.y = (float) (this.getViewStateCurrent().getY() + ((Math.floor(index / rows)) * offsetY));
 			}
 			else {
-				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + mY + ((Math.floor(index / rows)) * offsetY));
+				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY() + ((Math.floor(index / rows)) * offsetY));
 			}
 
 			// Row/Col position
@@ -224,8 +195,8 @@ public class ZoneModel extends BaseModel {
 				/*
 				 * Showing a collection with a primary and this is the primary
 				 */
-				position.x = mX;
-				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + mY);
+				position.x = this.getViewStateCurrent().getX();
+				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY());
 				position.col = 1;
 				position.row = 1;
 				position.colFirst = true;
@@ -234,22 +205,21 @@ public class ZoneModel extends BaseModel {
 				position.rowLast = false;
 			}
 			else if (candiModelZoneStatus == ZoneStatus.Secondary) {
-				
-				Random rand = new Random(candiModelTarget.getParent().hashCode());
-				int[] candies = {2,5,6,7,8};
 
-				for (int i = 0; i < candies.length; i++)
-				{
+				Random rand = new Random(candiModelTarget.getParent().hashCode());
+				int[] candies = { 2, 5, 6, 7, 8 };
+
+				for (int i = 0; i < candies.length; i++) {
 					int randomPosition = rand.nextInt(candies.length);
 					int temp = candies[i];
 					candies[i] = candies[randomPosition];
 					candies[randomPosition] = temp;
 				}
-				
+
 				if (index >= 5) {
 					index = 5;
 				}
-				
+
 				index = candies[(int) (index - 1)];
 
 				offsetX = CandiConstants.CANDI_VIEW_WIDTH / 3;
@@ -257,8 +227,8 @@ public class ZoneModel extends BaseModel {
 				columns = 3;
 				rows = 3;
 
-				position.x = (float) (mX + ((index % columns) * offsetX));
-				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + mY + ((Math.floor(index / rows)) * offsetY));
+				position.x = (float) (this.getViewStateCurrent().getX() + ((index % columns) * offsetX));
+				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY() + ((Math.floor(index / rows)) * offsetY));
 
 				position.col = (int) (index % columns) + 1;
 				if (position.col == columns)
@@ -284,7 +254,7 @@ public class ZoneModel extends BaseModel {
 
 		float scale = 1.0f;
 
-		if (candiModelTarget.getZoneStatusCurrent() == ZoneStatus.Normal) {
+		if (candiModelTarget.getZoneStateCurrent().getStatus() == ZoneStatus.Normal) {
 			int candiesCount = mCandiesCurrent.size();
 			if (candiesCount > 1) {
 				scale = 0.5f;
@@ -294,7 +264,7 @@ public class ZoneModel extends BaseModel {
 			}
 		}
 		else {
-			if (candiModelTarget.getZoneStatusCurrent() == ZoneStatus.Primary)
+			if (candiModelTarget.getZoneStateCurrent().getStatus() == ZoneStatus.Primary)
 				scale = 0.65f;
 			else
 				scale = 0.32f;
@@ -309,7 +279,7 @@ public class ZoneModel extends BaseModel {
 
 		float scale = 1.0f;
 
-		if (candiModelTarget.getZoneStatusNext() == ZoneStatus.Normal) {
+		if (candiModelTarget.getZoneStateNext().getStatus() == ZoneStatus.Normal) {
 			if (mCandiesNext.size() > 4) {
 				scale = 0.32f;
 			}
@@ -318,7 +288,7 @@ public class ZoneModel extends BaseModel {
 			}
 		}
 		else {
-			if (candiModelTarget.getZoneStatusNext() == ZoneStatus.Primary)
+			if (candiModelTarget.getZoneStateNext().getStatus() == ZoneStatus.Primary)
 				scale = 0.65f;
 			else
 				scale = 0.32f;
@@ -327,55 +297,13 @@ public class ZoneModel extends BaseModel {
 		return scale;
 	}
 
-	public float getY() {
-
-		return mY;
+	public String getBodyImageUri() {
+		return mBodyImageUri;
 	}
 
-	public float getCenterX() {
-
-		return mCenterX;
-	}
-
-	public float getCenterY() {
-
-		return mCenterY;
-	}
-
-	public void setX(float x) {
-
-		mX = x;
-	}
-
-	public void setY(float y) {
-
-		mY = y;
-	}
-
-	public void setCenterX(float centerX) {
-
-		mCenterX = centerX;
-	}
-
-	public void setCenterY(float centerY) {
-
-		mCenterY = centerY;
-	}
-
-	public String getBodyImageId() {
-		return mBodyImageId;
-	}
-
-	public String getBodyImageUrl() {
-		return mBodyImageUrl;
-	}
-
-	public void setBodyImageId(String bodyImageId) {
-		mBodyImageId = bodyImageId;
-	}
-
-	public void setBodyImageUrl(String bodyImageUrl) {
-		mBodyImageUrl = bodyImageUrl;
+	public void setBodyImageUri(String bodyImageUri) {
+		mBodyImageUri = bodyImageUri;
+		setChanged();
 	}
 
 	public List<CandiModel> getCandiesCurrent() {
@@ -396,10 +324,6 @@ public class ZoneModel extends BaseModel {
 
 	public int getZoneIndex() {
 		return mZoneIndex;
-	}
-
-	public void setZoneIndex(int zoneIndex) {
-		mZoneIndex = zoneIndex;
 	}
 
 	public static class Position {
@@ -456,6 +380,10 @@ public class ZoneModel extends BaseModel {
 
 	public boolean isInactive() {
 		return mInactive;
+	}
+
+	public enum ZoneAlignment {
+		None, Bottom, Center, Left, Right, Top
 	}
 
 	public enum ZoneStatus {

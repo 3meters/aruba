@@ -4,7 +4,7 @@ import android.graphics.Color;
 
 import com.proxibase.aircandi.candi.models.ZoneModel;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
-import com.proxibase.aircandi.candi.views.BaseView.OnViewTexturesLoadedListener;
+import com.proxibase.aircandi.candi.views.IView.ViewTexturesLoadedListener;
 
 public class ZoneViewFactory {
 
@@ -22,7 +22,7 @@ public class ZoneViewFactory {
 		zoneModel.addObserver(zoneView);
 
 		// Get textures loaded and then initialize
-		zoneView.setTexturesLoadedListener(new OnViewTexturesLoadedListener() {
+		zoneView.setTexturesLoadedListener(new ViewTexturesLoadedListener() {
 
 			@Override
 			public void onTexturesLoaded(IView zoneView) {
@@ -30,7 +30,7 @@ public class ZoneViewFactory {
 			}
 		});
 
-		zoneView.loadTextures();
+		zoneView.loadHardwareTextures();
 
 		return zoneView;
 	}

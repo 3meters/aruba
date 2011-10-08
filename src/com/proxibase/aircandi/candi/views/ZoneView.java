@@ -10,51 +10,82 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.IModifier.IModifierListener;
 
-import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.models.ZoneModel;
+import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
 import com.proxibase.aircandi.candi.models.CandiModel.Transition;
+import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.core.CandiConstants;
 
 public class ZoneView extends BaseView {
 
-	private OnViewTexturesLoadedListener	mTexturesLoadedListener;
-	private ZoneModel						mZoneModel;
+	private ViewTexturesLoadedListener	mTexturesLoadedListener;
 
-	private TextureRegion					mBodyTextureRegion;
-	private CandiSprite						mBodySprite;
-	private TextureRegion					mReflectionTextureRegion;
-	private CandiSprite						mReflectionSprite;
+	private TextureRegion				mBodyTextureRegion;
+	private CandiSprite					mBodySprite;
+	private TextureRegion				mReflectionTextureRegion;
+	private CandiSprite					mReflectionSprite;
 
-	public ZoneView(ZoneModel zoneModel, CandiPatchPresenter candiPatchPresenter) {
-		super((BaseModel) zoneModel, candiPatchPresenter);
-		mZoneModel = zoneModel;
+	public ZoneView() {
+		this(null, null);
+	}
+
+	public ZoneView(CandiPatchPresenter candiPatchPresenter) {
+		this(null, candiPatchPresenter);
+	}
+
+	public ZoneView(Object model, CandiPatchPresenter candiPatchPresenter) {
+		super(model, candiPatchPresenter);
+		this.setVisible(false);
+		this.setAlpha(0);
 	}
 
 	@Override
 	public void update(Observable observable, Object data) {
 		super.update(observable, data);
 
-		if (mZoneModel.isVisibleNext()) {
-			Transition transition = mZoneModel.getTransition();
-			if (transition == Transition.FadeIn)
-				setAlpha(0);
-			setVisible(true);
-		}
+		final ZoneModel zoneModel = (ZoneModel) mModel;
 
-		doModifiers();
+		if (!CandiConstants.TRANSITIONS_ACTIVE) {
+			ViewState viewStateNext = zoneModel.getViewStateNext();
+			/*
+			 * Visibility
+			 */
+			setAlpha(viewStateNext.getAlpha());
+			setVisible(zoneModel.getViewStateNext().isVisible());
+			/*
+			 * Modifiers
+			 */
+			doModifiers();
+		}
+		else {
+			if (zoneModel.getViewStateNext().isVisible()) {
+				Transition transition = zoneModel.getTransition();
+				if (transition == Transition.FadeIn)
+					setAlpha(0);
+				setVisible(true);
+			}
+			doModifiers();
+		}
 	}
 
 	@Override
 	public void initialize() {
 		super.initialize();
 
-		loadBodyTextureSources();
-		construct();
+		updateTextureSources();
+		constructSprites();
 	}
 
-	private void construct() {
+	@Override
+	public void initializeModel() {
+		super.initializeModel();
+
+		updateTextureSources();
+	}
+
+	private void constructSprites() {
 		// Body sprite
 		if (mBodyTextureRegion != null)
 			makeBodySprite();
@@ -65,6 +96,49 @@ public class ZoneView extends BaseView {
 
 		// ZOrder sort
 		sortChildren();
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+
+		if (!visible) {
+			for (int i = 0; i < getChildCount(); i++) {
+				getChild(i).setVisible(false);
+			}
+		}
+		else {
+			if (mTitleSprite != null) {
+				mTitleSprite.setVisible(true);
+			}
+			if (mBodySprite != null) {
+				mBodySprite.setVisible(true);
+				if (mReflectionSprite != null) {
+					mReflectionSprite.setVisible(true);
+				}
+			}
+		}
+	}
+
+	public void setVisibleAnimated(boolean visible) {
+		super.setVisible(visible);
+
+		if (!visible) {
+			for (int i = 0; i < getChildCount(); i++) {
+				getChild(i).setVisible(false);
+			}
+		}
+		else {
+			if (mTitleSprite != null) {
+				mTitleSprite.setVisible(true);
+			}
+			if (mBodySprite != null) {
+				mBodySprite.setVisible(true);
+				if (mReflectionSprite != null) {
+					mReflectionSprite.setVisible(true);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -82,45 +156,50 @@ public class ZoneView extends BaseView {
 	}
 
 	protected void doModifiers() {
-		if (!mZoneModel.getModifiers().isEmpty()) {
-			IEntityModifier modifier = mZoneModel.getModifiers().removeFirst();
+		final ZoneModel zoneModel = (ZoneModel) mModel;
+		if (!zoneModel.getModifiers().isEmpty()) {
+			final IEntityModifier modifier = zoneModel.getModifiers().removeFirst();
 			modifier.addModifierListener(new IModifierListener<IEntity>() {
 
 				@Override
 				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+					if (modifier instanceof CandiAlphaModifier) {
+						if (((CandiAlphaModifier) modifier).getToAlpha() == 0)
+							setVisible(false);
+					}
 					doModifiers();
 				}
 
 				@Override
-				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-				// TODO Auto-generated method stub
-
-				}
+				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
 			});
 			registerEntityModifier(modifier);
 		}
 	}
 
-	public void setTexturesLoadedListener(OnViewTexturesLoadedListener texturesLoadedListener) {
+	public void setTexturesLoadedListener(ViewTexturesLoadedListener texturesLoadedListener) {
 		mTexturesLoadedListener = texturesLoadedListener;
 	}
 
 	@Override
-	public void resetTextures() {
-		super.resetTextures();
+	public void resetTextureSources() {
+		super.resetTextureSources();
 
-		loadBodyTextureSources();
+		updateTextureSources();
 	}
 
 	@Override
-	public void loadTextures() {
-		super.loadTextures();
+	public void loadHardwareTextures() {
+		super.loadHardwareTextures();
 
 		if (mTexturesLoadedListener != null)
 			mTexturesLoadedListener.onTexturesLoaded(this);
 	}
 
-	protected void loadBodyTextureSources() {
+	@Override
+	protected void updateTextureSources() {
+		super.updateTextureSources();
+
 		mBodyTextureRegion = mCandiPatchPresenter.mZoneBodyTextureRegion.clone();
 		mReflectionTextureRegion = mCandiPatchPresenter.mZoneReflectionTextureRegion.clone();
 	}
@@ -145,7 +224,7 @@ public class ZoneView extends BaseView {
 
 	@Override
 	public ZoneModel getModel() {
-		return mZoneModel;
+		return (ZoneModel) mModel;
 	}
 
 	private void makeBodySprite() {
@@ -165,6 +244,6 @@ public class ZoneView extends BaseView {
 		attachChild(mReflectionSprite);
 	}
 
-	@Override
-	public void setSingleTapListener(com.proxibase.aircandi.candi.views.CandiView.OnCandiViewTouchListener listener) {}
+	public void setViewTouchListener(ViewTouchListener listener) {}
+
 }

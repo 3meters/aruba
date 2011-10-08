@@ -11,6 +11,7 @@ import org.anddev.andengine.opengl.buffer.BufferObjectManager;
 import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
+import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
 import org.anddev.andengine.opengl.util.GLHelper;
 
 import android.graphics.Bitmap;
@@ -23,8 +24,8 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 
 import com.proxibase.aircandi.candi.models.BaseModel;
-import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
+import com.proxibase.aircandi.candi.sprites.CandiAnimatedSprite;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
@@ -33,24 +34,48 @@ import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 public abstract class BaseView extends Entity implements Observer, IView {
 
 	protected CandiPatchPresenter	mCandiPatchPresenter;
-	protected BaseModel				mBaseModel;
+	protected Object				mModel;
+
+	protected TiledTextureRegion	mProgressTextureRegion;
+	protected CandiAnimatedSprite	mProgressSprite;
+
+	protected TextureRegion			mPlaceholderTextureRegion;
+	protected CandiSprite			mPlaceholderSprite;
+
+	protected boolean				mBound							= false;
 
 	protected Texture				mTitleTexture;
 	private TextureRegion			mTitleTextureRegion;
 	protected CandiSprite			mTitleSprite;
+
 	protected String				mTitleText;
 	private int						mTitleTextColor;
+	protected boolean				mHardwareTexturesInitialized	= false;
 
-	public BaseView(BaseModel baseModel, CandiPatchPresenter candiPatchPresenter) {
+	public BaseView() {
+		this(null, null);
+	}
+
+	public BaseView(CandiPatchPresenter candiPatchPresenter) {
+		this(null, candiPatchPresenter);
+	}
+
+	public BaseView(Object model, CandiPatchPresenter candiPatchPresenter) {
 		super();
 
-		mBaseModel = baseModel;
-		mCandiPatchPresenter = candiPatchPresenter;
+		mModel = model;
+		setCandiPatchPresenter(candiPatchPresenter);
+		makeProgressSprites();
 	}
 
 	public void initialize() {
-		loadTextureSources();
-		construct();
+		updateTextureSources();
+		mBound = true;
+	}
+
+	public void initializeModel() {
+		updateTextureSources();
+		mBound = true;
 	}
 
 	@Override
@@ -59,60 +84,86 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		 * Any requested display extras are added to the title text by
 		 * the getTitleText() method.
 		 */
-		updateTitleSprite(mBaseModel.getTitleText());
+		String titleTextModel = ((BaseModel) mModel).getTitleText();
+		if (mTitleSprite != null && titleTextModel != null && !titleTextModel.equals(mTitleText)) {
+			mTitleText = titleTextModel;
+			updateTextureSources();
+		}
 	}
 
-	private void construct() {
+	private void makeTitleSprite() {
 		mTitleSprite = new CandiSprite(0,
 				CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (mTitleTextureRegion.getHeight() + CandiConstants.CANDI_VIEW_TITLE_SPACER_HEIGHT),
 				mTitleTextureRegion);
 		mTitleSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mTitleSprite.setAlpha(0);
+		mTitleSprite.setVisible(false);
 		mTitleSprite.setZIndex(0);
-		attachChild(mTitleSprite);		
+		attachChild(mTitleSprite);
 	}
 
-	protected boolean isVisibleToCamera(final Camera camera) {
-		return (mTitleSprite != null && mTitleSprite.isVisibleToCamera(camera));
+	private void makeProgressSprites() {
+
+		// Placeholder
+		mPlaceholderTextureRegion = mCandiPatchPresenter.mPlaceholderTextureRegion.clone();
+		mPlaceholderSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mPlaceholderTextureRegion);
+		mPlaceholderSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
+		mPlaceholderSprite.setAlpha(0);
+		mPlaceholderSprite.setVisible(false);
+		mPlaceholderSprite.setZIndex(-10);
+		attachChild(mPlaceholderSprite);
+
+		// Progress
+		mProgressTextureRegion = mCandiPatchPresenter.mProgressTextureRegion.clone();
+		float progressX = (mPlaceholderSprite.getWidth() - mProgressTextureRegion.getTileWidth()) * 0.5f;
+		float progressY = CandiConstants.CANDI_VIEW_TITLE_HEIGHT + (mPlaceholderSprite.getHeight() * 0.5f)
+							- (mProgressTextureRegion.getTileHeight() * 0.5f);
+		mProgressSprite = new CandiAnimatedSprite(progressX, progressY, mProgressTextureRegion);
+		mProgressSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
+		mProgressSprite.setAlpha(0);
+		mProgressSprite.setVisible(false);
+		mProgressSprite.setZIndex(-9);
+		attachChild(mProgressSprite);
 	}
 
-	@Override
-	public void setAlpha(float alpha) {
-		super.setAlpha(alpha);
+	protected void updateTextureSources() {
+		if (((BaseModel) mModel).getTitleText() != null) {
 
-		for (int i = 0; i < getChildCount(); i++) {
-			getChild(i).setAlpha(alpha);
-		}
-	}
-
-	@Override
-	public void setZIndex(final int pZIndex) {
-		super.setZIndex(pZIndex);
-		this.mTitleSprite.setZIndex(pZIndex);
-	}
-
-	protected void updateTitleSprite(String titleText) {
-		if (titleText != mTitleText) {
-			mTitleText = titleText;
 			mTitleTexture.clearTextureSources();
-			Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBaseModel.getTitleText());
+			Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, ((BaseModel) mModel)
+					.getTitleText());
 			mTitleTextureRegion = TextureRegionFactory.createFromSource(mTitleTexture, new BitmapTextureSource(titleBitmap, new IBitmapAdapter() {
 
 				@Override
 				public Bitmap reloadBitmap() {
-					Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBaseModel
-							.getTitleText());
+					/*
+					 * This gets called if the bitmap being used as the texture source has been recycled
+					 */
+					Bitmap titleBitmap = null;
+					if (mModel != null) {
+						titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, ((BaseModel) mModel)
+								.getTitleText());
+					}
 					return titleBitmap;
 				}
 			}), 0, 0);
 
-			mTitleSprite.setPosition(0,
-					CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (titleBitmap.getHeight() + CandiConstants.CANDI_VIEW_TITLE_SPACER_HEIGHT));
+			if (mTitleSprite == null) {
+				makeTitleSprite();
+			}
 		}
 	}
 
-	public IModel getModel() {
-		return mBaseModel;
+	public void progressVisible(boolean visible) {
+		if (visible) {
+			mProgressSprite.setVisible(true);
+			mProgressSprite.setAlpha(1);
+			mProgressSprite.animate(150, true);
+		}
+		else {
+			mProgressSprite.setVisible(false);
+			mProgressSprite.stopAnimation();
+		}
 	}
 
 	private Bitmap makeTextBitmap(int width, int height, CharSequence text) {
@@ -121,8 +172,8 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		tp.setColor(mTitleTextColor);
 		tp.setTypeface(Typeface.SANS_SERIF);
 		tp.setAntiAlias(true);
-		//tp.setXfermode(new PorterDuffXfermode(Mode.DARKEN));
-		//tp.setShadowLayer(1f, 1, 1, Color.parseColor("#ffffff"));
+		// tp.setXfermode(new PorterDuffXfermode(Mode.DARKEN));
+		// tp.setShadowLayer(1f, 1, 1, Color.parseColor("#ffffff"));
 
 		DynamicLayout textLayout = new DynamicLayout(text, text, tp, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false,
 				TextUtils.TruncateAt.END, CandiConstants.CANDI_VIEW_WIDTH);
@@ -168,27 +219,13 @@ public abstract class BaseView extends Entity implements Observer, IView {
 			mCandiPatchPresenter.getEngine().getTextureManager().unloadTexture(mTitleTexture);
 	}
 
-	public void resetTextures() {
-		mTitleTexture.clearTextureSources();
-		loadTextureSources();
+	public void resetTextureSources() {
+		updateTextureSources();
 	}
 
-	public void loadTextures() {
+	public void loadHardwareTextures() {
 		mTitleTexture = new Texture(256, 128, CandiConstants.GL_TEXTURE_OPTION);
 		mCandiPatchPresenter.getEngine().getTextureManager().loadTextures(mTitleTexture);
-	}
-
-	protected void loadTextureSources() {
-		Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBaseModel.getTitleText());
-		mTitleTextureRegion = TextureRegionFactory.createFromSource(mTitleTexture, new BitmapTextureSource(titleBitmap, new IBitmapAdapter() {
-
-			@Override
-			public Bitmap reloadBitmap() {
-				Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBaseModel
-						.getTitleText());
-				return titleBitmap;
-			}
-		}), 0, 0);
 	}
 
 	@Override
@@ -210,16 +247,68 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		}
 	}
 
-	public void setTitleTextColor(int titleTextColor) {
+	public BaseView setTitleTextColor(int titleTextColor) {
 		this.mTitleTextColor = titleTextColor;
+		return this;
 	}
 
-	public int getTitleTextColor() {
-		return mTitleTextColor;
+	public BaseView setCandiPatchPresenter(CandiPatchPresenter candiPatchPresenter) {
+		this.mCandiPatchPresenter = candiPatchPresenter;
+		return this;
 	}
 
-	public interface OnViewTexturesLoadedListener {
+	protected boolean isVisibleToCamera(final Camera camera) {
 
-		void onTexturesLoaded(IView candiView);
+		if (mPlaceholderSprite != null && mPlaceholderSprite.isVisibleToCamera(camera)) {
+			return true;
+		}
+		else if (mTitleSprite != null && mTitleSprite.isVisibleToCamera(camera)) {
+			return true;
+		}
+		return false;
 	}
+
+	@Override
+	public void setAlpha(float alpha) {
+		super.setAlpha(alpha);
+
+		for (int i = 0; i < getChildCount(); i++) {
+			getChild(i).setAlpha(alpha);
+		}
+	}
+
+	@Override
+	public void setZIndex(final int zIndex) {
+		super.setZIndex(zIndex);
+
+		for (int i = 0; i < getChildCount(); i++) {
+			getChild(i).setZIndex(zIndex);
+		}
+	}
+
+	public BaseModel getModel() {
+		return (BaseModel) mModel;
+	}
+
+	public BaseView setModel(Object model) {
+		mModel = model;
+		return this;
+	}
+
+	public void setHardwareTexturesInitialized(boolean hardwareTexturesInitialized) {
+		this.mHardwareTexturesInitialized = hardwareTexturesInitialized;
+	}
+
+	public boolean isHardwareTexturesInitialized() {
+		return mHardwareTexturesInitialized;
+	}
+
+	public void setUnbound(boolean unbound) {
+		this.mBound = unbound;
+	}
+
+	public boolean isUnbound() {
+		return mBound;
+	}
+
 }

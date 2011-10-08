@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent"
+	android:background="?attr/backgroundCandiInfo">
+	<LinearLayout
+		android:id="@+id/activity_header"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_alignParentTop="true">
+		<include
+			layout="@layout/temp_activity_header" />
+	</LinearLayout>
+	<ScrollView
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_weight="1"
+		android:fillViewport="true"
+		android:layout_below="@id/activity_header"
+		android:layout_above="@+id/photo_footer">
+		<LinearLayout
+			android:id="@+id/activity_body"
+			android:layout_height="fill_parent"
+			android:layout_width="fill_parent"
+			android:orientation="vertical"
+			android:padding="5dp"
+			android:gravity="center_vertical|top">
+
+			<!-- Title and Content -->
+			<EditText
+				android:id="@+id/txt_title"
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent"
+				android:hint="@string/post_title_hint"
+				style="@style/edittext_form" />
+			<EditText
+				android:id="@+id/txt_content"
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent"
+				android:hint="@string/post_content_hint"
+				style="@style/edittext_form"
+				android:lines="5"
+				android:gravity="top"
+				android:inputType="textMultiLine" />
+
+			<!-- Public Image -->
+			<TextView
+				android:text="@string/post_public_image_section_header"
+				style="@style/section_header_form" />
+			<RelativeLayout
+				android:layout_width="fill_parent"
+				android:orientation="horizontal"
+				android:layout_height="wrap_content"
+				android:paddingBottom="10dp"
+				android:gravity="left">
+				<Button
+					android:id="@+id/btn_change_public_image"
+					android:text="@string/post_public_image_change_button"
+					style="@style/btn_form"
+					android:onClick="onChangePublicImageButtonClick" />
+				<ImageView
+					android:id="@+id/img_public_image"
+					android:layout_toRightOf="@id/btn_change_public_image"
+					android:layout_alignTop="@id/btn_change_public_image"
+					android:layout_marginLeft="10dp"
+					android:visibility="gone"
+					style="@style/img_photo" />
+			</RelativeLayout>
+		</LinearLayout>
+	</ScrollView>
+
+	<!-- Footer -->
+	<LinearLayout
+		android:id="@+id/photo_footer"
+		android:layout_alignParentBottom="true"
+		android:gravity="center_horizontal"
+		style="@style/activity_footer_form">
+		<Button
+			android:id="@+id/btn_save_post"
+			android:text="@string/post_save_button"
+			style="@style/btn_form"
+			android:onClick="onSaveButtonClick" />
+		<Button
+			android:id="@+id/btn_delete_post"
+			android:text="@string/post_delete_button"
+			style="@style/btn_form"
+			android:onClick="onDeleteButtonClick" />
+		<Button
+			android:id="@+id/btn_cancel"
+			android:text="@string/post_cancel_button"
+			style="@style/btn_form"
+			android:onClick="onCancelButtonClick" />
+	</LinearLayout>
+</RelativeLayout>

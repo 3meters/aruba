@@ -1,31 +1,17 @@
 package com.proxibase.aircandi.models;
 
-import android.graphics.Bitmap;
-
 import com.google.gson.annotations.Expose;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
-public class PostEntity extends BaseEntity {
+public class CommentEntity extends BaseEntity {
 
 	// Annotation syntax: @Expose (serialize = false, deserialize = false)
 	@Expose
-	public String		mediaUri;
-	@Expose
-	public String		mediaFormat;
-	@Expose
-	public boolean		locked;
-	@Expose
 	public Metadata		__metadata	= new Metadata();
 
-	//---------------------------------------------------------------------------------------------
-	// For client use only
-	//---------------------------------------------------------------------------------------------
-	
-	public Bitmap 		mediaBitmap;
-
-	public PostEntity() {
-		__metadata.type = "Aircandi.Post";
+	public CommentEntity() {
+		__metadata.type = "Aircandi.Comment";
 	}
 
 	@Override
@@ -33,7 +19,7 @@ public class PostEntity extends BaseEntity {
 		EntityProxy entityProxy = new EntityProxy();
 		entityProxy.beaconId = beaconId;
 		entityProxy.entityUri = getEntryUri();
-		entityProxy.entityType = CandiConstants.TYPE_CANDI_POST;
+		entityProxy.entityType = CandiConstants.TYPE_CANDI_COMMENT;
 		entityProxy.label = label;
 		entityProxy.title = title;
 		entityProxy.subtitle = subtitle;

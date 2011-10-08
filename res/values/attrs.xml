@@ -24,5 +24,6 @@
 	</declare-styleable>
 	<declare-styleable name="CandiInfo">
 		<attr name="ruleColor" format="color"/>
+		<attr name="textColor" format="color"/>
 	</declare-styleable>
 </resources>

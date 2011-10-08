@@ -16,7 +16,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.models.BaseEntity.SubType;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
@@ -31,7 +30,6 @@ public abstract class AircandiActivity extends Activity {
 	protected Button		mContextButton;
 
 	protected Verb			mVerb;
-	protected SubType		mSubType;
 	protected Integer		mParentEntityId;
 	protected Beacon		mBeacon;
 	protected Boolean		mBeaconUnregistered;
@@ -59,7 +57,6 @@ public abstract class AircandiActivity extends Activity {
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mVerb = (Verb) extras.get(getString(R.string.EXTRA_VERB));
-			mSubType = (SubType) extras.get(getString(R.string.EXTRA_SUBTYPE));
 			mParentEntityId = extras.getInt(getString(R.string.EXTRA_PARENT_ENTITY_ID));
 
 			String json = extras.getString(getString(R.string.EXTRA_ENTITY));

@@ -27,6 +27,7 @@
 		<item name="actionStripBackground">@drawable/actionstrip_background_dark</item>
 		<item name="ruleColor">#33ffffff</item>
 		<item name="logo">@drawable/logo_bitmap_dark</item>
+		<item name="textColor">#ffffffff</item>
 	</style>
 	
 	<style
@@ -53,6 +54,7 @@
 		<item name="actionStripBackground">@drawable/actionstrip_background_light</item>
 		<item name="ruleColor">#44000000</item>
 		<item name="logo">@drawable/logo_bitmap_light</item>
+		<item name="textColor">#ff000000</item>
 	</style>
 	
 	<style
@@ -213,13 +215,16 @@
 		<item name="android:height">50dp</item>
 	</style>
 	
-	<!-- CandiInfo -->
+	<!-- 
+		CandiInfo 
+	-->
 	
 	<style name="btn_candiinfo" parent="android:Widget.Button">
 		<item name="android:layout_height">wrap_content</item>	
 		<item name="android:layout_width">wrap_content</item>	
 		<item name="android:textColor">?attr/textColorButton</item>	
 		<item name="android:background">?attr/backgroundButton</item>		
+		<item name="android:layout_marginRight">10dp</item>		
 		<item name="android:height">72dp</item>
 		<item name="android:width">80dp</item>
 	</style>
@@ -228,6 +233,7 @@
 		<item name="android:layout_height">wrap_content</item>	
 		<item name="android:layout_width">fill_parent</item>
 		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>	
+		<item name="android:textColor">?attr/textColor</item>
 	</style>
 	
 	<style name="txt_candiinfo_title" parent="txt_candiinfo">

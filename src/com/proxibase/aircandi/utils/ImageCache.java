@@ -115,9 +115,9 @@ public class ImageCache implements Map<String, Bitmap> {
 			if (bitmap == null) {
 				return null;
 			}
-			if (!mFileCacheOnly)
+			if (!mFileCacheOnly) {
 				mCache.put(imageUrl, bitmap);
-
+			}
 			return bitmap;
 		}
 
@@ -126,6 +126,10 @@ public class ImageCache implements Map<String, Bitmap> {
 	}
 
 	public Bitmap put(String imageUrl, Bitmap image) {
+		return put(imageUrl, image, mCompressedImageFormat);
+	}
+
+	public Bitmap put(String imageUrl, Bitmap image, CompressFormat compressFormat) {
 		/*
 		 * Write bitmap to disk cache and then memory cache
 		 */
@@ -134,7 +138,7 @@ public class ImageCache implements Map<String, Bitmap> {
 		try {
 			imageFile.createNewFile();
 			ostream = new FileOutputStream(imageFile);
-			image.compress(mCompressedImageFormat, mCachedImageQuality, ostream);
+			image.compress(compressFormat, mCachedImageQuality, ostream);
 		}
 		catch (IOException e) {
 			e.printStackTrace();

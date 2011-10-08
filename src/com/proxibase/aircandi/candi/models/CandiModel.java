@@ -4,9 +4,9 @@ import java.util.LinkedList;
 
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 
-import com.proxibase.aircandi.candi.models.ZoneModel.Position;
+import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
-import com.proxibase.aircandi.utils.ImageManager.ImageFormat;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 /**
@@ -30,29 +30,22 @@ public class CandiModel extends BaseModel {
 		New, Navigation, Hidden, None, Deleting
 	}
 
-	private EntityProxy		mEntityProxy		= null;
+	private EntityProxy		mEntityProxy				= null;
 	private int				mModelId;
-	private ZoneModel		mZoneNext			= null;
-	private ZoneModel		mZoneCurrent		= null;
-	private ZoneStatus		mZoneStatusCurrent	= ZoneStatus.Normal;
-	private ZoneStatus		mZoneStatusNext		= ZoneStatus.Normal;
-	private Position		mPositionCurrent	= null;
-	private Position		mPositionNext		= null;
-	private DisplayExtra	mDisplayExtra		= DisplayExtra.None;
-	private boolean			mTitleOnly			= false;
-	private boolean			mBodyOnly			= false;
-	private boolean			mTouchAreaActive	= false;
-	private boolean			mRookie				= true;
-	private String			mBodyImageId		;
-	private String			mBodyImageUri		;
+	private ZoneState		mZoneStateCurrent			= new ZoneState();
+	private ZoneState		mZoneStateNext				= new ZoneState();
+	private DisplayExtra	mDisplayExtra				= DisplayExtra.None;
+	private boolean			mTouchAreaActive			= false;
+	private boolean			mRookie						= true;
+	private String			mBodyImageUri;
 	private ImageFormat		mBodyImageFormat;
-	private boolean			mOverflowCurrent	= false;
-	private boolean			mOverflowNext		= false;
-	private ReasonInactive	mReasonInactive		= ReasonInactive.None;
+	private ReasonInactive	mReasonInactive				= ReasonInactive.None;
+	private boolean			mBodyTextureSourcesDirty	= false;
 
-	public CandiModel(ModelType modelType, int modelId) {
-		super(modelType);
+	public CandiModel(int modelId, CandiPatchModel candiPatchModel) {
+		super();
 		setModelId(modelId);
+		mCandiPatchModel = candiPatchModel;
 	}
 
 	public Transition getTransition() {
@@ -60,59 +53,59 @@ public class CandiModel extends BaseModel {
 		 * If OverflowNext is true then VisibleNext was set to false
 		 * But if OverflowNext = false then VisibleNext can be true or false
 		 */
-
 		Transition transition = Transition.None;
+
+		// if (mZoneStateCurrent.getZone().isInactive())
+		// return transition;
+
 		if (mReasonInactive == ReasonInactive.Deleting) {
 			transition = Transition.Out;
 		}
-		else if (isVisibleCurrent() && isOverflowNext()) {
+		else if (mViewStateCurrent.isVisible() && mZoneStateNext.isOverflow()) {
 			transition = Transition.OverflowOut;
 		}
-		else if (!isVisibleCurrent() && isVisibleNext() && isOverflowCurrent()) {
+		else if (!mViewStateCurrent.isVisible() && mViewStateNext.isVisible() && mZoneStateCurrent.isOverflow()) {
 			transition = Transition.OverflowIn;
 		}
-		else if (!isVisibleCurrent() && isVisibleNext() && !isOverflowNext()) {
+		else if (!mViewStateCurrent.isVisible() && mViewStateNext.isVisible() && !mZoneStateNext.isOverflow()) {
 			transition = Transition.FadeIn;
 		}
-		else if (!isVisibleCurrent() && isVisibleNext()) {
+		else if (!mViewStateCurrent.isVisible() && mViewStateNext.isVisible()) {
 			transition = Transition.FadeIn;
 		}
-		else if (isVisibleCurrent() && !isVisibleNext()) {
+		else if (mViewStateCurrent.isVisible() && !mViewStateNext.isVisible()) {
 			transition = Transition.FadeOut;
 		}
-		else if (isVisibleNext()) {
-			if (mZoneCurrent.getZoneIndex() != mZoneNext.getZoneIndex())
+		else if (mViewStateNext.isVisible()) {
+			if (mZoneStateCurrent.getZone().getZoneIndex() != mZoneStateNext.getZone().getZoneIndex())
 				transition = Transition.Move;
 			else {
-				if (!mPositionNext.equals(mPositionCurrent))
+				if (!mViewStateNext.equals(mViewStateCurrent))
 					transition = Transition.Shift;
 			}
 		}
-		else if (mOverflowNext && !mVisibleCurrent && !mVisibleNext) {
-			transition = Transition.FadeOut;
-		}
+		// else if (mZoneStateNext.isOverflow() && !mViewStateCurrent.isVisible() && !mViewStateNext.isVisible()) {
+		// transition = Transition.FadeOut;
+		// }
 		return transition;
 	}
 
-	@Override
 	public void shiftToNext() {
-		super.shiftToNext();
+		mViewStateCurrent.setX(mViewStateNext.getX());
+		mViewStateCurrent.setY(mViewStateNext.getY());
+		mViewStateCurrent.setHeight(mViewStateNext.getHeight());
+		mViewStateCurrent.setWidth(mViewStateNext.getWidth());
+		mViewStateCurrent.setScale(mViewStateNext.getScale());
+		mViewStateCurrent.setVisible(mViewStateNext.isVisible());
+		mViewStateCurrent.setZIndex(mViewStateNext.getZIndex());
+		mViewStateCurrent.setZoomed(mViewStateNext.isZoomed());
+		mViewStateCurrent.setCollapsed(mViewStateNext.isCollapsed());
+		mViewStateCurrent.setHasReflection(mViewStateNext.hasReflection());
 
-		mZoneCurrent = mZoneNext;
-
-		Position positionCurrent = getPositionCurrent();
-		positionCurrent.x = mPositionNext.x;
-		positionCurrent.y = mPositionNext.y;
-		positionCurrent.scale = mPositionNext.scale;
-		positionCurrent.col = mPositionNext.col;
-		positionCurrent.row = mPositionNext.row;
-		positionCurrent.colFirst = mPositionNext.colFirst;
-		positionCurrent.colLast = mPositionNext.colLast;
-		positionCurrent.rowFirst = mPositionNext.rowFirst;
-		positionCurrent.rowLast = mPositionNext.rowLast;
-
-		mOverflowCurrent = mOverflowNext;
-		mZoneStatusCurrent = mZoneStatusNext;
+		mZoneStateCurrent.setAlignment(mZoneStateNext.getAlignment());
+		mZoneStateCurrent.setOverflow(mZoneStateNext.isOverflow());
+		mZoneStateCurrent.setStatus(mZoneStateNext.getStatus());
+		mZoneStateCurrent.setZone(mZoneStateNext.getZone());
 	}
 
 	public EntityProxy getEntityProxy() {
@@ -125,6 +118,10 @@ public class CandiModel extends BaseModel {
 
 	public int getModelId() {
 		return mModelId;
+	}
+
+	public String getModelIdAsString() {
+		return String.valueOf(mModelId);
 	}
 
 	@Override
@@ -143,18 +140,6 @@ public class CandiModel extends BaseModel {
 		return title;
 	}
 
-	public ZoneModel getZoneNext() {
-		return mZoneNext;
-	}
-
-	public ZoneModel getZoneCurrent() {
-		return mZoneCurrent;
-	}
-
-	public String getBodyImageId() {
-		return mBodyImageId;
-	}
-
 	public String getBodyImageUri() {
 		return mBodyImageUri;
 	}
@@ -163,21 +148,13 @@ public class CandiModel extends BaseModel {
 		return mBodyImageFormat;
 	}
 
-	public boolean isTitleOnly() {
-		return mTitleOnly;
-	}
-
-	public boolean isBodyOnly() {
-		return mBodyOnly;
-	}
-
 	public boolean isTouchAreaActive() {
 		return mTouchAreaActive;
 	}
 
 	public void setDisplayExtra(DisplayExtra displayExtra) {
 		mDisplayExtra = displayExtra;
-		super.setChanged();
+		setChanged();
 	}
 
 	public void setModifiers(LinkedList<IEntityModifier> modifiers) {
@@ -186,58 +163,30 @@ public class CandiModel extends BaseModel {
 
 	public void setEntityProxy(EntityProxy entityProxy) {
 		mEntityProxy = entityProxy;
-		super.setChanged();
-	}
-
-	public void setZoneNext(ZoneModel zoneNext) {
-		mZoneNext = zoneNext;
-		super.setChanged();
-	}
-
-	public void setZoneCurrent(ZoneModel zoneCurrent) {
-		mZoneCurrent = zoneCurrent;
-		super.setChanged();
-	}
-
-	public void setBodyOnly(boolean bodyOnly) {
-		mBodyOnly = bodyOnly;
-		super.setChanged();
-	}
-
-	public void setBodyImageId(String bodyImageId) {
-		mBodyImageId = bodyImageId;
+		setChanged();
 	}
 
 	public void setBodyImageUri(String bodyImageUri) {
 		mBodyImageUri = bodyImageUri;
+		setChanged();
 	}
 
 	public void setBodyImageFormat(ImageFormat bodyImageFormat) {
 		mBodyImageFormat = bodyImageFormat;
-	}
-
-	public void setTitleOnly(boolean titleOnly) {
-		mTitleOnly = titleOnly;
+		setChanged();
 	}
 
 	public void setTouchAreaActive(boolean touchAreaActive) {
 		mTouchAreaActive = touchAreaActive;
+		setChanged();
 	}
 
 	public void setModelId(int modelId) {
 		mModelId = modelId;
 	}
 
-	public void setOverflowNext(boolean overflowNext) {
-		mOverflowNext = overflowNext;
-	}
-
 	public void setRookie(boolean rookie) {
 		mRookie = rookie;
-	}
-
-	public void setOverflowCurrent(boolean overflowCurrent) {
-		mOverflowCurrent = overflowCurrent;
 	}
 
 	@Override
@@ -265,14 +214,6 @@ public class CandiModel extends BaseModel {
 		return mRookie;
 	}
 
-	public boolean isOverflowCurrent() {
-		return mOverflowCurrent;
-	}
-
-	public boolean isOverflowNext() {
-		return mOverflowNext;
-	}
-
 	public void setReasonInactive(ReasonInactive reasonInactive) {
 		mReasonInactive = reasonInactive;
 	}
@@ -281,39 +222,72 @@ public class CandiModel extends BaseModel {
 		return mReasonInactive;
 	}
 
-	public void setZoneStatusCurrent(ZoneStatus zoneStatusCurrent) {
-		mZoneStatusCurrent = zoneStatusCurrent;
+	public ZoneState getZoneStateCurrent() {
+		return this.mZoneStateCurrent;
 	}
 
-	public ZoneStatus getZoneStatusCurrent() {
-		return mZoneStatusCurrent;
+	public ZoneState getZoneStateNext() {
+		return this.mZoneStateNext;
 	}
 
-	public void setZoneStatusNext(ZoneStatus zoneStatusNext) {
-		mZoneStatusNext = zoneStatusNext;
+	public void setZoneStateCurrent(ZoneState zoneStateCurrent) {
+		this.mZoneStateCurrent = zoneStateCurrent;
 	}
 
-	public ZoneStatus getZoneStatusNext() {
-		return mZoneStatusNext;
+	public void setZoneStateNext(ZoneState zoneStateNext) {
+		this.mZoneStateNext = zoneStateNext;
 	}
 
-	public void setPositionCurrent(Position positionCurrent) {
-		mPositionCurrent = positionCurrent;
+	public void setBodyTextureSourcesDirty(boolean bodyTextureSourcesDirty) {
+		this.mBodyTextureSourcesDirty = bodyTextureSourcesDirty;
 	}
 
-	public Position getPositionCurrent() {
-		if (mPositionCurrent == null)
-			mPositionCurrent = new Position();
-		return mPositionCurrent;
+	public boolean isBodyTextureSourcesDirty() {
+		return mBodyTextureSourcesDirty;
 	}
 
-	public void setPositionNext(Position positionNext) {
-		mPositionNext = positionNext;
-	}
+	public class ZoneState {
 
-	public Position getPositionNext() {
-		if (mPositionNext == null)
-			mPositionNext = new Position();
-		return mPositionNext;
+		private ZoneModel		mZone		= null;
+		private ZoneStatus		mStatus		= ZoneStatus.Normal;
+		private ZoneAlignment	mAlignment	= ZoneAlignment.None;
+		private boolean			mOverflow	= false;
+
+		public ZoneState() {}
+
+		public void setZone(ZoneModel zone) {
+			this.mZone = zone;
+			setChanged();
+		}
+
+		public ZoneModel getZone() {
+			return mZone;
+		}
+
+		public void setStatus(ZoneStatus status) {
+			this.mStatus = status;
+		}
+
+		public ZoneStatus getStatus() {
+			return mStatus;
+		}
+
+		public void setAlignment(ZoneAlignment alignment) {
+			this.mAlignment = alignment;
+			setChanged();
+		}
+
+		public ZoneAlignment getAlignment() {
+			return mAlignment;
+		}
+
+		public void setOverflow(boolean overflow) {
+			this.mOverflow = overflow;
+			setChanged();
+		}
+
+		public boolean isOverflow() {
+			return mOverflow;
+		}
 	}
 }

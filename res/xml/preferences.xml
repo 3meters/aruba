@@ -39,6 +39,12 @@
 	<PreferenceCategory
 		android:title="Development preferences">
 		<CheckBoxPreference
+			android:id="@+id/Pref_Fullscreen"
+			android:key="Pref_Fullscreen"
+			android:defaultValue="false"
+			android:title="Fullscreen"
+			android:summary="Display fullscreen" />
+		<CheckBoxPreference
 			android:id="@+id/Pref_Demo_Mode"
 			android:key="Pref_Demo_Mode"
 			android:defaultValue="false"

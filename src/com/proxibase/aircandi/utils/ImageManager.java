@@ -39,6 +39,8 @@ import android.webkit.WebView.PictureListener;
 import com.proxibase.aircandi.core.AircandiException;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.core.AircandiException.CandiErrorCode;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
@@ -52,38 +54,32 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseExcepti
 public class ImageManager {
 
 	private static ImageManager					singletonObject;
+
 	private ImageCache							mImageCache;
+	private ImageLoader							mImageLoader;
 	private WebView								mWebView;
 	private Queue								mWebViewQueue		= new LinkedList<ImageRequest>();
 	private boolean								mWebViewProcessing	= false;
-	private IImageReadyListener					mImageReadyListener;
+	private IImageRequestListener				mImageReadyListener;
 	private static Context						mContext;
+
 	@SuppressWarnings("unused")
 	private HashMap<String, List<ImageRequest>>	mImageRequests		= new HashMap<String, List<ImageRequest>>();
 
 	public static synchronized ImageManager getInstance() {
-
 		if (singletonObject == null) {
 			singletonObject = new ImageManager();
 		}
 		return singletonObject;
 	}
 
-	public Object clone() throws CloneNotSupportedException {
-		throw new CloneNotSupportedException();
-	}
-
 	/**
 	 * Designed as a singleton. The private Constructor prevents any other class from instantiating.
 	 */
-	private ImageManager() {}
-
-	public ImageCache getImageCache() {
-		return mImageCache;
-	}
-
-	public void setImageCache(ImageCache imageCache) {
-		mImageCache = imageCache;
+	private ImageManager() {
+		setImageLoader(new ImageLoader(mContext));
+		getImageLoader().setImageCache(mImageCache);
+		getImageLoader().setWebView(mWebView);
 	}
 
 	public static Bitmap fetchImage(String url) throws ProxibaseException {
@@ -101,20 +97,15 @@ public class ImageManager {
 		return bm;
 	}
 
-	public Bitmap getImage(String key) {
-		return mImageCache.get(key);
-	}
-
-	public boolean hasImage(String key) {
-		return mImageCache.containsKey(key);
-	}
-
-	public void setContext(Context context) {
-		mContext = context;
-	}
-
 	public void fetchImageAsynch(ImageRequest imageRequest) throws AircandiException {
 
+		// Double check that we don't have it in the cache
+		Bitmap bitmap = mImageCache.get(imageRequest.imageUri);
+		if (bitmap != null) {
+			imageRequest.imageReadyListener.onImageReady(bitmap);
+			return;
+		}
+		
 		// Make sure the cache directory is intact
 		if (!mImageCache.cacheDirectoryExists())
 			mImageCache.makeCacheDirectory();
@@ -151,15 +142,16 @@ public class ImageManager {
 			catch (ProxibaseException exception) {
 				mProxibaseException = exception;
 				return null;
+
 			}
 
 			if (bitmap != null) {
 
-				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageId + "'");
+				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageUri + "'");
 
 				// Crop if requested
 				Bitmap bitmapCropped;
-				if (mImageRequest.imageShape.equals("square")) {
+				if (mImageRequest.imageShape == ImageShape.Square) {
 					bitmapCropped = ImageUtils.cropToSquare(bitmap);
 				}
 				else {
@@ -168,10 +160,10 @@ public class ImageManager {
 
 				// Scale if needed
 				Bitmap bitmapCroppedScaled;
-				if (mImageRequest.widthMinimum > 0 && bitmapCropped.getWidth() != mImageRequest.widthMinimum) {
-					float scalingRatio = (float) mImageRequest.widthMinimum / (float) bitmapCropped.getWidth();
+				if (mImageRequest.scaleToWidth > 0 && bitmapCropped.getWidth() != mImageRequest.scaleToWidth) {
+					float scalingRatio = (float) mImageRequest.scaleToWidth / (float) bitmapCropped.getWidth();
 					float newHeight = (float) bitmapCropped.getHeight() * scalingRatio;
-					bitmapCroppedScaled = Bitmap.createScaledBitmap(bitmapCropped, mImageRequest.widthMinimum, (int) (newHeight), true);
+					bitmapCroppedScaled = Bitmap.createScaledBitmap(bitmapCropped, mImageRequest.scaleToWidth, (int) (newHeight), true);
 				}
 				else {
 					bitmapCroppedScaled = bitmapCropped;
@@ -189,12 +181,12 @@ public class ImageManager {
 				// Stuff it into the disk and memory caches. Overwrites if it already exists.
 				if (bitmapFinal.isRecycled())
 					throw new IllegalArgumentException("bitmapFinal has been recycled");
-				mImageCache.put(mImageRequest.imageId, bitmapFinal);
+				mImageCache.put(mImageRequest.imageUri, bitmapFinal);
 
 				// Create reflection if requested
-				if (mImageRequest.showReflection) {
+				if (mImageRequest.makeReflection) {
 					final Bitmap bitmapReflection = ImageUtils.getReflection(bitmapFinal);
-					mImageCache.put(mImageRequest.imageId + ".reflection", bitmapReflection);
+					mImageCache.put(mImageRequest.imageUri + ".reflection", bitmapReflection);
 					if (mImageCache.isFileCacheOnly())
 						bitmapReflection.recycle();
 				}
@@ -202,7 +194,7 @@ public class ImageManager {
 				return bitmapFinal;
 			}
 			else {
-				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download failed for image '" + mImageRequest.imageId + "'");
+				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download failed for image '" + mImageRequest.imageUri + "'");
 				return null;
 			}
 		}
@@ -273,12 +265,12 @@ public class ImageManager {
 						if (bitmap != null) {
 
 							// Stuff it into the disk and memory caches. Overwrites if it already exists.
-							mImageCache.put(mImageRequest.imageId, bitmap);
+							mImageCache.put(mImageRequest.imageUri, bitmap);
 
 							// Create reflection if requested
-							if (mImageRequest.showReflection) {
+							if (mImageRequest.makeReflection) {
 								Bitmap bitmapReflection = ImageUtils.getReflection(bitmap);
-								mImageCache.put(mImageRequest.imageId + ".reflection", bitmapReflection);
+								mImageCache.put(mImageRequest.imageUri + ".reflection", bitmapReflection);
 								if (mImageCache.isFileCacheOnly()) {
 									bitmapReflection.recycle();
 									bitmapReflection = null;
@@ -315,10 +307,10 @@ public class ImageManager {
 	public Bitmap loadBitmapFromDevice(final Uri imageUri, String imageWidthMax) throws ProxibaseException {
 
 		String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
-		String imageOrientation = "";
 		@SuppressWarnings("unused")
 		String imagePath = "";
 		File imageFile = null;
+		int rotation = 0;
 
 		Cursor cursor = mContext.getContentResolver().query(imageUri, projection, null, null, null);
 
@@ -331,7 +323,7 @@ public class ImageManager {
 				int dataColumn = cursor.getColumnIndex(Images.Media.DATA);
 				int orientationColumn = cursor.getColumnIndex(Images.Media.ORIENTATION);
 				imageData = cursor.getString(dataColumn);
-				imageOrientation = cursor.getString(orientationColumn);
+				rotation = cursor.getInt(orientationColumn);
 			}
 
 			imageFile = new File(imageData);
@@ -343,6 +335,14 @@ public class ImageManager {
 			 */
 			imagePath = imageUri.toString().replace("file://", "");
 			imageFile = new File(imageUri.toString().replace("file://", ""));
+			ExifInterface exif;
+			try {
+				exif = new ExifInterface(imageUri.getPath());
+				rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
+			}
+			catch (IOException exception) {
+				exception.printStackTrace();
+			}
 		}
 
 		byte[] imageBytes = new byte[(int) imageFile.length()];
@@ -368,8 +368,9 @@ public class ImageManager {
 			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
 		}
 
-		imageOrientation = getExifOrientation(imageUri.getPath(), imageOrientation);
-		Bitmap bitmap = bitmapForByteArray(imageBytes, imageWidthMax, imageOrientation);
+		// imageOrientation = getExifOrientation(imageUri.getPath(), imageOrientation);
+		// imageOrientation = getExifOrientation(imageFile.getAbsolutePath(), imageOrientation);
+		Bitmap bitmap = bitmapForByteArray(imageBytes, imageWidthMax, rotation);
 		return bitmap;
 	}
 
@@ -391,7 +392,7 @@ public class ImageManager {
 		}
 	}
 
-	private Bitmap bitmapForByteArray(byte[] imageBytes, String imageWidthMax, String imageOrientation) {
+	private Bitmap bitmapForByteArray(byte[] imageBytes, String imageWidthMax, int rotation) {
 
 		BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 		bitmapOptions.inJustDecodeBounds = true;
@@ -483,8 +484,8 @@ public class ImageManager {
 
 				// Resize the bitmap
 				matrix.postScale(scaleBy, scaleBy);
-				if ((imageOrientation != null) && (imageOrientation.equals("90") || imageOrientation.equals("180") || imageOrientation.equals("270"))) {
-					matrix.postRotate(Integer.valueOf(imageOrientation));
+				if (rotation != 0) {
+					matrix.postRotate(rotation);
 				}
 
 				Bitmap bitmapSampledAndScaled = Bitmap.createBitmap(bitmapSampled, 0, 0, bitmapSampled.getWidth(), bitmapSampled.getHeight(), matrix,
@@ -505,6 +506,40 @@ public class ImageManager {
 		}
 	}
 
+	public static float rotationForImage(Context context, Uri uri) {
+		if (uri.getScheme().equals("content")) {
+			String[] projection = { Images.ImageColumns.ORIENTATION };
+			Cursor c = context.getContentResolver().query(uri, projection, null, null, null);
+			if (c.moveToFirst()) {
+				return c.getInt(0);
+			}
+		}
+		else if (uri.getScheme().equals("file")) {
+			try {
+				ExifInterface exif = new ExifInterface(uri.getPath());
+				int rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
+				return rotation;
+			}
+			catch (IOException e) {
+			}
+		}
+		return 0f;
+	}
+
+	private static float exifOrientationToDegrees(int exifOrientation) {
+		if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+			return 90;
+		}
+		else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+			return 180;
+		}
+		else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+			return 270;
+		}
+		return 0;
+	}
+
+	@SuppressWarnings("unused")
 	private String getExifOrientation(String imagePath, String imageOrientation) {
 		/*
 		 * Return image EXIF orientation using reflection (if Android 2.0 or higher)
@@ -581,7 +616,6 @@ public class ImageManager {
 		 * List of known devices that have the bug where the
 		 * OK button does nothing when using MediaStore.ACTION_IMAGE_CAPTURE intent.
 		 * http://code.google.com/p/android/issues/detail?id=1480
-		 * 
 		 * Nexus S fingerprint: google/soju/crespo
 		 */
 		ArrayList<String> devices = new ArrayList<String>();
@@ -593,19 +627,6 @@ public class ImageManager {
 		devices.add("verizon/voles/sholes");
 		devices.add("google_ion/google_ion/sapphire");
 		return devices.contains(android.os.Build.BRAND + "/" + android.os.Build.PRODUCT + "/" + android.os.Build.DEVICE);
-	}
-
-	public static ImageRequest imageRequestFactory(String imageUri, ImageFormat imageFormat, String imageShape, int minWidth, boolean makeReflection,
-			IImageReadyListener imageReadyListener) {
-		ImageRequest imageRequest = new ImageRequest();
-		imageRequest.imageId = imageUri;
-		imageRequest.imageUri = imageUri;
-		imageRequest.imageFormat = imageFormat;
-		imageRequest.imageShape = imageShape;
-		imageRequest.widthMinimum = minWidth;
-		imageRequest.showReflection = makeReflection;
-		imageRequest.imageReadyListener = imageReadyListener;
-		return imageRequest;
 	}
 
 	public void startWebViewProcessing() throws AircandiException {
@@ -623,19 +644,52 @@ public class ImageManager {
 		}
 	}
 
-	public void setWebView(WebView webView) {
-		mWebView = webView;
+	public Bitmap getImage(String key) {
+		return mImageCache.get(key);
+	}
+
+	public boolean hasImage(String key) {
+		return mImageCache.containsKey(key);
+	}
+
+	public ImageCache getImageCache() {
+		return mImageCache;
+	}
+
+	public void setImageCache(ImageCache imageCache) {
+		mImageCache = imageCache;
+		getImageLoader().setImageCache(imageCache);
 	}
 
 	public WebView getWebView() {
 		return mWebView;
 	}
 
+	public void setWebView(WebView webView) {
+		mWebView = webView;
+	}
+
 	public Queue getQueue() {
 		return mWebViewQueue;
 	}
 
-	public interface IImageReadyListener {
+	public void setContext(Context context) {
+		mContext = context;
+	}
+
+	public void setImageLoader(ImageLoader imageLoader) {
+		this.mImageLoader = imageLoader;
+	}
+
+	public ImageLoader getImageLoader() {
+		return mImageLoader;
+	}
+
+	public Object clone() throws CloneNotSupportedException {
+		throw new CloneNotSupportedException();
+	}
+
+	public interface IImageRequestListener {
 
 		void onImageReady(Bitmap bitmap);
 
@@ -644,16 +698,33 @@ public class ImageManager {
 
 	public static class ImageRequest {
 
-		public String				imageUri;
-		public String				imageId;
-		public String				imageShape			= "native";
-		public ImageFormat			imageFormat;
-		public int					widthMinimum;
-		public boolean				showReflection		= false;
-		public IImageReadyListener	imageReadyListener	= null;
-	}
+		public String					imageUri;
+		public ImageShape				imageShape			= ImageShape.Native;
+		public ImageFormat				imageFormat;
+		public Object					imageRequestor;
+		public int						priority			= 1;
+		public int						scaleToWidth;
+		public boolean					makeReflection		= false;
+		public IImageRequestListener	imageReadyListener	= null;
 
-	public enum ImageFormat {
-		Binary, Html
+		public ImageRequest(String imageUri, ImageShape imageShape, ImageFormat imageFormat, int scaleToWidth, boolean makeReflection, int priority,
+				Object imageRequestor, IImageRequestListener imageReadyListener) {
+			this.imageUri = imageUri;
+			this.imageShape = imageShape;
+			this.imageFormat = imageFormat;
+			this.imageRequestor = imageRequestor;
+			this.scaleToWidth = scaleToWidth;
+			this.priority = priority;
+			this.makeReflection = makeReflection;
+			this.imageReadyListener = imageReadyListener;
+		}
+
+		public enum ImageFormat {
+			Binary, Html
+		}
+
+		public enum ImageShape {
+			Native, Square
+		}
 	}
 }

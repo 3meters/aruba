@@ -9,7 +9,8 @@
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:paddingLeft="5dp"
-		android:paddingRight="5dp">
+		android:paddingRight="5dp"
+		>"
 		<com.proxibase.aircandi.widgets.PagerTextView
 			android:id="@+id/txt_pager_indicator_previous"
 			android:layout_height="wrap_content"
