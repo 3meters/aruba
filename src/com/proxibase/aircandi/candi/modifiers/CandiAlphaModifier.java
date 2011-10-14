@@ -1,5 +1,6 @@
 package com.proxibase.aircandi.candi.modifiers;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
@@ -7,41 +8,64 @@ public class CandiAlphaModifier extends AlphaModifier {
 
 	private float	mFromAlpha;
 	private float	mToAlpha;
+	private IEntity	mEntity;
 
-	public CandiAlphaModifier(AlphaModifier pAlphaModifier) {
-		super(pAlphaModifier);
-	}
-
-	public CandiAlphaModifier(float pDuration, float pFromAlpha, float pToAlpha, IEaseFunction pEaseFunction) {
+	public CandiAlphaModifier(IEntity entity, float pDuration, float pFromAlpha, float pToAlpha, IEaseFunction pEaseFunction) {
 		super(pDuration, pFromAlpha, pToAlpha, pEaseFunction);
 		mFromAlpha = pFromAlpha;
 		mToAlpha = pToAlpha;
+		mEntity = entity;
 	}
 
-	public CandiAlphaModifier(float pDuration, float pFromAlpha, float pToAlpha, IEntityModifierListener pEntityModifierListener,
+	public CandiAlphaModifier(IEntity entity, float pDuration, float pFromAlpha, float pToAlpha, IEntityModifierListener pEntityModifierListener,
 			IEaseFunction pEaseFunction) {
 		super(pDuration, pFromAlpha, pToAlpha, pEntityModifierListener, pEaseFunction);
 		mFromAlpha = pFromAlpha;
 		mToAlpha = pToAlpha;
+		mEntity = entity;
 	}
 
-	public CandiAlphaModifier(float pDuration, float pFromAlpha, float pToAlpha, IEntityModifierListener pEntityModifierListener) {
+	public CandiAlphaModifier(IEntity entity, float pDuration, float pFromAlpha, float pToAlpha, IEntityModifierListener pEntityModifierListener) {
 		super(pDuration, pFromAlpha, pToAlpha, pEntityModifierListener);
 		mFromAlpha = pFromAlpha;
 		mToAlpha = pToAlpha;
+		mEntity = entity;
 	}
 
-	public CandiAlphaModifier(float pDuration, float pFromAlpha, float pToAlpha) {
+	public CandiAlphaModifier(IEntity entity, float pDuration, float pFromAlpha, float pToAlpha) {
 		super(pDuration, pFromAlpha, pToAlpha);
 		mFromAlpha = pFromAlpha;
 		mToAlpha = pToAlpha;
+		mEntity = entity;
 	}
 
-	public float getFromAlpha() {
-		return mFromAlpha;
+	@Override
+	protected void onModifierFinished(IEntity pItem) {
+		if (mToAlpha == 0) {
+			if (mEntity != null) {
+				mEntity.setVisible(false);
+				mEntity.setAlpha(1);
+			}
+		}
+		super.onModifierFinished(pItem);
 	}
 
-	public float getToAlpha() {
-		return mToAlpha;
+	@Override
+	protected void onModifierStarted(IEntity pItem) {
+		if (mFromAlpha == 0) {
+			if (mEntity != null) {
+				mEntity.setAlpha(0);
+				mEntity.setVisible(true);
+			}
+		}
+		super.onModifierStarted(pItem);
+	}
+
+	public void setEntity(IEntity entity) {
+		this.mEntity = entity;
+	}
+
+	public IEntity getEntity() {
+		return mEntity;
 	}
 }
