@@ -85,6 +85,7 @@ public class ImageManager {
 	public static Bitmap fetchImage(String url) throws ProxibaseException {
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+		
 		/*
 		 * We request a byte array for decoding because of a bug
 		 * in pre 2.3 versions of android.
@@ -99,14 +100,14 @@ public class ImageManager {
 
 	public void fetchImageAsynch(ImageRequest imageRequest) throws AircandiException {
 
-		// Double check that we don't have it in the cache
+		/* Double check that we don't have it in the cache */
 		Bitmap bitmap = mImageCache.get(imageRequest.imageUri);
 		if (bitmap != null) {
 			imageRequest.imageReadyListener.onImageReady(bitmap);
 			return;
 		}
 		
-		// Make sure the cache directory is intact
+		/* Make sure the cache directory is intact */
 		if (!mImageCache.cacheDirectoryExists())
 			mImageCache.makeCacheDirectory();
 
@@ -133,7 +134,7 @@ public class ImageManager {
 		@Override
 		protected Bitmap doInBackground(final ImageRequest... params) {
 
-			// We are on the background thread
+			/* We are on the background thread */
 			mImageRequest = params[0];
 			Bitmap bitmap = null;
 			try {
@@ -149,7 +150,7 @@ public class ImageManager {
 
 				Utilities.Log(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageUri + "'");
 
-				// Crop if requested
+				/* Crop if requested */
 				Bitmap bitmapCropped;
 				if (mImageRequest.imageShape == ImageShape.Square) {
 					bitmapCropped = ImageUtils.cropToSquare(bitmap);
@@ -158,7 +159,7 @@ public class ImageManager {
 					bitmapCropped = bitmap;
 				}
 
-				// Scale if needed
+				/* Scale if needed */
 				Bitmap bitmapCroppedScaled;
 				if (mImageRequest.scaleToWidth > 0 && bitmapCropped.getWidth() != mImageRequest.scaleToWidth) {
 					float scalingRatio = (float) mImageRequest.scaleToWidth / (float) bitmapCropped.getWidth();
@@ -169,7 +170,7 @@ public class ImageManager {
 					bitmapCroppedScaled = bitmapCropped;
 				}
 
-				// Make sure the bitmap format is right
+				/* Make sure the bitmap format is right */
 				Bitmap bitmapFinal;
 				if (!bitmapCroppedScaled.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString())) {
 					bitmapFinal = bitmapCroppedScaled.copy(CandiConstants.IMAGE_CONFIG_DEFAULT, false);
@@ -178,12 +179,12 @@ public class ImageManager {
 					bitmapFinal = bitmapCroppedScaled;
 				}
 
-				// Stuff it into the disk and memory caches. Overwrites if it already exists.
+				/* Stuff it into the disk and memory caches. Overwrites if it already exists. */
 				if (bitmapFinal.isRecycled())
 					throw new IllegalArgumentException("bitmapFinal has been recycled");
 				mImageCache.put(mImageRequest.imageUri, bitmapFinal);
 
-				// Create reflection if requested
+				/* Create reflection if requested */
 				if (mImageRequest.makeReflection) {
 					final Bitmap bitmapReflection = ImageUtils.getReflection(bitmapFinal);
 					mImageCache.put(mImageRequest.imageUri + ".reflection", bitmapReflection);
@@ -202,7 +203,7 @@ public class ImageManager {
 		@Override
 		protected void onPostExecute(final Bitmap bitmap) {
 
-			// We are on the main thread
+			/* We are on the main thread */
 			super.onPostExecute(bitmap);
 
 			if (mProxibaseException != null) {
@@ -232,7 +233,7 @@ public class ImageManager {
 		@Override
 		protected Bitmap doInBackground(final ImageRequest... params) {
 
-			// We are on the background thread
+			/* We are on the background thread */
 			mImageRequest = params[0];
 			String webViewContent = "";
 			final AtomicBoolean ready = new AtomicBoolean(false);
@@ -264,10 +265,10 @@ public class ImageManager {
 
 						if (bitmap != null) {
 
-							// Stuff it into the disk and memory caches. Overwrites if it already exists.
+							/* Stuff it into the disk and memory caches. Overwrites if it already exists. */
 							mImageCache.put(mImageRequest.imageUri, bitmap);
 
-							// Create reflection if requested
+							/* Create reflection if requested */
 							if (mImageRequest.makeReflection) {
 								Bitmap bitmapReflection = ImageUtils.getReflection(bitmap);
 								mImageCache.put(mImageRequest.imageUri + ".reflection", bitmapReflection);
@@ -277,7 +278,7 @@ public class ImageManager {
 								}
 							}
 
-							// Ready to return to original requestor
+							/* Ready to return to original requestor */
 							if (mImageRequest.imageReadyListener != null)
 								mImageRequest.imageReadyListener.onImageReady(bitmap);
 							else if (mImageReadyListener != null) {
@@ -285,14 +286,15 @@ public class ImageManager {
 							}
 						}
 
-						// Release
+						/* Release */
 						canvas = null;
 						mWebViewProcessing = false;
 						try {
 							startWebViewProcessing();
 						}
 						catch (AircandiException exception) {
-							// TODO: We might have hit the thread limit for AsyncTasks
+							
+							/* TODO: We might have hit the thread limit for AsyncTasks */
 							exception.printStackTrace();
 						}
 					}
@@ -315,9 +317,8 @@ public class ImageManager {
 		Cursor cursor = mContext.getContentResolver().query(imageUri, projection, null, null, null);
 
 		if (cursor != null) {
-			/*
-			 * Means the image is in the media store
-			 */
+			
+			/* Means the image is in the media store */
 			String imageData = "";
 			if (cursor.moveToFirst()) {
 				int dataColumn = cursor.getColumnIndex(Images.Media.DATA);
@@ -330,9 +331,8 @@ public class ImageManager {
 			imagePath = imageData;
 		}
 		else {
-			/*
-			 * The image is in the local file system
-			 */
+			
+			/* The image is in the local file system */
 			imagePath = imageUri.toString().replace("file://", "");
 			imageFile = new File(imageUri.toString().replace("file://", ""));
 			ExifInterface exif;
@@ -398,7 +398,7 @@ public class ImageManager {
 		bitmapOptions.inJustDecodeBounds = true;
 		bitmapOptions.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
 
-		// Initial decode is just to get the bitmap dimensions
+		/* Initial decode is just to get the bitmap dimensions */
 		BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, bitmapOptions);
 
 		int widthRaw = bitmapOptions.outWidth;
@@ -435,7 +435,7 @@ public class ImageManager {
 
 				Bitmap bitmapSampledAndCompressed = BitmapFactory.decodeByteArray(baos.toByteArray(), 0, baos.toByteArray().length);
 
-				// Release
+				/* Release */
 				bitmapSampled.recycle();
 
 				return bitmapSampledAndCompressed;
@@ -479,10 +479,10 @@ public class ImageManager {
 				float scaleHeight = ((float) heightFinal) / bitmapSampled.getHeight();
 				float scaleBy = Math.min(scaleWidth, scaleHeight);
 
-				// Create a matrix for the manipulation
+				/* Create a matrix for the manipulation */
 				Matrix matrix = new Matrix();
 
-				// Resize the bitmap
+				/* Resize the bitmap */
 				matrix.postScale(scaleBy, scaleBy);
 				if (rotation != 0) {
 					matrix.postRotate(rotation);
@@ -497,7 +497,7 @@ public class ImageManager {
 				Bitmap bitmapSampledScaledCompressed = BitmapFactory.decodeByteArray(bitmapByteArrayOutputStream.toByteArray(), 0,
 						bitmapByteArrayOutputStream.toByteArray().length);
 
-				// Release
+				/* Release */
 				bitmapSampled.recycle();
 				bitmapSampledAndScaled.recycle();
 
@@ -541,6 +541,7 @@ public class ImageManager {
 
 	@SuppressWarnings("unused")
 	private String getExifOrientation(String imagePath, String imageOrientation) {
+		
 		/*
 		 * Return image EXIF orientation using reflection (if Android 2.0 or higher)
 		 * http://developer.android.com/resources/articles/backward-compatibility.html
@@ -583,14 +584,15 @@ public class ImageManager {
 					}
 				}
 				catch (InvocationTargetException exception) {
-					// Unpack original exception when possible
+					
+					/* Unpack original exception when possible */
 					imageOrientation = "0";
 				}
 				catch (IllegalAccessException exception) {
 					System.err.println("unexpected " + exception);
 					imageOrientation = "0";
 				}
-				// Success, this is a newer device
+				/* Success, this is a newer device */
 			}
 			catch (NoSuchMethodException exception) {
 				imageOrientation = "0";

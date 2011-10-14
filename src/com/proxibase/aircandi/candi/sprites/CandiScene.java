@@ -23,7 +23,7 @@ public class CandiScene extends Scene {
 			for (int x = 0; x < child.getChildCount(); x++) {
 				if (child.getChild(x) instanceof BaseView) {
 					BaseView baseView = (BaseView) child.getChild(x);
-					if (baseView.getModel() == null || !((BaseModel)baseView.getModel()).getViewStateCurrent().isVisible())
+					if (baseView.getModel() == null || !((BaseModel) baseView.getModel()).getViewStateCurrent().isVisible())
 						continue;
 				}
 				child.getChild(x).setAlpha(alpha);

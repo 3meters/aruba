@@ -18,29 +18,16 @@ import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 public class CandiModel extends BaseModel {
 
-	public static enum Transition {
-		None, FadeIn, FadeOut, OverflowIn, OverflowOut, Move, Shift, In, Out
-	}
-
-	public static enum DisplayExtra {
-		None, Level, Tag, Time
-	}
-
-	public static enum ReasonInactive {
-		New, Navigation, Hidden, None, Deleting
-	}
-
-	private EntityProxy		mEntityProxy				= null;
+	private EntityProxy		mEntityProxy		= null;
 	private int				mModelId;
-	private ZoneState		mZoneStateCurrent			= new ZoneState();
-	private ZoneState		mZoneStateNext				= new ZoneState();
-	private DisplayExtra	mDisplayExtra				= DisplayExtra.None;
-	private boolean			mTouchAreaActive			= false;
-	private boolean			mRookie						= true;
+	private ZoneState		mZoneStateCurrent	= new ZoneState();
+	private ZoneState		mZoneStateNext		= new ZoneState();
+	private DisplayExtra	mDisplayExtra		= DisplayExtra.None;
+	private boolean			mTouchAreaActive	= false;
+	private boolean			mRookie				= true;
 	private String			mBodyImageUri;
 	private ImageFormat		mBodyImageFormat;
-	private ReasonInactive	mReasonInactive				= ReasonInactive.None;
-	private boolean			mBodyTextureSourcesDirty	= false;
+	private ReasonInactive	mReasonInactive		= ReasonInactive.None;
 
 	public CandiModel(int modelId, CandiPatchModel candiPatchModel) {
 		super();
@@ -54,9 +41,6 @@ public class CandiModel extends BaseModel {
 		 * But if OverflowNext = false then VisibleNext can be true or false
 		 */
 		Transition transition = Transition.None;
-
-		// if (mZoneStateCurrent.getZone().isInactive())
-		// return transition;
 
 		if (mReasonInactive == ReasonInactive.Deleting) {
 			transition = Transition.Out;
@@ -77,16 +61,15 @@ public class CandiModel extends BaseModel {
 			transition = Transition.FadeOut;
 		}
 		else if (mViewStateNext.isVisible()) {
-			if (mZoneStateCurrent.getZone().getZoneIndex() != mZoneStateNext.getZone().getZoneIndex())
+			if (mZoneStateCurrent.getZone().getZoneIndex() != mZoneStateNext.getZone().getZoneIndex()) {
 				transition = Transition.Move;
+			}
 			else {
-				if (!mViewStateNext.equals(mViewStateCurrent))
+				if (!mViewStateNext.equals(mViewStateCurrent)) {
 					transition = Transition.Shift;
+				}
 			}
 		}
-		// else if (mZoneStateNext.isOverflow() && !mViewStateCurrent.isVisible() && !mViewStateNext.isVisible()) {
-		// transition = Transition.FadeOut;
-		// }
 		return transition;
 	}
 
@@ -101,6 +84,9 @@ public class CandiModel extends BaseModel {
 		mViewStateCurrent.setZoomed(mViewStateNext.isZoomed());
 		mViewStateCurrent.setCollapsed(mViewStateNext.isCollapsed());
 		mViewStateCurrent.setHasReflection(mViewStateNext.hasReflection());
+		mViewStateCurrent.setOkToAnimate(mViewStateNext.isOkToAnimate());
+		mViewStateCurrent.setAlpha(mViewStateNext.getAlpha());
+		mViewStateCurrent.setLastWithinHalo(mViewStateNext.isLastWithinHalo());
 
 		mZoneStateCurrent.setAlignment(mZoneStateNext.getAlignment());
 		mZoneStateCurrent.setOverflow(mZoneStateNext.isOverflow());
@@ -154,31 +140,26 @@ public class CandiModel extends BaseModel {
 
 	public void setDisplayExtra(DisplayExtra displayExtra) {
 		mDisplayExtra = displayExtra;
-		setChanged();
 	}
 
 	public void setModifiers(LinkedList<IEntityModifier> modifiers) {
-		mModifiers = modifiers;
+		mViewModifiers = modifiers;
 	}
 
 	public void setEntityProxy(EntityProxy entityProxy) {
 		mEntityProxy = entityProxy;
-		setChanged();
 	}
 
 	public void setBodyImageUri(String bodyImageUri) {
 		mBodyImageUri = bodyImageUri;
-		setChanged();
 	}
 
 	public void setBodyImageFormat(ImageFormat bodyImageFormat) {
 		mBodyImageFormat = bodyImageFormat;
-		setChanged();
 	}
 
 	public void setTouchAreaActive(boolean touchAreaActive) {
 		mTouchAreaActive = touchAreaActive;
-		setChanged();
 	}
 
 	public void setModelId(int modelId) {
@@ -238,14 +219,6 @@ public class CandiModel extends BaseModel {
 		this.mZoneStateNext = zoneStateNext;
 	}
 
-	public void setBodyTextureSourcesDirty(boolean bodyTextureSourcesDirty) {
-		this.mBodyTextureSourcesDirty = bodyTextureSourcesDirty;
-	}
-
-	public boolean isBodyTextureSourcesDirty() {
-		return mBodyTextureSourcesDirty;
-	}
-
 	public class ZoneState {
 
 		private ZoneModel		mZone		= null;
@@ -257,7 +230,6 @@ public class CandiModel extends BaseModel {
 
 		public void setZone(ZoneModel zone) {
 			this.mZone = zone;
-			setChanged();
 		}
 
 		public ZoneModel getZone() {
@@ -274,7 +246,6 @@ public class CandiModel extends BaseModel {
 
 		public void setAlignment(ZoneAlignment alignment) {
 			this.mAlignment = alignment;
-			setChanged();
 		}
 
 		public ZoneAlignment getAlignment() {
@@ -283,11 +254,23 @@ public class CandiModel extends BaseModel {
 
 		public void setOverflow(boolean overflow) {
 			this.mOverflow = overflow;
-			setChanged();
 		}
 
 		public boolean isOverflow() {
 			return mOverflow;
 		}
 	}
+
+	public static enum Transition {
+		None, FadeIn, FadeOut, OverflowIn, OverflowOut, Move, Shift, In, Out
+	}
+
+	public static enum DisplayExtra {
+		None, Level, Tag, Time
+	}
+
+	public static enum ReasonInactive {
+		New, Navigation, Hidden, None, Deleting
+	}
+
 }

@@ -8,21 +8,21 @@ import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 public class PostEntity extends BaseEntity {
 
-	// Annotation syntax: @Expose (serialize = false, deserialize = false)
+	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 	@Expose
-	public String		mediaUri;
+	public String	mediaUri;
 	@Expose
-	public String		mediaFormat;
+	public String	mediaFormat;
 	@Expose
-	public boolean		locked;
+	public boolean	locked;
 	@Expose
-	public Metadata		__metadata	= new Metadata();
+	public Metadata	__metadata	= new Metadata();
 
 	//---------------------------------------------------------------------------------------------
 	// For client use only
 	//---------------------------------------------------------------------------------------------
-	
-	public Bitmap 		mediaBitmap;
+
+	public Bitmap	mediaBitmap;
 
 	public PostEntity() {
 		__metadata.type = "Aircandi.Post";

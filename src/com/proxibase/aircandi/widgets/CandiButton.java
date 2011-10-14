@@ -12,32 +12,28 @@ import android.widget.ImageView.ScaleType;
  */
 @SuppressWarnings("unused")
 public class CandiButton extends Button {
-	
-	private Button button; 
+
+	private Button	button;
 
 	public CandiButton(final Context context, final int width, final float titleTextSize, final float bodyTextSize) {
-		
 
 		super(context);
 
-		// Button configuration.
-		
+		/* Button configuration. */
 		ViewConfiguration configuration = ViewConfiguration.get(context);
 		int maxCacheSize = configuration.getScaledMaximumDrawingCacheSize();
 		ScaleType scaleType = ScaleType.FIT_CENTER;
 
-
-		// Text layer
-
+		/* Text layer */
 		button = new Button(context);
-//		this.setWidth(80)
-//		button.setMaxHeight(width_);
-//		FrameLayout.LayoutParams paramsTextLayer = new FrameLayout.LayoutParams(width_, width_);
-//		paramsTextLayer.gravity = Gravity.LEFT | Gravity.CLIP_VERTICAL;
-//		button.setLayoutParams(paramsTextLayer);
-//		button.setTextSize(TypedValue.COMPLEX_UNIT_SP, bodyTextSize);
-//		button.setTextColor(Color.WHITE);
-//		button.setPadding(4, 4, 4, 4);
+		//		this.setWidth(80)
+		//		button.setMaxHeight(width_);
+		//		FrameLayout.LayoutParams paramsTextLayer = new FrameLayout.LayoutParams(width_, width_);
+		//		paramsTextLayer.gravity = Gravity.LEFT | Gravity.CLIP_VERTICAL;
+		//		button.setLayoutParams(paramsTextLayer);
+		//		button.setTextSize(TypedValue.COMPLEX_UNIT_SP, bodyTextSize);
+		//		button.setTextColor(Color.WHITE);
+		//		button.setPadding(4, 4, 4, 4);
 
 	}
 

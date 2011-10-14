@@ -6,49 +6,43 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DateUtils
-{
-	public static final String	DATE_NOW_FORMAT	= "yyyy-MM-dd HH:mm:ss";
-	public static final String 	DATE_NOW_FORMAT_FILENAME = "yyyyMMdd_HHmmss";
+public class DateUtils {
 
-	public static String nowString()
-	{
+	public static final String	DATE_NOW_FORMAT				= "yyyy-MM-dd HH:mm:ss";
+	public static final String	DATE_NOW_FORMAT_FILENAME	= "yyyyMMdd_HHmmss";
+
+	public static String nowString() {
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_NOW_FORMAT);
 		return sdf.format(cal.getTime());
 	}
 
-	public static String nowString(String pattern)
-	{
+	public static String nowString(String pattern) {
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 		return sdf.format(cal.getTime());
 	}
-	
-	public static Date nowDate()
-	{
+
+	public static Date nowDate() {
 		Calendar cal = Calendar.getInstance();
 		return cal.getTime();
 	}
 
-	public static Date wcfToDate(String wcfDate)
-	{
+	public static Date wcfToDate(String wcfDate) {
 		String JSONDateToMilliseconds = "\\/(Date\\((.*?)(\\+.*)?\\))\\/";
 		Pattern pattern = Pattern.compile(JSONDateToMilliseconds);
 		Matcher matcher = pattern.matcher(wcfDate);
 		String result = matcher.replaceAll("$2");
 		return new Date(new Long(result));
 	}
-	
-	public static int intervalInSeconds(Date dateOld, Date dateNew)
-	{
+
+	public static int intervalInSeconds(Date dateOld, Date dateNew) {
 		Long diff = dateNew.getTime() - dateOld.getTime();
 		int seconds = (int) (diff / 1000);
 		return seconds;
 	}
 
-	public static String intervalSince(Date dateOld, Date dateNew)
-	{
+	public static String intervalSince(Date dateOld, Date dateNew) {
 		Long diff = dateNew.getTime() - dateOld.getTime();
 		int minutes = (int) ((diff / 1000) / 60);
 		int hours = (int) ((diff / 1000) / (60 * 60));
@@ -60,7 +54,7 @@ public class DateUtils
 		String interval = "";
 		if (days >= 2)
 			interval += String.valueOf(days) + " days ago";
-		else if (days >= 1) // x days ago 1 day and x hour ago
+		else if (days >= 1) /* x days ago 1 day and x hour ago */
 		{
 			interval += "1 day";
 			if (hoursPart == 1)
@@ -69,19 +63,19 @@ public class DateUtils
 				interval += " " + String.valueOf(hoursPart) + " hours";
 			interval += " ago";
 		}
-		else if (hours == 1) // x hours x minutes ago
+		else if (hours == 1) /* x hours x minutes ago */
 		{
 			interval = "1 hour ago";
 		}
-		else if (hours > 1) // x hours x minutes ago
+		else if (hours > 1) /* x hours x minutes ago */
 		{
 			interval = String.valueOf(hours) + " hours ago";
 		}
-		else if (minutes == 1) // x hours x minutes ago
+		else if (minutes == 1) /* x hours x minutes ago */
 		{
 			interval = "1 minute ago";
 		}
-		else if (minutes > 1) // x hours x minutes ago
+		else if (minutes > 1) /* x hours x minutes ago */
 		{
 			interval = String.valueOf(minutes) + " minutes ago";
 		}

@@ -281,7 +281,8 @@ public abstract class EntityBase extends AircandiActivity {
 				}
 			}
 			else {
-				// User doesn't have a valid profile image
+				
+				/* User doesn't have a valid profile image */
 				Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
 				entity.imageBitmap = bitmap;
 				showImageThumbnail(bitmap);
@@ -296,7 +297,7 @@ public abstract class EntityBase extends AircandiActivity {
 
 	protected void doSave() {
 
-		// Insert beacon if it isn't already registered
+		/* Insert beacon if it isn't already registered */
 		if (mBeacon != null && mBeacon.isUnregistered) {
 			mBeacon.registeredById = String.valueOf(mUser.id);
 			mBeacon.beaconType = BeaconType.Fixed.name().toLowerCase();
@@ -336,8 +337,6 @@ public abstract class EntityBase extends AircandiActivity {
 		 * TODO: If update then we might have orphaned a photo in S3
 		 */
 		else if (entity.imageUri == null && entity.imageBitmap != null) {
-			/*
-			 */
 			if (entity.imageBitmap != null) {
 				String imageKey = String.valueOf(mUser.id) + "_" + String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME)) + ".jpg";
 				try {
@@ -388,7 +387,7 @@ public abstract class EntityBase extends AircandiActivity {
 						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_insert_success_toast), Toast.LENGTH_SHORT);
 						Intent intent = new Intent();
 
-						// We are editing so set the dirty flag
+						/* We are editing so set the dirty flag */
 						intent.putExtra(getString(R.string.EXTRA_BEACON_DIRTY), entity.beaconId);
 						intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.New);
 
@@ -407,7 +406,6 @@ public abstract class EntityBase extends AircandiActivity {
 				exception.printStackTrace();
 			}
 		});
-
 	}
 
 	protected void updateEntity() {
@@ -429,7 +427,8 @@ public abstract class EntityBase extends AircandiActivity {
 
 			@Override
 			public void onComplete(String response) {
-				// Post the processed result back to the UI thread
+				
+				/* Post the processed result back to the UI thread */
 				runOnUiThread(new Runnable() {
 
 					public void run() {
@@ -445,7 +444,6 @@ public abstract class EntityBase extends AircandiActivity {
 						overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 					}
 				});
-
 			}
 
 			@Override
@@ -459,7 +457,6 @@ public abstract class EntityBase extends AircandiActivity {
 						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
 					}
 				});
-
 			}
 		});
 
@@ -472,7 +469,7 @@ public abstract class EntityBase extends AircandiActivity {
 		 * be orphaning any images associated with child entities.
 		 */
 
-		// If there is an image stored with S3 then delete it
+		/* If there is an image stored with S3 then delete it */
 		BaseEntity entity = (BaseEntity) mEntity;
 		if (entity.imageUri != null && !entity.imageUri.equals("") && entity.imageFormat.equals("binary")) {
 			String imageKey = entity.imageUri.substring(entity.imageUri.lastIndexOf("/") + 1);
@@ -487,7 +484,7 @@ public abstract class EntityBase extends AircandiActivity {
 			}
 		}
 
-		// Delete the entity from the service
+		/* Delete the entity from the service */
 		Bundle parameters = new Bundle();
 		parameters.putInt("entityId", entity.id);
 
@@ -541,7 +538,8 @@ public abstract class EntityBase extends AircandiActivity {
 	}
 
 	protected void deleteImageFromS3(String imageKey) throws ProxibaseException {
-		// If the image is stored with S3 then it will be deleted
+		
+		/* If the image is stored with S3 then it will be deleted */
 		try {
 			S3.getInstance().deleteObject(CandiConstants.S3_BUCKET_IMAGES, imageKey);
 		}
@@ -572,7 +570,8 @@ public abstract class EntityBase extends AircandiActivity {
 				ImageManager.getInstance().fetchImageAsynch(imageRequest);
 			}
 			catch (AircandiException exception) {
-				// TODO: We might have hit the thread limit for asynctasks
+				
+				/* TODO: We might have hit the thread limit for asynctasks */
 				exception.printStackTrace();
 			}
 			return null;
@@ -655,9 +654,8 @@ public abstract class EntityBase extends AircandiActivity {
 	// --------------------------------------------------------------------------------------------
 	protected void onDestroy() {
 		super.onDestroy();
-		/*
-		 * This activity gets destroyed everytime we leave using back or finish().
-		 */
+		
+		/* This activity gets destroyed everytime we leave using back or finish(). */
 
 		try {
 			BaseEntity entity = (BaseEntity) mEntity;

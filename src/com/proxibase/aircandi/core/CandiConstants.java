@@ -3,6 +3,12 @@ package com.proxibase.aircandi.core;
 import javax.microedition.khronos.opengles.GL10;
 
 import org.anddev.andengine.opengl.texture.TextureOptions;
+import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
+import org.anddev.andengine.util.modifier.ease.EaseLinear;
+import org.anddev.andengine.util.modifier.ease.EaseQuartIn;
+import org.anddev.andengine.util.modifier.ease.EaseQuartOut;
+import org.anddev.andengine.util.modifier.ease.EaseStrongOut;
+import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import android.graphics.Bitmap.Config;
 
@@ -16,7 +22,7 @@ public interface CandiConstants {
 	public static final int				LAYER_ZONES						= 1;
 	public static final int				LAYER_CANDI						= 2;
 
-	public static final float			CANDI_VIEW_HALO					= 2.0f;																																	
+	public static final float			CANDI_VIEW_HALO					= 2.0f;
 	public static final int				CANDI_VIEW_WIDTH				= 250;
 	public static final int				CANDI_VIEW_SPACING				= 20;
 	public static final int				CANDI_VIEW_BODY_HEIGHT			= 250;
@@ -39,7 +45,9 @@ public interface CandiConstants {
 	public static final int				VERTEX_INDEX_X					= 0;
 	public static final int				VERTEX_INDEX_Y					= 1;
 
-	public static final String			PATH_IMAGECACHE					= "/imagecache/aircandi";
+	public static final String			CACHE_PATH						= "/imagecache/aircandi";
+	public static final long			CACHE_TARGET_SIZE				= 4000000;
+	public static final long			CACHE_TRIGGER_SIZE				= 6000000;
 
 	public static final int				TWO_MINUTES						= 1000 * 60 * 2;
 	public static final int				FIVE_MINUTES					= 1000 * 60 * 5;
@@ -70,7 +78,7 @@ public interface CandiConstants {
 	public static final int				VISIBILITY_PASSWORD_PROTECTED	= 1;
 	public static final int				VISIBILITY_PUBLIC				= 2;
 
-	public static final float			DURATION_MULTIPLIER				= 0.8f;
+	public static final float			DURATION_MULTIPLIER				= 1.0f;
 	public static final float			DURATION_ZOOM					= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_BOUNCEBACK				= 1.0f * DURATION_MULTIPLIER;
 	public static final float			DURATION_SLOTTING_MAJOR			= 0.5f * DURATION_MULTIPLIER;
@@ -80,12 +88,23 @@ public interface CandiConstants {
 	public static final float			DURATION_CANDIBODY_COLLAPSE		= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_CANDIBODY_EXPAND		= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_REFLECTION_HIDESHOW	= 0.8f * DURATION_MULTIPLIER;
-	public static final float			DURATION_PLACEHOLDER_HIDESHOW	= 0.5f * DURATION_MULTIPLIER;
+	public static final float			DURATION_PLACEHOLDER_HIDESHOW	= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_FADE		= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_FADE_TEST	= 5.0f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_MOVE		= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_DELAY		= 0.5f * DURATION_MULTIPLIER;
-	public static final boolean			TRANSITIONS_ACTIVE				= false;
+	public static final float			DURATION_INSTANT				= 0.0f;
+
+	public static final IEaseFunction	EASE_FADE_IN					= EaseLinear.getInstance();
+	public static final IEaseFunction	EASE_FADE_OUT					= EaseLinear.getInstance();
+	public static final IEaseFunction	EASE_FADE_OUT_STRONG			= EaseQuartOut.getInstance();
+	public static final IEaseFunction	EASE_FADE_OUT_WEAK				= EaseQuartIn.getInstance();
+	public static final IEaseFunction	EASE_SLOTTING_MINOR				= EaseStrongOut.getInstance();
+	public static final IEaseFunction	EASE_SLOTTING_MAJOR				= EaseStrongOut.getInstance();
+	public static final IEaseFunction	EASE_BOUNCE_BACK				= EaseStrongOut.getInstance();
+	public static final IEaseFunction	EASE_FLING						= EaseExponentialOut.getInstance();
+
+	public static final boolean			TRANSITIONS_ACTIVE				= true;
 
 	public static final int				GL_BLEND_FUNCTION_SOURCE		= GL10.GL_ONE;
 	public static final int				GL_BLEND_FUNCTION_DESTINATION	= GL10.GL_ONE_MINUS_SRC_ALPHA;

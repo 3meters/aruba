@@ -55,9 +55,8 @@ public class BitmapTextureSource implements ITextureSource {
 
 	@Override
 	public Bitmap onLoadBitmap(Config pBitmapConfig) {
-		/*
-		 * Andengine throws an IllegalArgumentException if we return null.
-		 */
+
+		/* Andengine throws an IllegalArgumentException if we return null. */
 		if (mBitmap != null && mBitmap.isRecycled()) {
 			if (this.mBitmapAdapter != null) {
 				Bitmap bitmap = this.mBitmapAdapter.reloadBitmap();

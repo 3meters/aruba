@@ -22,9 +22,8 @@ public class Comment extends EntityBase {
 
 	@Override
 	protected void bindEntity() {
-		/*
-		 * We handle all the elements that are different than the base entity.
-		 */
+		
+		/* We handle all the elements that are different than the base entity. */
 		if (mVerb == Verb.New) {
 			mEntity = new CommentEntity();
 		}

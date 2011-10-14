@@ -3,19 +3,15 @@ package com.proxibase.aircandi.candi.views;
 import java.util.Observable;
 
 import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.opengl.buffer.BufferObjectManager;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.modifier.IModifier;
-import org.anddev.andengine.util.modifier.IModifier.IModifierListener;
 
+import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.models.ZoneModel;
 import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
-import com.proxibase.aircandi.candi.models.CandiModel.Transition;
-import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
+import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.core.CandiConstants;
 
 public class ZoneView extends BaseView {
@@ -27,6 +23,10 @@ public class ZoneView extends BaseView {
 	private TextureRegion				mReflectionTextureRegion;
 	private CandiSprite					mReflectionSprite;
 
+	// --------------------------------------------------------------------------------------------
+	// Initialization
+	// --------------------------------------------------------------------------------------------
+
 	public ZoneView() {
 		this(null, null);
 	}
@@ -37,37 +37,7 @@ public class ZoneView extends BaseView {
 
 	public ZoneView(Object model, CandiPatchPresenter candiPatchPresenter) {
 		super(model, candiPatchPresenter);
-		this.setVisible(false);
-		this.setAlpha(0);
-	}
-
-	@Override
-	public void update(Observable observable, Object data) {
-		super.update(observable, data);
-
-		final ZoneModel zoneModel = (ZoneModel) mModel;
-
-		if (!CandiConstants.TRANSITIONS_ACTIVE) {
-			ViewState viewStateNext = zoneModel.getViewStateNext();
-			/*
-			 * Visibility
-			 */
-			setAlpha(viewStateNext.getAlpha());
-			setVisible(zoneModel.getViewStateNext().isVisible());
-			/*
-			 * Modifiers
-			 */
-			doModifiers();
-		}
-		else {
-			if (zoneModel.getViewStateNext().isVisible()) {
-				Transition transition = zoneModel.getTransition();
-				if (transition == Transition.FadeIn)
-					setAlpha(0);
-				setVisible(true);
-			}
-			doModifiers();
-		}
+		mVisible = false;
 	}
 
 	@Override
@@ -75,7 +45,14 @@ public class ZoneView extends BaseView {
 		super.initialize();
 
 		updateTextureSources();
-		constructSprites();
+
+		if (mBodyTextureRegion != null) {
+			makeBodySprite();
+		}
+		if (mReflectionTextureRegion != null) {
+			makeReflectionSprite();
+		}
+		sortChildren();
 	}
 
 	@Override
@@ -85,57 +62,62 @@ public class ZoneView extends BaseView {
 		updateTextureSources();
 	}
 
-	private void constructSprites() {
-		// Body sprite
-		if (mBodyTextureRegion != null)
-			makeBodySprite();
-
-		// Reflection
-		if (mReflectionTextureRegion != null)
-			makeReflectionSprite();
-
-		// ZOrder sort
-		sortChildren();
-	}
+	// --------------------------------------------------------------------------------------------
+	// Primary
+	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public void setVisible(boolean visible) {
-		super.setVisible(visible);
+	public void update(Observable observable, Object data) {
+		super.update(observable, data);
 
-		if (!visible) {
-			for (int i = 0; i < getChildCount(); i++) {
-				getChild(i).setVisible(false);
+		final ZoneModel zoneModel = (ZoneModel) mModel;
+		ViewState viewStateNext = zoneModel.getViewStateNext();
+
+		if (!CandiConstants.TRANSITIONS_ACTIVE) {
+			if (viewStateNext.isVisible() != this.isVisible()) {
+				setVisible(viewStateNext.isVisible());
 			}
 		}
-		else {
-			if (mTitleSprite != null) {
-				mTitleSprite.setVisible(true);
+
+		mCandiPatchPresenter.getEngine().runOnUpdateThread(new Runnable() {
+
+			@Override
+			public void run() {
+				clearEntityModifiers();
+				doViewActions();
+				doViewModifiers();
 			}
-			if (mBodySprite != null) {
-				mBodySprite.setVisible(true);
-				if (mReflectionSprite != null) {
-					mReflectionSprite.setVisible(true);
-				}
-			}
-		}
+		});
 	}
 
-	public void setVisibleAnimated(boolean visible) {
-		super.setVisible(visible);
+	// --------------------------------------------------------------------------------------------
+	// UI
+	// --------------------------------------------------------------------------------------------
 
-		if (!visible) {
-			for (int i = 0; i < getChildCount(); i++) {
-				getChild(i).setVisible(false);
-			}
-		}
-		else {
-			if (mTitleSprite != null) {
-				mTitleSprite.setVisible(true);
-			}
-			if (mBodySprite != null) {
-				mBodySprite.setVisible(true);
-				if (mReflectionSprite != null) {
-					mReflectionSprite.setVisible(true);
+	protected void doViewActions() {
+		final BaseModel model = (BaseModel) mModel;
+		if (model != null) {
+
+			while (true) {
+				ViewAction viewAction = null;
+				synchronized (model.getViewActions()) {
+					if (!model.getViewActions().isEmpty())
+						viewAction = model.getViewActions().removeFirst();
+				}
+
+				if (viewAction == null) break;
+
+				if (viewAction.getViewActionType() == ViewActionType.Position) {
+					setPosition(model.getViewStateNext().getX(), model.getViewStateNext().getY());
+				}
+				else if (viewAction.getViewActionType() == ViewActionType.Scale) {
+					setScale(model.getViewStateNext().getScale());
+				}
+				else if (viewAction.getViewActionType() == ViewActionType.Visibility) {
+					setVisible(model.getViewStateNext().isVisible());
+				}
+				else if (viewAction.getViewActionType() == ViewActionType.ZIndex) {
+					setZIndex(model.getViewStateNext().getZIndex());
 				}
 			}
 		}
@@ -155,27 +137,28 @@ public class ZoneView extends BaseView {
 		return false;
 	}
 
-	protected void doModifiers() {
-		final ZoneModel zoneModel = (ZoneModel) mModel;
-		if (!zoneModel.getModifiers().isEmpty()) {
-			final IEntityModifier modifier = zoneModel.getModifiers().removeFirst();
-			modifier.addModifierListener(new IModifierListener<IEntity>() {
+	// --------------------------------------------------------------------------------------------
+	// Sprites
+	// --------------------------------------------------------------------------------------------
 
-				@Override
-				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-					if (modifier instanceof CandiAlphaModifier) {
-						if (((CandiAlphaModifier) modifier).getToAlpha() == 0)
-							setVisible(false);
-					}
-					doModifiers();
-				}
-
-				@Override
-				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
-			});
-			registerEntityModifier(modifier);
-		}
+	private void makeBodySprite() {
+		mBodySprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBodyTextureRegion);
+		mBodySprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
+		mBodySprite.setZIndex(0);
+		attachChild(mBodySprite);
 	}
+
+	private void makeReflectionSprite() {
+		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT,
+				mReflectionTextureRegion);
+		mReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
+		mReflectionSprite.setZIndex(0);
+		attachChild(mReflectionSprite);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Textures
+	// --------------------------------------------------------------------------------------------
 
 	public void setTexturesLoadedListener(ViewTexturesLoadedListener texturesLoadedListener) {
 		mTexturesLoadedListener = texturesLoadedListener;
@@ -207,9 +190,8 @@ public class ZoneView extends BaseView {
 	@Override
 	public void unloadResources() {
 		super.unloadResources();
-		/*
-		 * Completely remove all resources associated with this sprite.
-		 */
+
+		/* Completely remove all resources associated with this sprite. */
 		if (mReflectionSprite != null)
 			mReflectionSprite.removeResources();
 		if (mBodySprite != null) {
@@ -222,28 +204,18 @@ public class ZoneView extends BaseView {
 			BufferObjectManager.getActiveInstance().unloadBufferObject(mBodyTextureRegion.getTextureBuffer());
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Setters/Getters
+	// --------------------------------------------------------------------------------------------
+
 	@Override
 	public ZoneModel getModel() {
 		return (ZoneModel) mModel;
 	}
 
-	private void makeBodySprite() {
-		mBodySprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBodyTextureRegion);
-		mBodySprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
-		mBodySprite.setAlpha(0);
-		mBodySprite.setZIndex(0);
-		attachChild(mBodySprite);
-	}
-
-	private void makeReflectionSprite() {
-		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT,
-				mReflectionTextureRegion);
-		mReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
-		mReflectionSprite.setAlpha(0);
-		mReflectionSprite.setZIndex(0);
-		attachChild(mReflectionSprite);
-	}
+	// --------------------------------------------------------------------------------------------
+	// Gestures
+	// --------------------------------------------------------------------------------------------
 
 	public void setViewTouchListener(ViewTouchListener listener) {}
-
 }

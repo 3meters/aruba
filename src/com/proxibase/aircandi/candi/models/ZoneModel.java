@@ -27,9 +27,8 @@ public class ZoneModel extends BaseModel {
 	}
 
 	private void initialize() {
-		/*
-		 * Zones have a locked in position right from the beginning
-		 */
+
+		/* Zones have a locked in position right from the beginning */
 		mViewStateCurrent.setX(mCandiPatchModel.getOriginX() + ((CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING) * mZoneIndex));
 		mViewStateCurrent.setY(mCandiPatchModel.getOriginY());
 		mViewStateCurrent.setWidth(CandiConstants.CANDI_VIEW_WIDTH);
@@ -93,28 +92,15 @@ public class ZoneModel extends BaseModel {
 			return null;
 	}
 
-	// public Position getChildPositionCurrent(CandiModel candiModelTarget) throws NoSuchElementException {
-	//
-	// if (mInactive)
-	// return new Position();
-	//
-	// if (!mCandiesCurrent.contains(candiModelTarget))
-	// throw new NoSuchElementException();
-	//
-	// Position position = doChildPosition(candiModelTarget, candiModelTarget.getPositionCurrent(), mCandiesCurrent,
-	// candiModelTarget
-	// .getZoneStatusCurrent());
-	// position.scale = getChildScaleCurrent(candiModelTarget);
-	// return position;
-	// }
-
 	public Position getChildPositionNext(CandiModel candiModelTarget) throws NoSuchElementException {
 
 		if (mInactive)
 			return new Position();
 
-		// TODO: Candies that have been temporarily hidden because of a root change won't show up
-		// in the collection unless I make a change.
+		/*
+		 * TODO: Candies that have been temporarily hidden because of a root change won't show up
+		 * in the collection unless I make a change.
+		 */
 		if (!mCandiesNext.contains(candiModelTarget))
 			throw new NoSuchElementException();
 
@@ -146,9 +132,8 @@ public class ZoneModel extends BaseModel {
 			index = ZONE_CHILDREN_MAX_VISIBLE - 1;
 
 		if (candiModelZoneStatus == ZoneStatus.Normal) {
-			/*
-			 * Showing a collection without a primary
-			 */
+
+			/* Showing a collection without a primary */
 			int candiesCount = candiModels.size();
 
 			if (candiesCount > 4) {
@@ -164,7 +149,7 @@ public class ZoneModel extends BaseModel {
 				rows = 2;
 			}
 
-			// X,Y position
+			/* X,Y position */
 			position.x = (float) (this.getViewStateCurrent().getX() + ((index % columns) * offsetX));
 			if (candiesCount == 1) {
 				position.y = (float) (this.getViewStateCurrent().getY() + ((Math.floor(index / rows)) * offsetY));
@@ -173,7 +158,7 @@ public class ZoneModel extends BaseModel {
 				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY() + ((Math.floor(index / rows)) * offsetY));
 			}
 
-			// Row/Col position
+			/* Row/Col position */
 			position.col = (int) (index % columns) + 1;
 			if (position.col == columns) {
 				position.colLast = true;
@@ -192,9 +177,8 @@ public class ZoneModel extends BaseModel {
 		}
 		else {
 			if (candiModelZoneStatus == ZoneStatus.Primary) {
-				/*
-				 * Showing a collection with a primary and this is the primary
-				 */
+				
+				/* Showing a collection with a primary and this is the primary */
 				position.x = this.getViewStateCurrent().getX();
 				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY());
 				position.col = 1;
@@ -303,7 +287,6 @@ public class ZoneModel extends BaseModel {
 
 	public void setBodyImageUri(String bodyImageUri) {
 		mBodyImageUri = bodyImageUri;
-		setChanged();
 	}
 
 	public List<CandiModel> getCandiesCurrent() {

@@ -14,7 +14,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.proxibase.aircandi.activities.R;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
@@ -42,11 +41,15 @@ public class ProxiHandlerManager {
 		String jsonStream = ProxibaseService.getGson(GsonType.ProxibaseService).toJson(proxiEntity);
 		intent.putExtra("ProxiEntity", jsonStream);
 		mActivity.startActivity(intent);
-		// Supply a custom animation. This one will just fade the new
-		// activity on top. Note that we need to also supply an animation
-		// (here just doing nothing for the same amount of time) for the
-		// old activity to prevent it from going away too soon.
-		mActivity.overridePendingTransition(R.anim.summary_in, R.anim.hold);
+		
+		/*
+		 * Supply a custom animation. This one will just fade the new
+		 * activity on top. Note that we need to also supply an animation
+		 * (here just doing nothing for the same amount of time) for the
+		 * old activity to prevent it from going away too soon.
+		 */
+		
+		//mActivity.overridePendingTransition(R.anim.summary_in, R.anim.hold);
 		// mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
 		return true;
 	}

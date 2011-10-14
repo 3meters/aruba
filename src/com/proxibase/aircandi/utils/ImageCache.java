@@ -3,8 +3,10 @@ package com.proxibase.aircandi.utils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
@@ -99,7 +101,7 @@ public class ImageCache implements Map<String, Bitmap> {
 		if (!mFileCacheOnly) {
 			Bitmap bitmap = mCache.get(imageUrl);
 
-			// 1st level cache hit (memory)
+			/* 1st level cache hit (memory) */
 			if (bitmap != null) {
 				return mCache.get(imageUrl);
 			}
@@ -108,10 +110,10 @@ public class ImageCache implements Map<String, Bitmap> {
 		File imageFile = getImageFile(imageUrl);
 		if (imageFile.exists()) {
 
-			// 2nd level cache hit (disk)
+			/* 2nd level cache hit (disk) */
 			Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), mOptions);
 
-			// treat decoding errors as a cache miss
+			/* treat decoding errors as a cache miss */
 			if (bitmap == null) {
 				return null;
 			}
@@ -121,7 +123,7 @@ public class ImageCache implements Map<String, Bitmap> {
 			return bitmap;
 		}
 
-		// cache miss
+		/* cache miss */
 		return null;
 	}
 
@@ -133,6 +135,11 @@ public class ImageCache implements Map<String, Bitmap> {
 		/*
 		 * Write bitmap to disk cache and then memory cache
 		 */
+
+		/* Cache could have been nuked externally so make sure it's there. */
+		if (!cacheDirectoryExists())
+			makeCacheDirectory();
+
 		File imageFile = getImageFile(imageUrl);
 		FileOutputStream ostream = null;
 		try {
@@ -145,14 +152,16 @@ public class ImageCache implements Map<String, Bitmap> {
 		}
 		finally {
 			try {
-				ostream.close();
+				if (ostream != null) {
+					ostream.close();
+				}
 			}
 			catch (IOException exception) {
 				exception.printStackTrace();
 			}
 		}
 
-		// Write file to memory cache as well
+		/* Write file to memory cache as well */
 		if (!mFileCacheOnly) {
 			mCache.put(imageUrl, image);
 		}
@@ -162,6 +171,93 @@ public class ImageCache implements Map<String, Bitmap> {
 
 	public void putAll(Map<? extends String, ? extends Bitmap> t) {
 		throw new UnsupportedOperationException();
+	}
+
+	public void cleanCacheAsync(Context context) {
+		Thread t = new Thread() {
+
+			@Override
+			public void run() {
+				try {
+					File cacheDir = new File(mSecondLevelCacheDir);
+					cleanCache(cacheDir, CandiConstants.CACHE_TRIGGER_SIZE, CandiConstants.CACHE_TARGET_SIZE);
+				}
+				catch (Exception exception) {
+				}
+			}
+		};
+
+		t.setName("CacheCleanThread");
+		t.start();
+	}
+
+	private void cleanCache(File cacheDir, long triggerSize, long targetSize) {
+		try {
+			File[] files = cacheDir.listFiles();
+			if (files == null) {
+				return;
+			}
+
+			Arrays.sort(files, new SortFilesByModified());
+			if (testCleanNeeded(files, triggerSize)) {
+				cleanCache(files, targetSize);
+			}
+		}
+		catch (Exception exception) {
+			exception.printStackTrace();
+		}
+	}
+
+	class SortFilesByModified implements Comparator<File> {
+
+		@Override
+		public int compare(File f1, File f2) {
+			long m1 = f1.lastModified();
+			long m2 = f2.lastModified();
+
+			if (m2 > m1) {
+				return 1;
+			}
+			else if (m2 == m1) {
+				return 0;
+			}
+			else {
+				return -1;
+			}
+		}
+	}
+
+	private static boolean testCleanNeeded(File[] files, long triggerSize) {
+
+		long total = 0;
+
+		for (File f : files) {
+			total += f.length();
+			if (total > triggerSize) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private void cleanCache(File[] files, long maxSize) {
+
+		long total = 0;
+		int deletes = 0;
+
+		for (int i = 0; i < files.length; i++) {
+			File f = files[i];
+			total += f.length();
+			if (total < maxSize) {
+				/* ok */
+			}
+			else {
+				f.delete();
+				deletes++;
+				Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Deleting from cache: " + f.getAbsolutePath());
+			}
+		}
 	}
 
 	public boolean containsKey(Object key) {

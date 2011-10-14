@@ -1,6 +1,6 @@
 /*
  * HorizontalListView.java v1.5
- *
+ * 
  * 
  * The MIT License
  * Copyright (c) 2011 Paul Soucy (paul@dev-smart.com)
@@ -22,7 +22,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
  */
 
 package com.proxibase.aircandi.widgets;
@@ -73,7 +72,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		mDisplayOffset = 0;
 		mCurrentX = 0;
 		mNextX = 0;
-		
+
 		mMaxX = Integer.MAX_VALUE;
 		mScroller = new Scroller(getContext(), new DecelerateInterpolator());
 		mGesture = new GestureDetector(getContext(), mOnGesture);

@@ -7,12 +7,18 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.Entity;
+import org.anddev.andengine.entity.IEntity;
+import org.anddev.andengine.entity.modifier.IEntityModifier;
+import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
+import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.opengl.buffer.BufferObjectManager;
 import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
 import org.anddev.andengine.opengl.util.GLHelper;
+import org.anddev.andengine.util.modifier.IModifier;
+import org.anddev.andengine.util.modifier.IModifier.IModifierListener;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -24,6 +30,7 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 
 import com.proxibase.aircandi.candi.models.BaseModel;
+import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiAnimatedSprite;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
@@ -43,6 +50,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	protected CandiSprite			mPlaceholderSprite;
 
 	protected boolean				mBound							= false;
+	private boolean					mRecycled						= false;
 
 	protected Texture				mTitleTexture;
 	private TextureRegion			mTitleTextureRegion;
@@ -96,31 +104,28 @@ public abstract class BaseView extends Entity implements Observer, IView {
 				CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (mTitleTextureRegion.getHeight() + CandiConstants.CANDI_VIEW_TITLE_SPACER_HEIGHT),
 				mTitleTextureRegion);
 		mTitleSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
-		mTitleSprite.setAlpha(0);
-		mTitleSprite.setVisible(false);
+		mTitleSprite.setVisible(true);
 		mTitleSprite.setZIndex(0);
 		attachChild(mTitleSprite);
 	}
 
 	private void makeProgressSprites() {
 
-		// Placeholder
+		/* Placeholder */
 		mPlaceholderTextureRegion = mCandiPatchPresenter.mPlaceholderTextureRegion.clone();
 		mPlaceholderSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mPlaceholderTextureRegion);
 		mPlaceholderSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
-		mPlaceholderSprite.setAlpha(0);
 		mPlaceholderSprite.setVisible(false);
 		mPlaceholderSprite.setZIndex(-10);
 		attachChild(mPlaceholderSprite);
 
-		// Progress
+		/* Progress */
 		mProgressTextureRegion = mCandiPatchPresenter.mProgressTextureRegion.clone();
 		float progressX = (mPlaceholderSprite.getWidth() - mProgressTextureRegion.getTileWidth()) * 0.5f;
 		float progressY = CandiConstants.CANDI_VIEW_TITLE_HEIGHT + (mPlaceholderSprite.getHeight() * 0.5f)
 							- (mProgressTextureRegion.getTileHeight() * 0.5f);
 		mProgressSprite = new CandiAnimatedSprite(progressX, progressY, mProgressTextureRegion);
 		mProgressSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
-		mProgressSprite.setAlpha(0);
 		mProgressSprite.setVisible(false);
 		mProgressSprite.setZIndex(-9);
 		attachChild(mProgressSprite);
@@ -154,10 +159,58 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		}
 	}
 
+	protected void doViewModifiers() {
+		final BaseModel model = (BaseModel) mModel;
+		if (model != null) {
+			/*
+			 * If this view get recyled, the modifier collection could be cleared while we
+			 * are trying to grab an item from it.
+			 */
+			IEntityModifier modifier = null;
+			synchronized (model.getViewModifiers()) {
+				if (!model.getViewModifiers().isEmpty()) {
+					modifier = model.getViewModifiers().removeFirst();
+				}
+			}
+
+			if (modifier != null) {
+				if (modifier instanceof CandiAlphaModifier) {
+					((CandiAlphaModifier) modifier).setEntity(this);
+				}
+				else if (modifier instanceof ParallelEntityModifier) {
+					final IModifier[] modifiers = ((ParallelEntityModifier) modifier).getModifiers();
+					for (int i = modifiers.length - 1; i >= 0; i--) {
+						if (modifiers[i] instanceof CandiAlphaModifier) {
+							((CandiAlphaModifier) modifiers[i]).setEntity(this);
+						}
+					}
+				}
+				else if (modifier instanceof SequenceEntityModifier) {
+					final IModifier[] modifiers = ((SequenceEntityModifier) modifier).getSubSequenceModifiers();
+					for (int i = modifiers.length - 1; i >= 0; i--) {
+						if (modifiers[i] instanceof CandiAlphaModifier) {
+							((CandiAlphaModifier) modifiers[i]).setEntity(this);
+						}
+					}
+				}
+				modifier.addModifierListener(new IModifierListener<IEntity>() {
+
+					@Override
+					public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+						doViewModifiers();
+					}
+
+					@Override
+					public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+				});
+				registerEntityModifier(modifier);
+			}
+		}
+	}
+
 	public void progressVisible(boolean visible) {
 		if (visible) {
 			mProgressSprite.setVisible(true);
-			mProgressSprite.setAlpha(1);
 			mProgressSprite.animate(150, true);
 		}
 		else {
@@ -206,9 +259,8 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public void unloadResources() {
-		/*
-		 * Completely remove all resources associated with this sprite.
-		 */
+
+		/* Completely remove all resources associated with this sprite. */
 		if (mTitleSprite != null)
 			mTitleSprite.removeResources();
 
@@ -231,7 +283,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	@Override
 	protected void applyRotation(final GL10 pGL) {
 
-		// Disable culling so we can see the backside of this sprite.
+		/* Disable culling so we can see the backside of this sprite. */
 		GLHelper.disableCulling(pGL);
 
 		final float rotation = mRotation;
@@ -241,7 +293,8 @@ public abstract class BaseView extends Entity implements Observer, IView {
 			final float rotationCenterY = mRotationCenterY;
 
 			pGL.glTranslatef(rotationCenterX, rotationCenterY, 0);
-			// Note we are applying rotation around the y-axis and not the z-axis anymore!
+
+			/* Note we are applying rotation around the y-axis and not the z-axis anymore! */
 			pGL.glRotatef(rotation, 0, 1, 0);
 			pGL.glTranslatef(-rotationCenterX, -rotationCenterY, 0);
 		}
@@ -311,4 +364,11 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		return mBound;
 	}
 
+	public void setRecycled(boolean recycled) {
+		this.mRecycled = recycled;
+	}
+
+	public boolean isRecycled() {
+		return mRecycled;
+	}
 }

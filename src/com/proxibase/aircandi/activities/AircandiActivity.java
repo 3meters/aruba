@@ -169,12 +169,12 @@ public abstract class AircandiActivity extends Activity {
 		startActivity(intent);
 	}
 
-	// Titlebar refresh
+	/* Titlebar refresh */
 	public void onRefreshClick(View view) {
 		return;
 	}
 
-	// Titlebar search
+	/* Titlebar search */
 	public void onSearchClick(View view) {
 		ImageUtils.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
 		return;
@@ -186,7 +186,7 @@ public abstract class AircandiActivity extends Activity {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
 
-		// Hide the sign out option if we don't have a current session
+		/* Hide the sign out option if we don't have a current session */
 		MenuItem item = menu.findItem(R.id.signout);
 		item.setVisible(false);
 		return true;
@@ -195,7 +195,7 @@ public abstract class AircandiActivity extends Activity {
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 
-		// Hide the sign out option if we don't have a current session
+		/* Hide the sign out option if we don't have a current session */
 		MenuItem item = menu.findItem(R.id.signout);
 		item.setVisible(false);
 		return true;

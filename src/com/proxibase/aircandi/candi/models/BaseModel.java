@@ -6,6 +6,7 @@ import java.util.Observable;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 
+import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.CandiList;
 
@@ -15,7 +16,8 @@ public abstract class BaseModel extends Observable implements IModel {
 	protected CandiList<IModel>				mChildren			= new CandiList<IModel>();
 	protected IModel						mParent				= null;
 	protected boolean						mRoot				= false;
-	protected LinkedList<IEntityModifier>	mModifiers			= new LinkedList<IEntityModifier>();
+	protected LinkedList<IEntityModifier>	mViewModifiers		= new LinkedList<IEntityModifier>();
+	private LinkedList<ViewAction>			mViewActions		= new LinkedList<ViewAction>();
 	protected ViewState						mViewStateCurrent	= new ViewState();
 	protected ViewState						mViewStateNext		= new ViewState();
 	private String							mTitleText			= "";
@@ -27,7 +29,7 @@ public abstract class BaseModel extends Observable implements IModel {
 		 * The super class only updates observers if hasChanged == true.
 		 * Super class also handles clearChanged.
 		 */
-		notifyObservers(UpdateType.Epoch);
+		notifyObservers();
 	}
 
 	@Override
@@ -40,8 +42,8 @@ public abstract class BaseModel extends Observable implements IModel {
 		super.clearChanged();
 	}
 
-	public LinkedList<IEntityModifier> getModifiers() {
-		return mModifiers;
+	public LinkedList<IEntityModifier> getViewModifiers() {
+		return mViewModifiers;
 	}
 
 	public CandiList<IModel> getChildren() {
@@ -57,7 +59,6 @@ public abstract class BaseModel extends Observable implements IModel {
 	public void setTitleText(String titleText) {
 
 		mTitleText = titleText;
-		setChanged();
 	}
 
 	public boolean hasVisibleChildrenNext() {
@@ -134,6 +135,14 @@ public abstract class BaseModel extends Observable implements IModel {
 		return mViewStateNext;
 	}
 
+	public void setViewActions(LinkedList<ViewAction> viewActions) {
+		this.mViewActions = viewActions;
+	}
+
+	public LinkedList<ViewAction> getViewActions() {
+		return mViewActions;
+	}
+
 	public class ViewState {
 
 		private float	mX;
@@ -144,9 +153,11 @@ public abstract class BaseModel extends Observable implements IModel {
 		private float	mScale			= 1.0f;
 		private boolean	mZoomed			= false;
 		private boolean	mVisible		= false;
-		private float	mAlpha			= 0;
+		private boolean	mLastWithinHalo	= false;
 		private boolean	mHasReflection	= true;
 		private boolean	mCollapsed		= false;
+		private boolean	mOkToAnimate	= true;
+		private float	mAlpha			= 1;
 
 		public ViewState() {}
 
@@ -155,9 +166,10 @@ public abstract class BaseModel extends Observable implements IModel {
 		}
 
 		public boolean isWithinHalo(Camera camera) {
-			return (!isOutsideHalo(camera));
+			mLastWithinHalo = !isOutsideHalo(camera);
+			return (mLastWithinHalo);
 		}
-		
+
 		private boolean isCulled(Camera camera) {
 			return mX > camera.getMaxX() || mY > camera.getMaxY()
 					|| mX + (mWidth * mScale) < camera.getMinX()
@@ -167,7 +179,7 @@ public abstract class BaseModel extends Observable implements IModel {
 		private boolean isOutsideHalo(Camera camera) {
 			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
 			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
-			return mX + (mWidth * mScale) < haloMinX || mX > haloMaxX; 
+			return mX + (mWidth * mScale) < haloMinX || mX > haloMaxX;
 		}
 
 		public float getX() {
@@ -212,42 +224,34 @@ public abstract class BaseModel extends Observable implements IModel {
 
 		public void setX(float x) {
 			this.mX = x;
-			setChanged();
 		}
 
 		public void setY(float y) {
 			this.mY = y;
-			setChanged();
 		}
 
 		public void setHeight(float height) {
 			this.mHeight = height;
-			setChanged();
 		}
 
 		public void setWidth(float width) {
 			this.mWidth = width;
-			setChanged();
 		}
 
 		public void setZIndex(int zIndex) {
 			this.mZIndex = zIndex;
-			setChanged();
 		}
 
 		public void setScale(float scale) {
 			this.mScale = scale;
-			setChanged();
 		}
 
 		public void setZoomed(boolean zoomed) {
 			this.mZoomed = zoomed;
-			setChanged();
 		}
 
 		public ViewState setVisible(boolean visible) {
 			this.mVisible = visible;
-			setChanged();
 			return this;
 		}
 
@@ -287,7 +291,6 @@ public abstract class BaseModel extends Observable implements IModel {
 
 		public void setHasReflection(boolean hasReflection) {
 			this.mHasReflection = hasReflection;
-			setChanged();
 		}
 
 		public boolean hasReflection() {
@@ -296,30 +299,39 @@ public abstract class BaseModel extends Observable implements IModel {
 
 		public void setCollapsed(boolean collapsed) {
 			this.mCollapsed = collapsed;
-			setChanged();
 		}
 
 		public boolean isCollapsed() {
 			return mCollapsed;
 		}
 
-		public ViewState setAlpha(float alpha) {
+		public void setOkToAnimate(boolean okToAnimate) {
+			this.mOkToAnimate = okToAnimate;
+		}
+
+		public boolean isOkToAnimate() {
+			return mOkToAnimate;
+		}
+
+		public void setAlpha(float alpha) {
 			this.mAlpha = alpha;
-			setChanged();
-			return this;
 		}
 
 		public float getAlpha() {
 			return mAlpha;
 		}
+
+		public void setLastWithinHalo(boolean lastWithinHalo) {
+			this.mLastWithinHalo = lastWithinHalo;
+		}
+
+		public boolean isLastWithinHalo() {
+			return mLastWithinHalo;
+		}
+
 	}
 
 	public enum ModelType {
 		Root, Entity
-	}
-	
-	public enum UpdateType
-	{
-		Local, Epoch, Reuse
 	}
 }

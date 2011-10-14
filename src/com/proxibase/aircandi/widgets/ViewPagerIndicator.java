@@ -90,7 +90,7 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 			mTextViewPrevious.setTextColor(Color.argb(255, mTextColorUnfocused[0], mTextColorUnfocused[1], mTextColorUnfocused[2]));
 		if (mTextViewNext != null)
 			mTextViewNext.setTextColor(Color.argb(255, mTextColorUnfocused[0], mTextColorUnfocused[1], mTextColorUnfocused[2]));
-		
+
 		this.removeAllViews();
 		this.addView(mBoundView);
 	}
@@ -134,7 +134,8 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 			updateColor(positionOffsetPixels);
 		}
 		else {
-			// Configure the back button
+
+			/* Configure the back button */
 		}
 		invalidate();
 	}
@@ -146,7 +147,7 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 	 */
 	void setPageTitles(int currentPosition) {
 
-		// Text for previous
+		/* Text for previous */
 		if (currentPosition == 1) {
 			mTextViewPrevious.setText("");
 		}
@@ -154,10 +155,10 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 			mTextViewPrevious.setText(mPageInfoProvider.getTitle(currentPosition - 2));
 		}
 
-		// Text for current
+		/* Text for current */
 		mTextViewCurrent.setText(mPageInfoProvider.getTitle(currentPosition - 1));
 
-		// Text for next
+		/* Text for next */
 		if (currentPosition + 1 <= this.mPageCount) {
 			mTextViewNext.setText(mPageInfoProvider.getTitle(currentPosition));
 		}

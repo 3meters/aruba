@@ -33,7 +33,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	protected ContextButtonState	mContextButtonState	= ContextButtonState.Default;
 	protected Command				mCommand;
 	protected User					mUser;
-	protected String					mPrefTheme;
+	protected String				mPrefTheme;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -53,7 +53,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 
 	private void configure() {
 
-		// Get view references
+		/* Get view references */
 		mProgressIndicator = (ImageView) findViewById(R.id.img_progress_indicator);
 		if (mProgressIndicator != null)
 			mProgressIndicator.setVisibility(View.INVISIBLE);
@@ -70,8 +70,10 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 		if (mLogo != null)
 			mLogo.setVisibility(View.VISIBLE);
 
-		// If mStream wasn't set by a sub class then check to see if there is something
-		// we can do to create it.
+		/*
+		 * If mStream wasn't set by a sub class then check to see if there is something
+		 * we can do to create it.
+		 */
 		if (mCommand == null) {
 			if (getIntent() != null && getIntent().getExtras() != null) {
 				String jsonStream = getIntent().getExtras().getString("stream");
@@ -137,5 +139,4 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	protected void onResume() {
 		super.onResume();
 	}
-
 }

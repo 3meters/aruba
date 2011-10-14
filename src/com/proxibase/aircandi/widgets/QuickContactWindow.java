@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2009 The Android Open Source Project
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,47 +53,14 @@ import com.proxibase.aircandi.utils.ImageUtils;
 @SuppressWarnings("unused")
 public class QuickContactWindow {
 
-	/**
-	 * Interface used to allow the person showing a {@link QuickContactWindow} to
-	 * know when the window has been dismissed.
-	 */
-	public interface OnDismissListener {
-
-		public void onDismiss(QuickContactWindow dialog);
-	}
-
-	/**
-	 * Custom layout the sole purpose of which is to intercept the BACK key and
-	 * close QC even when the soft keyboard is open.
-	 */
-	public static class RootLayout extends RelativeLayout {
-
-		QuickContactWindow	mQuickContactWindow;
-
-		public RootLayout(Context context, AttributeSet attrs) {
-			super(context, attrs);
-		}
-
-		/**
-		 * Intercepts the BACK key event and dismisses QuickContact window.
-		 */
-		@Override
-		public boolean dispatchKeyEventPreIme(KeyEvent event) {
-			if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-				mQuickContactWindow.doBackPressed();
-				return true;
-			}
-			else {
-				return super.dispatchKeyEventPreIme(event);
-			}
-		}
-	}
-
 	private final LayoutInflater	mInflater;
 	private PopupWindow				mPopupWindow;
 	private final Rect				mRect		= new Rect();
-
 	private boolean					mShowing	= false;
+	private RootLayout				mRootView;
+	private ViewGroup				mTrackSet;
+	private HorizontalScrollView	mTrackScroll;
+	private Animation				mTrackAnim;
 
 	private OnDismissListener		mDismissListener;
 
@@ -103,11 +70,6 @@ public class QuickContactWindow {
 
 	private ImageView				mArrowUp;
 	private ImageView				mArrowDown;
-
-	private RootLayout				mRootView;
-	private ViewGroup				mTrackSet;
-	private HorizontalScrollView	mTrackScroll;
-	private Animation				mTrackAnim;
 
 	/**
 	 * Prepare a dialog to show in the given {@link Context}.
@@ -161,8 +123,10 @@ public class QuickContactWindow {
 		mTrackAnim.setInterpolator(new Interpolator() {
 
 			public float getInterpolation(float t) {
-				// Pushes past the target area, then snaps back into place.
-				// Equation for graphing: 1.2-((x*1.6)-1.1)^2
+				/*
+				 * Pushes past the target area, then snaps back into place.
+				 * Equation for graphing: 1.2-((x*1.6)-1.1)^2
+				 */
 				final float inner = (t * 1.55f) - 1.1f;
 				return 1.2f - inner * inner;
 			}
@@ -175,7 +139,7 @@ public class QuickContactWindow {
 			dismiss();
 		}
 
-		// Validate incoming parameters
+		/* Validate incoming parameters */
 		if (anchor == null) {
 			throw new IllegalArgumentException("Missing anchor rectangle");
 		}
@@ -184,12 +148,14 @@ public class QuickContactWindow {
 			throw new IllegalArgumentException("Content for action strip is null");
 		}
 
-		// Prepare header view for requested mode
+		/* Prepare header view for requested mode */
 		resetTrack();
 		mTrackSet.addView(trackContent);
 
-		// We need to have a focused view inside the QuickContact window so
-		// that the BACK key event can be intercepted
+		/*
+		 * We need to have a focused view inside the QuickContact window so
+		 * that the BACK key event can be intercepted
+		 */
 		mRootView.requestFocus();
 
 		// showArrow(R.id.arrow_up, mAnchor.centerX());
@@ -220,7 +186,7 @@ public class QuickContactWindow {
 
 		showArrow.setVisibility(View.VISIBLE);
 
-		// Position the arrow
+		/* Position the arrow */
 		// ViewGroup.MarginLayoutParams param = (ViewGroup.MarginLayoutParams) showArrow.getLayoutParams();
 		// param.leftMargin = (requestedX - (mScreenWidth - mPopupWindow.getWidth())) - arrowWidth / 2;
 
@@ -248,4 +214,41 @@ public class QuickContactWindow {
 	public void setShowing(boolean showing) {
 		this.mShowing = showing;
 	}
+
+	/**
+	 * Interface used to allow the person showing a {@link QuickContactWindow} to
+	 * know when the window has been dismissed.
+	 */
+	public interface OnDismissListener {
+
+		public void onDismiss(QuickContactWindow dialog);
+	}
+
+	/**
+	 * Custom layout the sole purpose of which is to intercept the BACK key and
+	 * close QC even when the soft keyboard is open.
+	 */
+	public static class RootLayout extends RelativeLayout {
+
+		QuickContactWindow	mQuickContactWindow;
+
+		public RootLayout(Context context, AttributeSet attrs) {
+			super(context, attrs);
+		}
+
+		/**
+		 * Intercepts the BACK key event and dismisses QuickContact window.
+		 */
+		@Override
+		public boolean dispatchKeyEventPreIme(KeyEvent event) {
+			if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+				mQuickContactWindow.doBackPressed();
+				return true;
+			}
+			else {
+				return super.dispatchKeyEventPreIme(event);
+			}
+		}
+	}
+
 }

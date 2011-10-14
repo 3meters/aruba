@@ -6,7 +6,7 @@ import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 public class CommentEntity extends BaseEntity {
 
-	// Annotation syntax: @Expose (serialize = false, deserialize = false)
+	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 	@Expose
 	public Metadata		__metadata	= new Metadata();
 

@@ -46,7 +46,8 @@ public class PagerTextView extends TextView {
 	 * back to layout settings after next layout pass.
 	 */
 	public void setCenterX(int centerX) {
-		// Triggers call to onLayout();
+
+		/* Triggers call to onLayout() */
 		this.layout(mInitialLeft + (centerX - mInitialCenterX), this.getTop(), mInitialRight + (centerX - mInitialCenterX), this.getBottom());
 	}
 
@@ -65,5 +66,4 @@ public class PagerTextView extends TextView {
 	public int getInitialRight() {
 		return mInitialRight;
 	}
-
 }

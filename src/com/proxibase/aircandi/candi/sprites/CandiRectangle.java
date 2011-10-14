@@ -28,7 +28,8 @@ public class CandiRectangle extends Rectangle {
 			final float rotationCenterY = this.mRotationCenterY;
 
 			pGL.glTranslatef(rotationCenterX, rotationCenterY, 0);
-			// Note we are applying rotation around the y-axis and not the z-axis anymore
+
+			/* Note we are applying rotation around the y-axis and not the z-axis anymore */
 			pGL.glRotatef(rotation, 0, 1, 0);
 			pGL.glTranslatef(-rotationCenterX, -rotationCenterY, 0);
 		}
@@ -60,7 +61,7 @@ public class CandiRectangle extends Rectangle {
 		pGL.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
 		super.drawVertices(pGL, pCamera);
 
-		// Enable culling as 'normal' entities profit from culling.
+		/* Enable culling as 'normal' entities profit from culling. */
 		GLHelper.enableCulling(pGL);
 	}
 

@@ -41,9 +41,8 @@ public class Post extends EntityBase {
 	}
 
 	protected void bindEntity() {
-		/*
-		 * We handle all the elements that are different than the base entity.
-		 */
+		
+		/* We handle all the elements that are different than the base entity. */
 		if (mVerb == Verb.New) {
 			mEntity = new PostEntity();
 		}
@@ -193,7 +192,8 @@ public class Post extends EntityBase {
 				}
 			}
 			else {
-				// User doesn't have a valid profile image
+				
+				/* User doesn't have a valid profile image */
 				Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
 				entity.mediaBitmap = bitmap;
 				showMediaThumbnail(bitmap);
@@ -210,7 +210,7 @@ public class Post extends EntityBase {
 	protected void doSave() {
 		super.doSave();
 
-		// Delete or upload images to S3 as needed.
+		/* Delete or upload images to S3 as needed. */
 		updateImages();
 
 		if (mVerb == Verb.New) {
@@ -280,7 +280,7 @@ public class Post extends EntityBase {
 		 * be orphaning any images associated with child entities.
 		 */
 
-		// If there is an image stored with S3 then delete it
+		/* If there is an image stored with S3 then delete it  */
 		final PostEntity entity = (PostEntity) mEntity;
 		if (entity.mediaUri != null && !entity.mediaUri.equals("") && entity.mediaFormat.equals("binary")) {
 			String imageKey = entity.mediaUri.substring(entity.mediaUri.lastIndexOf("/") + 1);
@@ -295,7 +295,7 @@ public class Post extends EntityBase {
 			}
 		}
 
-		// Delete the entity from the service
+		/* Delete the entity from the service */
 		super.deleteEntity();
 	}
 
@@ -334,9 +334,8 @@ public class Post extends EntityBase {
 	// --------------------------------------------------------------------------------------------
 	protected void onDestroy() {
 		super.onDestroy();
-		/*
-		 * This activity gets destroyed everytime we leave using back or finish().
-		 */
+		
+		/* This activity gets destroyed everytime we leave using back or finish(). */
 		try {
 			final PostEntity entity = (PostEntity) mEntity;
 			if (entity.mediaBitmap != null) {
@@ -351,7 +350,6 @@ public class Post extends EntityBase {
 	@Override
 	protected int getLayoutID() {
 		return R.layout.post;
-
 	}
 
 	@Override

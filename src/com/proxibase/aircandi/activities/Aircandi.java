@@ -9,10 +9,9 @@ import com.proxibase.aircandi.core.CandiConstants;
 
 public class Aircandi extends Application {
 
-	public Location						currentLocation;
+	public Location	currentLocation;
 
-	public Aircandi() {
-	}
+	public Aircandi() {}
 
 	@Override
 	public void onCreate() {
@@ -29,36 +28,38 @@ public class Aircandi extends Application {
 	public static boolean isBetterLocation(Location location, Location currentBestLocation) {
 
 		if (currentBestLocation == null) {
-			// A new location is always better than no location
+			/* A new location is always better than no location */
 			return true;
 		}
 
-		// Check whether the new location fix is newer or older
+		/* Check whether the new location fix is newer or older */
 		long timeDelta = location.getTime() - currentBestLocation.getTime();
 		boolean isSignificantlyNewer = timeDelta > CandiConstants.TWO_MINUTES;
 		boolean isSignificantlyOlder = timeDelta < -CandiConstants.TWO_MINUTES;
 		boolean isNewer = timeDelta > 0;
 
-		// If it's been more than two minutes since the current location, use the new location
-		// because the user has likely moved
+		/*
+		 * If it's been more than two minutes since the current location, use the new location
+		 * because the user has likely moved
+		 */
 		if (isSignificantlyNewer) {
+			/* If the new location is more than two minutes older, it must be worse */
 			return true;
-			// If the new location is more than two minutes older, it must be worse
 		}
 		else if (isSignificantlyOlder) {
 			return false;
 		}
 
-		// Check whether the new location fix is more or less accurate
+		/* Check whether the new location fix is more or less accurate */
 		int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
 		boolean isLessAccurate = accuracyDelta > 0;
 		boolean isMoreAccurate = accuracyDelta < 0;
 		boolean isSignificantlyLessAccurate = accuracyDelta > 200;
 
-		// Check if the old and new location are from the same provider
+		/* Check if the old and new location are from the same provider */
 		boolean isFromSameProvider = isSameProvider(location.getProvider(), currentBestLocation.getProvider());
 
-		// Determine location quality using a combination of timeliness and accuracy
+		/* Determine location quality using a combination of timeliness and accuracy */
 		if (isMoreAccurate) {
 			return true;
 		}

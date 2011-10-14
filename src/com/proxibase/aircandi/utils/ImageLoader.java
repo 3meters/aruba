@@ -35,7 +35,8 @@ public class ImageLoader {
 	private WebView				mWebView;
 
 	public ImageLoader(Context context) {
-		// Make the background thead low priority so it doesn't effect the UI performance.
+		
+		/* Make the background thead low priority so it doesn't effect the UI performance. */
 		mImageLoaderThread.setPriority(Thread.MIN_PRIORITY);
 		mImageLoaderThread.setName("ImageLoader");
 	}
@@ -56,6 +57,7 @@ public class ImageLoader {
 	}
 
 	private void queueImage(ImageRequest imageRequest) {
+		
 		/*
 		 * The image requestor may have called for other images before. So there may be some old tasks
 		 * in the queue. We need to discard them.
@@ -71,7 +73,7 @@ public class ImageLoader {
 			mImagesQueue.mImagesToLoad.notifyAll();
 		}
 
-		// Start thread if it's not started yet
+		/* Start thread if it's not started yet */
 		if (mImageLoaderThread.getState() == Thread.State.NEW)
 			mImageLoaderThread.start();
 	}
@@ -79,6 +81,7 @@ public class ImageLoader {
 	public static Bitmap getBitmap(String url) throws ProxibaseException {
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+		
 		/*
 		 * We request a byte array for decoding because of a bug
 		 * in pre 2.3 versions of android.
@@ -120,7 +123,7 @@ public class ImageLoader {
 					Canvas canvas = new Canvas(bitmap);
 					picture.draw(canvas);
 
-					// Release
+					/* Release */
 					canvas = null;
 					listener.onImageReady(bitmap);
 				}
@@ -131,7 +134,8 @@ public class ImageLoader {
 	}
 
 	public Bitmap scaleAndCropBitmap(Bitmap bitmap, ImageRequest imageRequest) {
-		// Crop if requested
+		
+		/* Crop if requested */
 		Bitmap bitmapCropped;
 		if (imageRequest.imageShape == ImageShape.Square) {
 			bitmapCropped = ImageUtils.cropToSquare(bitmap);
@@ -140,7 +144,7 @@ public class ImageLoader {
 			bitmapCropped = bitmap;
 		}
 
-		// Scale if needed
+		/* Scale if needed */
 		Bitmap bitmapCroppedScaled;
 		if (imageRequest.scaleToWidth > 0 && bitmapCropped.getWidth() != imageRequest.scaleToWidth) {
 			float scalingRatio = (float) imageRequest.scaleToWidth / (float) bitmapCropped.getWidth();
@@ -151,7 +155,7 @@ public class ImageLoader {
 			bitmapCroppedScaled = bitmapCropped;
 		}
 
-		// Make sure the bitmap format is right
+		/* Make sure the bitmap format is right */
 		Bitmap bitmapFinal;
 		if (!bitmapCroppedScaled.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString())) {
 			bitmapFinal = bitmapCroppedScaled.copy(CandiConstants.IMAGE_CONFIG_DEFAULT, false);
@@ -191,7 +195,7 @@ public class ImageLoader {
 
 		private LinkedList<ImageRequest>	mImagesToLoad	= new LinkedList<ImageRequest>();
 
-		// Removes all instances of imageRequest associated with the imageRequestor
+		/* Removes all instances of imageRequest associated with the imageRequestor */
 		public void Clean(Object imageRequestor) {
 			for (int j = 0; j < mImagesToLoad.size();) {
 				if (mImagesToLoad.get(j).imageRequestor == imageRequestor) {
@@ -208,9 +212,10 @@ public class ImageLoader {
 
 		public void run() {
 			try {
-				
+
 				while (true) {
-					// Thread waits until there are any images to load in the queue
+					
+					/* Thread waits until there are any images to load in the queue */
 					if (mImagesQueue.mImagesToLoad.size() == 0) {
 						synchronized (mImagesQueue.mImagesToLoad) {
 							mImagesQueue.mImagesToLoad.wait();
@@ -229,13 +234,14 @@ public class ImageLoader {
 
 								@Override
 								public void onImageReady(Bitmap bitmap) {
-									// Perform requested post processing
+					
+									/* Perform requested post processing */
 									bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 
-									// Stuff it into the cache. Overwrites if it already exists.
+									/* Stuff it into the cache. Overwrites if it already exists. */
 									mImageCache.put(imageRequest.imageUri, bitmap, CompressFormat.JPEG);
 
-									// Create reflection if requested
+									/* Create reflection if requested */
 									if (imageRequest.makeReflection) {
 										final Bitmap bitmapReflection = ImageUtils.getReflection(bitmap);
 										mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection, CompressFormat.PNG);
@@ -279,7 +285,7 @@ public class ImageLoader {
 																									+ String.valueOf(estimatedTime / 1000000)
 																									+ "ms");
 
-							// Perform requested post processing
+							/* Perform requested post processing */
 							bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 
 							estimatedTime = System.nanoTime() - startTime;
@@ -288,16 +294,17 @@ public class ImageLoader {
 																									+ String.valueOf(estimatedTime / 1000000)
 																									+ "ms");
 
-							// Stuff it into the cache. Overwrites if it already exists.
+							/* Stuff it into the cache. Overwrites if it already exists. */
 							mImageCache.put(imageRequest.imageUri, bitmap);
 
-							// Create reflection if requested
+							/* Create reflection if requested */
 							if (imageRequest.makeReflection) {
 								final Bitmap bitmapReflection = ImageUtils.getReflection(bitmap);
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
 								Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(),
 										imageRequest.imageUri + ": Reflection created: " + String.valueOf(estimatedTime / 1000000) + "ms");
+
 								mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection);
 								if (mImageCache.isFileCacheOnly()) {
 									bitmapReflection.recycle();
@@ -316,7 +323,7 @@ public class ImageLoader {
 				}
 			}
 			catch (InterruptedException e) {
-				// Allow thread to exit
+				/* Allow thread to exit */
 			}
 		}
 	}

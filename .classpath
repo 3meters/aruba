@@ -9,7 +9,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="D:/Files/Proxibase/Code/Guava/bin/guava.jar"/>
 	<classpathentry kind="lib" path="D:/Files/Proxibase/Android/andengine/latest/bin/andengine.jar" sourcepath="D:/Files/Proxibase/Android/andengine/latest/bin/andengine.jar"/>
-	<classpathentry kind="lib" path="D:/Files/Proxibase/Code/Proxibase Sdk/android/bin/proxibase.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jayma/Files/Proxibase/Code/Proxibase Sdk/android/trunk/bin/proxibase.jar"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="lib" path="D:/Files/Proxibase/Android/amazonaws/aws-android-sdk-1.0.0/lib/aws-android-sdk-1.0.0-core.jar" sourcepath="D:/Files/Proxibase/Android/amazonaws/aws-android-sdk-0.2.1/src">
 		<attributes>

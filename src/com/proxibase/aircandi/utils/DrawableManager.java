@@ -22,15 +22,11 @@ public class DrawableManager {
 
 	private final Map	drawableMap;
 
-
 	public DrawableManager() {
-
 		drawableMap = new HashMap();
 	}
 
-
 	public Drawable fetchDrawable(String urlString) {
-
 		if (drawableMap.containsKey(urlString)) {
 			return (Drawable) drawableMap.get(urlString);
 		}
@@ -41,14 +37,14 @@ public class DrawableManager {
 			Drawable drawable = Drawable.createFromStream(is, "src");
 			drawableMap.put(urlString, drawable);
 			Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "got a thumbnail drawable: " + drawable.getBounds()
-													+ ", "
-													+ drawable.getIntrinsicHeight()
-													+ ","
-													+ drawable.getIntrinsicWidth()
-													+ ", "
-													+ drawable.getMinimumHeight()
-													+ ","
-													+ drawable.getMinimumWidth());
+																					+ ", "
+																					+ drawable.getIntrinsicHeight()
+																					+ ","
+																					+ drawable.getIntrinsicWidth()
+																					+ ", "
+																					+ drawable.getMinimumHeight()
+																					+ ","
+																					+ drawable.getMinimumWidth());
 			return drawable;
 		}
 		catch (MalformedURLException e) {
@@ -61,9 +57,7 @@ public class DrawableManager {
 		}
 	}
 
-
 	public void fetchDrawableOnThread(final String urlString, final ImageView imageView) {
-
 		if (drawableMap.containsKey(urlString)) {
 			imageView.setImageDrawable((Drawable) drawableMap.get(urlString));
 		}
@@ -91,13 +85,10 @@ public class DrawableManager {
 		thread.start();
 	}
 
-
 	private InputStream fetch(String urlString) throws MalformedURLException, IOException {
-
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		HttpGet request = new HttpGet(urlString);
 		HttpResponse response = httpClient.execute(request);
 		return response.getEntity().getContent();
 	}
-
 }

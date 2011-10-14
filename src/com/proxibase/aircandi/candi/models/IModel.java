@@ -13,7 +13,7 @@ public interface IModel {
 
 	public void shiftToNext();
 
-	public LinkedList<IEntityModifier> getModifiers();
+	public LinkedList<IEntityModifier> getViewModifiers();
 
 	public CandiList<IModel> getChildren();
 
