@@ -18,5 +18,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="D:/Files/Proxibase/Android/android-sdk-windows/extras/android/compatibility/v4/android-support-v4.jar" sourcepath="D:/Files/Proxibase/Android/android-sdk-windows/extras/android/compatibility/v4/src"/>
 	<classpathentry kind="lib" path="D:/Files/Proxibase/Android/amazonaws/aws-android-sdk-1.0.0/lib/aws-android-sdk-1.0.0-s3.jar"/>
+	<classpathentry kind="lib" path="D:/Files/Proxibase/Android/acra/acra-4.2.3/build/acra-4.2.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
