@@ -268,7 +268,7 @@ public class ImageLoader {
 						else if (imageRequest.imageFormat == ImageFormat.Binary) {
 							long startTime = System.nanoTime();
 							float estimatedTime = System.nanoTime();
-							Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download started...");
+							Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download started...");
 
 							try {
 								bitmap = getBitmap(imageRequest.imageUri);
@@ -281,7 +281,7 @@ public class ImageLoader {
 							}
 							estimatedTime = System.nanoTime() - startTime;
 							startTime = System.nanoTime();
-							Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download finished: "
+							Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download finished: "
 																									+ String.valueOf(estimatedTime / 1000000)
 																									+ "ms");
 
@@ -290,7 +290,7 @@ public class ImageLoader {
 
 							estimatedTime = System.nanoTime() - startTime;
 							startTime = System.nanoTime();
-							Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Post processing: "
+							Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Post processing: "
 																									+ String.valueOf(estimatedTime / 1000000)
 																									+ "ms");
 
@@ -302,7 +302,7 @@ public class ImageLoader {
 								final Bitmap bitmapReflection = ImageUtils.getReflection(bitmap);
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
-								Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(),
+								Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(),
 										imageRequest.imageUri + ": Reflection created: " + String.valueOf(estimatedTime / 1000000) + "ms");
 
 								mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection);

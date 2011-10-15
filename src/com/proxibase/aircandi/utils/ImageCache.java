@@ -255,7 +255,7 @@ public class ImageCache implements Map<String, Bitmap> {
 			else {
 				f.delete();
 				deletes++;
-				Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Deleting from cache: " + f.getAbsolutePath());
+				Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Deleting from cache: " + f.getAbsolutePath());
 			}
 		}
 	}
