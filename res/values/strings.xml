@@ -99,5 +99,20 @@
 
     <!-- Text that is shown in the Badge, when there is no data to display -->
     <string name="quickcontact_no_data">No data</string>
+    
+    <string name="pref_disable_acra">Error reporting</string>
+    <string name="pref_acra_disabled">Disabled</string>
+    <string name="pref_acra_enabled">Enabled</string>
+    
+    <string name="pref_acra_syslog">System logs</string>
+    <string name="pref_acra_syslog_enabled">Included</string>
+    <string name="pref_acra_syslog_disabled">Not included</string>
+    
+    <string name="pref_acra_user_email">Email address</string>
+    <string name="pref_acra_user_email_summary">Optionally include email address</string>
+    
+    <string name="pref_acra_alwaysaccept">Auto accept</string>
+    <string name="pref_acra_alwaysaccept_enabled">Reports always sent</string>
+    <string name="pref_acra_alwaysaccept_disabled">Report confirmation required</string>
 	
 </resources>
