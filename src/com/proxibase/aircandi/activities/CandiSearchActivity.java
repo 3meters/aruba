@@ -55,7 +55,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Display;
 import android.view.Gravity;
@@ -111,9 +110,9 @@ import com.proxibase.aircandi.utils.AnimUtils;
 import com.proxibase.aircandi.utils.ImageCache;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
+import com.proxibase.aircandi.utils.Log;
 import com.proxibase.aircandi.utils.ProxiHandlerManager;
 import com.proxibase.aircandi.utils.Rotate3dAnimation;
-import com.proxibase.aircandi.utils.Utilities;
 import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
@@ -240,7 +239,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onCreate called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onCreate called");
 		super.onCreate(savedInstanceState);
 		if (CandiConstants.DEBUG_TRACE) {
 			Debug.startMethodTracing("candi_search", 100000000);
@@ -306,8 +305,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		registerForContextMenu(view);
 
 		/* Check for emulator */
-		if (Build.PRODUCT.equals("google_sdk") || Build.PRODUCT.equals("sdk"))
+		if (Build.PRODUCT.equals("google_sdk") || Build.PRODUCT.equals("sdk")) {
 			mUsingEmulator = true;
+		}
 
 		/* Proxibase sdk components */
 		ProxibaseService.getInstance().isConnectedToNetwork(this);
@@ -360,6 +360,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		try {
 			String jsonResponse = (String) ProxibaseService.getInstance().select(CandiConstants.URL_PROXIBASE + "users/1000", ResponseFormat.Json);
 			mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseServiceNew);
+			Log.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Login: " + mUser.fullName);
 			return mUser;
 		}
 		catch (ProxibaseException exception) {
@@ -385,7 +386,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						|| (secretKey == null)
 						|| (secretKey.equals(""))
 						|| (secretKey.equals("CHANGEME"))) {
-						Log.e("AWS", "Aws Credentials not configured correctly.");
+						Log.e(CandiConstants.APP_NAME, "AWS", "Aws Credentials not configured correctly.");
 						mCredentialsFound = false;
 					}
 					else {
@@ -394,7 +395,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					}
 				}
 				catch (Exception exception) {
-					Log.e("Loading AWS Credentials", exception.getMessage());
+					Log.e(CandiConstants.APP_NAME, "Loading AWS Credentials", exception.getMessage(), exception);
 					mCredentialsFound = false;
 				}
 			}
@@ -543,7 +544,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	public void onRefreshClick(View view) {
-
+		
+		//int i = 1 / 0;
+		
 		/* For this activity, refresh means rescan and reload entity data from the service */
 		if (mReadyToRun) {
 			doRefresh();
@@ -589,7 +592,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		/* Logging */
 		IEntity layer = mEngine.getScene().getChild(CandiConstants.LAYER_CANDI);
-		Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "Current Position for scene: " + String.valueOf(layer.getX())
+		Log.d(CandiConstants.APP_NAME, "CandiPatchPresenter", "Current Position for scene: " + String.valueOf(layer.getX())
 																		+ ","
 																		+ String.valueOf(layer.getY()));
 		int childCount = layer.getChildCount();
@@ -598,7 +601,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			if (child instanceof CandiView) {
 				/* TODO: Should we null this so the GC can collect them. */
 				final CandiView candiView = (CandiView) child;
-				Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "Current Position for " + candiView.getModel().getTitleText()
+				Log.d(CandiConstants.APP_NAME, "CandiPatchPresenter", "Current Position for " + candiView.getModel().getTitleText()
 																				+ ": "
 																				+ String.valueOf(candiView.getX())
 																				+ ","
@@ -640,22 +643,23 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private void scanForBeacons(final Boolean fullUpdate, Boolean showProgress) {
 
-		if (showProgress)
+		if (showProgress) {
 			startTitlebarProgress(true);
+		}
 
 		if (fullUpdate && mCandiPatchPresenter != null) {
 			mCandiPatchPresenter.setFullUpdateInProgress(true);
 			mCandiPatchPresenter.mProgressSprite.setVisible(true);
 		}
 
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Calling Proxibase.ProxiExplorer to scan for tags");
+		Log.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting beacon scan");
 
 		ProxiExplorer.getInstance().scanForBeaconsAsync(fullUpdate, new IEntityProcessListener() {
 
 			@Override
 			public void onComplete(List<EntityProxy> entities) {
 
-				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Beacon scan results returned from Proxibase.ProxiExplorer");
+				Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Beacon scan results returned from Proxibase.ProxiExplorer");
 
 				if (entities.size() == 0) {
 					showNewCandiDialog();
@@ -698,16 +702,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 
 			public void onIOException(IOException exception) {
-				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
+				Log.w(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage(), exception);
 				ImageUtils.showToastNotification(CandiSearchActivity.this, "Network error", Toast.LENGTH_SHORT);
 				stopTitlebarProgress();
-				exception.printStackTrace();
 			}
 
 			@Override
 			public void onProxiExplorerError(ProxibaseException exception) {
 				ImageUtils.showToastNotification(CandiSearchActivity.this, exception.getMessage(), Toast.LENGTH_SHORT);
-				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
+				Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
 				stopTitlebarProgress();
 			}
 		});
@@ -718,14 +721,14 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		if (showProgress)
 			startTitlebarProgress(true);
 
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Calling Proxibase.ProxiExplorer to refresh entities");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Calling Proxibase.ProxiExplorer to refresh entities");
 
 		ProxiExplorer.getInstance().refreshEntitiesAsync(new IEntityProcessListener() {
 
 			@Override
 			public void onComplete(List<EntityProxy> entities) {
 
-				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Entity refresh results returned from Proxibase.ProxiExplorer");
+				Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Entity refresh results returned from Proxibase.ProxiExplorer");
 
 				doEntitiesUpdate(entities, false);
 
@@ -743,7 +746,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 
 			public void onIOException(IOException exception) {
-				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
+				Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
 				ImageUtils.showToastNotification(CandiSearchActivity.this, "Network error", Toast.LENGTH_SHORT);
 				stopTitlebarProgress();
 				exception.printStackTrace();
@@ -752,7 +755,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			@Override
 			public void onProxiExplorerError(ProxibaseException exception) {
 				ImageUtils.showToastNotification(CandiSearchActivity.this, exception.getMessage(), Toast.LENGTH_SHORT);
-				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
+				Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
 				stopTitlebarProgress();
 			}
 		});
@@ -1020,7 +1023,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		if (table != null) {
 			frame.addView(table);
 		}
-		
+
 		/* Update any UI indicators related to child candies */
 		if (candiModel.hasVisibleChildrenCurrent()) {
 		}
@@ -1064,7 +1067,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							public void onProxibaseException(ProxibaseException exception) {}
 						});
 
-				Utilities.Log(CandiConstants.APP_NAME, "buildCandiDetailView", "Fetching Image: " + candiModel.getBodyImageUri());
+				Log.d(CandiConstants.APP_NAME, "buildCandiDetailView", "Fetching Image: " + candiModel.getBodyImageUri());
 				ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
 			}
 		}
@@ -1359,7 +1362,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		@Override
 		public void onReceive(final Context context, Intent intent) {
-			
+
 			/* This is on the main UI thread */
 			if (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)) {
 				String publicName = mProxiHandlerManager.getPublicName(intent.getData().getEncodedSchemeSpecificPart());
@@ -1473,7 +1476,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							dialog.dismiss();
 						}
 						else if (item == 1) {
-							
+
 							/* We always use the first candi in a zone */
 							EntityProxy parentEntityProxy = mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone()
 									.getCandiesCurrent().get(0).getEntityProxy();
@@ -1500,7 +1503,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	@Override
 	public Engine onLoadEngine() {
 
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "onLoadEngine called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "onLoadEngine called");
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
 		int rotation = getWindowManager().getDefaultDisplay().getOrientation();
@@ -1513,7 +1516,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 			@Override
 			public void onApplySceneMatrix(GL10 pGL) {
-				
+
 				/* Gets called for every engine update */
 				mCandiPatchPresenter.setFrustum(pGL);
 			}
@@ -1538,7 +1541,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	@Override
 	public void onLoadResources() {
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "onLoadResources called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "onLoadResources called");
 		SoundFactory.setAssetBasePath("sfx/");
 		try {
 			mCandiAlertSound = SoundFactory.createSoundFromAsset(mEngine.getSoundManager(), this, "notification2.mp3");
@@ -1554,7 +1557,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * Called after Create, Resume->LoadEngine.
 		 * CandiPatchPresenter handles scene instantiation and setup
 		 */
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "onLoadScene called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "onLoadScene called");
 		mCandiPatchPresenter = new CandiPatchPresenter(this, this, mEngine, mRenderSurfaceView, mCandiPatchModel);
 		Scene scene = mCandiPatchPresenter.initializeScene();
 		mCandiPatchPresenter.mDisplayExtras = mPrefDisplayExtras;
@@ -1575,7 +1578,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	@Override
 	public void onLoadComplete() {
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onLoadComplete called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onLoadComplete called");
 	}
 
 	@Override
@@ -1585,7 +1588,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * engine acquries the wake lock, restarts the engine, resumes the GLSurfaceView.
 		 * The engine reloads textures.
 		 */
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onGameResumed called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onGameResumed called");
 	}
 
 	@Override
@@ -1595,13 +1598,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * called on the super class. The game engine releases the wake lock, stops the engine, pauses the
 		 * GLSurfaceView.
 		 */
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onGamePaused called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onGamePaused called");
 	}
 
 	@Override
 	public void onUnloadResources() {
 		super.onUnloadResources();
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onUnloadResources called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onUnloadResources called");
 	}
 
 	@Override
@@ -1619,16 +1622,16 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		/*
 		 * Parent class will trigger pause or resume for the game engine
 		 * based on hasWindowFocus.
-		 *
+		 * 
 		 * We control when this message get through to prevent unnecessary
 		 * restarts. We block it if we lost focus becase of a pop up like a
 		 * dialog or an android menu (which do not trigger this.onPause which
 		 * in turns stops the engine).
 		 */
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onWindowFocusChanged called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onWindowFocusChanged called");
 
 		if (!mEngine.isRunning()) {
-			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Passing onWindowFocusChanged to Andengine");
+			Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Passing onWindowFocusChanged to Andengine");
 			super.onWindowFocusChanged(hasWindowFocus);
 		}
 	}
@@ -1896,7 +1899,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * 
 		 * Game engine is started/restarted in super class if we currently have the window focus.
 		 */
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onResume called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onResume called");
 
 		ProxiExplorer.getInstance().onResume();
 
@@ -1938,7 +1941,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * loses focus but the activity is still active.
 		 */
 		try {
-			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onPause called");
+			Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onPause called");
 
 			unregisterReceiver(mPackageReceiver);
 
@@ -1957,7 +1960,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		
+
 		/* Fired when we lose our window. Follows onPause(). */
 		if (CandiConstants.DEBUG_TRACE) {
 			Debug.stopMethodTracing();
@@ -1971,7 +1974,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		/* Don't count on this always getting called when this activity is killed */
 		try {
-			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onDestroy called");
+			Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onDestroy called");
 			ProxiExplorer.getInstance().onDestroy();
 			ImageManager.getInstance().getImageLoader().stopThread();
 			ImageManager.getInstance().getImageLoader().getImageCache().cleanCacheAsync(getApplicationContext());
@@ -1998,7 +2001,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						Verb resultVerb = (Verb) extras.get(getString(R.string.EXTRA_RESULT_VERB));
 						String dirtyBeaconId = extras.getString(getString(R.string.EXTRA_BEACON_DIRTY));
 						Integer dirtyEntityId = extras.getInt(getString(R.string.EXTRA_ENTITY_DIRTY));
-						
+
 						/* New topic was inserted */
 						if (dirtyBeaconId != null && !dirtyBeaconId.equals("")) {
 							for (Beacon beacon : ProxiExplorer.getInstance().getBeacons()) {
@@ -2009,7 +2012,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 								}
 							}
 						}
-						
+
 						/* New comment was inserted or comment or topic was edited or deleted */
 						else if (dirtyEntityId != null) {
 							for (EntityProxy entityProxy : ProxiExplorer.getInstance().getEntityProxiesFlat()) {
@@ -2035,7 +2038,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 										}
 									}
 									else {
-										
+
 										/* We have a delete */
 										if (resultVerb == Verb.Delete) {
 											hideCandiInfo(AnimType.CrossFade);
@@ -2062,7 +2065,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * TODO: Not getting called because setRequestedOrientation() is beinging
 		 * called in BaseGameActivity.
 		 */
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "onConfigurationChanged called: " + newConfig.orientation);
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "onConfigurationChanged called: " + newConfig.orientation);
 
 		boolean landscape = false;
 		Display getOrient = getWindowManager().getDefaultDisplay();
@@ -2168,7 +2171,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
-		
+
 		/* Hide the sign out option if we don't have a current session */
 		MenuItem item = menu.findItem(R.id.signout);
 		item.setVisible(false);
@@ -2176,7 +2179,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		
+
 		/* Hide the sign out option if we don't have a current session */
 		MenuItem item = menu.findItem(R.id.signout);
 		item.setVisible(false);

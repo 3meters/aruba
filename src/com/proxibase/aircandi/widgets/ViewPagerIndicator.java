@@ -10,7 +10,7 @@ import android.widget.RelativeLayout;
 
 import com.proxibase.aircandi.activities.R;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.Utilities;
+import com.proxibase.aircandi.utils.Log;
 
 /**
  * An small bar indicating the title of the previous, current and next page to be shown in a ViewPager.
@@ -109,17 +109,17 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 
 	@Override
 	public void onPageSelected(int position) {
-		Utilities.Log(CandiConstants.APP_NAME, "ViewPagerIndicator", "PageSelected Position: " + String.valueOf(position));
+		Log.d(CandiConstants.APP_NAME, "ViewPagerIndicator", "PageSelected Position: " + String.valueOf(position));
 	}
 
 	@Override
 	public void onPageScrollStateChanged(int state) {
-		Utilities.Log(CandiConstants.APP_NAME, "ViewPagerIndicator", "PageScrollStateChanged State: " + String.valueOf(state));
+		Log.d(CandiConstants.APP_NAME, "ViewPagerIndicator", "PageScrollStateChanged State: " + String.valueOf(state));
 	}
 
 	@Override
 	public void onPageScrolled(int position, float positionOffset, final int positionOffsetPixels) {
-		Utilities.Log(CandiConstants.APP_NAME, "ViewPagerIndicator", "Position: " + String.valueOf(position)
+		Log.d(CandiConstants.APP_NAME, "ViewPagerIndicator", "Position: " + String.valueOf(position)
 																		+ " PositionOffset: "
 																		+ String.valueOf(positionOffset)
 																		+ " PositionOffsetPixels: "

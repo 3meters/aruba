@@ -21,6 +21,7 @@ import com.proxibase.aircandi.models.PostEntity;
 import com.proxibase.aircandi.utils.DateUtils;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
+import com.proxibase.aircandi.utils.Log;
 import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -28,7 +29,6 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
-import com.proxibase.sdk.android.util.Utilities;
 
 public class Post extends EntityBase {
 
@@ -79,7 +79,7 @@ public class Post extends EntityBase {
 						 * TODO: Cancel all active tasks in onDestroy()
 						 */
 						if (mEntity != null) {
-							Utilities.Log(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
+							Log.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
 							entity.mediaBitmap = bitmap;
 							showMediaThumbnail(bitmap);
 							((Button) findViewById(R.id.btn_clear_media)).setEnabled(true);
@@ -171,7 +171,7 @@ public class Post extends EntityBase {
 					@Override
 					public void onImageReady(Bitmap bitmap) {
 						if (mEntity != null) {
-							Utilities.Log(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
+							Log.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
 							entity.mediaBitmap = bitmap;
 							showMediaThumbnail(bitmap);
 						}

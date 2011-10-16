@@ -15,7 +15,7 @@
 	<application
 		android:name="com.proxibase.aircandi.activities.Aircandi"
 		android:label="@string/app_name"
-		android:icon="@drawable/icon_aircandi"
+		android:icon="@drawable/icon_app"
 		android:theme="@style/aircandi_theme.midnight"
 		android:debuggable="true">
 		<activity
@@ -63,6 +63,12 @@
 					android:name="android.intent.category.PREFERENCE" />
 			</intent-filter>
 		</activity>
+		<activity
+			android:name="org.acra.CrashReportDialog"
+			android:theme="@android:style/Theme.Dialog"
+			android:launchMode="singleInstance"
+			android:excludeFromRecents="true"
+			android:finishOnTaskLaunch="true" />
 	</application>
 	<uses-permission
 		android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -86,4 +92,6 @@
 		android:name="android.permission.WAKE_LOCK" />
 	<uses-permission
 		android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+	<uses-permission
+		android:name="android.permission.READ_LOGS" />
 </manifest>

@@ -72,13 +72,26 @@
 	<string name="post_insert_success_toast">Saved</string>
 	<string name="post_back_button">Back</string>
 	
+	<!--  
+		Crash reporting
+	-->
+	<string name="crash_toast_text">Ooooops ! I crashed, but a report has been sent to my developer to help him fix the issue !</string> 
+	<string name="crash_notif_ticker_text">Unexpected error, please send a report...</string> 
+	<string name="crash_notif_title">Aircandi has crashed...</string> 
+	<string name="crash_notif_text">Please click here to help fix the issue.</string>      
+	<string name="crash_dialog_title">Aircandi has crashed</string> 
+	<string name="crash_dialog_text">An unexpected error occurred forcing the application to stop. 
+		Please help us fix this by sending us error data, all you have to do is click \'OK\'.</string> 
+	<string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string> 
+	<string name="crash_dialog_ok_toast">Thank you!</string>	
+	
     <!-- Shown as a toast when the user taps on a Fast-Track icon, and no application
          was found that could perform the selected action -->
     <string name="quickcontact_missing_app">No application found to handle this action</string>
 
     <!-- Shown as the checkbox label that, when checked, will store remember the
          selected choice and shortcut to it in the future.  For example, this would
-         make a selected phone number the default. -->
+         make a selected phone number the default.-->
     <string name="quickcontact_remember_choice">Remember this choice</string>
 
     <!-- Shown as the header name for a person when the name is missing or unknown. -->
@@ -86,5 +99,20 @@
 
     <!-- Text that is shown in the Badge, when there is no data to display -->
     <string name="quickcontact_no_data">No data</string>
+    
+    <string name="pref_disable_acra">Error reporting</string>
+    <string name="pref_acra_disabled">Disabled</string>
+    <string name="pref_acra_enabled">Enabled</string>
+    
+    <string name="pref_acra_syslog">System logs</string>
+    <string name="pref_acra_syslog_enabled">Included</string>
+    <string name="pref_acra_syslog_disabled">Not included</string>
+    
+    <string name="pref_acra_user_email">Email address</string>
+    <string name="pref_acra_user_email_summary">Optionally include email address</string>
+    
+    <string name="pref_acra_alwaysaccept">Auto accept</string>
+    <string name="pref_acra_alwaysaccept_enabled">Reports always sent</string>
+    <string name="pref_acra_alwaysaccept_disabled">Report confirmation required</string>
 	
 </resources>

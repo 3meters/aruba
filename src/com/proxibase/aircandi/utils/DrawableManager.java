@@ -13,7 +13,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.proxibase.aircandi.core.CandiConstants;
@@ -31,12 +30,12 @@ public class DrawableManager {
 			return (Drawable) drawableMap.get(urlString);
 		}
 
-		Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Image url:" + urlString);
+		Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Image url:" + urlString);
 		try {
 			InputStream is = fetch(urlString);
 			Drawable drawable = Drawable.createFromStream(is, "src");
 			drawableMap.put(urlString, drawable);
-			Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "got a thumbnail drawable: " + drawable.getBounds()
+			Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "got a thumbnail drawable: " + drawable.getBounds()
 																					+ ", "
 																					+ drawable.getIntrinsicHeight()
 																					+ ","
@@ -48,11 +47,11 @@ public class DrawableManager {
 			return drawable;
 		}
 		catch (MalformedURLException e) {
-			Log.e(this.getClass().getSimpleName(), "fetchDrawable failed", e);
+			Log.e(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "fetchDrawable failed", e);
 			return null;
 		}
 		catch (IOException e) {
-			Log.e(this.getClass().getSimpleName(), "fetchDrawable failed", e);
+			Log.e(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "fetchDrawable failed", e);
 			return null;
 		}
 	}

@@ -28,7 +28,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.Utilities;
+import com.proxibase.aircandi.utils.Log;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
@@ -449,7 +449,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 							 * First time for a candiview is more expensive because the body and reflection sprites
 							 * are created.
 							 */
-							//Utilities.Log(CandiConstants.APP_NAME, "CandiView", "Image ready: " + candiModel.getTitleText());
+							//Log.d(CandiConstants.APP_NAME, "CandiView", "Image ready: " + candiModel.getTitleText());
 							if (bodyBitmap != null) {
 
 								/* The view could have been recycled while we were busy and won't have a bound model. */
@@ -580,7 +580,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		 * Completely remove all resources associated with this sprite.
 		 * This should only be called from the engine update thread.
 		 */
-		Utilities.Log(CandiConstants.APP_NAME, "ProxiTile", "Unloading resources: " + ((CandiModel) mModel).getEntityProxy().label);
+		Log.d(CandiConstants.APP_NAME, "ProxiTile", "Unloading resources: " + ((CandiModel) mModel).getEntityProxy().label);
 
 		if (mProgressSprite != null)
 			mProgressSprite.removeResources();
@@ -658,10 +658,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 		if (mTouchListener != null) {
 			long startTime = System.nanoTime();
-			Utilities.Log(CandiConstants.APP_NAME, "CandiView", "SingleTapUp started...");
+			Log.d(CandiConstants.APP_NAME, "CandiView", "SingleTapUp started...");
 			mTouchListener.onViewSingleTap(this);
 			long estimatedTime = System.nanoTime() - startTime;
-			Utilities.Log(CandiConstants.APP_NAME, "CandiView", "SingleTapUp finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
+			Log.d(CandiConstants.APP_NAME, "CandiView", "SingleTapUp finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
 			return true;
 		}
 		return false;

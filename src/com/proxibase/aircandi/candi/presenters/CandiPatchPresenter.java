@@ -76,7 +76,7 @@ import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.CandiList;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.Utilities;
+import com.proxibase.aircandi.utils.Log;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
@@ -170,7 +170,7 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	public Scene initializeScene() {
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "initScene called");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "initScene called");
 
 		final CandiScene scene = new CandiScene(3) {
 
@@ -267,7 +267,7 @@ public class CandiPatchPresenter implements Observer {
 					if (pSceneTouchEvent.isActionUp()) {
 						ZoneModel nearestZone = getNearestZone(mCameraTargetSprite.getX(), false);
 						if (nearestZone != null) {
-							Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "MoveNearestZone: From Scene Touch");
+							Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "MoveNearestZone: From Scene Touch");
 							mCandiPatchModel.setCandiModelFocused(nearestZone.getCandiesCurrent().get(0));
 							mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
 									CandiConstants.EASE_SLOTTING_MINOR, new MoveListener() {
@@ -339,7 +339,7 @@ public class CandiPatchPresenter implements Observer {
 		 * that should update the model and ripple to the views.
 		 */
 		if (fullUpdate) {
-			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Performing full update...");
+			Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Performing full update...");
 
 			/*
 			 * Clears all game engine sprites.
@@ -485,7 +485,7 @@ public class CandiPatchPresenter implements Observer {
 	public void navigateModel(IModel candiRootNext, boolean updatingData) {
 
 		long startTime = System.nanoTime();
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Navigate started...");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Navigate started...");
 
 		mCandiPatchModel.setCandiRootNext(candiRootNext);
 
@@ -531,7 +531,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		long estimatedTime = System.nanoTime() - startTime;
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Navigate finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Navigate finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
 	}
 
 	@SuppressWarnings("unused")
@@ -543,7 +543,7 @@ public class CandiPatchPresenter implements Observer {
 			if (candiModel.countObservers() > 0)
 				throw new IllegalStateException("CandiModel has an observer but CandiViewHash is empty");
 
-			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "ensureCandiView: " + candiModel.getTitleText());
+			Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "ensureCandiView: " + candiModel.getTitleText());
 
 			final CandiView candiView = new CandiView(CandiPatchPresenter.this);
 			candiView.setTitleTextColor(Color.parseColor(getStyleTextColorTitle()));
@@ -681,10 +681,10 @@ public class CandiPatchPresenter implements Observer {
 		final CandiView candiView = mCandiViewPool.obtainPoolItem();
 
 		if (candiView.isRecycled()) {
-			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiView pulled from pool: " + candiModel.getTitleText());
+			Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiView pulled from pool: " + candiModel.getTitleText());
 		}
 		else {
-			Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiView created: " + candiModel.getTitleText());
+			Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiView created: " + candiModel.getTitleText());
 		}
 
 		candiView.setModel(candiModel);
@@ -737,7 +737,7 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	public void sendCandiViewToPool(CandiModel candiModel) {
-		Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiView recycled to the pool: " + candiModel.getTitleText());
+		Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiView recycled to the pool: " + candiModel.getTitleText());
 
 		String modelId = String.valueOf(candiModel.getModelId());
 		CandiView candiView = (CandiView) getCandiViewsHash().get(modelId);
@@ -779,10 +779,10 @@ public class CandiPatchPresenter implements Observer {
 		int countCandiModels = candiModels.size();
 
 		if (localUpdate) {
-			Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Starting view management pass: async");
+			Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Starting view management pass: async");
 		}
 		else {
-			Utilities.Log(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Starting view management pass");
+			Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Starting view management pass");
 		}
 
 		/* Recycle views first */
@@ -832,7 +832,7 @@ public class CandiPatchPresenter implements Observer {
 
 	private void doCandiViewSingleTap(IView candiView) {
 		final CandiModel candiModel = (CandiModel) candiView.getModel();
-		Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "SingleTap triggered: " + candiModel.getEntityProxy().label);
+		Log.d(CandiConstants.APP_NAME, "CandiPatchPresenter", "SingleTap triggered: " + candiModel.getEntityProxy().label);
 
 		mCandiPatchModel.setCandiModelFocused(candiModel);
 		float distanceToMove = Math.abs(mCameraTargetSprite.getX() - candiModel.getZoneStateCurrent().getZone().getViewStateCurrent().getX());
@@ -877,7 +877,7 @@ public class CandiPatchPresenter implements Observer {
 
 	private void doCandiViewDoubleTap(IView candiView) {
 		final CandiModel candiModel = (CandiModel) candiView.getModel();
-		Utilities.Log(CandiConstants.APP_NAME, "CandiPatchPresenter", "DoubleTap triggered: " + candiModel.getEntityProxy().label);
+		Log.d(CandiConstants.APP_NAME, "CandiPatchPresenter", "DoubleTap triggered: " + candiModel.getEntityProxy().label);
 
 		float fromScale = mCameraTargetSprite.getScaleX();
 		float toScale = 1;
@@ -965,7 +965,7 @@ public class CandiPatchPresenter implements Observer {
 							ViewState viewStateCurrent = candiModel.getViewStateCurrent();
 							ViewState viewStateNext = candiModel.getViewStateNext();
 
-							Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Transition From: " + transition.toString()
+							Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Transition From: " + transition.toString()
 																					+ ": "
 																					+ candiModel.getTitleText());
 
@@ -1038,7 +1038,7 @@ public class CandiPatchPresenter implements Observer {
 							ViewState viewStateCurrent = candiModel.getViewStateCurrent();
 							ViewState viewStateNext = candiModel.getViewStateNext();
 
-							Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "Transition To: " + transition.toString()
+							Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Transition To: " + transition.toString()
 																					+ ": "
 																					+ candiModel.getTitleText());
 
@@ -1499,7 +1499,7 @@ public class CandiPatchPresenter implements Observer {
 			/* Check to see if we are at a boundary */
 			float cameraTargetX = mCameraTargetSprite.getX() + 125;
 			if (cameraTargetX <= mBoundsMinX || cameraTargetX >= mBoundsMaxX) {
-				Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "MoveNearestZone: At boundary");
+				Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "MoveNearestZone: At boundary");
 
 				mCameraTargetSprite
 						.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_BOUNCEBACK,
@@ -1534,7 +1534,7 @@ public class CandiPatchPresenter implements Observer {
 
 				@Override
 				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-					Utilities.Log(CandiConstants.APP_NAME, COMPONENT_NAME, "MoveNearestZone: Settling after fling");
+					Log.d(CandiConstants.APP_NAME, COMPONENT_NAME, "MoveNearestZone: Settling after fling");
 					mCandiPatchModel.setCandiModelFocused(getNearestZone(mCameraTargetSprite.getX(), false).getCandiesCurrent().get(0));
 
 					mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
