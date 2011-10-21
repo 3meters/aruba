@@ -30,12 +30,12 @@ public class DrawableManager {
 			return (Drawable) drawableMap.get(urlString);
 		}
 
-		Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Image url:" + urlString);
+		Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Image url:" + urlString);
 		try {
 			InputStream is = fetch(urlString);
 			Drawable drawable = Drawable.createFromStream(is, "src");
 			drawableMap.put(urlString, drawable);
-			Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "got a thumbnail drawable: " + drawable.getBounds()
+			Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "got a thumbnail drawable: " + drawable.getBounds()
 																					+ ", "
 																					+ drawable.getIntrinsicHeight()
 																					+ ","
@@ -47,11 +47,11 @@ public class DrawableManager {
 			return drawable;
 		}
 		catch (MalformedURLException e) {
-			Log.e(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "fetchDrawable failed", e);
+			Logger.e(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "fetchDrawable failed", e);
 			return null;
 		}
 		catch (IOException e) {
-			Log.e(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "fetchDrawable failed", e);
+			Logger.e(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "fetchDrawable failed", e);
 			return null;
 		}
 	}

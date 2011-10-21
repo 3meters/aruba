@@ -28,7 +28,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.Log;
+import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
@@ -489,8 +489,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 	private void updateTextureRegions(Bitmap bodyBitmap) {
 
 		final CandiModel candiModel = (CandiModel) this.mModel;
-		if (candiModel == null)
+		if (candiModel == null) {
 			throw new IllegalStateException("Trying to update texture regions with null model");
+		}
 
 		mBodyTexture.clearTextureSources();
 		mBodyTextureRegion = TextureRegionFactory.createFromSource(mBodyTexture, new BitmapTextureSource(bodyBitmap, new IBitmapAdapter() {
@@ -541,11 +542,17 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 		}
 
+		/*
+		 * This is where the primary sprites get created so we also need to
+		 * do some management that couldn't be done until their were created.
+		 */
 		if (mBodySprite == null) {
 			makeBodySprite();
 			if (mReflectionSprite == null) {
 				makeReflectionSprite();
 			}
+			configureCollapsed(mCollapsed);
+			updateTouchArea(candiModel.isTouchAreaActive());
 			sortChildren(); /* zorder sort */
 		}
 	}
@@ -580,7 +587,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		 * Completely remove all resources associated with this sprite.
 		 * This should only be called from the engine update thread.
 		 */
-		Log.d(CandiConstants.APP_NAME, "ProxiTile", "Unloading resources: " + ((CandiModel) mModel).getEntityProxy().label);
+		Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Unloading resources: " + ((CandiModel) mModel).getEntityProxy().label);
 
 		if (mProgressSprite != null)
 			mProgressSprite.removeResources();
@@ -658,10 +665,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 		if (mTouchListener != null) {
 			long startTime = System.nanoTime();
-			Log.d(CandiConstants.APP_NAME, "CandiView", "SingleTapUp started...");
+			Logger.v(CandiConstants.APP_NAME, "CandiView", "SingleTapUp started...");
 			mTouchListener.onViewSingleTap(this);
 			long estimatedTime = System.nanoTime() - startTime;
-			Log.d(CandiConstants.APP_NAME, "CandiView", "SingleTapUp finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
+			Logger.v(CandiConstants.APP_NAME, "CandiView", "SingleTapUp finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
 			return true;
 		}
 		return false;

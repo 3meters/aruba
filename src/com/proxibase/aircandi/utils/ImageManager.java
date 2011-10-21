@@ -148,7 +148,7 @@ public class ImageManager {
 
 			if (bitmap != null) {
 
-				Log.d(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageUri + "'");
+				Logger.v(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageUri + "'");
 
 				/* Crop if requested */
 				Bitmap bitmapCropped;
@@ -195,7 +195,7 @@ public class ImageManager {
 				return bitmapFinal;
 			}
 			else {
-				Log.d(CandiConstants.APP_NAME, "ImageManager", "Image download failed for image '" + mImageRequest.imageUri + "'");
+				Logger.v(CandiConstants.APP_NAME, "ImageManager", "Image download failed for image '" + mImageRequest.imageUri + "'");
 				return null;
 			}
 		}

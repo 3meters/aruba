@@ -21,6 +21,8 @@ public interface CandiConstants {
 	public static final int				LAYER_GENERAL					= 0;
 	public static final int				LAYER_ZONES						= 1;
 	public static final int				LAYER_CANDI						= 2;
+	
+	public static final int				NETWORK_INTERVAL_PHONEY			= 3000;
 
 	public static final float			CANDI_VIEW_HALO					= 2.0f;
 	public static final int				CANDI_VIEW_WIDTH				= 250;

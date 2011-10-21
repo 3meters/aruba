@@ -21,7 +21,7 @@ import com.proxibase.aircandi.models.PostEntity;
 import com.proxibase.aircandi.utils.DateUtils;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.Log;
+import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -79,7 +79,7 @@ public class Post extends EntityBase {
 						 * TODO: Cancel all active tasks in onDestroy()
 						 */
 						if (mEntity != null) {
-							Log.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
+							Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
 							entity.mediaBitmap = bitmap;
 							showMediaThumbnail(bitmap);
 							((Button) findViewById(R.id.btn_clear_media)).setEnabled(true);
@@ -171,7 +171,7 @@ public class Post extends EntityBase {
 					@Override
 					public void onImageReady(Bitmap bitmap) {
 						if (mEntity != null) {
-							Log.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
+							Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
 							entity.mediaBitmap = bitmap;
 							showMediaThumbnail(bitmap);
 						}

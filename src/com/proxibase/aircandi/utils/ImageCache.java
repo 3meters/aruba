@@ -200,6 +200,7 @@ public class ImageCache implements Map<String, Bitmap> {
 
 			Arrays.sort(files, new SortFilesByModified());
 			if (testCleanNeeded(files, triggerSize)) {
+				Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Trimming file cache.");		
 				cleanCache(files, targetSize);
 			}
 		}
@@ -255,7 +256,7 @@ public class ImageCache implements Map<String, Bitmap> {
 			else {
 				f.delete();
 				deletes++;
-				Log.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Deleting from cache: " + f.getAbsolutePath());
+				Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Deleting from file cache: " + f.getAbsolutePath());
 			}
 		}
 	}

@@ -36,7 +36,7 @@ import com.proxibase.aircandi.models.BaseEntity;
 import com.proxibase.aircandi.utils.DateUtils;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.Log;
+import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.S3;
 import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
@@ -85,7 +85,7 @@ public abstract class EntityBase extends AircandiActivity {
 
 					@Override
 					public void onImageReady(Bitmap bitmap) {
-						Log.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
+						Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
 						entity.imageBitmap = bitmap;
 						showImageThumbnail(bitmap);
 					}
@@ -115,7 +115,7 @@ public abstract class EntityBase extends AircandiActivity {
 					@Override
 					public void onImageReady(Bitmap bitmap) {
 						if (mEntity != null) {
-							Log.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
+							Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
 							entity.imageBitmap = bitmap;
 							showImageThumbnail(bitmap);
 						}
@@ -260,7 +260,7 @@ public abstract class EntityBase extends AircandiActivity {
 					@Override
 					public void onImageReady(Bitmap bitmap) {
 						if (mEntity != null) {
-							Log.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
+							Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
 							entity.imageBitmap = bitmap;
 							showImageThumbnail(bitmap);
 						}
@@ -565,7 +565,7 @@ public abstract class EntityBase extends AircandiActivity {
 		else {
 			ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, ImageFormat.Binary, CandiConstants.IMAGE_WIDTH_MAX, false, 1,
 					this, listener);
-			Log.d(CandiConstants.APP_NAME, "Photo", "Fetching Image: " + imageUri);
+			Logger.d(CandiConstants.APP_NAME, "Photo", "Fetching Image: " + imageUri);
 			try {
 				ImageManager.getInstance().fetchImageAsynch(imageRequest);
 			}
