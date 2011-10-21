@@ -15,6 +15,39 @@
 		android:layout_height="fill_parent"
 		android:layout_width="fill_parent"
 		android:layout_below="@+id/activity_header">
+		<RelativeLayout
+			android:id="@+id/retry_dialog"
+			android:layout_height="fill_parent"
+			android:layout_width="fill_parent"
+			android:visibility="gone">
+			<RelativeLayout
+				android:layout_height="180dp"
+				android:layout_width="200dp"
+				android:layout_centerInParent="true"
+				android:gravity="center"
+				style="@style/body_custom_dialog">
+				<TextView
+					android:id="@+id/retry_message"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:layout_centerInParent="true"
+					android:gravity="center"
+					android:paddingBottom="15dp"
+					style="@style/txt_dialog"
+					android:text="No connection" />
+				<Button
+					android:id="@+id/retry_button"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_centerInParent="true"
+					android:layout_below="@+id/retry_message"
+					style="@style/btn_dialog"
+					android:text="Retry"
+					android:clickable="true"
+					android:onClick="onRefreshClick" 
+					/>
+			</RelativeLayout>
+		</RelativeLayout>
 		<WebView
 			android:id="@+id/webview"
 			android:visibility="invisible"
@@ -25,6 +58,7 @@
 			android:id="@+id/flipper_candi"
 			android:layout_height="fill_parent"
 			android:layout_width="fill_parent"
+			android:visibility="visible"
 			android:gravity="center_vertical"
 			android:clipChildren="false">
 			<org.anddev.andengine.opengl.view.RenderSurfaceView
