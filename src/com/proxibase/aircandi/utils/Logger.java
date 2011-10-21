@@ -1,8 +1,20 @@
 package com.proxibase.aircandi.utils;
 
-public class Log {
+import android.util.Log;
 
-	private static int	LOG_LEVEL	= android.util.Log.DEBUG;
+public class Logger {
+	
+	/*
+	 * Logging levels
+	 * 
+	 * ERROR = 6
+	 * WARN = 5
+	 * INFO = 4
+	 * DEBUG = 3
+	 * VERBOSE = 2
+	 */
+
+	private static int	LOG_LEVEL	= Log.VERBOSE;
 
 	/**
 	 * Error
@@ -14,14 +26,14 @@ public class Log {
 	 * statistics-gathering server.
 	 */
 	static public void e(String tag, String task, String msgFormat) {
-		if (LOG_LEVEL <= android.util.Log.ERROR) {
-			android.util.Log.e(tag, msgFormat);
+		if (LOG_LEVEL <= Log.ERROR) {
+			Log.e(tag, msgFormat);
 		}
 	}
 
 	static public void e(String tag, String task, String msgFormat, Throwable t) {
-		if (LOG_LEVEL <= android.util.Log.ERROR) {
-			android.util.Log.e(tag, msgFormat, t);
+		if (LOG_LEVEL <= Log.ERROR) {
+			Log.e(tag, msgFormat, t);
 		}
 	}
 
@@ -35,14 +47,14 @@ public class Log {
 	 * also be considered for reporting to a statistics-gathering server.
 	 */
 	static public void w(String tag, String task, String msgFormat) {
-		if (LOG_LEVEL <= android.util.Log.WARN) {
-			android.util.Log.w(tag, msgFormat);
+		if (LOG_LEVEL <= Log.WARN) {
+			Log.w(tag, msgFormat);
 		}
 	}
 
 	static public void w(String tag, String task, String msgFormat, Throwable t) {
-		if (LOG_LEVEL <= android.util.Log.WARN) {
-			android.util.Log.w(tag, msgFormat, t);
+		if (LOG_LEVEL <= Log.WARN) {
+			Log.w(tag, msgFormat, t);
 		}
 	}
 
@@ -55,14 +67,14 @@ public class Log {
 	 * domain (to avoid duplicate logging by non-authoritative components). This level is always logged.
 	 */
 	static public void i(String tag, String task, String msgFormat) {
-		if (LOG_LEVEL <= android.util.Log.INFO) {
-			android.util.Log.i(tag, msgFormat);
+		if (LOG_LEVEL <= Log.INFO) {
+			Log.i(tag, msgFormat);
 		}
 	}
 
 	static public void i(String tag, String task, String msgFormat, Throwable t) {
-		if (LOG_LEVEL <= android.util.Log.INFO) {
-			android.util.Log.i(tag, msgFormat, t);
+		if (LOG_LEVEL <= Log.INFO) {
+			Log.i(tag, msgFormat, t);
 		}
 	}
 
@@ -75,14 +87,14 @@ public class Log {
 	 * using verbose logging.
 	 */
 	static public void d(String tag, String task, String msgFormat) {
-		if (LOG_LEVEL <= android.util.Log.DEBUG) {
-			android.util.Log.d(tag, msgFormat);
+		if (LOG_LEVEL <= Log.DEBUG) {
+			Log.d(tag, msgFormat);
 		}
 	}
 
 	static public void d(String tag, String task, String msgFormat, Throwable t) {
-		if (LOG_LEVEL <= android.util.Log.DEBUG) {
-			android.util.Log.d(tag, msgFormat, t);
+		if (LOG_LEVEL <= Log.DEBUG) {
+			Log.d(tag, msgFormat, t);
 		}
 	}
 
@@ -92,14 +104,14 @@ public class Log {
 	 * This level of logging should be used for everything else. This level will only be logged on debug builds.
 	 */
 	static public void v(String tag, String task, String msgFormat) {
-		if (LOG_LEVEL <= android.util.Log.VERBOSE) {
-			android.util.Log.v(tag, msgFormat);
+		if (LOG_LEVEL <= Log.VERBOSE) {
+			Log.v(tag, msgFormat);
 		}
 	}
 
 	static public void v(String tag, String task, String msgFormat, Throwable t) {
-		if (LOG_LEVEL <= android.util.Log.VERBOSE) {
-			android.util.Log.v(tag, msgFormat, t);
+		if (LOG_LEVEL <= Log.VERBOSE) {
+			Log.v(tag, msgFormat, t);
 		}
 	}
 }
