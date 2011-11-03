@@ -65,7 +65,7 @@ public class CandiRectangle extends Rectangle {
 		GLHelper.enableCulling(pGL);
 	}
 
-	protected void removeResources() {
+	public void removeResources() {
 		BufferObjectManager.getActiveInstance().unloadBufferObject(this.getVertexBuffer());
 	}
 }
