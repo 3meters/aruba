@@ -22,6 +22,9 @@
 		<attr name="iconBack" format="string"/>		
 		<attr name="logo" format="string"/>		
 	</declare-styleable>
+	<declare-styleable name="CandiForm">
+		<attr name="activityFooterFormBackground" format="string"/>
+	</declare-styleable>
 	<declare-styleable name="CandiInfo">
 		<attr name="ruleColor" format="color"/>
 		<attr name="textColor" format="color"/>
