@@ -48,6 +48,8 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.NetworkInfo.State;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -80,6 +82,8 @@ import android.view.animation.Animation.AnimationListener;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -91,6 +95,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 import android.widget.ViewSwitcher;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.gson.ExclusionStrategy;
@@ -121,6 +126,8 @@ import com.proxibase.aircandi.utils.Rotate3dAnimation;
 import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.utils.NetworkManager.IConnectivityListener;
+import com.proxibase.aircandi.utils.NetworkManager.IConnectivityReadyListener;
 import com.proxibase.aircandi.widgets.QuickContactWindow;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator.PageInfoProvider;
@@ -240,13 +247,12 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private boolean						mIgnoreInput			= false;
 	private boolean						mUsingEmulator			= false;
 
-	private boolean						mUserRefusedWifiEnable	= false;
 	private int							mRenderMode;
 	protected User						mUser;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onCreate called");
+		Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiSearchActivity created");
 		super.onCreate(savedInstanceState);
 		if (CandiConstants.DEBUG_TRACE) {
 			Debug.startMethodTracing("candi_search", 100000000);
@@ -322,19 +328,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		ProxiExplorer.getInstance().setContext(this.getApplicationContext());
 		ProxiExplorer.getInstance().setUsingEmulator(mUsingEmulator);
 		ProxiExplorer.getInstance().initialize();
-		if (!ProxiExplorer.getInstance().isUsingEmulator()) {
-			if (!NetworkManager.getInstance().isWifiEnabled()) {
-				Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Wifi is not enabled");
-				wifiAskToEnable();
-				if (mUserRefusedWifiEnable) {
-					Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "User refused to enable wifi");
-					return;
-				}
-			}
-			else {
-				Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Wifi is enabled");
-			}
-		}
 
 		/* AWS Credentials */
 		startGetCredentials();
@@ -476,6 +469,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 			else {
 				Class clazz = Class.forName(commandHandler, false, this.getClass().getClassLoader());
+				Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting activity: " + clazz.toString());								
 
 				EntityProxy entityProxy = command.entity;
 				Intent intent = buildIntent(Verb.Edit, entityProxy, 0, null, mUser, clazz);
@@ -550,6 +544,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			if (mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
 				mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false);
 			}
+			else {
+				super.onBackPressed();
+			}
 		}
 		else {
 			if (mQuickContactWindow != null && mQuickContactWindow.isShowing())
@@ -562,22 +559,56 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	public void onRefreshClick(View view) {
 		/* For this activity, refresh means rescan and reload entity data from the service */
 		if (mReadyToRun) {
-			doRefresh();
+			doRefresh(RefreshType.BeaconScan);
 		}
 		updateMemoryUsed();
 	}
 
-	private void doRefresh() {
-		if (mFullUpdateSuccess) {
-			synchronized (mCandiPatchModel.getCandiModelFocused()) {
-				mCandiPatchModel.getCandiModelFocused().getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
-			}
-			mCandiPatchModel.getCandiModelFocused().setChanged();
-			mCandiPatchModel.getCandiModelFocused().update();
+	private void doRefresh(RefreshType refreshType) {
+		if (!mFullUpdateSuccess || refreshType == RefreshType.All) {
+			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "User starting full beacon scan");
+			scanForBeacons(true, true);
+		}
+		else if (refreshType == RefreshType.BeaconScan) {
+			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "User starting lightweight beacon scan");
 			scanForBeacons(false, true);
 		}
-		else {
-			scanForBeacons(true, true);
+		else if (refreshType == RefreshType.BeaconScanPlusCurrent) {
+			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "User starting lightweight beacon scan");
+			CandiModel candiModelFocused = mCandiPatchModel.getCandiModelFocused();
+			scanForBeacons(false, true);
+			if (candiModelFocused.getViewStateCurrent().isVisible()) {
+				Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "User starting current entity refresh");
+				int idOfEntityToRefresh = candiModelFocused.getEntityProxy().id;
+				EntityProxy freshEntityProxy = null;
+				try {
+					freshEntityProxy = ProxiExplorer.getInstance().refreshEntity(idOfEntityToRefresh);
+				}
+				catch (ProxibaseException exception) {
+				}
+				if (freshEntityProxy != null) {
+					/* Refresh candi info */
+					if (mCandiInfoVisible && freshEntityProxy.id.equals(mCandiPatchModel.getCandiModelSelected().getEntityProxy().id)) {
+						mCandiPager.getAdapter().notifyDataSetChanged();
+					}
+
+					/* Refresh candi view texture */
+					synchronized (candiModelFocused.getViewActions()) {
+						candiModelFocused.getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
+					}
+					candiModelFocused.setChanged();
+					candiModelFocused.update();
+					for (IModel childModel : candiModelFocused.getChildren()) {
+						CandiModel childCandiModel = (CandiModel) childModel;
+						synchronized (childCandiModel.getViewActions()) {
+							childCandiModel.getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
+						}
+						childCandiModel.setChanged();
+						childCandiModel.update();
+					}
+				}
+				doEntityUpdate(freshEntityProxy, candiModelFocused.getEntityProxy());
+			}
 		}
 	}
 
@@ -659,151 +690,171 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	// Entity routines
 	// --------------------------------------------------------------------------------------------
 
-	private void scanForBeacons(final Boolean fullUpdate, Boolean showProgress) {
+	private void scanForBeacons(final Boolean fullUpdate, final Boolean showProgress) {
 
-		/* Check for connectivity */
-		if (!NetworkManager.getInstance().isConnected()) {
-			mCandiSurfaceView.setVisibility(View.VISIBLE);
-			((View) findViewById(R.id.retry_dialog)).setVisibility(View.GONE);
-			mCandiPatchPresenter.mProgressSprite.setVisible(true);
-			mHandler.postDelayed(new Runnable() {
-
-				public void run() {
-					mCandiSurfaceView.setVisibility(View.GONE);
-					((View) findViewById(R.id.retry_dialog)).setVisibility(View.VISIBLE);
-				}
-			}, CandiConstants.NETWORK_INTERVAL_PHONEY);
-			return;
-		}
-		else {
-			mCandiSurfaceView.setVisibility(View.VISIBLE);
-			((View) findViewById(R.id.retry_dialog)).setVisibility(View.GONE);
-		}
-
-		/* User */
-		if (mUser == null) {
-			mUser = loadUser("Jay Massena");
-			ProxiExplorer.getInstance().setUser(mUser);
-		}
-
-		if (showProgress) {
-			startTitlebarProgress(true);
-		}
-
-		if (fullUpdate && mCandiPatchPresenter != null) {
-			mCandiPatchPresenter.setFullUpdateInProgress(true);
-			mCandiPatchPresenter.mProgressSprite.setVisible(true);
-
-		}
-
-		Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting scan for beacons and entities: fullUpdate = " + String.valueOf(fullUpdate));
-
-		ProxiExplorer.getInstance().scanForBeaconsAsync(fullUpdate, new IEntityProcessListener() {
+		/* Check that wifi is enabled and we have a network connection */
+		verifyConnectivity(new IConnectivityReadyListener() {
 
 			@Override
-			public void onComplete(List<EntityProxy> entities) {
+			public void onConnectivityReady() {
 
-				Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Beacon scan results returned from Proxibase.ProxiExplorer");
-
-				if (entities.size() == 0) {
-					showNewCandiDialog();
-				}
-				else {
-					doEntitiesUpdate(entities, fullUpdate);
-
-					/* Check for rookies and play a sound */
-					if (mPrefSoundEffects)
-						for (CandiModel candiModel : mCandiPatchModel.getCandiModels())
-							if (candiModel.isRookie() && candiModel.getViewStateNext().isVisible()) {
-								mCandiAlertSound.play();
-								break;
-							}
+				/* User */
+				if (mUser == null) {
+					mUser = loadUser("Jay Massena");
+					ProxiExplorer.getInstance().setUser(mUser);
 				}
 
-				/* Wrap-up */
-				if (fullUpdate && !mFullUpdateSuccess) {
-					mFullUpdateSuccess = true;
+				if (showProgress) {
+					startTitlebarProgress(true);
 				}
-				updateMemoryUsed();
-				mCandiPatchPresenter.setFullUpdateInProgress(false);
-				mCandiPatchPresenter.mProgressSprite.setVisible(false);
-				stopTitlebarProgress();
 
-				/*
-				 * Schedule the next wifi scan run if autoscan is enabled
-				 * |
-				 * The autoscan will pick up new beacons and changes in visibility
-				 * of the entities associated with beacons that are already being tracked.
-				 * This is meant to be an efficient refresh that can run continuously without
-				 * a ton of data traffic. So there won't be any calls to the data service
-				 * unless we discover a new beacon.
-				 */
-				if (mPrefAutoscan) {
-					mHandler.postDelayed(new Runnable() {
+				if (fullUpdate && mCandiPatchPresenter != null) {
+					mCandiPatchPresenter.setFullUpdateInProgress(true);
+					mCandiPatchPresenter.mProgressSprite.setVisible(true);
 
-						public void run() {
-							scanForBeacons(false, false);
+				}
+
+				ProxiExplorer.getInstance().scanForBeaconsAsync(fullUpdate, new IEntityProcessListener() {
+
+					@Override
+					public void onComplete(List<EntityProxy> entities) {
+
+						Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Beacon scan results returned from Proxibase.ProxiExplorer");
+
+						if (entities.size() == 0) {
+							showNewCandiDialog();
 						}
-					}, mPrefAutoscanInterval);
-				}
-			}
+						else {
+							doEntitiesUpdate(entities, fullUpdate);
 
-			@Override
-			public void onProxibaseException(ProxibaseException exception) {
-				ImageUtils.showToastNotification(CandiSearchActivity.this, exception.getMessage(), Toast.LENGTH_SHORT);
-				Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
-				stopTitlebarProgress();
+							/* Check for rookies and play a sound */
+							if (mPrefSoundEffects)
+								for (CandiModel candiModel : mCandiPatchModel.getCandiModels())
+									if (candiModel.isRookie() && candiModel.getViewStateNext().isVisible()) {
+										mCandiAlertSound.play();
+										break;
+									}
+						}
+
+						/* Wrap-up */
+						if (fullUpdate && !mFullUpdateSuccess) {
+							mFullUpdateSuccess = true;
+						}
+						updateMemoryUsed();
+						mCandiPatchPresenter.setFullUpdateInProgress(false);
+						mCandiPatchPresenter.mProgressSprite.setVisible(false);
+						stopTitlebarProgress();
+
+						/*
+						 * Schedule the next wifi scan run if autoscan is enabled
+						 * |
+						 * The autoscan will pick up new beacons and changes in visibility
+						 * of the entities associated with beacons that are already being tracked.
+						 * This is meant to be an efficient refresh that can run continuously without
+						 * a ton of data traffic. So there won't be any calls to the data service
+						 * unless we discover a new beacon.
+						 */
+						if (mPrefAutoscan) {
+							mHandler.postDelayed(new Runnable() {
+
+								public void run() {
+									scanForBeacons(false, false);
+								}
+							}, mPrefAutoscanInterval);
+						}
+					}
+
+					@Override
+					public void onProxibaseException(ProxibaseException exception) {
+						ImageUtils.showToastNotification(CandiSearchActivity.this, exception.getMessage(), Toast.LENGTH_SHORT);
+						Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
+						stopTitlebarProgress();
+					}
+				});
+
 			}
 		});
+
 	}
 
-	private void refreshEntities(Boolean showProgress) {
+	private void refreshEntities(final boolean showProgress) {
 
-		if (showProgress)
-			startTitlebarProgress(true);
-
-		Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Refreshing entities");
-
-		ProxiExplorer.getInstance().refreshEntitiesAsync(new IEntityProcessListener() {
+		verifyConnectivity(new IConnectivityReadyListener() {
 
 			@Override
-			public void onComplete(List<EntityProxy> entities) {
+			public void onConnectivityReady() {
 
-				Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Entity refresh results returned from ProxiExplorer");
+				if (showProgress) {
+					startTitlebarProgress(true);
+				}
 
-				doEntitiesUpdate(entities, false);
+				Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Refreshing entities");
 
-				/* Check for rookies and play a sound */
-				if (mPrefSoundEffects)
-					for (CandiModel candiModel : mCandiPatchModel.getCandiModels())
-						if (candiModel.isRookie() && candiModel.getViewStateNext().isVisible()) {
-							mCandiAlertSound.play();
-							break;
-						}
+				ProxiExplorer.getInstance().refreshEntitiesAsync(new IEntityProcessListener() {
 
-				/* Wrap-up */
-				mCandiPatchPresenter.mProgressSprite.setVisible(false);
-				stopTitlebarProgress();
-			}
+					@Override
+					public void onComplete(List<EntityProxy> entities) {
 
-			@Override
-			public void onProxibaseException(ProxibaseException exception) {
-				ImageUtils.showToastNotification(CandiSearchActivity.this, exception.getMessage(), Toast.LENGTH_SHORT);
-				Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
-				stopTitlebarProgress();
+						Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Entity refresh results returned from ProxiExplorer");
+
+						doEntitiesUpdate(entities, false);
+
+						/* Check for rookies and play a sound */
+						if (mPrefSoundEffects)
+							for (CandiModel candiModel : mCandiPatchModel.getCandiModels())
+								if (candiModel.isRookie() && candiModel.getViewStateNext().isVisible()) {
+									mCandiAlertSound.play();
+									break;
+								}
+
+						/* Wrap-up */
+						mCandiPatchPresenter.mProgressSprite.setVisible(false);
+						stopTitlebarProgress();
+					}
+
+					@Override
+					public void onProxibaseException(ProxibaseException exception) {
+						ImageUtils.showToastNotification(CandiSearchActivity.this, exception.getMessage(), Toast.LENGTH_SHORT);
+						Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
+						stopTitlebarProgress();
+					}
+				});
+
 			}
 		});
+
 	}
 
 	private void doEntitiesUpdate(List<EntityProxy> freshEntities, Boolean fullUpdate) {
 		/*
 		 * Shallow copy so entities are by value but any object
-		 * // properties like beacon are by ref from the original.
+		 * properties like beacon are by ref from the original.
 		 */
 		mProxiEntities = (List<EntityProxy>) ((ArrayList<EntityProxy>) freshEntities).clone();
 
 		/* Push the new and updated entities into the system */
 		mCandiPatchPresenter.updateCandiData(mProxiEntities, fullUpdate);
+		ImageManager.getInstance().getImageCache().recycleBitmaps();
+	}
+
+	private void doEntityUpdate(EntityProxy freshEntity, EntityProxy staleEntity) {
+		/*
+		 * Replace the entity in our master collection.
+		 */
+		for (int i = mProxiEntities.size() - 1; i >= 0; i--) {
+			EntityProxy entityProxy = mProxiEntities.get(i);
+			if (entityProxy.id == staleEntity.id) {
+				if (freshEntity == null) {
+					mProxiEntities.remove(i);
+				}
+				else {
+					mProxiEntities.set(i, freshEntity);
+				}
+			}
+		}
+
+		/* Push the new and updated entities into the system */
+		mCandiPatchPresenter.updateCandiData(mProxiEntities, false);
 		ImageManager.getInstance().getImageCache().recycleBitmaps();
 	}
 
@@ -814,6 +865,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private void showCandiInfo(final CandiModel candiModel, AnimType animType) {
 
 		mCandiInfoVisible = true;
+		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Show candi info: " + candiModel.getTitleText());
 
 		if (animType == AnimType.CrossFadeFlipper) {
 			mCandiSurfaceView.setVisibility(View.GONE);
@@ -923,6 +975,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		if (mIgnoreInput)
 			return;
 
+		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Hide candi info");
 		mIgnoreInput = true;
 		mCandiPatchPresenter.setIgnoreInput(true);
 
@@ -1099,6 +1152,11 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 							@Override
 							public void onProxibaseException(ProxibaseException exception) {}
+
+							@Override
+							public boolean onProgressChanged(int progress) {
+								return false;
+							}
 						});
 
 				Logger.v(CandiConstants.APP_NAME, "buildCandiDetailView", "Fetching Image: " + candiModel.getBodyImageUri());
@@ -1434,8 +1492,178 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Dialog routines
+	// Connectivity routines
 	// --------------------------------------------------------------------------------------------
+
+	private void verifyConnectivity(final IConnectivityReadyListener listener) {
+
+		if (!NetworkManager.getInstance().isWifiEnabled() && !ProxiExplorer.getInstance().isUsingEmulator()) {
+
+			showNetworkDialog(true, getString(R.string.dialog_network_message_wifi_notready));
+			final Button retryButton = (Button) findViewById(R.id.retry_button);
+			final TextView txtMessage = (TextView) findViewById(R.id.retry_message);
+			retryButton.setEnabled(false);
+
+			NetworkManager.getInstance().setConnectivityListener(new IConnectivityListener() {
+
+				@Override
+				public void onConnectivityStateChanged(State networkInfoState) {
+				}
+
+				@Override
+				public void onWifiStateChanged(int wifiState) {
+
+					if (wifiState == WifiManager.WIFI_STATE_ENABLED)
+					{
+						ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state enabled.", Toast.LENGTH_SHORT);
+						if (((View) findViewById(R.id.retry_dialog)).getVisibility() == View.VISIBLE) {
+							((CheckBox) findViewById(R.id.wifi_enabled_checkbox)).setChecked(true);
+							txtMessage.setText(getString(R.string.dialog_network_message_wifi_ready));
+							retryButton.setEnabled(true);
+							retryButton.setOnClickListener(new OnClickListener() {
+
+								@Override
+								public void onClick(View v) {
+									/* Re-enter so we get to the next stage */
+									NetworkManager.getInstance().setConnectivityListener(null);
+									showNetworkDialog(false, "");
+									verifyConnectivity(listener);
+
+								}
+							});
+
+						}
+					}
+					else if (wifiState == WifiManager.WIFI_STATE_ENABLING) {
+						ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state enabling...", Toast.LENGTH_SHORT);
+					}
+					else if (wifiState == WifiManager.WIFI_STATE_DISABLING) {
+						ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state disabling...", Toast.LENGTH_SHORT);
+					}
+					else if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
+						((CheckBox) findViewById(R.id.wifi_enabled_checkbox)).setChecked(false);
+						txtMessage.setText(getString(R.string.dialog_network_message_wifi_notready));
+						retryButton.setEnabled(false);
+						ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state disabled.", Toast.LENGTH_SHORT);
+					}
+				}
+			});
+		}
+		else if (!NetworkManager.getInstance().isConnected()) {
+			/*
+			 * For better feedback we show the progress indicator for a few seconds
+			 * so it feels like we tried.
+			 */
+			showNetworkDialog(false, "");
+			mCandiPatchPresenter.mProgressSprite.setVisible(true);
+			final Button retryButton = (Button) findViewById(R.id.retry_button);
+			final TextView txtMessage = (TextView) findViewById(R.id.retry_message);
+			mHandler.postDelayed(new Runnable() {
+
+				public void run() {
+					NetworkManager.getInstance().setConnectivityListener(new IConnectivityListener() {
+
+						@Override
+						public void onConnectivityStateChanged(State networkInfoState) {
+							if (networkInfoState == State.CONNECTED)
+							{
+								if (((View) findViewById(R.id.retry_dialog)).getVisibility() == View.VISIBLE) {
+									txtMessage.setText(getString(R.string.dialog_network_message_connection_ready));
+									retryButton.setEnabled(true);
+									retryButton.setOnClickListener(new OnClickListener() {
+
+										@Override
+										public void onClick(View v) {
+											if (listener != null) {
+												NetworkManager.getInstance().setConnectivityListener(null);
+												showNetworkDialog(false, "");
+												Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Connectivity verified");								
+												listener.onConnectivityReady();
+												
+											}
+										}
+									});
+								}
+							}
+							else if (networkInfoState == State.DISCONNECTED)
+							{
+								txtMessage.setText(getString(R.string.dialog_network_message_connection_notready));
+								retryButton.setEnabled(false);
+								ImageUtils.showToastNotification(CandiSearchActivity.this, "Network disconnected.", Toast.LENGTH_SHORT);
+							}
+						}
+
+						@Override
+						public void onWifiStateChanged(int wifiState) {
+							if (wifiState == WifiManager.WIFI_STATE_ENABLING) {
+								ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state enabling...", Toast.LENGTH_SHORT);
+							}
+							else if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
+								ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state enabled.", Toast.LENGTH_SHORT);
+							}
+							else if (wifiState == WifiManager.WIFI_STATE_DISABLING) {
+								ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state disabling...", Toast.LENGTH_SHORT);
+							}
+							else if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
+								ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state disabled.", Toast.LENGTH_SHORT);
+							}
+						}
+					});
+					if (NetworkManager.getInstance().isConnected()) {
+						NetworkManager.getInstance().setConnectivityListener(null);
+						showNetworkDialog(false, "");
+						if (listener != null) {
+							Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Connectivity verified");															
+							listener.onConnectivityReady();
+						}
+					}
+					retryButton.setEnabled(false);
+					showNetworkDialog(true, getString(R.string.dialog_network_message_connection_notready));
+				}
+			}, CandiConstants.NETWORK_INTERVAL_PHONEY);
+		}
+		else {
+			if (listener != null) {
+				Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Connectivity verified");								
+				listener.onConnectivityReady();
+			}
+		}
+	}
+
+	private void showNetworkDialog(boolean visible, String message) {
+
+		if (visible) {
+			TextView txtMessage = (TextView) findViewById(R.id.retry_message);
+			CheckBox enableWifiCheckBox = (CheckBox) findViewById(R.id.wifi_enabled_checkbox);
+			Button retryButton = (Button) findViewById(R.id.retry_button);
+
+			mCandiSurfaceView.setVisibility(View.GONE);
+
+			txtMessage.setText(message);
+			boolean isWifiEnabled = NetworkManager.getInstance().isWifiEnabled();
+			enableWifiCheckBox.setChecked(isWifiEnabled);
+
+			enableWifiCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					if (isChecked) {
+						Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Enable wifi from activity");
+						NetworkManager.getInstance().enableWifi(true);
+					}
+					else {
+						Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Disable wifi from activity");
+						NetworkManager.getInstance().enableWifi(false);
+					}
+				}
+			});
+			((View) findViewById(R.id.retry_dialog)).setVisibility(View.VISIBLE);
+		}
+		else {
+			mCandiSurfaceView.setVisibility(View.VISIBLE);
+			((View) findViewById(R.id.retry_dialog)).setVisibility(View.GONE);
+		}
+	}
 
 	private void showInstallDialog(final CandiModel candi) {
 
@@ -1504,6 +1732,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 					public void onClick(DialogInterface dialog, int item) {
 						if (item == 0) {
+							Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting Post activity");								
 							Intent intent = buildIntent(Verb.New, null, 0, ProxiExplorer.getInstance().getStrongestBeacon(), mUser, Post.class);
 							startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
 							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
@@ -1512,6 +1741,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						else if (item == 1) {
 
 							/* We always use the first candi in a zone */
+							Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting Post activity");								
 							EntityProxy parentEntityProxy = mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone()
 									.getCandiesCurrent().get(0).getEntityProxy();
 							Intent intent = buildIntent(Verb.New, null, parentEntityProxy.id, parentEntityProxy.beacon, mUser, Post.class);
@@ -1537,17 +1767,23 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	@Override
 	public Engine onLoadEngine() {
 
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "onLoadEngine called");
+		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Initializing animation engine");
 
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
 		int rotation = getWindowManager().getDefaultDisplay().getOrientation();
-		if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270)
+		if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
 			mScreenOrientation = ScreenOrientation.LANDSCAPE;
-		else
+		}
+		else {
 			mScreenOrientation = ScreenOrientation.PORTRAIT;
+		}
+		
+		/* Adjusted for density */
+		int statusBarHeight = (int) Math.ceil(CandiConstants.ANDROID_STATUSBAR_HEIGHT * dm.density);
+		int titleBarHeight = (int) Math.ceil(CandiConstants.CANDI_TITLEBAR_HEIGHT * dm.density);
 
-		Camera camera = new ChaseCamera(0, 0, dm.widthPixels, dm.heightPixels - CandiConstants.CANDI_TITLEBAR_HEIGHT) {
+		Camera camera = new ChaseCamera(0, 0, dm.widthPixels, dm.heightPixels - (statusBarHeight + titleBarHeight) ) {
 
 			@Override
 			public void onApplySceneMatrix(GL10 pGL) {
@@ -1566,7 +1802,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 		};
 
-		EngineOptions options = new EngineOptions(true, mScreenOrientation, new FillResolutionPolicy(), camera);
+		EngineOptions options = new EngineOptions(false, mScreenOrientation, new FillResolutionPolicy(), camera);
 		options.setNeedsSound(true);
 		Engine engine = new Engine(options);
 
@@ -1575,7 +1811,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	@Override
 	public void onLoadResources() {
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "onLoadResources called");
 		SoundFactory.setAssetBasePath("sfx/");
 		try {
 			mCandiAlertSound = SoundFactory.createSoundFromAsset(mEngine.getSoundManager(), this, "notification2.mp3");
@@ -1591,7 +1826,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * Called after Create, Resume->LoadEngine.
 		 * CandiPatchPresenter handles scene instantiation and setup
 		 */
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "onLoadScene called");
 		mCandiPatchPresenter = new CandiPatchPresenter(this, this, mEngine, mRenderSurfaceView, mCandiPatchModel);
 		Scene scene = mCandiPatchPresenter.initializeScene();
 		mCandiPatchPresenter.mDisplayExtras = mPrefDisplayExtras;
@@ -1612,7 +1846,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	@Override
 	public void onLoadComplete() {
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onLoadComplete called");
 	}
 
 	@Override
@@ -1622,12 +1855,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * engine acquries the wake lock, restarts the engine, resumes the GLSurfaceView.
 		 * The engine reloads textures.
 		 */
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onResumeGame called");
+		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting animation engine");
 		if (mReadyToRun) {
 			boolean prefChangeThatRequiresRefresh = loadPreferences();
 			loadPreferencesProxiExplorer();
 
 			if (mFirstRun || prefChangeThatRequiresRefresh) {
+				Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting first run full beacon scan");
 				scanForBeacons(mFirstRun, false);
 				mFirstRun = false;
 			}
@@ -1641,13 +1875,12 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * called on the super class. The game engine releases the wake lock, stops the engine, pauses the
 		 * GLSurfaceView.
 		 */
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onGamePaused called");
+		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Pausing animation engine");
 	}
 
 	@Override
 	public void onUnloadResources() {
 		super.onUnloadResources();
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onUnloadResources called");
 	}
 
 	@Override
@@ -1671,7 +1904,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * dialog or an android menu (which do not trigger this.onPause which
 		 * in turns stops the engine).
 		 */
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onWindowFocusChanged called");
+		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, hasWindowFocus ? "Activity has window focus" : "Activity lost window focus");
 
 		if (!mEngine.isRunning()) {
 			Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Passing onWindowFocusChanged to Andengine");
@@ -1890,40 +2123,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Wifi routines
-	// --------------------------------------------------------------------------------------------
-
-	private void wifiAskToEnable() {
-
-		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-
-				switch (which) {
-					case DialogInterface.BUTTON_POSITIVE :
-																mUserRefusedWifiEnable = false;
-																wifiEnable();
-																break;
-															case DialogInterface.BUTTON_NEGATIVE :
-																mUserRefusedWifiEnable = true;
-																break;
-														}
-													}
-		};
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		builder.setIcon(R.drawable.icon_alert_dialog).setMessage(R.string.alert_dialog_wifidisabled).setPositiveButton(R.string.alert_dialog_yes,
-				dialogClickListener).setNegativeButton(R.string.alert_dialog_no, dialogClickListener).show();
-	}
-
-	private void wifiEnable() {
-		ImageUtils.showToastNotification(this, "Wifi enabling...", Toast.LENGTH_LONG);
-		NetworkManager.getInstance().enableWifi();
-	}
-
-	// --------------------------------------------------------------------------------------------
 	// System callbacks
 	// --------------------------------------------------------------------------------------------
 
@@ -1942,9 +2141,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * 
 		 * Game engine is started/restarted in super class if we currently have the window focus.
 		 */
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onResume called");
+		Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiSearchActivity resumed");
 
 		ProxiExplorer.getInstance().onResume();
+		NetworkManager.getInstance().onResume();
 
 		/* Package receiver */
 		IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
@@ -1953,7 +2153,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		filter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
 		filter.addDataScheme("package");
 		registerReceiver(mPackageReceiver, filter);
-
 	}
 
 	@Override
@@ -1969,14 +2168,12 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * loses focus but the activity is still active.
 		 */
 		try {
-			Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onPause called");
+			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiSearchActivity paused");
 
 			unregisterReceiver(mPackageReceiver);
 
-			// if (mEngine.getScene() != null)
-			// mEngine.getScene().setAlpha(0);
-
 			ProxiExplorer.getInstance().onPause();
+			NetworkManager.getInstance().onPause();
 
 			stopTitlebarProgress();
 		}
@@ -2002,7 +2199,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		/* Don't count on this always getting called when this activity is killed */
 		try {
-			Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity.onDestroy called");
+			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiSearchActivity destroyed");
 			ProxiExplorer.getInstance().onDestroy();
 			ImageManager.getInstance().getImageLoader().stopThread();
 			ImageManager.getInstance().getImageLoader().getImageCache().cleanCacheAsync(getApplicationContext());
@@ -2019,6 +2216,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * get a zero result code whether the user decided to start an install
 		 * or not.
 		 */
+		Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity result returned to CandiSearchActivity");
 		startTitlebarProgress(true);
 		mCandiSurfaceView.setVisibility(View.VISIBLE);
 		if (requestCode == CandiConstants.ACTIVITY_ENTITY_HANDLER) {
@@ -2184,27 +2382,32 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Menu routines
+	// Menu routines (refresh commands)
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, view, menuInfo);
 		menu.setHeaderTitle(getString(R.string.menu_refresh_title));
-		menu.add(0, ContextMenuItem.RefreshCurrent.ordinal(), 1, getString(R.string.menu_refresh_current));
-		menu.add(0, ContextMenuItem.RefreshAll.ordinal(), 2, getString(R.string.menu_refresh_all));
+		menu.add(0, RefreshType.BeaconScanPlusCurrent.ordinal(), 1, getString(R.string.menu_refresh_beacon_plus_current));
+		menu.add(0, RefreshType.All.ordinal(), 2, getString(R.string.menu_refresh_all));
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		if (item.getItemId() == ContextMenuItem.RefreshCurrent.ordinal()) {
-			doRefresh();
+		if (item.getItemId() == RefreshType.BeaconScanPlusCurrent.ordinal()) {
+			doRefresh(RefreshType.BeaconScanPlusCurrent);
 		}
-		else if (item.getItemId() == ContextMenuItem.RefreshAll.ordinal()) {
-			Intent intent = new Intent(this, CandiSearchActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivity(intent);
+		else if (item.getItemId() == RefreshType.All.ordinal()) {
+			mFullUpdateSuccess = false;
+			doRefresh(RefreshType.All);
+
+			//			scanForBeacons(true, true);
+			//			Intent intent = getIntent(); 
+			//			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			//			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			//			finish(); 
+			//			startActivity(intent); 
 		}
 		else {
 			return false;
@@ -2348,8 +2551,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		Snow
 	}
 
-	public enum ContextMenuItem {
-		RefreshCurrent,
-		RefreshAll
+	public enum RefreshType {
+		BeaconScan,
+		BeaconScanPlusCurrent,
+		All
 	}
 }
