@@ -37,31 +37,6 @@
 			android:id="@+id/Pref_Sound_Effects" />
 	</PreferenceCategory>
 	<PreferenceCategory
-		android:title="Error reporting">
-		<CheckBoxPreference
-			android:key="acra.enable"
-			android:title="@string/pref_disable_acra"
-			android:summaryOn="@string/pref_acra_enabled"
-			android:summaryOff="@string/pref_acra_disabled"
-			android:defaultValue="true" />
-		<CheckBoxPreference
-			android:key="acra.syslog.enable"
-			android:summaryOn="@string/pref_acra_syslog_enabled"
-			android:summaryOff="@string/pref_acra_syslog_disabled"
-			android:title="@string/pref_acra_syslog"
-			android:defaultValue="false" />
-		<EditTextPreference
-			android:key="acra.user.email"
-			android:title="@string/pref_acra_user_email"
-			android:summary="@string/pref_acra_user_email_summary" />
-		<CheckBoxPreference
-			android:key="acra.alwaysaccept"
-			android:title="@string/pref_acra_alwaysaccept"
-			android:summaryOn="@string/pref_acra_alwaysaccept_enabled"
-			android:summaryOff="@string/pref_acra_alwaysaccept_disabled"
-			android:defaultValue="false" />
-	</PreferenceCategory>
-	<PreferenceCategory
 		android:title="Development preferences">
 		<CheckBoxPreference
 			android:id="@+id/Pref_Fullscreen"
@@ -96,5 +71,30 @@
 			android:defaultValue="false"
 			android:title="Memory Consumption"
 			android:summary="Show memory usage in footer" />
+	</PreferenceCategory>
+	<PreferenceCategory
+		android:title="Error reporting">
+		<CheckBoxPreference
+			android:key="acra.enable"
+			android:title="@string/pref_disable_acra"
+			android:summaryOn="@string/pref_acra_enabled"
+			android:summaryOff="@string/pref_acra_disabled"
+			android:defaultValue="true" />
+		<CheckBoxPreference
+			android:key="acra.syslog.enable"
+			android:summaryOn="@string/pref_acra_syslog_enabled"
+			android:summaryOff="@string/pref_acra_syslog_disabled"
+			android:title="@string/pref_acra_syslog"
+			android:defaultValue="false" />
+		<EditTextPreference
+			android:key="acra.user.email"
+			android:title="@string/pref_acra_user_email"
+			android:summary="@string/pref_acra_user_email_summary" />
+		<CheckBoxPreference
+			android:key="acra.alwaysaccept"
+			android:title="@string/pref_acra_alwaysaccept"
+			android:summaryOn="@string/pref_acra_alwaysaccept_enabled"
+			android:summaryOff="@string/pref_acra_alwaysaccept_disabled"
+			android:defaultValue="false" />
 	</PreferenceCategory>
 </PreferenceScreen>
