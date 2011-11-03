@@ -33,6 +33,7 @@ import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiAnimatedSprite;
+import com.proxibase.aircandi.candi.sprites.CandiRectangle;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
@@ -45,12 +46,15 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 	protected TiledTextureRegion	mProgressTextureRegion;
 	protected CandiAnimatedSprite	mProgressSprite;
+	protected CandiRectangle		mProgressBarSprite;
 
 	protected TextureRegion			mPlaceholderTextureRegion;
 	protected CandiSprite			mPlaceholderSprite;
+	private TextureRegion			mPlaceholderReflectionTextureRegion;
+	protected CandiSprite			mPlaceholderReflectionSprite;
 
 	protected boolean				mBound							= false;
-	private boolean					mRecycled						= false;
+	protected boolean				mRecycled						= false;
 
 	protected Texture				mTitleTexture;
 	private TextureRegion			mTitleTextureRegion;
@@ -58,6 +62,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 	protected String				mTitleText;
 	private int						mTitleTextColor;
+	private int						mTitleTextFillColor;
 	protected boolean				mHardwareTexturesInitialized	= false;
 
 	public BaseView() {
@@ -73,7 +78,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 		mModel = model;
 		setCandiPatchPresenter(candiPatchPresenter);
-		makeProgressSprites();
+		makeSprites();
 	}
 
 	public void initialize() {
@@ -109,15 +114,23 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		attachChild(mTitleSprite);
 	}
 
-	private void makeProgressSprites() {
+	private void makeSprites() {
 
-		/* Placeholder */
+		/* Placeholder and reflection */
 		mPlaceholderTextureRegion = mCandiPatchPresenter.mPlaceholderTextureRegion.clone();
 		mPlaceholderSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mPlaceholderTextureRegion);
 		mPlaceholderSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mPlaceholderSprite.setVisible(false);
-		mPlaceholderSprite.setZIndex(-10);
+		mPlaceholderSprite.setZIndex(10);
 		attachChild(mPlaceholderSprite);
+
+		mPlaceholderReflectionTextureRegion = mCandiPatchPresenter.mZoneReflectionTextureRegion.clone();
+		mPlaceholderReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT,
+				mPlaceholderReflectionTextureRegion);
+		mPlaceholderReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
+		mPlaceholderReflectionSprite.setVisible(false);
+		mPlaceholderReflectionSprite.setZIndex(10);
+		attachChild(mPlaceholderReflectionSprite);
 
 		/* Progress */
 		mProgressTextureRegion = mCandiPatchPresenter.mProgressTextureRegion.clone();
@@ -127,8 +140,19 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mProgressSprite = new CandiAnimatedSprite(progressX, progressY, mProgressTextureRegion);
 		mProgressSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mProgressSprite.setVisible(false);
-		mProgressSprite.setZIndex(-9);
+		mProgressSprite.setZIndex(20);
 		attachChild(mProgressSprite);
+
+		/* Progress bar */
+		mProgressBarSprite = new CandiRectangle(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, 10);
+		mProgressBarSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
+		mProgressBarSprite.setVisible(false);
+		mProgressBarSprite.setColor(1, 0.827f, 0);
+		mProgressBarSprite.setZIndex(20);
+
+		attachChild(mProgressBarSprite);
+
+		this.sortChildren();
 	}
 
 	protected void updateTextureSources() {
@@ -209,13 +233,14 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public void progressVisible(boolean visible) {
+		//mProgressSprite.setVisible(visible);
+		mProgressBarSprite.setVisible(visible);
 		if (visible) {
-			mProgressSprite.setVisible(true);
-			mProgressSprite.animate(150, true);
+			//mProgressSprite.animate(150, true);
 		}
 		else {
-			mProgressSprite.setVisible(false);
-			mProgressSprite.stopAnimation();
+			//mProgressSprite.stopAnimation();
+			mProgressBarSprite.setWidth(0);
 		}
 	}
 
@@ -234,6 +259,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 				.getHeight();
 		Bitmap bitmap = Bitmap.createBitmap(width, cappedHeight, CandiConstants.IMAGE_CONFIG_DEFAULT);
 		Canvas canvas = new Canvas(bitmap);
+		canvas.drawColor(mTitleTextFillColor);
 		textLayout.draw(canvas);
 		canvas = null;
 
@@ -302,6 +328,11 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 	public BaseView setTitleTextColor(int titleTextColor) {
 		this.mTitleTextColor = titleTextColor;
+		return this;
+	}
+
+	public BaseView setTitleTextFillColor(int titleTextFillColor) {
+		this.mTitleTextFillColor = titleTextFillColor;
 		return this;
 	}
 
