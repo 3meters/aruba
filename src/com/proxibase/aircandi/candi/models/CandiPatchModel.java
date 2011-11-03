@@ -273,6 +273,13 @@ public class CandiPatchModel extends Observable {
 					}
 				}
 			}
+			/* 
+			 * If the model with the current focus is going to be hidden/gone then we
+			 * will need a new focus.
+			 */
+			if (candiModel == mCandiModelFocused && !candiModel.getViewStateNext().isVisible()){
+				mCandiModelFocused = null;
+			}
 		}
 	}
 
