@@ -10,8 +10,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Picture;
 import android.graphics.Bitmap.CompressFormat;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebView.PictureListener;
@@ -35,7 +37,7 @@ public class ImageLoader {
 	private WebView				mWebView;
 
 	public ImageLoader(Context context) {
-		
+
 		/* Make the background thead low priority so it doesn't effect the UI performance. */
 		mImageLoaderThread.setPriority(Thread.MIN_PRIORITY);
 		mImageLoaderThread.setName("ImageLoader");
@@ -57,7 +59,7 @@ public class ImageLoader {
 	}
 
 	private void queueImage(ImageRequest imageRequest) {
-		
+
 		/*
 		 * The image requestor may have called for other images before. So there may be some old tasks
 		 * in the queue. We need to discard them.
@@ -81,15 +83,16 @@ public class ImageLoader {
 	public static Bitmap getBitmap(String url) throws ProxibaseException {
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
-		
+
 		/*
 		 * We request a byte array for decoding because of a bug
 		 * in pre 2.3 versions of android.
 		 */
 		byte[] imageBytes = (byte[]) ProxibaseService.getInstance().select(url, ResponseFormat.Bytes);
 		Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
-		if (bitmap == null)
+		if (bitmap == null) {
 			throw new IllegalStateException("Stream could not be decoded to a bitmap: " + url);
+		}
 
 		return bitmap;
 	}
@@ -105,11 +108,32 @@ public class ImageLoader {
 			listener.onProxibaseException(exception);
 		}
 
+		mWebView.getSettings().setLoadWithOverviewMode(true);
+		/*
+		 * Setting to false will cause html text to layout to try and fit the sizing of the
+		 * webview though our screen capture will still be cover the full page width. Ju
+		 * 
+		 * Setting to true will handle text nicely but will show the full width
+		 * of the webview even if the page content only fills a portion of it.
+		 * 
+		 * We might have to have a property to control the desired result when
+		 * using html for the tile display image.
+		 */
+		mWebView.getSettings().setUseWideViewPort(false);
+
 		mWebView.setWebViewClient(new WebViewClient() {
 
 			@Override
 			public void onPageFinished(WebView view, String url) {
 				ready.set(true);
+			}
+		});
+
+		mWebView.setWebChromeClient(new WebChromeClient() {
+
+			@Override
+			public void onProgressChanged(WebView view, int progress) {
+				listener.onProgressChanged(progress);
 			}
 		});
 
@@ -119,13 +143,21 @@ public class ImageLoader {
 			public void onNewPicture(WebView view, Picture picture) {
 
 				if (ready.get()) {
-					Bitmap bitmap = Bitmap.createBitmap(250, 250, CandiConstants.IMAGE_CONFIG_DEFAULT);
+					Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
+							CandiConstants.IMAGE_CONFIG_DEFAULT);
 					Canvas canvas = new Canvas(bitmap);
-					picture.draw(canvas);
+
+					Matrix matrix = new Matrix();
+					float scale = (float) CandiConstants.CANDI_VIEW_WIDTH / (float) picture.getWidth();
+					matrix.postScale(scale, scale);
+
+					canvas.setMatrix(matrix);
+					canvas.drawPicture(picture);
 
 					/* Release */
 					canvas = null;
 					listener.onImageReady(bitmap);
+					mWebView.setPictureListener(null);
 				}
 			}
 		});
@@ -134,7 +166,7 @@ public class ImageLoader {
 	}
 
 	public Bitmap scaleAndCropBitmap(Bitmap bitmap, ImageRequest imageRequest) {
-		
+
 		/* Crop if requested */
 		Bitmap bitmapCropped;
 		if (imageRequest.imageShape == ImageShape.Square) {
@@ -214,7 +246,7 @@ public class ImageLoader {
 			try {
 
 				while (true) {
-					
+
 					/* Thread waits until there are any images to load in the queue */
 					if (mImagesQueue.mImagesToLoad.size() == 0) {
 						synchronized (mImagesQueue.mImagesToLoad) {
@@ -234,7 +266,7 @@ public class ImageLoader {
 
 								@Override
 								public void onImageReady(Bitmap bitmap) {
-					
+
 									/* Perform requested post processing */
 									bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 
@@ -257,6 +289,13 @@ public class ImageLoader {
 								}
 
 								@Override
+								public boolean onProgressChanged(int progress)
+								{
+									imageRequest.imageReadyListener.onProgressChanged(progress);
+									return true;
+								}
+
+								@Override
 								public void onProxibaseException(ProxibaseException exception) {
 									if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
 										Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
@@ -268,22 +307,25 @@ public class ImageLoader {
 						else if (imageRequest.imageFormat == ImageFormat.Binary) {
 							long startTime = System.nanoTime();
 							float estimatedTime = System.nanoTime();
+							imageRequest.imageReadyListener.onProgressChanged(20);
 							Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download started...");
 
 							try {
 								bitmap = getBitmap(imageRequest.imageUri);
-								// bitmap = getBitmapTest(imageRequest.imageUri);
-							}
-							catch (ProxibaseException exception) {
-								if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-									bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
-								}
-							}
-							estimatedTime = System.nanoTime() - startTime;
-							startTime = System.nanoTime();
-							Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download finished: "
+								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download finished: "
 																									+ String.valueOf(estimatedTime / 1000000)
 																									+ "ms");
+							}
+							catch (ProxibaseException exception) {
+								bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(),
+										imageRequest.imageUri + ": Download failed, using placeholder: "
+												+ String.valueOf(estimatedTime / 1000000)
+												+ "ms");
+							}
+							imageRequest.imageReadyListener.onProgressChanged(70);
+							estimatedTime = System.nanoTime() - startTime;
+							startTime = System.nanoTime();
 
 							/* Perform requested post processing */
 							bitmap = scaleAndCropBitmap(bitmap, imageRequest);
@@ -298,6 +340,7 @@ public class ImageLoader {
 							mImageCache.put(imageRequest.imageUri, bitmap);
 
 							/* Create reflection if requested */
+							imageRequest.imageReadyListener.onProgressChanged(80);
 							if (imageRequest.makeReflection) {
 								final Bitmap bitmapReflection = ImageUtils.getReflection(bitmap);
 								estimatedTime = System.nanoTime() - startTime;
@@ -313,6 +356,7 @@ public class ImageLoader {
 
 							String uri = mImageRequestors.get(imageRequest.imageRequestor);
 							if (uri != null && uri.equals(imageRequest.imageUri)) {
+								imageRequest.imageReadyListener.onProgressChanged(100);
 								imageRequest.imageReadyListener.onImageReady(bitmap);
 							}
 						}
