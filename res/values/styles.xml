@@ -4,7 +4,7 @@
 	<!-- Themes -->
 	
 	<style
-		name="aircandi_theme.midnight" parent="android:Theme.NoTitleBar">
+		name="aircandi_theme.midnight" parent="android:Theme">
 		<item name="android:windowNoTitle">true</item>	
 		<item name="android:windowContentOverlay">@null</item>
 		<item name="android:textColorHint">@color/edittext_color_hint_dark</item>
@@ -25,13 +25,14 @@
 		<item name="pagerBorder">#33ffffff</item>
 		<item name="backgroundCandiInfo">@android:color/transparent</item>
 		<item name="actionStripBackground">@drawable/actionstrip_background_dark</item>
+		<item name="activityFooterFormBackground">@drawable/app_header_bg_dark</item>
 		<item name="ruleColor">#33ffffff</item>
 		<item name="logo">@drawable/logo_bitmap_dark</item>
 		<item name="textColor">#ffffffff</item>
 	</style>
 	
 	<style
-		name="aircandi_theme.snow" parent="@android:style/Theme.Light.NoTitleBar">
+		name="aircandi_theme.snow" parent="@android:style/Theme.Light">
 		<item name="android:windowNoTitle">true</item>	
 		<item name="android:windowContentOverlay">@null</item>
 		<item name="android:textColorHint">@color/edittext_color_hint_light</item>
@@ -52,6 +53,7 @@
 		<item name="pagerBorder">#44000000</item>
 		<item name="backgroundCandiInfo">@android:color/transparent</item>
 		<item name="actionStripBackground">@drawable/actionstrip_background_light</item>
+		<item name="activityFooterFormBackground">@drawable/app_header_bg_light</item>
 		<item name="ruleColor">#44000000</item>
 		<item name="logo">@drawable/logo_bitmap_light</item>
 		<item name="textColor">#ff000000</item>
@@ -180,21 +182,16 @@
 
 	<!-- Dialogs -->
 	
-	<style
-		name="body_custom_dialog">
+	<style name="view_dialog">
 		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>		
 		<item name="android:background">?attr/backgroundHeader</item>		
 	</style>
 	
-	<style name="btn_dialog">
+	<style name="btn_dialog" parent="android:Widget.Button">
 		<item name="android:layout_height">wrap_content</item>	
 		<item name="android:layout_width">wrap_content</item>	
-		<item name="android:height">72dp</item>
-		<item name="android:width">80dp</item>
-		<item name="android:background">?attr/backgroundButton</item>
-		<item name="android:padding">5dp</item>
-		<item name="android:gravity">center</item>
-		<item name="android:textColor">?attr/textColorButton</item>
+		<item name="android:minWidth">80dp</item>
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>	
 	</style>
 	
 	<style name="btn_dialog_wide" parent="btn_dialog">
@@ -203,10 +200,12 @@
 		<item name="android:lines">3</item>
 	</style>
 	
+	<style name="chk_dialog" parent="android:Widget.CompoundButton.CheckBox">
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>	
+	</style>
+	
 	<style name="txt_dialog">
-		<item name="android:layout_height">wrap_content</item>	
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>	
+		<item name="android:textAppearance">?android:attr/textAppearanceMedium</item>	
 		<item name="android:textColor">?attr/textColor</item>
 	</style>
 	
@@ -364,8 +363,7 @@
 	<style name="btn_form" parent="android:Widget.Button">
 		<item name="android:layout_height">wrap_content</item>	
 		<item name="android:layout_width">wrap_content</item>	
-		<item name="android:height">72dp</item>
-		<item name="android:width">80dp</item>
+		<item name="android:minWidth">80dp</item>
 	</style>
 	
 	<style name="chk_form" parent="android:Widget.CompoundButton.CheckBox">
@@ -395,7 +393,7 @@
 		<item name="android:layout_width">fill_parent</item>
 		<item name="android:paddingTop">5dp</item>
 		<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>		
-		<item name="android:background">@drawable/app_header_bg_dark</item>		
+		<item name="android:background">?attr/activityFooterFormBackground</item>		
 	</style>
 	
 </resources>
