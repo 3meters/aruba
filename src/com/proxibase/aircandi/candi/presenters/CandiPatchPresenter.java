@@ -445,7 +445,6 @@ public class CandiPatchPresenter implements Observer {
 						mCandiPatchModel.setCandiRootNext(candiModel);
 					}
 					else {
-
 						/* Bounce up to the super root */
 						mCandiPatchModel.setCandiRootNext(candiRootNext);
 					}
@@ -496,8 +495,8 @@ public class CandiPatchPresenter implements Observer {
 		mCandiPatchModel.updateMiscNext();
 
 		/* Make sure zones have a view */
-		for (ZoneModel zone : mCandiPatchModel.getZones()) {
-			ensureZoneView(zone);
+		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
+			ensureZoneView(zoneModel);
 		}
 
 		/* For animations, we need to create views in advance. */
@@ -589,6 +588,7 @@ public class CandiPatchPresenter implements Observer {
 
 			final ZoneView zoneView = new ZoneView(zoneModel, CandiPatchPresenter.this);
 			zoneView.setTitleTextColor(Color.parseColor(getStyleTextColorTitle()));
+			zoneView.setTitleTextFillColor(Color.TRANSPARENT);
 
 			/* Link view to the model */
 			zoneModel.addObserver(zoneView);
@@ -636,6 +636,7 @@ public class CandiPatchPresenter implements Observer {
 			final CandiView candiView = new CandiView(CandiPatchPresenter.this);
 
 			candiView.setTitleTextColor(Color.parseColor(getStyleTextColorTitle()));
+			candiView.setTitleTextFillColor(Color.TRANSPARENT);
 			mEngine.getScene().getChild(CandiConstants.LAYER_CANDI).attachChild(candiView);
 
 			mCandiActivity.runOnUiThread(new Runnable() {
@@ -673,7 +674,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	public void getCandiViewFromPool(final CandiModel candiModel, boolean localUpdate) {
+	public void getCandiViewFromPool(final CandiModel candiModel, boolean localUpdate, boolean useNext) {
 
 		/* CandiView has been pre-configured except for anything that is model specific. */
 		final CandiView candiView = mCandiViewPool.obtainPoolItem();
@@ -685,6 +686,7 @@ public class CandiPatchPresenter implements Observer {
 			Logger.v(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiView created: " + candiModel.getTitleText());
 		}
 
+		candiView.setRecycled(false);
 		candiView.setModel(candiModel);
 		candiModel.addObserver(candiView);
 		getCandiViewsHash().put(String.valueOf(candiModel.getModelId()), candiView);
@@ -698,13 +700,16 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Hide zone ui */
-		ZoneModel zoneModel = candiModel.getZoneStateCurrent().getZone();
-		if (!zoneModel.isInactive() && candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Normal) {
+		ZoneModel zoneModel = useNext ? candiModel.getZoneStateNext().getZone() : candiModel.getZoneStateCurrent().getZone();
+		ZoneStatus zoneStatus = useNext ? candiModel.getZoneStateNext().getStatus() : candiModel.getZoneStateCurrent().getStatus();
+		boolean zoneVisible = useNext ? zoneModel.getViewStateNext().isVisible() : zoneModel.getViewStateCurrent().isVisible();
+		if (!zoneModel.isInactive() && zoneVisible && zoneStatus == ZoneStatus.Normal) {
 			synchronized (zoneModel.getViewModifiers()) {
 				zoneModel.getViewModifiers().clear();
 				zoneModel.getViewModifiers().addLast(
 						new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
 			}
+			zoneModel.getViewStateCurrent().setVisible(false);
 			zoneModel.setChanged();
 			zoneModel.update();
 		}
@@ -713,8 +718,11 @@ public class CandiPatchPresenter implements Observer {
 		 * Using localUpdate means this candiview is not part of a double buffer update so
 		 * we take complete control of how the candiview is snapped to the model. If the model
 		 * has any pre-loaded actions and/or modifiers, we strip them.
+		 * 
+		 * We monitor current visible state because transition logic won't fade in if it
+		 * thinks it is already supposed to be visible.
 		 */
-		if (localUpdate) {
+		if (localUpdate || candiModel.getViewStateCurrent().isVisible()) {
 			if (CandiConstants.TRANSITIONS_ACTIVE) {
 				synchronized (candiModel.getViewModifiers()) {
 					candiModel.getViewModifiers().clear();
@@ -726,7 +734,6 @@ public class CandiPatchPresenter implements Observer {
 					candiModel.getViewActions().addLast(new ViewAction(ViewActionType.Position));
 					candiModel.getViewActions().addLast(new ViewAction(ViewActionType.Scale));
 					candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ExpandCollapse));
-					candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ReflectionHideShow));
 				}
 			}
 			candiModel.setChanged();
@@ -742,11 +749,13 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Show zone ui */
 		final ZoneModel zoneModel = candiModel.getZoneStateCurrent().getZone();
+
 		if (!zoneModel.isInactive()) {
 			synchronized (zoneModel.getViewModifiers()) {
 				zoneModel.getViewModifiers().addLast(
-						new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
+							new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
 			}
+			zoneModel.getViewStateCurrent().setVisible(true);
 			zoneModel.setChanged();
 			zoneModel.notifyObservers();
 		}
@@ -812,7 +821,7 @@ public class CandiPatchPresenter implements Observer {
 
 			boolean isWithinHalo = viewState.isWithinHalo(mCamera);
 			if (isWithinHalo && !mCandiViewsHash.containsKey(candiModel.getModelIdAsString())) {
-				getCandiViewFromPool(candiModel, localUpdate);
+				getCandiViewFromPool(candiModel, localUpdate, useNext);
 			}
 		}
 	}
@@ -900,18 +909,32 @@ public class CandiPatchPresenter implements Observer {
 
 	private void doTransitionAnimations(boolean updatingData) {
 
-		/* Zone transitions */
+		/*
+		 * Zone transitions
+		 * 
+		 * The zone might already have a fade out modifier because manageViews() populated
+		 * it with a full size candi view.
+		 */
+		
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
-			Transition transition = zoneModel.getTransition();
-			synchronized (zoneModel.getViewModifiers()) {
-				if (transition == Transition.FadeIn)
-					zoneModel.getViewModifiers().addLast(
-							new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
-				else if (transition == Transition.FadeOut)
-					zoneModel.getViewModifiers().addLast(
-							new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
+			synchronized (zoneModel.getViewActions()) {
+				zoneModel.getViewActions().addLast(new ViewAction(ViewActionType.Visibility));
 			}
 		}
+		
+//		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
+//			if (zoneModel.getViewModifiers().isEmpty()) {
+//				Transition transition = zoneModel.getTransition();
+//				synchronized (zoneModel.getViewModifiers()) {
+//					if (transition == Transition.FadeIn)
+//						zoneModel.getViewModifiers().addLast(
+//								new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
+//					else if (transition == Transition.FadeOut)
+//						zoneModel.getViewModifiers().addLast(
+//								new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
+//				}
+//			}
+//		}
 
 		/* Clear out any left over actions and modifiers */
 		for (CandiModel candiModel : mCandiPatchModel.getCandiModels()) {
@@ -1117,11 +1140,13 @@ public class CandiPatchPresenter implements Observer {
 		if (mCandiPatchModel.getCandiModelFocused() != null && mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone().getZoneIndex() + 1 > mCandiPatchModel
 					.getZonesOccupiedNextCount()) {
 			ZoneModel zoneModel = getZoneContainsCandiNext(mCandiPatchModel.getCandiModelFocused());
-			if (zoneModel != null)
+			if (zoneModel != null) {
 				mCameraTargetSprite.moveToZone(zoneModel, CandiConstants.DURATION_SLOTTING_MAJOR, CandiConstants.EASE_SLOTTING_MAJOR);
-			else
+			}
+			else {
 				mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), true), CandiConstants.DURATION_SLOTTING_MAJOR,
 						CandiConstants.EASE_SLOTTING_MAJOR);
+			}
 		}
 	}
 
