@@ -95,6 +95,12 @@ public class Post extends EntityBase {
 							((Button) findViewById(R.id.btn_clear_media)).setEnabled(true);
 						}
 					}
+
+					@Override
+					public boolean onProgressChanged(int progress) {
+						// TODO Auto-generated method stub
+						return false;
+					}
 				});
 				if (bitmap != null) {
 					entity.mediaBitmap = bitmap;
@@ -184,6 +190,12 @@ public class Post extends EntityBase {
 							entity.mediaBitmap = bitmap;
 							showMediaThumbnail(bitmap);
 						}
+					}
+
+					@Override
+					public boolean onProgressChanged(int progress) {
+						// TODO Auto-generated method stub
+						return false;
 					}
 				});
 				if (bitmap != null) {
