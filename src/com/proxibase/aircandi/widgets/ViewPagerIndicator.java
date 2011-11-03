@@ -44,7 +44,6 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ViewPagerIndicator, defStyle, 0);
 		String colorString = ta.getString(R.styleable.ViewPagerIndicator_textColorFocused);
 		if (colorString != null) {
-
 			setTextColorFocused(Color.parseColor(colorString));
 		}
 		colorString = ta.getString(R.styleable.ViewPagerIndicator_textColorUnfocused);
