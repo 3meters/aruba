@@ -694,6 +694,8 @@ public class ImageManager {
 	public interface IImageRequestListener {
 
 		void onImageReady(Bitmap bitmap);
+		
+		boolean onProgressChanged(int progress);
 
 		void onProxibaseException(ProxibaseException exception);
 	}
