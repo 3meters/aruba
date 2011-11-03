@@ -1,93 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="fill_parent"
-	android:layout_width="fill_parent">
-	<LinearLayout
-		android:id="@+id/activity_header"
-		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:layout_alignParentTop="true">
-		<include
-			layout="@layout/temp_candi_search_header" />
-	</LinearLayout>
-	<FrameLayout
-		android:layout_height="fill_parent"
-		android:layout_width="fill_parent"
-		android:layout_below="@+id/activity_header">
-		<RelativeLayout
-			android:id="@+id/retry_dialog"
-			android:layout_height="fill_parent"
-			android:layout_width="fill_parent"
-			android:visibility="gone">
-			<RelativeLayout
-				android:layout_height="180dp"
-				android:layout_width="200dp"
-				android:layout_centerInParent="true"
-				android:gravity="center"
-				style="@style/body_custom_dialog">
-				<TextView
-					android:id="@+id/retry_message"
-					android:layout_height="wrap_content"
-					android:layout_width="wrap_content"
-					android:layout_centerInParent="true"
-					android:gravity="center"
-					android:paddingBottom="15dp"
-					style="@style/txt_dialog"
-					android:text="No connection" />
-				<Button
-					android:id="@+id/retry_button"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_centerInParent="true"
-					android:layout_below="@+id/retry_message"
-					style="@style/btn_dialog"
-					android:text="Retry"
-					android:clickable="true"
-					android:onClick="onRefreshClick" 
-					/>
-			</RelativeLayout>
-		</RelativeLayout>
-		<WebView
-			android:id="@+id/webview"
-			android:visibility="invisible"
-			android:layout_width="250dp"
-			android:layout_height="250dp"
-			android:scrollbars="none" />
-		<ViewFlipper
-			android:id="@+id/flipper_candi"
-			android:layout_height="fill_parent"
-			android:layout_width="fill_parent"
-			android:visibility="visible"
-			android:gravity="center_vertical"
-			android:clipChildren="false">
-			<org.anddev.andengine.opengl.view.RenderSurfaceView
-				android:id="@+id/view_rendersurface"
-				android:layout_height="fill_parent"
-				android:layout_width="fill_parent" />
-			<LinearLayout
-				android:id="@+id/view_candi_info"
-				android:layout_height="fill_parent"
-				android:layout_width="fill_parent"
-				android:orientation="vertical">
-				<com.proxibase.aircandi.widgets.ViewPagerIndicator
-					android:id="@+id/pager_indicator"
-					android:layout_height="wrap_content"
-					android:layout_width="fill_parent">
-				</com.proxibase.aircandi.widgets.ViewPagerIndicator>
-				<android.support.v4.view.ViewPager
-					android:id="@+id/pager"
-					android:layout_height="fill_parent"
-					android:layout_width="fill_parent" />
-			</LinearLayout>
-		</ViewFlipper>
-	</FrameLayout>
-	<LinearLayout
-		android:id="@+id/activity_footer"
-		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:layout_alignParentBottom="true">
-		<include
-			layout="@layout/temp_activity_footer" />
-	</LinearLayout>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:id="@+id/activity_header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" >
+
+        <include layout="@layout/temp_candi_search_header" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/activity_header" >
+
+        <RelativeLayout
+            android:id="@+id/retry_dialog"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:visibility="gone" >
+
+            <RelativeLayout
+            	style="@style/view_dialog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:padding="25dp"
+                android:gravity="center"
+                 >
+
+                <TextView
+                    android:id="@+id/retry_message"
+                    style="@style/txt_dialog"
+                    android:layout_width="175dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:paddingBottom="15dp" />
+
+                <Button
+                    android:id="@+id/retry_button"
+                    style="@style/btn_dialog"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/retry_message"
+                    android:layout_centerInParent="true"
+                    android:clickable="true"
+                    android:text="@string/dialog_network_retry_button" />
+
+                <CheckBox
+                    android:id="@+id/wifi_enabled_checkbox"
+                    style="@style/chk_dialog"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/retry_button"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/dialog_network_enable_wifi_checkbox" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <WebView
+            android:id="@+id/webview"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:scrollbars="none"
+            android:visibility="invisible" />
+
+        <ViewFlipper
+            android:id="@+id/flipper_candi"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:clipChildren="false"
+            android:gravity="center_vertical"
+            android:visibility="visible" >
+
+            <org.anddev.andengine.opengl.view.RenderSurfaceView
+                android:id="@+id/view_rendersurface"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:fitsSystemWindows="true" />
+
+            <LinearLayout
+                android:id="@+id/view_candi_info"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <com.proxibase.aircandi.widgets.ViewPagerIndicator
+                    android:id="@+id/pager_indicator"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" />
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/pager"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" />
+            </LinearLayout>
+        </ViewFlipper>
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/activity_footer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
+
+        <include layout="@layout/temp_activity_footer" />
+    </LinearLayout>
+
 </RelativeLayout>
