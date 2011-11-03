@@ -293,7 +293,7 @@ public abstract class BaseModel extends Observable implements IModel {
 			this.mHasReflection = hasReflection;
 		}
 
-		public boolean hasReflection() {
+		public boolean reflectionActive() {
 			return mHasReflection;
 		}
 
