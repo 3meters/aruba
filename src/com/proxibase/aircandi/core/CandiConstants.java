@@ -30,12 +30,15 @@ public interface CandiConstants {
 	public static final int				CANDI_VIEW_BODY_HEIGHT			= 250;
 	public static final int				CANDI_VIEW_TITLE_HEIGHT			= 100;
 	public static final int				CANDI_VIEW_REFLECTION_HEIGHT	= 125;
-	public static final int				CANDI_TITLEBAR_HEIGHT			= 63;
 	public static final int				CANDI_VIEW_TITLE_SPACER_HEIGHT	= 2;
 	public static final int				CANDI_VIEW_FONT_SIZE			= 24;
 	public static final int				CANDI_VIEW_HEIGHT				= CANDI_VIEW_BODY_HEIGHT + CANDI_VIEW_TITLE_HEIGHT
 																			+ CANDI_VIEW_TITLE_SPACER_HEIGHT;
 	public static final int				CANDI_VIEW_ZOOMED_PADDING		= 10;
+
+	/* Dimensions at mdpi */
+	public static final int				CANDI_TITLEBAR_HEIGHT			= 40; 
+	public static final int				ANDROID_STATUSBAR_HEIGHT		= 25; 
 
 	public static final int				SWIPE_MAX_OFF_PATH				= 500;
 	public static final float			SWIPE_SMALL_FLING				= 100;
