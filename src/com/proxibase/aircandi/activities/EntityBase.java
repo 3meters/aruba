@@ -17,7 +17,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -61,8 +60,8 @@ public abstract class EntityBase extends AircandiActivity {
 	public void onCreate(Bundle savedInstanceState) {
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+		//getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		//getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		super.onCreate(savedInstanceState);
 	}
 
@@ -98,6 +97,12 @@ public abstract class EntityBase extends AircandiActivity {
 							showImageThumbnail(bitmap);
 						}
 					}
+
+					@Override
+					public boolean onProgressChanged(int progress) {
+						// TODO Auto-generated method stub
+						return false;
+					}
 				});
 				if (bitmap != null) {
 					entity.imageBitmap = bitmap;
@@ -128,6 +133,12 @@ public abstract class EntityBase extends AircandiActivity {
 							entity.imageBitmap = bitmap;
 							showImageThumbnail(bitmap);
 						}
+					}
+
+					@Override
+					public boolean onProgressChanged(int progress) {
+						// TODO Auto-generated method stub
+						return false;
 					}
 				});
 				if (bitmap != null) {
@@ -274,6 +285,12 @@ public abstract class EntityBase extends AircandiActivity {
 							showImageThumbnail(bitmap);
 						}
 					}
+
+					@Override
+					public boolean onProgressChanged(int progress) {
+						// TODO Auto-generated method stub
+						return false;
+					}
 				});
 				if (bitmap != null) {
 					entity.imageBitmap = bitmap;
@@ -303,6 +320,7 @@ public abstract class EntityBase extends AircandiActivity {
 			mBeacon.beaconType = BeaconType.Fixed.name().toLowerCase();
 			mBeacon.beaconSetId = ProxiConstants.BEACONSET_WORLD;
 			try {
+				Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Inserting beacon: " + mBeacon.id);												
 				mBeacon.insert();
 			}
 			catch (ProxibaseException exception) {
@@ -374,6 +392,7 @@ public abstract class EntityBase extends AircandiActivity {
 		}
 		entity.enabled = true;
 		entity.createdDate = DateUtils.nowString();
+		Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Inserting entity: " + entity.title);												
 
 		entity.insertAsync(new IQueryListener() {
 
@@ -423,6 +442,7 @@ public abstract class EntityBase extends AircandiActivity {
 		if (findViewById(R.id.txt_password) != null)
 			entity.password = ((EditText) findViewById(R.id.txt_password)).getText().toString().trim();
 
+		Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Updating entity: " + entity.title);												
 		entity.updateAsync(new IQueryListener() {
 
 			@Override
@@ -487,6 +507,7 @@ public abstract class EntityBase extends AircandiActivity {
 		/* Delete the entity from the service */
 		Bundle parameters = new Bundle();
 		parameters.putInt("entityId", entity.id);
+		Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Deleting entity: " + entity.title);												
 
 		try {
 			ProxibaseService.getInstance().webMethod("DeleteEntityWithChildren", parameters, ResponseFormat.Json, null);
