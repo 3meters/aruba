@@ -83,7 +83,7 @@ public class CandiModel extends BaseModel {
 		mViewStateCurrent.setZIndex(mViewStateNext.getZIndex());
 		mViewStateCurrent.setZoomed(mViewStateNext.isZoomed());
 		mViewStateCurrent.setCollapsed(mViewStateNext.isCollapsed());
-		mViewStateCurrent.setHasReflection(mViewStateNext.hasReflection());
+		mViewStateCurrent.setHasReflection(mViewStateNext.reflectionActive());
 		mViewStateCurrent.setOkToAnimate(mViewStateNext.isOkToAnimate());
 		mViewStateCurrent.setAlpha(mViewStateNext.getAlpha());
 		mViewStateCurrent.setLastWithinHalo(mViewStateNext.isLastWithinHalo());
