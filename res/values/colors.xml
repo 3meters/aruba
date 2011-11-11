@@ -11,6 +11,9 @@
     <color name="quickcontact_disambig">#f2f2f2</color>
     <color name="quickcontact_disambig_divider">#afafaf</color>
     
+    <color name="progress_start">#ffffd300</color>
+    <color name="progress_end">#ffffd300</color>
+    
     <color name="actionstrip_background_fill_dark">#dd000000</color>
     <color name="actionstrip_background_stroke_dark">#ccaaaaaa</color>
     <color name="actionstrip_background_fill_light">#eed6d6d6</color>

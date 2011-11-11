@@ -39,12 +39,6 @@
 	<PreferenceCategory
 		android:title="Development preferences">
 		<CheckBoxPreference
-			android:id="@+id/Pref_Fullscreen"
-			android:key="Pref_Fullscreen"
-			android:defaultValue="false"
-			android:title="Fullscreen"
-			android:summary="Display fullscreen" />
-		<CheckBoxPreference
 			android:id="@+id/Pref_Demo_Mode"
 			android:key="Pref_Demo_Mode"
 			android:defaultValue="false"
@@ -66,11 +60,11 @@
 			android:entryValues="@array/displayextrasvalues_list_preference"
 			android:dialogTitle="Select extra" />
 		<CheckBoxPreference
-			android:id="@+id/Pref_Show_Memory"
-			android:key="Pref_Show_Memory"
+			android:id="@+id/Pref_Show_Debug"
+			android:key="Pref_Show_Debug"
 			android:defaultValue="false"
-			android:title="Memory Consumption"
-			android:summary="Show memory usage in footer" />
+			android:title="Debug Stats"
+			android:summary="Show debug stats footer" />
 	</PreferenceCategory>
 	<PreferenceCategory
 		android:title="Error reporting">
