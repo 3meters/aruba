@@ -56,7 +56,8 @@ public class QuickContactWindow {
 	private final LayoutInflater	mInflater;
 	private PopupWindow				mPopupWindow;
 	private final Rect				mRect		= new Rect();
-	private boolean					mShowing	= false;
+	private boolean					mActionStripShowing	= false;
+	private long					mActionStripToggleTime;
 	private RootLayout				mRootView;
 	private ViewGroup				mTrackSet;
 	private HorizontalScrollView	mTrackScroll;
@@ -104,7 +105,7 @@ public class QuickContactWindow {
 
 			@Override
 			public void onDismiss() {
-				mShowing = false;
+				setShowing(false);
 			}
 		});
 
@@ -133,10 +134,11 @@ public class QuickContactWindow {
 		});
 	}
 
-	public synchronized void show(Rect anchor, View trackContent, View anchorView) {
+	public synchronized void show(Rect anchor, View trackContent, View anchorView, int bodyOffsetX, int bodyOffsetY, int arrowOffsetX) {
 
-		if (mShowing) {
+		if (isShowing()) {
 			dismiss();
+			return;
 		}
 
 		/* Validate incoming parameters */
@@ -158,25 +160,24 @@ public class QuickContactWindow {
 		 */
 		mRootView.requestFocus();
 
-		// showArrow(R.id.arrow_up, mAnchor.centerX());
-		mShowing = true;
+		setShowing(true);
 		mTrackSet.startAnimation(mTrackAnim);
 
-		mPopupWindow.showAsDropDown(anchorView, 0, -20);
+		mPopupWindow.showAsDropDown(anchorView, bodyOffsetX, bodyOffsetY);
+		
 		if (mPopupWindow.isAboveAnchor()) {
 			mPopupWindow.setAnimationStyle(R.style.QuickContactAboveAnimation);
-			showArrow(R.id.arrow_down, anchor.centerX());
+			showArrow(R.id.arrow_down, anchor.centerX(), arrowOffsetX);
 		}
 		else {
 			mPopupWindow.setAnimationStyle(R.style.QuickContactBelowAnimation);
-			showArrow(R.id.arrow_up, anchor.centerX());
+			showArrow(R.id.arrow_up, anchor.centerX(), arrowOffsetX);
 		}
-
 	}
 
 	private void buildActionButtons() {}
 
-	private void showArrow(int whichArrow, int requestedX) {
+	private void showArrow(int whichArrow, int requestedX, int offsetX) {
 
 		final View showArrow = (whichArrow == R.id.arrow_up) ? mArrowUp : mArrowDown;
 		final View hideArrow = (whichArrow == R.id.arrow_up) ? mArrowDown : mArrowUp;
@@ -186,16 +187,17 @@ public class QuickContactWindow {
 
 		showArrow.setVisibility(View.VISIBLE);
 
-		/* Position the arrow */
-		// ViewGroup.MarginLayoutParams param = (ViewGroup.MarginLayoutParams) showArrow.getLayoutParams();
-		// param.leftMargin = (requestedX - (mScreenWidth - mPopupWindow.getWidth())) - arrowWidth / 2;
+		RelativeLayout.MarginLayoutParams marginParams = (RelativeLayout.MarginLayoutParams) showArrow.getLayoutParams();
+		marginParams.rightMargin = 10 + (offsetX * -1);
+		marginParams.leftMargin = ((requestedX - (mScreenWidth - mPopupWindow.getWidth())) - arrowWidth / 2) + offsetX; 
+		showArrow.setLayoutParams(marginParams);
 
 		hideArrow.setVisibility(View.INVISIBLE);
 	}
 
 	public synchronized void dismiss() {
+		setShowing(false);
 		mPopupWindow.dismiss();
-		mShowing = false;
 	}
 
 	private void doBackPressed() {
@@ -208,11 +210,16 @@ public class QuickContactWindow {
 	}
 
 	public boolean isShowing() {
-		return this.mShowing;
+		return this.mActionStripShowing;
 	}
 
 	public void setShowing(boolean showing) {
-		this.mShowing = showing;
+		this.mActionStripShowing = showing;
+		this.mActionStripToggleTime = System.currentTimeMillis();
+	}
+
+	public long getActionStripToggleTime() {
+		return mActionStripToggleTime;
 	}
 
 	/**
