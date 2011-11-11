@@ -97,7 +97,7 @@ public class ImageLoader {
 		return bitmap;
 	}
 
-	public void getWebPageAsBitmap(String uri, final IImageRequestListener listener) {
+	public void getWebPageAsBitmap(String uri, ImageRequest imageRequest, final IImageRequestListener listener) {
 		String webViewContent = "";
 		final AtomicBoolean ready = new AtomicBoolean(false);
 
@@ -119,7 +119,13 @@ public class ImageLoader {
 		 * We might have to have a property to control the desired result when
 		 * using html for the tile display image.
 		 */
-		mWebView.getSettings().setUseWideViewPort(false);
+
+		if (imageRequest.imageFormat == ImageFormat.HtmlZoom) {
+			mWebView.getSettings().setUseWideViewPort(false);
+		}
+		else if (imageRequest.imageFormat == ImageFormat.Html) {
+			mWebView.getSettings().setUseWideViewPort(true);
+		}
 
 		mWebView.setWebViewClient(new WebViewClient() {
 
@@ -261,8 +267,8 @@ public class ImageLoader {
 						}
 
 						Bitmap bitmap = null;
-						if (imageRequest.imageFormat == ImageFormat.Html) {
-							getWebPageAsBitmap(imageRequest.imageUri, new IImageRequestListener() {
+						if (imageRequest.imageFormat == ImageFormat.Html || imageRequest.imageFormat == ImageFormat.HtmlZoom) {
+							getWebPageAsBitmap(imageRequest.imageUri, imageRequest, new IImageRequestListener() {
 
 								@Override
 								public void onImageReady(Bitmap bitmap) {
