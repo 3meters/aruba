@@ -1,97 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.proxibase.aircandi.activities"
-	android:versionName="0.1"
-	android:versionCode="1">
-	<uses-sdk
-		android:minSdkVersion="7"
-		android:targetSdkVersion="9" />
-	<supports-screens
-		android:smallScreens="true"
-		android:normalScreens="true"
-		android:largeScreens="true"
-		android:anyDensity="true" />
-	<application
-		android:name="com.proxibase.aircandi.activities.Aircandi"
-		android:label="@string/app_name"
-		android:icon="@drawable/icon_app"
-		android:theme="@style/aircandi_theme.midnight"
-		android:debuggable="true">
-		<activity
-			android:name="CandiSearchActivity"
-			android:label="@string/app_name"
-			android:configChanges="orientation|keyboardHidden">
-			<intent-filter>
-				<action
-					android:name="android.intent.action.MAIN" />
-				<category
-					android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>
-		<activity
-			android:name=".CandiInfo"
-			android:label="@string/app_name">
-			<intent-filter>
-				<action
-					android:name="com.aircandi.intent.action.SHOWEntityProxy" />
-				<category
-					android:name="android.intent.category.DEFAULT" />
-				<category
-					android:name="com.aircandi.intent.category.PROXIHANDLER" />
-			</intent-filter>
-		</activity>
-		<activity
-			android:name=".Post"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name=".Comment"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-		</activity>
-		<activity
-			android:name="com.proxibase.aircandi.activities.Preferences"
-			android:theme="@android:style/Theme"
-			android:label="@string/app_name"
-			android:configChanges="orientation">
-			<intent-filter>
-				<action
-					android:name="com.proxibase.aircandi.activities.Preferences" />
-				<category
-					android:name="android.intent.category.PREFERENCE" />
-			</intent-filter>
-		</activity>
-		<activity
-			android:name="org.acra.CrashReportDialog"
-			android:theme="@android:style/Theme.Dialog"
-			android:launchMode="singleInstance"
-			android:excludeFromRecents="true"
-			android:finishOnTaskLaunch="true" />
-	</application>
-	<uses-permission
-		android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<uses-permission
-		android:name="android.permission.INTERNET" />
-	<uses-permission
-		android:name="android.permission.READ_PHONE_STATE" />
-	<uses-permission
-		android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission
-		android:name="android.permission.ACCESS_FINE_LOCATION" />
-	<uses-permission
-		android:name="android.permission.ACCESS_COARSE_LOCATION" />
-	<uses-permission
-		android:name="android.permission.ACCESS_WIFI_STATE" />
-	<uses-permission
-		android:name="android.permission.CHANGE_WIFI_STATE" />
-	<uses-permission
-		android:name="android.permission.UPDATE_DEVICE_STATS" />
-	<uses-permission
-		android:name="android.permission.WAKE_LOCK" />
-	<uses-permission
-		android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-	<uses-permission
-		android:name="android.permission.READ_LOGS" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.proxibase.aircandi.activities"
+    android:versionCode="1"
+    android:versionName="0.1" >
+
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="9" />
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true" />
+
+    <application
+        android:debuggable="true"
+        android:icon="@drawable/icon_app"
+        android:label="@string/app_name"
+        android:name="com.proxibase.aircandi.activities.Aircandi"
+        android:theme="@style/aircandi_theme.midnight" >
+        <activity
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/app_name"
+            android:name="CandiSearchActivity" >
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:label="@string/app_name"
+            android:name=".CandiInfo" >
+            <intent-filter >
+                <action android:name="com.aircandi.intent.action.SHOWEntityProxy" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.aircandi.intent.category.PROXIHANDLER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:name=".ForumForm"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:name=".PostForm"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:name=".AlbumForm"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:name=".PhotoForm"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:name=".PhotoBrowse"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+            <activity
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:name=".CommentForm"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:name=".WebForm"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:name=".WebBrowse" >
+        </activity>
+        <activity
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:name="com.proxibase.aircandi.activities.Preferences"
+            android:theme="@android:style/Theme" >
+            <intent-filter >
+                <action android:name="com.proxibase.aircandi.activities.Preferences" />
+
+                <category android:name="android.intent.category.PREFERENCE" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleInstance"
+            android:name="org.acra.CrashReportDialog"
+            android:theme="@android:style/Theme.Dialog" />
+    </application>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+    <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
+
 </manifest>
