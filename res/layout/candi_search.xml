@@ -24,13 +24,12 @@
             android:visibility="gone" >
 
             <RelativeLayout
-            	style="@style/view_dialog"
+                style="@style/view_dialog"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:padding="25dp"
                 android:gravity="center"
-                 >
+                android:padding="25dp" >
 
                 <TextView
                     android:id="@+id/retry_message"
@@ -103,13 +102,54 @@
         </ViewFlipper>
     </FrameLayout>
 
-    <LinearLayout
-        android:id="@+id/activity_footer"
+    <FrameLayout
+        android:id="@+id/slider_wrapper_search"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" >
+        android:layout_alignParentBottom="true"
+        android:visibility="gone" >
 
-        <include layout="@layout/temp_activity_footer" />
-    </LinearLayout>
+        <SlidingDrawer
+            android:id="@+id/slider_drawer_search"
+            android:layout_width="fill_parent"
+            android:layout_height="100dp"
+            android:content="@+id/slider_content_search"
+            android:handle="@+id/slider_handle_search" >
+
+            <LinearLayout
+                android:id="@+id/slider_handle_search"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:clickable="true"
+                android:orientation="vertical"
+                android:paddingBottom="0dp"
+                android:paddingTop="30dp" >
+
+                <ImageButton
+                    style="@style/slider_handle_search"
+                    android:layout_width="fill_parent"
+                    android:layout_height="20dp"
+                    android:duplicateParentState="true" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/slider_content_search"
+                style="@style/slider_content_search"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp" >
+
+                <TextView
+                    android:id="@+id/txt_footer"
+                    style="@style/txt_footer"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/new_button" />
+            </RelativeLayout>
+        </SlidingDrawer>
+    </FrameLayout>
 
 </RelativeLayout>

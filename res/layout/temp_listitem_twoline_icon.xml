@@ -38,7 +38,7 @@
 		<ImageView
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
-			android:src="?attr/iconActions" />
+			android:src="?attr/iconInfoActions" />
 	</LinearLayout>
 	<TextView
 		android:id="@+id/item_content"

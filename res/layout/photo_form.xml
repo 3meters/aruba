@@ -31,35 +31,15 @@
 
             <!-- Title and Content -->
 
+
+            <!-- Public Image -->
+
             <TextView
                 android:id="@+id/txt_formtitle"
                 style="@style/txt_formtitle"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Post" />
-
-            <EditText
-                android:id="@+id/txt_title"
-                style="@style/edittext_form"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/post_title_hint" />
-
-            <EditText
-                android:id="@+id/txt_content"
-                style="@style/edittext_form"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="top"
-                android:hint="@string/post_content_hint"
-                android:inputType="textMultiLine"
-                android:lines="5" />
-
-            <!-- Public Image -->
-
-            <TextView
-                style="@style/section_header_form"
-                android:text="@string/post_public_image_section_header" />
+                android:text="Photo" />
 
             <RelativeLayout
                 android:layout_width="fill_parent"
@@ -83,40 +63,22 @@
                     android:visibility="gone" />
             </RelativeLayout>
 
-            <!-- Media -->
-
-            <TextView
-                style="@style/section_header_form"
-                android:text="@string/post_media_section_header" />
-
-            <RelativeLayout
+            <EditText
+                android:id="@+id/txt_title"
+                style="@style/edittext_form"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:gravity="left"
-                android:orientation="horizontal"
-                android:paddingBottom="10dp" >
+                android:hint="@string/post_title_hint" />
 
-                <Button
-                    android:id="@+id/btn_add_media"
-                    style="@style/btn_form"
-                    android:onClick="onAddMediaButtonClick"
-                    android:text="@string/post_media_add_button" />
-
-                <Button
-                    android:id="@+id/btn_clear_media"
-                    style="@style/btn_form"
-                    android:onClick="onClearMediaButtonClick"
-                    android:text="@string/post_media_clear_button"
-                    android:visibility="invisible" />
-
-                <ImageView
-                    android:id="@+id/img_media"
-                    style="@style/img_photo_thumbnail"
-                    android:layout_alignTop="@id/btn_clear_media"
-                    android:layout_marginLeft="10dp"
-                    android:layout_toRightOf="@id/btn_clear_media"
-                    android:visibility="gone" />
-            </RelativeLayout>
+            <EditText
+                android:id="@+id/txt_content"
+                style="@style/edittext_form"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:hint="@string/post_content_hint"
+                android:inputType="textMultiLine"
+                android:lines="5" />
         </LinearLayout>
     </ScrollView>
 

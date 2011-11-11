@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundCandiInfo" >
+
+    <LinearLayout
+        android:id="@+id/activity_header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" >
+
+        <include layout="@layout/temp_activity_header" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/activity_header"
+        android:layout_weight="1"
+        android:fillViewport="true" >
+
+        <LinearLayout
+            android:id="@+id/activity_body"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center_vertical|top"
+            android:orientation="vertical"
+            android:padding="10dp" >
+
+            <!-- Title and Content -->
+
+            <TextView
+                android:id="@+id/txt_title"
+                style="@style/txt_browse_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="5dp"
+                android:text="Violette Heymann" />
+
+            <ImageView
+                android:id="@+id/img_media"
+                style="@style/img_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitStart"
+                android:src="@drawable/massena" />
+
+            <TextView
+                android:id="@+id/txt_content"
+                style="@style/txt_browse_content"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:text="Odilon Redon was born in Bordeaux in 1840 and spent most of his life in Paris, where he died in 1916. During his career, he was responsible for some of the best-known Symbolist paintings of the late 19th and early 20th centuries -- The Cyclops, most famously, but dozens of others as well. His work was not exhibited in America until the famed Armory Show of 1913, and, even today, few prominent American museums own much of his major work." />
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

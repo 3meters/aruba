@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundCandiInfo" >
+
+    <LinearLayout
+        android:id="@+id/activity_header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" >
+
+        <include layout="@layout/temp_activity_header" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/panel_wrapper"
+        android:layout_below="@id/activity_header"
+        android:layout_weight="1"
+        android:fillViewport="true" >
+
+        <LinearLayout
+            android:id="@+id/activity_body"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center_vertical|top"
+            android:orientation="vertical"
+            android:padding="5dp" >
+
+            <!-- Title and Content -->
+
+            <TextView
+                android:id="@+id/txt_formtitle"
+                style="@style/txt_formtitle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Topic" />
+
+            <EditText
+                android:id="@+id/txt_title"
+                style="@style/edittext_form"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/post_title_hint" />
+
+            <EditText
+                android:id="@+id/txt_content"
+                style="@style/edittext_form"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:hint="@string/post_content_hint"
+                android:inputType="textMultiLine"
+                android:lines="5" />
+
+            <!-- Public Image -->
+
+            <TextView
+                style="@style/section_header_form"
+                android:text="@string/post_public_image_section_header" />
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:orientation="horizontal"
+                android:paddingBottom="10dp" >
+
+                <Button
+                    android:id="@+id/btn_change_public_image"
+                    style="@style/btn_form"
+                    android:onClick="onChangePublicImageButtonClick"
+                    android:text="@string/post_public_image_change_button" />
+
+                <ImageView
+                    android:id="@+id/img_public_image"
+                    style="@style/img_photo_thumbnail"
+                    android:layout_alignTop="@id/btn_change_public_image"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toRightOf="@id/btn_change_public_image"
+                    android:visibility="gone" />
+            </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/panel_wrapper"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/form_footer" >
+
+        <include layout="@layout/temp_settings" />
+    </LinearLayout>
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/form_footer"
+        style="@style/activity_footer_form"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal" >
+
+        <Button
+            android:id="@+id/btn_save_post"
+            style="@style/btn_form"
+            android:onClick="onSaveButtonClick"
+            android:text="@string/post_save_button" />
+
+        <Button
+            android:id="@+id/btn_delete_post"
+            style="@style/btn_form"
+            android:onClick="onDeleteButtonClick"
+            android:text="@string/post_delete_button" />
+
+        <Button
+            android:id="@+id/btn_cancel"
+            style="@style/btn_form"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/post_cancel_button" />
+    </LinearLayout>
+
+</RelativeLayout>

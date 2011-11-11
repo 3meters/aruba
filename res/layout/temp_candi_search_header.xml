@@ -72,7 +72,7 @@
 			<ImageView
 				android:layout_height="wrap_content"
 				android:layout_width="wrap_content"
-				android:src="?attr/iconActions" />
+				android:src="?attr/iconSearchActions" />
 		</LinearLayout>
 	</RelativeLayout>
 </merge>

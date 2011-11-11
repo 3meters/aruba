@@ -59,12 +59,4 @@
 				android:cacheColorHint="#00000000" />
 		</ViewFlipper>
 	</FrameLayout>
-	<LinearLayout
-		android:id="@+id/activity_footer"
-		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:layout_alignParentBottom="true">
-		<include
-			layout="@layout/temp_activity_footer" />
-	</LinearLayout>
 </RelativeLayout>

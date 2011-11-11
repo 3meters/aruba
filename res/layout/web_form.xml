@@ -4,6 +4,14 @@
     android:layout_height="fill_parent"
     android:background="?attr/backgroundCandiInfo" >
 
+    <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+
+    <LinearLayout
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
     <LinearLayout
         android:id="@+id/activity_header"
         android:layout_width="fill_parent"
@@ -14,6 +22,7 @@
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/scrollView1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/panel_wrapper"
@@ -30,13 +39,42 @@
             android:padding="5dp" >
 
             <!-- Title and Content -->
+            
+			<TextView
+				android:id="@+id/txt_formtitle"
+				android:layout_height="wrap_content"
+				android:layout_width="fill_parent"
+				android:text="Website"
+				style="@style/txt_formtitle" />
 
-            <TextView
-                android:id="@+id/txt_formtitle"
-                style="@style/txt_formtitle"
+            <LinearLayout
+                android:id="@+id/activity_body"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Post" />
+                android:orientation="horizontal" >
+
+                <EditText
+                    android:id="@+id/txt_uri"
+                    style="@style/edittext_form"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center|left"
+                    android:hint="@string/post_uri_hint"
+                    android:inputType="textUri"
+                    android:singleLine="true" />
+
+                <ImageButton
+                    android:id="@+id/btn_link_builder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:clickable="true"
+                    android:maxWidth="50dp"
+                    android:minWidth="50dp"
+                    android:onClick="onLinkBuilderClick"
+                    android:src="@drawable/icon_bookmarks" />
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/txt_title"
@@ -55,71 +93,9 @@
                 android:inputType="textMultiLine"
                 android:lines="5" />
 
-            <!-- Public Image -->
-
-            <TextView
-                style="@style/section_header_form"
-                android:text="@string/post_public_image_section_header" />
-
-            <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:orientation="horizontal"
-                android:paddingBottom="10dp" >
-
-                <Button
-                    android:id="@+id/btn_change_public_image"
-                    style="@style/btn_form"
-                    android:onClick="onChangePublicImageButtonClick"
-                    android:text="@string/post_public_image_change_button" />
-
-                <ImageView
-                    android:id="@+id/img_public_image"
-                    style="@style/img_photo_thumbnail"
-                    android:layout_alignTop="@id/btn_change_public_image"
-                    android:layout_marginLeft="10dp"
-                    android:layout_toRightOf="@id/btn_change_public_image"
-                    android:visibility="gone" />
-            </RelativeLayout>
-
-            <!-- Media -->
-
-            <TextView
-                style="@style/section_header_form"
-                android:text="@string/post_media_section_header" />
-
-            <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:orientation="horizontal"
-                android:paddingBottom="10dp" >
-
-                <Button
-                    android:id="@+id/btn_add_media"
-                    style="@style/btn_form"
-                    android:onClick="onAddMediaButtonClick"
-                    android:text="@string/post_media_add_button" />
-
-                <Button
-                    android:id="@+id/btn_clear_media"
-                    style="@style/btn_form"
-                    android:onClick="onClearMediaButtonClick"
-                    android:text="@string/post_media_clear_button"
-                    android:visibility="invisible" />
-
-                <ImageView
-                    android:id="@+id/img_media"
-                    style="@style/img_photo_thumbnail"
-                    android:layout_alignTop="@id/btn_clear_media"
-                    android:layout_marginLeft="10dp"
-                    android:layout_toRightOf="@id/btn_clear_media"
-                    android:visibility="gone" />
-            </RelativeLayout>
         </LinearLayout>
     </ScrollView>
-
+    
     <LinearLayout
         android:id="@+id/panel_wrapper"
         android:layout_width="fill_parent"
@@ -128,6 +104,8 @@
 
         <include layout="@layout/temp_settings" />
     </LinearLayout>
+
+        
 
     <!-- Footer -->
 

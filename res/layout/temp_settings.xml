@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:panel="http://schemas.android.com/apk/res/com.proxibase.aircandi.activities" >
+
+    <com.proxibase.aircandi.widgets.Panel
+        android:id="@+id/panel_settings"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        panel:animationDuration="500"
+        panel:content="@+id/panel_content"
+        panel:handle="@+id/panel_handle"
+        panel:linearFlying="false"
+        android:paddingBottom="4dp"
+        panel:position="bottom" >
+
+        <TextView
+            android:id="@+id/panel_handle"
+            style="@style/section_header_form"
+            android:text="@string/post_settings_section_header" />
+
+        <LinearLayout
+            android:id="@+id/panel_content"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <Spinner
+                android:id="@+id/cbo_visibility"
+                style="@style/spinner_form"
+                android:layout_width="240dp"
+                android:drawSelectorOnTop="true"
+                android:entries="@array/post_visibility_values_list"
+                android:prompt="@string/post_visibility" />
+
+            <EditText
+                android:id="@+id/txt_password"
+                style="@style/edittext_form"
+                android:layout_width="240dp"
+                android:hint="@string/post_password_hint"
+                android:inputType="textPassword" />
+
+            <CheckBox
+                android:id="@+id/chk_locked"
+                style="@style/chk_form"
+                android:layout_width="240dp"
+                android:text="@string/post_locked" />
+        </LinearLayout>
+    </com.proxibase.aircandi.widgets.Panel>
+
+</merge>
