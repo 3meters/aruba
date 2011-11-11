@@ -18,6 +18,7 @@ import java.util.Queue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.acra.ErrorReporter;
 import org.anddev.andengine.util.StreamUtils;
 
 import android.content.Context;
@@ -47,7 +48,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
 /*
- * TODO: ImageCache uses weak references by default. Should investigate the possible benefits 
+ * TODO: ImageCache uses weak references by default. Should investigate the possible benefits
  * of switching to using soft references instead.
  */
 
@@ -85,17 +86,19 @@ public class ImageManager {
 	public static Bitmap fetchImage(String url) throws ProxibaseException {
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
-		
+
 		/*
 		 * We request a byte array for decoding because of a bug
 		 * in pre 2.3 versions of android.
 		 */
 		byte[] imageBytes = (byte[]) ProxibaseService.getInstance().select(url, ResponseFormat.Bytes);
-		Bitmap bm = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
-		if (bm == null)
-			throw new IllegalStateException("Stream could not be decoded to a bitmap: " + url);
+		Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
+		if (bitmap == null) {
+			bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+			ErrorReporter.getInstance().handleSilentException(new Exception("Stream could not be decoded to a bitmap: " + url)); 			
+		}
 
-		return bm;
+		return bitmap;
 	}
 
 	public void fetchImageAsynch(ImageRequest imageRequest) throws AircandiException {
@@ -106,12 +109,12 @@ public class ImageManager {
 			imageRequest.imageReadyListener.onImageReady(bitmap);
 			return;
 		}
-		
+
 		/* Make sure the cache directory is intact */
 		if (!mImageCache.cacheDirectoryExists())
 			mImageCache.makeCacheDirectory();
 
-		if (imageRequest.imageFormat == ImageFormat.Html) {
+		if (imageRequest.imageFormat == ImageFormat.Html || imageRequest.imageFormat == ImageFormat.HtmlZoom) {
 			mWebViewQueue.offer(imageRequest);
 			if (!mWebViewProcessing)
 				startWebViewProcessing();
@@ -293,7 +296,7 @@ public class ImageManager {
 							startWebViewProcessing();
 						}
 						catch (AircandiException exception) {
-							
+
 							/* TODO: We might have hit the thread limit for AsyncTasks */
 							exception.printStackTrace();
 						}
@@ -317,7 +320,7 @@ public class ImageManager {
 		Cursor cursor = mContext.getContentResolver().query(imageUri, projection, null, null, null);
 
 		if (cursor != null) {
-			
+
 			/* Means the image is in the media store */
 			String imageData = "";
 			if (cursor.moveToFirst()) {
@@ -331,7 +334,7 @@ public class ImageManager {
 			imagePath = imageData;
 		}
 		else {
-			
+
 			/* The image is in the local file system */
 			imagePath = imageUri.toString().replace("file://", "");
 			imageFile = new File(imageUri.toString().replace("file://", ""));
@@ -541,7 +544,7 @@ public class ImageManager {
 
 	@SuppressWarnings("unused")
 	private String getExifOrientation(String imagePath, String imageOrientation) {
-		
+
 		/*
 		 * Return image EXIF orientation using reflection (if Android 2.0 or higher)
 		 * http://developer.android.com/resources/articles/backward-compatibility.html
@@ -584,7 +587,7 @@ public class ImageManager {
 					}
 				}
 				catch (InvocationTargetException exception) {
-					
+
 					/* Unpack original exception when possible */
 					imageOrientation = "0";
 				}
@@ -694,7 +697,7 @@ public class ImageManager {
 	public interface IImageRequestListener {
 
 		void onImageReady(Bitmap bitmap);
-		
+
 		boolean onProgressChanged(int progress);
 
 		void onProxibaseException(ProxibaseException exception);
@@ -724,7 +727,7 @@ public class ImageManager {
 		}
 
 		public enum ImageFormat {
-			Binary, Html
+			Binary, Html, HtmlZoom
 		}
 
 		public enum ImageShape {
