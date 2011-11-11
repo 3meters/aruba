@@ -177,7 +177,7 @@ public class ZoneModel extends BaseModel {
 		}
 		else {
 			if (candiModelZoneStatus == ZoneStatus.Primary) {
-				
+
 				/* Showing a collection with a primary and this is the primary */
 				position.x = this.getViewStateCurrent().getX();
 				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY());

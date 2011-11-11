@@ -6,6 +6,7 @@ import org.anddev.andengine.entity.modifier.IEntityModifier;
 
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
@@ -33,6 +34,28 @@ public class CandiModel extends BaseModel {
 		super();
 		setModelId(modelId);
 		mCandiPatchModel = candiPatchModel;
+	}
+
+	public String getEntityType() {
+		if (mEntityProxy != null && mEntityProxy.entityType != null) {
+			String entityType = mEntityProxy.entityType;
+			if (entityType.equals(CandiConstants.TYPE_CANDI_ALBUM)) {
+				return "Album";
+			}
+			else if (entityType.equals(CandiConstants.TYPE_CANDI_FORUM)) {
+				return "Topic";
+			}
+			else if (entityType.equals(CandiConstants.TYPE_CANDI_WEB)) {
+				return "Web";
+			}
+			else if (entityType.equals(CandiConstants.TYPE_CANDI_PHOTO)) {
+				return "Photo";
+			}
+			else if (entityType.equals(CandiConstants.TYPE_CANDI_POST)) {
+				return "Post";
+			}
+		}
+		return null;
 	}
 
 	public Transition getTransition() {
@@ -123,6 +146,11 @@ public class CandiModel extends BaseModel {
 		else if (mDisplayExtra == DisplayExtra.Time) {
 			title += " " + String.valueOf(getEntityProxy().beacon.discoveryTime.getTime() / 100);
 		}
+
+		if (getEntityType() != null) {
+			title = getEntityType() + ": " + title;
+		}
+
 		return title;
 	}
 

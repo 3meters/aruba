@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 import com.google.gson.annotations.Expose;
 
-public class PostEntity extends BaseEntity {
+public class PhotoEntity extends BaseEntity {
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 	@Expose
@@ -22,7 +22,7 @@ public class PostEntity extends BaseEntity {
 
 	public Bitmap	mediaBitmap;
 
-	public PostEntity() {
-		__metadata.type = "Aircandi.Post";
+	public PhotoEntity() {
+		__metadata.type = "Aircandi.Photo";
 	}
 }

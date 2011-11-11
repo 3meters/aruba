@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
+import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -29,11 +30,11 @@ public abstract class AircandiActivity extends Activity {
 	protected ImageView		mButtonRefresh;
 	protected Button		mContextButton;
 
-	protected Verb			mVerb;
 	protected Integer		mParentEntityId;
 	protected Beacon		mBeacon;
 	protected Boolean		mBeaconUnregistered;
 	protected EntityProxy	mEntityProxy;
+	protected Command		mCommand;
 	protected User			mUser;
 	protected String		mPrefTheme;
 
@@ -56,7 +57,6 @@ public abstract class AircandiActivity extends Activity {
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			mVerb = (Verb) extras.get(getString(R.string.EXTRA_VERB));
 			mParentEntityId = extras.getInt(getString(R.string.EXTRA_PARENT_ENTITY_ID));
 
 			String json = extras.getString(getString(R.string.EXTRA_ENTITY));
@@ -64,6 +64,11 @@ public abstract class AircandiActivity extends Activity {
 				mEntityProxy = ProxibaseService.getGson(GsonType.Internal).fromJson(json, EntityProxy.class);
 			}
 
+			json = extras.getString(getString(R.string.EXTRA_COMMAND));
+			if (json != null && !json.equals("")) {
+				mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Command.class);
+			}
+			
 			json = extras.getString(getString(R.string.EXTRA_BEACON));
 			if (json != null && !json.equals("")) {
 				mBeacon = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Beacon.class);
@@ -100,12 +105,10 @@ public abstract class AircandiActivity extends Activity {
 			mButtonRefresh.setVisibility(View.VISIBLE);
 
 		mContextButton = (Button) findViewById(R.id.btn_context);
-		if (mContextButton != null)
+		if (mContextButton != null){
 			mContextButton.setVisibility(View.INVISIBLE);
-
-		if ((mVerb == Verb.New || mEntityProxy != null) && mContextButton != null)
 			showBackButton(true, getString(R.string.post_back_button));
-
+		}
 	}
 
 	public void showBackButton(boolean show, String backButtonText) {
@@ -224,6 +227,6 @@ public abstract class AircandiActivity extends Activity {
 	}
 
 	public static enum Verb {
-		New, Edit, Delete
+		New, Edit, Delete, View
 	}
 }

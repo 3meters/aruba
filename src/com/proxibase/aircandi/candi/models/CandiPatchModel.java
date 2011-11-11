@@ -144,7 +144,16 @@ public class CandiPatchModel extends Observable {
 		candiModelManaged.setEntityProxy(entityProxy);
 		candiModelManaged.setTitleText(entityProxy.label);
 		candiModelManaged.setBodyImageUri(entityProxy.imageUri);
-		candiModelManaged.setBodyImageFormat(entityProxy.imageFormat.equals("html") ? ImageFormat.Html : ImageFormat.Binary);
+
+		ImageFormat imageFormat = ImageFormat.Binary;
+		if (entityProxy.imageFormat.equals("html")) {
+			imageFormat = ImageFormat.Html;
+		}
+		else if (entityProxy.imageFormat.equals("htmlzoom")) {
+			imageFormat = ImageFormat.HtmlZoom;
+		}
+
+		candiModelManaged.setBodyImageFormat(imageFormat);
 
 		if (candiModelManaged.getReasonInactive() != ReasonInactive.Navigation) {
 			if (entityProxy.isHidden)
@@ -273,11 +282,11 @@ public class CandiPatchModel extends Observable {
 					}
 				}
 			}
-			/* 
+			/*
 			 * If the model with the current focus is going to be hidden/gone then we
 			 * will need a new focus.
 			 */
-			if (candiModel == mCandiModelFocused && !candiModel.getViewStateNext().isVisible()){
+			if (candiModel == mCandiModelFocused && !candiModel.getViewStateNext().isVisible()) {
 				mCandiModelFocused = null;
 			}
 		}

@@ -21,7 +21,7 @@ public interface CandiConstants {
 	public static final int				LAYER_GENERAL					= 0;
 	public static final int				LAYER_ZONES						= 1;
 	public static final int				LAYER_CANDI						= 2;
-	
+
 	public static final int				NETWORK_INTERVAL_PHONEY			= 3000;
 
 	public static final float			CANDI_VIEW_HALO					= 2.0f;
@@ -37,8 +37,8 @@ public interface CandiConstants {
 	public static final int				CANDI_VIEW_ZOOMED_PADDING		= 10;
 
 	/* Dimensions at mdpi */
-	public static final int				CANDI_TITLEBAR_HEIGHT			= 40; 
-	public static final int				ANDROID_STATUSBAR_HEIGHT		= 25; 
+	public static final int				CANDI_TITLEBAR_HEIGHT			= 40;
+	public static final int				ANDROID_STATUSBAR_HEIGHT		= 25;
 
 	public static final int				SWIPE_MAX_OFF_PATH				= 500;
 	public static final float			SWIPE_SMALL_FLING				= 100;
@@ -68,9 +68,11 @@ public interface CandiConstants {
 	public static final String			URL_AIRCANDI_MEDIA				= "https://s3.amazonaws.com/";
 	public static final String			S3_BUCKET_IMAGES				= "3meters_images";
 
-	public static final String			TYPE_CANDI_WEB					= "com.proxibase.aircandi.candi.web";
+	public static final String			TYPE_CANDI_FORUM				= "com.proxibase.aircandi.candi.forum";
 	public static final String			TYPE_CANDI_POST					= "com.proxibase.aircandi.candi.post";
-	public static final String			TYPE_CANDI_COMMENT				= "com.proxibase.aircandi.candi.comment";
+	public static final String			TYPE_CANDI_ALBUM				= "com.proxibase.aircandi.candi.album";
+	public static final String			TYPE_CANDI_PHOTO				= "com.proxibase.aircandi.candi.photo";
+	public static final String			TYPE_CANDI_WEB					= "com.proxibase.aircandi.candi.web";
 
 	public static final int				ACTIVITY_ENTITY_HANDLER			= 100;
 	public static final int				ACTIVITY_MARKET					= 200;

@@ -915,26 +915,26 @@ public class CandiPatchPresenter implements Observer {
 		 * The zone might already have a fade out modifier because manageViews() populated
 		 * it with a full size candi view.
 		 */
-		
+
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
 			synchronized (zoneModel.getViewActions()) {
 				zoneModel.getViewActions().addLast(new ViewAction(ViewActionType.Visibility));
 			}
 		}
-		
-//		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
-//			if (zoneModel.getViewModifiers().isEmpty()) {
-//				Transition transition = zoneModel.getTransition();
-//				synchronized (zoneModel.getViewModifiers()) {
-//					if (transition == Transition.FadeIn)
-//						zoneModel.getViewModifiers().addLast(
-//								new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
-//					else if (transition == Transition.FadeOut)
-//						zoneModel.getViewModifiers().addLast(
-//								new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
-//				}
-//			}
-//		}
+
+		//		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
+		//			if (zoneModel.getViewModifiers().isEmpty()) {
+		//				Transition transition = zoneModel.getTransition();
+		//				synchronized (zoneModel.getViewModifiers()) {
+		//					if (transition == Transition.FadeIn)
+		//						zoneModel.getViewModifiers().addLast(
+		//								new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
+		//					else if (transition == Transition.FadeOut)
+		//						zoneModel.getViewModifiers().addLast(
+		//								new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
+		//				}
+		//			}
+		//		}
 
 		/* Clear out any left over actions and modifiers */
 		for (CandiModel candiModel : mCandiPatchModel.getCandiModels()) {
@@ -1207,14 +1207,16 @@ public class CandiPatchPresenter implements Observer {
 		/* Remove associated candi view */
 		final CandiView candiView = (CandiView) getCandiViewsHash().get(String.valueOf(candiModel.getModelId()));
 		getCandiViewsHash().remove(String.valueOf(candiModel.getModelId()));
-		mEngine.runOnUpdateThread(new Runnable() {
+		if (candiView != null) {
+			mEngine.runOnUpdateThread(new Runnable() {
 
-			@Override
-			public void run() {
-				candiView.unloadResources(); /* Also removes any active touch areas for it */
-				candiView.detachSelf();
-			}
-		});
+				@Override
+				public void run() {
+					candiView.unloadResources(); /* Also removes any active touch areas for it */
+					candiView.detachSelf();
+				}
+			});
+		}
 
 		/* Repeat for all children */
 		for (IModel childModel : candiModel.getChildren()) {
@@ -1515,8 +1517,10 @@ public class CandiPatchPresenter implements Observer {
 			/* This gets called because the gesture detector thinks it has a fling gesture */
 
 			/* Test for swipe that is too vertical to trigger a fling */
-			if (Math.abs(e1.getY() - e2.getY()) > CandiConstants.SWIPE_MAX_OFF_PATH) {
-				return false;
+			if (e1 != null && e2 != null) {
+				if (Math.abs(e1.getY() - e2.getY()) > CandiConstants.SWIPE_MAX_OFF_PATH) {
+					return false;
+				}
 			}
 
 			/* Check to see if we are at a boundary */

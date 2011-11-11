@@ -12,5 +12,10 @@
 	<classpathentry kind="lib" path="lib/gson-1.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/guava.jar"/>
 	<classpathentry kind="lib" path="lib/proxibase.jar"/>
+	<classpathentry kind="lib" path="lib/jsoup-1.6.1.jar" sourcepath="C:/Users/Jayma/Files/Proxibase/Android/packages/jsoup/jsoup-1.6.1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Jayma/Files/Proxibase/Android/packages/jsoup/jsoup-1.6.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

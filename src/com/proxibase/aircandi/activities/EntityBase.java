@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
@@ -17,12 +18,13 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amazonaws.AmazonClientException;
@@ -52,22 +54,23 @@ import com.proxibase.sdk.android.util.ProxiConstants;
 
 public abstract class EntityBase extends AircandiActivity {
 
-	protected Object		mEntity;
-	protected boolean		mProcessing		= false;
-	protected PickerTarget	mPickerTarget	= PickerTarget.None;
+	protected Object			mEntity;
+	protected boolean			mProcessing		= false;
+	protected PickerTarget		mPickerTarget	= PickerTarget.None;
+	protected ProgressDialog	mProgressDialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		//getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		//getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		super.onCreate(savedInstanceState);
 	}
 
 	protected void bindEntity() {
 
-		if (mVerb == Verb.New) {
+		if (mCommand.verb.equals("new")) {
+			/*
+			 * Fill in the system and default properties for the new entity
+			 */
 			final BaseEntity entity = (BaseEntity) mEntity;
 			entity.beaconId = mBeacon.id;
 			entity.signalFence = mBeacon.levelDb - 10.0f;
@@ -75,7 +78,6 @@ public abstract class EntityBase extends AircandiActivity {
 			entity.enabled = true;
 			entity.visibility = Visibility.Public.ordinal();
 			entity.password = null;
-			entity.entityType = CandiConstants.TYPE_CANDI_POST;
 			entity.imageUri = mUser.imageUri;
 			entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
 
@@ -111,8 +113,10 @@ public abstract class EntityBase extends AircandiActivity {
 			}
 			entity.parentEntityId = mParentEntityId;
 		}
-		else if (mVerb == Verb.Edit) {
-
+		else if (mCommand.verb.equals("edit")) {
+			/*
+			 * Do any fetching needed to support editing the entity.
+			 */
 			final BaseEntity entity = (BaseEntity) mEntity;
 			if (entity.imageUri != null && !entity.imageUri.equals("")) {
 				Bitmap bitmap = fetchImage(entity.imageUri, new IImageRequestListener() {
@@ -137,7 +141,6 @@ public abstract class EntityBase extends AircandiActivity {
 
 					@Override
 					public boolean onProgressChanged(int progress) {
-						// TODO Auto-generated method stub
 						return false;
 					}
 				});
@@ -147,6 +150,8 @@ public abstract class EntityBase extends AircandiActivity {
 				}
 			}
 		}
+		else {
+		}
 	}
 
 	protected void drawEntity() {
@@ -154,20 +159,20 @@ public abstract class EntityBase extends AircandiActivity {
 		final BaseEntity entity = (BaseEntity) mEntity;
 
 		if (findViewById(R.id.txt_title) != null)
-			((EditText) findViewById(R.id.txt_title)).setText(entity.title);
+			((TextView) findViewById(R.id.txt_title)).setText(entity.title);
 
 		if (findViewById(R.id.txt_content) != null)
-			((EditText) findViewById(R.id.txt_content)).setText(entity.description);
+			((TextView) findViewById(R.id.txt_content)).setText(entity.description);
 
 		if (findViewById(R.id.cbo_visibility) != null)
 			((Spinner) findViewById(R.id.cbo_visibility)).setSelection(entity.visibility);
 
-		if (mVerb == Verb.New) {
+		if (mCommand.verb.equals("new")) {
 			if (findViewById(R.id.btn_delete_post) != null)
 				((Button) findViewById(R.id.btn_delete_post)).setVisibility(View.GONE);
 		}
 		if (findViewById(R.id.txt_password) != null)
-			((EditText) findViewById(R.id.txt_password)).setText(entity.password);
+			((TextView) findViewById(R.id.txt_password)).setText(entity.password);
 
 		updateImage(entity);
 
@@ -298,7 +303,7 @@ public abstract class EntityBase extends AircandiActivity {
 				}
 			}
 			else {
-				
+
 				/* User doesn't have a valid profile image */
 				Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
 				entity.imageBitmap = bitmap;
@@ -320,7 +325,7 @@ public abstract class EntityBase extends AircandiActivity {
 			mBeacon.beaconType = BeaconType.Fixed.name().toLowerCase();
 			mBeacon.beaconSetId = ProxiConstants.BEACONSET_WORLD;
 			try {
-				Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Inserting beacon: " + mBeacon.id);												
+				Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Inserting beacon: " + mBeacon.id);
 				mBeacon.insert();
 			}
 			catch (ProxibaseException exception) {
@@ -374,15 +379,15 @@ public abstract class EntityBase extends AircandiActivity {
 
 		final BaseEntity entity = (BaseEntity) mEntity;
 		if (findViewById(R.id.txt_title) != null)
-			entity.title = ((EditText) findViewById(R.id.txt_title)).getText().toString().trim();
+			entity.title = ((TextView) findViewById(R.id.txt_title)).getText().toString().trim();
 		if (findViewById(R.id.txt_title) != null)
-			entity.label = ((EditText) findViewById(R.id.txt_title)).getText().toString().trim();
+			entity.label = ((TextView) findViewById(R.id.txt_title)).getText().toString().trim();
 		if (findViewById(R.id.txt_content) != null)
-			entity.description = ((EditText) findViewById(R.id.txt_content)).getText().toString().trim();
+			entity.description = ((TextView) findViewById(R.id.txt_content)).getText().toString().trim();
 		if (findViewById(R.id.cbo_visibility) != null)
 			entity.visibility = ((Spinner) findViewById(R.id.cbo_visibility)).getSelectedItemPosition();
 		if (findViewById(R.id.txt_password) != null)
-			entity.password = ((EditText) findViewById(R.id.txt_password)).getText().toString().trim();
+			entity.password = ((TextView) findViewById(R.id.txt_password)).getText().toString().trim();
 
 		if (mParentEntityId != 0) {
 			entity.parentEntityId = mParentEntityId;
@@ -392,7 +397,7 @@ public abstract class EntityBase extends AircandiActivity {
 		}
 		entity.enabled = true;
 		entity.createdDate = DateUtils.nowString();
-		Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Inserting entity: " + entity.title);												
+		Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Inserting entity: " + entity.title);
 
 		entity.insertAsync(new IQueryListener() {
 
@@ -432,22 +437,22 @@ public abstract class EntityBase extends AircandiActivity {
 		final BaseEntity entity = (BaseEntity) mEntity;
 
 		if (findViewById(R.id.txt_title) != null)
-			entity.title = ((EditText) findViewById(R.id.txt_title)).getText().toString().trim();
+			entity.title = ((TextView) findViewById(R.id.txt_title)).getText().toString().trim();
 		if (findViewById(R.id.txt_title) != null)
-			entity.label = ((EditText) findViewById(R.id.txt_title)).getText().toString().trim();
+			entity.label = ((TextView) findViewById(R.id.txt_title)).getText().toString().trim();
 		if (findViewById(R.id.txt_content) != null)
-			entity.description = ((EditText) findViewById(R.id.txt_content)).getText().toString().trim();
+			entity.description = ((TextView) findViewById(R.id.txt_content)).getText().toString().trim();
 		if (findViewById(R.id.cbo_visibility) != null)
 			entity.visibility = ((Spinner) findViewById(R.id.cbo_visibility)).getSelectedItemPosition();
 		if (findViewById(R.id.txt_password) != null)
-			entity.password = ((EditText) findViewById(R.id.txt_password)).getText().toString().trim();
+			entity.password = ((TextView) findViewById(R.id.txt_password)).getText().toString().trim();
 
-		Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Updating entity: " + entity.title);												
+		Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Updating entity: " + entity.title);
 		entity.updateAsync(new IQueryListener() {
 
 			@Override
 			public void onComplete(String response) {
-				
+
 				/* Post the processed result back to the UI thread */
 				runOnUiThread(new Runnable() {
 
@@ -507,7 +512,7 @@ public abstract class EntityBase extends AircandiActivity {
 		/* Delete the entity from the service */
 		Bundle parameters = new Bundle();
 		parameters.putInt("entityId", entity.id);
-		Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Deleting entity: " + entity.title);												
+		Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Deleting entity: " + entity.title);
 
 		try {
 			ProxibaseService.getInstance().webMethod("DeleteEntityWithChildren", parameters, ResponseFormat.Json, null);
@@ -559,7 +564,7 @@ public abstract class EntityBase extends AircandiActivity {
 	}
 
 	protected void deleteImageFromS3(String imageKey) throws ProxibaseException {
-		
+
 		/* If the image is stored with S3 then it will be deleted */
 		try {
 			S3.getInstance().deleteObject(CandiConstants.S3_BUCKET_IMAGES, imageKey);
@@ -591,7 +596,7 @@ public abstract class EntityBase extends AircandiActivity {
 				ImageManager.getInstance().fetchImageAsynch(imageRequest);
 			}
 			catch (AircandiException exception) {
-				
+
 				/* TODO: We might have hit the thread limit for asynctasks */
 				exception.printStackTrace();
 			}
@@ -675,7 +680,7 @@ public abstract class EntityBase extends AircandiActivity {
 	// --------------------------------------------------------------------------------------------
 	protected void onDestroy() {
 		super.onDestroy();
-		
+
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 
 		try {
@@ -687,6 +692,18 @@ public abstract class EntityBase extends AircandiActivity {
 		}
 		catch (Exception exception) {
 			exception.printStackTrace();
+		}
+	}
+
+	protected void showProgressDialog(boolean visible, String message) {
+		if (visible) {
+			mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+			mProgressDialog.setMessage(message);
+			mProgressDialog.setIndeterminate(true);
+			mProgressDialog.show();
+		}
+		else {
+			mProgressDialog.dismiss();
 		}
 	}
 

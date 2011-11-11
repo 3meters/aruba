@@ -3,14 +3,13 @@ package com.proxibase.aircandi.activities;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.models.CommentEntity;
+import com.proxibase.aircandi.models.Comment;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class Comment extends EntityBase {
+public class CommentForm extends EntityBase {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -22,12 +21,12 @@ public class Comment extends EntityBase {
 
 	@Override
 	protected void bindEntity() {
-		
+
 		/* We handle all the elements that are different than the base entity. */
-		if (mVerb == Verb.New) {
-			mEntity = new CommentEntity();
+		if (mCommand.verb.equals("new")) {
+			mEntity = new Comment();
 		}
-		else if (mVerb == Verb.Edit) {
+		else if (mCommand.verb.equals("edit")) {
 			String jsonResponse = null;
 			try {
 				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
@@ -36,17 +35,11 @@ public class Comment extends EntityBase {
 				exception.printStackTrace();
 			}
 
-			mEntity = (CommentEntity) ProxibaseService.convertJsonToObject(jsonResponse, CommentEntity.class, GsonType.ProxibaseService);
+			mEntity = (Comment) ProxibaseService.convertJsonToObject(jsonResponse, Comment.class, GsonType.ProxibaseService);
 		}
 
 		super.bindEntity();
 
-		if (mVerb == Verb.New) {
-			final CommentEntity entity = (CommentEntity) mEntity;
-			entity.entityType = CandiConstants.TYPE_CANDI_COMMENT;
-		}
-		else if (mVerb == Verb.Edit) {
-		}
 	}
 
 	// --------------------------------------------------------------------------------------------

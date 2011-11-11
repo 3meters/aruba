@@ -169,6 +169,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 		/* Internal */
 		setVisible(false);
+		setRotation(0);
 		setPosition(0, 1000); /* Offscreen */
 		setScale(1);
 		configureCollapsed(false);
@@ -568,7 +569,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 						@Override
 						public boolean onProgressChanged(int progress) {
-							mProgressBarSprite.setWidth(progress * ((float)CandiConstants.CANDI_VIEW_WIDTH / 100f));
+							mProgressBarSprite.setWidth(progress * ((float) CandiConstants.CANDI_VIEW_WIDTH / 100f));
+//							if (progress == 100){
+//								mProgressBarSprite.setWidth(0);
+//							}
 							return false;
 						}
 

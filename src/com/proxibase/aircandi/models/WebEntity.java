@@ -4,15 +4,11 @@ import android.graphics.Bitmap;
 
 import com.google.gson.annotations.Expose;
 
-public class PostEntity extends BaseEntity {
+public class WebEntity extends BaseEntity {
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 	@Expose
-	public String	mediaUri;
-	@Expose
-	public String	mediaFormat;
-	@Expose
-	public boolean	locked;
+	public String	contentUri;
 	@Expose
 	public Metadata	__metadata	= new Metadata();
 
@@ -22,7 +18,7 @@ public class PostEntity extends BaseEntity {
 
 	public Bitmap	mediaBitmap;
 
-	public PostEntity() {
-		__metadata.type = "Aircandi.Post";
+	public WebEntity() {
+		__metadata.type = "Aircandi.Web";
 	}
 }

@@ -22,12 +22,11 @@ import org.anddev.andengine.util.modifier.IModifier.IModifierListener;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Typeface;
-import android.text.DynamicLayout;
-import android.text.Layout;
-import android.text.StaticLayout;
-import android.text.TextPaint;
-import android.text.TextUtils;
+import android.graphics.Color;
+import android.text.TextUtils.TruncateAt;
+import android.view.Gravity;
+import android.view.View.MeasureSpec;
+import android.widget.LinearLayout;
 
 import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
@@ -37,6 +36,7 @@ import com.proxibase.aircandi.candi.sprites.CandiRectangle;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
+import com.proxibase.aircandi.utils.TextViewEllipsizing;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 
 public abstract class BaseView extends Entity implements Observer, IView {
@@ -62,7 +62,8 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 	protected String				mTitleText;
 	private int						mTitleTextColor;
-	private int						mTitleTextFillColor;
+	private int						mTitleTextFillColor				= Color.TRANSPARENT;
+	private TextViewEllipsizing		mTitleTextView;
 	protected boolean				mHardwareTexturesInitialized	= false;
 
 	public BaseView() {
@@ -105,9 +106,10 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	private void makeTitleSprite() {
-		mTitleSprite = new CandiSprite(0,
-				CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (mTitleTextureRegion.getHeight() + CandiConstants.CANDI_VIEW_TITLE_SPACER_HEIGHT),
-				mTitleTextureRegion);
+		//		mTitleSprite = new CandiSprite(0,
+		//				CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (mTitleTextureRegion.getHeight() + CandiConstants.CANDI_VIEW_TITLE_SPACER_HEIGHT),
+		//				mTitleTextureRegion);
+		mTitleSprite = new CandiSprite(0, 0, mTitleTextureRegion);
 		mTitleSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mTitleSprite.setVisible(true);
 		mTitleSprite.setZIndex(0);
@@ -245,40 +247,25 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	private Bitmap makeTextBitmap(int width, int height, CharSequence text) {
-		final TextPaint tp = new TextPaint();
-		tp.setTextSize(CandiConstants.CANDI_VIEW_FONT_SIZE);
-		tp.setColor(mTitleTextColor);
-		tp.setTypeface(Typeface.SANS_SERIF);
-		tp.setAntiAlias(true);
-		// tp.setXfermode(new PorterDuffXfermode(Mode.DARKEN));
-		// tp.setShadowLayer(1f, 1, 1, Color.parseColor("#ffffff"));
 
-		DynamicLayout textLayout = new DynamicLayout(text, text, tp, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false,
-				TextUtils.TruncateAt.END, CandiConstants.CANDI_VIEW_WIDTH);
-		int cappedHeight = textLayout.getHeight() > CandiConstants.CANDI_VIEW_TITLE_HEIGHT ? CandiConstants.CANDI_VIEW_TITLE_HEIGHT : textLayout
-				.getHeight();
-		Bitmap bitmap = Bitmap.createBitmap(width, cappedHeight, CandiConstants.IMAGE_CONFIG_DEFAULT);
+		if (mTitleTextView == null) {
+			mTitleTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiActivity);
+		}
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
+		mTitleTextView.setLayoutParams(layoutParams);
+		mTitleTextView.setText(text);
+		mTitleTextView.setTextColor(mTitleTextColor);
+		mTitleTextView.setBackgroundColor(mTitleTextFillColor);
+		mTitleTextView.setEllipsize(TruncateAt.END);
+		mTitleTextView.setMaxLines(4);
+		mTitleTextView.setSingleLine(false);
+
+		Bitmap bitmap = Bitmap.createBitmap(width, height, CandiConstants.IMAGE_CONFIG_DEFAULT);
 		Canvas canvas = new Canvas(bitmap);
-		canvas.drawColor(mTitleTextFillColor);
-		textLayout.draw(canvas);
-		canvas = null;
-
-		return bitmap;
-	}
-
-	@SuppressWarnings("unused")
-	private Bitmap makeTextBitmapStatic(int width, int height, CharSequence text) {
-		final TextPaint tp = new TextPaint();
-		tp.setTextSize(CandiConstants.CANDI_VIEW_FONT_SIZE);
-		tp.setColor(mTitleTextColor);
-		tp.setTypeface(Typeface.SANS_SERIF);
-		tp.setAntiAlias(true);
-
-		StaticLayout sl = new StaticLayout(text, tp, width, Layout.Alignment.ALIGN_NORMAL, 0.95f, 0.0f, false);
-		int cappedHeight = sl.getHeight() > CandiConstants.CANDI_VIEW_TITLE_HEIGHT ? CandiConstants.CANDI_VIEW_TITLE_HEIGHT : sl.getHeight();
-		Bitmap bitmap = Bitmap.createBitmap(width, cappedHeight, CandiConstants.IMAGE_CONFIG_DEFAULT);
-		Canvas canvas = new Canvas(bitmap);
-		sl.draw(canvas);
+		mTitleTextView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+		mTitleTextView.layout(0, 0, width, height);
+		mTitleTextView.setGravity(Gravity.BOTTOM);
+		mTitleTextView.draw(canvas);
 		canvas = null;
 
 		return bitmap;

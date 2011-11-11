@@ -30,7 +30,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseExcepti
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
-public class Post extends EntityBase {
+public class PostForm extends EntityBase {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -40,13 +40,14 @@ public class Post extends EntityBase {
 		drawEntity();
 	}
 
+	@Override
 	protected void bindEntity() {
-		
+
 		/* We handle all the elements that are different than the base entity. */
-		if (mVerb == Verb.New) {
+		if (mCommand.verb.equals("new")) {
 			mEntity = new PostEntity();
 		}
-		else if (mVerb == Verb.Edit) {
+		else if (mCommand.verb.equals("edit")) {
 			String jsonResponse = null;
 			try {
 				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
@@ -60,14 +61,12 @@ public class Post extends EntityBase {
 
 		super.bindEntity();
 
-		if (mVerb == Verb.New) {
-			final PostEntity entity = (PostEntity) mEntity;
+		final PostEntity entity = (PostEntity) mEntity;
+
+		if (mCommand.verb.equals("new")) {
 			entity.entityType = CandiConstants.TYPE_CANDI_POST;
 		}
-		else if (mVerb == Verb.Edit) {
-
-			final PostEntity entity = (PostEntity) mEntity;
-
+		else if (mCommand.verb.equals("edit")) {
 			if (entity.mediaUri != null && !entity.mediaUri.equals("")) {
 				((Button) findViewById(R.id.btn_clear_media)).setEnabled(false);
 				Bitmap bitmap = fetchImage(entity.mediaUri, new IImageRequestListener() {
@@ -111,18 +110,17 @@ public class Post extends EntityBase {
 		}
 	}
 
+	@Override
 	protected void drawEntity() {
 		super.drawEntity();
 
 		final PostEntity entity = (PostEntity) mEntity;
 
-		((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
-		((CheckBox) findViewById(R.id.chk_locked)).setChecked(entity.locked);
-		updateImage(entity);
-	}
-	
-	private void updateImage(PostEntity entity)
-	{
+		if (findViewById(R.id.chk_locked) != null) {
+			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
+			((CheckBox) findViewById(R.id.chk_locked)).setChecked(entity.locked);
+		}
+		
 		if (entity.mediaBitmap != null) {
 			((ImageView) findViewById(R.id.img_media)).setImageBitmap(entity.mediaBitmap);
 			((ImageView) findViewById(R.id.img_media)).setVisibility(View.VISIBLE);
@@ -204,7 +202,7 @@ public class Post extends EntityBase {
 				}
 			}
 			else {
-				
+
 				/* User doesn't have a valid profile image */
 				Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
 				entity.mediaBitmap = bitmap;
@@ -225,10 +223,10 @@ public class Post extends EntityBase {
 		/* Delete or upload images to S3 as needed. */
 		updateImages();
 
-		if (mVerb == Verb.New) {
+		if (mCommand.verb.equals("new")) {
 			insertEntity();
 		}
-		else if (mVerb == Verb.Edit) {
+		else if (mCommand.verb.equals("edit")) {
 			updateEntity();
 		}
 	}
@@ -247,7 +245,7 @@ public class Post extends EntityBase {
 				entity.mediaUri = null;
 			}
 			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(Post.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(PostForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
 				exception.printStackTrace();
 			}
 		}
@@ -260,7 +258,7 @@ public class Post extends EntityBase {
 					addImageToS3(imageKey, entity.mediaBitmap);
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(Post.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(PostForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 				entity.mediaUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
@@ -292,7 +290,7 @@ public class Post extends EntityBase {
 		 * be orphaning any images associated with child entities.
 		 */
 
-		/* If there is an image stored with S3 then delete it  */
+		/* If there is an image stored with S3 then delete it */
 		final PostEntity entity = (PostEntity) mEntity;
 		if (entity.mediaUri != null && !entity.mediaUri.equals("") && entity.mediaFormat.equals("binary")) {
 			String imageKey = entity.mediaUri.substring(entity.mediaUri.lastIndexOf("/") + 1);
@@ -302,7 +300,7 @@ public class Post extends EntityBase {
 				ImageManager.getInstance().getImageCache().remove(entity.mediaUri + ".reflection");
 			}
 			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(Post.this, getString(R.string.post_delete_failed_toast), Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(PostForm.this, getString(R.string.post_delete_failed_toast), Toast.LENGTH_SHORT);
 				exception.printStackTrace();
 			}
 		}
@@ -329,7 +327,7 @@ public class Post extends EntityBase {
 	}
 
 	private void showMediaThumbnail(Bitmap bitmap) {
-		Animation animation = AnimationUtils.loadAnimation(Post.this, R.anim.fade_in_medium);
+		Animation animation = AnimationUtils.loadAnimation(PostForm.this, R.anim.fade_in_medium);
 		animation.setFillEnabled(true);
 		animation.setFillAfter(true);
 		animation.setStartOffset(500);
@@ -345,8 +343,7 @@ public class Post extends EntityBase {
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
 	protected void onDestroy() {
-		super.onDestroy();
-		
+
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 		try {
 			final PostEntity entity = (PostEntity) mEntity;
@@ -357,11 +354,14 @@ public class Post extends EntityBase {
 		catch (Exception exception) {
 			exception.printStackTrace();
 		}
+		finally {
+			super.onDestroy();
+		}
 	}
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.post;
+		return R.layout.post_form;
 	}
 
 	@Override
@@ -390,7 +390,7 @@ public class Post extends EntityBase {
 
 					entity.mediaUri = null;
 					entity.mediaBitmap = bitmap;
-					updateImage(entity);
+					drawEntity();
 				}
 			}
 		}
@@ -427,7 +427,7 @@ public class Post extends EntityBase {
 
 					entity.mediaUri = null;
 					entity.mediaBitmap = bitmap;
-					updateImage(entity);
+					drawEntity();
 				}
 			}
 		}
