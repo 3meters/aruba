@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,6 +16,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PostEntity;
 import com.proxibase.aircandi.utils.DateUtils;

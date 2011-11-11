@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -7,6 +7,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PhotoEntity;
 import com.proxibase.aircandi.utils.ImageManager;

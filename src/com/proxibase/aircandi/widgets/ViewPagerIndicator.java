@@ -8,7 +8,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout;
 
-import com.proxibase.aircandi.activities.R;
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.Logger;
 

@@ -1,14 +1,14 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi;
 
 import java.util.Calendar;
 
 import android.app.Application;
 import android.location.Location;
 
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 
 import org.acra.*;
-import org.acra.ReportField;
 import org.acra.annotation.*;
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ",                 
 		customReportContent = {

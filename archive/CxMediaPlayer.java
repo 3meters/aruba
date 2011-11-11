@@ -3,7 +3,7 @@ package com.proxibase.aircandi.activities;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.proxibase.aircandi.activities.R;
+import com.proxibase.aircandi.R;
 
 import android.app.Activity;
 import android.media.AudioManager;

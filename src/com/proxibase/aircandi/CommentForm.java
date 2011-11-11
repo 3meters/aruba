@@ -1,8 +1,9 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi;
 
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.models.Comment;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;

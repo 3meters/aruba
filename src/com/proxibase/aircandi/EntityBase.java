@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,6 +31,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.AircandiException;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.BaseEntity;

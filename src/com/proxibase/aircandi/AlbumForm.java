@@ -1,9 +1,10 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi;
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
 
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.AlbumEntity;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;

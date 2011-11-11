@@ -35,7 +35,7 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
-import com.proxibase.aircandi.activities.CandiSearchActivity;
+import com.proxibase.aircandi.CandiSearchActivity;
 
 public class S3 {
 

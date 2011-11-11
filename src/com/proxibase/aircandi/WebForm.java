@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,6 +18,7 @@ import android.webkit.URLUtil;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.WebEntity;
 import com.proxibase.aircandi.utils.ImageUtils;

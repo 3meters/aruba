@@ -20,7 +20,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.proxibase.aircandi.activities.R;
+import com.proxibase.aircandi.R;
 
 public class Panel extends LinearLayout {
 

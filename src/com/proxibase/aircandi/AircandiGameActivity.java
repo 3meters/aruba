@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi;
 
 import org.anddev.andengine.ui.activity.LayoutGameActivity;
 
@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.User;

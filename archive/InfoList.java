@@ -25,7 +25,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.activities.R;
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.candi.utils.CandiConstants;
 import com.proxibase.aircandi.models.Post;
 import com.proxibase.aircandi.utils.AircandiUI;

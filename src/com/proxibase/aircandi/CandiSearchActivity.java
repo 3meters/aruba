@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.activities;
+package com.proxibase.aircandi;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -108,7 +108,8 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.proxibase.aircandi.activities.AircandiActivity.Verb;
+import com.proxibase.aircandi.AircandiActivity.Verb;
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.candi.camera.ChaseCamera;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
@@ -453,7 +454,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	public void onCommandButtonClick(View view) {
 
 		Command command = (Command) view.getTag();
-		String commandHandler = "com.proxibase.aircandi.activities." + command.handler;
+		String commandHandler = "com.proxibase.aircandi." + command.handler;
 		String commandName = command.name.toLowerCase();
 
 		if (command.type.toLowerCase().equals("list")) {
@@ -2533,7 +2534,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			if (!mPrefTheme.equals(prefs.getString(Preferences.PREF_THEME, "aircandi_theme.blueray"))) {
 				prefChangeThatRequiresRefresh = false;
 				mPrefTheme = prefs.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
-				int themeResourceId = this.getResources().getIdentifier(mPrefTheme, "style", "com.proxibase.aircandi.activities");
+				int themeResourceId = this.getResources().getIdentifier(mPrefTheme, "style", "com.proxibase.aircandi");
 				this.setTheme(themeResourceId);
 				Intent intent = new Intent(this, CandiSearchActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

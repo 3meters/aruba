@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.proxibase.aircandi.activities"
+    package="com.proxibase.aircandi"
     android:versionCode="1"
     android:versionName="0.1" >
 
@@ -18,7 +18,7 @@
         android:debuggable="true"
         android:icon="@drawable/icon_app"
         android:label="@string/app_name"
-        android:name="com.proxibase.aircandi.activities.Aircandi"
+        android:name="com.proxibase.aircandi.Aircandi"
         android:theme="@style/aircandi_theme.midnight" >
         <activity
             android:configChanges="orientation|keyboardHidden"
@@ -89,10 +89,10 @@
         <activity
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:name="com.proxibase.aircandi.activities.Preferences"
+            android:name="com.proxibase.aircandi.Preferences"
             android:theme="@android:style/Theme" >
             <intent-filter >
-                <action android:name="com.proxibase.aircandi.activities.Preferences" />
+                <action android:name="com.proxibase.aircandi.Preferences" />
 
                 <category android:name="android.intent.category.PREFERENCE" />
             </intent-filter>

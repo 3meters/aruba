@@ -46,8 +46,8 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.GestureDetector.SimpleOnGestureListener;
 
-import com.proxibase.aircandi.activities.CandiSearchActivity;
-import com.proxibase.aircandi.activities.R;
+import com.proxibase.aircandi.CandiSearchActivity;
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.candi.camera.ChaseCamera;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiModelFactory;

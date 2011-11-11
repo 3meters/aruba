@@ -42,7 +42,7 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.Scroller;
 
-import com.proxibase.aircandi.activities.R;
+import com.proxibase.aircandi.R;
 
 public class HorizontalListView extends AdapterView<ListAdapter> {
 

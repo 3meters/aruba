@@ -43,7 +43,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.proxibase.aircandi.activities.R;
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.utils.ImageUtils;
 
