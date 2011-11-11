@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.utils;
+package com.proxibase.aircandi.widgets;
 
 import java.util.ArrayList;
 import java.util.List;
