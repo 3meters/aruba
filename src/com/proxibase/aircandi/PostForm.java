@@ -70,7 +70,7 @@ public class PostForm extends EntityBase {
 		else if (mCommand.verb.equals("edit")) {
 			if (entity.mediaUri != null && !entity.mediaUri.equals("")) {
 				((Button) findViewById(R.id.btn_clear_media)).setEnabled(false);
-				Bitmap bitmap = fetchImage(entity.mediaUri, new IImageRequestListener() {
+				fetchImage(entity.mediaUri, new IImageRequestListener() {
 
 					@Override
 					public void onImageReady(Bitmap bitmap) {
@@ -89,7 +89,7 @@ public class PostForm extends EntityBase {
 					@Override
 					public void onProxibaseException(ProxibaseException exception) {
 						if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-							Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
 							entity.mediaBitmap = bitmap;
 							showMediaThumbnail(bitmap);
 							((Button) findViewById(R.id.btn_clear_media)).setEnabled(true);
@@ -102,11 +102,6 @@ public class PostForm extends EntityBase {
 						return false;
 					}
 				});
-				if (bitmap != null) {
-					entity.mediaBitmap = bitmap;
-					showMediaThumbnail(bitmap);
-					((Button) findViewById(R.id.btn_clear_media)).setEnabled(true);
-				}
 			}
 		}
 	}
@@ -171,7 +166,7 @@ public class PostForm extends EntityBase {
 			entity.mediaFormat = ImageFormat.Binary.name().toLowerCase();
 
 			if (entity.mediaUri != null && !entity.mediaUri.equals("")) {
-				Bitmap bitmap = fetchImage(entity.mediaUri, new IImageRequestListener() {
+				fetchImage(entity.mediaUri, new IImageRequestListener() {
 
 					@Override
 					public void onImageReady(Bitmap bitmap) {
@@ -185,7 +180,7 @@ public class PostForm extends EntityBase {
 					@Override
 					public void onProxibaseException(ProxibaseException exception) {
 						if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-							Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
 							entity.mediaBitmap = bitmap;
 							showMediaThumbnail(bitmap);
 						}
@@ -197,15 +192,11 @@ public class PostForm extends EntityBase {
 						return false;
 					}
 				});
-				if (bitmap != null) {
-					entity.mediaBitmap = bitmap;
-					showMediaThumbnail(bitmap);
-				}
 			}
 			else {
 
 				/* User doesn't have a valid profile image */
-				Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+				Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
 				entity.mediaBitmap = bitmap;
 				showMediaThumbnail(bitmap);
 			}

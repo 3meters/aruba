@@ -11,40 +11,21 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.acra.ErrorReporter;
 import org.anddev.andengine.util.StreamUtils;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Picture;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.MediaStore.Images;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.webkit.WebView.PictureListener;
 
-import com.proxibase.aircandi.core.AircandiException;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.core.AircandiException.CandiErrorCode;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
 /*
@@ -54,18 +35,11 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseExcepti
 
 public class ImageManager {
 
-	private static ImageManager					singletonObject;
+	private static ImageManager	singletonObject;
 
-	private ImageCache							mImageCache;
-	private ImageLoader							mImageLoader;
-	private WebView								mWebView;
-	private Queue								mWebViewQueue		= new LinkedList<ImageRequest>();
-	private boolean								mWebViewProcessing	= false;
-	private IImageRequestListener				mImageReadyListener;
-	private static Context						mContext;
-
-	@SuppressWarnings("unused")
-	private HashMap<String, List<ImageRequest>>	mImageRequests		= new HashMap<String, List<ImageRequest>>();
+	private ImageCache			mImageCache;
+	private ImageLoader			mImageLoader;
+	private static Context		mContext;
 
 	public static synchronized ImageManager getInstance() {
 		if (singletonObject == null) {
@@ -80,233 +54,6 @@ public class ImageManager {
 	private ImageManager() {
 		setImageLoader(new ImageLoader(mContext));
 		getImageLoader().setImageCache(mImageCache);
-		getImageLoader().setWebView(mWebView);
-	}
-
-	public static Bitmap fetchImage(String url) throws ProxibaseException {
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
-
-		/*
-		 * We request a byte array for decoding because of a bug
-		 * in pre 2.3 versions of android.
-		 */
-		byte[] imageBytes = (byte[]) ProxibaseService.getInstance().select(url, ResponseFormat.Bytes);
-		Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
-		if (bitmap == null) {
-			bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
-			ErrorReporter.getInstance().handleSilentException(new Exception("Stream could not be decoded to a bitmap: " + url)); 			
-		}
-
-		return bitmap;
-	}
-
-	public void fetchImageAsynch(ImageRequest imageRequest) throws AircandiException {
-
-		/* Double check that we don't have it in the cache */
-		Bitmap bitmap = mImageCache.get(imageRequest.imageUri);
-		if (bitmap != null) {
-			imageRequest.imageReadyListener.onImageReady(bitmap);
-			return;
-		}
-
-		/* Make sure the cache directory is intact */
-		if (!mImageCache.cacheDirectoryExists())
-			mImageCache.makeCacheDirectory();
-
-		if (imageRequest.imageFormat == ImageFormat.Html || imageRequest.imageFormat == ImageFormat.HtmlZoom) {
-			mWebViewQueue.offer(imageRequest);
-			if (!mWebViewProcessing)
-				startWebViewProcessing();
-		}
-		else if (imageRequest.imageFormat == ImageFormat.Binary) {
-			try {
-				new GetImageBinaryTask().execute(imageRequest);
-			}
-			catch (RejectedExecutionException exception) {
-				throw new AircandiException(exception.getMessage(), CandiErrorCode.RejectedExecutionException, exception);
-			}
-		}
-	}
-
-	public class GetImageBinaryTask extends AsyncTask<ImageRequest, Void, Bitmap> {
-
-		ImageRequest		mImageRequest;
-		ProxibaseException	mProxibaseException;
-
-		@Override
-		protected Bitmap doInBackground(final ImageRequest... params) {
-
-			/* We are on the background thread */
-			mImageRequest = params[0];
-			Bitmap bitmap = null;
-			try {
-				bitmap = fetchImage(mImageRequest.imageUri);
-			}
-			catch (ProxibaseException exception) {
-				mProxibaseException = exception;
-				return null;
-
-			}
-
-			if (bitmap != null) {
-
-				Logger.v(CandiConstants.APP_NAME, "ImageManager", "Image download completed for image '" + mImageRequest.imageUri + "'");
-
-				/* Crop if requested */
-				Bitmap bitmapCropped;
-				if (mImageRequest.imageShape == ImageShape.Square) {
-					bitmapCropped = ImageUtils.cropToSquare(bitmap);
-				}
-				else {
-					bitmapCropped = bitmap;
-				}
-
-				/* Scale if needed */
-				Bitmap bitmapCroppedScaled;
-				if (mImageRequest.scaleToWidth > 0 && bitmapCropped.getWidth() != mImageRequest.scaleToWidth) {
-					float scalingRatio = (float) mImageRequest.scaleToWidth / (float) bitmapCropped.getWidth();
-					float newHeight = (float) bitmapCropped.getHeight() * scalingRatio;
-					bitmapCroppedScaled = Bitmap.createScaledBitmap(bitmapCropped, mImageRequest.scaleToWidth, (int) (newHeight), true);
-				}
-				else {
-					bitmapCroppedScaled = bitmapCropped;
-				}
-
-				/* Make sure the bitmap format is right */
-				Bitmap bitmapFinal;
-				if (!bitmapCroppedScaled.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString())) {
-					bitmapFinal = bitmapCroppedScaled.copy(CandiConstants.IMAGE_CONFIG_DEFAULT, false);
-				}
-				else {
-					bitmapFinal = bitmapCroppedScaled;
-				}
-
-				/* Stuff it into the disk and memory caches. Overwrites if it already exists. */
-				if (bitmapFinal.isRecycled())
-					throw new IllegalArgumentException("bitmapFinal has been recycled");
-				mImageCache.put(mImageRequest.imageUri, bitmapFinal);
-
-				/* Create reflection if requested */
-				if (mImageRequest.makeReflection) {
-					final Bitmap bitmapReflection = ImageUtils.getReflection(bitmapFinal);
-					mImageCache.put(mImageRequest.imageUri + ".reflection", bitmapReflection);
-					if (mImageCache.isFileCacheOnly())
-						bitmapReflection.recycle();
-				}
-
-				return bitmapFinal;
-			}
-			else {
-				Logger.v(CandiConstants.APP_NAME, "ImageManager", "Image download failed for image '" + mImageRequest.imageUri + "'");
-				return null;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(final Bitmap bitmap) {
-
-			/* We are on the main thread */
-			super.onPostExecute(bitmap);
-
-			if (mProxibaseException != null) {
-				if (mImageRequest.imageReadyListener != null)
-					mImageRequest.imageReadyListener.onProxibaseException(mProxibaseException);
-				else if (mImageReadyListener != null) {
-					mImageReadyListener.onProxibaseException(mProxibaseException);
-				}
-			}
-			else {
-				if (bitmap != null) {
-					if (mImageRequest.imageReadyListener != null)
-						mImageRequest.imageReadyListener.onImageReady(bitmap);
-					else if (mImageReadyListener != null) {
-						mImageReadyListener.onImageReady(bitmap);
-					}
-				}
-			}
-		}
-	}
-
-	public class GetImageHtmlTask extends AsyncTask<ImageRequest, Void, Bitmap> {
-
-		ImageRequest		mImageRequest;
-		ProxibaseException	mProxibaseException;
-
-		@Override
-		protected Bitmap doInBackground(final ImageRequest... params) {
-
-			/* We are on the background thread */
-			mImageRequest = params[0];
-			String webViewContent = "";
-			final AtomicBoolean ready = new AtomicBoolean(false);
-
-			try {
-				webViewContent = (String) ProxibaseService.getInstance().select(mImageRequest.imageUri, ResponseFormat.Html);
-			}
-			catch (ProxibaseException exception) {
-				mProxibaseException = exception;
-				return null;
-			}
-			mWebView.setWebViewClient(new WebViewClient() {
-
-				@Override
-				public void onPageFinished(WebView view, String url) {
-					ready.set(true);
-				}
-
-			});
-			mWebView.setPictureListener(new PictureListener() {
-
-				@Override
-				public void onNewPicture(WebView view, Picture picture) {
-
-					if (ready.get()) {
-						Bitmap bitmap = Bitmap.createBitmap(250, 250, CandiConstants.IMAGE_CONFIG_DEFAULT);
-						Canvas canvas = new Canvas(bitmap);
-						picture.draw(canvas);
-
-						if (bitmap != null) {
-
-							/* Stuff it into the disk and memory caches. Overwrites if it already exists. */
-							mImageCache.put(mImageRequest.imageUri, bitmap);
-
-							/* Create reflection if requested */
-							if (mImageRequest.makeReflection) {
-								Bitmap bitmapReflection = ImageUtils.getReflection(bitmap);
-								mImageCache.put(mImageRequest.imageUri + ".reflection", bitmapReflection);
-								if (mImageCache.isFileCacheOnly()) {
-									bitmapReflection.recycle();
-									bitmapReflection = null;
-								}
-							}
-
-							/* Ready to return to original requestor */
-							if (mImageRequest.imageReadyListener != null)
-								mImageRequest.imageReadyListener.onImageReady(bitmap);
-							else if (mImageReadyListener != null) {
-								mImageReadyListener.onImageReady(bitmap);
-							}
-						}
-
-						/* Release */
-						canvas = null;
-						mWebViewProcessing = false;
-						try {
-							startWebViewProcessing();
-						}
-						catch (AircandiException exception) {
-
-							/* TODO: We might have hit the thread limit for AsyncTasks */
-							exception.printStackTrace();
-						}
-					}
-				}
-			});
-
-			mWebView.loadDataWithBaseURL(mImageRequest.imageUri, webViewContent, "text/html", "utf-8", null);
-			return null;
-		}
 	}
 
 	public Bitmap loadBitmapFromDevice(final Uri imageUri, String imageWidthMax) throws ProxibaseException {
@@ -377,7 +124,7 @@ public class ImageManager {
 		return bitmap;
 	}
 
-	public static Bitmap loadBitmapFromAssets(final String assetPath) {
+	public Bitmap loadBitmapFromAssets(final String assetPath) {
 		InputStream in = null;
 		try {
 			final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
@@ -509,7 +256,7 @@ public class ImageManager {
 		}
 	}
 
-	public static float rotationForImage(Context context, Uri uri) {
+	public float rotationForImage(Context context, Uri uri) {
 		if (uri.getScheme().equals("content")) {
 			String[] projection = { Images.ImageColumns.ORIENTATION };
 			Cursor c = context.getContentResolver().query(uri, projection, null, null, null);
@@ -529,7 +276,7 @@ public class ImageManager {
 		return 0f;
 	}
 
-	private static float exifOrientationToDegrees(int exifOrientation) {
+	private float exifOrientationToDegrees(int exifOrientation) {
 		if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
 			return 90;
 		}
@@ -634,21 +381,6 @@ public class ImageManager {
 		return devices.contains(android.os.Build.BRAND + "/" + android.os.Build.PRODUCT + "/" + android.os.Build.DEVICE);
 	}
 
-	public void startWebViewProcessing() throws AircandiException {
-		mWebView.setPictureListener(null);
-		ImageRequest imageRequest = (ImageRequest) mWebViewQueue.poll();
-		if (imageRequest != null) {
-			mWebViewProcessing = true;
-			try {
-				new GetImageHtmlTask().execute(imageRequest);
-			}
-			catch (RejectedExecutionException exception) {
-				exception.printStackTrace();
-				throw new AircandiException(exception.getMessage(), CandiErrorCode.RejectedExecutionException, exception);
-			}
-		}
-	}
-
 	public Bitmap getImage(String key) {
 		return mImageCache.get(key);
 	}
@@ -664,18 +396,6 @@ public class ImageManager {
 	public void setImageCache(ImageCache imageCache) {
 		mImageCache = imageCache;
 		getImageLoader().setImageCache(imageCache);
-	}
-
-	public WebView getWebView() {
-		return mWebView;
-	}
-
-	public void setWebView(WebView webView) {
-		mWebView = webView;
-	}
-
-	public Queue getQueue() {
-		return mWebViewQueue;
 	}
 
 	public void setContext(Context context) {

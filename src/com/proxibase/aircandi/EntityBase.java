@@ -31,8 +31,6 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.proxibase.aircandi.R;
-import com.proxibase.aircandi.core.AircandiException;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.BaseEntity;
 import com.proxibase.aircandi.utils.DateUtils;
@@ -83,7 +81,8 @@ public abstract class EntityBase extends AircandiActivity {
 			entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
 
 			if (entity.imageUri != null && !entity.imageUri.equals("")) {
-				Bitmap bitmap = fetchImage(entity.imageUri, new IImageRequestListener() {
+
+				fetchImage(entity.imageUri, new IImageRequestListener() {
 
 					@Override
 					public void onImageReady(Bitmap bitmap) {
@@ -95,7 +94,7 @@ public abstract class EntityBase extends AircandiActivity {
 					@Override
 					public void onProxibaseException(ProxibaseException exception) {
 						if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-							Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
 							entity.imageBitmap = bitmap;
 							showImageThumbnail(bitmap);
 						}
@@ -107,10 +106,6 @@ public abstract class EntityBase extends AircandiActivity {
 						return false;
 					}
 				});
-				if (bitmap != null) {
-					entity.imageBitmap = bitmap;
-					showImageThumbnail(bitmap);
-				}
 			}
 			entity.parentEntityId = mParentEntityId;
 		}
@@ -120,7 +115,7 @@ public abstract class EntityBase extends AircandiActivity {
 			 */
 			final BaseEntity entity = (BaseEntity) mEntity;
 			if (entity.imageUri != null && !entity.imageUri.equals("")) {
-				Bitmap bitmap = fetchImage(entity.imageUri, new IImageRequestListener() {
+				fetchImage(entity.imageUri, new IImageRequestListener() {
 
 					@Override
 					public void onImageReady(Bitmap bitmap) {
@@ -134,7 +129,7 @@ public abstract class EntityBase extends AircandiActivity {
 					@Override
 					public void onProxibaseException(ProxibaseException exception) {
 						if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-							Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
 							entity.imageBitmap = bitmap;
 							showImageThumbnail(bitmap);
 						}
@@ -145,10 +140,6 @@ public abstract class EntityBase extends AircandiActivity {
 						return false;
 					}
 				});
-				if (bitmap != null) {
-					entity.imageBitmap = bitmap;
-					showImageThumbnail(bitmap);
-				}
 			}
 		}
 		else {
@@ -272,7 +263,7 @@ public abstract class EntityBase extends AircandiActivity {
 			entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
 
 			if (entity.imageUri != null && !entity.imageUri.equals("")) {
-				Bitmap bitmap = fetchImage(entity.imageUri, new IImageRequestListener() {
+				fetchImage(entity.imageUri, new IImageRequestListener() {
 
 					@Override
 					public void onImageReady(Bitmap bitmap) {
@@ -286,7 +277,7 @@ public abstract class EntityBase extends AircandiActivity {
 					@Override
 					public void onProxibaseException(ProxibaseException exception) {
 						if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-							Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
 							entity.imageBitmap = bitmap;
 							showImageThumbnail(bitmap);
 						}
@@ -298,15 +289,11 @@ public abstract class EntityBase extends AircandiActivity {
 						return false;
 					}
 				});
-				if (bitmap != null) {
-					entity.imageBitmap = bitmap;
-					showImageThumbnail(bitmap);
-				}
 			}
 			else {
 
 				/* User doesn't have a valid profile image */
-				Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+				Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
 				entity.imageBitmap = bitmap;
 				showImageThumbnail(bitmap);
 			}
@@ -582,27 +569,12 @@ public abstract class EntityBase extends AircandiActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	protected Bitmap fetchImage(final String imageUri, IImageRequestListener listener) {
+	protected void fetchImage(final String imageUri, IImageRequestListener listener) {
 
-		if (ImageManager.getInstance().hasImage(imageUri)) {
-			Bitmap bitmap = ImageManager.getInstance().getImage(imageUri);
-			return bitmap;
-
-		}
-		else {
-			ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, ImageFormat.Binary, CandiConstants.IMAGE_WIDTH_MAX, false, 1,
+		ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, ImageFormat.Binary, CandiConstants.IMAGE_WIDTH_MAX, false, 1,
 					this, listener);
-			Logger.d(CandiConstants.APP_NAME, "Photo", "Fetching Image: " + imageUri);
-			try {
-				ImageManager.getInstance().fetchImageAsynch(imageRequest);
-			}
-			catch (AircandiException exception) {
-
-				/* TODO: We might have hit the thread limit for asynctasks */
-				exception.printStackTrace();
-			}
-			return null;
-		}
+		Logger.d(CandiConstants.APP_NAME, "Photo", "Fetching Image: " + imageUri);
+		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
 	}
 
 	private void showImageThumbnail(Bitmap bitmap) {

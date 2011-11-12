@@ -108,9 +108,16 @@ public class ImageLoader {
 			listener.onProxibaseException(exception);
 		}
 
-		mWebView.getSettings().setLoadWithOverviewMode(true);
 		/*
-		 * Setting to false will cause html text to layout to try and fit the sizing of the
+		 * We turn off javascript for performance reasons. Some pages will render differently
+		 * because javascript is used to control UI elements.
+		 */
+		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
+		mWebView.getSettings().setJavaScriptEnabled(false);
+		mWebView.getSettings().setLoadWithOverviewMode(true);
+		
+		/*
+		 * Setting WideViewPort to false will cause html text to layout to try and fit the sizing of the
 		 * webview though our screen capture will still be cover the full page width. Ju
 		 * 
 		 * Setting to true will handle text nicely but will show the full width
@@ -222,11 +229,7 @@ public class ImageLoader {
 	}
 
 	public void setWebView(WebView webView) {
-		this.mWebView = webView;
-	}
-
-	public WebView getWebView() {
-		return mWebView;
+		mWebView = webView;
 	}
 
 	public class ImagesQueue {
@@ -288,6 +291,7 @@ public class ImageLoader {
 										}
 									}
 
+									Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Html image processed: " +  imageRequest.imageUri);
 									String uri = mImageRequestors.get(imageRequest.imageRequestor);
 									if (uri != null && uri.equals(imageRequest.imageUri)) {
 										imageRequest.imageReadyListener.onImageReady(bitmap);
@@ -304,7 +308,7 @@ public class ImageLoader {
 								@Override
 								public void onProxibaseException(ProxibaseException exception) {
 									if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-										Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+										Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
 										imageRequest.imageReadyListener.onImageReady(bitmap);
 									}
 								}
@@ -323,7 +327,7 @@ public class ImageLoader {
 																									+ "ms");
 							}
 							catch (ProxibaseException exception) {
-								bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+								bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
 								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(),
 										imageRequest.imageUri + ": Download failed, using placeholder: "
 												+ String.valueOf(estimatedTime / 1000000)

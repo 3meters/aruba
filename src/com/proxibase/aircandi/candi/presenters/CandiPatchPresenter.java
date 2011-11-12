@@ -939,7 +939,7 @@ public class CandiPatchPresenter implements Observer {
 		/* Clear out any left over actions and modifiers */
 		for (CandiModel candiModel : mCandiPatchModel.getCandiModels()) {
 			synchronized (candiModel.getViewActions()) {
-				candiModel.getViewActions().clear();
+				//candiModel.getViewActions().clear();
 			}
 			synchronized (candiModel.getViewModifiers()) {
 				candiModel.getViewModifiers().clear();
@@ -947,7 +947,7 @@ public class CandiPatchPresenter implements Observer {
 			for (IModel childModel : candiModel.getChildren()) {
 				CandiModel childCandiModel = (CandiModel) childModel;
 				synchronized (childCandiModel.getViewActions()) {
-					childCandiModel.getViewActions().clear();
+					//childCandiModel.getViewActions().clear();
 				}
 				synchronized (childCandiModel.getViewModifiers()) {
 					childCandiModel.getViewModifiers().clear();
@@ -986,9 +986,9 @@ public class CandiPatchPresenter implements Observer {
 							ViewState viewStateCurrent = candiModel.getViewStateCurrent();
 							ViewState viewStateNext = candiModel.getViewStateNext();
 
-							Logger.v(CandiConstants.APP_NAME, COMPONENT_NAME, "Transition From: " + transition.toString()
-																					+ ": "
-																					+ candiModel.getTitleText());
+//							Logger.v(CandiConstants.APP_NAME, COMPONENT_NAME, "Transition From: " + transition.toString()
+//																					+ ": "
+//																					+ candiModel.getTitleText());
 
 							if (transition == Transition.Out) {
 								candiModel.getViewModifiers().addLast(
@@ -1059,9 +1059,9 @@ public class CandiPatchPresenter implements Observer {
 							ViewState viewStateCurrent = candiModel.getViewStateCurrent();
 							ViewState viewStateNext = candiModel.getViewStateNext();
 
-							Logger.v(CandiConstants.APP_NAME, COMPONENT_NAME, "Transition To: " + transition.toString()
-																					+ ": "
-																					+ candiModel.getTitleText());
+//							Logger.v(CandiConstants.APP_NAME, COMPONENT_NAME, "Transition To: " + transition.toString()
+//																					+ ": "
+//																					+ candiModel.getTitleText());
 
 							if (transition == Transition.FadeOut) {
 								// viewStateNext.setVisible(false);
@@ -1308,7 +1308,7 @@ public class CandiPatchPresenter implements Observer {
 	public void loadTextureSources() {
 
 		/* Textures that are shared by zone views */
-		Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets(mStyleTextureBodyZone);
+		Bitmap zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
 		if (zoneBodyBitmap != null) {
 			Bitmap zoneReflectionBitmap = ImageUtils.getReflection(zoneBodyBitmap);
 
@@ -1316,7 +1316,7 @@ public class CandiPatchPresenter implements Observer {
 
 				@Override
 				public Bitmap reloadBitmap() {
-					Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets(mStyleTextureBodyZone);
+					Bitmap zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
 					return zoneBodyBitmap;
 				}
 			}), 0, 0);
@@ -1326,7 +1326,7 @@ public class CandiPatchPresenter implements Observer {
 
 						@Override
 						public Bitmap reloadBitmap() {
-							Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets(mStyleTextureBodyZone);
+							Bitmap zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
 							if (zoneBodyBitmap != null) {
 								Bitmap zoneReflectionBitmap = ImageUtils.getReflection(zoneBodyBitmap);
 								return zoneReflectionBitmap;

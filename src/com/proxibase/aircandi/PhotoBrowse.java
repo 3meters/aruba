@@ -46,7 +46,7 @@ public class PhotoBrowse extends EntityBase {
 		final PhotoEntity entity = (PhotoEntity) mEntity;
 
 		if (entity.mediaUri != null && !entity.mediaUri.equals("")) {
-			Bitmap bitmap = fetchImage(entity.mediaUri, new IImageRequestListener() {
+			fetchImage(entity.mediaUri, new IImageRequestListener() {
 
 				@Override
 				public void onImageReady(Bitmap bitmap) {
@@ -64,7 +64,7 @@ public class PhotoBrowse extends EntityBase {
 				@Override
 				public void onProxibaseException(ProxibaseException exception) {
 					if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-						Bitmap bitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
+						Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
 						entity.mediaBitmap = bitmap;
 						showMediaThumbnail(bitmap);
 					}
@@ -75,10 +75,6 @@ public class PhotoBrowse extends EntityBase {
 					return false;
 				}
 			});
-			if (bitmap != null) {
-				entity.mediaBitmap = bitmap;
-				showMediaThumbnail(bitmap);
-			}
 		}
 	}
 
