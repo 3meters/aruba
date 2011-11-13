@@ -563,7 +563,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			if (mQuickContactWindow != null && mQuickContactWindow.isShowing())
 				mQuickContactWindow.dismiss();
 			hideCandiInfo(AnimType.RotateCandi, false);
-			mCandiInfoVisible = false;
 		}
 	}
 
@@ -595,7 +594,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 			else {
 				Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "User starting current entity refresh");
-				
+
 				/* Mark the entity as dirty */
 				for (EntityProxy entityProxy : ProxiExplorer.getInstance().getEntityProxiesFlat()) {
 					if (entityProxy.id.equals(idOfEntityToRefresh)) {
@@ -603,12 +602,12 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						break;
 					}
 				}
-				
-				/* 
-				 * This will come back before we really know if the candi we want to 
+
+				/*
+				 * This will come back before we really know if the candi we want to
 				 * refresh textures for is still around.
 				 */
-				
+
 				scanForBeacons(new Options(false, true), true);
 
 				/* Scan could have caused the current candi to go away or be hidden */
@@ -872,6 +871,19 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			mCandiPatchPresenter.setIgnoreInput(false);
 			mIgnoreInput = false;
 		}
+		if (animType == AnimType.Zoom) {
+			Animation animationEnter = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.zoom_enter);
+			Animation animationExit = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.zoom_exit);
+
+			mCandiSurfaceView.startAnimation(animationExit);
+			hideGLSurfaceView(CandiConstants.DURATION_CANDIINFO_SHOW);
+			mCandiInfoView.setVisibility(View.VISIBLE);
+			mCandiInfoView.startAnimation(animationEnter);
+
+			updateCandiBackButton(null);
+			mCandiPatchPresenter.setIgnoreInput(false);
+			mIgnoreInput = false;
+		}
 		else if (animType == AnimType.CrossFade) {
 			mCandiInfoView.setVisibility(View.VISIBLE);
 			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(this, R.anim.fade_in_medium));
@@ -1050,7 +1062,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				}
 			});
 
-			mCandiInfoVisible = false;
 			mCandiPatchModel.setCandiModelSelected(null);
 			updateCandiBackButton(!mCandiPatchModel.getCandiRootCurrent().isSuperRoot() ? mCandiPatchModel.getCandiRootCurrent().getTitleText()
 																						: null);
@@ -1151,6 +1162,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 			mCandiFlipper.startAnimation(mRotate3dAnimation);
 		}
+		mCandiInfoVisible = false;
 	}
 
 	private RelativeLayout buildCandiInfo(final CandiModel candiModel, final RelativeLayout candiInfoView) {
@@ -2043,6 +2055,12 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		if (!mEngine.isRunning()) {
 			Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Passing onWindowFocusChanged to Andengine");
+			if (hasWindowFocus && mCandiInfoVisible) {
+				mEngine.setBlockReloadTextures(true);
+			}
+			else {
+				mEngine.setBlockReloadTextures(false);
+			}
 			super.onWindowFocusChanged(hasWindowFocus);
 		}
 	}
@@ -2689,7 +2707,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		CrossFade,
 		CrossFadeFlipper,
 		RotateScene,
-		RotateCandi
+		RotateCandi,
+		Zoom
 	}
 
 	public enum PagerView {
