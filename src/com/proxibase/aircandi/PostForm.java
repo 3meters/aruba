@@ -14,9 +14,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PostEntity;
 import com.proxibase.aircandi.utils.DateUtils;
@@ -31,7 +31,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseExcepti
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
-public class PostForm extends EntityBase {
+public class PostForm extends EntityBaseForm {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -47,27 +47,23 @@ public class PostForm extends EntityBase {
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
 			mEntity = new PostEntity();
+			((PostEntity) mEntity).entityType = CandiConstants.TYPE_CANDI_POST;
 		}
 		else if (mCommand.verb.equals("edit")) {
 			String jsonResponse = null;
 			try {
 				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
+				mEntity = (PostEntity) ProxibaseService.convertJsonToObject(jsonResponse, PostEntity.class, GsonType.ProxibaseService);
 			}
 			catch (ProxibaseException exception) {
 				exception.printStackTrace();
 			}
-
-			mEntity = (PostEntity) ProxibaseService.convertJsonToObject(jsonResponse, PostEntity.class, GsonType.ProxibaseService);
 		}
 
 		super.bindEntity();
 
-		final PostEntity entity = (PostEntity) mEntity;
-
-		if (mCommand.verb.equals("new")) {
-			entity.entityType = CandiConstants.TYPE_CANDI_POST;
-		}
-		else if (mCommand.verb.equals("edit")) {
+		if (mCommand.verb.equals("edit")) {
+			final PostEntity entity = (PostEntity) mEntity;
 			if (entity.mediaUri != null && !entity.mediaUri.equals("")) {
 				((Button) findViewById(R.id.btn_clear_media)).setEnabled(false);
 				fetchImage(entity.mediaUri, new IImageRequestListener() {
@@ -98,7 +94,6 @@ public class PostForm extends EntityBase {
 
 					@Override
 					public boolean onProgressChanged(int progress) {
-						// TODO Auto-generated method stub
 						return false;
 					}
 				});
@@ -109,6 +104,8 @@ public class PostForm extends EntityBase {
 	@Override
 	protected void drawEntity() {
 		super.drawEntity();
+		
+		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_post));
 
 		final PostEntity entity = (PostEntity) mEntity;
 

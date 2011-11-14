@@ -5,9 +5,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PhotoEntity;
 import com.proxibase.aircandi.utils.ImageManager;
@@ -19,29 +20,27 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseExcepti
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
-public class PhotoBrowse extends EntityBase {
+public class PhotoBrowse extends AircandiActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		configure();
 		bindEntity();
 		drawEntity();
 	}
 
-	@Override
 	protected void bindEntity() {
 
 		String jsonResponse = null;
 		try {
 			jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
+			mEntity = (PhotoEntity) ProxibaseService.convertJsonToObject(jsonResponse, PhotoEntity.class, GsonType.ProxibaseService);
 		}
 		catch (ProxibaseException exception) {
 			exception.printStackTrace();
 		}
-
-		mEntity = (PhotoEntity) ProxibaseService.convertJsonToObject(jsonResponse, PhotoEntity.class, GsonType.ProxibaseService);
-		super.bindEntity();
 
 		final PhotoEntity entity = (PhotoEntity) mEntity;
 
@@ -78,11 +77,15 @@ public class PhotoBrowse extends EntityBase {
 		}
 	}
 
-	@Override
 	protected void drawEntity() {
-		super.drawEntity();
 
 		final PhotoEntity entity = (PhotoEntity) mEntity;
+
+		if (findViewById(R.id.txt_title) != null)
+			((TextView) findViewById(R.id.txt_title)).setText(entity.title);
+
+		if (findViewById(R.id.txt_content) != null)
+			((TextView) findViewById(R.id.txt_content)).setText(entity.description);
 
 		if (entity.mediaBitmap != null) {
 			((ImageView) findViewById(R.id.img_media)).setImageBitmap(entity.mediaBitmap);
@@ -92,6 +95,14 @@ public class PhotoBrowse extends EntityBase {
 			((ImageView) findViewById(R.id.img_media)).setImageBitmap(null);
 			((ImageView) findViewById(R.id.img_media)).setAnimation(null);
 			((ImageView) findViewById(R.id.img_media)).setVisibility(View.GONE);
+		}
+	}
+
+	private void configure() {
+		mContextButton = (Button) findViewById(R.id.btn_context);
+		if (mContextButton != null) {
+			mContextButton.setVisibility(View.INVISIBLE);
+			showBackButton(true, getString(R.string.post_back_button));
 		}
 	}
 

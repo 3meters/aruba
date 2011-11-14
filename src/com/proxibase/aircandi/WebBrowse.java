@@ -1,19 +1,17 @@
 package com.proxibase.aircandi;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.WebEntity;
 import com.proxibase.aircandi.utils.Logger;
@@ -22,7 +20,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class WebBrowse extends EntityBase {
+public class WebBrowse extends AircandiActivity {
 
 	WebView		mWebView;
 	ProgressBar	mProgressBar;
@@ -31,14 +29,11 @@ public class WebBrowse extends EntityBase {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mWebView = (WebView) findViewById(R.id.webview);
-		mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-
+		configure();
 		bindEntity();
 		drawEntity();
 	}
 
-	@Override
 	protected void bindEntity() {
 		/*
 		 * We handle all the elements that are different than the base entity.
@@ -46,17 +41,14 @@ public class WebBrowse extends EntityBase {
 		String jsonResponse = null;
 		try {
 			jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
+			mEntity = (WebEntity) ProxibaseService.convertJsonToObject(jsonResponse, WebEntity.class, GsonType.ProxibaseService);
 		}
 		catch (ProxibaseException exception) {
 			exception.printStackTrace();
 		}
-
-		mEntity = (WebEntity) ProxibaseService.convertJsonToObject(jsonResponse, WebEntity.class, GsonType.ProxibaseService);
-		super.bindEntity();
 	}
 
 	protected void drawEntity() {
-		super.drawEntity();
 
 		mWebView.setWebViewClient(new WebViewClient() {
 
@@ -65,16 +57,7 @@ public class WebBrowse extends EntityBase {
 				return false;
 			}
 		});
-
-		mWebView.setDownloadListener(new DownloadListener() {
-
-			public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
-				Intent intent = new Intent(Intent.ACTION_VIEW);
-				intent.setData(Uri.parse(url));
-				startActivity(intent);
-			}
-		});
-
+		
 		mWebView.setWebChromeClient(new WebChromeClient() {
 
 			public void onProgressChanged(WebView view, int progress) {
@@ -105,6 +88,17 @@ public class WebBrowse extends EntityBase {
 		mWebView.loadUrl(uri.toString());
 	}
 
+	private void configure() {
+		mWebView = (WebView) findViewById(R.id.webview);
+		mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+		mContextButton = (Button) findViewById(R.id.btn_context);
+		if (mContextButton != null) {
+			mContextButton.setVisibility(View.INVISIBLE);
+			showBackButton(true, getString(R.string.post_back_button));
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
@@ -115,18 +109,6 @@ public class WebBrowse extends EntityBase {
 		}
 		else {
 			super.onBackPressed();
-		}
-	}
-
-	protected void onDestroy() {
-		super.onDestroy();
-
-		/* This activity gets destroyed everytime we leave using back or finish(). */
-		try {
-			mEntity = null;
-		}
-		catch (Exception exception) {
-			exception.printStackTrace();
 		}
 	}
 

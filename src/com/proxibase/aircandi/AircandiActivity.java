@@ -1,23 +1,33 @@
 package com.proxibase.aircandi;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.R;
+import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
+import com.proxibase.aircandi.utils.Logger;
+import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
@@ -27,17 +37,20 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
 public abstract class AircandiActivity extends Activity {
 
-	protected ImageView		mProgressIndicator;
-	protected ImageView		mButtonRefresh;
-	protected Button		mContextButton;
+	protected ImageView			mProgressIndicator;
+	protected ImageView			mButtonRefresh;
+	protected Button			mContextButton;
 
-	protected Integer		mParentEntityId;
-	protected Beacon		mBeacon;
-	protected Boolean		mBeaconUnregistered;
-	protected EntityProxy	mEntityProxy;
-	protected Command		mCommand;
-	protected User			mUser;
-	protected String		mPrefTheme;
+	protected Integer			mParentEntityId;
+	protected Beacon			mBeacon;
+	protected Boolean			mBeaconUnregistered;
+	protected EntityProxy		mEntityProxy;
+	protected Object			mEntity;
+	protected Command			mCommand;
+	protected User				mUser;
+	protected String			mPrefTheme;
+	protected DisplayMetrics	mDisplayMetrics;
+	protected ProgressDialog	mProgressDialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -47,6 +60,7 @@ public abstract class AircandiActivity extends Activity {
 		 * style attributes.
 		 */
 		setTheme();
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 		super.setContentView(this.getLayoutID());
 
@@ -69,7 +83,7 @@ public abstract class AircandiActivity extends Activity {
 			if (json != null && !json.equals("")) {
 				mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Command.class);
 			}
-			
+
 			json = extras.getString(getString(R.string.EXTRA_BEACON));
 			if (json != null && !json.equals("")) {
 				mBeacon = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Beacon.class);
@@ -95,7 +109,18 @@ public abstract class AircandiActivity extends Activity {
 		return 0;
 	}
 
+	protected void fetchImage(final String imageUri, IImageRequestListener listener) {
+
+		ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, ImageFormat.Binary, CandiConstants.IMAGE_WIDTH_MAX, false, 1,
+					this, listener);
+		Logger.d(CandiConstants.APP_NAME, "Photo", "Fetching Image: " + imageUri);
+		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
+	}
+
 	private void configure() {
+
+		mDisplayMetrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(mDisplayMetrics);
 
 		mProgressIndicator = (ImageView) findViewById(R.id.img_progress_indicator);
 		if (mProgressIndicator != null)
@@ -105,10 +130,17 @@ public abstract class AircandiActivity extends Activity {
 		if (mButtonRefresh != null)
 			mButtonRefresh.setVisibility(View.VISIBLE);
 
-		mContextButton = (Button) findViewById(R.id.btn_context);
-		if (mContextButton != null){
-			mContextButton.setVisibility(View.INVISIBLE);
-			showBackButton(true, getString(R.string.post_back_button));
+	}
+
+	protected void showProgressDialog(boolean visible, String message) {
+		if (visible) {
+			mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+			mProgressDialog.setMessage(message);
+			mProgressDialog.setIndeterminate(true);
+			mProgressDialog.show();
+		}
+		else {
+			mProgressDialog.dismiss();
 		}
 	}
 
@@ -227,6 +259,18 @@ public abstract class AircandiActivity extends Activity {
 		super.onResume();
 	}
 
+	protected void onDestroy() {
+		super.onDestroy();
+
+		/* This activity gets destroyed everytime we leave using back or finish(). */
+		try {
+			mEntity = null;
+		}
+		catch (Exception exception) {
+			exception.printStackTrace();
+		}
+	}
+	
 	public static enum Verb {
 		New, Edit, Delete, View
 	}

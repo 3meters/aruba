@@ -10,7 +10,7 @@
 		android:layout_width="fill_parent"
 		android:layout_alignParentTop="true">
 		<include
-			layout="@layout/temp_activity_header" />
+			layout="@layout/temp_activity_form_header" />
 	</LinearLayout>
 	<ScrollView
 		android:layout_height="wrap_content"

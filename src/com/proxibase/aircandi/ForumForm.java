@@ -3,16 +3,17 @@ package com.proxibase.aircandi;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.ForumEntity;
+import com.proxibase.aircandi.models.WebEntity;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class ForumForm extends EntityBase {
+public class ForumForm extends EntityBaseForm {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -21,44 +22,37 @@ public class ForumForm extends EntityBase {
 		bindEntity();
 		drawEntity();
 	}
-	
+
 	@Override
 	protected void bindEntity() {
 
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
 			mEntity = new ForumEntity();
+			((WebEntity) mEntity).entityType = CandiConstants.TYPE_CANDI_FORUM;
 		}
 		else if (mCommand.verb.equals("edit")) {
 			String jsonResponse = null;
 			try {
 				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
+				mEntity = (ForumEntity) ProxibaseService.convertJsonToObject(jsonResponse, ForumEntity.class, GsonType.ProxibaseService);
 			}
 			catch (ProxibaseException exception) {
 				exception.printStackTrace();
 			}
-
-			mEntity = (ForumEntity) ProxibaseService.convertJsonToObject(jsonResponse, ForumEntity.class, GsonType.ProxibaseService);
 		}
-
 		super.bindEntity();
-
-		final ForumEntity entity = (ForumEntity) mEntity;
-
-		if (mCommand.verb.equals("new")) {
-			entity.entityType = CandiConstants.TYPE_CANDI_FORUM;
-		}
 	}
 
 	@Override
 	protected void drawEntity() {
 		super.drawEntity();
 
-		final ForumEntity entity = (ForumEntity) mEntity;
+		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_album));
 
 		if (findViewById(R.id.chk_locked) != null) {
 			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
-			((CheckBox) findViewById(R.id.chk_locked)).setChecked(entity.locked);
+			((CheckBox) findViewById(R.id.chk_locked)).setChecked(((ForumEntity) mEntity).locked);
 		}
 	}
 
@@ -99,7 +93,7 @@ public class ForumForm extends EntityBase {
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
 	protected int getLayoutID() {
 		return R.layout.forum_form;

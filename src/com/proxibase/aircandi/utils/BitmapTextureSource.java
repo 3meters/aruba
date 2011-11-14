@@ -2,8 +2,6 @@ package com.proxibase.aircandi.utils;
 
 import org.anddev.andengine.opengl.texture.source.ITextureSource;
 
-import com.proxibase.aircandi.core.CandiConstants;
-
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 
@@ -61,15 +59,11 @@ public class BitmapTextureSource implements ITextureSource {
 		/* Andengine throws an IllegalArgumentException if we return null. */
 		if (mBitmap != null && mBitmap.isRecycled()) {
 			if (this.mBitmapAdapter != null) {
-				Logger.d("AndEngine", getClass().getSimpleName(), "Reloading recycled texture for Andengine");
+				Logger.v("AndEngine", getClass().getSimpleName(), "Reloading recycled texture for Andengine");
 				Bitmap bitmap = this.mBitmapAdapter.reloadBitmap();
 				if (bitmap != null)
 					mBitmap = bitmap;
 			}
-		}
-		else
-		{
-			Logger.d(CandiConstants.APP_NAME, getClass().getSimpleName(), "Loading texture for Andengine");
 		}
 		return mBitmap;
 	}

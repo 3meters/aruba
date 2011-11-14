@@ -10,17 +10,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PhotoEntity;
+import com.proxibase.aircandi.models.WebEntity;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class PhotoForm extends EntityBase {
+public class PhotoForm extends EntityBaseForm {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -36,43 +38,33 @@ public class PhotoForm extends EntityBase {
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
 			mEntity = new PhotoEntity();
+			((WebEntity) mEntity).entityType = CandiConstants.TYPE_CANDI_PHOTO;
+
 		}
 		else if (mCommand.verb.equals("edit")) {
 			String jsonResponse = null;
 			try {
 				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
+				mEntity = (PhotoEntity) ProxibaseService.convertJsonToObject(jsonResponse, PhotoEntity.class, GsonType.ProxibaseService);
 			}
 			catch (ProxibaseException exception) {
 				exception.printStackTrace();
 			}
-
-			mEntity = (PhotoEntity) ProxibaseService.convertJsonToObject(jsonResponse, PhotoEntity.class, GsonType.ProxibaseService);
 		}
-
 		super.bindEntity();
-
-		final PhotoEntity entity = (PhotoEntity) mEntity;
-
-		if (mCommand.verb.equals("new")) {
-			entity.entityType = CandiConstants.TYPE_CANDI_PHOTO;
-		}
 	}
 
 	@Override
 	protected void drawEntity() {
 		super.drawEntity();
 
-		final PhotoEntity entity = (PhotoEntity) mEntity;
+		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_photo));
 
 		if (findViewById(R.id.chk_locked) != null) {
 			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
-			((CheckBox) findViewById(R.id.chk_locked)).setChecked(entity.locked);
+			((CheckBox) findViewById(R.id.chk_locked)).setChecked(((PhotoEntity) mEntity).locked);
 		}
 	}
-
-	// --------------------------------------------------------------------------------------------
-	// Event routines
-	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
 	// Picker routines

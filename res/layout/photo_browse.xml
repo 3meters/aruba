@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" >
 
-        <include layout="@layout/temp_activity_header" />
+        <include layout="@layout/temp_activity_browse_header" />
     </LinearLayout>
 
     <ScrollView

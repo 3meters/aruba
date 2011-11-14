@@ -18,94 +18,109 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" >
 
-        <include layout="@layout/temp_activity_header" />
+        <include layout="@layout/temp_activity_form_header" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/form_tabs"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_header"
+        android:background="?attr/backgroundForm" >
+
+        <include layout="@layout/temp_form_tabs" />
     </LinearLayout>
 
     <ScrollView
-        android:id="@+id/scrollView1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/panel_wrapper"
-        android:layout_below="@id/activity_header"
+        android:layout_above="@+id/form_footer"
+        android:layout_below="@id/form_tabs"
         android:layout_weight="1"
+        android:background="?attr/backgroundForm"
         android:fillViewport="true" >
 
-        <LinearLayout
-            android:id="@+id/activity_body"
+        <ViewFlipper
+            android:id="@+id/flipper_form"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:gravity="center_vertical|top"
-            android:orientation="vertical"
-            android:padding="5dp" >
+            android:clipChildren="false"
+            android:gravity="center_vertical"
+            android:visibility="visible" >
 
-            <!-- Title and Content -->
-            
-			<TextView
-				android:id="@+id/txt_formtitle"
-				android:layout_height="wrap_content"
-				android:layout_width="fill_parent"
-				android:text="Website"
-				style="@style/txt_formtitle" />
+            <!-- Content -->
 
             <LinearLayout
                 android:id="@+id/activity_body"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical|top"
+                android:orientation="vertical"
+                android:padding="5dp" >
+
+                <!-- Title and Content -->
+
+                <LinearLayout
+                    android:id="@+id/activity_body"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <EditText
+                        android:id="@+id/txt_uri"
+                        style="@style/edittext_form"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center|left"
+                        android:hint="@string/post_uri_hint"
+                        android:inputType="textUri"
+                        android:singleLine="true" />
+
+                    <ImageButton
+                        android:id="@+id/btn_link_builder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:clickable="true"
+                        android:maxWidth="50dp"
+                        android:minWidth="50dp"
+                        android:onClick="onLinkBuilderClick"
+                        android:src="@drawable/icon_bookmarks" />
+                </LinearLayout>
 
                 <EditText
-                    android:id="@+id/txt_uri"
+                    android:id="@+id/txt_title"
                     style="@style/edittext_form"
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center|left"
-                    android:hint="@string/post_uri_hint"
-                    android:inputType="textUri"
-                    android:singleLine="true" />
+                    android:hint="@string/post_title_hint" />
 
-                <ImageButton
-                    android:id="@+id/btn_link_builder"
-                    android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/txt_content"
+                    style="@style/edittext_form"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:clickable="true"
-                    android:maxWidth="50dp"
-                    android:minWidth="50dp"
-                    android:onClick="onLinkBuilderClick"
-                    android:src="@drawable/icon_bookmarks" />
+                    android:gravity="top"
+                    android:hint="@string/post_content_hint"
+                    android:inputType="textMultiLine"
+                    android:lines="10" />
             </LinearLayout>
 
-            <EditText
-                android:id="@+id/txt_title"
-                style="@style/edittext_form"
+            <!-- Settings -->
+
+            <LinearLayout
+                android:id="@+id/panel_wrapper"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/post_title_hint" />
+                android:layout_above="@+id/form_footer"
+                android:orientation="vertical"
+                android:padding="5dp" >
 
-            <EditText
-                android:id="@+id/txt_content"
-                style="@style/edittext_form"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="top"
-                android:hint="@string/post_content_hint"
-                android:inputType="textMultiLine"
-                android:lines="5" />
-
-        </LinearLayout>
+                <include layout="@layout/temp_settings" />
+            </LinearLayout>
+        </ViewFlipper>
     </ScrollView>
-    
-    <LinearLayout
-        android:id="@+id/panel_wrapper"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/form_footer" >
-
-        <include layout="@layout/temp_settings" />
-    </LinearLayout>
-
-        
 
     <!-- Footer -->
 

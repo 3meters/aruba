@@ -17,6 +17,7 @@
 		<attr name="backgroundHeader" format="string"/>
 		<attr name="backgroundButton" format="string"/>
 		<attr name="backgroundCandiInfo" format="color"/>
+		<attr name="backgroundForm" format="string"/>
 		<attr name="iconSearchActions" format="string"/>		
 		<attr name="iconRefresh" format="string"/>		
 		<attr name="iconNew" format="string"/>		
@@ -29,6 +30,9 @@
 	<declare-styleable name="CandiForm">
 		<attr name="activityFooterFormBackground" format="string"/>
 		<attr name="textColorFormTitle" format="color"/>
+		<attr name="sectionHeaderFillStart" format="color"/>
+		<attr name="sectionHeaderFillEnd" format="color"/>
+		<attr name="tabColorHighlight" format="color"/>
 	</declare-styleable>
 	<declare-styleable name="CandiInfo">
 		<attr name="ruleColor" format="color"/>

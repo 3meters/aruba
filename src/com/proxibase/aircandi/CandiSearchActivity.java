@@ -30,9 +30,11 @@ import org.anddev.andengine.util.modifier.ease.EaseCubicOut;
 import org.anddev.andengine.util.modifier.ease.EaseLinear;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.app.ActivityManager.MemoryInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -327,7 +329,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mSliderWrapperSearch = (FrameLayout) findViewById(R.id.slider_wrapper_search);
 		debugSliderShow(mPrefShowDebug);
 		if (mPrefShowDebug) {
-			updateMemoryUsed();
+			updateDebugInfo();
 		}
 
 		registerForContextMenu(findViewById(R.id.group_refresh));
@@ -374,7 +376,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mRotate3dAnimation = new Rotate3dAnimation();
 
 		/* Memory info */
-		updateMemoryUsed();
+		updateDebugInfo();
 
 		mReadyToRun = true;
 	}
@@ -459,6 +461,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		try {
 
 			if (command.handler.toLowerCase().equals("dialog.new")) {
+				showNewCandiDialog();
+				return;
+			}
+			else if (command.handler.toLowerCase().equals("dialog.new")) {
 				showNewCandiDialog();
 				return;
 			}
@@ -571,7 +577,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		if (mReadyToRun) {
 			doRefresh(RefreshType.BeaconScanPlusCurrent);
 		}
-		updateMemoryUsed();
+		updateDebugInfo();
 	}
 
 	private void doRefresh(RefreshType refreshType) {
@@ -670,29 +676,52 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mQuickContactWindow.show(rect, content, view, 0, -10, -11);
 	}
 
-	private void debugOutput() {
+	private void updateDebugInfo() {
 
-		/* Logging */
-		IEntity layer = mEngine.getScene().getChild(CandiConstants.LAYER_CANDI);
-		Logger.v(CandiConstants.APP_NAME, "CandiPatchPresenter", "Current Position for scene: " + String.valueOf(layer.getX())
-																		+ ","
-																		+ String.valueOf(layer.getY()));
-		int childCount = layer.getChildCount();
-		for (int i = childCount - 1; i >= 0; i--) {
-			IEntity child = layer.getChild(i);
-			if (child instanceof CandiView) {
-				/* TODO: Should we null this so the GC can collect them. */
-				final CandiView candiView = (CandiView) child;
-				Logger.v(CandiConstants.APP_NAME, "CandiPatchPresenter", "Current Position for " + candiView.getModel().getTitleText()
-																				+ ": "
-																				+ String.valueOf(candiView.getX())
-																				+ ","
-																				+ String.valueOf(candiView.getY()));
-			}
+		if (mPrefShowDebug) {
+			
+			ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
+			MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+			activityManager.getMemoryInfo(memoryInfo);
+			
+			((RelativeLayout) findViewById(R.id.slider_content_search)).removeAllViews();
+			final TableLayout table = new TableLayout(this);
+			TableLayout.LayoutParams tableLp = new TableLayout.LayoutParams();
+			tableLp.setMargins(0, 0, 0, 0);
+
+			TableRow tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+			((TextView) tableRow.findViewById(R.id.txt_label)).setText("Native Heap Alloc: ");
+			((TextView) tableRow.findViewById(R.id.txt_value)).setText(String.format("%2.2f MB", (float) ((float) Debug.getNativeHeapAllocatedSize() / 1048576f)));
+			table.addView(tableRow, tableLp);
+			
+			tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+			((TextView) tableRow.findViewById(R.id.txt_label)).setText("Global Alloc: ");
+			((TextView) tableRow.findViewById(R.id.txt_value)).setText(String.format("%2.2f MB", (float) ((float) Debug.getGlobalAllocSize() / 1048576f)));
+			table.addView(tableRow, tableLp);
+			
+			tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+			((TextView) tableRow.findViewById(R.id.txt_label)).setText("Global External Alloc: ");
+			((TextView) tableRow.findViewById(R.id.txt_value)).setText(String.format("%2.2f MB", (float) ((float) Debug.getGlobalExternalAllocSize() / 1048576f)));
+			table.addView(tableRow, tableLp);
+			
+			tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+			((TextView) tableRow.findViewById(R.id.txt_label)).setText("Available Mem: ");
+			((TextView) tableRow.findViewById(R.id.txt_value)).setText(String.valueOf(memoryInfo.availMem));
+			table.addView(tableRow, tableLp);
+			
+			tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+			((TextView) tableRow.findViewById(R.id.txt_label)).setText("Low Mem: ");
+			((TextView) tableRow.findViewById(R.id.txt_value)).setText(String.valueOf(memoryInfo.lowMemory));
+			table.addView(tableRow, tableLp);
+			
+			tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+			((TextView) tableRow.findViewById(R.id.txt_label)).setText("Threshold: ");
+			((TextView) tableRow.findViewById(R.id.txt_value)).setText(String.valueOf(memoryInfo.threshold));
+			table.addView(tableRow, tableLp);
+
+			
+			((RelativeLayout) findViewById(R.id.slider_content_search)).addView(table);
 		}
-
-		ImageUtils.showToastNotification(this, "Debug output has been logged...", Toast.LENGTH_SHORT);
-		return;
 	}
 
 	public void onNewCandiClick(View view) {
@@ -779,7 +808,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 								if (options.refreshAllBeacons && !mFullUpdateSuccess) {
 									mFullUpdateSuccess = true;
 								}
-								updateMemoryUsed();
+								updateDebugInfo();
 								mCandiPatchPresenter.setFullUpdateInProgress(false);
 								mCandiPatchPresenter.mProgressSprite.setVisible(false);
 								stopTitlebarProgress();
@@ -1431,7 +1460,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			commandButtonContainer = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_button_command, null);
 
 			final TextView commandButton = (TextView) commandButtonContainer.findViewById(R.id.CommandButton);
-			final TextView commandBadge = (TextView) commandButtonContainer.findViewById(R.id.CommandBadge);
 			commandButtonContainer.setTag(command);
 			if (needMoreButton && commandCount == 5) {
 				commandButton.setText("More...");
@@ -1440,8 +1468,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			else {
 				commandButton.setText(command.labelCustom != null ? command.labelCustom : command.label);
 				commandButton.setTag(command);
-				commandBadge.setTag(command);
-				commandBadge.setVisibility(View.INVISIBLE);
 			}
 
 			/* Add button to row */
@@ -1483,7 +1509,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		if (candi == null) {
 			viewGroup = new LinearLayout(context);
 			Button commandButton = (Button) getLayoutInflater().inflate(R.layout.temp_actionstrip_button, null);
-			commandButton.setText("New Candi");
+			commandButton.setText("New");
 			Drawable icon = getResources().getDrawable(R.drawable.icon_new2_dark);
 			icon.setBounds(0, 0, 30, 30);
 			commandButton.setCompoundDrawables(null, icon, null, null);
@@ -1494,6 +1520,22 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			command.handler = "dialog.new";
 			commandButton.setTag(command);
 			viewGroup.addView(commandButton);
+
+			Button commandButtonCandi = (Button) getLayoutInflater().inflate(R.layout.temp_actionstrip_button, null);
+			commandButtonCandi.setText("Candi");
+			icon = getResources().getDrawable(R.drawable.logo5_dark);
+			icon.setBounds(0, 0, 30, 30);
+			commandButtonCandi.setCompoundDrawables(null, icon, null, null);
+
+			Command commandCandi = new Command();
+			commandCandi.verb = "view";
+			commandCandi.name = "aircandi.candi.view";
+			commandCandi.type = "action";
+			commandCandi.handler = "CandiList";
+			commandButtonCandi.setTag(commandCandi);
+
+			viewGroup.addView(commandButtonCandi);
+
 		}
 		else {
 			if (candi.getEntityProxy().commands == null || candi.getEntityProxy().commands.size() == 0)
@@ -1858,11 +1900,14 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			@Override
 			public void run() {
 
-				final CharSequence[] items = { "Topic", "Photo Album", "Website" };
+				final CharSequence[] items = { 
+				                               getResources().getString(R.string.dialog_new_album),
+				                               getResources().getString(R.string.dialog_new_topic),
+				                               getResources().getString(R.string.dialog_new_web)};
 				AlertDialog.Builder builder = new AlertDialog.Builder(CandiSearchActivity.this);
-				builder.setTitle("Drop some candi...");
+				builder.setTitle(getResources().getString(R.string.dialog_new_message));
 				builder.setCancelable(true);
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				builder.setNegativeButton(getResources().getString(R.string.dialog_new_negative), new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {}
@@ -1930,8 +1975,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		/* Adjusted for density */
 		int statusBarHeight = (int) Math.ceil(CandiConstants.ANDROID_STATUSBAR_HEIGHT * dm.density);
 		int titleBarHeight = (int) Math.ceil(CandiConstants.CANDI_TITLEBAR_HEIGHT * dm.density);
+		int widthPixels = dm.widthPixels;
+		int heightPixels = dm.heightPixels;
 
-		Camera camera = new ChaseCamera(0, 0, dm.widthPixels, dm.heightPixels - (statusBarHeight + titleBarHeight)) {
+		if (widthPixels > heightPixels) {
+			widthPixels = dm.heightPixels;
+			heightPixels = dm.widthPixels;
+		}
+
+		Camera camera = new ChaseCamera(0, 0, widthPixels, heightPixels - (statusBarHeight + titleBarHeight)) {
 
 			@Override
 			public void onApplySceneMatrix(GL10 pGL) {
@@ -2518,7 +2570,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				mPrefShowDebug = prefs.getBoolean(Preferences.PREF_SHOW_DEBUG, false);
 				debugSliderShow(mPrefShowDebug);
 				if (mPrefShowDebug) {
-					updateMemoryUsed();
+					updateDebugInfo();
 				}
 			}
 
@@ -2683,17 +2735,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
 			if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null) {
 				bitmapDrawable.getBitmap().recycle();
-			}
-		}
-	}
-
-	private void updateMemoryUsed() {
-		if (mPrefShowDebug) {
-			TextView textView = (TextView) findViewById(R.id.txt_footer);
-			if (textView != null) {
-				float usedMegs = (float) ((float) Debug.getNativeHeapAllocatedSize() / 1048576f);
-				String usedMegsString = String.format("Memory Used: %2.2f MB", usedMegs);
-				textView.setText(usedMegsString);
 			}
 		}
 	}

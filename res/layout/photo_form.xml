@@ -4,92 +4,125 @@
     android:layout_height="fill_parent"
     android:background="?attr/backgroundCandiInfo" >
 
+    <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+
+    <LinearLayout
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
     <LinearLayout
         android:id="@+id/activity_header"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" >
 
-        <include layout="@layout/temp_activity_header" />
+        <include layout="@layout/temp_activity_form_header" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/form_tabs"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_header"
+        android:background="?attr/backgroundForm" >
+
+        <include layout="@layout/temp_form_tabs" />
     </LinearLayout>
 
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/panel_wrapper"
-        android:layout_below="@id/activity_header"
+        android:layout_above="@+id/form_footer"
+        android:layout_below="@id/form_tabs"
         android:layout_weight="1"
+        android:background="?attr/backgroundForm"
         android:fillViewport="true" >
 
-        <LinearLayout
-            android:id="@+id/activity_body"
+        <ViewFlipper
+            android:id="@+id/flipper_form"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:gravity="center_vertical|top"
-            android:orientation="vertical"
-            android:padding="5dp" >
+            android:clipChildren="false"
+            android:gravity="center_vertical"
+            android:visibility="visible" >
 
-            <!-- Title and Content -->
+            <!-- Content -->
 
+            <LinearLayout
+                android:id="@+id/activity_body"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical|top"
+                android:orientation="vertical"
+                android:padding="5dp" >
 
-            <!-- Public Image -->
+                <!-- Public Image -->
 
-            <TextView
-                android:id="@+id/txt_formtitle"
-                style="@style/txt_formtitle"
+                <TextView
+                    android:id="@+id/txt_formtitle"
+                    style="@style/txt_formtitle"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Photo" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:orientation="horizontal"
+                    android:paddingBottom="10dp" >
+
+                    <Button
+                        android:id="@+id/btn_change_public_image"
+                        style="@style/btn_form"
+                        android:onClick="onChangePublicImageButtonClick"
+                        android:text="@string/post_public_image_change_button" />
+
+                    <ImageView
+                        android:id="@+id/img_public_image"
+                        style="@style/img_photo_thumbnail"
+                        android:layout_alignTop="@id/btn_change_public_image"
+                        android:layout_marginLeft="10dp"
+                        android:layout_toRightOf="@id/btn_change_public_image"
+                        android:visibility="gone" />
+                </RelativeLayout>
+
+                <!-- Title and Content -->
+
+                <EditText
+                    android:id="@+id/txt_title"
+                    style="@style/edittext_form"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/post_title_hint" />
+
+                <EditText
+                    android:id="@+id/txt_content"
+                    style="@style/edittext_form"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:hint="@string/post_content_hint"
+                    android:inputType="textMultiLine"
+                    android:lines="10" />
+            </LinearLayout>
+
+            <!-- Settings -->
+
+            <LinearLayout
+                android:id="@+id/panel_wrapper"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Photo" />
+                android:layout_above="@+id/form_footer"
+                android:orientation="vertical"
+                android:padding="5dp" >
 
-            <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:orientation="horizontal"
-                android:paddingBottom="10dp" >
-
-                <Button
-                    android:id="@+id/btn_change_public_image"
-                    style="@style/btn_form"
-                    android:onClick="onChangePublicImageButtonClick"
-                    android:text="@string/post_public_image_change_button" />
-
-                <ImageView
-                    android:id="@+id/img_public_image"
-                    style="@style/img_photo_thumbnail"
-                    android:layout_alignTop="@id/btn_change_public_image"
-                    android:layout_marginLeft="10dp"
-                    android:layout_toRightOf="@id/btn_change_public_image"
-                    android:visibility="gone" />
-            </RelativeLayout>
-
-            <EditText
-                android:id="@+id/txt_title"
-                style="@style/edittext_form"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/post_title_hint" />
-
-            <EditText
-                android:id="@+id/txt_content"
-                style="@style/edittext_form"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="top"
-                android:hint="@string/post_content_hint"
-                android:inputType="textMultiLine"
-                android:lines="5" />
-        </LinearLayout>
+                <include layout="@layout/temp_settings" />
+            </LinearLayout>
+        </ViewFlipper>
     </ScrollView>
-
-    <LinearLayout
-        android:id="@+id/panel_wrapper"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/form_footer" >
-
-        <include layout="@layout/temp_settings" />
-    </LinearLayout>
 
     <!-- Footer -->
 

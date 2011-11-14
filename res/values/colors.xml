@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <color name="application_titlebar_text">@color/theme_text</color>
-    <color name="application_titlebar_start">@color/theme_widget_start</color>
-    <color name="application_titlebar_end">@color/theme_widget_end</color>
-    <color name="application_titlebar_separator_start">@color/theme_white</color>
-    <color name="application_titlebar_separator_center">@color/theme_white</color>
-    <color name="application_titlebar_separator_end">@color/theme_white</color>
+ 
+    <color name="application_titlebar_separator_start">@color/rule_dark</color>
+    <color name="application_titlebar_separator_center">@color/rule_dark</color>
+    <color name="application_titlebar_separator_end">@color/rule_dark</color>
     
     <color name="quickcontact_disambig">#f2f2f2</color>
     <color name="quickcontact_disambig_divider">#afafaf</color>
@@ -14,97 +11,58 @@
     <color name="progress_start">#ffffd300</color>
     <color name="progress_end">#ffffd300</color>
     
-    <color name="actionstrip_background_fill_dark">#dd000000</color>
-    <color name="actionstrip_background_stroke_dark">#ccaaaaaa</color>
-    <color name="actionstrip_background_fill_light">#eed6d6d6</color>
-    <color name="actionstrip_background_stroke_light">#eeaaaaaa</color>
-    <color name="actionstrip_background_fill_blueray">#ee3064A8</color>
-    <color name="actionstrip_background_stroke_blueray">#eeffffff</color>
-    <color name="actionstrip_background_fill_serene">#ee54ADD3</color>
-    <color name="actionstrip_background_stroke_serene">#eeffffff</color>
+    <color name="actionstrip_background_fill_dark">@color/fill_shadelight_dark</color>
+    <color name="actionstrip_background_stroke_dark">@color/rule_dark</color>
+    <color name="actionstrip_background_fill_light">@color/fill_shadelight_light</color>
+    <color name="actionstrip_background_stroke_light">@color/rule_light</color>
+    <color name="actionstrip_background_fill_blueray">@color/fill_shadelight_blueray</color>
+    <color name="actionstrip_background_stroke_blueray">@color/rule_dark</color>
+    <color name="actionstrip_background_fill_serene">@color/fill_shadelight_serene</color>
+    <color name="actionstrip_background_stroke_serene">@color/rule_dark</color>
     
-    <color name="section_header_start">#33ffffff</color>
-    <color name="section_header_end">#00ffffff</color>
+    <color name="section_header_start_dark">#33ffffff</color>
+    <color name="section_header_end_dark">#00ffffff</color>
     
-    <color name="pager_indicator_text_unfocused_dark">#ffcccccc</color>
-    <color name="pager_indicator_text_unfocused_light">#ff666666</color>
-    <color name="pager_indicator_text_focused_dark">#ffffaa00</color>
-    <color name="pager_indicator_text_focused_light">#ffffaa00</color>
-
-    <color name="edittext_color_hint_dark">#FFA01C</color>
-    <color name="edittext_color_hint_light">#FFA01C</color>
+    <color name="section_header_start_light">#33000000</color>
+    <color name="section_header_end_light">#00000000</color>
     
-    <color name="menu_title_text">@color/theme_text</color>
-    <color name="normal_text">@color/theme_text</color>
-    <color name="normal_text_reversed">@color/theme_white</color>
+    <color name="pager_indicator_text_unfocused_dark">@color/text_unfocused_dark</color>
+    <color name="pager_indicator_text_unfocused_light">@color/text_unfocused_light</color>
+    <color name="pager_indicator_text_focused_dark">@color/accent</color>
+    <color name="pager_indicator_text_focused_light">@color/accent</color>
     
-    <color name="form_label_text">@color/theme_text</color>
-    <color name="form_value_text">@color/theme_text</color>
-    <color name="form_input_text">@color/theme_text_reverse</color>
-    <color name="form_button_text">@color/theme_text</color>
+    <!-- 
+    Theme Colors
+    	- light suffix means a theme where backgrounds are generally light in tone. 
+    	- dark suffix means a theme where backgrounds are generally dark in tone. 
+    -->
     
-    <color name="button_text">@color/theme_text</color>
-    <color name="button_start">@color/theme_lightest</color>
-    <color name="button_end">@color/theme_lightest</color>
-    <color name="button_outline">@color/theme_primary_dark</color>
-    <color name="button_color_filter">@color/theme_tint</color>
+    <color name="accent">#ffffaa00</color>
+    <color name="tab_highlight">#ff63A9E2</color>
+    <color name="edit_hint">#ffffa01c</color>
+    <color name="transparent">#00000000</color>
     
-    <color name="window_wallpaper_start">@color/theme_white</color>
-    <color name="window_wallpaper_end">@color/theme_white</color>
+    <color name="text_dark">#ffffffff</color>
+    <color name="text_light">#ff000000</color>
+    <color name="text_unfocused_dark">#ffcccccc</color>
+    <color name="text_unfocused_light">#ff666666</color>
     
-    <color name="badge_text">@color/theme_text_reverse</color>
+    <color name="fill_shadelight_dark">#ff000000</color>
+    <color name="fill_shadedark_dark">#ff000000</color>
+    <color name="fill_shadelight_light">#ffd6d6d6</color>
+    <color name="fill_shadedark_light">#ffd6d6d6</color>
     
-    <color name="listitem_start">@android:color/transparent</color>
-    <color name="listitem_end">@android:color/transparent</color>
-    <color name="listitem_divider">#ffFFAE5E</color>
-    <color name="picture_border">@color/theme_white</color>
+    <color name="fill_shadelightest_blueray">#ffc6e0ff</color>
+    <color name="fill_shadelight_blueray">#ff3064A8</color>
+    <color name="fill_shadedark_blueray">#ff183880</color>
+    <color name="fill_shadelight_serene">#ff54add3</color>
+    <color name="fill_shadedark_serene">#ff54add3</color>
     
-    <!-- Special -->
+    <color name="fill_30_dark">#33ffffff</color>
+    <color name="fill_30_light">#22000000</color>
     
-    <color name="gray_lightest">#ffdddddd</color>
-    <color name="gray_light">#ffbbbbbb</color>
-    <color name="gray_medium">#ff999999</color>
-    <color name="gray_dark">#ff777777</color>
-    <color name="gray_darkest">#ff555555</color>
-    <color name="orange">#ffffaa00</color>
-    
-    <!-- Gradients -->
-    
-    <!-- Theme Colors -->
-    
-    <color name="theme_white">#ffffffff</color>
-    <color name="theme_black">#ff000000</color>
-    <color name="theme_gray_light">#ffbbbbbb</color>
-    <color name="theme_gray_dark">#ff555555</color>
-    <color name="theme_tint">#FFEFC9</color>
-    <color name="theme_tint2">#FFE8A9</color>
-    
-    <color name="theme_lightest">#D6C76F</color>
-    <color name="theme_light">#ADC1FF</color>
-    <color name="theme_primary_medium">#677DC0</color>
-    <color name="theme_primary_dark">#3B5DC0</color>
-    <color name="theme_primary_highlight">#FFA01C</color>
-    <color name="theme_primary_highlight_soft">#FFC170</color>
-    <color name="theme_secondary_medium">#9E4900</color>
-    <color name="theme_secondaryb_medium">#9E8700</color>
-    
-    <!-- Wind and Sand
-    <color name="theme_white">#ffffffff</color>
-    <color name="theme_black">#ff000000</color>
-    <color name="theme_lightest">#ffFFF7C2</color>
-    <color name="theme_light">#ffE5DFAE</color>
-    <color name="theme_primary_medium">#ffAEC2AE</color>
-    <color name="theme_primary_dark">#ff6F8787</color>
-    <color name="theme_primary_highlight">#ffDBAE5E</color>
-    <color name="theme_secondary_medium">#ffB0B57B</color>
-    <color name="theme_secondary_dark">#ff888F51</color>
-     -->
-     
-    <color name="theme_text">@color/theme_white</color>
-    <color name="theme_text_inactive">@color/theme_primary_dark</color>
-    <color name="theme_text_reverse">@color/theme_black</color>
-    <color name="theme_text_shadow">@color/theme_black</color>
-    <color name="theme_widget_start">#33ffffff</color>
-    <color name="theme_widget_end">#33ffffff</color>
-
+    <color name="rule_dark">#ffffffff</color>
+    <color name="rule_light">#ff000000</color>
+    <color name="rule_30_dark">#33ffffff</color>
+    <color name="rule_30_light">#33000000</color>    
 </resources>

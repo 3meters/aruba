@@ -16,9 +16,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.webkit.URLUtil;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.WebEntity;
 import com.proxibase.aircandi.utils.ImageUtils;
@@ -28,7 +28,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.IQueryListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class WebForm extends EntityBase {
+public class WebForm extends EntityBaseForm {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -49,19 +49,19 @@ public class WebForm extends EntityBase {
 			String jsonResponse = null;
 			try {
 				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
+				mEntity = (WebEntity) ProxibaseService.convertJsonToObject(jsonResponse, WebEntity.class, GsonType.ProxibaseService);
 			}
 			catch (ProxibaseException exception) {
 				exception.printStackTrace();
 			}
-
-			mEntity = (WebEntity) ProxibaseService.convertJsonToObject(jsonResponse, WebEntity.class, GsonType.ProxibaseService);
 		}
-
 		super.bindEntity();
 	}
 
 	protected void drawEntity() {
 		super.drawEntity();
+
+		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_web));
 
 		if (mCommand.verb.equals("edit")) {
 			((EditText) findViewById(R.id.txt_uri)).setText(((WebEntity) mEntity).contentUri);
@@ -139,9 +139,11 @@ public class WebForm extends EntityBase {
 			@Override
 			public void run() {
 
-				final CharSequence[] items = { "Select a bookmark", "Browse to find site" };
+				final CharSequence[] items = {
+												getResources().getString(R.string.dialog_link_bookmark),
+												getResources().getString(R.string.dialog_link_search) };
 				AlertDialog.Builder builder = new AlertDialog.Builder(WebForm.this);
-				builder.setTitle("Build link...");
+				builder.setTitle(getResources().getString(R.string.dialog_link_message));
 				builder.setCancelable(true);
 
 				builder.setOnCancelListener(new OnCancelListener() {
@@ -152,7 +154,7 @@ public class WebForm extends EntityBase {
 					}
 				});
 
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				builder.setNegativeButton(getResources().getString(R.string.dialog_link_negative), new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
@@ -167,40 +169,21 @@ public class WebForm extends EntityBase {
 
 							final Intent intent = new Intent(Intent.ACTION_MAIN, null);
 							intent.addCategory(Intent.CATEGORY_LAUNCHER);
-							final ComponentName cm = new ComponentName("com.android.browser", "com.android.browser.CombinedBookmarkHistoryActivity");
+							ComponentName cm = new ComponentName("com.android.browser", "com.android.browser.CombinedBookmarkHistoryActivity");
 							intent.setComponent(cm);
-							//intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-							startActivityForResult(intent, 1);
-
-							//							Class clazz = null;
-							//							try {
-							//								clazz = Class.forName("com.android.browser.CombinedBookmarkHistoryActivity", false, this.getClass().getClassLoader());
-							//							}
-							//							catch (ClassNotFoundException exception) {
-							//								exception.printStackTrace();
-							//							}
-							//							Intent intentFromClass = new Intent(WebForm.this, clazz);
-							//							startActivityForResult(intentFromClass, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-
-							//							Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-							//							photoPickerIntent.setType("image/*");
-							//							startActivityForResult(photoPickerIntent, CandiConstants.ACTIVITY_PHOTO_PICK);
-							//
-							//
-							//							String[] projection = new String[] { Browser.BookmarkColumns._ID,
-							//																	Browser.BookmarkColumns.TITLE,
-							//																	Browser.BookmarkColumns.URL };
-							//
-							//							Cursor cursor = managedQuery(android.provider.Browser.BOOKMARKS_URI, projection, Browser.BookmarkColumns.BOOKMARK, null, null);
-
+							try {
+								startActivityForResult(intent, 1);
+							}
+							catch (Exception exception) {
+								/* We fallback to try a different way to construct the component */
+								cm = new ComponentName("com.android.browser", "CombinedBookmarkHistoryActivity");
+							}
 						}
 						else if (item == 1) {
-							//Uri uriUrl = Uri.parse("http://androidbook.blogspot.com/");
-							//Intent launchBrowser = new Intent(Intent.ACTION_WEB_SEARCH, uriUrl);
 							Intent launchBrowser = new Intent(Intent.ACTION_WEB_SEARCH);
 							launchBrowser.putExtra(SearchManager.QUERY, "cat humor");
 							startActivityForResult(launchBrowser, 10);
-							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+							//overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 							mProcessing = false;
 							dialog.dismiss();
 						}
@@ -303,5 +286,10 @@ public class WebForm extends EntityBase {
 	@Override
 	protected int getLayoutID() {
 		return R.layout.web_form;
+	}
+
+	public enum FormTab {
+		Content,
+		Settings
 	}
 }

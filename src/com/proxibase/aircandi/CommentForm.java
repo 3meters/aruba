@@ -10,7 +10,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class CommentForm extends EntityBase {
+public class CommentForm extends EntityBaseForm {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

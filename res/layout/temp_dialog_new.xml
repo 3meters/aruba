@@ -26,12 +26,12 @@
 			android:id="@+id/btn_new_topic"
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
-			android:text="@string/dialog_new_topic_button" />
+			android:text="New Topic" />
 		<TextView
 			android:id="@+id/txt_new_topic"
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
-			android:text="@string/dialog_new_topic_label"
+			android:text="New Topic"
 			android:ellipsize="none"
 			android:lines="4"
 			android:paddingLeft="10dp"
@@ -49,11 +49,11 @@
 			android:id="@+id/btn_new_comment"
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
-			android:text="@string/dialog_new_comment_button" />
+			android:text="New Comment" />
 		<TextView
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
-			android:text="@string/dialog_new_comment_label"
+			android:text="New Comment"
 			android:paddingLeft="10dp"
 			android:width="200dp" />
 	</LinearLayout>

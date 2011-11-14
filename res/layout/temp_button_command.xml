@@ -11,19 +11,4 @@
 		android:id="@+id/CommandButton"
 		style="@style/btn_candiinfo"
 		android:onClick="onCommandButtonClick" />
-	<TextView
-		android:id="@+id/CommandBadge"
-		android:text="10"
-		android:textSize="14sp"
-		android:textColor="@color/badge_text"
-		android:layout_marginTop="2dp"
-		android:layout_marginRight="2dp"
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		android:layout_alignParentRight="true"
-		android:gravity="center"
-		android:height="24dp"
-		android:width="24dp"
-		android:clickable="true"
-		android:onClick="onCommandButtonClick" />
 </RelativeLayout>

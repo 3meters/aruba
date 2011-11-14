@@ -112,7 +112,7 @@
         <SlidingDrawer
             android:id="@+id/slider_drawer_search"
             android:layout_width="fill_parent"
-            android:layout_height="100dp"
+            android:layout_height="200dp"
             android:content="@+id/slider_content_search"
             android:handle="@+id/slider_handle_search" >
 
@@ -140,14 +140,6 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp" >
 
-                <TextView
-                    android:id="@+id/txt_footer"
-                    style="@style/txt_footer"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@+id/new_button" />
             </RelativeLayout>
         </SlidingDrawer>
     </FrameLayout>

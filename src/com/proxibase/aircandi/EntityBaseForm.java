@@ -8,29 +8,33 @@ import java.io.IOException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
+import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.proxibase.aircandi.WebForm.FormTab;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.BaseEntity;
 import com.proxibase.aircandi.utils.DateUtils;
@@ -39,9 +43,7 @@ import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.S3;
 import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.consumer.Beacon.BeaconType;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy.Visibility;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -51,17 +53,48 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public abstract class EntityBase extends AircandiActivity {
+public abstract class EntityBaseForm extends AircandiActivity {
 
-	protected Object			mEntity;
-	protected boolean			mProcessing		= false;
-	protected PickerTarget		mPickerTarget	= PickerTarget.None;
-	protected ProgressDialog	mProgressDialog;
+	protected boolean		mProcessing		= false;
+	protected PickerTarget	mPickerTarget	= PickerTarget.None;
+	private FormTab			mActiveTab		= FormTab.Content;
+	private ViewFlipper		mViewFlipper;
+	private int				mTextColorFocused;
+	private int				mTextColorUnfocused;
+	private int				mHeightActive;
+	private int				mHeightInactive;
+	private ImageView		mImageViewContent;
+	private ImageView		mImageViewSettings;
+	private TextView		mTextViewContent;
+	private TextView		mTextViewSettings;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
+		configure();
+	}
+
+	private void configure() {
+		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
+		mImageViewContent = (ImageView) findViewById(R.id.img_tab_content);
+		mImageViewSettings = (ImageView) findViewById(R.id.img_tab_settings);
+		mTextViewContent = (TextView) findViewById(R.id.txt_tab_content);
+		mTextViewSettings = (TextView) findViewById(R.id.txt_tab_settings);
+
+		TypedValue resourceName = new TypedValue();
+		if (this.getTheme().resolveAttribute(R.attr.textColorFocused, resourceName, true)) {
+			mTextColorFocused = Color.parseColor((String) resourceName.coerceToString());
+		}
+
+		if (this.getTheme().resolveAttribute(R.attr.textColorUnfocused, resourceName, true)) {
+			mTextColorUnfocused = Color.parseColor((String) resourceName.coerceToString());
+		}
+
+		mHeightActive = ImageUtils.getRawPixelsForDisplayPixels(mDisplayMetrics, 6);
+		mHeightInactive = ImageUtils.getRawPixelsForDisplayPixels(mDisplayMetrics, 2);
+		setActiveTab(FormTab.Content);
+
 	}
 
 	protected void bindEntity() {
@@ -190,11 +223,15 @@ public abstract class EntityBase extends AircandiActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	public void onSaveButtonClick(View view) {
-		if (!mProcessing) {
-			mProcessing = true;
-			startTitlebarProgress();
-			doSave();
+	public void onContentTabClick(View view) {
+		if (mActiveTab != FormTab.Content) {
+			setActiveTab(FormTab.Content);
+		}
+	}
+
+	public void onSettingsTabClick(View view) {
+		if (mActiveTab != FormTab.Settings) {
+			setActiveTab(FormTab.Settings);
 		}
 	}
 
@@ -317,7 +354,7 @@ public abstract class EntityBase extends AircandiActivity {
 				mBeacon.insert();
 			}
 			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(EntityBase.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
 				exception.printStackTrace();
 			}
 		}
@@ -338,7 +375,7 @@ public abstract class EntityBase extends AircandiActivity {
 				entity.imageUri = null;
 			}
 			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(EntityBase.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
 				exception.printStackTrace();
 			}
 		}
@@ -354,7 +391,7 @@ public abstract class EntityBase extends AircandiActivity {
 					addImageToS3(imageKey, entity.imageBitmap);
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(EntityBase.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 				entity.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
@@ -492,7 +529,7 @@ public abstract class EntityBase extends AircandiActivity {
 				ImageManager.getInstance().getImageCache().remove(entity.imageUri + ".reflection");
 			}
 			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(EntityBase.this, getString(R.string.post_delete_failed_toast), Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_delete_failed_toast), Toast.LENGTH_SHORT);
 				exception.printStackTrace();
 			}
 		}
@@ -506,12 +543,12 @@ public abstract class EntityBase extends AircandiActivity {
 			ProxibaseService.getInstance().webMethod("DeleteEntityWithChildren", parameters, ResponseFormat.Json, null);
 		}
 		catch (ProxibaseException exception) {
-			ImageUtils.showToastNotification(EntityBase.this, getString(R.string.post_delete_failed_toast), Toast.LENGTH_SHORT);
+			ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_delete_failed_toast), Toast.LENGTH_SHORT);
 			exception.printStackTrace();
 		}
 
 		stopTitlebarProgress();
-		ImageUtils.showToastNotification(EntityBase.this, getString(R.string.post_delete_success_toast), Toast.LENGTH_SHORT);
+		ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_delete_success_toast), Toast.LENGTH_SHORT);
 		Intent intent = new Intent();
 		intent.putExtra(getString(R.string.EXTRA_ENTITY_DIRTY), entity.id);
 		intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.Delete);
@@ -569,17 +606,48 @@ public abstract class EntityBase extends AircandiActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	protected void fetchImage(final String imageUri, IImageRequestListener listener) {
+	private void setActiveTab(FormTab formTab) {
+		if (formTab == FormTab.Content) {
+			mTextViewContent.setTextColor(mTextColorFocused);
+			mTextViewSettings.setTextColor(mTextColorUnfocused);
 
-		ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, ImageFormat.Binary, CandiConstants.IMAGE_WIDTH_MAX, false, 1,
-					this, listener);
-		Logger.d(CandiConstants.APP_NAME, "Photo", "Fetching Image: " + imageUri);
-		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightActive);
+			params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+			mImageViewContent.setLayoutParams(params);
+
+			params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightInactive);
+			params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+			mImageViewSettings.setLayoutParams(params);
+
+		}
+		else if (formTab == FormTab.Settings) {
+			mTextViewContent.setTextColor(mTextColorUnfocused);
+			mTextViewSettings.setTextColor(mTextColorFocused);
+
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightActive);
+			params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+			mImageViewSettings.setLayoutParams(params);
+
+			params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightInactive);
+			params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+			mImageViewContent.setLayoutParams(params);
+
+		}
+		mViewFlipper.setDisplayedChild(formTab.ordinal());
+		mActiveTab = formTab;
+	}
+
+	public void onSaveButtonClick(View view) {
+		if (!mProcessing) {
+			mProcessing = true;
+			startTitlebarProgress();
+			doSave();
+		}
 	}
 
 	private void showImageThumbnail(Bitmap bitmap) {
 		if (findViewById(R.id.img_public_image) != null) {
-			Animation animation = AnimationUtils.loadAnimation(EntityBase.this, R.anim.fade_in_medium);
+			Animation animation = AnimationUtils.loadAnimation(EntityBaseForm.this, R.anim.fade_in_medium);
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			animation.setStartOffset(500);
@@ -598,7 +666,7 @@ public abstract class EntityBase extends AircandiActivity {
 			public void run() {
 
 				final CharSequence[] items = { "Select a gallery photo", "Take a new photo", "Use your profile photo" };
-				AlertDialog.Builder builder = new AlertDialog.Builder(EntityBase.this);
+				AlertDialog.Builder builder = new AlertDialog.Builder(EntityBaseForm.this);
 				builder.setTitle("Select photo...");
 				builder.setCancelable(true);
 				builder.setOnCancelListener(new OnCancelListener() {
@@ -652,31 +720,19 @@ public abstract class EntityBase extends AircandiActivity {
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
 	protected void onDestroy() {
-		super.onDestroy();
 
 		/* This activity gets destroyed everytime we leave using back or finish(). */
-
 		try {
 			BaseEntity entity = (BaseEntity) mEntity;
 			if (entity.imageBitmap != null) {
 				entity.imageBitmap.recycle();
 			}
-			mEntity = null;
 		}
 		catch (Exception exception) {
 			exception.printStackTrace();
 		}
-	}
-
-	protected void showProgressDialog(boolean visible, String message) {
-		if (visible) {
-			mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-			mProgressDialog.setMessage(message);
-			mProgressDialog.setIndeterminate(true);
-			mProgressDialog.show();
-		}
-		else {
-			mProgressDialog.dismiss();
+		finally {
+			super.onDestroy();
 		}
 	}
 

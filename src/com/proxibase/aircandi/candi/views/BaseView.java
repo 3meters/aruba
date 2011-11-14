@@ -163,6 +163,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 			mTitleTexture.clearTextureSources();
 			Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, ((BaseModel) mModel)
 					.getTitleText());
+			
 			mTitleTextureRegion = TextureRegionFactory.createFromSource(mTitleTexture, new BitmapTextureSource(titleBitmap, new IBitmapAdapter() {
 
 				@Override
