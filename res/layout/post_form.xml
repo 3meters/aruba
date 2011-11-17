@@ -75,19 +75,18 @@
                     android:gravity="top"
                     android:hint="@string/post_content_hint"
                     android:inputType="textMultiLine"
-                    android:lines="5" />
+                    android:lines="10" />
 
                 <!-- Public Image -->
 
                 <TextView
                     style="@style/section_header_form"
-                    android:text="@string/post_public_image_section_header" />
+                    android:text="@string/post_badge_image_section_header" />
 
                 <RelativeLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:gravity="left"
-                    android:orientation="horizontal"
                     android:paddingBottom="10dp" >
 
                     <Button
@@ -99,59 +98,36 @@
                     <ImageView
                         android:id="@+id/img_public_image"
                         style="@style/img_photo_thumbnail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignTop="@id/btn_change_public_image"
                         android:layout_marginLeft="10dp"
                         android:layout_toRightOf="@id/btn_change_public_image"
+                        android:maxWidth="100dp"
                         android:visibility="gone" />
                 </RelativeLayout>
 
-                <!-- Media -->
-
-                <TextView
-                    style="@style/section_header_form"
-                    android:text="@string/post_media_section_header" />
-
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="left"
-                    android:orientation="horizontal"
-                    android:paddingBottom="10dp" >
+                    android:orientation="vertical"
+                    android:paddingLeft="3dp"
+                    android:paddingTop="5dp" >
 
-                    <Button
-                        android:id="@+id/btn_add_media"
-                        style="@style/btn_form"
-                        android:onClick="onAddMediaButtonClick"
-                        android:text="@string/post_media_add_button" />
-
-                    <Button
-                        android:id="@+id/btn_clear_media"
-                        style="@style/btn_form"
-                        android:onClick="onClearMediaButtonClick"
-                        android:text="@string/post_media_clear_button"
-                        android:visibility="invisible" />
-
-                    <ImageView
-                        android:id="@+id/img_media"
-                        style="@style/img_photo_thumbnail"
-                        android:layout_alignTop="@id/btn_clear_media"
-                        android:layout_marginLeft="10dp"
-                        android:layout_toRightOf="@id/btn_clear_media"
-                        android:visibility="gone" />
-                </RelativeLayout>
+                    <include layout="@layout/temp_user_info" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Settings -->
 
             <LinearLayout
-                android:id="@+id/panel_wrapper"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/form_footer"
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical|top"
                 android:orientation="vertical"
                 android:padding="5dp" >
 
-                <include layout="@layout/temp_settings" />
+                <include layout="@layout/temp_form_settings" />
             </LinearLayout>
         </ViewFlipper>
     </ScrollView>
@@ -167,18 +143,21 @@
         <Button
             android:id="@+id/btn_save_post"
             style="@style/btn_form"
+            android:layout_weight="1"
             android:onClick="onSaveButtonClick"
             android:text="@string/post_save_button" />
 
         <Button
             android:id="@+id/btn_delete_post"
             style="@style/btn_form"
+            android:layout_weight="1"
             android:onClick="onDeleteButtonClick"
             android:text="@string/post_delete_button" />
 
         <Button
             android:id="@+id/btn_cancel"
             style="@style/btn_form"
+            android:layout_weight="1"
             android:onClick="onCancelButtonClick"
             android:text="@string/post_cancel_button" />
     </LinearLayout>

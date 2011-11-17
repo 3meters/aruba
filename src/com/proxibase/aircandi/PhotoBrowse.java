@@ -1,19 +1,23 @@
 package com.proxibase.aircandi;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PhotoEntity;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
@@ -21,6 +25,11 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
 public class PhotoBrowse extends AircandiActivity {
+
+	private ImageView	mPhotoPlaceholderProgress;
+	private ViewFlipper	mViewFlipper;
+	private ProgressBar	mProgressBar;
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -35,7 +44,7 @@ public class PhotoBrowse extends AircandiActivity {
 
 		String jsonResponse = null;
 		try {
-			jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
+			jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json, null);
 			mEntity = (PhotoEntity) ProxibaseService.convertJsonToObject(jsonResponse, PhotoEntity.class, GsonType.ProxibaseService);
 		}
 		catch (ProxibaseException exception) {
@@ -45,36 +54,68 @@ public class PhotoBrowse extends AircandiActivity {
 		final PhotoEntity entity = (PhotoEntity) mEntity;
 
 		if (entity.mediaUri != null && !entity.mediaUri.equals("")) {
-			fetchImage(entity.mediaUri, new IImageRequestListener() {
 
-				@Override
-				public void onImageReady(Bitmap bitmap) {
-					/*
-					 * We can get this callback even when activity has finished.
-					 * TODO: Cancel all active tasks in onDestroy()
-					 */
-					if (mEntity != null) {
-						Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
-						entity.mediaBitmap = bitmap;
-						showMediaThumbnail(bitmap);
-					}
-				}
+			ImageRequest imageRequest = new ImageRequest(entity.mediaUri, ImageShape.Native, ImageFormat.Binary, false,
+					CandiConstants.IMAGE_WIDTH_ORIGINAL, false, false, 1,
+					this, new IImageRequestListener() {
 
-				@Override
-				public void onProxibaseException(ProxibaseException exception) {
-					if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-						Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
-						entity.mediaBitmap = bitmap;
-						showMediaThumbnail(bitmap);
-					}
-				}
+						@Override
+						public void onImageReady(final Bitmap bitmap) {
+							/*
+							 * We can get this callback even when activity has finished.
+							 * TODO: Cancel all active tasks in onDestroy()
+							 */
+							runOnUiThread(new Runnable() {
 
-				@Override
-				public boolean onProgressChanged(int progress) {
-					return false;
-				}
-			});
+								@Override
+								public void run() {
+									if (mEntity != null) {
+										Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
+										entity.mediaBitmap = bitmap;
+										showPhoto(bitmap);
+									}
+								}
+							});
+						}
+
+						@Override
+						public void onProxibaseException(ProxibaseException exception) {
+							if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
+								Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
+								entity.mediaBitmap = bitmap;
+								showPhoto(bitmap);
+							}
+						}
+
+						@Override
+						public boolean onProgressChanged(int progress) {
+							Logger.v(CandiConstants.APP_NAME, "Photo", "Image fetch: " + entity.mediaUri + " progress: " + String.valueOf(progress));
+							mProgressBar.setProgress(progress);
+							return false;
+						}
+					});
+
+			Logger.d(CandiConstants.APP_NAME, "Photo", "Fetching Image: " + entity.mediaUri);
+			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, true);
 		}
+	}
+
+	protected void startProgress() {
+		mPhotoPlaceholderProgress.bringToFront();
+		mPhotoPlaceholderProgress.post(new Runnable() {
+
+			@Override
+			public void run() {
+				AnimationDrawable animation = (AnimationDrawable) mPhotoPlaceholderProgress.getBackground();
+				animation.start();
+
+			}
+		});
+		//mPhotoPlaceholderProgress.invalidate();
+	}
+
+	protected void stopProgress() {
+		//mPhotoPlaceholderProgress.setAnimation(null);
 	}
 
 	protected void drawEntity() {
@@ -99,6 +140,14 @@ public class PhotoBrowse extends AircandiActivity {
 	}
 
 	private void configure() {
+		//mPhotoPlaceholderProgress = (ImageView) findViewById(R.id.img_photo_progress_indicator);
+		mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+		
+		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
+		mViewFlipper.setDisplayedChild(1);
+		mViewFlipper.setInAnimation(this, R.anim.fade_in_medium);
+		mViewFlipper.setOutAnimation(this, R.anim.fade_out_medium);
+
 		mContextButton = (Button) findViewById(R.id.btn_context);
 		if (mContextButton != null) {
 			mContextButton.setVisibility(View.INVISIBLE);
@@ -110,15 +159,10 @@ public class PhotoBrowse extends AircandiActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	private void showMediaThumbnail(Bitmap bitmap) {
-		Animation animation = AnimationUtils.loadAnimation(PhotoBrowse.this, R.anim.fade_in_medium);
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		animation.setStartOffset(500);
-
+	private void showPhoto(Bitmap bitmap) {
 		((ImageView) findViewById(R.id.img_media)).setImageBitmap(bitmap);
-		((ImageView) findViewById(R.id.img_media)).startAnimation(animation);
-		((ImageView) findViewById(R.id.img_media)).setVisibility(View.VISIBLE);
+		stopProgress();
+		mViewFlipper.setDisplayedChild(0);
 	}
 
 	// --------------------------------------------------------------------------------------------

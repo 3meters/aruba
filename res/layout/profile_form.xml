@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundCandiInfo" >
+
+    <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+
+    <LinearLayout
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
+    <LinearLayout
+        android:id="@+id/activity_header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" >
+
+        <include layout="@layout/temp_activity_signin_header" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/form_footer"
+        android:layout_below="@id/activity_header"
+        android:layout_weight="1"
+        android:background="?attr/backgroundForm"
+        android:fillViewport="true" >
+
+        <!-- Content -->
+
+        <LinearLayout
+            android:id="@+id/activity_body"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center_vertical|top"
+            android:orientation="vertical"
+            android:padding="5dp" >
+
+            <!-- Title and Content -->
+
+            <EditText
+                android:id="@+id/txt_username"
+                style="@style/edittext_form"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_username" />
+
+            <EditText
+                android:id="@+id/txt_password"
+                style="@style/edittext_form"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:hint="@string/hint_password" />
+
+            <!-- Public Image -->
+
+            <TextView
+                style="@style/section_header_form"
+                android:text="@string/form_signin_image_section_header" />
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:orientation="horizontal"
+                android:paddingBottom="10dp">
+
+                <Button
+                    android:id="@+id/btn_change_public_image"
+                    style="@style/btn_form"
+                    android:onClick="onChangePublicImageButtonClick"
+                    android:text="@string/post_public_image_change_button" />
+
+                <ImageView
+                    android:id="@+id/img_public_image"
+                    style="@style/img_photo_thumbnail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/btn_change_public_image"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toRightOf="@id/btn_change_public_image"
+                    android:visibility="gone" />
+            </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/form_footer"
+        style="@style/activity_footer_form"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal" >
+
+        <Button
+            android:id="@+id/btn_signin"
+            style="@style/btn_form"
+            android:onClick="onSigninButtonClick"
+            android:text="@string/btn_signin" />
+
+        <Button
+            android:id="@+id/btn_cancel"
+            style="@style/btn_form"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/post_cancel_button" />
+    </LinearLayout>
+
+</RelativeLayout>

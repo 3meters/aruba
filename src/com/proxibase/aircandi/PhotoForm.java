@@ -8,14 +8,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PhotoEntity;
-import com.proxibase.aircandi.models.WebEntity;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
@@ -38,7 +34,7 @@ public class PhotoForm extends EntityBaseForm {
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
 			mEntity = new PhotoEntity();
-			((WebEntity) mEntity).entityType = CandiConstants.TYPE_CANDI_PHOTO;
+			((PhotoEntity) mEntity).entityType = CandiConstants.TYPE_CANDI_PHOTO;
 
 		}
 		else if (mCommand.verb.equals("edit")) {
@@ -59,11 +55,6 @@ public class PhotoForm extends EntityBaseForm {
 		super.drawEntity();
 
 		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_photo));
-
-		if (findViewById(R.id.chk_locked) != null) {
-			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
-			((CheckBox) findViewById(R.id.chk_locked)).setChecked(((PhotoEntity) mEntity).locked);
-		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -97,21 +88,11 @@ public class PhotoForm extends EntityBaseForm {
 	@Override
 	protected void updateImages() {
 		super.updateImages();
-	}
-
-	@Override
-	protected void insertEntity() {
 		final PhotoEntity entity = (PhotoEntity) mEntity;
-		entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
-		super.insertEntity();
-
-	}
-
-	@Override
-	protected void updateEntity() {
-		final PhotoEntity entity = (PhotoEntity) mEntity;
-		entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
-		super.updateEntity();
+		if (entity.imageUri != null) {
+			entity.mediaUri = entity.imageUri;
+			entity.mediaFormat = entity.mediaFormat;
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

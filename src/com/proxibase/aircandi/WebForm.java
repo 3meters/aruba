@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.URLUtil;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -66,6 +67,16 @@ public class WebForm extends EntityBaseForm {
 		if (mCommand.verb.equals("edit")) {
 			((EditText) findViewById(R.id.txt_uri)).setText(((WebEntity) mEntity).contentUri);
 		}
+		
+		if (findViewById(R.id.chk_html_zoom) != null) {
+			((CheckBox) findViewById(R.id.chk_html_zoom)).setVisibility(View.VISIBLE);
+			((CheckBox) findViewById(R.id.chk_html_zoom)).setChecked(((WebEntity) mEntity).imageFormat.equals("htmlzoom") ? true : false);
+		}
+		
+		if (findViewById(R.id.chk_html_javascript) != null) {
+			((CheckBox) findViewById(R.id.chk_html_javascript)).setVisibility(View.VISIBLE);
+			((CheckBox) findViewById(R.id.chk_html_javascript)).setChecked(((WebEntity) mEntity).javascriptEnabled);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -115,7 +126,11 @@ public class WebForm extends EntityBaseForm {
 		final WebEntity entity = (WebEntity) mEntity;
 		entity.contentUri = ((EditText) findViewById(R.id.txt_uri)).getText().toString().trim();
 		entity.imageUri = entity.contentUri;
-		entity.imageFormat = "html";
+		
+		entity.javascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
+		boolean zoomHtml = ((CheckBox) findViewById(R.id.chk_html_zoom)).isChecked();
+		entity.imageFormat = zoomHtml ? "htmlzoom" : "html";
+		
 		super.insertEntity();
 	}
 
@@ -124,7 +139,11 @@ public class WebForm extends EntityBaseForm {
 		final WebEntity entity = (WebEntity) mEntity;
 		entity.contentUri = ((EditText) findViewById(R.id.txt_uri)).getText().toString().trim();
 		entity.imageUri = entity.contentUri;
-		entity.imageFormat = "html";
+		
+		entity.javascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
+		boolean zoomHtml = ((CheckBox) findViewById(R.id.chk_html_zoom)).isChecked();
+		entity.imageFormat = zoomHtml ? "htmlzoom" : "html";
+		
 		super.updateEntity();
 	}
 

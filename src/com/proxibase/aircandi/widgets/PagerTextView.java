@@ -1,5 +1,8 @@
 package com.proxibase.aircandi.widgets;
 
+import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.aircandi.utils.Logger;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
@@ -25,6 +28,8 @@ public class PagerTextView extends TextView {
 
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		Logger.v(CandiConstants.APP_NAME, getClass().getSimpleName(), "onLayout called");
+
 		if (mFirstLayout) {
 			super.onLayout(changed, left, top, right, bottom);
 			mInitialCenterX = this.getCenterX();
@@ -65,5 +70,13 @@ public class PagerTextView extends TextView {
 
 	public int getInitialRight() {
 		return mInitialRight;
+	}
+
+	public void setFirstLayout(boolean firstLayout) {
+		this.mFirstLayout = firstLayout;
+	}
+
+	public boolean isFirstLayout() {
+		return mFirstLayout;
 	}
 }

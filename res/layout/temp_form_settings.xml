@@ -23,10 +23,26 @@
             android:inputType="textPassword" />
 
         <CheckBox
+            android:id="@+id/chk_html_zoom"
+            style="@style/chk_form"
+            android:layout_width="240dp"
+            android:visibility="gone"
+            android:text="@string/form_setting_html_zoom" />
+        
+        <CheckBox
+            android:id="@+id/chk_html_javascript"
+            style="@style/chk_form"
+            android:layout_width="240dp"
+            android:visibility="gone"
+            android:text="@string/form_setting_javascript" />
+        
+        <CheckBox
             android:id="@+id/chk_locked"
             style="@style/chk_form"
             android:layout_width="240dp"
+            android:visibility="gone"
             android:text="@string/post_locked" />
-    </LinearLayout>
+        
+        </LinearLayout>
 
 </merge>

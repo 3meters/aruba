@@ -7,7 +7,6 @@ import android.widget.TextView;
 
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.ForumEntity;
-import com.proxibase.aircandi.models.WebEntity;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
@@ -29,7 +28,7 @@ public class ForumForm extends EntityBaseForm {
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
 			mEntity = new ForumEntity();
-			((WebEntity) mEntity).entityType = CandiConstants.TYPE_CANDI_FORUM;
+			((ForumEntity) mEntity).entityType = CandiConstants.TYPE_CANDI_FORUM;
 		}
 		else if (mCommand.verb.equals("edit")) {
 			String jsonResponse = null;
@@ -48,7 +47,7 @@ public class ForumForm extends EntityBaseForm {
 	protected void drawEntity() {
 		super.drawEntity();
 
-		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_album));
+		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_topic));
 
 		if (findViewById(R.id.chk_locked) != null) {
 			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);

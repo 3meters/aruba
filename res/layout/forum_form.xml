@@ -99,24 +99,35 @@
                     <ImageView
                         android:id="@+id/img_public_image"
                         style="@style/img_photo_thumbnail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignTop="@id/btn_change_public_image"
                         android:layout_marginLeft="10dp"
                         android:layout_toRightOf="@id/btn_change_public_image"
                         android:visibility="gone" />
                 </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingLeft="3dp"
+                    android:paddingTop="5dp" >
+
+                    <include layout="@layout/temp_user_info" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Settings -->
 
             <LinearLayout
-                android:id="@+id/panel_wrapper"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/form_footer"
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical|top"
                 android:orientation="vertical"
                 android:padding="5dp" >
 
-                <include layout="@layout/temp_settings" />
+                <include layout="@layout/temp_form_settings" />
             </LinearLayout>
         </ViewFlipper>
     </ScrollView>
@@ -132,18 +143,21 @@
         <Button
             android:id="@+id/btn_save_post"
             style="@style/btn_form"
+            android:layout_weight="1"
             android:onClick="onSaveButtonClick"
             android:text="@string/post_save_button" />
 
         <Button
             android:id="@+id/btn_delete_post"
             style="@style/btn_form"
+            android:layout_weight="1"
             android:onClick="onDeleteButtonClick"
             android:text="@string/post_delete_button" />
 
         <Button
             android:id="@+id/btn_cancel"
             style="@style/btn_form"
+            android:layout_weight="1"
             android:onClick="onCancelButtonClick"
             android:text="@string/post_cancel_button" />
     </LinearLayout>

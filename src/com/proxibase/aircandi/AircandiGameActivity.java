@@ -58,7 +58,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 		mProgressIndicator = (ImageView) findViewById(R.id.img_progress_indicator);
 		if (mProgressIndicator != null)
 			mProgressIndicator.setVisibility(View.INVISIBLE);
-		
+
 		mButtonRefresh = (ImageView) findViewById(R.id.img_refresh_button);
 		if (mButtonRefresh != null)
 			mButtonRefresh.setVisibility(View.VISIBLE);
@@ -110,16 +110,24 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 		return;
 	}
 
-	protected void startTitlebarProgress(boolean oneShot) {
+	protected void startTitlebarProgress(final boolean oneShot) {
 		if (mProgressIndicator != null) {
 			mProgressIndicator.setVisibility(View.VISIBLE);
 			mButtonRefresh.setVisibility(View.INVISIBLE);
 			mProgressIndicator.bringToFront();
-			AnimationDrawable rippleAnimation = (AnimationDrawable) mProgressIndicator.getBackground();
-			rippleAnimation.setOneShot(oneShot);
-			rippleAnimation.start();
-			mProgressIndicator.invalidate();
-			
+
+			mProgressIndicator.post(new Runnable() {
+
+				@Override
+				public void run() {
+					AnimationDrawable animation = (AnimationDrawable) mProgressIndicator.getBackground();
+					animation.setOneShot(oneShot);
+					animation.start();
+
+				}
+			});
+
+			//mProgressIndicator.invalidate();
 		}
 	}
 

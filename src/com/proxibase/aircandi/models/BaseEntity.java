@@ -33,6 +33,8 @@ public class BaseEntity extends AircandiEntity {
 	@Expose
 	public String	imageFormat;
 	@Expose
+	public boolean	javascriptEnabled;
+	@Expose
 	public Float	signalFence	= -200f;
 	@Expose
 	public Float	createdLatitude;

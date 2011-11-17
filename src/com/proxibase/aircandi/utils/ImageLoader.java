@@ -24,6 +24,7 @@ import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.IProgressListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
@@ -51,6 +52,13 @@ public class ImageLoader {
 		if (!skipCache) {
 			Bitmap bitmap = mImageCache.get(imageRequest.imageUri);
 			if (bitmap != null) {
+				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+					/*
+					 * We might have cached a large version of an image so we
+					 * need to make sure we honor the image request specifications.
+					 */
+					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+				}
 				imageRequest.imageReadyListener.onImageReady(bitmap);
 				return;
 			}
@@ -80,7 +88,7 @@ public class ImageLoader {
 			mImageLoaderThread.start();
 	}
 
-	public static Bitmap getBitmap(String url) throws ProxibaseException {
+	public static Bitmap getBitmap(String url, IProgressListener listener) throws ProxibaseException {
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
 
@@ -88,7 +96,7 @@ public class ImageLoader {
 		 * We request a byte array for decoding because of a bug
 		 * in pre 2.3 versions of android.
 		 */
-		byte[] imageBytes = (byte[]) ProxibaseService.getInstance().select(url, ResponseFormat.Bytes);
+		byte[] imageBytes = (byte[]) ProxibaseService.getInstance().select(url, ResponseFormat.Bytes, listener);
 		Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
 		if (bitmap == null) {
 			throw new IllegalStateException("Stream could not be decoded to a bitmap: " + url);
@@ -102,7 +110,7 @@ public class ImageLoader {
 		final AtomicBoolean ready = new AtomicBoolean(false);
 
 		try {
-			webViewContent = (String) ProxibaseService.getInstance().select(uri, ResponseFormat.Html);
+			webViewContent = (String) ProxibaseService.getInstance().select(uri, ResponseFormat.Html, null);
 		}
 		catch (ProxibaseException exception) {
 			listener.onProxibaseException(exception);
@@ -113,9 +121,9 @@ public class ImageLoader {
 		 * because javascript is used to control UI elements.
 		 */
 		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
-		mWebView.getSettings().setJavaScriptEnabled(false);
+		mWebView.getSettings().setJavaScriptEnabled(imageRequest.javascriptEnabled);
 		mWebView.getSettings().setLoadWithOverviewMode(true);
-		
+
 		/*
 		 * Setting WideViewPort to false will cause html text to layout to try and fit the sizing of the
 		 * webview though our screen capture will still be cover the full page width. Ju
@@ -291,7 +299,8 @@ public class ImageLoader {
 										}
 									}
 
-									Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Html image processed: " +  imageRequest.imageUri);
+									Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(),
+											"Html image processed: " + imageRequest.imageUri);
 									String uri = mImageRequestors.get(imageRequest.imageRequestor);
 									if (uri != null && uri.equals(imageRequest.imageUri)) {
 										imageRequest.imageReadyListener.onImageReady(bitmap);
@@ -317,11 +326,22 @@ public class ImageLoader {
 						else if (imageRequest.imageFormat == ImageFormat.Binary) {
 							long startTime = System.nanoTime();
 							float estimatedTime = System.nanoTime();
-							imageRequest.imageReadyListener.onProgressChanged(20);
 							Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download started...");
 
 							try {
-								bitmap = getBitmap(imageRequest.imageUri);
+								bitmap = getBitmap(imageRequest.imageUri, new IProgressListener() {
+
+									@Override
+									public boolean onProgressChanged(int progress) {
+										if (imageRequest.imageReadyListener != null) {
+											if (progress > 0) {
+												imageRequest.imageReadyListener.onProgressChanged((int) (70 * ((float) progress / 100f)));
+											}
+										}
+										return false;
+									}
+								});
+
 								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download finished: "
 																									+ String.valueOf(estimatedTime / 1000000)
 																									+ "ms");
@@ -333,12 +353,16 @@ public class ImageLoader {
 												+ String.valueOf(estimatedTime / 1000000)
 												+ "ms");
 							}
-							imageRequest.imageReadyListener.onProgressChanged(70);
+
+							//imageRequest.imageReadyListener.onProgressChanged(70);
 							estimatedTime = System.nanoTime() - startTime;
 							startTime = System.nanoTime();
 
 							/* Perform requested post processing */
-							bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+							if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL) {
+								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Scale and crop...");
+								bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+							}
 
 							estimatedTime = System.nanoTime() - startTime;
 							startTime = System.nanoTime();
@@ -346,8 +370,14 @@ public class ImageLoader {
 																									+ String.valueOf(estimatedTime / 1000000)
 																									+ "ms");
 
-							/* Stuff it into the cache. Overwrites if it already exists. */
-							mImageCache.put(imageRequest.imageUri, bitmap);
+							/*
+							 * Stuff it into the cache. Overwrites if it already exists.
+							 * This is a perf hit in the process cause writing files is slow.
+							 */
+							if (imageRequest.cachingAllowed) {
+								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Pushing into cache...");
+								mImageCache.put(imageRequest.imageUri, bitmap);
+							}
 
 							/* Create reflection if requested */
 							imageRequest.imageReadyListener.onProgressChanged(80);

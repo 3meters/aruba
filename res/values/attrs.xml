@@ -39,6 +39,8 @@
 		<attr name="textColor" format="color"/>
 		<attr name="iconInfoActions" format="string"/>		
 		<attr name="imageSliderHandleInfo" format="string"/>
+		<attr name="imageForwardInfo" format="string"/>
+		<attr name="backgroundForwardInfo" format="string"/>
 		<attr name="backgroundSliderHandleInfo" format="string"/>
 		<attr name="backgroundSliderContentInfo" format="string"/>
 	</declare-styleable>

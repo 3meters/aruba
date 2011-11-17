@@ -117,6 +117,7 @@ public interface CandiConstants {
 	public static final int				GL_BLEND_FUNCTION_DESTINATION	= GL10.GL_ONE_MINUS_SRC_ALPHA;
 	public static final TextureOptions	GL_TEXTURE_OPTION				= TextureOptions.BILINEAR_PREMULTIPLYALPHA;
 	public static final int				IMAGE_WIDTH_MAX					= 250;
+	public static final int				IMAGE_WIDTH_ORIGINAL			= -1;
 	public static final String			USER_AGENT						= "Mozilla/5.0 (Linux; U; Android 2.2.1; fr-ch; A43 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 
 }

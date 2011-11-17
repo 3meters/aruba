@@ -8,8 +8,8 @@
 	<RelativeLayout
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:paddingLeft="5dp"
-		android:paddingRight="5dp"
+		android:paddingLeft="4dp"
+		android:paddingRight="4dp"
 		>"
 		<com.proxibase.aircandi.widgets.PagerTextView
 			android:id="@+id/txt_pager_indicator_previous"
@@ -17,7 +17,7 @@
 			android:layout_width="wrap_content"
 			android:layout_alignParentLeft="true"
 			style="@style/txt_pager_indicator"
-			android:text="Previous" />
+			android:text="Gallery" />
 		<com.proxibase.aircandi.widgets.PagerTextView
 			android:id="@+id/txt_pager_indicator_current"
 			android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
 			android:layout_marginRight="-3dp"
 			android:layout_alignParentRight="true"
 			style="@style/txt_pager_indicator"
-			android:text="Next" />
+			android:text="Gallery" />
 	</RelativeLayout>
 	<RelativeLayout
 		android:id="@+id/indicator_notch"

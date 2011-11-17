@@ -111,7 +111,7 @@ public abstract class AircandiActivity extends Activity {
 
 	protected void fetchImage(final String imageUri, IImageRequestListener listener) {
 
-		ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, ImageFormat.Binary, CandiConstants.IMAGE_WIDTH_MAX, false, 1,
+		ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, ImageFormat.Binary, false, CandiConstants.IMAGE_WIDTH_MAX, false, true, 1,
 					this, listener);
 		Logger.d(CandiConstants.APP_NAME, "Photo", "Fetching Image: " + imageUri);
 		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
@@ -187,7 +187,6 @@ public abstract class AircandiActivity extends Activity {
 		startTitlebarProgress();
 		setResult(Activity.RESULT_OK);
 		super.onBackPressed();
-		overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 	}
 
 	@Override

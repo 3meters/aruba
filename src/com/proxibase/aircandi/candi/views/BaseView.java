@@ -61,9 +61,11 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	protected CandiSprite			mTitleSprite;
 
 	protected String				mTitleText;
-	private int						mTitleTextColor;
-	private int						mTitleTextFillColor				= Color.TRANSPARENT;
+	protected int					mTitleTextColor;
+	protected int					mTitleTextFillColor				= Color.TRANSPARENT;
+
 	private TextViewEllipsizing		mTitleTextView;
+
 	protected boolean				mHardwareTexturesInitialized	= false;
 
 	public BaseView() {
@@ -161,9 +163,9 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		if (((BaseModel) mModel).getTitleText() != null) {
 
 			mTitleTexture.clearTextureSources();
-			Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, ((BaseModel) mModel)
+			Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, ((BaseModel) mModel)
 					.getTitleText());
-			
+
 			mTitleTextureRegion = TextureRegionFactory.createFromSource(mTitleTexture, new BitmapTextureSource(titleBitmap, new IBitmapAdapter() {
 
 				@Override
@@ -173,7 +175,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 					 */
 					Bitmap titleBitmap = null;
 					if (mModel != null) {
-						titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, ((BaseModel) mModel)
+						titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, ((BaseModel) mModel)
 								.getTitleText());
 					}
 					return titleBitmap;
@@ -247,7 +249,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		}
 	}
 
-	private Bitmap makeTextBitmap(int width, int height, CharSequence text) {
+	protected Bitmap makeTextBitmap(int width, int height, int padding, CharSequence text) {
 
 		if (mTitleTextView == null) {
 			mTitleTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiActivity);
@@ -256,7 +258,9 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTitleTextView.setLayoutParams(layoutParams);
 		mTitleTextView.setText(text);
 		mTitleTextView.setTextColor(mTitleTextColor);
+		mTitleTextView.setShadowLayer(0, 0, 0, 0xff000000);
 		mTitleTextView.setBackgroundColor(mTitleTextFillColor);
+		mTitleTextView.setPadding(padding, padding, padding, padding);
 		mTitleTextView.setEllipsize(TruncateAt.END);
 		mTitleTextView.setMaxLines(4);
 		mTitleTextView.setSingleLine(false);
@@ -270,6 +274,33 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		canvas = null;
 
 		return bitmap;
+	}
+
+	protected Bitmap overlayTextOnBitmap(int width, int height, int textColor, int textFillColor, int padding, CharSequence text, Bitmap bitmap) {
+
+		if (mTitleTextView == null) {
+			mTitleTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiActivity);
+		}
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
+		mTitleTextView.setLayoutParams(layoutParams);
+		mTitleTextView.setText("\n\n\n\n\n\n" + text);
+		mTitleTextView.setTextColor(textColor);
+		mTitleTextView.setShadowLayer(2, 2, 2, 0xff000000);
+		mTitleTextView.setBackgroundColor(0x00000000);
+		mTitleTextView.setPadding(padding, padding, padding, padding);
+		mTitleTextView.setEllipsize(TruncateAt.END);
+		mTitleTextView.setMaxLines(4);
+		mTitleTextView.setSingleLine(false);
+
+		Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+		Canvas canvas = new Canvas(bitmapCopy);
+		mTitleTextView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+		mTitleTextView.layout(0, 0, width, height);
+		mTitleTextView.setGravity(Gravity.BOTTOM);
+		mTitleTextView.draw(canvas);
+		canvas = null;
+
+		return bitmapCopy;
 	}
 
 	public void unloadResources() {

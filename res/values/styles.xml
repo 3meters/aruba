@@ -32,6 +32,8 @@
         <item name="backgroundSliderContentSearch">@drawable/slider_content_search_bg_dark</item>
         <item name="imageSliderHandleInfo">@drawable/gripper_dark</item>
         <item name="backgroundSliderHandleInfo">@drawable/slider_handle_info_bg_dark</item>
+        <item name="imageForwardInfo">@drawable/icon_forward_dark</item>
+        <item name="backgroundForwardInfo">@color/transparent</item>
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_dark</item>
         <item name="actionStripBackground">@drawable/actionstrip_background_dark</item>
         <item name="activityFooterFormBackground">@drawable/app_header_bg_dark</item>
@@ -73,6 +75,8 @@
         <item name="imageSliderHandleInfo">@drawable/gripper_light</item>
         <item name="backgroundSliderHandleInfo">@drawable/slider_handle_info_bg_light</item>
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_light</item>
+        <item name="imageForwardInfo">@drawable/icon_forward_light</item>
+        <item name="backgroundForwardInfo">@color/transparent</item>
         <item name="actionStripBackground">@drawable/actionstrip_background_light</item>
         <item name="activityFooterFormBackground">@drawable/app_header_bg_light</item>
         <item name="ruleColor">@color/rule_30_light</item>
@@ -348,6 +352,7 @@
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxWidth">100dp</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <!-- Candi Dialogs -->
@@ -361,7 +366,7 @@
              This is a hack because we want to be able to animate away the
              QuickContact window, and we close its containing activity at the
              same time.  So put in a dummy animation so this guy sticks around
-             while the fast track window is animating.
+             while the fast track window is animating.
         -->
         <item name="android:windowAnimationStyle">@style/DummyAnimation</item>
     </style>
@@ -433,9 +438,20 @@
         <item name="android:textColor">?attr/textColor</item>
     </style>
 
+    <style name="txt_label" parent="android:Widget.TextView">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">?attr/textColor</item>
+        <item name="android:paddingLeft">2dp</item>
+    </style>
+
     <style name="btn_form" parent="android:Widget.Button">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">wrap_content</item>
+        <item name="android:minWidth">80dp</item>
+    </style>
+
+    <style name="btn_actionbar" parent="android:Widget.Button">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:minWidth">80dp</item>
     </style>
 
@@ -465,14 +481,16 @@
         <item name="android:focusableInTouchMode">true</item>
     </style>
 
+    <style name="img_photo_placeholder">
+        <item name="android:background">#33ffffff</item>
+        <item name="android:padding">3dp</item>
+    </style>
+
     <style name="img_photo_thumbnail">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
         <item name="android:adjustViewBounds">true</item>
         <item name="android:background">#cfff</item>
         <item name="android:focusable">true</item>
         <item name="android:focusableInTouchMode">true</item>
-        <item name="android:maxWidth">150dp</item>
         <item name="android:padding">3dp</item>
         <item name="android:scaleType">centerInside</item>
     </style>
@@ -483,6 +501,25 @@
         <item name="android:paddingTop">5dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:background">?attr/activityFooterFormBackground</item>
+    </style>
+
+    <style name="img_user">
+        <item name="android:background">#0000</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:adjustViewBounds">true</item>
+    </style>
+
+    <style name="txt_user_name" parent="android:Widget.TextView">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">?attr/textColor</item>
+    </style>
+
+    <style name="txt_user_date" parent="android:Widget.TextView">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">?attr/textColor</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
     <!-- Misc -->

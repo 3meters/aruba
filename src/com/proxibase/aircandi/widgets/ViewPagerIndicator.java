@@ -9,8 +9,6 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.proxibase.aircandi.R;
-import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.Logger;
 
 /**
  * An small bar indicating the title of the previous, current and next page to be shown in a ViewPager.
@@ -21,7 +19,6 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 	PageInfoProvider	mPageInfoProvider;
 	View				mBoundView;
 	int					mPageCount;
-	boolean				mFirstLayout		= true;
 	int					mPositionCurrent;
 
 	PagerTextView		mTextViewPrevious;
@@ -62,11 +59,12 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 	 * @param pageInfoProvider Interface that returns page titles
 	 */
 	public void initialize(int startPageNumber, int pageCount, PageInfoProvider pageInfoProvider) {
-		if (mBoundView == null)
+		if (mBoundView == null) {
 			throw new IllegalStateException("bindToView must be called before initialization.");
-
-		if (startPageNumber < 1)
+		}
+		if (startPageNumber < 1) {
 			throw new IllegalArgumentException("startPageNumber must be 1 or more.");
+		}
 
 		this.mPageCount = pageCount;
 		mPageInfoProvider = pageInfoProvider;
@@ -83,12 +81,15 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 		mTextViewCurrent = (PagerTextView) view.findViewById(R.id.txt_pager_indicator_current);
 		mTextViewPrevious = (PagerTextView) view.findViewById(R.id.txt_pager_indicator_previous);
 		mTextViewNext = (PagerTextView) view.findViewById(R.id.txt_pager_indicator_next);
-		if (mTextViewCurrent != null)
+		if (mTextViewCurrent != null) {
 			mTextViewCurrent.setTextColor(Color.argb(255, mTextColorFocused[0], mTextColorFocused[1], mTextColorFocused[2]));
-		if (mTextViewPrevious != null)
+		}
+		if (mTextViewPrevious != null) {
 			mTextViewPrevious.setTextColor(Color.argb(255, mTextColorUnfocused[0], mTextColorUnfocused[1], mTextColorUnfocused[2]));
-		if (mTextViewNext != null)
+		}
+		if (mTextViewNext != null) {
 			mTextViewNext.setTextColor(Color.argb(255, mTextColorUnfocused[0], mTextColorUnfocused[1], mTextColorUnfocused[2]));
+		}
 
 		this.removeAllViews();
 		this.addView(mBoundView);
@@ -100,30 +101,17 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-		if (mFirstLayout) {
-			super.onLayout(changed, left, top, right, bottom);
-			mFirstLayout = false;
-		}
+		super.onLayout(changed, left, top, right, bottom);
 	}
 
 	@Override
-	public void onPageSelected(int position) {
-		Logger.v(CandiConstants.APP_NAME, "ViewPagerIndicator", "PageSelected Position: " + String.valueOf(position));
-	}
+	public void onPageSelected(int position) {}
 
 	@Override
-	public void onPageScrollStateChanged(int state) {
-		Logger.v(CandiConstants.APP_NAME, "ViewPagerIndicator", "PageScrollStateChanged State: " + String.valueOf(state));
-	}
+	public void onPageScrollStateChanged(int state) {}
 
 	@Override
 	public void onPageScrolled(int position, float positionOffset, final int positionOffsetPixels) {
-		Logger.v(CandiConstants.APP_NAME, "ViewPagerIndicator", "Position: " + String.valueOf(position)
-																		+ " PositionOffset: "
-																		+ String.valueOf(positionOffset)
-																		+ " PositionOffsetPixels: "
-																		+ String.valueOf(positionOffsetPixels));
-
 		int currentCenterSpan = getSpanBetweenCenters(mTextViewCurrent);
 		int nextCenterSpan = getSpanBetweenCenters(mTextViewNext);
 
@@ -133,7 +121,6 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 			updateColor(positionOffsetPixels);
 		}
 		else {
-
 			/* Configure the back button */
 		}
 		invalidate();
@@ -164,6 +151,10 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 		else {
 			mTextViewNext.setText("");
 		}
+
+		mTextViewPrevious.setFirstLayout(true);
+		mTextViewCurrent.setFirstLayout(true);
+		mTextViewNext.setFirstLayout(true);
 	}
 
 	private int getSpanBetweenCenters(PagerTextView pagerTextView) {
@@ -175,18 +166,21 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 		mTextColorFocused[0] = Color.red(color);
 		mTextColorFocused[1] = Color.green(color);
 		mTextColorFocused[2] = Color.blue(color);
-		if (mTextViewCurrent != null)
+		if (mTextViewCurrent != null) {
 			mTextViewCurrent.setTextColor(color);
+		}
 	}
 
 	public void setTextColorUnfocused(int color) {
 		mTextColorUnfocused[0] = Color.red(color);
 		mTextColorUnfocused[1] = Color.green(color);
 		mTextColorUnfocused[2] = Color.blue(color);
-		if (mTextViewNext != null)
+		if (mTextViewNext != null) {
 			mTextViewNext.setTextColor(color);
-		if (mTextViewPrevious != null)
+		}
+		if (mTextViewPrevious != null) {
 			mTextViewPrevious.setTextColor(color);
+		}
 	}
 
 	/**
@@ -201,15 +195,16 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 		int r = (int) (mTextColorUnfocused[0] * fraction + mTextColorFocused[0] * (1 - fraction));
 		int g = (int) (mTextColorUnfocused[1] * fraction + mTextColorFocused[1] * (1 - fraction));
 		int b = (int) (mTextColorUnfocused[2] * fraction + mTextColorFocused[2] * (1 - fraction));
-		if (mTextViewCurrent != null)
+		if (mTextViewCurrent != null) {
 			mTextViewCurrent.setTextColor(Color.argb(255, r, g, b));
+		}
 
 		r = (int) (mTextColorFocused[0] * fraction + mTextColorUnfocused[0] * (1 - fraction));
 		g = (int) (mTextColorFocused[1] * fraction + mTextColorUnfocused[1] * (1 - fraction));
 		b = (int) (mTextColorFocused[2] * fraction + mTextColorUnfocused[2] * (1 - fraction));
-
-		if (mTextViewNext != null)
+		if (mTextViewNext != null) {
 			mTextViewNext.setTextColor(Color.argb(255, r, g, b));
+		}
 	}
 
 	public interface PageInfoProvider {

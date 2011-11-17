@@ -41,12 +41,11 @@
 			android:onClick="onRefreshClick">
 			<ImageView
 				android:id="@+id/img_progress_indicator"
+				style="@style/application_progress"
 				android:layout_height="22dp"
 				android:layout_width="22dp"
 				android:layout_centerInParent="true"
-				style="@style/application_progress"
 				android:scaleType="fitCenter"
-				android:visibility="invisible"
 				android:adjustViewBounds="true"
 				android:background="@drawable/busy_anim" />
 			<ImageView

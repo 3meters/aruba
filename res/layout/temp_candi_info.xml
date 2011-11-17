@@ -69,8 +69,20 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/img_public"
+                        android:layout_marginTop="10dp"
                         android:clickable="true"
                         android:text="0\nComments" />
+
+                    <LinearLayout
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/btn_comments2"
+                        android:orientation="vertical"
+                        android:paddingLeft="3dp"
+                        android:paddingTop="5dp" >
+
+                        <include layout="@layout/temp_user_info_stacked" />
+                    </LinearLayout>
                 </RelativeLayout>
 
                 <LinearLayout
@@ -78,7 +90,9 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
+                    android:layout_alignWithParentIfMissing="true"
                     android:layout_marginBottom="10dp"
+                    android:layout_toLeftOf="@+id/img_forward"
                     android:layout_toRightOf="@+id/group_controls"
                     android:clickable="true"
                     android:onClick="onInfoViewClick"
@@ -101,6 +115,19 @@
                         android:clickable="false"
                         android:onClick="onInfoViewClick" />
 
+                    <!--
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:orientation="vertical"
+                        android:paddingLeft="3dp"
+                        android:paddingTop="5dp" >
+
+                        <include layout="@layout/temp_user_info" />
+                    </LinearLayout>
+                    -->
+
                     <TextView
                         android:id="@+id/txt_content"
                         style="@style/txt_candiinfo"
@@ -110,6 +137,16 @@
                         android:onClick="onInfoViewClick"
                         android:paddingBottom="30dp" />
                 </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_forward"
+                    android:layout_width="10dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:paddingRight="3dp"
+                    android:scaleType="fitXY"
+                    android:src="?attr/imageForwardInfo" />
             </RelativeLayout>
         </ScrollView>
     </FrameLayout>
@@ -120,40 +157,41 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:visibility="visible" >
-        
+
         <SlidingDrawer
-        android:id="@+id/slide_actions_info"
-        android:layout_width="fill_parent"
-        android:layout_height="140dp"
-        android:content="@+id/slider_content_info"
-        android:handle="@+id/slider_handle_info" >
-
-        <LinearLayout
-            android:id="@+id/slider_handle_info"
+            android:id="@+id/slide_actions_info"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:clickable="true"
-            android:orientation="vertical"
-            android:paddingBottom="0dp"
-            android:paddingTop="30dp" >
+            android:layout_height="140dp"
+            android:content="@+id/slider_content_info"
+            android:handle="@+id/slider_handle_info" >
 
-            <ImageButton
-                style="@style/slider_handle_info"
+            <LinearLayout
+                android:id="@+id/slider_handle_info"
                 android:layout_width="fill_parent"
-                android:layout_height="20dp"
-                android:duplicateParentState="true" />
-        </LinearLayout>
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:clickable="true"
+                android:orientation="vertical"
+                android:paddingBottom="0dp"
+                android:paddingTop="30dp" >
 
-        <RelativeLayout
-            android:id="@+id/slider_content_info"
-            style="@style/slider_content_info"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:gravity="center_vertical"
-            android:paddingLeft="90dp" >
-        </RelativeLayout>
-    </SlidingDrawer>
-</FrameLayout>
+                <ImageButton
+                    style="@style/slider_handle_info"
+                    android:layout_width="fill_parent"
+                    android:layout_height="20dp"
+                    android:duplicateParentState="true" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/slider_content_info"
+                style="@style/slider_content_info"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:gravity="center_vertical"
+                android:paddingLeft="90dp" >
+            </RelativeLayout>
+        </SlidingDrawer>
+    </FrameLayout>
+
 </RelativeLayout>

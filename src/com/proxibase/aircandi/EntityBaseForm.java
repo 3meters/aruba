@@ -93,116 +93,134 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 		mHeightActive = ImageUtils.getRawPixelsForDisplayPixels(mDisplayMetrics, 6);
 		mHeightInactive = ImageUtils.getRawPixelsForDisplayPixels(mDisplayMetrics, 2);
-		setActiveTab(FormTab.Content);
-
+		if (mViewFlipper != null) {
+			setActiveTab(FormTab.Content);
+		}
 	}
 
 	protected void bindEntity() {
 
-		if (mCommand.verb.equals("new")) {
-			/*
-			 * Fill in the system and default properties for the new entity
-			 */
-			final BaseEntity entity = (BaseEntity) mEntity;
-			entity.beaconId = mBeacon.id;
-			entity.signalFence = mBeacon.levelDb - 10.0f;
-			entity.createdById = String.valueOf(mUser.id);
-			entity.enabled = true;
-			entity.visibility = Visibility.Public.ordinal();
-			entity.password = null;
-			entity.imageUri = mUser.imageUri;
-			entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
+		if (mCommand != null) {
 
-			if (entity.imageUri != null && !entity.imageUri.equals("")) {
+			if (mCommand.verb.equals("new")) {
+				/*
+				 * Fill in the system and default properties for the new entity
+				 */
+				final BaseEntity entity = (BaseEntity) mEntity;
+				entity.beaconId = mBeacon.id;
+				entity.signalFence = mBeacon.levelDb - 10.0f;
+				entity.createdById = String.valueOf(mUser.id);
+				entity.enabled = true;
+				entity.visibility = Visibility.Public.ordinal();
+				entity.password = null;
+				entity.imageUri = mUser.imageUri;
+				entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
 
-				fetchImage(entity.imageUri, new IImageRequestListener() {
+				if (entity.imageUri != null && !entity.imageUri.equals("")) {
 
-					@Override
-					public void onImageReady(Bitmap bitmap) {
-						Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
-						entity.imageBitmap = bitmap;
-						showImageThumbnail(bitmap);
-					}
+					fetchImage(entity.imageUri, new IImageRequestListener() {
 
-					@Override
-					public void onProxibaseException(ProxibaseException exception) {
-						if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
-							entity.imageBitmap = bitmap;
-							showImageThumbnail(bitmap);
-						}
-					}
-
-					@Override
-					public boolean onProgressChanged(int progress) {
-						// TODO Auto-generated method stub
-						return false;
-					}
-				});
-			}
-			entity.parentEntityId = mParentEntityId;
-		}
-		else if (mCommand.verb.equals("edit")) {
-			/*
-			 * Do any fetching needed to support editing the entity.
-			 */
-			final BaseEntity entity = (BaseEntity) mEntity;
-			if (entity.imageUri != null && !entity.imageUri.equals("")) {
-				fetchImage(entity.imageUri, new IImageRequestListener() {
-
-					@Override
-					public void onImageReady(Bitmap bitmap) {
-						if (mEntity != null) {
+						@Override
+						public void onImageReady(Bitmap bitmap) {
 							Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
 							entity.imageBitmap = bitmap;
 							showImageThumbnail(bitmap);
 						}
-					}
 
-					@Override
-					public void onProxibaseException(ProxibaseException exception) {
-						if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
-							entity.imageBitmap = bitmap;
-							showImageThumbnail(bitmap);
+						@Override
+						public void onProxibaseException(ProxibaseException exception) {
+							if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
+								Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
+								entity.imageBitmap = bitmap;
+								showImageThumbnail(bitmap);
+							}
 						}
-					}
 
-					@Override
-					public boolean onProgressChanged(int progress) {
-						return false;
-					}
-				});
+						@Override
+						public boolean onProgressChanged(int progress) {
+							// TODO Auto-generated method stub
+							return false;
+						}
+					});
+				}
+				entity.parentEntityId = mParentEntityId;
 			}
-		}
-		else {
+			else if (mCommand.verb.equals("edit")) {
+				/*
+				 * Do any fetching needed to support editing the entity.
+				 */
+				final BaseEntity entity = (BaseEntity) mEntity;
+				if (entity.imageUri != null && !entity.imageUri.equals("")) {
+					fetchImage(entity.imageUri, new IImageRequestListener() {
+
+						@Override
+						public void onImageReady(Bitmap bitmap) {
+							if (mEntity != null) {
+								Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
+								entity.imageBitmap = bitmap;
+								showImageThumbnail(bitmap);
+							}
+						}
+
+						@Override
+						public void onProxibaseException(ProxibaseException exception) {
+							if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
+								Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
+								entity.imageBitmap = bitmap;
+								showImageThumbnail(bitmap);
+							}
+						}
+
+						@Override
+						public boolean onProgressChanged(int progress) {
+							return false;
+						}
+					});
+				}
+			}
+			else {
+			}
 		}
 	}
 
 	protected void drawEntity() {
 
-		final BaseEntity entity = (BaseEntity) mEntity;
+		if (mEntity != null) {
 
-		if (findViewById(R.id.txt_title) != null)
-			((TextView) findViewById(R.id.txt_title)).setText(entity.title);
+			final BaseEntity entity = (BaseEntity) mEntity;
 
-		if (findViewById(R.id.txt_content) != null)
-			((TextView) findViewById(R.id.txt_content)).setText(entity.description);
+			/* Content */
 
-		if (findViewById(R.id.cbo_visibility) != null)
-			((Spinner) findViewById(R.id.cbo_visibility)).setSelection(entity.visibility);
+			if (findViewById(R.id.txt_title) != null) {
+				((TextView) findViewById(R.id.txt_title)).setText(entity.title);
+			}
 
-		if (mCommand.verb.equals("new")) {
-			if (findViewById(R.id.btn_delete_post) != null)
-				((Button) findViewById(R.id.btn_delete_post)).setVisibility(View.GONE);
+			if (findViewById(R.id.txt_content) != null) {
+				((TextView) findViewById(R.id.txt_content)).setText(entity.description);
+			}
+
+			if (mCommand.verb.equals("new")) {
+				if (findViewById(R.id.btn_delete_post) != null) {
+					((Button) findViewById(R.id.btn_delete_post)).setVisibility(View.GONE);
+				}
+			}
+
+			/* Settings */
+
+			if (findViewById(R.id.cbo_visibility) != null) {
+				((Spinner) findViewById(R.id.cbo_visibility)).setSelection(entity.visibility);
+			}
+
+			if (findViewById(R.id.txt_password) != null) {
+				((TextView) findViewById(R.id.txt_password)).setText(entity.password);
+			}
+
+			updateImage(entity);
+
+			if (findViewById(R.id.img_public_image) != null) {
+				((ImageView) findViewById(R.id.img_public_image)).requestFocus();
+			}
 		}
-		if (findViewById(R.id.txt_password) != null)
-			((TextView) findViewById(R.id.txt_password)).setText(entity.password);
-
-		updateImage(entity);
-
-		if (findViewById(R.id.img_public_image) != null)
-			((ImageView) findViewById(R.id.img_public_image)).requestFocus();
 	}
 
 	private void updateImage(BaseEntity entity) {
@@ -245,10 +263,9 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 	public void onCancelButtonClick(View view) {
 		mProcessing = false;
-		startTitlebarProgress();
 		setResult(Activity.RESULT_CANCELED);
 		finish();
-		overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
+		//overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 	}
 
 	public void onChangePublicImageButtonClick(View view) {
@@ -303,21 +320,33 @@ public abstract class EntityBaseForm extends AircandiActivity {
 				fetchImage(entity.imageUri, new IImageRequestListener() {
 
 					@Override
-					public void onImageReady(Bitmap bitmap) {
-						if (mEntity != null) {
-							Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
-							entity.imageBitmap = bitmap;
-							showImageThumbnail(bitmap);
-						}
+					public void onImageReady(final Bitmap bitmap) {
+						runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								if (mEntity != null) {
+									Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.imageUri);
+									entity.imageBitmap = bitmap;
+									showImageThumbnail(bitmap);
+								}
+							}
+						});
 					}
 
 					@Override
-					public void onProxibaseException(ProxibaseException exception) {
-						if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
-							entity.imageBitmap = bitmap;
-							showImageThumbnail(bitmap);
-						}
+					public void onProxibaseException(final ProxibaseException exception) {
+						runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
+									Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
+									entity.imageBitmap = bitmap;
+									showImageThumbnail(bitmap);
+								}
+							}
+						});
 					}
 
 					@Override
@@ -756,8 +785,9 @@ public abstract class EntityBaseForm extends AircandiActivity {
 					catch (ProxibaseException exception) {
 						exception.printStackTrace();
 					}
-					if (bitmap == null)
+					if (bitmap == null) {
 						throw new IllegalStateException("bitmap picked from gallery is null");
+					}
 
 					entity.imageUri = null;
 					entity.imageBitmap = bitmap;

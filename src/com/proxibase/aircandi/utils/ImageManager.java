@@ -432,9 +432,11 @@ public class ImageManager {
 		public int						priority			= 1;
 		public int						scaleToWidth;
 		public boolean					makeReflection		= false;
+		public boolean					javascriptEnabled	= false;
+		public boolean					cachingAllowed		= true;
 		public IImageRequestListener	imageReadyListener	= null;
 
-		public ImageRequest(String imageUri, ImageShape imageShape, ImageFormat imageFormat, int scaleToWidth, boolean makeReflection, int priority,
+		public ImageRequest(String imageUri, ImageShape imageShape, ImageFormat imageFormat, boolean javascriptEnabled, int scaleToWidth, boolean makeReflection, boolean cachingAllowed, int priority,
 				Object imageRequestor, IImageRequestListener imageReadyListener) {
 			this.imageUri = imageUri;
 			this.imageShape = imageShape;
@@ -443,6 +445,8 @@ public class ImageManager {
 			this.scaleToWidth = scaleToWidth;
 			this.priority = priority;
 			this.makeReflection = makeReflection;
+			this.javascriptEnabled = javascriptEnabled;
+			this.cachingAllowed = cachingAllowed;
 			this.imageReadyListener = imageReadyListener;
 		}
 

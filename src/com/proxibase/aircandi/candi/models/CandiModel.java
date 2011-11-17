@@ -40,7 +40,7 @@ public class CandiModel extends BaseModel {
 		if (mEntityProxy != null && mEntityProxy.entityType != null) {
 			String entityType = mEntityProxy.entityType;
 			if (entityType.equals(CandiConstants.TYPE_CANDI_ALBUM)) {
-				return "Album";
+				return "Gallery";
 			}
 			else if (entityType.equals(CandiConstants.TYPE_CANDI_FORUM)) {
 				return "Topic";

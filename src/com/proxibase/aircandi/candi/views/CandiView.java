@@ -441,7 +441,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 			mBodySprite.registerEntityModifier(
 					new CandiAlphaModifier(mBodySprite, CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
 
-			if (((BaseModel) mModel).getViewStateCurrent().reflectionActive() && mReflectionSprite != null) {
+			if (mModel != null && ((BaseModel) mModel).getViewStateCurrent().reflectionActive() && mReflectionSprite != null) {
 				mReflectionSprite
 						.registerEntityModifier(
 						new CandiAlphaModifier(mReflectionSprite, CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 0.0f, 1.0f,
@@ -544,11 +544,12 @@ public class CandiView extends BaseView implements OnGestureListener {
 			 * but position hasn't been assigned when this first gets called.
 			 */
 			//mActiveImageRequest = true;
-			ImageRequest imageRequest = new ImageRequest(candiModel.getBodyImageUri(), ImageShape.Square, candiModel.getBodyImageFormat(), 250, true,
+			ImageRequest imageRequest = new ImageRequest(candiModel.getBodyImageUri(), ImageShape.Square, candiModel.getBodyImageFormat(), candiModel
+					.getEntityProxy().javascriptEnabled, 250, true, true,
 					2, this, new IImageRequestListener() {
 
 						@Override
-						public void onImageReady(final Bitmap bodyBitmap) {
+						public void onImageReady(Bitmap bodyBitmap) {
 							/*
 							 * Executes on the ViewManager thread (which has the lowest possible priority).
 							 * First time for a candiview is more expensive because the body and reflection sprites
@@ -558,6 +559,14 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 								/* The view could have been recycled while we were busy and won't have a bound model. */
 								if (mModel != null && !mRecycled) {
+									/*
+									 * Are we going to overlay some text
+									 */
+									if (candiModel.getEntityProxy().entityType.equals(CandiConstants.TYPE_CANDI_POST) && candiModel.getEntityProxy().description != null) {
+										bodyBitmap = overlayTextOnBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_BODY_HEIGHT, 0xffffffff,
+												mTitleTextFillColor, 5, candiModel.getEntityProxy().description, bodyBitmap);
+									}
+
 									mHasBitmap = true;
 									updateTextureRegions(bodyBitmap);
 									makePlaceholderActiveAnimated(false);
@@ -570,9 +579,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 						@Override
 						public boolean onProgressChanged(int progress) {
 							mProgressBarSprite.setWidth(progress * ((float) CandiConstants.CANDI_VIEW_WIDTH / 100f));
-//							if (progress == 100){
-//								mProgressBarSprite.setWidth(0);
-//							}
+							//							if (progress == 100){
+							//								mProgressBarSprite.setWidth(0);
+							//							}
 							return false;
 						}
 

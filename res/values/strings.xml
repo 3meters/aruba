@@ -27,9 +27,9 @@
 	<string name="dialog_take_photo_button">Take a new photo</string>
 	<string name="dialog_profile_photo_button">Use your profile photo</string>
 	
-	<string name="dialog_new_message">Drop some candi and make your mark</string>
-	<string name="dialog_new_album">Gallery</string>
-	<string name="dialog_new_topic">Topic</string>
+	<string name="dialog_new_message">Drop some candi and make your mark!</string>
+	<string name="dialog_new_album">Gallery for photos</string>
+	<string name="dialog_new_topic">Topic for discussions</string>
 	<string name="dialog_new_web">Web bookmark</string>
 	<string name="dialog_new_negative">Cancel</string>
 		
@@ -65,10 +65,16 @@
 	<string name="form_title_post">Post</string>
 	<string name="form_title_web">Web bookmark</string>
 	
+	<string name="form_setting_html_zoom">Zoom html</string>
+	<string name="form_setting_javascript">Javascript enabled</string>
+	
 	<string name="post_locked">Locked</string>
 	<string name="post_visibility">Visibility</string>
+	
 	<string name="post_password_hint">Password (optional)</string>
+	
 	<string name="post_public_image_section_header">Display Image</string>
+	<string name="post_badge_image_section_header">Post Badge</string>
 	<string name="post_public_image_change_button">Change</string>
 	<string name="post_media_section_header">Media</string>
 	<string name="post_media_add_button">Add</string>
@@ -87,6 +93,13 @@
 	<string name="post_insert_failed_toast">Save failed</string>
 	<string name="post_insert_success_toast">Saved</string>
 	<string name="post_back_button">Back</string>
+
+	<string name="hint_username">Username or email</string>
+	<string name="hint_password">Password</string>
+
+	<string name="form_signin_image_section_header">Profile picture</string>
+	<string name="btn_signin">Sign In</string>
+	<string name="btn_signup">Sign Up</string>
 	
 	<!--  
 		Crash reporting

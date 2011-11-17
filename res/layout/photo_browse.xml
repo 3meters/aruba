@@ -38,14 +38,52 @@
                 android:paddingBottom="5dp"
                 android:text="Violette Heymann" />
 
-            <ImageView
-                android:id="@+id/img_media"
-                style="@style/img_photo"
-                android:layout_width="wrap_content"
+            <ViewFlipper
+                android:id="@+id/flipper_form"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:adjustViewBounds="true"
-                android:scaleType="fitStart" />
+                android:layout_marginBottom="10dp" >
+
+                <ImageView
+                    android:id="@+id/img_media"
+                    style="@style/img_photo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitStart" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" >
+
+                    <ImageView
+                        android:id="@+id/img_photo_placeholder"
+                        style="@style/img_photo_placeholder"
+                        android:layout_width="250px"
+                        android:layout_height="250px" />
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="250px"
+                        android:layout_height="10dp"
+                        android:layout_alignParentTop="true"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/progress" />
+                    <!--
+                    <ImageView
+                        android:id="@+id/img_photo_progress_indicator"
+                        style="@style/application_progress"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_centerInParent="true"
+                        android:adjustViewBounds="true"
+                        android:background="@drawable/busy_anim"
+                        android:scaleType="fitCenter" />
+                    -->
+                </RelativeLayout>
+            </ViewFlipper>
 
             <TextView
                 android:id="@+id/txt_content"
@@ -54,6 +92,16 @@
                 android:layout_height="wrap_content"
                 android:gravity="top"
                 android:text="Odilon Redon was born in Bordeaux in 1840 and spent most of his life in Paris, where he died in 1916. During his career, he was responsible for some of the best-known Symbolist paintings of the late 19th and early 20th centuries -- The Cyclops, most famously, but dozens of others as well. His work was not exhibited in America until the famed Armory Show of 1913, and, even today, few prominent American museums own much of his major work." />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="3dp"
+                android:paddingTop="10dp" >
+
+                <include layout="@layout/temp_user_info" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

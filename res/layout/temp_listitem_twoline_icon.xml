@@ -19,6 +19,7 @@
 	<TextView
 		android:id="@+id/item_title"
 		android:layout_toRightOf="@id/item_image"
+		android:layout_toLeftOf="@+id/item_action_button"
 		android:layout_alignParentTop="true"
 		android:layout_alignWithParentIfMissing="true"
 		style="@style/list_candiinfo_title" />
@@ -46,4 +47,16 @@
 		android:layout_below="@+id/item_subtitle"
 		android:layout_alignWithParentIfMissing="true"
 		style="@style/list_candiinfo_content" />
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/item_content"
+		android:layout_toRightOf="@id/item_image"
+		android:layout_alignWithParentIfMissing="true"
+		android:orientation="vertical"
+		android:paddingLeft="3dp"
+		android:paddingTop="5dp">
+		<include
+			layout="@layout/temp_user_info" />
+	</LinearLayout>
 </RelativeLayout>

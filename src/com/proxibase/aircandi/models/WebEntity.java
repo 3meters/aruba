@@ -9,6 +9,7 @@ public class WebEntity extends BaseEntity {
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 	@Expose
 	public String	contentUri;
+	
 	@Expose
 	public Metadata	__metadata	= new Metadata();
 
