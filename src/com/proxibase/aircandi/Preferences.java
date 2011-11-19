@@ -18,6 +18,8 @@ public class Preferences extends PreferenceActivity {
 	public static final String	PREF_SHOW_DEBUG			= "Pref_Show_Debug";
 	public static final String	PREF_SOUND_EFFECTS		= "Pref_Sound_Effects";
 	public static final String	PREF_THEME				= "Pref_Theme";
+	public static final String	PREF_USERNAME			= "Pref_Username";
+	public static final String	PREF_PASSWORD			= "Pref_Password";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

@@ -14,6 +14,8 @@
 		<attr name="textColorButtonHeader" format="color"/>
 		<attr name="textColorFooter" format="color"/>
 		<attr name="actionStripBackground" format="string"/>
+		<attr name="actionStripUpArrow" format="string"/>
+		<attr name="actionStripDownArrow" format="string"/>
 		<attr name="backgroundHeader" format="string"/>
 		<attr name="backgroundButton" format="string"/>
 		<attr name="backgroundCandiInfo" format="color"/>

@@ -3,11 +3,9 @@ package com.proxibase.aircandi;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,7 +17,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
@@ -51,6 +48,7 @@ public abstract class AircandiActivity extends Activity {
 	protected String			mPrefTheme;
 	protected DisplayMetrics	mDisplayMetrics;
 	protected ProgressDialog	mProgressDialog;
+	protected String			mMessage;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -73,6 +71,7 @@ public abstract class AircandiActivity extends Activity {
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mParentEntityId = extras.getInt(getString(R.string.EXTRA_PARENT_ENTITY_ID));
+			mMessage = extras.getString(getString(R.string.EXTRA_MESSAGE));
 
 			String json = extras.getString(getString(R.string.EXTRA_ENTITY));
 			if (json != null && !json.equals("")) {
@@ -97,12 +96,9 @@ public abstract class AircandiActivity extends Activity {
 	}
 
 	private void setTheme() {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		if (prefs != null) {
-			mPrefTheme = prefs.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
-			int themeResourceId = getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", getPackageName());
-			this.setTheme(themeResourceId);
-		}
+		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
+		int themeResourceId = getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", getPackageName());
+		this.setTheme(themeResourceId);
 	}
 
 	protected int getLayoutID() {
@@ -111,7 +107,8 @@ public abstract class AircandiActivity extends Activity {
 
 	protected void fetchImage(final String imageUri, IImageRequestListener listener) {
 
-		ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, ImageFormat.Binary, false, CandiConstants.IMAGE_WIDTH_MAX, false, true, 1,
+		ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, ImageFormat.Binary, false, CandiConstants.IMAGE_WIDTH_MAX, false,
+				true, 1,
 					this, listener);
 		Logger.d(CandiConstants.APP_NAME, "Photo", "Fetching Image: " + imageUri);
 		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
@@ -129,6 +126,8 @@ public abstract class AircandiActivity extends Activity {
 		mButtonRefresh = (ImageView) findViewById(R.id.img_refresh_button);
 		if (mButtonRefresh != null)
 			mButtonRefresh.setVisibility(View.VISIBLE);
+
+		mProgressDialog = new ProgressDialog(this);
 
 	}
 
@@ -269,7 +268,7 @@ public abstract class AircandiActivity extends Activity {
 			exception.printStackTrace();
 		}
 	}
-	
+
 	public static enum Verb {
 		New, Edit, Delete, View
 	}

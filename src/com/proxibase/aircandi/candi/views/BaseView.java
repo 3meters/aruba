@@ -108,9 +108,6 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	private void makeTitleSprite() {
-		//		mTitleSprite = new CandiSprite(0,
-		//				CandiConstants.CANDI_VIEW_TITLE_HEIGHT - (mTitleTextureRegion.getHeight() + CandiConstants.CANDI_VIEW_TITLE_SPACER_HEIGHT),
-		//				mTitleTextureRegion);
 		mTitleSprite = new CandiSprite(0, 0, mTitleTextureRegion);
 		mTitleSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mTitleSprite.setVisible(true);
@@ -231,8 +228,11 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 					@Override
 					public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+
 				});
 				registerEntityModifier(modifier);
+				mCandiPatchPresenter.getRenderingTimer().activate();
+
 			}
 		}
 	}

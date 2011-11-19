@@ -29,10 +29,17 @@
 	
 	<string name="dialog_new_message">Drop some candi and make your mark!</string>
 	<string name="dialog_new_album">Gallery for photos</string>
+	<string name="dialog_new_album_signin">Please sign-in to create a new Gallery</string>
 	<string name="dialog_new_topic">Topic for discussions</string>
+	<string name="dialog_new_topic_signin">Please sign-in to create a new Topic</string>
 	<string name="dialog_new_web">Web bookmark</string>
+	<string name="dialog_new_web_signin">Please sign-in to create a new Web bookmark</string>
 	<string name="dialog_new_negative">Cancel</string>
 		
+	<string name="dialog_new_post_signin">Please sign-in to create a new Post</string>
+	<string name="dialog_new_photo_signin">Please sign-in to create a new Photo</string>
+	<string name="dialog_new_signin">Please sign-in to create a new</string>
+	
 	<string name="dialog_link_message">Build link...</string>
 	<string name="dialog_link_bookmark">Select a bookmark</string>
 	<string name="dialog_link_search">Web search</string>
@@ -49,6 +56,7 @@
 	<string name="EXTRA_ENTITY">com.proxibase.aircandi.EXTRA_ENTITY</string>
 	<string name="EXTRA_COMMAND">com.proxibase.aircandi.EXTRA_COMMAND</string>
 	<string name="EXTRA_USER">com.proxibase.aircandi.EXTRA_USER</string>
+	<string name="EXTRA_MESSAGE">com.proxibase.aircandi.EXTRA_MESSAGE</string>
 	<string name="EXTRA_BEACON_DIRTY">com.proxibase.aircandi.EXTRA_BEACON_DIRTY</string>
 	<string name="EXTRA_ENTITY_DIRTY">com.proxibase.aircandi.EXTRA_ENTITY_DIRTY</string>
 	<string name="EXTRA_SUBTYPE">com.proxibase.aircandi.EXTRA_SUBTYPE</string>
@@ -94,9 +102,11 @@
 	<string name="post_insert_success_toast">Saved</string>
 	<string name="post_back_button">Back</string>
 
-	<string name="hint_username">Username or email</string>
-	<string name="hint_password">Password</string>
-
+	<string name="label_username">Username or email</string>
+	<string name="label_password">Password</string>
+	<string name="label_keep_signedin">Keep me signed in.</string>
+	<string name="form_signin_error">Wrong username/email and password combination.</string>
+	
 	<string name="form_signin_image_section_header">Profile picture</string>
 	<string name="btn_signin">Sign In</string>
 	<string name="btn_signup">Sign Up</string>

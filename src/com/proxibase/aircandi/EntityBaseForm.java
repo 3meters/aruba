@@ -472,7 +472,6 @@ public abstract class EntityBaseForm extends AircandiActivity {
 						setResult(Activity.RESULT_FIRST_USER, intent);
 						mProcessing = false;
 						finish();
-						overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 					}
 				});
 			}
@@ -520,7 +519,6 @@ public abstract class EntityBaseForm extends AircandiActivity {
 						setResult(Activity.RESULT_FIRST_USER, intent);
 						mProcessing = false;
 						finish();
-						overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 					}
 				});
 			}
@@ -584,7 +582,6 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		setResult(Activity.RESULT_FIRST_USER, intent);
 		mProcessing = false;
 		finish();
-		overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 	}
 
 	protected void addImageToS3(String imageKey, Bitmap bitmap) throws ProxibaseException {

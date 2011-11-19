@@ -46,10 +46,20 @@
             <!-- Title and Content -->
 
             <TextView
+                android:id="@+id/txt_message"
+                style="@style/txt_message"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="15dp"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:text="Please sign-in to create a new topic or post" />
+
+            <TextView
                 style="@style/txt_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/hint_username" />
+                android:text="@string/label_username" />
 
             <EditText
                 android:id="@+id/txt_username"
@@ -61,7 +71,7 @@
                 style="@style/txt_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/hint_password" />
+                android:text="@string/label_password" />
 
             <EditText
                 android:id="@+id/txt_password"
@@ -69,7 +79,17 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword" />
-        </LinearLayout>
+
+            <TextView
+                android:id="@+id/txt_signin_error"
+                style="@style/txt_signin_error"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dp"
+                android:padding="5dp"
+                android:visibility="gone"
+                android:text="@string/form_signin_error" />
+            </LinearLayout>
     </ScrollView>
 
     <!-- Footer -->
@@ -78,14 +98,14 @@
         android:id="@+id/form_footer"
         style="@style/activity_footer_form"
         android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal" 
->
+        android:gravity="center_horizontal" >
 
         <Button
             android:id="@+id/btn_signin"
             style="@style/btn_form"
             android:layout_weight="1"
             android:onClick="onSignInButtonClick"
+            android:enabled="false"
             android:text="@string/btn_signin" />
 
         <Button

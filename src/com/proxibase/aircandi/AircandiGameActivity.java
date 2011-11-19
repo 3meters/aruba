@@ -3,18 +3,15 @@ package com.proxibase.aircandi;
 import org.anddev.andengine.ui.activity.LayoutGameActivity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.User;
@@ -85,12 +82,9 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	}
 
 	private void setTheme() {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		if (prefs != null) {
-			mPrefTheme = prefs.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
-			int themeResourceId = getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", getPackageName());
-			this.setTheme(themeResourceId);
-		}
+		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
+		int themeResourceId = getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", getPackageName());
+		this.setTheme(themeResourceId);
 	}
 
 	public void onHomeClick(View view) {

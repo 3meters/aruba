@@ -10,11 +10,15 @@ import org.anddev.andengine.util.modifier.ease.EaseExponentialInOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import com.proxibase.aircandi.candi.models.ZoneModel;
+import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 
 public class CameraTargetSprite extends CandiRectangle {
 
-	public CameraTargetSprite(final float x, final float y, final float width, final float height) {
+	private CandiPatchPresenter	mCandiPatchPresenter;
+
+	public CameraTargetSprite(final float x, final float y, final float width, final float height, CandiPatchPresenter candiPatchPresenter) {
 		super(x, y, width, height);
+		mCandiPatchPresenter = candiPatchPresenter;
 	}
 
 	public float moveToZone(ZoneModel targetZone, float duration) {
@@ -27,32 +31,42 @@ public class CameraTargetSprite extends CandiRectangle {
 
 	public float moveToZone(ZoneModel targetZone, float duration, IEaseFunction easeFunction, final MoveListener moveListener) {
 
-		if (targetZone == null)
+		if (targetZone == null) {
 			return 0;
+		}
 
-		if (easeFunction == null)
+		if (easeFunction == null) {
 			easeFunction = EaseExponentialInOut.getInstance();
+		}
 
 		SequenceEntityModifier modifier = new SequenceEntityModifier(new IEntityModifierListener() {
 
 			@Override
 			public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-				if (moveListener != null)
+				if (moveListener != null) {
 					moveListener.onMoveFinished();
+				}
 			}
 
 			@Override
-			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
-		},
+			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+				mCandiPatchPresenter.getRenderingTimer().activate();
+				if (moveListener != null) {
+					moveListener.onMoveStarted();
+				}
+			}
 
-		new DelayModifier(0), new MoveXModifier(duration, this.getX(), targetZone.getViewStateCurrent().getX(), easeFunction));
+		}, new DelayModifier(0), new MoveXModifier(duration, this.getX(), targetZone.getViewStateCurrent().getX(), easeFunction));
 
 		this.registerEntityModifier(modifier);
 		float distanceMoved = Math.abs(this.getX() - targetZone.getViewStateCurrent().getX());
+
 		return distanceMoved;
 	}
 
 	public interface MoveListener {
+
+		public void onMoveStarted();
 
 		public void onMoveFinished();
 	}

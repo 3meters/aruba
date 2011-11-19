@@ -60,6 +60,12 @@ public class CandiAlphaModifier extends AlphaModifier {
 		}
 		super.onModifierStarted(pItem);
 	}
+	
+	@Override
+	protected void onSetValue(final IEntity pEntity, final float pPercentageDone, final float pAlpha) {
+		pEntity.setAlpha(pAlpha);
+	}
+
 
 	public void setEntity(IEntity entity) {
 		this.mEntity = entity;

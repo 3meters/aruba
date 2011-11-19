@@ -80,6 +80,7 @@ public interface CandiConstants {
 	public static final int				ACTIVITY_PHOTO_MAKE				= 310;
 	public static final int				ACTIVITY_VIDEO_PICK				= 320;
 	public static final int				ACTIVITY_VIDEO_MAKE				= 330;
+	public static final int				ACTIVITY_SIGNIN					= 400;
 
 	public static final int				VISIBILITY_PRIVATE				= 0;
 	public static final int				VISIBILITY_PASSWORD_PROTECTED	= 1;

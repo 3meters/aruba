@@ -2,14 +2,17 @@ package com.proxibase.aircandi;
 
 import java.util.Calendar;
 
+import org.acra.ACRA;
+import org.acra.ReportField;
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
+
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.location.Location;
+import android.preference.PreferenceManager;
 
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
-
-import org.acra.*;
-import org.acra.annotation.*;
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ",                 
 		customReportContent = {
 		                       ReportField.REPORT_ID, 
@@ -60,7 +63,9 @@ import org.acra.annotation.*;
 )
 public class Aircandi extends Application {
 
-	public Location	currentLocation;
+	public Location							currentLocation;
+	public static SharedPreferences 		settings;
+	public static SharedPreferences.Editor 	settingsEditor;
 
 	public Aircandi() {}
 
@@ -68,9 +73,15 @@ public class Aircandi extends Application {
 	public void onCreate() {
 		/* The following line triggers the initialization of ACRA */
 		ACRA.init(this);
+		
 		super.onCreate();
-	}
+		
+		/* Make settings available app wide */
+		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+		settingsEditor = settings.edit();
 
+	}
+	
 	/**
 	 * Determines whether one Location reading is better than the current Location fix *
 	 * 

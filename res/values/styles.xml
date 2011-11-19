@@ -35,7 +35,11 @@
         <item name="imageForwardInfo">@drawable/icon_forward_dark</item>
         <item name="backgroundForwardInfo">@color/transparent</item>
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_dark</item>
+        
         <item name="actionStripBackground">@drawable/actionstrip_background_dark</item>
+        <item name="actionStripUpArrow">@drawable/actionstrip_arrow_up_dark</item>
+        <item name="actionStripDownArrow">@drawable/actionstrip_arrow_down_dark</item>
+            
         <item name="activityFooterFormBackground">@drawable/app_header_bg_dark</item>
         <item name="ruleColor">@color/rule_30_dark</item>
         <item name="logo">@drawable/logo_bitmap_dark</item>
@@ -78,7 +82,9 @@
         <item name="imageForwardInfo">@drawable/icon_forward_light</item>
         <item name="backgroundForwardInfo">@color/transparent</item>
         <item name="actionStripBackground">@drawable/actionstrip_background_light</item>
-        <item name="activityFooterFormBackground">@drawable/app_header_bg_light</item>
+        <item name="actionStripUpArrow">@drawable/actionstrip_arrow_up_light</item>
+        <item name="actionStripDownArrow">@drawable/actionstrip_arrow_down_light</item>
+            <item name="activityFooterFormBackground">@drawable/app_header_bg_light</item>
         <item name="ruleColor">@color/rule_30_light</item>
         <item name="logo">@drawable/logo_bitmap_light</item>
         <item name="textColor">@color/text_light</item>
@@ -112,7 +118,9 @@
         <item name="iconBack">@drawable/icon_back_dark</item>
         <item name="backgroundCandiInfo">#99ffffff</item>
         <item name="actionStripBackground">@drawable/actionstrip_background_serene</item>
-        <item name="logo">@drawable/logo_bitmap_dark</item>
+        <item name="actionStripUpArrow">@drawable/actionstrip_arrow_up_dark</item>
+        <item name="actionStripDownArrow">@drawable/actionstrip_arrow_down_dark</item>
+		<item name="logo">@drawable/logo_bitmap_dark</item>
         <item name="imageSliderHandleSearch">@drawable/gripper_dark</item>
         <item name="backgroundSliderHandleSearch">@drawable/slider_handle_search_bg_dark</item>
         <item name="backgroundSliderContentSearch">@drawable/slider_content_search_bg_dark</item>
@@ -439,12 +447,23 @@
     </style>
 
     <style name="txt_label" parent="android:Widget.TextView">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">?attr/textColor</item>
         <item name="android:paddingLeft">2dp</item>
     </style>
 
-    <style name="btn_form" parent="android:Widget.Button">
+    <style name="txt_message" parent="android:Widget.TextView">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">?attr/textColor</item>
+    </style>
+    
+    <style name="txt_signin_error" parent="android:Widget.TextView">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">#ffff8844</item>
+        <item name="android:background">?attr/backgroundHeader</item>
+        </style>
+    
+        <style name="btn_form" parent="android:Widget.Button">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:minWidth">80dp</item>
@@ -458,7 +477,8 @@
     <style name="chk_form" parent="android:Widget.CompoundButton.CheckBox">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">wrap_content</item>
-    </style>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        </style>
 
     <style name="spinner_form" parent="android:Widget.Spinner">
         <item name="android:layout_height">wrap_content</item>
