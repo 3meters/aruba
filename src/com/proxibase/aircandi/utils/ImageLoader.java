@@ -292,7 +292,7 @@ public class ImageLoader {
 
 									/* Create reflection if requested */
 									if (imageRequest.makeReflection) {
-										final Bitmap bitmapReflection = ImageUtils.getReflection(bitmap);
+										final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap);
 										mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection, CompressFormat.PNG);
 										if (mImageCache.isFileCacheOnly()) {
 											bitmapReflection.recycle();
@@ -382,7 +382,7 @@ public class ImageLoader {
 							/* Create reflection if requested */
 							imageRequest.imageReadyListener.onProgressChanged(80);
 							if (imageRequest.makeReflection) {
-								final Bitmap bitmapReflection = ImageUtils.getReflection(bitmap);
+								final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap);
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
 								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(),

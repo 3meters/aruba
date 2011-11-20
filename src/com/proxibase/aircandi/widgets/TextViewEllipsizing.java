@@ -29,6 +29,7 @@ public class TextViewEllipsizing extends TextView {
 	private int								maxLines						= -1;
 	private float							lineSpacingMultiplier			= 1.0f;
 	private float							lineAdditionalVerticalPadding	= 0.0f;
+	private boolean							mMirrorText						= false;
 
 	public TextViewEllipsizing(Context context) {
 		super(context);
@@ -90,7 +91,22 @@ public class TextViewEllipsizing extends TextView {
 			super.setEllipsize(null);
 			resetText();
 		}
-		super.onDraw(canvas);
+
+		if (mMirrorText) {
+			/* This saves off the matrix that the canvas applies to draws, so it can be restored later. */
+			canvas.save();
+
+			canvas.scale(1.0f, -1.0f, super.getWidth() * 0.5f, super.getHeight() * 0.5f);
+
+			/* draw the text with the matrix applied. */ 
+			super.onDraw(canvas);
+
+			/* restore the old matrix. */ 
+			canvas.restore();
+		}
+		else {
+			super.onDraw(canvas);
+		}
 	}
 
 	private void resetText() {
@@ -138,5 +154,13 @@ public class TextViewEllipsizing extends TextView {
 	@Override
 	public void setEllipsize(TruncateAt where) {
 	// Ellipsize settings are not respected
+	}
+
+	public void setMirrorText(boolean mirrorText) {
+		this.mMirrorText = mirrorText;
+	}
+
+	public boolean isMirrorText() {
+		return mMirrorText;
 	}
 }

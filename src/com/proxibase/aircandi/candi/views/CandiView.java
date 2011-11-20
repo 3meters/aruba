@@ -559,13 +559,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 								/* The view could have been recycled while we were busy and won't have a bound model. */
 								if (mModel != null && !mRecycled) {
-									/*
-									 * Are we going to overlay some text
-									 */
-									if (candiModel.getEntityProxy().entityType.equals(CandiConstants.TYPE_CANDI_POST) && candiModel.getEntityProxy().description != null) {
-										bodyBitmap = overlayTextOnBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_BODY_HEIGHT, 0xffffffff,
-												mTitleTextFillColor, 5, candiModel.getEntityProxy().description, bodyBitmap);
-									}
+
+									/* Process any decorations like text overlays */
+									bodyBitmap = decorateTexture(bodyBitmap, false);
 
 									mHasBitmap = true;
 									updateTextureRegions(bodyBitmap);
@@ -579,9 +575,6 @@ public class CandiView extends BaseView implements OnGestureListener {
 						@Override
 						public boolean onProgressChanged(int progress) {
 							mProgressBarSprite.setWidth(progress * ((float) CandiConstants.CANDI_VIEW_WIDTH / 100f));
-							//							if (progress == 100){
-							//								mProgressBarSprite.setWidth(0);
-							//							}
 							return false;
 						}
 
@@ -624,13 +617,14 @@ public class CandiView extends BaseView implements OnGestureListener {
 			public Bitmap reloadBitmap() {
 
 				/* We could be in recycled state without a bound model. */
-				if (mModel == null) {
+				if (mModel == null || mRecycled) {
 					return null;
 				}
 
 				/* TextureSource needs to refresh a recycled bitmap. */
 				Bitmap bitmap = ImageManager.getInstance().getImage(candiModel.getBodyImageUri());
 				if (bitmap != null) {
+					bitmap = decorateTexture(bitmap, false);
 					return bitmap;
 				}
 
@@ -644,21 +638,26 @@ public class CandiView extends BaseView implements OnGestureListener {
 		Bitmap reflectionBitmap = ImageManager.getInstance().getImage(candiModel.getBodyImageUri() + ".reflection");
 		if (reflectionBitmap == null) {
 			if (bodyBitmap != null && !bodyBitmap.isRecycled()) {
-				reflectionBitmap = ImageUtils.getReflection(bodyBitmap);
+				reflectionBitmap = ImageUtils.makeReflection(bodyBitmap);
 				ImageManager.getInstance().getImageCache().put(candiModel.getBodyImageUri() + ".reflection", reflectionBitmap, CompressFormat.PNG);
+				bodyBitmap = decorateTexture(bodyBitmap, true);
 			}
 		}
 
 		if (reflectionBitmap != null) {
+			reflectionBitmap = decorateTexture(reflectionBitmap, true);
 			mReflectionTexture.clearTextureSources();
 			mReflectionTextureRegion = TextureRegionFactory.createFromSource(mReflectionTexture, new BitmapTextureSource(reflectionBitmap,
 					new IBitmapAdapter() {
 
 						@Override
 						public Bitmap reloadBitmap() {
-							Bitmap bitmap = ImageManager.getInstance().getImage(candiModel.getBodyImageUri() + ".reflection");
-							if (bitmap != null) {
-								return bitmap;
+							if (mModel != null && !mRecycled) {
+								Bitmap bitmap = ImageManager.getInstance().getImage(candiModel.getBodyImageUri() + ".reflection");
+								if (bitmap != null) {
+									bitmap = decorateTexture(bitmap, true);
+									return bitmap;
+								}
 							}
 							return null;
 						}
@@ -679,6 +678,21 @@ public class CandiView extends BaseView implements OnGestureListener {
 			updateTouchArea(candiModel.isTouchAreaActive());
 			sortChildren(); /* zorder sort */
 		}
+	}
+
+	public Bitmap decorateTexture(Bitmap bitmap, boolean isReflection) {
+		final CandiModel candiModel = (CandiModel) this.mModel;
+		if (candiModel.getEntityProxy().entityType.equals(CandiConstants.TYPE_CANDI_POST) &&
+				candiModel.getEntityProxy().description != null &&
+				candiModel.getEntityProxy().description.length() > 0) {
+			if (!isReflection) {
+				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x99000000, 175, 5, candiModel.getEntityProxy().description, false, false);
+			}
+			else {
+				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x99000000, -45, 5, candiModel.getEntityProxy().description, true, true);
+			}
+		}
+		return bitmap;
 	}
 
 	@Override
@@ -726,6 +740,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 			mReflectionSprite.removeResources();
 		if (mBodySprite != null)
 			mBodySprite.removeResources();
+
+		/* These are holding onto Contexts */
+		mTextView = null;
+		mCandiPatchPresenter = null;
 
 		if (mBodySprite != null) {
 			boolean registeredTouchArea = mCandiPatchPresenter.getEngine().getScene().getTouchAreas().contains(mBodySprite);

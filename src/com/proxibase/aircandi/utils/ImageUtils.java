@@ -18,6 +18,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 public class ImageUtils {
 
 	private static Paint			mPaint	= new Paint();
+	private static Canvas			mCanvas	= new Canvas();
 	private static LinearGradient	mShader	= new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x70ffffff, 0x00ffffff,
 													TileMode.CLAMP);
 
@@ -60,7 +61,7 @@ public class ImageUtils {
 		return croppedBitmap;
 	}
 
-	public static Bitmap getReflection(Bitmap originalBitmap) {
+	public static Bitmap makeReflection(Bitmap originalBitmap) {
 
 		int width = originalBitmap.getWidth();
 		int height = originalBitmap.getHeight();
@@ -77,15 +78,26 @@ public class ImageUtils {
 
 		/* Create a new bitmap with same width but taller to fit reflection */
 		Bitmap reflectionBitmap = Bitmap.createBitmap(width, (height / 2), CandiConstants.IMAGE_CONFIG_DEFAULT);
-
-		/*
-		 * Create a new Canvas with the bitmap that's big enough for
-		 * the image plus gap plus reflection
-		 */
-		Canvas canvas = new Canvas(reflectionBitmap);
-
+		
+		mCanvas = new Canvas();
+		
+		mCanvas.setBitmap(reflectionBitmap);
+		
 		/* Draw in the reflection */
-		canvas.drawBitmap(reflectionImage, 0, 0, null);
+		mCanvas.drawBitmap(reflectionImage, 0, 0, null);
+
+		/* Apply reflection gradient */
+		applyReflectionGradient(reflectionBitmap);
+		
+		/* Stash the image with reflection */
+		return reflectionBitmap;
+	}
+
+	public static void applyReflectionGradient(Bitmap reflectionBitmap) {
+		
+		mCanvas = new Canvas();
+		
+		mCanvas.setBitmap(reflectionBitmap);
 
 		/* Set the paint to use this shader (linear gradient) */
 		mPaint.setShader(mShader);
@@ -94,15 +106,10 @@ public class ImageUtils {
 		mPaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
 
 		/* Draw a rectangle using the paint with our linear gradient */
-		canvas.drawRect(0, 0, width, reflectionBitmap.getHeight(), mPaint);
+		mCanvas.drawRect(0, 0, reflectionBitmap.getWidth(), reflectionBitmap.getHeight(), mPaint);
 
 		/* Release */
-		reflectionImage.recycle();
-		reflectionImage = null;
-		canvas = null;
-
-		/* Stash the image with reflection */
-		return reflectionBitmap;
+		//mCanvas.setBitmap(null);
 	}
 
 	public static int hexToColor(String hex) {

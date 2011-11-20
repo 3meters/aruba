@@ -50,7 +50,7 @@ public class CameraTargetSprite extends CandiRectangle {
 
 			@Override
 			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-				mCandiPatchPresenter.getRenderingTimer().activate();
+				mCandiPatchPresenter.RenderingActivate();
 				if (moveListener != null) {
 					moveListener.onMoveStarted();
 				}

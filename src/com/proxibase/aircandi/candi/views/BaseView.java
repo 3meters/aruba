@@ -23,7 +23,10 @@ import org.anddev.andengine.util.modifier.IModifier.IModifierListener;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.text.TextUtils.TruncateAt;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View.MeasureSpec;
 import android.widget.LinearLayout;
@@ -36,6 +39,8 @@ import com.proxibase.aircandi.candi.sprites.CandiRectangle;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
+import com.proxibase.aircandi.utils.ImageUtils;
+import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 
@@ -63,8 +68,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	protected String				mTitleText;
 	protected int					mTitleTextColor;
 	protected int					mTitleTextFillColor				= Color.TRANSPARENT;
-
-	private TextViewEllipsizing		mTitleTextView;
+	protected TextViewEllipsizing	mTextView;
 
 	protected boolean				mHardwareTexturesInitialized	= false;
 
@@ -231,73 +235,95 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 				});
 				registerEntityModifier(modifier);
-				mCandiPatchPresenter.getRenderingTimer().activate();
-
+				mCandiPatchPresenter.RenderingActivate();
 			}
 		}
 	}
 
 	public void progressVisible(boolean visible) {
-		//mProgressSprite.setVisible(visible);
+		mProgressSprite.setVisible(visible);
 		mProgressBarSprite.setVisible(visible);
 		if (visible) {
-			//mProgressSprite.animate(150, true);
+			mProgressSprite.animate(150, true);
 		}
 		else {
-			//mProgressSprite.stopAnimation();
+			mProgressSprite.stopAnimation();
 			mProgressBarSprite.setWidth(0);
 		}
 	}
 
 	protected Bitmap makeTextBitmap(int width, int height, int padding, CharSequence text) {
 
-		if (mTitleTextView == null) {
-			mTitleTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiActivity);
+		if (mTextView == null) {
+			mTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiActivity);
 		}
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
-		mTitleTextView.setLayoutParams(layoutParams);
-		mTitleTextView.setText(text);
-		mTitleTextView.setTextColor(mTitleTextColor);
-		mTitleTextView.setShadowLayer(0, 0, 0, 0xff000000);
-		mTitleTextView.setBackgroundColor(mTitleTextFillColor);
-		mTitleTextView.setPadding(padding, padding, padding, padding);
-		mTitleTextView.setEllipsize(TruncateAt.END);
-		mTitleTextView.setMaxLines(4);
-		mTitleTextView.setSingleLine(false);
+		mTextView.setLayoutParams(layoutParams);
+		mTextView.setSingleLine(false);
+		mTextView.setText(text);
+		mTextView.setTextColor(mTitleTextColor);
+		mTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+		mTextView.setShadowLayer(0, 0, 0, 0xff000000);
+		mTextView.setBackgroundColor(mTitleTextFillColor);
+		mTextView.setPadding(padding, padding, padding, padding);
+		mTextView.setEllipsize(TruncateAt.END);
 
 		Bitmap bitmap = Bitmap.createBitmap(width, height, CandiConstants.IMAGE_CONFIG_DEFAULT);
 		Canvas canvas = new Canvas(bitmap);
-		mTitleTextView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-		mTitleTextView.layout(0, 0, width, height);
-		mTitleTextView.setGravity(Gravity.BOTTOM);
-		mTitleTextView.draw(canvas);
+		mTextView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+		mTextView.layout(0, 0, width, height);
+		mTextView.setMaxLines(4);
+		mTextView.setGravity(Gravity.BOTTOM);
+		mTextView.setMirrorText(false);
+		mTextView.draw(canvas);
 		canvas = null;
 
 		return bitmap;
 	}
 
-	protected Bitmap overlayTextOnBitmap(int width, int height, int textColor, int textFillColor, int padding, CharSequence text, Bitmap bitmap) {
+	protected Bitmap overlayTextOnBitmap(Bitmap bitmap, int textColor, int textFillColor, float textOffsetY, int padding, CharSequence text,
+			boolean mirror,
+			boolean applyReflectionGradient) {
 
-		if (mTitleTextView == null) {
-			mTitleTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiActivity);
+		int width = bitmap.getWidth();
+		int height = bitmap.getHeight();
+
+		if (mTextView == null) {
+			mTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiActivity);
 		}
-		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
-		mTitleTextView.setLayoutParams(layoutParams);
-		mTitleTextView.setText("\n\n\n\n\n\n" + text);
-		mTitleTextView.setTextColor(textColor);
-		mTitleTextView.setShadowLayer(2, 2, 2, 0xff000000);
-		mTitleTextView.setBackgroundColor(0x00000000);
-		mTitleTextView.setPadding(padding, padding, padding, padding);
-		mTitleTextView.setEllipsize(TruncateAt.END);
-		mTitleTextView.setMaxLines(4);
-		mTitleTextView.setSingleLine(false);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, (int) (height - textOffsetY));
+		mTextView.setLayoutParams(layoutParams);
+		mTextView.setSingleLine(false);
+		mTextView.setText(text);
+		mTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+		mTextView.setTextColor(textColor);
+		mTextView.setBackgroundColor(Color.TRANSPARENT);
+		mTextView.setPadding(padding, padding, padding, padding);
+
+		ShapeDrawable mDrawable = new ShapeDrawable(new RectShape());
+		mDrawable.getPaint().setColor(textFillColor);
+		mDrawable.setBounds(0, (int) textOffsetY, width, height);
 
 		Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 		Canvas canvas = new Canvas(bitmapCopy);
-		mTitleTextView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-		mTitleTextView.layout(0, 0, width, height);
-		mTitleTextView.setGravity(Gravity.BOTTOM);
-		mTitleTextView.draw(canvas);
+		mTextView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+		mTextView.layout(0, 0, width, height);
+		mTextView.setGravity(Gravity.TOP);
+		mTextView.setMaxLines(3);
+		Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "TextView: lineCount: " + String.valueOf(mTextView.getLineCount()));
+		if (mirror) {
+			mTextView.setMirrorText(true);
+		}
+
+		mDrawable.draw(canvas);
+		canvas.translate(0, textOffsetY);
+
+		mTextView.draw(canvas);
+
+		if (applyReflectionGradient) {
+			ImageUtils.applyReflectionGradient(bitmapCopy);
+		}
+
 		canvas = null;
 
 		return bitmapCopy;

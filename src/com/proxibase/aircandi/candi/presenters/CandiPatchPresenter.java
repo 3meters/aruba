@@ -238,7 +238,7 @@ public class CandiPatchPresenter implements Observer {
 					 * TouchEvent is world coordinates
 					 * MotionEvent is screen coordinates
 					 */
-					getRenderingTimer().activate();
+					RenderingActivate();
 					if (mFullUpdateInProgress || mIgnoreInput)
 						return true;
 
@@ -844,7 +844,7 @@ public class CandiPatchPresenter implements Observer {
 	// --------------------------------------------------------------------------------------------
 
 	private void doCandiViewSingleTap(IView candiView) {
-		getRenderingTimer().activate();
+		RenderingActivate();
 
 		final CandiModel candiModel = (CandiModel) candiView.getModel();
 		Logger.d(CandiConstants.APP_NAME, "CandiPatchPresenter", "SingleTap triggered: " + candiModel.getEntityProxy().label);
@@ -1302,7 +1302,7 @@ public class CandiPatchPresenter implements Observer {
 		/* Textures that are shared by zone views */
 		Bitmap zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
 		if (zoneBodyBitmap != null) {
-			Bitmap zoneReflectionBitmap = ImageUtils.getReflection(zoneBodyBitmap);
+			Bitmap zoneReflectionBitmap = ImageUtils.makeReflection(zoneBodyBitmap);
 
 			mZoneBodyTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(zoneBodyBitmap, new IBitmapAdapter() {
 
@@ -1320,7 +1320,7 @@ public class CandiPatchPresenter implements Observer {
 						public Bitmap reloadBitmap() {
 							Bitmap zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
 							if (zoneBodyBitmap != null) {
-								Bitmap zoneReflectionBitmap = ImageUtils.getReflection(zoneBodyBitmap);
+								Bitmap zoneReflectionBitmap = ImageUtils.makeReflection(zoneBodyBitmap);
 								return zoneReflectionBitmap;
 							}
 							return null;
@@ -1493,10 +1493,6 @@ public class CandiPatchPresenter implements Observer {
 		return mRenderingActive;
 	}
 
-	public RenderCountDownTimer getRenderingTimer() {
-		return mRenderingTimer;
-	}
-
 	public interface ICandiListener {
 
 		void onSelected(IModel candi);
@@ -1509,6 +1505,25 @@ public class CandiPatchPresenter implements Observer {
 		void onMoveFinished();
 	}
 
+	public void RenderingActivate()
+	{
+		mRenderingActive = true;
+		mRenderSurfaceView.requestRender();
+		Logger.v(CandiConstants.APP_NAME, COMPONENT_NAME, "Rendering activated");
+		mRenderingTimer.cancel();
+		mRenderingTimer.start();
+	}
+	
+	public void RenderingActivate(long millisInFuture)
+	{
+		mRenderingTimer.cancel();
+		mRenderingTimer = new RenderCountDownTimer(millisInFuture, millisInFuture);
+		mRenderingActive = true;
+		mRenderSurfaceView.requestRender();
+		Logger.v(CandiConstants.APP_NAME, COMPONENT_NAME, "Rendering activated");
+		mRenderingTimer.start();
+	}
+	
 	public class RenderCountDownTimer extends CountDownTimer {
 
 		public RenderCountDownTimer(long millisInFuture) {
@@ -1524,15 +1539,7 @@ public class CandiPatchPresenter implements Observer {
 			mRenderingActive = false;
 			Logger.v(CandiConstants.APP_NAME, COMPONENT_NAME, "Rendering deactivated");
 		}
-
-		public void activate() {
-			mRenderingActive = true;
-			mRenderSurfaceView.requestRender();
-			Logger.v(CandiConstants.APP_NAME, COMPONENT_NAME, "Rendering activated");
-			this.cancel();
-			this.start();
-		}
-
+		
 		@Override
 		public void onTick(long millisUntilFinished) {}
 
@@ -1553,7 +1560,7 @@ public class CandiPatchPresenter implements Observer {
 			}
 
 			/* Check to see if we are at a boundary */
-			getRenderingTimer().activate();
+			RenderingActivate();
 			float cameraTargetX = mCameraTargetSprite.getX() + 125;
 			if (cameraTargetX <= mBoundsMinX || cameraTargetX >= mBoundsMaxX) {
 				Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "MoveNearestZone: At boundary");

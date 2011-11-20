@@ -776,7 +776,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				}
 
 				if (options.refreshAllBeacons && mCandiPatchPresenter != null) {
-					mCandiPatchPresenter.getRenderingTimer().activate();
+					mCandiPatchPresenter.RenderingActivate(60000);
 					mCandiPatchPresenter.setFullUpdateInProgress(true);
 					mCandiPatchPresenter.mProgressSprite.setVisible(true);
 
@@ -800,7 +800,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 									showNewCandiDialog();
 								}
 								else {
-									mCandiPatchPresenter.getRenderingTimer().activate();
+									mCandiPatchPresenter.RenderingActivate(3000);
 									doUpdateEntities(entities, options.refreshAllBeacons);
 
 									/* Check for rookies and play a sound */
@@ -896,7 +896,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private void showCandiInfo(final CandiModel candiModel, AnimType animType) {
 
 		mCandiInfoVisible = true;
-		mCandiPatchPresenter.getRenderingTimer().activate();
+		mCandiPatchPresenter.RenderingActivate();
 		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Show candi info: " + candiModel.getTitleText());
 
 		if (animType == AnimType.CrossFadeFlipper) {
@@ -1052,7 +1052,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			return;
 
 		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Hide candi info");
-		mCandiPatchPresenter.getRenderingTimer().activate();
+		mCandiPatchPresenter.RenderingActivate();
 		mIgnoreInput = true;
 		mCandiPatchPresenter.setIgnoreInput(true);
 
