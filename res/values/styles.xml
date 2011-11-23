@@ -94,7 +94,7 @@
     </style>
 
     <style name="aircandi_theme.blueray" parent="aircandi_theme.midnight">
-        <item name="android:windowBackground">@drawable/wallpaper7</item>
+        <item name="android:windowBackground">@drawable/wallpaper_blueray</item>
         <item name="actionStripBackground">@drawable/actionstrip_background_blueray</item>
         <item name="backgroundForm">@color/transparent</item>
         <item name="backgroundSliderHandleInfo">@drawable/slider_handle_info_bg_blueray</item>
@@ -102,11 +102,11 @@
     </style>
 
     <style name="aircandi_theme.smolder" parent="aircandi_theme.midnight">
-        <item name="android:windowBackground">@drawable/wallpaper15</item>
+        <item name="android:windowBackground">@drawable/wallpaper_smolder</item>
     </style>
 
     <style name="aircandi_theme.serene" parent="aircandi_theme.snow">
-        <item name="android:windowBackground">@drawable/wallpaper_lake</item>
+        <item name="android:windowBackground">@drawable/wallpaper_serene</item>
         <item name="textColorFocused">@android:color/white</item>
         <item name="textColorUnfocused">@color/text_unfocused_dark</item>
         <item name="textColorButtonHeader">@color/text_dark</item>

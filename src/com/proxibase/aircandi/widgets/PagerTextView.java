@@ -28,9 +28,8 @@ public class PagerTextView extends TextView {
 
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-		Logger.v(CandiConstants.APP_NAME, getClass().getSimpleName(), "onLayout called");
-
 		if (mFirstLayout) {
+			Logger.v(CandiConstants.APP_NAME, getClass().getSimpleName(), "onLayout performed");
 			super.onLayout(changed, left, top, right, bottom);
 			mInitialCenterX = this.getCenterX();
 			mInitialLeft = this.getLeft();

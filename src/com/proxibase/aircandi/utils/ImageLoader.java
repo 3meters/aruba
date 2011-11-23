@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -97,6 +98,9 @@ public class ImageLoader {
 		 * in pre 2.3 versions of android.
 		 */
 		byte[] imageBytes = (byte[]) ProxibaseService.getInstance().select(url, ResponseFormat.Bytes, listener);
+		if (imageBytes == null || imageBytes.length == 0) {
+			throw new IllegalStateException("Image byte array is null or empty: " + url);
+		}
 		Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
 		if (bitmap == null) {
 			throw new IllegalStateException("Stream could not be decoded to a bitmap: " + url);
@@ -108,6 +112,7 @@ public class ImageLoader {
 	public void getWebPageAsBitmap(String uri, ImageRequest imageRequest, final IImageRequestListener listener) {
 		String webViewContent = "";
 		final AtomicBoolean ready = new AtomicBoolean(false);
+		final AtomicInteger pictureCount = new AtomicInteger(0);
 
 		try {
 			webViewContent = (String) ProxibaseService.getInstance().select(uri, ResponseFormat.Html, null);
@@ -115,14 +120,6 @@ public class ImageLoader {
 		catch (ProxibaseException exception) {
 			listener.onProxibaseException(exception);
 		}
-
-		/*
-		 * We turn off javascript for performance reasons. Some pages will render differently
-		 * because javascript is used to control UI elements.
-		 */
-		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
-		mWebView.getSettings().setJavaScriptEnabled(imageRequest.javascriptEnabled);
-		mWebView.getSettings().setLoadWithOverviewMode(true);
 
 		/*
 		 * Setting WideViewPort to false will cause html text to layout to try and fit the sizing of the
@@ -133,19 +130,33 @@ public class ImageLoader {
 		 * 
 		 * We might have to have a property to control the desired result when
 		 * using html for the tile display image.
+		 * 
+		 * Makes the Webview have a normal viewport (such as a normal desktop browser), while when false the webview
+		 * will have a viewport constrained to it's own dimensions (so if the webview is 50px*50px the viewport will be
+		 * the same size)
 		 */
-
+		mWebView.getSettings().setUseWideViewPort(true);
 		if (imageRequest.imageFormat == ImageFormat.HtmlZoom) {
 			mWebView.getSettings().setUseWideViewPort(false);
 		}
-		else if (imageRequest.imageFormat == ImageFormat.Html) {
-			mWebView.getSettings().setUseWideViewPort(true);
-		}
+
+		/*
+		 * We turn off javascript for performance reasons. Some pages will render differently
+		 * because javascript is used to control UI elements.
+		 */
+		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
+		mWebView.getSettings().setJavaScriptEnabled(imageRequest.javascriptEnabled);
+		mWebView.getSettings().setLoadWithOverviewMode(true);
+
+		//mWebView.requestLayout();
+//		mWebView.invalidate();
+//		mWebView.postInvalidate();
 
 		mWebView.setWebViewClient(new WebViewClient() {
 
 			@Override
 			public void onPageFinished(WebView view, String url) {
+				super.onPageFinished(view, url);
 				ready.set(true);
 			}
 		});
@@ -162,8 +173,14 @@ public class ImageLoader {
 
 			@Override
 			public void onNewPicture(WebView view, Picture picture) {
+				/*
+				 * Sometimes the first call isn't finished with layout but the
+				 * second one is correct. How can we tell the difference?
+				 */
 
 				if (ready.get()) {
+					pictureCount.getAndIncrement();
+
 					Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
 							CandiConstants.IMAGE_CONFIG_DEFAULT);
 					Canvas canvas = new Canvas(bitmap);
@@ -178,7 +195,11 @@ public class ImageLoader {
 					/* Release */
 					canvas = null;
 					listener.onImageReady(bitmap);
-					mWebView.setPictureListener(null);
+					
+					/* We only allow a maximum of two picture calls */
+					if (pictureCount.get() >= 2){
+						mWebView.setPictureListener(null);
+					}
 				}
 			}
 		});
@@ -259,6 +280,8 @@ public class ImageLoader {
 
 	public class ImagesLoader extends Thread {
 
+		private boolean	processingWebPage	= false;
+
 		public void run() {
 			try {
 
@@ -274,15 +297,28 @@ public class ImageLoader {
 					if (mImagesQueue.mImagesToLoad.size() != 0) {
 						final ImageRequest imageRequest;
 						synchronized (mImagesQueue.mImagesToLoad) {
+							ImageRequest imageRequestCheck = mImagesQueue.mImagesToLoad.peek();
+							if (imageRequestCheck.imageFormat == ImageFormat.Html || imageRequestCheck.imageFormat == ImageFormat.HtmlZoom) {
+								if (processingWebPage) {
+									mImagesQueue.mImagesToLoad.wait();
+								}
+							}
 							imageRequest = mImagesQueue.mImagesToLoad.poll();
 						}
 
 						Bitmap bitmap = null;
 						if (imageRequest.imageFormat == ImageFormat.Html || imageRequest.imageFormat == ImageFormat.HtmlZoom) {
+							processingWebPage = true;
 							getWebPageAsBitmap(imageRequest.imageUri, imageRequest, new IImageRequestListener() {
 
 								@Override
 								public void onImageReady(Bitmap bitmap) {
+									processingWebPage = false;
+
+									/* It safe to start processing another web page image if we have one */
+									synchronized (mImagesQueue.mImagesToLoad) {
+										mImagesQueue.mImagesToLoad.notifyAll();
+									}
 
 									/* Perform requested post processing */
 									bitmap = scaleAndCropBitmap(bitmap, imageRequest);
@@ -292,7 +328,7 @@ public class ImageLoader {
 
 									/* Create reflection if requested */
 									if (imageRequest.makeReflection) {
-										final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap);
+										final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
 										mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection, CompressFormat.PNG);
 										if (mImageCache.isFileCacheOnly()) {
 											bitmapReflection.recycle();
@@ -382,7 +418,7 @@ public class ImageLoader {
 							/* Create reflection if requested */
 							imageRequest.imageReadyListener.onProgressChanged(80);
 							if (imageRequest.makeReflection) {
-								final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap);
+								final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
 								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(),

@@ -165,8 +165,8 @@ public abstract class BaseModel extends Observable implements IModel {
 			return (!isCulled(camera));
 		}
 
-		public boolean isWithinHalo(Camera camera) {
-			mLastWithinHalo = !isOutsideHalo(camera);
+		public boolean isWithinHalo(Camera camera, float lastX) {
+			mLastWithinHalo = !isOutsideHalo(camera, lastX);
 			return (mLastWithinHalo);
 		}
 
@@ -176,9 +176,18 @@ public abstract class BaseModel extends Observable implements IModel {
 					|| mY + (mHeight * mScale) < camera.getMinY();
 		}
 
-		private boolean isOutsideHalo(Camera camera) {
+		private boolean isOutsideHalo(Camera camera, float lastX) {
 			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
 			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
+//			if (haloMinX < 0) {
+//				haloMaxX += Math.abs(haloMinX);
+//				haloMinX = 0;
+//			}
+//			else if (haloMaxX > lastX) {
+//				haloMinX -= Math.abs(lastX - haloMaxX);
+//				haloMaxX = lastX;
+//			}
+
 			return mX + (mWidth * mScale) < haloMinX || mX > haloMaxX;
 		}
 

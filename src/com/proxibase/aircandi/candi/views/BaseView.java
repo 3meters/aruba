@@ -23,6 +23,7 @@ import org.anddev.andengine.util.modifier.IModifier.IModifierListener;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.text.TextUtils.TruncateAt;
@@ -40,7 +41,6 @@ import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 
@@ -235,19 +235,19 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 				});
 				registerEntityModifier(modifier);
-				mCandiPatchPresenter.RenderingActivate();
+				mCandiPatchPresenter.renderingActivate();
 			}
 		}
 	}
 
 	public void progressVisible(boolean visible) {
-		mProgressSprite.setVisible(visible);
+		//mProgressSprite.setVisible(visible);
 		mProgressBarSprite.setVisible(visible);
 		if (visible) {
-			mProgressSprite.animate(150, true);
+			//mProgressSprite.animate(150, true);
 		}
 		else {
-			mProgressSprite.stopAnimation();
+			//mProgressSprite.stopAnimation();
 			mProgressBarSprite.setWidth(0);
 		}
 	}
@@ -272,7 +272,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		Canvas canvas = new Canvas(bitmap);
 		mTextView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 		mTextView.layout(0, 0, width, height);
-		mTextView.setMaxLines(4);
+		mTextView.setMaxLines(4); /* Important to set this after measure/layout */
 		mTextView.setGravity(Gravity.BOTTOM);
 		mTextView.setMirrorText(false);
 		mTextView.draw(canvas);
@@ -298,7 +298,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
 		mTextView.setTextColor(textColor);
 		mTextView.setBackgroundColor(Color.TRANSPARENT);
-		mTextView.setPadding(padding, padding, padding, padding);
+		mTextView.setPadding(padding + 5, padding, padding, padding);
 
 		ShapeDrawable mDrawable = new ShapeDrawable(new RectShape());
 		mDrawable.getPaint().setColor(textFillColor);
@@ -309,8 +309,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTextView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 		mTextView.layout(0, 0, width, height);
 		mTextView.setGravity(Gravity.TOP);
-		mTextView.setMaxLines(3);
-		Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "TextView: lineCount: " + String.valueOf(mTextView.getLineCount()));
+		mTextView.setMaxLines(3); /* Important to set this after measure/layout */
 		if (mirror) {
 			mTextView.setMirrorText(true);
 		}
@@ -321,7 +320,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTextView.draw(canvas);
 
 		if (applyReflectionGradient) {
-			ImageUtils.applyReflectionGradient(bitmapCopy);
+			ImageUtils.applyReflectionGradient(bitmapCopy, Mode.DST_IN);
 		}
 
 		canvas = null;

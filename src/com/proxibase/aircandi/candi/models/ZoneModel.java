@@ -211,21 +211,40 @@ public class ZoneModel extends BaseModel {
 				columns = 3;
 				rows = 3;
 
-				position.x = (float) (this.getViewStateCurrent().getX() + ((index % columns) * offsetX));
-				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY() + ((Math.floor(index / rows)) * offsetY));
-
 				position.col = (int) (index % columns) + 1;
-				if (position.col == columns)
+
+				int fixedX = 0;
+				if (position.col == columns) {
 					position.colLast = true;
-				else if (position.col == 1)
+					fixedX = 170;
+				}
+				else if (position.col == 1) {
 					position.colFirst = true;
+				}
+				else if (position.col == 2) {
+					position.colFirst = true;
+					fixedX = 85;
+				}
 
 				position.row = (int) Math.floor(index / rows) + 1;
 
-				if (position.row == rows)
+				int fixedY = 0;
+				if (position.row == rows) {
 					position.rowLast = true;
-				else if (position.row == 1)
+					fixedY = 170;
+				}
+				else if (position.row == 1) {
 					position.rowFirst = true;
+				}
+				else if (position.row == 2) {
+					position.rowFirst = true;
+					fixedY = 85;
+				}
+
+				//position.x = (float) (this.getViewStateCurrent().getX() + ((index % columns) * offsetX));
+				//position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY() + ((Math.floor(index / rows)) * offsetY));
+				position.x = (float) (this.getViewStateCurrent().getX() + fixedX);
+				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY() + fixedY);
 			}
 		}
 
@@ -273,7 +292,7 @@ public class ZoneModel extends BaseModel {
 		}
 		else {
 			if (candiModelTarget.getZoneStateNext().getStatus() == ZoneStatus.Primary)
-				scale = 0.65f;
+				scale = 0.66f;
 			else
 				scale = 0.32f;
 		}

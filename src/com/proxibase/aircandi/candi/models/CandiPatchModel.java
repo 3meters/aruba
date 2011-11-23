@@ -198,7 +198,10 @@ public class CandiPatchModel extends Observable {
 		/* Reset inactive zone */
 		mZoneInactive.getCandiesNext().clear();
 
-		/* Manage visibility and touch areas */
+		/*
+		 * Manage visibility and touch areas.
+		 * mCandiModels is a flattened list of all candi models.
+		 */
 		for (CandiModel candiModel : mCandiModels) {
 			candiModel.setTouchAreaActive(false);
 			candiModel.setChanged();
@@ -213,72 +216,28 @@ public class CandiPatchModel extends Observable {
 				boolean underNextRoot = mCandiRootNext.getChildren().containsKey(String.valueOf(candiModel.getModelId())) || mCandiRootNext
 												.getChildren().containsKey(String.valueOf(((CandiModel) candiModel.getParent()).getModelId()));
 				if (!underNextRoot) {
-
 					/* Assign candies being hidden because of navigation to the inactive zone */
 					candiModel.getViewStateNext().setVisible(false);
 					candiModel.setReasonInactive(ReasonInactive.Navigation);
 					candiModel.getZoneStateNext().setZone(mZoneInactive);
+					candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
 					mZoneInactive.getCandiesNext().add(candiModel);
-
-					/* Include any children */
-					for (IModel childModel : candiModel.getChildren()) {
-						CandiModel childCandiModel = (CandiModel) childModel;
-						mZoneInactive.getCandiesNext().add(childCandiModel);
-						childCandiModel.getZoneStateNext().setZone(mZoneInactive);
-						childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
-						childCandiModel.setChanged();
-					}
 				}
 				else {
-					if (candiModel.getReasonInactive() != ReasonInactive.Deleting) {
-
+					candiModel.setReasonInactive(ReasonInactive.None);
+					if (candiModel.getEntityProxy().isHidden) {
+						/* Assign hidden candies to the inactive zone */
+						candiModel.getViewStateNext().setVisible(false);
+						candiModel.setReasonInactive(ReasonInactive.Hidden);
+						candiModel.getZoneStateNext().setZone(mZoneInactive);
+						candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
+						mZoneInactive.getCandiesNext().add(candiModel);
+					}
+					else {
+						candiModel.getViewStateNext().setVisible(true);
 						candiModel.setReasonInactive(ReasonInactive.None);
-						if (candiModel.getEntityProxy().isHidden) {
-							/*
-							 * Candi models that won't be visible next are assigned to the special
-							 * inactive zone including their children.
-							 */
-							candiModel.getViewStateNext().setVisible(false);
-							candiModel.setReasonInactive(ReasonInactive.Hidden);
-							candiModel.getZoneStateNext().setZone(mZoneInactive);
-							candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
-							mZoneInactive.getCandiesNext().add(candiModel);
-
-							for (IModel childModel : candiModel.getChildren()) {
-								CandiModel childCandiModel = (CandiModel) childModel;
-								mZoneInactive.getCandiesNext().add(childCandiModel);
-								childCandiModel.getZoneStateNext().setZone(mZoneInactive);
-								childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
-								childCandiModel.setChanged();
-							}
-
-						}
-						else {
-							candiModel.getViewStateNext().setVisible(true);
-							candiModel.setReasonInactive(ReasonInactive.None);
-							candiModel.setTouchAreaActive(true);
-
-							for (IModel childModel : candiModel.getChildren()) {
-								CandiModel childCandiModel = (CandiModel) childModel;
-								childCandiModel.setChanged();
-
-								if (childCandiModel.getEntityProxy().isHidden) {
-									/*
-									 * Parent is visible but the child is hidden so we assign it to
-									 * the special inactive zone.
-									 */
-									childCandiModel.setReasonInactive(ReasonInactive.Hidden);
-									childCandiModel.getZoneStateNext().setZone(mZoneInactive);
-									childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
-									mZoneInactive.getCandiesNext().add(childCandiModel);
-								}
-								else {
-									childCandiModel.setReasonInactive(ReasonInactive.None);
-									childCandiModel.getViewStateNext().setVisible(true);
-									childCandiModel.setTouchAreaActive(true);
-								}
-							}
-						}
+						candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
+						candiModel.setTouchAreaActive(true);
 					}
 				}
 			}

@@ -18,8 +18,8 @@ import com.proxibase.aircandi.core.CandiConstants;
 public class ImageUtils {
 
 	private static Paint			mPaint	= new Paint();
-	private static Canvas			mCanvas	= new Canvas();
-	private static LinearGradient	mShader	= new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x70ffffff, 0x00ffffff,
+	//private static Canvas			mCanvas	= new Canvas();
+	private static LinearGradient	mShader	= new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x88ffffff, 0x00ffffff,
 													TileMode.CLAMP);
 
 	public static void showToastNotification(Context context, String message, int duration) {
@@ -61,7 +61,7 @@ public class ImageUtils {
 		return croppedBitmap;
 	}
 
-	public static Bitmap makeReflection(Bitmap originalBitmap) {
+	public static Bitmap makeReflection(Bitmap originalBitmap, boolean applyReflectionGradient) {
 
 		int width = originalBitmap.getWidth();
 		int height = originalBitmap.getHeight();
@@ -78,38 +78,38 @@ public class ImageUtils {
 
 		/* Create a new bitmap with same width but taller to fit reflection */
 		Bitmap reflectionBitmap = Bitmap.createBitmap(width, (height / 2), CandiConstants.IMAGE_CONFIG_DEFAULT);
-		
-		mCanvas = new Canvas();
-		
-		mCanvas.setBitmap(reflectionBitmap);
-		
+
+		Canvas canvas = new Canvas();
+
+		canvas.setBitmap(reflectionBitmap);
+
 		/* Draw in the reflection */
-		mCanvas.drawBitmap(reflectionImage, 0, 0, null);
+		canvas.drawBitmap(reflectionImage, 0, 0, null);
 
 		/* Apply reflection gradient */
-		applyReflectionGradient(reflectionBitmap);
-		
+		if (applyReflectionGradient) {
+			applyReflectionGradient(reflectionBitmap, Mode.DST_IN);
+		}
+
 		/* Stash the image with reflection */
 		return reflectionBitmap;
 	}
 
-	public static void applyReflectionGradient(Bitmap reflectionBitmap) {
-		
-		mCanvas = new Canvas();
-		
-		mCanvas.setBitmap(reflectionBitmap);
+	public static void applyReflectionGradient(Bitmap reflectionBitmap, Mode mode) {
+
+		Canvas canvas = new Canvas();
+
+		canvas.setBitmap(reflectionBitmap);
 
 		/* Set the paint to use this shader (linear gradient) */
+		//LinearGradient shader = new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x88ffffff, 0x00ffffff, TileMode.CLAMP);
 		mPaint.setShader(mShader);
 
 		/* Set the Transfer mode to be porter duff and destination in */
-		mPaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
+		mPaint.setXfermode(new PorterDuffXfermode(mode));
 
 		/* Draw a rectangle using the paint with our linear gradient */
-		mCanvas.drawRect(0, 0, reflectionBitmap.getWidth(), reflectionBitmap.getHeight(), mPaint);
-
-		/* Release */
-		//mCanvas.setBitmap(null);
+		canvas.drawRect(0, 0, reflectionBitmap.getWidth(), reflectionBitmap.getHeight(), mPaint);
 	}
 
 	public static int hexToColor(String hex) {
