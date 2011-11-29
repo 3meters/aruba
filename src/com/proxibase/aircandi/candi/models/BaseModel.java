@@ -9,6 +9,7 @@ import org.anddev.andengine.entity.modifier.IEntityModifier;
 import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.CandiList;
+import com.proxibase.aircandi.utils.Exceptions;
 
 public abstract class BaseModel extends Observable implements IModel {
 
@@ -283,7 +284,7 @@ public abstract class BaseModel extends Observable implements IModel {
 				return super.clone();
 			}
 			catch (CloneNotSupportedException exception) {
-				exception.printStackTrace();
+				Exceptions.Handle(exception);
 				return null;
 			}
 		}

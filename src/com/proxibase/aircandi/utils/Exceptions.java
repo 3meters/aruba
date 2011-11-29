@@ -4,11 +4,15 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseExcepti
 
 public class Exceptions {
 
-	public static void Handle(Exception exception) {
-		exception.printStackTrace();
+	public static boolean Handle(Exception exception) {
+		/* 
+		 * For now we are re-throwing all exceptions so they get 
+		 * handled by the top level uncaught exception handler. 
+		 */
+		throw new RuntimeException(exception);
 	}
 	
-	public static void Handle(ProxibaseException exception) {
-		exception.printStackTrace();
+	public static boolean Handle(ProxibaseException exception) {
+		throw new RuntimeException(exception);
 	}
 }

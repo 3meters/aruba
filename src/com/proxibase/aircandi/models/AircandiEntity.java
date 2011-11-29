@@ -2,6 +2,7 @@ package com.proxibase.aircandi.models;
 
 import com.google.gson.annotations.Expose;
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.IQueryListener;
@@ -41,7 +42,7 @@ public class AircandiEntity {
 			return response;
 		}
 		catch (ProxibaseException exception) {
-			exception.printStackTrace();
+			Exceptions.Handle(exception);
 		}
 		return null;
 	}
@@ -52,7 +53,7 @@ public class AircandiEntity {
 			return true;
 		}
 		catch (ProxibaseException exception) {
-			exception.printStackTrace();
+			Exceptions.Handle(exception);
 		}
 		return false;
 	}
@@ -63,7 +64,7 @@ public class AircandiEntity {
 			return true;
 		}
 		catch (ProxibaseException exception) {
-			exception.printStackTrace();
+			Exceptions.Handle(exception);
 		}
 		return false;
 	}

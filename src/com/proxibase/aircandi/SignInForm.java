@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -94,7 +95,7 @@ public class SignInForm extends AircandiActivity {
 			mUser = ProxibaseService.getInstance().loadUser(email);
 		}
 		catch (ProxibaseException exception) {
-			exception.printStackTrace();
+			Exceptions.Handle(exception);
 		}
 		finally {
 			showProgressDialog(false, null);

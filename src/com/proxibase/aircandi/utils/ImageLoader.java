@@ -25,6 +25,7 @@ import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.utils.Utilities.SimpleCountDownTimer;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.IProgressListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
@@ -32,11 +33,14 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
 public class ImageLoader {
 
-	private ImageCache			mImageCache;
-	private Map<Object, String>	mImageRequestors	= Collections.synchronizedMap(new WeakHashMap<Object, String>());
-	private ImagesQueue			mImagesQueue		= new ImagesQueue();
-	private ImagesLoader		mImageLoaderThread	= new ImagesLoader();
-	private WebView				mWebView;
+	private ImageCache				mImageCache;
+	private Map<Object, String>		mImageRequestors	= Collections.synchronizedMap(new WeakHashMap<Object, String>());
+	private ImagesQueue				mImagesQueue		= new ImagesQueue();
+	private ImagesLoader			mImageLoaderThread	= new ImagesLoader();
+	@SuppressWarnings("unused")
+	private SimpleCountDownTimer	mCountDownTimer;
+
+	private WebView					mWebView;
 
 	public ImageLoader(Context context) {
 
@@ -111,7 +115,13 @@ public class ImageLoader {
 		}
 		else if (imageRequest.imageUri.toLowerCase().contains("asset:")) {
 			String assetName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("asset:"));
-			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(assetName);
+			Bitmap bitmap = null;
+			try {
+				bitmap = ImageManager.getInstance().loadBitmapFromAssets(assetName);
+			}
+			catch (ProxibaseException exception) {
+				imageRequest.imageReadyListener.onProxibaseException(exception);
+			}
 			if (bitmap != null) {
 				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
 					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
@@ -185,6 +195,7 @@ public class ImageLoader {
 	}
 
 	public void getWebPageAsBitmap(String uri, ImageRequest imageRequest, final ImageRequestListener listener) {
+
 		String webViewContent = "";
 		final AtomicBoolean ready = new AtomicBoolean(false);
 		final AtomicInteger pictureCount = new AtomicInteger(0);
@@ -256,7 +267,7 @@ public class ImageLoader {
 				if (ready.get()) {
 					pictureCount.getAndIncrement();
 
-					Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
+					final Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
 							CandiConstants.IMAGE_CONFIG_DEFAULT);
 					Canvas canvas = new Canvas(bitmap);
 
@@ -280,6 +291,7 @@ public class ImageLoader {
 		});
 
 		mWebView.loadDataWithBaseURL(uri, webViewContent, "text/html", "utf-8", null);
+
 	}
 
 	public Bitmap scaleAndCropBitmap(Bitmap bitmap, ImageRequest imageRequest) {
@@ -388,6 +400,8 @@ public class ImageLoader {
 						Bitmap bitmap = null;
 						if (imageRequest.imageFormat == ImageFormat.Html || imageRequest.imageFormat == ImageFormat.HtmlZoom) {
 							processingWebPage = true;
+							mWebView.stopLoading();
+							mWebView.setPictureListener(null);
 							getWebPageAsBitmap(imageRequest.imageUri, imageRequest, new ImageRequestListener() {
 
 								@Override
@@ -430,7 +444,6 @@ public class ImageLoader {
 								@Override
 								public void onProxibaseException(ProxibaseException exception) {
 									imageRequest.imageReadyListener.onImageReady(null);
-									super.onProxibaseException(exception);
 								}
 							});
 						}
@@ -458,11 +471,7 @@ public class ImageLoader {
 																									+ "ms");
 							}
 							catch (ProxibaseException exception) {
-								bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
-								Logger.v(this,
-										imageRequest.imageUri + ": Download failed, using placeholder: "
-												+ String.valueOf(estimatedTime / 1000000)
-												+ "ms");
+								imageRequest.imageReadyListener.onProxibaseException(exception);
 							}
 
 							//imageRequest.imageReadyListener.onProgressChanged(70);

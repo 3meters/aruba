@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.proxibase.aircandi.models.PhotoEntity;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
@@ -44,7 +45,7 @@ public class PhotoBrowse extends AircandiActivity {
 			mEntity = (PhotoEntity) ProxibaseService.convertJsonToObject(jsonResponse, PhotoEntity.class, GsonType.ProxibaseService);
 		}
 		catch (ProxibaseException exception) {
-			exception.printStackTrace();
+			Exceptions.Handle(exception);
 		}
 
 		final PhotoEntity entity = (PhotoEntity) mEntity;
@@ -160,7 +161,7 @@ public class PhotoBrowse extends AircandiActivity {
 			}
 		}
 		catch (Exception exception) {
-			exception.printStackTrace();
+			Exceptions.Handle(exception);
 		}
 		finally {
 			super.onDestroy();

@@ -44,12 +44,12 @@ public class DrawableManager {
 																					+ drawable.getMinimumWidth());
 			return drawable;
 		}
-		catch (MalformedURLException e) {
-			Logger.e(this, "fetchDrawable failed", e);
+		catch (MalformedURLException exception) {
+			Logger.e(this, "fetchDrawable failed", exception);
 			return null;
 		}
-		catch (IOException e) {
-			Logger.e(this, "fetchDrawable failed", e);
+		catch (IOException exception) {
+			Logger.e(this, "fetchDrawable failed", exception);
 			return null;
 		}
 	}

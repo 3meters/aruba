@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.WebEntity;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
@@ -54,7 +55,7 @@ public class WebForm extends EntityBaseForm {
 				mEntity = (WebEntity) ProxibaseService.convertJsonToObject(jsonResponse, WebEntity.class, GsonType.ProxibaseService);
 			}
 			catch (ProxibaseException exception) {
-				exception.printStackTrace();
+				Exceptions.Handle(exception);
 			}
 		}
 		super.bindEntity();
@@ -264,14 +265,17 @@ public class WebForm extends EntityBaseForm {
 
 								@Override
 								public void onProxibaseException(ProxibaseException exception) {
-									runOnUiThread(new Runnable() {
+									if (!Exceptions.Handle(exception))
+									{
+										runOnUiThread(new Runnable() {
 
-										@Override
-										public void run() {
-											mProgressDialog.dismiss();
-											ImageUtils.showToastNotification(WebForm.this, "Website unavailable", Toast.LENGTH_SHORT);
-										}
-									});
+											@Override
+											public void run() {
+												mProgressDialog.dismiss();
+												ImageUtils.showToastNotification(WebForm.this, "Website unavailable", Toast.LENGTH_SHORT);
+											}
+										});
+									}
 								}
 							});
 						}

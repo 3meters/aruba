@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.models.Comment;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
@@ -33,7 +34,7 @@ public class CommentForm extends EntityBaseForm {
 				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
 			}
 			catch (ProxibaseException exception) {
-				exception.printStackTrace();
+				Exceptions.Handle(exception);
 			}
 
 			mEntity = (Comment) ProxibaseService.convertJsonToObject(jsonResponse, Comment.class, GsonType.ProxibaseService);

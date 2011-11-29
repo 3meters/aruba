@@ -197,6 +197,13 @@ public abstract class EntityBaseForm extends AircandiActivity {
 				entity.imageBitmap = bitmap;
 				showPicture(bitmap, R.id.img_public_image);
 			}
+
+			@Override
+			public void onProxibaseException(ProxibaseException exception) {
+				mUser.imageUri = "resource:user_placeholder";
+				mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.user_placeholder);
+			}
+
 		});
 	}
 
@@ -328,12 +335,13 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 			@Override
 			public void onProxibaseException(ProxibaseException exception) {
-				runOnUiThread(new Runnable(){
+				runOnUiThread(new Runnable() {
 
 					@Override
 					public void run() {
 						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_insert_failed_toast), Toast.LENGTH_SHORT);
-					}});
+					}
+				});
 				exception.printStackTrace();
 			}
 		});

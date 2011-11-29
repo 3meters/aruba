@@ -63,7 +63,6 @@ public class ProxiHandlerManager {
 			return publicName;
 		}
 		catch (NameNotFoundException exception) {
-			exception.printStackTrace();
 			return null;
 		}
 	}

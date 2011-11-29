@@ -95,7 +95,7 @@ public class ImageManager {
 				rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
 			}
 			catch (IOException exception) {
-				exception.printStackTrace();
+				throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
 			}
 		}
 
@@ -128,7 +128,7 @@ public class ImageManager {
 		return bitmap;
 	}
 
-	public Bitmap loadBitmapFromAssets(final String assetPath) {
+	public Bitmap loadBitmapFromAssets(final String assetPath) throws ProxibaseException {
 		InputStream in = null;
 		try {
 			final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
@@ -137,9 +137,8 @@ public class ImageManager {
 			in = mContext.getAssets().open(assetPath);
 			return BitmapFactory.decodeStream(in, null, decodeOptions);
 		}
-		catch (final IOException e) {
-			e.printStackTrace();
-			return null;
+		catch (final IOException exception) {
+			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
 		}
 		finally {
 			StreamUtils.close(in);
@@ -283,7 +282,8 @@ public class ImageManager {
 				int rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
 				return rotation;
 			}
-			catch (IOException e) {
+			catch (IOException exception) {
+				Exceptions.Handle(exception);
 			}
 		}
 		return 0f;
@@ -317,7 +317,7 @@ public class ImageManager {
 		try {
 			sdkInt = Integer.valueOf(Build.VERSION.SDK);
 		}
-		catch (Exception e1) {
+		catch (Exception exception) {
 			sdkInt = 3; // assume they are on cupcake
 		}
 		if (sdkInt >= 5) {

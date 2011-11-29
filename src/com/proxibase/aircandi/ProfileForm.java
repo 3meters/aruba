@@ -21,6 +21,7 @@ import android.widget.ViewFlipper;
 
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.DateUtils;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
@@ -147,7 +148,7 @@ public class ProfileForm extends AircandiActivity {
 			mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 		}
 		catch (ProxibaseException exception) {
-			exception.printStackTrace();
+			Exceptions.Handle(exception);
 		}
 	}
 
@@ -222,6 +223,13 @@ public class ProfileForm extends AircandiActivity {
 					}
 				});
 			}
+
+			@Override
+			public void onProxibaseException(ProxibaseException exception) {
+				mUser.imageUri = "resource:user_placeholder";
+				mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.user_placeholder);
+			}
+
 		});
 	}
 
@@ -230,15 +238,14 @@ public class ProfileForm extends AircandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	protected void doSave() {
-		if (!validate()){
+		if (!validate()) {
 			return;
 		}
 		updateImages();
 		updateEntity();
 	}
-	
-	private boolean validate()
-	{
+
+	private boolean validate() {
 		String alertMessage = "";
 		if (mTextPassword.getText().toString().length() > 0) {
 			if (mTextPassword.getText().toString().length() == 0) {
@@ -269,8 +276,9 @@ public class ProfileForm extends AircandiActivity {
 				mUser.imageUri = null;
 			}
 			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(ProfileForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
-				exception.printStackTrace();
+				if (!Exceptions.Handle(exception)) {
+					ImageUtils.showToastNotification(ProfileForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+				}
 			}
 		}
 		/*
@@ -287,8 +295,9 @@ public class ProfileForm extends AircandiActivity {
 					S3.putImage(imageKey, mUser.imageBitmap);
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(ProfileForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
-					exception.printStackTrace();
+					if (!Exceptions.Handle(exception)) {
+						ImageUtils.showToastNotification(ProfileForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					}
 				}
 				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
 			}
@@ -331,14 +340,15 @@ public class ProfileForm extends AircandiActivity {
 
 			@Override
 			public void onProxibaseException(ProxibaseException exception) {
-				exception.printStackTrace();
-				runOnUiThread(new Runnable() {
+				if (!Exceptions.Handle(exception)) {
+					runOnUiThread(new Runnable() {
 
-					@Override
-					public void run() {
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
-					}
-				});
+						@Override
+						public void run() {
+							ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+						}
+					});
+				}
 			}
 		});
 
@@ -387,7 +397,7 @@ public class ProfileForm extends AircandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
-	
+
 	protected void onDestroy() {
 
 		/* This activity gets destroyed everytime we leave using back or finish(). */
@@ -397,7 +407,7 @@ public class ProfileForm extends AircandiActivity {
 			}
 		}
 		catch (Exception exception) {
-			exception.printStackTrace();
+			Exceptions.Handle(exception);
 		}
 		finally {
 			super.onDestroy();

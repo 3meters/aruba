@@ -74,11 +74,13 @@ import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.CandiList;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 
 public class CandiPatchPresenter implements Observer {
 
@@ -508,8 +510,8 @@ public class CandiPatchPresenter implements Observer {
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
 			ensureZoneView(zoneModel);
 		}
-		
-		/* 
+
+		/*
 		 * Reset focus to primary if we are navigating up to root and currently
 		 * focused on a child
 		 */
@@ -522,7 +524,7 @@ public class CandiPatchPresenter implements Observer {
 
 		/* For animations, we need to create views in advance. */
 		if (CandiConstants.TRANSITIONS_ACTIVE) {
-			
+
 			/* Clear out any left over actions and modifiers */
 			for (CandiModel candiModel : mCandiPatchModel.getCandiModels()) {
 				synchronized (candiModel.getViewModifiers()) {
@@ -535,7 +537,7 @@ public class CandiPatchPresenter implements Observer {
 					}
 				}
 			}
-			
+
 			manageViews(false, true);
 			doTransitionAnimations(updatingData);
 		}
@@ -574,8 +576,9 @@ public class CandiPatchPresenter implements Observer {
 		/* We use the observer count as an indication of whether this candi model already has a candi view. */
 		if (!mCandiViewsHash.containsKey(candiModel.getModelIdAsString()) && !candiModel.getEntityProxy().isHidden) {
 
-			if (candiModel.countObservers() > 0)
+			if (candiModel.countObservers() > 0) {
 				throw new IllegalStateException("CandiModel has an observer but CandiViewHash is empty");
+			}
 
 			final CandiView candiView = new CandiView(CandiPatchPresenter.this);
 			candiView.setTitleTextColor(Color.parseColor(getStyleTextColorTitle()));
@@ -762,8 +765,8 @@ public class CandiPatchPresenter implements Observer {
 				synchronized (candiModel.getViewModifiers()) {
 					candiModel.getViewModifiers().clear();
 					candiModel.getViewModifiers().addLast(
-							
-							new CandiAlphaModifier(null, CandiConstants.DURATION_INSTANT, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
+
+					new CandiAlphaModifier(null, CandiConstants.DURATION_INSTANT, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
 				}
 				synchronized (candiModel.getViewActions()) {
 					candiModel.getViewActions().clear();
@@ -1136,12 +1139,12 @@ public class CandiPatchPresenter implements Observer {
 																					+ candiModel.getTitleText());
 							}
 
-//							if (transition != Transition.None && candiModel.getViewStateNext().isLastWithinHalo()) {
-//								Logger.v(this, "Transition To: " + transition.toString()
-//																					+ ": "
-//																					+ candiModel.getTitleText());
-//							}
-							
+							//							if (transition != Transition.None && candiModel.getViewStateNext().isLastWithinHalo()) {
+							//								Logger.v(this, "Transition To: " + transition.toString()
+							//																					+ ": "
+							//																					+ candiModel.getTitleText());
+							//							}
+
 							if (transition == Transition.FadeOut) {
 								// viewStateNext.setVisible(false);
 							}
@@ -1164,21 +1167,21 @@ public class CandiPatchPresenter implements Observer {
 							}
 							else if (transition == Transition.FadeIn) {
 
-//								if (candiModel.getViewStateNext().isLastWithinHalo()) {
-									if (needDelay) {
-										candiModel.getViewModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
-									}
+								//								if (candiModel.getViewStateNext().isLastWithinHalo()) {
+								if (needDelay) {
+									candiModel.getViewModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
+								}
 
-									candiModel.getViewModifiers().addLast(
+								candiModel.getViewModifiers().addLast(
 											new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f,
 													CandiConstants.EASE_FADE_IN));
-									synchronized (candiModel.getViewActions()) {
-										candiModel.getViewActions().addLast(new ViewAction(ViewActionType.Position));
-										candiModel.getViewActions().addLast(new ViewAction(ViewActionType.Scale));
-										candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ExpandCollapse));
-										candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ReflectionHideShow));
-									}
-	//							}
+								synchronized (candiModel.getViewActions()) {
+									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.Position));
+									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.Scale));
+									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ExpandCollapse));
+									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ReflectionHideShow));
+								}
+								//							}
 							}
 							else if (transition == Transition.Move) {
 
@@ -1389,7 +1392,13 @@ public class CandiPatchPresenter implements Observer {
 	public void loadTextureSources() {
 
 		/* Textures that are shared by zone views */
-		Bitmap zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
+		Bitmap zoneBodyBitmap = null;
+		try {
+			zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
+		}
+		catch (ProxibaseException exception) {
+			Exceptions.Handle(exception);
+		}
 		if (zoneBodyBitmap != null) {
 			Bitmap zoneReflectionBitmap = ImageUtils.makeReflection(zoneBodyBitmap, true);
 
@@ -1397,7 +1406,13 @@ public class CandiPatchPresenter implements Observer {
 
 				@Override
 				public Bitmap reloadBitmap() {
-					Bitmap zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
+					Bitmap zoneBodyBitmap = null;
+					try {
+						zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
+					}
+					catch (ProxibaseException exception) {
+						Exceptions.Handle(exception);
+					}
 					return zoneBodyBitmap;
 				}
 			}), 0, 0);
@@ -1407,7 +1422,13 @@ public class CandiPatchPresenter implements Observer {
 
 						@Override
 						public Bitmap reloadBitmap() {
-							Bitmap zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
+							Bitmap zoneBodyBitmap = null;
+							try {
+								zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
+							}
+							catch (ProxibaseException exception) {
+								Exceptions.Handle(exception);
+							}
 							if (zoneBodyBitmap != null) {
 								Bitmap zoneReflectionBitmap = ImageUtils.makeReflection(zoneBodyBitmap, true);
 								return zoneReflectionBitmap;

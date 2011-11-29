@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
@@ -322,7 +323,7 @@ public abstract class AircandiActivity extends Activity {
 
 											@Override
 											public void onProxibaseException(final ProxibaseException exception) {
-												listener.onImageReady(null);
+												listener.onProxibaseException(exception);
 											}
 										});
 							}
@@ -407,7 +408,12 @@ public abstract class AircandiActivity extends Activity {
 					bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_MAX));
 				}
 				catch (ProxibaseException exception) {
-					exception.printStackTrace();
+					if (mImageRequestListener != null) {
+						mImageRequestListener.onProxibaseException(exception);
+					}
+					else {
+						Exceptions.Handle(exception);
+					}
 				}
 				if (bitmap == null) {
 					throw new IllegalStateException("bitmap picked from gallery is null");
@@ -451,7 +457,7 @@ public abstract class AircandiActivity extends Activity {
 						}
 					}
 					catch (FileNotFoundException exception) {
-						exception.printStackTrace();
+						Exceptions.Handle(exception);
 					}
 				}
 				else {
@@ -462,7 +468,12 @@ public abstract class AircandiActivity extends Activity {
 					bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_MAX));
 				}
 				catch (ProxibaseException exception) {
-					exception.printStackTrace();
+					if (mImageRequestListener != null) {
+						mImageRequestListener.onProxibaseException(exception);
+					}
+					else {
+						Exceptions.Handle(exception);
+					}
 				}
 				if (bitmap == null) {
 					throw new IllegalStateException("bitmap taken with camera is null");
@@ -472,13 +483,6 @@ public abstract class AircandiActivity extends Activity {
 						mImageRequestListener.onImageReady(bitmap);
 					}
 				}
-
-				//				BaseEntity entity = (BaseEntity) mEntity;
-				//
-				//				entity.imageUri = null;
-				//				entity.imageBitmap = bitmap;
-				//				((ImageView) findViewById(mPickerTarget)).setImageBitmap(entity.imageBitmap);
-				//				((ImageView) findViewById(mPickerTarget)).setVisibility(View.VISIBLE);
 			}
 		}
 	}
@@ -497,14 +501,9 @@ public abstract class AircandiActivity extends Activity {
 		super.onDestroy();
 
 		/* This activity gets destroyed everytime we leave using back or finish(). */
-		try {
-			mEntity = null;
-			mUser = null;
-			mBeacon = null;
-		}
-		catch (Exception exception) {
-			exception.printStackTrace();
-		}
+		mEntity = null;
+		mUser = null;
+		mBeacon = null;
 	}
 
 	protected int getLayoutID() {

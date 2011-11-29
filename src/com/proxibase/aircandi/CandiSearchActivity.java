@@ -127,6 +127,7 @@ import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.AnimUtils;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageCache;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
@@ -1253,7 +1254,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				}
 			}
 			else {
-				Bitmap zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mCandiPatchPresenter.getStyleTextureBodyZone());
+				Bitmap zoneBodyBitmap = null;
+				try {
+					zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mCandiPatchPresenter.getStyleTextureBodyZone());
+				}
+				catch (ProxibaseException exception) {
+					Exceptions.Handle(exception);
+				}
 				((ImageView) candiInfoView.findViewById(R.id.img_public)).setImageBitmap(zoneBodyBitmap);
 				((ImageView) candiInfoView.findViewById(R.id.img_public_reflection)).setImageBitmap(null);
 
@@ -1323,23 +1330,23 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			else {
 				ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.SquareTile, imageUri, new ImageRequestListener() {
 
-							@Override
-							public void onImageReady(final Bitmap bitmap) {
-								if (bitmap != null) {
-									runOnUiThread(new Runnable() {
+					@Override
+					public void onImageReady(final Bitmap bitmap) {
+						if (bitmap != null) {
+							runOnUiThread(new Runnable() {
 
-										@Override
-										public void run() {
-											imageView.setImageBitmap(bitmap);
-											Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_long);
-											animation.setFillEnabled(true);
-											animation.setFillAfter(true);
-											imageView.startAnimation(animation);
-										}
-									});
+								@Override
+								public void run() {
+									imageView.setImageBitmap(bitmap);
+									Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_long);
+									animation.setFillEnabled(true);
+									animation.setFillAfter(true);
+									imageView.startAnimation(animation);
 								}
-							}
-						});
+							});
+						}
+					}
+				});
 
 				Logger.v(this, "Fetching user image: " + imageUri);
 			}
@@ -1705,8 +1712,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			/* This is on the main UI thread */
 			if (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)) {
 				String publicName = mProxiHandlerManager.getPublicName(intent.getData().getEncodedSchemeSpecificPart());
-				ImageUtils.showToastNotification(CandiSearchActivity.this, publicName + getText(R.string.dialog_install_toast_package_installed),
-						Toast.LENGTH_SHORT);
+				if (publicName != null) {
+					ImageUtils.showToastNotification(CandiSearchActivity.this, publicName + getText(R.string.dialog_install_toast_package_installed),
+							Toast.LENGTH_SHORT);
+				}
 			}
 		}
 	}

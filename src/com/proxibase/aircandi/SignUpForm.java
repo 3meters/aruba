@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.DateUtils;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
@@ -155,6 +156,13 @@ public class SignUpForm extends AircandiActivity {
 					}
 				});
 			}
+
+			@Override
+			public void onProxibaseException(ProxibaseException exception) {
+				mUser.imageUri = "resource:user_placeholder";
+				mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.user_placeholder);
+			}
+
 		});
 	}
 
@@ -193,8 +201,9 @@ public class SignUpForm extends AircandiActivity {
 					S3.putImage(imageKey, mUser.imageBitmap);
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
-					exception.printStackTrace();
+					if (!Exceptions.Handle(exception)) {
+						ImageUtils.showToastNotification(this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					}
 				}
 				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
 			}
@@ -226,8 +235,9 @@ public class SignUpForm extends AircandiActivity {
 							S3.putImage(imageKey, mUser.imageBitmap);
 						}
 						catch (ProxibaseException exception) {
-							ImageUtils.showToastNotification(SignUpForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
-							exception.printStackTrace();
+							if (!Exceptions.Handle(exception)) {
+								ImageUtils.showToastNotification(SignUpForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+							}
 						}
 						mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
 						mUser.update(); /* Need to update the user to capture the uri for the image we saved */
@@ -254,14 +264,15 @@ public class SignUpForm extends AircandiActivity {
 					});
 				}
 				catch (ProxibaseException exception) {
-					exception.printStackTrace();
+					Exceptions.Handle(exception);
 				}
 			}
 
 			@Override
 			public void onProxibaseException(ProxibaseException exception) {
-				ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_insert_failed_toast), Toast.LENGTH_SHORT);
-				exception.printStackTrace();
+				if (!Exceptions.Handle(exception)) {
+					ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_insert_failed_toast), Toast.LENGTH_SHORT);
+				}
 			}
 		});
 	}

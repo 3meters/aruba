@@ -137,8 +137,9 @@ public class ImageCache implements Map<String, Bitmap> {
 		 */
 
 		/* Cache could have been nuked externally so make sure it's there. */
-		if (!cacheDirectoryExists())
+		if (!cacheDirectoryExists()) {
 			makeCacheDirectory();
+		}
 
 		File imageFile = getImageFile(imageUrl);
 		FileOutputStream ostream = null;
@@ -147,8 +148,8 @@ public class ImageCache implements Map<String, Bitmap> {
 			ostream = new FileOutputStream(imageFile);
 			image.compress(compressFormat, mCachedImageQuality, ostream);
 		}
-		catch (IOException e) {
-			e.printStackTrace();
+		catch (IOException exception) {
+			Exceptions.Handle(exception);
 		}
 		finally {
 			try {
@@ -157,11 +158,11 @@ public class ImageCache implements Map<String, Bitmap> {
 				}
 			}
 			catch (IOException exception) {
-				exception.printStackTrace();
+				Exceptions.Handle(exception);
 			}
 		}
 
-		/* Write file to memory cache as well */
+		/* Write file to memory cache as well if allowed */
 		if (!mFileCacheOnly) {
 			mCache.put(imageUrl, image);
 		}
@@ -183,6 +184,7 @@ public class ImageCache implements Map<String, Bitmap> {
 					cleanCache(cacheDir, CandiConstants.CACHE_TRIGGER_SIZE, CandiConstants.CACHE_TARGET_SIZE);
 				}
 				catch (Exception exception) {
+					Exceptions.Handle(exception);
 				}
 			}
 		};
@@ -200,12 +202,12 @@ public class ImageCache implements Map<String, Bitmap> {
 
 			Arrays.sort(files, new SortFilesByModified());
 			if (testCleanNeeded(files, triggerSize)) {
-				Logger.d(this, "Trimming file cache.");		
+				Logger.d(this, "Trimming file cache.");
 				cleanCache(files, targetSize);
 			}
 		}
 		catch (Exception exception) {
-			exception.printStackTrace();
+			Exceptions.Handle(exception);
 		}
 	}
 

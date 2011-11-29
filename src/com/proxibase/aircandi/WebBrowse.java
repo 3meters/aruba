@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.models.WebEntity;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
@@ -43,7 +44,7 @@ public class WebBrowse extends AircandiActivity {
 			mEntity = (WebEntity) ProxibaseService.convertJsonToObject(jsonResponse, WebEntity.class, GsonType.ProxibaseService);
 		}
 		catch (ProxibaseException exception) {
-			exception.printStackTrace();
+			Exceptions.Handle(exception);
 		}
 	}
 

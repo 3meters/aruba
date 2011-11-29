@@ -6,6 +6,7 @@ import android.widget.TextView;
 
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.ForumEntity;
+import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
@@ -31,7 +32,7 @@ public class ForumForm extends EntityBaseForm {
 				mEntity = (ForumEntity) ProxibaseService.convertJsonToObject(jsonResponse, ForumEntity.class, GsonType.ProxibaseService);
 			}
 			catch (ProxibaseException exception) {
-				exception.printStackTrace();
+				Exceptions.Handle(exception);
 			}
 		}
 		super.bindEntity();

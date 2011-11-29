@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.proxibase.aircandi.candi.models.CandiModel.Transition;
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.aircandi.utils.Exceptions;
 
 public class ZoneModel extends BaseModel {
 
@@ -94,15 +95,16 @@ public class ZoneModel extends BaseModel {
 
 	public Position getChildPositionNext(CandiModel candiModelTarget) throws NoSuchElementException {
 
-		if (mInactive)
+		if (mInactive) {
 			return new Position();
-
+		}
 		/*
 		 * TODO: Candies that have been temporarily hidden because of a root change won't show up
 		 * in the collection unless I make a change.
 		 */
-		if (!mCandiesNext.contains(candiModelTarget))
+		if (!mCandiesNext.contains(candiModelTarget)) {
 			throw new NoSuchElementException();
+		}
 
 		Position position = doChildPosition(candiModelTarget, mCandiesNext, candiModelTarget.getZoneStateNext().getStatus());
 		position.scale = getChildScaleNext(candiModelTarget);
@@ -359,7 +361,7 @@ public class ZoneModel extends BaseModel {
 				return super.clone();
 			}
 			catch (CloneNotSupportedException exception) {
-				exception.printStackTrace();
+				Exceptions.Handle(exception);
 				return null;
 			}
 		}
