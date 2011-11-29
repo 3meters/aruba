@@ -19,16 +19,16 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebView.PictureListener;
 
+import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.IProgressListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
 public class ImageLoader {
 
@@ -45,12 +45,83 @@ public class ImageLoader {
 		mImageLoaderThread.setName("ImageLoader");
 	}
 
-	public void fetchImage(ImageRequest imageRequest, boolean skipCache) {
+	// --------------------------------------------------------------------------------------------
+	// Primary entry routines
+	// --------------------------------------------------------------------------------------------
+
+	public void fetchImageByProfile(ImageProfile imageProfile, String imageUri, ImageRequestListener listener) {
+		ImageRequest imageRequest = null;
+
+		if (imageProfile == ImageProfile.SquareTile) {
+			imageRequest = new ImageRequest(imageUri,
+					ImageShape.Square,
+					ImageFormat.Binary,
+					false,
+					CandiConstants.IMAGE_WIDTH_MAX,
+					false,
+					true,
+					true,
+					1,
+					this,
+					listener);
+		}
+		else if (imageProfile == ImageProfile.Original) {
+			imageRequest = new ImageRequest(imageUri,
+					ImageShape.Native,
+					ImageFormat.Binary,
+					false,
+					CandiConstants.IMAGE_WIDTH_ORIGINAL,
+					false,
+					false,
+					false,
+					1,
+					this,
+					listener);
+		}
+		Logger.d(this, "Fetching Image: " + imageUri);
+		if (imageRequest != null) {
+			fetchImage(imageRequest);
+		}
+	}
+
+	public void fetchImage(ImageRequest imageRequest) {
 		if (imageRequest.imageReadyListener == null) {
 			throw new IllegalArgumentException("imageRequest.imageReadyListener is required");
 		}
+
 		mImageRequestors.put(imageRequest.imageRequestor, imageRequest.imageUri);
-		if (!skipCache) {
+
+		if (imageRequest.imageUri.toLowerCase().contains("resource:")) {
+
+			String resourceName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("resource:") + 9);
+			int resourceId = Aircandi.context.getResources().getIdentifier(resourceName, "drawable", "com.proxibase.aircandi");
+			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(resourceId);
+
+			if (bitmap != null) {
+				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+					/*
+					 * We might have cached a large version of an image so we
+					 * need to make sure we honor the image request specifications.
+					 */
+					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+				}
+				imageRequest.imageReadyListener.onImageReady(bitmap);
+				return;
+			}
+		}
+		else if (imageRequest.imageUri.toLowerCase().contains("asset:")) {
+			String assetName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("asset:"));
+			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(assetName);
+			if (bitmap != null) {
+				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+				}
+				imageRequest.imageReadyListener.onImageReady(bitmap);
+				return;
+			}
+		}
+
+		if (imageRequest.searchCache) {
 			Bitmap bitmap = mImageCache.get(imageRequest.imageUri);
 			if (bitmap != null) {
 				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
@@ -66,6 +137,10 @@ public class ImageLoader {
 		}
 		queueImage(imageRequest);
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Processing routines
+	// --------------------------------------------------------------------------------------------
 
 	private void queueImage(ImageRequest imageRequest) {
 
@@ -109,7 +184,7 @@ public class ImageLoader {
 		return bitmap;
 	}
 
-	public void getWebPageAsBitmap(String uri, ImageRequest imageRequest, final IImageRequestListener listener) {
+	public void getWebPageAsBitmap(String uri, ImageRequest imageRequest, final ImageRequestListener listener) {
 		String webViewContent = "";
 		final AtomicBoolean ready = new AtomicBoolean(false);
 		final AtomicInteger pictureCount = new AtomicInteger(0);
@@ -149,8 +224,8 @@ public class ImageLoader {
 		mWebView.getSettings().setLoadWithOverviewMode(true);
 
 		//mWebView.requestLayout();
-//		mWebView.invalidate();
-//		mWebView.postInvalidate();
+		//		mWebView.invalidate();
+		//		mWebView.postInvalidate();
 
 		mWebView.setWebViewClient(new WebViewClient() {
 
@@ -195,9 +270,9 @@ public class ImageLoader {
 					/* Release */
 					canvas = null;
 					listener.onImageReady(bitmap);
-					
+
 					/* We only allow a maximum of two picture calls */
-					if (pictureCount.get() >= 2){
+					if (pictureCount.get() >= 2) {
 						mWebView.setPictureListener(null);
 					}
 				}
@@ -245,9 +320,9 @@ public class ImageLoader {
 		return bitmapFinal;
 	}
 
-	public void stopThread() {
-		mImageLoaderThread.interrupt();
-	}
+	// --------------------------------------------------------------------------------------------
+	// Setter/Getter routines
+	// --------------------------------------------------------------------------------------------
 
 	public void setImageCache(ImageCache imageCache) {
 		this.mImageCache = imageCache;
@@ -260,6 +335,10 @@ public class ImageLoader {
 	public void setWebView(WebView webView) {
 		mWebView = webView;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Loader routines
+	// --------------------------------------------------------------------------------------------
 
 	public class ImagesQueue {
 
@@ -309,7 +388,7 @@ public class ImageLoader {
 						Bitmap bitmap = null;
 						if (imageRequest.imageFormat == ImageFormat.Html || imageRequest.imageFormat == ImageFormat.HtmlZoom) {
 							processingWebPage = true;
-							getWebPageAsBitmap(imageRequest.imageUri, imageRequest, new IImageRequestListener() {
+							getWebPageAsBitmap(imageRequest.imageUri, imageRequest, new ImageRequestListener() {
 
 								@Override
 								public void onImageReady(Bitmap bitmap) {
@@ -335,7 +414,7 @@ public class ImageLoader {
 										}
 									}
 
-									Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(),
+									Logger.v(this,
 											"Html image processed: " + imageRequest.imageUri);
 									String uri = mImageRequestors.get(imageRequest.imageRequestor);
 									if (uri != null && uri.equals(imageRequest.imageUri)) {
@@ -344,25 +423,21 @@ public class ImageLoader {
 								}
 
 								@Override
-								public boolean onProgressChanged(int progress)
-								{
+								public void onProgressChanged(int progress) {
 									imageRequest.imageReadyListener.onProgressChanged(progress);
-									return true;
 								}
 
 								@Override
 								public void onProxibaseException(ProxibaseException exception) {
-									if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-										Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
-										imageRequest.imageReadyListener.onImageReady(bitmap);
-									}
+									imageRequest.imageReadyListener.onImageReady(null);
+									super.onProxibaseException(exception);
 								}
 							});
 						}
 						else if (imageRequest.imageFormat == ImageFormat.Binary) {
 							long startTime = System.nanoTime();
 							float estimatedTime = System.nanoTime();
-							Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download started...");
+							Logger.v(this, imageRequest.imageUri + ": Download started...");
 
 							try {
 								bitmap = getBitmap(imageRequest.imageUri, new IProgressListener() {
@@ -378,13 +453,13 @@ public class ImageLoader {
 									}
 								});
 
-								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Download finished: "
+								Logger.v(this, imageRequest.imageUri + ": Download finished: "
 																									+ String.valueOf(estimatedTime / 1000000)
 																									+ "ms");
 							}
 							catch (ProxibaseException exception) {
 								bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
-								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(),
+								Logger.v(this,
 										imageRequest.imageUri + ": Download failed, using placeholder: "
 												+ String.valueOf(estimatedTime / 1000000)
 												+ "ms");
@@ -396,13 +471,13 @@ public class ImageLoader {
 
 							/* Perform requested post processing */
 							if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL) {
-								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Scale and crop...");
+								Logger.v(this, imageRequest.imageUri + ": Scale and crop...");
 								bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 							}
 
 							estimatedTime = System.nanoTime() - startTime;
 							startTime = System.nanoTime();
-							Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Post processing: "
+							Logger.v(this, imageRequest.imageUri + ": Post processing: "
 																									+ String.valueOf(estimatedTime / 1000000)
 																									+ "ms");
 
@@ -410,8 +485,8 @@ public class ImageLoader {
 							 * Stuff it into the cache. Overwrites if it already exists.
 							 * This is a perf hit in the process cause writing files is slow.
 							 */
-							if (imageRequest.cachingAllowed) {
-								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), imageRequest.imageUri + ": Pushing into cache...");
+							if (imageRequest.updateCache) {
+								Logger.v(this, imageRequest.imageUri + ": Pushing into cache...");
 								mImageCache.put(imageRequest.imageUri, bitmap);
 							}
 
@@ -421,7 +496,7 @@ public class ImageLoader {
 								final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
-								Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(),
+								Logger.v(this,
 										imageRequest.imageUri + ": Reflection created: " + String.valueOf(estimatedTime / 1000000) + "ms");
 
 								mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection);
@@ -446,5 +521,14 @@ public class ImageLoader {
 				/* Allow thread to exit */
 			}
 		}
+	}
+
+	public void stopThread() {
+		mImageLoaderThread.interrupt();
+	}
+
+	public enum ImageProfile {
+		SquareTile,
+		Original
 	}
 }

@@ -56,6 +56,10 @@ public class ImageManager {
 		getImageLoader().setImageCache(mImageCache);
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Load routines
+	// --------------------------------------------------------------------------------------------
+
 	public Bitmap loadBitmapFromDevice(final Uri imageUri, String imageWidthMax) throws ProxibaseException {
 
 		String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
@@ -141,6 +145,15 @@ public class ImageManager {
 			StreamUtils.close(in);
 		}
 	}
+
+	public Bitmap loadBitmapFromResources(final int resourceId) {
+		Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), resourceId);
+		return bitmap;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Processing routines
+	// --------------------------------------------------------------------------------------------
 
 	private Bitmap bitmapForByteArray(byte[] imageBytes, String imageWidthMax, int rotation) {
 
@@ -381,12 +394,20 @@ public class ImageManager {
 		return devices.contains(android.os.Build.BRAND + "/" + android.os.Build.PRODUCT + "/" + android.os.Build.DEVICE);
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Cache routines
+	// --------------------------------------------------------------------------------------------
+
 	public Bitmap getImage(String key) {
 		return mImageCache.get(key);
 	}
 
 	public boolean hasImage(String key) {
 		return mImageCache.containsKey(key);
+	}
+
+	public void deleteImage(String key) {
+		mImageCache.remove(key);
 	}
 
 	public ImageCache getImageCache() {
@@ -397,6 +418,10 @@ public class ImageManager {
 		mImageCache = imageCache;
 		getImageLoader().setImageCache(imageCache);
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Setters/Getters routines
+	// --------------------------------------------------------------------------------------------
 
 	public void setContext(Context context) {
 		mContext = context;
@@ -414,30 +439,47 @@ public class ImageManager {
 		throw new CloneNotSupportedException();
 	}
 
-	public interface IImageRequestListener {
+	// --------------------------------------------------------------------------------------------
+	// Inner classes and enums
+	// --------------------------------------------------------------------------------------------
+
+	private interface IImageRequestListener {
 
 		void onImageReady(Bitmap bitmap);
 
-		boolean onProgressChanged(int progress);
+		void onProgressChanged(int progress);
 
 		void onProxibaseException(ProxibaseException exception);
 	}
 
+	public static class ImageRequestListener implements IImageRequestListener {
+
+		public void onImageReady(Bitmap bitmap) {}
+
+		public void onProgressChanged(int progress) {}
+
+		public void onProxibaseException(ProxibaseException exception) {
+			Exceptions.Handle(exception);
+		}
+	}
+
 	public static class ImageRequest {
 
-		public String					imageUri;
-		public ImageShape				imageShape			= ImageShape.Native;
-		public ImageFormat				imageFormat;
-		public Object					imageRequestor;
-		public int						priority			= 1;
-		public int						scaleToWidth;
-		public boolean					makeReflection		= false;
-		public boolean					javascriptEnabled	= false;
-		public boolean					cachingAllowed		= true;
-		public IImageRequestListener	imageReadyListener	= null;
+		public String				imageUri;
+		public ImageShape			imageShape			= ImageShape.Native;
+		public ImageFormat			imageFormat;
+		public Object				imageRequestor;
+		public int					priority			= 1;
+		public int					scaleToWidth;
+		public boolean				makeReflection		= false;
+		public boolean				javascriptEnabled	= false;
+		public boolean				updateCache			= true;
+		public boolean				searchCache			= true;
+		public ImageRequestListener	imageReadyListener	= null;
 
-		public ImageRequest(String imageUri, ImageShape imageShape, ImageFormat imageFormat, boolean javascriptEnabled, int scaleToWidth, boolean makeReflection, boolean cachingAllowed, int priority,
-				Object imageRequestor, IImageRequestListener imageReadyListener) {
+		public ImageRequest(String imageUri, ImageShape imageShape, ImageFormat imageFormat, boolean javascriptEnabled, int scaleToWidth,
+				boolean makeReflection, boolean searchCache, boolean updateCache, int priority,
+				Object imageRequestor, ImageRequestListener imageReadyListener) {
 			this.imageUri = imageUri;
 			this.imageShape = imageShape;
 			this.imageFormat = imageFormat;
@@ -446,7 +488,8 @@ public class ImageManager {
 			this.priority = priority;
 			this.makeReflection = makeReflection;
 			this.javascriptEnabled = javascriptEnabled;
-			this.cachingAllowed = cachingAllowed;
+			this.searchCache = searchCache;
+			this.updateCache = updateCache;
 			this.imageReadyListener = imageReadyListener;
 		}
 

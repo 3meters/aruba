@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.WebEntity;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -84,7 +83,7 @@ public class WebBrowse extends AircandiActivity {
 			overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 		}
 
-		Logger.i(CandiConstants.APP_NAME, getClass().getSimpleName(), "Loading uri: " + uri.toString());
+		Logger.i(this, "Loading uri: " + uri.toString());
 		mWebView.loadUrl(uri.toString());
 	}
 

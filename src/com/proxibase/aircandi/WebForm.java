@@ -32,19 +32,20 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 public class WebForm extends EntityBaseForm {
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-		bindEntity();
-		drawEntity();
-	}
-
 	protected void bindEntity() {
 
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
-			mEntity = new WebEntity();
-			((WebEntity) mEntity).entityType = CandiConstants.TYPE_CANDI_WEB;
+			WebEntity entity = new WebEntity();
+			entity.entityType = CandiConstants.TYPE_CANDI_WEB;
+			if (mParentEntityId != 0) {
+				entity.parentEntityId = mParentEntityId;
+			}
+			else {
+				entity.parentEntityId = null;
+			}
+			entity.enabled = true;
+			mEntity = entity;
 		}
 		else if (mCommand.verb.equals("edit")) {
 			String jsonResponse = null;
@@ -59,6 +60,7 @@ public class WebForm extends EntityBaseForm {
 		super.bindEntity();
 	}
 
+	@Override
 	protected void drawEntity() {
 		super.drawEntity();
 
@@ -67,12 +69,12 @@ public class WebForm extends EntityBaseForm {
 		if (mCommand.verb.equals("edit")) {
 			((EditText) findViewById(R.id.txt_uri)).setText(((WebEntity) mEntity).contentUri);
 		}
-		
+
 		if (findViewById(R.id.chk_html_zoom) != null) {
 			((CheckBox) findViewById(R.id.chk_html_zoom)).setVisibility(View.VISIBLE);
 			((CheckBox) findViewById(R.id.chk_html_zoom)).setChecked(((WebEntity) mEntity).imageFormat.equals("htmlzoom") ? true : false);
 		}
-		
+
 		if (findViewById(R.id.chk_html_javascript) != null) {
 			((CheckBox) findViewById(R.id.chk_html_javascript)).setVisibility(View.VISIBLE);
 			((CheckBox) findViewById(R.id.chk_html_javascript)).setChecked(((WebEntity) mEntity).javascriptEnabled);
@@ -96,19 +98,12 @@ public class WebForm extends EntityBaseForm {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void doSave() {
-		super.doSave();
-
+	protected void doSave(boolean updateImages) {
 		if (!validate()) {
 			return;
 		}
 
-		if (mCommand.verb.equals("new")) {
-			insertEntity();
-		}
-		else if (mCommand.verb.equals("edit")) {
-			updateEntity();
-		}
+		super.doSave(false);
 	}
 
 	private boolean validate() {
@@ -122,29 +117,19 @@ public class WebForm extends EntityBaseForm {
 	}
 
 	@Override
-	protected void insertEntity() {
+	protected void gather() {
+		/*
+		 * Handle properties that are not part of the base entity
+		 */
 		final WebEntity entity = (WebEntity) mEntity;
 		entity.contentUri = ((EditText) findViewById(R.id.txt_uri)).getText().toString().trim();
 		entity.imageUri = entity.contentUri;
-		
-		entity.javascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
-		boolean zoomHtml = ((CheckBox) findViewById(R.id.chk_html_zoom)).isChecked();
-		entity.imageFormat = zoomHtml ? "htmlzoom" : "html";
-		
-		super.insertEntity();
-	}
 
-	@Override
-	protected void updateEntity() {
-		final WebEntity entity = (WebEntity) mEntity;
-		entity.contentUri = ((EditText) findViewById(R.id.txt_uri)).getText().toString().trim();
-		entity.imageUri = entity.contentUri;
-		
 		entity.javascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
 		boolean zoomHtml = ((CheckBox) findViewById(R.id.chk_html_zoom)).isChecked();
 		entity.imageFormat = zoomHtml ? "htmlzoom" : "html";
-		
-		super.updateEntity();
+
+		super.gather();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -169,7 +154,6 @@ public class WebForm extends EntityBaseForm {
 
 					@Override
 					public void onCancel(DialogInterface dialog) {
-						mProcessing = false;
 					}
 				});
 
@@ -177,7 +161,6 @@ public class WebForm extends EntityBaseForm {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						mProcessing = false;
 					}
 				});
 
@@ -202,12 +185,9 @@ public class WebForm extends EntityBaseForm {
 							Intent launchBrowser = new Intent(Intent.ACTION_WEB_SEARCH);
 							launchBrowser.putExtra(SearchManager.QUERY, "cat humor");
 							startActivityForResult(launchBrowser, 10);
-							//overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-							mProcessing = false;
 							dialog.dismiss();
 						}
 						else {
-							mProcessing = false;
 							Toast.makeText(getApplicationContext(), "Not implemented yet.", Toast.LENGTH_SHORT).show();
 						}
 					}
@@ -305,10 +285,5 @@ public class WebForm extends EntityBaseForm {
 	@Override
 	protected int getLayoutID() {
 		return R.layout.web_form;
-	}
-
-	public enum FormTab {
-		Content,
-		Settings
 	}
 }

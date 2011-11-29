@@ -12,7 +12,6 @@ import com.proxibase.aircandi.candi.models.ZoneModel.Position;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
-import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.CandiList;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
@@ -518,7 +517,7 @@ public class CandiPatchModel extends Observable {
 
 	public void setCandiModelFocused(CandiModel candiFocused) {
 		if (mCandiModelFocused != candiFocused) {
-			Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Changing candi model focus: " + candiFocused.getTitleText());
+			Logger.d(null, "Changing candi model focus: " + candiFocused.getTitleText());
 		}
 		mCandiModelFocused = candiFocused;
 	}

@@ -9,8 +9,6 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
 
-import com.proxibase.aircandi.core.CandiConstants;
-
 public class NetworkManager {
 
 	private static NetworkManager		singletonObject;
@@ -151,25 +149,25 @@ public class NetworkManager {
 			NetworkInfo otherNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
 
 			if (!currentNetworkInfo.isConnected() && currentNetworkInfo.isConnectedOrConnecting()) {
-				Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Network connecting: " + currentNetworkInfo.getTypeName());
+				Logger.d(this, "Network connecting: " + currentNetworkInfo.getTypeName());
 				if (mConnectivityListener != null) {
 					mConnectivityListener.onConnectivityStateChanged(State.CONNECTING);
 				}
 			}
 			else if (currentNetworkInfo.isConnected()) {
-				Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Network connected: " + currentNetworkInfo.getTypeName());
+				Logger.d(this, "Network connected: " + currentNetworkInfo.getTypeName());
 				if (mConnectivityListener != null) {
 					mConnectivityListener.onConnectivityStateChanged(State.CONNECTED);
 				}
 			}
 			else if (otherNetworkInfo != null && otherNetworkInfo.isConnected()) {
-				Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Alt network connected: " + currentNetworkInfo.getTypeName());
+				Logger.d(this, "Alt network connected: " + currentNetworkInfo.getTypeName());
 				if (mConnectivityListener != null) {
 					mConnectivityListener.onConnectivityStateChanged(State.CONNECTED);
 				}
 			}
 			else {
-				Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Network disconnected");
+				Logger.d(this, "Network disconnected");
 				if (mConnectivityListener != null) {
 					mConnectivityListener.onConnectivityStateChanged(State.DISCONNECTED);
 				}
@@ -189,22 +187,22 @@ public class NetworkManager {
 			}
 
 			if (extraWifiState == WifiManager.WIFI_STATE_ENABLED) {
-				Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Wifi state enabled");
+				Logger.d(this, "Wifi state enabled");
 			}
 			else if (extraWifiState == WifiManager.WIFI_STATE_ENABLING) {
-				Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Wifi state enabling");
+				Logger.d(this, "Wifi state enabling");
 			}
 			else {
 				switch (extraWifiState) {
 					case WifiManager.WIFI_STATE_DISABLED :
-						Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Wifi state disabled");
+						Logger.d(this, "Wifi state disabled");
 						break;
 					case WifiManager.WIFI_STATE_DISABLING :
-						Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Wifi state disabling");
+						Logger.d(this, "Wifi state disabling");
 						//ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state disabling...", Toast.LENGTH_SHORT);
 						break;
 					case WifiManager.WIFI_STATE_UNKNOWN :
-						Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Wifi state unknown");
+						Logger.d(this, "Wifi state unknown");
 						break;
 				}
 			}

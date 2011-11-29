@@ -8,6 +8,7 @@ import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
@@ -66,6 +67,7 @@ public class Aircandi extends Application {
 	public Location							currentLocation;
 	public static SharedPreferences 		settings;
 	public static SharedPreferences.Editor 	settingsEditor;
+	public static Context					context;
 
 	public Aircandi() {}
 
@@ -73,6 +75,8 @@ public class Aircandi extends Application {
 	public void onCreate() {
 		/* The following line triggers the initialization of ACRA */
 		ACRA.init(this);
+		
+		context = getApplicationContext();
 		
 		super.onCreate();
 		

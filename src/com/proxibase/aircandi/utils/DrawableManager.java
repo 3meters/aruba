@@ -15,8 +15,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.ImageView;
 
-import com.proxibase.aircandi.core.CandiConstants;
-
 public class DrawableManager {
 
 	private final Map	drawableMap;
@@ -30,12 +28,12 @@ public class DrawableManager {
 			return (Drawable) drawableMap.get(urlString);
 		}
 
-		Logger.d(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Image url:" + urlString);
+		Logger.d(this, "Image url:" + urlString);
 		try {
 			InputStream is = fetch(urlString);
 			Drawable drawable = Drawable.createFromStream(is, "src");
 			drawableMap.put(urlString, drawable);
-			Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "got a thumbnail drawable: " + drawable.getBounds()
+			Logger.v(this, "got a thumbnail drawable: " + drawable.getBounds()
 																					+ ", "
 																					+ drawable.getIntrinsicHeight()
 																					+ ","
@@ -47,11 +45,11 @@ public class DrawableManager {
 			return drawable;
 		}
 		catch (MalformedURLException e) {
-			Logger.e(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "fetchDrawable failed", e);
+			Logger.e(this, "fetchDrawable failed", e);
 			return null;
 		}
 		catch (IOException e) {
-			Logger.e(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "fetchDrawable failed", e);
+			Logger.e(this, "fetchDrawable failed", e);
 			return null;
 		}
 	}

@@ -1,37 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-	<string-array name="displayextras_list_preference">
+	<string-array
+		name="displayextras_list_preference">
 		<item>None</item>
 		<item>Level</item>
 		<item>Tag</item>
 		<item>Time</item>
 	</string-array>
-	
-	<string-array name="displayextrasvalues_list_preference">
+	<string-array
+		name="displayextrasvalues_list_preference">
 		<item>None</item>
 		<item>Level</item>
 		<item>Tag</item>
 		<item>Time</item>
 	</string-array>
-
-	<string-array name="theme_list_preference">
+	<string-array
+		name="theme_list_preference">
 		<item>Blueray</item>
 		<item>Midnight</item>
 		<item>Serene</item>
 		<item>Smolder</item>
 		<item>Snow</item>
 	</string-array>
-	
-	<string-array name="themevalues_list_preference">
+	<string-array
+		name="dialog_list_picture_sources">
+		<item>Select a gallery picture</item>
+		<item>Take a new picture</item>
+		<item>None</item>
+	</string-array>
+	<string-array
+		name="dialog_list_picture_sources_facebook">
+		<item>Select a gallery picture</item>
+		<item>Take a new picture</item>
+		<item>Use Facebook picture</item>
+		<item>None</item>
+	</string-array>
+	<string-array
+		name="themevalues_list_preference">
 		<item>aircandi_theme.blueray</item>
 		<item>aircandi_theme.midnight</item>
 		<item>aircandi_theme.serene</item>
 		<item>aircandi_theme.smolder</item>
 		<item>aircandi_theme.snow</item>
 	</string-array>
-	
-	<string-array name="post_visibility_values_list">
+	<string-array
+		name="post_visibility_values_list">
 		<item>Public</item>
 		<item>Private</item>
 	</string-array>

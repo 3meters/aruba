@@ -10,19 +10,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PhotoEntity;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Logger;
-import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
 public class PhotoBrowse extends AircandiActivity {
 
@@ -55,9 +51,7 @@ public class PhotoBrowse extends AircandiActivity {
 
 		if (entity.mediaUri != null && !entity.mediaUri.equals("")) {
 
-			ImageRequest imageRequest = new ImageRequest(entity.mediaUri, ImageShape.Native, ImageFormat.Binary, false,
-					CandiConstants.IMAGE_WIDTH_ORIGINAL, false, false, 1,
-					this, new IImageRequestListener() {
+			ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.Original, entity.mediaUri, new ImageRequestListener() {
 
 						@Override
 						public void onImageReady(final Bitmap bitmap) {
@@ -70,7 +64,7 @@ public class PhotoBrowse extends AircandiActivity {
 								@Override
 								public void run() {
 									if (mEntity != null) {
-										Logger.d(CandiConstants.APP_NAME, "Photo", "Image fetched: " + entity.mediaUri);
+										Logger.d(PhotoBrowse.this, "Image fetched: " + entity.mediaUri);
 										entity.mediaBitmap = bitmap;
 										showPhoto(bitmap);
 									}
@@ -79,24 +73,12 @@ public class PhotoBrowse extends AircandiActivity {
 						}
 
 						@Override
-						public void onProxibaseException(ProxibaseException exception) {
-							if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
-								Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets("gfx/placeholder3.png");
-								entity.mediaBitmap = bitmap;
-								showPhoto(bitmap);
-							}
-						}
-
-						@Override
-						public boolean onProgressChanged(int progress) {
-							Logger.v(CandiConstants.APP_NAME, "Photo", "Image fetch: " + entity.mediaUri + " progress: " + String.valueOf(progress));
+						public void onProgressChanged(int progress) {
 							mProgressBar.setProgress(progress);
-							return false;
 						}
 					});
 
-			Logger.d(CandiConstants.APP_NAME, "Photo", "Fetching Image: " + entity.mediaUri);
-			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, true);
+			Logger.d(this, "Fetching Image: " + entity.mediaUri);
 		}
 	}
 

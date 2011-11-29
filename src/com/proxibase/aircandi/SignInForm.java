@@ -4,97 +4,94 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.proxibase.sdk.android.proxi.consumer.Command;
+import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 
-public class SignInForm extends EntityBaseForm {
+public class SignInForm extends AircandiActivity {
 
-	private EditText	mUsername;
-	private EditText	mPassword;
-	private Button		mSigninButton;
-	private TextView	mSigninError;
+	protected String	mMessage;
+	
+	private EditText	mTextEmail;
+	private EditText	mTextPassword;
+	private TextView	mTextMessage;
+	private TextView	mTextError;
+	private Button		mButtonSignIn;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		bindEntity();
-		drawEntity();
+		configure();
+		draw();
 	}
 
 	@Override
-	public void drawEntity() {
-		super.drawEntity();
-		if (findViewById(R.id.txt_message) != null) {
-			if (mMessage != null) {
-				((TextView) findViewById(R.id.txt_message)).setText(mMessage);
+	protected void unpackIntent(Intent intent) {
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			mMessage = extras.getString(getString(R.string.EXTRA_MESSAGE));
+		}
+		super.unpackIntent(intent);
+	}
+
+	private void configure() {
+
+		mTextEmail = (EditText) findViewById(R.id.txt_email);
+		mTextPassword = (EditText) findViewById(R.id.txt_password);
+		mTextMessage = (TextView) findViewById(R.id.txt_message);
+		mTextError = (TextView) findViewById(R.id.txt_signin_error);
+		mButtonSignIn = (Button) findViewById(R.id.btn_signin);
+		mButtonSignIn.setEnabled(false);
+		mTextEmail.addTextChangedListener(new SimpleTextWatcher() {
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				mButtonSignIn.setEnabled(s.length() > 0 && mTextPassword.getText().length() > 0);
 			}
-			else {
-				((TextView) findViewById(R.id.txt_message)).setVisibility(View.GONE);
+		});
+		mTextPassword.addTextChangedListener(new SimpleTextWatcher() {
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				mButtonSignIn.setEnabled(s.length() > 0 && mTextEmail.getText().length() > 0);
 			}
+		});
+	}
+
+	public void draw() {
+		if (mMessage != null) {
+			mTextMessage.setText(mMessage);
 		}
-		if (findViewById(R.id.btn_signin) != null) {
-			mSigninButton = (Button) findViewById(R.id.btn_signin);
-		}
-		if (findViewById(R.id.txt_username) != null) {
-			mUsername = (EditText) findViewById(R.id.txt_username);
-			mUsername.addTextChangedListener(new TextWatcher() {
-
-				@Override
-				public void afterTextChanged(Editable s) {
-					mSigninButton.setEnabled(s.length() > 0 && mPassword.getText().length() > 0);
-				}
-
-				@Override
-				public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				}
-
-				@Override
-				public void onTextChanged(CharSequence s, int start, int before, int count) {
-				}
-			});
-		}
-		if (findViewById(R.id.txt_password) != null) {
-			mPassword = (EditText) findViewById(R.id.txt_password);
-			mPassword.addTextChangedListener(new TextWatcher() {
-
-				@Override
-				public void afterTextChanged(Editable s) {
-					mSigninButton.setEnabled(s.length() > 0 && mUsername.getText().length() > 0);
-				}
-
-				@Override
-				public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				}
-
-				@Override
-				public void onTextChanged(CharSequence s, int start, int before, int count) {
-				}
-			});
-		}
-		if (findViewById(R.id.txt_signin_error) != null) {
-			mSigninError = (TextView) findViewById(R.id.txt_signin_error);
+		else {
+			mTextMessage.setVisibility(View.GONE);
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Event routines
+	// --------------------------------------------------------------------------------------------
+
 	public void onSignUpButtonClick(View view) {
-		Toast.makeText(this, "Not implemented yet.", Toast.LENGTH_SHORT).show();
+		String json = ProxibaseService.getGson(GsonType.Internal).toJson(new Command("new"));
+		Intent intent = new Intent(this, SignUpForm.class);
+		intent.putExtra(getString(R.string.EXTRA_COMMAND), json);
+		startActivity(intent);
 	}
 
 	public void onSignInButtonClick(View view) {
 		try {
-			mSigninError.setVisibility(View.GONE);
-			String username = (String) ((EditText) findViewById(R.id.txt_username)).getText().toString();
+			mTextError.setVisibility(View.GONE);
+			String email = mTextEmail.getText().toString();
 			showProgressDialog(true, "Signing in...");
-			mUser = ProxibaseService.getInstance().loadUser(username);
+			mUser = ProxibaseService.getInstance().loadUser(email);
 		}
 		catch (ProxibaseException exception) {
 			exception.printStackTrace();
@@ -104,11 +101,11 @@ public class SignInForm extends EntityBaseForm {
 		}
 
 		if (mUser == null) {
-			mSigninError.setVisibility(View.VISIBLE);
-			mPassword.setText("");
+			mTextError.setVisibility(View.VISIBLE);
+			mTextPassword.setText("");
 		}
 		else {
-			Toast.makeText(this, "Signed in as " + mUser.fullname, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Signed in as " + ((User) mUser).fullname, Toast.LENGTH_SHORT).show();
 			Intent intent = new Intent();
 			String jsonUser = ProxibaseService.getGson(GsonType.Internal).toJson(mUser);
 			if (!jsonUser.equals("")) {
@@ -120,15 +117,10 @@ public class SignInForm extends EntityBaseForm {
 		}
 	}
 
-	@Override
 	public void onCancelButtonClick(View view) {
 		setResult(Activity.RESULT_CANCELED);
 		finish();
 	}
-
-	// --------------------------------------------------------------------------------------------
-	// Service routines
-	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines

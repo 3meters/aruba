@@ -63,6 +63,7 @@
 	
 	<string name="menu_settings_title">Settings</string>
 	<string name="menu_signout_title">Sign out</string>
+	<string name="menu_profile_title">Profile</string>
 	
 	<string name="search_back_button">Back</string>
 	<string name="form_tab_content">Content</string>
@@ -102,8 +103,13 @@
 	<string name="post_insert_success_toast">Saved</string>
 	<string name="post_back_button">Back</string>
 
+	<string name="label_picture">Picture</string>
+	<string name="label_fullname">Full name</string>
 	<string name="label_username">Username or email</string>
 	<string name="label_password">Password</string>
+	<string name="label_password_confirm">Confirm password</string>
+	<string name="label_password_old">Old password</string>
+	<string name="label_email">Email</string>
 	<string name="label_keep_signedin">Keep me signed in.</string>
 	<string name="form_signin_error">Wrong username/email and password combination.</string>
 	
@@ -114,7 +120,7 @@
 	<!--  
 		Crash reporting
 	-->
-	<string name="crash_toast_text">Ooooops ! I crashed, but a report has been sent to my developer to help him fix the issue !</string> 
+	<string name="crash_toast_text">Rats! I crashed, but a report has been sent to my developer to help him fix the issue!</string> 
 	<string name="crash_notif_ticker_text">Unexpected error, please send a report...</string> 
 	<string name="crash_notif_title">Aircandi has crashed...</string> 
 	<string name="crash_notif_text">Please click here to help fix the issue.</string>      

@@ -8,7 +8,7 @@
 	<classpathentry kind="lib" path="lib/andengine.jar"/>
 	<classpathentry kind="lib" path="lib/android-support-v4.jar"/>
 	<classpathentry kind="lib" path="lib/aws-android-sdk-1.0.0-core.jar"/>
-	<classpathentry kind="lib" path="lib/aws-android-sdk-1.0.0-s3.jar"/>
+	<classpathentry kind="lib" path="lib/aws-android-sdk-1.0.0-s3.jar" sourcepath="C:/Users/Jayma/Desktop/Proxibase/Android/amazonaws/aws-android-sdk-1.0.0/src"/>
 	<classpathentry kind="lib" path="lib/gson-1.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/guava.jar"/>
 	<classpathentry kind="lib" path="lib/proxibase.jar"/>

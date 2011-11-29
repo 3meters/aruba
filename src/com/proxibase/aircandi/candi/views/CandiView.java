@@ -30,7 +30,7 @@ import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
-import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
@@ -550,8 +550,8 @@ public class CandiView extends BaseView implements OnGestureListener {
 			 */
 			//mActiveImageRequest = true;
 			ImageRequest imageRequest = new ImageRequest(candiModel.getBodyImageUri(), ImageShape.Square, candiModel.getBodyImageFormat(), candiModel
-					.getEntityProxy().javascriptEnabled, CandiConstants.IMAGE_WIDTH_MAX, true, true,
-					2, this, new IImageRequestListener() {
+					.getEntityProxy().javascriptEnabled, CandiConstants.IMAGE_WIDTH_MAX, true, !skipCache, true,
+					2, this, new ImageRequestListener() {
 
 						@Override
 						public void onImageReady(Bitmap bodyBitmap) {
@@ -574,19 +574,19 @@ public class CandiView extends BaseView implements OnGestureListener {
 						}
 
 						@Override
-						public boolean onProgressChanged(int progress) {
+						public void onProgressChanged(int progress) {
 							mProgressBarSprite.setWidth(progress * ((float) CandiConstants.CANDI_VIEW_WIDTH / 100f));
 
 							/* We tickle the rendering window if it's getting low */
 							if (mCandiPatchPresenter.getRenderingTimeLeft() <= 1000) {
 								mCandiPatchPresenter.renderingActivate();
 							}
-							return false;
 						}
 
 						@Override
 						public void onProxibaseException(ProxibaseException exception) {
 							mActiveImageRequest = false;
+							super.onProxibaseException(exception);
 						}
 					});
 
@@ -605,7 +605,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 			}
 
 			progressVisible(true);
-			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, skipCache);
+			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
 		}
 	}
 
@@ -735,7 +735,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		 * This should only be called from the engine update thread.
 		 */
 		String associatedModel = mModel != null ? ((CandiModel) mModel).getEntityProxy().label : "Recycled";
-		Logger.v(CandiConstants.APP_NAME, this.getClass().getSimpleName(), "Unloading resources: " + associatedModel);
+		Logger.v(this, "Unloading resources: " + associatedModel);
 
 		if (mProgressSprite != null) {
 			mProgressSprite.removeResources();
@@ -827,10 +827,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 		if (mTouchListener != null) {
 			long startTime = System.nanoTime();
-			Logger.v(CandiConstants.APP_NAME, "CandiView", "SingleTapUp started...");
+			Logger.v(this, "SingleTapUp started...");
 			mTouchListener.onViewSingleTap(this);
 			long estimatedTime = System.nanoTime() - startTime;
-			Logger.v(CandiConstants.APP_NAME, "CandiView", "SingleTapUp finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
+			Logger.v(this, "SingleTapUp finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
 			return true;
 		}
 		return false;

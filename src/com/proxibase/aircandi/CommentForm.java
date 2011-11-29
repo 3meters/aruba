@@ -49,7 +49,7 @@ public class CommentForm extends EntityBaseForm {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.comment;
+		return R.layout.comment_form;
 
 	}
 

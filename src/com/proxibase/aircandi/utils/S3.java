@@ -16,6 +16,7 @@ package com.proxibase.aircandi.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,17 +26,24 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import com.proxibase.aircandi.CandiSearchActivity;
+import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 
 public class S3 {
 
@@ -160,4 +168,51 @@ public class S3 {
 			return exception.getMessage();
 		}
 	}
+
+	/* Jayma: Added routines */
+	
+	public static void putImage(String imageKey, Bitmap bitmap) throws ProxibaseException {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+		byte[] bitmapBytes = outputStream.toByteArray();
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(bitmapBytes);
+		ObjectMetadata metadata = new ObjectMetadata();
+		metadata.setContentLength(bitmapBytes.length);
+		metadata.setContentType("image/jpeg");
+
+		try {
+			S3.getInstance().putObject(CandiConstants.S3_BUCKET_IMAGES, imageKey, inputStream, metadata);
+			S3.getInstance().setObjectAcl(CandiConstants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
+		}
+		catch (final AmazonServiceException exception) {
+			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.AmazonServiceException, exception);
+		}
+		catch (final AmazonClientException exception) {
+			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.AmazonClientException, exception);
+		}
+		finally {
+			try {
+				outputStream.close();
+				inputStream.close();
+			}
+			catch (IOException exception) {
+				throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
+			}
+		}
+	}
+
+	public static void deleteImage(String imageKey) throws ProxibaseException {
+
+		/* If the image is stored with S3 then it will be deleted */
+		try {
+			S3.getInstance().deleteObject(CandiConstants.S3_BUCKET_IMAGES, imageKey);
+		}
+		catch (final AmazonServiceException exception) {
+			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.AmazonServiceException, exception);
+		}
+		catch (final AmazonClientException exception) {
+			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.AmazonClientException, exception);
+		}
+	}
+
 }

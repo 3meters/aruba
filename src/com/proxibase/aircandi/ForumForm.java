@@ -1,6 +1,5 @@
 package com.proxibase.aircandi;
 
-import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -15,20 +14,15 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 public class ForumForm extends EntityBaseForm {
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-		bindEntity();
-		drawEntity();
-	}
-
-	@Override
 	protected void bindEntity() {
 
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
-			mEntity = new ForumEntity();
-			((ForumEntity) mEntity).entityType = CandiConstants.TYPE_CANDI_FORUM;
+			ForumEntity entity = new ForumEntity();
+			entity.entityType = CandiConstants.TYPE_CANDI_FORUM;
+			entity.parentEntityId = null;
+			entity.enabled = true;
+			mEntity = entity;
 		}
 		else if (mCommand.verb.equals("edit")) {
 			String jsonResponse = null;
@@ -60,33 +54,18 @@ public class ForumForm extends EntityBaseForm {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void doSave() {
-		super.doSave();
-
-		/* Delete or upload images to S3 as needed. */
-		updateImages();
-
-		if (mCommand.verb.equals("new")) {
-			insertEntity();
-		}
-		else if (mCommand.verb.equals("edit")) {
-			updateEntity();
-		}
+	protected void doSave(boolean updateImages) {
+		super.doSave(true);
 	}
 
 	@Override
-	protected void insertEntity() {
+	protected void gather() {
+		/*
+		 * Handle properties that are not part of the base entity
+		 */
 		final ForumEntity entity = (ForumEntity) mEntity;
 		entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
-		super.insertEntity();
-
-	}
-
-	@Override
-	protected void updateEntity() {
-		final ForumEntity entity = (ForumEntity) mEntity;
-		entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
-		super.updateEntity();
+		super.gather();
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -1,6 +1,5 @@
 package com.proxibase.aircandi;
 
-import android.os.Bundle;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.core.CandiConstants;
@@ -13,20 +12,20 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 public class PostForm extends EntityBaseForm {
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-		bindEntity();
-		drawEntity();
-	}
-
-	@Override
 	protected void bindEntity() {
 
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
-			mEntity = new PostEntity();
-			((PostEntity) mEntity).entityType = CandiConstants.TYPE_CANDI_POST;
+			PostEntity entity = new PostEntity();
+			entity.entityType = CandiConstants.TYPE_CANDI_POST;
+			if (mParentEntityId != 0) {
+				entity.parentEntityId = mParentEntityId;
+			}
+			else {
+				entity.parentEntityId = null;
+			}
+			entity.enabled = true;
+			mEntity = entity;
 		}
 		else if (mCommand.verb.equals("edit")) {
 			String jsonResponse = null;
@@ -38,48 +37,25 @@ public class PostForm extends EntityBaseForm {
 				exception.printStackTrace();
 			}
 		}
-
 		super.bindEntity();
 	}
 
 	@Override
 	protected void drawEntity() {
 		super.drawEntity();
-		
+
 		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_post));
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Event routines
-	// --------------------------------------------------------------------------------------------
-
-	// --------------------------------------------------------------------------------------------
-	// Picker routines
-	// --------------------------------------------------------------------------------------------
-
-	// --------------------------------------------------------------------------------------------
-	// Service routines
-	// --------------------------------------------------------------------------------------------
-
 	@Override
-	protected void doSave() {
-		super.doSave();
-
-		/* Delete or upload images to S3 as needed. */
-		updateImages();
-
-		if (mCommand.verb.equals("new")) {
-			insertEntity();
-		}
-		else if (mCommand.verb.equals("edit")) {
-			updateEntity();
-		}
+	protected void doSave(boolean updateImages) {
+		super.doSave(true);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
 	protected int getLayoutID() {
 		return R.layout.post_form;

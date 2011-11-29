@@ -134,7 +134,8 @@ import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.NetworkManager;
 import com.proxibase.aircandi.utils.ProxiHandlerManager;
 import com.proxibase.aircandi.utils.Rotate3dAnimation;
-import com.proxibase.aircandi.utils.ImageManager.IImageRequestListener;
+import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
@@ -181,7 +182,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseExcepti
  * animations that need it. When we are regaining window focus after having displayed the
  * candi info, we block texture reloading.
  * 
- * - VM limits: I believe that unlike bitmaps allocated on the native heap 
+ * - VM limits: I believe that unlike bitmaps allocated on the native heap
  * (Android version < 3.0), opengl textures do not count toward the VM memory limit.
  */
 
@@ -270,7 +271,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiSearchActivity created");
+		Logger.i(this, "CandiSearchActivity created");
 		super.onCreate(savedInstanceState);
 		if (CandiConstants.DEBUG_TRACE) {
 			Debug.startMethodTracing("candi_search", 100000000);
@@ -407,7 +408,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						|| (secretKey == null)
 						|| (secretKey.equals(""))
 						|| (secretKey.equals("CHANGEME"))) {
-						Logger.e(CandiConstants.APP_NAME, "AWS", "Aws Credentials not configured correctly.");
+						Logger.e(CandiSearchActivity.this, "Aws Credentials not configured correctly.");
 						mCredentialsFound = false;
 					}
 					else {
@@ -416,7 +417,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					}
 				}
 				catch (Exception exception) {
-					Logger.e(CandiConstants.APP_NAME, "Loading AWS Credentials", exception.getMessage(), exception);
+					Logger.e(CandiSearchActivity.this, exception.getMessage(), exception);
 					mCredentialsFound = false;
 				}
 			}
@@ -491,7 +492,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					public void run() {
 						try {
 							Class clazz = Class.forName(commandHandler, false, this.getClass().getClassLoader());
-							Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting activity: " + clazz.toString());
+							Logger.i(CandiSearchActivity.this, "Starting activity: " + clazz.toString());
 							EntityProxy entityProxy = command.entity;
 
 							if (command.verb.equals("new")) {
@@ -587,16 +588,16 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private void doRefresh(RefreshType refreshType) {
 		if (!mFullUpdateSuccess || refreshType == RefreshType.All) {
-			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "User starting full beacon scan");
+			Logger.i(this, "User starting full beacon scan");
 			scanForBeacons(new Options(true, false), true);
 		}
 		else if (refreshType == RefreshType.BeaconScan) {
-			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "User starting lightweight beacon scan");
+			Logger.i(this, "User starting lightweight beacon scan");
 			scanForBeacons(new Options(false, false), true);
 		}
 		else if (refreshType == RefreshType.BeaconScanPlusCurrent) {
 
-			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "User starting lightweight beacon scan");
+			Logger.i(this, "User starting lightweight beacon scan");
 			final CandiModel candiModelFocused = mCandiPatchModel.getCandiModelFocused();
 			final int idOfEntityToRefresh = candiModelFocused.getEntityProxy().id;
 
@@ -604,7 +605,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				scanForBeacons(new Options(false, false), true);
 			}
 			else {
-				Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "User starting current entity refresh");
+				Logger.i(this, "User starting current entity refresh");
 
 				/* Mark the entity as dirty */
 				for (EntityProxy entityProxy : ProxiExplorer.getInstance().getEntityProxiesFlat()) {
@@ -631,7 +632,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					}
 
 					/* Refresh candi view texture */
-					Logger.v(CandiConstants.APP_NAME, COMPONENT_NAME, "Update texture: " + candiModelFocused.getTitleText());
+					Logger.v(this, "Update texture: " + candiModelFocused.getTitleText());
 					synchronized (candiModelFocused.getViewActions()) {
 						candiModelFocused.getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
 					}
@@ -677,6 +678,18 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		View content = configureActionButtons(CandiSearchActivity.this);
 
 		mQuickContactWindow.show(rect, content, view, 0, -10, -11);
+	}
+
+	public void onProfileClick(View view) {
+
+		if (mUser.anonymous) {
+			mUserSignedInRunnable = null;
+			startActivityForResult(new Intent(this, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
+		}
+		else {
+			Intent intent = buildIntent(null, 0, new Command("edit"), null, mUser, ProfileForm.class);
+			startActivityForResult(intent, CandiConstants.ACTIVITY_PROFILE);
+		}
 	}
 
 	private void updateDebugInfo() {
@@ -777,7 +790,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				}
 
 				if (options.refreshAllBeacons && mCandiPatchPresenter != null) {
-					mCandiPatchPresenter.renderingActivate(600000);
+					mCandiPatchPresenter.renderingActivate(60000);
 					mCandiPatchPresenter.setFullUpdateInProgress(true);
 					mCandiPatchPresenter.mProgressSprite.setVisible(true);
 
@@ -795,13 +808,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							@Override
 							public void run() {
 
-								Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Beacon scan results returned from Proxibase.ProxiExplorer");
+								Logger.d(CandiSearchActivity.this, "Beacon scan results returned from Proxibase.ProxiExplorer");
 
 								if (entities.size() == 0) {
 									showNewCandiDialog();
 								}
 								else {
-									mCandiPatchPresenter.renderingActivate(300000);
+									mCandiPatchPresenter.renderingActivate(3000);
 									doUpdateEntities(entities, options.refreshAllBeacons);
 
 									/* Check for rookies and play a sound */
@@ -846,7 +859,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					@Override
 					public void onProxibaseException(ProxibaseException exception) {
 						ImageUtils.showToastNotification(CandiSearchActivity.this, exception.getMessage(), Toast.LENGTH_SHORT);
-						Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, exception.getMessage());
+						Logger.d(CandiSearchActivity.this, exception.getMessage());
 						stopTitlebarProgress();
 					}
 				});
@@ -898,7 +911,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		mCandiInfoVisible = true;
 		mCandiPatchPresenter.renderingActivate();
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Show candi info: " + candiModel.getTitleText());
+		Logger.d(this, "Show candi info: " + candiModel.getTitleText());
 
 		if (animType == AnimType.CrossFadeFlipper) {
 			mCandiSurfaceView.setVisibility(View.GONE);
@@ -1052,7 +1065,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		if (mIgnoreInput)
 			return;
 
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Hide candi info");
+		Logger.d(this, "Hide candi info");
 		mCandiPatchPresenter.renderingActivate();
 		mIgnoreInput = true;
 		mCandiPatchPresenter.setIgnoreInput(true);
@@ -1246,7 +1259,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 				ImageRequest imageRequest = new ImageRequest(candiModel.getBodyImageUri(), ImageShape.Square, candiModel.getBodyImageFormat(),
 						candiModel.getEntityProxy().javascriptEnabled,
-						CandiConstants.IMAGE_WIDTH_MAX, true, true, 1, this, new IImageRequestListener() {
+						CandiConstants.IMAGE_WIDTH_MAX, true, true, true, 1, this, new ImageRequestListener() {
 
 							@Override
 							public void onImageReady(final Bitmap bitmap) {
@@ -1270,18 +1283,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 									});
 								}
 							}
-
-							@Override
-							public void onProxibaseException(ProxibaseException exception) {}
-
-							@Override
-							public boolean onProgressChanged(int progress) {
-								return false;
-							}
 						});
 
-				Logger.v(CandiConstants.APP_NAME, "buildCandiDetailView", "Fetching Image: " + candiModel.getBodyImageUri());
-				ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
+				Logger.v(this, "Fetching Image: " + candiModel.getBodyImageUri());
+				ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
 			}
 		}
 
@@ -1299,7 +1304,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private void setImageView(String imageUri, final ImageView imageView) {
 		if (imageUri != null && !imageUri.equals("")) {
-			if (ImageManager.getInstance().hasImage(imageUri)) {
+			if (imageUri.toLowerCase().contains("resource:user_placeholder")) {
+				Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.user_placeholder);
+				imageView.setImageBitmap(bitmap);
+				Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_long);
+				animation.setFillEnabled(true);
+				animation.setFillAfter(true);
+				imageView.startAnimation(animation);
+			}
+			else if (ImageManager.getInstance().hasImage(imageUri)) {
 				Bitmap bitmap = ImageManager.getInstance().getImage(imageUri);
 				imageView.setImageBitmap(bitmap);
 				Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_long);
@@ -1308,8 +1321,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				imageView.startAnimation(animation);
 			}
 			else {
-				ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, ImageFormat.Binary, false,
-						CandiConstants.IMAGE_WIDTH_MAX, false, true, 1, this, new IImageRequestListener() {
+				ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.SquareTile, imageUri, new ImageRequestListener() {
 
 							@Override
 							public void onImageReady(final Bitmap bitmap) {
@@ -1327,18 +1339,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 									});
 								}
 							}
-
-							@Override
-							public void onProxibaseException(ProxibaseException exception) {}
-
-							@Override
-							public boolean onProgressChanged(int progress) {
-								return false;
-							}
 						});
 
-				Logger.v(CandiConstants.APP_NAME, getClass().getSimpleName(), "Fetching user imagee: " + imageUri);
-				ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
+				Logger.v(this, "Fetching user image: " + imageUri);
 			}
 		}
 	}
@@ -1854,7 +1857,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						NetworkManager.getInstance().setConnectivityListener(null);
 						showNetworkDialog(false, "");
 						if (listener != null) {
-							Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Connectivity verified");
+							Logger.d(CandiSearchActivity.this, "Connectivity verified");
 							listener.onConnectivityReady();
 						}
 					}
@@ -1869,7 +1872,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				/* Keep user signed in */
 				String username = Aircandi.settings.getString(Preferences.PREF_USERNAME, null);
 				if (username == null) {
-					username = "anonymous";
+					username = "anonymous@3meters.com";
 					mUser = ProxibaseService.getInstance().loadUser(username);
 					if (mUser != null) {
 						mUser.anonymous = true;
@@ -1877,7 +1880,20 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				}
 				else {
 					mUser = ProxibaseService.getInstance().loadUser(username);
-					Toast.makeText(this, "Signed in as " + mUser.fullname, Toast.LENGTH_SHORT).show();
+					if (mUser != null) {
+						Toast.makeText(this, "Signed in as " + mUser.fullname, Toast.LENGTH_SHORT).show();
+					}
+					else {
+						Logger.d(this, "Error resigning in: Previous user does not exist: " + username);
+						username = "anonymous@3meters.com";
+						mUser = ProxibaseService.getInstance().loadUser(username);
+						if (mUser != null) {
+							mUser.anonymous = true;
+							Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, null);
+							Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, null);
+							Aircandi.settingsEditor.commit();
+						}
+					}
 				}
 			}
 			catch (ProxibaseException exception) {
@@ -1890,7 +1906,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				}
 				ProxiExplorer.getInstance().setUser(mUser);
 				if (listener != null) {
-					Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Connectivity and service verified");
+					Logger.d(this, "Connectivity and service verified");
 					listener.onConnectivityReady();
 				}
 			}
@@ -1902,7 +1918,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 		else {
 			if (listener != null) {
-				Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Connectivity and service verified");
+				Logger.d(this, "Connectivity and service verified");
 				listener.onConnectivityReady();
 			}
 		}
@@ -1926,11 +1942,11 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 					if (isChecked) {
-						Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Enable wifi from activity");
+						Logger.i(CandiSearchActivity.this, "Enable wifi from activity");
 						NetworkManager.getInstance().enableWifi(true);
 					}
 					else {
-						Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Disable wifi from activity");
+						Logger.i(CandiSearchActivity.this, "Disable wifi from activity");
 						NetworkManager.getInstance().enableWifi(false);
 					}
 				}
@@ -2021,7 +2037,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 								@Override
 								public void run() {
-									Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting Gallery activity");
+									Logger.i(CandiSearchActivity.this, "Starting Gallery activity");
 									Intent intent = buildIntent(null, 0, command, ProxiExplorer.getInstance().getStrongestBeacon(), mUser,
 											AlbumForm.class);
 									startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
@@ -2036,7 +2052,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 								@Override
 								public void run() {
-									Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting Topic activity");
+									Logger.i(CandiSearchActivity.this, "Starting Topic activity");
 									Intent intent = buildIntent(null, 0, command, ProxiExplorer.getInstance().getStrongestBeacon(), mUser,
 											ForumForm.class);
 									startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
@@ -2051,7 +2067,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 								@Override
 								public void run() {
-									Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting Web activity");
+									Logger.i(CandiSearchActivity.this, "Starting Web activity");
 									Intent intent = buildIntent(null, 0, command, ProxiExplorer.getInstance().getStrongestBeacon(), mUser,
 											WebForm.class);
 									startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
@@ -2082,7 +2098,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	@Override
 	public Engine onLoadEngine() {
 
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Initializing animation engine");
+		Logger.d(this, "Initializing animation engine");
 
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -2178,13 +2194,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * engine acquries the wake lock, restarts the engine, resumes the GLSurfaceView.
 		 * The engine reloads textures.
 		 */
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting animation engine");
+		Logger.d(this, "Starting animation engine");
 		if (mReadyToRun) {
 			boolean prefChangeThatRequiresRefresh = loadPreferences();
 			loadPreferencesProxiExplorer();
 
 			if (mFirstRun || prefChangeThatRequiresRefresh) {
-				Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Starting first run full beacon scan");
+				Logger.i(this, "Starting first run full beacon scan");
 				scanForBeacons(new Options(mFirstRun, false), false);
 				mFirstRun = false;
 			}
@@ -2198,7 +2214,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * called on the super class. The game engine releases the wake lock, stops the engine, pauses the
 		 * GLSurfaceView.
 		 */
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Pausing animation engine");
+		Logger.d(this, "Pausing animation engine");
 	}
 
 	@Override
@@ -2227,10 +2243,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * dialog or an android menu (which do not trigger this.onPause which
 		 * in turns stops the engine).
 		 */
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, hasWindowFocus ? "Activity has window focus" : "Activity lost window focus");
+		Logger.d(this, hasWindowFocus ? "Activity has window focus" : "Activity lost window focus");
 
 		//if (!mEngine.isRunning()) {
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "Passing onWindowFocusChanged to Andengine");
+		Logger.d(this, "Passing onWindowFocusChanged to Andengine");
 		if (hasWindowFocus && mCandiInfoVisible) {
 			mEngine.setBlockReloadTextures(true);
 		}
@@ -2484,7 +2500,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * 
 		 * Game engine is started/restarted in super class if we currently have the window focus.
 		 */
-		Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiSearchActivity resumed");
+		Logger.i(this, "CandiSearchActivity resumed");
 
 		ProxiExplorer.getInstance().onResume();
 		NetworkManager.getInstance().onResume();
@@ -2511,7 +2527,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * loses focus but the activity is still active.
 		 */
 		try {
-			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiSearchActivity paused");
+			Logger.i(this, "CandiSearchActivity paused");
 
 			unregisterReceiver(mPackageReceiver);
 
@@ -2542,7 +2558,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		/* Don't count on this always getting called when this activity is killed */
 		try {
-			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiSearchActivity destroyed");
+			Logger.i(this, "CandiSearchActivity destroyed");
 			ProxiExplorer.getInstance().onDestroy();
 			ImageManager.getInstance().getImageLoader().stopThread();
 			ImageManager.getInstance().getImageLoader().getImageCache().cleanCacheAsync(getApplicationContext());
@@ -2559,7 +2575,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * get a zero result code whether the user decided to start an install
 		 * or not.
 		 */
-		Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "Activity result returned to CandiSearchActivity");
+		Logger.i(this, "Activity result returned to CandiSearchActivity");
 		startTitlebarProgress(true);
 		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
 			if (data != null) {
@@ -2572,12 +2588,35 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							if (findViewById(R.id.img_user) != null) {
 								setImageView(mUser.imageUri, (ImageView) findViewById(R.id.img_user));
 							}
-							Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, mUser.username);
+							Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, mUser.email);
 							Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, mUser.password);
 							Aircandi.settingsEditor.commit();
 
 							if (mUserSignedInRunnable != null) {
 								mHandler.post(mUserSignedInRunnable);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (requestCode == CandiConstants.ACTIVITY_PROFILE) {
+			if (resultCode == Activity.RESULT_FIRST_USER) {
+				if (data != null) {
+					Bundle extras = data.getExtras();
+					if (extras != null) {
+						String json = extras.getString(getString(R.string.EXTRA_USER));
+						if (json != null && !json.equals("")) {
+							mUser = ProxibaseService.getGson(GsonType.Internal).fromJson(json, User.class);
+							if (mUser != null) {
+								if (findViewById(R.id.img_user) != null) {
+									setImageView(mUser.imageUri, (ImageView) findViewById(R.id.img_user));
+								}
+								Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, mUser.email);
+								if (mUser.password != null && mUser.password.length() != 0) {
+									Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, mUser.password);
+								}
+								Aircandi.settingsEditor.commit();
 							}
 						}
 					}
@@ -2674,7 +2713,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * TODO: Not getting called because setRequestedOrientation() is beinging
 		 * called in BaseGameActivity.
 		 */
-		Logger.d(CandiConstants.APP_NAME, COMPONENT_NAME, "onConfigurationChanged called: " + newConfig.orientation);
+		Logger.d(this, "onConfigurationChanged called: " + newConfig.orientation);
 
 		boolean landscape = false;
 		Display getOrient = getWindowManager().getDefaultDisplay();
@@ -2777,12 +2816,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		/* Hide the sign out option if we don't have a current session */
-		MenuItem item = menu.findItem(R.id.signout);
+		MenuItem itemOut = menu.findItem(R.id.signinout);
+		MenuItem itemProfile = menu.findItem(R.id.profile);
 		if (mUser != null && !mUser.anonymous) {
-			item.setTitle("Sign Out");
+			itemOut.setTitle("Sign Out");
+			itemProfile.setVisible(true);
 		}
 		else {
-			item.setTitle("Sign In");
+			itemOut.setTitle("Sign In");
+			itemProfile.setVisible(false);
 		}
 		return true;
 	}
@@ -2793,11 +2835,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			case R.id.settings :
 				startActivityForResult(new Intent(this, Preferences.class), 0);
 				return (true);
-			case R.id.signout :
+			case R.id.profile :
+				Intent intent = buildIntent(null, 0, new Command("edit"), null, mUser, ProfileForm.class);
+				startActivityForResult(intent, CandiConstants.ACTIVITY_PROFILE);
+				return (true);
+			case R.id.signinout :
 				if (mUser != null && !mUser.anonymous) {
 					showProgressDialog("Signing out...");
 					try {
-						mUser = ProxibaseService.getInstance().loadUser("Anonymous");
+						mUser = ProxibaseService.getInstance().loadUser("anonymous@3meters.com");
 						mUser.anonymous = true;
 
 						Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, null);
@@ -2916,7 +2962,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		void stop() {
 			long elapsed = (System.nanoTime() - start) / 1000;
 			Debug.stopAllocCounting();
-			Logger.i(CandiConstants.APP_NAME, COMPONENT_NAME, "CandiSearchActivity: " + elapsed + "us, "
+			Logger.i(CandiSearchActivity.this, "CandiSearchActivity: " + elapsed + "us, "
 																+ Debug.getThreadAllocCount() + " allocations, "
 																+ Debug.getThreadAllocSize() + " bytes");
 		}
