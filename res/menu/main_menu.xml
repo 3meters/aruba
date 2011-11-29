@@ -6,7 +6,11 @@
 		android:icon="@drawable/icon_settings"
 		android:title="@string/menu_settings_title" />
 	<item
-		android:id="@+id/signout"
+		android:id="@+id/profile"
+		android:icon="@drawable/icon_profile"
+		android:title="@string/menu_profile_title" />
+	<item
+		android:id="@+id/signinout"
 		android:icon="@drawable/icon_signout"
 		android:title="@string/menu_signout_title" />
 </menu>

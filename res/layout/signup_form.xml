@@ -19,8 +19,9 @@
         style="@style/app_header"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="5dp"
-        android:paddingRight="5dp" >
+        android:layout_alignParentTop="true"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp" >
 
         <ImageView
             android:id="@+id/btn_logo"
@@ -38,21 +39,11 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/btn_signup"
             android:layout_toRightOf="@+id/btn_logo"
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:text="Sign In" />
-
-        <Button
-            android:id="@+id/btn_signup"
-            style="@style/btn_actionbar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:onClick="onSignUpButtonClick"
-            android:text="@string/btn_signup" />
+            android:text="Settings" />
     </RelativeLayout>
 
     <ScrollView
@@ -77,17 +68,53 @@
             android:paddingRight="5dp"
             android:paddingTop="15dp" >
 
-            <!-- Title and Content -->
+            <!-- User picture -->
 
             <TextView
-                android:id="@+id/txt_message"
-                style="@style/txt_message"
+                style="@style/txt_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="15dp"
-                android:paddingLeft="2dp"
-                android:paddingRight="2dp"
-                android:text="Please sign-in to create a new candies" />
+                android:text="@string/label_picture" />
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dp"
+                android:gravity="left"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/img_public_image"
+                    style="@style/img_picture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/user_placeholder" />
+
+                <Button
+                    android:id="@+id/btn_change_public_image"
+                    style="@style/btn_form"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/img_public_image"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toRightOf="@+id/img_public_image"
+                    android:onClick="onChangePictureButtonClick"
+                    android:text="@string/post_public_image_change_button" />
+            </RelativeLayout>
+
+            <!-- Full name -->
+
+            <TextView
+                style="@style/txt_label"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/label_fullname" />
+
+            <EditText
+                android:id="@+id/txt_fullname"
+                style="@style/edittext_form"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
 
             <TextView
                 style="@style/txt_label"
@@ -115,15 +142,18 @@
                 android:inputType="textPassword" />
 
             <TextView
-                android:id="@+id/txt_signin_error"
-                style="@style/txt_signin_error"
+                style="@style/txt_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="3dp"
-                android:padding="5dp"
-                android:visibility="gone"
-                android:text="@string/form_signin_error" />
-            </LinearLayout>
+                android:text="@string/label_password_confirm" />
+
+            <EditText
+                android:id="@+id/txt_password_confirm"
+                style="@style/edittext_form"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword" />
+        </LinearLayout>
     </ScrollView>
 
     <!-- Footer -->
@@ -135,12 +165,11 @@
         android:gravity="center_horizontal" >
 
         <Button
-            android:id="@+id/btn_signin"
+            android:id="@+id/btn_signup"
             style="@style/btn_form"
             android:layout_weight="1"
-            android:onClick="onSignInButtonClick"
-            android:enabled="false"
-            android:text="@string/btn_signin" />
+            android:onClick="onSignUpButtonClick"
+            android:text="@string/btn_signup" />
 
         <Button
             android:id="@+id/btn_cancel"

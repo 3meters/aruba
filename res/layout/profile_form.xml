@@ -12,81 +12,259 @@
         android:focusable="true"
         android:focusableInTouchMode="true" />
 
-    <LinearLayout
+    <!-- Header -->
+
+    <RelativeLayout
         android:id="@+id/activity_header"
+        style="@style/app_header"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" >
+        android:layout_alignParentTop="true"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp" >
 
-        <include layout="@layout/temp_activity_signin_header" />
+        <ImageView
+            android:id="@+id/btn_logo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:adjustViewBounds="true"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:src="?attr/logo" />
+
+        <TextView
+            android:id="@+id/txt_header_title"
+            style="@style/txt_header_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/btn_logo"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="Settings" />
+    </RelativeLayout>
+
+    <!-- Tabs -->
+
+    <LinearLayout
+        android:id="@+id/form_tabs"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_header"
+        android:background="?attr/backgroundForm" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="2" >
+
+            <RelativeLayout
+                android:id="@+id/tab_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" >
+
+                <TextView
+                    android:id="@+id/txt_tab_profile"
+                    style="@style/tab_text"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentTop="true"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:onClick="onProfileTabClick"
+                    android:text="Profile" />
+
+                <ImageView
+                    android:id="@+id/img_tab_profile"
+                    style="@style/tab_highlight"
+                    android:layout_width="fill_parent"
+                    android:layout_height="5dp"
+                    android:layout_alignParentBottom="true"
+                    android:adjustViewBounds="true" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/tab_account"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" >
+
+                <TextView
+                    android:id="@+id/txt_tab_account"
+                    style="@style/tab_text"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_alignParentTop="true"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:onClick="onAccountTabClick"
+                    android:text="Account" />
+
+                <ImageView
+                    android:id="@+id/img_tab_account"
+                    style="@style/tab_highlight"
+                    android:layout_width="fill_parent"
+                    android:layout_height="2dp"
+                    android:layout_alignParentBottom="true"
+                    android:adjustViewBounds="true" />
+            </RelativeLayout>
+
+        </LinearLayout>
     </LinearLayout>
 
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
-        android:layout_below="@id/activity_header"
+        android:layout_below="@id/form_tabs"
         android:layout_weight="1"
         android:background="?attr/backgroundForm"
         android:fillViewport="true" >
 
-        <!-- Content -->
-
-        <LinearLayout
-            android:id="@+id/activity_body"
+        <ViewFlipper
+            android:id="@+id/flipper_form"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:gravity="center_vertical|top"
-            android:orientation="vertical"
-            android:padding="5dp" >
+            android:clipChildren="false"
+            android:gravity="center_vertical"
+            android:visibility="visible" >
 
-            <!-- Title and Content -->
+            <!-- Content -->
 
-            <EditText
-                android:id="@+id/txt_username"
-                style="@style/edittext_form"
+            <LinearLayout
+                android:id="@+id/activity_body"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/label_username" />
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical|top"
+                android:orientation="vertical"
+                android:paddingBottom="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="15dp" >
 
-            <EditText
-                android:id="@+id/txt_password"
-                style="@style/edittext_form"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:hint="@string/label_password" />
+                <!-- User picture -->
 
-            <!-- Public Image -->
-
-            <TextView
-                style="@style/section_header_form"
-                android:text="@string/form_signin_image_section_header" />
-
-            <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:orientation="horizontal"
-                android:paddingBottom="10dp">
-
-                <Button
-                    android:id="@+id/btn_change_public_image"
-                    style="@style/btn_form"
-                    android:onClick="onChangePublicImageButtonClick"
-                    android:text="@string/post_public_image_change_button" />
-
-                <ImageView
-                    android:id="@+id/img_public_image"
-                    style="@style/img_photo_thumbnail"
-                    android:layout_width="wrap_content"
+                <TextView
+                    style="@style/txt_label"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/btn_change_public_image"
-                    android:layout_marginLeft="10dp"
-                    android:layout_toRightOf="@id/btn_change_public_image"
-                    android:visibility="gone" />
-            </RelativeLayout>
-        </LinearLayout>
+                    android:text="@string/label_picture" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:orientation="horizontal"
+                    android:paddingBottom="10dp" >
+
+                    <Button
+                        android:id="@+id/btn_change_public_image"
+                        style="@style/btn_form"
+                        android:onClick="onChangePictureButtonClick"
+                        android:text="@string/post_public_image_change_button" />
+
+                    <ImageView
+                        android:id="@+id/img_public_image"
+                        style="@style/img_picture"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@id/btn_change_public_image"
+                        android:layout_marginLeft="10dp"
+                        android:layout_toRightOf="@id/btn_change_public_image"
+                        android:src="@drawable/user_placeholder" />
+                </RelativeLayout>
+
+                <!-- Full name -->
+
+                <TextView
+                    style="@style/txt_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_fullname" />
+
+                <EditText
+                    android:id="@+id/txt_fullname"
+                    style="@style/edittext_form"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" />
+                
+                
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical|top"
+                android:orientation="vertical"
+                android:padding="5dp" >
+
+                <TextView
+                    style="@style/txt_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_email" />
+
+                <EditText
+                    android:id="@+id/txt_email"
+                    style="@style/edittext_form"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" />
+                
+                <TextView
+                    android:id="@+id/txt_label_password_old"
+                    style="@style/txt_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_password_old" />
+
+                <EditText
+                    android:id="@+id/txt_password_old"
+                    style="@style/edittext_form"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword" />
+
+                <TextView
+                    style="@style/txt_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_password" />
+
+                <EditText
+                    android:id="@+id/txt_password"
+                    style="@style/edittext_form"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword" />
+
+                <TextView
+                    style="@style/txt_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_password_confirm" />
+
+                <EditText
+                    android:id="@+id/txt_password_confirm"
+                    style="@style/edittext_form"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword" />
+                
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical|top"
+                android:orientation="vertical"
+                android:padding="5dp" >
+
+            </LinearLayout>
+        </ViewFlipper>
     </ScrollView>
 
     <!-- Footer -->
@@ -98,14 +276,16 @@
         android:gravity="center_horizontal" >
 
         <Button
-            android:id="@+id/btn_signin"
+            android:id="@+id/btn_save"
             style="@style/btn_form"
-            android:onClick="onSigninButtonClick"
-            android:text="@string/btn_signin" />
+            android:layout_weight="1"
+            android:onClick="onSaveButtonClick"
+            android:text="@string/post_save_button" />
 
         <Button
             android:id="@+id/btn_cancel"
             style="@style/btn_form"
+            android:layout_weight="1"
             android:onClick="onCancelButtonClick"
             android:text="@string/post_cancel_button" />
     </LinearLayout>

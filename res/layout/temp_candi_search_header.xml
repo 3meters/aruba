@@ -96,6 +96,9 @@
             android:layout_height="fill_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
+            android:background="@drawable/app_button_selector"
+            android:clickable="true"
+            android:onClick="onProfileClick"
             android:src="@drawable/user_placeholder" />
     </RelativeLayout>
 

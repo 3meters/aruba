@@ -12,14 +12,41 @@
         android:focusable="true"
         android:focusableInTouchMode="true" />
 
-    <LinearLayout
+    <!-- Header -->
+
+    <RelativeLayout
         android:id="@+id/activity_header"
+        style="@style/app_header"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" >
+        android:layout_alignParentTop="true"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp" >
 
-        <include layout="@layout/temp_activity_form_header" />
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/btn_logo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:adjustViewBounds="true"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:src="?attr/logo" />
+
+        <TextView
+            android:id="@+id/txt_header_title"
+            style="@style/txt_header_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/btn_logo"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="Topic" />
+    </RelativeLayout>
+
+    <!-- Tabs -->
 
     <LinearLayout
         android:id="@+id/form_tabs"
@@ -93,7 +120,7 @@
                     <Button
                         android:id="@+id/btn_change_public_image"
                         style="@style/btn_form"
-                        android:onClick="onChangePublicImageButtonClick"
+                        android:onClick="onChangePictureButtonClick"
                         android:text="@string/post_public_image_change_button" />
 
                     <ImageView
