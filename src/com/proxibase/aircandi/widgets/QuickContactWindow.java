@@ -36,7 +36,9 @@ import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -121,17 +123,18 @@ public class QuickContactWindow {
 		mTrackScroll = (HorizontalScrollView) mRootView.findViewById(R.id.scroll);
 
 		mTrackAnim = AnimationUtils.loadAnimation(context, R.anim.quickcontact);
-		mTrackAnim.setInterpolator(new Interpolator() {
-
-			public float getInterpolation(float t) {
-				/*
-				 * Pushes past the target area, then snaps back into place.
-				 * Equation for graphing: 1.2-((x*1.6)-1.1)^2
-				 */
-				final float inner = (t * 1.55f) - 1.1f;
-				return 1.2f - inner * inner;
-			}
-		});
+		mTrackAnim.setInterpolator(new DecelerateInterpolator());
+//		mTrackAnim.setInterpolator(new Interpolator() {
+//
+//			public float getInterpolation(float t) {
+//				/*
+//				 * Pushes past the target area, then snaps back into place.
+//				 * Equation for graphing: 1.2-((x*1.6)-1.1)^2
+//				 */
+//				final float inner = (t * 1.55f) - 1.1f;
+//				return 1.2f - inner * inner;
+//			}
+//		});
 	}
 
 	public synchronized void show(Rect anchor, View trackContent, View anchorView, int bodyOffsetX, int bodyOffsetY, int arrowOffsetX) {

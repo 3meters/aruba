@@ -87,17 +87,19 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		 * Fill in the system and default properties for the base entity properties. The activities
 		 * that subclass this will set any additional properties beyond the base ones.
 		 */
+		final BaseEntity entity = (BaseEntity) mEntity;
 		if (mCommand.verb.equals("new")) {
-			final BaseEntity entity = (BaseEntity) mEntity;
 			entity.beaconId = mBeacon.id;
-			entity.signalFence = mBeacon.levelDb - 10.0f;
+			entity.signalFence = -100.0f;
 			entity.createdById = String.valueOf(((User) mUser).id);
 			entity.enabled = true;
 			entity.visibility = Visibility.Public.ordinal();
 			entity.password = null;
-			entity.imageUri = ((User) mUser).imageUri;
-			entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
 		}
+		else if (mCommand.verb.equals("edit")) {
+			mImageUriOriginal = entity.imageUri;
+		}
+
 	}
 
 	protected void drawEntity() {
@@ -187,26 +189,6 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		finish();
 	}
 
-	public void onChangePictureButtonClick(View view) {
-		showAddPictureDialog(false, new ImageRequestListener() {
-
-			@Override
-			public void onImageReady(Bitmap bitmap) {
-				BaseEntity entity = (BaseEntity) mEntity;
-				entity.imageUri = null;
-				entity.imageBitmap = bitmap;
-				showPicture(bitmap, R.id.img_public_image);
-			}
-
-			@Override
-			public void onProxibaseException(ProxibaseException exception) {
-				mUser.imageUri = "resource:user_placeholder";
-				mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.user_placeholder);
-			}
-
-		});
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
@@ -264,31 +246,26 @@ public abstract class EntityBaseForm extends AircandiActivity {
 	}
 
 	protected void updateImages() {
-		/*
-		 * If we have imageUri but no imageBitmap then image was cleared and save should null imageUri and delete bitmap
-		 * from service.
-		 */
 		BaseEntity entity = (BaseEntity) mEntity;
 
-		if (entity.imageUri != null && entity.imageBitmap == null) {
-			try {
-				S3.deleteImage(entity.imageUri.substring(entity.imageUri.lastIndexOf("/") + 1));
-				ImageManager.getInstance().deleteImage(entity.imageUri);
-				ImageManager.getInstance().deleteImage(entity.imageUri + ".reflection");
-				entity.imageUri = null;
-			}
-			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
-				exception.printStackTrace();
+		/* Delete image from S3 if it has been orphaned */
+		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
+			if (!entity.imageUri.equals(mImageUriOriginal)) {
+				try {
+					S3.deleteImage(mImageUriOriginal.substring(mImageUriOriginal.lastIndexOf("/") + 1));
+					ImageManager.getInstance().deleteImage(mImageUriOriginal);
+					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
+				}
+				catch (ProxibaseException exception) {
+					ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					exception.printStackTrace();
+				}
 			}
 		}
-		/*
-		 * If we have no imageUri and do have imageBitmap then new image has been picked and we should save the image
-		 * to the service and set imageUri.
-		 * TODO: If update then we might have orphaned a photo in S3
-		 */
-		else if (entity.imageUri == null && entity.imageBitmap != null) {
-			if (entity.imageBitmap != null) {
+
+		/* Put image to S3 if we have a new one. */
+		if (entity.imageUri != null && !ImageManager.isLocalImage(entity.imageUri)) {
+			if (!entity.imageUri.equals(mImageUriOriginal) && entity.imageBitmap != null) {
 				String imageKey = String.valueOf(((User) mUser).id) + "_"
 									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
 									+ ".jpg";
@@ -324,7 +301,12 @@ public abstract class EntityBaseForm extends AircandiActivity {
 						Intent intent = new Intent();
 
 						/* We are editing so set the dirty flag */
-						intent.putExtra(getString(R.string.EXTRA_BEACON_DIRTY), entity.beaconId);
+						if (entity.parentEntityId == null) {
+							intent.putExtra(getString(R.string.EXTRA_BEACON_DIRTY), entity.beaconId);
+						}
+						else {
+							intent.putExtra(getString(R.string.EXTRA_ENTITY_DIRTY), entity.parentEntityId);
+						}
 						intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.New);
 
 						setResult(Activity.RESULT_FIRST_USER, intent);
@@ -396,7 +378,8 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 		/* If there is an image stored with S3 then delete it */
 		BaseEntity entity = (BaseEntity) mEntity;
-		if (entity.imageUri != null && !entity.imageUri.equals("") && entity.imageFormat.equals("binary")) {
+		if (entity.imageUri != null && entity.imageUri.length() != 0 &&
+				!ImageManager.isLocalImage(entity.imageUri) && entity.imageFormat.equals("binary")) {
 			String imageKey = entity.imageUri.substring(entity.imageUri.lastIndexOf("/") + 1);
 			try {
 				S3.deleteImage(imageKey);

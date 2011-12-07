@@ -1,5 +1,9 @@
 package com.proxibase.aircandi.utils;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import android.graphics.Bitmap;
 import android.os.CountDownTimer;
 import android.util.Log;
 
@@ -11,7 +15,7 @@ public class Utilities {
 		if (CandiConstants.MODE_DEBUG)
 			Log.d(tag, task + ": " + message);
 	}
-	
+
 	public static class SimpleCountDownTimer extends CountDownTimer {
 
 		private long	mMillisUntilFinished;
@@ -40,5 +44,55 @@ public class Utilities {
 		}
 	}
 
-	
+	public static final String md5(final String s) {
+		try {
+			// Create MD5 Hash
+			MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+			digest.update(s.getBytes());
+			byte messageDigest[] = digest.digest();
+
+			// Create Hex String
+			StringBuffer hexString = new StringBuffer();
+			for (int i = 0; i < messageDigest.length; i++) {
+				String h = Integer.toHexString(0xFF & messageDigest[i]);
+				while (h.length() < 2) {
+					h = "0" + h;
+				}
+				hexString.append(h);
+			}
+			return hexString.toString();
+
+		}
+		catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+
+	public static final String md5HashForBitmap(Bitmap bitmap) {
+		try {
+			// Create MD5 Hash
+			MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+			byte[] bytes = ImageManager.byteArrayForBitmap(bitmap);
+			digest.update(bytes);
+			byte messageDigest[] = digest.digest();
+			return messageDigest.toString();
+
+			//			// Create Hex String
+			//			StringBuffer hexString = new StringBuffer();
+			//			for (int i = 0; i < messageDigest.length; i++) {
+			//				String h = Integer.toHexString(0xFF & messageDigest[i]);
+			//				while (h.length() < 2) {
+			//					h = "0" + h;
+			//				}
+			//				hexString.append(h);
+			//			}
+			//			return hexString.toString();
+
+		}
+		catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
 }

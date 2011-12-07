@@ -7,6 +7,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -41,6 +42,7 @@ public class ImageLoader {
 	private SimpleCountDownTimer	mCountDownTimer;
 
 	private WebView					mWebView;
+	private Activity				mActivity;
 
 	public ImageLoader(Context context) {
 
@@ -95,42 +97,6 @@ public class ImageLoader {
 
 		mImageRequestors.put(imageRequest.imageRequestor, imageRequest.imageUri);
 
-		if (imageRequest.imageUri.toLowerCase().contains("resource:")) {
-
-			String resourceName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("resource:") + 9);
-			int resourceId = Aircandi.context.getResources().getIdentifier(resourceName, "drawable", "com.proxibase.aircandi");
-			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(resourceId);
-
-			if (bitmap != null) {
-				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
-					/*
-					 * We might have cached a large version of an image so we
-					 * need to make sure we honor the image request specifications.
-					 */
-					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
-				}
-				imageRequest.imageReadyListener.onImageReady(bitmap);
-				return;
-			}
-		}
-		else if (imageRequest.imageUri.toLowerCase().contains("asset:")) {
-			String assetName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("asset:"));
-			Bitmap bitmap = null;
-			try {
-				bitmap = ImageManager.getInstance().loadBitmapFromAssets(assetName);
-			}
-			catch (ProxibaseException exception) {
-				imageRequest.imageReadyListener.onProxibaseException(exception);
-			}
-			if (bitmap != null) {
-				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
-					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
-				}
-				imageRequest.imageReadyListener.onImageReady(bitmap);
-				return;
-			}
-		}
-
 		if (imageRequest.searchCache) {
 			Bitmap bitmap = mImageCache.get(imageRequest.imageUri);
 			if (bitmap != null) {
@@ -145,6 +111,57 @@ public class ImageLoader {
 				return;
 			}
 		}
+		
+		if (imageRequest.imageUri.toLowerCase().contains("resource:")) {
+
+			String resourceName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("resource:") + 9);
+			int resourceId = Aircandi.context.getResources().getIdentifier(resourceName, "drawable", "com.proxibase.aircandi");
+			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(resourceId);
+
+			if (bitmap != null) {
+				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+					/*
+					 * We might have cached a large version of an image so we
+					 * need to make sure we honor the image request specifications.
+					 */
+					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+				}
+				
+				/* We put resource images into the cache so they are consistent */
+				if (imageRequest.updateCache) {
+					Logger.v(this, imageRequest.imageUri + ": Pushing into cache...");
+					mImageCache.put(imageRequest.imageUri, bitmap);
+				}
+				
+				imageRequest.imageReadyListener.onImageReady(bitmap);
+				return;
+			}
+		}
+		else if (imageRequest.imageUri.toLowerCase().contains("asset:")) {
+			String assetName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("asset:") + 6);
+			Bitmap bitmap = null;
+			try {
+				bitmap = ImageManager.getInstance().loadBitmapFromAssets(assetName);
+			}
+			catch (ProxibaseException exception) {
+				imageRequest.imageReadyListener.onProxibaseException(exception);
+			}
+			if (bitmap != null) {
+				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+				}
+				
+				/* We put resource images into the cache so they are consistent */
+				if (imageRequest.updateCache) {
+					Logger.v(this, imageRequest.imageUri + ": Pushing into cache...");
+					mImageCache.put(imageRequest.imageUri, bitmap);
+				}
+				
+				imageRequest.imageReadyListener.onImageReady(bitmap);
+				return;
+			}
+		}
+
 		queueImage(imageRequest);
 	}
 
@@ -170,8 +187,9 @@ public class ImageLoader {
 		}
 
 		/* Start thread if it's not started yet */
-		if (mImageLoaderThread.getState() == Thread.State.NEW)
+		if (mImageLoaderThread.getState() == Thread.State.NEW) {
 			mImageLoaderThread.start();
+		}
 	}
 
 	public static Bitmap getBitmap(String url, IProgressListener listener) throws ProxibaseException {
@@ -194,18 +212,18 @@ public class ImageLoader {
 		return bitmap;
 	}
 
-	public void getWebPageAsBitmap(String uri, ImageRequest imageRequest, final ImageRequestListener listener) {
+	public void getWebPageAsBitmap(String uri, final ImageRequest imageRequest, final ImageRequestListener listener) {
 
-		String webViewContent = "";
+		//String webViewContent = "";
 		final AtomicBoolean ready = new AtomicBoolean(false);
 		final AtomicInteger pictureCount = new AtomicInteger(0);
 
-		try {
-			webViewContent = (String) ProxibaseService.getInstance().select(uri, ResponseFormat.Html, null);
-		}
-		catch (ProxibaseException exception) {
-			listener.onProxibaseException(exception);
-		}
+		//		try {
+		//			webViewContent = (String) ProxibaseService.getInstance().select(uri, ResponseFormat.Html, null);
+		//		}
+		//		catch (ProxibaseException exception) {
+		//			listener.onProxibaseException(exception);
+		//		}
 
 		/*
 		 * Setting WideViewPort to false will cause html text to layout to try and fit the sizing of the
@@ -221,18 +239,28 @@ public class ImageLoader {
 		 * will have a viewport constrained to it's own dimensions (so if the webview is 50px*50px the viewport will be
 		 * the same size)
 		 */
+
 		mWebView.getSettings().setUseWideViewPort(true);
 		if (imageRequest.imageFormat == ImageFormat.HtmlZoom) {
 			mWebView.getSettings().setUseWideViewPort(false);
 		}
 
+		/* Clear */
+		//mWebView.loadUrl("about:blank");
+		//mWebView.loadData("<html><head></head><body></body></html>", "text/html", "UTF-8");
+
 		/*
 		 * We turn off javascript for performance reasons. Some pages will render differently
 		 * because javascript is used to control UI elements.
 		 */
+		//mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+		//mWebView.getSettings().setAppCacheEnabled(false);
 		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
+		//mWebView.setDrawingCacheEnabled(false);
+		//mWebView.clearView();
 		mWebView.getSettings().setJavaScriptEnabled(imageRequest.javascriptEnabled);
 		mWebView.getSettings().setLoadWithOverviewMode(true);
+		mWebView.refreshDrawableState();
 
 		//mWebView.requestLayout();
 		//		mWebView.invalidate();
@@ -241,8 +269,15 @@ public class ImageLoader {
 		mWebView.setWebViewClient(new WebViewClient() {
 
 			@Override
+			public void onPageStarted(WebView view, String url, Bitmap favicon) {
+				super.onPageStarted(view, url, favicon);
+				Logger.v(this, "Page started: " + url);
+			}
+
+			@Override
 			public void onPageFinished(WebView view, String url) {
 				super.onPageFinished(view, url);
+				Logger.v(this, "Page finished: " + url);
 				ready.set(true);
 			}
 		});
@@ -252,6 +287,31 @@ public class ImageLoader {
 			@Override
 			public void onProgressChanged(WebView view, int progress) {
 				listener.onProgressChanged(progress);
+				/*
+				 * Somehow I am getting called here even though the web view is still
+				 * showing content from previous site. Is draw pulling from drawing cache?
+				 */
+				//				if (!imageSent.get() && ready.get() && progress == 100)
+				//				{
+				//					//Picture picture = mWebView.capturePicture();
+				//					final Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
+				//							CandiConstants.IMAGE_CONFIG_DEFAULT);
+				//					Canvas canvas = new Canvas(bitmap);
+				//
+				//					Matrix matrix = new Matrix();
+				//					float scale = (float) CandiConstants.CANDI_VIEW_WIDTH / (float) view.getWidth();
+				//					matrix.postScale(scale, scale);
+				//
+				//					canvas.setMatrix(matrix);
+				//					//view.destroyDrawingCache();
+				//					view.draw(canvas);
+				//					//canvas.drawPicture(picture);
+				//
+				//					/* Release */
+				//					canvas = null;
+				//					listener.onImageReady(bitmap);
+				//					imageSent.set(true);
+				//				}
 			}
 		});
 
@@ -268,7 +328,7 @@ public class ImageLoader {
 					pictureCount.getAndIncrement();
 
 					final Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
-							CandiConstants.IMAGE_CONFIG_DEFAULT);
+													CandiConstants.IMAGE_CONFIG_DEFAULT);
 					Canvas canvas = new Canvas(bitmap);
 
 					Matrix matrix = new Matrix();
@@ -287,10 +347,12 @@ public class ImageLoader {
 						mWebView.setPictureListener(null);
 					}
 				}
+
 			}
 		});
 
-		mWebView.loadDataWithBaseURL(uri, webViewContent, "text/html", "utf-8", null);
+		//mWebView.loadDataWithBaseURL(uri, webViewContent, "text/html", "utf-8", null);
+		mWebView.loadUrl(uri);
 
 	}
 
@@ -400,8 +462,11 @@ public class ImageLoader {
 						Bitmap bitmap = null;
 						if (imageRequest.imageFormat == ImageFormat.Html || imageRequest.imageFormat == ImageFormat.HtmlZoom) {
 							processingWebPage = true;
-							mWebView.stopLoading();
-							mWebView.setPictureListener(null);
+							//							mWebView.stopLoading();
+							//							mWebView.setPictureListener(null);
+							//							mWebView.setWebChromeClient(null);
+							//							mWebView.setWebViewClient(null);
+							Logger.v(this, "Starting html image processing: " + imageRequest.imageUri);
 							getWebPageAsBitmap(imageRequest.imageUri, imageRequest, new ImageRequestListener() {
 
 								@Override
@@ -428,8 +493,8 @@ public class ImageLoader {
 										}
 									}
 
-									Logger.v(this,
-											"Html image processed: " + imageRequest.imageUri);
+									Logger.v(this, "Html image processed: " + imageRequest.imageUri);
+									Logger.v(this, "Html image hashcode: " + Utilities.md5HashForBitmap(bitmap));
 									String uri = mImageRequestors.get(imageRequest.imageRequestor);
 									if (uri != null && uri.equals(imageRequest.imageUri)) {
 										imageRequest.imageReadyListener.onImageReady(bitmap);
@@ -443,7 +508,7 @@ public class ImageLoader {
 
 								@Override
 								public void onProxibaseException(ProxibaseException exception) {
-									imageRequest.imageReadyListener.onImageReady(null);
+									imageRequest.imageReadyListener.onProxibaseException(exception);
 								}
 							});
 						}
@@ -466,9 +531,7 @@ public class ImageLoader {
 									}
 								});
 
-								Logger.v(this, imageRequest.imageUri + ": Download finished: "
-																									+ String.valueOf(estimatedTime / 1000000)
-																									+ "ms");
+								Logger.v(this, imageRequest.imageUri + ": Download finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
 							}
 							catch (ProxibaseException exception) {
 								imageRequest.imageReadyListener.onProxibaseException(exception);
@@ -486,9 +549,7 @@ public class ImageLoader {
 
 							estimatedTime = System.nanoTime() - startTime;
 							startTime = System.nanoTime();
-							Logger.v(this, imageRequest.imageUri + ": Post processing: "
-																									+ String.valueOf(estimatedTime / 1000000)
-																									+ "ms");
+							Logger.v(this, imageRequest.imageUri + ": Post processing: " + String.valueOf(estimatedTime / 1000000) + "ms");
 
 							/*
 							 * Stuff it into the cache. Overwrites if it already exists.
@@ -505,8 +566,7 @@ public class ImageLoader {
 								final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
-								Logger.v(this,
-										imageRequest.imageUri + ": Reflection created: " + String.valueOf(estimatedTime / 1000000) + "ms");
+								Logger.v(this, imageRequest.imageUri + ": Reflection created: " + String.valueOf(estimatedTime / 1000000) + "ms");
 
 								mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection);
 								if (mImageCache.isFileCacheOnly()) {
@@ -533,7 +593,20 @@ public class ImageLoader {
 	}
 
 	public void stopThread() {
+		/*
+		 * We call this when the search activity is being destroyed. S
+		 */
 		mImageLoaderThread.interrupt();
+		mImagesQueue.mImagesToLoad.clear();
+		mImageLoaderThread = new ImagesLoader();
+	}
+
+	public void setActivity(Activity activity) {
+		this.mActivity = activity;
+	}
+
+	public Activity getActivity() {
+		return mActivity;
 	}
 
 	public enum ImageProfile {

@@ -35,6 +35,12 @@
 			android:title="Sounds"
 			android:summary="Play sound notifications and effects"
 			android:id="@+id/Pref_Sound_Effects" />
+		<CheckBoxPreference
+			android:id="@+id/Pref_Global_Beacons"
+			android:key="Pref_Global_Beacons"
+			android:defaultValue="true"
+			android:title="Aircandi feed"
+			android:summary="Show Aircandi feed" />
 	</PreferenceCategory>
 	<PreferenceCategory
 		android:title="Development preferences">

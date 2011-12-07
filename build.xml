@@ -27,6 +27,12 @@
 
          -->
 	<property file="ant.properties" />
+	
+	<!-- Build info -->
+	
+	<property file="build_info.properties" />
+	<property name="build.number" value="${build.major.number}.${build.minor.number}.${build.revision.number}"/>
+	
 
 	<!-- The project.properties file is created and updated by the 'android'
          tool, as well as ADT.
@@ -42,6 +48,10 @@
 	<!-- quick check on sdk.dir -->
 	<property name="sdk.dir" value="D:\\Files\\Proxibase\\Android\\android-sdk-windows" />
 	<fail message="sdk.dir is missing. Make sure to generate local.properties using 'android update project'" unless="sdk.dir" />
+	
+	<!-- extra output directory -->
+	<property name="web.dir" value="\\DATASERVER\Files\Websites\Development\Aircandi\Android" />
+	<property name="web.local.dir" value="D:\Files\Proxibase\Code\Aircandi\Service\Android" />
 
 	<!-- extension targets. Uncomment the ones where you want to do custom work
 	     in between standard targets -->
@@ -621,7 +631,6 @@
 
 	<!-- Obfuscation with ProGuard -->
 
-
 	<!-- Obfuscate target
         This is only active in release builds when proguard.config is defined
         in default.properties.
@@ -699,7 +708,7 @@
 				<proguard>
                     @${proguard.config}
                     -injars       ${project.jars}
-                   -outjars      "${obfuscated.jar.file}"
+                    -outjars      "${obfuscated.jar.file}"
                   	-libraryjars  ${android.libraryjars}
                     -dump         "${obfuscate.absolute.dir}/dump.txt"
                     -printseeds   "${obfuscate.absolute.dir}/seeds.txt"
@@ -785,6 +794,41 @@
 
 	<target name="-set-mode-check">
 		<fail if="out.final.file" message="Cannot run two different modes at the same time. If you are running more than one debug/release/instrument type targets, call them from different Ant calls." />
+	</target>
+
+	<!-- Handles incrementing build numbers -->
+	
+	<target name="-revision">
+	    <propertyfile  file="build_info.properties">
+	            <entry key="build.revision.number" type="int" operation="+" value="1" pattern="00"/>
+	    </propertyfile>
+	</target>
+
+	<target name="-minor">
+	    <propertyfile  file="build_info.properties">
+	            <entry key="build.minor.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.revision.number" type="int" value="0" pattern="00"/>
+	    </propertyfile>
+	</target>
+
+	<target name="-major">
+	    <propertyfile  file="build_info.properties">
+	            <entry key="build.major.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.minor.number" type="int" value="0" pattern="00"/>
+	            <entry key="build.revision.number" type="int" value="0" pattern="00"/>
+	    </propertyfile>
+	</target>
+
+	<target name="-all">
+	    <propertyfile  file="build_info.properties">
+	            <entry key="build.major.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.minor.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.revision.number" type="int" operation="+" value="1" pattern="00"/>
+	    </propertyfile>
+	</target>	
+	
+	<target name="current_build_number" description="Shows current build number.">
+	 	<echo>Current build number:${build.number}</echo>
 	</target>
 
 	<!-- ********** Debug specific targets ********** -->
@@ -912,6 +956,10 @@
 		<!-- only create apk if *not* a library project -->
 		<do-only-if-not-library elseText="Library project: do not create apk...">
 			<sequential>
+				<antcall target="-revision" />				
+				<xpath input="AndroidManifest.xml" expression="/manifest/@android:versionCode" output="build.version.code" default="false" />
+				<xpath input="AndroidManifest.xml" expression="/manifest/@android:versionName" output="build.version.name" default="false" />
+				<antcall target="current_build_number" />				
 				<property name="out.unaligned.file" location="${out.absolute.dir}/${ant.project.name}-release-unaligned.apk" />
 
 				<!-- Signs the APK -->
@@ -921,12 +969,17 @@
 				<!-- Zip aligns the APK -->
 				<zipalign-helper in.package="${out.unaligned.file}" out.package="${out.final.file}" />
 				<echo>Release Package: ${out.final.file}</echo>
+				
+				<!-- Extra copy to website -->
+				<copy file="${out.final.file}" toDir="${web.dir}" overwrite="true" />				
+				<copy file="${out.final.file}" toDir="${web.local.dir}" overwrite="true" />				
 			</sequential>
 		</do-only-if-not-library>
 		<record-build-info />
 	</target>
 
 	<!-- ********** Install/uninstall specific targets ********** -->
+	
 
 	<target name="install" description="Installs the newly build package. Must be used in conjunction with a build target
                             (debug/release). If the application was previously installed, the application
@@ -986,6 +1039,7 @@
 	</target>
 
 	<target name="installd" depends="-set-debug-files, install" description="Installs (only) the debug package." />
+	
 	<target name="installr" depends="-set-release-mode, install" description="Installs (only) the release package." />
 
 	<!-- Uninstalls the package from the default emulator/device -->

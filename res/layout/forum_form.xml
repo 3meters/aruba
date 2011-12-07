@@ -107,31 +107,36 @@
                 <!-- Public Image -->
 
                 <TextView
-                    style="@style/section_header_form"
-                    android:text="@string/post_public_image_section_header" />
+                    style="@style/txt_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_picture" />
 
                 <RelativeLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                                        android:paddingBottom="10dp"
+                    
                     android:gravity="left"
-                    android:orientation="horizontal"
-                    android:paddingBottom="10dp" >
+                    android:orientation="horizontal" >
+
+                    <ImageView
+                        android:id="@+id/img_public_image"
+                        style="@style/img_picture"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp" />
 
                     <Button
                         android:id="@+id/btn_change_public_image"
                         style="@style/btn_form"
-                        android:onClick="onChangePictureButtonClick"
-                        android:text="@string/post_public_image_change_button" />
-
-                    <ImageView
-                        android:id="@+id/img_public_image"
-                        style="@style/img_photo_thumbnail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignTop="@id/btn_change_public_image"
+                        android:layout_alignTop="@+id/img_public_image"
                         android:layout_marginLeft="10dp"
-                        android:layout_toRightOf="@id/btn_change_public_image"
-                        android:visibility="gone" />
+                        android:layout_toRightOf="@+id/img_public_image"
+                        android:onClick="onChangePictureButtonClick"
+                        android:text="@string/post_public_image_change_button" />
                 </RelativeLayout>
 
                 <LinearLayout

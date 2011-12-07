@@ -57,6 +57,7 @@ public class ProfileForm extends AircandiActivity {
 	@SuppressWarnings("unused")
 	private EditText	mTextPasswordOld;
 	private Button		mButtonSave;
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -146,6 +147,7 @@ public class ProfileForm extends AircandiActivity {
 			Query query = new Query("Users").filter("Email eq '" + ((User) mUser).email + "'");
 			jsonResponse = (String) ProxibaseService.getInstance().selectUsingQuery(query, ProxiConstants.URL_AIRCANDI_SERVICE_ODATA);
 			mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
+			mImageUriOriginal = mUser.imageUri;
 		}
 		catch (ProxibaseException exception) {
 			Exceptions.Handle(exception);
@@ -203,7 +205,7 @@ public class ProfileForm extends AircandiActivity {
 	}
 
 	public void onChangePictureButtonClick(View view) {
-		showAddPictureDialog((mUser.facebookId != null && mUser.facebookId.length() != 0), new ImageRequestListener() {
+		showChangePictureDialog((mUser.facebookId != null && mUser.facebookId.length() != 0), new ImageRequestListener() {
 
 			@Override
 			public void onImageReady(final Bitmap bitmap) {
@@ -212,11 +214,11 @@ public class ProfileForm extends AircandiActivity {
 					@Override
 					public void run() {
 						if (bitmap == null) {
-							mUser.imageUri = "resource:user_placeholder";
-							mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.user_placeholder);
+							mUser.imageUri = "resource:placeholder_user";
+							mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.placeholder_user);
 						}
 						else {
-							mUser.imageUri = null;
+							mUser.imageUri = "updated";
 							mUser.imageBitmap = bitmap;
 						}
 						showPicture(mUser.imageBitmap, R.id.img_public_image);
@@ -226,8 +228,7 @@ public class ProfileForm extends AircandiActivity {
 
 			@Override
 			public void onProxibaseException(ProxibaseException exception) {
-				mUser.imageUri = "resource:user_placeholder";
-				mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.user_placeholder);
+				/* Do nothing */
 			}
 
 		});
@@ -263,31 +264,27 @@ public class ProfileForm extends AircandiActivity {
 		return true;
 	}
 
+
 	protected void updateImages() {
-		/*
-		 * If we have imageUri but no imageBitmap then image was cleared and save should null imageUri and delete bitmap
-		 * from service.
-		 */
-		if (mUser.imageUri != null && mUser.imageBitmap == null) {
-			try {
-				S3.deleteImage(mUser.imageUri.substring(mUser.imageUri.lastIndexOf("/") + 1));
-				ImageManager.getInstance().deleteImage(mUser.imageUri);
-				ImageManager.getInstance().deleteImage(mUser.imageUri + ".reflection");
-				mUser.imageUri = null;
-			}
-			catch (ProxibaseException exception) {
-				if (!Exceptions.Handle(exception)) {
-					ImageUtils.showToastNotification(ProfileForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+		
+		/* Delete image from S3 if it has been orphaned */
+		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
+			if (!mUser.imageUri.equals(mImageUriOriginal)) {
+				try {
+					S3.deleteImage(mImageUriOriginal.substring(mImageUriOriginal.lastIndexOf("/") + 1));
+					ImageManager.getInstance().deleteImage(mImageUriOriginal);
+					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
+				}
+				catch (ProxibaseException exception) {
+					ImageUtils.showToastNotification(this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					exception.printStackTrace();
 				}
 			}
 		}
-		/*
-		 * If we have no imageUri and do have imageBitmap then new image has been picked and we should save the image
-		 * to the service and set imageUri.
-		 * TODO: If update then we might have orphaned a photo in S3
-		 */
-		else if (mUser.imageUri == null && mUser.imageBitmap != null) {
-			if (mUser.imageBitmap != null) {
+
+		/* Put image to S3 if we have a new one. */
+		if (mUser.imageUri != null && !ImageManager.isLocalImage(mUser.imageUri)) {
+			if (!mUser.imageUri.equals(mImageUriOriginal) && mUser.imageBitmap != null) {
 				String imageKey = String.valueOf(((User) mUser).id) + "_"
 									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
 									+ ".jpg";
@@ -295,9 +292,8 @@ public class ProfileForm extends AircandiActivity {
 					S3.putImage(imageKey, mUser.imageBitmap);
 				}
 				catch (ProxibaseException exception) {
-					if (!Exceptions.Handle(exception)) {
-						ImageUtils.showToastNotification(ProfileForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
-					}
+					ImageUtils.showToastNotification(this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					exception.printStackTrace();
 				}
 				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
 			}
@@ -345,7 +341,8 @@ public class ProfileForm extends AircandiActivity {
 
 						@Override
 						public void run() {
-							ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+							ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_update_failed_toast),
+									Toast.LENGTH_SHORT);
 						}
 					});
 				}

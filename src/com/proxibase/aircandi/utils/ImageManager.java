@@ -154,6 +154,13 @@ public class ImageManager {
 	// Processing routines
 	// --------------------------------------------------------------------------------------------
 
+	public static byte[] byteArrayForBitmap(Bitmap bitmap) {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+		byte[] bitmapBytes = outputStream.toByteArray();
+		return bitmapBytes;
+	}
+
 	private Bitmap bitmapForByteArray(byte[] imageBytes, String imageWidthMax, int rotation) {
 
 		BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
@@ -392,6 +399,14 @@ public class ImageManager {
 		devices.add("verizon/voles/sholes");
 		devices.add("google_ion/google_ion/sapphire");
 		return devices.contains(android.os.Build.BRAND + "/" + android.os.Build.PRODUCT + "/" + android.os.Build.DEVICE);
+	}
+
+	public static boolean isLocalImage(String imageUri) {
+		if (imageUri.toLowerCase().contains("resource:"))
+			return true;
+		if (imageUri.toLowerCase().contains("asset:"))
+			return true;
+		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------

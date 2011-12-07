@@ -9,7 +9,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnClickListener;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
@@ -55,6 +54,7 @@ public abstract class AircandiActivity extends Activity {
 	protected Boolean				mBeaconUnregistered;
 	protected EntityProxy			mEntityProxy;
 	protected Object				mEntity;
+	protected String				mImageUriOriginal;
 	protected Command				mCommand;
 	protected User					mUser;
 	protected String				mPrefTheme;
@@ -244,17 +244,6 @@ public abstract class AircandiActivity extends Activity {
 		}
 	}
 
-	protected void showAlertDialog(int iconResource, String title, String message, OnClickListener listener) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(title);
-		builder.setMessage(message);
-		builder.setIcon(iconResource);
-		if (listener != null) {
-			builder.setPositiveButton(android.R.string.ok, listener);
-		}
-		builder.show();
-	}
-
 	public void showBackButton(boolean show, String backButtonText) {
 		if (show) {
 			mContextButton.setVisibility(View.VISIBLE);
@@ -269,7 +258,7 @@ public abstract class AircandiActivity extends Activity {
 		}
 	}
 
-	protected void showAddPictureDialog(final boolean showFacebookOption, final ImageRequestListener listener) {
+	protected void showChangePictureDialog(final boolean showFacebookOption, final ImageRequestListener listener) {
 
 		mImageRequestListener = listener;
 
@@ -343,6 +332,7 @@ public abstract class AircandiActivity extends Activity {
 					}
 				});
 				AlertDialog alert = builder.create();
+				alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 				alert.show();
 			}
 		});
@@ -423,25 +413,6 @@ public abstract class AircandiActivity extends Activity {
 						mImageRequestListener.onImageReady(bitmap);
 					}
 				}
-
-				//				BaseEntity entity = (BaseEntity) mEntity;
-				//
-				//				Uri imageUri = data.getData();
-				//				Bitmap bitmap = null;
-				//				try {
-				//					bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_MAX));
-				//				}
-				//				catch (ProxibaseException exception) {
-				//					exception.printStackTrace();
-				//				}
-				//				if (bitmap == null) {
-				//					throw new IllegalStateException("bitmap picked from gallery is null");
-				//				}
-				//
-				//				entity.imageUri = null;
-				//				entity.imageBitmap = bitmap;
-				//				((ImageView) findViewById(mPickerTarget)).setImageBitmap(entity.imageBitmap);
-				//				((ImageView) findViewById(mPickerTarget)).setVisibility(View.VISIBLE);
 			}
 		}
 		else if (requestCode == CandiConstants.ACTIVITY_PHOTO_MAKE) {

@@ -12,8 +12,6 @@ public class PostEntity extends BaseEntity {
 	@Expose
 	public String	mediaFormat;
 	@Expose
-	public boolean	locked;
-	@Expose
 	public Metadata	__metadata	= new Metadata();
 
 	//---------------------------------------------------------------------------------------------

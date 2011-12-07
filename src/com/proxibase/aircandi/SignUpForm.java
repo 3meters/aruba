@@ -93,8 +93,8 @@ public class SignUpForm extends AircandiActivity {
 
 	protected void bind() {
 		mUser = new User();
-		mUser.imageUri = "resource:user_placeholder";
-		mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.user_placeholder);
+		mUser.imageUri = "resource:placeholder_user";
+		mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.placeholder_user);
 	}
 
 	protected void draw() {
@@ -136,7 +136,7 @@ public class SignUpForm extends AircandiActivity {
 	}
 
 	public void onChangePictureButtonClick(View view) {
-		showAddPictureDialog(false, new ImageRequestListener() {
+		showChangePictureDialog(false, new ImageRequestListener() {
 
 			@Override
 			public void onImageReady(final Bitmap bitmap) {
@@ -145,11 +145,11 @@ public class SignUpForm extends AircandiActivity {
 					@Override
 					public void run() {
 						if (bitmap == null) {
-							mUser.imageUri = "resource:user_placeholder";
-							mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.user_placeholder);
+							mUser.imageUri = "resource:placeholder_user";
+							mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.placeholder_user);
 						}
 						else {
-							mUser.imageUri = null;
+							mUser.imageUri = "updated";
 							mUser.imageBitmap = bitmap;
 						}
 						showPicture(mUser.imageBitmap, R.id.img_public_image);
@@ -159,9 +159,8 @@ public class SignUpForm extends AircandiActivity {
 
 			@Override
 			public void onProxibaseException(ProxibaseException exception) {
-				mUser.imageUri = "resource:user_placeholder";
-				mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.user_placeholder);
-			}
+				/* Do nothing */
+				}
 
 		});
 	}
@@ -180,20 +179,16 @@ public class SignUpForm extends AircandiActivity {
 
 	private boolean validate() {
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
-			showAlertDialog(android.R.drawable.ic_dialog_alert, "Password", "Passwords do not match", null);
+			Aircandi.showAlertDialog(android.R.drawable.ic_dialog_alert, "Password", "Passwords do not match", this, null);
 			return false;
 		}
 		return true;
 	}
 
 	protected void updateImages() {
-		/*
-		 * If we have no imageUri and do have imageBitmap then new image has been picked and we should save the image
-		 * to the service and set imageUri.
-		 * TODO: If update then we might have orphaned a photo in S3
-		 */
-		if (mUser.imageUri == null && mUser.imageBitmap != null) {
-			if (mUser.imageBitmap != null) {
+		/* Put image to S3 if we have a new one. */
+		if (mUser.imageUri != null && !ImageManager.isLocalImage(mUser.imageUri)) {
+			if (!mUser.imageUri.equals(mImageUriOriginal) && mUser.imageBitmap != null) {
 				String imageKey = String.valueOf(((User) mUser).id) + "_"
 									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
 									+ ".jpg";
@@ -201,9 +196,8 @@ public class SignUpForm extends AircandiActivity {
 					S3.putImage(imageKey, mUser.imageBitmap);
 				}
 				catch (ProxibaseException exception) {
-					if (!Exceptions.Handle(exception)) {
-						ImageUtils.showToastNotification(this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
-					}
+					ImageUtils.showToastNotification(this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					exception.printStackTrace();
 				}
 				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
 			}
@@ -251,8 +245,9 @@ public class SignUpForm extends AircandiActivity {
 																							+ mUser.id
 																							+ ")");
 							stopTitlebarProgress();
-							showAlertDialog(R.drawable.icon_app, "New user created",
-									"A message has been sent to your email address with instructions on how to activate your account.", new
+							Aircandi.showAlertDialog(R.drawable.icon_app, "New user created",
+									"A message has been sent to your email address with instructions on how to activate your account.",
+									SignUpForm.this, new
 									OnClickListener() {
 
 										public void onClick(DialogInterface dialog, int which) {

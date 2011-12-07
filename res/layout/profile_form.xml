@@ -175,7 +175,7 @@
                         android:layout_alignTop="@id/btn_change_public_image"
                         android:layout_marginLeft="10dp"
                         android:layout_toRightOf="@id/btn_change_public_image"
-                        android:src="@drawable/user_placeholder" />
+                        android:src="@drawable/placeholder_user" />
                 </RelativeLayout>
 
                 <!-- Full name -->

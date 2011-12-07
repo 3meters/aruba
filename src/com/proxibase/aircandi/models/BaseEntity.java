@@ -50,6 +50,8 @@ public class BaseEntity extends AircandiEntity {
 	public String	password;
 	@Expose
 	public boolean	enabled;
+	@Expose
+	public boolean	locked;
 
 	/* For client use only */
 	public Bitmap	imageBitmap;

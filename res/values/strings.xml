@@ -28,16 +28,16 @@
 	<string name="dialog_profile_photo_button">Use your profile photo</string>
 	
 	<string name="dialog_new_message">Drop some candi and make your mark!</string>
-	<string name="dialog_new_album">Gallery for photos</string>
+	<string name="dialog_new_album">Picture gallery </string>
 	<string name="dialog_new_album_signin">Please sign-in to create a new Gallery</string>
-	<string name="dialog_new_topic">Topic for discussions</string>
+	<string name="dialog_new_topic">Discussion topic</string>
 	<string name="dialog_new_topic_signin">Please sign-in to create a new Topic</string>
 	<string name="dialog_new_web">Web bookmark</string>
 	<string name="dialog_new_web_signin">Please sign-in to create a new Web bookmark</string>
 	<string name="dialog_new_negative">Cancel</string>
 		
 	<string name="dialog_new_post_signin">Please sign-in to create a new Post</string>
-	<string name="dialog_new_photo_signin">Please sign-in to create a new Photo</string>
+	<string name="dialog_new_photo_signin">Please sign-in to create a new Picture</string>
 	<string name="dialog_new_signin">Please sign-in to create a new</string>
 	
 	<string name="dialog_link_message">Build link...</string>

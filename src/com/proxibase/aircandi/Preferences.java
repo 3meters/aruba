@@ -13,6 +13,7 @@ public class Preferences extends PreferenceActivity {
 	public static final String	PREF_AUTOSCAN			= "Pref_Autoscan";
 	public static final String	PREF_AUTOSCAN_INTERVAL	= "Pref_Autoscan_Interval";
 	public static final String	PREF_DEMO_MODE			= "Pref_Demo_Mode";
+	public static final String	PREF_GLOBAL_BEACONS		= "Pref_Global_Beacons";
 	public static final String	PREF_DISPLAY_EXTRAS		= "Pref_Display_Extras";
 	public static final String	PREF_ENTITY_FENCING		= "Pref_Entity_Fencing";
 	public static final String	PREF_SHOW_DEBUG			= "Pref_Show_Debug";
@@ -20,6 +21,7 @@ public class Preferences extends PreferenceActivity {
 	public static final String	PREF_THEME				= "Pref_Theme";
 	public static final String	PREF_USERNAME			= "Pref_Username";
 	public static final String	PREF_PASSWORD			= "Pref_Password";
+	public static final String	SETTING_VERSION_NAME	= "Setting_Version_Name";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

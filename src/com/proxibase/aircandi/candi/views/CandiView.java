@@ -30,8 +30,8 @@ import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 
@@ -137,7 +137,12 @@ public class CandiView extends BaseView implements OnGestureListener {
 			}
 		}
 
-		/* Animation and touch support */
+		/*
+		 * Animation and touch support
+		 * 
+		 * Update thread isn't running unless rendering is active.
+		 */
+		mCandiPatchPresenter.renderingActivate();
 		mCandiPatchPresenter.getEngine().runOnUpdateThread(new Runnable() {
 
 			@Override
@@ -158,6 +163,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		 */
 
 		/* Engine resources */
+		mCandiPatchPresenter.renderingActivate();
 		mCandiPatchPresenter.getEngine().runOnUpdateThread(new Runnable() {
 
 			@Override
@@ -500,7 +506,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 				else if (viewAction.getViewActionType() == ViewActionType.ZIndex) {
 					setZIndex(model.getViewStateNext().getZIndex());
 				}
-				mCandiPatchPresenter.renderingActivate();
+				if (mCandiPatchPresenter != null) {
+					mCandiPatchPresenter.renderingActivate();
+				}
 			}
 		}
 	}
@@ -542,6 +550,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 	private void updateTextureSources(final boolean skipCache) {
 
 		final CandiModel candiModel = (CandiModel) this.mModel;
+		Logger.v(this, "Updating texture sources: " + ((CandiModel) this.mModel).getTitleText());
 
 		if (!mActiveImageRequest) {
 			/*
@@ -579,6 +588,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 							/* We tickle the rendering window if it's getting low */
 							if (mCandiPatchPresenter.getRenderingTimeLeft() <= 1000) {
+								Logger.v(this, "Bumping rendering timer");
 								mCandiPatchPresenter.renderingActivate();
 							}
 						}
@@ -594,7 +604,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 				mReflectionSprite.setVisible(false);
 			}
 
-			if (mPlaceholderSprite != null) {
+			if (mPlaceholderSprite != null && !ImageManager.isLocalImage(imageRequest.imageUri)) {
 				mPlaceholderSprite.setVisible(!ImageManager.getInstance().hasImage(imageRequest.imageUri));
 			}
 
@@ -605,6 +615,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 			}
 
 			progressVisible(true);
+			Logger.v(this, "Queueing image fetch: " + candiModel.getTitleText());
 			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
 		}
 	}
@@ -621,6 +632,17 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 		mCandiPatchPresenter.renderingActivate();
 		mBodyTexture.clearTextureSources();
+
+		/* Create reflection before creating texture regions because the bitmaps get recycled */
+		/* Fetching from the cache is expense because it involves decoding from a file. */
+		Bitmap reflectionBitmap = ImageManager.getInstance().getImage(candiModel.getBodyImageUri() + ".reflection");
+		if (reflectionBitmap == null) {
+			if (bodyBitmap != null && !bodyBitmap.isRecycled()) {
+				reflectionBitmap = ImageUtils.makeReflection(bodyBitmap, true);
+				ImageManager.getInstance().getImageCache().put(candiModel.getBodyImageUri() + ".reflection", reflectionBitmap, CompressFormat.PNG);
+			}
+		}
+
 		mBodyTextureRegion = TextureRegionFactory.createFromSource(mBodyTexture, new BitmapTextureSource(bodyBitmap, new IBitmapAdapter() {
 
 			@Override
@@ -643,15 +665,6 @@ public class CandiView extends BaseView implements OnGestureListener {
 				return null;
 			}
 		}), 0, 0);
-
-		/* Fetching from the cache is expense because it involves decoding from a file. */
-		Bitmap reflectionBitmap = ImageManager.getInstance().getImage(candiModel.getBodyImageUri() + ".reflection");
-		if (reflectionBitmap == null) {
-			if (bodyBitmap != null && !bodyBitmap.isRecycled()) {
-				reflectionBitmap = ImageUtils.makeReflection(bodyBitmap, true);
-				ImageManager.getInstance().getImageCache().put(candiModel.getBodyImageUri() + ".reflection", reflectionBitmap, CompressFormat.PNG);
-			}
-		}
 
 		if (reflectionBitmap != null) {
 			reflectionBitmap = decorateTexture(reflectionBitmap, true);

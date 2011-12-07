@@ -6,8 +6,6 @@ public class AlbumEntity extends BaseEntity {
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 	@Expose
-	public boolean	locked;
-	@Expose
 	public Metadata	__metadata	= new Metadata();
 
 	//---------------------------------------------------------------------------------------------

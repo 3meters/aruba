@@ -61,11 +61,13 @@ public class CandiPatchModel extends Observable {
 		super.notifyObservers();
 
 		/* Each submodel will notify it's observers only if it has been flagged as changed. */
-		for (IModel candi : mCandiModels)
+		for (IModel candi : mCandiModels) {
 			candi.update();
+		}
 
-		for (ZoneModel zone : mZoneModels)
+		for (ZoneModel zone : mZoneModels) {
 			zone.update();
+		}
 	}
 
 	public void reset() {
@@ -483,6 +485,14 @@ public class CandiPatchModel extends Observable {
 		return false;
 	}
 
+	public CandiModel getCandiModelForEntity(Integer entityId) {
+		for (CandiModel candiModel : mCandiModels) {
+			if (candiModel.getEntityProxy().id.equals(entityId))
+				return candiModel;
+		}
+		return null;
+	}
+
 	public CandiList<CandiModel> getCandiModels() {
 		return mCandiModels;
 	}
@@ -517,7 +527,12 @@ public class CandiPatchModel extends Observable {
 
 	public void setCandiModelFocused(CandiModel candiFocused) {
 		if (mCandiModelFocused != candiFocused) {
-			Logger.d(null, "Changing candi model focus: " + candiFocused.getTitleText());
+			if (candiFocused != null) {
+				Logger.d(null, "Changing candi model focus: " + candiFocused.getTitleText());
+			}
+			else {
+				Logger.d(null, "Changing candi model focus: null");
+			}
 		}
 		mCandiModelFocused = candiFocused;
 	}

@@ -234,6 +234,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 					public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
 
 				});
+				
 				registerEntityModifier(modifier);
 				mCandiPatchPresenter.renderingActivate();
 			}
@@ -305,6 +306,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mDrawable.setBounds(0, (int) textOffsetY, width, height);
 
 		Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+
 		Canvas canvas = new Canvas(bitmapCopy);
 		mTextView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 		mTextView.layout(0, 0, width, height);
@@ -313,10 +315,15 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		if (mirror) {
 			mTextView.setMirrorText(true);
 		}
+		else {
+			mTextView.setMirrorText(false);
+		}
 
+		/* Draw type background rectangle */
 		mDrawable.draw(canvas);
-		canvas.translate(0, textOffsetY);
 
+		/* Shift canvas so text gets drawn starting in the text area */
+		canvas.translate(0, textOffsetY);
 		mTextView.draw(canvas);
 
 		if (applyReflectionGradient) {

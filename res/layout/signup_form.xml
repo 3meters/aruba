@@ -88,7 +88,7 @@
                     style="@style/img_picture"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/user_placeholder" />
+                    android:src="@drawable/placeholder_user" />
 
                 <Button
                     android:id="@+id/btn_change_public_image"

@@ -11,8 +11,13 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
 import android.util.DisplayMetrics;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.Aircandi;
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 
 public class ImageUtils {
@@ -126,4 +131,22 @@ public class ImageUtils {
 		return hexColor;
 	}
 
+	public static void showImageInImageView(Bitmap bitmap, ImageView imageView)
+	{
+		showImageInImageView(bitmap, null, imageView, null);
+	}
+	
+	public static void showImageInImageView(Bitmap bitmap, Bitmap bitmapReflection, ImageView imageView, ImageView imageViewReflection)
+	{
+		imageView.setImageBitmap(bitmap);
+		Animation animation = AnimationUtils.loadAnimation(Aircandi.context, R.anim.fade_in_medium);
+		animation.setFillEnabled(true);
+		animation.setFillAfter(true);
+		imageView.startAnimation(animation);
+		
+		if (bitmapReflection != null&& imageViewReflection != null) {
+			imageViewReflection.setImageBitmap(bitmapReflection);
+			imageViewReflection.startAnimation(animation);
+		}
+	}
 }

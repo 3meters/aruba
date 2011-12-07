@@ -161,7 +161,7 @@ public class CandiPatchPresenter implements Observer {
 		mCandiViewPool = new CandiViewPool();
 
 		/* Rendering timer */
-		mRenderingTimer = new RenderCountDownTimer(3000, 500);
+		mRenderingTimer = new RenderCountDownTimer(5000, 500);
 
 		/* Origin */
 		mCandiPatchModel.setOriginX(0);
@@ -344,7 +344,67 @@ public class CandiPatchPresenter implements Observer {
 	// Primary
 	// --------------------------------------------------------------------------------------------
 
-	public void updateCandiData(List<EntityProxy> proxiEntities, boolean fullUpdate) {
+	public void updateCandiModelFromEntity(EntityProxy entity) {
+
+		CandiModel candiModel = null;
+		if (mCandiPatchModel.hasCandiModelForEntity(entity.id)) {
+			candiModel = mCandiPatchModel.updateCandiModel(entity, mDisplayExtras);
+			candiModel.getChildren().clear();
+			candiModel.setChanged();
+
+			for (EntityProxy childEntity : entity.children) {
+
+				CandiModel childCandiModel = null;
+				if (mCandiPatchModel.hasCandiModelForEntity(childEntity.id)) {
+					childCandiModel = mCandiPatchModel.updateCandiModel(childEntity, mDisplayExtras);
+					childCandiModel.getViewStateCurrent().setVisible(!childCandiModel.getEntityProxy().isHidden);
+					candiModel.getChildren().add(childCandiModel);
+					childCandiModel.setParent(candiModel);
+					childCandiModel.setChanged();
+				}
+				else {
+					childCandiModel = CandiModelFactory.newCandiModel(childEntity.id, childEntity, mCandiPatchModel);
+					childCandiModel.setDisplayExtra(mDisplayExtras);
+					mCandiPatchModel.addCandiModel(childCandiModel);
+					childCandiModel.getViewStateCurrent().setVisible(!childCandiModel.getEntityProxy().isHidden);
+					candiModel.getChildren().add(childCandiModel);
+					childCandiModel.setParent(candiModel);
+					childCandiModel.setChanged();
+				}
+			}
+		}
+	}
+	
+	public void deleteCandiModelByEntity(EntityProxy deletedEntity)
+	{
+		/*
+		 * Used to synchronize candi models with entities
+		 */
+		for (CandiModel candiModel : mCandiPatchModel.getCandiModels()) {
+			if (candiModel.getEntityProxy().id.equals(deletedEntity.id))
+			{
+				if (candiModel.getParent() != null) {
+					CandiModel parentCandiModel = (CandiModel) candiModel.getParent();
+					parentCandiModel.getChildren().remove(candiModel);
+				}
+				removeCandiModel(candiModel);
+				
+				/* Make sure we have a new focus if needed */
+				if (mCandiPatchModel.getCandiModelFocused() == null) {
+					ZoneModel zoneModel = getNearestZone(mCameraTargetSprite.getX(), false);
+					if (zoneModel != null && zoneModel.getCandiesCurrent().size() > 0) {
+						mCandiPatchModel.setCandiModelFocused(getNearestZone(mCameraTargetSprite.getX(), false).getCandiesCurrent().get(0));
+//						mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
+//								CandiConstants.EASE_SLOTTING_MINOR);
+					}
+				}
+				
+				break;
+			}
+		}
+	}
+
+	public void updateCandiData(List<EntityProxy> proxiEntities, boolean fullUpdate, boolean delayObserverUpdate) {
 		/*
 		 * Primary entry point from the host activity. This is a primary trigger
 		 * that should update the model and ripple to the views.
@@ -471,7 +531,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Navigate to make sure we are completely configured */
-		navigateModel(mCandiPatchModel.getCandiRootNext(), true);
+		navigateModel(mCandiPatchModel.getCandiRootNext(), delayObserverUpdate);
 
 		/* Make sure we have a current candi and UI is centered on it */
 		if (fullUpdate) {
@@ -493,7 +553,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	public void navigateModel(IModel candiRootNext, boolean updatingData) {
+	public void navigateModel(IModel candiRootNext, boolean delayObserverUpdate) {
 
 		long startTime = System.nanoTime();
 		Logger.d(null, "Starting model navigation.");
@@ -539,14 +599,16 @@ public class CandiPatchPresenter implements Observer {
 			}
 
 			manageViews(false, true);
-			doTransitionAnimations(updatingData);
+			doTransitionAnimations();
 		}
 
 		/* Candies come and go so make sure our zone positioning is correct */
 		ensureZoneFocus();
 
 		/* Trigger epoch observer updates */
-		mCandiPatchModel.update();
+		if (!delayObserverUpdate) {
+			mCandiPatchModel.update();
+		}
 
 		/* Copy next to current across the model and child models */
 		mCandiPatchModel.shiftToNext();
@@ -773,6 +835,7 @@ public class CandiPatchPresenter implements Observer {
 					candiModel.getViewActions().addLast(new ViewAction(ViewActionType.Position));
 					candiModel.getViewActions().addLast(new ViewAction(ViewActionType.Scale));
 					candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ExpandCollapse));
+					//candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ReflectionHideShow));
 				}
 			}
 			candiModel.setChanged();
@@ -992,7 +1055,7 @@ public class CandiPatchPresenter implements Observer {
 	// Animation
 	// --------------------------------------------------------------------------------------------
 
-	private void doTransitionAnimations(boolean updatingData) {
+	private void doTransitionAnimations() {
 
 		/*
 		 * Zone transitions
@@ -1292,6 +1355,7 @@ public class CandiPatchPresenter implements Observer {
 		final CandiView candiView = (CandiView) getCandiViewsHash().get(String.valueOf(candiModel.getModelId()));
 		getCandiViewsHash().remove(String.valueOf(candiModel.getModelId()));
 		if (candiView != null) {
+			renderingActivate();
 			mEngine.runOnUpdateThread(new Runnable() {
 
 				@Override
@@ -1307,6 +1371,7 @@ public class CandiPatchPresenter implements Observer {
 			CandiModel childCandiModel = (CandiModel) childModel;
 			final CandiView childCandiView = (CandiView) getCandiViewsHash().get(String.valueOf(childCandiModel.getModelId()));
 			getCandiViewsHash().remove(String.valueOf(childCandiModel.getModelId()));
+			renderingActivate();
 			mEngine.runOnUpdateThread(new Runnable() {
 
 				@Override
@@ -1347,6 +1412,7 @@ public class CandiPatchPresenter implements Observer {
 
 				/* TODO: Should we null this so the GC can collect them. */
 				final CandiView candiView = (CandiView) child;
+				renderingActivate();
 				mEngine.runOnUpdateThread(new Runnable() {
 
 					@Override
@@ -1368,6 +1434,7 @@ public class CandiPatchPresenter implements Observer {
 
 				/* TODO: Should we null this so the GC can collect them. */
 				final ZoneView zoneView = (ZoneView) child;
+				renderingActivate();
 				mEngine.runOnUpdateThread(new Runnable() {
 
 					@Override
@@ -1729,20 +1796,28 @@ public class CandiPatchPresenter implements Observer {
 				@Override
 				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
 					//Logger.v(this, "MoveNearestZone: Settling after fling: " + info);
-					mCandiPatchModel.setCandiModelFocused(getNearestZone(mCameraTargetSprite.getX(), false).getCandiesCurrent().get(0));
 
-					mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
-							CandiConstants.EASE_SLOTTING_MINOR, new MoveListener() {
+					ZoneModel zoneModel = getNearestZone(mCameraTargetSprite.getX(), false);
+					if (zoneModel != null) {
+						CandiModel candiModel = zoneModel.getCandiesCurrent().get(0);
+						if (candiModel != null) {
+							mCandiPatchModel.setCandiModelFocused(zoneModel.getCandiesCurrent().get(0));
 
-								@Override
-								public void onMoveFinished() {
-									manageViewsAsync();
-								}
+							mCameraTargetSprite.moveToZone(zoneModel, CandiConstants.DURATION_SLOTTING_MINOR,
+									CandiConstants.EASE_SLOTTING_MINOR, new MoveListener() {
 
-								@Override
-								public void onMoveStarted() {
-								}
-							});
+										@Override
+										public void onMoveFinished() {
+											manageViewsAsync();
+										}
+
+										@Override
+										public void onMoveStarted() {
+										}
+									});
+						}
+					}
+
 				}
 
 				@Override

@@ -73,7 +73,9 @@ public class WebForm extends EntityBaseForm {
 
 		if (findViewById(R.id.chk_html_zoom) != null) {
 			((CheckBox) findViewById(R.id.chk_html_zoom)).setVisibility(View.VISIBLE);
-			((CheckBox) findViewById(R.id.chk_html_zoom)).setChecked(((WebEntity) mEntity).imageFormat.equals("htmlzoom") ? true : false);
+			if (((WebEntity)mEntity).imageFormat != null) {
+				((CheckBox) findViewById(R.id.chk_html_zoom)).setChecked(((WebEntity) mEntity).imageFormat.equals("htmlzoom") ? true : false);
+			}
 		}
 
 		if (findViewById(R.id.chk_html_javascript) != null) {
@@ -87,7 +89,8 @@ public class WebForm extends EntityBaseForm {
 	// --------------------------------------------------------------------------------------------
 
 	public void onLinkBuilderClick(View view) {
-		showLinkBuilderDialog();
+		showBookmarkActivity();
+		//showLinkBuilderDialog();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -169,18 +172,7 @@ public class WebForm extends EntityBaseForm {
 
 					public void onClick(DialogInterface dialog, int item) {
 						if (item == 0) {
-
-							final Intent intent = new Intent(Intent.ACTION_MAIN, null);
-							intent.addCategory(Intent.CATEGORY_LAUNCHER);
-							ComponentName cm = new ComponentName("com.android.browser", "com.android.browser.CombinedBookmarkHistoryActivity");
-							intent.setComponent(cm);
-							try {
-								startActivityForResult(intent, 1);
-							}
-							catch (Exception exception) {
-								/* We fallback to try a different way to construct the component */
-								cm = new ComponentName("com.android.browser", "CombinedBookmarkHistoryActivity");
-							}
+							showBookmarkActivity();
 						}
 						else if (item == 1) {
 							Intent launchBrowser = new Intent(Intent.ACTION_WEB_SEARCH);
@@ -197,6 +189,20 @@ public class WebForm extends EntityBaseForm {
 				alert.show();
 			}
 		});
+	}
+
+	private void showBookmarkActivity() {
+		final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+		intent.addCategory(Intent.CATEGORY_LAUNCHER);
+		ComponentName cm = new ComponentName("com.android.browser", "com.android.browser.CombinedBookmarkHistoryActivity");
+		intent.setComponent(cm);
+		try {
+			startActivityForResult(intent, 1);
+		}
+		catch (Exception exception) {
+			/* We fallback to try a different way to construct the component */
+			cm = new ComponentName("com.android.browser", "CombinedBookmarkHistoryActivity");
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -182,6 +182,7 @@ public class ImageCache implements Map<String, Bitmap> {
 				try {
 					File cacheDir = new File(mSecondLevelCacheDir);
 					cleanCache(cacheDir, CandiConstants.CACHE_TRIGGER_SIZE, CandiConstants.CACHE_TARGET_SIZE);
+					Logger.i(this, "Checked size of file cache");
 				}
 				catch (Exception exception) {
 					Exceptions.Handle(exception);
@@ -195,14 +196,18 @@ public class ImageCache implements Map<String, Bitmap> {
 
 	private void cleanCache(File cacheDir, long triggerSize, long targetSize) {
 		try {
+
 			File[] files = cacheDir.listFiles();
 			if (files == null) {
 				return;
 			}
 
 			Arrays.sort(files, new SortFilesByModified());
-			if (testCleanNeeded(files, triggerSize)) {
-				Logger.d(this, "Trimming file cache.");
+			long cacheSize = cacheSize(files);
+			Logger.d(this, "Cache size: " + String.valueOf(cacheSize) + " trigger size: " + String.valueOf(triggerSize) + " target size: " + String.valueOf(targetSize));
+			if (cacheSize > triggerSize)
+			{
+				Logger.d(this, "Trimming file cache");
 				cleanCache(files, targetSize);
 			}
 		}
@@ -230,18 +235,15 @@ public class ImageCache implements Map<String, Bitmap> {
 		}
 	}
 
-	private static boolean testCleanNeeded(File[] files, long triggerSize) {
+	private static long cacheSize(File[] files) {
 
 		long total = 0;
 
 		for (File f : files) {
 			total += f.length();
-			if (total > triggerSize) {
-				return true;
-			}
 		}
 
-		return false;
+		return total;
 	}
 
 	private void cleanCache(File[] files, long maxSize) {
