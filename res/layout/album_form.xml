@@ -78,7 +78,6 @@
             <!-- Content -->
 
             <LinearLayout
-                android:id="@+id/activity_body"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:gravity="center_vertical|top"
@@ -116,9 +115,9 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="3dp"
-                    android:paddingBottom="10dp"
                     android:gravity="left"
-                    android:orientation="horizontal" >
+                    android:orientation="horizontal"
+                    android:paddingBottom="10dp" >
 
                     <ImageView
                         android:id="@+id/img_public_image"
@@ -137,7 +136,6 @@
                         android:onClick="onChangePictureButtonClick"
                         android:text="@string/post_public_image_change_button" />
                 </RelativeLayout>
-
 
                 <LinearLayout
                     android:layout_width="fill_parent"
@@ -167,13 +165,13 @@
     <!-- Footer -->
 
     <LinearLayout
-        android:id="@+id/form_footer"
         style="@style/activity_footer_form"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
 
         <Button
-            android:id="@+id/btn_save_post"
             style="@style/btn_form"
             android:layout_weight="1"
             android:onClick="onSaveButtonClick"
@@ -187,7 +185,6 @@
             android:text="@string/post_delete_button" />
 
         <Button
-            android:id="@+id/btn_cancel"
             style="@style/btn_form"
             android:layout_weight="1"
             android:onClick="onCancelButtonClick"

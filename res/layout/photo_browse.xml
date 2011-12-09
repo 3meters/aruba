@@ -15,6 +15,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
             android:drawablePadding="5dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp" />
@@ -28,7 +29,7 @@
         android:fillViewport="true" >
 
         <LinearLayout
-            android:id="@+id/activity_body"
+            
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:gravity="center_vertical|top"
@@ -78,17 +79,6 @@
                         android:layout_alignParentTop="true"
                         android:progress="0"
                         android:progressDrawable="@drawable/progress" />
-                    <!--
-                    <ImageView
-                        android:id="@+id/img_photo_progress_indicator"
-                        style="@style/application_progress"
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_centerInParent="true"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/busy_anim"
-                        android:scaleType="fitCenter" />
-                    -->
                 </RelativeLayout>
             </ViewFlipper>
 

@@ -155,7 +155,6 @@
     </style>
 
     <style name="btn_back">
-        <item name="android:layout_gravity">center_vertical|left</item>
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical|left</item>
@@ -174,14 +173,7 @@
         <item name="android:background">@drawable/app_header_separator</item>
     </style>
 
-    <style name="line_horizontal">
-        <item name="android:layout_height">1px</item>
-        <item name="android:layout_width">fill_parent</item>
-        <item name="android:background">@drawable/app_header_separator</item>
-    </style>
-
     <style name="application_progress">
-        <item name="android:layout_gravity">center</item>
         <item name="android:minHeight">22dp</item>
         <item name="android:minWidth">22dp</item>
         <item name="android:maxHeight">22dp</item>
@@ -205,16 +197,8 @@
     </style>
 
     <style name="btn_dialog" parent="android:Widget.Button">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
         <item name="android:minWidth">80dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-    </style>
-
-    <style name="btn_dialog_wide" parent="btn_dialog">
-        <item name="android:width">200dp</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:lines">3</item>
     </style>
 
     <style name="chk_dialog" parent="android:Widget.CompoundButton.CheckBox">
@@ -229,8 +213,6 @@
     <!-- ActionStrip -->
 
     <style name="btn_actionstrip" parent="android:Widget.Button">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
         <item name="android:textColor">?attr/textColorButton</item>
         <item name="android:background">@drawable/button_nooutline_selector</item>
         <item name="android:minWidth">50dp</item>
@@ -241,28 +223,22 @@
     <!-- CandiInfo -->
 
     <style name="btn_candiinfo" parent="android:Widget.Button">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
         <item name="android:textColor">?attr/textColorButton</item>
         <item name="android:background">?attr/backgroundButton</item>
-        <item name="android:layout_marginRight">10dp</item>
         <item name="android:height">72dp</item>
         <item name="android:width">80dp</item>
     </style>
 
     <style name="btn_comments" parent="android:Widget.Button">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
         <item name="android:height">72dp</item>
-        <item name="android:width">80dp</item>
+        <item name="android:minWidth">80dp</item>
         <item name="android:padding">0dp</item>
         <item name="android:textColor">#ffffaa00</item>
         <item name="android:background">@drawable/button_nooutline_selector</item>
     </style>
 
+	<!-- Used only as parent style -->
     <style name="txt_candiinfo">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">fill_parent</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?attr/textColor</item>
     </style>
@@ -278,8 +254,6 @@
     </style>
 
     <style name="list_candiinfo_image">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">60dp</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="android:adjustViewBounds">true</item>
     </style>
@@ -294,34 +268,21 @@
     </style>
 
     <style name="list_button">
-        <item name="android:layout_width">40dp</item>
-        <item name="android:layout_height">40dp</item>
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/app_button_selector</item>
     </style>
 
     <style name="list_candiinfo_title" parent="txt_candiinfo">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">fill_parent</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="list_candiinfo_subtitle" parent="txt_candiinfo">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">fill_parent</item>
         <item name="android:textStyle">italic</item>
-    </style>
-
-    <style name="list_candiinfo_content" parent="txt_candiinfo">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">fill_parent</item>
     </style>
 
     <!-- CandiInfo: Pager Indicator -->
 
     <style name="txt_pager_indicator">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxWidth">100dp</item>
@@ -329,21 +290,6 @@
     </style>
 
     <!-- Candi Dialogs -->
-    <style name="FullyTranslucent" parent="android:Theme.Translucent.NoTitleBar">
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-
-    <style name="FullyTranslucent.QuickContact">
-
-        <!--
-             This is a hack because we want to be able to animate away the
-             QuickContact window, and we close its containing activity at the
-             same time.  So put in a dummy animation so this guy sticks around
-             while the fast track window is animating.
-        -->
-        <item name="android:windowAnimationStyle">@style/DummyAnimation</item>
-    </style>
-
     <style name="QuickContactAboveAnimation">
         <item name="android:windowEnterAnimation">@anim/quickcontact_above_enter</item>
         <item name="android:windowExitAnimation">@anim/quickcontact_above_exit</item>
@@ -354,23 +300,14 @@
         <item name="android:windowExitAnimation">@anim/quickcontact_below_exit</item>
     </style>
 
-    <style name="DummyAnimation">
-        <item name="android:windowExitAnimation">@anim/dummy_animation</item>
-    </style>
-
     <!-- Candi Forms -->
 
     <style name="section_header_form" parent="android:Widget.TextView">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_marginBottom">5dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:background">@drawable/section_header_bg</item>
     </style>
 
     <style name="edittext_form" parent="android:Widget.EditText">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
@@ -409,8 +346,6 @@
     </style>
 
     <style name="btn_form" parent="android:Widget.Button">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
         <item name="android:minWidth">80dp</item>
     </style>
 
@@ -420,14 +355,7 @@
     </style>
 
     <style name="chk_form" parent="android:Widget.CompoundButton.CheckBox">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-    </style>
-
-    <style name="spinner_form" parent="android:Widget.Spinner">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
     </style>
 
     <style name="tab_highlight">
@@ -461,8 +389,6 @@
     </style>
 
     <style name="activity_footer_form" parent="android:Widget.TextView">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">fill_parent</item>
         <item name="android:paddingTop">5dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:background">?attr/activityFooterFormBackground</item>

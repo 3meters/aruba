@@ -10,5 +10,8 @@
 	<Button
 		android:id="@+id/CommandButton"
 		style="@style/btn_candiinfo"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginRight="10dp"
 		android:onClick="onCommandButtonClick" />
 </RelativeLayout>

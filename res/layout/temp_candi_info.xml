@@ -66,7 +66,7 @@
                     <Button
                         android:id="@+id/btn_comments2"
                         style="@style/btn_comments"
-                        android:layout_width="80dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/img_public"
                         android:layout_marginTop="10dp"
@@ -114,19 +114,6 @@
                         android:layout_height="wrap_content"
                         android:clickable="false"
                         android:onClick="onInfoViewClick" />
-
-                    <!--
-                    <LinearLayout
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:orientation="vertical"
-                        android:paddingLeft="3dp"
-                        android:paddingTop="5dp" >
-
-                        <include layout="@layout/temp_user_info" />
-                    </LinearLayout>
-                    -->
 
                     <TextView
                         android:id="@+id/txt_content"

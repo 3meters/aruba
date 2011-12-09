@@ -5,9 +5,6 @@
     <color name="application_titlebar_separator_center">@color/rule_dark</color>
     <color name="application_titlebar_separator_end">@color/rule_dark</color>
     
-    <color name="quickcontact_disambig">#f2f2f2</color>
-    <color name="quickcontact_disambig_divider">#afafaf</color>
-    
     <color name="progress_start">#ffffd300</color>
     <color name="progress_end">#ffffd300</color>
     
@@ -19,12 +16,6 @@
     <color name="actionstrip_background_stroke_blueray">@color/rule_dark</color>
     <color name="actionstrip_background_fill_serene">@color/fill_shadelight_serene</color>
     <color name="actionstrip_background_stroke_serene">@color/rule_dark</color>
-    
-    <color name="section_header_start_dark">#33ffffff</color>
-    <color name="section_header_end_dark">#00ffffff</color>
-    
-    <color name="section_header_start_light">#33000000</color>
-    <color name="section_header_end_light">#00000000</color>
     
     <color name="pager_indicator_text_unfocused_dark">@color/text_unfocused_dark</color>
     <color name="pager_indicator_text_unfocused_light">@color/text_unfocused_light</color>
