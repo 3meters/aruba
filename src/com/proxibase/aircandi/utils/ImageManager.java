@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 import org.anddev.andengine.util.StreamUtils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -23,6 +24,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore.Images;
+import android.util.TypedValue;
 
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
@@ -39,7 +41,7 @@ public class ImageManager {
 
 	private ImageCache			mImageCache;
 	private ImageLoader			mImageLoader;
-	private static Context		mContext;
+	private Activity			mActivity;
 
 	public static synchronized ImageManager getInstance() {
 		if (singletonObject == null) {
@@ -52,8 +54,9 @@ public class ImageManager {
 	 * Designed as a singleton. The private Constructor prevents any other class from instantiating.
 	 */
 	private ImageManager() {
-		setImageLoader(new ImageLoader(mContext));
+		setImageLoader(new ImageLoader());
 		getImageLoader().setImageCache(mImageCache);
+		getImageLoader().setImageManager(this);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -68,7 +71,7 @@ public class ImageManager {
 		File imageFile = null;
 		int rotation = 0;
 
-		Cursor cursor = mContext.getContentResolver().query(imageUri, projection, null, null, null);
+		Cursor cursor = mActivity.getContentResolver().query(imageUri, projection, null, null, null);
 
 		if (cursor != null) {
 
@@ -134,7 +137,7 @@ public class ImageManager {
 			final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
 			decodeOptions.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
 
-			in = mContext.getAssets().open(assetPath);
+			in = mActivity.getAssets().open(assetPath);
 			return BitmapFactory.decodeStream(in, null, decodeOptions);
 		}
 		catch (final IOException exception) {
@@ -146,7 +149,10 @@ public class ImageManager {
 	}
 
 	public Bitmap loadBitmapFromResources(final int resourceId) {
-		Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), resourceId);
+		Bitmap bitmap = BitmapFactory.decodeResource(mActivity.getResources(), resourceId);
+		//Drawable drawable = mContext.getResources().getDrawable(resourceId);
+		//BitmapDrawable bitmapDrawable = (BitmapDrawable) mContext.getResources().getDrawable(resourceId); 
+		//BitmapDrawable bitmapDrawable = new BitmapDrawable(BitmapFactory.decodeResource(mContext.getResources(), resourceId));		
 		return bitmap;
 	}
 
@@ -272,6 +278,55 @@ public class ImageManager {
 
 				return bitmapSampledScaledCompressed;
 			}
+		}
+	}
+
+	public  String resolveResourceName(String rawResourceName) {
+		int resourceId = mActivity.getResources().getIdentifier(rawResourceName, "drawable", "com.proxibase.aircandi");
+		if (resourceId == 0) {
+			resourceId = mActivity.getResources().getIdentifier(rawResourceName, "attr", "com.proxibase.aircandi");
+			TypedValue value = new TypedValue();
+			if (mActivity.getTheme().resolveAttribute(resourceId, value, true)) {
+				String redirectedResourceName = (String) value.coerceToString();
+				return redirectedResourceName;
+			}
+			else {
+				/* We failed to resolve the resource name */
+				throw new IllegalStateException("Resource not resolved: " + rawResourceName);
+			}
+		}
+		else {
+			return rawResourceName;
+		}
+	}
+
+	public String resolveCacheName(String imageUri) {
+		if (imageUri.toLowerCase().startsWith("resource:", 0)) {
+			String rawCacheName = imageUri.substring(imageUri.indexOf("resource:") + 9);
+
+			int resourceId = mActivity.getResources().getIdentifier(rawCacheName, "drawable", "com.proxibase.aircandi");
+			if (resourceId == 0) {
+				resourceId = mActivity.getResources().getIdentifier(rawCacheName, "attr", "com.proxibase.aircandi");
+				TypedValue value = new TypedValue();
+				if (mActivity.getTheme().resolveAttribute(resourceId, value, true)) {
+					String redirectedResourceName = (String) value.coerceToString();
+					return redirectedResourceName;
+				}
+				else {
+					/* We failed to resolve the resource name */
+					throw new IllegalStateException("Resource not resolved: " + rawCacheName);
+				}
+			}
+			else {
+				return rawCacheName;
+			}
+		}
+		else if (imageUri.toLowerCase().startsWith("asset:", 0)) {
+			String rawCacheName = imageUri.substring(imageUri.indexOf("asset:") + 6);
+			return rawCacheName;
+		}
+		else {
+			return imageUri;
 		}
 	}
 
@@ -438,16 +493,20 @@ public class ImageManager {
 	// Setters/Getters routines
 	// --------------------------------------------------------------------------------------------
 
-	public void setContext(Context context) {
-		mContext = context;
-	}
-
 	public void setImageLoader(ImageLoader imageLoader) {
 		this.mImageLoader = imageLoader;
 	}
 
 	public ImageLoader getImageLoader() {
 		return mImageLoader;
+	}
+
+	public void setActivity(Activity activity) {
+		mActivity = activity;
+	}
+
+	public Activity getActivity() {
+		return mActivity;
 	}
 
 	public Object clone() throws CloneNotSupportedException {

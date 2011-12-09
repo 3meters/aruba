@@ -215,7 +215,7 @@ public class ProfileForm extends AircandiActivity {
 					public void run() {
 						if (bitmap == null) {
 							mUser.imageUri = "resource:placeholder_user";
-							mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.placeholder_user);
+							mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_user);
 						}
 						else {
 							mUser.imageUri = "updated";

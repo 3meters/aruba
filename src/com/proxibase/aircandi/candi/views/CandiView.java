@@ -635,11 +635,12 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 		/* Create reflection before creating texture regions because the bitmaps get recycled */
 		/* Fetching from the cache is expense because it involves decoding from a file. */
-		Bitmap reflectionBitmap = ImageManager.getInstance().getImage(candiModel.getBodyImageUri() + ".reflection");
+		final String cacheName = ImageManager.getInstance().resolveCacheName(candiModel.getBodyImageUri());
+		Bitmap reflectionBitmap = ImageManager.getInstance().getImage(cacheName + ".reflection");
 		if (reflectionBitmap == null) {
 			if (bodyBitmap != null && !bodyBitmap.isRecycled()) {
 				reflectionBitmap = ImageUtils.makeReflection(bodyBitmap, true);
-				ImageManager.getInstance().getImageCache().put(candiModel.getBodyImageUri() + ".reflection", reflectionBitmap, CompressFormat.PNG);
+				ImageManager.getInstance().getImageCache().put(cacheName + ".reflection", reflectionBitmap, CompressFormat.PNG);
 			}
 		}
 
@@ -652,7 +653,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 				if (mModel != null || !mRecycled) {
 
 					/* TextureSource needs to refresh a recycled bitmap. */
-					Bitmap bodyBitmap = ImageManager.getInstance().getImage(candiModel.getBodyImageUri());
+					Bitmap bodyBitmap = ImageManager.getInstance().getImage(cacheName);
 					if (bodyBitmap != null) {
 						bodyBitmap = decorateTexture(bodyBitmap, false);
 						return bodyBitmap;
@@ -675,7 +676,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 						@Override
 						public Bitmap reloadBitmap() {
 							if (mModel != null && !mRecycled) {
-								Bitmap bitmap = ImageManager.getInstance().getImage(candiModel.getBodyImageUri() + ".reflection");
+								Bitmap bitmap = ImageManager.getInstance().getImage(cacheName + ".reflection");
 								if (bitmap != null) {
 									bitmap = decorateTexture(bitmap, true);
 									return bitmap;

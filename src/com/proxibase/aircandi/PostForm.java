@@ -67,7 +67,7 @@ public class PostForm extends EntityBaseForm {
 				BaseEntity entity = (BaseEntity) mEntity;
 				if (bitmap == null) {
 					entity.imageUri = "resource:placeholder_user";
-					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.placeholder_user);
+					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_user);
 				}
 				else {
 					entity.imageUri = "updated";

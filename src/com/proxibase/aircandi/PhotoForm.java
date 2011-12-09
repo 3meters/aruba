@@ -31,7 +31,7 @@ public class PhotoForm extends EntityBaseForm {
 			else {
 				entity.parentEntityId = null;
 			}
-			entity.imageUri = "resource:placeholder_logo";
+			entity.imageUri = "resource:placeholder_picture";
 			entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
 			mEntity = entity;
 		}
@@ -66,8 +66,8 @@ public class PhotoForm extends EntityBaseForm {
 			public void onImageReady(Bitmap bitmap) {
 				BaseEntity entity = (BaseEntity) mEntity;
 				if (bitmap == null) {
-					entity.imageUri = "resource:placeholder_logo";
-					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.placeholder_logo);
+					entity.imageUri = "resource:placeholder_picture";
+					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_picture);
 				}
 				else {
 					entity.imageUri = "updated";

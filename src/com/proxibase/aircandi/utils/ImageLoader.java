@@ -7,8 +7,6 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -20,7 +18,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebView.PictureListener;
 
-import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
@@ -42,9 +39,9 @@ public class ImageLoader {
 	private SimpleCountDownTimer	mCountDownTimer;
 
 	private WebView					mWebView;
-	private Activity				mActivity;
+	private ImageManager			mImageManager;
 
-	public ImageLoader(Context context) {
+	public ImageLoader() {
 
 		/* Make the background thead low priority so it doesn't effect the UI performance. */
 		mImageLoaderThread.setPriority(Thread.MIN_PRIORITY);
@@ -97,25 +94,28 @@ public class ImageLoader {
 
 		mImageRequestors.put(imageRequest.imageRequestor, imageRequest.imageUri);
 
-		if (imageRequest.searchCache) {
-			Bitmap bitmap = mImageCache.get(imageRequest.imageUri);
-			if (bitmap != null) {
-				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
-					/*
-					 * We might have cached a large version of an image so we
-					 * need to make sure we honor the image request specifications.
-					 */
-					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
-				}
-				imageRequest.imageReadyListener.onImageReady(bitmap);
-				return;
-			}
-		}
-		
 		if (imageRequest.imageUri.toLowerCase().contains("resource:")) {
 
-			String resourceName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("resource:") + 9);
-			int resourceId = Aircandi.context.getResources().getIdentifier(resourceName, "drawable", "com.proxibase.aircandi");
+			String rawResourceName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("resource:") + 9);
+			String resolvedResourceName = ImageManager.getInstance().resolveResourceName(rawResourceName);
+
+			if (imageRequest.searchCache) {
+				Bitmap bitmap = mImageCache.get(resolvedResourceName);
+				if (bitmap != null) {
+					if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+						/*
+						 * We might have cached a large version of an image so we
+						 * need to make sure we honor the image request specifications.
+						 */
+						bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+					}
+					imageRequest.imageReadyListener.onImageReady(bitmap);
+					return;
+				}
+			}
+
+			int resourceId = ImageManager.getInstance().getActivity().getResources().getIdentifier(resolvedResourceName, "drawable",
+					"com.proxibase.aircandi");
 			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(resourceId);
 
 			if (bitmap != null) {
@@ -126,15 +126,18 @@ public class ImageLoader {
 					 */
 					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 				}
-				
+
 				/* We put resource images into the cache so they are consistent */
 				if (imageRequest.updateCache) {
-					Logger.v(this, imageRequest.imageUri + ": Pushing into cache...");
-					mImageCache.put(imageRequest.imageUri, bitmap);
+					Logger.v(this, resolvedResourceName + ": Pushing into cache...");
+					mImageCache.put(resolvedResourceName, bitmap);
 				}
-				
+
 				imageRequest.imageReadyListener.onImageReady(bitmap);
 				return;
+			}
+			else {
+				throw new IllegalStateException("Bitmap resource is null: " + resolvedResourceName);
 			}
 		}
 		else if (imageRequest.imageUri.toLowerCase().contains("asset:")) {
@@ -150,15 +153,31 @@ public class ImageLoader {
 				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
 					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 				}
-				
+
 				/* We put resource images into the cache so they are consistent */
 				if (imageRequest.updateCache) {
 					Logger.v(this, imageRequest.imageUri + ": Pushing into cache...");
 					mImageCache.put(imageRequest.imageUri, bitmap);
 				}
-				
+
 				imageRequest.imageReadyListener.onImageReady(bitmap);
 				return;
+			}
+		}
+		else {
+			if (imageRequest.searchCache) {
+				Bitmap bitmap = mImageCache.get(imageRequest.imageUri);
+				if (bitmap != null) {
+					if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+						/*
+						 * We might have cached a large version of an image so we
+						 * need to make sure we honor the image request specifications.
+						 */
+						bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+					}
+					imageRequest.imageReadyListener.onImageReady(bitmap);
+					return;
+				}
 			}
 		}
 
@@ -601,12 +620,12 @@ public class ImageLoader {
 		mImageLoaderThread = new ImagesLoader();
 	}
 
-	public void setActivity(Activity activity) {
-		this.mActivity = activity;
+	public void setImageManager(ImageManager imageManager) {
+		this.mImageManager = imageManager;
 	}
 
-	public Activity getActivity() {
-		return mActivity;
+	public ImageManager getImageManager() {
+		return mImageManager;
 	}
 
 	public enum ImageProfile {

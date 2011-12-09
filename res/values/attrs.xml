@@ -28,6 +28,11 @@
 		<attr name="imageSliderHandleSearch" format="string"/>
 		<attr name="backgroundSliderHandleSearch" format="string"/>
 		<attr name="backgroundSliderContentSearch" format="string"/>
+		<attr name="placeholder_forum" format="string"/>
+		<attr name="placeholder_post" format="string"/>
+		<attr name="placeholder_gallery" format="string"/>
+		<attr name="placeholder_picture" format="string"/>
+		<attr name="placeholder_user" format="string"/>
 	</declare-styleable>
 	<declare-styleable name="CandiForm">
 		<attr name="activityFooterFormBackground" format="string"/>

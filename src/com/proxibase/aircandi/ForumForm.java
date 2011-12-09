@@ -68,7 +68,7 @@ public class ForumForm extends EntityBaseForm {
 				BaseEntity entity = (BaseEntity) mEntity;
 				if (bitmap == null) {
 					entity.imageUri = "resource:placeholder_forum";
-					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.placeholder_forum);
+					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_forum);
 				}
 				else {
 					entity.imageUri = "updated";

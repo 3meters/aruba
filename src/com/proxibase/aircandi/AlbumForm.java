@@ -68,7 +68,7 @@ public class AlbumForm extends EntityBaseForm {
 				BaseEntity entity = (BaseEntity) mEntity;
 				if (bitmap == null) {
 					entity.imageUri = "resource:placeholder_gallery";
-					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.placeholder_gallery);
+					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_gallery);
 				}
 				else {
 					entity.imageUri = "updated";

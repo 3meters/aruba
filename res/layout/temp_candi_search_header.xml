@@ -99,7 +99,7 @@
             android:background="@drawable/app_button_selector"
             android:clickable="true"
             android:onClick="onProfileClick"
-            android:src="@drawable/placeholder_user" />
+            android:src="@drawable/placeholder_user_action" />
     </RelativeLayout>
 
 </merge>

@@ -46,6 +46,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -67,6 +69,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.Display;
 import android.view.Gravity;
@@ -373,8 +376,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		ImageManager.getInstance().setImageCache(new ImageCache(getApplicationContext(), CandiConstants.CACHE_PATH, 100, 16));
 		ImageManager.getInstance().getImageCache().setFileCacheOnly(true);
 		ImageManager.getInstance().getImageLoader().setWebView((WebView) findViewById(R.id.webview));
-		ImageManager.getInstance().getImageLoader().setActivity(this);
-		ImageManager.getInstance().setContext(getApplicationContext());
+		ImageManager.getInstance().setActivity(this);
 
 		/* Candi patch */
 		mDisplayMetrics = getResources().getDisplayMetrics();
@@ -923,13 +925,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			if (mPrefShowDebug) {
 				debugSliderShow(false);
 			}
-//			if (mCandiPatchModel.getCandiModelSelected() != null && mCandiPatchModel.getCandiModelSelected().hasVisibleChildrenCurrent()) {
-//				mCandiPagerIndicator.setVisibility(View.VISIBLE);
-//				mCandiPagerIndicator.initialize(1, 2, (PageInfoProvider) mCandiPager.getAdapter());
-//			}
-//			else {
-//				mCandiPagerIndicator.setVisibility(View.GONE);
-//			}
+			//			if (mCandiPatchModel.getCandiModelSelected() != null && mCandiPatchModel.getCandiModelSelected().hasVisibleChildrenCurrent()) {
+			//				mCandiPagerIndicator.setVisibility(View.VISIBLE);
+			//				mCandiPagerIndicator.initialize(1, 2, (PageInfoProvider) mCandiPager.getAdapter());
+			//			}
+			//			else {
+			//				mCandiPagerIndicator.setVisibility(View.GONE);
+			//			}
 
 			float rotationX = mCandiPatchModel.getCandiModelSelected().getZoneStateCurrent().getZone().getViewStateCurrent().getCenterX();
 			float rotationY = mCandiPatchModel.getCandiModelSelected().getZoneStateCurrent().getZone().getViewStateCurrent().getCenterY();
@@ -1047,23 +1049,24 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mCandiPatchPresenter.setIgnoreInput(true);
 
 		if (animType == AnimType.Fade) {
-			
+
 			/* Fade out candi info */
 			mCandiInfoEntity = null;
 			mCandiInfoVisible = false;
 			mCandiInfoView.setVisibility(View.GONE);
 			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(this, R.anim.fade_out_long));
-			
+
 			/* Fade in candi search */
 			if (mPrefShowDebug) {
 				debugSliderShow(true);
 			}
 			mCandiSurfaceView.setVisibility(View.VISIBLE);
-			mEngine.getScene().registerEntityModifier(new AlphaModifier(CandiConstants.DURATION_CANDIINFO_HIDE, 0.0f, 1.0f, EaseLinear.getInstance()));
-			
+			mEngine.getScene()
+					.registerEntityModifier(new AlphaModifier(CandiConstants.DURATION_CANDIINFO_HIDE, 0.0f, 1.0f, EaseLinear.getInstance()));
+
 			/* Update candi views */
 			updateCandiBackButton(!mCandiPatchModel.getCandiRootCurrent().isSuperRoot() ? mCandiPatchModel.getCandiRootCurrent()
-			                                        									.getTitleText() : null);
+																						.getTitleText() : null);
 			doUpdateEntities(mProxiEntities, false, false);
 			mCandiPatchModel.setCandiModelSelected(null);
 			mCandiPatchModel.update(); /* clears the previous rotation modifier */
@@ -1105,7 +1108,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							mCandiPatchModel.update(); /* clears the previous rotation modifier */
 							mCandiPatchPresenter.setIgnoreInput(false);
 							CandiSearchActivity.this.mIgnoreInput = false;
-							
+
 						}
 
 						@Override
@@ -1282,8 +1285,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 										@Override
 										public void run() {
-											Bitmap bitmapReflection = ImageManager.getInstance().getImage(
-													entity.imageUri + ".reflection");
+											String cacheName = ImageManager.getInstance().resolveCacheName(entity.imageUri);
+											Bitmap bitmapReflection = ImageManager.getInstance().getImage(cacheName + ".reflection");
 											ImageUtils.showImageInImageView(bitmap, bitmapReflection, imageView, imageViewReflection);
 										}
 									});
@@ -1309,37 +1312,27 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private void setImageView(String imageUri, final ImageView imageView) {
 		if (imageUri != null && !imageUri.equals("")) {
-			if (imageUri.toLowerCase().contains("resource:user_placeholder")) {
-				Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.placeholder_user);
-				imageView.setImageBitmap(bitmap);
-				Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_long);
-				animation.setFillEnabled(true);
-				animation.setFillAfter(true);
-				imageView.startAnimation(animation);
-			}
-			else {
-				ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.SquareTile, imageUri, new ImageRequestListener() {
+			ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.SquareTile, imageUri, new ImageRequestListener() {
 
-					@Override
-					public void onImageReady(final Bitmap bitmap) {
-						if (bitmap != null) {
-							runOnUiThread(new Runnable() {
+				@Override
+				public void onImageReady(final Bitmap bitmap) {
+					if (bitmap != null) {
+						runOnUiThread(new Runnable() {
 
-								@Override
-								public void run() {
-									imageView.setImageBitmap(bitmap);
-									Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_long);
-									animation.setFillEnabled(true);
-									animation.setFillAfter(true);
-									imageView.startAnimation(animation);
-								}
-							});
-						}
+							@Override
+							public void run() {
+								imageView.setImageBitmap(bitmap);
+								Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_long);
+								animation.setFillEnabled(true);
+								animation.setFillAfter(true);
+								imageView.startAnimation(animation);
+							}
+						});
 					}
-				});
+				}
+			});
 
-				Logger.v(this, "Fetching user image: " + imageUri);
-			}
+			Logger.v(this, "Fetching user image: " + imageUri);
 		}
 	}
 

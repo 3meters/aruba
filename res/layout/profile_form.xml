@@ -112,7 +112,6 @@
                     android:layout_alignParentBottom="true"
                     android:adjustViewBounds="true" />
             </RelativeLayout>
-
         </LinearLayout>
     </LinearLayout>
 
@@ -174,8 +173,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignTop="@id/btn_change_public_image"
                         android:layout_marginLeft="10dp"
-                        android:layout_toRightOf="@id/btn_change_public_image"
-                        android:src="@drawable/placeholder_user" />
+                        android:layout_toRightOf="@id/btn_change_public_image" />
                 </RelativeLayout>
 
                 <!-- Full name -->
@@ -191,8 +189,6 @@
                     style="@style/edittext_form"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content" />
-                
-                
             </LinearLayout>
 
             <LinearLayout
@@ -213,7 +209,7 @@
                     style="@style/edittext_form"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content" />
-                
+
                 <TextView
                     android:id="@+id/txt_label_password_old"
                     style="@style/txt_label"
@@ -253,7 +249,6 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword" />
-                
             </LinearLayout>
 
             <LinearLayout
@@ -262,7 +257,6 @@
                 android:gravity="center_vertical|top"
                 android:orientation="vertical"
                 android:padding="5dp" >
-
             </LinearLayout>
         </ViewFlipper>
     </ScrollView>

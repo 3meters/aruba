@@ -46,6 +46,11 @@
         <item name="sectionHeaderFillEnd">@color/transparent</item>
         <item name="tabColorHighlight">@color/tab_highlight</item>
         <item name="backgroundPicture">@drawable/picture_bg_dark</item>
+        <item name="placeholder_forum">placeholder_forum_dark</item>
+        <item name="placeholder_post">placeholder_user_dark</item>
+        <item name="placeholder_gallery">placeholder_gallery_dark</item>
+        <item name="placeholder_picture">placeholder_picture_dark</item>
+        <item name="placeholder_user">placeholder_user_dark</item>
     </style>
 
     <style name="aircandi_theme.snow" parent="@android:style/Theme.Light">
@@ -91,7 +96,12 @@
         <item name="sectionHeaderFillEnd">@color/transparent</item>
         <item name="tabColorHighlight">@color/tab_highlight</item>
         <item name="backgroundPicture">@drawable/picture_bg_light</item>
-    </style>
+        <item name="placeholder_forum">placeholder_forum_light</item>
+        <item name="placeholder_post">placeholder_user_light</item>
+        <item name="placeholder_gallery">placeholder_gallery_light</item>
+        <item name="placeholder_picture">placeholder_picture_light</item>
+        <item name="placeholder_user">placeholder_user_light</item>
+        </style>
 
     <style name="aircandi_theme.blueray" parent="aircandi_theme.midnight">
         <item name="android:windowBackground">@drawable/wallpaper_blueray</item>
@@ -374,7 +384,7 @@
              This is a hack because we want to be able to animate away the
              QuickContact window, and we close its containing activity at the
              same time.  So put in a dummy animation so this guy sticks around
-             while the fast track window is animating.
+             while the fast track window is animating.
         -->
         <item name="android:windowAnimationStyle">@style/DummyAnimation</item>
     </style>
