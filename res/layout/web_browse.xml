@@ -4,7 +4,10 @@
     android:layout_height="fill_parent"
     android:background="?attr/backgroundCandiInfo" >
 
-    <RelativeLayout style="@style/app_header" >
+    <RelativeLayout
+        style="@style/app_header"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp" >
 
         <Button
             android:id="@+id/btn_context"

@@ -2,14 +2,6 @@
 <resources>
 	<string name="app_name">Aircandi</string>
 	
-	<string name="test_long_text">The ladies of Assassins Creed: Brotherhood have both bark and bite. If you played Assassins Creed II, then you already know Caterina Sforza,
-		the comely Italian countess with a soft spot for sly, rugged assassins. Shes not the only female character with an important role to play in
-		Brotherhood, however. The ladies of Assassins Creed: Brotherhood have both bark and bite. If you played Assassins Creed II, then you already know Caterina Sforza,
-		the comely Italian countess with a soft spot for sly, rugged assassins. Shes not the only female character with an important role to play in
-		Brotherhood, however. The ladies of Assassins Creed: Brotherhood have both bark and bite. If you played Assassins Creed II, then you already know Caterina Sforza,
-		the comely Italian countess with a soft spot for sly, rugged assassins. Shes not the only female character with an important role to play in
-		Brotherhood, however. </string>
-
 	<string name="dialog_network_message_wifi_ready">Wifi enabled, ready for retry</string>
 	<string name="dialog_network_message_wifi_notready">Enable wifi and retry</string>
 	<string name="dialog_network_message_connection_ready">Connection established, ready for retry</string>
@@ -23,10 +15,6 @@
 	<string name="dialog_install_cancel"> No Thanks</string>
 	<string name="dialog_install_toast_package_installed"> has been installed. Tap the candi to launch.</string>
 	
-	<string name="dialog_select_photo_button">Select a photo from your gallery</string>
-	<string name="dialog_take_photo_button">Take a new photo</string>
-	<string name="dialog_profile_photo_button">Use your profile photo</string>
-	
 	<string name="dialog_new_message">Drop some candi and make your mark!</string>
 	<string name="dialog_new_album">Picture gallery </string>
 	<string name="dialog_new_album_signin">Please sign-in to create a new Gallery</string>
@@ -36,8 +24,6 @@
 	<string name="dialog_new_web_signin">Please sign-in to create a new Web bookmark</string>
 	<string name="dialog_new_negative">Cancel</string>
 		
-	<string name="dialog_new_post_signin">Please sign-in to create a new Post</string>
-	<string name="dialog_new_photo_signin">Please sign-in to create a new Picture</string>
 	<string name="dialog_new_signin">Please sign-in to create a new</string>
 	
 	<string name="dialog_link_message">Build link...</string>
@@ -49,7 +35,6 @@
 	<string name="menu_refresh_beacon_plus_current">Refresh</string>
 	<string name="menu_refresh_all">Refresh All</string>
 
-	<string name="EXTRA_VERB">com.proxibase.aircandi.EXTRA_VERB</string>
 	<string name="EXTRA_RESULT_VERB">com.proxibase.aircandi.EXTRA_RESULT_VERB</string>
 	<string name="EXTRA_PARENT_ENTITY_ID">com.proxibase.aircandi.EXTRA_PARENT_ENTITY_ID</string>
 	<string name="EXTRA_BEACON">com.proxibase.aircandi.EXTRA_BEACON</string>
@@ -59,15 +44,12 @@
 	<string name="EXTRA_MESSAGE">com.proxibase.aircandi.EXTRA_MESSAGE</string>
 	<string name="EXTRA_BEACON_DIRTY">com.proxibase.aircandi.EXTRA_BEACON_DIRTY</string>
 	<string name="EXTRA_ENTITY_DIRTY">com.proxibase.aircandi.EXTRA_ENTITY_DIRTY</string>
-	<string name="EXTRA_SUBTYPE">com.proxibase.aircandi.EXTRA_SUBTYPE</string>
 	
 	<string name="menu_settings_title">Settings</string>
 	<string name="menu_signout_title">Sign out</string>
 	<string name="menu_profile_title">Profile</string>
 	
 	<string name="search_back_button">Back</string>
-	<string name="form_tab_content">Content</string>
-	<string name="form_tab_settings">Settings</string>
 	<string name="form_title_album">Gallery</string>
 	<string name="form_title_photo">Photo</string>
 	<string name="form_title_topic">Topic</string>
@@ -85,10 +67,6 @@
 	<string name="post_public_image_section_header">Display Image</string>
 	<string name="post_badge_image_section_header">Post Badge</string>
 	<string name="post_public_image_change_button">Change</string>
-	<string name="post_media_section_header">Media</string>
-	<string name="post_media_add_button">Add</string>
-	<string name="post_media_clear_button">Clear</string>
-	<string name="post_settings_section_header">Settings</string>
 	<string name="post_save_button">Save</string>
 	<string name="post_delete_button">Delete</string>
 	<string name="post_cancel_button">Cancel</string>
@@ -105,15 +83,12 @@
 
 	<string name="label_picture">Picture</string>
 	<string name="label_fullname">Full name</string>
-	<string name="label_username">Username or email</string>
 	<string name="label_password">Password</string>
 	<string name="label_password_confirm">Confirm password</string>
 	<string name="label_password_old">Old password</string>
 	<string name="label_email">Email</string>
-	<string name="label_keep_signedin">Keep me signed in.</string>
 	<string name="form_signin_error">Wrong username/email and password combination.</string>
 	
-	<string name="form_signin_image_section_header">Profile picture</string>
 	<string name="btn_signin">Sign In</string>
 	<string name="btn_signup">Sign Up</string>
 	
@@ -129,22 +104,7 @@
 		Please help us fix this by sending us error data, all you have to do is click \'OK\'.</string> 
 	<string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string> 
 	<string name="crash_dialog_ok_toast">Thank you!</string>	
-	
-    <!-- Shown as a toast when the user taps on a Fast-Track icon, and no application
-         was found that could perform the selected action -->
-    <string name="quickcontact_missing_app">No application found to handle this action</string>
 
-    <!-- Shown as the checkbox label that, when checked, will store remember the
-         selected choice and shortcut to it in the future.  For example, this would
-         make a selected phone number the default.-->
-    <string name="quickcontact_remember_choice">Remember this choice</string>
-
-    <!-- Shown as the header name for a person when the name is missing or unknown. -->
-    <string name="quickcontact_missing_name">Unknown</string>
-
-    <!-- Text that is shown in the Badge, when there is no data to display -->
-    <string name="quickcontact_no_data">No data</string>
-    
     <string name="pref_disable_acra">Error reporting</string>
     <string name="pref_acra_disabled">Disabled</string>
     <string name="pref_acra_enabled">Enabled</string>

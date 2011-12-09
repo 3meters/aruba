@@ -148,7 +148,7 @@ import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.utils.NetworkManager.IConnectivityListener;
 import com.proxibase.aircandi.utils.NetworkManager.IConnectivityReadyListener;
-import com.proxibase.aircandi.widgets.QuickContactWindow;
+import com.proxibase.aircandi.widgets.ActionsWindow;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator.PageInfoProvider;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
@@ -262,7 +262,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private ViewSwitcher				mViewSwitcher;
 
 	private boolean						mCandiInfoVisible			= false;
-	private QuickContactWindow			mQuickContactWindow;
+	private ActionsWindow				mActionsWindow;
 	private boolean						mCandiActivityActive		= false;
 	private AnimType					mAnimTypeCandiInfo			= AnimType.RotateCandi;
 	private Sound						mCandiAlertSound;
@@ -441,8 +441,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	public void onCommandButtonClick(View view) {
 
-		if (mQuickContactWindow != null) {
-			mQuickContactWindow.dismiss();
+		if (mActionsWindow != null) {
+			mActionsWindow.dismiss();
 		}
 
 		final Command command = (Command) view.getTag();
@@ -557,11 +557,11 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	public void onItemMoreButtonClick(View view) {
 
 		EntityProxy entity = (EntityProxy) view.getTag();
-		if (mQuickContactWindow == null) {
-			mQuickContactWindow = new QuickContactWindow(this);
+		if (mActionsWindow == null) {
+			mActionsWindow = new ActionsWindow(this);
 		}
 		else {
-			long dismissInterval = System.currentTimeMillis() - mQuickContactWindow.getActionStripToggleTime();
+			long dismissInterval = System.currentTimeMillis() - mActionsWindow.getActionStripToggleTime();
 			if (dismissInterval <= 200) {
 				return;
 			}
@@ -573,7 +573,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		final Rect rect = new Rect(coordinates[0], coordinates[1], coordinates[0] + view.getWidth(), coordinates[1] + view.getHeight());
 		View content = configureActionButtons(entity, CandiSearchActivity.this);
 
-		mQuickContactWindow.show(rect, content, view, 0, -13, -5);
+		mActionsWindow.show(rect, content, view, 0, -13, -5);
 	}
 
 	public void onBackPressed() {
@@ -587,8 +587,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 		}
 		else {
-			if (mQuickContactWindow != null && mQuickContactWindow.isShowing())
-				mQuickContactWindow.dismiss();
+			if (mActionsWindow != null && mActionsWindow.isShowing())
+				mActionsWindow.dismiss();
 			hideCandiInfo(AnimType.RotateCandi);
 		}
 	}
@@ -610,11 +610,11 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	public void onActionsClick(View view) {
 
-		if (mQuickContactWindow == null) {
-			mQuickContactWindow = new QuickContactWindow(this);
+		if (mActionsWindow == null) {
+			mActionsWindow = new ActionsWindow(this);
 		}
 		else {
-			long dismissInterval = System.currentTimeMillis() - mQuickContactWindow.getActionStripToggleTime();
+			long dismissInterval = System.currentTimeMillis() - mActionsWindow.getActionStripToggleTime();
 			if (dismissInterval <= 200) {
 				return;
 			}
@@ -626,7 +626,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		final Rect rect = new Rect(coordinates[0], coordinates[1], coordinates[0] + view.getWidth(), coordinates[1] + view.getHeight());
 		View content = configureActionButtons(CandiSearchActivity.this);
 
-		mQuickContactWindow.show(rect, content, view, 0, -10, -71);
+		mActionsWindow.show(rect, content, view, 0, -10, -71);
 	}
 
 	public void onProfileClick(View view) {
@@ -1642,42 +1642,42 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		return viewGroup;
 	}
 
-	class BuildMenuTask extends AsyncTask<FrameLayout, Void, TableLayout> {
-
-		FrameLayout	frame;
-
-		@Override
-		protected TableLayout doInBackground(FrameLayout... params) {
-
-			/* We are on the background thread */
-			frame = params[0];
-			boolean landscape = false;
-			Display getOrient = getWindowManager().getDefaultDisplay();
-			if (getOrient.getOrientation() == Surface.ROTATION_90 || getOrient.getOrientation() == Surface.ROTATION_270)
-				landscape = true;
-			TableLayout table;
-			try {
-				table = configureMenus(mCandiPatchModel.getCandiModelSelected(), landscape, CandiSearchActivity.this);
-				return table;
-			}
-			catch (Exception exception) {
-				exception.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(TableLayout table) {
-
-			/* We are on the UI thread */
-			super.onPostExecute(table);
-			FrameLayout frame = (FrameLayout) findViewById(R.id.frame_menu);
-			frame.removeAllViews();
-			if (table != null) {
-				frame.addView(table);
-			}
-		}
-	}
+//	class BuildMenuTask extends AsyncTask<FrameLayout, Void, TableLayout> {
+//
+//		FrameLayout	frame;
+//
+//		@Override
+//		protected TableLayout doInBackground(FrameLayout... params) {
+//
+//			/* We are on the background thread */
+//			frame = params[0];
+//			boolean landscape = false;
+//			Display getOrient = getWindowManager().getDefaultDisplay();
+//			if (getOrient.getOrientation() == Surface.ROTATION_90 || getOrient.getOrientation() == Surface.ROTATION_270)
+//				landscape = true;
+//			TableLayout table;
+//			try {
+//				table = configureMenus(mCandiPatchModel.getCandiModelSelected(), landscape, CandiSearchActivity.this);
+//				return table;
+//			}
+//			catch (Exception exception) {
+//				exception.printStackTrace();
+//			}
+//			return null;
+//		}
+//
+//		@Override
+//		protected void onPostExecute(TableLayout table) {
+//
+//			/* We are on the UI thread */
+//			super.onPostExecute(table);
+//			FrameLayout frame = (FrameLayout) findViewById(R.id.frame_menu);
+//			frame.removeAllViews();
+//			if (table != null) {
+//				frame.addView(table);
+//			}
+//		}
+//	}
 
 	public ScreenOrientation getScreenOrientation() {
 		return mScreenOrientation;
@@ -2836,9 +2836,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		super.onConfigurationChanged(newConfig);
 		if (mCandiInfoVisible) {
 			TableLayout table = configureMenus(mCandiPatchModel.getCandiModelFocused(), landscape, CandiSearchActivity.this);
-			FrameLayout frame = (FrameLayout) findViewById(R.id.frame_menu);
-			frame.removeAllViews();
-			frame.addView(table);
+//			FrameLayout frame = (FrameLayout) findViewById(R.id.frame_menu);
+//			frame.removeAllViews();
+//			frame.addView(table);
 		}
 	}
 

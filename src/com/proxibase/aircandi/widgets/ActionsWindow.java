@@ -53,7 +53,7 @@ import com.proxibase.aircandi.utils.ImageUtils;
  * Window that shows QuickContact dialog for a specific {@link Contacts#_ID}.
  */
 @SuppressWarnings("unused")
-public class QuickContactWindow {
+public class ActionsWindow {
 
 	private final LayoutInflater	mInflater;
 	private PopupWindow				mPopupWindow;
@@ -77,7 +77,7 @@ public class QuickContactWindow {
 	/**
 	 * Prepare a dialog to show in the given {@link Context}.
 	 */
-	public QuickContactWindow(Context context) {
+	public ActionsWindow(Context context) {
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		initialize(context);
 	}
@@ -226,12 +226,12 @@ public class QuickContactWindow {
 	}
 
 	/**
-	 * Interface used to allow the person showing a {@link QuickContactWindow} to
+	 * Interface used to allow the person showing a {@link ActionsWindow} to
 	 * know when the window has been dismissed.
 	 */
 	public interface OnDismissListener {
 
-		public void onDismiss(QuickContactWindow dialog);
+		public void onDismiss(ActionsWindow dialog);
 	}
 
 	/**
@@ -240,7 +240,7 @@ public class QuickContactWindow {
 	 */
 	public static class RootLayout extends RelativeLayout {
 
-		QuickContactWindow	mQuickContactWindow;
+		ActionsWindow	mQuickContactWindow;
 
 		public RootLayout(Context context, AttributeSet attrs) {
 			super(context, attrs);
