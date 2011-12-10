@@ -1234,7 +1234,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		boolean landscape = (getOrient.getOrientation() == Surface.ROTATION_90 || getOrient.getOrientation() == Surface.ROTATION_270);
 		TableLayout table = configureMenus(mCandiPatchModel.getCandiModelSelected(), landscape, CandiSearchActivity.this);
 		if (table != null) {
-			RelativeLayout slideContent = (RelativeLayout) candiInfoView.findViewById(R.id.slider_content_info);
+			RelativeLayout slideContent = (RelativeLayout) candiInfoView.findViewById(R.id.candi_info_slider_content);
 			slideContent.removeAllViews();
 			slideContent.addView(table);
 			((View) candiInfoView.findViewById(R.id.slide_actions_info)).setVisibility(View.VISIBLE);
@@ -1298,14 +1298,14 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
 		}
 
-		((TextView) candiInfoView.findViewById(R.id.txt_subtitle)).setText("");
-		((TextView) candiInfoView.findViewById(R.id.txt_content)).setText("");
+		((TextView) candiInfoView.findViewById(R.id.candi_info_subtitle)).setText("");
+		((TextView) candiInfoView.findViewById(R.id.candi_info_description)).setText("");
 
-		((TextView) candiInfoView.findViewById(R.id.txt_title)).setText(entity.title);
+		((TextView) candiInfoView.findViewById(R.id.candi_info_title)).setText(entity.title);
 		if (entity.subtitle != null)
-			((TextView) candiInfoView.findViewById(R.id.txt_subtitle)).setText(Html.fromHtml(entity.subtitle));
+			((TextView) candiInfoView.findViewById(R.id.candi_info_subtitle)).setText(Html.fromHtml(entity.subtitle));
 		if (entity.description != null)
-			((TextView) candiInfoView.findViewById(R.id.txt_content)).setText(Html.fromHtml(entity.description));
+			((TextView) candiInfoView.findViewById(R.id.candi_info_description)).setText(Html.fromHtml(entity.description));
 
 		return candiInfoView;
 	}
@@ -1642,43 +1642,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		return viewGroup;
 	}
 
-//	class BuildMenuTask extends AsyncTask<FrameLayout, Void, TableLayout> {
-//
-//		FrameLayout	frame;
-//
-//		@Override
-//		protected TableLayout doInBackground(FrameLayout... params) {
-//
-//			/* We are on the background thread */
-//			frame = params[0];
-//			boolean landscape = false;
-//			Display getOrient = getWindowManager().getDefaultDisplay();
-//			if (getOrient.getOrientation() == Surface.ROTATION_90 || getOrient.getOrientation() == Surface.ROTATION_270)
-//				landscape = true;
-//			TableLayout table;
-//			try {
-//				table = configureMenus(mCandiPatchModel.getCandiModelSelected(), landscape, CandiSearchActivity.this);
-//				return table;
-//			}
-//			catch (Exception exception) {
-//				exception.printStackTrace();
-//			}
-//			return null;
-//		}
-//
-//		@Override
-//		protected void onPostExecute(TableLayout table) {
-//
-//			/* We are on the UI thread */
-//			super.onPostExecute(table);
-//			FrameLayout frame = (FrameLayout) findViewById(R.id.frame_menu);
-//			frame.removeAllViews();
-//			if (table != null) {
-//				frame.addView(table);
-//			}
-//		}
-//	}
-
 	public ScreenOrientation getScreenOrientation() {
 		return mScreenOrientation;
 	}
@@ -2010,7 +1973,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			public void run() {
 
 				final CharSequence[] items = {
-												getResources().getString(R.string.dialog_new_album),
+												getResources().getString(R.string.dialog_new_gallery),
 												getResources().getString(R.string.dialog_new_topic),
 												getResources().getString(R.string.dialog_new_web) };
 				AlertDialog.Builder builder = new AlertDialog.Builder(CandiSearchActivity.this);
@@ -2028,14 +1991,14 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						command.verb = "new";
 						String message = null;
 						if (item == 0) {
-							message = getString(R.string.dialog_new_album_signin);
+							message = getString(R.string.dialog_new_gallery_signin);
 							mUserSignedInRunnable = new Runnable() {
 
 								@Override
 								public void run() {
 									Logger.i(CandiSearchActivity.this, "Starting Gallery activity");
 									Intent intent = buildIntent(null, 0, command, ProxiExplorer.getInstance().getStrongestBeacon(), mUser,
-											AlbumForm.class);
+											GalleryForm.class);
 									startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
 									dialog.dismiss();
 									mUserSignedInRunnable = null;
@@ -2050,7 +2013,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 								public void run() {
 									Logger.i(CandiSearchActivity.this, "Starting Topic activity");
 									Intent intent = buildIntent(null, 0, command, ProxiExplorer.getInstance().getStrongestBeacon(), mUser,
-											ForumForm.class);
+											TopicForm.class);
 									startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
 									dialog.dismiss();
 									mUserSignedInRunnable = null;
@@ -2340,10 +2303,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			if (mCandiInfoEntity != null) {
 				entityType = mCandiInfoEntity.entityType;
 				if (position == PagerView.CandiInfo.ordinal()) {
-					if (entityType.equals(CandiConstants.TYPE_CANDI_ALBUM)) {
+					if (entityType.equals(CandiConstants.TYPE_CANDI_GALLERY)) {
 						return "GALLERY";
 					}
-					else if (entityType.equals(CandiConstants.TYPE_CANDI_FORUM)) {
+					else if (entityType.equals(CandiConstants.TYPE_CANDI_TOPIC)) {
 						return "TOPIC";
 					}
 					else if (entityType.equals(CandiConstants.TYPE_CANDI_WEB)) {
@@ -2351,10 +2314,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					}
 				}
 				else if (position == PagerView.CandiList.ordinal()) {
-					if (entityType.equals(CandiConstants.TYPE_CANDI_ALBUM)) {
-						return "PHOTOS";
+					if (entityType.equals(CandiConstants.TYPE_CANDI_GALLERY)) {
+						return "PICTURES";
 					}
-					else if (entityType.equals(CandiConstants.TYPE_CANDI_FORUM)) {
+					else if (entityType.equals(CandiConstants.TYPE_CANDI_TOPIC)) {
 						return "POSTS";
 
 					}
@@ -2880,9 +2843,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			mCandiPatchPresenter.mDisplayExtras = mPrefDisplayExtras;
 		}
 
-		if (!mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme.blueray"))) {
+		if (!mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_blueray"))) {
 			prefChangeThatRequiresRefresh = false;
-			mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
+			mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_blueray");
 			int themeResourceId = this.getResources().getIdentifier(mPrefTheme, "style", "com.proxibase.aircandi");
 			this.setTheme(themeResourceId);
 			Intent intent = new Intent(this, CandiSearchActivity.class);
@@ -3094,7 +3057,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			Debug.MemoryInfo memoryInfo = new Debug.MemoryInfo();
 			Debug.getMemoryInfo(memoryInfo);
 
-			((RelativeLayout) findViewById(R.id.slider_content_search)).removeAllViews();
+			((RelativeLayout) findViewById(R.id.search_slider_content)).removeAllViews();
 			final TableLayout table = new TableLayout(this);
 			TableLayout.LayoutParams tableLp = new TableLayout.LayoutParams();
 			tableLp.setMargins(0, 0, 0, 0);
@@ -3134,7 +3097,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					(float) ((float) memoryInfo.getTotalPrivateDirty() / 1024)));
 			table.addView(tableRow, tableLp);
 
-			((RelativeLayout) findViewById(R.id.slider_content_search)).addView(table);
+			((RelativeLayout) findViewById(R.id.search_slider_content)).addView(table);
 		}
 	}
 

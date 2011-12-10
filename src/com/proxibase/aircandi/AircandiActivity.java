@@ -114,7 +114,7 @@ public abstract class AircandiActivity extends Activity {
 	}
 
 	private void setTheme() {
-		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
+		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_blueray");
 		int themeResourceId = getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", getPackageName());
 		this.setTheme(themeResourceId);
 	}
@@ -200,10 +200,10 @@ public abstract class AircandiActivity extends Activity {
 	// Picker routines
 	// --------------------------------------------------------------------------------------------
 
-	public void pickPhoto() {
-		Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-		photoPickerIntent.setType("image/*");
-		startActivityForResult(photoPickerIntent, CandiConstants.ACTIVITY_PHOTO_PICK);
+	public void pickPicture() {
+		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK);
+		picturePickerIntent.setType("image/*");
+		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK);
 	}
 
 	public void pickVideo() {
@@ -217,7 +217,7 @@ public abstract class AircandiActivity extends Activity {
 		startActivityForResult(takeVideoIntent, CandiConstants.ACTIVITY_VIDEO_MAKE);
 	}
 
-	public void takePhoto() {
+	public void takePicture() {
 		Intent takePictureFromCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		if (ImageManager.getInstance().hasImageCaptureBug()) {
 			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File("/sdcard/tmp/foo.jpeg")));
@@ -225,7 +225,7 @@ public abstract class AircandiActivity extends Activity {
 		else
 			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
 					android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		startActivityForResult(takePictureFromCameraIntent, CandiConstants.ACTIVITY_PHOTO_MAKE);
+		startActivityForResult(takePictureFromCameraIntent, CandiConstants.ACTIVITY_PICTURE_MAKE);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -292,11 +292,11 @@ public abstract class AircandiActivity extends Activity {
 
 					public void onClick(DialogInterface dialog, int item) {
 						if (item == 0) { /* Gallery picture */
-							pickPhoto();
+							pickPicture();
 							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 						}
 						else if (item == 1) { /* Take picture */
-							takePhoto();
+							takePicture();
 							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 						}
 						else if (item == 2) { /* Facebook picture */
@@ -389,7 +389,7 @@ public abstract class AircandiActivity extends Activity {
 		 * get a zero result code whether the user decided to start an install
 		 * or not.
 		 */
-		if (requestCode == CandiConstants.ACTIVITY_PHOTO_PICK) {
+		if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK) {
 			if (resultCode == Activity.RESULT_OK) {
 
 				Uri imageUri = data.getData();
@@ -415,7 +415,7 @@ public abstract class AircandiActivity extends Activity {
 				}
 			}
 		}
-		else if (requestCode == CandiConstants.ACTIVITY_PHOTO_MAKE) {
+		else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
 			if (resultCode == Activity.RESULT_OK) {
 
 				Uri imageUri = null;

@@ -1,10 +1,16 @@
 package com.proxibase.aircandi.models;
 
+import android.graphics.Bitmap;
+
 import com.google.gson.annotations.Expose;
 
-public class ForumEntity extends BaseEntity {
+public class PictureEntity extends BaseEntity {
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
+	@Expose
+	public String	mediaUri;
+	@Expose
+	public String	mediaFormat;
 	@Expose
 	public Metadata	__metadata	= new Metadata();
 
@@ -12,7 +18,9 @@ public class ForumEntity extends BaseEntity {
 	// For client use only
 	//---------------------------------------------------------------------------------------------
 
-	public ForumEntity() {
-		__metadata.type = "Aircandi.Forum";
+	public Bitmap	mediaBitmap;
+
+	public PictureEntity() {
+		__metadata.type = "Aircandi.Photo";
 	}
 }

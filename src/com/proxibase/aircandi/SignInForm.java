@@ -47,7 +47,7 @@ public class SignInForm extends AircandiActivity {
 
 		mTextEmail = (EditText) findViewById(R.id.txt_email);
 		mTextPassword = (EditText) findViewById(R.id.txt_password);
-		mTextMessage = (TextView) findViewById(R.id.txt_message);
+		mTextMessage = (TextView) findViewById(R.id.form_message);
 		mTextError = (TextView) findViewById(R.id.txt_signin_error);
 		mButtonSignIn = (Button) findViewById(R.id.btn_signin);
 		mButtonSignIn.setEnabled(false);

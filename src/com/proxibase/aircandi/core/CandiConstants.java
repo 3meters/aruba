@@ -69,16 +69,17 @@ public interface CandiConstants {
 	public static final String			URL_AIRCANDI_MEDIA					= "https://s3.amazonaws.com/";
 	public static final String			S3_BUCKET_IMAGES					= "3meters_images";
 
-	public static final String			TYPE_CANDI_FORUM					= "com.proxibase.aircandi.candi.forum";
+	public static final String			TYPE_CANDI_TOPIC					= "com.proxibase.aircandi.candi.forum";
 	public static final String			TYPE_CANDI_POST						= "com.proxibase.aircandi.candi.post";
-	public static final String			TYPE_CANDI_ALBUM					= "com.proxibase.aircandi.candi.album";
-	public static final String			TYPE_CANDI_PHOTO					= "com.proxibase.aircandi.candi.photo";
+	public static final String			TYPE_CANDI_GALLERY					= "com.proxibase.aircandi.candi.album";
+	public static final String			TYPE_CANDI_PICTURE					= "com.proxibase.aircandi.candi.photo";
 	public static final String			TYPE_CANDI_WEB						= "com.proxibase.aircandi.candi.web";
+	public static final String			TYPE_CANDI_GRAM						= "com.proxibase.aircandi.candi.gram";
 
 	public static final int				ACTIVITY_ENTITY_HANDLER				= 100;
 	public static final int				ACTIVITY_MARKET						= 200;
-	public static final int				ACTIVITY_PHOTO_PICK					= 300;
-	public static final int				ACTIVITY_PHOTO_MAKE					= 310;
+	public static final int				ACTIVITY_PICTURE_PICK					= 300;
+	public static final int				ACTIVITY_PICTURE_MAKE					= 310;
 	public static final int				ACTIVITY_VIDEO_PICK					= 320;
 	public static final int				ACTIVITY_VIDEO_MAKE					= 330;
 	public static final int				ACTIVITY_SIGNIN						= 400;

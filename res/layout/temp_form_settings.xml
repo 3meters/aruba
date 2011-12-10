@@ -17,7 +17,6 @@
 
         <EditText
             android:id="@+id/txt_password"
-            style="@style/edittext_form"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:hint="@string/post_password_hint"
@@ -25,7 +24,6 @@
 
         <CheckBox
             android:id="@+id/chk_html_zoom"
-            style="@style/chk_form"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
@@ -33,7 +31,6 @@
         
         <CheckBox
             android:id="@+id/chk_html_javascript"
-            style="@style/chk_form"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
@@ -41,7 +38,6 @@
         
         <CheckBox
             android:id="@+id/chk_locked"
-            style="@style/chk_form"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:visibility="gone"

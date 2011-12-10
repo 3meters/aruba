@@ -19,7 +19,7 @@
         android:icon="@drawable/icon_app"
         android:label="@string/app_name"
         android:name="com.proxibase.aircandi.Aircandi"
-        android:theme="@style/aircandi_theme.midnight" >
+        android:theme="@style/aircandi_theme_midnight" >
         <activity
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name"
@@ -51,7 +51,7 @@
         <activity
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:name=".ForumForm"
+            android:name=".TopicForm"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
@@ -63,19 +63,19 @@
         <activity
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:name=".AlbumForm"
+            android:name=".GalleryForm"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:name=".PhotoForm"
+            android:name=".PictureForm"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:name=".PhotoBrowse"
+            android:name=".PictureBrowse"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity

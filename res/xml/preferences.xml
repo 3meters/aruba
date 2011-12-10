@@ -19,7 +19,7 @@
 			android:dialogTitle="Enter autoscan interval"
 			android:id="@+id/Pref_Autoscan_Interval" />
 		<ListPreference
-			android:defaultValue="aircandi_theme.blueray"
+			android:defaultValue="aircandi_theme_blueray"
 			android:summary="Choose a theme"
 			android:entries="@array/theme_list_preference"
 			android:entryValues="@array/themevalues_list_preference"

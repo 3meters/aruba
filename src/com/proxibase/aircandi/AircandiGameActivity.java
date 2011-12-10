@@ -82,7 +82,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	}
 
 	private void setTheme() {
-		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme.blueray");
+		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_blueray");
 		int themeResourceId = getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", getPackageName());
 		this.setTheme(themeResourceId);
 	}

@@ -2,11 +2,12 @@ package com.proxibase.aircandi;
 
 import android.graphics.Bitmap;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.BaseEntity;
-import com.proxibase.aircandi.models.PhotoEntity;
+import com.proxibase.aircandi.models.TopicEntity;
 import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
@@ -16,22 +17,17 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class PhotoForm extends EntityBaseForm {
+public class TopicForm extends EntityBaseForm {
 
 	@Override
 	protected void bindEntity() {
 
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
-			PhotoEntity entity = new PhotoEntity();
-			entity.entityType = CandiConstants.TYPE_CANDI_PHOTO;
-			if (mParentEntityId != 0) {
-				entity.parentEntityId = mParentEntityId;
-			}
-			else {
-				entity.parentEntityId = null;
-			}
-			entity.imageUri = "resource:placeholder_picture";
+			TopicEntity entity = new TopicEntity();
+			entity.entityType = CandiConstants.TYPE_CANDI_TOPIC;
+			entity.parentEntityId = null;
+			entity.imageUri = "resource:placeholder_forum";
 			entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
 			mEntity = entity;
 		}
@@ -39,7 +35,7 @@ public class PhotoForm extends EntityBaseForm {
 			String jsonResponse = null;
 			try {
 				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
-				mEntity = (PhotoEntity) ProxibaseService.convertJsonToObject(jsonResponse, PhotoEntity.class, GsonType.ProxibaseService);
+				mEntity = (TopicEntity) ProxibaseService.convertJsonToObject(jsonResponse, TopicEntity.class, GsonType.ProxibaseService);
 			}
 			catch (ProxibaseException exception) {
 				Exceptions.Handle(exception);
@@ -52,9 +48,14 @@ public class PhotoForm extends EntityBaseForm {
 	protected void drawEntity() {
 		super.drawEntity();
 
-		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_photo));
-	}
+		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_topic));
 
+		if (findViewById(R.id.chk_locked) != null) {
+			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
+			((CheckBox) findViewById(R.id.chk_locked)).setChecked(((TopicEntity) mEntity).locked);
+		}
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
@@ -66,8 +67,8 @@ public class PhotoForm extends EntityBaseForm {
 			public void onImageReady(Bitmap bitmap) {
 				BaseEntity entity = (BaseEntity) mEntity;
 				if (bitmap == null) {
-					entity.imageUri = "resource:placeholder_picture";
-					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_picture);
+					entity.imageUri = "resource:placeholder_forum";
+					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_forum);
 				}
 				else {
 					entity.imageUri = "updated";
@@ -79,9 +80,10 @@ public class PhotoForm extends EntityBaseForm {
 			@Override
 			public void onProxibaseException(ProxibaseException exception) {
 				/* Do nothing */
-				}
+			}
 		});
 	}
+
 
 	// --------------------------------------------------------------------------------------------
 	// Service routines
@@ -92,12 +94,22 @@ public class PhotoForm extends EntityBaseForm {
 		super.doSave(true);
 	}
 
+	@Override
+	protected void gather() {
+		/*
+		 * Handle properties that are not part of the base entity
+		 */
+		final TopicEntity entity = (TopicEntity) mEntity;
+		entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
+		super.gather();
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.photo_form;
+		return R.layout.topic_form;
 	}
 }

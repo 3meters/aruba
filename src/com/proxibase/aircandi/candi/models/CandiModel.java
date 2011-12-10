@@ -39,17 +39,17 @@ public class CandiModel extends BaseModel {
 	public String getEntityType() {
 		if (mEntityProxy != null && mEntityProxy.entityType != null) {
 			String entityType = mEntityProxy.entityType;
-			if (entityType.equals(CandiConstants.TYPE_CANDI_ALBUM)) {
+			if (entityType.equals(CandiConstants.TYPE_CANDI_GALLERY)) {
 				return "Gallery";
 			}
-			else if (entityType.equals(CandiConstants.TYPE_CANDI_FORUM)) {
+			else if (entityType.equals(CandiConstants.TYPE_CANDI_TOPIC)) {
 				return "Topic";
 			}
 			else if (entityType.equals(CandiConstants.TYPE_CANDI_WEB)) {
 				return "Web";
 			}
-			else if (entityType.equals(CandiConstants.TYPE_CANDI_PHOTO)) {
-				return "Photo";
+			else if (entityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
+				return "Picture";
 			}
 			else if (entityType.equals(CandiConstants.TYPE_CANDI_POST)) {
 				return "Post";

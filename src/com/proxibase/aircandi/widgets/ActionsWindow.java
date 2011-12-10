@@ -169,11 +169,11 @@ public class ActionsWindow {
 		mPopupWindow.showAsDropDown(anchorView, bodyOffsetX, bodyOffsetY);
 		
 		if (mPopupWindow.isAboveAnchor()) {
-			mPopupWindow.setAnimationStyle(R.style.QuickContactAboveAnimation);
+			mPopupWindow.setAnimationStyle(R.style.actionstrip_above_animation);
 			showArrow(R.id.arrow_down, anchor.centerX(), arrowOffsetX);
 		}
 		else {
-			mPopupWindow.setAnimationStyle(R.style.QuickContactBelowAnimation);
+			mPopupWindow.setAnimationStyle(R.style.actionstrip_below_animation);
 			showArrow(R.id.arrow_up, anchor.centerX(), arrowOffsetX);
 		}
 	}

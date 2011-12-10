@@ -16,7 +16,7 @@
 
     <RelativeLayout
         android:id="@+id/activity_header"
-        style="@style/app_header"
+        style="@style/actionbar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -35,7 +35,7 @@
 
         <TextView
             android:id="@+id/txt_header_title"
-            style="@style/txt_header_title"
+            style="@style/form_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -78,13 +78,18 @@
             <!-- Content -->
 
             <LinearLayout
-                
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:orientation="vertical"
                 android:padding="5dp" >
 
                 <!-- Public Image -->
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_picture" />
 
                 <RelativeLayout
                     android:layout_width="fill_parent"
@@ -97,7 +102,7 @@
 
                     <ImageView
                         android:id="@+id/img_public_image"
-                        style="@style/img_picture"
+                        style="@style/form_picture"
                         android:layout_width="200dp"
                         android:layout_height="200dp"
                         android:maxWidth="200dp"
@@ -105,7 +110,7 @@
 
                     <Button
                         android:id="@+id/btn_change_public_image"
-                        style="@style/btn_form"
+                        style="@style/app_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignTop="@+id/img_public_image"
@@ -115,12 +120,10 @@
                         android:text="@string/post_public_image_change_button" />
                 </RelativeLayout>
 
-
                 <!-- Title and Content -->
 
                 <EditText
                     android:id="@+id/txt_title"
-                    style="@style/edittext_form"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
@@ -128,7 +131,6 @@
 
                 <EditText
                     android:id="@+id/txt_content"
-                    style="@style/edittext_form"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
@@ -166,31 +168,34 @@
     <!-- Footer -->
 
     <LinearLayout
-        
-        style="@style/activity_footer_form"
+        android:id="@+id/form_footer"
+        style="@style/form_footer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
 
         <Button
-            
-            style="@style/btn_form"
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onSaveButtonClick"
             android:text="@string/post_save_button" />
 
         <Button
             android:id="@+id/btn_delete_post"
-            style="@style/btn_form"
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onDeleteButtonClick"
             android:text="@string/post_delete_button" />
 
         <Button
-            
-            style="@style/btn_form"
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onCancelButtonClick"
             android:text="@string/post_cancel_button" />

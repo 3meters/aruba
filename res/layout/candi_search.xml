@@ -24,7 +24,7 @@
             android:visibility="gone" >
 
             <RelativeLayout
-                style="@style/view_dialog"
+                style="@style/search_dialog_connect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -33,7 +33,6 @@
 
                 <TextView
                     android:id="@+id/retry_message"
-                    style="@style/txt_dialog"
                     android:layout_width="175dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
@@ -43,7 +42,7 @@
 
                 <Button
                     android:id="@+id/retry_button"
-                    style="@style/btn_dialog"
+                    style="@style/app_button"
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/retry_message"
@@ -53,7 +52,7 @@
 
                 <CheckBox
                     android:id="@+id/wifi_enabled_checkbox"
-                    style="@style/chk_dialog"
+                    style="@style/app_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/retry_button"
@@ -113,11 +112,11 @@
             android:id="@+id/slider_drawer_search"
             android:layout_width="fill_parent"
             android:layout_height="180dp"
-            android:content="@+id/slider_content_search"
-            android:handle="@+id/slider_handle_search" >
+            android:content="@+id/search_slider_content"
+            android:handle="@+id/search_slider_handle" >
 
             <LinearLayout
-                android:id="@+id/slider_handle_search"
+                android:id="@+id/search_slider_handle"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -127,15 +126,15 @@
                 android:paddingTop="30dp" >
 
                 <ImageButton
-                    style="@style/slider_handle_search"
+                    style="@style/search_slider_handle"
                     android:layout_width="fill_parent"
                     android:layout_height="20dp"
                     android:duplicateParentState="true" />
             </LinearLayout>
 
             <RelativeLayout
-                android:id="@+id/slider_content_search"
-                style="@style/slider_content_search"
+                android:id="@+id/search_slider_content"
+                style="@style/search_slider_content"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp" >

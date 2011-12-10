@@ -5,13 +5,14 @@
     android:background="?attr/backgroundCandiInfo" >
 
     <RelativeLayout
-        style="@style/app_header"
+        android:id="@+id/actionbar"
+        style="@style/actionbar"
         android:layout_width="fill_parent"
         android:layout_height="40dp" >
 
         <Button
             android:id="@+id/btn_context"
-            style="@style/btn_back"
+            style="@style/actionbar_button_back"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_alignParentLeft="true"
@@ -33,7 +34,7 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="fill_parent"
         android:layout_height="15dp"
-        android:layout_below="@id/activity_header"
+        android:layout_below="@id/actionbar"
         android:progress="0"
         android:progressDrawable="@drawable/progress" />
 

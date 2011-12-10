@@ -37,11 +37,11 @@
 	</string-array>
 	<string-array
 		name="themevalues_list_preference">
-		<item>aircandi_theme.blueray</item>
-		<item>aircandi_theme.midnight</item>
-		<item>aircandi_theme.serene</item>
-		<item>aircandi_theme.smolder</item>
-		<item>aircandi_theme.snow</item>
+		<item>aircandi_theme_blueray</item>
+		<item>aircandi_theme_midnight</item>
+		<item>aircandi_theme_serene</item>
+		<item>aircandi_theme_smolder</item>
+		<item>aircandi_theme_snow</item>
 	</string-array>
 	<string-array
 		name="post_visibility_values_list">

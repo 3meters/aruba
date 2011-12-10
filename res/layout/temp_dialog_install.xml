@@ -12,7 +12,6 @@
 		android:layout_alignParentTop="true"
 		android:layout_centerHorizontal="true"
 		android:text="@string/dialog_install_message"
-		style="@style/txt_dialog"
 		android:gravity="center" />
 	<LinearLayout
 		android:id="@+id/group_install"
@@ -25,11 +24,11 @@
 			android:id="@+id/btn_install_ok"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			style="@style/btn_dialog"
+			style="@style/app_button"
 			android:text="@string/dialog_install_ok" />
 		<Button
 			android:id="@+id/btn_install_cancel"
-			style="@style/btn_dialog"
+			style="@style/app_button"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/dialog_install_cancel" />

@@ -2,7 +2,7 @@ package com.proxibase.aircandi.models;
 
 import com.google.gson.annotations.Expose;
 
-public class AlbumEntity extends BaseEntity {
+public class GalleryEntity extends BaseEntity {
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 	@Expose
@@ -12,7 +12,7 @@ public class AlbumEntity extends BaseEntity {
 	// For client use only
 	//---------------------------------------------------------------------------------------------
 
-	public AlbumEntity() {
+	public GalleryEntity() {
 		__metadata.type = "Aircandi.Album";
 	}
 }

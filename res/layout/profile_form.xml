@@ -16,7 +16,7 @@
 
     <RelativeLayout
         android:id="@+id/activity_header"
-        style="@style/app_header"
+        style="@style/actionbar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -35,7 +35,7 @@
 
         <TextView
             android:id="@+id/txt_header_title"
-            style="@style/txt_header_title"
+            style="@style/form_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -69,7 +69,7 @@
 
                 <TextView
                     android:id="@+id/txt_tab_profile"
-                    style="@style/tab_text"
+                    style="@style/form_tab_label"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_alignParentTop="true"
@@ -80,7 +80,7 @@
 
                 <ImageView
                     android:id="@+id/img_tab_profile"
-                    style="@style/tab_highlight"
+                    style="@style/form_tab_highlight"
                     android:layout_width="fill_parent"
                     android:layout_height="5dp"
                     android:layout_alignParentBottom="true"
@@ -95,7 +95,7 @@
 
                 <TextView
                     android:id="@+id/txt_tab_account"
-                    style="@style/tab_text"
+                    style="@style/form_tab_label"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_alignParentTop="true"
@@ -106,7 +106,7 @@
 
                 <ImageView
                     android:id="@+id/img_tab_account"
-                    style="@style/tab_highlight"
+                    style="@style/form_tab_highlight"
                     android:layout_width="fill_parent"
                     android:layout_height="2dp"
                     android:layout_alignParentBottom="true"
@@ -148,7 +148,7 @@
                 <!-- User picture -->
 
                 <TextView
-                    style="@style/txt_label"
+                    style="@style/form_label"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/label_picture" />
@@ -162,13 +162,13 @@
 
                     <Button
                         android:id="@+id/btn_change_public_image"
-                        style="@style/btn_form"
+                        style="@style/app_button"
                         android:onClick="onChangePictureButtonClick"
                         android:text="@string/post_public_image_change_button" />
 
                     <ImageView
                         android:id="@+id/img_public_image"
-                        style="@style/img_picture"
+                        style="@style/form_picture"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignTop="@id/btn_change_public_image"
@@ -179,14 +179,13 @@
                 <!-- Full name -->
 
                 <TextView
-                    style="@style/txt_label"
+                    style="@style/form_label"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/label_fullname" />
 
                 <EditText
                     android:id="@+id/txt_fullname"
-                    style="@style/edittext_form"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
@@ -199,53 +198,49 @@
                 android:padding="5dp" >
 
                 <TextView
-                    style="@style/txt_label"
+                    style="@style/form_label"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/label_email" />
 
                 <EditText
                     android:id="@+id/txt_email"
-                    style="@style/edittext_form"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/txt_label_password_old"
-                    style="@style/txt_label"
+                    style="@style/form_label"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/label_password_old" />
 
                 <EditText
                     android:id="@+id/txt_password_old"
-                    style="@style/edittext_form"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword" />
 
                 <TextView
-                    style="@style/txt_label"
+                    style="@style/form_label"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/label_password" />
 
                 <EditText
                     android:id="@+id/txt_password"
-                    style="@style/edittext_form"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword" />
 
                 <TextView
-                    style="@style/txt_label"
+                    style="@style/form_label"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/label_password_confirm" />
 
                 <EditText
                     android:id="@+id/txt_password_confirm"
-                    style="@style/edittext_form"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword" />
@@ -265,7 +260,8 @@
 
     <LinearLayout
         
-        style="@style/activity_footer_form"
+        android:id="@+id/form_footer"
+        style="@style/form_footer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -273,14 +269,18 @@
 
         <Button
             android:id="@+id/btn_save"
-            style="@style/btn_form"
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onSaveButtonClick"
             android:text="@string/post_save_button" />
 
         <Button
             
-            style="@style/btn_form"
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onCancelButtonClick"
             android:text="@string/post_cancel_button" />

@@ -6,8 +6,8 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.aircandi.models.GalleryEntity;
 import com.proxibase.aircandi.models.BaseEntity;
-import com.proxibase.aircandi.models.ForumEntity;
 import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
@@ -17,17 +17,17 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class ForumForm extends EntityBaseForm {
+public class GalleryForm extends EntityBaseForm {
 
 	@Override
 	protected void bindEntity() {
 
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
-			ForumEntity entity = new ForumEntity();
-			entity.entityType = CandiConstants.TYPE_CANDI_FORUM;
+			GalleryEntity entity = new GalleryEntity();
+			entity.entityType = CandiConstants.TYPE_CANDI_GALLERY;
 			entity.parentEntityId = null;
-			entity.imageUri = "resource:placeholder_forum";
+			entity.imageUri = "resource:placeholder_gallery";
 			entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
 			mEntity = entity;
 		}
@@ -35,7 +35,7 @@ public class ForumForm extends EntityBaseForm {
 			String jsonResponse = null;
 			try {
 				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
-				mEntity = (ForumEntity) ProxibaseService.convertJsonToObject(jsonResponse, ForumEntity.class, GsonType.ProxibaseService);
+				mEntity = (GalleryEntity) ProxibaseService.convertJsonToObject(jsonResponse, GalleryEntity.class, GsonType.ProxibaseService);
 			}
 			catch (ProxibaseException exception) {
 				Exceptions.Handle(exception);
@@ -48,14 +48,14 @@ public class ForumForm extends EntityBaseForm {
 	protected void drawEntity() {
 		super.drawEntity();
 
-		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_topic));
+		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_gallery));
 
 		if (findViewById(R.id.chk_locked) != null) {
 			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
-			((CheckBox) findViewById(R.id.chk_locked)).setChecked(((ForumEntity) mEntity).locked);
+			((CheckBox) findViewById(R.id.chk_locked)).setChecked(((GalleryEntity) mEntity).locked);
 		}
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
@@ -67,8 +67,8 @@ public class ForumForm extends EntityBaseForm {
 			public void onImageReady(Bitmap bitmap) {
 				BaseEntity entity = (BaseEntity) mEntity;
 				if (bitmap == null) {
-					entity.imageUri = "resource:placeholder_forum";
-					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_forum);
+					entity.imageUri = "resource:placeholder_gallery";
+					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_gallery);
 				}
 				else {
 					entity.imageUri = "updated";
@@ -80,10 +80,9 @@ public class ForumForm extends EntityBaseForm {
 			@Override
 			public void onProxibaseException(ProxibaseException exception) {
 				/* Do nothing */
-			}
+				}
 		});
 	}
-
 
 	// --------------------------------------------------------------------------------------------
 	// Service routines
@@ -93,13 +92,13 @@ public class ForumForm extends EntityBaseForm {
 	protected void doSave(boolean updateImages) {
 		super.doSave(true);
 	}
-
+	
 	@Override
 	protected void gather() {
 		/*
 		 * Handle properties that are not part of the base entity
 		 */
-		final ForumEntity entity = (ForumEntity) mEntity;
+		final GalleryEntity entity = (GalleryEntity) mEntity;
 		entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
 		super.gather();
 	}
@@ -110,6 +109,6 @@ public class ForumForm extends EntityBaseForm {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.forum_form;
+		return R.layout.gallery_form;
 	}
 }

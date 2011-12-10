@@ -2,12 +2,11 @@ package com.proxibase.aircandi;
 
 import android.graphics.Bitmap;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.models.AlbumEntity;
 import com.proxibase.aircandi.models.BaseEntity;
+import com.proxibase.aircandi.models.PictureEntity;
 import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
@@ -17,17 +16,22 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class AlbumForm extends EntityBaseForm {
+public class PictureForm extends EntityBaseForm {
 
 	@Override
 	protected void bindEntity() {
 
 		/* We handle all the elements that are different than the base entity. */
 		if (mCommand.verb.equals("new")) {
-			AlbumEntity entity = new AlbumEntity();
-			entity.entityType = CandiConstants.TYPE_CANDI_ALBUM;
-			entity.parentEntityId = null;
-			entity.imageUri = "resource:placeholder_gallery";
+			PictureEntity entity = new PictureEntity();
+			entity.entityType = CandiConstants.TYPE_CANDI_PICTURE;
+			if (mParentEntityId != 0) {
+				entity.parentEntityId = mParentEntityId;
+			}
+			else {
+				entity.parentEntityId = null;
+			}
+			entity.imageUri = "resource:placeholder_picture";
 			entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
 			mEntity = entity;
 		}
@@ -35,7 +39,7 @@ public class AlbumForm extends EntityBaseForm {
 			String jsonResponse = null;
 			try {
 				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
-				mEntity = (AlbumEntity) ProxibaseService.convertJsonToObject(jsonResponse, AlbumEntity.class, GsonType.ProxibaseService);
+				mEntity = (PictureEntity) ProxibaseService.convertJsonToObject(jsonResponse, PictureEntity.class, GsonType.ProxibaseService);
 			}
 			catch (ProxibaseException exception) {
 				Exceptions.Handle(exception);
@@ -48,12 +52,7 @@ public class AlbumForm extends EntityBaseForm {
 	protected void drawEntity() {
 		super.drawEntity();
 
-		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_album));
-
-		if (findViewById(R.id.chk_locked) != null) {
-			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
-			((CheckBox) findViewById(R.id.chk_locked)).setChecked(((AlbumEntity) mEntity).locked);
-		}
+		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_picture));
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -67,8 +66,8 @@ public class AlbumForm extends EntityBaseForm {
 			public void onImageReady(Bitmap bitmap) {
 				BaseEntity entity = (BaseEntity) mEntity;
 				if (bitmap == null) {
-					entity.imageUri = "resource:placeholder_gallery";
-					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_gallery);
+					entity.imageUri = "resource:placeholder_picture";
+					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_picture);
 				}
 				else {
 					entity.imageUri = "updated";
@@ -92,16 +91,6 @@ public class AlbumForm extends EntityBaseForm {
 	protected void doSave(boolean updateImages) {
 		super.doSave(true);
 	}
-	
-	@Override
-	protected void gather() {
-		/*
-		 * Handle properties that are not part of the base entity
-		 */
-		final AlbumEntity entity = (AlbumEntity) mEntity;
-		entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
-		super.gather();
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
@@ -109,6 +98,6 @@ public class AlbumForm extends EntityBaseForm {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.album_form;
+		return R.layout.picture_form;
 	}
 }

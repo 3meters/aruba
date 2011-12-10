@@ -10,7 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import com.proxibase.aircandi.models.PhotoEntity;
+import com.proxibase.aircandi.models.PictureEntity;
 import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Logger;
@@ -21,9 +21,9 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class PhotoBrowse extends AircandiActivity {
+public class PictureBrowse extends AircandiActivity {
 
-	private ImageView	mPhotoPlaceholderProgress;
+	private ImageView	mPicturePlaceholderProgress;
 	private ViewFlipper	mViewFlipper;
 	private ProgressBar	mProgressBar;
 	
@@ -42,13 +42,13 @@ public class PhotoBrowse extends AircandiActivity {
 		String jsonResponse = null;
 		try {
 			jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json, null);
-			mEntity = (PhotoEntity) ProxibaseService.convertJsonToObject(jsonResponse, PhotoEntity.class, GsonType.ProxibaseService);
+			mEntity = (PictureEntity) ProxibaseService.convertJsonToObject(jsonResponse, PictureEntity.class, GsonType.ProxibaseService);
 		}
 		catch (ProxibaseException exception) {
 			Exceptions.Handle(exception);
 		}
 
-		final PhotoEntity entity = (PhotoEntity) mEntity;
+		final PictureEntity entity = (PictureEntity) mEntity;
 
 		if (entity.mediaUri != null && !entity.mediaUri.equals("")) {
 
@@ -65,9 +65,9 @@ public class PhotoBrowse extends AircandiActivity {
 								@Override
 								public void run() {
 									if (mEntity != null) {
-										Logger.d(PhotoBrowse.this, "Image fetched: " + entity.mediaUri);
+										Logger.d(PictureBrowse.this, "Image fetched: " + entity.mediaUri);
 										entity.mediaBitmap = bitmap;
-										showPhoto(bitmap);
+										showPicture(bitmap);
 									}
 								}
 							});
@@ -84,12 +84,12 @@ public class PhotoBrowse extends AircandiActivity {
 	}
 
 	protected void startProgress() {
-		mPhotoPlaceholderProgress.bringToFront();
-		mPhotoPlaceholderProgress.post(new Runnable() {
+		mPicturePlaceholderProgress.bringToFront();
+		mPicturePlaceholderProgress.post(new Runnable() {
 
 			@Override
 			public void run() {
-				AnimationDrawable animation = (AnimationDrawable) mPhotoPlaceholderProgress.getBackground();
+				AnimationDrawable animation = (AnimationDrawable) mPicturePlaceholderProgress.getBackground();
 				animation.start();
 
 			}
@@ -103,7 +103,7 @@ public class PhotoBrowse extends AircandiActivity {
 
 	protected void drawEntity() {
 
-		final PhotoEntity entity = (PhotoEntity) mEntity;
+		final PictureEntity entity = (PictureEntity) mEntity;
 
 		if (findViewById(R.id.txt_title) != null)
 			((TextView) findViewById(R.id.txt_title)).setText(entity.title);
@@ -142,7 +142,7 @@ public class PhotoBrowse extends AircandiActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	private void showPhoto(Bitmap bitmap) {
+	private void showPicture(Bitmap bitmap) {
 		((ImageView) findViewById(R.id.img_media)).setImageBitmap(bitmap);
 		stopProgress();
 		mViewFlipper.setDisplayedChild(0);
@@ -155,7 +155,7 @@ public class PhotoBrowse extends AircandiActivity {
 
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 		try {
-			final PhotoEntity entity = (PhotoEntity) mEntity;
+			final PictureEntity entity = (PictureEntity) mEntity;
 			if (entity.mediaBitmap != null) {
 				entity.mediaBitmap.recycle();
 			}
@@ -170,6 +170,6 @@ public class PhotoBrowse extends AircandiActivity {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.photo_browse;
+		return R.layout.picture_browse;
 	}
 }

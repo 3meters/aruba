@@ -15,9 +15,9 @@
 	<string name="dialog_install_cancel"> No Thanks</string>
 	<string name="dialog_install_toast_package_installed"> has been installed. Tap the candi to launch.</string>
 	
-	<string name="dialog_new_message">Drop some candi and make your mark!</string>
-	<string name="dialog_new_album">Picture gallery </string>
-	<string name="dialog_new_album_signin">Please sign-in to create a new Gallery</string>
+	<string name="dialog_new_message">Drop some candi!</string>
+	<string name="dialog_new_gallery">Picture gallery </string>
+	<string name="dialog_new_gallery_signin">Please sign-in to create a new Gallery</string>
 	<string name="dialog_new_topic">Discussion topic</string>
 	<string name="dialog_new_topic_signin">Please sign-in to create a new Topic</string>
 	<string name="dialog_new_web">Web bookmark</string>
@@ -50,8 +50,8 @@
 	<string name="menu_profile_title">Profile</string>
 	
 	<string name="search_back_button">Back</string>
-	<string name="form_title_album">Gallery</string>
-	<string name="form_title_photo">Photo</string>
+	<string name="form_title_gallery">Gallery</string>
+	<string name="form_title_picture">Picture</string>
 	<string name="form_title_topic">Topic</string>
 	<string name="form_title_post">Post</string>
 	<string name="form_title_web">Web bookmark</string>
@@ -70,8 +70,8 @@
 	<string name="post_save_button">Save</string>
 	<string name="post_delete_button">Delete</string>
 	<string name="post_cancel_button">Cancel</string>
-	<string name="post_title_hint">Title</string>
-	<string name="post_content_hint">Content</string>
+	<string name="post_title_hint">Subject</string>
+	<string name="post_content_hint">Description</string>
 	<string name="post_uri_hint">Web address</string>
 	<string name="post_delete_failed_toast">Delete failed</string>
 	<string name="post_delete_success_toast">Deleted</string>
@@ -87,7 +87,7 @@
 	<string name="label_password_confirm">Confirm password</string>
 	<string name="label_password_old">Old password</string>
 	<string name="label_email">Email</string>
-	<string name="form_signin_error">Wrong username/email and password combination.</string>
+	<string name="form_signin_error">Wrong email and password combination.</string>
 	
 	<string name="btn_signin">Sign In</string>
 	<string name="btn_signup">Sign Up</string>

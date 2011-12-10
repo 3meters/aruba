@@ -12,34 +12,34 @@
 		android:layout_alignParentTop="true" />
 	<ImageView
 		android:id="@+id/item_image"
-		style="@style/list_candiinfo_image"
+		style="@style/candi_list_image"
 		android:layout_width="60dp"
 		android:layout_height="wrap_content"
 		android:layout_alignParentTop="true"
-		android:paddingTop="5dp"
-		android:layout_marginRight="10dp" />
+		android:layout_marginRight="10dp"
+		android:paddingTop="5dp" />
 	<TextView
 		android:id="@+id/item_title"
-		android:layout_width="fill_parent"
+		style="@style/candi_list_title"
 		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
 		android:layout_toRightOf="@id/item_image"
 		android:layout_toLeftOf="@+id/item_action_button"
 		android:layout_alignParentTop="true"
-		android:layout_alignWithParentIfMissing="true"
-		style="@style/list_candiinfo_title" />
+		android:layout_alignWithParentIfMissing="true" />
 	<TextView
 		android:id="@+id/item_subtitle"
-		android:layout_width="fill_parent"
+		style="@style/candi_list_subtitle"
 		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
 		android:layout_below="@+id/item_title"
 		android:layout_toRightOf="@id/item_image"
-		android:layout_alignWithParentIfMissing="true"
-		style="@style/list_candiinfo_subtitle" />
+		android:layout_alignWithParentIfMissing="true" />
 	<LinearLayout
 		android:id="@+id/item_action_button"
-		style="@style/list_button"
-		android:layout_width="40dp"
+		style="@style/candi_list_button"
 		android:layout_height="40dp"
+		android:layout_width="40dp"
 		android:layout_alignParentTop="true"
 		android:layout_alignParentRight="true"
 		android:clickable="true"
@@ -51,6 +51,7 @@
 	</LinearLayout>
 	<TextView
 		android:id="@+id/item_content"
+		style="@style/candi_list_description"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_toRightOf="@id/item_image"

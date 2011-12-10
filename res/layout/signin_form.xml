@@ -16,7 +16,7 @@
 
     <RelativeLayout
         android:id="@+id/activity_header"
-        style="@style/app_header"
+        style="@style/actionbar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingTop="5dp"
@@ -34,7 +34,7 @@
 
         <TextView
             android:id="@+id/txt_header_title"
-            style="@style/txt_header_title"
+            style="@style/form_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -47,7 +47,7 @@
 
         <Button
             android:id="@+id/btn_signup"
-            style="@style/btn_actionbar"
+            style="@style/app_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -80,8 +80,7 @@
             <!-- Title and Content -->
 
             <TextView
-                android:id="@+id/txt_message"
-                style="@style/txt_message"
+                android:id="@+id/form_message"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="15dp"
@@ -90,33 +89,31 @@
                 android:text="Please sign-in to create a new candies" />
 
             <TextView
-                style="@style/txt_label"
+                style="@style/form_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/label_email" />
 
             <EditText
                 android:id="@+id/txt_email"
-                style="@style/edittext_form"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
             <TextView
-                style="@style/txt_label"
+                style="@style/form_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/label_password" />
 
             <EditText
                 android:id="@+id/txt_password"
-                style="@style/edittext_form"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword" />
 
             <TextView
                 android:id="@+id/txt_signin_error"
-                style="@style/txt_signin_error"
+                style="@style/form_error"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="3dp"
@@ -130,7 +127,8 @@
 
     <LinearLayout
         
-        style="@style/activity_footer_form"
+        android:id="@+id/form_footer"
+        style="@style/form_footer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -138,7 +136,9 @@
 
         <Button
             android:id="@+id/btn_signin"
-            style="@style/btn_form"
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onSignInButtonClick"
             android:enabled="false"
@@ -146,7 +146,9 @@
 
         <Button
             
-            style="@style/btn_form"
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onCancelButtonClick"
             android:text="@string/post_cancel_button" />
