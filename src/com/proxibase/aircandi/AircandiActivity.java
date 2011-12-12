@@ -23,8 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -329,26 +327,6 @@ public abstract class AircandiActivity extends Activity {
 				AlertDialog alert = builder.create();
 				alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 				alert.show();
-			}
-		});
-	}
-
-	protected void showPicture(final Bitmap bitmap, final int targetImageViewId) {
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				ImageView targetImageView = (ImageView) findViewById(targetImageViewId);
-				if (targetImageView != null) {
-					Animation animation = AnimationUtils.loadAnimation(AircandiActivity.this, R.anim.fade_in_medium);
-					animation.setFillEnabled(true);
-					animation.setFillAfter(true);
-					animation.setStartOffset(500);
-
-					targetImageView.setImageBitmap(bitmap);
-					targetImageView.startAnimation(animation);
-					targetImageView.setVisibility(View.VISIBLE);
-				}
 			}
 		});
 	}

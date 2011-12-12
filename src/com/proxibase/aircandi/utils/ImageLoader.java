@@ -66,7 +66,7 @@ public class ImageLoader {
 		if (imageProfile == ImageProfile.SquareTile) {
 			imageRequest = new ImageRequest(imageUri,
 					ImageShape.Square,
-					ImageFormat.Binary,
+					"binary",
 					false,
 					CandiConstants.IMAGE_WIDTH_MAX,
 					false,
@@ -79,7 +79,7 @@ public class ImageLoader {
 		else if (imageProfile == ImageProfile.SquareUser) {
 			imageRequest = new ImageRequest(imageUri,
 					ImageShape.Native,
-					ImageFormat.Binary,
+					"binary",
 					false,
 					CandiConstants.IMAGE_WIDTH_USER_SMALL,
 					false,
@@ -92,7 +92,7 @@ public class ImageLoader {
 		else if (imageProfile == ImageProfile.Original) {
 			imageRequest = new ImageRequest(imageUri,
 					ImageShape.Native,
-					ImageFormat.Binary,
+					"binary",
 					false,
 					CandiConstants.IMAGE_WIDTH_ORIGINAL,
 					false,

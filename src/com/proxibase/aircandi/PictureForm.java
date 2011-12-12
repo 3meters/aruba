@@ -8,6 +8,7 @@ import com.proxibase.aircandi.models.BaseEntity;
 import com.proxibase.aircandi.models.PictureEntity;
 import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
+import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -65,7 +66,7 @@ public class PictureForm extends EntityBaseForm {
 					entity.imageUri = "updated";
 					entity.imageBitmap = bitmap;
 				}
-				showPicture(entity.imageBitmap, R.id.image_public_image);
+				ImageUtils.showImageInImageView(bitmap, mImagePicture);
 			}
 
 			@Override

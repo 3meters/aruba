@@ -921,7 +921,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 		else if (animType == AnimType.CrossFade) {
 			mCandiInfoView.setVisibility(View.VISIBLE);
-			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(this, R.anim.fade_in_medium));
+			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(R.anim.fade_in_medium));
 			hideGLSurfaceView(CandiConstants.DURATION_CANDIINFO_SHOW);
 			updateCandiBackButton(null);
 			mCandiPatchPresenter.setIgnoreInput(false);
@@ -1059,7 +1059,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			mCandiInfoEntity = null;
 			mCandiInfoVisible = false;
 			mCandiInfoView.setVisibility(View.GONE);
-			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(this, R.anim.fade_out_long));
+			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(R.anim.fade_out_long));
 
 			/* Fade in candi search */
 			if (mPrefShowDebug) {
@@ -1091,7 +1091,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		else if (animType == AnimType.CrossFade) {
 
 			mCandiInfoView.setVisibility(View.GONE);
-			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(this, R.anim.fade_out_short));
+			mCandiInfoView.startAnimation(AnimUtils.loadAnimation(R.anim.fade_out_short));
 			mCandiInfoEntity = null;
 
 			/* Sets to Visible and does an alpha fade-in */
@@ -1262,29 +1262,16 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_info_subtitle);
 		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_info_description);
 		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
-		//		final WebImageView imageUser = (WebImageView) candiInfoView.findViewById(R.id.image_user_picture);
-		//		final TextView fullname = (TextView) candiInfoView.findViewById(R.id.text_user_fullname);
-		//		final TextView timesince = (TextView) candiInfoView.findViewById(R.id.text_user_timesince);
 
 		/* Candi image */
-
 		if (entity.imageUri != null && entity.imageUri.length() != 0) {
-			ImageFormat imageFormat = ImageFormat.Binary;
-			if (entity.imageFormat.equals("html")) {
-				imageFormat = ImageFormat.Html;
-			}
-			else if (entity.imageFormat.equals("htmlzoom")) {
-				imageFormat = ImageFormat.HtmlZoom;
-			}
-			ImageRequest imageRequest = new ImageRequest(entity.imageUri, ImageShape.Square, imageFormat,
+			ImageRequest imageRequest = new ImageRequest(entity.imageUri, ImageShape.Square, entity.imageFormat,
 					entity.javascriptEnabled,
 					CandiConstants.IMAGE_WIDTH_MAX, true, true, true, 1, this, null);
-
 			image.setImageRequest(imageRequest, imageReflection);
 		}
 
 		/* Author block */
-
 		if (entity.author != null) {
 			authorBlock.bindToAuthor(entity.author, DateUtils.wcfToDate(entity.createdDate));
 		}
@@ -1293,7 +1280,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 
 		/* Candi text */
-
 		title.setText(null);
 		subtitle.setText(null);
 		description.setText(null);
@@ -1311,29 +1297,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		return candiInfoView;
 	}
 
-	private void setImageView(String imageUri, final ImageView imageView) {
-		if (imageUri != null && !imageUri.equals("")) {
-			ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.SquareTile, imageUri, new ImageRequestListener() {
-
-				@Override
-				public void onImageReady(final Bitmap bitmap) {
-					if (bitmap != null) {
-						runOnUiThread(new Runnable() {
-
-							@Override
-							public void run() {
-								imageView.setImageBitmap(bitmap);
-								Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, R.anim.fade_in_long);
-								animation.setFillEnabled(true);
-								animation.setFillAfter(true);
-								imageView.startAnimation(animation);
-							}
-						});
-					}
-				}
-			});
-
-			Logger.v(this, "Fetching user image: " + imageUri);
+	private void setUserPicture(String imageUri, final WebImageView imageView) {
+		if (imageUri != null && imageUri.length() != 0) {
+			imageView.setImageRequest(ImageManager.getInstance().getImageLoader().getImageRequestByProfile(ImageProfile.SquareUser,
+						imageUri, null), null);
 		}
 	}
 
@@ -1643,14 +1610,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		return viewGroup;
 	}
 
-	public ScreenOrientation getScreenOrientation() {
-		return mScreenOrientation;
-	}
-
-	public void setScreenOrientation(ScreenOrientation screenOrientation) {
-		mScreenOrientation = screenOrientation;
-	}
-
 	class PackageReceiver extends BroadcastReceiver {
 
 		@Override
@@ -1858,7 +1817,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 			if (mUser != null) {
 				if (findViewById(R.id.image_user) != null) {
-					setImageView(mUser.imageUri, (ImageView) findViewById(R.id.image_user));
+					setUserPicture(mUser.imageUri, (WebImageView) findViewById(R.id.image_user));
 				}
 				ProxiExplorer.getInstance().setUser(mUser);
 				if (listener != null) {
@@ -2244,7 +2203,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		public Object instantiateItem(View collection, int position) {
 
 			LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			
+
 			if (position == PagerView.CandiInfo.ordinal()) {
 				RelativeLayout candiInfoView = (RelativeLayout) inflater.inflate(R.layout.temp_candi_info, null);
 				candiInfoView = buildCandiInfo(mCandiInfoEntity, candiInfoView);
@@ -2260,7 +2219,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				return candiInfoView;
 			}
 			else if (position == PagerView.CandiList.ordinal()) {
-				
+
 				View candiInfoList = (View) inflater.inflate(R.layout.temp_candi_list, null);
 				ListView candiListView = (ListView) candiInfoList.findViewById(R.id.list_candi_children);
 				ListAdapter adapter = new ListAdapter(CandiSearchActivity.this, R.id.item_description, mCandiInfoEntity.children);
@@ -2352,12 +2311,12 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				view = inflater.inflate(R.layout.temp_listitem_twoline_icon, null);
 				holder = new ViewHolder();
-				holder.itemIcon = (WebImageView) view.findViewById(R.id.item_image);
+				holder.itemImage = (WebImageView) view.findViewById(R.id.item_image);
 				holder.itemTitle = (TextView) view.findViewById(R.id.item_title);
 				holder.itemSubtitle = (TextView) view.findViewById(R.id.item_subtitle);
-				holder.itemBody = (TextView) view.findViewById(R.id.item_description);
-				holder.itemAuthorBlock = (AuthorBlock) view.findViewById(R.id.item_layout_author);
-				holder.itemActionButton = (View) view.findViewById(R.id.item_action_button);
+				holder.itemDescription = (TextView) view.findViewById(R.id.item_description);
+				holder.itemAuthor = (AuthorBlock) view.findViewById(R.id.item_block_author);
+				holder.itemActionButton = (View) view.findViewById(R.id.item_button_action);
 				view.setTag(holder);
 			}
 			else {
@@ -2385,52 +2344,31 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					}
 				}
 
-				if (holder.itemBody != null) {
+				if (holder.itemDescription != null) {
 					if (entityProxy.description != null && !entityProxy.description.equals("")) {
-						holder.itemBody.setText(entityProxy.description);
+						holder.itemDescription.setText(entityProxy.description);
 					}
 					else {
-						holder.itemBody.setVisibility(View.GONE);
+						holder.itemDescription.setVisibility(View.GONE);
 					}
 				}
 
-				if (holder.itemAuthorBlock != null) {
+				if (holder.itemAuthor != null) {
 					if (entityProxy.author != null) {
-						holder.itemAuthorBlock.bindToAuthor(entityProxy.author, DateUtils.wcfToDate(entityProxy.createdDate));
+						holder.itemAuthor.bindToAuthor(entityProxy.author, DateUtils.wcfToDate(entityProxy.createdDate));
 					}
 					else {
-						holder.itemAuthorBlock.setVisibility(View.GONE);
+						holder.itemAuthor.setVisibility(View.GONE);
 					}
 				}
 
-				if (holder.itemIcon != null) {
-					ImageFormat imageFormat = ImageFormat.Binary;
-					if (itemData.imageFormat.equals("html")) {
-						imageFormat = ImageFormat.Html;
+				if (holder.itemImage != null) {
+					if (entityProxy.imageUri != null && entityProxy.imageUri.length() != 0) {
+						ImageRequest imageRequest = new ImageRequest(entityProxy.imageUri, ImageShape.Square, entityProxy.imageFormat,
+								entityProxy.javascriptEnabled,
+								CandiConstants.IMAGE_WIDTH_MAX, false, true, true, 1, this, null);
+						holder.itemImage.setImageRequest(imageRequest, null);
 					}
-					else if (itemData.imageFormat.equals("htmlzoom")) {
-						imageFormat = ImageFormat.HtmlZoom;
-					}
-
-					ImageRequest imageRequest = new ImageRequest(itemData.imageUri, ImageShape.Square, imageFormat,
-							itemData.javascriptEnabled,
-							CandiConstants.IMAGE_WIDTH_MAX, true, true, true, 1, this, new ImageRequestListener() {
-
-								@Override
-								public void onImageReady(final Bitmap bitmap) {
-									if (bitmap != null) {
-										runOnUiThread(new Runnable() {
-
-											@Override
-											public void run() {
-												ImageUtils.showImageInImageView(bitmap, holder.itemIcon);
-											}
-										});
-									}
-								}
-							});
-
-					ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
 				}
 
 				/* Loop the streams */
@@ -2470,11 +2408,11 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private class ViewHolder {
 
-		public WebImageView	itemIcon;
+		public WebImageView	itemImage;
 		public TextView		itemTitle;
 		public TextView		itemSubtitle;
-		public TextView		itemBody;
-		public AuthorBlock	itemAuthorBlock;
+		public TextView		itemDescription;
+		public AuthorBlock	itemAuthor;
 		public View			itemActionButton;
 		public Object		data;
 	}
@@ -2586,7 +2524,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						mUser = ProxibaseService.getGson(GsonType.Internal).fromJson(json, User.class);
 						if (mUser != null) {
 							if (findViewById(R.id.image_user) != null) {
-								setImageView(mUser.imageUri, (ImageView) findViewById(R.id.image_user));
+								setUserPicture(mUser.imageUri, (WebImageView) findViewById(R.id.image_user));
 							}
 							Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, mUser.email);
 							Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, mUser.password);
@@ -2610,7 +2548,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							mUser = ProxibaseService.getGson(GsonType.Internal).fromJson(json, User.class);
 							if (mUser != null) {
 								if (findViewById(R.id.image_user) != null) {
-									setImageView(mUser.imageUri, (ImageView) findViewById(R.id.image_user));
+									setUserPicture(mUser.imageUri, (WebImageView) findViewById(R.id.image_user));
 								}
 								Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, mUser.email);
 								if (mUser.password != null && mUser.password.length() != 0) {
@@ -2939,7 +2877,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						Aircandi.settingsEditor.commit();
 
 						if (findViewById(R.id.image_user) != null) {
-							setImageView(mUser.imageUri, (ImageView) findViewById(R.id.image_user));
+							setUserPicture(mUser.imageUri, (WebImageView) findViewById(R.id.image_user));
 						}
 					}
 					catch (ProxibaseException exception) {
@@ -3036,7 +2974,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 	}
 
-	public void checkForUpdate() throws ProxibaseException {
+	private void checkForUpdate() throws ProxibaseException {
 
 		Query query = new Query("Versions").filter("Target eq 'aircandi'");
 		String jsonResponse = (String) ProxibaseService.getInstance().selectUsingQuery(query, ProxiConstants.URL_AIRCANDI_SERVICE_ODATA);

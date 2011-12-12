@@ -44,6 +44,7 @@ public class DateUtils {
 
 	public static String intervalSince(Date dateOld, Date dateNew) {
 		Long diff = dateNew.getTime() - dateOld.getTime();
+		int seconds = (int) (diff / 1000);
 		int minutes = (int) ((diff / 1000) / 60);
 		int hours = (int) ((diff / 1000) / (60 * 60));
 		int days = (int) ((diff / 1000) / (60 * 60 * 24));
@@ -52,8 +53,9 @@ public class DateUtils {
 		int minutesPart = minutes - (hours * 60);
 
 		String interval = "";
-		if (days >= 2)
+		if (days >= 2) {
 			interval += String.valueOf(days) + " days ago";
+		}
 		else if (days >= 1) /* x days ago 1 day and x hour ago */
 		{
 			interval += "1 day";
@@ -78,6 +80,14 @@ public class DateUtils {
 		else if (minutes > 1) /* x hours x minutes ago */
 		{
 			interval = String.valueOf(minutes) + " minutes ago";
+		}
+		else if (seconds == 1) /* 1 second ago */
+		{
+			interval = "1 second ago";
+		}
+		else if (seconds > 1) /* x hours x minutes ago */
+		{
+			interval = String.valueOf(seconds) + " seconds ago";
 		}
 		return interval;
 	}

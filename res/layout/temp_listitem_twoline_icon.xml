@@ -41,7 +41,7 @@
         android:layout_toRightOf="@id/item_image" />
 
     <LinearLayout
-        android:id="@+id/item_action_button"
+        android:id="@+id/item_button_action"
         style="@style/candi_list_button"
         android:layout_width="40dp"
         android:layout_height="40dp"
@@ -76,7 +76,7 @@
         android:paddingTop="5dp" >
 
         <com.proxibase.aircandi.widgets.AuthorBlock
-            android:id="@+id/item_layout_author"
+            android:id="@+id/item_block_author"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             aircandi:orientation="horizontal" />

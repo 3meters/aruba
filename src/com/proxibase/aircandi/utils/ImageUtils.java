@@ -14,11 +14,9 @@ import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
@@ -162,7 +160,7 @@ public class ImageUtils {
 
 	public static void showImageInImageView(Bitmap bitmap, Bitmap bitmapReflection, WebImageView imageView, ImageView imageViewReflection) {
 		imageView.setImageBitmap(bitmap);
-		Animation animation = AnimationUtils.loadAnimation(Aircandi.context, R.anim.fade_in_medium);
+		Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
 		animation.setFillEnabled(true);
 		animation.setFillAfter(true);
 		imageView.startAnimation(animation);

@@ -26,8 +26,10 @@ import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.S3;
-import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.Query;
@@ -38,26 +40,25 @@ import com.proxibase.sdk.android.util.ProxiConstants;
 
 public class ProfileForm extends AircandiActivity {
 
-	private FormTab		mActiveTab	= FormTab.Profile;
-	private ViewFlipper	mViewFlipper;
-	private int			mTextColorFocused;
-	private int			mTextColorUnfocused;
-	private int			mHeightActive;
-	private int			mHeightInactive;
-	private ImageView	mImageProfileTab;
-	private ImageView	mImageAccountTab;
-	private TextView	mTextProfileTab;
-	private TextView	mTextAccountTab;
+	private FormTab			mActiveTab	= FormTab.Profile;
+	private ViewFlipper		mViewFlipper;
+	private int				mTextColorFocused;
+	private int				mTextColorUnfocused;
+	private int				mHeightActive;
+	private int				mHeightInactive;
+	private ImageView		mImageProfileTab;
+	private ImageView		mImageAccountTab;
+	private TextView		mTextProfileTab;
+	private TextView		mTextAccountTab;
 
-	private ImageView	mImageUser;
-	private EditText	mTextFullname;
-	private EditText	mTextEmail;
-	private EditText	mTextPassword;
-	private EditText	mTextPasswordConfirm;
+	private WebImageView	mImageUser;
+	private EditText		mTextFullname;
+	private EditText		mTextEmail;
+	private EditText		mTextPassword;
+	private EditText		mTextPasswordConfirm;
 	@SuppressWarnings("unused")
-	private EditText	mTextPasswordOld;
-	private Button		mButtonSave;
-	
+	private EditText		mTextPasswordOld;
+	private Button			mButtonSave;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -76,7 +77,7 @@ public class ProfileForm extends AircandiActivity {
 		mTextProfileTab = (TextView) findViewById(R.id.text_tab_profile);
 		mTextAccountTab = (TextView) findViewById(R.id.text_tab_account);
 
-		mImageUser = (ImageView) findViewById(R.id.image_public_image);
+		mImageUser = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
@@ -162,18 +163,18 @@ public class ProfileForm extends AircandiActivity {
 		if (mUser.imageUri != null && mUser.imageUri.length() > 0) {
 			if (mUser.imageBitmap != null) {
 				mImageUser.setImageBitmap(mUser.imageBitmap);
-				mImageUser.setVisibility(View.VISIBLE);
 			}
 			else {
-				ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.SquareTile, mUser.imageUri, new ImageRequestListener() {
+				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
+						CandiConstants.IMAGE_WIDTH_MAX, false, true, true, 1, this, new ImageRequestListener() {
 
-					@Override
-					public void onImageReady(Bitmap bitmap) {
-						Logger.d(ProfileForm.this, "Image fetched: " + mUser.imageUri);
-						mUser.imageBitmap = bitmap;
-						showPicture(bitmap, R.id.image_public_image);
-					}
-				});
+							@Override
+							public void onImageReady(Bitmap bitmap) {
+								mUser.imageBitmap = bitmap;
+							}
+						});
+
+				mImageUser.setImageRequest(imageRequest, null);
 			}
 		}
 	}
@@ -221,7 +222,7 @@ public class ProfileForm extends AircandiActivity {
 							mUser.imageUri = "updated";
 							mUser.imageBitmap = bitmap;
 						}
-						showPicture(mUser.imageBitmap, R.id.image_public_image);
+						ImageUtils.showImageInImageView(bitmap, mImageUser);
 					}
 				});
 			}
@@ -229,7 +230,7 @@ public class ProfileForm extends AircandiActivity {
 			@Override
 			public void onProxibaseException(ProxibaseException exception) {
 				/* Do nothing */
-			}
+				}
 
 		});
 	}
@@ -264,9 +265,8 @@ public class ProfileForm extends AircandiActivity {
 		return true;
 	}
 
-
 	protected void updateImages() {
-		
+
 		/* Delete image from S3 if it has been orphaned */
 		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
 			if (!mUser.imageUri.equals(mImageUriOriginal)) {

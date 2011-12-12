@@ -73,7 +73,7 @@ public class Aircandi extends Application {
 	public Location							currentLocation;
 	public static SharedPreferences			settings;
 	public static SharedPreferences.Editor	settingsEditor;
-	public static Context					context;
+	public static Context					applicationContext;
 
 	public Aircandi() {}
 
@@ -82,7 +82,7 @@ public class Aircandi extends Application {
 		/* The following line triggers the initialization of ACRA */
 		ACRA.init(this);
 
-		context = getApplicationContext();
+		applicationContext = getApplicationContext();
 
 		super.onCreate();
 

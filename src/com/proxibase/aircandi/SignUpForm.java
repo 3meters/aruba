@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.core.CandiConstants;
@@ -20,8 +19,10 @@ import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.S3;
-import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.IQueryListener;
@@ -29,12 +30,12 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseExcepti
 
 public class SignUpForm extends AircandiActivity {
 
-	private EditText	mTextFullname;
-	private EditText	mTextEmail;
-	private EditText	mTextPassword;
-	private EditText	mTextPasswordConfirm;
-	private ImageView	mImageUser;
-	private Button		mButtonSignUp;
+	private EditText		mTextFullname;
+	private EditText		mTextEmail;
+	private EditText		mTextPassword;
+	private EditText		mTextPasswordConfirm;
+	private WebImageView	mImageUser;
+	private Button			mButtonSignUp;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -47,7 +48,7 @@ public class SignUpForm extends AircandiActivity {
 	}
 
 	protected void configure() {
-		mImageUser = (ImageView) findViewById(R.id.image_public_image);
+		mImageUser = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
@@ -106,18 +107,18 @@ public class SignUpForm extends AircandiActivity {
 				mImageUser.setImageBitmap(mUser.imageBitmap);
 			}
 			else {
-				ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.SquareTile, mUser.imageUri, new ImageRequestListener() {
+				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
+						CandiConstants.IMAGE_WIDTH_MAX, false, true, true, 1, this, new ImageRequestListener() {
 
-					@Override
-					public void onImageReady(Bitmap bitmap) {
-						Logger.d(SignUpForm.this, "User picture fetched: " + mUser.imageUri);
-						mUser.imageBitmap = bitmap;
-						showPicture(bitmap, R.id.image_public_image);
-					}
-				});
+							@Override
+							public void onImageReady(Bitmap bitmap) {
+								mUser.imageBitmap = bitmap;
+							}
+						});
+
+				mImageUser.setImageRequest(imageRequest, null);
 			}
 		}
-
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -151,7 +152,7 @@ public class SignUpForm extends AircandiActivity {
 							mUser.imageUri = "updated";
 							mUser.imageBitmap = bitmap;
 						}
-						showPicture(mUser.imageBitmap, R.id.image_public_image);
+						ImageUtils.showImageInImageView(bitmap, mImageUser);
 					}
 				});
 			}

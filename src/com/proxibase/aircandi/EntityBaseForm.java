@@ -24,10 +24,12 @@ import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.S3;
-import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.widgets.AuthorBlock;
+import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.consumer.Beacon.BeaconType;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy.Visibility;
@@ -39,16 +41,17 @@ import com.proxibase.sdk.android.util.ProxiConstants;
 
 public abstract class EntityBaseForm extends AircandiActivity {
 
-	private FormTab		mActiveTab	= FormTab.Content;
-	private ViewFlipper	mViewFlipper;
-	private int			mTextColorFocused;
-	private int			mTextColorUnfocused;
-	private int			mHeightActive;
-	private int			mHeightInactive;
-	private ImageView	mImageViewContent;
-	private ImageView	mImageViewSettings;
-	private TextView	mTextViewContent;
-	private TextView	mTextViewSettings;
+	private FormTab			mActiveTab	= FormTab.Content;
+	private ViewFlipper		mViewFlipper;
+	private int				mTextColorFocused;
+	private int				mTextColorUnfocused;
+	private int				mHeightActive;
+	private int				mHeightInactive;
+	private ImageView		mImageViewContent;
+	private ImageView		mImageViewSettings;
+	private TextView		mTextViewContent;
+	private TextView		mTextViewSettings;
+	protected WebImageView	mImagePicture;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -110,23 +113,26 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 			/* Content */
 
-			if (findViewById(R.id.image_public_image) != null) {
+			if (findViewById(R.id.image_picture) != null) {
+				mImagePicture = (WebImageView) findViewById(R.id.image_picture);
 				if (entity.imageUri != null && entity.imageUri.length() > 0) {
 					if (entity.imageBitmap != null) {
-						((ImageView) findViewById(R.id.image_public_image)).setImageBitmap(entity.imageBitmap);
-						((ImageView) findViewById(R.id.image_public_image)).setVisibility(View.VISIBLE);
+						mImagePicture.setImageBitmap(entity.imageBitmap);
+						mImagePicture.setVisibility(View.VISIBLE);
 					}
 					else {
-						ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.SquareTile, entity.imageUri,
-								new ImageRequestListener() {
+
+						ImageRequest imageRequest = new ImageRequest(entity.imageUri, ImageShape.Square, entity.imageFormat,
+								entity.javascriptEnabled,
+								CandiConstants.IMAGE_WIDTH_MAX, false, true, true, 1, this, new ImageRequestListener() {
 
 									@Override
 									public void onImageReady(Bitmap bitmap) {
-										Logger.d(EntityBaseForm.this, "Image fetched: " + entity.imageUri);
 										entity.imageBitmap = bitmap;
-										showPicture(bitmap, R.id.image_public_image);
 									}
 								});
+
+						mImagePicture.setImageRequest(imageRequest, null);
 					}
 				}
 			}
@@ -150,7 +156,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 			}
 
 			/* Author */
-			
+
 			if (mEntityProxy != null && mEntityProxy.author != null) {
 				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(mEntityProxy.author, DateUtils.wcfToDate(mEntityProxy.createdDate));
 			}

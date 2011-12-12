@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import com.proxibase.aircandi.Aircandi;
+
 import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.content.res.Resources.NotFoundException;
@@ -27,12 +29,12 @@ public class AnimUtils {
 	 * @return The animation object reference by the specified id
 	 * @throws NotFoundException when the animation cannot be loaded
 	 */
-	public static Animation loadAnimation(Context context, int id) throws NotFoundException {
+	public static Animation loadAnimation(int id) throws NotFoundException {
 
 		XmlResourceParser parser = null;
 		try {
-			parser = context.getResources().getAnimation(id);
-			return AnimUtils.createAnimationFromXml(context, parser);
+			parser = Aircandi.applicationContext.getResources().getAnimation(id);
+			return AnimUtils.createAnimationFromXml(Aircandi.applicationContext, parser);
 		}
 		catch (XmlPullParserException ex) {
 			NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(id));

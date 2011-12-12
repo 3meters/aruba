@@ -558,7 +558,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 			 * but position hasn't been assigned when this first gets called.
 			 */
 			//mActiveImageRequest = true;
-			ImageRequest imageRequest = new ImageRequest(candiModel.getBodyImageUri(), ImageShape.Square, candiModel.getBodyImageFormat(), candiModel
+			ImageRequest imageRequest = new ImageRequest(candiModel.getBodyImageUri(), ImageShape.Square, candiModel.getEntityProxy().imageFormat, candiModel
 					.getEntityProxy().javascriptEnabled, CandiConstants.IMAGE_WIDTH_MAX, true, !skipCache, true,
 					2, this, new ImageRequestListener() {
 
@@ -705,7 +705,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	public Bitmap decorateTexture(Bitmap bitmap, boolean isReflection) {
 		final CandiModel candiModel = (CandiModel) this.mModel;
-		if (candiModel.getEntityProxy().entityType.equals(CandiConstants.TYPE_CANDI_POST) &&
+		if (candiModel != null && candiModel.getEntityProxy().entityType.equals(CandiConstants.TYPE_CANDI_POST) &&
 				candiModel.getEntityProxy().description != null &&
 				candiModel.getEntityProxy().description.length() > 0) {
 			if (!isReflection) {

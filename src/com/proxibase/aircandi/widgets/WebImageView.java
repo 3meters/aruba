@@ -75,12 +75,17 @@ public class WebImageView extends ImageView {
 	}
 
 	public void setImageRequest(final ImageRequest imageRequest, final ImageView imageReflection) {
+		
+		final ImageRequestListener originalImageReadyListener = imageRequest.imageReadyListener;
 
 		imageRequest.imageReadyListener = new ImageRequestListener() {
 
 			@Override
 			public void onImageReady(final Bitmap bitmap) {
 				if (bitmap != null) {
+					if (originalImageReadyListener != null) {
+						originalImageReadyListener.onImageReady(bitmap);
+					}
 					mThreadHandler.post(new Runnable() {
 
 						@Override

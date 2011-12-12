@@ -561,11 +561,20 @@ public class ImageManager {
 		public boolean				searchCache			= true;
 		public ImageRequestListener	imageReadyListener	= null;
 
-		public ImageRequest(String imageUri, ImageShape imageShape, ImageFormat imageFormat, boolean javascriptEnabled, int scaleToWidth,
+		public ImageRequest(String imageUri, ImageShape imageShape, String imageFormatString, boolean javascriptEnabled, int scaleToWidth,
 				boolean makeReflection, boolean searchCache, boolean updateCache, int priority,
 				Object imageRequestor, ImageRequestListener imageReadyListener) {
 			this.imageUri = imageUri;
 			this.imageShape = imageShape;
+			
+			ImageFormat imageFormat = ImageFormat.Binary;
+			if (imageFormatString.equals("html")) {
+				imageFormat = ImageFormat.Html;
+			}
+			else if (imageFormatString.equals("htmlzoom")) {
+				imageFormat = ImageFormat.HtmlZoom;
+			}
+
 			this.imageFormat = imageFormat;
 			this.imageRequestor = imageRequestor;
 			this.scaleToWidth = scaleToWidth;
