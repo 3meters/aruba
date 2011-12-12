@@ -45,10 +45,10 @@ public class SignInForm extends AircandiActivity {
 
 	private void configure() {
 
-		mTextEmail = (EditText) findViewById(R.id.txt_email);
-		mTextPassword = (EditText) findViewById(R.id.txt_password);
+		mTextEmail = (EditText) findViewById(R.id.text_email);
+		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextMessage = (TextView) findViewById(R.id.form_message);
-		mTextError = (TextView) findViewById(R.id.txt_signin_error);
+		mTextError = (TextView) findViewById(R.id.text_signin_error);
 		mButtonSignIn = (Button) findViewById(R.id.btn_signin);
 		mButtonSignIn.setEnabled(false);
 		mTextEmail.addTextChangedListener(new SimpleTextWatcher() {
@@ -91,7 +91,7 @@ public class SignInForm extends AircandiActivity {
 		try {
 			mTextError.setVisibility(View.GONE);
 			String email = mTextEmail.getText().toString();
-			showProgressDialog(true, "Signing in...");
+			showProgressDialog(true, getResources().getString(R.string.alert_signing_in));
 			mUser = ProxibaseService.getInstance().loadUser(email);
 		}
 		catch (ProxibaseException exception) {
@@ -106,7 +106,7 @@ public class SignInForm extends AircandiActivity {
 			mTextPassword.setText("");
 		}
 		else {
-			Toast.makeText(this, "Signed in as " + ((User) mUser).fullname, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, getResources().getString(R.string.alert_signed_in) + " " + ((User) mUser).fullname, Toast.LENGTH_SHORT).show();
 			Intent intent = new Intent();
 			String jsonUser = ProxibaseService.getGson(GsonType.Internal).toJson(mUser);
 			if (!jsonUser.equals("")) {

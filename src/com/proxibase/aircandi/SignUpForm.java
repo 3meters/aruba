@@ -47,11 +47,11 @@ public class SignUpForm extends AircandiActivity {
 	}
 
 	protected void configure() {
-		mImageUser = (ImageView) findViewById(R.id.img_public_image);
-		mTextFullname = (EditText) findViewById(R.id.txt_fullname);
-		mTextEmail = (EditText) findViewById(R.id.txt_email);
-		mTextPassword = (EditText) findViewById(R.id.txt_password);
-		mTextPasswordConfirm = (EditText) findViewById(R.id.txt_password_confirm);
+		mImageUser = (ImageView) findViewById(R.id.image_public_image);
+		mTextFullname = (EditText) findViewById(R.id.text_fullname);
+		mTextEmail = (EditText) findViewById(R.id.text_email);
+		mTextPassword = (EditText) findViewById(R.id.text_password);
+		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
 		mButtonSignUp = (Button) findViewById(R.id.btn_signup);
 		mButtonSignUp.setEnabled(false);
 
@@ -94,7 +94,6 @@ public class SignUpForm extends AircandiActivity {
 	protected void bind() {
 		mUser = new User();
 		mUser.imageUri = "resource:placeholder_user";
-		mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_user);
 	}
 
 	protected void draw() {
@@ -113,7 +112,7 @@ public class SignUpForm extends AircandiActivity {
 					public void onImageReady(Bitmap bitmap) {
 						Logger.d(SignUpForm.this, "User picture fetched: " + mUser.imageUri);
 						mUser.imageBitmap = bitmap;
-						showPicture(bitmap, R.id.img_public_image);
+						showPicture(bitmap, R.id.image_public_image);
 					}
 				});
 			}
@@ -152,7 +151,7 @@ public class SignUpForm extends AircandiActivity {
 							mUser.imageUri = "updated";
 							mUser.imageBitmap = bitmap;
 						}
-						showPicture(mUser.imageBitmap, R.id.img_public_image);
+						showPicture(mUser.imageBitmap, R.id.image_public_image);
 					}
 				});
 			}
@@ -179,7 +178,8 @@ public class SignUpForm extends AircandiActivity {
 
 	private boolean validate() {
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
-			Aircandi.showAlertDialog(android.R.drawable.ic_dialog_alert, "Password", "Passwords do not match", this, null);
+			Aircandi.showAlertDialog(android.R.drawable.ic_dialog_alert, getResources().getString(R.string.signup_alert_missmatched_passwords_title),
+					getResources().getString(R.string.signup_alert_missmatched_passwords_message), this, null);
 			return false;
 		}
 		return true;
@@ -196,7 +196,7 @@ public class SignUpForm extends AircandiActivity {
 					S3.putImage(imageKey, mUser.imageBitmap);
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
@@ -230,7 +230,7 @@ public class SignUpForm extends AircandiActivity {
 						}
 						catch (ProxibaseException exception) {
 							if (!Exceptions.Handle(exception)) {
-								ImageUtils.showToastNotification(SignUpForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+								ImageUtils.showToastNotification(SignUpForm.this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 							}
 						}
 						mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
@@ -245,8 +245,8 @@ public class SignUpForm extends AircandiActivity {
 																							+ mUser.id
 																							+ ")");
 							stopTitlebarProgress();
-							Aircandi.showAlertDialog(R.drawable.icon_app, "New user created",
-									"A message has been sent to your email address with instructions on how to activate your account.",
+							Aircandi.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),
+									getResources().getString(R.string.signup_alert_new_user_message),
 									SignUpForm.this, new
 									OnClickListener() {
 
@@ -266,7 +266,7 @@ public class SignUpForm extends AircandiActivity {
 			@Override
 			public void onProxibaseException(ProxibaseException exception) {
 				if (!Exceptions.Handle(exception)) {
-					ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_insert_failed_toast), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
 				}
 			}
 		});

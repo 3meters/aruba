@@ -1726,7 +1726,7 @@ public class CandiPatchPresenter implements Observer {
 		public void onFinish() {
 			mRenderingActive = false;
 			mMillisUntilFinished = 0;
-			Logger.v(this, "Rendering deactivated");
+			Logger.v(this, "Rendering deactivated: thread = " + Thread.currentThread().getName());
 		}
 
 		@Override

@@ -17,7 +17,6 @@ import android.view.WindowManager;
 import android.webkit.URLUtil;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.core.CandiConstants;
@@ -65,15 +64,13 @@ public class WebForm extends EntityBaseForm {
 	protected void drawEntity() {
 		super.drawEntity();
 
-		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_web));
-
 		if (mCommand.verb.equals("edit")) {
-			((EditText) findViewById(R.id.txt_uri)).setText(((WebEntity) mEntity).contentUri);
+			((EditText) findViewById(R.id.text_uri)).setText(((WebEntity) mEntity).contentUri);
 		}
 
 		if (findViewById(R.id.chk_html_zoom) != null) {
 			((CheckBox) findViewById(R.id.chk_html_zoom)).setVisibility(View.VISIBLE);
-			if (((WebEntity)mEntity).imageFormat != null) {
+			if (((WebEntity) mEntity).imageFormat != null) {
 				((CheckBox) findViewById(R.id.chk_html_zoom)).setChecked(((WebEntity) mEntity).imageFormat.equals("htmlzoom") ? true : false);
 			}
 		}
@@ -112,7 +109,7 @@ public class WebForm extends EntityBaseForm {
 
 	private boolean validate() {
 		// Validate URL
-		String uri = ((EditText) findViewById(R.id.txt_uri)).getText().toString().trim();
+		String uri = ((EditText) findViewById(R.id.text_uri)).getText().toString().trim();
 		if (!URLUtil.isValidUrl(uri)) {
 			Toast.makeText(this, "Invalid URL specified", Toast.LENGTH_SHORT).show();
 			return false;
@@ -126,7 +123,7 @@ public class WebForm extends EntityBaseForm {
 		 * Handle properties that are not part of the base entity
 		 */
 		final WebEntity entity = (WebEntity) mEntity;
-		entity.contentUri = ((EditText) findViewById(R.id.txt_uri)).getText().toString().trim();
+		entity.contentUri = ((EditText) findViewById(R.id.text_uri)).getText().toString().trim();
 		entity.imageUri = entity.contentUri;
 
 		entity.javascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
@@ -148,10 +145,10 @@ public class WebForm extends EntityBaseForm {
 			public void run() {
 
 				final CharSequence[] items = {
-												getResources().getString(R.string.dialog_link_bookmark),
-												getResources().getString(R.string.dialog_link_search) };
+												getResources().getString(R.string.web_dialog_link_bookmark),
+												getResources().getString(R.string.web_dialog_link_search) };
 				AlertDialog.Builder builder = new AlertDialog.Builder(WebForm.this);
-				builder.setTitle(getResources().getString(R.string.dialog_link_message));
+				builder.setTitle(getResources().getString(R.string.web_dialog_link_message));
 				builder.setCancelable(true);
 
 				builder.setOnCancelListener(new OnCancelListener() {
@@ -161,7 +158,7 @@ public class WebForm extends EntityBaseForm {
 					}
 				});
 
-				builder.setNegativeButton(getResources().getString(R.string.dialog_link_negative), new DialogInterface.OnClickListener() {
+				builder.setNegativeButton(getResources().getString(R.string.web_dialog_link_negative), new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
@@ -221,11 +218,11 @@ public class WebForm extends EntityBaseForm {
 					else {
 						if (data != null && data.length() != 0) {
 
-							((EditText) findViewById(R.id.txt_uri)).setText(data);
+							((EditText) findViewById(R.id.text_uri)).setText(data);
 
 							mProgressDialog = new ProgressDialog(this);
 							mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-							mProgressDialog.setMessage("Validating website...");
+							mProgressDialog.setMessage(getResources().getString(R.string.web_progress_validating));
 							mProgressDialog.show();
 
 							ProxibaseService.getInstance().selectAsync(data, ResponseFormat.Html, new IQueryListener() {
@@ -237,7 +234,7 @@ public class WebForm extends EntityBaseForm {
 										@Override
 										public void run() {
 											Document document = Jsoup.parse(response);
-											((EditText) findViewById(R.id.txt_title)).setText(document.title());
+											((EditText) findViewById(R.id.text_title)).setText(document.title());
 
 											String description = null;
 											Element element = document.select("meta[name=description]").first();
@@ -259,10 +256,10 @@ public class WebForm extends EntityBaseForm {
 											}
 
 											if (description != null) {
-												((EditText) findViewById(R.id.txt_content)).setText(description);
+												((EditText) findViewById(R.id.text_content)).setText(description);
 											}
 											else {
-												((EditText) findViewById(R.id.txt_content)).setText("");
+												((EditText) findViewById(R.id.text_content)).setText("");
 											}
 											mProgressDialog.dismiss();
 										}
@@ -278,7 +275,8 @@ public class WebForm extends EntityBaseForm {
 											@Override
 											public void run() {
 												mProgressDialog.dismiss();
-												ImageUtils.showToastNotification(WebForm.this, "Website unavailable", Toast.LENGTH_SHORT);
+												ImageUtils.showToastNotification(WebForm.this, getResources().getString(
+														R.string.web_alert_website_unavailable), Toast.LENGTH_SHORT);
 											}
 										});
 									}

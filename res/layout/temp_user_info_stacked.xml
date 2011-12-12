@@ -1,35 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
 
-    <RelativeLayout
+    <com.proxibase.aircandi.widgets.WebImageView
+        android:id="@+id/image_user_picture"
+        style="@style/app_user_picture"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" />
+
+    <TextView
+        android:id="@+id/text_user_fullname"
+        style="@style/app_user_fullname"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/image_user_picture"
+        android:gravity="center_vertical"
+        android:text="Jay Massena" />
 
-        <ImageView
-            android:id="@+id/img_user"
-            style="@style/app_user_picture"
-            android:layout_width="40dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:src="@drawable/jaymassena" />
+    <TextView
+        android:id="@+id/text_user_timesince"
+        style="@style/app_user_fullname"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/text_user_fullname"
+        android:layout_below="@+id/text_user_fullname"
+        android:gravity="center_vertical"
+        android:text="10 hours ago" />
 
-        <TextView
-            android:id="@+id/txt_user_name"
-            style="@style/app_user_name"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/img_user"
-            android:gravity="center_vertical"
-            android:text="Jay Massena" />
-
-        <TextView
-            android:id="@+id/txt_user_date"
-            style="@style/app_user_date"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/txt_user_name"
-            android:singleLine="true"
-            android:text="10 hours ago" />
-    </RelativeLayout>
-
-</merge>
+</RelativeLayout>

@@ -12,21 +12,21 @@
 		android:paddingRight="4dp"
 		>"
 		<com.proxibase.aircandi.widgets.PagerTextView
-			android:id="@+id/txt_pager_indicator_previous"
+			android:id="@+id/text_pager_indicator_previous"
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
 			android:layout_alignParentLeft="true"
 			style="@style/candi_info_pager_text"
 			android:text="Gallery" />
 		<com.proxibase.aircandi.widgets.PagerTextView
-			android:id="@+id/txt_pager_indicator_current"
+			android:id="@+id/text_pager_indicator_current"
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
 			android:layout_centerInParent="true"
 			style="@style/candi_info_pager_text"
 			android:text="Current" />
 		<com.proxibase.aircandi.widgets.PagerTextView
-			android:id="@+id/txt_pager_indicator_next"
+			android:id="@+id/text_pager_indicator_next"
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
 			android:layout_marginRight="-3dp"

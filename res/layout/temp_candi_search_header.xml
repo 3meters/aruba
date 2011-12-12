@@ -43,12 +43,12 @@
             style="@style/actionbar_button"
             android:layout_width="50dp"
             android:layout_height="fill_parent"
-            android:layout_toLeftOf="@+id/img_action_button"
+            android:layout_toLeftOf="@+id/image_action_button"
             android:clickable="true"
             android:onClick="onRefreshClick" >
 
             <ImageView
-                android:id="@+id/img_progress_indicator"
+                android:id="@+id/image_progress_indicator"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:minHeight="22dp"
@@ -61,7 +61,7 @@
                 android:scaleType="fitCenter" />
 
             <ImageView
-                android:id="@+id/img_refresh_button"
+                android:id="@+id/image_refresh_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -72,14 +72,14 @@
             style="@style/actionbar_rule_vertical"
             android:layout_width="@dimen/application_button_separator_width"
             android:layout_height="fill_parent"
-            android:layout_toLeftOf="@+id/img_action_button" />
+            android:layout_toLeftOf="@+id/image_action_button" />
 
         <LinearLayout
-            android:id="@+id/img_action_button"
+            android:id="@+id/image_action_button"
             style="@style/actionbar_button"
             android:layout_width="50dp"
             android:layout_height="fill_parent"
-            android:layout_toLeftOf="@+id/img_user"
+            android:layout_toLeftOf="@+id/image_user"
             android:clickable="true"
             android:onClick="onActionsClick" >
 
@@ -93,10 +93,10 @@
             style="@style/actionbar_rule_vertical"
             android:layout_width="@dimen/application_button_separator_width"
             android:layout_height="fill_parent"
-            android:layout_toLeftOf="@+id/img_user" />
+            android:layout_toLeftOf="@+id/image_user" />
 
-        <ImageView
-            android:id="@+id/img_user"
+        <com.proxibase.aircandi.widgets.WebImageView
+            android:id="@+id/image_user"
             style="@style/app_user_picture"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"

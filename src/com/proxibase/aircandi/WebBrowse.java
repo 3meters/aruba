@@ -95,7 +95,7 @@ public class WebBrowse extends AircandiActivity {
 		mContextButton = (Button) findViewById(R.id.btn_context);
 		if (mContextButton != null) {
 			mContextButton.setVisibility(View.INVISIBLE);
-			showBackButton(true, getString(R.string.post_back_button));
+			showBackButton(true, getString(R.string.form_button_back));
 		}
 	}
 

@@ -27,6 +27,7 @@ import com.proxibase.aircandi.utils.S3;
 import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
+import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.consumer.Beacon.BeaconType;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy.Visibility;
@@ -61,10 +62,10 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 	protected void configure() {
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
-		mImageViewContent = (ImageView) findViewById(R.id.img_tab_content);
-		mImageViewSettings = (ImageView) findViewById(R.id.img_tab_settings);
-		mTextViewContent = (TextView) findViewById(R.id.txt_tab_content);
-		mTextViewSettings = (TextView) findViewById(R.id.txt_tab_settings);
+		mImageViewContent = (ImageView) findViewById(R.id.image_tab_content);
+		mImageViewSettings = (ImageView) findViewById(R.id.image_tab_settings);
+		mTextViewContent = (TextView) findViewById(R.id.text_tab_content);
+		mTextViewSettings = (TextView) findViewById(R.id.text_tab_settings);
 
 		TypedValue resourceName = new TypedValue();
 		if (this.getTheme().resolveAttribute(R.attr.textColorFocused, resourceName, true)) {
@@ -75,8 +76,8 @@ public abstract class EntityBaseForm extends AircandiActivity {
 			mTextColorUnfocused = Color.parseColor((String) resourceName.coerceToString());
 		}
 
-		mHeightActive = ImageUtils.getRawPixelsForDisplayPixels(mDisplayMetrics, 6);
-		mHeightInactive = ImageUtils.getRawPixelsForDisplayPixels(mDisplayMetrics, 2);
+		mHeightActive = ImageUtils.getRawPixelsForDisplayPixels(6);
+		mHeightInactive = ImageUtils.getRawPixelsForDisplayPixels(2);
 		if (mViewFlipper != null) {
 			setActiveTab(FormTab.Content);
 		}
@@ -109,11 +110,11 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 			/* Content */
 
-			if (findViewById(R.id.img_public_image) != null) {
+			if (findViewById(R.id.image_public_image) != null) {
 				if (entity.imageUri != null && entity.imageUri.length() > 0) {
 					if (entity.imageBitmap != null) {
-						((ImageView) findViewById(R.id.img_public_image)).setImageBitmap(entity.imageBitmap);
-						((ImageView) findViewById(R.id.img_public_image)).setVisibility(View.VISIBLE);
+						((ImageView) findViewById(R.id.image_public_image)).setImageBitmap(entity.imageBitmap);
+						((ImageView) findViewById(R.id.image_public_image)).setVisibility(View.VISIBLE);
 					}
 					else {
 						ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.SquareTile, entity.imageUri,
@@ -123,19 +124,19 @@ public abstract class EntityBaseForm extends AircandiActivity {
 									public void onImageReady(Bitmap bitmap) {
 										Logger.d(EntityBaseForm.this, "Image fetched: " + entity.imageUri);
 										entity.imageBitmap = bitmap;
-										showPicture(bitmap, R.id.img_public_image);
+										showPicture(bitmap, R.id.image_public_image);
 									}
 								});
 					}
 				}
 			}
 
-			if (findViewById(R.id.txt_title) != null) {
-				((TextView) findViewById(R.id.txt_title)).setText(entity.title);
+			if (findViewById(R.id.text_title) != null) {
+				((TextView) findViewById(R.id.text_title)).setText(entity.title);
 			}
 
-			if (findViewById(R.id.txt_content) != null) {
-				((TextView) findViewById(R.id.txt_content)).setText(entity.description);
+			if (findViewById(R.id.text_content) != null) {
+				((TextView) findViewById(R.id.text_content)).setText(entity.description);
 			}
 
 			/* Settings */
@@ -144,8 +145,17 @@ public abstract class EntityBaseForm extends AircandiActivity {
 				((Spinner) findViewById(R.id.cbo_visibility)).setSelection(entity.visibility);
 			}
 
-			if (findViewById(R.id.txt_password) != null) {
-				((TextView) findViewById(R.id.txt_password)).setText(entity.password);
+			if (findViewById(R.id.text_password) != null) {
+				((TextView) findViewById(R.id.text_password)).setText(entity.password);
+			}
+
+			/* Author */
+			
+			if (mEntityProxy != null && mEntityProxy.author != null) {
+				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(mEntityProxy.author, DateUtils.wcfToDate(mEntityProxy.createdDate));
+			}
+			else {
+				((AuthorBlock) findViewById(R.id.block_author)).setVisibility(View.GONE);
 			}
 
 			/* Configure UI */
@@ -205,7 +215,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 				mBeacon.insert();
 			}
 			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 				exception.printStackTrace();
 			}
 		}
@@ -228,20 +238,20 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 	protected void gather() {
 		final BaseEntity entity = (BaseEntity) mEntity;
-		if (findViewById(R.id.txt_title) != null) {
-			entity.title = ((TextView) findViewById(R.id.txt_title)).getText().toString().trim();
+		if (findViewById(R.id.text_title) != null) {
+			entity.title = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
 		}
-		if (findViewById(R.id.txt_title) != null) {
-			entity.label = ((TextView) findViewById(R.id.txt_title)).getText().toString().trim();
+		if (findViewById(R.id.text_title) != null) {
+			entity.label = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
 		}
-		if (findViewById(R.id.txt_content) != null) {
-			entity.description = ((TextView) findViewById(R.id.txt_content)).getText().toString().trim();
+		if (findViewById(R.id.text_content) != null) {
+			entity.description = ((TextView) findViewById(R.id.text_content)).getText().toString().trim();
 		}
 		if (findViewById(R.id.cbo_visibility) != null) {
 			entity.visibility = ((Spinner) findViewById(R.id.cbo_visibility)).getSelectedItemPosition();
 		}
-		if (findViewById(R.id.txt_password) != null) {
-			entity.password = ((TextView) findViewById(R.id.txt_password)).getText().toString().trim();
+		if (findViewById(R.id.text_password) != null) {
+			entity.password = ((TextView) findViewById(R.id.text_password)).getText().toString().trim();
 		}
 	}
 
@@ -257,7 +267,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 			}
@@ -273,7 +283,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 					S3.putImage(imageKey, entity.imageBitmap);
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 				entity.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
@@ -297,7 +307,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 					public void run() {
 						stopTitlebarProgress();
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_insert_success_toast), Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						Intent intent = new Intent();
 
 						/* We are editing so set the dirty flag */
@@ -321,7 +331,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 					@Override
 					public void run() {
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_insert_failed_toast), Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
 					}
 				});
 				exception.printStackTrace();
@@ -343,7 +353,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 					public void run() {
 						stopTitlebarProgress();
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_update_success_toast), Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 						Intent intent = new Intent();
 						intent.putExtra(getString(R.string.EXTRA_ENTITY_DIRTY), entity.id);
 						intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.Edit);
@@ -361,7 +371,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 					@Override
 					public void run() {
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					}
 				});
 			}
@@ -387,7 +397,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 				ImageManager.getInstance().deleteImage(entity.imageUri + ".reflection");
 			}
 			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_delete_failed_toast), Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_delete_failed), Toast.LENGTH_SHORT);
 				exception.printStackTrace();
 			}
 		}
@@ -401,12 +411,12 @@ public abstract class EntityBaseForm extends AircandiActivity {
 			ProxibaseService.getInstance().webMethod("DeleteEntityWithChildren", parameters, ResponseFormat.Json, null);
 		}
 		catch (ProxibaseException exception) {
-			ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_delete_failed_toast), Toast.LENGTH_SHORT);
+			ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_delete_failed), Toast.LENGTH_SHORT);
 			exception.printStackTrace();
 		}
 
 		stopTitlebarProgress();
-		ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.post_delete_success_toast), Toast.LENGTH_SHORT);
+		ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 		Intent intent = new Intent();
 		intent.putExtra(getString(R.string.EXTRA_ENTITY_DIRTY), entity.id);
 		intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.Delete);

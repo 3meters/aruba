@@ -78,9 +78,9 @@ public class ViewPagerIndicator extends RelativeLayout implements OnPageChangeLi
 	 */
 	public void bindToView(View view) {
 		mBoundView = view;
-		mTextViewCurrent = (PagerTextView) view.findViewById(R.id.txt_pager_indicator_current);
-		mTextViewPrevious = (PagerTextView) view.findViewById(R.id.txt_pager_indicator_previous);
-		mTextViewNext = (PagerTextView) view.findViewById(R.id.txt_pager_indicator_next);
+		mTextViewCurrent = (PagerTextView) view.findViewById(R.id.text_pager_indicator_current);
+		mTextViewPrevious = (PagerTextView) view.findViewById(R.id.text_pager_indicator_previous);
+		mTextViewNext = (PagerTextView) view.findViewById(R.id.text_pager_indicator_next);
 		if (mTextViewCurrent != null) {
 			mTextViewCurrent.setTextColor(Color.argb(255, mTextColorFocused[0], mTextColorFocused[1], mTextColorFocused[2]));
 		}

@@ -71,17 +71,17 @@ public class ProfileForm extends AircandiActivity {
 
 	protected void configure() {
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
-		mImageProfileTab = (ImageView) findViewById(R.id.img_tab_profile);
-		mImageAccountTab = (ImageView) findViewById(R.id.img_tab_account);
-		mTextProfileTab = (TextView) findViewById(R.id.txt_tab_profile);
-		mTextAccountTab = (TextView) findViewById(R.id.txt_tab_account);
+		mImageProfileTab = (ImageView) findViewById(R.id.image_tab_profile);
+		mImageAccountTab = (ImageView) findViewById(R.id.image_tab_account);
+		mTextProfileTab = (TextView) findViewById(R.id.text_tab_profile);
+		mTextAccountTab = (TextView) findViewById(R.id.text_tab_account);
 
-		mImageUser = (ImageView) findViewById(R.id.img_public_image);
-		mTextFullname = (EditText) findViewById(R.id.txt_fullname);
-		mTextEmail = (EditText) findViewById(R.id.txt_email);
-		mTextPassword = (EditText) findViewById(R.id.txt_password);
-		mTextPasswordOld = (EditText) findViewById(R.id.txt_password_old);
-		mTextPasswordConfirm = (EditText) findViewById(R.id.txt_password_confirm);
+		mImageUser = (ImageView) findViewById(R.id.image_public_image);
+		mTextFullname = (EditText) findViewById(R.id.text_fullname);
+		mTextEmail = (EditText) findViewById(R.id.text_email);
+		mTextPassword = (EditText) findViewById(R.id.text_password);
+		mTextPasswordOld = (EditText) findViewById(R.id.text_password_old);
+		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
 		mButtonSave = (Button) findViewById(R.id.btn_save);
 
 		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
@@ -125,8 +125,8 @@ public class ProfileForm extends AircandiActivity {
 			mTextColorUnfocused = Color.parseColor((String) resourceName.coerceToString());
 		}
 
-		mHeightActive = ImageUtils.getRawPixelsForDisplayPixels(mDisplayMetrics, 6);
-		mHeightInactive = ImageUtils.getRawPixelsForDisplayPixels(mDisplayMetrics, 2);
+		mHeightActive = ImageUtils.getRawPixelsForDisplayPixels(6);
+		mHeightInactive = ImageUtils.getRawPixelsForDisplayPixels(2);
 		if (mViewFlipper != null) {
 			if (mCommand.verb.equals("new")) {
 				setActiveTab(FormTab.Account);
@@ -171,7 +171,7 @@ public class ProfileForm extends AircandiActivity {
 					public void onImageReady(Bitmap bitmap) {
 						Logger.d(ProfileForm.this, "Image fetched: " + mUser.imageUri);
 						mUser.imageBitmap = bitmap;
-						showPicture(bitmap, R.id.img_public_image);
+						showPicture(bitmap, R.id.image_public_image);
 					}
 				});
 			}
@@ -221,7 +221,7 @@ public class ProfileForm extends AircandiActivity {
 							mUser.imageUri = "updated";
 							mUser.imageBitmap = bitmap;
 						}
-						showPicture(mUser.imageBitmap, R.id.img_public_image);
+						showPicture(mUser.imageBitmap, R.id.image_public_image);
 					}
 				});
 			}
@@ -250,10 +250,10 @@ public class ProfileForm extends AircandiActivity {
 		String alertMessage = "";
 		if (mTextPassword.getText().toString().length() > 0) {
 			if (mTextPassword.getText().toString().length() == 0) {
-				alertMessage = "Please enter your old password";
+				alertMessage = getResources().getString(R.string.profile_alert_missing_old_password);
 			}
 			if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
-				alertMessage = "Passwords do not match";
+				alertMessage = getResources().getString(R.string.profile_alert_missmatched_passwords);
 			}
 			if (alertMessage.length() != 0) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -276,7 +276,7 @@ public class ProfileForm extends AircandiActivity {
 					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 			}
@@ -292,7 +292,7 @@ public class ProfileForm extends AircandiActivity {
 					S3.putImage(imageKey, mUser.imageBitmap);
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(this, getString(R.string.post_update_failed_toast), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
@@ -319,7 +319,7 @@ public class ProfileForm extends AircandiActivity {
 
 					public void run() {
 						stopTitlebarProgress();
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_update_success_toast), Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 						Intent intent = new Intent();
 						//mUser.imageBitmap.recycle();
 						mUser.imageBitmap = null;
@@ -341,7 +341,7 @@ public class ProfileForm extends AircandiActivity {
 
 						@Override
 						public void run() {
-							ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.post_update_failed_toast),
+							ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_update_failed),
 									Toast.LENGTH_SHORT);
 						}
 					});

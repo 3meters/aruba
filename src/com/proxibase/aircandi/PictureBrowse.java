@@ -26,7 +26,6 @@ public class PictureBrowse extends AircandiActivity {
 	private ImageView	mPicturePlaceholderProgress;
 	private ViewFlipper	mViewFlipper;
 	private ProgressBar	mProgressBar;
-	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -54,30 +53,30 @@ public class PictureBrowse extends AircandiActivity {
 
 			ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.Original, entity.mediaUri, new ImageRequestListener() {
 
-						@Override
-						public void onImageReady(final Bitmap bitmap) {
-							/*
-							 * We can get this callback even when activity has finished.
-							 * TODO: Cancel all active tasks in onDestroy()
-							 */
-							runOnUiThread(new Runnable() {
-
-								@Override
-								public void run() {
-									if (mEntity != null) {
-										Logger.d(PictureBrowse.this, "Image fetched: " + entity.mediaUri);
-										entity.mediaBitmap = bitmap;
-										showPicture(bitmap);
-									}
-								}
-							});
-						}
+				@Override
+				public void onImageReady(final Bitmap bitmap) {
+					/*
+					 * We can get this callback even when activity has finished.
+					 * TODO: Cancel all active tasks in onDestroy()
+					 */
+					runOnUiThread(new Runnable() {
 
 						@Override
-						public void onProgressChanged(int progress) {
-							mProgressBar.setProgress(progress);
+						public void run() {
+							if (mEntity != null) {
+								Logger.d(PictureBrowse.this, "Image fetched: " + entity.mediaUri);
+								entity.mediaBitmap = bitmap;
+								showPicture(bitmap);
+							}
 						}
 					});
+				}
+
+				@Override
+				public void onProgressChanged(int progress) {
+					mProgressBar.setProgress(progress);
+				}
+			});
 
 			Logger.d(this, "Fetching Image: " + entity.mediaUri);
 		}
@@ -98,34 +97,36 @@ public class PictureBrowse extends AircandiActivity {
 	}
 
 	protected void stopProgress() {
-		//mPhotoPlaceholderProgress.setAnimation(null);
+	//mPhotoPlaceholderProgress.setAnimation(null);
 	}
 
 	protected void drawEntity() {
 
 		final PictureEntity entity = (PictureEntity) mEntity;
 
-		if (findViewById(R.id.txt_title) != null)
-			((TextView) findViewById(R.id.txt_title)).setText(entity.title);
+		if (findViewById(R.id.text_title) != null) {
+			((TextView) findViewById(R.id.text_title)).setText(entity.title);
+		}
 
-		if (findViewById(R.id.txt_content) != null)
-			((TextView) findViewById(R.id.txt_content)).setText(entity.description);
+		if (findViewById(R.id.text_content) != null) {
+			((TextView) findViewById(R.id.text_content)).setText(entity.description);
+		}
 
 		if (entity.mediaBitmap != null) {
-			((ImageView) findViewById(R.id.img_media)).setImageBitmap(entity.mediaBitmap);
-			((ImageView) findViewById(R.id.img_media)).setVisibility(View.VISIBLE);
+			((ImageView) findViewById(R.id.image_media)).setImageBitmap(entity.mediaBitmap);
+			((ImageView) findViewById(R.id.image_media)).setVisibility(View.VISIBLE);
 		}
 		else {
-			((ImageView) findViewById(R.id.img_media)).setImageBitmap(null);
-			((ImageView) findViewById(R.id.img_media)).setAnimation(null);
-			((ImageView) findViewById(R.id.img_media)).setVisibility(View.GONE);
+			((ImageView) findViewById(R.id.image_media)).setImageBitmap(null);
+			((ImageView) findViewById(R.id.image_media)).setAnimation(null);
+			((ImageView) findViewById(R.id.image_media)).setVisibility(View.GONE);
 		}
 	}
 
 	private void configure() {
-		//mPhotoPlaceholderProgress = (ImageView) findViewById(R.id.img_photo_progress_indicator);
+		//mPhotoPlaceholderProgress = (ImageView) findViewById(R.id.image_photo_progress_indicator);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-		
+
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mViewFlipper.setDisplayedChild(1);
 		mViewFlipper.setInAnimation(this, R.anim.fade_in_medium);
@@ -134,7 +135,7 @@ public class PictureBrowse extends AircandiActivity {
 		mContextButton = (Button) findViewById(R.id.btn_context);
 		if (mContextButton != null) {
 			mContextButton.setVisibility(View.INVISIBLE);
-			showBackButton(true, getString(R.string.post_back_button));
+			showBackButton(true, getString(R.string.form_button_back));
 		}
 	}
 
@@ -143,7 +144,7 @@ public class PictureBrowse extends AircandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private void showPicture(Bitmap bitmap) {
-		((ImageView) findViewById(R.id.img_media)).setImageBitmap(bitmap);
+		((ImageView) findViewById(R.id.image_media)).setImageBitmap(bitmap);
 		stopProgress();
 		mViewFlipper.setDisplayedChild(0);
 	}

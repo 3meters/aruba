@@ -8,9 +8,11 @@ import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
-import android.util.DisplayMetrics;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.aircandi.widgets.WebImageView;
 
 public class ImageUtils {
 
@@ -38,9 +41,31 @@ public class ImageUtils {
 		toast.show();
 	}
 
-	public static int getRawPixelsForDisplayPixels(DisplayMetrics displayMetrics, int displayPixels) {
-		final float scale = displayMetrics.density;
+	public static int getRawPixelsForDisplayPixels(int displayPixels) {
+		final float scale = ImageManager.getInstance().getDisplayMetrics().density;
 		return (int) (displayPixels * scale + 0.5f);
+	}
+
+	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
+		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
+				.getHeight(), Config.ARGB_8888);
+		Canvas canvas = new Canvas(output);
+
+		final int color = 0xff424242;
+		final Paint paint = new Paint();
+		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+		final RectF rectF = new RectF(rect);
+		final float roundPx = pixels;
+
+		paint.setAntiAlias(true);
+		canvas.drawARGB(0, 0, 0, 0);
+		paint.setColor(color);
+		canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+
+		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+		canvas.drawBitmap(bitmap, rect, rect, paint);
+
+		return output;
 	}
 
 	public static Bitmap cropToSquare(Bitmap bitmap) {
@@ -131,20 +156,18 @@ public class ImageUtils {
 		return hexColor;
 	}
 
-	public static void showImageInImageView(Bitmap bitmap, ImageView imageView)
-	{
+	public static void showImageInImageView(Bitmap bitmap, WebImageView imageView) {
 		showImageInImageView(bitmap, null, imageView, null);
 	}
-	
-	public static void showImageInImageView(Bitmap bitmap, Bitmap bitmapReflection, ImageView imageView, ImageView imageViewReflection)
-	{
+
+	public static void showImageInImageView(Bitmap bitmap, Bitmap bitmapReflection, WebImageView imageView, ImageView imageViewReflection) {
 		imageView.setImageBitmap(bitmap);
 		Animation animation = AnimationUtils.loadAnimation(Aircandi.context, R.anim.fade_in_medium);
 		animation.setFillEnabled(true);
 		animation.setFillAfter(true);
 		imageView.startAnimation(animation);
-		
-		if (bitmapReflection != null&& imageViewReflection != null) {
+
+		if (bitmapReflection != null && imageViewReflection != null) {
 			imageViewReflection.setImageBitmap(bitmapReflection);
 			imageViewReflection.startAnimation(animation);
 		}

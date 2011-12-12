@@ -52,11 +52,11 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	private void configure() {
 
 		/* Get view references */
-		mProgressIndicator = (ImageView) findViewById(R.id.img_progress_indicator);
+		mProgressIndicator = (ImageView) findViewById(R.id.image_progress_indicator);
 		if (mProgressIndicator != null)
 			mProgressIndicator.setVisibility(View.INVISIBLE);
 
-		mButtonRefresh = (ImageView) findViewById(R.id.img_refresh_button);
+		mButtonRefresh = (ImageView) findViewById(R.id.image_refresh_button);
 		if (mButtonRefresh != null)
 			mButtonRefresh.setVisibility(View.VISIBLE);
 

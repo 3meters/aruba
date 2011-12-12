@@ -17,7 +17,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -58,7 +57,6 @@ public abstract class AircandiActivity extends Activity {
 	protected Command				mCommand;
 	protected User					mUser;
 	protected String				mPrefTheme;
-	protected DisplayMetrics		mDisplayMetrics;
 	protected ProgressDialog		mProgressDialog;
 
 	protected ImageRequestListener	mImageRequestListener;
@@ -121,15 +119,12 @@ public abstract class AircandiActivity extends Activity {
 
 	private void configure() {
 
-		mDisplayMetrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(mDisplayMetrics);
-
-		mProgressIndicator = (ImageView) findViewById(R.id.img_progress_indicator);
+		mProgressIndicator = (ImageView) findViewById(R.id.image_progress_indicator);
 		if (mProgressIndicator != null) {
 			mProgressIndicator.setVisibility(View.INVISIBLE);
 		}
 
-		mButtonRefresh = (ImageView) findViewById(R.id.img_refresh_button);
+		mButtonRefresh = (ImageView) findViewById(R.id.image_refresh_button);
 		if (mButtonRefresh != null) {
 			mButtonRefresh.setVisibility(View.VISIBLE);
 		}
@@ -273,7 +268,7 @@ public abstract class AircandiActivity extends Activity {
 					listId = R.array.dialog_list_picture_sources_facebook;
 				}
 				AlertDialog.Builder builder = new AlertDialog.Builder(AircandiActivity.this);
-				builder.setTitle("Select picture...");
+				builder.setTitle(getResources().getString(R.string.dialog_change_picture_title));
 				builder.setCancelable(true);
 				builder.setOnCancelListener(new OnCancelListener() {
 
@@ -281,7 +276,7 @@ public abstract class AircandiActivity extends Activity {
 					public void onCancel(DialogInterface dialog) {
 					}
 				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				builder.setNegativeButton(getResources().getString(R.string.dialog_change_picture_button_negative), new DialogInterface.OnClickListener() {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {

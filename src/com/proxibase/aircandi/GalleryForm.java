@@ -3,11 +3,10 @@ package com.proxibase.aircandi;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.TextView;
 
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.models.GalleryEntity;
 import com.proxibase.aircandi.models.BaseEntity;
+import com.proxibase.aircandi.models.GalleryEntity;
 import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
@@ -48,8 +47,6 @@ public class GalleryForm extends EntityBaseForm {
 	protected void drawEntity() {
 		super.drawEntity();
 
-		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_gallery));
-
 		if (findViewById(R.id.chk_locked) != null) {
 			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
 			((CheckBox) findViewById(R.id.chk_locked)).setChecked(((GalleryEntity) mEntity).locked);
@@ -74,7 +71,7 @@ public class GalleryForm extends EntityBaseForm {
 					entity.imageUri = "updated";
 					entity.imageBitmap = bitmap;
 				}
-				showPicture(entity.imageBitmap, R.id.img_public_image);
+				showPicture(entity.imageBitmap, R.id.image_public_image);
 			}
 
 			@Override
@@ -92,7 +89,7 @@ public class GalleryForm extends EntityBaseForm {
 	protected void doSave(boolean updateImages) {
 		super.doSave(true);
 	}
-	
+
 	@Override
 	protected void gather() {
 		/*

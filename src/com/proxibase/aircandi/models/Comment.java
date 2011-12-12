@@ -39,7 +39,7 @@ public class Comment extends AircandiEntity {
 
 	@Override
 	public String getCollection() {
-		return "Entities";
+		return "Comments";
 	}
 
 	@Override

@@ -33,6 +33,7 @@
 
                 <TextView
                     android:id="@+id/retry_message"
+                    style="@style/search_dialog_text"
                     android:layout_width="175dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"

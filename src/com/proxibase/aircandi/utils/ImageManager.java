@@ -24,6 +24,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore.Images;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
 import com.proxibase.aircandi.core.CandiConstants;
@@ -41,6 +42,7 @@ public class ImageManager {
 
 	private ImageCache			mImageCache;
 	private ImageLoader			mImageLoader;
+	private DisplayMetrics		mDisplayMetrics;
 	private Activity			mActivity;
 
 	public static synchronized ImageManager getInstance() {
@@ -281,7 +283,7 @@ public class ImageManager {
 		}
 	}
 
-	public  String resolveResourceName(String rawResourceName) {
+	public String resolveResourceName(String rawResourceName) {
 		int resourceId = mActivity.getResources().getIdentifier(rawResourceName, "drawable", "com.proxibase.aircandi");
 		if (resourceId == 0) {
 			resourceId = mActivity.getResources().getIdentifier(rawResourceName, "attr", "com.proxibase.aircandi");
@@ -516,6 +518,14 @@ public class ImageManager {
 	// --------------------------------------------------------------------------------------------
 	// Inner classes and enums
 	// --------------------------------------------------------------------------------------------
+
+	public void setDisplayMetrics(DisplayMetrics displayMetrics) {
+		this.mDisplayMetrics = displayMetrics;
+	}
+
+	public DisplayMetrics getDisplayMetrics() {
+		return mDisplayMetrics;
+	}
 
 	private interface IImageRequestListener {
 

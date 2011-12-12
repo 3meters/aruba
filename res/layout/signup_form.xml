@@ -34,7 +34,7 @@
             android:src="?attr/logo" />
 
         <TextView
-            android:id="@+id/txt_header_title"
+            android:id="@+id/text_header_title"
             style="@style/form_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -43,7 +43,7 @@
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:text="Settings" />
+            android:text="@string/form_title_signup" />
     </RelativeLayout>
 
     <ScrollView
@@ -58,7 +58,6 @@
         <!-- Content -->
 
         <LinearLayout
-            
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:gravity="center_vertical|top"
@@ -74,31 +73,31 @@
                 style="@style/form_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_picture" />
+                android:text="@string/form_label_picture" />
 
             <RelativeLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="3dp"
                 android:gravity="left"
-                android:orientation="horizontal">
+                android:orientation="horizontal" >
 
-                <ImageView
-                    android:id="@+id/img_public_image"
+                <com.proxibase.aircandi.widgets.WebImageView
+                    android:id="@+id/image_public_image"
                     style="@style/form_picture"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_width="100dp"
+                    android:layout_height="100dp" />
 
                 <Button
                     android:id="@+id/btn_change_public_image"
                     style="@style/app_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignTop="@+id/img_public_image"
+                    android:layout_alignTop="@+id/image_public_image"
                     android:layout_marginLeft="10dp"
-                    android:layout_toRightOf="@+id/img_public_image"
+                    android:layout_toRightOf="@+id/image_public_image"
                     android:onClick="onChangePictureButtonClick"
-                    android:text="@string/post_public_image_change_button" />
+                    android:text="@string/form_button_change_picture" />
             </RelativeLayout>
 
             <!-- Full name -->
@@ -107,10 +106,10 @@
                 style="@style/form_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_fullname" />
+                android:text="@string/form_label_fullname" />
 
             <EditText
-                android:id="@+id/txt_fullname"
+                android:id="@+id/text_fullname"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
@@ -118,10 +117,10 @@
                 style="@style/form_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_email" />
+                android:text="@string/form_label_email" />
 
             <EditText
-                android:id="@+id/txt_email"
+                android:id="@+id/text_email"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
@@ -129,10 +128,10 @@
                 style="@style/form_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_password" />
+                android:text="@string/form_label_password" />
 
             <EditText
-                android:id="@+id/txt_password"
+                android:id="@+id/text_password"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword" />
@@ -141,10 +140,10 @@
                 style="@style/form_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_password_confirm" />
+                android:text="@string/form_label_password_confirm" />
 
             <EditText
-                android:id="@+id/txt_password_confirm"
+                android:id="@+id/text_password_confirm"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword" />
@@ -154,7 +153,6 @@
     <!-- Footer -->
 
     <LinearLayout
-        
         android:id="@+id/form_footer"
         style="@style/form_footer"
         android:layout_width="fill_parent"
@@ -169,16 +167,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onSignUpButtonClick"
-            android:text="@string/btn_signup" />
+            android:text="@string/form_button_signup" />
 
         <Button
-            
             style="@style/app_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onCancelButtonClick"
-            android:text="@string/post_cancel_button" />
+            android:text="@string/form_button_cancel" />
     </LinearLayout>
 
 </RelativeLayout>

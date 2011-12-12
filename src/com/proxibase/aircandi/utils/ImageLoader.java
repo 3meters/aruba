@@ -53,6 +53,14 @@ public class ImageLoader {
 	// --------------------------------------------------------------------------------------------
 
 	public void fetchImageByProfile(ImageProfile imageProfile, String imageUri, ImageRequestListener listener) {
+		ImageRequest imageRequest = getImageRequestByProfile(imageProfile, imageUri, listener);
+		if (imageRequest != null) {
+			Logger.d(this, "Fetching Image: " + imageUri);
+			fetchImage(imageRequest);
+		}
+	}
+
+	public ImageRequest getImageRequestByProfile(ImageProfile imageProfile, String imageUri, ImageRequestListener listener) {
 		ImageRequest imageRequest = null;
 
 		if (imageProfile == ImageProfile.SquareTile) {
@@ -61,6 +69,19 @@ public class ImageLoader {
 					ImageFormat.Binary,
 					false,
 					CandiConstants.IMAGE_WIDTH_MAX,
+					false,
+					true,
+					true,
+					1,
+					this,
+					listener);
+		}
+		else if (imageProfile == ImageProfile.SquareUser) {
+			imageRequest = new ImageRequest(imageUri,
+					ImageShape.Native,
+					ImageFormat.Binary,
+					false,
+					CandiConstants.IMAGE_WIDTH_USER_SMALL,
 					false,
 					true,
 					true,
@@ -81,10 +102,7 @@ public class ImageLoader {
 					this,
 					listener);
 		}
-		Logger.d(this, "Fetching Image: " + imageUri);
-		if (imageRequest != null) {
-			fetchImage(imageRequest);
-		}
+		return imageRequest;
 	}
 
 	public void fetchImage(ImageRequest imageRequest) {
@@ -630,6 +648,7 @@ public class ImageLoader {
 
 	public enum ImageProfile {
 		SquareTile,
-		Original
+		Original,
+		SquareUser
 	}
 }

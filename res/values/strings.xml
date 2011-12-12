@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="app_name">Aircandi</string>
+
+	<!-- Application -->
+	
+	<string name="EXTRA_RESULT_VERB">com.proxibase.aircandi.EXTRA_RESULT_VERB</string>
+	<string name="EXTRA_PARENT_ENTITY_ID">com.proxibase.aircandi.EXTRA_PARENT_ENTITY_ID</string>
+	<string name="EXTRA_BEACON">com.proxibase.aircandi.EXTRA_BEACON</string>
+	<string name="EXTRA_ENTITY">com.proxibase.aircandi.EXTRA_ENTITY</string>
+	<string name="EXTRA_COMMAND">com.proxibase.aircandi.EXTRA_COMMAND</string>
+	<string name="EXTRA_USER">com.proxibase.aircandi.EXTRA_USER</string>
+	<string name="EXTRA_MESSAGE">com.proxibase.aircandi.EXTRA_MESSAGE</string>
+	<string name="EXTRA_BEACON_DIRTY">com.proxibase.aircandi.EXTRA_BEACON_DIRTY</string>
+	<string name="EXTRA_ENTITY_DIRTY">com.proxibase.aircandi.EXTRA_ENTITY_DIRTY</string>
+	
+	<string name="menu_settings_title">Settings</string>
+	<string name="menu_signout_title">Sign out</string>
+	<string name="menu_profile_title">Profile</string>
+	
+	<string name="menu_refresh_title">Refresh Options</string>
+	<string name="menu_refresh_beacon_plus_current">Refresh</string>
+	<string name="menu_refresh_all">Refresh All</string>
+	
+	<!-- Search -->
+
+	<string name="search_back_button">Back</string>
 	
 	<string name="dialog_network_message_wifi_ready">Wifi enabled, ready for retry</string>
 	<string name="dialog_network_message_wifi_notready">Enable wifi and retry</string>
@@ -24,84 +48,90 @@
 	<string name="dialog_new_web_signin">Please sign-in to create a new Web bookmark</string>
 	<string name="dialog_new_negative">Cancel</string>
 		
-	<string name="dialog_new_signin">Please sign-in to create a new</string>
+	<!-- Forms -->
 	
-	<string name="dialog_link_message">Build link...</string>
-	<string name="dialog_link_bookmark">Select a bookmark</string>
-	<string name="dialog_link_search">Web search</string>
-	<string name="dialog_link_negative">Cancel</string>
-	
-	<string name="menu_refresh_title">Refresh Options</string>
-	<string name="menu_refresh_beacon_plus_current">Refresh</string>
-	<string name="menu_refresh_all">Refresh All</string>
-
-	<string name="EXTRA_RESULT_VERB">com.proxibase.aircandi.EXTRA_RESULT_VERB</string>
-	<string name="EXTRA_PARENT_ENTITY_ID">com.proxibase.aircandi.EXTRA_PARENT_ENTITY_ID</string>
-	<string name="EXTRA_BEACON">com.proxibase.aircandi.EXTRA_BEACON</string>
-	<string name="EXTRA_ENTITY">com.proxibase.aircandi.EXTRA_ENTITY</string>
-	<string name="EXTRA_COMMAND">com.proxibase.aircandi.EXTRA_COMMAND</string>
-	<string name="EXTRA_USER">com.proxibase.aircandi.EXTRA_USER</string>
-	<string name="EXTRA_MESSAGE">com.proxibase.aircandi.EXTRA_MESSAGE</string>
-	<string name="EXTRA_BEACON_DIRTY">com.proxibase.aircandi.EXTRA_BEACON_DIRTY</string>
-	<string name="EXTRA_ENTITY_DIRTY">com.proxibase.aircandi.EXTRA_ENTITY_DIRTY</string>
-	
-	<string name="menu_settings_title">Settings</string>
-	<string name="menu_signout_title">Sign out</string>
-	<string name="menu_profile_title">Profile</string>
-	
-	<string name="search_back_button">Back</string>
 	<string name="form_title_gallery">Gallery</string>
 	<string name="form_title_picture">Picture</string>
 	<string name="form_title_topic">Topic</string>
 	<string name="form_title_post">Post</string>
 	<string name="form_title_web">Web bookmark</string>
+	<string name="form_title_profile">Profile settings</string>
+	<string name="form_title_signin">Sign in</string>
+	<string name="form_title_signup">Sign up</string>
+	<string name="form_title_comment">Comment</string>
 	
-	<string name="form_setting_html_zoom">Zoom html</string>
-	<string name="form_setting_javascript">Javascript enabled</string>
+	<string name="form_tab_content">Content</string>
+	<string name="form_tab_settings">Settings</string>
+	<string name="form_tab_profile">Profile</string>
+	<string name="form_tab_account">Account</string>
 	
-	<string name="post_locked">Locked</string>
-	<string name="post_visibility">Visibility</string>
+	<string name="form_button_change_picture">Change</string>
+	<string name="form_button_signup">Sign Up</string>
+	<string name="form_button_save">Save</string>
+	<string name="form_button_delete">Delete</string>
+	<string name="form_button_cancel">Cancel</string>
+	<string name="form_button_back">Back</string>
 	
-	<string name="post_password_hint">Password (optional)</string>
+	<string name="form_label_picture">Picture</string>
+	<string name="form_label_fullname">Full name</string>
+	<string name="form_label_password">Password</string>
+	<string name="form_label_password_confirm">Confirm password</string>
+	<string name="form_label_password_old">Old password</string>
+	<string name="form_label_email">Email</string>
+	<string name="form_label_locked">Locked</string>
+	<string name="form_label_visibility">Visibility</string>
+	<string name="form_label_password_hint">Password (optional)</string>
 	
-	<string name="post_public_image_section_header">Display Image</string>
-	<string name="post_badge_image_section_header">Post Badge</string>
-	<string name="post_public_image_change_button">Change</string>
-	<string name="post_save_button">Save</string>
-	<string name="post_delete_button">Delete</string>
-	<string name="post_cancel_button">Cancel</string>
-	<string name="post_title_hint">Subject</string>
-	<string name="post_content_hint">Description</string>
-	<string name="post_uri_hint">Web address</string>
-	<string name="post_delete_failed_toast">Delete failed</string>
-	<string name="post_delete_success_toast">Deleted</string>
-	<string name="post_update_failed_toast">Save failed</string>
-	<string name="post_update_success_toast">Saved</string>
-	<string name="post_insert_failed_toast">Save failed</string>
-	<string name="post_insert_success_toast">Saved</string>
-	<string name="post_back_button">Back</string>
+	<string name="form_title_hint">Subject</string>
+	<string name="form_subtitle_hint">Subtitle</string>
+	<string name="form_description_hint">Description</string>
+	<string name="form_uri_hint">Web address</string>
+	
+	<string name="alert_delete_failed">Delete failed</string>
+	<string name="alert_deleted">Deleted</string>
+	<string name="alert_update_failed">Save failed</string>
+	<string name="alert_updated">Saved</string>
+	<string name="alert_insert_failed">Save failed</string>
+	<string name="alert_inserted">Saved</string>
+	<string name="alert_signing_in">Signing in...</string>
+	<string name="alert_signed_in">Signed in as</string>
 
-	<string name="label_picture">Picture</string>
-	<string name="label_fullname">Full name</string>
-	<string name="label_password">Password</string>
-	<string name="label_password_confirm">Confirm password</string>
-	<string name="label_password_old">Old password</string>
-	<string name="label_email">Email</string>
-	<string name="form_signin_error">Wrong email and password combination.</string>
+	<string name="post_label_image">Post Badge</string>
 	
-	<string name="btn_signin">Sign In</string>
-	<string name="btn_signup">Sign Up</string>
+	<string name="dialog_change_picture_title">Select picture...</string>
+	<string name="dialog_change_picture_button_negative">Cancel</string>
 	
-	<!--  
-		Crash reporting
-	-->
+	<string name="signin_message">Please sign-in to create and edit candi.</string>
+	<string name="signin_message_new_candi">Please sign-in to create a new</string>
+	<string name="signin_alert_invalid_signin">Wrong email and password combination.</string>
+	
+	<string name="signin_button_signin">Sign In</string>
+	
+	<string name="signup_alert_new_user_title">New user created</string>
+	<string name="signup_alert_new_user_message">A message has been sent to your email address with instructions on how to activate your account.</string>
+	<string name="signup_alert_missmatched_passwords_title">Password</string>
+	<string name="signup_alert_missmatched_passwords_message">Passwords do not match</string>
+	
+	<string name="profile_alert_missing_old_password">Please enter your old password</string>
+	<string name="profile_alert_missmatched_passwords">Passwords do not match</string>
+
+	<string name="web_dialog_link_message">Build link...</string>
+	<string name="web_dialog_link_bookmark">Select a bookmark</string>
+	<string name="web_dialog_link_search">Web search</string>
+	<string name="web_dialog_link_negative">Cancel</string>
+	<string name="web_progress_validating">Validating website...</string>
+	<string name="web_alert_website_unavailable">Website unavailable</string>
+	<string name="web_label_html_zoom">Zoom html</string>
+	<string name="web_label_javascript">Javascript enabled</string>
+	
+	<!--  Crash reporting -->
+	
 	<string name="crash_toast_text">Rats! I crashed, but a report has been sent to my developer to help him fix the issue!</string> 
 	<string name="crash_notif_ticker_text">Unexpected error, please send a report...</string> 
 	<string name="crash_notif_title">Aircandi has crashed...</string> 
 	<string name="crash_notif_text">Please click here to help fix the issue.</string>      
 	<string name="crash_dialog_title">Aircandi has crashed</string> 
-	<string name="crash_dialog_text">An unexpected error occurred forcing the application to stop. 
-		Please help us fix this by sending us error data, all you have to do is click \'OK\'.</string> 
+	<string name="crash_dialog_text">An unexpected error occurred forcing the application to stop. Please help us fix this by sending us error data, all you have to do is click \'OK\'.</string> 
 	<string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string> 
 	<string name="crash_dialog_ok_toast">Thank you!</string>	
 

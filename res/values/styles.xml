@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Theme level styles -->
+    <!-- Application wide styles -->
 
     <style name="app_text_appearance" parent="@android:style/TextAppearance">
         <item name="android:textSize">14sp</item>
@@ -39,7 +39,7 @@
     </style>
 
     <style name="app_checkbox" parent="android:Widget.CompoundButton.CheckBox">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
 
     <style name="app_edittext" parent="@android:style/Widget.EditText">
@@ -53,14 +53,12 @@
         <item name="android:adjustViewBounds">true</item>
     </style>
 
-    <style name="app_user_name" parent="android:Widget.TextView">
+    <style name="app_user_fullname" parent="android:Widget.TextView">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
-    <style name="app_user_date" parent="android:Widget.TextView">
+    <style name="app_user_timesince" parent="android:Widget.TextView">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textStyle">italic</item>
-        <item name="android:textSize">12sp</item>
     </style>
 
     <!-- Actionbar -->
@@ -103,10 +101,13 @@
     <!-- Dialogs -->
 
     <style name="search_dialog_connect" parent="android:Theme.Dialog">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:windowBackground">@null</item>
     </style>
 
+    <style name="search_dialog_text">
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+    </style>
+    
     <!-- ActionStrip -->
 
     <style name="actionstrip_button" parent="android:Widget.Button">

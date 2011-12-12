@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="?attr/backgroundCandiInfo" >
@@ -34,7 +35,7 @@
             android:src="?attr/logo" />
 
         <TextView
-            android:id="@+id/txt_header_title"
+            android:id="@+id/text_header_title"
             style="@style/form_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -43,7 +44,7 @@
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:text="Post" />
+            android:text="@string/form_title_post" />
     </RelativeLayout>
 
     <!-- Tabs -->
@@ -87,17 +88,17 @@
                 <!-- Title and Content -->
 
                 <EditText
-                    android:id="@+id/txt_title"
+                    android:id="@+id/text_title"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/post_title_hint" />
+                    android:hint="@string/form_title_hint" />
 
                 <EditText
-                    android:id="@+id/txt_content"
+                    android:id="@+id/text_content"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:gravity="top"
-                    android:hint="@string/post_content_hint"
+                    android:hint="@string/form_description_hint"
                     android:inputType="textMultiLine"
                     android:lines="10" />
 
@@ -108,7 +109,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
-                    android:text="@string/post_badge_image_section_header" />
+                    android:text="@string/form_label_picture" />
 
                 <RelativeLayout
                     android:layout_width="fill_parent"
@@ -118,8 +119,8 @@
                     android:orientation="horizontal"
                     android:paddingBottom="10dp" >
 
-                    <ImageView
-                        android:id="@+id/img_public_image"
+                    <com.proxibase.aircandi.widgets.WebImageView
+                        android:id="@+id/image_public_image"
                         style="@style/form_picture"
                         android:layout_width="100dp"
                         android:layout_height="100dp"
@@ -130,22 +131,19 @@
                         style="@style/app_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignTop="@+id/img_public_image"
+                        android:layout_alignTop="@+id/image_public_image"
                         android:layout_marginLeft="10dp"
-                        android:layout_toRightOf="@+id/img_public_image"
+                        android:layout_toRightOf="@+id/image_public_image"
                         android:onClick="onChangePictureButtonClick"
-                        android:text="@string/post_public_image_change_button" />
+                        android:text="@string/form_button_change_picture" />
                 </RelativeLayout>
 
-                <LinearLayout
+                <com.proxibase.aircandi.widgets.AuthorBlock
+                    android:id="@+id/block_author"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingLeft="3dp"
-                    android:paddingTop="5dp" >
-
-                    <include layout="@layout/temp_user_info" />
-                </LinearLayout>
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    aircandi:orientation="horizontal" />
             </LinearLayout>
 
             <!-- Settings -->
@@ -178,7 +176,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onSaveButtonClick"
-            android:text="@string/post_save_button" />
+            android:text="@string/form_button_save" />
 
         <Button
             android:id="@+id/btn_delete_post"
@@ -187,7 +185,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onDeleteButtonClick"
-            android:text="@string/post_delete_button" />
+            android:text="@string/form_button_delete" />
 
         <Button
             style="@style/app_button"
@@ -195,7 +193,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onCancelButtonClick"
-            android:text="@string/post_cancel_button" />
+            android:text="@string/form_button_cancel" />
     </LinearLayout>
 
 </RelativeLayout>

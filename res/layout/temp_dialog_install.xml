@@ -6,7 +6,7 @@
 	android:layout_gravity="center"
 	android:padding="25dp">
 	<TextView
-		android:id="@+id/txt_dialog_message"
+		android:id="@+id/text_dialog_message"
 		android:layout_height="wrap_content"
 		android:layout_width="wrap_content"
 		android:layout_alignParentTop="true"
@@ -17,7 +17,7 @@
 		android:id="@+id/group_install"
 		android:layout_height="wrap_content"
 		android:layout_width="wrap_content"
-		android:layout_below="@id/txt_dialog_message"
+		android:layout_below="@id/text_dialog_message"
 		android:layout_centerHorizontal="true"
 		android:orientation="horizontal">
 		<Button

@@ -78,8 +78,8 @@ public interface CandiConstants {
 
 	public static final int				ACTIVITY_ENTITY_HANDLER				= 100;
 	public static final int				ACTIVITY_MARKET						= 200;
-	public static final int				ACTIVITY_PICTURE_PICK					= 300;
-	public static final int				ACTIVITY_PICTURE_MAKE					= 310;
+	public static final int				ACTIVITY_PICTURE_PICK				= 300;
+	public static final int				ACTIVITY_PICTURE_MAKE				= 310;
 	public static final int				ACTIVITY_VIDEO_PICK					= 320;
 	public static final int				ACTIVITY_VIDEO_MAKE					= 330;
 	public static final int				ACTIVITY_SIGNIN						= 400;
@@ -122,6 +122,7 @@ public interface CandiConstants {
 	public static final int				GL_BLEND_FUNCTION_SOURCE			= GL10.GL_ONE;
 	public static final int				GL_BLEND_FUNCTION_DESTINATION		= GL10.GL_ONE_MINUS_SRC_ALPHA;
 	public static final TextureOptions	GL_TEXTURE_OPTION					= TextureOptions.BILINEAR_PREMULTIPLYALPHA;
+	public static final int				IMAGE_WIDTH_USER_SMALL				= 60;
 	public static final int				IMAGE_WIDTH_MAX						= 250;
 	public static final int				IMAGE_WIDTH_ORIGINAL				= -1;
 	public static final String			USER_AGENT							= "Mozilla/5.0 (Linux; U; Android 2.2.1; fr-ch; A43 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";

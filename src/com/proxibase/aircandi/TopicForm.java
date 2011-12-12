@@ -3,7 +3,6 @@ package com.proxibase.aircandi;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.TextView;
 
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.BaseEntity;
@@ -48,8 +47,6 @@ public class TopicForm extends EntityBaseForm {
 	protected void drawEntity() {
 		super.drawEntity();
 
-		((TextView) findViewById(R.id.txt_header_title)).setText(getResources().getString(R.string.form_title_topic));
-
 		if (findViewById(R.id.chk_locked) != null) {
 			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
 			((CheckBox) findViewById(R.id.chk_locked)).setChecked(((TopicEntity) mEntity).locked);
@@ -74,7 +71,7 @@ public class TopicForm extends EntityBaseForm {
 					entity.imageUri = "updated";
 					entity.imageBitmap = bitmap;
 				}
-				showPicture(entity.imageBitmap, R.id.img_public_image);
+				showPicture(entity.imageBitmap, R.id.image_public_image);
 			}
 
 			@Override

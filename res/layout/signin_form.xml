@@ -33,7 +33,7 @@
             android:src="?attr/logo" />
 
         <TextView
-            android:id="@+id/txt_header_title"
+            android:id="@+id/text_header_title"
             style="@style/form_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -43,7 +43,7 @@
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:text="Sign In" />
+            android:text="@string/form_title_signin" />
 
         <Button
             android:id="@+id/btn_signup"
@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:onClick="onSignUpButtonClick"
-            android:text="@string/btn_signup" />
+            android:text="@string/form_button_signup" />
     </RelativeLayout>
 
     <ScrollView
@@ -81,21 +81,22 @@
 
             <TextView
                 android:id="@+id/form_message"
+                style="@style/form_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="15dp"
                 android:paddingLeft="2dp"
                 android:paddingRight="2dp"
-                android:text="Please sign-in to create a new candies" />
+                android:text="@string/signin_message" />
 
             <TextView
                 style="@style/form_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_email" />
+                android:text="@string/form_label_email" />
 
             <EditText
-                android:id="@+id/txt_email"
+                android:id="@+id/text_email"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
@@ -103,23 +104,23 @@
                 style="@style/form_label"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_password" />
+                android:text="@string/form_label_password" />
 
             <EditText
-                android:id="@+id/txt_password"
+                android:id="@+id/text_password"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword" />
 
             <TextView
-                android:id="@+id/txt_signin_error"
+                android:id="@+id/text_signin_error"
                 style="@style/form_error"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="3dp"
                 android:padding="5dp"
                 android:visibility="gone"
-                android:text="@string/form_signin_error" />
+                android:text="@string/signin_alert_invalid_signin" />
             </LinearLayout>
     </ScrollView>
 
@@ -142,7 +143,7 @@
             android:layout_weight="1"
             android:onClick="onSignInButtonClick"
             android:enabled="false"
-            android:text="@string/btn_signin" />
+            android:text="@string/signin_button_signin" />
 
         <Button
             
@@ -151,7 +152,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onCancelButtonClick"
-            android:text="@string/post_cancel_button" />
+            android:text="@string/form_button_cancel" />
     </LinearLayout>
 
 </RelativeLayout>

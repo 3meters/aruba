@@ -13,13 +13,13 @@
             android:layout_height="wrap_content"
             android:drawSelectorOnTop="true"
             android:entries="@array/post_visibility_values_list"
-            android:prompt="@string/post_visibility" />
+            android:prompt="@string/form_label_visibility" />
 
         <EditText
-            android:id="@+id/txt_password"
+            android:id="@+id/text_password"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
-            android:hint="@string/post_password_hint"
+            android:hint="@string/form_label_password_hint"
             android:inputType="textPassword" />
 
         <CheckBox
@@ -27,21 +27,21 @@
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:text="@string/form_setting_html_zoom" />
+            android:text="@string/web_label_html_zoom" />
         
         <CheckBox
             android:id="@+id/chk_html_javascript"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:text="@string/form_setting_javascript" />
+            android:text="@string/web_label_javascript" />
         
         <CheckBox
             android:id="@+id/chk_locked"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:text="@string/post_locked" />
+            android:text="@string/form_label_locked" />
         
         </LinearLayout>
 
