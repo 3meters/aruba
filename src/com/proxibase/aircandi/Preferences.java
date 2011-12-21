@@ -1,5 +1,6 @@
 package com.proxibase.aircandi;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.R;
 
 import android.content.SharedPreferences;
@@ -22,10 +23,12 @@ public class Preferences extends PreferenceActivity {
 	public static final String	PREF_USERNAME			= "Pref_Username";
 	public static final String	PREF_PASSWORD			= "Pref_Password";
 	public static final String	SETTING_VERSION_NAME	= "Setting_Version_Name";
+	public static final String	SETTING_PICTURE_SEARCH	= "Setting_Picture_Search";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences);
+		GoogleAnalyticsTracker.getInstance().trackPageView("/Preferences");
 	}
 }

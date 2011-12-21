@@ -1,14 +1,18 @@
 package com.proxibase.aircandi;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.proxibase.aircandi.R;
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.models.Comment;
-import com.proxibase.aircandi.utils.Exceptions;
+import com.proxibase.aircandi.utils.NetworkManager;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
 public class CommentForm extends EntityBaseForm {
@@ -29,15 +33,19 @@ public class CommentForm extends EntityBaseForm {
 			mEntity = new Comment();
 		}
 		else if (mCommand.verb.equals("edit")) {
-			String jsonResponse = null;
-			try {
-				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
-			}
-			catch (ProxibaseException exception) {
-				Exceptions.Handle(exception);
-			}
+			ServiceResponse serviceResponse = NetworkManager.getInstance().request(
+					new ServiceRequest(mEntityProxy.getEntryUri(), RequestType.Get, ResponseFormat.Json));
 
-			mEntity = (Comment) ProxibaseService.convertJsonToObject(jsonResponse, Comment.class, GsonType.ProxibaseService);
+			if (serviceResponse.resultCode != ResultCode.Success) {
+				setResult(Activity.RESULT_CANCELED);
+				finish();
+				overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
+			}
+			else {
+				String jsonResponse = (String) serviceResponse.data;
+				mEntity = (Comment) ProxibaseService.convertJsonToObject(jsonResponse, Comment.class, GsonType.ProxibaseService);
+				GoogleAnalyticsTracker.getInstance().dispatch();
+			}
 		}
 
 		super.bindEntity();

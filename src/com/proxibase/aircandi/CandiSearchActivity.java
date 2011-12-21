@@ -2,20 +2,15 @@ package com.proxibase.aircandi;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import android.content.DialogInterface;
-
-import org.acra.ErrorReporter;
 import org.anddev.andengine.audio.sound.Sound;
 import org.anddev.andengine.audio.sound.SoundFactory;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
@@ -32,30 +27,22 @@ import org.anddev.andengine.util.modifier.ease.EaseCircularOut;
 import org.anddev.andengine.util.modifier.ease.EaseCubicIn;
 import org.anddev.andengine.util.modifier.ease.EaseCubicOut;
 import org.anddev.andengine.util.modifier.ease.EaseLinear;
-import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.app.ActivityManager.MemoryInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.content.res.Resources.Theme;
-import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
@@ -65,12 +52,10 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.Display;
 import android.view.Gravity;
@@ -78,28 +63,23 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Animation.AnimationListener;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -114,12 +94,12 @@ import android.widget.ViewSwitcher;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.proxibase.aircandi.AircandiActivity.Verb;
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.candi.camera.ChaseCamera;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
@@ -128,7 +108,6 @@ import com.proxibase.aircandi.candi.models.CandiModel.DisplayExtra;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.ICandiListener;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.TextureReset;
-import com.proxibase.aircandi.candi.views.CandiView;
 import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -141,33 +120,36 @@ import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.NetworkManager;
+import com.proxibase.aircandi.utils.ProxiExplorer;
 import com.proxibase.aircandi.utils.ProxiHandlerManager;
 import com.proxibase.aircandi.utils.Rotate3dAnimation;
-import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.utils.NetworkManager.IConnectivityListener;
-import com.proxibase.aircandi.utils.NetworkManager.IConnectivityReadyListener;
+import com.proxibase.aircandi.utils.NetworkManager.IWifiReadyListener;
+import com.proxibase.aircandi.utils.NetworkManager.NetworkRequestListener;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCodeDetail;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.utils.ProxiExplorer.Options;
 import com.proxibase.aircandi.widgets.ActionsWindow;
 import com.proxibase.aircandi.widgets.AuthorBlock;
-import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator;
+import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator.PageInfoProvider;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
-import com.proxibase.sdk.android.proxi.consumer.ProxiExplorer;
 import com.proxibase.sdk.android.proxi.consumer.User;
-import com.proxibase.sdk.android.proxi.consumer.ProxiExplorer.IEntityProcessListener;
-import com.proxibase.sdk.android.proxi.consumer.ProxiExplorer.Options;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.Query;
+import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxiErrorCode;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
 /*
@@ -236,6 +218,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private Boolean						mReadyToRun					= false;
 	private Boolean						mFullUpdateSuccess			= false;
+	private Boolean						mScanActive					= false;
 	private Handler						mHandler					= new Handler();
 	private LayoutInflater				mInflater;
 	private Boolean						mCredentialsFound			= false;
@@ -260,8 +243,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private FrameLayout					mSliderWrapperSearch;
 	private EntityProxy					mCandiInfoEntity;
 
-	//private DisplayMetrics				mDisplayMetrics;
-
 	private ViewFlipper					mCandiFlipper;
 	private ViewSwitcher				mViewSwitcher;
 
@@ -280,8 +261,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private boolean						mUsingEmulator				= false;
 
 	private int							mRenderMode;
-	protected User						mUser;
 	private Runnable					mUserSignedInRunnable;
+	private GoogleAnalyticsTracker		mTracker;
+	private Options						mScanOptions;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -324,6 +306,11 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		/* Tools */
 		LayoutInflater mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		/* Analytics tracker */
+		mTracker = GoogleAnalyticsTracker.getInstance();
+		mTracker.startNewSession(getAnalyticsId(), this);
+		mTracker.trackPageView("/SearchHome");
 
 		/* Ui Hookup */
 		mCandiFlipper = (ViewFlipper) findViewById(R.id.flipper_candi);
@@ -418,10 +405,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					String secretKey = properties.getProperty("secretKey");
 
 					if ((accessKeyId == null) || (accessKeyId.equals(""))
-						|| (accessKeyId.equals("CHANGEME"))
-						|| (secretKey == null)
-						|| (secretKey.equals(""))
-						|| (secretKey.equals("CHANGEME"))) {
+							|| (accessKeyId.equals("CHANGEME"))
+							|| (secretKey == null)
+							|| (secretKey.equals(""))
+							|| (secretKey.equals("CHANGEME"))) {
 						Logger.e(CandiSearchActivity.this, "Aws Credentials not configured correctly.");
 						mCredentialsFound = false;
 					}
@@ -439,6 +426,18 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		t.start();
 	}
 
+	private String getAnalyticsId() {
+		Properties properties = new Properties();
+		try {
+			properties.load(getClass().getResourceAsStream("google_analytics.properties"));
+			String analyticsId = properties.getProperty("analyticsId");
+			return analyticsId;
+		}
+		catch (IOException exception) {
+			throw new IllegalStateException("Unable to retrieve google analytics id");
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Event handlers
 	// --------------------------------------------------------------------------------------------
@@ -454,7 +453,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		String commandName = command.name.toLowerCase();
 
 		if (command.type.toLowerCase().equals("list")) {
-			ImageUtils.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
+			ImageUtils.showToastNotification("Unimplemented...", Toast.LENGTH_SHORT);
 			return;
 		}
 
@@ -503,6 +502,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				// startActivity(tostart);
 			}
 			else {
+				mTracker.trackEvent("Clicks", "Command", command.label, 0);
 				String message = getString(R.string.signin_message_new_candi) + " " + command.label;
 				mUserSignedInRunnable = new Runnable() {
 
@@ -582,12 +582,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	public void onBackPressed() {
 		if (!mCandiInfoVisible) {
-			if (mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
+			if (mCandiPatchModel != null && mCandiPatchModel.getCandiRootCurrent() != null
+				&& mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
 				mCandiPatchPresenter.renderingActivate();
 				mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false);
 			}
 			else {
-				super.onBackPressed();
+				//super.onBackPressed();
 			}
 		}
 		else {
@@ -598,7 +599,14 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	public void onRefreshClick(View view) {
+		if (mScanActive) {
+			Logger.v(this, "User refresh request ignored because of active scan");
+			return;
+		}
+
 		/* For this activity, refresh means rescan and reload entity data from the service */
+		mTracker.trackEvent("Clicks", "Button", "refresh", 0);
+
 		if (mReadyToRun) {
 			doRefresh(RefreshType.BeaconScanPlusCurrent);
 		}
@@ -646,6 +654,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	public void onNewCandiClick(View view) {
+		mTracker.trackEvent("Clicks", "Button", "new_candi", 0);
 		showNewCandiDialog();
 	}
 
@@ -673,117 +682,153 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	// Entity routines
 	// --------------------------------------------------------------------------------------------
 
-	public interface IScanCompleteListener {
+	private void scanForBeacons(Options options, final boolean showProgress) {
 
-		void onScanComplete();
-	}
-
-	private void scanForBeacons(final Options options, final boolean showProgress) {
+		/*
+		 * Everything associated with this call is on the main thread but the
+		 * UI is still responsive because most of the UI is being handled
+		 * by the 2d engine thread.
+		 */
 
 		/* Check that wifi is enabled and we have a network connection */
-		verifyConnectivity(new IConnectivityReadyListener() {
+		mScanOptions = options;
+		mScanActive = true;
+
+		verifyWifi(new IWifiReadyListener() {
 
 			@Override
-			public void onConnectivityReady() {
+			public void onWifiReady() {
 
+				/* Time to turn on the progress indicators */
 				if (showProgress) {
-					startTitlebarProgress(true);
+					if (!isVisibleEntity() && mCandiPatchPresenter != null) {
+						mCandiPatchPresenter.renderingActivate(30000);
+						mCandiPatchPresenter.mProgressSprite.setVisible(true);
+					}
+					else {
+						startTitlebarProgress();
+					}
 				}
 
-				if (options.refreshAllBeacons && mCandiPatchPresenter != null) {
+				/* Make sure we have a user */
+				ServiceResponse serviceResponse = verifyUser();
+
+				if (serviceResponse.resultCode != ResultCode.Success) {
+					if (serviceResponse.resultCode == ResultCode.Unrecoverable) {
+						Exceptions.Handle(serviceResponse.exception);
+					}
+					else {
+						mCandiPatchPresenter.renderingActivate(5000);
+						mCandiPatchPresenter.mProgressSprite.setVisible(false);
+						stopTitlebarProgress();
+						mScanActive = false;
+						return;
+					}
+				}
+
+				if (mScanOptions.refreshAllBeacons && mCandiPatchPresenter != null) {
 					mCandiPatchPresenter.renderingActivate(60000);
 					mCandiPatchPresenter.setFullUpdateInProgress(true);
 					mCandiPatchPresenter.mProgressSprite.setVisible(true);
-
-					/* Quick check for a new version */
-					try {
-						checkForUpdate();
-					}
-					catch (ProxibaseException exception) {
-						Exceptions.Handle(exception);
-					}
+					/*
+					 * Quick check for a new version. We continue even if the network
+					 * call fails.
+					 */
+					checkForUpdate();
 				}
 
-				ProxiExplorer.getInstance().scanForBeaconsAsync(options, new IEntityProcessListener() {
+				ProxiExplorer.getInstance().scanForBeacons(mScanOptions, new RequestListener() {
 
 					@Override
-					public void onComplete(final List<EntityProxy> entities) {
+					public void onComplete(Object response) {
 
-						/* We get called back on a background thread */
+						/* We get called back on the main thread */
+						ServiceResponse serviceResponse = (ServiceResponse) response;
+						final List<EntityProxy> entities = (List<EntityProxy>) serviceResponse.data;
 
-						runOnUiThread(new Runnable() {
+						if (serviceResponse.resultCode != ResultCode.Success) {
+							if (serviceResponse.resultCode == ResultCode.Unrecoverable) {
+								Exceptions.Handle(serviceResponse.exception);
+							}
+							else {
+								mCandiPatchPresenter.mProgressSprite.setVisible(false);
+								mCandiPatchPresenter.renderingActivate(5000);
+								stopTitlebarProgress();
+								mScanActive = false;
+								return;
+							}
+						}
 
-							@Override
-							public void run() {
+						Logger.d(CandiSearchActivity.this, "Beacon scan results returned from Proxibase.ProxiExplorer");
 
-								Logger.d(CandiSearchActivity.this, "Beacon scan results returned from Proxibase.ProxiExplorer");
+						/* Check to see if we have any visible entities */
+						boolean visibleEntity = false;
+						for (EntityProxy entityProxy : entities) {
+							if (!entityProxy.isHidden) {
+								visibleEntity = true;
+								break;
+							}
+						}
 
-								/* Check to see if we have any visible entities */
-								boolean visibleEntity = false;
-								for (EntityProxy entityProxy : entities) {
-									if (!entityProxy.isHidden) {
-										visibleEntity = true;
+						if (!visibleEntity) {
+							showNewCandiDialog();
+						}
+						else {
+							mCandiPatchPresenter.renderingActivate();
+							doUpdateEntities(entities, mScanOptions.refreshAllBeacons, false);
+							mCandiPatchPresenter.renderingActivate(5000);
+
+							/* Check for rookies and play a sound */
+							if (mPrefSoundEffects) {
+								for (CandiModel candiModel : mCandiPatchModel.getCandiModels()) {
+									if (candiModel.isRookie() && candiModel.getViewStateNext().isVisible()) {
+										mCandiAlertSound.play();
 										break;
 									}
 								}
-
-								if (!visibleEntity) {
-									showNewCandiDialog();
-								}
-								else {
-									mCandiPatchPresenter.renderingActivate();
-									doUpdateEntities(entities, options.refreshAllBeacons, false);
-									mCandiPatchPresenter.renderingActivate(5000);
-
-									/* Check for rookies and play a sound */
-									if (mPrefSoundEffects)
-										for (CandiModel candiModel : mCandiPatchModel.getCandiModels())
-											if (candiModel.isRookie() && candiModel.getViewStateNext().isVisible()) {
-												mCandiAlertSound.play();
-												break;
-											}
-								}
-
-								/* Wrap-up */
-								if (options.refreshAllBeacons && !mFullUpdateSuccess) {
-									mFullUpdateSuccess = true;
-								}
-								updateDebugInfo();
-								mCandiPatchPresenter.setFullUpdateInProgress(false);
-								mCandiPatchPresenter.mProgressSprite.setVisible(false);
-								stopTitlebarProgress();
-
-								/*
-								 * Schedule the next wifi scan run if autoscan is enabled
-								 * |
-								 * The autoscan will pick up new beacons and changes in visibility
-								 * of the entities associated with beacons that are already being tracked.
-								 * This is meant to be an efficient refresh that can run continuously without
-								 * a ton of data traffic. So there won't be any calls to the data service
-								 * unless we discover a new beacon.
-								 */
-								if (mPrefAutoscan) {
-									mHandler.postDelayed(new Runnable() {
-
-										public void run() {
-											scanForBeacons(new Options(false, false), false);
-										}
-									}, mPrefAutoscanInterval);
-								}
 							}
-						});
-					}
+						}
 
-					@Override
-					public void onProxibaseException(ProxibaseException exception) {
-						ImageUtils.showToastNotification(CandiSearchActivity.this, exception.getMessage(), Toast.LENGTH_SHORT);
-						Logger.d(CandiSearchActivity.this, exception.getMessage());
+						/* Wrap-up */
+						if (mScanOptions.refreshAllBeacons && !mFullUpdateSuccess) {
+							mFullUpdateSuccess = true;
+						}
+
+						/* Add a call to pass along analytics */
+						mTracker.dispatch();
+						updateDebugInfo();
+						mCandiPatchPresenter.setFullUpdateInProgress(false);
+						mCandiPatchPresenter.mProgressSprite.setVisible(false);
 						stopTitlebarProgress();
+
+						/*
+						 * Schedule the next wifi scan run if autoscan is enabled
+						 * |
+						 * The autoscan will pick up new beacons and changes in visibility
+						 * of the entities associated with beacons that are already being tracked.
+						 * This is meant to be an efficient refresh that can run continuously without
+						 * a ton of data traffic. So there won't be any calls to the data service
+						 * unless we discover a new beacon.
+						 */
+						if (mPrefAutoscan) {
+							mHandler.postDelayed(new Runnable() {
+
+								public void run() {
+									scanForBeacons(new Options(false, false), false);
+								}
+							}, mPrefAutoscanInterval);
+						}
+						mScanActive = false;
 					}
 				});
 			}
-		});
 
+			@Override
+			public void onWifiFailed() {
+				mCandiPatchPresenter.mProgressSprite.setVisible(false);
+				mScanActive = false;
+			}
+		});
 	}
 
 	private void doUpdateEntities(List<EntityProxy> freshEntities, boolean fullUpdate, boolean delayObserverUpdate) {
@@ -818,17 +863,27 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	private void doRefresh(RefreshType refreshType) {
-		if (!mFullUpdateSuccess || refreshType == RefreshType.All) {
+
+		NetworkManager.getInstance().reset();
+		if (!mFullUpdateSuccess) {
+			Logger.i(this, "User starting first beacon scan");
+			mTracker.trackEvent("Search", "Refresh", "All", 0);
+			scanForBeacons(new Options(true, false), true);
+		}
+		else if (refreshType == RefreshType.All) {
 			Logger.i(this, "User starting full beacon scan");
+			mTracker.trackEvent("Search", "Refresh", "All", 0);
 			scanForBeacons(new Options(true, false), true);
 		}
 		else if (refreshType == RefreshType.BeaconScan) {
 			Logger.i(this, "User starting lightweight beacon scan");
+			mTracker.trackEvent("Search", "Refresh", "BeaconScan", 0);
 			scanForBeacons(new Options(false, false), true);
 		}
 		else if (refreshType == RefreshType.BeaconScanPlusCurrent) {
 
 			Logger.i(this, "User starting lightweight beacon scan");
+			mTracker.trackEvent("Search", "Refresh", "BeaconScanPlusCurrent", 0);
 			final CandiModel candiModelFocused = mCandiPatchModel.getCandiModelFocused();
 
 			if (candiModelFocused == null || !candiModelFocused.getViewStateCurrent().isVisible()) {
@@ -838,24 +893,16 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				final int idOfEntityToRefresh = candiModelFocused.getEntityProxy().id;
 				Logger.i(this, "User starting current entity refresh");
 
-				//				/* Mark the entity as dirty */
-				//				for (EntityProxy entityProxy : ProxiExplorer.getInstance().getEntityProxiesFlat()) {
-				//					if (entityProxy.id.equals(idOfEntityToRefresh)) {
-				//						entityProxy.isDirty = true;
-				//						break;
-				//					}
-				//				}
-
 				/*
 				 * This will come back before we really know if the candi we want to
 				 * refresh textures for is still around.
 				 */
-
 				scanForBeacons(new Options(false, true), true);
 
 				/* Scan could have caused the current candi to go away or be hidden */
 				EntityProxy entityProxy = ProxiExplorer.getInstance().getEntityById(idOfEntityToRefresh);
 				if (entityProxy != null && !entityProxy.isHidden) {
+					//startTitlebarProgress();
 
 					/* Refresh candi info */
 					if (mCandiInfoVisible && entityProxy.id.equals(mCandiPatchModel.getCandiModelSelected().getEntityProxy().id)) {
@@ -885,6 +932,18 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 	}
 
+	private boolean isVisibleEntity() {
+		if (mProxiEntities == null || mProxiEntities.size() == 0) {
+			return false;
+		}
+		for (EntityProxy entityProxy : mProxiEntities) {
+			if (!entityProxy.isHidden) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
@@ -895,6 +954,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mCandiPatchPresenter.renderingActivate();
 		mCandiInfoEntity = candiModel.getEntityProxy();
 		Logger.d(this, "Show candi info: " + candiModel.getTitleText());
+		mTracker.trackPageView("/CandiInfo");
 
 		if (animType == AnimType.CrossFadeFlipper) {
 			mCandiSurfaceView.setVisibility(View.GONE);
@@ -1267,7 +1327,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		if (entity.imageUri != null && entity.imageUri.length() != 0) {
 			ImageRequest imageRequest = new ImageRequest(entity.imageUri, ImageShape.Square, entity.imageFormat,
 					entity.javascriptEnabled,
-					CandiConstants.IMAGE_WIDTH_MAX, true, true, true, 1, this, null);
+					CandiConstants.IMAGE_WIDTH_SEARCH_MAX, true, true, true, 1, this, null);
 			image.setImageRequest(imageRequest, imageReflection);
 		}
 
@@ -1299,8 +1359,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private void setUserPicture(String imageUri, final WebImageView imageView) {
 		if (imageUri != null && imageUri.length() != 0) {
-			imageView.setImageRequest(ImageManager.getInstance().getImageLoader().getImageRequestByProfile(ImageProfile.SquareUser,
-						imageUri, null), null);
+			ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, "binary", false,
+					CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
+			imageView.setImageRequest(imageRequest, null);
 		}
 	}
 
@@ -1619,7 +1680,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			if (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)) {
 				String publicName = mProxiHandlerManager.getPublicName(intent.getData().getEncodedSchemeSpecificPart());
 				if (publicName != null) {
-					ImageUtils.showToastNotification(CandiSearchActivity.this, publicName + getText(R.string.dialog_install_toast_package_installed),
+					ImageUtils.showToastNotification(publicName + getText(R.string.dialog_install_toast_package_installed),
 							Toast.LENGTH_SHORT);
 				}
 			}
@@ -1657,27 +1718,36 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	// Connectivity routines
 	// --------------------------------------------------------------------------------------------
 
-	private void verifyConnectivity(final IConnectivityReadyListener listener) {
+	private void verifyWifi(final IWifiReadyListener listener) {
 
 		if (!NetworkManager.getInstance().isWifiEnabled() && !ProxiExplorer.getInstance().isUsingEmulator()) {
 
 			showNetworkDialog(true, getString(R.string.dialog_network_message_wifi_notready));
-			final Button retryButton = (Button) findViewById(R.id.retry_button);
+			final Button retryButton = (Button) findViewById(R.id.button_retry);
+			final Button cancelButton = (Button) findViewById(R.id.button_cancel);
 			final TextView txtMessage = (TextView) findViewById(R.id.retry_message);
 			retryButton.setEnabled(false);
+			cancelButton.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					showNetworkDialog(false, "");
+					listener.onWifiFailed();
+					return;
+				}
+			});
 
 			NetworkManager.getInstance().setConnectivityListener(new IConnectivityListener() {
 
 				@Override
-				public void onConnectivityStateChanged(State networkInfoState) {
-				}
+				public void onConnectivityStateChanged(State networkInfoState) {}
 
 				@Override
 				public void onWifiStateChanged(int wifiState) {
 
 					if (wifiState == WifiManager.WIFI_STATE_ENABLED)
 					{
-						ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state enabled.", Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification("Wifi state enabled.", Toast.LENGTH_SHORT);
 						if (((View) findViewById(R.id.retry_dialog)).getVisibility() == View.VISIBLE) {
 							((CheckBox) findViewById(R.id.wifi_enabled_checkbox)).setChecked(true);
 							txtMessage.setText(getString(R.string.dialog_network_message_wifi_ready));
@@ -1689,119 +1759,91 @@ public class CandiSearchActivity extends AircandiGameActivity {
 									/* Re-enter so we get to the next stage */
 									NetworkManager.getInstance().setConnectivityListener(null);
 									showNetworkDialog(false, "");
-									verifyConnectivity(listener);
-
+									if (listener != null) {
+										Logger.d(this, "Wifi verified");
+										listener.onWifiReady();
+									}
 								}
 							});
 
 						}
 					}
 					else if (wifiState == WifiManager.WIFI_STATE_ENABLING) {
-						ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state enabling...", Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification("Wifi state enabling...", Toast.LENGTH_SHORT);
 					}
 					else if (wifiState == WifiManager.WIFI_STATE_DISABLING) {
-						ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state disabling...", Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification("Wifi state disabling...", Toast.LENGTH_SHORT);
 					}
 					else if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
 						((CheckBox) findViewById(R.id.wifi_enabled_checkbox)).setChecked(false);
 						txtMessage.setText(getString(R.string.dialog_network_message_wifi_notready));
 						retryButton.setEnabled(false);
-						ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state disabled.", Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification("Wifi state disabled.", Toast.LENGTH_SHORT);
 					}
 				}
 			});
+		
 		}
-		else if (!NetworkManager.getInstance().isConnected()) {
-			/*
-			 * For better feedback we show the progress indicator for a few seconds
-			 * so it feels like we tried.
-			 */
-			showNetworkDialog(false, "");
-			mCandiPatchPresenter.mProgressSprite.setVisible(true);
-			final Button retryButton = (Button) findViewById(R.id.retry_button);
-			final TextView txtMessage = (TextView) findViewById(R.id.retry_message);
-			mHandler.postDelayed(new Runnable() {
+		else {
+			if (listener != null) {
+				Logger.d(this, "Wifi verified");
+				listener.onWifiReady();
+			}
+		}
+	}
 
-				public void run() {
-					NetworkManager.getInstance().setConnectivityListener(new IConnectivityListener() {
+	private ServiceResponse verifyUser() {
 
-						@Override
-						public void onConnectivityStateChanged(State networkInfoState) {
-							if (networkInfoState == State.CONNECTED)
-							{
-								if (((View) findViewById(R.id.retry_dialog)).getVisibility() == View.VISIBLE) {
-									txtMessage.setText(getString(R.string.dialog_network_message_connection_ready));
-									retryButton.setEnabled(true);
-									retryButton.setOnClickListener(new OnClickListener() {
+		if (mUser != null) {
+			return new ServiceResponse();
+		}
 
-										@Override
-										public void onClick(View v) {
-											/* Re-enter so we get to the next stage */
-											NetworkManager.getInstance().setConnectivityListener(null);
-											showNetworkDialog(false, "");
-											verifyConnectivity(listener);
-										}
-									});
-								}
-							}
-							else if (networkInfoState == State.DISCONNECTED)
-							{
-								txtMessage.setText(getString(R.string.dialog_network_message_connection_notready));
-								retryButton.setEnabled(false);
-								ImageUtils.showToastNotification(CandiSearchActivity.this, "Network disconnected.", Toast.LENGTH_SHORT);
-							}
-						}
+		/* Keep user signed in */
+		ServiceResponse serviceResponse = new ServiceResponse();
+		String username = Aircandi.settings.getString(Preferences.PREF_USERNAME, null);
+		Logger.i(this, "Signing in...");
+		if (username == null) {
 
-						@Override
-						public void onWifiStateChanged(int wifiState) {
-							if (wifiState == WifiManager.WIFI_STATE_ENABLING) {
-								ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state enabling...", Toast.LENGTH_SHORT);
-							}
-							else if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
-								ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state enabled.", Toast.LENGTH_SHORT);
-							}
-							else if (wifiState == WifiManager.WIFI_STATE_DISABLING) {
-								ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state disabling...", Toast.LENGTH_SHORT);
-							}
-							else if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
-								ImageUtils.showToastNotification(CandiSearchActivity.this, "Wifi state disabled.", Toast.LENGTH_SHORT);
-							}
-						}
-					});
-					if (NetworkManager.getInstance().isConnected()) {
-						NetworkManager.getInstance().setConnectivityListener(null);
-						showNetworkDialog(false, "");
-						if (listener != null) {
-							Logger.d(CandiSearchActivity.this, "Connectivity verified");
-							listener.onConnectivityReady();
-						}
-					}
-					retryButton.setEnabled(false);
-					showNetworkDialog(true, getString(R.string.dialog_network_message_connection_notready));
+			username = "anonymous@3meters.com";
+			Query query = new Query("Users").filter("Email eq '" + username + "'");
+			serviceResponse = NetworkManager.getInstance().request(
+									new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+
+			if (serviceResponse.resultCode == ResultCode.Success) {
+
+				String jsonResponse = (String) serviceResponse.data;
+				mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
+				if (mUser != null) {
+					mUser.anonymous = true;
 				}
-			}, CandiConstants.NETWORK_INTERVAL_PHONEY);
+			}
 		}
-		else if (mUser == null) {
+		else {
 
-			try {
-				/* Keep user signed in */
-				String username = Aircandi.settings.getString(Preferences.PREF_USERNAME, null);
-				if (username == null) {
-					username = "anonymous@3meters.com";
-					mUser = ProxibaseService.getInstance().loadUser(username);
-					if (mUser != null) {
-						mUser.anonymous = true;
-					}
+			Query query = new Query("Users").filter("Email eq '" + username + "'");
+			serviceResponse = NetworkManager.getInstance().request(
+									new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+
+			if (serviceResponse.resultCode == ResultCode.Success) {
+
+				String jsonResponse = (String) serviceResponse.data;
+				mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
+				if (mUser != null) {
+					ImageUtils.showToastNotification("Signed in as " + mUser.fullname, Toast.LENGTH_SHORT);
 				}
 				else {
-					mUser = ProxibaseService.getInstance().loadUser(username);
-					if (mUser != null) {
-						Toast.makeText(this, "Signed in as " + mUser.fullname, Toast.LENGTH_SHORT).show();
-					}
-					else {
-						Logger.d(this, "Error resigning in: Previous user does not exist: " + username);
-						username = "anonymous@3meters.com";
-						mUser = ProxibaseService.getInstance().loadUser(username);
+
+					Logger.d(this, "Error resigning in: Previous user does not exist: " + username);
+					username = "anonymous@3meters.com";
+					query = new Query("Users").filter("Email eq '" + username + "'");
+					serviceResponse = NetworkManager
+								.getInstance()
+								.request(new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+
+					if (serviceResponse.resultCode == ResultCode.Success) {
+
+						jsonResponse = (String) serviceResponse.data;
+						mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 						if (mUser != null) {
 							mUser.anonymous = true;
 							Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, null);
@@ -1811,32 +1853,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					}
 				}
 			}
-			catch (ProxibaseException exception) {
-				exception.printStackTrace();
-			}
+		}
 
-			if (mUser != null) {
-				if (findViewById(R.id.image_user) != null) {
-					setUserPicture(mUser.imageUri, (WebImageView) findViewById(R.id.image_user));
-				}
-				ProxiExplorer.getInstance().setUser(mUser);
-				if (listener != null) {
-					Logger.d(this, "Connectivity and service verified");
-					listener.onConnectivityReady();
-				}
+		if (serviceResponse.resultCode == ResultCode.Success) {
+			if (findViewById(R.id.image_user) != null) {
+				setUserPicture(mUser.imageUri, (WebImageView) findViewById(R.id.image_user));
 			}
-			else {
-				showNetworkDialog(true, getString(R.string.dialog_network_message_service_notready));
-				final Button retryButton = (Button) findViewById(R.id.retry_button);
-				retryButton.setEnabled(true);
-			}
+			ProxiExplorer.getInstance().setUser(mUser);
 		}
-		else {
-			if (listener != null) {
-				Logger.d(this, "Connectivity and service verified");
-				listener.onConnectivityReady();
-			}
-		}
+		return serviceResponse;
 	}
 
 	private void showNetworkDialog(boolean visible, String message) {
@@ -1844,7 +1869,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		if (visible) {
 			TextView txtMessage = (TextView) findViewById(R.id.retry_message);
 			CheckBox enableWifiCheckBox = (CheckBox) findViewById(R.id.wifi_enabled_checkbox);
-			Button retryButton = (Button) findViewById(R.id.retry_button);
 
 			mCandiSurfaceView.setVisibility(View.GONE);
 
@@ -2088,6 +2112,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * Called after Create, Resume->LoadEngine.
 		 * CandiPatchPresenter handles scene instantiation and setup
 		 */
+		Logger.d(this, "Loading scene");
 		mCandiPatchPresenter = new CandiPatchPresenter(this, this, mEngine, mRenderSurfaceView, mCandiPatchModel);
 		Scene scene = mCandiPatchPresenter.initializeScene();
 
@@ -2123,7 +2148,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			loadPreferencesProxiExplorer();
 
 			if (mFirstRun || prefChangeThatRequiresRefresh) {
-				Logger.i(this, "Starting first run full beacon scan");
+				if (mFirstRun) {
+					Logger.i(this, "Starting first run full beacon scan");
+				}
+				else {
+					Logger.i(this, "Starting full beacon scan because of preference change");
+				}
+
 				scanForBeacons(new Options(mFirstRun, false), false);
 				mFirstRun = false;
 			}
@@ -2327,7 +2358,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				EntityProxy entityProxy = itemData;
 				holder.data = itemData;
 				if (holder.itemTitle != null) {
-					if (entityProxy.title != null && !entityProxy.title.equals("")) {
+					if (entityProxy.title != null && entityProxy.title.length() > 0) {
 						holder.itemTitle.setText(entityProxy.title);
 					}
 					else {
@@ -2336,7 +2367,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				}
 
 				if (holder.itemSubtitle != null) {
-					if (entityProxy.subtitle != null && !entityProxy.subtitle.equals("")) {
+					if (entityProxy.subtitle != null && entityProxy.subtitle.length() > 0) {
 						holder.itemSubtitle.setText(entityProxy.subtitle);
 					}
 					else {
@@ -2345,7 +2376,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				}
 
 				if (holder.itemDescription != null) {
-					if (entityProxy.description != null && !entityProxy.description.equals("")) {
+					if (entityProxy.description != null && entityProxy.description.length() > 0) {
 						holder.itemDescription.setText(entityProxy.description);
 					}
 					else {
@@ -2366,7 +2397,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					if (entityProxy.imageUri != null && entityProxy.imageUri.length() != 0) {
 						ImageRequest imageRequest = new ImageRequest(entityProxy.imageUri, ImageShape.Square, entityProxy.imageFormat,
 								entityProxy.javascriptEnabled,
-								CandiConstants.IMAGE_WIDTH_MAX, false, true, true, 1, this, null);
+								CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, null);
 						holder.itemImage.setImageRequest(imageRequest, null);
 					}
 				}
@@ -2492,6 +2523,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 
+		mTracker.stopSession();
+
 		/* Don't count on this always getting called when this activity is killed */
 		try {
 			Logger.i(this, "CandiSearchActivity destroyed");
@@ -2514,13 +2547,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 * for a result.
 		 */
 		Logger.i(this, "Activity result returned to CandiSearchActivity: " + String.valueOf(requestCode));
-		startTitlebarProgress(true);
+		startTitlebarProgress();
 		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
 			if (data != null) {
 				Bundle extras = data.getExtras();
 				if (extras != null) {
 					String json = extras.getString(getString(R.string.EXTRA_USER));
-					if (json != null && !json.equals("")) {
+					if (json != null && json.length() > 0) {
 						mUser = ProxibaseService.getGson(GsonType.Internal).fromJson(json, User.class);
 						if (mUser != null) {
 							if (findViewById(R.id.image_user) != null) {
@@ -2544,7 +2577,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					Bundle extras = data.getExtras();
 					if (extras != null) {
 						String json = extras.getString(getString(R.string.EXTRA_USER));
-						if (json != null && !json.equals("")) {
+						if (json != null && json.length() > 0) {
 							mUser = ProxibaseService.getGson(GsonType.Internal).fromJson(json, User.class);
 							if (mUser != null) {
 								if (findViewById(R.id.image_user) != null) {
@@ -2571,19 +2604,26 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						Integer dirtyEntityId = extras.getInt(getString(R.string.EXTRA_ENTITY_DIRTY));
 
 						/* New top level type was inserted: discussion, album, website */
-						if (dirtyBeaconId != null && !dirtyBeaconId.equals("")) {
+						if (dirtyBeaconId != null && dirtyBeaconId.length() > 0) {
 							for (Beacon beacon : ProxiExplorer.getInstance().getBeacons()) {
 								if (beacon.id.equals(dirtyBeaconId)) {
 									beacon.isDirty = true;
-									List<EntityProxy> freshEntityProxies = null;
-									try {
-										freshEntityProxies = ProxiExplorer.getInstance().refreshDirtyEntities();
-									}
-									catch (ProxibaseException exception) {
-										if (!Exceptions.Handle(exception)) {
-											/* What do we want to do if this is a recoverable exception */
+
+									ServiceResponse serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
+									List<EntityProxy> freshEntityProxies = (List<EntityProxy>) serviceResponse.data;
+
+									if (serviceResponse.resultCode != ResultCode.Success) {
+										if (serviceResponse.resultCode == ResultCode.Unrecoverable) {
+											Exceptions.Handle(serviceResponse.exception);
+										}
+										else {
+											mCandiPatchPresenter.mProgressSprite.setVisible(false);
+											mCandiPatchPresenter.renderingActivate(5000);
+											stopTitlebarProgress();
+											return;
 										}
 									}
+									mTracker.dispatch();
 									doUpdateEntities(freshEntityProxies, false, false);
 								}
 							}
@@ -2600,17 +2640,22 @@ public class CandiSearchActivity extends AircandiGameActivity {
 								if (entityProxy.id.equals(dirtyEntityId)) {
 									entityProxy.isDirty = true;
 
-									List<EntityProxy> freshEntityProxies = null;
-									try {
-										/* TODO: We aren't going through the code that verifies connectivity */
-										freshEntityProxies = ProxiExplorer.getInstance().refreshDirtyEntities();
-									}
-									catch (ProxibaseException exception) {
-										if (exception.getErrorCode() == ProxiErrorCode.NetworkError) {
-											/* TODO: What do we want to do when there is a network error? */
+									ServiceResponse serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
+									List<EntityProxy> freshEntityProxies = (List<EntityProxy>) serviceResponse.data;
+
+									if (serviceResponse.resultCode != ResultCode.Success) {
+										if (serviceResponse.resultCode == ResultCode.Unrecoverable) {
+											Exceptions.Handle(serviceResponse.exception);
+										}
+										else {
+											mCandiPatchPresenter.mProgressSprite.setVisible(false);
+											mCandiPatchPresenter.renderingActivate(5000);
+											stopTitlebarProgress();
+											return;
 										}
 									}
 
+									mTracker.dispatch();
 									mProxiEntities = (List<EntityProxy>) ((ArrayList<EntityProxy>) freshEntityProxies).clone();
 
 									boolean matchFound = false;
@@ -2868,25 +2913,29 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			case R.id.signinout :
 				if (mUser != null && !mUser.anonymous) {
 					showProgressDialog("Signing out...");
-					try {
-						mUser = ProxibaseService.getInstance().loadUser("anonymous@3meters.com");
-						mUser.anonymous = true;
+					Query query = new Query("Users").filter("Email eq 'anonymous@3meters.com'");
 
-						Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, null);
-						Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, null);
-						Aircandi.settingsEditor.commit();
+					ServiceResponse serviceResponse = NetworkManager.getInstance().request(
+							new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-						if (findViewById(R.id.image_user) != null) {
-							setUserPicture(mUser.imageUri, (WebImageView) findViewById(R.id.image_user));
-						}
+					if (serviceResponse.resultCode != ResultCode.Success) {
+						return true;
 					}
-					catch (ProxibaseException exception) {
-						exception.printStackTrace();
+
+					String jsonResponse = (String) serviceResponse.data;
+
+					mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
+					mUser.anonymous = true;
+
+					Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, null);
+					Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, null);
+					Aircandi.settingsEditor.commit();
+
+					if (findViewById(R.id.image_user) != null) {
+						setUserPicture(mUser.imageUri, (WebImageView) findViewById(R.id.image_user));
 					}
-					finally {
-						mProgressDialog.dismiss();
-						Toast.makeText(this, "Signed out.", Toast.LENGTH_SHORT).show();
-					}
+					mProgressDialog.dismiss();
+					Toast.makeText(this, "Signed out.", Toast.LENGTH_SHORT).show();
 				}
 				else {
 					mUserSignedInRunnable = null;
@@ -2937,21 +2986,21 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		if (beacon != null) {
 			String jsonBeacon = gson.toJson(beacon);
-			if (!jsonBeacon.equals("")) {
+			if (jsonBeacon.length() > 0) {
 				intent.putExtra(getString(R.string.EXTRA_BEACON), jsonBeacon);
 			}
 		}
 
 		if (entityProxy != null) {
 			String jsonEntityProxy = gson.toJson(entityProxy);
-			if (!jsonEntityProxy.equals("")) {
+			if (jsonEntityProxy.length() > 0) {
 				intent.putExtra(getString(R.string.EXTRA_ENTITY), jsonEntityProxy);
 			}
 		}
 
 		if (user != null) {
 			String jsonUser = ProxibaseService.getGson(GsonType.Internal).toJson(user);
-			if (!jsonUser.equals("")) {
+			if (jsonUser.length() > 0) {
 				intent.putExtra(getString(R.string.EXTRA_USER), jsonUser);
 			}
 		}
@@ -2974,10 +3023,18 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 	}
 
-	private void checkForUpdate() throws ProxibaseException {
+	private void checkForUpdate() {
 
 		Query query = new Query("Versions").filter("Target eq 'aircandi'");
-		String jsonResponse = (String) ProxibaseService.getInstance().selectUsingQuery(query, ProxiConstants.URL_AIRCANDI_SERVICE_ODATA);
+		ServiceRequest serviceRequest = new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json);
+		serviceRequest.setSuppressUI(true);
+		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
+		if (serviceResponse.resultCode != ResultCode.Success) {
+			return;
+		}
+
+		String jsonResponse = (String) serviceResponse.data;
 		VersionInfo versionInfo = (VersionInfo) ProxibaseService.convertJsonToObject(jsonResponse, VersionInfo.class, GsonType.ProxibaseService);
 		String currentVersionName = Aircandi.getVersionName(this, CandiSearchActivity.class);
 
@@ -3049,6 +3106,37 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	// --------------------------------------------------------------------------------------------
 	// Misc classes/interfaces/enums
 	// --------------------------------------------------------------------------------------------
+
+	public interface IScanCompleteListener {
+
+		void onScanComplete();
+	}
+
+	public static class SimpleAsyncTask extends AsyncTask<Object, Void, Object> {
+
+		@Override
+		protected Object doInBackground(Object... params) {
+			return true;
+		}
+
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+		}
+
+		@Override
+		protected void onPostExecute(Object response) {}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+		}
+
+		@Override
+		protected void onProgressUpdate(Void... values) {
+			super.onProgressUpdate(values);
+		}
+	}
 
 	private class Stopwatch {
 

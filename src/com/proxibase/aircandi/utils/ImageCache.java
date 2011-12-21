@@ -204,9 +204,12 @@ public class ImageCache implements Map<String, Bitmap> {
 
 			Arrays.sort(files, new SortFilesByModified());
 			long cacheSize = cacheSize(files);
-			Logger.d(this, "Cache size: " + String.valueOf(cacheSize) + " trigger size: " + String.valueOf(triggerSize) + " target size: " + String.valueOf(targetSize));
-			if (cacheSize > triggerSize)
-			{
+			Logger.d(this, "Cache size: " + String.valueOf(cacheSize)
+							+ " trigger size: "
+							+ String.valueOf(triggerSize)
+							+ " target size: "
+							+ String.valueOf(targetSize));
+			if (cacheSize > triggerSize) {
 				Logger.d(this, "Trimming file cache");
 				cleanCache(files, targetSize);
 			}
@@ -292,7 +295,19 @@ public class ImageCache implements Map<String, Bitmap> {
 	}
 
 	public Bitmap remove(Object key) {
-		return mCache.remove(key);
+
+		/* Memory cache */
+		if (mCache.containsKey(key)) {
+			mCache.remove(key);
+		}
+
+		/* File cache */
+		File imageFile = getImageFile((String) key);
+		if (imageFile.exists()) {
+			imageFile.delete();
+		}
+		
+		return null;
 	}
 
 	public Set<String> keySet() {

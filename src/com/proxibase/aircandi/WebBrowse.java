@@ -12,12 +12,16 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.models.WebEntity;
-import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.Logger;
+import com.proxibase.aircandi.utils.NetworkManager;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
 public class WebBrowse extends AircandiActivity {
@@ -32,19 +36,25 @@ public class WebBrowse extends AircandiActivity {
 		configure();
 		bindEntity();
 		drawEntity();
+		GoogleAnalyticsTracker.getInstance().trackPageView("/WebBrowse");
 	}
 
 	protected void bindEntity() {
 		/*
 		 * We handle all the elements that are different than the base entity.
 		 */
-		String jsonResponse = null;
-		try {
-			jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
-			mEntity = (WebEntity) ProxibaseService.convertJsonToObject(jsonResponse, WebEntity.class, GsonType.ProxibaseService);
+		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
+				new ServiceRequest(mEntityProxy.getEntryUri(), RequestType.Get, ResponseFormat.Json));
+
+		if (serviceResponse.resultCode != ResultCode.Success) {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 		}
-		catch (ProxibaseException exception) {
-			Exceptions.Handle(exception);
+		else {
+			String jsonResponse = (String) serviceResponse.data;
+			mEntity = (WebEntity) ProxibaseService.convertJsonToObject(jsonResponse, WebEntity.class, GsonType.ProxibaseService);
+			GoogleAnalyticsTracker.getInstance().dispatch();
 		}
 	}
 
@@ -57,7 +67,7 @@ public class WebBrowse extends AircandiActivity {
 				return false;
 			}
 		});
-		
+
 		mWebView.setWebChromeClient(new WebChromeClient() {
 
 			public void onProgressChanged(WebView view, int progress) {

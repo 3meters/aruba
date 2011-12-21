@@ -41,22 +41,36 @@
                     android:gravity="center"
                     android:paddingBottom="15dp" />
 
-                <Button
-                    android:id="@+id/retry_button"
-                    style="@style/app_button"
-                    android:layout_width="120dp"
+                <LinearLayout
+                    android:id="@+id/group_buttons"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/retry_message"
-                    android:layout_centerInParent="true"
-                    android:clickable="true"
-                    android:text="@string/dialog_network_retry_button" />
+                    android:orientation="horizontal" >
+
+                    <Button
+                        android:id="@+id/button_retry"
+                        style="@style/app_button"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:text="@string/dialog_network_retry_button" />
+
+                    <Button
+                        android:id="@+id/button_cancel"
+                        style="@style/app_button"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:text="@string/dialog_network_cancel_button" />
+                </LinearLayout>
 
                 <CheckBox
                     android:id="@+id/wifi_enabled_checkbox"
                     style="@style/app_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/retry_button"
+                    android:layout_below="@+id/group_buttons"
                     android:layout_centerHorizontal="true"
                     android:text="@string/dialog_network_enable_wifi_checkbox" />
             </RelativeLayout>

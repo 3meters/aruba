@@ -1,20 +1,20 @@
 package com.proxibase.aircandi;
 
-import android.graphics.Bitmap;
+import android.app.Activity;
 import android.view.View;
 import android.widget.CheckBox;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.models.BaseEntity;
 import com.proxibase.aircandi.models.GalleryEntity;
-import com.proxibase.aircandi.utils.Exceptions;
-import com.proxibase.aircandi.utils.ImageManager;
-import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
+import com.proxibase.aircandi.utils.NetworkManager;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
 public class GalleryForm extends EntityBaseForm {
@@ -27,18 +27,24 @@ public class GalleryForm extends EntityBaseForm {
 			GalleryEntity entity = new GalleryEntity();
 			entity.entityType = CandiConstants.TYPE_CANDI_GALLERY;
 			entity.parentEntityId = null;
-			entity.imageUri = "resource:placeholder_gallery";
+			entity.imageUri = (String) mImagePicture.getTag();
 			entity.imageFormat = ImageFormat.Binary.name().toLowerCase();
 			mEntity = entity;
 		}
 		else if (mCommand.verb.equals("edit")) {
-			String jsonResponse = null;
-			try {
-				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
-				mEntity = (GalleryEntity) ProxibaseService.convertJsonToObject(jsonResponse, GalleryEntity.class, GsonType.ProxibaseService);
+			
+			ServiceResponse serviceResponse = NetworkManager.getInstance().request(
+					new ServiceRequest(mEntityProxy.getEntryUri(), RequestType.Get, ResponseFormat.Json));
+
+			if (serviceResponse.resultCode != ResultCode.Success) {
+				setResult(Activity.RESULT_CANCELED);
+				finish();
+				overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 			}
-			catch (ProxibaseException exception) {
-				Exceptions.Handle(exception);
+			else {
+				String jsonResponse = (String) serviceResponse.data;
+				mEntity = (GalleryEntity) ProxibaseService.convertJsonToObject(jsonResponse, GalleryEntity.class, GsonType.ProxibaseService);
+				GoogleAnalyticsTracker.getInstance().dispatch();
 			}
 		}
 		super.bindEntity();
@@ -52,34 +58,6 @@ public class GalleryForm extends EntityBaseForm {
 			((CheckBox) findViewById(R.id.chk_locked)).setVisibility(View.VISIBLE);
 			((CheckBox) findViewById(R.id.chk_locked)).setChecked(((GalleryEntity) mEntity).locked);
 		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Event routines
-	// --------------------------------------------------------------------------------------------
-
-	public void onChangePictureButtonClick(View view) {
-		showChangePictureDialog(false, new ImageRequestListener() {
-
-			@Override
-			public void onImageReady(Bitmap bitmap) {
-				BaseEntity entity = (BaseEntity) mEntity;
-				if (bitmap == null) {
-					entity.imageUri = "resource:placeholder_gallery";
-					entity.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_gallery);
-				}
-				else {
-					entity.imageUri = "updated";
-					entity.imageBitmap = bitmap;
-				}
-				ImageUtils.showImageInImageView(bitmap, mImagePicture);
-			}
-
-			@Override
-			public void onProxibaseException(ProxibaseException exception) {
-				/* Do nothing */
-				}
-		});
 	}
 
 	// --------------------------------------------------------------------------------------------

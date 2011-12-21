@@ -4,7 +4,6 @@ import org.anddev.andengine.opengl.texture.source.ITextureSource;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.util.Log;
 
 public class BitmapTextureSource implements ITextureSource {
 
@@ -60,7 +59,7 @@ public class BitmapTextureSource implements ITextureSource {
 		/* Andengine throws an IllegalArgumentException if we return null. */
 		if (mBitmap != null && mBitmap.isRecycled()) {
 			if (this.mBitmapAdapter != null) {
-				Log.v("AndEngine", "Reloading recycled texture for Andengine");
+				//Log.v("AndEngine", "Reloading recycled texture for Andengine");
 				Bitmap bitmap = this.mBitmapAdapter.reloadBitmap();
 				if (bitmap != null)
 					mBitmap = bitmap;

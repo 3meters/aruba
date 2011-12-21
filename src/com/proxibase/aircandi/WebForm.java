@@ -4,6 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
@@ -19,14 +20,18 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.WebEntity;
-import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageUtils;
+import com.proxibase.aircandi.utils.NetworkManager;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.IQueryListener;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
 public class WebForm extends EntityBaseForm {
@@ -35,6 +40,7 @@ public class WebForm extends EntityBaseForm {
 	protected void bindEntity() {
 
 		/* We handle all the elements that are different than the base entity. */
+
 		if (mCommand.verb.equals("new")) {
 			WebEntity entity = new WebEntity();
 			entity.entityType = CandiConstants.TYPE_CANDI_WEB;
@@ -48,13 +54,19 @@ public class WebForm extends EntityBaseForm {
 			mEntity = entity;
 		}
 		else if (mCommand.verb.equals("edit")) {
-			String jsonResponse = null;
-			try {
-				jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json);
-				mEntity = (WebEntity) ProxibaseService.convertJsonToObject(jsonResponse, WebEntity.class, GsonType.ProxibaseService);
+
+			ServiceResponse serviceResponse = NetworkManager.getInstance().request(
+					new ServiceRequest(mEntityProxy.getEntryUri(), RequestType.Get, ResponseFormat.Json));
+
+			if (serviceResponse.resultCode != ResultCode.Success) {
+				setResult(Activity.RESULT_CANCELED);
+				finish();
+				overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
 			}
-			catch (ProxibaseException exception) {
-				Exceptions.Handle(exception);
+			else {
+				String jsonResponse = (String) serviceResponse.data;
+				mEntity = (WebEntity) ProxibaseService.convertJsonToObject(jsonResponse, WebEntity.class, GsonType.ProxibaseService);
+				GoogleAnalyticsTracker.getInstance().dispatch();
 			}
 		}
 		super.bindEntity();
@@ -225,63 +237,56 @@ public class WebForm extends EntityBaseForm {
 							mProgressDialog.setMessage(getResources().getString(R.string.web_progress_validating));
 							mProgressDialog.show();
 
-							ProxibaseService.getInstance().selectAsync(data, ResponseFormat.Html, new IQueryListener() {
+							ServiceRequest serviceRequest = new ServiceRequest();
+							serviceRequest.setUri(data);
+							serviceRequest.setRequestType(RequestType.Get);
+							serviceRequest.setResponseFormat(ResponseFormat.Html);
+							serviceRequest.setRequestListener(new RequestListener() {
 
 								@Override
-								public void onComplete(final String response) {
-									runOnUiThread(new Runnable() {
+								public void onComplete(Object response) {
+									
+									ServiceResponse serviceResponse = (ServiceResponse) response;
+									if (serviceResponse.resultCode != ResultCode.Success) {
+										mProgressDialog.dismiss();
+										ImageUtils.showToastNotification(getResources().getString(R.string.web_alert_website_unavailable),
+												Toast.LENGTH_SHORT);
+									}
+									else {
+										Document document = Jsoup.parse((String) response);
+										((EditText) findViewById(R.id.text_title)).setText(document.title());
 
-										@Override
-										public void run() {
-											Document document = Jsoup.parse(response);
-											((EditText) findViewById(R.id.text_title)).setText(document.title());
-
-											String description = null;
-											Element element = document.select("meta[name=description]").first();
-											if (element != null) {
-												description = element.attr("content");
-											}
-
-											if (description == null) {
-												element = document.select("p[class=description]").first();
-												if (element != null) {
-													description = element.text();
-												}
-											}
-											if (description == null) {
-												element = document.select("p").first();
-												if (element != null) {
-													description = element.text();
-												}
-											}
-
-											if (description != null) {
-												((EditText) findViewById(R.id.text_content)).setText(description);
-											}
-											else {
-												((EditText) findViewById(R.id.text_content)).setText("");
-											}
-											mProgressDialog.dismiss();
+										String description = null;
+										Element element = document.select("meta[name=description]").first();
+										if (element != null) {
+											description = element.attr("content");
 										}
-									});
-								}
 
-								@Override
-								public void onProxibaseException(ProxibaseException exception) {
-									if (!Exceptions.Handle(exception))
-									{
-										runOnUiThread(new Runnable() {
-
-											@Override
-											public void run() {
-												mProgressDialog.dismiss();
-												ImageUtils.showToastNotification(WebForm.this, getResources().getString(
-														R.string.web_alert_website_unavailable), Toast.LENGTH_SHORT);
+										if (description == null) {
+											element = document.select("p[class=description]").first();
+											if (element != null) {
+												description = element.text();
 											}
-										});
+										}
+										if (description == null) {
+											element = document.select("p").first();
+											if (element != null) {
+												description = element.text();
+											}
+										}
+
+										if (description != null) {
+											((EditText) findViewById(R.id.text_content)).setText(description);
+										}
+										else {
+											((EditText) findViewById(R.id.text_content)).setText("");
+										}
+										mProgressDialog.dismiss();
 									}
 								}
 							});
+
+							NetworkManager.getInstance().requestAsync(serviceRequest);
 						}
 					}
 				}

@@ -13,7 +13,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
-import android.widget.ImageView;
+
+import com.proxibase.aircandi.widgets.WebImageView;
 
 public class DrawableManager {
 
@@ -54,17 +55,16 @@ public class DrawableManager {
 		}
 	}
 
-	public void fetchDrawableOnThread(final String urlString, final ImageView imageView) {
+	public void fetchDrawableOnThread(final String urlString, final WebImageView imageView) {
 		if (drawableMap.containsKey(urlString)) {
-			imageView.setImageDrawable((Drawable) drawableMap.get(urlString));
+			ImageUtils.showDrawableInImageView((Drawable) drawableMap.get(urlString), imageView);
 		}
 
 		final Handler handler = new Handler() {
 
 			@Override
 			public void handleMessage(Message message) {
-
-				imageView.setImageDrawable((Drawable) message.obj);
+				ImageUtils.showDrawableInImageView((Drawable) message.obj, imageView);
 			}
 		};
 
@@ -72,8 +72,6 @@ public class DrawableManager {
 
 			@Override
 			public void run() {
-
-				// TODO : set imageView to a "pending" image
 				Drawable drawable = fetchDrawable(urlString);
 				Message message = handler.obtainMessage(1, drawable);
 				handler.sendMessage(message);

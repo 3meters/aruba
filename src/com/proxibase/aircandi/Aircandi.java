@@ -15,6 +15,7 @@ import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
 import android.content.pm.PackageInfo;
 import android.location.Location;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import com.proxibase.aircandi.core.CandiConstants;
@@ -74,6 +75,7 @@ public class Aircandi extends Application {
 	public static SharedPreferences			settings;
 	public static SharedPreferences.Editor	settingsEditor;
 	public static Context					applicationContext;
+	public static Handler					applicationHandler;
 
 	public Aircandi() {}
 
@@ -83,6 +85,7 @@ public class Aircandi extends Application {
 		ACRA.init(this);
 
 		applicationContext = getApplicationContext();
+		applicationHandler = new Handler();
 
 		super.onCreate();
 

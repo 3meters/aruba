@@ -12,21 +12,29 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.DateUtils;
 import com.proxibase.aircandi.utils.Exceptions;
-import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
+import com.proxibase.aircandi.utils.NetworkManager;
 import com.proxibase.aircandi.utils.S3;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.IQueryListener;
+import com.proxibase.sdk.android.proxi.service.Query;
+import com.proxibase.sdk.android.proxi.service.ServiceRequest;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
+import com.proxibase.sdk.android.util.ProxiConstants;
 
 public class SignUpForm extends AircandiActivity {
 
@@ -45,6 +53,7 @@ public class SignUpForm extends AircandiActivity {
 		configure();
 		bind();
 		draw();
+		GoogleAnalyticsTracker.getInstance().trackPageView("/SignUpForm");
 	}
 
 	protected void configure() {
@@ -94,7 +103,9 @@ public class SignUpForm extends AircandiActivity {
 
 	protected void bind() {
 		mUser = new User();
-		mUser.imageUri = "resource:placeholder_user";
+		mUser.imageUri = (String) mImageUser.getTag();
+		GoogleAnalyticsTracker.getInstance().dispatch();
+
 	}
 
 	protected void draw() {
@@ -108,11 +119,14 @@ public class SignUpForm extends AircandiActivity {
 			}
 			else {
 				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
-						CandiConstants.IMAGE_WIDTH_MAX, false, true, true, 1, this, new ImageRequestListener() {
+						CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
 
 							@Override
-							public void onImageReady(Bitmap bitmap) {
-								mUser.imageBitmap = bitmap;
+							public void onComplete(Object response) {
+								ServiceResponse serviceResponse = (ServiceResponse) response;
+								if (serviceResponse.resultCode == ResultCode.Success) {
+									mUser.imageBitmap = (Bitmap) serviceResponse.data;
+								}
 							}
 						});
 
@@ -136,32 +150,20 @@ public class SignUpForm extends AircandiActivity {
 	}
 
 	public void onChangePictureButtonClick(View view) {
-		showChangePictureDialog(false, new ImageRequestListener() {
+
+		showChangePictureDialog(true, mImageUser, new RequestListener() {
 
 			@Override
-			public void onImageReady(final Bitmap bitmap) {
-				runOnUiThread(new Runnable() {
+			public void onComplete(Object response, Object extra) {
 
-					@Override
-					public void run() {
-						if (bitmap == null) {
-							mUser.imageUri = "resource:placeholder_user";
-							mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_user);
-						}
-						else {
-							mUser.imageUri = "updated";
-							mUser.imageBitmap = bitmap;
-						}
-						ImageUtils.showImageInImageView(bitmap, mImageUser);
-					}
-				});
-			}
-
-			@Override
-			public void onProxibaseException(ProxibaseException exception) {
-				/* Do nothing */
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				if (serviceResponse.resultCode == ResultCode.Success) {
+					Bitmap bitmap = (Bitmap) serviceResponse.data;
+					String imageUri = (String) extra;
+					mUser.imageUri = imageUri;
+					mUser.imageBitmap = bitmap;
 				}
-
+			}
 		});
 	}
 
@@ -173,8 +175,7 @@ public class SignUpForm extends AircandiActivity {
 		if (!validate()) {
 			return;
 		}
-		updateImages();
-		insertEntity();
+		insertUser();
 	}
 
 	private boolean validate() {
@@ -186,91 +187,88 @@ public class SignUpForm extends AircandiActivity {
 		return true;
 	}
 
-	protected void updateImages() {
-		/* Put image to S3 if we have a new one. */
-		if (mUser.imageUri != null && !ImageManager.isLocalImage(mUser.imageUri)) {
-			if (!mUser.imageUri.equals(mImageUriOriginal) && mUser.imageBitmap != null) {
-				String imageKey = String.valueOf(((User) mUser).id) + "_"
-									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-									+ ".jpg";
-				try {
-					S3.putImage(imageKey, mUser.imageBitmap);
-				}
-				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
-					exception.printStackTrace();
-				}
-				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
-			}
-		}
-	}
-
-	protected void insertEntity() {
+	protected void insertUser() {
 
 		mUser.email = mTextEmail.getText().toString().trim();
 		mUser.fullname = mTextFullname.getText().toString().trim();
 		mUser.password = mTextPassword.getText().toString().trim();
 		mUser.createdDate = DateUtils.nowString();
 
-		mUser.insertAsync(new IQueryListener() {
+		Logger.i(this, "Insert user: " + mUser.fullname);
+
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mUser.getCollection());
+		serviceRequest.setRequestType(RequestType.Insert);
+		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
+		serviceRequest.setResponseFormat(ResponseFormat.Json);
+		serviceRequest.setRequestListener(new RequestListener() {
 
 			@Override
-			public void onComplete(String jsonResponse) {
+			public void onComplete(Object response) {
 
-				/* Load the just insert user to get the user id */
-				try {
-					mUser = ProxibaseService.getInstance().loadUser(mUser.email);
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				if (serviceResponse.resultCode != ResultCode.Success) {
+					ImageUtils.showToastNotification(getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
+					return;
+				}
+				else {
+					/* Load the just insert user to get the user id */
+					Query query = new Query("Users").filter("Email eq '" + mUser.email + "'");
+					serviceResponse = NetworkManager.getInstance().request(
+							new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-					/* Delete or upload images to S3 as needed. */
-					if (mUser.imageUri != null && !mUser.imageUri.contains("resource:") && mUser.imageBitmap != null) {
-						String imageKey = String.valueOf(mUser.id) + "_"
-													+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-													+ ".jpg";
-						try {
-							S3.putImage(imageKey, mUser.imageBitmap);
-						}
-						catch (ProxibaseException exception) {
-							if (!Exceptions.Handle(exception)) {
-								ImageUtils.showToastNotification(SignUpForm.this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
-							}
-						}
-						mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
-						mUser.update(); /* Need to update the user to capture the uri for the image we saved */
+					if (serviceResponse.resultCode != ResultCode.Success) {
+						/* Jayma: We might have succeeded inserting user but not the user picture */
+						return;
 					}
+					else
+					{
+						String jsonResponse = (String) serviceResponse.data;
+						mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 
-					runOnUiThread(new Runnable() {
+						/* Upload images to S3 as needed. */
+						if (mUser.imageUri != null && !mUser.imageUri.contains("resource:") && mUser.imageBitmap != null) {
+							String imageKey = String.valueOf(mUser.id) + "_"
+														+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
+														+ ".jpg";
+							try {
+								S3.putImage(imageKey, mUser.imageBitmap);
+							}
+							catch (ProxibaseException exception) {
+								if (!Exceptions.Handle(exception)) {
+									ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
+								}
+							}
+							mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
 
-						public void run() {
-							Logger.i(SignUpForm.this, "Inserted new user: " + mUser.fullname
-																							+ " ("
-																							+ mUser.id
-																							+ ")");
-							stopTitlebarProgress();
-							Aircandi.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),
-									getResources().getString(R.string.signup_alert_new_user_message),
-									SignUpForm.this, new
-									OnClickListener() {
+							/* Need to update the user to capture the uri for the image we saved */
+							ServiceRequest serviceRequest = new ServiceRequest();
+							serviceRequest.setUri(mUser.getEntryUri());
+							serviceRequest.setRequestType(RequestType.Update);
+							serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
+							serviceRequest.setResponseFormat(ResponseFormat.Json);
 
-										public void onClick(DialogInterface dialog, int which) {
-											finish();
-										}
-									});
-
+							/* Doing an insert so we don't need anything back */
+							NetworkManager.getInstance().request(serviceRequest);
 						}
-					});
-				}
-				catch (ProxibaseException exception) {
-					Exceptions.Handle(exception);
-				}
-			}
 
-			@Override
-			public void onProxibaseException(ProxibaseException exception) {
-				if (!Exceptions.Handle(exception)) {
-					ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
+						Logger.i(SignUpForm.this, "Inserted new user: " + mUser.fullname + " (" + mUser.id + ")");
+						stopTitlebarProgress();
+						Aircandi.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),
+										getResources().getString(R.string.signup_alert_new_user_message),
+										SignUpForm.this, new OnClickListener() {
+
+											public void onClick(DialogInterface dialog, int which) {
+												finish();
+											}
+										});
+					}
 				}
+
 			}
 		});
+
+		NetworkManager.getInstance().requestAsync(serviceRequest);
 	}
 
 	private boolean isValid() {

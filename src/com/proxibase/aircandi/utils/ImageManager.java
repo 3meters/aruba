@@ -28,8 +28,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 /*
  * TODO: ImageCache uses weak references by default. Should investigate the possible benefits
@@ -65,7 +64,7 @@ public class ImageManager {
 	// Load routines
 	// --------------------------------------------------------------------------------------------
 
-	public Bitmap loadBitmapFromDevice(final Uri imageUri, String imageWidthMax) throws ProxibaseException {
+	public Bitmap loadBitmapFromDevice(final Uri imageUri, String imageWidthMax) {
 
 		String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
 		@SuppressWarnings("unused")
@@ -100,7 +99,8 @@ public class ImageManager {
 				rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
 			}
 			catch (IOException exception) {
-				throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
+				Exceptions.Handle(exception);
+				return null;
 			}
 		}
 
@@ -112,19 +112,22 @@ public class ImageManager {
 			in = new DataInputStream(new FileInputStream(imageFile));
 		}
 		catch (FileNotFoundException exception) {
-			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.FileNotFoundException, exception);
+			Exceptions.Handle(exception);
+			return null;
 		}
 		try {
 			in.readFully(imageBytes);
 		}
 		catch (IOException exception) {
-			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
+			Exceptions.Handle(exception);
+			return null;
 		}
 		try {
 			in.close();
 		}
 		catch (IOException exception) {
-			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
+			Exceptions.Handle(exception);
+			return null;
 		}
 
 		// imageOrientation = getExifOrientation(imageUri.getPath(), imageOrientation);
@@ -133,7 +136,7 @@ public class ImageManager {
 		return bitmap;
 	}
 
-	public Bitmap loadBitmapFromAssets(final String assetPath) throws ProxibaseException {
+	public Bitmap loadBitmapFromAssets(final String assetPath) {
 		InputStream in = null;
 		try {
 			final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
@@ -143,7 +146,8 @@ public class ImageManager {
 			return BitmapFactory.decodeStream(in, null, decodeOptions);
 		}
 		catch (final IOException exception) {
-			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
+			Exceptions.Handle(exception);
+			return null;
 		}
 		finally {
 			StreamUtils.close(in);
@@ -152,9 +156,6 @@ public class ImageManager {
 
 	public Bitmap loadBitmapFromResources(final int resourceId) {
 		Bitmap bitmap = BitmapFactory.decodeResource(mActivity.getResources(), resourceId);
-		//Drawable drawable = mContext.getResources().getDrawable(resourceId);
-		//BitmapDrawable bitmapDrawable = (BitmapDrawable) mContext.getResources().getDrawable(resourceId); 
-		//BitmapDrawable bitmapDrawable = new BitmapDrawable(BitmapFactory.decodeResource(mContext.getResources(), resourceId));		
 		return bitmap;
 	}
 
@@ -169,7 +170,46 @@ public class ImageManager {
 		return bitmapBytes;
 	}
 
-	private Bitmap bitmapForByteArray(byte[] imageBytes, String imageWidthMax, int rotation) {
+	public Bitmap bitmapForByteArraySampled(byte[] imageBytes, ImageRequest imageRequest, int imageByteMax) {
+
+		//		if (imageBytes.length > imageByteMax) {
+
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+
+		/* Initial decode is just to get the bitmap dimensions */
+		BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
+
+		int width_tmp = options.outWidth, height_tmp = options.outHeight;
+		int originalSize = width_tmp * width_tmp;
+		int scale = 1;
+		while (true) {
+			if ((width_tmp * height_tmp) < imageByteMax) {
+				break;
+			}
+			width_tmp /= 2;
+			height_tmp /= 2;
+			scale *= 2;
+		}
+
+		options.inSampleSize = scale;
+		options.inJustDecodeBounds = false;
+
+		Bitmap bitmapSampled = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
+		int newSize = bitmapSampled.getHeight() * bitmapSampled.getWidth();
+		if (newSize != originalSize) {
+			Logger.v(this, "Image downsampled: from " + String.valueOf(originalSize)
+							+ " to "
+							+ String.valueOf(bitmapSampled.getHeight() * bitmapSampled.getWidth())
+							+ ": "
+							+ imageRequest.imageUri);
+		}
+
+		return bitmapSampled;
+	}
+
+	public Bitmap bitmapForByteArray(byte[] imageBytes, String imageWidthMax, int rotation) {
 
 		BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 		bitmapOptions.inJustDecodeBounds = true;
@@ -196,6 +236,9 @@ public class ImageManager {
 				}
 				else if (sample > 4 && sample < 8) {
 					sample = 8;
+				}
+				else if (sample > 8 && sample < 16) {
+					sample = 16;
 				}
 
 				bitmapOptions.inSampleSize = sample;
@@ -459,9 +502,9 @@ public class ImageManager {
 	}
 
 	public static boolean isLocalImage(String imageUri) {
-		if (imageUri.toLowerCase().contains("resource:"))
+		if (imageUri.toLowerCase().startsWith("resource:"))
 			return true;
-		if (imageUri.toLowerCase().contains("asset:"))
+		if (imageUri.toLowerCase().startsWith("asset:"))
 			return true;
 		return false;
 	}
@@ -479,8 +522,13 @@ public class ImageManager {
 	}
 
 	public void deleteImage(String key) {
+		/* Removes the image from the memory and file caches. */
 		mImageCache.remove(key);
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Setters/Getters routines
+	// --------------------------------------------------------------------------------------------
 
 	public ImageCache getImageCache() {
 		return mImageCache;
@@ -490,10 +538,6 @@ public class ImageManager {
 		mImageCache = imageCache;
 		getImageLoader().setImageCache(imageCache);
 	}
-
-	// --------------------------------------------------------------------------------------------
-	// Setters/Getters routines
-	// --------------------------------------------------------------------------------------------
 
 	public void setImageLoader(ImageLoader imageLoader) {
 		this.mImageLoader = imageLoader;
@@ -527,46 +571,26 @@ public class ImageManager {
 		return mDisplayMetrics;
 	}
 
-	private interface IImageRequestListener {
-
-		void onImageReady(Bitmap bitmap);
-
-		void onProgressChanged(int progress);
-
-		void onProxibaseException(ProxibaseException exception);
-	}
-
-	public static class ImageRequestListener implements IImageRequestListener {
-
-		public void onImageReady(Bitmap bitmap) {}
-
-		public void onProgressChanged(int progress) {}
-
-		public void onProxibaseException(ProxibaseException exception) {
-			Exceptions.Handle(exception);
-		}
-	}
-
 	public static class ImageRequest {
 
-		public String				imageUri;
-		public ImageShape			imageShape			= ImageShape.Native;
-		public ImageFormat			imageFormat;
-		public Object				imageRequestor;
-		public int					priority			= 1;
-		public int					scaleToWidth;
-		public boolean				makeReflection		= false;
-		public boolean				javascriptEnabled	= false;
-		public boolean				updateCache			= true;
-		public boolean				searchCache			= true;
-		public ImageRequestListener	imageReadyListener	= null;
+		public String			imageUri;
+		public ImageShape		imageShape			= ImageShape.Native;
+		public ImageFormat		imageFormat;
+		public Object			imageRequestor;
+		public int				priority			= 1;
+		public int				scaleToWidth;
+		public boolean			makeReflection		= false;
+		public boolean			javascriptEnabled	= false;
+		public boolean			updateCache			= true;
+		public boolean			searchCache			= true;
+		public RequestListener	requestListener		= null;
 
 		public ImageRequest(String imageUri, ImageShape imageShape, String imageFormatString, boolean javascriptEnabled, int scaleToWidth,
 				boolean makeReflection, boolean searchCache, boolean updateCache, int priority,
-				Object imageRequestor, ImageRequestListener imageReadyListener) {
+				Object imageRequestor, RequestListener requestListener) {
 			this.imageUri = imageUri;
 			this.imageShape = imageShape;
-			
+
 			ImageFormat imageFormat = ImageFormat.Binary;
 			if (imageFormatString.equals("html")) {
 				imageFormat = ImageFormat.Html;
@@ -583,7 +607,7 @@ public class ImageManager {
 			this.javascriptEnabled = javascriptEnabled;
 			this.searchCache = searchCache;
 			this.updateCache = updateCache;
-			this.imageReadyListener = imageReadyListener;
+			this.requestListener = requestListener;
 		}
 
 		public enum ImageFormat {

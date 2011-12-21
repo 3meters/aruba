@@ -29,7 +29,7 @@
 		<attr name="backgroundHeader" format="string"/>
 		<attr name="backgroundButton" format="string"/>
 		<attr name="backgroundCandiInfo" format="color"/>
-		<attr name="backgroundForm" format="string"/>
+		<attr name="backgroundForm" format="color"/>
 		<attr name="iconSearchActions" format="string"/>		
 		<attr name="iconRefresh" format="string"/>		
 		<attr name="iconNew" format="string"/>		

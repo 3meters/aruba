@@ -1,6 +1,5 @@
 package com.proxibase.aircandi.utils;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -13,10 +12,12 @@ import android.graphics.RectF;
 import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
+import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
@@ -28,20 +29,37 @@ public class ImageUtils {
 	private static LinearGradient	mShader	= new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x88ffffff, 0x00ffffff,
 													TileMode.CLAMP);
 
-	public static void showToastNotification(Context context, String message, int duration) {
-		CharSequence text = message;
-		Toast toast = Toast.makeText(context, text, duration);
-		toast.show();
+	public static void showToastNotification(final String message, final int duration) {
+		Aircandi.applicationHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				CharSequence text = message;
+				Toast toast = Toast.makeText(Aircandi.applicationContext, text, duration);
+				toast.show();
+			}
+		});
 	}
 
-	public static void showToastNotification(Context context, int messageId, int duration) {
-		Toast toast = Toast.makeText(context, messageId, duration);
-		toast.show();
+	public static void showToastNotification(final int messageId, final int duration) {
+		Aircandi.applicationHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				Toast toast = Toast.makeText(Aircandi.applicationContext, messageId, duration);
+				toast.show();
+			}
+		});
 	}
 
 	public static int getRawPixelsForDisplayPixels(int displayPixels) {
-		final float scale = ImageManager.getInstance().getDisplayMetrics().density;
-		return (int) (displayPixels * scale + 0.5f);
+		if (ImageManager.getInstance().getDisplayMetrics() != null) {
+			final float scale = ImageManager.getInstance().getDisplayMetrics().density;
+			return (int) (displayPixels * scale + 0.5f);
+		}
+		else {
+			return (int) (displayPixels * 1.5f + 0.5f);
+		}
 	}
 
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
@@ -167,6 +185,23 @@ public class ImageUtils {
 
 		if (bitmapReflection != null && imageViewReflection != null) {
 			imageViewReflection.setImageBitmap(bitmapReflection);
+			imageViewReflection.startAnimation(animation);
+		}
+	}
+
+	public static void showDrawableInImageView(Drawable drawable, WebImageView imageView) {
+		showDrawableInImageView(drawable, null, imageView, null);
+	}
+
+	public static void showDrawableInImageView(Drawable drawable, Drawable drawableReflection, WebImageView imageView, ImageView imageViewReflection) {
+		imageView.setImageDrawable(drawable);
+		Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+		animation.setFillEnabled(true);
+		animation.setFillAfter(true);
+		imageView.startAnimation(animation);
+
+		if (drawableReflection != null && imageViewReflection != null) {
+			imageViewReflection.setImageDrawable(drawableReflection);
 			imageViewReflection.startAnimation(animation);
 		}
 	}

@@ -24,13 +24,15 @@
 	</string-array>
 	<string-array
 		name="dialog_list_picture_sources">
-		<item>Select a gallery picture</item>
+		<item>Select a Gallery picture</item>
+		<item>Search for pictures</item>
 		<item>Take a new picture</item>
 		<item>None</item>
 	</string-array>
 	<string-array
 		name="dialog_list_picture_sources_facebook">
-		<item>Select a gallery picture</item>
+		<item>Select a Gallery picture</item>
+		<item>Search for pictures</item>
 		<item>Take a new picture</item>
 		<item>Use Facebook picture</item>
 		<item>None</item>
@@ -44,7 +46,18 @@
 		<item>aircandi_theme_snow</item>
 	</string-array>
 	<string-array
-		name="post_visibility_values_list">
+		name="gallery_categories">
+		<item>space</item>
+		<item>cats</item>
+		<item>cats humor</item>
+		<item>cats funny</item>
+		<item>animals</item>
+		<item>sports</item>
+		<item>nature</item>
+		<item>italy</item>
+	</string-array>
+	<string-array
+		name="form_visibility_values_list">
 		<item>Public</item>
 		<item>Private</item>
 	</string-array>

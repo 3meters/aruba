@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundCandiInfo" >
+
+    <RelativeLayout
+        android:id="@+id/actionbar"
+        style="@style/actionbar"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp" >
+
+        <Button
+            android:id="@+id/btn_context"
+            style="@style/actionbar_button_back"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:drawablePadding="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
+    </RelativeLayout>
+
+    <!--
+    <Spinner
+        android:id="@+id/cbo_category"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/actionbar"
+        android:drawSelectorOnTop="true"
+        android:entries="@array/gallery_categories"
+        android:prompt="@string/gallery_label_category" />
+    -->
+
+    <LinearLayout
+        android:id="@+id/cbo_category"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/actionbar"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/text_uri"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center|left"
+            android:hint="@string/gallery_label_category"
+            android:inputType="textUri"
+            android:singleLine="true" />
+
+        <ImageButton
+            android:id="@+id/btn_link_builder"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_weight="0"
+            android:clickable="true"
+            android:maxWidth="48dp"
+            android:minWidth="48dp"
+            android:onClick="onSearchClick"
+            android:scaleType="center"
+            android:src="@android:drawable/ic_search_category_default" />
+    </LinearLayout>
+
+    <GridView
+        android:id="@+id/grid_gallery"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/form_footer"
+        android:layout_below="@+id/cbo_category"
+        android:columnWidth="100dp"
+        android:gravity="center"
+        android:horizontalSpacing="5dp"
+        android:numColumns="3"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="5dp" >
+
+        <!-- Preview: listitem=@layout/temp_galleryitem -->
+    </GridView>
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/form_footer"
+        style="@style/form_footer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal" >
+
+        <Button
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
+    </LinearLayout>
+
+</RelativeLayout>

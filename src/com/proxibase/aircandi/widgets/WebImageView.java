@@ -10,13 +10,14 @@ import android.util.TypedValue;
 import android.widget.ImageView;
 
 import com.proxibase.aircandi.R;
-import com.proxibase.aircandi.utils.Exceptions;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 public class WebImageView extends ImageView {
 
@@ -47,13 +48,8 @@ public class WebImageView extends ImageView {
 		if (context.getTheme().resolveAttribute(R.attr.textureBodyZone, resourceName, true)) {
 			String placeholderAsset = (String) resourceName.coerceToString();
 			Bitmap placeholderBitmap = null;
-			try {
-				placeholderBitmap = ImageManager.getInstance().loadBitmapFromAssets(placeholderAsset);
-				mPlaceholder = new BitmapDrawable(placeholderBitmap);
-			}
-			catch (ProxibaseException exception) {
-				Exceptions.Handle(exception);
-			}
+			placeholderBitmap = ImageManager.getInstance().loadBitmapFromAssets(placeholderAsset);
+			mPlaceholder = new BitmapDrawable(placeholderBitmap);
 			setImageBitmap(placeholderBitmap);
 		}
 	}
@@ -75,22 +71,50 @@ public class WebImageView extends ImageView {
 	}
 
 	public void setImageRequest(final ImageRequest imageRequest, final ImageView imageReflection) {
-		
-		final ImageRequestListener originalImageReadyListener = imageRequest.imageReadyListener;
 
-		imageRequest.imageReadyListener = new ImageRequestListener() {
+		@SuppressWarnings("unused")
+		final RequestListener originalImageReadyListener = imageRequest.requestListener;
+
+		imageRequest.requestListener = new RequestListener() {
 
 			@Override
-			public void onImageReady(final Bitmap bitmap) {
-				if (bitmap != null) {
-					if (originalImageReadyListener != null) {
-						originalImageReadyListener.onImageReady(bitmap);
-					}
-					mThreadHandler.post(new Runnable() {
+			public void onComplete(Object response) {
 
-						@Override
-						public void run() {
-							if (imageRequest.makeReflection && imageReflection != null)
+				/* Who's looking for imageUri? */
+
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+
+				if (serviceResponse.resultCode != ResultCode.Success) {
+					final Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
+					if (bitmap != null) {
+						mThreadHandler.post(new Runnable() {
+
+							@Override
+							public void run() {
+								if (imageRequest.makeReflection && imageReflection != null)
+									{
+										String cacheName = ImageManager.getInstance().resolveCacheName(imageRequest.imageUri);
+										Bitmap bitmapReflection = ImageManager.getInstance().getImage(cacheName + ".reflection");
+										ImageUtils.showImageInImageView(bitmap, bitmapReflection, WebImageView.this, imageReflection);
+									}
+									else
+									{
+										ImageUtils.showImageInImageView(bitmap, WebImageView.this);
+									}
+								}
+						});
+					}
+				}
+				else
+				{
+					final Bitmap bitmap = (Bitmap) serviceResponse.data;
+
+					if (bitmap != null) {
+						mThreadHandler.post(new Runnable() {
+
+							@Override
+							public void run() {
+								if (imageRequest.makeReflection && imageReflection != null)
 							{
 								String cacheName = ImageManager.getInstance().resolveCacheName(imageRequest.imageUri);
 								Bitmap bitmapReflection = ImageManager.getInstance().getImage(cacheName + ".reflection");
@@ -101,7 +125,8 @@ public class WebImageView extends ImageView {
 								ImageUtils.showImageInImageView(bitmap, WebImageView.this);
 							}
 						}
-					});
+						});
+					}
 				}
 			}
 		};

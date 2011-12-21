@@ -75,7 +75,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 		if (mCommand == null) {
 			if (getIntent() != null && getIntent().getExtras() != null) {
 				String jsonStream = getIntent().getExtras().getString("stream");
-				if (jsonStream != null && !jsonStream.equals(""))
+				if (jsonStream != null && jsonStream.length() > 0)
 					mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(getIntent().getExtras().getString("stream"), Command.class);
 			}
 		}
@@ -100,11 +100,11 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	}
 
 	public void onSearchClick(View view) {
-		ImageUtils.showToastNotification(this, "Unimplemented...", Toast.LENGTH_SHORT);
+		ImageUtils.showToastNotification( "Unimplemented...", Toast.LENGTH_SHORT);
 		return;
 	}
 
-	protected void startTitlebarProgress(final boolean oneShot) {
+	protected void startTitlebarProgress() {
 		if (mProgressIndicator != null) {
 			mProgressIndicator.setVisibility(View.VISIBLE);
 			mButtonRefresh.setVisibility(View.INVISIBLE);
@@ -115,9 +115,8 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 				@Override
 				public void run() {
 					AnimationDrawable animation = (AnimationDrawable) mProgressIndicator.getBackground();
-					animation.setOneShot(oneShot);
+					animation.setOneShot(false);
 					animation.start();
-
 				}
 			});
 

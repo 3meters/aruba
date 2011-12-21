@@ -124,7 +124,8 @@
                         style="@style/form_picture"
                         android:layout_width="100dp"
                         android:layout_height="100dp"
-                        android:maxWidth="100dp" />
+                        android:maxWidth="100dp"
+                        android:tag="resource:placeholder_user" />
 
                     <Button
                         android:id="@+id/btn_change_public_image"

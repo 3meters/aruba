@@ -19,23 +19,29 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.DateUtils;
 import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
+import com.proxibase.aircandi.utils.NetworkManager;
 import com.proxibase.aircandi.utils.S3;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.Query;
+import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.IQueryListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
 public class ProfileForm extends AircandiActivity {
@@ -68,6 +74,7 @@ public class ProfileForm extends AircandiActivity {
 		configure();
 		bind();
 		draw();
+		GoogleAnalyticsTracker.getInstance().trackPageView("/ProfileForm");
 	}
 
 	protected void configure() {
@@ -143,15 +150,21 @@ public class ProfileForm extends AircandiActivity {
 		 * This form is always for editing. We always reload the user to make sure
 		 * we have the freshest data.
 		 */
-		String jsonResponse = null;
-		try {
-			Query query = new Query("Users").filter("Email eq '" + ((User) mUser).email + "'");
-			jsonResponse = (String) ProxibaseService.getInstance().selectUsingQuery(query, ProxiConstants.URL_AIRCANDI_SERVICE_ODATA);
+		Query query = new Query("Users").filter("Email eq '" + ((User) mUser).email + "'");
+
+		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
+				new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+
+		if (serviceResponse.resultCode != ResultCode.Success) {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
+		}
+		else {
+			String jsonResponse = (String) serviceResponse.data;
 			mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 			mImageUriOriginal = mUser.imageUri;
-		}
-		catch (ProxibaseException exception) {
-			Exceptions.Handle(exception);
+			GoogleAnalyticsTracker.getInstance().dispatch();
 		}
 	}
 
@@ -166,11 +179,18 @@ public class ProfileForm extends AircandiActivity {
 			}
 			else {
 				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
-						CandiConstants.IMAGE_WIDTH_MAX, false, true, true, 1, this, new ImageRequestListener() {
+						CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
 
 							@Override
-							public void onImageReady(Bitmap bitmap) {
-								mUser.imageBitmap = bitmap;
+							public void onComplete(Object response) {
+
+								ServiceResponse serviceResponse = (ServiceResponse) response;
+								if (serviceResponse.resultCode != ResultCode.Success) {
+									return;
+								}
+								else {
+									mUser.imageBitmap = (Bitmap) serviceResponse.data;
+								}
 							}
 						});
 
@@ -206,32 +226,19 @@ public class ProfileForm extends AircandiActivity {
 	}
 
 	public void onChangePictureButtonClick(View view) {
-		showChangePictureDialog((mUser.facebookId != null && mUser.facebookId.length() != 0), new ImageRequestListener() {
+		showChangePictureDialog(true, mImageUser, new RequestListener() {
 
 			@Override
-			public void onImageReady(final Bitmap bitmap) {
-				runOnUiThread(new Runnable() {
+			public void onComplete(Object response, Object extra) {
 
-					@Override
-					public void run() {
-						if (bitmap == null) {
-							mUser.imageUri = "resource:placeholder_user";
-							mUser.imageBitmap = ImageManager.getInstance().loadBitmapFromResources(R.attr.placeholder_user);
-						}
-						else {
-							mUser.imageUri = "updated";
-							mUser.imageBitmap = bitmap;
-						}
-						ImageUtils.showImageInImageView(bitmap, mImageUser);
-					}
-				});
-			}
-
-			@Override
-			public void onProxibaseException(ProxibaseException exception) {
-				/* Do nothing */
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				if (serviceResponse.resultCode == ResultCode.Success) {
+					Bitmap bitmap = (Bitmap) serviceResponse.data;
+					String imageUri = (String) extra;
+					mUser.imageUri = imageUri;
+					mUser.imageBitmap = bitmap;
 				}
-
+			}
 		});
 	}
 
@@ -244,7 +251,7 @@ public class ProfileForm extends AircandiActivity {
 			return;
 		}
 		updateImages();
-		updateEntity();
+		updateProfile();
 	}
 
 	private boolean validate() {
@@ -276,7 +283,7 @@ public class ProfileForm extends AircandiActivity {
 					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 			}
@@ -292,7 +299,7 @@ public class ProfileForm extends AircandiActivity {
 					S3.putImage(imageKey, mUser.imageBitmap);
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
@@ -300,7 +307,7 @@ public class ProfileForm extends AircandiActivity {
 		}
 	}
 
-	protected void updateEntity() {
+	protected void updateProfile() {
 
 		mUser.email = mTextEmail.getText().toString().trim();
 		mUser.fullname = mTextFullname.getText().toString().trim();
@@ -309,46 +316,40 @@ public class ProfileForm extends AircandiActivity {
 		}
 
 		Logger.i(this, "Updating user: " + mUser.fullname);
-		mUser.updateAsync(new IQueryListener() {
+
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setUri(mUser.getEntryUri());
+		serviceRequest.setRequestType(RequestType.Update);
+		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
+		serviceRequest.setResponseFormat(ResponseFormat.Json);
+		serviceRequest.setRequestListener(new RequestListener() {
 
 			@Override
-			public void onComplete(String response) {
+			public void onComplete(Object response) {
+				
+				stopTitlebarProgress();
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				if (serviceResponse.resultCode != ResultCode.Success) {
+					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
+					return;
+				}
+				else {
+					ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+					Intent intent = new Intent();
+					mUser.imageBitmap = null;
 
-				/* Post the processed result back to the UI thread */
-				runOnUiThread(new Runnable() {
-
-					public void run() {
-						stopTitlebarProgress();
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-						Intent intent = new Intent();
-						//mUser.imageBitmap.recycle();
-						mUser.imageBitmap = null;
-						String jsonUser = ProxibaseService.getGson(GsonType.Internal).toJson(mUser);
-						if (!jsonUser.equals("")) {
-							intent.putExtra(getString(R.string.EXTRA_USER), jsonUser);
-						}
-
-						setResult(Activity.RESULT_FIRST_USER, intent);
-						finish();
+					String jsonUser = ProxibaseService.getGson(GsonType.Internal).toJson(mUser);
+					if (jsonUser.length() > 0) {
+						intent.putExtra(getString(R.string.EXTRA_USER), jsonUser);
 					}
-				});
-			}
 
-			@Override
-			public void onProxibaseException(ProxibaseException exception) {
-				if (!Exceptions.Handle(exception)) {
-					runOnUiThread(new Runnable() {
-
-						@Override
-						public void run() {
-							ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_update_failed),
-									Toast.LENGTH_SHORT);
-						}
-					});
+					setResult(Activity.RESULT_FIRST_USER, intent);
+					finish();
 				}
 			}
 		});
 
+		NetworkManager.getInstance().requestAsync(serviceRequest);
 	}
 
 	private boolean isValid() {

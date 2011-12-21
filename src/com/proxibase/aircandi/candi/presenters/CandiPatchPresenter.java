@@ -40,7 +40,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.opengl.GLU;
-import android.os.CountDownTimer;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -74,13 +73,12 @@ import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.BitmapTextureSource;
 import com.proxibase.aircandi.utils.CandiList;
-import com.proxibase.aircandi.utils.Exceptions;
+import com.proxibase.aircandi.utils.CountDownTimer;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 
 public class CandiPatchPresenter implements Observer {
 
@@ -215,7 +213,7 @@ public class CandiPatchPresenter implements Observer {
 			mProgressSprite.setPosition(centerX, centerY);
 			mProgressSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 			mProgressSprite.animate(150, true);
-			mProgressSprite.setVisible(true);
+			mProgressSprite.setVisible(false);
 			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mProgressSprite);
 
 			/* Invisible entity used to scroll */
@@ -374,31 +372,29 @@ public class CandiPatchPresenter implements Observer {
 			}
 		}
 	}
-	
-	public void deleteCandiModelByEntity(EntityProxy deletedEntity)
-	{
+
+	public void deleteCandiModelByEntity(EntityProxy deletedEntity) {
 		/*
 		 * Used to synchronize candi models with entities
 		 */
 		for (CandiModel candiModel : mCandiPatchModel.getCandiModels()) {
-			if (candiModel.getEntityProxy().id.equals(deletedEntity.id))
-			{
+			if (candiModel.getEntityProxy().id.equals(deletedEntity.id)) {
 				if (candiModel.getParent() != null) {
 					CandiModel parentCandiModel = (CandiModel) candiModel.getParent();
 					parentCandiModel.getChildren().remove(candiModel);
 				}
 				removeCandiModel(candiModel);
-				
+
 				/* Make sure we have a new focus if needed */
 				if (mCandiPatchModel.getCandiModelFocused() == null) {
 					ZoneModel zoneModel = getNearestZone(mCameraTargetSprite.getX(), false);
 					if (zoneModel != null && zoneModel.getCandiesCurrent().size() > 0) {
 						mCandiPatchModel.setCandiModelFocused(getNearestZone(mCameraTargetSprite.getX(), false).getCandiesCurrent().get(0));
-//						mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
-//								CandiConstants.EASE_SLOTTING_MINOR);
+						//						mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
+						//								CandiConstants.EASE_SLOTTING_MINOR);
 					}
 				}
-				
+
 				break;
 			}
 		}
@@ -420,7 +416,7 @@ public class CandiPatchPresenter implements Observer {
 			 * Creates new root candi model
 			 */
 			mFullUpdateInProgress = true;
-			getCandiViewsHash().clear();
+			mCandiViewsHash.clear();
 			mZoneViews.clear();
 			clearCandiLayer();
 			clearZoneLayer();
@@ -788,6 +784,7 @@ public class CandiPatchPresenter implements Observer {
 
 		candiView.setRecycled(false);
 		candiView.setModel(candiModel);
+		candiView.setCandiPatchPresenter(CandiPatchPresenter.this);
 		candiModel.addObserver(candiView);
 		getCandiViewsHash().put(String.valueOf(candiModel.getModelId()), candiView);
 
@@ -1412,7 +1409,6 @@ public class CandiPatchPresenter implements Observer {
 
 				/* TODO: Should we null this so the GC can collect them. */
 				final CandiView candiView = (CandiView) child;
-				renderingActivate();
 				mEngine.runOnUpdateThread(new Runnable() {
 
 					@Override
@@ -1434,7 +1430,6 @@ public class CandiPatchPresenter implements Observer {
 
 				/* TODO: Should we null this so the GC can collect them. */
 				final ZoneView zoneView = (ZoneView) child;
-				renderingActivate();
 				mEngine.runOnUpdateThread(new Runnable() {
 
 					@Override
@@ -1460,12 +1455,7 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Textures that are shared by zone views */
 		Bitmap zoneBodyBitmap = null;
-		try {
-			zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
-		}
-		catch (ProxibaseException exception) {
-			Exceptions.Handle(exception);
-		}
+		zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
 		if (zoneBodyBitmap != null) {
 			Bitmap zoneReflectionBitmap = ImageUtils.makeReflection(zoneBodyBitmap, true);
 
@@ -1474,12 +1464,7 @@ public class CandiPatchPresenter implements Observer {
 				@Override
 				public Bitmap reloadBitmap() {
 					Bitmap zoneBodyBitmap = null;
-					try {
-						zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
-					}
-					catch (ProxibaseException exception) {
-						Exceptions.Handle(exception);
-					}
+					zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
 					return zoneBodyBitmap;
 				}
 			}), 0, 0);
@@ -1490,12 +1475,7 @@ public class CandiPatchPresenter implements Observer {
 						@Override
 						public Bitmap reloadBitmap() {
 							Bitmap zoneBodyBitmap = null;
-							try {
-								zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
-							}
-							catch (ProxibaseException exception) {
-								Exceptions.Handle(exception);
-							}
+							zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
 							if (zoneBodyBitmap != null) {
 								Bitmap zoneReflectionBitmap = ImageUtils.makeReflection(zoneBodyBitmap, true);
 								return zoneReflectionBitmap;
@@ -1697,7 +1677,7 @@ public class CandiPatchPresenter implements Observer {
 	public void renderingActivate(long millisInFuture) {
 		synchronized (mRenderingTimer) {
 			mRenderingTimer.cancel();
-			mRenderingTimer = new RenderCountDownTimer(millisInFuture, 500);
+			mRenderingTimer.setMillisInFuture(millisInFuture);
 			mRenderingActive = true;
 			mRenderSurfaceView.requestRender();
 			Logger.v(this, "Rendering activated at " + String.valueOf(millisInFuture));

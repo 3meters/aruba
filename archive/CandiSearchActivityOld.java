@@ -627,7 +627,7 @@ public class CandiSearchActivityOld extends AircandiGameActivity {
 
 	private void updateMemoryUsed() {
 		if (mPrefShowMemory) {
-			TextView textView = (TextView) findViewById(R.id.txt_footer);
+			TextView textView = (TextView) findViewById(R.id.text_footer);
 			if (textView != null) {
 				float usedMegs = (float) ((float) Debug.getNativeHeapAllocatedSize() / 1048576f);
 				String usedMegsString = String.format("Memory Used: %2.2f MB", usedMegs);
@@ -959,16 +959,16 @@ public class CandiSearchActivityOld extends AircandiGameActivity {
 		if (candiModel.getEntityProxy().imageUri != null && !candiModel.getEntityProxy().imageUri.equals("")) {
 			if (ImageManager.getInstance().hasImage(candiModel.getEntityProxy().imageUri)) {
 				Bitmap bitmap = ImageManager.getInstance().getImage(candiModel.getEntityProxy().imageUri);
-				((ImageView) mCandiInfoViewCurrent.findViewById(R.id.img_public)).setImageBitmap(bitmap);
+				((ImageView) mCandiInfoViewCurrent.findViewById(R.id.image_public)).setImageBitmap(bitmap);
 				if (ImageManager.getInstance().hasImage(candiModel.getEntityProxy().imageUri + ".reflection")) {
 					bitmap = ImageManager.getInstance().getImage(candiModel.getEntityProxy().imageUri + ".reflection");
-					((ImageView) mCandiInfoViewCurrent.findViewById(R.id.img_public_reflection)).setImageBitmap(bitmap);
+					((ImageView) mCandiInfoViewCurrent.findViewById(R.id.image_public_reflection)).setImageBitmap(bitmap);
 				}
 			}
 			else {
 				Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets("gfx/trans_30.png");
-				((ImageView) mCandiInfoViewCurrent.findViewById(R.id.img_public)).setImageBitmap(zoneBodyBitmap);
-				((ImageView) mCandiInfoViewCurrent.findViewById(R.id.img_public_reflection)).setImageBitmap(null);
+				((ImageView) mCandiInfoViewCurrent.findViewById(R.id.image_public)).setImageBitmap(zoneBodyBitmap);
+				((ImageView) mCandiInfoViewCurrent.findViewById(R.id.image_public_reflection)).setImageBitmap(null);
 				ImageRequest imageRequest = new ImageManager.ImageRequest();
 				imageRequest.imageId = candiModel.getBodyImageId();
 				imageRequest.imageUri = candiModel.getBodyImageUri();
@@ -982,16 +982,16 @@ public class CandiSearchActivityOld extends AircandiGameActivity {
 					public void onImageReady(Bitmap bitmap) {
 						Bitmap bitmapNew = ImageManager.getInstance().getImage(candiModel.getBodyImageUri());
 						if (bitmapNew != null) {
-							((ImageView) mCandiInfoViewCurrent.findViewById(R.id.img_public)).setImageBitmap(bitmapNew);
+							((ImageView) mCandiInfoViewCurrent.findViewById(R.id.image_public)).setImageBitmap(bitmapNew);
 							Bitmap bitmapReflection = ImageManager.getInstance().getImage(candiModel.getBodyImageUri() + ".reflection");
 							if (bitmapReflection != null)
-								((ImageView) mCandiInfoViewCurrent.findViewById(R.id.img_public_reflection)).setImageBitmap(bitmapReflection);
+								((ImageView) mCandiInfoViewCurrent.findViewById(R.id.image_public_reflection)).setImageBitmap(bitmapReflection);
 
 							Animation animation = AnimationUtils.loadAnimation(CandiSearchActivityOld.this, R.anim.fade_in_medium);
 							animation.setFillEnabled(true);
 							animation.setFillAfter(true);
-							((ImageView) findViewById(R.id.img_public)).startAnimation(animation);
-							((ImageView) findViewById(R.id.img_public_reflection)).startAnimation(animation);
+							((ImageView) findViewById(R.id.image_public)).startAnimation(animation);
+							((ImageView) findViewById(R.id.image_public_reflection)).startAnimation(animation);
 						}
 
 					}
@@ -1000,7 +1000,7 @@ public class CandiSearchActivityOld extends AircandiGameActivity {
 					public void onProxibaseException(ProxibaseException exception) {
 						if (exception.getErrorCode() == ProxiErrorCode.OperationFailed) {
 							Bitmap zoneBodyBitmap = ImageManager.loadBitmapFromAssets("gfx/placeholder3.png");
-							((ImageView) mCandiInfoViewCurrent.findViewById(R.id.img_public)).setImageBitmap(zoneBodyBitmap);
+							((ImageView) mCandiInfoViewCurrent.findViewById(R.id.image_public)).setImageBitmap(zoneBodyBitmap);
 						}
 					}
 				};
@@ -1015,14 +1015,14 @@ public class CandiSearchActivityOld extends AircandiGameActivity {
 			}
 		}
 
-		((TextView) mCandiInfoViewCurrent.findViewById(R.id.txt_subtitle)).setText("");
-		((TextView) mCandiInfoViewCurrent.findViewById(R.id.txt_content)).setText("");
+		((TextView) mCandiInfoViewCurrent.findViewById(R.id.text_subtitle)).setText("");
+		((TextView) mCandiInfoViewCurrent.findViewById(R.id.text_content)).setText("");
 
-		((TextView) mCandiInfoViewCurrent.findViewById(R.id.txt_title)).setText(candiModel.getEntityProxy().title);
+		((TextView) mCandiInfoViewCurrent.findViewById(R.id.text_title)).setText(candiModel.getEntityProxy().title);
 		if (candiModel.getEntityProxy().subtitle != null)
-			((TextView) mCandiInfoViewCurrent.findViewById(R.id.txt_subtitle)).setText(Html.fromHtml(candiModel.getEntityProxy().subtitle));
+			((TextView) mCandiInfoViewCurrent.findViewById(R.id.text_subtitle)).setText(Html.fromHtml(candiModel.getEntityProxy().subtitle));
 		if (candiModel.getEntityProxy().description != null)
-			((TextView) mCandiInfoViewCurrent.findViewById(R.id.txt_content)).setText(Html.fromHtml(candiModel.getEntityProxy().description));
+			((TextView) mCandiInfoViewCurrent.findViewById(R.id.text_content)).setText(Html.fromHtml(candiModel.getEntityProxy().description));
 	}
 
 	private void hideGLSurfaceView(float duration) {
@@ -1792,8 +1792,8 @@ public class CandiSearchActivityOld extends AircandiGameActivity {
 	}
 
 	private void recycleBitmaps() {
-		recycleImageViewDrawable(R.id.img_public);
-		recycleImageViewDrawable(R.id.img_public_reflection);
+		recycleImageViewDrawable(R.id.image_public);
+		recycleImageViewDrawable(R.id.image_public_reflection);
 	}
 
 	private void recycleImageViewDrawable(int resourceId) {
@@ -1860,7 +1860,7 @@ public class CandiSearchActivityOld extends AircandiGameActivity {
 				updateMemoryUsed();
 			}
 			else {
-				TextView textView = (TextView) findViewById(R.id.txt_footer);
+				TextView textView = (TextView) findViewById(R.id.text_footer);
 				textView.setText("");
 			}
 		}

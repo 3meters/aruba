@@ -31,9 +31,10 @@ import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 // @SuppressWarnings("unused")
 public class CandiView extends BaseView implements OnGestureListener {
@@ -558,28 +559,51 @@ public class CandiView extends BaseView implements OnGestureListener {
 			 * but position hasn't been assigned when this first gets called.
 			 */
 			//mActiveImageRequest = true;
-			ImageRequest imageRequest = new ImageRequest(candiModel.getBodyImageUri(), ImageShape.Square, candiModel.getEntityProxy().imageFormat, candiModel
-					.getEntityProxy().javascriptEnabled, CandiConstants.IMAGE_WIDTH_MAX, true, !skipCache, true,
-					2, this, new ImageRequestListener() {
+			ImageRequest imageRequest = new ImageRequest(candiModel.getBodyImageUri(), ImageShape.Square, candiModel.getEntityProxy().imageFormat,
+					candiModel.getEntityProxy().javascriptEnabled, CandiConstants.IMAGE_WIDTH_SEARCH_MAX, true, !skipCache, true,
+					2, this, new RequestListener() {
 
 						@Override
-						public void onImageReady(Bitmap bodyBitmap) {
+						public void onComplete(Object response) {
 							/*
 							 * Executes on the ViewManager thread (which has the lowest possible priority).
 							 * First time for a candiview is more expensive because the body and reflection sprites
 							 * are created.
 							 */
-							if (bodyBitmap != null) {
+							ServiceResponse serviceResponse = (ServiceResponse) response;
 
-								/* The view could have been recycled while we were busy and won't have a bound model. */
-								if (mModel != null && !mRecycled) {
-									mHasBitmap = true;
-									updateTextureRegions(bodyBitmap);
-									makePlaceholderActiveAnimated(false);
-									progressVisible(false);
+							if (serviceResponse.resultCode != ResultCode.Success) {
+								mActiveImageRequest = false;
+								if (!mHasBitmap) {
+									Logger.w(this, "Broken image: " + candiModel.getBodyImageUri());
+									Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
+									if (bitmap != null && mModel != null && !mRecycled) {
+										mHasBitmap = false;
+										updateTextureRegions(bitmap);
+										makePlaceholderActiveAnimated(false);
+										progressVisible(false);
+									}
 								}
 							}
-							mActiveImageRequest = false;
+							else
+							{
+								Bitmap bodyBitmap = (Bitmap) serviceResponse.data;
+								if (bodyBitmap != null) {
+
+									/*
+									 * The view could have been recycled while we were busy and won't have a bound
+									 * model.
+									 */
+									if (mModel != null && !mRecycled) {
+										mHasBitmap = true;
+										updateTextureRegions(bodyBitmap);
+										makePlaceholderActiveAnimated(false);
+										progressVisible(false);
+									}
+								}
+								mActiveImageRequest = false;
+							}
+
 						}
 
 						@Override
@@ -591,12 +615,6 @@ public class CandiView extends BaseView implements OnGestureListener {
 								Logger.v(this, "Bumping rendering timer");
 								mCandiPatchPresenter.renderingActivate();
 							}
-						}
-
-						@Override
-						public void onProxibaseException(ProxibaseException exception) {
-							mActiveImageRequest = false;
-							super.onProxibaseException(exception);
 						}
 					});
 

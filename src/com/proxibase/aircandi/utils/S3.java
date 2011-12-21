@@ -43,7 +43,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.proxibase.aircandi.CandiSearchActivity;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException.ProxiErrorCode;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxiErrorCode;
 
 public class S3 {
 

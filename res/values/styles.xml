@@ -35,7 +35,8 @@
 
     <style name="app_button" parent="android:Widget.Button">
         <item name="android:minWidth">80dp</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:maxWidth">200dp</item>
+            <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
 
     <style name="app_checkbox" parent="android:Widget.CompoundButton.CheckBox">
@@ -202,6 +203,14 @@
         <item name="android:maxWidth">100dp</item>
         <item name="android:gravity">center</item>
     </style>
+    
+        <!-- Aircandi Gallery -->
+    <style name="gallery_image">
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:background">?attr/backgroundHeader</item>
+        </style>
+        
 
     <!-- Candi Forms -->
 
@@ -247,7 +256,7 @@
         <item name="android:paddingTop">5dp</item>
         <item name="android:background">?attr/activityFooterFormBackground</item>
     </style>
-
+    
     <!-- Misc -->
 
     <style name="app_debug_label" parent="android:Widget.TextView">

@@ -12,7 +12,7 @@
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:drawSelectorOnTop="true"
-            android:entries="@array/post_visibility_values_list"
+            android:entries="@array/form_visibility_values_list"
             android:prompt="@string/form_label_visibility" />
 
         <EditText

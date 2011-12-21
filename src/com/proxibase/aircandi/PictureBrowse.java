@@ -1,5 +1,6 @@
 package com.proxibase.aircandi;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
@@ -10,15 +11,22 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PictureEntity;
 import com.proxibase.aircandi.utils.Exceptions;
-import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.Logger;
-import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
+import com.proxibase.aircandi.utils.NetworkManager;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
 public class PictureBrowse extends AircandiActivity {
@@ -34,51 +42,57 @@ public class PictureBrowse extends AircandiActivity {
 		configure();
 		bindEntity();
 		drawEntity();
+		GoogleAnalyticsTracker.getInstance().trackPageView("/PictureBrowse");
+
 	}
 
 	protected void bindEntity() {
 
-		String jsonResponse = null;
-		try {
-			jsonResponse = (String) ProxibaseService.getInstance().select(mEntityProxy.getEntryUri(), ResponseFormat.Json, null);
+		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
+				new ServiceRequest(mEntityProxy.getEntryUri(), RequestType.Get, ResponseFormat.Json));
+
+		if (serviceResponse.resultCode != ResultCode.Success) {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
+		}
+		else {
+			String jsonResponse = (String) serviceResponse.data;
 			mEntity = (PictureEntity) ProxibaseService.convertJsonToObject(jsonResponse, PictureEntity.class, GsonType.ProxibaseService);
-		}
-		catch (ProxibaseException exception) {
-			Exceptions.Handle(exception);
-		}
 
-		final PictureEntity entity = (PictureEntity) mEntity;
+			final PictureEntity entity = (PictureEntity) mEntity;
+			WebImageView mediaImageView = (WebImageView) findViewById(R.id.image_media);
 
-		if (entity.mediaUri != null && !entity.mediaUri.equals("")) {
+			if (entity.mediaUri != null && entity.mediaUri.length() > 0) {
 
-			ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.Original, entity.mediaUri, new ImageRequestListener() {
+				ImageRequest imageRequest = new ImageRequest(entity.mediaUri, ImageShape.Native, "binary", false,
+						CandiConstants.IMAGE_WIDTH_ORIGINAL, false, false, false, 1, this, new RequestListener() {
 
-				@Override
-				public void onImageReady(final Bitmap bitmap) {
-					/*
-					 * We can get this callback even when activity has finished.
-					 * TODO: Cancel all active tasks in onDestroy()
-					 */
-					runOnUiThread(new Runnable() {
-
-						@Override
-						public void run() {
-							if (mEntity != null) {
-								Logger.d(PictureBrowse.this, "Image fetched: " + entity.mediaUri);
-								entity.mediaBitmap = bitmap;
-								showPicture(bitmap);
+							@Override
+							public void onComplete(Object response) {
+								
+								ServiceResponse serviceResponse = (ServiceResponse) response;
+								if (serviceResponse.resultCode != ResultCode.Success) {
+									return;
+								}
+								else {
+									Logger.d(PictureBrowse.this, "Image fetched: " + entity.mediaUri);
+									entity.mediaBitmap = (Bitmap) serviceResponse.data;
+									stopProgress();
+									mViewFlipper.setDisplayedChild(0);
+								}
 							}
-						}
-					});
-				}
 
-				@Override
-				public void onProgressChanged(int progress) {
-					mProgressBar.setProgress(progress);
-				}
-			});
+							@Override
+							public void onProgressChanged(int progress) {
+								mProgressBar.setProgress(progress);
+							}
+						});
 
-			Logger.d(this, "Fetching Image: " + entity.mediaUri);
+				Logger.d(this, "Fetching Image: " + entity.mediaUri);
+				mediaImageView.setImageRequest(imageRequest, null);
+			}
+			GoogleAnalyticsTracker.getInstance().dispatch();
 		}
 	}
 
@@ -137,16 +151,6 @@ public class PictureBrowse extends AircandiActivity {
 			mContextButton.setVisibility(View.INVISIBLE);
 			showBackButton(true, getString(R.string.form_button_back));
 		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// UI routines
-	// --------------------------------------------------------------------------------------------
-
-	private void showPicture(Bitmap bitmap) {
-		((ImageView) findViewById(R.id.image_media)).setImageBitmap(bitmap);
-		stopProgress();
-		mViewFlipper.setDisplayedChild(0);
 	}
 
 	// --------------------------------------------------------------------------------------------

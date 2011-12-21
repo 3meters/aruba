@@ -17,25 +17,31 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.BaseEntity;
 import com.proxibase.aircandi.utils.DateUtils;
 import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
+import com.proxibase.aircandi.utils.NetworkManager;
 import com.proxibase.aircandi.utils.S3;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.consumer.Beacon.BeaconType;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy.Visibility;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.IQueryListener;
+import com.proxibase.sdk.android.proxi.service.ServiceRequest;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
@@ -61,6 +67,10 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		configure();
 		bindEntity();
 		drawEntity();
+
+		/* Tracking */
+		GoogleAnalyticsTracker.getInstance().trackPageView("/" + mCommand.handler);
+		GoogleAnalyticsTracker.getInstance().trackEvent("Entity", mCommand.verb, ((BaseEntity) mEntity).entityType, 0);
 	}
 
 	protected void configure() {
@@ -69,6 +79,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		mImageViewSettings = (ImageView) findViewById(R.id.image_tab_settings);
 		mTextViewContent = (TextView) findViewById(R.id.text_tab_content);
 		mTextViewSettings = (TextView) findViewById(R.id.text_tab_settings);
+		mImagePicture = (WebImageView) findViewById(R.id.image_picture);
 
 		TypedValue resourceName = new TypedValue();
 		if (this.getTheme().resolveAttribute(R.attr.textColorFocused, resourceName, true)) {
@@ -103,7 +114,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		else if (mCommand.verb.equals("edit")) {
 			mImageUriOriginal = entity.imageUri;
 		}
-
+		//GoogleAnalyticsTracker.getInstance().dispatch();
 	}
 
 	protected void drawEntity() {
@@ -124,11 +135,15 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 						ImageRequest imageRequest = new ImageRequest(entity.imageUri, ImageShape.Square, entity.imageFormat,
 								entity.javascriptEnabled,
-								CandiConstants.IMAGE_WIDTH_MAX, false, true, true, 1, this, new ImageRequestListener() {
+								CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
 
 									@Override
-									public void onImageReady(Bitmap bitmap) {
-										entity.imageBitmap = bitmap;
+									public void onComplete(Object response) {
+										ServiceResponse serviceResponse = (ServiceResponse) response;
+										if (serviceResponse.resultCode == ResultCode.Success) {
+											Bitmap bitmap = (Bitmap) serviceResponse.data;
+											entity.imageBitmap = bitmap;
+										}
 									}
 								});
 
@@ -190,6 +205,24 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		}
 	}
 
+	public void onChangePictureButtonClick(View view) {
+		showChangePictureDialog(false, mImagePicture, new RequestListener() {
+
+			@Override
+			public void onComplete(Object response, Object extra) {
+
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				if (serviceResponse.resultCode == ResultCode.Success) {
+					Bitmap bitmap = (Bitmap) serviceResponse.data;
+					String imageUri = (String) extra;
+					BaseEntity entity = (BaseEntity) mEntity;
+					entity.imageUri = imageUri;
+					entity.imageBitmap = bitmap;
+				}
+			}
+		});
+	}
+
 	public void onSaveButtonClick(View view) {
 		startTitlebarProgress();
 		doSave(true);
@@ -216,13 +249,17 @@ public abstract class EntityBaseForm extends AircandiActivity {
 			mBeacon.registeredById = String.valueOf(((User) mUser).id);
 			mBeacon.beaconType = BeaconType.Fixed.name().toLowerCase();
 			mBeacon.beaconSetId = ProxiConstants.BEACONSET_WORLD;
-			try {
-				Logger.i(this, "Inserting beacon: " + mBeacon.id);
-				mBeacon.insert();
-			}
-			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
-				exception.printStackTrace();
+
+			Logger.i(this, "Inserting beacon: " + mBeacon.id);
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mBeacon.getCollection());
+			serviceRequest.setRequestType(RequestType.Insert);
+			serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) this, GsonType.ProxibaseService));
+			serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+			ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+			if (serviceResponse.resultCode != ResultCode.Success) {
+				return;
 			}
 		}
 
@@ -240,14 +277,13 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		else if (mCommand.verb.equals("edit")) {
 			updateEntity();
 		}
+		GoogleAnalyticsTracker.getInstance().dispatch();
 	}
 
 	protected void gather() {
 		final BaseEntity entity = (BaseEntity) mEntity;
 		if (findViewById(R.id.text_title) != null) {
 			entity.title = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
-		}
-		if (findViewById(R.id.text_title) != null) {
 			entity.label = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
 		}
 		if (findViewById(R.id.text_content) != null) {
@@ -273,7 +309,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 			}
@@ -289,7 +325,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 					S3.putImage(imageKey, entity.imageBitmap);
 				}
 				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
+					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					exception.printStackTrace();
 				}
 				entity.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
@@ -303,86 +339,79 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		final BaseEntity entity = (BaseEntity) mEntity;
 		entity.createdDate = DateUtils.nowString();
 		Logger.i(this, "Inserting entity: " + entity.title);
+		GoogleAnalyticsTracker.getInstance().trackEvent("Entity", "Insert", entity.entityType, 0);
 
-		entity.insertAsync(new IQueryListener() {
-
-			@Override
-			public void onComplete(String jsonResponse) {
-
-				runOnUiThread(new Runnable() {
-
-					public void run() {
-						stopTitlebarProgress();
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
-						Intent intent = new Intent();
-
-						/* We are editing so set the dirty flag */
-						if (entity.parentEntityId == null) {
-							intent.putExtra(getString(R.string.EXTRA_BEACON_DIRTY), entity.beaconId);
-						}
-						else {
-							intent.putExtra(getString(R.string.EXTRA_ENTITY_DIRTY), entity.parentEntityId);
-						}
-						intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.New);
-
-						setResult(Activity.RESULT_FIRST_USER, intent);
-						finish();
-					}
-				});
-			}
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + entity.getCollection());
+		serviceRequest.setRequestType(RequestType.Insert);
+		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson(entity, GsonType.ProxibaseService));
+		serviceRequest.setResponseFormat(ResponseFormat.Json);
+		serviceRequest.setRequestListener(new RequestListener() {
 
 			@Override
-			public void onProxibaseException(ProxibaseException exception) {
-				runOnUiThread(new Runnable() {
+			public void onComplete(Object response) {
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				stopTitlebarProgress();
+				if (serviceResponse.resultCode != ResultCode.Success) {
+					ImageUtils.showToastNotification(getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
+					return;
+				}
 
-					@Override
-					public void run() {
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
-					}
-				});
-				exception.printStackTrace();
+				ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
+				Intent intent = new Intent();
+
+				/* We are editing so set the dirty flag */
+				if (entity.parentEntityId == null) {
+					intent.putExtra(getString(R.string.EXTRA_BEACON_DIRTY), entity.beaconId);
+				}
+				else {
+					intent.putExtra(getString(R.string.EXTRA_ENTITY_DIRTY), entity.parentEntityId);
+				}
+				intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.New);
+
+				setResult(Activity.RESULT_FIRST_USER, intent);
+				finish();
 			}
 		});
+
+		NetworkManager.getInstance().requestAsync(serviceRequest);
+
 	}
 
 	protected void updateEntity() {
 
 		final BaseEntity entity = (BaseEntity) mEntity;
 		Logger.i(this, "Updating entity: " + entity.title);
-		entity.updateAsync(new IQueryListener() {
+		GoogleAnalyticsTracker.getInstance().trackEvent("Entity", "Update", entity.entityType, 0);
+
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setUri(entity.getEntryUri());
+		serviceRequest.setRequestType(RequestType.Update);
+		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson(entity, GsonType.ProxibaseService));
+		serviceRequest.setResponseFormat(ResponseFormat.Json);
+		serviceRequest.setRequestListener(new RequestListener() {
 
 			@Override
-			public void onComplete(String response) {
+			public void onComplete(Object response) {
 
-				/* Post the processed result back to the UI thread */
-				runOnUiThread(new Runnable() {
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				stopTitlebarProgress();
+				if (serviceResponse.resultCode != ResultCode.Success) {
+					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
+					return;
+				}
 
-					public void run() {
-						stopTitlebarProgress();
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-						Intent intent = new Intent();
-						intent.putExtra(getString(R.string.EXTRA_ENTITY_DIRTY), entity.id);
-						intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.Edit);
+				ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+				Intent intent = new Intent();
+				intent.putExtra(getString(R.string.EXTRA_ENTITY_DIRTY), entity.id);
+				intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.Edit);
 
-						setResult(Activity.RESULT_FIRST_USER, intent);
-						finish();
-					}
-				});
-			}
-
-			@Override
-			public void onProxibaseException(ProxibaseException exception) {
-				exception.printStackTrace();
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						ImageUtils.showToastNotification(getApplicationContext(), getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
-					}
-				});
+				setResult(Activity.RESULT_FIRST_USER, intent);
+				finish();
 			}
 		});
 
+		NetworkManager.getInstance().requestAsync(serviceRequest);
 	}
 
 	protected void deleteEntity() {
@@ -394,6 +423,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 		/* If there is an image stored with S3 then delete it */
 		BaseEntity entity = (BaseEntity) mEntity;
+		GoogleAnalyticsTracker.getInstance().trackEvent("Entity", "Delete", entity.entityType, 0);
 		if (entity.imageUri != null && entity.imageUri.length() != 0 &&
 				!ImageManager.isLocalImage(entity.imageUri) && entity.imageFormat.equals("binary")) {
 			String imageKey = entity.imageUri.substring(entity.imageUri.lastIndexOf("/") + 1);
@@ -403,8 +433,10 @@ public abstract class EntityBaseForm extends AircandiActivity {
 				ImageManager.getInstance().deleteImage(entity.imageUri + ".reflection");
 			}
 			catch (ProxibaseException exception) {
-				ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_delete_failed), Toast.LENGTH_SHORT);
+				ImageUtils.showToastNotification(getString(R.string.alert_delete_failed), Toast.LENGTH_SHORT);
 				exception.printStackTrace();
+				stopTitlebarProgress();
+				return;
 			}
 		}
 
@@ -413,16 +445,22 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		parameters.putInt("entityId", entity.id);
 		Logger.i(this, "Deleting entity: " + entity.title);
 
-		try {
-			ProxibaseService.getInstance().webMethod("DeleteEntityWithChildren", parameters, ResponseFormat.Json, null);
-		}
-		catch (ProxibaseException exception) {
-			ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_delete_failed), Toast.LENGTH_SHORT);
-			exception.printStackTrace();
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "DeleteEntityWithChildren");
+		serviceRequest.setParameters(parameters);
+		serviceRequest.setRequestType(RequestType.Method);
+		serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		if (serviceResponse.resultCode != ResultCode.Success) {
+			ImageUtils.showToastNotification(getString(R.string.alert_delete_failed), Toast.LENGTH_SHORT);
+			serviceResponse.exception.printStackTrace();
+			stopTitlebarProgress();
+			return;
 		}
 
 		stopTitlebarProgress();
-		ImageUtils.showToastNotification(EntityBaseForm.this, getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
+		ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 		Intent intent = new Intent();
 		intent.putExtra(getString(R.string.EXTRA_ENTITY_DIRTY), entity.id);
 		intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.Delete);

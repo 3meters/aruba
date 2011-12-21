@@ -2,11 +2,7 @@ package com.proxibase.aircandi.models;
 
 import com.google.gson.annotations.Expose;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.IQueryListener;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 
 /**
  * Bound by default to the aircandi odata service.
@@ -22,51 +18,6 @@ public class AircandiEntity {
 		String entity = this.getCollection();
 		String uri = root + entity + "(" + this.getId() + ")";
 		return uri;
-	}
-
-	public void insertAsync(IQueryListener listener) {
-		ProxibaseService.getInstance().insertAsync(this, getCollection(), mServiceUri, listener);
-	}
-
-	public void updateAsync(IQueryListener listener) {
-		ProxibaseService.getInstance().updateAsync(this, this.getEntryUri(), listener);
-	}
-
-	public void deleteAsync(IQueryListener listener) {
-		ProxibaseService.getInstance().deleteAsync(this.getEntryUri(), listener);
-	}
-
-	public String insert() {
-		try {
-			String response = ProxibaseService.getInstance().insert(this, getCollection(), mServiceUri);
-			return response;
-		}
-		catch (ProxibaseException exception) {
-			Exceptions.Handle(exception);
-		}
-		return null;
-	}
-
-	public boolean update() {
-		try {
-			ProxibaseService.getInstance().update(this, this.getEntryUri());
-			return true;
-		}
-		catch (ProxibaseException exception) {
-			Exceptions.Handle(exception);
-		}
-		return false;
-	}
-
-	public boolean delete() {
-		try {
-			ProxibaseService.getInstance().delete(this.getEntryUri());
-			return true;
-		}
-		catch (ProxibaseException exception) {
-			Exceptions.Handle(exception);
-		}
-		return false;
 	}
 
 	public EntityProxy getEntityProxy() {

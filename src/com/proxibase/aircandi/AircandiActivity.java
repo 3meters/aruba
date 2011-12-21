@@ -27,37 +27,44 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.Exceptions;
 import com.proxibase.aircandi.utils.ImageManager;
-import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequestListener;
+import com.proxibase.aircandi.utils.ImageUtils;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResultCodeDetail;
+import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 public abstract class AircandiActivity extends Activity {
 
-	protected ImageView				mProgressIndicator;
-	protected ImageView				mButtonRefresh;
-	protected Button				mContextButton;
+	protected ImageView			mProgressIndicator;
+	protected ImageView			mButtonRefresh;
+	protected Button			mContextButton;
 
-	protected Integer				mParentEntityId;
-	protected Beacon				mBeacon;
-	protected Boolean				mBeaconUnregistered;
-	protected EntityProxy			mEntityProxy;
-	protected Object				mEntity;
-	protected String				mImageUriOriginal;
-	protected Command				mCommand;
-	protected User					mUser;
-	protected String				mPrefTheme;
-	protected ProgressDialog		mProgressDialog;
+	protected Integer			mParentEntityId;
+	protected Beacon			mBeacon;
+	protected Boolean			mBeaconUnregistered;
+	protected EntityProxy		mEntityProxy;
+	protected Object			mEntity;
+	protected String			mImageUriOriginal;
+	protected Command			mCommand;
+	protected User				mUser;
+	protected String			mPrefTheme;
+	protected ProgressDialog	mProgressDialog;
 
-	protected ImageRequestListener	mImageRequestListener;
+	protected RequestListener	mImageRequestListener;
+	protected WebImageView		mImageRequestWebImageView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -82,12 +89,12 @@ public abstract class AircandiActivity extends Activity {
 			mParentEntityId = extras.getInt(getString(R.string.EXTRA_PARENT_ENTITY_ID));
 
 			String json = extras.getString(getString(R.string.EXTRA_ENTITY));
-			if (json != null && !json.equals("")) {
+			if (json != null && json.length() > 0) {
 				mEntityProxy = ProxibaseService.getGson(GsonType.Internal).fromJson(json, EntityProxy.class);
 			}
 
 			json = extras.getString(getString(R.string.EXTRA_COMMAND));
-			if (json != null && !json.equals("")) {
+			if (json != null && json.length() > 0) {
 				mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Command.class);
 				if (mCommand.verb == null || mCommand.verb.length() == 0) {
 					throw new IllegalStateException("A command passed to an activity must include a verb");
@@ -98,12 +105,12 @@ public abstract class AircandiActivity extends Activity {
 			}
 
 			json = extras.getString(getString(R.string.EXTRA_BEACON));
-			if (json != null && !json.equals("")) {
+			if (json != null && json.length() > 0) {
 				mBeacon = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Beacon.class);
 			}
 
 			json = extras.getString(getString(R.string.EXTRA_USER));
-			if (json != null && !json.equals("")) {
+			if (json != null && json.length() > 0) {
 				mUser = ProxibaseService.getGson(GsonType.Internal).fromJson(json, User.class);
 			}
 		}
@@ -196,7 +203,7 @@ public abstract class AircandiActivity extends Activity {
 	public void pickPicture() {
 		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK);
 		picturePickerIntent.setType("image/*");
-		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK);
+		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
 	}
 
 	public void pickVideo() {
@@ -219,6 +226,48 @@ public abstract class AircandiActivity extends Activity {
 			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
 					android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 		startActivityForResult(takePictureFromCameraIntent, CandiConstants.ACTIVITY_PICTURE_MAKE);
+	}
+
+	public void pickAircandiPicture() {
+		Intent candigramPickerIntent = new Intent(this, PictureSearch.class);
+		startActivityForResult(candigramPickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_AIRCANDI);
+	}
+
+	public void useFacebook() {
+
+		mUser.imageUri = "https://graph.facebook.com/" + mUser.facebookId + "/picture?type=large";
+
+		ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
+				CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
+
+					@Override
+					public void onComplete(Object response) {
+
+						/* Used to pass back the bitmap and imageUri (sometimes) for the entity */
+						if (mImageRequestListener != null) {
+							mImageRequestListener.onComplete(response, mUser.imageUri);
+						}
+
+						final ServiceResponse serviceResponse = (ServiceResponse) response;
+						if (serviceResponse.resultCode != ResultCode.Success) {
+							return;
+						}
+						else {
+							runOnUiThread(new Runnable() {
+
+								@Override
+								public void run() {
+									GoogleAnalyticsTracker.getInstance().trackEvent("Entity", "FacebookPicture", "None", 0);
+									Bitmap bitmap = (Bitmap) serviceResponse.data;
+									ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView);
+								}
+							});
+						}
+					}
+				});
+
+		mImageRequestWebImageView.setImageBitmap(null);
+		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -251,9 +300,10 @@ public abstract class AircandiActivity extends Activity {
 		}
 	}
 
-	protected void showChangePictureDialog(final boolean showFacebookOption, final ImageRequestListener listener) {
+	protected void showChangePictureDialog(final boolean showFacebookOption, WebImageView webImageView, final RequestListener listener) {
 
 		mImageRequestListener = listener;
+		mImageRequestWebImageView = webImageView;
 
 		runOnUiThread(new Runnable() {
 
@@ -261,25 +311,28 @@ public abstract class AircandiActivity extends Activity {
 			public void run() {
 
 				int listId = R.array.dialog_list_picture_sources;
-
 				if (showFacebookOption) {
 					listId = R.array.dialog_list_picture_sources_facebook;
 				}
+
 				AlertDialog.Builder builder = new AlertDialog.Builder(AircandiActivity.this);
+
 				builder.setTitle(getResources().getString(R.string.dialog_change_picture_title));
+
 				builder.setCancelable(true);
+
 				builder.setOnCancelListener(new OnCancelListener() {
 
 					@Override
-					public void onCancel(DialogInterface dialog) {
-					}
+					public void onCancel(DialogInterface dialog) {}
 				});
-				builder.setNegativeButton(getResources().getString(R.string.dialog_change_picture_button_negative), new DialogInterface.OnClickListener() {
 
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-					}
-				});
+				builder.setNegativeButton(getResources().getString(R.string.dialog_change_picture_button_negative),
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog, int which) {}
+						});
 
 				builder.setItems(listId, new DialogInterface.OnClickListener() {
 
@@ -288,42 +341,39 @@ public abstract class AircandiActivity extends Activity {
 							pickPicture();
 							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 						}
-						else if (item == 1) { /* Take picture */
+						else if (item == 1) { /* Aircandi picture */
+							pickAircandiPicture();
+							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+						}
+						else if (item == 2) { /* Take picture */
 							takePicture();
 							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 						}
-						else if (item == 2) { /* Facebook picture */
-							if (showFacebookOption) {
-								mUser.imageUri = "https://graph.facebook.com/" + mUser.facebookId + "/picture?type=large";
-								ImageManager.getInstance().getImageLoader().fetchImageByProfile(ImageProfile.SquareTile, mUser.imageUri,
-										new ImageRequestListener() {
-
-											@Override
-											public void onImageReady(final Bitmap bitmap) {
-												listener.onImageReady(bitmap);
-											}
-
-											@Override
-											public void onProxibaseException(final ProxibaseException exception) {
-												listener.onProxibaseException(exception);
-											}
-										});
-							}
-							else {
-								listener.onImageReady(null);
-							}
+						else if (item == 3 && showFacebookOption) { /* Facebook */
+							useFacebook();
 						}
-						else if (item == 3) { /* None */
-							if (showFacebookOption) {
-								listener.onImageReady(null);
+						else if ((item == 3 && !showFacebookOption) || (item == 4 && showFacebookOption)) { /* None */
+
+							String imageUri = (String) mImageRequestWebImageView.getTag();
+
+							ImageRequest imageRequest = new ImageRequest(imageUri, ImageShape.Square, "binary", false,
+										CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, null);
+
+							mImageRequestWebImageView.setImageRequest(imageRequest, null);
+
+							if (mImageRequestListener != null) {
+								mImageRequestListener.onComplete(new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, null, null),
+										imageUri);
 							}
+							GoogleAnalyticsTracker.getInstance().trackEvent("Entity", "DefaultPicture", "None", 0);
 						}
 						else {
-							Toast.makeText(getApplicationContext(), "Not implemented yet.", Toast.LENGTH_SHORT).show();
+							ImageUtils.showToastNotification("Not implemented yet.", Toast.LENGTH_SHORT);
 						}
 						dialog.dismiss();
 					}
 				});
+
 				AlertDialog alert = builder.create();
 				alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 				alert.show();
@@ -362,41 +412,70 @@ public abstract class AircandiActivity extends Activity {
 		 * get a zero result code whether the user decided to start an install
 		 * or not.
 		 */
-		if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK) {
+		if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_AIRCANDI) {
+			if (resultCode == Activity.RESULT_FIRST_USER) {
+				if (data != null) {
+					Bundle extras = data.getExtras();
+					if (extras != null) {
+						final String aircandiImageUri = extras.getString(getString(R.string.EXTRA_URI));
+
+						ImageRequest imageRequest = new ImageRequest(aircandiImageUri, ImageShape.Square, "binary", false,
+								CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
+
+									@Override
+									public void onComplete(Object response) {
+
+										final ServiceResponse serviceResponse = (ServiceResponse) response;
+										if (serviceResponse.resultCode != ResultCode.Success) {
+											return;
+										}
+										else {
+											final Bitmap bitmap = (Bitmap) serviceResponse.data;
+											runOnUiThread(new Runnable() {
+
+												@Override
+												public void run() {
+													ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView);
+													if (mImageRequestListener != null) {
+														mImageRequestListener.onComplete(serviceResponse, aircandiImageUri);
+													}
+												}
+											});
+										}
+									}
+								});
+
+						mImageRequestWebImageView.setImageBitmap(null);
+						ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
+					}
+				}
+			}
+		}
+		else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
 			if (resultCode == Activity.RESULT_OK) {
 
 				Uri imageUri = data.getData();
 				Bitmap bitmap = null;
-				try {
-					bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_MAX));
-				}
-				catch (ProxibaseException exception) {
-					if (mImageRequestListener != null) {
-						mImageRequestListener.onProxibaseException(exception);
-					}
-					else {
-						Exceptions.Handle(exception);
-					}
-				}
-				if (bitmap == null) {
-					throw new IllegalStateException("bitmap picked from gallery is null");
-				}
-				else {
-					if (mImageRequestListener != null) {
-						mImageRequestListener.onImageReady(bitmap);
-					}
+				mImageRequestWebImageView.setImageBitmap(null);
+
+				bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_SEARCH_MAX));
+				if (mImageRequestListener != null) {
+					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView);
+					mImageRequestListener.onComplete(new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, bitmap, null), "updated");
+					GoogleAnalyticsTracker.getInstance().trackEvent("Entity", "PickPicture", "None", 0);
 				}
 			}
 		}
 		else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
 			if (resultCode == Activity.RESULT_OK) {
 
+				mImageRequestWebImageView.setImageBitmap(null);
 				Uri imageUri = null;
 				if (ImageManager.getInstance().hasImageCaptureBug()) {
 					File imageFile = new File("/sdcard/tmp/foo.jpeg");
 					try {
-						imageUri = Uri.parse(android.provider.MediaStore.Images.Media.insertImage(getContentResolver(), imageFile
-									.getAbsolutePath(), null, null));
+						imageUri = Uri.parse(android.provider.MediaStore.Images.Media.insertImage(getContentResolver(), imageFile.getAbsolutePath(),
+								null, null));
 						if (!imageFile.delete()) {
 						}
 					}
@@ -407,25 +486,12 @@ public abstract class AircandiActivity extends Activity {
 				else {
 					imageUri = data.getData();
 				}
-				Bitmap bitmap = null;
-				try {
-					bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_MAX));
-				}
-				catch (ProxibaseException exception) {
-					if (mImageRequestListener != null) {
-						mImageRequestListener.onProxibaseException(exception);
-					}
-					else {
-						Exceptions.Handle(exception);
-					}
-				}
-				if (bitmap == null) {
-					throw new IllegalStateException("bitmap taken with camera is null");
-				}
-				else {
-					if (mImageRequestListener != null) {
-						mImageRequestListener.onImageReady(bitmap);
-					}
+
+				Bitmap bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_SEARCH_MAX));
+				if (mImageRequestListener != null) {
+					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView);
+					mImageRequestListener.onComplete(new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, bitmap, null), "updated");
+					GoogleAnalyticsTracker.getInstance().trackEvent("Entity", "TakePicture", "None", 0);
 				}
 			}
 		}

@@ -12,9 +12,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.R;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.DateUtils;
-import com.proxibase.aircandi.utils.ImageManager;
-import com.proxibase.aircandi.utils.ImageLoader.ImageProfile;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
+import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.consumer.Author;
 
 public class AuthorBlock extends RelativeLayout {
@@ -75,8 +76,9 @@ public class AuthorBlock extends RelativeLayout {
 				mTextTimeSince.setText(DateUtils.intervalSince(date, DateUtils.nowDate()));
 			}
 			if (mAuthor.imageUri != null && mAuthor.imageUri.length() != 0) {
-				mImageUser.setImageRequest(ImageManager.getInstance().getImageLoader().getImageRequestByProfile(ImageProfile.SquareUser,
-						mAuthor.imageUri, null), null);
+				ImageRequest imageRequest = new ImageRequest(mAuthor.imageUri, ImageShape.Square, "binary", false,
+						CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
+				mImageUser.setImageRequest(imageRequest, null);
 			}
 		}
 	}

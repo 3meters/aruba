@@ -39,6 +39,12 @@
         <activity
             android:configChanges="orientation"
             android:label="@string/app_name"
+            android:name=".PictureSearch"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+            <activity
+            android:configChanges="orientation"
+            android:label="@string/app_name"
             android:name=".SignUpForm"
             android:windowSoftInputMode="stateHidden" >
         </activity>
