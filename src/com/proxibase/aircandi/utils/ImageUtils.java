@@ -189,20 +189,26 @@ public class ImageUtils {
 		}
 	}
 
-	public static void showDrawableInImageView(Drawable drawable, WebImageView imageView) {
-		showDrawableInImageView(drawable, null, imageView, null);
+	public static void showDrawableInImageView(Drawable drawable, WebImageView imageView, boolean animate) {
+		showDrawableInImageView(drawable, null, imageView, null, animate);
 	}
 
-	public static void showDrawableInImageView(Drawable drawable, Drawable drawableReflection, WebImageView imageView, ImageView imageViewReflection) {
+	public static void showDrawableInImageView(Drawable drawable, Drawable drawableReflection, WebImageView imageView, ImageView imageViewReflection,
+			boolean animate) {
 		imageView.setImageDrawable(drawable);
-		Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		imageView.startAnimation(animation);
+		Animation animation = null;
+		if (animate) {
+			animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+			animation.setFillEnabled(true);
+			animation.setFillAfter(true);
+			imageView.startAnimation(animation);
+		}
 
 		if (drawableReflection != null && imageViewReflection != null) {
 			imageViewReflection.setImageDrawable(drawableReflection);
-			imageViewReflection.startAnimation(animation);
+			if (animate) {
+				imageViewReflection.startAnimation(animation);
+			}
 		}
 	}
 }

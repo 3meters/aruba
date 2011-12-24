@@ -3,8 +3,8 @@ package com.proxibase.aircandi.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -14,35 +14,28 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 
-import com.proxibase.aircandi.widgets.WebImageView;
+import com.proxibase.aircandi.PictureSearch;
 
 public class DrawableManager {
 
 	private final Map	drawableMap;
 
 	public DrawableManager() {
-		drawableMap = new HashMap();
+		drawableMap = new WeakHashMap();
 	}
 
 	public Drawable fetchDrawable(String urlString) {
+		
 		if (drawableMap.containsKey(urlString)) {
 			return (Drawable) drawableMap.get(urlString);
 		}
 
-		Logger.d(this, "Image url:" + urlString);
+		InputStream is = null;
 		try {
-			InputStream is = fetch(urlString);
+			is = fetch(urlString);
 			Drawable drawable = Drawable.createFromStream(is, "src");
 			drawableMap.put(urlString, drawable);
-			Logger.v(this, "got a thumbnail drawable: " + drawable.getBounds()
-																					+ ", "
-																					+ drawable.getIntrinsicHeight()
-																					+ ","
-																					+ drawable.getIntrinsicWidth()
-																					+ ", "
-																					+ drawable.getMinimumHeight()
-																					+ ","
-																					+ drawable.getMinimumWidth());
+			is.close();
 			return drawable;
 		}
 		catch (MalformedURLException exception) {
@@ -55,16 +48,20 @@ public class DrawableManager {
 		}
 	}
 
-	public void fetchDrawableOnThread(final String urlString, final WebImageView imageView) {
+	public void fetchDrawableOnThread(final String urlString, final PictureSearch.ViewHolder holder) {
 		if (drawableMap.containsKey(urlString)) {
-			ImageUtils.showDrawableInImageView((Drawable) drawableMap.get(urlString), imageView);
+			//Logger.v(this, "Image fetched from drawable cache: " + urlString);
+			ImageUtils.showDrawableInImageView((Drawable) drawableMap.get(urlString), holder.itemImage, false);
+			return;
 		}
 
 		final Handler handler = new Handler() {
 
 			@Override
 			public void handleMessage(Message message) {
-				ImageUtils.showDrawableInImageView((Drawable) message.obj, imageView);
+				if (((String) holder.itemImage.getTag()).equals(urlString)) {
+					ImageUtils.showDrawableInImageView((Drawable) message.obj, holder.itemImage, false);
+				}
 			}
 		};
 
@@ -73,6 +70,7 @@ public class DrawableManager {
 			@Override
 			public void run() {
 				Drawable drawable = fetchDrawable(urlString);
+				//Logger.v(this, "Image downloaded: " + urlString);
 				Message message = handler.obtainMessage(1, drawable);
 				handler.sendMessage(message);
 			}

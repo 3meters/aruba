@@ -4,22 +4,38 @@
     android:layout_height="fill_parent"
     android:background="?attr/backgroundCandiInfo" >
 
+    <!-- Header -->
+
     <RelativeLayout
-        android:id="@+id/actionbar"
+        android:id="@+id/activity_header"
         style="@style/actionbar"
         android:layout_width="fill_parent"
-        android:layout_height="40dp" >
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp" >
 
-        <Button
-            android:id="@+id/btn_context"
-            style="@style/actionbar_button_back"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_alignParentLeft="true"
+        <ImageView
+            android:id="@+id/btn_logo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_centerVertical="true"
-            android:drawablePadding="5dp"
+            android:adjustViewBounds="true"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:src="?attr/logo" />
+
+        <TextView
+            android:id="@+id/text_header_title"
+            style="@style/form_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/btn_logo"
+            android:gravity="center_vertical"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp" />
+            android:paddingRight="10dp"
+            android:text="@string/form_title_picture_search" />
     </RelativeLayout>
 
     <!--
@@ -37,7 +53,7 @@
         android:id="@+id/cbo_category"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/actionbar"
+        android:layout_below="@+id/activity_header"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
         android:layout_marginTop="5dp"
@@ -49,7 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center|left"
-            android:hint="@string/gallery_label_category"
+            android:hint="@string/picture_search_query_hint"
             android:inputType="textUri"
             android:singleLine="true" />
 
@@ -75,7 +91,7 @@
         android:columnWidth="100dp"
         android:gravity="center"
         android:horizontalSpacing="5dp"
-        android:numColumns="3"
+        android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
         android:verticalSpacing="5dp" >
 
@@ -96,6 +112,7 @@
             style="@style/app_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="150dp"
             android:onClick="onCancelButtonClick"
             android:text="@string/form_button_cancel" />
     </LinearLayout>
