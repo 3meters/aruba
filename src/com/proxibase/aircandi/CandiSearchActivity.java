@@ -219,8 +219,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private Boolean						mReadyToRun					= false;
 	private Boolean						mFullUpdateSuccess			= false;
 	private Boolean						mScanActive					= false;
-	private Handler						mHandler					= new Handler();
-	private LayoutInflater				mInflater;
+	private Handler						mMyHandler					= new Handler();
 	private Boolean						mCredentialsFound			= false;
 	public static BasicAWSCredentials	mAwsCredentials				= null;
 
@@ -231,8 +230,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private CandiPatchModel				mCandiPatchModel;
 	private CandiPatchPresenter			mCandiPatchPresenter;
 
-	protected ImageView					mProgressIndicator;
-	protected ImageView					mButtonRefresh;
 	private RenderSurfaceView			mCandiSurfaceView;
 	private View						mCandiInfoView;
 	private ProgressDialog				mProgressDialog;
@@ -304,9 +301,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		/* Start normal processing */
 		mReadyToRun = false;
 
-		/* Tools */
-		LayoutInflater mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
 		/* Analytics tracker */
 		mTracker = GoogleAnalyticsTracker.getInstance();
 		mTracker.startNewSession(getAnalyticsId(), this);
@@ -324,7 +318,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		mCandiPager.setOnPageChangeListener(mCandiPagerIndicator);
 
 		mCandiPagerIndicator = (ViewPagerIndicator) findViewById(R.id.pager_indicator);
-		mCandiPagerIndicator.bindToView((View) mInflater.inflate(R.layout.temp_page_indicator, null));
+		mCandiPagerIndicator.bindToView((View) getLayoutInflater().inflate(R.layout.temp_page_indicator, null));
 		mCandiPagerIndicator.initialize(1, 2, (PageInfoProvider) mCandiPager.getAdapter());
 		mCandiPager.setOnPageChangeListener(mCandiPagerIndicator);
 
@@ -539,11 +533,11 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
 					}
 					else {
-						mHandler.post(mUserSignedInRunnable);
+						mMyHandler.post(mUserSignedInRunnable);
 					}
 				}
 				else {
-					mHandler.post(mUserSignedInRunnable);
+					mMyHandler.post(mUserSignedInRunnable);
 				}
 			}
 		}
@@ -588,7 +582,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false);
 			}
 			else {
-				//super.onBackPressed();
+				super.onBackPressed();
 			}
 		}
 		else {
@@ -682,7 +676,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	// Entity routines
 	// --------------------------------------------------------------------------------------------
 
-	private void scanForBeacons(Options options, final boolean showProgress) {
+	private void scanForBeacons(final Options options, final boolean showProgress) {
 
 		/*
 		 * Everything associated with this call is on the main thread but the
@@ -811,7 +805,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						 * unless we discover a new beacon.
 						 */
 						if (mPrefAutoscan) {
-							mHandler.postDelayed(new Runnable() {
+							mMyHandler.postDelayed(new Runnable() {
 
 								public void run() {
 									scanForBeacons(new Options(false, false), false);
@@ -1782,7 +1776,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					}
 				}
 			});
-		
+
 		}
 		else {
 			if (listener != null) {
@@ -2028,7 +2022,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							//									message), CandiConstants.ACTIVITY_SIGNIN);
 						}
 						else {
-							mHandler.post(mUserSignedInRunnable);
+							mMyHandler.post(mUserSignedInRunnable);
 						}
 					}
 				});
@@ -2144,10 +2138,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 */
 		Logger.d(this, "Starting animation engine");
 		if (mReadyToRun) {
-			boolean prefChangeThatRequiresRefresh = loadPreferences();
+			PrefResponse prefResponse = loadPreferences();
 			loadPreferencesProxiExplorer();
 
-			if (mFirstRun || prefChangeThatRequiresRefresh) {
+			if (mFirstRun || prefResponse == PrefResponse.Refresh) {
 				if (mFirstRun) {
 					Logger.i(this, "Starting first run full beacon scan");
 				}
@@ -2157,6 +2151,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 				scanForBeacons(new Options(mFirstRun, false), false);
 				mFirstRun = false;
+			}
+			else if (prefResponse == PrefResponse.Restart) {
+				restartFirstActivity();
 			}
 		}
 	}
@@ -2564,7 +2561,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							Aircandi.settingsEditor.commit();
 
 							if (mUserSignedInRunnable != null) {
-								mHandler.post(mUserSignedInRunnable);
+								mMyHandler.post(mUserSignedInRunnable);
 							}
 						}
 					}
@@ -2695,7 +2692,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 											}
 										}
 										else if (resultVerb == Verb.New) {
-											mHandler.postDelayed(new Runnable() {
+											mMyHandler.postDelayed(new Runnable() {
 
 												@Override
 												public void run() {
@@ -2799,23 +2796,31 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	// Preferences routines
 	// --------------------------------------------------------------------------------------------
 
-	private boolean loadPreferences() {
-		boolean prefChangeThatRequiresRefresh = false;
+	private void restartFirstActivity() {
+		Intent intent = this.getIntent();
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(intent);
+		finish();
+	}
+
+	private PrefResponse loadPreferences() {
+
+		PrefResponse prefResponse = PrefResponse.None;
 
 		if (mPrefAutoscan != Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
-			prefChangeThatRequiresRefresh = true;
+			prefResponse = PrefResponse.Refresh;
 			mPrefAutoscan = Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false);
 		}
 		if (mPrefDisplayExtras != DisplayExtra.valueOf(Aircandi.settings.getString(Preferences.PREF_DISPLAY_EXTRAS, "None"))) {
-			prefChangeThatRequiresRefresh = true;
+			prefResponse = PrefResponse.Refresh;
 			mPrefDisplayExtras = DisplayExtra.valueOf(Aircandi.settings.getString(Preferences.PREF_DISPLAY_EXTRAS, "None"));
 		}
 		if (mPrefDemoMode != Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false)) {
-			prefChangeThatRequiresRefresh = true;
+			prefResponse = PrefResponse.Refresh;
 			mPrefDemoMode = Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false);
 		}
 		if (mPrefGlobalBeacons != Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true)) {
-			prefChangeThatRequiresRefresh = true;
+			prefResponse = PrefResponse.Refresh;
 			mPrefGlobalBeacons = Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true);
 		}
 
@@ -2834,16 +2839,16 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		}
 
 		if (!mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_blueray"))) {
-			prefChangeThatRequiresRefresh = false;
-			mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_blueray");
-			int themeResourceId = this.getResources().getIdentifier(mPrefTheme, "style", "com.proxibase.aircandi");
-			this.setTheme(themeResourceId);
-			Intent intent = new Intent(this, CandiSearchActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivity(intent);
+			prefResponse = PrefResponse.Restart;
+//			mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_blueray");
+//			int themeResourceId = this.getResources().getIdentifier(mPrefTheme, "style", "com.proxibase.aircandi");
+//			this.setTheme(themeResourceId);
 		}
-		return prefChangeThatRequiresRefresh;
+		return prefResponse;
+	}
+
+	public enum PrefResponse {
+		None, Refresh, Restart
 	}
 
 	private void loadPreferencesProxiExplorer() {

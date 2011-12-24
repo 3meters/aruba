@@ -104,10 +104,12 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		 * Any requested display extras are added to the title text by
 		 * the getTitleText() method.
 		 */
-		String titleTextModel = ((BaseModel) mModel).getTitleText();
-		if (mTitleSprite != null && titleTextModel != null && !titleTextModel.equals(mTitleText)) {
-			mTitleText = titleTextModel;
-			updateTextureSources();
+		if (mModel != null) {
+			String titleTextModel = ((BaseModel) mModel).getTitleText();
+			if (mTitleSprite != null && titleTextModel != null && !titleTextModel.equals(mTitleText)) {
+				mTitleText = titleTextModel;
+				updateTextureSources();
+			}
 		}
 	}
 
@@ -234,7 +236,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 					public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
 
 				});
-				
+
 				registerEntityModifier(modifier);
 				mCandiPatchPresenter.renderingActivate();
 			}

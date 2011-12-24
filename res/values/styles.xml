@@ -36,7 +36,7 @@
     <style name="app_button" parent="android:Widget.Button">
         <item name="android:minWidth">80dp</item>
         <item name="android:maxWidth">200dp</item>
-            <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
 
     <style name="app_checkbox" parent="android:Widget.CompoundButton.CheckBox">
@@ -108,7 +108,7 @@
     <style name="search_dialog_text">
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
-    
+
     <!-- ActionStrip -->
 
     <style name="actionstrip_button" parent="android:Widget.Button">
@@ -203,16 +203,21 @@
         <item name="android:maxWidth">100dp</item>
         <item name="android:gravity">center</item>
     </style>
-    
-        <!-- Aircandi Gallery -->
+
+    <!-- Aircandi Gallery -->
+
     <style name="gallery_image">
         <item name="android:scaleType">centerCrop</item>
         <item name="android:adjustViewBounds">true</item>
         <item name="android:background">?attr/backgroundHeader</item>
-        </style>
-        
+    </style>
 
-    <!-- Candi Forms -->
+    <style name="gallery_image_placeholder">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:background">?attr/backgroundHeader</item>
+    </style>
+    
+        <!-- Candi Forms -->
 
     <style name="form_title" parent="android:Widget.TextView">
         <item name="android:textAppearance">@style/app_text_appearance_title1</item>
@@ -256,7 +261,7 @@
         <item name="android:paddingTop">5dp</item>
         <item name="android:background">?attr/activityFooterFormBackground</item>
     </style>
-    
+
     <!-- Misc -->
 
     <style name="app_debug_label" parent="android:Widget.TextView">

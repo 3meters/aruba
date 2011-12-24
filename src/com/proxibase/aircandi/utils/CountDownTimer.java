@@ -75,7 +75,7 @@ public abstract class CountDownTimer {
 	 * Do not call it from inside CountDownTimer threads
 	 */
 	public final void cancel() {
-		mHandler.removeMessages(MSG);
+		mMyHandler.removeMessages(MSG);
 		mCancelled = true;
 	}
 
@@ -88,7 +88,7 @@ public abstract class CountDownTimer {
 			return this;
 		}
 		mStopTimeInFuture = SystemClock.elapsedRealtime() + mMillisInFuture;
-		mHandler.sendMessage(mHandler.obtainMessage(MSG));
+		mMyHandler.sendMessage(mMyHandler.obtainMessage(MSG));
 		mCancelled = false;
 		return this;
 	}
@@ -116,7 +116,7 @@ public abstract class CountDownTimer {
 	private static final int	MSG			= 1;
 
 	// handles counting down
-	private Handler				mHandler	= new Handler() {
+	private Handler				mMyHandler	= new Handler() {
 
 												@Override
 												public void handleMessage(Message msg) {

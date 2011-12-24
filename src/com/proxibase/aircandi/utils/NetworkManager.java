@@ -57,6 +57,7 @@ public class NetworkManager {
 		mContext.registerReceiver(mConnectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 		mContext.registerReceiver(mWifiStateChangedReceiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 		mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+		mIsConnectedFailurePrevious = false;
 	}
 
 	public void requestAsync(final ServiceRequest serviceRequest) {
@@ -218,13 +219,15 @@ public class NetworkManager {
 	// --------------------------------------------------------------------------------------------
 
 	public boolean isConnected() {
-		ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-		if (cm != null) {
-			NetworkInfo[] info = cm.getAllNetworkInfo();
-			if (info != null) {
-				for (int i = 0; i < info.length; i++) {
-					if (info[i].getState() == State.CONNECTED) {
-						return true;
+		if (mContext != null) {
+			ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+			if (cm != null) {
+				NetworkInfo[] info = cm.getAllNetworkInfo();
+				if (info != null) {
+					for (int i = 0; i < info.length; i++) {
+						if (info[i].getState() == State.CONNECTED) {
+							return true;
+						}
 					}
 				}
 			}

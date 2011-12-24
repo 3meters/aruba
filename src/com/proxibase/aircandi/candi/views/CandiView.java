@@ -230,7 +230,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 		 */
 		mCollapsed = collapsed;
 		if (collapsed) {
-			mTitleSprite.setVisible(false);
+			if (mTitleSprite != null) {
+				mTitleSprite.setVisible(false);
+			}
 
 			/* Positioning */
 			if (mBodySprite != null) {
@@ -251,7 +253,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 			}
 		}
 		else {
-			mTitleSprite.setVisible(true);
+			if (mTitleSprite != null) {
+				mTitleSprite.setVisible(true);
+			}
 
 			/* Positioning */
 			if (mBodySprite != null) {
@@ -340,6 +344,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 								CandiConstants.CANDI_VIEW_BODY_HEIGHT)));
 					}
 				}
+				if (mProgressBarSprite != null) {
+					mProgressBarSprite.registerEntityModifier(new MoveYModifier(duration, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0));
+				}
 			}
 			if (mPlaceholderSprite != null) {
 				mPlaceholderSprite.registerEntityModifier(new MoveYModifier(duration, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0));
@@ -361,6 +368,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 										CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT
 												+ CandiConstants.CANDI_VIEW_REFLECTION_GAP)));
 					}
+				}
+				if (mProgressBarSprite != null) {
+					mProgressBarSprite.registerEntityModifier(new MoveYModifier(duration, 0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT));
 				}
 			}
 			if (mPlaceholderSprite != null) {

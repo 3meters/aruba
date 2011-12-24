@@ -121,6 +121,15 @@ public abstract class AircandiActivity extends Activity {
 		int themeResourceId = getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", getPackageName());
 		this.setTheme(themeResourceId);
 	}
+	
+	@SuppressWarnings("unused")
+	private void startAircandi()
+	{
+		Intent intent = new Intent(this, CandiSearchActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(intent);
+	}
 
 	private void configure() {
 
@@ -337,12 +346,12 @@ public abstract class AircandiActivity extends Activity {
 				builder.setItems(listId, new DialogInterface.OnClickListener() {
 
 					public void onClick(DialogInterface dialog, int item) {
-						if (item == 0) { /* Gallery picture */
-							pickPicture();
+						if (item == 0) { /* Aircandi picture */
+							pickAircandiPicture();
 							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 						}
-						else if (item == 1) { /* Aircandi picture */
-							pickAircandiPicture();
+						else if (item == 1) { /* Gallery picture */
+							pickPicture();
 							overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 						}
 						else if (item == 2) { /* Take picture */

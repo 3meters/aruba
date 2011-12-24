@@ -95,10 +95,6 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 		startActivity(intent);
 	}
 
-	public void onRefreshClick(View view) {
-		return;
-	}
-
 	public void onSearchClick(View view) {
 		ImageUtils.showToastNotification( "Unimplemented...", Toast.LENGTH_SHORT);
 		return;

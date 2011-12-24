@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="?attr/backgroundCandiInfo" >
+
+    <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+
+    <LinearLayout
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
 
     <RelativeLayout
         android:id="@+id/activity_header"
@@ -42,6 +51,7 @@
         android:layout_above="@+id/form_footer"
         android:layout_below="@id/activity_header"
         android:layout_weight="1"
+        android:background="?attr/backgroundForm"
         android:fillViewport="true" >
 
         <LinearLayout
@@ -54,50 +64,20 @@
             <!-- Title and Content -->
 
             <EditText
-                android:id="@+id/text_title"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/form_title_hint" />
-
-            <EditText
                 android:id="@+id/text_content"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
-                android:hint="@string/form_description_hint"
+                android:hint="@string/form_comment_hint"
                 android:inputType="textMultiLine"
-                android:lines="5" />
+                android:lines="10" />
 
-            <!-- Public Image -->
-
-            <TextView
-                style="@style/form_label"
+            <com.proxibase.aircandi.widgets.AuthorBlock
+                android:id="@+id/block_author"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:text="@string/form_label_picture" />
-
-            <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:orientation="horizontal"
-                android:paddingBottom="10dp" >
-
-                <Button
-                    android:id="@+id/btn_change_public_image"
-                    style="@style/app_button"
-                    android:onClick="onChangePictureButtonClick"
-                    android:text="@string/form_button_change_picture" />
-
-                <com.proxibase.aircandi.widgets.WebImageView
-                    android:id="@+id/image_picture"
-                    style="@style/form_picture"
-                    android:layout_alignTop="@id/btn_change_public_image"
-                    android:layout_marginLeft="10dp"
-                    android:layout_toRightOf="@id/btn_change_public_image"
-                    android:visibility="gone" />
-            </RelativeLayout>
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                aircandi:orientation="horizontal" />
         </LinearLayout>
     </ScrollView>
 

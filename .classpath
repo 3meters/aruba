@@ -19,5 +19,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/google-analytics-1.4.2.jar"/>
 	<classpathentry kind="lib" path="lib/bing-search-java-sdk.jar" sourcepath="C:/Users/Jayma/Desktop/Proxibase/Android/bing-search/bing-search-java-sdk"/>
+	<classpathentry kind="lib" path="lib/cwac-adapter-wrapper.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

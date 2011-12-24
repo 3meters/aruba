@@ -70,6 +70,7 @@
 	<string name="form_title_profile">Profile settings</string>
 	<string name="form_title_signin">Sign in</string>
 	<string name="form_title_signup">Sign up</string>
+	<string name="form_title_picture_search">Picture search</string>
 	<string name="form_title_comment">Comment</string>
 	
 	<string name="form_tab_content">Content</string>
@@ -97,6 +98,7 @@
 	<string name="form_title_hint">Subject</string>
 	<string name="form_subtitle_hint">Subtitle</string>
 	<string name="form_description_hint">Description</string>
+	<string name="form_comment_hint">Comment</string>
 	<string name="form_uri_hint">Web address</string>
 	
 	<string name="alert_delete_failed">Delete failed</string>
@@ -136,7 +138,9 @@
 	<string name="web_label_html_zoom">Zoom html</string>
 	<string name="web_label_javascript">Javascript enabled</string>
 	
-	<string name="gallery_label_category">Category</string>
+	<string name="picture_search_query_hint">Search</string>
+	<string name="picture_search_loading">Loading...</string>
+	
 	<!--  Crash reporting -->
 	
 	<string name="crash_toast_text">Rats! I crashed, but a report has been sent to my developer to help him fix the issue!</string> 

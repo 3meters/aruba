@@ -49,6 +49,7 @@ public class ProxiExplorer {
 	private Boolean					mScanRequestActive		= false;
 	private Boolean					mScanRequestProcessing	= false;
 	private Options					mOptions;
+	private RequestListener			mRequestListener;
 
 	private List<WifiScanResult>	mWifiList				= new ArrayList<WifiScanResult>();
 	private WifiManager				mWifiManager;
@@ -89,12 +90,13 @@ public class ProxiExplorer {
 	 * @param fullUpdate if true then the existing beacon collection is cleared.
 	 * @param listener the callback used to return the EntityProxy collection.
 	 */
-	public void scanForBeacons(Options options, final RequestListener listener) {
+	public void scanForBeacons(Options options, RequestListener listener) {
 
 		if (listener == null) {
 			throw new IllegalArgumentException("Listener is required when calling scanForBeacons");
 		}
 
+		mRequestListener = listener;
 		mOptions = options;
 		mWifiList.clear();
 
@@ -142,13 +144,13 @@ public class ProxiExplorer {
 						ServiceResponse serviceResponse = processBeaconsFromScan(mWifiList, mOptions.refreshAllBeacons);
 
 						if (serviceResponse.resultCode != ResultCode.Success) {
-							listener.onComplete(serviceResponse);
+							mRequestListener.onComplete(serviceResponse);
 						}
 
 						if (mOptions.refreshDirty) {
 							serviceResponse = refreshDirtyEntities();
 							if (serviceResponse.resultCode != ResultCode.Success) {
-								listener.onComplete(serviceResponse);
+								mRequestListener.onComplete(serviceResponse);
 							}
 							mEntityProxies = (List<EntityProxy>) serviceResponse.data;
 						}
@@ -157,7 +159,7 @@ public class ProxiExplorer {
 
 						Logger.d(ProxiConstants.APP_NAME, sModName, "Passing updated proxi beacon collection back to listeners");
 						serviceResponse.data = mEntityProxies;
-						listener.onComplete(serviceResponse);
+						mRequestListener.onComplete(serviceResponse);
 					}
 				}
 			}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));

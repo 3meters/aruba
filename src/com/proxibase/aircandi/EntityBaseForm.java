@@ -103,16 +103,18 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		 * that subclass this will set any additional properties beyond the base ones.
 		 */
 		final BaseEntity entity = (BaseEntity) mEntity;
-		if (mCommand.verb.equals("new")) {
-			entity.beaconId = mBeacon.id;
-			entity.signalFence = -100.0f;
-			entity.createdById = String.valueOf(((User) mUser).id);
-			entity.enabled = true;
-			entity.visibility = Visibility.Public.ordinal();
-			entity.password = null;
-		}
-		else if (mCommand.verb.equals("edit")) {
-			mImageUriOriginal = entity.imageUri;
+		if (entity != null) {
+			if (mCommand.verb.equals("new")) {
+				entity.beaconId = mBeacon.id;
+				entity.signalFence = -100.0f;
+				entity.createdById = String.valueOf(((User) mUser).id);
+				entity.enabled = true;
+				entity.visibility = Visibility.Public.ordinal();
+				entity.password = null;
+			}
+			else if (mCommand.verb.equals("edit")) {
+				mImageUriOriginal = entity.imageUri;
+			}
 		}
 		//GoogleAnalyticsTracker.getInstance().dispatch();
 	}
