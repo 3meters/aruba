@@ -65,20 +65,21 @@
                         android:width="80dp" />
 
                     <Button
-                        android:id="@+id/btn_comments2"
+                        android:id="@+id/button_comments"
                         style="@style/comments_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/image_public"
                         android:layout_marginTop="10dp"
                         android:clickable="true"
+                        android:onClick="onCommentsClick"
                         android:text="0\nComments" />
 
                     <com.proxibase.aircandi.widgets.AuthorBlock
                         android:id="@+id/block_author"
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/btn_comments2"
+                        android:layout_below="@+id/button_comments"
                         aircandi:orientation="vertical"
                         android:paddingLeft="3dp"
                         android:paddingTop="5dp" >

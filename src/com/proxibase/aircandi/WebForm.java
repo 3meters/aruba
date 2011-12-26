@@ -25,7 +25,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.WebEntity;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.NetworkManager;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
@@ -43,7 +43,7 @@ public class WebForm extends EntityBaseForm {
 
 		if (mCommand.verb.equals("new")) {
 			WebEntity entity = new WebEntity();
-			entity.entityType = CandiConstants.TYPE_CANDI_WEB;
+			entity.entityType = CandiConstants.TYPE_CANDI_WEB_BOOKMARK;
 			if (mParentEntityId != 0) {
 				entity.parentEntityId = mParentEntityId;
 			}
@@ -58,7 +58,7 @@ public class WebForm extends EntityBaseForm {
 			ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 					new ServiceRequest(mEntityProxy.getEntryUri(), RequestType.Get, ResponseFormat.Json));
 
-			if (serviceResponse.resultCode != ResultCode.Success) {
+			if (serviceResponse.responseCode != ResponseCode.Success) {
 				setResult(Activity.RESULT_CANCELED);
 				finish();
 				overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
@@ -247,7 +247,7 @@ public class WebForm extends EntityBaseForm {
 								public void onComplete(Object response) {
 									
 									ServiceResponse serviceResponse = (ServiceResponse) response;
-									if (serviceResponse.resultCode != ResultCode.Success) {
+									if (serviceResponse.responseCode != ResponseCode.Success) {
 										mProgressDialog.dismiss();
 										ImageUtils.showToastNotification(getResources().getString(R.string.web_alert_website_unavailable),
 												Toast.LENGTH_SHORT);

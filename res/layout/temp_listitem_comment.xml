@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
+    android:id="@+id/item_row"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="10dp" >
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:layout_alignParentTop="true"
+        android:background="?attr/ruleColor" />
+
+    <com.proxibase.aircandi.widgets.WebImageView
+        android:id="@+id/item_author_image"
+        style="@style/candi_list_image"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="10dp"
+        android:paddingTop="5dp"
+        android:src="@drawable/placeholder_user_dark" />
+
+    <RelativeLayout
+        android:id="@+id/group_author"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/item_author_image"
+        android:layout_toRightOf="@+id/item_author_image"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/item_author_name"
+            style="@style/candi_list_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="Jay Massena" />
+
+        <View
+            android:id="@+id/item_author_location_separator"
+            android:layout_width="1px"
+            android:layout_height="20dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/item_author_name"
+            android:background="?attr/ruleColor" />
+
+        <TextView
+            android:id="@+id/item_author_location"
+            style="@style/candi_list_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/item_author_name"
+            android:text="Seattle"
+            android:textColor="?attr/textColorUnfocused" />
+
+        <LinearLayout
+            android:id="@+id/item_button_action"
+            style="@style/candi_list_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:onClick="onCommentMoreButtonClick" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="?attr/iconInfoActions" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/item_comment"
+        style="@style/candi_list_description"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/group_author"
+        android:layout_below="@+id/group_author"
+        android:layout_marginBottom="5dp"
+        android:text="The computers in the cars can now figure out the true oil change interval (based on idle time, distance driven, etc), but no one would ever bealive it because then have been brain washed already and would still change the oil every 3k miles." />
+
+    <LinearLayout
+        android:id="@+id/group_actions"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/group_author"
+        android:layout_below="@+id/item_comment"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/item_created_date"
+            style="@style/candi_list_description"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="December 23 at 10:12am"
+            android:textColor="?attr/textColorUnfocused" />
+    </LinearLayout>
+
+</RelativeLayout>

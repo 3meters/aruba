@@ -7,7 +7,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PictureEntity;
 import com.proxibase.aircandi.utils.NetworkManager;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
@@ -38,7 +38,7 @@ public class PictureForm extends EntityBaseForm {
 			ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 					new ServiceRequest(mEntityProxy.getEntryUri(), RequestType.Get, ResponseFormat.Json));
 
-			if (serviceResponse.resultCode != ResultCode.Success) {
+			if (serviceResponse.responseCode != ResponseCode.Success) {
 				setResult(Activity.RESULT_CANCELED);
 				finish();
 				overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
@@ -50,6 +50,14 @@ public class PictureForm extends EntityBaseForm {
 			}
 		}
 		super.bindEntity();
+	}
+	
+	@Override
+	protected void gather() {
+		final PictureEntity entity = (PictureEntity) mEntity;
+		entity.mediaUri = entity.imageUri;
+		entity.mediaFormat = entity.imageFormat;
+		super.gather();
 	}
 
 	// --------------------------------------------------------------------------------------------

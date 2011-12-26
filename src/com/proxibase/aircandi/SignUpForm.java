@@ -22,7 +22,7 @@ import com.proxibase.aircandi.utils.NetworkManager;
 import com.proxibase.aircandi.utils.S3;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
@@ -124,7 +124,7 @@ public class SignUpForm extends AircandiActivity {
 							@Override
 							public void onComplete(Object response) {
 								ServiceResponse serviceResponse = (ServiceResponse) response;
-								if (serviceResponse.resultCode == ResultCode.Success) {
+								if (serviceResponse.responseCode == ResponseCode.Success) {
 									mUser.imageBitmap = (Bitmap) serviceResponse.data;
 								}
 							}
@@ -157,7 +157,7 @@ public class SignUpForm extends AircandiActivity {
 			public void onComplete(Object response, Object extra) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.resultCode == ResultCode.Success) {
+				if (serviceResponse.responseCode == ResponseCode.Success) {
 					Bitmap bitmap = (Bitmap) serviceResponse.data;
 					String imageUri = (String) extra;
 					mUser.imageUri = imageUri;
@@ -207,7 +207,7 @@ public class SignUpForm extends AircandiActivity {
 			public void onComplete(Object response) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.resultCode != ResultCode.Success) {
+				if (serviceResponse.responseCode != ResponseCode.Success) {
 					ImageUtils.showToastNotification(getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
 					return;
 				}
@@ -217,7 +217,7 @@ public class SignUpForm extends AircandiActivity {
 					serviceResponse = NetworkManager.getInstance().request(
 							new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-					if (serviceResponse.resultCode != ResultCode.Success) {
+					if (serviceResponse.responseCode != ResponseCode.Success) {
 						/* Jayma: We might have succeeded inserting user but not the user picture */
 						return;
 					}

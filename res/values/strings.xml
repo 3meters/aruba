@@ -10,6 +10,7 @@
 	<string name="EXTRA_ENTITY">com.proxibase.aircandi.EXTRA_ENTITY</string>
 	<string name="EXTRA_COMMAND">com.proxibase.aircandi.EXTRA_COMMAND</string>
 	<string name="EXTRA_USER">com.proxibase.aircandi.EXTRA_USER</string>
+	<string name="EXTRA_COMMENT">com.proxibase.aircandi.EXTRA_COMMENT</string>
 	<string name="EXTRA_URI">com.proxibase.aircandi.EXTRA_URI</string>
 	<string name="EXTRA_MESSAGE">com.proxibase.aircandi.EXTRA_MESSAGE</string>
 	<string name="EXTRA_BEACON_DIRTY">com.proxibase.aircandi.EXTRA_BEACON_DIRTY</string>

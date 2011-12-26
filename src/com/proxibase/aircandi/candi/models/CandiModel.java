@@ -45,7 +45,7 @@ public class CandiModel extends BaseModel {
 			else if (entityType.equals(CandiConstants.TYPE_CANDI_TOPIC)) {
 				return "Topic";
 			}
-			else if (entityType.equals(CandiConstants.TYPE_CANDI_WEB)) {
+			else if (entityType.equals(CandiConstants.TYPE_CANDI_WEB_BOOKMARK)) {
 				return "Web";
 			}
 			else if (entityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {

@@ -19,7 +19,7 @@ import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.NetworkManager;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -51,7 +51,7 @@ public class PictureBrowse extends AircandiActivity {
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 				new ServiceRequest(mEntityProxy.getEntryUri(), RequestType.Get, ResponseFormat.Json));
 
-		if (serviceResponse.resultCode != ResultCode.Success) {
+		if (serviceResponse.responseCode != ResponseCode.Success) {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
 			overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
@@ -70,16 +70,22 @@ public class PictureBrowse extends AircandiActivity {
 
 							@Override
 							public void onComplete(Object response) {
-								
+
 								ServiceResponse serviceResponse = (ServiceResponse) response;
-								if (serviceResponse.resultCode != ResultCode.Success) {
+								if (serviceResponse.responseCode != ResponseCode.Success) {
 									return;
 								}
 								else {
 									Logger.d(PictureBrowse.this, "Image fetched: " + entity.mediaUri);
 									entity.mediaBitmap = (Bitmap) serviceResponse.data;
-									stopProgress();
-									mViewFlipper.setDisplayedChild(0);
+									runOnUiThread(new Runnable() {
+
+										@Override
+										public void run() {
+											stopProgress();
+											mViewFlipper.setDisplayedChild(0);
+										}
+									});
 								}
 							}
 

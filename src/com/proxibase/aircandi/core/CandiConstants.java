@@ -73,11 +73,11 @@ public interface CandiConstants {
 	public static final String			URL_AIRCANDI_MEDIA					= "https://s3.amazonaws.com/";
 	public static final String			S3_BUCKET_IMAGES					= "3meters_images";
 
-	public static final String			TYPE_CANDI_TOPIC					= "com.proxibase.aircandi.candi.forum";
+	public static final String			TYPE_CANDI_TOPIC					= "com.proxibase.aircandi.candi.topic";
 	public static final String			TYPE_CANDI_POST						= "com.proxibase.aircandi.candi.post";
-	public static final String			TYPE_CANDI_GALLERY					= "com.proxibase.aircandi.candi.album";
-	public static final String			TYPE_CANDI_PICTURE					= "com.proxibase.aircandi.candi.photo";
-	public static final String			TYPE_CANDI_WEB						= "com.proxibase.aircandi.candi.web";
+	public static final String			TYPE_CANDI_GALLERY					= "com.proxibase.aircandi.candi.gallery";
+	public static final String			TYPE_CANDI_PICTURE					= "com.proxibase.aircandi.candi.picture";
+	public static final String			TYPE_CANDI_WEB_BOOKMARK				= "com.proxibase.aircandi.candi.webbookmark";
 	public static final String			TYPE_CANDI_GRAM						= "com.proxibase.aircandi.candi.gram";
 
 	public static final int				ACTIVITY_ENTITY_HANDLER				= 100;
@@ -90,6 +90,9 @@ public interface CandiConstants {
 	public static final int				ACTIVITY_SIGNIN						= 400;
 	public static final int				ACTIVITY_SIGNUP						= 410;
 	public static final int				ACTIVITY_PROFILE					= 420;
+	public static final int				ACTIVITY_COMMENT					= 430;
+	public static final int				ACTIVITY_COMMENT_LIST				= 435;
+	public static final int				ACTIVITY_CANDI_INFO					= 440;
 
 	public static final int				VISIBILITY_PRIVATE					= 0;
 	public static final int				VISIBILITY_PASSWORD_PROTECTED		= 1;

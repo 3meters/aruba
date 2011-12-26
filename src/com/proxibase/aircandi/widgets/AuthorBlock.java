@@ -17,6 +17,7 @@ import com.proxibase.aircandi.utils.DateUtils;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.consumer.Author;
+import com.proxibase.sdk.android.proxi.consumer.User;
 
 public class AuthorBlock extends RelativeLayout {
 
@@ -28,6 +29,7 @@ public class AuthorBlock extends RelativeLayout {
 	private TextView		mTextFullname;
 	private TextView		mTextTimeSince;
 	private Author			mAuthor;
+	private User			mUser;
 	private Activity		mActivity;
 
 	public AuthorBlock(Context context) {
@@ -77,6 +79,24 @@ public class AuthorBlock extends RelativeLayout {
 			}
 			if (mAuthor.imageUri != null && mAuthor.imageUri.length() != 0) {
 				ImageRequest imageRequest = new ImageRequest(mAuthor.imageUri, ImageShape.Square, "binary", false,
+						CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
+				mImageUser.setImageRequest(imageRequest, null);
+			}
+		}
+	}
+
+	public void bindToUser(User user, Date date) {
+		mUser = user;
+		if (mUser != null) {
+			mTextFullname.setText(mUser.fullname);
+			if (date != null) {
+				mTextTimeSince.setText(DateUtils.intervalSince(date, DateUtils.nowDate()));
+			}
+			else {
+				mTextTimeSince.setVisibility(View.GONE);
+			}
+			if (mUser.imageUri != null && mUser.imageUri.length() != 0) {
+				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
 						CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
 				mImageUser.setImageRequest(imageRequest, null);
 			}

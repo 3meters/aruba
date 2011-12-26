@@ -16,7 +16,7 @@ import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.models.WebEntity;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.NetworkManager;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
@@ -46,7 +46,7 @@ public class WebBrowse extends AircandiActivity {
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 				new ServiceRequest(mEntityProxy.getEntryUri(), RequestType.Get, ResponseFormat.Json));
 
-		if (serviceResponse.resultCode != ResultCode.Success) {
+		if (serviceResponse.responseCode != ResponseCode.Success) {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
 			overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);

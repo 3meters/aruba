@@ -75,6 +75,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Animation.AnimationListener;
 import android.webkit.WebView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -128,12 +129,13 @@ import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.utils.NetworkManager.IConnectivityListener;
 import com.proxibase.aircandi.utils.NetworkManager.IWifiReadyListener;
 import com.proxibase.aircandi.utils.NetworkManager.NetworkRequestListener;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ResultCodeDetail;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.utils.ProxiExplorer.Options;
 import com.proxibase.aircandi.widgets.ActionsWindow;
 import com.proxibase.aircandi.widgets.AuthorBlock;
+import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator.PageInfoProvider;
@@ -244,6 +246,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private ViewSwitcher				mViewSwitcher;
 
 	private boolean						mCandiInfoVisible			= false;
+	private boolean						mCandiInfoChildVisible		= false;
 	private ActionsWindow				mActionsWindow;
 	private boolean						mCandiActivityActive		= false;
 	private AnimType					mAnimTypeCandiInfo			= AnimType.RotateCandi;
@@ -508,7 +511,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 							EntityProxy entityProxy = command.entity;
 
 							if (command.verb.equals("new")) {
-								Intent intent = buildIntent(null, command.entity.id, command, command.entity.beacon, mUser, clazz);
+								Intent intent = buildIntent(command.entity, command.entity.id, command, command.entity.beacon, mUser, clazz);
 								startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
 							}
 							else {
@@ -575,7 +578,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	public void onBackPressed() {
-		if (!mCandiInfoVisible) {
+		if (!mCandiInfoVisible && !mCandiInfoChildVisible) {
 			if (mCandiPatchModel != null && mCandiPatchModel.getCandiRootCurrent() != null
 				&& mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
 				mCandiPatchPresenter.renderingActivate();
@@ -586,9 +589,20 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 		}
 		else {
-			if (mActionsWindow != null && mActionsWindow.isShowing())
-				mActionsWindow.dismiss();
-			hideCandiInfo(AnimType.RotateCandi);
+			if (mCandiInfoVisible) {
+				if (mActionsWindow != null && mActionsWindow.isShowing()) {
+					mActionsWindow.dismiss();
+				}
+				hideCandiInfo(AnimType.RotateCandi);
+			}
+			else if (mCandiInfoChildVisible) {
+				mCandiFlipper.clearAnimation();
+				mCandiFlipper.setOutAnimation(this, R.anim.slide_out_right);
+				mCandiFlipper.setInAnimation(this, R.anim.slide_in_left);
+				mCandiFlipper.setDisplayedChild(1);
+				mCandiInfoChildVisible = false;
+				mCandiInfoVisible = true;
+			}
 		}
 	}
 
@@ -608,11 +622,21 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	}
 
 	public void onInfoViewClick(View v) {
-		hideCandiInfo(AnimType.RotateCandi);
-		mCandiInfoVisible = false;
+		if (mCandiInfoVisible) {
+			hideCandiInfo(AnimType.RotateCandi);
+			mCandiInfoVisible = false;
+		}
 	}
 
 	public void onHomeClick(View view) {}
+
+	public void onCommentsClick(View view) {
+		EntityProxy entity = (EntityProxy) view.getTag();
+		if (entity.commentCount > 0) {
+			Intent intent = buildIntent(entity, 0, new Command("view"), null, mUser, CommentList.class);
+			startActivity(intent);
+		}
+	}
 
 	public void onActionsClick(View view) {
 
@@ -707,8 +731,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				/* Make sure we have a user */
 				ServiceResponse serviceResponse = verifyUser();
 
-				if (serviceResponse.resultCode != ResultCode.Success) {
-					if (serviceResponse.resultCode == ResultCode.Unrecoverable) {
+				if (serviceResponse.responseCode != ResponseCode.Success) {
+					if (serviceResponse.responseCode == ResponseCode.Unrecoverable) {
 						Exceptions.Handle(serviceResponse.exception);
 					}
 					else {
@@ -740,8 +764,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 						ServiceResponse serviceResponse = (ServiceResponse) response;
 						final List<EntityProxy> entities = (List<EntityProxy>) serviceResponse.data;
 
-						if (serviceResponse.resultCode != ResultCode.Success) {
-							if (serviceResponse.resultCode == ResultCode.Unrecoverable) {
+						if (serviceResponse.responseCode != ResponseCode.Success) {
+							if (serviceResponse.responseCode == ResponseCode.Unrecoverable) {
 								Exceptions.Handle(serviceResponse.exception);
 							}
 							else {
@@ -942,19 +966,34 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
+	private void showCandiInfoChild(EntityProxy entityProxy) {
+		RelativeLayout candiInfoView = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_candi_info, null);
+		LinearLayout candiInfoChildView = (LinearLayout) findViewById(R.id.view_candi_info_child);
+		candiInfoView = buildCandiInfo(entityProxy, candiInfoView);
+		candiInfoChildView.removeAllViews();
+		candiInfoChildView.addView(candiInfoView);
+		mCandiFlipper.clearAnimation();
+		mCandiFlipper.setInAnimation(this, R.anim.slide_in_right);
+		mCandiFlipper.setOutAnimation(this, R.anim.slide_out_left);
+		mCandiFlipper.showNext();
+		mCandiInfoChildVisible = true;
+		mCandiInfoVisible = false;
+	}
+
 	private void showCandiInfo(final CandiModel candiModel, AnimType animType) {
 
 		mCandiInfoVisible = true;
 		mCandiPatchPresenter.renderingActivate();
 		mCandiInfoEntity = candiModel.getEntityProxy();
+		mCandiPager.setCurrentItem(0);
 		Logger.d(this, "Show candi info: " + candiModel.getTitleText());
 		mTracker.trackPageView("/CandiInfo");
 
 		if (animType == AnimType.CrossFadeFlipper) {
 			mCandiSurfaceView.setVisibility(View.GONE);
 			mCandiFlipper.clearAnimation();
-			mCandiFlipper.setInAnimation(this, android.R.anim.slide_in_left);
-			mCandiFlipper.setOutAnimation(this, android.R.anim.slide_out_right);
+			mCandiFlipper.setInAnimation(this, R.anim.slide_in_right);
+			mCandiFlipper.setOutAnimation(this, R.anim.slide_out_left);
 			mCandiFlipper.showNext();
 			updateCandiBackButton(null);
 			mCandiPatchPresenter.setIgnoreInput(false);
@@ -984,13 +1023,6 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			if (mPrefShowDebug) {
 				debugSliderShow(false);
 			}
-			//			if (mCandiPatchModel.getCandiModelSelected() != null && mCandiPatchModel.getCandiModelSelected().hasVisibleChildrenCurrent()) {
-			//				mCandiPagerIndicator.setVisibility(View.VISIBLE);
-			//				mCandiPagerIndicator.initialize(1, 2, (PageInfoProvider) mCandiPager.getAdapter());
-			//			}
-			//			else {
-			//				mCandiPagerIndicator.setVisibility(View.GONE);
-			//			}
 
 			float rotationX = mCandiPatchModel.getCandiModelSelected().getZoneStateCurrent().getZone().getViewStateCurrent().getCenterX();
 			float rotationY = mCandiPatchModel.getCandiModelSelected().getZoneStateCurrent().getZone().getViewStateCurrent().getCenterY();
@@ -1027,6 +1059,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 						public void run() {
 
+							//Intent intent = buildIntent(null, 0, new Command("edit"), null, mUser, CandiInfo.class);
+							//startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_INFO);
+
 							/*
 							 * mCandiDetailView.setVisibility(View.VISIBLE);
 							 * mCandiDetailView.startAnimation(AircandiUI.loadAnimation(CandiSearchActivity.this,
@@ -1052,14 +1087,15 @@ public class CandiSearchActivity extends AircandiGameActivity {
 								public void onAnimationEnd(Animation animation) {
 
 									if (mFirstTimeSliderInfoShow)
-									{
-										SlidingDrawer slidingDrawer = (SlidingDrawer) mCandiInfoView.findViewById(R.id.slide_actions_info);
-										slidingDrawer.animateOpen();
-										mFirstTimeSliderInfoShow = false;
-									}
+																{
+																	SlidingDrawer slidingDrawer = (SlidingDrawer) mCandiInfoView
+																			.findViewById(R.id.slide_actions_info);
+																	slidingDrawer.animateOpen();
+																	mFirstTimeSliderInfoShow = false;
+																}
 
-									mRotate3dAnimation.setAnimationListener(null);
-								}
+																mRotate3dAnimation.setAnimationListener(null);
+															}
 
 								@Override
 								public void onAnimationRepeat(Animation animation) {}
@@ -1289,9 +1325,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 	private RelativeLayout buildCandiInfo(final EntityProxy entity, final RelativeLayout candiInfoView) {
 
 		/* Build menus */
+		CandiModel candiModel = mCandiPatchModel.getCandiModelForEntity(entity.id);
 		Display getOrient = getWindowManager().getDefaultDisplay();
 		boolean landscape = (getOrient.getOrientation() == Surface.ROTATION_90 || getOrient.getOrientation() == Surface.ROTATION_270);
-		TableLayout table = configureMenus(mCandiPatchModel.getCandiModelSelected(), landscape, CandiSearchActivity.this);
+		TableLayout table = configureMenus(candiModel, landscape, CandiSearchActivity.this);
 		if (table != null) {
 			RelativeLayout slideContent = (RelativeLayout) candiInfoView.findViewById(R.id.candi_info_slider_content);
 			slideContent.removeAllViews();
@@ -1316,6 +1353,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_info_subtitle);
 		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_info_description);
 		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
+		final Button comments = (Button) candiInfoView.findViewById(R.id.button_comments);
 
 		/* Candi image */
 		if (entity.imageUri != null && entity.imageUri.length() != 0) {
@@ -1332,6 +1370,10 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		else {
 			authorBlock.setVisibility(View.GONE);
 		}
+
+		/* Comments */
+		comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? "\nComment" : "\nComments"));
+		comments.setTag(entity);
 
 		/* Candi text */
 		title.setText(null);
@@ -1560,7 +1602,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			commandCount++;
 
 			/* If we have three in a row then commit it and make a new row */
-			int newRow = 2;
+			int newRow = 3;
 			if (landscape) {
 				newRow = 4;
 			}
@@ -1803,7 +1845,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			serviceResponse = NetworkManager.getInstance().request(
 									new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-			if (serviceResponse.resultCode == ResultCode.Success) {
+			if (serviceResponse.responseCode == ResponseCode.Success) {
 
 				String jsonResponse = (String) serviceResponse.data;
 				mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
@@ -1818,7 +1860,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			serviceResponse = NetworkManager.getInstance().request(
 									new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-			if (serviceResponse.resultCode == ResultCode.Success) {
+			if (serviceResponse.responseCode == ResponseCode.Success) {
 
 				String jsonResponse = (String) serviceResponse.data;
 				mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
@@ -1834,7 +1876,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 								.getInstance()
 								.request(new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-					if (serviceResponse.resultCode == ResultCode.Success) {
+					if (serviceResponse.responseCode == ResponseCode.Success) {
 
 						jsonResponse = (String) serviceResponse.data;
 						mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
@@ -1849,7 +1891,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			}
 		}
 
-		if (serviceResponse.resultCode == ResultCode.Success) {
+		if (serviceResponse.responseCode == ResponseCode.Success) {
 			if (findViewById(R.id.image_user) != null) {
 				setUserPicture(mUser.imageUri, (WebImageView) findViewById(R.id.image_user));
 			}
@@ -2196,16 +2238,16 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		 */
 		Logger.d(this, hasWindowFocus ? "Activity has window focus" : "Activity lost window focus");
 
-		//if (!mEngine.isRunning()) {
-		Logger.d(this, "Passing onWindowFocusChanged to Andengine");
-		if (hasWindowFocus && mCandiInfoVisible) {
-			mEngine.setBlockReloadTextures(true);
+		if (!mEngine.isRunning()) {
+			Logger.d(this, "Passing onWindowFocusChanged to Andengine");
+			if (hasWindowFocus && mCandiInfoVisible) {
+				mEngine.setBlockReloadTextures(true);
+			}
+			else {
+				mEngine.setBlockReloadTextures(false);
+			}
+			super.onWindowFocusChanged(hasWindowFocus);
 		}
-		else {
-			mEngine.setBlockReloadTextures(false);
-		}
-		super.onWindowFocusChanged(hasWindowFocus);
-		//}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -2249,7 +2291,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			else if (position == PagerView.CandiList.ordinal()) {
 
 				View candiInfoList = (View) inflater.inflate(R.layout.temp_candi_list, null);
-				ListView candiListView = (ListView) candiInfoList.findViewById(R.id.list_candi_children);
+				final ListView candiListView = (ListView) candiInfoList.findViewById(R.id.list_candi_children);
 				ListAdapter adapter = new ListAdapter(CandiSearchActivity.this, R.id.item_description, mCandiInfoEntity.children);
 				candiListView.setAdapter(adapter);
 				candiListView.setClickable(true);
@@ -2297,7 +2339,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					else if (entityType.equals(CandiConstants.TYPE_CANDI_TOPIC)) {
 						return "TOPIC";
 					}
-					else if (entityType.equals(CandiConstants.TYPE_CANDI_WEB)) {
+					else if (entityType.equals(CandiConstants.TYPE_CANDI_WEB_BOOKMARK)) {
 						return "BOOKMARK";
 					}
 				}
@@ -2338,11 +2380,22 @@ public class CandiSearchActivity extends AircandiGameActivity {
 			if (view == null) {
 				LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				view = inflater.inflate(R.layout.temp_listitem_twoline_icon, null);
+				view.setClickable(true);
+				view.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View view) {
+						ViewHolder holder = (ViewHolder) view.getTag();
+						//ImageUtils.showToastNotification("Clicked on item " + ((EntityProxy) holder.data).id, Toast.LENGTH_SHORT);
+						showCandiInfoChild((EntityProxy) holder.data);
+					}
+				});
+
 				holder = new ViewHolder();
 				holder.itemImage = (WebImageView) view.findViewById(R.id.item_image);
 				holder.itemTitle = (TextView) view.findViewById(R.id.item_title);
 				holder.itemSubtitle = (TextView) view.findViewById(R.id.item_subtitle);
-				holder.itemDescription = (TextView) view.findViewById(R.id.item_description);
+				holder.itemDescription = (TextViewEllipsizing) view.findViewById(R.id.item_description);
 				holder.itemAuthor = (AuthorBlock) view.findViewById(R.id.item_block_author);
 				holder.itemActionButton = (View) view.findViewById(R.id.item_button_action);
 				view.setTag(holder);
@@ -2373,6 +2426,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				}
 
 				if (holder.itemDescription != null) {
+					holder.itemDescription.setMaxLines(5);
 					if (entityProxy.description != null && entityProxy.description.length() > 0) {
 						holder.itemDescription.setText(entityProxy.description);
 					}
@@ -2436,13 +2490,13 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	private class ViewHolder {
 
-		public WebImageView	itemImage;
-		public TextView		itemTitle;
-		public TextView		itemSubtitle;
-		public TextView		itemDescription;
-		public AuthorBlock	itemAuthor;
-		public View			itemActionButton;
-		public Object		data;
+		public WebImageView			itemImage;
+		public TextView				itemTitle;
+		public TextView				itemSubtitle;
+		public TextViewEllipsizing	itemDescription;
+		public AuthorBlock			itemAuthor;
+		public View					itemActionButton;
+		public Object				data;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -2591,6 +2645,60 @@ public class CandiSearchActivity extends AircandiGameActivity {
 				}
 			}
 		}
+		else if (requestCode == CandiConstants.ACTIVITY_CANDI_INFO) {
+			/* Always rotate back to the candi */
+			mCandiPatchPresenter.renderingActivate();
+			mEngine.getScene().registerEntityModifier(new AlphaModifier(1.0f, 0.0f, 1.0f, EaseLinear.getInstance()));
+
+			//			final float duration = 4.0f;
+			//			if (mPrefShowDebug) {
+			//				debugSliderShow(true);
+			//			}
+			//
+			//			float rotationX = mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone().getViewStateCurrent()
+			//					.getCenterX();
+			//			float rotationY = mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone().getViewStateCurrent()
+			//					.getCenterY();
+			//			float scaleFrom = 0.5f;
+			//			float scaleTo = 1.0f;
+			//			float alphaFrom = 0.0f;
+			//			float alphaTo = 1.0f;
+			//
+			//			IEntity entity = mEngine.getScene();
+			//
+			//			if (mAnimTypeCandiInfo == AnimType.RotateCandi) {
+			//				entity = (IEntity) mCandiPatchPresenter.getCandiViewsHash().get(
+			//						String.valueOf(mCandiPatchModel.getCandiModelFocused().getModelId()));
+			//				rotationX = (CandiConstants.CANDI_VIEW_WIDTH * 0.5f);
+			//				rotationY = (CandiConstants.CANDI_VIEW_BODY_HEIGHT * 0.5f);
+			//				scaleFrom = 1.3f;
+			//				alphaFrom = 0.5f;
+			//				mEngine.getScene().registerEntityModifier(new AlphaModifier(duration, 0.0f, 1.0f, EaseLinear.getInstance()));
+			//
+			//			}
+			//
+			//			/* Using a scaling modifier is tricky to reverse without shifting coordinates */
+			//			//							entity.registerEntityModifier(new ParallelEntityModifier(new RotationAtModifier(duration, 90f, 0.0f, rotationX,
+			//			//									rotationY, EaseCubicOut.getInstance()), new AlphaModifier(duration, alphaFrom, alphaTo, EaseCircularOut
+			//			//									.getInstance())));
+			//			mCandiPatchPresenter.renderingActivate();
+			//			mCandiInfoEntity = null;
+			//
+			//			CandiModel candiModel = mCandiPatchModel.getCandiModelFocused();
+			//			//doUpdateEntities(mProxiEntities, false, true);
+			//			candiModel.getViewModifiers().addFirst(new ParallelEntityModifier(new RotationAtModifier(duration, 90f, 0.0f, rotationX,
+			//					rotationY, EaseCubicOut.getInstance()), new AlphaModifier(duration, alphaFrom, alphaTo, EaseCircularOut
+			//					.getInstance())));
+			//			candiModel.setChanged();
+			//			candiModel.update();
+			//
+			//			updateCandiBackButton(!mCandiPatchModel.getCandiRootCurrent().isSuperRoot() ? mCandiPatchModel.getCandiRootCurrent()
+			//					.getTitleText() : null);
+			mCandiPatchModel.setCandiModelSelected(null);
+			//			//mCandiPatchModel.update(); /* clears the previous rotation modifier */
+			mCandiPatchPresenter.setIgnoreInput(false);
+			CandiSearchActivity.this.mIgnoreInput = false;
+		}
 		else if (requestCode == CandiConstants.ACTIVITY_ENTITY_HANDLER) {
 			if (resultCode == Activity.RESULT_FIRST_USER) {
 				if (data != null) {
@@ -2609,8 +2717,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 									ServiceResponse serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
 									List<EntityProxy> freshEntityProxies = (List<EntityProxy>) serviceResponse.data;
 
-									if (serviceResponse.resultCode != ResultCode.Success) {
-										if (serviceResponse.resultCode == ResultCode.Unrecoverable) {
+									if (serviceResponse.responseCode != ResponseCode.Success) {
+										if (serviceResponse.responseCode == ResponseCode.Unrecoverable) {
 											Exceptions.Handle(serviceResponse.exception);
 										}
 										else {
@@ -2638,10 +2746,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 									entityProxy.isDirty = true;
 
 									ServiceResponse serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
-									List<EntityProxy> freshEntityProxies = (List<EntityProxy>) serviceResponse.data;
 
-									if (serviceResponse.resultCode != ResultCode.Success) {
-										if (serviceResponse.resultCode == ResultCode.Unrecoverable) {
+									if (serviceResponse.responseCode != ResponseCode.Success) {
+										if (serviceResponse.responseCode == ResponseCode.Unrecoverable) {
 											Exceptions.Handle(serviceResponse.exception);
 										}
 										else {
@@ -2653,6 +2760,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 									}
 
 									mTracker.dispatch();
+									List<EntityProxy> freshEntityProxies = (List<EntityProxy>) serviceResponse.data;
 									mProxiEntities = (List<EntityProxy>) ((ArrayList<EntityProxy>) freshEntityProxies).clone();
 
 									boolean matchFound = false;
@@ -2840,9 +2948,9 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 		if (!mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_blueray"))) {
 			prefResponse = PrefResponse.Restart;
-//			mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_blueray");
-//			int themeResourceId = this.getResources().getIdentifier(mPrefTheme, "style", "com.proxibase.aircandi");
-//			this.setTheme(themeResourceId);
+			//			mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_blueray");
+			//			int themeResourceId = this.getResources().getIdentifier(mPrefTheme, "style", "com.proxibase.aircandi");
+			//			this.setTheme(themeResourceId);
 		}
 		return prefResponse;
 	}
@@ -2923,7 +3031,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 					ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 							new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-					if (serviceResponse.resultCode != ResultCode.Success) {
+					if (serviceResponse.responseCode != ResponseCode.Success) {
 						return true;
 					}
 
@@ -3035,7 +3143,7 @@ public class CandiSearchActivity extends AircandiGameActivity {
 		serviceRequest.setSuppressUI(true);
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-		if (serviceResponse.resultCode != ResultCode.Success) {
+		if (serviceResponse.responseCode != ResponseCode.Success) {
 			return;
 		}
 
@@ -3170,7 +3278,8 @@ public class CandiSearchActivity extends AircandiGameActivity {
 
 	public enum PagerView {
 		CandiInfo,
-		CandiList
+		CandiList,
+		CandiInfoChild
 	}
 
 	public enum Theme {

@@ -29,7 +29,7 @@ import com.proxibase.aircandi.utils.S3;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
@@ -142,7 +142,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 									@Override
 									public void onComplete(Object response) {
 										ServiceResponse serviceResponse = (ServiceResponse) response;
-										if (serviceResponse.resultCode == ResultCode.Success) {
+										if (serviceResponse.responseCode == ResponseCode.Success) {
 											Bitmap bitmap = (Bitmap) serviceResponse.data;
 											entity.imageBitmap = bitmap;
 										}
@@ -214,7 +214,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 			public void onComplete(Object response, Object extra) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.resultCode == ResultCode.Success) {
+				if (serviceResponse.responseCode == ResponseCode.Success) {
 					Bitmap bitmap = (Bitmap) serviceResponse.data;
 					String imageUri = (String) extra;
 					BaseEntity entity = (BaseEntity) mEntity;
@@ -260,7 +260,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 			serviceRequest.setResponseFormat(ResponseFormat.Json);
 
 			ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-			if (serviceResponse.resultCode != ResultCode.Success) {
+			if (serviceResponse.responseCode != ResponseCode.Success) {
 				return;
 			}
 		}
@@ -354,7 +354,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 			public void onComplete(Object response) {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				stopTitlebarProgress();
-				if (serviceResponse.resultCode != ResultCode.Success) {
+				if (serviceResponse.responseCode != ResponseCode.Success) {
 					ImageUtils.showToastNotification(getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
 					return;
 				}
@@ -398,7 +398,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				stopTitlebarProgress();
-				if (serviceResponse.resultCode != ResultCode.Success) {
+				if (serviceResponse.responseCode != ResponseCode.Success) {
 					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					return;
 				}
@@ -454,7 +454,7 @@ public abstract class EntityBaseForm extends AircandiActivity {
 		serviceRequest.setResponseFormat(ResponseFormat.Json);
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-		if (serviceResponse.resultCode != ResultCode.Success) {
+		if (serviceResponse.responseCode != ResponseCode.Success) {
 			ImageUtils.showToastNotification(getString(R.string.alert_delete_failed), Toast.LENGTH_SHORT);
 			serviceResponse.exception.printStackTrace();
 			stopTitlebarProgress();

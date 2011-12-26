@@ -32,7 +32,7 @@ import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
@@ -582,7 +582,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 							 */
 							ServiceResponse serviceResponse = (ServiceResponse) response;
 
-							if (serviceResponse.resultCode != ResultCode.Success) {
+							if (serviceResponse.responseCode != ResponseCode.Success) {
 								mActiveImageRequest = false;
 								if (!mHasBitmap) {
 									Logger.w(this, "Broken image: " + candiModel.getBodyImageUri());

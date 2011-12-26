@@ -4,6 +4,8 @@
     android:id="@+id/item_row"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
+    android:background="@drawable/button_nooutline_selector"
     android:paddingBottom="10dp" >
 
     <View
@@ -28,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_toLeftOf="@+id/item_action_button"
+        android:layout_toLeftOf="@+id/item_button_action"
         android:layout_toRightOf="@id/item_image" />
 
     <TextView
@@ -56,7 +58,7 @@
             android:src="?attr/iconInfoActions" />
     </LinearLayout>
 
-    <TextView
+    <com.proxibase.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_description"
         style="@style/candi_list_description"
         android:layout_width="fill_parent"

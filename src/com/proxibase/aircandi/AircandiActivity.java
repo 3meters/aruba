@@ -34,12 +34,13 @@ import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ResultCodeDetail;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.Command;
+import com.proxibase.sdk.android.proxi.consumer.Comment;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
@@ -60,6 +61,7 @@ public abstract class AircandiActivity extends Activity {
 	protected String			mImageUriOriginal;
 	protected Command			mCommand;
 	protected User				mUser;
+	protected Comment			mComment;
 	protected String			mPrefTheme;
 	protected ProgressDialog	mProgressDialog;
 
@@ -112,6 +114,11 @@ public abstract class AircandiActivity extends Activity {
 			json = extras.getString(getString(R.string.EXTRA_USER));
 			if (json != null && json.length() > 0) {
 				mUser = ProxibaseService.getGson(GsonType.Internal).fromJson(json, User.class);
+			}
+			
+			json = extras.getString(getString(R.string.EXTRA_COMMENT));
+			if (json != null && json.length() > 0) {
+				mComment = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Comment.class);
 			}
 		}
 	}
@@ -258,7 +265,7 @@ public abstract class AircandiActivity extends Activity {
 						}
 
 						final ServiceResponse serviceResponse = (ServiceResponse) response;
-						if (serviceResponse.resultCode != ResultCode.Success) {
+						if (serviceResponse.responseCode != ResponseCode.Success) {
 							return;
 						}
 						else {
@@ -371,7 +378,7 @@ public abstract class AircandiActivity extends Activity {
 							mImageRequestWebImageView.setImageRequest(imageRequest, null);
 
 							if (mImageRequestListener != null) {
-								mImageRequestListener.onComplete(new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, null, null),
+								mImageRequestListener.onComplete(new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null),
 										imageUri);
 							}
 							GoogleAnalyticsTracker.getInstance().trackEvent("Entity", "DefaultPicture", "None", 0);
@@ -435,7 +442,7 @@ public abstract class AircandiActivity extends Activity {
 									public void onComplete(Object response) {
 
 										final ServiceResponse serviceResponse = (ServiceResponse) response;
-										if (serviceResponse.resultCode != ResultCode.Success) {
+										if (serviceResponse.responseCode != ResponseCode.Success) {
 											return;
 										}
 										else {
@@ -470,7 +477,7 @@ public abstract class AircandiActivity extends Activity {
 				bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_SEARCH_MAX));
 				if (mImageRequestListener != null) {
 					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView);
-					mImageRequestListener.onComplete(new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, bitmap, null), "updated");
+					mImageRequestListener.onComplete(new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, bitmap, null), "updated");
 					GoogleAnalyticsTracker.getInstance().trackEvent("Entity", "PickPicture", "None", 0);
 				}
 			}
@@ -499,7 +506,7 @@ public abstract class AircandiActivity extends Activity {
 				Bitmap bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_SEARCH_MAX));
 				if (mImageRequestListener != null) {
 					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView);
-					mImageRequestListener.onComplete(new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, bitmap, null), "updated");
+					mImageRequestListener.onComplete(new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, bitmap, null), "updated");
 					GoogleAnalyticsTracker.getInstance().trackEvent("Entity", "TakePicture", "None", 0);
 				}
 			}

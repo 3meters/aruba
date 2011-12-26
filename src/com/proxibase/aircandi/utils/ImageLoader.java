@@ -21,7 +21,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ResultCodeDetail;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
@@ -52,7 +52,7 @@ public class ImageLoader {
 
 	public void fetchImage(ImageRequest imageRequest) {
 
-		ServiceResponse serviceResponse = new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, null, null);
+		ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);
 		if (imageRequest.requestListener == null) {
 			throw new IllegalArgumentException("imageRequest.imageReadyListener is required");
 		}
@@ -188,7 +188,7 @@ public class ImageLoader {
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-		if (serviceResponse.resultCode != ResultCode.Success) {
+		if (serviceResponse.responseCode != ResponseCode.Success) {
 			return serviceResponse;
 		}
 
@@ -210,7 +210,7 @@ public class ImageLoader {
 	private void getWebPageAsBitmap(String uri, final ImageRequest imageRequest, final RequestListener listener) {
 
 		//String webViewContent = "";
-		final ServiceResponse serviceResponse = new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, null, null);
+		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);
 		final AtomicBoolean ready = new AtomicBoolean(false);
 		final AtomicInteger pictureCount = new AtomicInteger(0);
 
@@ -448,7 +448,7 @@ public class ImageLoader {
 						}
 
 						Bitmap bitmap = null;
-						ServiceResponse serviceResponse = new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, null, null);
+						ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);
 						/*
 						 * Html image
 						 */
@@ -462,7 +462,7 @@ public class ImageLoader {
 								public void onComplete(Object response) {
 
 									ServiceResponse serviceResponse = (ServiceResponse) response;
-									if (serviceResponse.resultCode != ResultCode.Success) {
+									if (serviceResponse.responseCode != ResponseCode.Success) {
 										imageRequest.requestListener.onComplete(serviceResponse);
 									}
 									else
@@ -528,7 +528,7 @@ public class ImageLoader {
 								}
 							});
 
-							if (serviceResponse.resultCode != ResultCode.Success) {
+							if (serviceResponse.responseCode != ResponseCode.Success) {
 								imageRequest.requestListener.onComplete(serviceResponse);
 							}
 							else {
@@ -562,17 +562,17 @@ public class ImageLoader {
 								/* Create reflection if requested */
 								imageRequest.requestListener.onProgressChanged(80);
 								if (imageRequest.makeReflection) {
-									final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
-									estimatedTime = System.nanoTime() - startTime;
-									startTime = System.nanoTime();
-									Logger.v(this, imageRequest.imageUri + ": Reflection created: "
-													+ String.valueOf(estimatedTime / 1000000)
-													+ "ms");
-
-									mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection);
-									if (mImageCache.isFileCacheOnly()) {
-										bitmapReflection.recycle();
-									}
+//									final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
+//									estimatedTime = System.nanoTime() - startTime;
+//									startTime = System.nanoTime();
+//									Logger.v(this, imageRequest.imageUri + ": Reflection created: "
+//													+ String.valueOf(estimatedTime / 1000000)
+//													+ "ms");
+//
+//									mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection);
+//									if (mImageCache.isFileCacheOnly()) {
+//										bitmapReflection.recycle();
+//									}
 								}
 
 								String uri = mImageRequestors.get(imageRequest.imageRequestor);

@@ -23,7 +23,7 @@
     </RelativeLayout>
 
     <ListView
-        android:id="@+id/list_candi_children"
+        android:id="@+id/list_comments"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_below="@+id/actionbar"

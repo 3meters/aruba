@@ -15,7 +15,7 @@ import com.proxibase.aircandi.utils.ImageManager;
 import com.proxibase.aircandi.utils.ImageUtils;
 import com.proxibase.aircandi.utils.Logger;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
@@ -72,10 +72,16 @@ public class WebImageView extends ImageView {
 
 	public void setImageRequest(final ImageRequest imageRequest, final ImageView imageReflection) {
 
-		@SuppressWarnings("unused")
 		final RequestListener originalImageReadyListener = imageRequest.requestListener;
 
 		imageRequest.requestListener = new RequestListener() {
+
+			@Override
+			public void onProgressChanged(int progress) {
+				if (originalImageReadyListener != null) {
+					originalImageReadyListener.onProgressChanged(progress);
+				}
+			}
 
 			@Override
 			public void onComplete(Object response) {
@@ -84,7 +90,7 @@ public class WebImageView extends ImageView {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 
-				if (serviceResponse.resultCode != ResultCode.Success) {
+				if (serviceResponse.responseCode != ResponseCode.Success) {
 					final Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
 					if (bitmap != null) {
 						mThreadHandler.post(new Runnable() {
@@ -127,7 +133,12 @@ public class WebImageView extends ImageView {
 						}
 						});
 					}
+					
 				}
+				if (originalImageReadyListener != null) {
+					originalImageReadyListener.onComplete(response);
+				}
+				
 			}
 		};
 

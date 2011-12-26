@@ -30,7 +30,7 @@ import com.proxibase.aircandi.utils.NetworkManager;
 import com.proxibase.aircandi.utils.S3;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
 import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
@@ -155,7 +155,7 @@ public class ProfileForm extends AircandiActivity {
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 				new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-		if (serviceResponse.resultCode != ResultCode.Success) {
+		if (serviceResponse.responseCode != ResponseCode.Success) {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
 			overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
@@ -185,7 +185,7 @@ public class ProfileForm extends AircandiActivity {
 							public void onComplete(Object response) {
 
 								ServiceResponse serviceResponse = (ServiceResponse) response;
-								if (serviceResponse.resultCode != ResultCode.Success) {
+								if (serviceResponse.responseCode != ResponseCode.Success) {
 									return;
 								}
 								else {
@@ -232,7 +232,7 @@ public class ProfileForm extends AircandiActivity {
 			public void onComplete(Object response, Object extra) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.resultCode == ResultCode.Success) {
+				if (serviceResponse.responseCode == ResponseCode.Success) {
 					Bitmap bitmap = (Bitmap) serviceResponse.data;
 					String imageUri = (String) extra;
 					mUser.imageUri = imageUri;
@@ -329,7 +329,7 @@ public class ProfileForm extends AircandiActivity {
 				
 				stopTitlebarProgress();
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.resultCode != ResultCode.Success) {
+				if (serviceResponse.responseCode != ResponseCode.Success) {
 					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 					return;
 				}

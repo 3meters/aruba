@@ -14,7 +14,7 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Bundle;
 
-import com.proxibase.aircandi.utils.NetworkManager.ResultCode;
+import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.utils.NetworkManager.ResultCodeDetail;
 import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
@@ -143,13 +143,13 @@ public class ProxiExplorer {
 						/* We are on the background thread */
 						ServiceResponse serviceResponse = processBeaconsFromScan(mWifiList, mOptions.refreshAllBeacons);
 
-						if (serviceResponse.resultCode != ResultCode.Success) {
+						if (serviceResponse.responseCode != ResponseCode.Success) {
 							mRequestListener.onComplete(serviceResponse);
 						}
 
 						if (mOptions.refreshDirty) {
 							serviceResponse = refreshDirtyEntities();
-							if (serviceResponse.resultCode != ResultCode.Success) {
+							if (serviceResponse.responseCode != ResponseCode.Success) {
 								mRequestListener.onComplete(serviceResponse);
 							}
 							mEntityProxies = (List<EntityProxy>) serviceResponse.data;
@@ -184,14 +184,14 @@ public class ProxiExplorer {
 			/* We are on the background thread */
 			ServiceResponse serviceResponse = processBeaconsFromScan(mWifiList, mOptions.refreshAllBeacons);
 
-			if (serviceResponse.resultCode != ResultCode.Success) {
+			if (serviceResponse.responseCode != ResponseCode.Success) {
 				listener.onComplete(serviceResponse);
 				return;
 			}
 
 			if (mOptions.refreshDirty) {
 				serviceResponse = refreshDirtyEntities();
-				if (serviceResponse.resultCode != ResultCode.Success) {
+				if (serviceResponse.responseCode != ResponseCode.Success) {
 					listener.onComplete(serviceResponse);
 					return;
 				}
@@ -218,7 +218,7 @@ public class ProxiExplorer {
 		 * - first entity or addtional entities could be added.
 		 * - existing entities could be modified or gone.
 		 */
-		ServiceResponse serviceResponse = new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, null, null);;
+		ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);;
 		for (Beacon beacon : mBeacons) {
 
 			if (Thread.interrupted()) {
@@ -241,7 +241,7 @@ public class ProxiExplorer {
 
 				serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-				if (serviceResponse.resultCode != ResultCode.Success) {
+				if (serviceResponse.responseCode != ResponseCode.Success) {
 					return serviceResponse;
 				}
 
@@ -338,7 +338,7 @@ public class ProxiExplorer {
 		 * Entities from previous scans will still be updated for local changes in visibility.
 		 */
 		Logger.d(ProxiConstants.APP_NAME, sModName, "Processing beacons from scan");
-		ServiceResponse serviceResponse = new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, null, null);;
+		ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);;
 
 		/* Clear beacon collection for a complete rebuild */
 		if (refreshAllBeacons)
@@ -430,7 +430,7 @@ public class ProxiExplorer {
 				return null;
 			}
 
-			if (serviceResponse.resultCode != ResultCode.Success) {
+			if (serviceResponse.responseCode != ResponseCode.Success) {
 				return serviceResponse;
 			}
 
@@ -481,7 +481,7 @@ public class ProxiExplorer {
 
 	private ServiceResponse doRefreshEntity(int entityId) {
 
-		ServiceResponse serviceResponse = new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, null, null);
+		ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);
 		EntityProxy targetEntityProxy = getEntityById(entityId);
 
 		for (Beacon beacon : mBeacons) {
@@ -501,7 +501,7 @@ public class ProxiExplorer {
 
 				serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-				if (serviceResponse.resultCode != ResultCode.Success) {
+				if (serviceResponse.responseCode != ResponseCode.Success) {
 					return serviceResponse;
 				}
 
@@ -548,7 +548,7 @@ public class ProxiExplorer {
 
 						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-						if (serviceResponse.resultCode != ResultCode.Success) {
+						if (serviceResponse.responseCode != ResponseCode.Success) {
 							return serviceResponse;
 						}
 

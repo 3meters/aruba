@@ -93,13 +93,13 @@ public class NetworkManager {
 				}
 			}
 			Logger.d(this, "Connection exception: " + serviceRequest.getUri());
-			return new ServiceResponse(ResultCode.Recoverable, ResultCodeDetail.ConnectionException, null, null);
+			return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ConnectionException, null, null);
 		}
 
 		/* We have a network connection so give it a try */
 		try {
 			Object response = ProxibaseService.getInstance().request(serviceRequest);
-			return new ServiceResponse(ResultCode.Success, ResultCodeDetail.Success, response, null);
+			return new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, response, null);
 		}
 		catch (ProxibaseException exception) {
 
@@ -109,7 +109,7 @@ public class NetworkManager {
 					ImageUtils.showToastNotification(R.string.network_message_connection_poor, Toast.LENGTH_LONG);
 				}
 				Logger.d(this, "Transport exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResultCode.Recoverable, ResultCodeDetail.TransportException, null, exception);
+				return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.TransportException, null, exception);
 
 			}
 			else if (exception.getErrorCode() == ProxiErrorCode.NotFoundException) {
@@ -118,30 +118,30 @@ public class NetworkManager {
 					ImageUtils.showToastNotification(R.string.network_message_service_notready, Toast.LENGTH_LONG);
 				}
 				Logger.d(this, "Service not founr exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResultCode.Recoverable, ResultCodeDetail.ServiceNotFoundException, null, exception);
+				return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceNotFoundException, null, exception);
 			}
 			else if (exception.getErrorCode() == ProxiErrorCode.AircandiServiceException) {
 				/* Unrecoverable */
 				Logger.d(this, "Service exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResultCode.Unrecoverable, ResultCodeDetail.ServiceException, null, exception);
+				return new ServiceResponse(ResponseCode.Unrecoverable, ResultCodeDetail.ServiceException, null, exception);
 			}
 			else if (exception.getErrorCode() == ProxiErrorCode.ClientProtocolException) {
 				/* Unrecoverable */
 				Exceptions.Handle(exception);
 				Logger.d(this, "Protocol exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResultCode.Unrecoverable, ResultCodeDetail.ProtocolException, null, exception);
+				return new ServiceResponse(ResponseCode.Unrecoverable, ResultCodeDetail.ProtocolException, null, exception);
 			}
 			else if (exception.getErrorCode() == ProxiErrorCode.URISyntaxException) {
 				/* Unrecoverable */
 				Exceptions.Handle(exception);
 				Logger.d(this, "URI syntax exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResultCode.Unrecoverable, ResultCodeDetail.ProtocolException, null, exception);
+				return new ServiceResponse(ResponseCode.Unrecoverable, ResultCodeDetail.ProtocolException, null, exception);
 			}
 			else {
 				/* Unrecoverable */
 				Exceptions.Handle(exception);
 				Logger.d(this, "Unknown exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResultCode.Unrecoverable, ResultCodeDetail.UnknownException, null, exception);
+				return new ServiceResponse(ResponseCode.Unrecoverable, ResultCodeDetail.UnknownException, null, exception);
 			}
 		}
 	}
@@ -347,14 +347,14 @@ public class NetworkManager {
 	public static class ServiceResponse {
 
 		public Object				data;
-		public ResultCode			resultCode			= ResultCode.Success;
+		public ResponseCode			responseCode			= ResponseCode.Success;
 		public ResultCodeDetail		resultCodeDetail	= ResultCodeDetail.Success;
 		public ProxibaseException	exception;
 
 		public ServiceResponse() {}
 
-		public ServiceResponse(ResultCode resultCode, ResultCodeDetail resultCodeDetail, Object data, ProxibaseException exception) {
-			this.resultCode = resultCode;
+		public ServiceResponse(ResponseCode resultCode, ResultCodeDetail resultCodeDetail, Object data, ProxibaseException exception) {
+			this.responseCode = resultCode;
 			this.resultCodeDetail = resultCodeDetail;
 			this.data = data;
 			this.exception = exception;
@@ -365,7 +365,7 @@ public class NetworkManager {
 		Success, ServiceException, ServiceNotFoundException, ConnectionException, TransportException, ProtocolException, UnknownException
 	}
 
-	public enum ResultCode {
+	public enum ResponseCode {
 		Success, Recoverable, Unrecoverable
 	}
 }
