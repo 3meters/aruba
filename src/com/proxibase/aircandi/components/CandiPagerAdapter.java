@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.utils;
+package com.proxibase.aircandi.components;
 
 import android.content.Context;
 import android.os.Parcelable;
@@ -18,9 +18,9 @@ import android.widget.TextView;
 
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.CandiSearchActivity.PagerView;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator;
 import com.proxibase.aircandi.widgets.WebImageView;

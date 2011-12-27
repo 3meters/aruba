@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.utils;
+package com.proxibase.aircandi.components;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

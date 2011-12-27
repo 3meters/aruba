@@ -27,9 +27,9 @@ import com.google.code.bing.search.schema.AdultOption;
 import com.google.code.bing.search.schema.SearchResponse;
 import com.google.code.bing.search.schema.SourceType;
 import com.google.code.bing.search.schema.multimedia.ImageResult;
-import com.proxibase.aircandi.utils.DrawableManager;
-import com.proxibase.aircandi.utils.EndlessAdapter;
-import com.proxibase.aircandi.utils.Logger;
+import com.proxibase.aircandi.components.DrawableManager;
+import com.proxibase.aircandi.components.EndlessAdapter;
+import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.widgets.WebImageView;
 
 /*

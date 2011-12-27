@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.utils;
+package com.proxibase.aircandi.components;
 
 import java.util.List;
 
@@ -10,9 +10,9 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.R;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 import com.proxibase.aircandi.widgets.WebImageView;

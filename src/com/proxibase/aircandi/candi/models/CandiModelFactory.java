@@ -1,6 +1,6 @@
 package com.proxibase.aircandi.candi.models;
 
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 public class CandiModelFactory {

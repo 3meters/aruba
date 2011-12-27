@@ -70,14 +70,14 @@ import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.candi.views.ZoneView;
 import com.proxibase.aircandi.candi.views.IView.ViewTouchListener;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
+import com.proxibase.aircandi.components.BitmapTextureSource;
+import com.proxibase.aircandi.components.CandiList;
+import com.proxibase.aircandi.components.CountDownTimer;
+import com.proxibase.aircandi.components.ImageManager;
+import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.BitmapTextureSource;
-import com.proxibase.aircandi.utils.CandiList;
-import com.proxibase.aircandi.utils.CountDownTimer;
-import com.proxibase.aircandi.utils.ImageManager;
-import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.Logger;
-import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 public class CandiPatchPresenter implements Observer {

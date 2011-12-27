@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 
 import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
-import com.proxibase.aircandi.utils.CandiList;
+import com.proxibase.aircandi.components.CandiList;
 
 public interface IModel {
 

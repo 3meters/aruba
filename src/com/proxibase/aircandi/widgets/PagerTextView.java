@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.proxibase.aircandi.utils.Logger;
+import com.proxibase.aircandi.components.Logger;
 
 public class PagerTextView extends TextView {
 

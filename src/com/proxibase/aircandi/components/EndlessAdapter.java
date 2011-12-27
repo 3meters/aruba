@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.utils;
+package com.proxibase.aircandi.components;
 
 /***
  * Copyright (c) 2008-2009 CommonsWare, LLC

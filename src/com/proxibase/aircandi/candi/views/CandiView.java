@@ -24,16 +24,16 @@ import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
+import com.proxibase.aircandi.components.BitmapTextureSource;
+import com.proxibase.aircandi.components.ImageManager;
+import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.BitmapTextureSource;
-import com.proxibase.aircandi.utils.ImageManager;
-import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.Logger;
-import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
-import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 // @SuppressWarnings("unused")

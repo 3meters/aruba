@@ -12,7 +12,7 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.proxibase.aircandi.utils;
+package com.proxibase.aircandi.components;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

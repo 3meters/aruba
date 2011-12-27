@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.proxibase.aircandi.utils;
+package com.proxibase.aircandi.components;
 
 import android.os.Handler;
 import android.os.Message;

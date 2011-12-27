@@ -38,10 +38,10 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiAnimatedSprite;
 import com.proxibase.aircandi.candi.sprites.CandiRectangle;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
+import com.proxibase.aircandi.components.BitmapTextureSource;
+import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.BitmapTextureSource;
-import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 
 public abstract class BaseView extends Entity implements Observer, IView {

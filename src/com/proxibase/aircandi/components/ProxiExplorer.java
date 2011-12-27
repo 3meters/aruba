@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.utils;
+package com.proxibase.aircandi.components;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -14,9 +14,9 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Bundle;
 
-import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
-import com.proxibase.aircandi.utils.NetworkManager.ResultCodeDetail;
-import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.NetworkManager.ResultCodeDetail;
+import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.consumer.User;

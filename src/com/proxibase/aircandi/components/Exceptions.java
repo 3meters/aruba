@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.utils;
+package com.proxibase.aircandi.components;
 
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 

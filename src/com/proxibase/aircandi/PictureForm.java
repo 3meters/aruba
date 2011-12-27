@@ -3,12 +3,12 @@ package com.proxibase.aircandi;
 import android.app.Activity;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageFormat;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.models.PictureEntity;
-import com.proxibase.aircandi.utils.NetworkManager;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
-import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
-import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;

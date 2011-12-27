@@ -10,8 +10,8 @@ import android.widget.LinearLayout;
 import android.widget.ViewFlipper;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-import com.proxibase.aircandi.utils.CandiPagerAdapter;
-import com.proxibase.aircandi.utils.CandiListAdapter.CandiListViewHolder;
+import com.proxibase.aircandi.components.CandiPagerAdapter;
+import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;

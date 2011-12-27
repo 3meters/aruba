@@ -11,12 +11,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-import com.proxibase.aircandi.utils.DateUtils;
-import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.Logger;
-import com.proxibase.aircandi.utils.NetworkManager;
-import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
-import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.DateUtils;
+import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.sdk.android.proxi.consumer.Comment;
 import com.proxibase.sdk.android.proxi.consumer.User;

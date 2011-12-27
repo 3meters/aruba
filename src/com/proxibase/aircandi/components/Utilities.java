@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.utils;
+package com.proxibase.aircandi.components;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

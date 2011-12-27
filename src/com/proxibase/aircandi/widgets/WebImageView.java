@@ -10,13 +10,13 @@ import android.util.TypedValue;
 import android.widget.ImageView;
 
 import com.proxibase.aircandi.R;
+import com.proxibase.aircandi.components.ImageManager;
+import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.ImageManager;
-import com.proxibase.aircandi.utils.ImageUtils;
-import com.proxibase.aircandi.utils.Logger;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.NetworkManager.ResponseCode;
-import com.proxibase.aircandi.utils.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 public class WebImageView extends ImageView {

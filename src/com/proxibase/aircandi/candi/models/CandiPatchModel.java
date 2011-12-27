@@ -12,9 +12,9 @@ import com.proxibase.aircandi.candi.models.ZoneModel.Position;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
-import com.proxibase.aircandi.utils.CandiList;
-import com.proxibase.aircandi.utils.Logger;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageFormat;
+import com.proxibase.aircandi.components.CandiList;
+import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 /**

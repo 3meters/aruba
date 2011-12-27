@@ -13,10 +13,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.R;
+import com.proxibase.aircandi.components.DateUtils;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest;
+import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.utils.DateUtils;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest;
-import com.proxibase.aircandi.utils.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.consumer.Author;
 import com.proxibase.sdk.android.proxi.consumer.User;
 

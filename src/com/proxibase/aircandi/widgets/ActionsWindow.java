@@ -47,7 +47,7 @@ import android.widget.TextView;
 
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.candi.models.CandiModel;
-import com.proxibase.aircandi.utils.ImageUtils;
+import com.proxibase.aircandi.components.ImageUtils;
 
 /**
  * Window that shows QuickContact dialog for a specific {@link Contacts#_ID}.
