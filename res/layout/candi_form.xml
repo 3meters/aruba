@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundCandiInfo" >
+
+    <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+
+    <LinearLayout
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
+    <!-- Header -->
+
+    <RelativeLayout
+        android:id="@+id/activity_header"
+        style="@style/actionbar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp" >
+
+        <ImageView
+            android:id="@+id/btn_logo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:adjustViewBounds="true"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:src="?attr/logo" />
+
+        <TextView
+            android:id="@+id/text_header_title"
+            style="@style/form_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/btn_logo"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="@string/form_title_profile" />
+    </RelativeLayout>
+
+    <!-- Body -->
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/activity_header" >
+
+        <ViewFlipper
+            android:id="@+id/flipper_candi"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:clipChildren="false"
+            android:gravity="center_vertical"
+            android:visibility="visible" >
+
+            <LinearLayout
+                android:id="@+id/view_candi_info"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <com.proxibase.aircandi.widgets.ViewPagerIndicator
+                    android:id="@+id/pager_indicator"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" />
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/pager"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/view_candi_info_child"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+            </LinearLayout>
+        </ViewFlipper>
+    </FrameLayout>
+
+    <!-- Footer -->
+
+    <FrameLayout
+        android:id="@+id/slider_wrapper_search"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone" >
+
+        <SlidingDrawer
+            android:id="@+id/slider_drawer_search"
+            android:layout_width="fill_parent"
+            android:layout_height="180dp"
+            android:content="@+id/search_slider_content"
+            android:handle="@+id/search_slider_handle" >
+
+            <LinearLayout
+                android:id="@+id/search_slider_handle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:clickable="true"
+                android:orientation="vertical"
+                android:paddingBottom="0dp"
+                android:paddingTop="30dp" >
+
+                <ImageButton
+                    style="@style/search_slider_handle"
+                    android:layout_width="fill_parent"
+                    android:layout_height="20dp"
+                    android:duplicateParentState="true" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/search_slider_content"
+                style="@style/search_slider_content"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp" >
+            </RelativeLayout>
+        </SlidingDrawer>
+    </FrameLayout>
+
+</RelativeLayout>

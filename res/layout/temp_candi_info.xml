@@ -15,9 +15,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:clickable="true"
-            android:fillViewport="true"
-            android:onClick="onInfoViewClick" >
+            android:fillViewport="true" >
 
             <RelativeLayout
                 android:id="@+id/group_candi_content"
@@ -26,7 +24,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentTop="true"
                 android:clickable="true"
-                android:onClick="onInfoViewClick"
+                android:onClick="onCandiInfoClick"
                 android:paddingBottom="10dp" >
 
                 <RelativeLayout
@@ -34,8 +32,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
-                    android:clickable="true"
-                    android:onClick="onInfoViewClick"
                     android:orientation="vertical" >
 
                     <com.proxibase.aircandi.widgets.WebImageView
@@ -44,9 +40,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="top"
                         android:adjustViewBounds="true"
-                        android:clickable="true"
                         android:maxWidth="80dp"
-                        android:onClick="onInfoViewClick"
                         android:paddingTop="5dp"
                         android:scaleType="centerInside"
                         android:width="80dp" />
@@ -58,9 +52,7 @@
                         android:layout_below="@+id/image_public"
                         android:layout_gravity="top"
                         android:adjustViewBounds="true"
-                        android:clickable="true"
                         android:maxWidth="80dp"
-                        android:onClick="onInfoViewClick"
                         android:scaleType="centerInside"
                         android:width="80dp" />
 
@@ -70,7 +62,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/image_public"
-                        android:layout_marginTop="10dp"
+                        android:layout_marginTop="20dp"
                         android:clickable="true"
                         android:onClick="onCommentsClick"
                         android:text="0\nComments" />
@@ -80,7 +72,7 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/button_comments"
-                        aircandi:orientation="vertical"
+                        aircandi:layout="@layout/temp_user_info_stacked"
                         android:paddingLeft="3dp"
                         android:paddingTop="5dp" >
                     </com.proxibase.aircandi.widgets.AuthorBlock>
@@ -95,8 +87,6 @@
                     android:layout_marginBottom="10dp"
                     android:layout_toLeftOf="@+id/image_forward"
                     android:layout_toRightOf="@+id/group_controls"
-                    android:clickable="true"
-                    android:onClick="onInfoViewClick"
                     android:orientation="vertical"
                     android:paddingLeft="10dp" >
 
@@ -104,25 +94,19 @@
                         android:id="@+id/candi_info_title"
                         style="@style/candi_info_title"
                         android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:clickable="false"
-                        android:onClick="onInfoViewClick" />
+                        android:layout_height="wrap_content" />
 
                     <TextView
                         android:id="@+id/candi_info_subtitle"
                         style="@style/candi_info_subtitle"
                         android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:clickable="false"
-                        android:onClick="onInfoViewClick" />
+                        android:layout_height="wrap_content" />
 
                     <TextView
                         android:id="@+id/candi_info_description"
                         style="@style/candi_info_description"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:clickable="false"
-                        android:onClick="onInfoViewClick"
                         android:paddingBottom="30dp" />
                 </LinearLayout>
 

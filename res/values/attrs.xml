@@ -10,11 +10,8 @@
 		<attr name="placeholder" format="string"/>
 		<attr name="progressColor" format="color"/>
 	</declare-styleable>
-	<declare-styleable name="UserLayout">
-		<attr name="orientation">
-			<enum name="horizontal" value="0" />
-			<enum name="vertical" value="1" />
-		</attr>
+	<declare-styleable name="AuthorLayout">
+		<attr name="layout" format="integer"/>
 	</declare-styleable>
 	<declare-styleable name="CandiSearch">
 		<attr name="textureBodyZone" format="string"/>

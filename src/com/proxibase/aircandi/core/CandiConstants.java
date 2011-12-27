@@ -52,8 +52,8 @@ public interface CandiConstants {
 	public static final int				VERTEX_INDEX_Y						= 1;
 
 	public static final String			CACHE_PATH							= "/imagecache/aircandi";
-	public static final long			CACHE_TARGET_SIZE					= 4000000;
-	public static final long			CACHE_TRIGGER_SIZE					= 6000000;
+	public static final long			CACHE_TARGET_SIZE					= 8000000;
+	public static final long			CACHE_TRIGGER_SIZE					= 10000000;
 
 	public static final int				TWO_MINUTES							= 1000 * 60 * 2;
 	public static final int				FIVE_MINUTES						= 1000 * 60 * 5;

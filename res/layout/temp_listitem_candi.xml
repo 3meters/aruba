@@ -4,8 +4,9 @@
     android:id="@+id/item_row"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
     android:background="@drawable/button_nooutline_selector"
+    android:clickable="true"
+    android:onClick="onListItemClick"
     android:paddingBottom="10dp" >
 
     <View
@@ -81,7 +82,7 @@
             android:id="@+id/item_block_author"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            aircandi:orientation="horizontal" />
+            aircandi:layout="@layout/temp_user_info_text_only" />
     </LinearLayout>
 
 </RelativeLayout>

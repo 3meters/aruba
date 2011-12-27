@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundCandiInfo" >
+
+    <RelativeLayout
+        android:id="@+id/actionbar"
+        style="@style/actionbar"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp" >
+
+        <Button
+            android:id="@+id/btn_context"
+            style="@style/actionbar_button_back"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:drawablePadding="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/list_candi"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/actionbar"
+        android:cacheColorHint="#00000000"
+        android:listSelector="#00000000" />
+
+</RelativeLayout>

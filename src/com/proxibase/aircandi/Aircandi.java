@@ -1,6 +1,7 @@
 package com.proxibase.aircandi;
 
 import java.util.Calendar;
+import java.util.List;
 
 import org.acra.ACRA;
 import org.acra.ReportField;
@@ -11,6 +12,7 @@ import android.app.AlertDialog;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
 import android.content.pm.PackageInfo;
@@ -18,7 +20,17 @@ import android.location.Location;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.sdk.android.proxi.consumer.Beacon;
+import com.proxibase.sdk.android.proxi.consumer.Command;
+import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
+import com.proxibase.sdk.android.proxi.consumer.User;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ", customReportContent = {
 																						ReportField.REPORT_ID,
@@ -182,6 +194,70 @@ public class Aircandi extends Application {
 			builder.setPositiveButton(android.R.string.ok, listener);
 		}
 		builder.show();
+	}
+
+	public static Intent buildIntent(
+			Context context,
+			EntityProxy entityProxy,
+			int parentEntityId,
+			boolean includeChildren,
+			Command command,
+			Beacon beacon,
+			User user,
+			Class<?> clazz) {
+		Intent intent = new Intent(context, clazz);
+
+		/* We want to make sure that any child entities don't get serialized */
+		GsonBuilder gsonb = new GsonBuilder();
+
+		if (!includeChildren) {
+			gsonb.setExclusionStrategies(new ExclusionStrategy() {
+
+				@Override
+				public boolean shouldSkipClass(Class<?> clazz) {
+					return (clazz == (Class<List<EntityProxy>>) (Class<?>) List.class);
+				}
+
+				@Override
+				public boolean shouldSkipField(FieldAttributes f) {
+					return (f.getDeclaredClass() == (Class<List<EntityProxy>>) (Class<?>) List.class);
+				}
+			});
+		}
+		
+		Gson gson = gsonb.create();
+
+		if (command != null) {
+			String jsonCommand = gson.toJson(command);
+			intent.putExtra(context.getString(R.string.EXTRA_COMMAND), jsonCommand);
+		}
+
+		if (parentEntityId != 0) {
+			intent.putExtra(context.getString(R.string.EXTRA_PARENT_ENTITY_ID), parentEntityId);
+		}
+
+		if (beacon != null) {
+			String jsonBeacon = gson.toJson(beacon);
+			if (jsonBeacon.length() > 0) {
+				intent.putExtra(context.getString(R.string.EXTRA_BEACON), jsonBeacon);
+			}
+		}
+
+		if (entityProxy != null) {
+			String jsonEntityProxy = gson.toJson(entityProxy);
+			if (jsonEntityProxy.length() > 0) {
+				intent.putExtra(context.getString(R.string.EXTRA_ENTITY), jsonEntityProxy);
+			}
+		}
+
+		if (user != null) {
+			String jsonUser = ProxibaseService.getGson(GsonType.Internal).toJson(user);
+			if (jsonUser.length() > 0) {
+				intent.putExtra(context.getString(R.string.EXTRA_USER), jsonUser);
+			}
+		}
+
+		return intent;
 	}
 
 }

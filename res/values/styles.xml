@@ -47,6 +47,11 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="app_bullet">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/accent</item>
+   	</style>
+    
     <style name="app_user_picture">
         <item name="android:background">#0000</item>
         <item name="android:padding">0dp</item>
@@ -132,11 +137,13 @@
     <!-- Candi Info -->
 
     <style name="candi_info_button" parent="android:Widget.Button">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?attr/textColorButton</item>
         <item name="android:background">?attr/backgroundButton</item>
-        <item name="android:height">72dp</item>
-        <item name="android:width">80dp</item>
-    </style>
+        <item name="android:height">70dp</item>
+        <item name="android:width">78dp</item>
+        <item name="android:padding">5dp</item>
+        </style>
 
     <style name="comments_button" parent="android:Widget.Button">
         <item name="android:height">72dp</item>

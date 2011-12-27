@@ -10,6 +10,9 @@ public class DateUtils {
 
 	public static final String	DATE_NOW_FORMAT				= "yyyy-MM-dd HH:mm:ss";
 	public static final String	DATE_NOW_FORMAT_FILENAME	= "yyyyMMdd_HHmmss";
+	public static final String	DATE_FORMAT_TIME_SINCE		= "MMM d";
+	public static final String	TIME_FORMAT_TIME_SINCE		= "h:mm";
+	public static final String	AMPM_FORMAT_TIME_SINCE		= "a";
 
 	public static String nowString() {
 		Calendar cal = Calendar.getInstance();
@@ -40,6 +43,51 @@ public class DateUtils {
 		Long diff = dateNew.getTime() - dateOld.getTime();
 		int seconds = (int) (diff / 1000);
 		return seconds;
+	}
+
+	public static String timeSince(Date dateOld, Date dateNew) {
+		Long diff = dateNew.getTime() - dateOld.getTime();
+		int seconds = (int) (diff / 1000);
+		int minutes = (int) ((diff / 1000) / 60);
+		int hours = (int) ((diff / 1000) / (60 * 60));
+		int days = (int) ((diff / 1000) / (60 * 60 * 24));
+		@SuppressWarnings("unused")
+		int hoursPart = hours - (days * 24);
+		@SuppressWarnings("unused")
+		int minutesPart = minutes - (hours * 60);
+
+		String interval = "";
+		if (days >= 1) {
+			SimpleDateFormat datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE);
+			SimpleDateFormat timePart = new SimpleDateFormat(TIME_FORMAT_TIME_SINCE);
+			SimpleDateFormat ampmPart = new SimpleDateFormat(AMPM_FORMAT_TIME_SINCE);
+			return datePart.format(dateOld.getTime()) + " at " + timePart.format(dateOld.getTime()) + ampmPart.format(dateOld.getTime()).toLowerCase();
+		}
+		else if (hours == 1) /* x hours x minutes ago */
+		{
+			interval = "1 hour ago";
+		}
+		else if (hours > 1) /* x hours x minutes ago */
+		{
+			interval = String.valueOf(hours) + " hours ago";
+		}
+		else if (minutes == 1) /* x hours x minutes ago */
+		{
+			interval = "1 minute ago";
+		}
+		else if (minutes > 1) /* x hours x minutes ago */
+		{
+			interval = String.valueOf(minutes) + " minutes ago";
+		}
+		else if (seconds == 1) /* 1 second ago */
+		{
+			interval = "1 second ago";
+		}
+		else if (seconds > 1) /* x hours x minutes ago */
+		{
+			interval = String.valueOf(seconds) + " seconds ago";
+		}
+		return interval;
 	}
 
 	public static String intervalSince(Date dateOld, Date dateNew) {

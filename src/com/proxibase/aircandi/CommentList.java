@@ -234,56 +234,6 @@ public class CommentList extends AircandiActivity {
 //		}
 	}
 
-	private Intent buildIntent(EntityProxy entityProxy, int parentEntityId, Command command, Beacon beacon, User user, Class<?> clazz) {
-		Intent intent = new Intent(this, clazz);
-
-		/* We want to make sure that any child entities don't get serialized */
-		Gson gson = new GsonBuilder().setExclusionStrategies(new ExclusionStrategy() {
-
-			@Override
-			public boolean shouldSkipClass(Class<?> clazz) {
-				return (clazz == (Class<List<EntityProxy>>) (Class<?>) List.class);
-			}
-
-			@Override
-			public boolean shouldSkipField(FieldAttributes f) {
-				return (f.getDeclaredClass() == (Class<List<EntityProxy>>) (Class<?>) List.class);
-			}
-		}).create();
-
-		if (command != null) {
-			String jsonCommand = gson.toJson(command);
-			intent.putExtra(getString(R.string.EXTRA_COMMAND), jsonCommand);
-		}
-
-		if (parentEntityId != 0) {
-			intent.putExtra(getString(R.string.EXTRA_PARENT_ENTITY_ID), parentEntityId);
-		}
-
-		if (beacon != null) {
-			String jsonBeacon = gson.toJson(beacon);
-			if (jsonBeacon.length() > 0) {
-				intent.putExtra(getString(R.string.EXTRA_BEACON), jsonBeacon);
-			}
-		}
-
-		if (entityProxy != null) {
-			String jsonEntityProxy = gson.toJson(entityProxy);
-			if (jsonEntityProxy.length() > 0) {
-				intent.putExtra(getString(R.string.EXTRA_ENTITY), jsonEntityProxy);
-			}
-		}
-
-		if (user != null) {
-			String jsonUser = ProxibaseService.getGson(GsonType.Internal).toJson(user);
-			if (jsonUser.length() > 0) {
-				intent.putExtra(getString(R.string.EXTRA_USER), jsonUser);
-			}
-		}
-
-		return intent;
-	}
-
 	public class ListAdapter extends ArrayAdapter<Object> {
 
 		private List<Object>	items;
@@ -348,7 +298,7 @@ public class CommentList extends AircandiActivity {
 				if (holder.itemCreatedDate != null) {
 					if (comment.createdDate != null) {
 						Date createdDate = DateUtils.wcfToDate(comment.createdDate);
-						holder.itemCreatedDate.setText(DateUtils.intervalSince(createdDate, DateUtils.nowDate()));
+						holder.itemCreatedDate.setText(DateUtils.timeSince(createdDate, DateUtils.nowDate()));
 					}
 					else {
 						holder.itemCreatedDate.setVisibility(View.GONE);

@@ -8,6 +8,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -23,8 +24,7 @@ public class AuthorBlock extends RelativeLayout {
 
 	public static final int	HORIZONTAL	= 0;
 	public static final int	VERTICAL	= 1;
-	private int				mOrientation;
-	private View			mBoundView;
+	private ViewGroup			mBoundView;
 	private WebImageView	mImageUser;
 	private TextView		mTextFullname;
 	private TextView		mTextTimeSince;
@@ -43,24 +43,17 @@ public class AuthorBlock extends RelativeLayout {
 	public AuthorBlock(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.UserLayout, defStyle, 0);
+		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.AuthorLayout, defStyle, 0);
 
-		int index = ta.getInt(R.styleable.UserLayout_orientation, -1);
-		if (index >= 0) {
-			setOrientation(index);
-		}
+		int layoutId = ta.getResourceId(R.styleable.AuthorLayout_layout, R.layout.temp_user_info);
+		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mBoundView = (ViewGroup) inflater.inflate(layoutId, null);
+
 		ta.recycle();
 		bindToView();
 	}
 
 	private void bindToView() {
-		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		if (mOrientation == HORIZONTAL) {
-			mBoundView = (RelativeLayout) inflater.inflate(R.layout.temp_user_info, null);
-		}
-		else if (mOrientation == VERTICAL) {
-			mBoundView = (RelativeLayout) inflater.inflate(R.layout.temp_user_info_stacked, null);
-		}
 
 		mImageUser = (WebImageView) mBoundView.findViewById(R.id.image_user_picture);
 		mTextFullname = (TextView) mBoundView.findViewById(R.id.text_user_fullname);
@@ -73,14 +66,23 @@ public class AuthorBlock extends RelativeLayout {
 	public void bindToAuthor(Author author, Date date) {
 		mAuthor = author;
 		if (mAuthor != null) {
-			mTextFullname.setText(mAuthor.fullname);
-			if (date != null) {
-				mTextTimeSince.setText(DateUtils.intervalSince(date, DateUtils.nowDate()));
+			if (mTextFullname != null) {
+				mTextFullname.setText(mAuthor.fullname);
 			}
-			if (mAuthor.imageUri != null && mAuthor.imageUri.length() != 0) {
-				ImageRequest imageRequest = new ImageRequest(mAuthor.imageUri, ImageShape.Square, "binary", false,
-						CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
-				mImageUser.setImageRequest(imageRequest, null);
+			if (mTextTimeSince != null) {
+				if (date != null) {
+					mTextTimeSince.setText(DateUtils.timeSince(date, DateUtils.nowDate()));
+				}
+				else {
+					mTextTimeSince.setVisibility(View.GONE);
+				}
+			}
+			if (mImageUser != null) {
+				if (mAuthor.imageUri != null && mAuthor.imageUri.length() != 0) {
+					ImageRequest imageRequest = new ImageRequest(mAuthor.imageUri, ImageShape.Square, "binary", false,
+							CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
+					mImageUser.setImageRequest(imageRequest, null);
+				}
 			}
 		}
 	}
@@ -88,17 +90,23 @@ public class AuthorBlock extends RelativeLayout {
 	public void bindToUser(User user, Date date) {
 		mUser = user;
 		if (mUser != null) {
-			mTextFullname.setText(mUser.fullname);
-			if (date != null) {
-				mTextTimeSince.setText(DateUtils.intervalSince(date, DateUtils.nowDate()));
+			if (mTextFullname != null) {
+				mTextFullname.setText(mUser.fullname);
 			}
-			else {
-				mTextTimeSince.setVisibility(View.GONE);
+			if (mTextTimeSince != null) {
+				if (date != null) {
+					mTextTimeSince.setText(DateUtils.timeSince(date, DateUtils.nowDate()));
+				}
+				else {
+					mTextTimeSince.setVisibility(View.GONE);
+				}
 			}
-			if (mUser.imageUri != null && mUser.imageUri.length() != 0) {
-				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
-						CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
-				mImageUser.setImageRequest(imageRequest, null);
+			if (mImageUser != null) {
+				if (mUser.imageUri != null && mUser.imageUri.length() != 0) {
+					ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
+							CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
+					mImageUser.setImageRequest(imageRequest, null);
+				}
 			}
 		}
 	}
@@ -110,14 +118,6 @@ public class AuthorBlock extends RelativeLayout {
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
-	}
-
-	public void setOrientation(int orientation) {
-		this.mOrientation = orientation;
-	}
-
-	public int getOrientation() {
-		return mOrientation;
 	}
 
 	public void setAuthor(Author author) {
