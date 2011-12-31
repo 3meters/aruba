@@ -23,7 +23,7 @@
                 android:layout_height="fill_parent"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentTop="true"
-                android:clickable="true"
+                android:background="@drawable/button_nooutline_selector"
                 android:onClick="onCandiInfoClick"
                 android:paddingBottom="10dp" >
 
@@ -74,8 +74,8 @@
                         android:layout_below="@+id/button_comments"
                         aircandi:layout="@layout/temp_user_info_stacked"
                         android:paddingLeft="3dp"
-                        android:paddingTop="5dp" >
-                    </com.proxibase.aircandi.widgets.AuthorBlock>
+                        android:paddingTop="5dp" />
+                    
                 </RelativeLayout>
 
                 <LinearLayout

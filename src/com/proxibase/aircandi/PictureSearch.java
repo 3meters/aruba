@@ -36,7 +36,7 @@ import com.proxibase.aircandi.widgets.WebImageView;
  * We often will get duplicates because the ordering of images isn't 
  * guaranteed while paging.
  */
-public class PictureSearch extends AircandiActivity {
+public class PictureSearch extends CandiActivity {
 
 	private GridView				mGridView;
 	@SuppressWarnings("unused")

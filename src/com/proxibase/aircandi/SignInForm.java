@@ -24,7 +24,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public class SignInForm extends AircandiActivity {
+public class SignInForm extends CandiActivity {
 
 	protected String	mMessage;
 

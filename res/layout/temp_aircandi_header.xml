@@ -6,31 +6,28 @@
         android:layout_width="fill_parent"
         android:layout_height="40dp" >
 
-        <ViewSwitcher
-            android:id="@+id/view_switcher"
+        <ImageView
+            android:id="@+id/btn_logo"
+            style="@style/actionbar_button"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_alignParentLeft="true"
-            android:layout_toLeftOf="@+id/group_refresh" >
+            android:adjustViewBounds="true"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:clickable="true"
+            android:onClick="onHomeClick"
+            android:src="?attr/logo" />
 
-            <ImageView
-                android:id="@+id/btn_logo"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:adjustViewBounds="true"
-                android:padding="6dp"
-                android:scaleType="fitCenter"
-                android:src="?attr/logo" />
-
-            <Button
-                android:id="@+id/btn_context"
-                style="@style/actionbar_button_back"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:drawablePadding="5dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp" />
-        </ViewSwitcher>
+        <TextView
+            android:id="@+id/text_title"
+            style="@style/actionbar_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/btn_logo"
+            android:layout_toLeftOf="@+id/group_refresh"
+            android:text="@string/app_name"/>"
 
         <View
             style="@style/actionbar_rule_vertical"
@@ -51,13 +48,13 @@
                 android:id="@+id/image_progress_indicator"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:minHeight="22dp"
-                android:minWidth="22dp"
-                android:maxHeight="22dp"
-                android:maxWidth="22dp"
                 android:layout_centerInParent="true"
                 android:adjustViewBounds="true"
                 android:background="@drawable/busy_anim"
+                android:maxHeight="22dp"
+                android:maxWidth="22dp"
+                android:minHeight="22dp"
+                android:minWidth="22dp"
                 android:scaleType="fitCenter" />
 
             <ImageView

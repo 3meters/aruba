@@ -47,7 +47,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
 @SuppressWarnings("unused")
-public class CommentList extends AircandiActivity {
+public class CommentList extends CandiActivity {
 
 	private ListView		mListViewComments;
 	private List<Object>	mListComments;

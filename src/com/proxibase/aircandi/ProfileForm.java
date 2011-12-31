@@ -44,7 +44,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public class ProfileForm extends AircandiActivity {
+public class ProfileForm extends CandiActivity {
 
 	private FormTab			mActiveTab	= FormTab.Profile;
 	private ViewFlipper		mViewFlipper;

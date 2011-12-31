@@ -46,19 +46,19 @@
         <item name="sectionHeaderFillEnd">@color/transparent</item>
         <item name="tabColorHighlight">@color/tab_highlight</item>
         <item name="backgroundPicture">@drawable/picture_bg_dark</item>
+        <item name="backgroundProgress">@drawable/progress_bg_dark</item>
         <item name="placeholder_forum">placeholder_forum_dark</item>
         <item name="placeholder_post">placeholder_user_dark</item>
         <item name="placeholder_gallery">placeholder_gallery_dark</item>
         <item name="placeholder_picture">placeholder_picture_dark</item>
         <item name="placeholder_user">placeholder_user_dark</item>
-        
         <item name="android:textColorPrimary">@color/text_dark</item>
         <item name="android:textAppearanceLarge">@style/app_text_appearance_large</item>
         <item name="android:textAppearanceMedium">@style/app_text_appearance_medium</item>
         <item name="android:textAppearanceSmall">@style/app_text_appearance_small</item>
         <item name="android:textAppearance">@style/app_text_appearance</item>
         <item name="android:editTextStyle">@style/app_edittext</item>
-        </style>
+    </style>
 
     <style name="aircandi_theme_snow" parent="@android:style/Theme.Light">
         <item name="android:windowNoTitle">true</item>
@@ -103,19 +103,18 @@
         <item name="sectionHeaderFillEnd">@color/transparent</item>
         <item name="tabColorHighlight">@color/tab_highlight</item>
         <item name="backgroundPicture">@drawable/picture_bg_light</item>
+        <item name="backgroundProgress">@drawable/progress_bg_light</item>
         <item name="placeholder_forum">placeholder_forum_light</item>
         <item name="placeholder_post">placeholder_user_light</item>
         <item name="placeholder_gallery">placeholder_gallery_light</item>
         <item name="placeholder_picture">placeholder_picture_light</item>
         <item name="placeholder_user">placeholder_user_light</item>
-        
         <item name="android:textColorPrimary">@color/text_light</item>
         <item name="android:textAppearanceLarge">@style/app_text_appearance_large</item>
         <item name="android:textAppearanceMedium">@style/app_text_appearance_medium</item>
         <item name="android:textAppearanceSmall">@style/app_text_appearance_small</item>
         <item name="android:textAppearance">@style/app_text_appearance</item>
         <item name="android:editTextStyle">@style/app_edittext</item>
-            
     </style>
 
     <style name="aircandi_theme_blueray" parent="aircandi_theme_midnight">

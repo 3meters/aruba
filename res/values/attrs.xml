@@ -35,6 +35,7 @@
 		<attr name="imageSliderHandleSearch" format="string"/>
 		<attr name="backgroundSliderHandleSearch" format="string"/>
 		<attr name="backgroundSliderContentSearch" format="string"/>
+		<attr name="backgroundProgress" format="string"/>
 		<attr name="placeholder_forum" format="string"/>
 		<attr name="placeholder_post" format="string"/>
 		<attr name="placeholder_gallery" format="string"/>

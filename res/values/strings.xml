@@ -8,6 +8,7 @@
 	<string name="EXTRA_PARENT_ENTITY_ID">com.proxibase.aircandi.EXTRA_PARENT_ENTITY_ID</string>
 	<string name="EXTRA_BEACON">com.proxibase.aircandi.EXTRA_BEACON</string>
 	<string name="EXTRA_ENTITY">com.proxibase.aircandi.EXTRA_ENTITY</string>
+	<string name="EXTRA_ENTITY_LIST">com.proxibase.aircandi.EXTRA_ENTITY_LIST</string>
 	<string name="EXTRA_COMMAND">com.proxibase.aircandi.EXTRA_COMMAND</string>
 	<string name="EXTRA_USER">com.proxibase.aircandi.EXTRA_USER</string>
 	<string name="EXTRA_COMMENT">com.proxibase.aircandi.EXTRA_COMMENT</string>
@@ -15,6 +16,7 @@
 	<string name="EXTRA_MESSAGE">com.proxibase.aircandi.EXTRA_MESSAGE</string>
 	<string name="EXTRA_BEACON_DIRTY">com.proxibase.aircandi.EXTRA_BEACON_DIRTY</string>
 	<string name="EXTRA_ENTITY_DIRTY">com.proxibase.aircandi.EXTRA_ENTITY_DIRTY</string>
+	<string name="EXTRA_CANDI_TASK">com.proxibase.aircandi.EXTRA_CANDI_TASK</string>
 	
 	<string name="menu_settings_title">Settings</string>
 	<string name="menu_signout_title">Sign out</string>
@@ -37,6 +39,8 @@
 	<!-- Search -->
 
 	<string name="search_back_button">Back</string>
+	<string name="search_tab_radar">Radar</string>
+	<string name="search_tab_mycandi">Your Candi</string>
 	
 	<string name="dialog_network_message_wifi_ready">Wifi enabled, ready for retry</string>
 	<string name="dialog_network_message_wifi_notready">Enable wifi and retry</string>

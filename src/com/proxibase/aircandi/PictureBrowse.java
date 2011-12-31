@@ -29,7 +29,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class PictureBrowse extends AircandiActivity {
+public class PictureBrowse extends CandiActivity {
 
 	private ImageView	mPicturePlaceholderProgress;
 	private ViewFlipper	mViewFlipper;

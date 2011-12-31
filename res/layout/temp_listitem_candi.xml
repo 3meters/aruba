@@ -41,6 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
         android:layout_below="@+id/item_title"
+        android:layout_toLeftOf="@+id/image_forward"
         android:layout_toRightOf="@id/item_image" />
 
     <LinearLayout
@@ -66,6 +67,7 @@
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
         android:layout_below="@+id/item_subtitle"
+        android:layout_toLeftOf="@+id/image_forward"
         android:layout_toRightOf="@id/item_image" />
 
     <LinearLayout
@@ -74,6 +76,7 @@
         android:layout_alignWithParentIfMissing="true"
         android:layout_below="@+id/item_description"
         android:layout_toRightOf="@+id/item_image"
+        android:layout_toLeftOf="@+id/image_forward"
         android:orientation="vertical"
         android:paddingLeft="3dp"
         android:paddingTop="5dp" >
@@ -84,5 +87,15 @@
             android:layout_height="wrap_content"
             aircandi:layout="@layout/temp_user_info_text_only" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/image_forward"
+        android:layout_width="10dp"
+        android:layout_height="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:paddingRight="3dp"
+        android:scaleType="fitXY"
+        android:src="?attr/imageForwardInfo" />
 
 </RelativeLayout>

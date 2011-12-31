@@ -24,7 +24,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
-public class WebBrowse extends AircandiActivity {
+public class WebBrowse extends CandiActivity {
 
 	WebView		mWebView;
 	ProgressBar	mProgressBar;

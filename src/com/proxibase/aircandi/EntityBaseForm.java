@@ -45,7 +45,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public abstract class EntityBaseForm extends AircandiActivity {
+public abstract class EntityBaseForm extends CandiActivity {
 
 	private FormTab			mActiveTab	= FormTab.Content;
 	private ViewFlipper		mViewFlipper;
@@ -524,7 +524,6 @@ public abstract class EntityBaseForm extends AircandiActivity {
 			super.onDestroy();
 		}
 	}
-
 	protected enum FormTab {
 		Content,
 		Settings

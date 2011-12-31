@@ -28,7 +28,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public class CommentForm extends AircandiActivity {
+public class CommentForm extends CandiActivity {
 
 	private EditText	mContent;
 	private Button		mButtonSave;

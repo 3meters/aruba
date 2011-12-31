@@ -14,6 +14,7 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Bundle;
 
+import com.proxibase.aircandi.CandiSearchActivity.EventBus;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResultCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
@@ -26,16 +27,13 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
-import com.proxibase.sdk.android.util.Logger;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
 public class ProxiExplorer {
 
 	private static ProxiExplorer	singletonObject;
-	private static String			sModName				= "ProxiExplorer";
 	private Context					mContext;
 	private User					mUser;
 
@@ -44,14 +42,12 @@ public class ProxiExplorer {
 	private boolean					mPrefGlobalBeacons		= true;
 
 	private List<Beacon>			mBeacons				= new ArrayList<Beacon>();
-	private List<EntityProxy>		mEntityProxies			= new ArrayList<EntityProxy>();
+	public List<EntityProxy>		mEntityProxies			= new ArrayList<EntityProxy>();
 
 	private Boolean					mScanRequestActive		= false;
 	private Boolean					mScanRequestProcessing	= false;
-	private Options					mOptions;
-	private RequestListener			mRequestListener;
 
-	private List<WifiScanResult>	mWifiList				= new ArrayList<WifiScanResult>();
+	public List<WifiScanResult>		mWifiList				= new ArrayList<WifiScanResult>();
 	private WifiManager				mWifiManager;
 	private WifiLock				mWifiLock;
 	private boolean					mUsingEmulator			= false;
@@ -90,14 +86,9 @@ public class ProxiExplorer {
 	 * @param fullUpdate if true then the existing beacon collection is cleared.
 	 * @param listener the callback used to return the EntityProxy collection.
 	 */
-	public void scanForBeacons(Options options, RequestListener listener) {
+	
+	public void scanForBeacons(Options options) {
 
-		if (listener == null) {
-			throw new IllegalArgumentException("Listener is required when calling scanForBeacons");
-		}
-
-		mRequestListener = listener;
-		mOptions = options;
 		mWifiList.clear();
 
 		if (!mUsingEmulator) {
@@ -106,6 +97,7 @@ public class ProxiExplorer {
 			}
 
 			mScanRequestActive = true;
+
 			mContext.registerReceiver(new BroadcastReceiver() {
 
 				@Override
@@ -115,7 +107,6 @@ public class ProxiExplorer {
 					if (mScanRequestActive && !mScanRequestProcessing) {
 
 						mScanRequestActive = false;
-						mScanRequestProcessing = true;
 
 						/* Get the latest scan results */
 						mWifiList.clear();
@@ -135,31 +126,8 @@ public class ProxiExplorer {
 							mWifiList.add(new WifiScanResult(globalBssid, globalSsid, globalLevel));
 						}
 
-						Logger.d(ProxiConstants.APP_NAME, sModName, "Received wifi scan results");
-
-						/* Start asych task to process the results of the just completed wifi scan. */
-						Logger.d(ProxiConstants.APP_NAME, sModName, "Starting AsyncTask to rebuild entities");
-
-						/* We are on the background thread */
-						ServiceResponse serviceResponse = processBeaconsFromScan(mWifiList, mOptions.refreshAllBeacons);
-
-						if (serviceResponse.responseCode != ResponseCode.Success) {
-							mRequestListener.onComplete(serviceResponse);
-						}
-
-						if (mOptions.refreshDirty) {
-							serviceResponse = refreshDirtyEntities();
-							if (serviceResponse.responseCode != ResponseCode.Success) {
-								mRequestListener.onComplete(serviceResponse);
-							}
-							mEntityProxies = (List<EntityProxy>) serviceResponse.data;
-						}
-
-						mScanRequestProcessing = false;
-
-						Logger.d(ProxiConstants.APP_NAME, sModName, "Passing updated proxi beacon collection back to listeners");
-						serviceResponse.data = mEntityProxies;
-						mRequestListener.onComplete(serviceResponse);
+						Logger.d(this, "Received wifi scan results");
+						EventBus.onWifiScanReceived(null);
 					}
 				}
 			}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -170,39 +138,15 @@ public class ProxiExplorer {
 				mWifiList.add(new WifiScanResult(scanResult));
 			}
 
-			Logger.d(ProxiConstants.APP_NAME, sModName, "Requesting system wifi scan");
+			Logger.d(this, "Requesting system wifi scan");
 
 			/* Beacon and entity processing start when we recieve the scan results */
 			mWifiManager.startScan();
 		}
 		else {
-			Logger.d(ProxiConstants.APP_NAME, sModName, "Emulator enabled so using dummy scan results");
-
+			Logger.d(this, "Emulator enabled so using dummy scan results");
 			mWifiList.add(new WifiScanResult(demoBssid, demoSsid, demoLevel));
-			mScanRequestProcessing = true;
-
-			/* We are on the background thread */
-			ServiceResponse serviceResponse = processBeaconsFromScan(mWifiList, mOptions.refreshAllBeacons);
-
-			if (serviceResponse.responseCode != ResponseCode.Success) {
-				listener.onComplete(serviceResponse);
-				return;
-			}
-
-			if (mOptions.refreshDirty) {
-				serviceResponse = refreshDirtyEntities();
-				if (serviceResponse.responseCode != ResponseCode.Success) {
-					listener.onComplete(serviceResponse);
-					return;
-				}
-				mEntityProxies = (List<EntityProxy>) serviceResponse.data;
-			}
-
-			mScanRequestProcessing = false;
-
-			Logger.d(ProxiConstants.APP_NAME, sModName, "Passing updated proxi beacon collection back to listeners");
-			serviceResponse.data = mEntityProxies;
-			listener.onComplete(serviceResponse);
+			EventBus.wifiScanReceived.onEvent(null);
 		}
 	}
 
@@ -212,6 +156,7 @@ public class ProxiExplorer {
 	 * @return Updated master entity list which includes all entities refreshed or not.
 	 * @throws ProxibaseException
 	 */
+	
 	public ServiceResponse refreshDirtyEntities() {
 		/*
 		 * For beacons:
@@ -331,14 +276,15 @@ public class ProxiExplorer {
 		}
 	}
 
-	private ServiceResponse processBeaconsFromScan(List<WifiScanResult> scanList, boolean refreshAllBeacons) {
+	public void processBeaconsFromScan(boolean refreshAllBeacons) {
 		/*
 		 * Full update: Queries service for entities for every discovered beacon.
 		 * Partial update: Queries service for entities for beacons that were not discovered on previous scans.
 		 * Entities from previous scans will still be updated for local changes in visibility.
 		 */
-		Logger.d(ProxiConstants.APP_NAME, sModName, "Processing beacons from scan");
-		ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);;
+		Logger.d(this, "Processing beacons from scan");
+		ServiceResponse serviceResponse = new ServiceResponse();
+		mScanRequestProcessing = true;
 
 		/* Clear beacon collection for a complete rebuild */
 		if (refreshAllBeacons)
@@ -349,9 +295,9 @@ public class ProxiExplorer {
 			beacon.detectedLastPass = false;
 
 		/* Walk all the latest wifi scan hits */
-		for (int i = 0; i < scanList.size(); i++) {
+		for (int i = 0; i < mWifiList.size(); i++) {
 
-			final WifiScanResult scanResult = scanList.get(i);
+			final WifiScanResult scanResult = mWifiList.get(i);
 
 			/* See if we are already tracking the beacon */
 			Beacon beaconMatch = findBeaconById(scanResult.BSSID);
@@ -408,10 +354,6 @@ public class ProxiExplorer {
 			}
 		}
 
-		if (Thread.interrupted()) {
-			return null;
-		}
-
 		if (refreshBeaconIds.size() > 0) {
 
 			Bundle parameters = new Bundle();
@@ -426,12 +368,10 @@ public class ProxiExplorer {
 
 			serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-			if (Thread.interrupted()) {
-				return null;
-			}
-
 			if (serviceResponse.responseCode != ResponseCode.Success) {
-				return serviceResponse;
+				EventBus.onEntitiesLoaded(serviceResponse);
+				mScanRequestProcessing = false;
+				return;
 			}
 
 			String jsonResponse = (String) serviceResponse.data;
@@ -467,7 +407,9 @@ public class ProxiExplorer {
 		}
 
 		manageEntityVisibility();
-		return serviceResponse;
+		EventBus.onEntitiesLoaded(serviceResponse);
+		mScanRequestProcessing = false;
+		return;
 	}
 
 	private Beacon findBeaconById(String beaconId) {
@@ -593,7 +535,7 @@ public class ProxiExplorer {
 	private void manageEntityVisibility() {
 
 		/* Visibility status effects all entities regardless of whether this is a full or partial update. */
-		Logger.d(ProxiConstants.APP_NAME, sModName, "Managing entity visibility");
+		Logger.d(this, "Managing entity visibility");
 
 		for (Beacon beacon : mBeacons) {
 			for (EntityProxy entity : beacon.entityProxies) {

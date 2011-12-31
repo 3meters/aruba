@@ -9,13 +9,24 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" >
 
-        <include layout="@layout/temp_candi_search_header" />
+        <include layout="@layout/temp_aircandi_header" />
+    </LinearLayout>
+
+    <!-- Tabs -->
+
+    <LinearLayout
+        android:id="@+id/form_tabs"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_header" >
+
+        <include layout="@layout/temp_aircandi_tabs" />
     </LinearLayout>
 
     <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/activity_header" >
+        android:layout_below="@+id/form_tabs" >
 
         <RelativeLayout
             android:id="@+id/retry_dialog"
@@ -83,44 +94,11 @@
             android:scrollbars="none"
             android:visibility="invisible" />
 
-        <ViewFlipper
-            android:id="@+id/flipper_candi"
+        <org.anddev.andengine.opengl.view.RenderSurfaceView
+            android:id="@+id/view_rendersurface"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:clipChildren="false"
-            android:gravity="center_vertical"
-            android:visibility="visible" >
-
-            <org.anddev.andengine.opengl.view.RenderSurfaceView
-                android:id="@+id/view_rendersurface"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:fitsSystemWindows="true" />
-
-            <LinearLayout
-                android:id="@+id/view_candi_info"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical" >
-
-                <com.proxibase.aircandi.widgets.ViewPagerIndicator
-                    android:id="@+id/pager_indicator"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content" />
-
-                <android.support.v4.view.ViewPager
-                    android:id="@+id/pager"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/view_candi_info_child"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical" >
-            </LinearLayout>
-        </ViewFlipper>
+            android:fitsSystemWindows="true" />
     </FrameLayout>
 
     <FrameLayout

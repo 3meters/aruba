@@ -4,29 +4,35 @@
     android:layout_height="fill_parent"
     android:background="?attr/backgroundCandiInfo" >
 
-    <RelativeLayout
-        android:id="@+id/actionbar"
-        style="@style/actionbar"
-        android:layout_width="fill_parent"
-        android:layout_height="40dp" >
+    <!-- Header -->
 
-        <Button
-            android:id="@+id/btn_context"
-            style="@style/actionbar_button_back"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:drawablePadding="5dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp" />
-    </RelativeLayout>
+    <LinearLayout
+        android:id="@+id/activity_header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" >
+
+        <include layout="@layout/temp_aircandi_header" />
+    </LinearLayout>
+    
+    <!-- Tabs -->
+
+    <LinearLayout
+        android:id="@+id/form_tabs"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_header" >
+
+        <include layout="@layout/temp_form_tabs" />
+    </LinearLayout>
+
+    <!-- Body -->
 
     <ListView
         android:id="@+id/list_candi"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/actionbar"
+        android:layout_below="@+id/form_tabs"
         android:cacheColorHint="#00000000"
         android:listSelector="#00000000" />
 

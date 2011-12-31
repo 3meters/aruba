@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -24,7 +23,6 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.ViewPagerIndicator;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.aircandi.widgets.ViewPagerIndicator.PageInfoProvider;
 import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 import com.proxibase.sdk.android.proxi.consumer.User;
@@ -35,6 +33,7 @@ public class CandiPagerAdapter extends PagerAdapter implements ViewPagerIndicato
 	private ViewPagerIndicator	mViewPagerIndicator;
 	private Context				mContext;
 	private User				mUser;
+	@SuppressWarnings("unused")
 	private ViewPager			mViewPager;
 	private LayoutInflater		mInflater;
 
@@ -52,13 +51,7 @@ public class CandiPagerAdapter extends PagerAdapter implements ViewPagerIndicato
 			return 0;
 		}
 		else {
-			if (mEntity.children != null) {
-				return mEntity.hasVisibleChildren() ? 2 : 1;
-			}
-			else
-			{
-				return 1;
-			}
+			return 1;
 		}
 	}
 
@@ -73,27 +66,9 @@ public class CandiPagerAdapter extends PagerAdapter implements ViewPagerIndicato
 
 				ViewGroup candiInfoView = (ViewGroup) mInflater.inflate(R.layout.temp_candi_info, null);
 				candiInfoView = buildCandiInfo(mEntity, candiInfoView);
-
-				if (mEntity != null && mEntity.children != null && mEntity.hasVisibleChildren()) {
-					mViewPagerIndicator.setVisibility(View.VISIBLE);
-					mViewPagerIndicator.initialize(1, 2, (PageInfoProvider) mViewPager.getAdapter());
-				}
-				else {
-					mViewPagerIndicator.setVisibility(View.GONE);
-				}
-
+				mViewPagerIndicator.setVisibility(View.GONE);
 				((ViewPager) collection).addView(candiInfoView, 0);
 				return candiInfoView;
-			}
-			else if (position == PagerView.CandiList.ordinal()) {
-
-				View candiInfoList = (View) mInflater.inflate(R.layout.temp_candi_list, null);
-				final ListView candiListView = (ListView) candiInfoList.findViewById(R.id.list_candi_children);
-				CandiListAdapter adapter = new CandiListAdapter(mContext, mUser, mEntity.children);
-				candiListView.setAdapter(adapter);
-				candiListView.setClickable(true);
-				((ViewPager) collection).addView(candiInfoList, 0);
-				return candiInfoList;
 			}
 		}
 		return null;
@@ -183,6 +158,7 @@ public class CandiPagerAdapter extends PagerAdapter implements ViewPagerIndicato
 		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_info_description);
 		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
 		final Button comments = (Button) candiInfoView.findViewById(R.id.button_comments);
+		final ImageView navigate = (ImageView) candiInfoView.findViewById(R.id.image_forward);
 
 		/* Candi image */
 		if (entity.imageUri != null && entity.imageUri.length() != 0) {
@@ -198,6 +174,16 @@ public class CandiPagerAdapter extends PagerAdapter implements ViewPagerIndicato
 		}
 		else {
 			authorBlock.setVisibility(View.GONE);
+		}
+
+		/* Navigate indicator */
+		if (entity.childCount == 0) {
+			((ViewGroup) candiInfoView.findViewById(R.id.group_candi_content)).setClickable(false);
+			navigate.setVisibility(View.GONE);
+		}
+		else {
+			((ViewGroup) candiInfoView.findViewById(R.id.group_candi_content)).setClickable(true);
+			navigate.setVisibility(View.VISIBLE);
 		}
 
 		/* Comments */

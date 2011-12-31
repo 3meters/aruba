@@ -24,6 +24,7 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.proxibase.aircandi.CandiSearchActivity.CandiTask;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.Command;
@@ -200,8 +201,10 @@ public class Aircandi extends Application {
 			Context context,
 			EntityProxy entityProxy,
 			int parentEntityId,
-			boolean includeChildren,
+			final boolean includeChildren,
+			List<EntityProxy> entities,
 			Command command,
+			CandiTask candiTask,
 			Beacon beacon,
 			User user,
 			Class<?> clazz) {
@@ -210,22 +213,36 @@ public class Aircandi extends Application {
 		/* We want to make sure that any child entities don't get serialized */
 		GsonBuilder gsonb = new GsonBuilder();
 
-		if (!includeChildren) {
-			gsonb.setExclusionStrategies(new ExclusionStrategy() {
+		gsonb.setExclusionStrategies(new ExclusionStrategy() {
 
-				@Override
-				public boolean shouldSkipClass(Class<?> clazz) {
-					return (clazz == (Class<List<EntityProxy>>) (Class<?>) List.class);
-				}
+			@Override
+			public boolean shouldSkipClass(Class<?> clazz) {
+				return false;
+				//return (clazz == (Class<List<EntityProxy>>) (Class<?>) List.class);
+			}
 
-				@Override
-				public boolean shouldSkipField(FieldAttributes f) {
-					return (f.getDeclaredClass() == (Class<List<EntityProxy>>) (Class<?>) List.class);
+			@Override
+			public boolean shouldSkipField(FieldAttributes f) {
+				/* We always skip these fields because they produce circular references */
+				boolean skip = (f.getDeclaringClass() == Beacon.class && f.getName().equals("entityProxies"))
+								|| (f.getDeclaringClass() == Command.class && f.getName().equals("entity"));
+
+				if (!includeChildren) {
+					skip = skip || (f.getDeclaringClass() == EntityProxy.class && f.getName().equals("children"));
 				}
-			});
-		}
-		
+				return skip;
+				//return (f.getDeclaredType() == (Class<List<EntityProxy>>) (Class<?>) List.class);
+			}
+		});
+
 		Gson gson = gsonb.create();
+
+		if (entities != null) {
+			String jsonEntities = gson.toJson(entities);
+			if (jsonEntities.length() > 0) {
+				intent.putExtra(context.getString(R.string.EXTRA_ENTITY_LIST), jsonEntities);
+			}
+		}
 
 		if (command != null) {
 			String jsonCommand = gson.toJson(command);
@@ -235,6 +252,8 @@ public class Aircandi extends Application {
 		if (parentEntityId != 0) {
 			intent.putExtra(context.getString(R.string.EXTRA_PARENT_ENTITY_ID), parentEntityId);
 		}
+
+		intent.putExtra(context.getString(R.string.EXTRA_CANDI_TASK), candiTask);
 
 		if (beacon != null) {
 			String jsonBeacon = gson.toJson(beacon);
@@ -260,4 +279,8 @@ public class Aircandi extends Application {
 		return intent;
 	}
 
+	public static class EventHandler {
+
+		public void onEvent(Object data) {}
+	}
 }

@@ -90,7 +90,7 @@ public class CandiPatchPresenter implements Observer {
 	private CandiViewPool			mCandiViewPool;
 
 	private GestureDetector			mGestureDetector;
-	private boolean					mIgnoreInput			= false;
+	public boolean					mIgnoreInput			= false;
 	private Context					mContext;
 	private Engine					mEngine;
 	public CandiAnimatedSprite		mProgressSprite;
@@ -139,6 +139,10 @@ public class CandiPatchPresenter implements Observer {
 		mCamera = (ChaseCamera) engine.getCamera();
 		mRenderSurfaceView = renderSurfaceView;
 		mCandiActivity = (CandiSearchActivity) activity;
+		mGestureDetector = new GestureDetector(mContext, new SingleTapGestureDetector());
+		
+		/* Rendering timer */
+		mRenderingTimer = new RenderCountDownTimer(5000, 500);
 
 		initialize();
 	}
@@ -146,7 +150,6 @@ public class CandiPatchPresenter implements Observer {
 	private void initialize() {
 
 		/* Gestures */
-		mGestureDetector = new GestureDetector(mContext, new SingleTapGestureDetector());
 		final ViewConfiguration configuration = ViewConfiguration.get(mContext);
 
 		int touchSlop = configuration.getScaledTouchSlop();
@@ -158,8 +161,6 @@ public class CandiPatchPresenter implements Observer {
 		/* Pooling */
 		mCandiViewPool = new CandiViewPool();
 
-		/* Rendering timer */
-		mRenderingTimer = new RenderCountDownTimer(5000, 500);
 
 		/* Origin */
 		mCandiPatchModel.setOriginX(0);
@@ -214,7 +215,7 @@ public class CandiPatchPresenter implements Observer {
 			mProgressSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 			mProgressSprite.animate(150, true);
 			mProgressSprite.setVisible(false);
-			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mProgressSprite);
+			//scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mProgressSprite);
 
 			/* Invisible entity used to scroll */
 			mCameraTargetSprite = new CameraTargetSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, CandiConstants.CANDI_VIEW_WIDTH,
@@ -615,9 +616,6 @@ public class CandiPatchPresenter implements Observer {
 		/* Now that all the view entities have updated we can do global operations like z sorting. */
 		IEntity layer = mEngine.getScene().getChild(CandiConstants.LAYER_CANDI);
 		layer.sortChildren();
-
-		/* Back button needs updating */
-		mCandiActivity.updateCandiBackButton(candiRootNext.getTitleText());
 
 		/* Without animations, we can lazy create views. */
 		if (!CandiConstants.TRANSITIONS_ACTIVE) {

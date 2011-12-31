@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:weightSum="2" >
+
+        <RelativeLayout
+            android:id="@+id/tab_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" >
+
+            <TextView
+                android:id="@+id/text_tab_content"
+                style="@style/form_tab_label"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_alignParentTop="true"
+                android:clickable="true"
+                android:gravity="center"
+                android:onClick="onRadarTabClick"
+                android:text="@string/search_tab_radar" />
+
+            <ImageView
+                android:id="@+id/image_tab_content"
+                style="@style/form_tab_highlight"
+                android:layout_width="fill_parent"
+                android:layout_height="5dp"
+                android:layout_alignParentBottom="true"
+                android:adjustViewBounds="true" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/tab_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" >
+
+            <TextView
+                android:id="@+id/text_tab_settings"
+                style="@style/form_tab_label"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_alignParentTop="true"
+                android:clickable="true"
+                android:gravity="center"
+                android:onClick="onMyCandiTabClick"
+                android:text="@string/search_tab_mycandi" />
+
+            <ImageView
+                android:id="@+id/image_tab_settings"
+                style="@style/form_tab_highlight"
+                android:layout_width="fill_parent"
+                android:layout_height="2dp"
+                android:layout_alignParentBottom="true"
+                android:adjustViewBounds="true" />
+        </RelativeLayout>
+    </LinearLayout>
+
+</merge>

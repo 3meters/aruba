@@ -248,7 +248,7 @@ public class WebForm extends EntityBaseForm {
 									
 									ServiceResponse serviceResponse = (ServiceResponse) response;
 									if (serviceResponse.responseCode != ResponseCode.Success) {
-										mProgressDialog.dismiss();
+										showProgressDialog(false, null);
 										ImageUtils.showToastNotification(getResources().getString(R.string.web_alert_website_unavailable),
 												Toast.LENGTH_SHORT);
 									}
@@ -281,7 +281,7 @@ public class WebForm extends EntityBaseForm {
 										else {
 											((EditText) findViewById(R.id.text_content)).setText("");
 										}
-										mProgressDialog.dismiss();
+										showProgressDialog(false, null);
 									}
 								}
 							});

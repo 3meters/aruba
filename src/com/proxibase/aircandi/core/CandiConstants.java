@@ -39,6 +39,7 @@ public interface CandiConstants {
 
 	/* Dimensions at mdpi */
 	public static final int				CANDI_TITLEBAR_HEIGHT				= 40;
+	public static final int				CANDI_TABBAR_HEIGHT					= 40;
 	public static final int				ANDROID_STATUSBAR_HEIGHT			= 25;
 
 	public static final int				SWIPE_MAX_OFF_PATH					= 500;

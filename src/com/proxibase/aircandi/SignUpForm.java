@@ -36,7 +36,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public class SignUpForm extends AircandiActivity {
+public class SignUpForm extends CandiActivity {
 
 	private EditText		mTextFullname;
 	private EditText		mTextEmail;
