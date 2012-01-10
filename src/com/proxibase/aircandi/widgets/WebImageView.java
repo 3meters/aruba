@@ -114,31 +114,32 @@ public class WebImageView extends ImageView {
 				else
 				{
 					final Bitmap bitmap = (Bitmap) serviceResponse.data;
+					@SuppressWarnings("unused")
+					String imageFileUri = ImageManager.getInstance().getImageCache().getImageFileUri(imageRequest.imageUri);
+					WebImageView.this.setTag(imageRequest.imageUri);
 
 					if (bitmap != null) {
 						mThreadHandler.post(new Runnable() {
 
 							@Override
 							public void run() {
-								if (imageRequest.makeReflection && imageReflection != null)
-							{
-								String cacheName = ImageManager.getInstance().resolveCacheName(imageRequest.imageUri);
-								Bitmap bitmapReflection = ImageManager.getInstance().getImage(cacheName + ".reflection");
-								ImageUtils.showImageInImageView(bitmap, bitmapReflection, WebImageView.this, imageReflection);
+								if (imageRequest.makeReflection && imageReflection != null) {
+									String cacheName = ImageManager.getInstance().resolveCacheName(imageRequest.imageUri);
+									Bitmap bitmapReflection = ImageManager.getInstance().getImage(cacheName + ".reflection");
+									ImageUtils.showImageInImageView(bitmap, bitmapReflection, WebImageView.this, imageReflection);
+								}
+								else {
+									ImageUtils.showImageInImageView(bitmap, WebImageView.this);
+								}
 							}
-							else
-							{
-								ImageUtils.showImageInImageView(bitmap, WebImageView.this);
-							}
-						}
 						});
 					}
-					
+
 				}
 				if (originalImageReadyListener != null) {
 					originalImageReadyListener.onComplete(response);
 				}
-				
+
 			}
 		};
 

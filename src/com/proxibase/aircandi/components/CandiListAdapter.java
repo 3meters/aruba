@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.R;
@@ -16,23 +17,23 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.consumer.User;
 
-public class CandiListAdapter extends ArrayAdapter<EntityProxy> {
+public class CandiListAdapter extends ArrayAdapter<Entity> {
 
 	@Override
-	public EntityProxy getItem(int position) {
+	public Entity getItem(int position) {
 		return mItems.get(position);
 	}
 
-	private List<EntityProxy>	mItems;
-	private Context				mContext;
+	private List<Entity>	mItems;
+	private Context			mContext;
 	@SuppressWarnings("unused")
-	private User				mUser;
-	private LayoutInflater		mInflater;
+	private User			mUser;
+	private LayoutInflater	mInflater;
 
-	public CandiListAdapter(Context context, User user, List<EntityProxy> items) {
+	public CandiListAdapter(Context context, User user, List<Entity> items) {
 		super(context, 0, items);
 		this.mItems = items;
 		this.mContext = context;
@@ -44,7 +45,7 @@ public class CandiListAdapter extends ArrayAdapter<EntityProxy> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
 		final CandiListViewHolder holder;
-		EntityProxy itemData = (EntityProxy) mItems.get(position);
+		Entity itemData = (Entity) mItems.get(position);
 
 		if (view == null) {
 			view = mInflater.inflate(R.layout.temp_listitem_candi, null);
@@ -54,7 +55,7 @@ public class CandiListAdapter extends ArrayAdapter<EntityProxy> {
 			holder.itemSubtitle = (TextView) view.findViewById(R.id.item_subtitle);
 			holder.itemDescription = (TextViewEllipsizing) view.findViewById(R.id.item_description);
 			holder.itemAuthor = (AuthorBlock) view.findViewById(R.id.item_block_author);
-			holder.itemActionButton = (View) view.findViewById(R.id.item_button_action);
+			holder.itemComments = (Button) view.findViewById(R.id.item_comments);
 			view.setTag(holder);
 		}
 		else {
@@ -62,11 +63,11 @@ public class CandiListAdapter extends ArrayAdapter<EntityProxy> {
 		}
 
 		if (itemData != null) {
-			EntityProxy entityProxy = itemData;
+			Entity entity = itemData;
 			holder.data = itemData;
 			if (holder.itemTitle != null) {
-				if (entityProxy.title != null && entityProxy.title.length() > 0) {
-					holder.itemTitle.setText(entityProxy.title);
+				if (entity.title != null && entity.title.length() > 0) {
+					holder.itemTitle.setText(entity.title);
 					holder.itemTitle.setVisibility(View.VISIBLE);
 				}
 				else {
@@ -75,8 +76,8 @@ public class CandiListAdapter extends ArrayAdapter<EntityProxy> {
 			}
 
 			if (holder.itemSubtitle != null) {
-				if (entityProxy.subtitle != null && entityProxy.subtitle.length() > 0) {
-					holder.itemSubtitle.setText(entityProxy.subtitle);
+				if (entity.subtitle != null && entity.subtitle.length() > 0) {
+					holder.itemSubtitle.setText(entity.subtitle);
 					holder.itemSubtitle.setVisibility(View.VISIBLE);
 				}
 				else {
@@ -86,8 +87,8 @@ public class CandiListAdapter extends ArrayAdapter<EntityProxy> {
 
 			if (holder.itemDescription != null) {
 				holder.itemDescription.setMaxLines(5);
-				if (entityProxy.description != null && entityProxy.description.length() > 0) {
-					holder.itemDescription.setText(entityProxy.description);
+				if (entity.description != null && entity.description.length() > 0) {
+					holder.itemDescription.setText(entity.description);
 					holder.itemDescription.setVisibility(View.VISIBLE);
 				}
 				else {
@@ -95,9 +96,21 @@ public class CandiListAdapter extends ArrayAdapter<EntityProxy> {
 				}
 			}
 
+			/* Comments */
+			if (holder.itemComments != null) {
+				if (entity.commentCount > 0) {
+					holder.itemComments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
+					holder.itemComments.setTag(entity);
+					holder.itemComments.setVisibility(View.VISIBLE);
+				}
+				else {
+					holder.itemComments.setVisibility(View.GONE);
+				}
+			}
+
 			if (holder.itemAuthor != null) {
-				if (entityProxy.author != null) {
-					holder.itemAuthor.bindToAuthor(entityProxy.author, DateUtils.wcfToDate(entityProxy.createdDate));
+				if (entity.author != null) {
+					holder.itemAuthor.bindToAuthor(entity.author, DateUtils.wcfToDate(entity.createdDate));
 					holder.itemAuthor.setVisibility(View.VISIBLE);
 				}
 				else {
@@ -106,43 +119,40 @@ public class CandiListAdapter extends ArrayAdapter<EntityProxy> {
 			}
 
 			if (holder.itemImage != null) {
-				if (entityProxy.imageUri != null && entityProxy.imageUri.length() != 0) {
-					ImageRequest imageRequest = new ImageRequest(entityProxy.imageUri, ImageShape.Square, entityProxy.imageFormat,
-							entityProxy.javascriptEnabled,
+				ImageRequest imageRequest = new ImageRequest(entity, ImageShape.Square,
 							CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, null);
-					holder.itemImage.setImageRequest(imageRequest, null);
-				}
+				holder.itemImage.setImageRequest(imageRequest, null);
 			}
 
 			/* Loop the streams */
 			if (holder.itemActionButton != null) {
 				holder.itemActionButton.setVisibility(View.GONE);
 			}
-//			if (entityProxy.commands != null && holder.itemActionButton != null) {
-//				boolean activeCommand = false;
-//				for (Command command : entityProxy.commands) {
-//					if (command.name.toLowerCase().contains("edit")) {
-//						if (entityProxy.createdById != null && entityProxy.createdById.toString().equals(mUser.id)) {
-//							activeCommand = true;
-//							command.entity = entityProxy;
-//						}
-//					}
-//					else {
-//						activeCommand = true;
-//						command.entity = entityProxy;
-//					}
-//				}
-//				if (!activeCommand) {
-//					holder.itemActionButton.setVisibility(View.GONE);
-//				}
-//				else {
-//					holder.itemActionButton.setVisibility(View.VISIBLE);
-//					holder.itemActionButton.setTag(itemData);
-//				}
-//			}
-//			else {
-//				holder.itemActionButton.setVisibility(View.GONE);
-//			}
+			//			if (entity.commands != null && holder.itemActionButton != null) {
+			//				boolean activeCommand = false;
+			//				for (Command command : entity.commands) {
+			//					if (command.name.toLowerCase().contains("edit")) {
+			//						if (entity.createdById != null && entity.createdById.toString().equals(mUser.id)) {
+			//							activeCommand = true;
+			//							command.entity = entity;
+			//						}
+			//					}
+			//					else {
+			//						activeCommand = true;
+			//						command.entity = entity;
+			//					}
+			//				}
+			//				if (!activeCommand) {
+			//					holder.itemActionButton.setVisibility(View.GONE);
+			//				}
+			//				else {
+			//					holder.itemActionButton.setVisibility(View.VISIBLE);
+			//					holder.itemActionButton.setTag(itemData);
+			//				}
+			//			}
+			//			else {
+			//				holder.itemActionButton.setVisibility(View.GONE);
+			//			}
 		}
 		return view;
 	}
@@ -162,6 +172,7 @@ public class CandiListAdapter extends ArrayAdapter<EntityProxy> {
 		public TextView				itemSubtitle;
 		public TextViewEllipsizing	itemDescription;
 		public AuthorBlock			itemAuthor;
+		public Button				itemComments;
 		public View					itemActionButton;
 		public Object				data;
 	}

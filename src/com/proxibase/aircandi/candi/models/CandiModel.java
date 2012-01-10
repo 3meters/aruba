@@ -6,9 +6,8 @@ import org.anddev.andengine.entity.modifier.IEntityModifier;
 
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 
 /**
  * @author Jayma
@@ -19,15 +18,13 @@ import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
 
 public class CandiModel extends BaseModel {
 
-	private EntityProxy		mEntityProxy		= null;
+	private Entity		mEntity		= null;
 	private int				mModelId;
 	private ZoneState		mZoneStateCurrent	= new ZoneState();
 	private ZoneState		mZoneStateNext		= new ZoneState();
 	private DisplayExtra	mDisplayExtra		= DisplayExtra.None;
 	private boolean			mTouchAreaActive	= false;
 	private boolean			mRookie				= true;
-	private String			mBodyImageUri;
-	private ImageFormat		mBodyImageFormat;
 	private ReasonInactive	mReasonInactive		= ReasonInactive.None;
 
 	public CandiModel(int modelId, CandiPatchModel candiPatchModel) {
@@ -37,16 +34,10 @@ public class CandiModel extends BaseModel {
 	}
 
 	public String getEntityType() {
-		if (mEntityProxy != null && mEntityProxy.entityType != null) {
-			String entityType = mEntityProxy.entityType;
-			if (entityType.equals(CandiConstants.TYPE_CANDI_GALLERY)) {
-				return "Gallery";
-			}
-			else if (entityType.equals(CandiConstants.TYPE_CANDI_TOPIC)) {
-				return "Topic";
-			}
-			else if (entityType.equals(CandiConstants.TYPE_CANDI_WEB_BOOKMARK)) {
-				return "Web";
+		if (mEntity != null && mEntity.entityType != null) {
+			String entityType = mEntity.entityType;
+			if (entityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
+				return "Link";
 			}
 			else if (entityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
 				return "Picture";
@@ -117,8 +108,8 @@ public class CandiModel extends BaseModel {
 		mZoneStateCurrent.setZone(mZoneStateNext.getZone());
 	}
 
-	public EntityProxy getEntityProxy() {
-		return mEntityProxy;
+	public Entity getEntity() {
+		return mEntity;
 	}
 
 	public DisplayExtra getDisplayExtra() {
@@ -138,28 +129,16 @@ public class CandiModel extends BaseModel {
 		String title = super.getTitleText();
 
 		if (mDisplayExtra == DisplayExtra.Level) {
-			title += " " + String.valueOf(getEntityProxy().beacon.getAvgBeaconLevel());
+			title += " " + String.valueOf(getEntity().beacon.getAvgBeaconLevel());
 		}
 		else if (mDisplayExtra == DisplayExtra.Tag) {
-			title += " " + String.valueOf(getEntityProxy().beacon.id);
+			title += " " + String.valueOf(getEntity().beacon.id);
 		}
 		else if (mDisplayExtra == DisplayExtra.Time) {
-			title += " " + String.valueOf(getEntityProxy().beacon.discoveryTime.getTime() / 100);
-		}
-
-		if (getEntityType() != null) {
-			title = getEntityType() + ": " + title;
+			title += " " + String.valueOf(getEntity().beacon.discoveryTime.getTime() / 100);
 		}
 
 		return title;
-	}
-
-	public String getBodyImageUri() {
-		return mBodyImageUri;
-	}
-
-	public ImageFormat getBodyImageFormat() {
-		return mBodyImageFormat;
 	}
 
 	public boolean isTouchAreaActive() {
@@ -174,17 +153,10 @@ public class CandiModel extends BaseModel {
 		mViewModifiers = modifiers;
 	}
 
-	public void setEntityProxy(EntityProxy entityProxy) {
-		mEntityProxy = entityProxy;
+	public void setEntity(Entity entity) {
+		mEntity = entity;
 	}
 
-	public void setBodyImageUri(String bodyImageUri) {
-		mBodyImageUri = bodyImageUri;
-	}
-
-	public void setBodyImageFormat(ImageFormat bodyImageFormat) {
-		mBodyImageFormat = bodyImageFormat;
-	}
 
 	public void setTouchAreaActive(boolean touchAreaActive) {
 		mTouchAreaActive = touchAreaActive;

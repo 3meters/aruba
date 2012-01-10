@@ -53,10 +53,9 @@
         android:id="@+id/form_tabs"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/activity_header"
-        android:background="?attr/backgroundForm" >
+        android:layout_below="@+id/activity_header" >
 
-        <include layout="@layout/temp_form_tabs" />
+        <include layout="@layout/temp_tabs_form" />
     </LinearLayout>
 
     <ScrollView
@@ -65,7 +64,6 @@
         android:layout_above="@+id/form_footer"
         android:layout_below="@id/form_tabs"
         android:layout_weight="1"
-        android:background="?attr/backgroundForm"
         android:fillViewport="true" >
 
         <ViewFlipper
@@ -101,43 +99,6 @@
                     android:hint="@string/form_description_hint"
                     android:inputType="textMultiLine"
                     android:lines="10" />
-
-                <!-- Public Image -->
-
-                <TextView
-                    style="@style/form_label"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:text="@string/form_label_picture" />
-
-                <RelativeLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="3dp"
-                    android:gravity="left"
-                    android:orientation="horizontal"
-                    android:paddingBottom="10dp" >
-
-                    <com.proxibase.aircandi.widgets.WebImageView
-                        android:id="@+id/image_picture"
-                        style="@style/form_picture"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:maxWidth="100dp"
-                        android:tag="resource:placeholder_user" />
-
-                    <Button
-                        android:id="@+id/btn_change_public_image"
-                        style="@style/app_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignTop="@+id/image_picture"
-                        android:layout_marginLeft="10dp"
-                        android:layout_toRightOf="@+id/image_picture"
-                        android:onClick="onChangePictureButtonClick"
-                        android:text="@string/form_button_change_picture" />
-                </RelativeLayout>
 
                 <com.proxibase.aircandi.widgets.AuthorBlock
                     android:id="@+id/block_author"

@@ -13,10 +13,10 @@
             android:layout_height="fill_parent"
             android:layout_alignParentLeft="true"
             android:adjustViewBounds="true"
-            android:padding="6dp"
-            android:scaleType="fitCenter"
             android:clickable="true"
             android:onClick="onHomeClick"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
             android:src="?attr/logo" />
 
         <TextView
@@ -25,9 +25,9 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/btn_logo"
             android:layout_toLeftOf="@+id/group_refresh"
-            android:text="@string/app_name"/>"
+            android:layout_toRightOf="@+id/btn_logo"
+            android:text="@string/app_name" />
 
         <View
             style="@style/actionbar_rule_vertical"

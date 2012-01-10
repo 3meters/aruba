@@ -31,7 +31,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_toLeftOf="@+id/item_button_action"
         android:layout_toRightOf="@id/item_image" />
 
     <TextView
@@ -44,22 +43,6 @@
         android:layout_toLeftOf="@+id/image_forward"
         android:layout_toRightOf="@id/item_image" />
 
-    <LinearLayout
-        android:id="@+id/item_button_action"
-        style="@style/candi_list_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:clickable="true"
-        android:onClick="onItemMoreButtonClick" >
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="?attr/iconInfoActions" />
-    </LinearLayout>
-
     <com.proxibase.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_description"
         style="@style/candi_list_description"
@@ -71,21 +54,30 @@
         android:layout_toRightOf="@id/item_image" />
 
     <LinearLayout
+        android:id="@+id/item_info_group"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignWithParentIfMissing="true"
+        android:layout_alignParentBottom="true"
         android:layout_below="@+id/item_description"
-        android:layout_toRightOf="@+id/item_image"
         android:layout_toLeftOf="@+id/image_forward"
-        android:orientation="vertical"
-        android:paddingLeft="3dp"
-        android:paddingTop="5dp" >
+        android:layout_toRightOf="@+id/item_image"
+        android:orientation="vertical" >
 
         <com.proxibase.aircandi.widgets.AuthorBlock
             android:id="@+id/item_block_author"
-            android:layout_width="200dp"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             aircandi:layout="@layout/temp_user_info_text_only" />
+
+        <Button
+            android:id="@+id/item_comments"
+            style="@style/comments_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:gravity="left"
+            android:onClick="onCommentsClick"
+            android:text="0 Comments" />
     </LinearLayout>
 
     <ImageView

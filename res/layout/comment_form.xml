@@ -51,7 +51,6 @@
         android:layout_above="@+id/form_footer"
         android:layout_below="@id/activity_header"
         android:layout_weight="1"
-        android:background="?attr/backgroundForm"
         android:fillViewport="true" >
 
         <LinearLayout
@@ -59,7 +58,11 @@
             android:layout_height="fill_parent"
             android:gravity="center_vertical|top"
             android:orientation="vertical"
-            android:padding="5dp" >
+            android:paddingTop="10dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            >
 
             <!-- Title and Content -->
 

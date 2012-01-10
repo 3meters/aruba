@@ -28,6 +28,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 /*
@@ -57,7 +58,6 @@ public class ImageManager {
 	private ImageManager() {
 		setImageLoader(new ImageLoader());
 		getImageLoader().setImageCache(mImageCache);
-		getImageLoader().setImageManager(this);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -502,10 +502,15 @@ public class ImageManager {
 	}
 
 	public static boolean isLocalImage(String imageUri) {
-		if (imageUri.toLowerCase().startsWith("resource:"))
+		if (imageUri == null) {
+			return false;
+		}
+		if (imageUri.toLowerCase().startsWith("resource:")) {
 			return true;
-		if (imageUri.toLowerCase().startsWith("asset:"))
+		}
+		if (imageUri.toLowerCase().startsWith("asset:")) {
 			return true;
+		}
 		return false;
 	}
 
@@ -574,44 +579,87 @@ public class ImageManager {
 	public static class ImageRequest {
 
 		public String			imageUri;
-		public ImageShape		imageShape			= ImageShape.Native;
 		public ImageFormat		imageFormat;
+		public ImageShape		imageShape				= ImageShape.Native;
 		public Object			imageRequestor;
-		public int				priority			= 1;
-		public int				scaleToWidth;
-		public boolean			makeReflection		= false;
-		public boolean			javascriptEnabled	= false;
-		public boolean			updateCache			= true;
-		public boolean			searchCache			= true;
-		public RequestListener	requestListener		= null;
+		public Integer			priority				= 1;
+		public Integer			scaleToWidth;
+		public Boolean			makeReflection			= false;
+		public Boolean			linkZoom				= false;
+		public Boolean			linkJavascriptEnabled	= false;
+		public Boolean			updateCache				= true;
+		public Boolean			searchCache				= true;
+		public RequestListener	requestListener			= null;
 
-		public ImageRequest(String imageUri, ImageShape imageShape, String imageFormatString, boolean javascriptEnabled, int scaleToWidth,
-				boolean makeReflection, boolean searchCache, boolean updateCache, int priority,
+		public ImageRequest(Entity entity, ImageShape imageShape, Integer scaleToWidth,
+				Boolean makeReflection, Boolean searchCache, Boolean updateCache, Integer priority,
 				Object imageRequestor, RequestListener requestListener) {
-			this.imageUri = imageUri;
+			
+			if (entity.imagePreviewUri != null && !entity.imagePreviewUri.equals("")) {
+				this.imageUri = entity.imagePreviewUri;
+				this.imageFormat = ImageFormat.Binary;
+			}
+			else if (entity.linkUri != null && !entity.linkUri.equals("")) {
+				this.imageUri = entity.linkUri;
+				this.imageFormat = ImageFormat.Html;
+				this.linkZoom = entity.linkZoom;
+				this.linkJavascriptEnabled = entity.linkJavascriptEnabled;
+			}
+			else if (entity.author != null) {
+				if (entity.author.imageUri != null && !entity.author.imageUri.equals("")) {
+					this.imageUri = entity.author.imageUri;
+					this.imageFormat = ImageFormat.Binary;
+				}
+				else if (entity.author.linkUri != null && !entity.author.linkUri.equals("")) {
+					this.imageUri = entity.author.linkUri;
+					this.imageFormat = ImageFormat.Html;
+					this.linkZoom = entity.linkZoom;
+					this.linkJavascriptEnabled = entity.linkJavascriptEnabled;
+				}
+			}
+
 			this.imageShape = imageShape;
-
-			ImageFormat imageFormat = ImageFormat.Binary;
-			if (imageFormatString.equals("html")) {
-				imageFormat = ImageFormat.Html;
-			}
-			else if (imageFormatString.equals("htmlzoom")) {
-				imageFormat = ImageFormat.HtmlZoom;
-			}
-
-			this.imageFormat = imageFormat;
-			this.imageRequestor = imageRequestor;
 			this.scaleToWidth = scaleToWidth;
-			this.priority = priority;
+
 			this.makeReflection = makeReflection;
-			this.javascriptEnabled = javascriptEnabled;
+			this.priority = priority;
+
 			this.searchCache = searchCache;
 			this.updateCache = updateCache;
+			this.imageRequestor = imageRequestor;
+			this.requestListener = requestListener;
+		}
+
+		public ImageRequest(String imageUri, String linkUri, ImageShape imageShape, Boolean linkZoom,
+				Boolean linkJavascriptEnabled, Integer scaleToWidth,
+				Boolean makeReflection, Boolean searchCache, Boolean updateCache, Integer priority,
+				Object imageRequestor, RequestListener requestListener) {
+
+			if (imageUri != null && !imageUri.equals("")) {
+				this.imageUri = imageUri;
+				this.imageFormat = ImageFormat.Binary;
+			}
+			else if (linkUri != null && !linkUri.equals("")) {
+				this.imageUri = linkUri;
+				this.imageFormat = ImageFormat.Html;
+				this.linkZoom = linkZoom;
+				this.linkJavascriptEnabled = linkJavascriptEnabled;
+			}
+
+			this.imageShape = imageShape;
+			this.scaleToWidth = scaleToWidth;
+
+			this.makeReflection = makeReflection;
+			this.priority = priority;
+
+			this.searchCache = searchCache;
+			this.updateCache = updateCache;
+			this.imageRequestor = imageRequestor;
 			this.requestListener = requestListener;
 		}
 
 		public enum ImageFormat {
-			Binary, Html, HtmlZoom
+			Binary, Html
 		}
 
 		public enum ImageShape {

@@ -1,11 +1,11 @@
 package com.proxibase.aircandi;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-import com.proxibase.aircandi.R;
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+
+import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.core.CandiConstants;
 
 public class Preferences extends PreferenceActivity {
 
@@ -28,7 +28,13 @@ public class Preferences extends PreferenceActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.preferences);
-		GoogleAnalyticsTracker.getInstance().trackPageView("/Preferences");
+		if (CandiConstants.MODE_DEV) {
+			addPreferencesFromResource(R.xml.preferences_dev);
+			Tracker.trackPageView("/Preferences");
+		}
+		else {
+			addPreferencesFromResource(R.xml.preferences);
+			Tracker.trackPageView("/PreferencesDev");
+		}
 	}
 }

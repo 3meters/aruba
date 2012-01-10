@@ -37,7 +37,6 @@ public class ImageLoader {
 	private ImagesLoader		mImageLoaderThread	= new ImagesLoader();
 
 	private WebView				mWebView;
-	private ImageManager		mImageManager;
 
 	public ImageLoader() {
 
@@ -59,7 +58,7 @@ public class ImageLoader {
 
 		mImageRequestors.put(imageRequest.imageRequestor, imageRequest.imageUri);
 
-		if (imageRequest.imageUri.toLowerCase().contains("resource:")) {
+		if (imageRequest.imageUri.toLowerCase().startsWith("resource:")) {
 
 			String rawResourceName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("resource:") + 9);
 			String resolvedResourceName = ImageManager.getInstance().resolveResourceName(rawResourceName);
@@ -107,7 +106,7 @@ public class ImageLoader {
 				throw new IllegalStateException("Bitmap resource is null: " + resolvedResourceName);
 			}
 		}
-		else if (imageRequest.imageUri.toLowerCase().contains("asset:")) {
+		else if (imageRequest.imageUri.toLowerCase().startsWith("asset:")) {
 
 			String assetName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("asset:") + 6);
 			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(assetName);
@@ -138,6 +137,19 @@ public class ImageLoader {
 						 * need to make sure we honor the image request specifications.
 						 */
 						bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+
+						/* Create reflection if requested and needed */
+
+						Bitmap reflectionBitmap = ImageManager.getInstance().getImage(imageRequest.imageUri + ".reflection");
+						if (reflectionBitmap == null) {
+							if (imageRequest.makeReflection) {
+								final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
+								mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection, CompressFormat.PNG);
+								if (mImageCache.isFileCacheOnly()) {
+									bitmapReflection.recycle();
+								}
+							}
+						}
 					}
 					serviceResponse.data = bitmap;
 					imageRequest.requestListener.onComplete(serviceResponse);
@@ -146,6 +158,7 @@ public class ImageLoader {
 			}
 		}
 
+		Logger.v(this, imageRequest.imageUri + ": Queued for download");
 		queueImage(imageRequest);
 	}
 
@@ -196,7 +209,7 @@ public class ImageLoader {
 
 		/* Turn byte array into bitmap that fits in our desired max size */
 		Bitmap bitmap = ImageManager.getInstance().bitmapForByteArraySampled(imageBytes, imageRequest, CandiConstants.IMAGE_BYTES_MAX);
-		
+
 		if (bitmap == null) {
 			throw new IllegalStateException("Stream could not be decoded to a bitmap: " + url);
 		}
@@ -237,11 +250,11 @@ public class ImageLoader {
 		 */
 
 		mWebView.getSettings().setUseWideViewPort(true);
-		if (imageRequest.imageFormat == ImageFormat.HtmlZoom) {
+		if (imageRequest.linkZoom) {
 			mWebView.getSettings().setUseWideViewPort(false);
 		}
 		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
-		mWebView.getSettings().setJavaScriptEnabled(imageRequest.javascriptEnabled);
+		mWebView.getSettings().setJavaScriptEnabled(imageRequest.linkJavascriptEnabled);
 		mWebView.getSettings().setLoadWithOverviewMode(true);
 		mWebView.refreshDrawableState();
 
@@ -389,14 +402,6 @@ public class ImageLoader {
 		mWebView = webView;
 	}
 
-	public void setImageManager(ImageManager imageManager) {
-		this.mImageManager = imageManager;
-	}
-
-	public ImageManager getImageManager() {
-		return mImageManager;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Loader routines
 	// --------------------------------------------------------------------------------------------
@@ -439,7 +444,7 @@ public class ImageLoader {
 						final ImageRequest imageRequest;
 						synchronized (mImagesQueue.mImagesToLoad) {
 							ImageRequest imageRequestCheck = mImagesQueue.mImagesToLoad.peek();
-							if (imageRequestCheck.imageFormat == ImageFormat.Html || imageRequestCheck.imageFormat == ImageFormat.HtmlZoom) {
+							if (imageRequestCheck.imageFormat == ImageFormat.Html) {
 								if (processingWebPage) {
 									mImagesQueue.mImagesToLoad.wait();
 								}
@@ -452,7 +457,7 @@ public class ImageLoader {
 						/*
 						 * Html image
 						 */
-						if (imageRequest.imageFormat == ImageFormat.Html || imageRequest.imageFormat == ImageFormat.HtmlZoom) {
+						if (imageRequest.imageFormat == ImageFormat.Html) {
 
 							processingWebPage = true;
 							Logger.v(this, "Starting html image processing: " + imageRequest.imageUri);
@@ -505,7 +510,7 @@ public class ImageLoader {
 									imageRequest.requestListener.onProgressChanged(progress);
 								}
 							});
-						
+
 						}
 						/*
 						 * Binary image
@@ -562,24 +567,28 @@ public class ImageLoader {
 								/* Create reflection if requested */
 								imageRequest.requestListener.onProgressChanged(80);
 								if (imageRequest.makeReflection) {
-//									final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
-//									estimatedTime = System.nanoTime() - startTime;
-//									startTime = System.nanoTime();
-//									Logger.v(this, imageRequest.imageUri + ": Reflection created: "
-//													+ String.valueOf(estimatedTime / 1000000)
-//													+ "ms");
-//
-//									mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection);
-//									if (mImageCache.isFileCacheOnly()) {
-//										bitmapReflection.recycle();
-//									}
+									//									final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
+									//									estimatedTime = System.nanoTime() - startTime;
+									//									startTime = System.nanoTime();
+									//									Logger.v(this, imageRequest.imageUri + ": Reflection created: "
+									//													+ String.valueOf(estimatedTime / 1000000)
+									//													+ "ms");
+									//
+									//									mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection);
+									//									if (mImageCache.isFileCacheOnly()) {
+									//										bitmapReflection.recycle();
+									//									}
 								}
 
 								String uri = mImageRequestors.get(imageRequest.imageRequestor);
 								if (uri != null && uri.equals(imageRequest.imageUri)) {
+									Logger.v(this, imageRequest.imageUri + ": Progress complete");
 									serviceResponse.data = bitmap;
 									imageRequest.requestListener.onProgressChanged(100);
 									imageRequest.requestListener.onComplete(serviceResponse);
+								}
+								else {
+									Logger.v(this, imageRequest.imageUri + ": Requestor might have been recycled");
 								}
 							}
 						}
@@ -595,9 +604,9 @@ public class ImageLoader {
 		}
 	}
 
-	public void stopThread() {
+	public void stopLoaderThread() {
 		/*
-		 * We call this when the search activity is being destroyed. S
+		 * We call this when the search activity is being destroyed.
 		 */
 		mImageLoaderThread.interrupt();
 		mImagesQueue.mImagesToLoad.clear();

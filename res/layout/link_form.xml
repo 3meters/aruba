@@ -53,10 +53,9 @@
         android:id="@+id/form_tabs"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/activity_header"
-        android:background="?attr/backgroundForm" >
+        android:layout_below="@+id/activity_header" >
 
-        <include layout="@layout/temp_form_tabs" />
+        <include layout="@layout/temp_tabs_form" />
     </LinearLayout>
 
     <ScrollView
@@ -65,7 +64,6 @@
         android:layout_above="@+id/form_footer"
         android:layout_below="@id/form_tabs"
         android:layout_weight="1"
-        android:background="?attr/backgroundForm"
         android:fillViewport="true" >
 
         <ViewFlipper

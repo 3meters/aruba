@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/activity_header" >
 
-        <include layout="@layout/temp_form_tabs" />
+        <include layout="@layout/temp_tabs_aircandi" />
     </LinearLayout>
 
     <!-- Body -->
@@ -35,7 +35,7 @@
         android:id="@+id/info_body"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/form_tabs" 
+        android:layout_below="@+id/form_tabs"
         android:background="?attr/backgroundCandiInfo" >
 
         <ScrollView
@@ -48,11 +48,10 @@
                 android:id="@+id/group_candi_content"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentTop="true"
                 android:background="@drawable/button_nooutline_selector"
                 android:onClick="onCandiInfoClick"
-                android:paddingBottom="10dp" >
+                android:paddingBottom="15dp"
+                android:paddingTop="10dp" >
 
                 <RelativeLayout
                     android:id="@+id/group_controls"
@@ -62,46 +61,26 @@
                     android:orientation="vertical" >
 
                     <com.proxibase.aircandi.widgets.WebImageView
-                        android:id="@+id/image_public"
-                        android:layout_width="80dp"
+                        android:id="@+id/image_author"
+                        android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="top"
                         android:adjustViewBounds="true"
-                        android:maxWidth="80dp"
-                        android:paddingTop="5dp"
+                        android:maxWidth="60dp"
                         android:scaleType="centerInside"
-                        android:width="80dp" />
+                        android:src="@drawable/placeholder_user_dark"
+                        android:width="60dp" />
 
                     <ImageView
-                        android:id="@+id/image_public_reflection"
-                        android:layout_width="80dp"
+                        android:id="@+id/image_author_reflection"
+                        android:layout_width="60dp"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/image_public"
+                        android:layout_below="@+id/image_author"
                         android:layout_gravity="top"
                         android:adjustViewBounds="true"
-                        android:maxWidth="80dp"
+                        android:maxWidth="60dp"
                         android:scaleType="centerInside"
-                        android:width="80dp" />
-
-                    <Button
-                        android:id="@+id/button_comments"
-                        style="@style/comments_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/image_public"
-                        android:layout_marginTop="20dp"
-                        android:clickable="true"
-                        android:onClick="onCommentsClick"
-                        android:text="0\nComments" />
-
-                    <com.proxibase.aircandi.widgets.AuthorBlock
-                        android:id="@+id/block_author"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/button_comments"
-                        aircandi:layout="@layout/temp_user_info_stacked"
-                        android:paddingLeft="3dp"
-                        android:paddingTop="5dp" />
+                        android:width="60dp" />
                 </RelativeLayout>
 
                 <LinearLayout
@@ -110,45 +89,116 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:layout_alignWithParentIfMissing="true"
-                    android:layout_marginBottom="10dp"
                     android:layout_toLeftOf="@+id/image_forward"
                     android:layout_toRightOf="@+id/group_controls"
+                    android:duplicateParentState="true"
                     android:orientation="vertical"
-                    android:paddingLeft="10dp" >
+                    android:paddingLeft="12dp" >
 
                     <TextView
                         android:id="@+id/candi_info_title"
                         style="@style/candi_info_title"
                         android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="3dp"
+                        android:layout_marginLeft="3dp"
+                        android:layout_marginTop="-7dp" />
 
                     <TextView
                         android:id="@+id/candi_info_subtitle"
                         style="@style/candi_info_subtitle"
                         android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="7dp"
+                        android:layout_marginLeft="3dp" />
+
+                    <FrameLayout
+                        android:id="@+id/candi_info_image_holder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="7dp" >
+
+                        <com.proxibase.aircandi.widgets.WebImageView
+                            android:id="@+id/candi_info_image"
+                            style="@style/app_image"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:clickable="true"
+                            android:onClick="onImageClick"
+                            android:scaleType="centerInside"
+                            android:width="250dp" />
+
+                        <LinearLayout
+                            android:layout_width="250px"
+                            android:layout_height="250px"
+                            android:gravity="bottom|right" >
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/zoom_light" />
+                        </LinearLayout>
+                    </FrameLayout>
 
                     <TextView
                         android:id="@+id/candi_info_description"
                         style="@style/candi_info_description"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:paddingBottom="30dp" />
+                        android:layout_marginBottom="7dp"
+                        android:layout_marginLeft="3dp" />
+
+                    <com.proxibase.aircandi.widgets.AuthorBlock
+                        android:id="@+id/block_author"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/button_comments"
+                        android:layout_marginLeft="3dp"
+                        aircandi:layout="@layout/temp_user_info_text_only" />
+
+                    <Button
+                        android:id="@+id/button_comments"
+                        style="@style/comments_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="3dp"
+                        android:clickable="true"
+                        android:gravity="left"
+                        android:onClick="onCommentsClick"
+                        android:paddingBottom="10dp"
+                        android:paddingTop="10dp"
+                        android:text="0 Comments" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/frame_buttons"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_below="@+id/group_content"
+                    android:layout_toLeftOf="@+id/image_forward"
+                    android:layout_toRightOf="@+id/group_controls"
+                    android:gravity="bottom"
+                    android:orientation="horizontal"
+                    android:paddingLeft="12dp" />
 
                 <ImageView
                     android:id="@+id/image_forward"
                     android:layout_width="10dp"
-                    android:layout_height="20dp"
+                    android:layout_height="50dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
+                    android:duplicateParentState="true"
+                    android:onClick="onCandiInfoClick"
                     android:paddingRight="3dp"
-                    android:scaleType="fitXY"
+                    android:scaleType="center"
                     android:src="?attr/imageForwardInfo" />
             </RelativeLayout>
         </ScrollView>
     </FrameLayout>
-
+    <!--
     <FrameLayout
         android:id="@+id/slider_wrapper_info"
         android:layout_width="fill_parent"
@@ -190,6 +240,7 @@
                 android:paddingLeft="90dp" >
             </RelativeLayout>
         </SlidingDrawer>
-    </FrameLayout>
+    </FrameLayout>
+    -->
 
 </RelativeLayout>

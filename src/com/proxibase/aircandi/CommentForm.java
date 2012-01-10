@@ -10,13 +10,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.AircandiCommon.IntentBuilder;
+import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.sdk.android.proxi.consumer.Comment;
 import com.proxibase.sdk.android.proxi.consumer.User;
@@ -28,7 +32,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public class CommentForm extends CandiActivity {
+public class CommentForm extends FormActivity {
 
 	private EditText	mContent;
 	private Button		mButtonSave;
@@ -38,13 +42,24 @@ public class CommentForm extends CandiActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 
-		configure();
+		User user = Aircandi.getInstance().getUser();
+		if (user != null && user.anonymous) {
+			
+			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
+			intentBuilder.setCommand(new Command(CommandVerb.Edit));
+			intentBuilder.setMessage(getString(R.string.signin_message_new_candi));
+			Intent intent = intentBuilder.create();
+			
+			startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
+		}
+
+		initialize();
 		bind();
 		draw();
-		GoogleAnalyticsTracker.getInstance().trackPageView("/SignUpForm");
+		Tracker.trackPageView("/SignUpForm");
 	}
 
-	protected void configure() {
+	protected void initialize() {
 		mContent = (EditText) findViewById(R.id.text_content);
 		mButtonSave = (Button) findViewById(R.id.button_save);
 		mButtonSave.setEnabled(false);
@@ -59,20 +74,15 @@ public class CommentForm extends CandiActivity {
 	}
 
 	protected void bind() {
-		mComment = new Comment();
-		mComment.createdById = String.valueOf(((User) mUser).id);
-		mComment.entityId = mParentEntityId;
+		mCommon.mComment = new Comment();
+		mCommon.mComment.createdById = String.valueOf(Aircandi.getInstance().getUser().id);
+		mCommon.mComment.entityId = mCommon.mParentEntityId;
 	}
 
 	protected void draw() {
 		/* Author */
-		if (mUser != null) {
-			((AuthorBlock) findViewById(R.id.block_author)).bindToUser(mUser, mComment.createdDate != null ? DateUtils
-					.wcfToDate(mComment.createdDate) : null);
-		}
-		else {
-			((AuthorBlock) findViewById(R.id.block_author)).setVisibility(View.GONE);
-		}
+		((AuthorBlock) findViewById(R.id.block_author)).bindToUser(Aircandi.getInstance().getUser(), mCommon.mComment.createdDate != null ? DateUtils
+					.wcfToDate(mCommon.mComment.createdDate) : null);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -80,13 +90,30 @@ public class CommentForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onSaveButtonClick(View view) {
-		startTitlebarProgress();
+		mCommon.startTitlebarProgress();
 		doSave();
 	}
 
 	public void onCancelButtonClick(View view) {
 		setResult(Activity.RESULT_CANCELED);
 		finish();
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
+			if (resultCode == Activity.RESULT_CANCELED) {
+				setResult(resultCode);
+				finish();
+			}
+			else {
+				initialize();
+				bind();
+				draw();
+				Tracker.trackPageView("/CommentForm");
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -97,7 +124,7 @@ public class CommentForm extends CandiActivity {
 		if (!validate()) {
 			return;
 		}
-		insertComment();
+		insert();
 	}
 
 	private boolean validate() {
@@ -107,17 +134,17 @@ public class CommentForm extends CandiActivity {
 		return true;
 	}
 
-	protected void insertComment() {
+	protected void insert() {
 
-		mComment.description = mContent.getText().toString().trim();
-		mComment.createdDate = DateUtils.nowString();
+		mCommon.mComment.description = mContent.getText().toString().trim();
+		mCommon.mComment.createdDate = DateUtils.nowString();
 
-		Logger.i(this, "Insert comment for: " + String.valueOf(mComment.entityId));
+		Logger.i(this, "Insert comment for: " + String.valueOf(mCommon.mComment.entityId));
 
 		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mComment.getCollection());
+		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mCommon.mComment.getCollection());
 		serviceRequest.setRequestType(RequestType.Insert);
-		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mComment, GsonType.ProxibaseService));
+		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mCommon.mComment, GsonType.ProxibaseService));
 		serviceRequest.setResponseFormat(ResponseFormat.Json);
 		serviceRequest.setRequestListener(new RequestListener() {
 
@@ -125,20 +152,16 @@ public class CommentForm extends CandiActivity {
 			public void onComplete(Object response) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
+				mCommon.stopTitlebarProgress();
 				if (serviceResponse.responseCode != ResponseCode.Success) {
 					ImageUtils.showToastNotification(getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
 				}
 				else {
 					ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
-					Intent intent = new Intent();
 
-					/* We are editing so set the dirty flag */
-					intent.putExtra(getString(R.string.EXTRA_ENTITY_DIRTY), mComment.entityId);
-					intent.putExtra(getString(R.string.EXTRA_RESULT_VERB), Verb.Edit);
-					setResult(Activity.RESULT_FIRST_USER, intent);
+					setResult(CandiConstants.RESULT_COMMENT_INSERTED);
 					finish();
 				}
-
 			}
 		});
 

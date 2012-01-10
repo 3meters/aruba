@@ -195,7 +195,7 @@ public class ActionsWindow {
 		marginParams.leftMargin = ((requestedX - (mScreenWidth - mPopupWindow.getWidth())) - arrowWidth / 2) + offsetX; 
 		showArrow.setLayoutParams(marginParams);
 
-		hideArrow.setVisibility(View.INVISIBLE);
+		hideArrow.setVisibility(View.GONE);
 	}
 
 	public synchronized void dismiss() {

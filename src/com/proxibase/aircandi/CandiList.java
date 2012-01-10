@@ -2,21 +2,24 @@ package com.proxibase.aircandi;
 
 import java.util.List;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.components.CandiListAdapter;
+import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.AircandiCommon.ActionButtonSet;
+import com.proxibase.aircandi.components.AircandiCommon.IntentBuilder;
 import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
+import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.sdk.android.proxi.consumer.Command;
-import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
+import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
@@ -24,53 +27,52 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public class CandiList extends AircandiActivity {
+public class CandiList extends CandiActivity {
 
 	public enum MethodType {
 		CandiByUser, CandiForParent
 	}
 
-	private ListView			mListView;
-	private Context				mContext;
-	protected List<EntityProxy>	mListEntities;
-	private MethodType			mMethodType;
+	private ListView		mListView;
+	protected List<Entity>	mListEntities;
+	private MethodType		mMethodType;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		initialize();
-		bind();
-		draw();
-		GoogleAnalyticsTracker.getInstance().trackPageView("/YourCandiList");
+		bind(false);
+		Tracker.trackPageView("/YourCandiList");
 	}
 
-	private void initialize() {
-		mContext = this;
-	}
-
-	protected void bind() {
+	@Override
+	protected void bind(boolean refresh) {
+		super.bind(refresh);
 
 		mListView = (ListView) findViewById(R.id.list_candi);
 
 		final Bundle parameters = new Bundle();
 		final ServiceRequest serviceRequest = new ServiceRequest();
 
-		if (mListEntities == null && mEntityProxy != null) {
+		if (mCommon.mEntity != null) {
 			mMethodType = MethodType.CandiForParent;
-			parameters.putInt("entityId", mEntityProxy.id);
+			parameters.putInt("entityId", mCommon.mEntity.id);
 			parameters.putBoolean("includeChildren", true);
 			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntity");
 		}
-		else if (mListEntities == null && mEntityProxy == null) {
+		else if (mCommon.mEntity == null) {
 			mMethodType = MethodType.CandiByUser;
-			parameters.putInt("userId", Integer.parseInt(mUser.id));
+			parameters.putInt("userId", Integer.parseInt(Aircandi.getInstance().getUser().id));
 			parameters.putBoolean("includeChildren", false);
 			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesForUser");
 		}
 
-		showProgressDialog(true, "Loading...");
 		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, "Loading...");
+			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
@@ -85,8 +87,8 @@ public class CandiList extends AircandiActivity {
 				}
 				else {
 					String jsonResponse = (String) serviceResponse.data;
-					mListEntities = (List<EntityProxy>) (List<?>) ProxibaseService.convertJsonToObjects(jsonResponse,
-								EntityProxy.class,
+					mListEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(jsonResponse,
+								Entity.class,
 								GsonType.ProxibaseService);
 					if (mMethodType == MethodType.CandiForParent) {
 						mListEntities = mListEntities.get(0).children;
@@ -99,25 +101,63 @@ public class CandiList extends AircandiActivity {
 			protected void onPostExecute(Object result) {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					if (mListEntities != null) {
-						mListView.setAdapter(new CandiListAdapter(mContext, mUser, mListEntities));
-						showProgressDialog(false, null);
+					if (mListEntities != null && mListEntities.size() > 0) {
+						mListView.setAdapter(new CandiListAdapter(CandiList.this, Aircandi.getInstance().getUser(), mListEntities));
+					}
+					else {
+						setResult(mLastResultCode);
+						finish();
 					}
 				}
+				mCommon.showProgressDialog(false, null);
 			}
 		}.execute();
 	}
-
-	protected void draw() {}
 
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
 	public void onListItemClick(View view) {
-		CandiListViewHolder holder = (CandiListViewHolder) view.getTag();
-		Intent intent = Aircandi.buildIntent(this, (EntityProxy) holder.data, 0, false, null, new Command("view"), mCandiTask, null, mUser, CandiForm.class);
-		startActivity(intent);
+		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
+
+		IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class);
+		intentBuilder.setCommand(new Command(CommandVerb.View));
+		intentBuilder.setEntity(entity);
+		intentBuilder.setEntityType(entity.entityType);
+		Intent intent = intentBuilder.create();
+
+		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_INFO);
+	}
+
+	public void onActionsClick(View view) {
+		if (mCommon.mEntity == null || !mCommon.mEntity.locked) {
+			mCommon.doActionsClick(view, mCommon.mEntity != null, ActionButtonSet.CandiList);
+		}
+	}
+
+	public void onCommentsClick(View view) {
+		Entity entity = (Entity) view.getTag();
+		if (entity.commentCount > 0) {
+
+			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
+			intentBuilder.setCommand(new Command(CommandVerb.View));
+			intentBuilder.setEntity(entity);
+			Intent intent = intentBuilder.create();
+
+			startActivityForResult(intent, 0);
+		}
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		mLastResultCode = resultCode;
+		if (resultCode == CandiConstants.RESULT_ENTITY_UPDATED
+				|| resultCode == CandiConstants.RESULT_ENTITY_DELETED
+				|| resultCode == CandiConstants.RESULT_ENTITY_INSERTED
+				|| resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
+			bind(false);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

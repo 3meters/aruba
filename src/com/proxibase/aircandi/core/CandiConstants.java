@@ -14,9 +14,10 @@ import android.graphics.Bitmap.Config;
 
 public interface CandiConstants {
 
-	public static final boolean			MODE_DEBUG							= true;
+	public static final boolean			MODE_DEV							= false;
 	public static final boolean			DEBUG_TRACE							= false;
 	public static final String			APP_NAME							= "Aircandi";
+	public static final String			APP_PACKAGE_NAME					= "com.proxibase.aircandi.";
 
 	public static final int				LAYER_GENERAL						= 0;
 	public static final int				LAYER_ZONES							= 1;
@@ -74,12 +75,9 @@ public interface CandiConstants {
 	public static final String			URL_AIRCANDI_MEDIA					= "https://s3.amazonaws.com/";
 	public static final String			S3_BUCKET_IMAGES					= "3meters_images";
 
-	public static final String			TYPE_CANDI_TOPIC					= "com.proxibase.aircandi.candi.topic";
 	public static final String			TYPE_CANDI_POST						= "com.proxibase.aircandi.candi.post";
-	public static final String			TYPE_CANDI_GALLERY					= "com.proxibase.aircandi.candi.gallery";
 	public static final String			TYPE_CANDI_PICTURE					= "com.proxibase.aircandi.candi.picture";
-	public static final String			TYPE_CANDI_WEB_BOOKMARK				= "com.proxibase.aircandi.candi.webbookmark";
-	public static final String			TYPE_CANDI_GRAM						= "com.proxibase.aircandi.candi.gram";
+	public static final String			TYPE_CANDI_LINK						= "com.proxibase.aircandi.candi.link";
 
 	public static final int				ACTIVITY_ENTITY_HANDLER				= 100;
 	public static final int				ACTIVITY_MARKET						= 200;
@@ -94,6 +92,15 @@ public interface CandiConstants {
 	public static final int				ACTIVITY_COMMENT					= 430;
 	public static final int				ACTIVITY_COMMENT_LIST				= 435;
 	public static final int				ACTIVITY_CANDI_INFO					= 440;
+	public static final int				ACTIVITY_LINK_PICK					= 500;
+
+	public static final int				RESULT_ENTITY_INSERTED				= 100;
+	public static final int				RESULT_ENTITY_UPDATED				= 110;
+	public static final int				RESULT_ENTITY_DELETED				= 120;
+	public static final int				RESULT_COMMENT_INSERTED				= 200;
+	public static final int				RESULT_PROFILE_INSERTED				= 300;
+	public static final int				RESULT_PROFILE_UPDATED				= 310;
+	public static final int				RESULT_USER_SIGNED_IN				= 400;
 
 	public static final int				VISIBILITY_PRIVATE					= 0;
 	public static final int				VISIBILITY_PASSWORD_PROTECTED		= 1;

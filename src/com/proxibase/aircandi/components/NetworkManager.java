@@ -72,8 +72,7 @@ public class NetworkManager {
 
 			@Override
 			protected void onPostExecute(Object result) {
-				ServiceResponse serviceResponse = (ServiceResponse) result;
-				serviceRequest.getRequestListener().onComplete(serviceResponse);
+				serviceRequest.getRequestListener().onComplete(result);
 			}
 
 		}.execute();

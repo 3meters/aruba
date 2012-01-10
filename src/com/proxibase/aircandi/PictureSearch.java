@@ -13,13 +13,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.Spinner;
 import android.widget.AdapterView.OnItemClickListener;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.google.code.bing.search.client.BingSearchClient;
 import com.google.code.bing.search.client.BingSearchServiceClientFactory;
 import com.google.code.bing.search.client.BingSearchClient.SearchRequestBuilder;
@@ -30,13 +28,14 @@ import com.google.code.bing.search.schema.multimedia.ImageResult;
 import com.proxibase.aircandi.components.DrawableManager;
 import com.proxibase.aircandi.components.EndlessAdapter;
 import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.widgets.WebImageView;
 
 /*
  * We often will get duplicates because the ordering of images isn't 
  * guaranteed while paging.
  */
-public class PictureSearch extends CandiActivity {
+public class PictureSearch extends FormActivity {
 
 	private GridView				mGridView;
 	@SuppressWarnings("unused")
@@ -54,18 +53,13 @@ public class PictureSearch extends CandiActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		configure();
-		bindEntity();
-		drawEntity();
-		GoogleAnalyticsTracker.getInstance().trackPageView("/AircandiGallery");
+		initialize();
+		bind();
+		draw();
+		Tracker.trackPageView("/AircandiGallery");
 	}
 
-	@Override
-	protected void unpackIntent(Intent intent) {
-	/* Prevent logic based on objects passed with the intent */
-	}
-
-	protected void bindEntity() {
+	protected void bind() {
 		String query = Aircandi.settings.getString(Preferences.SETTING_PICTURE_SEARCH, null);
 		if (query == null || query.equals("")) {
 			query = "trending now site:yahoo.com";
@@ -80,9 +74,9 @@ public class PictureSearch extends CandiActivity {
 		mGridView.setAdapter(new EndlessImageAdapter(mImages));
 	}
 
-	protected void drawEntity() {}
+	protected void draw() {}
 
-	private void configure() {
+	private void initialize() {
 		mDrawableManager = new DrawableManager();
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mGridView = (GridView) findViewById(R.id.grid_gallery);
@@ -93,18 +87,12 @@ public class PictureSearch extends CandiActivity {
 				String imageUri = mImages.get(position).getMediaUrl();
 				Intent intent = new Intent();
 				intent.putExtra(getString(R.string.EXTRA_URI), imageUri);
-				setResult(Activity.RESULT_FIRST_USER, intent);
+				setResult(Activity.RESULT_OK, intent);
 				finish();
 			}
 		});
 
 		mSearch = (EditText) findViewById(R.id.text_uri);
-
-		mContextButton = (Button) findViewById(R.id.btn_context);
-		if (mContextButton != null) {
-			mContextButton.setVisibility(View.INVISIBLE);
-			showBackButton(true, getString(R.string.form_button_back));
-		}
 	}
 
 	private ArrayList<ImageResult> loadImages(String query, long count, long offset) {

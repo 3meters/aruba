@@ -26,12 +26,16 @@
     Theme Colors
     	- light suffix means a theme where backgrounds are generally light in tone. 
     	- dark suffix means a theme where backgrounds are generally dark in tone. 
+    <color name="edit_hint">#ffffa01c</color>
     -->
     
     <color name="accent">#ffffaa00</color>
+    <color name="accent_darker">#ffbb7700</color>
+    <color name="accent_lighter">#ffffcc00</color>
     <color name="tab_highlight">#ff63A9E2</color>
-    <color name="edit_hint">#ffffa01c</color>
+    <color name="edit_hint">#ff888888</color>
     <color name="transparent">#00000000</color>
+    <color name="text_pressed">#ff000000</color>
     
     <color name="text_dark">#ffffffff</color>
     <color name="text_light">#ff000000</color>

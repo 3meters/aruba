@@ -57,22 +57,6 @@
             android:layout_toRightOf="@+id/item_author_name"
             android:text="Seattle"
             android:textColor="?attr/textColorUnfocused" />
-
-        <LinearLayout
-            android:id="@+id/item_button_action"
-            style="@style/candi_list_button"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:clickable="true"
-            android:onClick="onCommentMoreButtonClick" >
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="?attr/iconInfoActions" />
-        </LinearLayout>
     </RelativeLayout>
 
     <TextView

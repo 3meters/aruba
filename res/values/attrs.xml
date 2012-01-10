@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<declare-styleable name="Global">
+		<attr name="themeTone" format="string"/>
+	</declare-styleable>
 	<declare-styleable name="ViewPagerIndicator">
 		<attr name="textColorFocused" format="color"/>
 		<attr name="textColorUnfocused" format="color"/>

@@ -52,67 +52,9 @@
         android:id="@+id/form_tabs"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/activity_header"
-        android:background="?attr/backgroundForm" >
+        android:layout_below="@+id/activity_header" >
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="40dp"
-            android:orientation="horizontal"
-            android:weightSum="2" >
-
-            <RelativeLayout
-                android:id="@+id/tab_profile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" >
-
-                <TextView
-                    android:id="@+id/text_tab_profile"
-                    style="@style/form_tab_label"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_alignParentTop="true"
-                    android:clickable="true"
-                    android:gravity="center"
-                    android:onClick="onProfileTabClick"
-                    android:text="@string/form_tab_profile" />
-
-                <ImageView
-                    android:id="@+id/image_tab_profile"
-                    style="@style/form_tab_highlight"
-                    android:layout_width="fill_parent"
-                    android:layout_height="5dp"
-                    android:layout_alignParentBottom="true"
-                    android:adjustViewBounds="true" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/tab_account"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" >
-
-                <TextView
-                    android:id="@+id/text_tab_account"
-                    style="@style/form_tab_label"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_alignParentTop="true"
-                    android:clickable="true"
-                    android:gravity="center"
-                    android:onClick="onAccountTabClick"
-                    android:text="@string/form_tab_account" />
-
-                <ImageView
-                    android:id="@+id/image_tab_account"
-                    style="@style/form_tab_highlight"
-                    android:layout_width="fill_parent"
-                    android:layout_height="2dp"
-                    android:layout_alignParentBottom="true"
-                    android:adjustViewBounds="true" />
-            </RelativeLayout>
-        </LinearLayout>
+        <include layout="@layout/temp_tabs_profile" />
     </LinearLayout>
 
     <ScrollView
@@ -121,7 +63,6 @@
         android:layout_above="@+id/form_footer"
         android:layout_below="@id/form_tabs"
         android:layout_weight="1"
-        android:background="?attr/backgroundForm"
         android:fillViewport="true" >
 
         <ViewFlipper
@@ -155,8 +96,8 @@
                 <RelativeLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="3dp"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="3dp"
                     android:gravity="left"
                     android:orientation="horizontal" >
 

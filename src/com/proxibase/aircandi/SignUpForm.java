@@ -12,13 +12,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.S3;
+import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.ImageManager.ImageRequest;
 import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
@@ -36,7 +37,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public class SignUpForm extends CandiActivity {
+public class SignUpForm extends FormActivity {
 
 	private EditText		mTextFullname;
 	private EditText		mTextEmail;
@@ -44,19 +45,20 @@ public class SignUpForm extends CandiActivity {
 	private EditText		mTextPasswordConfirm;
 	private WebImageView	mImageUser;
 	private Button			mButtonSignUp;
+	private User			mUser;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 
-		configure();
+		initialize();
 		bind();
 		draw();
-		GoogleAnalyticsTracker.getInstance().trackPageView("/SignUpForm");
+		Tracker.trackPageView("/SignUpForm");
 	}
 
-	protected void configure() {
+	protected void initialize() {
 		mImageUser = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
@@ -104,8 +106,7 @@ public class SignUpForm extends CandiActivity {
 	protected void bind() {
 		mUser = new User();
 		mUser.imageUri = (String) mImageUser.getTag();
-		GoogleAnalyticsTracker.getInstance().dispatch();
-
+		Tracker.dispatch();
 	}
 
 	protected void draw() {
@@ -113,12 +114,12 @@ public class SignUpForm extends CandiActivity {
 		 * We only want to enable the save button when there is something in all
 		 * the required fields: fullname, email, password
 		 */
-		if (mUser.imageUri != null && mUser.imageUri.length() > 0) {
+		if (mUser.imageUri != null && !mUser.imageUri.equals("")) {
 			if (mUser.imageBitmap != null) {
 				mImageUser.setImageBitmap(mUser.imageBitmap);
 			}
 			else {
-				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
+				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, mUser.linkUri, ImageShape.Square, false, false,
 						CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
 
 							@Override
@@ -140,7 +141,7 @@ public class SignUpForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onSignUpButtonClick(View view) {
-		startTitlebarProgress();
+		mCommon.startTitlebarProgress();
 		doSave();
 	}
 
@@ -175,19 +176,19 @@ public class SignUpForm extends CandiActivity {
 		if (!validate()) {
 			return;
 		}
-		insertUser();
+		insert();
 	}
 
 	private boolean validate() {
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
-			Aircandi.showAlertDialog(android.R.drawable.ic_dialog_alert, getResources().getString(R.string.signup_alert_missmatched_passwords_title),
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, getResources().getString(R.string.signup_alert_missmatched_passwords_title),
 					getResources().getString(R.string.signup_alert_missmatched_passwords_message), this, null);
 			return false;
 		}
 		return true;
 	}
 
-	protected void insertUser() {
+	protected void insert() {
 
 		mUser.email = mTextEmail.getText().toString().trim();
 		mUser.fullname = mTextFullname.getText().toString().trim();
@@ -253,12 +254,13 @@ public class SignUpForm extends CandiActivity {
 						}
 
 						Logger.i(SignUpForm.this, "Inserted new user: " + mUser.fullname + " (" + mUser.id + ")");
-						stopTitlebarProgress();
-						Aircandi.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),
+						mCommon.stopTitlebarProgress();
+						AircandiCommon.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),
 										getResources().getString(R.string.signup_alert_new_user_message),
 										SignUpForm.this, new OnClickListener() {
 
 											public void onClick(DialogInterface dialog, int which) {
+												setResult(CandiConstants.RESULT_PROFILE_INSERTED);
 												finish();
 											}
 										});

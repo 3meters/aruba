@@ -79,7 +79,7 @@ public class AuthorBlock extends RelativeLayout {
 			}
 			if (mImageUser != null) {
 				if (mAuthor.imageUri != null && mAuthor.imageUri.length() != 0) {
-					ImageRequest imageRequest = new ImageRequest(mAuthor.imageUri, ImageShape.Square, "binary", false,
+					ImageRequest imageRequest = new ImageRequest(mAuthor.imageUri, mAuthor.linkUri, ImageShape.Square, false, false,
 							CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
 					mImageUser.setImageRequest(imageRequest, null);
 				}
@@ -103,7 +103,7 @@ public class AuthorBlock extends RelativeLayout {
 			}
 			if (mImageUser != null) {
 				if (mUser.imageUri != null && mUser.imageUri.length() != 0) {
-					ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
+					ImageRequest imageRequest = new ImageRequest(mUser.imageUri, mUser.linkUri, ImageShape.Square, false, false,
 							CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
 					mImageUser.setImageRequest(imageRequest, null);
 				}

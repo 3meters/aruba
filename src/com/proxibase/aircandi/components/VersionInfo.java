@@ -1,4 +1,4 @@
-package com.proxibase.aircandi.models;
+package com.proxibase.aircandi.components;
 
 import com.google.gson.annotations.Expose;
 

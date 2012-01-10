@@ -34,6 +34,7 @@ import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 // @SuppressWarnings("unused")
@@ -317,6 +318,18 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}
 	}
 
+	public void highlight(boolean highlight) {
+		return;
+//		if (mBodySprite != null) {
+//			if (highlight) {
+//				mBodySprite.setColor(1.0f, 0.7f, 0.0f);
+//			}
+//			else {
+//				mBodySprite.setColor(1.0f, 1.0f, 1.0f);
+//			}
+//		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Animation
 	// --------------------------------------------------------------------------------------------
@@ -569,8 +582,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 			 * but position hasn't been assigned when this first gets called.
 			 */
 			//mActiveImageRequest = true;
-			ImageRequest imageRequest = new ImageRequest(candiModel.getBodyImageUri(), ImageShape.Square, candiModel.getEntityProxy().imageFormat,
-					candiModel.getEntityProxy().javascriptEnabled, CandiConstants.IMAGE_WIDTH_SEARCH_MAX, true, !skipCache, true,
+			final Entity entity = candiModel.getEntity();
+
+			ImageRequest imageRequest = new ImageRequest(entity, ImageShape.Square, CandiConstants.IMAGE_WIDTH_SEARCH_MAX, true, !skipCache, true,
 					2, this, new RequestListener() {
 
 						@Override
@@ -585,7 +599,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 							if (serviceResponse.responseCode != ResponseCode.Success) {
 								mActiveImageRequest = false;
 								if (!mHasBitmap) {
-									Logger.w(this, "Broken image: " + candiModel.getBodyImageUri());
+									Logger.w(this, "Broken image: " + entity.imageUri);
 									Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
 									if (bitmap != null && mModel != null && !mRecycled) {
 										mHasBitmap = false;
@@ -632,8 +646,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 				mReflectionSprite.setVisible(false);
 			}
 
-			if (mPlaceholderSprite != null && !ImageManager.isLocalImage(imageRequest.imageUri)) {
-				mPlaceholderSprite.setVisible(!ImageManager.getInstance().hasImage(imageRequest.imageUri));
+			if (mPlaceholderSprite != null) {
+				if (imageRequest.imageUri != null && !ImageManager.isLocalImage(imageRequest.imageUri)) {
+					mPlaceholderSprite.setVisible(!ImageManager.getInstance().hasImage(imageRequest.imageUri));
+				}
 			}
 
 			if (((BaseModel) mModel).getViewStateCurrent().isCollapsed()) {
@@ -651,6 +667,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 	private void updateTextureRegions(Bitmap bodyBitmap) {
 
 		final CandiModel candiModel = (CandiModel) this.mModel;
+		Entity entity = candiModel.getEntity();
 		if (candiModel == null) {
 			throw new IllegalStateException("Trying to update texture regions with null model");
 		}
@@ -663,7 +680,8 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 		/* Create reflection before creating texture regions because the bitmaps get recycled */
 		/* Fetching from the cache is expense because it involves decoding from a file. */
-		final String cacheName = ImageManager.getInstance().resolveCacheName(candiModel.getBodyImageUri());
+		String imageUri = entity.imageUri != null ? entity.imageUri : entity.linkUri != null ? entity.linkUri : entity.author.imageUri;
+		final String cacheName = ImageManager.getInstance().resolveCacheName(imageUri);
 		Bitmap reflectionBitmap = ImageManager.getInstance().getImage(cacheName + ".reflection");
 		if (reflectionBitmap == null) {
 			if (bodyBitmap != null && !bodyBitmap.isRecycled()) {
@@ -733,14 +751,14 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	public Bitmap decorateTexture(Bitmap bitmap, boolean isReflection) {
 		final CandiModel candiModel = (CandiModel) this.mModel;
-		if (candiModel != null && candiModel.getEntityProxy().entityType.equals(CandiConstants.TYPE_CANDI_POST) &&
-				candiModel.getEntityProxy().description != null &&
-				candiModel.getEntityProxy().description.length() > 0) {
+		if (candiModel != null && candiModel.getEntity().entityType.equals(CandiConstants.TYPE_CANDI_POST) &&
+				candiModel.getEntity().description != null &&
+				candiModel.getEntity().description.length() > 0) {
 			if (!isReflection) {
-				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0xcc000000, 175, 5, candiModel.getEntityProxy().description, false, false);
+				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0xcc000000, 175, 5, candiModel.getEntity().description, false, false);
 			}
 			else {
-				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0xcc000000, -45, 5, candiModel.getEntityProxy().description, true, true);
+				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0xcc000000, -45, 5, candiModel.getEntity().description, true, true);
 			}
 		}
 		return bitmap;
@@ -776,7 +794,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		 * Completely remove all resources associated with this sprite.
 		 * This should only be called from the engine update thread.
 		 */
-		String associatedModel = mModel != null ? ((CandiModel) mModel).getEntityProxy().label : "Recycled";
+		String associatedModel = mModel != null ? ((CandiModel) mModel).getEntity().label : "Recycled";
 		Logger.v(this, "Unloading resources: " + associatedModel);
 
 		if (mProgressSprite != null) {
@@ -846,11 +864,13 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+		this.highlight(false);
 		return false;
 	}
 
 	@Override
 	public void onLongPress(MotionEvent e) {
+		this.highlight(false);
 		if (mTouchListener != null) {
 			mTouchListener.onViewLongPress(this);
 		}
@@ -858,15 +878,19 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	@Override
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+		this.highlight(false);
 		return false;
 	}
 
 	@Override
-	public void onShowPress(MotionEvent e) {}
+	public void onShowPress(MotionEvent e) {
+		this.highlight(true);
+	}
 
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
 
+		this.highlight(false);
 		if (mTouchListener != null) {
 			long startTime = System.nanoTime();
 			Logger.v(this, "SingleTapUp started...");

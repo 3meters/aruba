@@ -4,22 +4,16 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
-import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageManager;
@@ -27,6 +21,8 @@ import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.S3;
+import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.ImageManager.ImageRequest;
 import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
@@ -44,19 +40,9 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public class ProfileForm extends CandiActivity {
+public class ProfileForm extends FormActivity {
 
-	private FormTab			mActiveTab	= FormTab.Profile;
 	private ViewFlipper		mViewFlipper;
-	private int				mTextColorFocused;
-	private int				mTextColorUnfocused;
-	private int				mHeightActive;
-	private int				mHeightInactive;
-	private ImageView		mImageProfileTab;
-	private ImageView		mImageAccountTab;
-	private TextView		mTextProfileTab;
-	private TextView		mTextAccountTab;
-
 	private WebImageView	mImageUser;
 	private EditText		mTextFullname;
 	private EditText		mTextEmail;
@@ -65,24 +51,34 @@ public class ProfileForm extends CandiActivity {
 	@SuppressWarnings("unused")
 	private EditText		mTextPasswordOld;
 	private Button			mButtonSave;
+	private User			mUser;
+	private Integer			mUserId;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 
-		configure();
+		initialize();
 		bind();
 		draw();
-		GoogleAnalyticsTracker.getInstance().trackPageView("/ProfileForm");
+		Tracker.trackPageView("/ProfileForm");
 	}
 
-	protected void configure() {
+	protected void initialize() {
+
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			mUserId = extras.getInt(getString(R.string.EXTRA_USER_ID));
+		}
+		
+		mUser = Aircandi.getInstance().getUser();
+
+		if (mUser == null && mUserId == null) {
+			throw new IllegalStateException("User or userId must be passed to ProfileForm");
+		}
+
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
-		mImageProfileTab = (ImageView) findViewById(R.id.image_tab_profile);
-		mImageAccountTab = (ImageView) findViewById(R.id.image_tab_account);
-		mTextProfileTab = (TextView) findViewById(R.id.text_tab_profile);
-		mTextAccountTab = (TextView) findViewById(R.id.text_tab_account);
 
 		mImageUser = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
@@ -124,23 +120,12 @@ public class ProfileForm extends CandiActivity {
 			}
 		});
 
-		TypedValue resourceName = new TypedValue();
-		if (this.getTheme().resolveAttribute(R.attr.textColorFocused, resourceName, true)) {
-			mTextColorFocused = Color.parseColor((String) resourceName.coerceToString());
-		}
-
-		if (this.getTheme().resolveAttribute(R.attr.textColorUnfocused, resourceName, true)) {
-			mTextColorUnfocused = Color.parseColor((String) resourceName.coerceToString());
-		}
-
-		mHeightActive = ImageUtils.getRawPixelsForDisplayPixels(6);
-		mHeightInactive = ImageUtils.getRawPixelsForDisplayPixels(2);
 		if (mViewFlipper != null) {
-			if (mCommand.verb.equals("new")) {
-				setActiveTab(FormTab.Account);
+			if (mCommon.mCommand.verb == CommandVerb.New) {
+				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(1));		
 			}
 			else {
-				setActiveTab(FormTab.Profile);
+				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));		
 			}
 		}
 	}
@@ -150,7 +135,13 @@ public class ProfileForm extends CandiActivity {
 		 * This form is always for editing. We always reload the user to make sure
 		 * we have the freshest data.
 		 */
-		Query query = new Query("Users").filter("Email eq '" + ((User) mUser).email + "'");
+		Query query = null;
+		if (mUser != null) {
+			query = new Query("Users").filter("Email eq '" + ((User) mUser).email + "'");
+		}
+		else {
+			query = new Query("Users").filter("Id eq '" + String.valueOf(mUserId) + "'");
+		}
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 				new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
@@ -164,7 +155,7 @@ public class ProfileForm extends CandiActivity {
 			String jsonResponse = (String) serviceResponse.data;
 			mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 			mImageUriOriginal = mUser.imageUri;
-			GoogleAnalyticsTracker.getInstance().dispatch();
+			Tracker.dispatch();
 		}
 	}
 
@@ -178,7 +169,7 @@ public class ProfileForm extends CandiActivity {
 				mImageUser.setImageBitmap(mUser.imageBitmap);
 			}
 			else {
-				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, ImageShape.Square, "binary", false,
+				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, null, ImageShape.Square, false, false,
 						CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
 
 							@Override
@@ -202,21 +193,19 @@ public class ProfileForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
-
-	public void onProfileTabClick(View view) {
-		if (mActiveTab != FormTab.Profile) {
-			setActiveTab(FormTab.Profile);
+	
+	public void onTabClick(View view) {
+		mCommon.setActiveTab(view);
+		if (view.getTag().equals("profile")) {
+			mViewFlipper.setDisplayedChild(0);
 		}
-	}
-
-	public void onAccountTabClick(View view) {
-		if (mActiveTab != FormTab.Account) {
-			setActiveTab(FormTab.Account);
+		else if (view.getTag().equals("account")) {
+			mViewFlipper.setDisplayedChild(1);
 		}
 	}
 
 	public void onSaveButtonClick(View view) {
-		startTitlebarProgress();
+		mCommon.startTitlebarProgress();
 		doSave();
 	}
 
@@ -251,7 +240,7 @@ public class ProfileForm extends CandiActivity {
 			return;
 		}
 		updateImages();
-		updateProfile();
+		update();
 	}
 
 	private boolean validate() {
@@ -307,7 +296,7 @@ public class ProfileForm extends CandiActivity {
 		}
 	}
 
-	protected void updateProfile() {
+	protected void update() {
 
 		mUser.email = mTextEmail.getText().toString().trim();
 		mUser.fullname = mTextFullname.getText().toString().trim();
@@ -326,8 +315,8 @@ public class ProfileForm extends CandiActivity {
 
 			@Override
 			public void onComplete(Object response) {
-				
-				stopTitlebarProgress();
+
+				mCommon.stopTitlebarProgress();
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode != ResponseCode.Success) {
 					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
@@ -343,7 +332,7 @@ public class ProfileForm extends CandiActivity {
 						intent.putExtra(getString(R.string.EXTRA_USER), jsonUser);
 					}
 
-					setResult(Activity.RESULT_FIRST_USER, intent);
+					setResult(CandiConstants.RESULT_PROFILE_UPDATED);
 					finish();
 				}
 			}
@@ -365,32 +354,6 @@ public class ProfileForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
-
-	private void setActiveTab(FormTab formTab) {
-
-		mTextProfileTab.setTextColor(mTextColorUnfocused);
-		mTextAccountTab.setTextColor(mTextColorUnfocused);
-
-		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightInactive);
-		params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-
-		mImageProfileTab.setLayoutParams(params);
-		mImageAccountTab.setLayoutParams(params);
-
-		params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightActive);
-		params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-
-		if (formTab == FormTab.Profile) {
-			mTextProfileTab.setTextColor(mTextColorFocused);
-			mImageProfileTab.setLayoutParams(params);
-		}
-		else if (formTab == FormTab.Account) {
-			mTextAccountTab.setTextColor(mTextColorFocused);
-			mImageAccountTab.setLayoutParams(params);
-		}
-		mViewFlipper.setDisplayedChild(formTab.ordinal());
-		mActiveTab = formTab;
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines

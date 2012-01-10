@@ -14,7 +14,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 
@@ -27,7 +27,7 @@ public class ProxiHandlerManager {
 		mActivity = activity;
 	}
 
-	public boolean startProxiHandler(String proxiHandlerAction, EntityProxy proxiEntity) {
+	public boolean startProxiHandler(String proxiHandlerAction, Entity proxiEntity) {
 
 		Intent intent = new Intent();
 		intent.setAction(proxiHandlerAction);

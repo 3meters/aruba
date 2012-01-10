@@ -4,6 +4,7 @@
     <!-- Themes -->
 
     <style name="aircandi_theme_midnight" parent="android:Theme">
+        <item name="themeTone">dark</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:textColorHint">@color/edit_hint</item>
@@ -61,6 +62,7 @@
     </style>
 
     <style name="aircandi_theme_snow" parent="@android:style/Theme.Light">
+        <item name="themeTone">light</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:textColorHint">@color/edit_hint</item>
@@ -130,9 +132,10 @@
     </style>
 
     <style name="aircandi_theme_serene" parent="aircandi_theme_snow">
+        <item name="themeTone">dark</item>
         <item name="android:windowBackground">@drawable/wallpaper_serene</item>
-        <item name="textColorFocused">@android:color/white</item>
-        <item name="textColorUnfocused">@color/text_unfocused_dark</item>
+        <item name="textColorFocused">@color/text_dark</item>
+        <item name="textColorUnfocused">@color/pager_indicator_text_unfocused_light</item>
         <item name="textColorButtonHeader">@color/text_dark</item>
         <item name="textColorFooter">@color/text_dark</item>
         <item name="iconSearchActions">@drawable/icon_actions_dark</item>

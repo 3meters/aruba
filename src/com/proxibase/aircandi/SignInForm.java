@@ -10,11 +10,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.proxibase.aircandi.components.Command;
+import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.sdk.android.proxi.consumer.Command;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.Query;
@@ -24,7 +27,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public class SignInForm extends CandiActivity {
+public class SignInForm extends FormActivity {
 
 	protected String	mMessage;
 
@@ -37,22 +40,14 @@ public class SignInForm extends CandiActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		configure();
+
+		initialize();
 		draw();
-		GoogleAnalyticsTracker.getInstance().trackPageView("/SignInForm");
-		GoogleAnalyticsTracker.getInstance().dispatch();
+		Tracker.trackPageView("/SignInForm");
+		Tracker.dispatch();
 	}
 
-	@Override
-	protected void unpackIntent(Intent intent) {
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			mMessage = extras.getString(getString(R.string.EXTRA_MESSAGE));
-		}
-		super.unpackIntent(intent);
-	}
-
-	private void configure() {
+	private void initialize() {
 
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
@@ -90,7 +85,7 @@ public class SignInForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onSignUpButtonClick(View view) {
-		String json = ProxibaseService.getGson(GsonType.Internal).toJson(new Command("new"));
+		String json = ProxibaseService.getGson(GsonType.Internal).toJson(new Command(CommandVerb.New));
 		Intent intent = new Intent(this, SignUpForm.class);
 		intent.putExtra(getString(R.string.EXTRA_COMMAND), json);
 		startActivity(intent);
@@ -99,35 +94,35 @@ public class SignInForm extends CandiActivity {
 	public void onSignInButtonClick(View view) {
 		mTextError.setVisibility(View.GONE);
 		String email = mTextEmail.getText().toString();
-		showProgressDialog(true, getResources().getString(R.string.alert_signing_in));
 		Query query = new Query("Users").filter("Email eq '" + email + "'");
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 				new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
 		if (serviceResponse.responseCode != ResponseCode.Success) {
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-			overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
+			/* 
+			 * We just stay here if it was a network problem. 
+			 */
+			return;
 		}
 		else {
 			String jsonResponse = (String) serviceResponse.data;
-			mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
-			showProgressDialog(false, null);
+			User user = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 
-			if (mUser == null) {
+			if (user == null) {
 				mTextError.setVisibility(View.VISIBLE);
 				mTextPassword.setText("");
 			}
 			else {
-				Toast.makeText(this, getResources().getString(R.string.alert_signed_in) + " " + ((User) mUser).fullname, Toast.LENGTH_SHORT).show();
-				Intent intent = new Intent();
-				String jsonUser = ProxibaseService.getGson(GsonType.Internal).toJson(mUser);
-				if (jsonUser.length() > 0) {
-					intent.putExtra(getString(R.string.EXTRA_USER), jsonUser);
-				}
-
-				setResult(Activity.RESULT_FIRST_USER, intent);
+				
+				Aircandi.getInstance().setUser(user);
+				ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in) + " " + Aircandi.getInstance().getUser().fullname, Toast.LENGTH_SHORT);
+				
+				Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, Aircandi.getInstance().getUser().email);
+				Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, Aircandi.getInstance().getUser().password);
+				Aircandi.settingsEditor.commit();
+				
+				setResult(CandiConstants.RESULT_USER_SIGNED_IN);
 				finish();
 			}
 		}

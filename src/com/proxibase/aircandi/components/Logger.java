@@ -32,6 +32,7 @@ public class Logger {
 	}
 
 	static private void Log(LogLevel logLevel, Object taskContext, String msgFormat, Throwable t) {
+		
 		String task = "";
 		if (INCLUDE_MODULE && taskContext != null) {
 			task = taskContext.getClass().getSimpleName() + ": ";

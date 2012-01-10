@@ -84,19 +84,11 @@
                 </RelativeLayout>
             </ViewFlipper>
 
-            <TextView
-                android:id="@+id/text_content"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="top"
-                android:text="Odilon Redon was born in Bordeaux in 1840 and spent most of his life in Paris, where he died in 1916. During his career, he was responsible for some of the best-known Symbolist paintings of the late 19th and early 20th centuries -- The Cyclops, most famously, but dozens of others as well. His work was not exhibited in America until the famed Armory Show of 1913, and, even today, few prominent American museums own much of his major work." />
-
             <com.proxibase.aircandi.widgets.AuthorBlock
                 android:id="@+id/block_author"
                 android:layout_width="fill_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                aircandi:layout="@layout/temp_user_info" />
+                android:layout_height="wrap_content"
+                aircandi:layout="@layout/temp_user_info_text_only" />
         </LinearLayout>
     </ScrollView>
 

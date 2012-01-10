@@ -177,15 +177,24 @@ public class ImageUtils {
 	}
 
 	public static void showImageInImageView(Bitmap bitmap, Bitmap bitmapReflection, WebImageView imageView, ImageView imageViewReflection) {
-		imageView.setImageBitmap(bitmap);
-		Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		imageView.startAnimation(animation);
+		if (imageView.getDrawable() != null) {
+			imageView.setImageBitmap(bitmap);
+			if (bitmapReflection != null && imageViewReflection != null) {
+				imageViewReflection.setImageBitmap(bitmapReflection);
+			}
+		}
+		else {
 
-		if (bitmapReflection != null && imageViewReflection != null) {
-			imageViewReflection.setImageBitmap(bitmapReflection);
-			imageViewReflection.startAnimation(animation);
+			imageView.setImageBitmap(bitmap);
+			Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+			animation.setFillEnabled(true);
+			animation.setFillAfter(true);
+			imageView.startAnimation(animation);
+
+			if (bitmapReflection != null && imageViewReflection != null) {
+				imageViewReflection.setImageBitmap(bitmapReflection);
+				imageViewReflection.startAnimation(animation);
+			}
 		}
 	}
 

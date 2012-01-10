@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -24,9 +25,14 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.proxibase.aircandi.CandiList.MethodType;
+import com.proxibase.aircandi.components.CandiListAdapter;
+import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.AircandiCommon.ActionButtonSet;
 import com.proxibase.aircandi.components.ImageManager.ImageRequest;
 import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
@@ -35,9 +41,8 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.ActionsWindow;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
-import com.proxibase.sdk.android.proxi.consumer.Command;
 import com.proxibase.sdk.android.proxi.consumer.Comment;
-import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
@@ -47,192 +52,107 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
 @SuppressWarnings("unused")
-public class CommentList extends CandiActivity {
+public class CommentList extends FormActivity {
 
 	private ListView		mListViewComments;
 	private List<Object>	mListComments;
-	private ActionsWindow	mActionsWindow;
-	private Runnable		mUserSignedInRunnable;
-	private Handler			mHandler;
+	protected int			mLastResultCode	= Activity.RESULT_OK;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		configure();
-		bindEntity();
-		drawEntity();
-		GoogleAnalyticsTracker.getInstance().trackPageView("/CommentList");
+		bind();
+		Tracker.trackPageView("/CommentList");
 	}
 
-	protected void bindEntity() {
+	protected void bind() {
 
 		mListViewComments = (ListView) findViewById(R.id.list_comments);
 
-		Bundle parameters = new Bundle();
-		parameters.putInt("entityId", mEntityProxy.id);
+		new AsyncTask() {
 
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetCommentsForEntity");
-		serviceRequest.setRequestType(RequestType.Method);
-		serviceRequest.setParameters(parameters);
-		serviceRequest.setResponseFormat(ResponseFormat.Json);
-
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-		if (serviceResponse.responseCode != ResponseCode.Success) {
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-			overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
-		}
-		else {
-			String jsonResponse = (String) serviceResponse.data;
-			mListComments = ProxibaseService.convertJsonToObjects(jsonResponse, Comment.class, GsonType.ProxibaseService);
-			GoogleAnalyticsTracker.getInstance().dispatch();
-		}
-		mListViewComments.setAdapter(new ListAdapter(CommentList.this, 0, mListComments));
-	}
-
-	protected void drawEntity() {}
-
-	private void configure() {
-		mHandler = new Handler();
-		mContextButton = (Button) findViewById(R.id.btn_context);
-		if (mContextButton != null) {
-			mContextButton.setVisibility(View.INVISIBLE);
-			showBackButton(true, getString(R.string.form_button_back));
-		}
-	}
-
-	public void onCommentMoreButtonClick(View view) {
-
-		Comment comment = (Comment) view.getTag();
-		if (mActionsWindow == null) {
-			mActionsWindow = new ActionsWindow(this);
-		}
-		else {
-			long dismissInterval = System.currentTimeMillis() - mActionsWindow.getActionStripToggleTime();
-			if (dismissInterval <= 200) {
-				return;
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, "Loading...");
 			}
-		}
 
-		int[] coordinates = { 0, 0 };
+			@Override
+			protected Object doInBackground(Object... params) {
 
-		view.getLocationInWindow(coordinates);
-		final Rect rect = new Rect(coordinates[0], coordinates[1], coordinates[0] + view.getWidth(), coordinates[1] + view.getHeight());
-		View content = configureActionButtons(comment);
+				Bundle parameters = new Bundle();
+				parameters.putInt("entityId", mCommon.mEntity.id);
 
-		mActionsWindow.show(rect, content, view, 0, -13, -5);
+				ServiceRequest serviceRequest = new ServiceRequest();
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetCommentsForEntity");
+				serviceRequest.setRequestType(RequestType.Method);
+				serviceRequest.setParameters(parameters);
+				serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					String jsonResponse = (String) serviceResponse.data;
+					mListComments = ProxibaseService.convertJsonToObjects(jsonResponse, Comment.class, GsonType.ProxibaseService);
+					Tracker.dispatch();
+				}
+				return serviceResponse;
+			}
+
+			@Override
+			protected void onPostExecute(Object result) {
+				ServiceResponse serviceResponse = (ServiceResponse) result;
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					mListViewComments.setAdapter(new ListAdapter(CommentList.this, 0, mListComments));
+				}
+				else {
+					setResult(Activity.RESULT_CANCELED);
+					finish();
+					overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
+				}
+				mCommon.showProgressDialog(false, null);
+			}
+		}.execute();
 	}
 
-	private View configureActionButtons(Comment comment) {
+	// --------------------------------------------------------------------------------------------
+	// Event routines
+	// --------------------------------------------------------------------------------------------
 
-		ViewGroup viewGroup = null;
-
-		viewGroup = new LinearLayout(this);
-
-		/* Like */
-
-		Button commandButton = (Button) getLayoutInflater().inflate(R.layout.temp_actionstrip_button, null);
-		commandButton.setText("Like");
-		Drawable icon = getResources().getDrawable(R.drawable.icon_new2_dark);
-		icon.setBounds(0, 0, 30, 30);
-		commandButton.setCompoundDrawables(null, icon, null, null);
-
-		Command command = new Command();
-		command.verb = "like";
-		command.name = "aircandi.like";
-		command.type = "action";
-		command.handler = "dialog.new";
-		commandButton.setTag(command);
-		viewGroup.addView(commandButton);
-
-		/* Reply */
-
-		Button commandButtonCandi = (Button) getLayoutInflater().inflate(R.layout.temp_actionstrip_button, null);
-		commandButtonCandi.setText("Reply");
-		icon = getResources().getDrawable(R.drawable.logo5_dark);
-		icon.setBounds(0, 0, 30, 30);
-		commandButtonCandi.setCompoundDrawables(null, icon, null, null);
-
-		Command commandCandi = new Command();
-		commandCandi.verb = "new";
-		commandCandi.name = "aircandi.candi.new";
-		commandCandi.type = "action";
-		commandCandi.handler = "CommentForm";
-		commandButtonCandi.setTag(commandCandi);
-
-		viewGroup.addView(commandButtonCandi);
-
-		return viewGroup;
+	public void onActionsClick(View view) {
+		if (mCommon.mEntity == null || !mCommon.mEntity.locked) {
+			mCommon.doActionsClick(view, mCommon.mEntity != null, ActionButtonSet.CommentList);
+		}
 	}
 
 	public void onCommandButtonClick(View view) {
-
-		if (mActionsWindow != null) {
-			mActionsWindow.dismiss();
+		if (mCommon.mActionsWindow != null) {
+			mCommon.mActionsWindow.dismiss();
 		}
-
-//		final Command command = (Command) view.getTag();
-//		final String commandHandler = "com.proxibase.aircandi." + command.handler;
-//		String commandName = command.name.toLowerCase();
-
-		ImageUtils.showToastNotification("Unimplemented...", Toast.LENGTH_SHORT);
-
-//		try {
-//
-//			String message = getString(R.string.signin_message_new_candi) + " " + command.label;
-//			mUserSignedInRunnable = new Runnable() {
-//
-//				@Override
-//				public void run() {
-//					try {
-//						Class clazz = Class.forName(commandHandler, false, this.getClass().getClassLoader());
-//
-//						if (command.verb.equals("new")) {
-//							Intent intent = buildIntent(null, command.entity.id, command, command.entity.beacon, mUser, clazz);
-//							startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-//						}
-//						else {
-//							Intent intent = buildIntent(null, 0, command, null, mUser, clazz);
-//							startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-//						}
-//
-//					}
-//					catch (ClassNotFoundException exception) {
-//						exception.printStackTrace();
-//					}
-//					finally {
-//						mUserSignedInRunnable = null;
-//					}
-//				}
-//			};
-//
-//			if (!command.verb.equals("view")) {
-//				if (mUser != null && mUser.anonymous) {
-//					Intent intent = buildIntent(null, 0, new Command("edit"), null, null, SignInForm.class);
-//					intent.putExtra(getString(R.string.EXTRA_MESSAGE), message);
-//					startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-//				}
-//				else {
-//					mHandler.post(mUserSignedInRunnable);
-//				}
-//			}
-//			else {
-//				mHandler.post(mUserSignedInRunnable);
-//			}
-//		}
-//		catch (IllegalArgumentException e) {
-//			e.printStackTrace();
-//		}
-//		catch (IllegalStateException e) {
-//			e.printStackTrace();
-//		}
-//		catch (SecurityException exception) {
-//			exception.printStackTrace();
-//		}
+		Command command = (Command) view.getTag();
+		mCommon.doCommand(command);
 	}
+
+	public void onRefreshClick(View view) {
+		bind();
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		mLastResultCode = resultCode;
+		if (resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
+			bind();
+		}
+	}
+
+	public void onBackPressed() {
+		setResult(mLastResultCode);
+		super.onBackPressed();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Inner classes/enums
+	// --------------------------------------------------------------------------------------------
 
 	public class ListAdapter extends ArrayAdapter<Object> {
 
@@ -263,7 +183,6 @@ public class CommentList extends CandiActivity {
 				holder.itemAuthorLocationSeparator = (View) view.findViewById(R.id.item_author_location_separator);
 				holder.itemComment = (TextView) view.findViewById(R.id.item_comment);
 				holder.itemCreatedDate = (TextView) view.findViewById(R.id.item_created_date);
-				holder.itemButtonAction = (View) view.findViewById(R.id.item_button_action);
 				view.setTag(holder);
 			}
 			else {
@@ -307,7 +226,7 @@ public class CommentList extends CandiActivity {
 
 				if (holder.itemAuthorImage != null) {
 					if (comment.author.imageUri != null && comment.author.imageUri.length() != 0) {
-						ImageRequest imageRequest = new ImageRequest(comment.author.imageUri, ImageShape.Square, "binary", false,
+						ImageRequest imageRequest = new ImageRequest(comment.author.imageUri, null, ImageShape.Square, false, false,
 								CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, null);
 						holder.itemAuthorImage.setImageRequest(imageRequest, null);
 					}

@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/activity_header" >
 
-        <include layout="@layout/temp_aircandi_tabs" />
+        <include layout="@layout/temp_tabs_aircandi" />
     </LinearLayout>
 
     <FrameLayout

@@ -1,6 +1,11 @@
 package com.proxibase.aircandi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.View;
@@ -8,229 +13,302 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.SlidingDrawer;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-import com.proxibase.aircandi.CandiSearchActivity.CandiTask;
+import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
-import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.ProxiExplorer;
+import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.AircandiCommon.ActionButtonSet;
+import com.proxibase.aircandi.components.AircandiCommon.IntentBuilder;
+import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.ImageManager.ImageRequest;
 import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.sdk.android.proxi.consumer.Command;
-import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 
-public class CandiForm extends AircandiActivity {
+public class CandiForm extends CandiActivity {
 
-	private Runnable	mUserSignedInRunnable;
+	private SlidingDrawer	mSlidingDrawer;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		bind();
-		GoogleAnalyticsTracker.getInstance().trackPageView("/CandiForm");
+		bind(false);
+		Tracker.trackPageView("/CandiForm");
 	}
 
-	protected void bind() {
-		showProgressDialog(true, "Loading...");
+	@Override
+	protected void bind(boolean refresh) {
+		super.bind(refresh);
+
+		mSlidingDrawer = (SlidingDrawer) findViewById(R.id.slide_actions_info);
+
+		mCommon.showProgressDialog(true, "Loading...");
 		ViewGroup candiInfoView = (ViewGroup) findViewById(R.id.candi_form);
-		buildCandiInfo(mEntityProxy, candiInfoView);
-		showProgressDialog(false, null);
+		buildCandiInfo(mCommon.mEntity, candiInfoView, refresh);
+		mCommon.showProgressDialog(false, null);
+
+		if (Aircandi.getInstance().getToolstripOpen()) {
+			if (mSlidingDrawer != null) {
+				mSlidingDrawer.open();
+			}
+		}
+		else if (Aircandi.getInstance().getFirstTimeCandiForm()) {
+			Aircandi.getInstance().setFirstTimeCandiForm(false);
+			Aircandi.applicationHandler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					if (mSlidingDrawer != null) {
+						mSlidingDrawer.animateOpen();
+					}
+				}
+			}, 500);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	public void onCommandButtonClick(View view) {
-
-		try {
-			final Command command = (Command) view.getTag();
-			final String commandHandler = "com.proxibase.aircandi." + command.handler;
-			GoogleAnalyticsTracker.getInstance().trackEvent("Clicks", "Command", command.label, 0);
-			String message = getString(R.string.signin_message_new_candi) + " " + command.label;
-			mUserSignedInRunnable = new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						Class clazz = Class.forName(commandHandler, false, this.getClass().getClassLoader());
-						Logger.i(mContext, "Starting activity: " + clazz.toString());
-						EntityProxy entityProxy = command.entity;
-
-						if (command.verb.equals("new")) {
-							Intent intent = Aircandi.buildIntent(mContext, command.entity, command.entity.id, command.includeChildren, null,
-										command, CandiTask.None, command.entity.beacon, mUser, clazz);
-							startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-						}
-						else {
-							Intent intent = Aircandi.buildIntent(mContext, entityProxy, 0, command.includeChildren, null, command,
-										CandiTask.None, null, mUser, clazz);
-							startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-						}
-					}
-					catch (ClassNotFoundException exception) {
-						exception.printStackTrace();
-					}
-					finally {
-						mUserSignedInRunnable = null;
-					}
-				}
-			};
-
-			if (!command.verb.equals("view")) {
-				if (mUser != null && mUser.anonymous) {
-					Intent intent = Aircandi.buildIntent(mContext, null, 0, false, null, new Command("edit"), CandiTask.None, null, null,
-								SignInForm.class);
-					intent.putExtra(getString(R.string.EXTRA_MESSAGE), message);
-					startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-				}
-				else {
-					mHandler.post(mUserSignedInRunnable);
-				}
-			}
-			else {
-				mHandler.post(mUserSignedInRunnable);
-			}
-		}
-		catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		}
-		catch (IllegalStateException e) {
-			e.printStackTrace();
-		}
-		catch (SecurityException exception) {
-			exception.printStackTrace();
-		}
-	}
-
 	public void onCandiInfoClick(View v) {
-		Intent intent = Aircandi.buildIntent(mContext, mEntityProxy, 0, false, null, new Command("view"), mCandiTask, null, mUser,
-				CandiList.class);
+		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
+		intentBuilder.setCommand(new Command(CommandVerb.View));
+		intentBuilder.setEntity(mCommon.mEntity);
+		Intent intent = intentBuilder.create();
+
 		startActivity(intent);
 	}
 
 	public void onCommentsClick(View view) {
-		EntityProxy entity = (EntityProxy) view.getTag();
+		Entity entity = (Entity) view.getTag();
 		if (entity.commentCount > 0) {
-			Intent intent = Aircandi.buildIntent(this, entity, 0, false, null, new Command("view"), mCandiTask, null, mUser, CommentList.class);
-			startActivity(intent);
+			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
+			intentBuilder.setCommand(new Command(CommandVerb.View));
+			intentBuilder.setEntity(entity);
+			Intent intent = intentBuilder.create();
+			startActivityForResult(intent, 0);
 		}
 	}
 
-	public void onBackPressed() {
-		super.onBackPressed();
-		//overridePendingTransition(R.anim.fade_in_short, R.anim.fade_out_short);
+	public void onImageClick(View view) {
+
+		Intent intent = null;
+		if (mCommon.mEntity.imageUri != null && !mCommon.mEntity.imageUri.equals("")) {
+			IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
+			intentBuilder.setCommand(new Command(CommandVerb.View));
+			intentBuilder.setEntity(mCommon.mEntity);
+			intent = intentBuilder.create();
+		}
+		else {
+			intent = new Intent(android.content.Intent.ACTION_VIEW);
+			intent.setData(Uri.parse(mCommon.mEntity.linkUri));
+		}
+		startActivity(intent);
+
+	}
+
+	public void onActionsClick(View view) {
+		if (!mCommon.mEntity.locked) {
+			mCommon.doActionsClick(view, true, ActionButtonSet.CandiForm);
+		}
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+		mLastResultCode = resultCode;
+		if (resultCode == CandiConstants.RESULT_ENTITY_UPDATED
+				|| resultCode == CandiConstants.RESULT_ENTITY_INSERTED
+				|| resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
+			refreshEntity();
+		}
+		else if (resultCode == CandiConstants.RESULT_ENTITY_DELETED) {
+			setResult(CandiConstants.RESULT_ENTITY_DELETED);
+			finish();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
 
+	protected void refreshEntity() {
+
+		new AsyncTask() {
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntity.id, false);
+				return serviceResponse;
+			}
+
+			@Override
+			protected void onPostExecute(Object result) {
+				ServiceResponse serviceResponse = (ServiceResponse) result;
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					mCommon.mEntity = (Entity) serviceResponse.data;
+					bind(true);
+				}
+			}
+		}.execute();
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	public ViewGroup buildCandiInfo(final EntityProxy entity, final ViewGroup candiInfoView) {
+	public ViewGroup buildCandiInfo(final Entity entity, final ViewGroup candiInfoView, boolean refresh) {
 
 		/* Build menus */
-		TableLayout table = configureMenus(entity);
+		TableLayout table = null;
+		List<Command> commands = new ArrayList<Command>();
+		if (!entity.locked) {
+			commands.add(new Command(CommandVerb.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
+		}
+		if (entity.createdById.equals(Integer.parseInt(Aircandi.getInstance().getUser().id))) {
+			commands.add(new Command(CommandVerb.Edit, "Edit", "EntityForm", entity.entityType, entity.id, null, null));
+		}
+		if (commands.size() > 0) {
+			table = configureMenus(commands);
+		}
+
+		ViewGroup frameButtons = (ViewGroup) candiInfoView.findViewById(R.id.frame_buttons);
 		if (table != null) {
-			RelativeLayout slideContent = (RelativeLayout) candiInfoView.findViewById(R.id.candi_info_slider_content);
-			slideContent.removeAllViews();
-			slideContent.addView(table);
-			((View) candiInfoView.findViewById(R.id.slide_actions_info)).setVisibility(View.VISIBLE);
+			frameButtons.removeAllViews();
+			frameButtons.addView(table);
 		}
 		else {
-			((View) candiInfoView.findViewById(R.id.slide_actions_info)).setVisibility(View.GONE);
+			frameButtons.setVisibility(View.GONE);
 		}
 
-		/* Update any UI indicators related to child candies */
-		if (entity.children != null && entity.hasVisibleChildren()) {
-			((ImageView) candiInfoView.findViewById(R.id.image_forward)).setVisibility(View.VISIBLE);
-		}
-		else {
-			((ImageView) candiInfoView.findViewById(R.id.image_forward)).setVisibility(View.GONE);
-		}
+		/*
+		 * if (table != null) {
+		 * RelativeLayout slideContent = (RelativeLayout) candiInfoView.findViewById(R.id.candi_info_slider_content);
+		 * slideContent.removeAllViews();
+		 * slideContent.addView(table);
+		 * ((View) candiInfoView.findViewById(R.id.slide_actions_info)).setVisibility(View.VISIBLE);
+		 * }
+		 * else {
+		 * ((View) candiInfoView.findViewById(R.id.slide_actions_info)).setVisibility(View.GONE);
+		 * }
+		 */
 
-		final WebImageView image = (WebImageView) candiInfoView.findViewById(R.id.image_public);
-		final ImageView imageReflection = (ImageView) candiInfoView.findViewById(R.id.image_public_reflection);
+		final WebImageView imageAuthor = (WebImageView) candiInfoView.findViewById(R.id.image_author);
+		final ImageView imageAuthorReflection = (ImageView) candiInfoView.findViewById(R.id.image_author_reflection);
 		final TextView title = (TextView) candiInfoView.findViewById(R.id.candi_info_title);
 		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_info_subtitle);
+		final WebImageView image = (WebImageView) candiInfoView.findViewById(R.id.candi_info_image);
+		final ViewGroup imageHolder = (ViewGroup) candiInfoView.findViewById(R.id.candi_info_image_holder);
 		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_info_description);
 		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
 		final Button comments = (Button) candiInfoView.findViewById(R.id.button_comments);
 		final ImageView navigate = (ImageView) candiInfoView.findViewById(R.id.image_forward);
 
+		/* Author image */
+		if (!refresh) {
+			if (entity.author != null) {
+				if (entity.author.imageUri != null && !entity.author.imageUri.equals("")) {
+					ImageRequest imageRequest = new ImageRequest(entity.author.imageUri, null, ImageShape.Square, false, false,
+							CandiConstants.IMAGE_WIDTH_SEARCH_MAX, true, true, true, 1, this, null);
+					imageAuthor.setImageRequest(imageRequest, imageAuthorReflection);
+				}
+			}
+		}
+
 		/* Candi image */
-		if (entity.imageUri != null && entity.imageUri.length() != 0) {
-			ImageRequest imageRequest = new ImageRequest(entity.imageUri, ImageShape.Square, entity.imageFormat,
-					entity.javascriptEnabled,
+		if (entity.imageUri != null || entity.linkUri != null) {
+			ImageRequest imageRequest = new ImageRequest(entity, ImageShape.Square,
 					CandiConstants.IMAGE_WIDTH_SEARCH_MAX, true, true, true, 1, this, null);
-			image.setImageRequest(imageRequest, imageReflection);
+			image.setImageRequest(imageRequest, null);
+		}
+		else {
+			imageHolder.setVisibility(View.GONE);
 		}
 
 		/* Author block */
-		if (entity.author != null) {
-			authorBlock.bindToAuthor(entity.author, DateUtils.wcfToDate(entity.createdDate));
-		}
-		else {
-			authorBlock.setVisibility(View.GONE);
+		if (!refresh) {
+			if (entity.author != null) {
+				authorBlock.bindToAuthor(entity.author, DateUtils.wcfToDate(entity.createdDate));
+			}
+			else {
+				authorBlock.setVisibility(View.GONE);
+			}
 		}
 
-		/* Navigate indicator */
-		if (entity.childCount == 0) {
-			((ViewGroup) candiInfoView.findViewById(R.id.group_candi_content)).setClickable(false);
-			navigate.setVisibility(View.GONE);
-		}
-		else {
+		/* Update any UI indicators related to child candies */
+		if ((entity.children != null && entity.hasVisibleChildren()) || entity.childCount > 0) {
 			((ViewGroup) candiInfoView.findViewById(R.id.group_candi_content)).setClickable(true);
 			navigate.setVisibility(View.VISIBLE);
+			navigate.setClickable(true);
+		}
+		else {
+			((ViewGroup) candiInfoView.findViewById(R.id.group_candi_content)).setClickable(false);
+			navigate.setVisibility(View.GONE);
+			navigate.setClickable(false);
 		}
 
 		/* Comments */
-		comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? "\nComment" : "\nComments"));
-		comments.setTag(entity);
+		if (entity.commentCount > 0) {
+			comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
+			comments.setTag(entity);
+		}
+		else {
+			comments.setVisibility(View.GONE);
+		}
 
 		/* Candi text */
 		title.setText(null);
 		subtitle.setText(null);
 		description.setText(null);
 
-		if (entity.title != null) {
+		if (entity.title != null && !entity.title.equals("")) {
 			title.setText(Html.fromHtml(entity.title));
 		}
-		if (entity.subtitle != null) {
+		else {
+			title.setVisibility(View.GONE);
+		}
+		if (entity.subtitle != null && !entity.subtitle.equals("")) {
 			subtitle.setText(Html.fromHtml(entity.subtitle));
 		}
-		if (entity.description != null) {
+		else {
+			subtitle.setVisibility(View.GONE);
+		}
+		if (entity.description != null && !entity.description.equals("")) {
 			description.setText(Html.fromHtml(entity.description));
+		}
+		else {
+			description.setVisibility(View.GONE);
 		}
 
 		return candiInfoView;
 	}
 
-	public TableLayout configureMenus(EntityProxy entity) {
+	public TableLayout configureMenus(List<Command> commands) {
 
 		Boolean needMoreButton = false;
 
-		if (entity.commands == null || entity.commands.size() == 0) {
+		if (commands == null || commands.size() == 0) {
 			return null;
 		}
-		if (entity.commands.size() > 6) {
+		if (commands.size() > 6) {
 			needMoreButton = true;
 		}
 
 		/* Get the table we use for grouping and clear it */
-		final TableLayout table = new TableLayout(mContext);
+		final TableLayout table = new TableLayout(this);
 
 		/* Make the first row */
-		TableRow tableRow = (TableRow) mInflater.inflate(R.layout.temp_tablerow_commands, null);
+		TableRow tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_commands, null);
 		final TableRow.LayoutParams rowLp = new TableRow.LayoutParams();
 		rowLp.setMargins(0, 0, 0, 0);
 		TableLayout.LayoutParams tableLp;
@@ -238,20 +316,13 @@ public class CandiForm extends AircandiActivity {
 		/* Loop the streams */
 		Integer commandCount = 0;
 		RelativeLayout commandButtonContainer;
-		for (Command command : entity.commands) {
+		for (Command command : commands) {
 			/*
 			 * TODO: This is a temporary hack. The service shouldn't pass commands
 			 * that this user doesn't have sufficient permissions for.
 			 */
-			if (command.name.toLowerCase().contains("edit")) {
-				if (entity.createdById != null && !entity.createdById.toString().equals(mUser.id)) {
-					continue;
-				}
-			}
-
 			/* Make a button and configure it */
-			command.entity = entity;
-			commandButtonContainer = (RelativeLayout) mInflater.inflate(R.layout.temp_button_command, null);
+			commandButtonContainer = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_button_command, null);
 
 			final TextView commandButton = (TextView) commandButtonContainer.findViewById(R.id.CommandButton);
 			commandButtonContainer.setTag(command);
@@ -260,7 +331,7 @@ public class CandiForm extends AircandiActivity {
 				commandButton.setTag(command);
 			}
 			else {
-				commandButton.setText(command.labelCustom != null ? command.labelCustom : command.label);
+				commandButton.setText(command.label);
 				commandButton.setTag(command);
 			}
 
@@ -275,7 +346,7 @@ public class CandiForm extends AircandiActivity {
 				tableLp = new TableLayout.LayoutParams();
 				tableLp.setMargins(0, 0, 0, 0);
 				table.addView(tableRow, tableLp);
-				tableRow = (TableRow) mInflater.inflate(R.layout.temp_tablerow_commands, null);
+				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_commands, null);
 			}
 			else if (commandCount == 6) {
 				break;
@@ -292,16 +363,31 @@ public class CandiForm extends AircandiActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected int getLayoutId() {
-		return R.layout.candi_form;
+	protected void onPause() {
+		super.onPause();
+		//Aircandi.getInstance().setToolstripOpen(mSlidingDrawer.isOpened());
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Misc routines
+	// --------------------------------------------------------------------------------------------
 	@Override
-	protected void onResume() {
-		super.onResume();
+	protected int getLayoutId() {
+		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
+			return R.layout.candi_form;
+		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
+			return R.layout.candi_form;
+		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
+			return R.layout.candi_form;
+		}
+		else {
+			return 0;
+		}
 	}
 }

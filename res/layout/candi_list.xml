@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/activity_header" >
 
-        <include layout="@layout/temp_form_tabs" />
+        <include layout="@layout/temp_tabs_aircandi" />
     </LinearLayout>
 
     <!-- Body -->

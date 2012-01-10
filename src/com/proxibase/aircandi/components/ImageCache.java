@@ -306,7 +306,7 @@ public class ImageCache implements Map<String, Bitmap> {
 		if (imageFile.exists()) {
 			imageFile.delete();
 		}
-		
+
 		return null;
 	}
 
@@ -334,9 +334,14 @@ public class ImageCache implements Map<String, Bitmap> {
 		return mCache.values();
 	}
 
-	private File getImageFile(String imageUrl) {
-		String fileName = Integer.toHexString(imageUrl.hashCode()) + "." + mCompressedImageFormat.name();
+	private File getImageFile(String imageUri) {
+		String fileName = Integer.toHexString(imageUri.hashCode()) + "." + mCompressedImageFormat.name();
 		return new File(mSecondLevelCacheDir + "/" + fileName);
+	}
+
+	public String getImageFileUri(String imageUri) {
+		String fileName = Integer.toHexString(imageUri.hashCode()) + "." + mCompressedImageFormat.name();
+		return mSecondLevelCacheDir + "/" + fileName;
 	}
 
 	public void setFileCacheOnly(boolean fileCacheOnly) {

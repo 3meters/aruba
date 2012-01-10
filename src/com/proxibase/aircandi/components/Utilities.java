@@ -5,16 +5,8 @@ import java.security.NoSuchAlgorithmException;
 
 import android.graphics.Bitmap;
 import android.os.CountDownTimer;
-import android.util.Log;
-
-import com.proxibase.aircandi.core.CandiConstants;
 
 public class Utilities {
-
-	public static void Log(String tag, String task, String message) {
-		if (CandiConstants.MODE_DEBUG)
-			Log.d(tag, task + ": " + message);
-	}
 
 	public static class SimpleCountDownTimer extends CountDownTimer {
 

@@ -78,7 +78,7 @@ import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.consumer.EntityProxy;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 
 public class CandiPatchPresenter implements Observer {
 
@@ -343,7 +343,7 @@ public class CandiPatchPresenter implements Observer {
 	// Primary
 	// --------------------------------------------------------------------------------------------
 
-	public void updateCandiModelFromEntity(EntityProxy entity) {
+	public void updateCandiModelFromEntity(Entity entity) {
 
 		CandiModel candiModel = null;
 		if (mCandiPatchModel.hasCandiModelForEntity(entity.id)) {
@@ -351,12 +351,12 @@ public class CandiPatchPresenter implements Observer {
 			candiModel.getChildren().clear();
 			candiModel.setChanged();
 
-			for (EntityProxy childEntity : entity.children) {
+			for (Entity childEntity : entity.children) {
 
 				CandiModel childCandiModel = null;
 				if (mCandiPatchModel.hasCandiModelForEntity(childEntity.id)) {
 					childCandiModel = mCandiPatchModel.updateCandiModel(childEntity, mDisplayExtras);
-					childCandiModel.getViewStateCurrent().setVisible(!childCandiModel.getEntityProxy().isHidden);
+					childCandiModel.getViewStateCurrent().setVisible(!childCandiModel.getEntity().isHidden);
 					candiModel.getChildren().add(childCandiModel);
 					childCandiModel.setParent(candiModel);
 					childCandiModel.setChanged();
@@ -365,7 +365,7 @@ public class CandiPatchPresenter implements Observer {
 					childCandiModel = CandiModelFactory.newCandiModel(childEntity.id, childEntity, mCandiPatchModel);
 					childCandiModel.setDisplayExtra(mDisplayExtras);
 					mCandiPatchModel.addCandiModel(childCandiModel);
-					childCandiModel.getViewStateCurrent().setVisible(!childCandiModel.getEntityProxy().isHidden);
+					childCandiModel.getViewStateCurrent().setVisible(!childCandiModel.getEntity().isHidden);
 					candiModel.getChildren().add(childCandiModel);
 					childCandiModel.setParent(candiModel);
 					childCandiModel.setChanged();
@@ -374,12 +374,12 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	public void deleteCandiModelByEntity(EntityProxy deletedEntity) {
+	public void deleteCandiModelByEntity(Entity deletedEntity) {
 		/*
 		 * Used to synchronize candi models with entities
 		 */
 		for (CandiModel candiModel : mCandiPatchModel.getCandiModels()) {
-			if (candiModel.getEntityProxy().id.equals(deletedEntity.id)) {
+			if (candiModel.getEntity().id.equals(deletedEntity.id)) {
 				if (candiModel.getParent() != null) {
 					CandiModel parentCandiModel = (CandiModel) candiModel.getParent();
 					parentCandiModel.getChildren().remove(candiModel);
@@ -401,7 +401,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	public void updateCandiData(List<EntityProxy> proxiEntities, boolean fullUpdate, boolean delayObserverUpdate) {
+	public void updateCandiData(List<Entity> proxiEntities, boolean fullUpdate, boolean delayObserverUpdate) {
 		/*
 		 * Primary entry point from the host activity. This is a primary trigger
 		 * that should update the model and ripple to the views.
@@ -439,14 +439,14 @@ public class CandiPatchPresenter implements Observer {
 			for (int i = mCandiPatchModel.getCandiModels().size() - 1; i >= 0; i--) {
 				CandiModel candiModel = mCandiPatchModel.getCandiModels().get(i);
 				boolean orphaned = true;
-				for (EntityProxy entity : proxiEntities) {
-					if (entity.id.equals(candiModel.getEntityProxy().id)) {
+				for (Entity entity : proxiEntities) {
+					if (entity.id.equals(candiModel.getEntity().id)) {
 						orphaned = false;
 						break;
 					}
 					else {
-						for (EntityProxy childEntity : entity.children) {
-							if (childEntity.id.equals(candiModel.getEntityProxy().id)) {
+						for (Entity childEntity : entity.children) {
+							if (childEntity.id.equals(candiModel.getEntity().id)) {
 								orphaned = false;
 								break;
 							}
@@ -470,7 +470,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Make sure each entity has a candi model */
-		for (EntityProxy entity : proxiEntities) {
+		for (Entity entity : proxiEntities) {
 
 			CandiModel candiModel = null;
 			if (mCandiPatchModel.hasCandiModelForEntity(entity.id)) {
@@ -486,7 +486,7 @@ public class CandiPatchPresenter implements Observer {
 				candiRootNext.getChildren().add(candiModel);
 			}
 
-			for (EntityProxy childEntity : entity.children) {
+			for (Entity childEntity : entity.children) {
 
 				CandiModel childCandiModel = null;
 				if (mCandiPatchModel.hasCandiModelForEntity(childEntity.id)) {
@@ -630,7 +630,7 @@ public class CandiPatchPresenter implements Observer {
 	private IView ensureCandiView(final CandiModel candiModel) {
 
 		/* We use the observer count as an indication of whether this candi model already has a candi view. */
-		if (!mCandiViewsHash.containsKey(candiModel.getModelIdAsString()) && !candiModel.getEntityProxy().isHidden) {
+		if (!mCandiViewsHash.containsKey(candiModel.getModelIdAsString()) && !candiModel.getEntity().isHidden) {
 
 			if (candiModel.countObservers() > 0) {
 				throw new IllegalStateException("CandiModel has an observer but CandiViewHash is empty");
@@ -978,7 +978,7 @@ public class CandiPatchPresenter implements Observer {
 		renderingActivate();
 
 		final CandiModel candiModel = (CandiModel) candiView.getModel();
-		Logger.d(this, "SingleTap triggered: " + candiModel.getEntityProxy().label);
+		Logger.d(this, "SingleTap triggered: " + candiModel.getEntity().label);
 
 		mCandiPatchModel.setCandiModelFocused(candiModel);
 		float distanceToMove = Math.abs(mCameraTargetSprite.getX() - candiModel.getZoneStateCurrent().getZone().getViewStateCurrent().getX());
@@ -1027,7 +1027,7 @@ public class CandiPatchPresenter implements Observer {
 
 	private void doCandiViewDoubleTap(IView candiView) {
 		final CandiModel candiModel = (CandiModel) candiView.getModel();
-		Logger.d(this, "DoubleTap triggered: " + candiModel.getEntityProxy().label);
+		Logger.d(this, "DoubleTap triggered: " + candiModel.getEntity().label);
 
 		float fromScale = mCameraTargetSprite.getScaleX();
 		float toScale = 1;

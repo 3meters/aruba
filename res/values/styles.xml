@@ -24,7 +24,7 @@
     </style>
 
     <style name="app_text_appearance_title1" parent="@android:style/TextAppearance">
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -37,6 +37,10 @@
         <item name="android:minWidth">80dp</item>
         <item name="android:maxWidth">200dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <style name="app_image">
+        <item name="android:background">@drawable/app_image_selector</item>
     </style>
 
     <style name="app_checkbox" parent="android:Widget.CompoundButton.CheckBox">
@@ -52,8 +56,7 @@
         <item name="android:textColor">@color/accent</item>
     </style>
 
-    <style name="app_user_picture">
-        <item name="android:background">#0000</item>
+    <style name="app_user_picture" parent="app_image">
         <item name="android:padding">0dp</item>
         <item name="android:scaleType">centerInside</item>
         <item name="android:adjustViewBounds">true</item>
@@ -138,10 +141,11 @@
     <style name="actionstrip_button" parent="android:Widget.Button">
         <item name="android:textColor">?attr/textColorButton</item>
         <item name="android:background">@drawable/button_nooutline_selector</item>
-        <item name="android:minWidth">50dp</item>
+        <item name="android:minWidth">60dp</item>
         <item name="android:padding">5dp</item>
-        <item name="android:height">50dp</item>
-    </style>
+        <item name="android:drawablePadding">3dp</item>
+        <item name="android:gravity">bottom|center_horizontal</item>
+        </style>
 
     <style name="actionstrip_above_animation">
         <item name="android:windowEnterAnimation">@anim/quickcontact_above_enter</item>
@@ -151,6 +155,13 @@
     <style name="actionstrip_below_animation">
         <item name="android:windowEnterAnimation">@anim/quickcontact_below_enter</item>
         <item name="android:windowExitAnimation">@anim/quickcontact_below_exit</item>
+    </style>
+    
+    <!-- Comments -->
+        
+    <style name="comments_button" parent="android:Widget.Button">
+        <item name="android:textColor">#ffffaa00</item>
+        <item name="android:background">@drawable/button_nooutline_selector</item>
     </style>
 
     <!-- Candi Info -->
@@ -162,14 +173,6 @@
         <item name="android:height">70dp</item>
         <item name="android:width">78dp</item>
         <item name="android:padding">5dp</item>
-    </style>
-
-    <style name="comments_button" parent="android:Widget.Button">
-        <item name="android:height">72dp</item>
-        <item name="android:minWidth">80dp</item>
-        <item name="android:padding">0dp</item>
-        <item name="android:textColor">#ffffaa00</item>
-        <item name="android:background">@drawable/button_nooutline_selector</item>
     </style>
 
     <style name="candi_info_title">
