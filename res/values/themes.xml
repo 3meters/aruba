@@ -24,6 +24,10 @@
         <item name="iconRefresh">@drawable/icon_refresh_dark</item>
         <item name="iconNew">@drawable/icon_new_dark</item>
         <item name="iconBack">@drawable/icon_back_dark</item>
+        <item name="iconPost">@drawable/post_dark</item>
+        <item name="iconPicture">@drawable/picture_dark</item>
+        <item name="iconLink">@drawable/link_dark</item>
+        <item name="iconProfile">@drawable/placeholder_user_dark</item>
         <item name="pagerNotch">@drawable/indicator_current_dark</item>
         <item name="pagerBorder">#33ffffff</item>
         <item name="backgroundCandiInfo">@android:color/transparent</item>
@@ -41,7 +45,7 @@
         <item name="actionStripDownArrow">@drawable/actionstrip_arrow_down_dark</item>
         <item name="activityFooterFormBackground">@drawable/app_header_bg_dark</item>
         <item name="ruleColor">@color/rule_30_dark</item>
-        <item name="logo">@drawable/logo_bitmap_dark</item>
+        <item name="logo">@drawable/icon_app</item>
         <item name="textColor">@color/text_dark</item>
         <item name="sectionHeaderFillStart">@color/fill_30_dark</item>
         <item name="sectionHeaderFillEnd">@color/transparent</item>
@@ -82,6 +86,10 @@
         <item name="iconRefresh">@drawable/icon_refresh_light</item>
         <item name="iconNew">@drawable/icon_new_light</item>
         <item name="iconBack">@drawable/icon_back_light</item>
+        <item name="iconPost">@drawable/post_light</item>
+        <item name="iconPicture">@drawable/picture_light</item>
+        <item name="iconLink">@drawable/link_light</item>
+        <item name="iconProfile">@drawable/placeholder_user_light</item>
         <item name="pagerNotch">@drawable/indicator_current_light</item>
         <item name="pagerBorder">@color/rule_30_light</item>
         <item name="backgroundCandiInfo">@android:color/transparent</item>
@@ -99,7 +107,7 @@
         <item name="actionStripDownArrow">@drawable/actionstrip_arrow_down_light</item>
         <item name="activityFooterFormBackground">@drawable/app_header_bg_light</item>
         <item name="ruleColor">@color/rule_30_light</item>
-        <item name="logo">@drawable/logo_bitmap_light</item>
+        <item name="logo">@drawable/icon_app</item>
         <item name="textColor">@color/text_light</item>
         <item name="sectionHeaderFillStart">@color/fill_30_light</item>
         <item name="sectionHeaderFillEnd">@color/transparent</item>
@@ -120,6 +128,7 @@
     </style>
 
     <style name="aircandi_theme_blueray" parent="aircandi_theme_midnight">
+        <item name="logo">@drawable/icon_app</item>
         <item name="android:windowBackground">@drawable/wallpaper_blueray</item>
         <item name="actionStripBackground">@drawable/actionstrip_background_blueray</item>
         <item name="backgroundForm">@color/transparent</item>
@@ -143,11 +152,15 @@
         <item name="iconRefresh">@drawable/icon_refresh_dark</item>
         <item name="iconNew">@drawable/icon_new_dark</item>
         <item name="iconBack">@drawable/icon_back_dark</item>
+        <item name="iconPost">@drawable/post_dark</item>
+        <item name="iconPicture">@drawable/picture_dark</item>
+        <item name="iconLink">@drawable/link_dark</item>
+        <item name="iconProfile">@drawable/placeholder_user_dark</item>
         <item name="backgroundCandiInfo">#99ffffff</item>
         <item name="actionStripBackground">@drawable/actionstrip_background_serene</item>
         <item name="actionStripUpArrow">@drawable/actionstrip_arrow_up_dark</item>
         <item name="actionStripDownArrow">@drawable/actionstrip_arrow_down_dark</item>
-        <item name="logo">@drawable/logo_bitmap_dark</item>
+        <item name="logo">@drawable/icon_app</item>
         <item name="imageSliderHandleSearch">@drawable/gripper_dark</item>
         <item name="backgroundSliderHandleSearch">@drawable/slider_handle_search_bg_dark</item>
         <item name="backgroundSliderContentSearch">@drawable/slider_content_search_bg_dark</item>

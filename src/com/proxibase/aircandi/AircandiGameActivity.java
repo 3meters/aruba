@@ -22,6 +22,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 		mCommon.setTheme();
 		super.onCreate(savedInstanceState);
 		mCommon.initialize();
+		mCommon.initializeDialogs();		
 	}
 
 	// --------------------------------------------------------------------------------------------

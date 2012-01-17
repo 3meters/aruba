@@ -13,12 +13,15 @@
         android:focusable="true"
         android:focusableInTouchMode="true" />
 
+    <!-- Header -->
+
     <RelativeLayout
         android:id="@+id/activity_header"
         style="@style/actionbar"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_alignParentTop="true"
+        android:paddingBottom="5dp"
         android:paddingRight="5dp"
         android:paddingTop="5dp" >
 
@@ -28,9 +31,8 @@
             android:layout_height="40dp"
             android:layout_centerVertical="true"
             android:adjustViewBounds="true"
-            android:padding="6dp"
             android:scaleType="fitCenter"
-            android:src="?attr/logo" />
+            android:src="?attr/iconPost" />
 
         <TextView
             android:id="@+id/text_header_title"
@@ -39,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@+id/btn_logo"
-            android:gravity="center_vertical"
+            android:gravity="center_vertical|left"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/form_title_comment" />
@@ -58,11 +60,10 @@
             android:layout_height="fill_parent"
             android:gravity="center_vertical|top"
             android:orientation="vertical"
-            android:paddingTop="10dp"
             android:paddingBottom="5dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            >
+            android:paddingTop="10dp" >
 
             <!-- Title and Content -->
 

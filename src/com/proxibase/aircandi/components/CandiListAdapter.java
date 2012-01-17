@@ -11,9 +11,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.R;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 import com.proxibase.aircandi.widgets.WebImageView;
@@ -110,7 +107,8 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 
 			if (holder.itemAuthor != null) {
 				if (entity.author != null) {
-					holder.itemAuthor.bindToAuthor(entity.author, DateUtils.wcfToDate(entity.createdDate));
+					Integer dateToUse = entity.updatedDate != null ? entity.updatedDate : entity.createdDate;
+					holder.itemAuthor.bindToAuthor(entity.author, dateToUse);
 					holder.itemAuthor.setVisibility(View.VISIBLE);
 				}
 				else {
@@ -119,8 +117,9 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 			}
 
 			if (holder.itemImage != null) {
-				ImageRequest imageRequest = new ImageRequest(entity, ImageShape.Square,
-							CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, null);
+				ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemImage);
+				builder.setFromEntity(entity);
+				ImageRequest imageRequest = builder.create();
 				holder.itemImage.setImageRequest(imageRequest, null);
 			}
 

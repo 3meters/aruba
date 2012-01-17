@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="wrap_content"
-	android:layout_width="wrap_content"
-	android:gravity="bottom"
-	android:clipChildren="false"
-	android:clickable="true"
-	android:onClick="onCommandButtonClick">
-	<Button
-		android:id="@+id/CommandButton"
-		style="@style/candi_info_button"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginRight="10dp"
-		android:onClick="onCommandButtonClick" />
-</RelativeLayout>
+<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/CommandButton"
+    style="@style/candi_info_button"
+    android:layout_width="65dp"
+    android:layout_height="65dp"
+    android:height="65dp"
+    android:onClick="onCommandButtonClick"
+    android:padding="3dp"
+    android:width="65dp" />

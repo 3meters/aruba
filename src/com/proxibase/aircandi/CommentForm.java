@@ -2,6 +2,7 @@ package com.proxibase.aircandi;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -13,10 +14,10 @@ import android.widget.Toast;
 import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.AircandiCommon.IntentBuilder;
 import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
@@ -27,7 +28,6 @@ import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
@@ -44,13 +44,15 @@ public class CommentForm extends FormActivity {
 
 		User user = Aircandi.getInstance().getUser();
 		if (user != null && user.anonymous) {
-			
+
 			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
 			intentBuilder.setCommand(new Command(CommandVerb.Edit));
 			intentBuilder.setMessage(getString(R.string.signin_message_new_candi));
 			Intent intent = intentBuilder.create();
-			
+
 			startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
+			overridePendingTransition(R.anim.form_in, R.anim.browse_out);		
+
 		}
 
 		initialize();
@@ -81,8 +83,7 @@ public class CommentForm extends FormActivity {
 
 	protected void draw() {
 		/* Author */
-		((AuthorBlock) findViewById(R.id.block_author)).bindToUser(Aircandi.getInstance().getUser(), mCommon.mComment.createdDate != null ? DateUtils
-					.wcfToDate(mCommon.mComment.createdDate) : null);
+		((AuthorBlock) findViewById(R.id.block_author)).bindToUser(Aircandi.getInstance().getUser(), null);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -92,11 +93,6 @@ public class CommentForm extends FormActivity {
 	public void onSaveButtonClick(View view) {
 		mCommon.startTitlebarProgress();
 		doSave();
-	}
-
-	public void onCancelButtonClick(View view) {
-		setResult(Activity.RESULT_CANCELED);
-		finish();
 	}
 
 	@Override
@@ -137,35 +133,42 @@ public class CommentForm extends FormActivity {
 	protected void insert() {
 
 		mCommon.mComment.description = mContent.getText().toString().trim();
-		mCommon.mComment.createdDate = DateUtils.nowString();
+		mCommon.mComment.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
 
 		Logger.i(this, "Insert comment for: " + String.valueOf(mCommon.mComment.entityId));
 
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mCommon.mComment.getCollection());
-		serviceRequest.setRequestType(RequestType.Insert);
-		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mCommon.mComment, GsonType.ProxibaseService));
-		serviceRequest.setResponseFormat(ResponseFormat.Json);
-		serviceRequest.setRequestListener(new RequestListener() {
+		new AsyncTask() {
 
 			@Override
-			public void onComplete(Object response) {
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, "Saving...");
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+
+				ServiceRequest serviceRequest = new ServiceRequest();
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mCommon.mComment.getCollection());
+				serviceRequest.setRequestType(RequestType.Insert);
+				serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mCommon.mComment, GsonType.ProxibaseService));
+				serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+				return serviceResponse;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				mCommon.stopTitlebarProgress();
-				if (serviceResponse.responseCode != ResponseCode.Success) {
-					ImageUtils.showToastNotification(getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
-				}
-				else {
+				mCommon.showProgressDialog(false, null);
+				if (serviceResponse.responseCode == ResponseCode.Success) {
 					ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
-
 					setResult(CandiConstants.RESULT_COMMENT_INSERTED);
 					finish();
 				}
 			}
-		});
-
-		NetworkManager.getInstance().requestAsync(serviceRequest);
+		}.execute();
 	}
 
 	private boolean isValid() {

@@ -80,7 +80,7 @@ public class Aircandi extends Application {
 	private User							mUser;
 	private Boolean							mToolstripOpen		= false;
 	private Boolean							mFirstTimeCandiForm	= true;
-	private CandiTask						mCandiTask = CandiTask.RadarCandi;
+	private CandiTask						mCandiTask			= CandiTask.RadarCandi;
 
 	public static Aircandi getInstance() {
 		return singletonObject;

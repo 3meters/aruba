@@ -5,10 +5,10 @@
 
     <com.proxibase.aircandi.widgets.WebImageView
         android:id="@+id/image_user_picture"
-        style="@style/app_user_picture"
         android:layout_width="40dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/text_user_fullname"

@@ -34,6 +34,6 @@ public class Command {
 	}
 
 	public enum CommandVerb {
-		None, View, Edit, New
+		None, View, Edit, New, Dialog
 	}
 }

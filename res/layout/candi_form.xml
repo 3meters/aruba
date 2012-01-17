@@ -51,7 +51,7 @@
                 android:background="@drawable/button_nooutline_selector"
                 android:onClick="onCandiInfoClick"
                 android:paddingBottom="15dp"
-                android:paddingTop="10dp" >
+                android:paddingTop="7dp" >
 
                 <RelativeLayout
                     android:id="@+id/group_controls"
@@ -62,25 +62,48 @@
 
                     <com.proxibase.aircandi.widgets.WebImageView
                         android:id="@+id/image_author"
-                        android:layout_width="60dp"
-                        android:layout_height="wrap_content"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
                         android:layout_gravity="top"
-                        android:adjustViewBounds="true"
-                        android:maxWidth="60dp"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/placeholder_user_dark"
-                        android:width="60dp" />
+                        android:layout_marginTop="3dp"
+                        aircandi:layout="@layout/temp_webimageview"
+                        android:scaleType="centerCrop" />
 
                     <ImageView
                         android:id="@+id/image_author_reflection"
-                        android:layout_width="60dp"
+                        android:layout_width="65dp"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/image_author"
                         android:layout_gravity="top"
+                        android:layout_marginTop="1dp"
                         android:adjustViewBounds="true"
-                        android:maxWidth="60dp"
+                        android:maxWidth="65dp"
                         android:scaleType="centerInside"
-                        android:width="60dp" />
+                        android:visibility="gone"
+                        android:width="65dp" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/frame_buttons_side"
+                    android:layout_width="65dp"
+                    android:layout_height="fill_parent"
+                    android:layout_alignBottom="@+id/candi_info_image"
+                    android:layout_below="@+id/group_controls"
+                    android:layout_marginTop="30dp"
+                    android:gravity="top"
+                    android:orientation="vertical" >
+
+                    <Button
+                        xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:id="@+id/button_comment"
+                        style="@style/candi_info_button"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:height="65dp"
+                        android:onClick="onCommandButtonClick"
+                        android:padding="3dp"
+                        android:text="@string/candi_button_comment"
+                        android:width="65dp" />
                 </RelativeLayout>
 
                 <LinearLayout
@@ -94,6 +117,36 @@
                     android:duplicateParentState="true"
                     android:orientation="vertical"
                     android:paddingLeft="12dp" >
+
+                    <FrameLayout
+                        android:id="@+id/candi_info_image_holder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginBottom="7dp" >
+
+                        <com.proxibase.aircandi.widgets.WebImageView
+                            android:id="@+id/candi_info_image"
+                            android:layout_width="250px"
+                            android:layout_height="250px"
+                            android:background="@drawable/app_image_selector"
+                            android:clickable="true"
+                            aircandi:layout="@layout/temp_webimageview"
+                            aircandi:minWidth="250px"
+                            android:onClick="onImageClick"
+                            android:scaleType="centerCrop" />
+
+                        <LinearLayout
+                            android:layout_width="250px"
+                            android:layout_height="250px"
+                            android:gravity="bottom|right" >
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/zoom_light" />
+                        </LinearLayout>
+                    </FrameLayout>
 
                     <TextView
                         android:id="@+id/candi_info_title"
@@ -111,36 +164,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="7dp"
                         android:layout_marginLeft="3dp" />
-
-                    <FrameLayout
-                        android:id="@+id/candi_info_image_holder"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="left"
-                        android:layout_marginBottom="7dp" >
-
-                        <com.proxibase.aircandi.widgets.WebImageView
-                            android:id="@+id/candi_info_image"
-                            style="@style/app_image"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:adjustViewBounds="true"
-                            android:clickable="true"
-                            android:onClick="onImageClick"
-                            android:scaleType="centerInside"
-                            android:width="250dp" />
-
-                        <LinearLayout
-                            android:layout_width="250px"
-                            android:layout_height="250px"
-                            android:gravity="bottom|right" >
-
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/zoom_light" />
-                        </LinearLayout>
-                    </FrameLayout>
 
                     <TextView
                         android:id="@+id/candi_info_description"
@@ -172,7 +195,7 @@
                         android:text="0 Comments" />
                 </LinearLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/frame_buttons"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
@@ -182,7 +205,51 @@
                     android:layout_toRightOf="@+id/group_controls"
                     android:gravity="bottom"
                     android:orientation="horizontal"
-                    android:paddingLeft="12dp" />
+                    android:paddingLeft="12dp" >
+
+                    <Button
+                        android:id="@+id/button_new"
+                        style="@style/candi_info_button"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginRight="10dp"
+                        android:height="65dp"
+                        android:onClick="onCommandButtonClick"
+                        android:padding="3dp"
+                        android:text="@string/candi_button_new"
+                        android:width="65dp" />
+
+                    <Button
+                        android:id="@+id/button_edit"
+                        style="@style/candi_info_button"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginRight="10dp"
+                        android:layout_toRightOf="@+id/button_new"
+                        android:height="65dp"
+                        android:onClick="onCommandButtonClick"
+                        android:padding="3dp"
+                        android:text="@string/candi_button_edit"
+                        android:width="65dp" />
+
+                    <ImageView
+                        android:id="@+id/button_list"
+                        style="@style/candi_info_button"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_alignParentBottom="true"
+                        android:layout_toRightOf="@+id/button_edit"
+                        android:height="65dp"
+                        android:minHeight="65dp"
+                        android:minWidth="65dp"
+                        android:src="?attr/imageForwardInfo"
+                        android:onClick="onCandiInfoClick"
+                        android:padding="3dp"
+                        android:scaleType="center"
+                        android:width="65dp" />
+                </RelativeLayout>
 
                 <ImageView
                     android:id="@+id/image_forward"
@@ -240,7 +307,7 @@
                 android:paddingLeft="90dp" >
             </RelativeLayout>
         </SlidingDrawer>
-    </FrameLayout>
+    </FrameLayout>
     -->
 
 </RelativeLayout>

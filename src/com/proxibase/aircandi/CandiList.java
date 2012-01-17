@@ -1,5 +1,7 @@
 package com.proxibase.aircandi;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.content.Intent;
@@ -10,10 +12,10 @@ import android.widget.ListView;
 
 import com.proxibase.aircandi.components.CandiListAdapter;
 import com.proxibase.aircandi.components.Command;
+import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.AircandiCommon.ActionButtonSet;
-import com.proxibase.aircandi.components.AircandiCommon.IntentBuilder;
 import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
@@ -41,13 +43,13 @@ public class CandiList extends CandiActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		bind(false);
-		Tracker.trackPageView("/YourCandiList");
+		bind();
+		Tracker.trackPageView("/MyCandiList");
 	}
 
 	@Override
-	protected void bind(boolean refresh) {
-		super.bind(refresh);
+	protected void bind() {
+		super.bind();
 
 		mListView = (ListView) findViewById(R.id.list_candi);
 
@@ -82,10 +84,7 @@ public class CandiList extends CandiActivity {
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
 
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-				if (serviceResponse.responseCode != ResponseCode.Success) {
-					return serviceResponse;
-				}
-				else {
+				if (serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) serviceResponse.data;
 					mListEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(jsonResponse,
 								Entity.class,
@@ -93,8 +92,8 @@ public class CandiList extends CandiActivity {
 					if (mMethodType == MethodType.CandiForParent) {
 						mListEntities = mListEntities.get(0).children;
 					}
-					return serviceResponse;
 				}
+				return serviceResponse;
 			}
 
 			@Override
@@ -102,11 +101,8 @@ public class CandiList extends CandiActivity {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					if (mListEntities != null && mListEntities.size() > 0) {
+						Collections.sort(mListEntities, new SortEntitiesByUpdatedTime());
 						mListView.setAdapter(new CandiListAdapter(CandiList.this, Aircandi.getInstance().getUser(), mListEntities));
-					}
-					else {
-						setResult(mLastResultCode);
-						finish();
 					}
 				}
 				mCommon.showProgressDialog(false, null);
@@ -144,19 +140,30 @@ public class CandiList extends CandiActivity {
 			intentBuilder.setCommand(new Command(CommandVerb.View));
 			intentBuilder.setEntity(entity);
 			Intent intent = intentBuilder.create();
-
 			startActivityForResult(intent, 0);
 		}
 	}
 
+	public void onRefreshClick(View view) {
+		bind();
+	}
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		mLastResultCode = resultCode;
 		if (resultCode == CandiConstants.RESULT_ENTITY_UPDATED
 				|| resultCode == CandiConstants.RESULT_ENTITY_DELETED
 				|| resultCode == CandiConstants.RESULT_ENTITY_INSERTED
 				|| resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
-			bind(false);
+			bind();
+		}
+		else if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED) {
+			mCommon.updateUserPicture();
+			bind();
+		}
+		else if (resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
+			mCommon.updateUserPicture();
 		}
 	}
 
@@ -167,5 +174,22 @@ public class CandiList extends CandiActivity {
 	@Override
 	protected int getLayoutId() {
 		return R.layout.candi_list;
+	}
+
+	class SortEntitiesByUpdatedTime implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity object1, Entity object2) {
+			int dateObject1 = object1.updatedDate != null ? object1.updatedDate : object1.createdDate;
+			int dateObject2 = object2.updatedDate != null ? object2.updatedDate : object2.createdDate;
+			
+			if (dateObject1 < dateObject2) {
+				return 1;
+			}
+			else if (dateObject1 == dateObject2) {
+				return 0;
+			}
+			return -1;
+		}
 	}
 }

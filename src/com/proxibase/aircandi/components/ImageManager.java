@@ -28,8 +28,6 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.consumer.Entity;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 /*
  * TODO: ImageCache uses weak references by default. Should investigate the possible benefits
@@ -203,7 +201,7 @@ public class ImageManager {
 							+ " to "
 							+ String.valueOf(bitmapSampled.getHeight() * bitmapSampled.getWidth())
 							+ ": "
-							+ imageRequest.imageUri);
+							+ imageRequest.getImageUri());
 		}
 
 		return bitmapSampled;
@@ -576,94 +574,4 @@ public class ImageManager {
 		return mDisplayMetrics;
 	}
 
-	public static class ImageRequest {
-
-		public String			imageUri;
-		public ImageFormat		imageFormat;
-		public ImageShape		imageShape				= ImageShape.Native;
-		public Object			imageRequestor;
-		public Integer			priority				= 1;
-		public Integer			scaleToWidth;
-		public Boolean			makeReflection			= false;
-		public Boolean			linkZoom				= false;
-		public Boolean			linkJavascriptEnabled	= false;
-		public Boolean			updateCache				= true;
-		public Boolean			searchCache				= true;
-		public RequestListener	requestListener			= null;
-
-		public ImageRequest(Entity entity, ImageShape imageShape, Integer scaleToWidth,
-				Boolean makeReflection, Boolean searchCache, Boolean updateCache, Integer priority,
-				Object imageRequestor, RequestListener requestListener) {
-			
-			if (entity.imagePreviewUri != null && !entity.imagePreviewUri.equals("")) {
-				this.imageUri = entity.imagePreviewUri;
-				this.imageFormat = ImageFormat.Binary;
-			}
-			else if (entity.linkUri != null && !entity.linkUri.equals("")) {
-				this.imageUri = entity.linkUri;
-				this.imageFormat = ImageFormat.Html;
-				this.linkZoom = entity.linkZoom;
-				this.linkJavascriptEnabled = entity.linkJavascriptEnabled;
-			}
-			else if (entity.author != null) {
-				if (entity.author.imageUri != null && !entity.author.imageUri.equals("")) {
-					this.imageUri = entity.author.imageUri;
-					this.imageFormat = ImageFormat.Binary;
-				}
-				else if (entity.author.linkUri != null && !entity.author.linkUri.equals("")) {
-					this.imageUri = entity.author.linkUri;
-					this.imageFormat = ImageFormat.Html;
-					this.linkZoom = entity.linkZoom;
-					this.linkJavascriptEnabled = entity.linkJavascriptEnabled;
-				}
-			}
-
-			this.imageShape = imageShape;
-			this.scaleToWidth = scaleToWidth;
-
-			this.makeReflection = makeReflection;
-			this.priority = priority;
-
-			this.searchCache = searchCache;
-			this.updateCache = updateCache;
-			this.imageRequestor = imageRequestor;
-			this.requestListener = requestListener;
-		}
-
-		public ImageRequest(String imageUri, String linkUri, ImageShape imageShape, Boolean linkZoom,
-				Boolean linkJavascriptEnabled, Integer scaleToWidth,
-				Boolean makeReflection, Boolean searchCache, Boolean updateCache, Integer priority,
-				Object imageRequestor, RequestListener requestListener) {
-
-			if (imageUri != null && !imageUri.equals("")) {
-				this.imageUri = imageUri;
-				this.imageFormat = ImageFormat.Binary;
-			}
-			else if (linkUri != null && !linkUri.equals("")) {
-				this.imageUri = linkUri;
-				this.imageFormat = ImageFormat.Html;
-				this.linkZoom = linkZoom;
-				this.linkJavascriptEnabled = linkJavascriptEnabled;
-			}
-
-			this.imageShape = imageShape;
-			this.scaleToWidth = scaleToWidth;
-
-			this.makeReflection = makeReflection;
-			this.priority = priority;
-
-			this.searchCache = searchCache;
-			this.updateCache = updateCache;
-			this.imageRequestor = imageRequestor;
-			this.requestListener = requestListener;
-		}
-
-		public enum ImageFormat {
-			Binary, Html
-		}
-
-		public enum ImageShape {
-			Native, Square
-		}
-	}
 }

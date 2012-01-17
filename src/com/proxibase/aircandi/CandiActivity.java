@@ -3,13 +3,15 @@ package com.proxibase.aircandi;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.AircandiCommon.IntentBuilder;
+import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
 
@@ -27,9 +29,10 @@ public abstract class CandiActivity extends Activity {
 		setContentView(getLayoutId());
 		super.onCreate(savedInstanceState);
 		mCommon.initialize();
+		mCommon.initializeDialogs();
 	}
 
-	protected void bind(boolean refresh) {
+	protected void bind() {
 		if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
 			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
 		}
@@ -92,6 +95,29 @@ public abstract class CandiActivity extends Activity {
 		mCommon.doRefreshClick(view);
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {}
+
+	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	public boolean onCreateOptionsMenu(Menu menu) {
+		mCommon.doCreateOptionsMenu(menu);
+		return true;
+	}
+
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		mCommon.doPrepareOptionsMenu(menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		mCommon.doOptionsItemSelected(item);
+		return true;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
@@ -102,6 +128,15 @@ public abstract class CandiActivity extends Activity {
 		if (findViewById(R.id.image_user) != null && Aircandi.getInstance().getUser() != null) {
 			User user = Aircandi.getInstance().getUser();
 			mCommon.setUserPicture(user.imageUri, user.linkUri, (WebImageView) findViewById(R.id.image_user));
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+			mCommon.reload();
 		}
 	}
 

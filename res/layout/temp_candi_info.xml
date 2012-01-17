@@ -39,11 +39,7 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="top"
-                        android:adjustViewBounds="true"
-                        android:maxWidth="80dp"
-                        android:paddingTop="5dp"
-                        android:scaleType="centerInside"
-                        android:width="80dp" />
+                        android:paddingTop="5dp" />
 
                     <ImageView
                         android:id="@+id/image_public_reflection"

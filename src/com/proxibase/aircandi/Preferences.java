@@ -37,4 +37,14 @@ public class Preferences extends PreferenceActivity {
 			Tracker.trackPageView("/PreferencesDev");
 		}
 	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		overridePendingTransition(R.anim.browse_in, R.anim.form_out);
+	}
+
+	public enum PrefResponse {
+		None, Change, Refresh, Restart
+	}
 }

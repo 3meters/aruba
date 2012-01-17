@@ -1,49 +1,32 @@
 package com.proxibase.aircandi;
 
-import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.proxibase.aircandi.CandiList.MethodType;
-import com.proxibase.aircandi.components.CandiListAdapter;
 import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
-import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.AircandiCommon.ActionButtonSet;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.widgets.ActionsWindow;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.Comment;
-import com.proxibase.sdk.android.proxi.consumer.Entity;
-import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
@@ -51,8 +34,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-@SuppressWarnings("unused")
-public class CommentList extends FormActivity {
+public class CommentList extends CandiActivity {
 
 	private ListView		mListViewComments;
 	private List<Object>	mListComments;
@@ -105,11 +87,6 @@ public class CommentList extends FormActivity {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mListViewComments.setAdapter(new ListAdapter(CommentList.this, 0, mListComments));
 				}
-				else {
-					setResult(Activity.RESULT_CANCELED);
-					finish();
-					overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
-				}
 				mCommon.showProgressDialog(false, null);
 			}
 		}.execute();
@@ -143,11 +120,32 @@ public class CommentList extends FormActivity {
 		if (resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
 			bind();
 		}
+		else if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED) {
+			mCommon.updateUserPicture();
+		}
+		else if (resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
+			mCommon.updateUserPicture();
+		}
 	}
 
-	public void onBackPressed() {
-		setResult(mLastResultCode);
-		super.onBackPressed();
+	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	public boolean onCreateOptionsMenu(Menu menu) {
+		mCommon.doCreateOptionsMenu(menu);
+		return true;
+	}
+
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		mCommon.doPrepareOptionsMenu(menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		mCommon.doOptionsItemSelected(item);
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -216,8 +214,7 @@ public class CommentList extends FormActivity {
 
 				if (holder.itemCreatedDate != null) {
 					if (comment.createdDate != null) {
-						Date createdDate = DateUtils.wcfToDate(comment.createdDate);
-						holder.itemCreatedDate.setText(DateUtils.timeSince(createdDate, DateUtils.nowDate()));
+						holder.itemCreatedDate.setText(DateUtils.timeSince(comment.createdDate, (int) (DateUtils.nowDate().getTime() / 1000L)));
 					}
 					else {
 						holder.itemCreatedDate.setVisibility(View.GONE);
@@ -226,8 +223,9 @@ public class CommentList extends FormActivity {
 
 				if (holder.itemAuthorImage != null) {
 					if (comment.author.imageUri != null && comment.author.imageUri.length() != 0) {
-						ImageRequest imageRequest = new ImageRequest(comment.author.imageUri, null, ImageShape.Square, false, false,
-								CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, null);
+						ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemAuthorImage);
+						builder.setFromUris(comment.author.imageUri, null);
+						ImageRequest imageRequest = builder.create();
 						holder.itemAuthorImage.setImageRequest(imageRequest, null);
 					}
 				}
@@ -265,7 +263,7 @@ public class CommentList extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected int getLayoutID() {
+	protected int getLayoutId() {
 		return R.layout.comment_list;
 	}
 }

@@ -20,7 +20,6 @@ import android.widget.Toast;
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.widgets.WebImageView;
 
 public class ImageUtils {
 
@@ -172,52 +171,61 @@ public class ImageUtils {
 		return hexColor;
 	}
 
-	public static void showImageInImageView(Bitmap bitmap, WebImageView imageView) {
+	public static void showImageInImageView(Bitmap bitmap, ImageView imageView) {
 		showImageInImageView(bitmap, null, imageView, null);
 	}
 
-	public static void showImageInImageView(Bitmap bitmap, Bitmap bitmapReflection, WebImageView imageView, ImageView imageViewReflection) {
-		if (imageView.getDrawable() != null) {
-			imageView.setImageBitmap(bitmap);
-			if (bitmapReflection != null && imageViewReflection != null) {
-				imageViewReflection.setImageBitmap(bitmapReflection);
-			}
-		}
-		else {
+	public static void showImageInImageView(Bitmap bitmap, Bitmap bitmapReflection, ImageView imageView, ImageView imageViewReflection) {
+		//		if (imageView.getDrawable() != null) {
+		//			imageView.setImageBitmap(bitmap);
+		//			if (bitmapReflection != null && imageViewReflection != null) {
+		//				imageViewReflection.setImageBitmap(bitmapReflection);
+		//			}
+		//		}
+		//		else {
 
-			imageView.setImageBitmap(bitmap);
-			Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
-			animation.setFillEnabled(true);
-			animation.setFillAfter(true);
-			imageView.startAnimation(animation);
+		imageView.setImageBitmap(bitmap);
+		Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+		animation.setFillEnabled(true);
+		animation.setFillAfter(true);
+		imageView.startAnimation(animation);
 
-			if (bitmapReflection != null && imageViewReflection != null) {
-				imageViewReflection.setImageBitmap(bitmapReflection);
-				imageViewReflection.startAnimation(animation);
-			}
+		if (bitmapReflection != null && imageViewReflection != null) {
+			imageViewReflection.setImageBitmap(bitmapReflection);
+			imageViewReflection.startAnimation(animation);
 		}
+		//		}
 	}
 
-	public static void showDrawableInImageView(Drawable drawable, WebImageView imageView, boolean animate) {
+	public static void showDrawableInImageView(Drawable drawable, ImageView imageView, boolean animate) {
 		showDrawableInImageView(drawable, null, imageView, null, animate);
 	}
 
-	public static void showDrawableInImageView(Drawable drawable, Drawable drawableReflection, WebImageView imageView, ImageView imageViewReflection,
-			boolean animate) {
-		imageView.setImageDrawable(drawable);
-		Animation animation = null;
-		if (animate) {
-			animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
-			animation.setFillEnabled(true);
-			animation.setFillAfter(true);
-			imageView.startAnimation(animation);
-		}
+	public static void showDrawableInImageView(final Drawable drawable, final Drawable drawableReflection, final ImageView imageView,
+			final ImageView imageViewReflection,
+			final boolean animate) {
 
-		if (drawableReflection != null && imageViewReflection != null) {
-			imageViewReflection.setImageDrawable(drawableReflection);
-			if (animate) {
-				imageViewReflection.startAnimation(animation);
-			}
-		}
+//		/* We could get called from a thread other than the main UI thread */
+//		Aircandi.applicationHandler.post(new Runnable() {
+//
+//			@Override
+//			public void run() {
+				imageView.setImageDrawable(drawable);
+				Animation animation = null;
+				if (animate) {
+					animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+					animation.setFillEnabled(true);
+					animation.setFillAfter(true);
+					imageView.startAnimation(animation);
+				}
+
+				if (drawableReflection != null && imageViewReflection != null) {
+					imageViewReflection.setImageDrawable(drawableReflection);
+					if (animate) {
+						imageViewReflection.startAnimation(animation);
+					}
+				}
+//			}
+//		});
 	}
 }

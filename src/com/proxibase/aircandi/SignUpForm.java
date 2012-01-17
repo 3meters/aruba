@@ -1,6 +1,5 @@
 package com.proxibase.aircandi;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.graphics.Bitmap;
@@ -15,13 +14,13 @@ import android.widget.Toast;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
+import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -116,21 +115,24 @@ public class SignUpForm extends FormActivity {
 		 */
 		if (mUser.imageUri != null && !mUser.imageUri.equals("")) {
 			if (mUser.imageBitmap != null) {
-				mImageUser.setImageBitmap(mUser.imageBitmap);
+				ImageUtils.showImageInImageView(mUser.imageBitmap, mImageUser.getImageView());
 			}
 			else {
-				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, mUser.linkUri, ImageShape.Square, false, false,
-						CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
 
-							@Override
-							public void onComplete(Object response) {
-								ServiceResponse serviceResponse = (ServiceResponse) response;
-								if (serviceResponse.responseCode == ResponseCode.Success) {
-									mUser.imageBitmap = (Bitmap) serviceResponse.data;
-								}
-							}
-						});
+				ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
+				builder.setFromUris(mUser.imageUri, mUser.linkUri);
+				builder.setRequestListener(new RequestListener() {
 
+					@Override
+					public void onComplete(Object response) {
+						ServiceResponse serviceResponse = (ServiceResponse) response;
+						if (serviceResponse.responseCode == ResponseCode.Success) {
+							mUser.imageBitmap = (Bitmap) serviceResponse.data;
+						}
+					}
+				});
+
+				ImageRequest imageRequest = builder.create();
 				mImageUser.setImageRequest(imageRequest, null);
 			}
 		}
@@ -143,11 +145,6 @@ public class SignUpForm extends FormActivity {
 	public void onSignUpButtonClick(View view) {
 		mCommon.startTitlebarProgress();
 		doSave();
-	}
-
-	public void onCancelButtonClick(View view) {
-		setResult(Activity.RESULT_CANCELED);
-		finish();
 	}
 
 	public void onChangePictureButtonClick(View view) {
@@ -181,7 +178,8 @@ public class SignUpForm extends FormActivity {
 
 	private boolean validate() {
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, getResources().getString(R.string.signup_alert_missmatched_passwords_title),
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, getResources().getString(
+					R.string.signup_alert_missmatched_passwords_title),
 					getResources().getString(R.string.signup_alert_missmatched_passwords_message), this, null);
 			return false;
 		}
@@ -193,7 +191,7 @@ public class SignUpForm extends FormActivity {
 		mUser.email = mTextEmail.getText().toString().trim();
 		mUser.fullname = mTextFullname.getText().toString().trim();
 		mUser.password = mTextPassword.getText().toString().trim();
-		mUser.createdDate = DateUtils.nowString();
+		mUser.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
 
 		Logger.i(this, "Insert user: " + mUser.fullname);
 
@@ -208,22 +206,16 @@ public class SignUpForm extends FormActivity {
 			public void onComplete(Object response) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode != ResponseCode.Success) {
-					ImageUtils.showToastNotification(getString(R.string.alert_insert_failed), Toast.LENGTH_SHORT);
-					return;
-				}
-				else {
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+
 					/* Load the just insert user to get the user id */
 					Query query = new Query("Users").filter("Email eq '" + mUser.email + "'");
 					serviceResponse = NetworkManager.getInstance().request(
 							new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-					if (serviceResponse.responseCode != ResponseCode.Success) {
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+
 						/* Jayma: We might have succeeded inserting user but not the user picture */
-						return;
-					}
-					else
-					{
 						String jsonResponse = (String) serviceResponse.data;
 						mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 

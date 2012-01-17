@@ -33,14 +33,26 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="app_button" parent="android:Widget.Button">
+    <style name="app_button">
         <item name="android:minWidth">80dp</item>
         <item name="android:maxWidth">200dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
 
-    <style name="app_image">
-        <item name="android:background">@drawable/app_image_selector</item>
+    <style name="app_picture">
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+    </style>
+
+    <style name="app_picture_framed" parent="app_picture">
+        <item name="android:background">?attr/backgroundPicture</item>
+        <item name="android:padding">3dp</item>
+    </style>
+
+    <style name="app_picture_outlined" parent="app_picture">
+        <item name="android:background">?attr/backgroundPicture</item>
+        <item name="android:padding">0dp</item>
     </style>
 
     <style name="app_checkbox" parent="android:Widget.CompoundButton.CheckBox">
@@ -56,12 +68,6 @@
         <item name="android:textColor">@color/accent</item>
     </style>
 
-    <style name="app_user_picture" parent="app_image">
-        <item name="android:padding">0dp</item>
-        <item name="android:scaleType">centerInside</item>
-        <item name="android:adjustViewBounds">true</item>
-    </style>
-
     <style name="app_user_fullname" parent="android:Widget.TextView">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
@@ -73,7 +79,6 @@
     <!-- Actionbar -->
 
     <style name="actionbar">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:background">?attr/backgroundHeader</item>
     </style>
 
@@ -90,11 +95,11 @@
         <item name="android:textColor">?attr/textColorButtonHeader</item>
     </style>
 
-    <style name="actionbar_button_back">
+    <style name="actionbar_logo">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical|left</item>
-        <item name="android:drawableLeft">?attr/iconBack</item>
+        <item name="android:drawableLeft">?attr/logo</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:background">@drawable/button_nooutline_selector</item>
         <item name="android:textColor">?attr/textColorButtonHeader</item>
@@ -145,7 +150,7 @@
         <item name="android:padding">5dp</item>
         <item name="android:drawablePadding">3dp</item>
         <item name="android:gravity">bottom|center_horizontal</item>
-        </style>
+    </style>
 
     <style name="actionstrip_above_animation">
         <item name="android:windowEnterAnimation">@anim/quickcontact_above_enter</item>
@@ -156,9 +161,9 @@
         <item name="android:windowEnterAnimation">@anim/quickcontact_below_enter</item>
         <item name="android:windowExitAnimation">@anim/quickcontact_below_exit</item>
     </style>
-    
+
     <!-- Comments -->
-        
+
     <style name="comments_button" parent="android:Widget.Button">
         <item name="android:textColor">#ffffaa00</item>
         <item name="android:background">@drawable/button_nooutline_selector</item>
@@ -166,13 +171,23 @@
 
     <!-- Candi Info -->
 
+
+    <!--
     <style name="candi_info_button" parent="android:Widget.Button">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?attr/textColorButton</item>
         <item name="android:background">?attr/backgroundButton</item>
-        <item name="android:height">70dp</item>
-        <item name="android:width">78dp</item>
-        <item name="android:padding">5dp</item>
+        <item name="android:layout_height">65dp</item>
+        <item name="android:layout_width">65dp</item>
+    </style>
+    -->
+
+    <style name="candi_info_button" parent="android:Widget.Button">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">?attr/textColorButton</item>
+        <item name="android:background">?attr/backgroundButton</item>
+        <item name="android:layout_height">65dp</item>
+        <item name="android:layout_width">65dp</item>
     </style>
 
     <style name="candi_info_title">
@@ -199,10 +214,13 @@
 
     <!-- Candi List -->
 
+
+    <!--
     <style name="candi_list_image">
         <item name="android:scaleType">fitCenter</item>
         <item name="android:adjustViewBounds">true</item>
-    </style>
+    </style>
+    -->
 
     <style name="candi_list_title">
         <item name="android:textAppearance">@style/app_text_appearance_title2</item>
@@ -235,11 +253,14 @@
 
     <!-- Aircandi Gallery -->
 
+
+    <!--
     <style name="gallery_image">
         <item name="android:scaleType">centerCrop</item>
         <item name="android:adjustViewBounds">true</item>
         <item name="android:background">?attr/backgroundHeader</item>
-    </style>
+    </style>
+    -->
 
     <style name="gallery_image_placeholder">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
@@ -249,7 +270,9 @@
     <!-- Candi Forms -->
 
     <style name="form_title" parent="android:Widget.TextView">
-        <item name="android:textAppearance">@style/app_text_appearance_title1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:textColor">?attr/textColorFormTitle</item>
     </style>
 

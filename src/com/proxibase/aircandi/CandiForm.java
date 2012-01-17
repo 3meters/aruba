@@ -1,8 +1,8 @@
 package com.proxibase.aircandi;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -13,20 +13,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.SlidingDrawer;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.DateUtils;
+import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequestBuilder;
+import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.AircandiCommon.ActionButtonSet;
-import com.proxibase.aircandi.components.AircandiCommon.IntentBuilder;
 import com.proxibase.aircandi.components.Command.CommandVerb;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -36,44 +31,43 @@ import com.proxibase.sdk.android.proxi.consumer.Entity;
 
 public class CandiForm extends CandiActivity {
 
-	private SlidingDrawer	mSlidingDrawer;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		bind(false);
+		bind();
 		Tracker.trackPageView("/CandiForm");
 	}
 
 	@Override
-	protected void bind(boolean refresh) {
-		super.bind(refresh);
+	protected void bind() {
+		super.bind();
 
-		mSlidingDrawer = (SlidingDrawer) findViewById(R.id.slide_actions_info);
+		/* We always get the freshest version because the data could be stale */
+		new AsyncTask() {
 
-		mCommon.showProgressDialog(true, "Loading...");
-		ViewGroup candiInfoView = (ViewGroup) findViewById(R.id.candi_form);
-		buildCandiInfo(mCommon.mEntity, candiInfoView, refresh);
-		mCommon.showProgressDialog(false, null);
-
-		if (Aircandi.getInstance().getToolstripOpen()) {
-			if (mSlidingDrawer != null) {
-				mSlidingDrawer.open();
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, "Loading...");
 			}
-		}
-		else if (Aircandi.getInstance().getFirstTimeCandiForm()) {
-			Aircandi.getInstance().setFirstTimeCandiForm(false);
-			Aircandi.applicationHandler.postDelayed(new Runnable() {
 
-				@Override
-				public void run() {
-					if (mSlidingDrawer != null) {
-						mSlidingDrawer.animateOpen();
-					}
+			@Override
+			protected Object doInBackground(Object... params) {
+				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntity.id, false);
+				return serviceResponse;
+			}
+
+			@Override
+			protected void onPostExecute(Object result) {
+				ServiceResponse serviceResponse = (ServiceResponse) result;
+				mCommon.showProgressDialog(false, null);
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					mCommon.mEntity = (Entity) serviceResponse.data;
+					ViewGroup candiInfoView = (ViewGroup) findViewById(R.id.candi_form);
+					buildCandiInfo(mCommon.mEntity, candiInfoView, false);
 				}
-			}, 500);
-		}
+			}
+		}.execute();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -114,27 +108,38 @@ public class CandiForm extends CandiActivity {
 			intent.setData(Uri.parse(mCommon.mEntity.linkUri));
 		}
 		startActivity(intent);
-
+		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 	}
 
 	public void onActionsClick(View view) {
-		if (!mCommon.mEntity.locked) {
-			mCommon.doActionsClick(view, true, ActionButtonSet.CandiForm);
-		}
+		showDialog(CandiConstants.DIALOG_NEW_CANDI_ID);
+		//		if (!mCommon.mEntity.locked) {
+		//			mCommon.doActionsClick(view, true, ActionButtonSet.CandiForm);
+		//		}
+	}
+
+	public void onRefreshClick(View view) {
+		bind();
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 
 		mLastResultCode = resultCode;
 		if (resultCode == CandiConstants.RESULT_ENTITY_UPDATED
 				|| resultCode == CandiConstants.RESULT_ENTITY_INSERTED
 				|| resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
-			refreshEntity();
+			bind();
 		}
 		else if (resultCode == CandiConstants.RESULT_ENTITY_DELETED) {
 			setResult(CandiConstants.RESULT_ENTITY_DELETED);
 			finish();
+		}
+		else if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED
+					|| resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
+			mCommon.updateUserPicture();
+			bind();
 		}
 	}
 
@@ -147,6 +152,11 @@ public class CandiForm extends CandiActivity {
 		new AsyncTask() {
 
 			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, "Loading...");
+			}
+
+			@Override
 			protected Object doInBackground(Object... params) {
 				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntity.id, false);
 				return serviceResponse;
@@ -155,9 +165,9 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected void onPostExecute(Object result) {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
+				mCommon.showProgressDialog(false, null);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mCommon.mEntity = (Entity) serviceResponse.data;
-					bind(true);
 				}
 			}
 		}.execute();
@@ -169,40 +179,6 @@ public class CandiForm extends CandiActivity {
 
 	public ViewGroup buildCandiInfo(final Entity entity, final ViewGroup candiInfoView, boolean refresh) {
 
-		/* Build menus */
-		TableLayout table = null;
-		List<Command> commands = new ArrayList<Command>();
-		if (!entity.locked) {
-			commands.add(new Command(CommandVerb.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
-		}
-		if (entity.createdById.equals(Integer.parseInt(Aircandi.getInstance().getUser().id))) {
-			commands.add(new Command(CommandVerb.Edit, "Edit", "EntityForm", entity.entityType, entity.id, null, null));
-		}
-		if (commands.size() > 0) {
-			table = configureMenus(commands);
-		}
-
-		ViewGroup frameButtons = (ViewGroup) candiInfoView.findViewById(R.id.frame_buttons);
-		if (table != null) {
-			frameButtons.removeAllViews();
-			frameButtons.addView(table);
-		}
-		else {
-			frameButtons.setVisibility(View.GONE);
-		}
-
-		/*
-		 * if (table != null) {
-		 * RelativeLayout slideContent = (RelativeLayout) candiInfoView.findViewById(R.id.candi_info_slider_content);
-		 * slideContent.removeAllViews();
-		 * slideContent.addView(table);
-		 * ((View) candiInfoView.findViewById(R.id.slide_actions_info)).setVisibility(View.VISIBLE);
-		 * }
-		 * else {
-		 * ((View) candiInfoView.findViewById(R.id.slide_actions_info)).setVisibility(View.GONE);
-		 * }
-		 */
-
 		final WebImageView imageAuthor = (WebImageView) candiInfoView.findViewById(R.id.image_author);
 		final ImageView imageAuthorReflection = (ImageView) candiInfoView.findViewById(R.id.image_author_reflection);
 		final TextView title = (TextView) candiInfoView.findViewById(R.id.candi_info_title);
@@ -211,15 +187,21 @@ public class CandiForm extends CandiActivity {
 		final ViewGroup imageHolder = (ViewGroup) candiInfoView.findViewById(R.id.candi_info_image_holder);
 		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_info_description);
 		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
-		final Button comments = (Button) candiInfoView.findViewById(R.id.button_comments);
 		final ImageView navigate = (ImageView) candiInfoView.findViewById(R.id.image_forward);
+		final Button comments = (Button) candiInfoView.findViewById(R.id.button_comments);
+		final Button newComment = (Button) candiInfoView.findViewById(R.id.button_comment);
+		final Button newCandi = (Button) candiInfoView.findViewById(R.id.button_new);
+		final Button editCandi = (Button) candiInfoView.findViewById(R.id.button_edit);
+		final ImageView listCandi = (ImageView) candiInfoView.findViewById(R.id.button_list);
 
 		/* Author image */
 		if (!refresh) {
 			if (entity.author != null) {
 				if (entity.author.imageUri != null && !entity.author.imageUri.equals("")) {
-					ImageRequest imageRequest = new ImageRequest(entity.author.imageUri, null, ImageShape.Square, false, false,
-							CandiConstants.IMAGE_WIDTH_SEARCH_MAX, true, true, true, 1, this, null);
+					ImageRequestBuilder builder = new ImageRequestBuilder(imageAuthor);
+					builder.setFromUris(entity.author.imageUri, null);
+					builder.setMakeReflection(true);
+					ImageRequest imageRequest = builder.create();
 					imageAuthor.setImageRequest(imageRequest, imageAuthorReflection);
 				}
 			}
@@ -227,26 +209,30 @@ public class CandiForm extends CandiActivity {
 
 		/* Candi image */
 		if (entity.imageUri != null || entity.linkUri != null) {
-			ImageRequest imageRequest = new ImageRequest(entity, ImageShape.Square,
-					CandiConstants.IMAGE_WIDTH_SEARCH_MAX, true, true, true, 1, this, null);
+			ImageRequestBuilder builder = new ImageRequestBuilder(image);
+			builder.setFromEntity(entity);
+			builder.setMakeReflection(true);
+			ImageRequest imageRequest = builder.create();
 			image.setImageRequest(imageRequest, null);
+			imageHolder.setVisibility(View.VISIBLE);
 		}
 		else {
 			imageHolder.setVisibility(View.GONE);
 		}
 
 		/* Author block */
-		if (!refresh) {
-			if (entity.author != null) {
-				authorBlock.bindToAuthor(entity.author, DateUtils.wcfToDate(entity.createdDate));
-			}
-			else {
-				authorBlock.setVisibility(View.GONE);
-			}
+		if (entity.author != null) {
+			Integer dateToUse = entity.updatedDate != null ? entity.updatedDate : entity.createdDate;
+			authorBlock.bindToAuthor(entity.author, dateToUse);
+			authorBlock.setVisibility(View.VISIBLE);
+		}
+		else {
+			authorBlock.setVisibility(View.GONE);
 		}
 
 		/* Update any UI indicators related to child candies */
-		if ((entity.children != null && entity.hasVisibleChildren()) || entity.childCount > 0) {
+		boolean visibleChildren = (entity.children != null && entity.hasVisibleChildren()) || entity.childCount > 0;
+		if (visibleChildren) {
 			((ViewGroup) candiInfoView.findViewById(R.id.group_candi_content)).setClickable(true);
 			navigate.setVisibility(View.VISIBLE);
 			navigate.setClickable(true);
@@ -257,10 +243,82 @@ public class CandiForm extends CandiActivity {
 			navigate.setClickable(false);
 		}
 
+		/* Adjust menus */
+
+		newComment.setVisibility(View.VISIBLE);
+		newComment.setTag(new Command(CommandVerb.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
+		listCandi.setVisibility(View.VISIBLE);
+		if (entity.locked) {
+			newCandi.setVisibility(View.GONE);
+		}
+		else {
+			newCandi.setVisibility(View.VISIBLE);
+			newCandi.setTag(new Command(CommandVerb.Dialog, "Add\nCandi", "NewCandi", entity.entityType, entity.id, entity.id, null));
+		}
+		if (!entity.createdById.equals(Integer.parseInt(Aircandi.getInstance().getUser().id))) {
+			editCandi.setVisibility(View.GONE);
+		}
+		else {
+			editCandi.setVisibility(View.VISIBLE);
+			editCandi.setTag(new Command(CommandVerb.Edit, "Edit", "EntityForm", entity.entityType, entity.id, null, null));
+		}
+		if (!visibleChildren) {
+			listCandi.setVisibility(View.GONE);
+		}
+		
+
+		//		List<Command> commands = new ArrayList<Command>();
+		//		if (!entity.locked) {
+		//			commands.add(new Command(CommandVerb.Dialog, "Add\nCandi", "NewCandi", entity.entityType, entity.id, entity.id, null));
+		//		}
+		//		if (entity.createdById.equals(Integer.parseInt(Aircandi.getInstance().getUser().id))) {
+		//			commands.add(new Command(CommandVerb.Edit, "Edit", "EntityForm", entity.entityType, entity.id, null, null));
+		//		}
+		//		if (visibleChildren) {
+		//			TypedValue resourceName = new TypedValue();
+		//			if (getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
+		//				String themeTone = (String) resourceName.coerceToString();
+		//				if (themeTone.equals("dark")) {
+		//					commands.add(new Command(CommandVerb.View, null, "CandiList", entity.entityType, entity.id, null,
+		//							R.drawable.icon_forward_strong_dark));
+		//				}
+		//				else if (themeTone.equals("light")) {
+		//					commands.add(new Command(CommandVerb.View, null, "CandiList", entity.entityType, entity.id, null,
+		//							R.drawable.icon_forward_strong_light));
+		//				}
+		//			}
+		//		}
+		//
+		//		RelativeLayout frameButtons = (RelativeLayout) candiInfoView.findViewById(R.id.frame_buttons);
+		//		frameButtons.removeAllViews();
+		//		if (commands.size() > 0) {
+		//			configureMenus(commands, frameButtons);
+		//			frameButtons.setVisibility(View.VISIBLE);
+		//		}
+		//		else {
+		//			frameButtons.setVisibility(View.GONE);
+		//		}
+		//
+		//		commands = new ArrayList<Command>();
+		//		if (!entity.locked) {
+		//			commands.add(new Command(CommandVerb.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
+		//		}
+		//
+		//		RelativeLayout frameButtonsSide = (RelativeLayout) candiInfoView.findViewById(R.id.frame_buttons_side);
+		//		frameButtonsSide.removeAllViews();
+		//		if (commands.size() > 0) {
+		//			configureMenus(commands, frameButtonsSide);
+		//			frameButtonsSide.setVisibility(View.VISIBLE);
+		//		}
+		//		else {
+		//			frameButtonsSide.setVisibility(View.GONE);
+		//		}
+
 		/* Comments */
 		if (entity.commentCount > 0) {
 			comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
 			comments.setTag(entity);
+			comments.setVisibility(View.VISIBLE);
 		}
 		else {
 			comments.setVisibility(View.GONE);
@@ -273,18 +331,21 @@ public class CandiForm extends CandiActivity {
 
 		if (entity.title != null && !entity.title.equals("")) {
 			title.setText(Html.fromHtml(entity.title));
+			title.setVisibility(View.VISIBLE);
 		}
 		else {
 			title.setVisibility(View.GONE);
 		}
 		if (entity.subtitle != null && !entity.subtitle.equals("")) {
 			subtitle.setText(Html.fromHtml(entity.subtitle));
+			subtitle.setVisibility(View.VISIBLE);
 		}
 		else {
 			subtitle.setVisibility(View.GONE);
 		}
 		if (entity.description != null && !entity.description.equals("")) {
 			description.setText(Html.fromHtml(entity.description));
+			description.setVisibility(View.VISIBLE);
 		}
 		else {
 			description.setVisibility(View.GONE);
@@ -293,73 +354,47 @@ public class CandiForm extends CandiActivity {
 		return candiInfoView;
 	}
 
-	public TableLayout configureMenus(List<Command> commands) {
-
-		Boolean needMoreButton = false;
+	public ViewGroup configureMenus(List<Command> commands, RelativeLayout viewGroup) {
 
 		if (commands == null || commands.size() == 0) {
 			return null;
 		}
-		if (commands.size() > 6) {
-			needMoreButton = true;
-		}
-
-		/* Get the table we use for grouping and clear it */
-		final TableLayout table = new TableLayout(this);
 
 		/* Make the first row */
-		TableRow tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_commands, null);
-		final TableRow.LayoutParams rowLp = new TableRow.LayoutParams();
-		rowLp.setMargins(0, 0, 0, 0);
-		TableLayout.LayoutParams tableLp;
+		//		TableRow tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_commands, null);
+		//		final TableRow.LayoutParams rowLp = new TableRow.LayoutParams();
+		//		rowLp.setMargins(0, 0, 0, 0);
+		//		TableLayout.LayoutParams tableLp;
 
-		/* Loop the streams */
-		Integer commandCount = 0;
-		RelativeLayout commandButtonContainer;
 		for (Command command : commands) {
-			/*
-			 * TODO: This is a temporary hack. The service shouldn't pass commands
-			 * that this user doesn't have sufficient permissions for.
-			 */
-			/* Make a button and configure it */
-			commandButtonContainer = (RelativeLayout) getLayoutInflater().inflate(R.layout.temp_button_command, null);
 
-			final TextView commandButton = (TextView) commandButtonContainer.findViewById(R.id.CommandButton);
-			commandButtonContainer.setTag(command);
-			if (needMoreButton && commandCount == 5) {
-				commandButton.setText("More...");
-				commandButton.setTag(command);
-			}
-			else {
+			/* Make a button and configure it */
+			if (command.iconResourceId == null) {
+				TextView commandButton = (TextView) getLayoutInflater().inflate(R.layout.temp_button_command, null);
+				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(65, 65);
+				params.addRule(RelativeLayout.ALIGN_TOP);
+				commandButton.setLayoutParams(params);
 				commandButton.setText(command.label);
 				commandButton.setTag(command);
+				viewGroup.addView(commandButton);
 			}
-
-			/* Add button to row */
-			tableRow.addView(commandButtonContainer, rowLp);
-			commandCount++;
-
-			/* If we have three in a row then commit it and make a new row */
-			int newRow = 3;
-
-			if (commandCount % newRow == 0) {
-				tableLp = new TableLayout.LayoutParams();
-				tableLp.setMargins(0, 0, 0, 0);
-				table.addView(tableRow, tableLp);
-				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_commands, null);
-			}
-			else if (commandCount == 6) {
-				break;
+			else {
+				ImageView commandButton = (ImageView) getLayoutInflater().inflate(R.layout.temp_image_command, null);
+				commandButton.setImageResource(command.iconResourceId);
+				commandButton.setTag(command);
+				viewGroup.addView(commandButton);
 			}
 		}
 
-		/* We might have an uncommited row with stream buttons in it */
-		if (commandCount != 3) {
-			tableLp = new TableLayout.LayoutParams();
-			tableLp.setMargins(0, 3, 0, 3);
-			table.addView(tableRow, tableLp);
+		return viewGroup;
+	}
+
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		if (id == CandiConstants.DIALOG_NEW_CANDI_ID) {
+			return mCommon.mIconContextMenu.createMenu(getString(R.string.dialog_new_message));
 		}
-		return table;
+		return super.onCreateDialog(id);
 	}
 
 	// --------------------------------------------------------------------------------------------

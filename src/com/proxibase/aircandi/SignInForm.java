@@ -1,6 +1,5 @@
 package com.proxibase.aircandi;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -89,6 +88,8 @@ public class SignInForm extends FormActivity {
 		Intent intent = new Intent(this, SignUpForm.class);
 		intent.putExtra(getString(R.string.EXTRA_COMMAND), json);
 		startActivity(intent);
+		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+
 	}
 
 	public void onSignInButtonClick(View view) {
@@ -99,13 +100,7 @@ public class SignInForm extends FormActivity {
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 				new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-		if (serviceResponse.responseCode != ResponseCode.Success) {
-			/* 
-			 * We just stay here if it was a network problem. 
-			 */
-			return;
-		}
-		else {
+		if (serviceResponse.responseCode == ResponseCode.Success) {
 			String jsonResponse = (String) serviceResponse.data;
 			User user = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 
@@ -114,23 +109,19 @@ public class SignInForm extends FormActivity {
 				mTextPassword.setText("");
 			}
 			else {
-				
+
 				Aircandi.getInstance().setUser(user);
-				ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in) + " " + Aircandi.getInstance().getUser().fullname, Toast.LENGTH_SHORT);
-				
+				ImageUtils.showToastNotification(
+						getResources().getString(R.string.alert_signed_in) + " " + Aircandi.getInstance().getUser().fullname, Toast.LENGTH_SHORT);
+
 				Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, Aircandi.getInstance().getUser().email);
 				Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, Aircandi.getInstance().getUser().password);
 				Aircandi.settingsEditor.commit();
-				
+
 				setResult(CandiConstants.RESULT_USER_SIGNED_IN);
 				finish();
 			}
 		}
-	}
-
-	public void onCancelButtonClick(View view) {
-		setResult(Activity.RESULT_CANCELED);
-		finish();
 	}
 
 	// --------------------------------------------------------------------------------------------

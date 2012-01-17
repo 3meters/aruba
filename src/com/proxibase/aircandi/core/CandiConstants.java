@@ -14,7 +14,7 @@ import android.graphics.Bitmap.Config;
 
 public interface CandiConstants {
 
-	public static final boolean			MODE_DEV							= false;
+	public static final boolean			MODE_DEV							= true;
 	public static final boolean			DEBUG_TRACE							= false;
 	public static final String			APP_NAME							= "Aircandi";
 	public static final String			APP_PACKAGE_NAME					= "com.proxibase.aircandi.";
@@ -49,7 +49,8 @@ public interface CandiConstants {
 
 	public static final int				DIALOG_INSTALL_ID					= 1;
 	public static final int				DIALOG_WIFIENABLE_ID				= 2;
-
+	public static final int				DIALOG_NEW_CANDI_ID					= 3;
+	
 	public static final int				VERTEX_INDEX_X						= 0;
 	public static final int				VERTEX_INDEX_Y						= 1;
 
@@ -62,8 +63,8 @@ public interface CandiConstants {
 
 	public static final int				IMAGE_BYTES_MAX						= 500000;
 	public static final Config			IMAGE_CONFIG_DEFAULT				= Config.ARGB_8888;
-	public static final int				IMAGE_WIDTH_USER_SMALL				= 60;
-	public static final int				IMAGE_WIDTH_SEARCH_MAX				= 250;
+	public static final int				IMAGE_WIDTH_SMALL					= 60;
+	public static final int				IMAGE_WIDTH_DEFAULT					= 250;
 	public static final int				IMAGE_WIDTH_ORIGINAL				= -1;
 	public static final String			IMAGE_BROKEN						= "gfx/placeholder3.png";
 
@@ -93,6 +94,7 @@ public interface CandiConstants {
 	public static final int				ACTIVITY_COMMENT_LIST				= 435;
 	public static final int				ACTIVITY_CANDI_INFO					= 440;
 	public static final int				ACTIVITY_LINK_PICK					= 500;
+	public static final int				ACTIVITY_PREFERENCES				= 600;
 
 	public static final int				RESULT_ENTITY_INSERTED				= 100;
 	public static final int				RESULT_ENTITY_UPDATED				= 110;

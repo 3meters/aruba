@@ -1,0 +1,132 @@
+package com.proxibase.aircandi.components;
+
+import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
+
+public class ImageRequest {
+
+	private String			mImageUri				= null;
+	private Object			mImageRequestor			= null;
+	private RequestListener	mRequestListener		= null;
+	private ImageFormat		mImageFormat			= ImageFormat.Binary;
+	private ImageShape		mImageShape				= ImageShape.Square;
+	private Integer			mPriority				= 1;
+	private Integer			mScaleToWidth			= CandiConstants.IMAGE_WIDTH_DEFAULT;
+	private Boolean			mMakeReflection			= false;
+	private Boolean			mLinkZoom				= false;
+	private Boolean			mLinkJavascriptEnabled	= false;
+	private Boolean			mUpdateCache			= true;
+	private Boolean			mSearchCache			= true;
+
+	public ImageRequest() {}
+
+	public ImageRequest(String imageUri, Object imageRequestor, RequestListener requestListener) {
+		mImageUri = imageUri;
+		mImageRequestor = imageRequestor;
+		mRequestListener = requestListener;
+	}
+
+	public String getImageUri() {
+		return this.mImageUri;
+	}
+
+	public void setImageUri(String imageUri) {
+		this.mImageUri = imageUri;
+	}
+
+	public ImageFormat getImageFormat() {
+		return this.mImageFormat;
+	}
+
+	public void setImageFormat(ImageFormat imageFormat) {
+		this.mImageFormat = imageFormat;
+	}
+
+	public ImageShape getImageShape() {
+		return this.mImageShape;
+	}
+
+	public void setImageShape(ImageShape imageShape) {
+		this.mImageShape = imageShape;
+	}
+
+	public Object getImageRequestor() {
+		return this.mImageRequestor;
+	}
+
+	public void setImageRequestor(Object imageRequestor) {
+		this.mImageRequestor = imageRequestor;
+	}
+
+	public Integer getPriority() {
+		return this.mPriority;
+	}
+
+	public void setPriority(Integer priority) {
+		this.mPriority = priority;
+	}
+
+	public Integer getScaleToWidth() {
+		return this.mScaleToWidth;
+	}
+
+	public void setScaleToWidth(Integer scaleToWidth) {
+		this.mScaleToWidth = scaleToWidth;
+	}
+
+	public Boolean getMakeReflection() {
+		return this.mMakeReflection;
+	}
+
+	public void setMakeReflection(Boolean makeReflection) {
+		this.mMakeReflection = makeReflection;
+	}
+
+	public Boolean getLinkZoom() {
+		return this.mLinkZoom;
+	}
+
+	public void setLinkZoom(Boolean linkZoom) {
+		this.mLinkZoom = linkZoom;
+	}
+
+	public Boolean getLinkJavascriptEnabled() {
+		return this.mLinkJavascriptEnabled;
+	}
+
+	public void setLinkJavascriptEnabled(Boolean linkJavascriptEnabled) {
+		this.mLinkJavascriptEnabled = linkJavascriptEnabled;
+	}
+
+	public Boolean getUpdateCache() {
+		return this.mUpdateCache;
+	}
+
+	public void setUpdateCache(Boolean updateCache) {
+		this.mUpdateCache = updateCache;
+	}
+
+	public Boolean getSearchCache() {
+		return this.mSearchCache;
+	}
+
+	public void setSearchCache(Boolean searchCache) {
+		this.mSearchCache = searchCache;
+	}
+
+	public RequestListener getRequestListener() {
+		return this.mRequestListener;
+	}
+
+	public void setRequestListener(RequestListener requestListener) {
+		this.mRequestListener = requestListener;
+	}
+
+	public enum ImageFormat {
+		Binary, Html
+	}
+
+	public enum ImageShape {
+		Native, Square
+	}
+}

@@ -150,7 +150,7 @@ public class ZoneView extends BaseView {
 	}
 
 	private void makeReflectionSprite() {
-		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT +  + CandiConstants.CANDI_VIEW_REFLECTION_GAP,
+		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_REFLECTION_GAP,
 				mReflectionTextureRegion);
 		mReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mReflectionSprite.setZIndex(0);

@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -29,10 +30,9 @@ import com.proxibase.aircandi.components.DrawableManager;
 import com.proxibase.aircandi.components.EndlessAdapter;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.widgets.WebImageView;
 
 /*
- * We often will get duplicates because the ordering of images isn't 
+ * We often will get duplicates because the ordering of images isn't
  * guaranteed while paging.
  */
 public class PictureSearch extends FormActivity {
@@ -116,7 +116,7 @@ public class PictureSearch extends FormActivity {
 		if (response == null) {
 			return null;
 		}
-		
+
 		ArrayList<ImageResult> images = (ArrayList<ImageResult>) response.getImage().getResults();
 		return images;
 	}
@@ -124,6 +124,7 @@ public class PictureSearch extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
+	
 	public void onSearchClick(View view) {
 
 		String query = mSearch.getText().toString();
@@ -140,11 +141,6 @@ public class PictureSearch extends FormActivity {
 		mOffset += PAGE_SIZE;
 		mQuery = query;
 		mGridView.setAdapter(new EndlessImageAdapter(mImages));
-	}
-
-	public void onCancelButtonClick(View view) {
-		setResult(Activity.RESULT_CANCELED);
-		finish();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -205,7 +201,7 @@ public class PictureSearch extends FormActivity {
 			if (view == null) {
 				view = mInflater.inflate(R.layout.temp_picture_search_item, null);
 				holder = new ViewHolder();
-				holder.itemImage = (WebImageView) view.findViewById(R.id.item_image);
+				holder.itemImage = (ImageView) view.findViewById(R.id.item_image);
 				view.setTag(holder);
 			}
 			else {
@@ -225,7 +221,7 @@ public class PictureSearch extends FormActivity {
 
 	public class ViewHolder {
 
-		public WebImageView	itemImage;
+		public ImageView	itemImage;
 		public Object		data;
 	}
 

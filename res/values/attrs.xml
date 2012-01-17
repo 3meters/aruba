@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+		<attr name="layout" format="integer"/>
 	<declare-styleable name="Global">
 		<attr name="themeTone" format="string"/>
 	</declare-styleable>
@@ -9,12 +10,15 @@
 		<attr name="pagerNotch" format="string"/>		
 		<attr name="pagerBorder" format="color"/>		
 	</declare-styleable>
-	<declare-styleable name="WebImageView">
-		<attr name="placeholder" format="string"/>
-		<attr name="progressColor" format="color"/>
-	</declare-styleable>
 	<declare-styleable name="AuthorLayout">
-		<attr name="layout" format="integer"/>
+		<attr name="layout"/>
+	</declare-styleable>
+	<declare-styleable name="WebImageView">
+		<attr name="layout" />
+		<attr name="showBusy" format="boolean"/>
+		<attr name="busyWidth" format="dimension"/>
+		<attr name="minWidth" format="dimension"/>
+		<attr name="maxWidth" format="dimension"/>
 	</declare-styleable>
 	<declare-styleable name="CandiSearch">
 		<attr name="textureBodyZone" format="string"/>
@@ -34,6 +38,10 @@
 		<attr name="iconRefresh" format="string"/>		
 		<attr name="iconNew" format="string"/>		
 		<attr name="iconBack" format="string"/>		
+		<attr name="iconPost" format="string"/>		
+		<attr name="iconPicture" format="string"/>		
+		<attr name="iconLink" format="string"/>		
+		<attr name="iconProfile" format="string"/>		
 		<attr name="logo" format="string"/>		
 		<attr name="imageSliderHandleSearch" format="string"/>
 		<attr name="backgroundSliderHandleSearch" format="string"/>

@@ -116,7 +116,7 @@ public class NetworkManager {
 				if (!serviceRequest.isSuppressUI()) {
 					ImageUtils.showToastNotification(R.string.network_message_service_notready, Toast.LENGTH_LONG);
 				}
-				Logger.d(this, "Service not founr exception: " + serviceRequest.getUri());
+				Logger.d(this, "Service not found exception: " + serviceRequest.getUri());
 				return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceNotFoundException, null, exception);
 			}
 			else if (exception.getErrorCode() == ProxiErrorCode.AircandiServiceException) {

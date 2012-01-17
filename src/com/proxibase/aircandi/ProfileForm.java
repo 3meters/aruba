@@ -1,9 +1,8 @@
 package com.proxibase.aircandi;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -17,15 +16,16 @@ import android.widget.ViewFlipper;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageManager;
+import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.Command.CommandVerb;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.NetworkManager.ResultCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
@@ -71,7 +71,7 @@ public class ProfileForm extends FormActivity {
 		if (extras != null) {
 			mUserId = extras.getInt(getString(R.string.EXTRA_USER_ID));
 		}
-		
+
 		mUser = Aircandi.getInstance().getUser();
 
 		if (mUser == null && mUserId == null) {
@@ -122,10 +122,10 @@ public class ProfileForm extends FormActivity {
 
 		if (mViewFlipper != null) {
 			if (mCommon.mCommand.verb == CommandVerb.New) {
-				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(1));		
+				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(1));
 			}
 			else {
-				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));		
+				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
 			}
 		}
 	}
@@ -146,12 +146,7 @@ public class ProfileForm extends FormActivity {
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 				new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
-		if (serviceResponse.responseCode != ResponseCode.Success) {
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-			overridePendingTransition(R.anim.hold, R.anim.fade_out_medium);
-		}
-		else {
+		if (serviceResponse.responseCode == ResponseCode.Success) {
 			String jsonResponse = (String) serviceResponse.data;
 			mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 			mImageUriOriginal = mUser.imageUri;
@@ -166,25 +161,23 @@ public class ProfileForm extends FormActivity {
 
 		if (mUser.imageUri != null && mUser.imageUri.length() > 0) {
 			if (mUser.imageBitmap != null) {
-				mImageUser.setImageBitmap(mUser.imageBitmap);
+				ImageUtils.showImageInImageView(mUser.imageBitmap, mImageUser.getImageView());
 			}
 			else {
-				ImageRequest imageRequest = new ImageRequest(mUser.imageUri, null, ImageShape.Square, false, false,
-						CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
+				ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
+				builder.setFromUris(mUser.imageUri, null);
+				builder.setRequestListener(new RequestListener() {
 
-							@Override
-							public void onComplete(Object response) {
+					@Override
+					public void onComplete(Object response) {
+						ServiceResponse serviceResponse = (ServiceResponse) response;
+						if (serviceResponse.responseCode == ResponseCode.Success) {
+							mUser.imageBitmap = (Bitmap) serviceResponse.data;
+						}
+					}
+				});
 
-								ServiceResponse serviceResponse = (ServiceResponse) response;
-								if (serviceResponse.responseCode != ResponseCode.Success) {
-									return;
-								}
-								else {
-									mUser.imageBitmap = (Bitmap) serviceResponse.data;
-								}
-							}
-						});
-
+				ImageRequest imageRequest = builder.create();
 				mImageUser.setImageRequest(imageRequest, null);
 			}
 		}
@@ -193,7 +186,7 @@ public class ProfileForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
-	
+
 	public void onTabClick(View view) {
 		mCommon.setActiveTab(view);
 		if (view.getTag().equals("profile")) {
@@ -205,27 +198,19 @@ public class ProfileForm extends FormActivity {
 	}
 
 	public void onSaveButtonClick(View view) {
-		mCommon.startTitlebarProgress();
 		doSave();
-	}
-
-	public void onCancelButtonClick(View view) {
-		setResult(Activity.RESULT_CANCELED);
-		finish();
 	}
 
 	public void onChangePictureButtonClick(View view) {
 		showChangePictureDialog(true, mImageUser, new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, Object extra) {
+			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					Bitmap bitmap = (Bitmap) serviceResponse.data;
-					String imageUri = (String) extra;
 					mUser.imageUri = imageUri;
-					mUser.imageBitmap = bitmap;
+					mUser.imageBitmap = imageBitmap;
 				}
 			}
 		});
@@ -236,11 +221,98 @@ public class ProfileForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	protected void doSave() {
-		if (!validate()) {
-			return;
+
+		if (validate()) {
+
+			new AsyncTask() {
+
+				@Override
+				protected void onPreExecute() {
+					mCommon.showProgressDialog(true, "Saving...");
+				}
+
+				@Override
+				protected Object doInBackground(Object... params) {
+
+					/* Delete or upload images to S3 as needed. */
+					ServiceResponse serviceResponse = updateImages();
+
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						serviceResponse = update();
+					}
+
+					return serviceResponse;
+				}
+
+				@Override
+				protected void onPostExecute(Object response) {
+					ServiceResponse serviceResponse = (ServiceResponse) response;
+					mCommon.showProgressDialog(false, null);
+
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						Aircandi.getInstance().setUser(mUser);
+						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+						setResult(CandiConstants.RESULT_PROFILE_UPDATED);
+						finish();
+					}
+				}
+			}.execute();
 		}
-		updateImages();
-		update();
+	}
+
+	protected ServiceResponse updateImages() {
+
+		/* Delete image from S3 if it has been orphaned */
+		ServiceResponse serviceResponse = new ServiceResponse();
+		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
+			if (!mUser.imageUri.equals(mImageUriOriginal)) {
+				try {
+					S3.deleteImage(mImageUriOriginal.substring(mImageUriOriginal.lastIndexOf("/") + 1));
+					ImageManager.getInstance().deleteImage(mImageUriOriginal);
+					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
+				}
+				catch (ProxibaseException exception) {
+					return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceException, null, exception);
+				}
+			}
+		}
+
+		/* Put image to S3 if we have a new one. */
+		if (mUser.imageBitmap != null) {
+			try {
+				String imageKey = String.valueOf(((User) mUser).id) + "_"
+									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
+									+ ".jpg";
+				S3.putImage(imageKey, mUser.imageBitmap);
+				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
+			}
+			catch (ProxibaseException exception) {
+				return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceException, null, exception);
+			}
+		}
+		return serviceResponse;
+	}
+
+	protected ServiceResponse update() {
+
+		mUser.email = mTextEmail.getText().toString().trim();
+		mUser.fullname = mTextFullname.getText().toString().trim();
+		mUser.updatedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+
+		if (mTextPassword.getText().toString().length() != 0) {
+			mUser.password = mTextPassword.getText().toString().trim();
+		}
+
+		Logger.i(this, "Updating user: " + mUser.fullname);
+
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setUri(mUser.getEntryUri());
+		serviceRequest.setRequestType(RequestType.Update);
+		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
+		serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		return serviceResponse;
 	}
 
 	private boolean validate() {
@@ -259,86 +331,6 @@ public class ProfileForm extends FormActivity {
 			}
 		}
 		return true;
-	}
-
-	protected void updateImages() {
-
-		/* Delete image from S3 if it has been orphaned */
-		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
-			if (!mUser.imageUri.equals(mImageUriOriginal)) {
-				try {
-					S3.deleteImage(mImageUriOriginal.substring(mImageUriOriginal.lastIndexOf("/") + 1));
-					ImageManager.getInstance().deleteImage(mImageUriOriginal);
-					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
-				}
-				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
-					exception.printStackTrace();
-				}
-			}
-		}
-
-		/* Put image to S3 if we have a new one. */
-		if (mUser.imageUri != null && !ImageManager.isLocalImage(mUser.imageUri)) {
-			if (!mUser.imageUri.equals(mImageUriOriginal) && mUser.imageBitmap != null) {
-				String imageKey = String.valueOf(((User) mUser).id) + "_"
-									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-									+ ".jpg";
-				try {
-					S3.putImage(imageKey, mUser.imageBitmap);
-				}
-				catch (ProxibaseException exception) {
-					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
-					exception.printStackTrace();
-				}
-				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
-			}
-		}
-	}
-
-	protected void update() {
-
-		mUser.email = mTextEmail.getText().toString().trim();
-		mUser.fullname = mTextFullname.getText().toString().trim();
-		if (mTextPassword.getText().toString().length() != 0) {
-			mUser.password = mTextPassword.getText().toString().trim();
-		}
-
-		Logger.i(this, "Updating user: " + mUser.fullname);
-
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(mUser.getEntryUri());
-		serviceRequest.setRequestType(RequestType.Update);
-		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
-		serviceRequest.setResponseFormat(ResponseFormat.Json);
-		serviceRequest.setRequestListener(new RequestListener() {
-
-			@Override
-			public void onComplete(Object response) {
-
-				mCommon.stopTitlebarProgress();
-				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode != ResponseCode.Success) {
-					ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
-					return;
-				}
-				else {
-					ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-					Intent intent = new Intent();
-					mUser.imageBitmap = null;
-
-					String jsonUser = ProxibaseService.getGson(GsonType.Internal).toJson(mUser);
-					if (jsonUser.length() > 0) {
-						intent.putExtra(getString(R.string.EXTRA_USER), jsonUser);
-					}
-
-					setResult(CandiConstants.RESULT_PROFILE_UPDATED);
-					finish();
-				}
-			}
-		});
-
-		NetworkManager.getInstance().requestAsync(serviceRequest);
 	}
 
 	private boolean isValid() {
@@ -365,6 +357,7 @@ public class ProfileForm extends FormActivity {
 		try {
 			if (mUser != null && mUser.imageBitmap != null) {
 				mUser.imageBitmap.recycle();
+				mUser.imageBitmap = null;
 			}
 		}
 		catch (Exception exception) {
@@ -378,10 +371,5 @@ public class ProfileForm extends FormActivity {
 	@Override
 	protected int getLayoutID() {
 		return R.layout.profile_form;
-	}
-
-	protected enum FormTab {
-		Profile,
-		Account
 	}
 }

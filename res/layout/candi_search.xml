@@ -99,6 +99,27 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:fitsSystemWindows="true" />
+
+        <RelativeLayout
+            android:id="@+id/button_layer"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:visibility="visible" >
+
+            <Button
+                android:id="@+id/button_new"
+                style="@style/candi_info_button"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_margin="15dp"
+                android:height="65dp"
+                android:onClick="onNewCandiClick"
+                android:padding="3dp"
+                android:text="@string/candi_button_new"
+                android:width="65dp" />
+        </RelativeLayout>
     </FrameLayout>
 
     <FrameLayout

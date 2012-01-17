@@ -1,7 +1,5 @@
 package com.proxibase.aircandi.widgets;
 
-import java.util.Date;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -14,9 +12,8 @@ import android.widget.TextView;
 
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.DateUtils;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
-import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.sdk.android.proxi.consumer.Author;
 import com.proxibase.sdk.android.proxi.consumer.User;
 
@@ -24,7 +21,7 @@ public class AuthorBlock extends RelativeLayout {
 
 	public static final int	HORIZONTAL	= 0;
 	public static final int	VERTICAL	= 1;
-	private ViewGroup			mBoundView;
+	private ViewGroup		mBoundView;
 	private WebImageView	mImageUser;
 	private TextView		mTextFullname;
 	private TextView		mTextTimeSince;
@@ -63,7 +60,7 @@ public class AuthorBlock extends RelativeLayout {
 		this.addView(mBoundView);
 	}
 
-	public void bindToAuthor(Author author, Date date) {
+	public void bindToAuthor(Author author, Integer date) {
 		mAuthor = author;
 		if (mAuthor != null) {
 			if (mTextFullname != null) {
@@ -71,7 +68,7 @@ public class AuthorBlock extends RelativeLayout {
 			}
 			if (mTextTimeSince != null) {
 				if (date != null) {
-					mTextTimeSince.setText(DateUtils.timeSince(date, DateUtils.nowDate()));
+					mTextTimeSince.setText(DateUtils.timeSince(date, (int) (DateUtils.nowDate().getTime() / 1000L)));
 				}
 				else {
 					mTextTimeSince.setVisibility(View.GONE);
@@ -79,15 +76,16 @@ public class AuthorBlock extends RelativeLayout {
 			}
 			if (mImageUser != null) {
 				if (mAuthor.imageUri != null && mAuthor.imageUri.length() != 0) {
-					ImageRequest imageRequest = new ImageRequest(mAuthor.imageUri, mAuthor.linkUri, ImageShape.Square, false, false,
-							CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
+					ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
+					builder.setFromUris(mAuthor.imageUri, mAuthor.linkUri);
+					ImageRequest imageRequest = builder.create();
 					mImageUser.setImageRequest(imageRequest, null);
 				}
 			}
 		}
 	}
 
-	public void bindToUser(User user, Date date) {
+	public void bindToUser(User user, Integer date) {
 		mUser = user;
 		if (mUser != null) {
 			if (mTextFullname != null) {
@@ -95,7 +93,7 @@ public class AuthorBlock extends RelativeLayout {
 			}
 			if (mTextTimeSince != null) {
 				if (date != null) {
-					mTextTimeSince.setText(DateUtils.timeSince(date, DateUtils.nowDate()));
+					mTextTimeSince.setText(DateUtils.timeSince(date, (int) (DateUtils.nowDate().getTime() / 1000L)));
 				}
 				else {
 					mTextTimeSince.setVisibility(View.GONE);
@@ -103,8 +101,9 @@ public class AuthorBlock extends RelativeLayout {
 			}
 			if (mImageUser != null) {
 				if (mUser.imageUri != null && mUser.imageUri.length() != 0) {
-					ImageRequest imageRequest = new ImageRequest(mUser.imageUri, mUser.linkUri, ImageShape.Square, false, false,
-							CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
+					ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
+					builder.setFromUris(mUser.imageUri, mUser.linkUri);
+					ImageRequest imageRequest = builder.create();
 					mImageUser.setImageRequest(imageRequest, null);
 				}
 			}

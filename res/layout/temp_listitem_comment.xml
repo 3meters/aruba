@@ -14,13 +14,12 @@
 
     <com.proxibase.aircandi.widgets.WebImageView
         android:id="@+id/item_author_image"
-        style="@style/candi_list_image"
         android:layout_width="60dp"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
+        android:scaleType="centerCrop"
         android:layout_alignParentTop="true"
         android:layout_marginRight="10dp"
-        android:paddingTop="5dp"
-        android:src="@drawable/placeholder_user_dark" />
+        android:layout_marginTop="5dp" />
 
     <RelativeLayout
         android:id="@+id/group_author"

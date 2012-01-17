@@ -17,9 +17,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebView.PictureListener;
 
-import com.proxibase.aircandi.components.ImageManager.ImageRequest;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageFormat;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.components.ImageRequest.ImageFormat;
+import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResultCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
@@ -51,22 +50,22 @@ public class ImageLoader {
 
 	public void fetchImage(ImageRequest imageRequest) {
 
-		ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);
-		if (imageRequest.requestListener == null) {
+		ServiceResponse serviceResponse = new ServiceResponse();
+		if (imageRequest.getRequestListener() == null) {
 			throw new IllegalArgumentException("imageRequest.imageReadyListener is required");
 		}
 
-		mImageRequestors.put(imageRequest.imageRequestor, imageRequest.imageUri);
+		mImageRequestors.put(imageRequest.getImageRequestor(), imageRequest.getImageUri());
 
-		if (imageRequest.imageUri.toLowerCase().startsWith("resource:")) {
+		if (imageRequest.getImageUri().toLowerCase().startsWith("resource:")) {
 
-			String rawResourceName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("resource:") + 9);
+			String rawResourceName = imageRequest.getImageUri().substring(imageRequest.getImageUri().indexOf("resource:") + 9);
 			String resolvedResourceName = ImageManager.getInstance().resolveResourceName(rawResourceName);
 
-			if (imageRequest.searchCache) {
+			if (imageRequest.getSearchCache()) {
 				Bitmap bitmap = mImageCache.get(resolvedResourceName);
 				if (bitmap != null) {
-					if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+					if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.getScaleToWidth() != bitmap.getWidth()) {
 						/*
 						 * We might have cached a large version of an image so we
 						 * need to make sure we honor the image request specifications.
@@ -74,7 +73,7 @@ public class ImageLoader {
 						bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 					}
 					serviceResponse.data = bitmap;
-					imageRequest.requestListener.onComplete(serviceResponse);
+					imageRequest.getRequestListener().onComplete(serviceResponse);
 					return;
 				}
 			}
@@ -84,7 +83,7 @@ public class ImageLoader {
 			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(resourceId);
 
 			if (bitmap != null) {
-				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+				if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.getScaleToWidth() != bitmap.getWidth()) {
 					/*
 					 * We might have cached a large version of an image so we
 					 * need to make sure we honor the image request specifications.
@@ -93,45 +92,46 @@ public class ImageLoader {
 				}
 
 				/* We put resource images into the cache so they are consistent */
-				if (imageRequest.updateCache) {
+				if (imageRequest.getUpdateCache()) {
 					Logger.v(this, resolvedResourceName + ": Pushing into cache...");
 					mImageCache.put(resolvedResourceName, bitmap);
 				}
 
 				serviceResponse.data = bitmap;
-				imageRequest.requestListener.onComplete(serviceResponse);
+				imageRequest.getRequestListener().onComplete(serviceResponse);
 				return;
 			}
 			else {
 				throw new IllegalStateException("Bitmap resource is null: " + resolvedResourceName);
 			}
 		}
-		else if (imageRequest.imageUri.toLowerCase().startsWith("asset:")) {
+		else if (imageRequest.getImageUri().toLowerCase().startsWith("asset:")) {
 
-			String assetName = imageRequest.imageUri.substring(imageRequest.imageUri.indexOf("asset:") + 6);
+			String assetName = imageRequest.getImageUri().substring(imageRequest.getImageUri().indexOf("asset:") + 6);
 			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(assetName);
 			if (bitmap != null) {
-				if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+				if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.getScaleToWidth() != bitmap.getWidth()) {
 					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 				}
 
 				/* We put resource images into the cache so they are consistent */
-				if (imageRequest.updateCache) {
-					Logger.v(this, imageRequest.imageUri + ": Pushing into cache...");
-					mImageCache.put(imageRequest.imageUri, bitmap);
+				if (imageRequest.getUpdateCache()) {
+					Logger.v(this, imageRequest.getImageUri() + ": Pushing into cache...");
+					mImageCache.put(imageRequest.getImageUri(), bitmap);
 				}
 
 				serviceResponse.data = bitmap;
-				imageRequest.requestListener.onComplete(serviceResponse);
+				imageRequest.getRequestListener().onComplete(serviceResponse);
 				return;
 			}
 		}
 		else {
 
-			if (imageRequest.searchCache) {
-				Bitmap bitmap = mImageCache.get(imageRequest.imageUri);
+			if (imageRequest.getSearchCache()) {
+				Bitmap bitmap = mImageCache.get(imageRequest.getImageUri());
 				if (bitmap != null) {
-					if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.scaleToWidth != bitmap.getWidth()) {
+					Logger.v(this, "Image request satisfied from cache: " + imageRequest.getImageUri());
+					if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.getScaleToWidth() != bitmap.getWidth()) {
 						/*
 						 * We might have cached a large version of an image so we
 						 * need to make sure we honor the image request specifications.
@@ -140,11 +140,11 @@ public class ImageLoader {
 
 						/* Create reflection if requested and needed */
 
-						Bitmap reflectionBitmap = ImageManager.getInstance().getImage(imageRequest.imageUri + ".reflection");
+						Bitmap reflectionBitmap = ImageManager.getInstance().getImage(imageRequest.getImageUri() + ".reflection");
 						if (reflectionBitmap == null) {
-							if (imageRequest.makeReflection) {
+							if (imageRequest.getMakeReflection()) {
 								final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
-								mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection, CompressFormat.PNG);
+								mImageCache.put(imageRequest.getImageUri() + ".reflection", bitmapReflection, CompressFormat.PNG);
 								if (mImageCache.isFileCacheOnly()) {
 									bitmapReflection.recycle();
 								}
@@ -152,13 +152,12 @@ public class ImageLoader {
 						}
 					}
 					serviceResponse.data = bitmap;
-					imageRequest.requestListener.onComplete(serviceResponse);
+					imageRequest.getRequestListener().onComplete(serviceResponse);
 					return;
 				}
 			}
 		}
 
-		Logger.v(this, imageRequest.imageUri + ": Queued for download");
 		queueImage(imageRequest);
 	}
 
@@ -171,14 +170,15 @@ public class ImageLoader {
 		 * The image requestor may have called for other images before. So there may be some old tasks
 		 * in the queue. We need to discard them.
 		 */
-		mImagesQueue.Clean(imageRequest.imageRequestor);
+		mImagesQueue.Clean(imageRequest.getImageRequestor());
 		synchronized (mImagesQueue.mImagesToLoad) {
-			if (imageRequest.priority == 1) {
-				mImagesQueue.mImagesToLoad.addFirst(imageRequest);
-			}
-			else {
+//			if (imageRequest.getPriority() == 1) {
+//				mImagesQueue.mImagesToLoad.addFirst(imageRequest);
+//			}
+//			else {
+				Logger.v(this, imageRequest.getImageUri() + ": Queued for download");
 				mImagesQueue.mImagesToLoad.add(imageRequest);
-			}
+//			}
 			mImagesQueue.mImagesToLoad.notifyAll();
 		}
 
@@ -201,22 +201,20 @@ public class ImageLoader {
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-		if (serviceResponse.responseCode != ResponseCode.Success) {
-			return serviceResponse;
+		if (serviceResponse.responseCode == ResponseCode.Success) {
+
+			byte[] imageBytes = (byte[]) serviceResponse.data;
+
+			/* Turn byte array into bitmap that fits in our desired max size */
+			Bitmap bitmap = ImageManager.getInstance().bitmapForByteArraySampled(imageBytes, imageRequest, CandiConstants.IMAGE_BYTES_MAX);
+
+			if (bitmap == null) {
+				throw new IllegalStateException("Stream could not be decoded to a bitmap: " + url);
+			}
+			else {
+				serviceResponse.data = bitmap;
+			}
 		}
-
-		byte[] imageBytes = (byte[]) serviceResponse.data;
-
-		/* Turn byte array into bitmap that fits in our desired max size */
-		Bitmap bitmap = ImageManager.getInstance().bitmapForByteArraySampled(imageBytes, imageRequest, CandiConstants.IMAGE_BYTES_MAX);
-
-		if (bitmap == null) {
-			throw new IllegalStateException("Stream could not be decoded to a bitmap: " + url);
-		}
-		else {
-			serviceResponse.data = bitmap;
-		}
-
 		return serviceResponse;
 	}
 
@@ -250,11 +248,11 @@ public class ImageLoader {
 		 */
 
 		mWebView.getSettings().setUseWideViewPort(true);
-		if (imageRequest.linkZoom) {
+		if (imageRequest.getLinkZoom()) {
 			mWebView.getSettings().setUseWideViewPort(false);
 		}
 		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
-		mWebView.getSettings().setJavaScriptEnabled(imageRequest.linkJavascriptEnabled);
+		mWebView.getSettings().setJavaScriptEnabled(imageRequest.getLinkJavascriptEnabled());
 		mWebView.getSettings().setLoadWithOverviewMode(true);
 		mWebView.refreshDrawableState();
 
@@ -352,7 +350,7 @@ public class ImageLoader {
 
 		/* Crop if requested */
 		Bitmap bitmapCropped;
-		if (imageRequest.imageShape == ImageShape.Square) {
+		if (imageRequest.getImageShape() == ImageShape.Square) {
 			bitmapCropped = ImageUtils.cropToSquare(bitmap);
 		}
 		else {
@@ -361,10 +359,10 @@ public class ImageLoader {
 
 		/* Scale if needed */
 		Bitmap bitmapCroppedScaled;
-		if (imageRequest.scaleToWidth > 0 && bitmapCropped.getWidth() != imageRequest.scaleToWidth) {
-			float scalingRatio = (float) imageRequest.scaleToWidth / (float) bitmapCropped.getWidth();
+		if (imageRequest.getScaleToWidth() > 0 && bitmapCropped.getWidth() != imageRequest.getScaleToWidth()) {
+			float scalingRatio = (float) imageRequest.getScaleToWidth() / (float) bitmapCropped.getWidth();
 			float newHeight = (float) bitmapCropped.getHeight() * scalingRatio;
-			bitmapCroppedScaled = Bitmap.createScaledBitmap(bitmapCropped, imageRequest.scaleToWidth, (int) (newHeight), true);
+			bitmapCroppedScaled = Bitmap.createScaledBitmap(bitmapCropped, imageRequest.getScaleToWidth(), (int) (newHeight), true);
 		}
 		else {
 			bitmapCroppedScaled = bitmapCropped;
@@ -413,7 +411,7 @@ public class ImageLoader {
 		/* Removes all instances of imageRequest associated with the imageRequestor */
 		public void Clean(Object imageRequestor) {
 			for (int j = 0; j < mImagesToLoad.size();) {
-				if (mImagesToLoad.get(j).imageRequestor == imageRequestor) {
+				if (mImagesToLoad.get(j).getImageRequestor() == imageRequestor) {
 					mImagesToLoad.remove(j);
 				}
 				else {
@@ -436,42 +434,43 @@ public class ImageLoader {
 					/* Thread waits until there are any images to load in the queue */
 					if (mImagesQueue.mImagesToLoad.size() == 0) {
 						synchronized (mImagesQueue.mImagesToLoad) {
+							//mImageLoaderThread.wait();
 							mImagesQueue.mImagesToLoad.wait();
+							Logger.v(this, "ImageQueue thread is waiting");
 						}
 					}
 
 					if (mImagesQueue.mImagesToLoad.size() != 0) {
+						Logger.v(this, "ImageQueue has " + String.valueOf(mImagesQueue.mImagesToLoad.size()) + " images requests pending");
 						final ImageRequest imageRequest;
 						synchronized (mImagesQueue.mImagesToLoad) {
 							ImageRequest imageRequestCheck = mImagesQueue.mImagesToLoad.peek();
-							if (imageRequestCheck.imageFormat == ImageFormat.Html) {
+							if (imageRequestCheck.getImageFormat() == ImageFormat.Html) {
 								if (processingWebPage) {
+									//mImageLoaderThread.wait();
 									mImagesQueue.mImagesToLoad.wait();
+									Logger.v(this, "ImageQueue thread is waiting");
 								}
 							}
 							imageRequest = mImagesQueue.mImagesToLoad.poll();
 						}
 
 						Bitmap bitmap = null;
-						ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);
+						ServiceResponse serviceResponse = new ServiceResponse();
 						/*
 						 * Html image
 						 */
-						if (imageRequest.imageFormat == ImageFormat.Html) {
+						if (imageRequest.getImageFormat() == ImageFormat.Html) {
 
 							processingWebPage = true;
-							Logger.v(this, "Starting html image processing: " + imageRequest.imageUri);
-							getWebPageAsBitmap(imageRequest.imageUri, imageRequest, new RequestListener() {
+							Logger.v(this, "Starting html image processing: " + imageRequest.getImageUri());
+							getWebPageAsBitmap(imageRequest.getImageUri(), imageRequest, new RequestListener() {
 
 								@Override
 								public void onComplete(Object response) {
 
 									ServiceResponse serviceResponse = (ServiceResponse) response;
-									if (serviceResponse.responseCode != ResponseCode.Success) {
-										imageRequest.requestListener.onComplete(serviceResponse);
-									}
-									else
-									{
+									if (serviceResponse.responseCode == ResponseCode.Success) {
 										processingWebPage = false;
 
 										/* It safe to start processing another web page image if we have one */
@@ -484,89 +483,85 @@ public class ImageLoader {
 										bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 
 										/* Stuff it into the cache. Overwrites if it already exists. */
-										mImageCache.put(imageRequest.imageUri, bitmap, CompressFormat.JPEG);
+										mImageCache.put(imageRequest.getImageUri(), bitmap, CompressFormat.JPEG);
 
 										/* Create reflection if requested */
-										if (imageRequest.makeReflection) {
+										if (imageRequest.getMakeReflection()) {
 											final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
-											mImageCache.put(imageRequest.imageUri + ".reflection", bitmapReflection, CompressFormat.PNG);
+											mImageCache.put(imageRequest.getImageUri() + ".reflection", bitmapReflection, CompressFormat.PNG);
 											if (mImageCache.isFileCacheOnly()) {
 												bitmapReflection.recycle();
 											}
 										}
 
-										Logger.v(this, "Html image processed: " + imageRequest.imageUri);
+										Logger.v(this, "Html image processed: " + imageRequest.getImageUri());
 										Logger.v(this, "Html image hashcode: " + Utilities.md5HashForBitmap(bitmap));
-										String uri = mImageRequestors.get(imageRequest.imageRequestor);
-										if (uri != null && uri.equals(imageRequest.imageUri)) {
+										String uri = mImageRequestors.get(imageRequest.getImageRequestor());
+										if (uri != null && uri.equals(imageRequest.getImageUri())) {
 											serviceResponse.data = bitmap;
-											imageRequest.requestListener.onComplete(serviceResponse);
 										}
 									}
+									imageRequest.getRequestListener().onComplete(serviceResponse);
 								}
 
 								@Override
 								public void onProgressChanged(int progress) {
-									imageRequest.requestListener.onProgressChanged(progress);
+									imageRequest.getRequestListener().onProgressChanged(progress);
 								}
 							});
-
 						}
 						/*
 						 * Binary image
 						 */
-						else if (imageRequest.imageFormat == ImageFormat.Binary) {
+						else if (imageRequest.getImageFormat() == ImageFormat.Binary) {
 
 							long startTime = System.nanoTime();
 							float estimatedTime = System.nanoTime();
-							Logger.v(this, imageRequest.imageUri + ": Download started...");
+							Logger.v(this, imageRequest.getImageUri() + ": Download started...");
 
-							serviceResponse = getBitmap(imageRequest.imageUri, imageRequest, new RequestListener() {
+							serviceResponse = getBitmap(imageRequest.getImageUri(), imageRequest, new RequestListener() {
 
 								@Override
 								public void onProgressChanged(int progress) {
-									if (imageRequest.requestListener != null) {
+									if (imageRequest.getRequestListener() != null) {
 										if (progress > 0) {
-											imageRequest.requestListener.onProgressChanged((int) (70 * ((float) progress / 100f)));
+											imageRequest.getRequestListener().onProgressChanged((int) (70 * ((float) progress / 100f)));
 										}
 									}
 								}
 							});
 
-							if (serviceResponse.responseCode != ResponseCode.Success) {
-								imageRequest.requestListener.onComplete(serviceResponse);
-							}
-							else {
+							if (serviceResponse.responseCode == ResponseCode.Success) {
 
 								bitmap = (Bitmap) serviceResponse.data;
-								Logger.v(this, imageRequest.imageUri + ": Download finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
+								Logger.v(this, imageRequest.getImageUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
 
 								//imageRequest.imageReadyListener.onProgressChanged(70);
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
 
 								/* Perform requested post processing */
-								if (imageRequest.scaleToWidth != CandiConstants.IMAGE_WIDTH_ORIGINAL) {
-									Logger.v(this, imageRequest.imageUri + ": Scale and crop...");
+								if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL) {
+									Logger.v(this, imageRequest.getImageUri() + ": Scale and crop...");
 									bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 								}
 
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
-								Logger.v(this, imageRequest.imageUri + ": Post processing: " + String.valueOf(estimatedTime / 1000000) + "ms");
+								Logger.v(this, imageRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000) + "ms");
 
 								/*
 								 * Stuff it into the cache. Overwrites if it already exists.
 								 * This is a perf hit in the process cause writing files is slow.
 								 */
-								if (imageRequest.updateCache) {
-									Logger.v(this, imageRequest.imageUri + ": Pushing into cache...");
-									mImageCache.put(imageRequest.imageUri, bitmap);
+								if (imageRequest.getUpdateCache()) {
+									Logger.v(this, imageRequest.getImageUri() + ": Pushing into cache...");
+									mImageCache.put(imageRequest.getImageUri(), bitmap);
 								}
 
 								/* Create reflection if requested */
-								imageRequest.requestListener.onProgressChanged(80);
-								if (imageRequest.makeReflection) {
+								imageRequest.getRequestListener().onProgressChanged(80);
+								if (imageRequest.getMakeReflection()) {
 									//									final Bitmap bitmapReflection = ImageUtils.makeReflection(bitmap, true);
 									//									estimatedTime = System.nanoTime() - startTime;
 									//									startTime = System.nanoTime();
@@ -580,20 +575,21 @@ public class ImageLoader {
 									//									}
 								}
 
-								String uri = mImageRequestors.get(imageRequest.imageRequestor);
-								if (uri != null && uri.equals(imageRequest.imageUri)) {
-									Logger.v(this, imageRequest.imageUri + ": Progress complete");
+								String uri = mImageRequestors.get(imageRequest.getImageRequestor());
+								if (uri != null && uri.equals(imageRequest.getImageUri())) {
+									Logger.v(this, imageRequest.getImageUri() + ": Progress complete");
 									serviceResponse.data = bitmap;
-									imageRequest.requestListener.onProgressChanged(100);
-									imageRequest.requestListener.onComplete(serviceResponse);
+									imageRequest.getRequestListener().onProgressChanged(100);
 								}
 								else {
-									Logger.v(this, imageRequest.imageUri + ": Requestor might have been recycled");
+									Logger.v(this, imageRequest.getImageUri() + ": Requestor might have been recycled");
 								}
 							}
+							imageRequest.getRequestListener().onComplete(serviceResponse);
 						}
 					}
 					if (Thread.interrupted()) {
+						Logger.d(this, "ImageQueue thread interrupted");
 						break;
 					}
 				}

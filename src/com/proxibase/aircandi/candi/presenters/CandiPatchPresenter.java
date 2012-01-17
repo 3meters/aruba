@@ -21,6 +21,7 @@ import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
+import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
@@ -55,7 +56,6 @@ import com.proxibase.aircandi.candi.models.CandiPatchModel;
 import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.models.ZoneModel;
 import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
-import com.proxibase.aircandi.candi.models.CandiModel.DisplayExtra;
 import com.proxibase.aircandi.candi.models.CandiModel.ReasonInactive;
 import com.proxibase.aircandi.candi.models.CandiModel.Transition;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
@@ -70,6 +70,7 @@ import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.candi.views.ZoneView;
 import com.proxibase.aircandi.candi.views.IView.ViewTouchListener;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
+import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.BitmapTextureSource;
 import com.proxibase.aircandi.components.CandiList;
 import com.proxibase.aircandi.components.CountDownTimer;
@@ -94,6 +95,7 @@ public class CandiPatchPresenter implements Observer {
 	private Context					mContext;
 	private Engine					mEngine;
 	public CandiAnimatedSprite		mProgressSprite;
+	public Rectangle				mHighlight;
 	private float					mLastMotionX;
 	private CameraTargetSprite		mCameraTargetSprite;
 	private float					mBoundsMinX;
@@ -109,9 +111,9 @@ public class CandiPatchPresenter implements Observer {
 	public TextureRegion			mZoneReflectionTextureRegion;
 
 	public CandiSearchActivity		mCandiActivity;
+	private AircandiCommon			mCommon;
 	public RenderSurfaceView		mRenderSurfaceView;
 	private ManageViewsThread		mManageViewsThread;
-	public DisplayExtra				mDisplayExtras;
 	public boolean					mFullUpdateInProgress	= true;
 
 	private ICandiListener			mCandiListener;
@@ -140,7 +142,7 @@ public class CandiPatchPresenter implements Observer {
 		mRenderSurfaceView = renderSurfaceView;
 		mCandiActivity = (CandiSearchActivity) activity;
 		mGestureDetector = new GestureDetector(mContext, new SingleTapGestureDetector());
-		
+
 		/* Rendering timer */
 		mRenderingTimer = new RenderCountDownTimer(5000, 500);
 
@@ -160,7 +162,6 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Pooling */
 		mCandiViewPool = new CandiViewPool();
-
 
 		/* Origin */
 		mCandiPatchModel.setOriginX(0);
@@ -208,6 +209,12 @@ public class CandiPatchPresenter implements Observer {
 			final int centerX = (int) ((CandiConstants.CANDI_VIEW_WIDTH - mProgressTextureRegion.getTileWidth()) / 2);
 			final int centerY = (int) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + (CandiConstants.CANDI_VIEW_BODY_HEIGHT - mProgressTextureRegion
 					.getTileHeight()) / 2);
+
+			/* Highlight */
+			mHighlight = new Rectangle(0, 0, 258, 258);
+			mHighlight.setColor(1.0f, 0.7f, 0f, 1.0f);
+			mHighlight.setVisible(false);
+			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mHighlight);
 
 			/* Progress sprite */
 			mProgressSprite = new CandiAnimatedSprite(0, 0, mProgressTextureRegion);
@@ -278,6 +285,9 @@ public class CandiPatchPresenter implements Observer {
 					}
 
 					if (pSceneTouchEvent.isActionMove()) {
+						if (mHighlight.isVisible()) {
+							mHighlight.setVisible(false);
+						}
 
 						float scrollX = mLastMotionX - screenX;
 						scrollX /= mCameraTargetSprite.getScaleX();
@@ -347,7 +357,7 @@ public class CandiPatchPresenter implements Observer {
 
 		CandiModel candiModel = null;
 		if (mCandiPatchModel.hasCandiModelForEntity(entity.id)) {
-			candiModel = mCandiPatchModel.updateCandiModel(entity, mDisplayExtras);
+			candiModel = mCandiPatchModel.updateCandiModel(entity, mCandiActivity.mPrefDisplayExtras);
 			candiModel.getChildren().clear();
 			candiModel.setChanged();
 
@@ -355,7 +365,7 @@ public class CandiPatchPresenter implements Observer {
 
 				CandiModel childCandiModel = null;
 				if (mCandiPatchModel.hasCandiModelForEntity(childEntity.id)) {
-					childCandiModel = mCandiPatchModel.updateCandiModel(childEntity, mDisplayExtras);
+					childCandiModel = mCandiPatchModel.updateCandiModel(childEntity, mCandiActivity.mPrefDisplayExtras);
 					childCandiModel.getViewStateCurrent().setVisible(!childCandiModel.getEntity().isHidden);
 					candiModel.getChildren().add(childCandiModel);
 					childCandiModel.setParent(candiModel);
@@ -363,7 +373,7 @@ public class CandiPatchPresenter implements Observer {
 				}
 				else {
 					childCandiModel = CandiModelFactory.newCandiModel(childEntity.id, childEntity, mCandiPatchModel);
-					childCandiModel.setDisplayExtra(mDisplayExtras);
+					childCandiModel.setDisplayExtra(mCandiActivity.mPrefDisplayExtras);
 					mCandiPatchModel.addCandiModel(childCandiModel);
 					childCandiModel.getViewStateCurrent().setVisible(!childCandiModel.getEntity().isHidden);
 					candiModel.getChildren().add(childCandiModel);
@@ -474,13 +484,13 @@ public class CandiPatchPresenter implements Observer {
 
 			CandiModel candiModel = null;
 			if (mCandiPatchModel.hasCandiModelForEntity(entity.id)) {
-				candiModel = mCandiPatchModel.updateCandiModel(entity, mDisplayExtras);
+				candiModel = mCandiPatchModel.updateCandiModel(entity, mCandiActivity.mPrefDisplayExtras);
 				candiModel.setParent(candiRootNext);
 				candiRootNext.getChildren().add(candiModel);
 			}
 			else {
 				candiModel = CandiModelFactory.newCandiModel(entity.id, entity, mCandiPatchModel);
-				candiModel.setDisplayExtra(mDisplayExtras);
+				candiModel.setDisplayExtra(mCandiActivity.mPrefDisplayExtras);
 				mCandiPatchModel.addCandiModel(candiModel);
 				candiModel.setParent(candiRootNext);
 				candiRootNext.getChildren().add(candiModel);
@@ -490,13 +500,13 @@ public class CandiPatchPresenter implements Observer {
 
 				CandiModel childCandiModel = null;
 				if (mCandiPatchModel.hasCandiModelForEntity(childEntity.id)) {
-					childCandiModel = mCandiPatchModel.updateCandiModel(childEntity, mDisplayExtras);
+					childCandiModel = mCandiPatchModel.updateCandiModel(childEntity, mCandiActivity.mPrefDisplayExtras);
 					candiModel.getChildren().add(childCandiModel);
 					childCandiModel.setParent(candiModel);
 				}
 				else {
 					childCandiModel = CandiModelFactory.newCandiModel(childEntity.id, childEntity, mCandiPatchModel);
-					childCandiModel.setDisplayExtra(mDisplayExtras);
+					childCandiModel.setDisplayExtra(mCandiActivity.mPrefDisplayExtras);
 					mCandiPatchModel.addCandiModel(childCandiModel);
 					candiModel.getChildren().add(childCandiModel);
 					childCandiModel.setParent(candiModel);
@@ -1642,6 +1652,14 @@ public class CandiPatchPresenter implements Observer {
 
 	public Context getContext() {
 		return mContext;
+	}
+
+	public void setCommon(AircandiCommon common) {
+		this.mCommon = common;
+	}
+
+	public AircandiCommon getCommon() {
+		return mCommon;
 	}
 
 	public boolean isRenderingActive() {

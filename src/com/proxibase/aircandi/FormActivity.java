@@ -24,10 +24,10 @@ import android.widget.Toast;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageManager;
+import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -68,6 +68,13 @@ public abstract class FormActivity extends Activity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
+		overridePendingTransition(R.anim.browse_in, R.anim.form_out);
+	}
+
+	public void onCancelButtonClick(View view) {
+		setResult(Activity.RESULT_CANCELED);
+		finish();
+		overridePendingTransition(R.anim.browse_in, R.anim.form_out);
 	}
 
 	@Override
@@ -107,6 +114,8 @@ public abstract class FormActivity extends Activity {
 		switch (item.getItemId()) {
 			case R.id.settings :
 				startActivity(new Intent(this, Preferences.class));
+				overridePendingTransition(R.anim.form_in, R.anim.browse_out);		
+				
 				return (true);
 			default :
 				return (super.onOptionsItemSelected(item));
@@ -121,6 +130,7 @@ public abstract class FormActivity extends Activity {
 		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK);
 		picturePickerIntent.setType("image/*");
 		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
+		
 	}
 
 	public void pickVideo() {
@@ -148,6 +158,8 @@ public abstract class FormActivity extends Activity {
 	public void pickAircandiPicture() {
 		Intent candigramPickerIntent = new Intent(this, PictureSearch.class);
 		startActivityForResult(candigramPickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_AIRCANDI);
+		overridePendingTransition(R.anim.form_in, R.anim.browse_out);		
+
 	}
 
 	public void useFacebook() {
@@ -156,35 +168,23 @@ public abstract class FormActivity extends Activity {
 		 */
 		final User user = Aircandi.getInstance().getUser();
 		user.imageUri = "https://graph.facebook.com/" + user.facebookId + "/picture?type=large";
+		
+		ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
+		builder.setFromUris(user.imageUri, user.linkUri);
+		builder.setRequestListener(new RequestListener() {
 
-		ImageRequest imageRequest = new ImageRequest(user.imageUri, user.linkUri, ImageShape.Square, false, false,
-				CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
+			@Override
+			public void onComplete(Object response) {
 
-					@Override
-					public void onComplete(Object response) {
+				/* Used to pass back the bitmap and imageUri (sometimes) for the entity */
+				if (mImageRequestListener != null) {
+					mImageRequestListener.onComplete(response, user.imageUri);
+				}
+			}
+		});
 
-						/* Used to pass back the bitmap and imageUri (sometimes) for the entity */
-						if (mImageRequestListener != null) {
-							mImageRequestListener.onComplete(response, user.imageUri);
-						}
-
-						final ServiceResponse serviceResponse = (ServiceResponse) response;
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							runOnUiThread(new Runnable() {
-
-								@Override
-								public void run() {
-									Tracker.trackEvent("Entity", "FacebookPicture", "None", 0);
-									Bitmap bitmap = (Bitmap) serviceResponse.data;
-									ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView);
-								}
-							});
-						}
-					}
-				});
-
-		mImageRequestWebImageView.setImageBitmap(null);
-		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
+		ImageRequest imageRequest = builder.create();
+		mImageRequestWebImageView.setImageRequest(imageRequest, null);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -239,9 +239,10 @@ public abstract class FormActivity extends Activity {
 
 					/* Tag has the uri to use for the placeholder */
 					String imageUri = "resource:placeholder_picture";
-					ImageRequest imageRequest = new ImageRequest(imageUri, null, ImageShape.Square, false, false,
-										CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, null);
-
+					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
+					builder.setFromUris(imageUri, null);
+					ImageRequest imageRequest = builder.create();
+					
 					mImageRequestWebImageView.setImageRequest(imageRequest, null);
 
 					if (mImageRequestListener != null) {
@@ -279,32 +280,32 @@ public abstract class FormActivity extends Activity {
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
 					final String imageUri = extras.getString(getString(R.string.EXTRA_URI));
+					
+					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
+					builder.setFromUris(imageUri, null);
+					builder.setRequestListener(new RequestListener() {
 
-					ImageRequest imageRequest = new ImageRequest(imageUri, null, ImageShape.Square, false, false,
-									CandiConstants.IMAGE_WIDTH_SEARCH_MAX, false, true, true, 1, this, new RequestListener() {
+						@Override
+						public void onComplete(Object response) {
 
-										@Override
-										public void onComplete(Object response) {
+							final ServiceResponse serviceResponse = (ServiceResponse) response;
+							if (serviceResponse.responseCode == ResponseCode.Success) {
+								final Bitmap bitmap = (Bitmap) serviceResponse.data;
+								runOnUiThread(new Runnable() {
 
-											final ServiceResponse serviceResponse = (ServiceResponse) response;
-											if (serviceResponse.responseCode == ResponseCode.Success) {
-												final Bitmap bitmap = (Bitmap) serviceResponse.data;
-												runOnUiThread(new Runnable() {
-
-													@Override
-													public void run() {
-														ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView);
-														if (mImageRequestListener != null) {
-															mImageRequestListener.onComplete(serviceResponse, imageUri, null, bitmap);
-														}
-													}
-												});
-											}
+									@Override
+									public void run() {
+										if (mImageRequestListener != null) {
+											mImageRequestListener.onComplete(serviceResponse, imageUri, null, bitmap);
 										}
-									});
+									}
+								});
+							}
+						}
+					});
 
-					mImageRequestWebImageView.setImageBitmap(null);
-					ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
+					ImageRequest imageRequest = builder.create();
+					mImageRequestWebImageView.setImageRequest(imageRequest, null);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
@@ -312,17 +313,17 @@ public abstract class FormActivity extends Activity {
 				Uri imageUri = intent.getData();
 				Bitmap bitmap = null;
 
-				bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_SEARCH_MAX));
+				bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_DEFAULT));
 				if (bitmap != null && mImageRequestListener != null) {
-					mImageRequestWebImageView.setImageBitmap(null);
-					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView);
+					mImageRequestWebImageView.getImageView().setImageBitmap(null);
+					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView());
 					mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap);
 					Tracker.trackEvent("Entity", "PickPicture", "None", 0);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
 
-				mImageRequestWebImageView.setImageBitmap(null);
+				mImageRequestWebImageView.getImageView().setImageBitmap(null);
 				Uri imageUri = null;
 				if (ImageManager.getInstance().hasImageCaptureBug()) {
 					File imageFile = new File("/sdcard/tmp/foo.jpeg");
@@ -341,9 +342,9 @@ public abstract class FormActivity extends Activity {
 					imageUri = intent.getData();
 				}
 
-				Bitmap bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_SEARCH_MAX));
+				Bitmap bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_DEFAULT));
 				if (mImageRequestListener != null) {
-					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView);
+					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView());
 					mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap);
 					Tracker.trackEvent("Entity", "TakePicture", "None", 0);
 				}
@@ -359,6 +360,15 @@ public abstract class FormActivity extends Activity {
 					}
 				}
 			}
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+			mCommon.reload();
 		}
 	}
 

@@ -61,21 +61,25 @@
 	<string name="dialog_install_toast_package_installed"> has been installed. Tap the candi to launch.</string>
 	
 	<string name="dialog_new_message">Share some candi!</string>
-	<string name="dialog_new_gallery">Picture</string>
-	<string name="dialog_new_gallery_signin">Please sign-in to share a new picture</string>
-	<string name="dialog_new_topic">Post</string>
-	<string name="dialog_new_topic_signin">Please sign-in to share a new post</string>
-	<string name="dialog_new_web">Link</string>
-	<string name="dialog_new_web_signin">Please sign-in to create a new link</string>
+	<string name="dialog_new_picture">Picture</string>
+	<string name="dialog_new_picture_signin">Please sign-in to share a new picture</string>
+	<string name="dialog_new_post">Post</string>
+	<string name="dialog_new_post_signin">Please sign-in to share a new post</string>
+	<string name="dialog_new_link">Link</string>
+	<string name="dialog_new_link_signin">Please sign-in to create a new link</string>
 	<string name="dialog_new_negative">Cancel</string>
 		
+	<!-- Candi Form -->
+	
+	<string name="candi_button_comment">Comment</string>
+	<string name="candi_button_new">Add\nCandi</string>
+	<string name="candi_button_edit">Edit</string>
+	
 	<!-- Forms -->
 	
-	<string name="form_title_gallery">Gallery</string>
 	<string name="form_title_picture">Picture</string>
-	<string name="form_title_topic">Topic</string>
 	<string name="form_title_post">Post</string>
-	<string name="form_title_web">Link</string>
+	<string name="form_title_link">Link</string>
 	<string name="form_title_profile">Profile settings</string>
 	<string name="form_title_signin">Sign in</string>
 	<string name="form_title_signup">Sign up</string>

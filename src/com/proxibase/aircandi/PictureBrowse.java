@@ -3,22 +3,23 @@ package com.proxibase.aircandi;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
+import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequestBuilder;
+import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 public class PictureBrowse extends FormActivity {
@@ -40,45 +41,49 @@ public class PictureBrowse extends FormActivity {
 	protected void bind() {
 
 		WebImageView mediaImageView = (WebImageView) findViewById(R.id.image_media);
+		final Entity entity = mCommon.mEntity;
 
-		if (mCommon.mEntity.imageUri != null && !mCommon.mEntity.imageUri.equals("")) {
+		if (entity.imageUri != null && !entity.imageUri.equals("")) {
+			ImageRequestBuilder builder = new ImageRequestBuilder(mediaImageView);
+			builder.setFromUris(entity.imageUri, entity.linkUri);
+			builder.setImageShape(ImageShape.Native);
+			builder.setScaleToWidth(CandiConstants.IMAGE_WIDTH_ORIGINAL);
+			builder.setSearchCache(false);
+			builder.setUpdateCache(false);
+			builder.setRequestListener(new RequestListener() {
 
-			ImageRequest imageRequest = new ImageRequest(mCommon.mEntity.imageUri, mCommon.mEntity.linkUri, ImageShape.Native, false, false,
-						CandiConstants.IMAGE_WIDTH_ORIGINAL, false, false, false, 1, this, new RequestListener() {
+				@Override
+				public void onComplete(Object response) {
 
-							@Override
-							public void onComplete(Object response) {
-
-								ServiceResponse serviceResponse = (ServiceResponse) response;
-								if (serviceResponse.responseCode != ResponseCode.Success) {
-									return;
-								}
-								else {
-									Logger.d(PictureBrowse.this, "Image fetched: " + mCommon.mEntity.imageUri);
-									mCommon.mEntity.imageBitmap = (Bitmap) serviceResponse.data;
-									runOnUiThread(new Runnable() {
-
-										@Override
-										public void run() {
-											mViewFlipper.setDisplayedChild(0);
-										}
-									});
-								}
-							}
+					ServiceResponse serviceResponse = (ServiceResponse) response;
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						Logger.d(PictureBrowse.this, "Image fetched: " + entity.imageUri);
+						entity.imageBitmap = (Bitmap) serviceResponse.data;
+						runOnUiThread(new Runnable() {
 
 							@Override
-							public void onProgressChanged(int progress) {
-								mProgressBar.setProgress(progress);
+							public void run() {
+								mViewFlipper.setDisplayedChild(0);
 							}
 						});
+					}
+				}
 
-			Logger.d(this, "Fetching Image: " + mCommon.mEntity.imageUri);
+				@Override
+				public void onProgressChanged(int progress) {
+					mProgressBar.setProgress(progress);
+				}
+			});
+
+			ImageRequest imageRequest = builder.create();
+			Logger.d(this, "Requesting Image: " + entity.imageUri);
 			mediaImageView.setImageRequest(imageRequest, null);
 		}
 
 		/* Author block */
-		if (mCommon.mEntity.author != null) {
-			((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(mCommon.mEntity.author, DateUtils.wcfToDate(mCommon.mEntity.createdDate));
+		if (entity.author != null) {
+			Integer dateToUse = entity.updatedDate != null ? entity.updatedDate : entity.createdDate;
+			((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, dateToUse);
 		}
 		else {
 			((View) findViewById(R.id.block_author)).setVisibility(View.GONE);
@@ -94,14 +99,15 @@ public class PictureBrowse extends FormActivity {
 			((TextView) findViewById(R.id.text_title)).setText(mCommon.mEntity.title);
 		}
 
+		WebImageView webImageView = (WebImageView) findViewById(R.id.image_media);
 		if (mCommon.mEntity.imageBitmap != null) {
-			((ImageView) findViewById(R.id.image_media)).setImageBitmap(mCommon.mEntity.imageBitmap);
-			((ImageView) findViewById(R.id.image_media)).setVisibility(View.VISIBLE);
+			ImageUtils.showImageInImageView(mCommon.mEntity.imageBitmap, webImageView.getImageView());
+			webImageView.setVisibility(View.VISIBLE);
 		}
 		else {
-			((ImageView) findViewById(R.id.image_media)).setImageBitmap(null);
-			((ImageView) findViewById(R.id.image_media)).setAnimation(null);
-			((ImageView) findViewById(R.id.image_media)).setVisibility(View.GONE);
+			webImageView.getImageView().setImageBitmap(null);
+			webImageView.getImageView().setAnimation(null);
+			webImageView.setVisibility(View.GONE);
 		}
 	}
 

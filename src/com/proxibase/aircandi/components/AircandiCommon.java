@@ -7,17 +7,22 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface.OnDismissListener;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -28,11 +33,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.CandiSearchActivity;
 import com.proxibase.aircandi.Preferences;
@@ -40,24 +42,31 @@ import com.proxibase.aircandi.ProfileForm;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.SignInForm;
 import com.proxibase.aircandi.components.Command.CommandVerb;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest;
-import com.proxibase.aircandi.components.ImageManager.ImageRequest.ImageShape;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.ActionsWindow;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.sdk.android.proxi.consumer.Beacon;
 import com.proxibase.sdk.android.proxi.consumer.Comment;
 import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.Query;
+import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
+import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
+import com.proxibase.sdk.android.util.ProxiConstants;
 
 public class AircandiCommon {
+
+	public static final int	MENU_ITEM_NEW_POST_ID		= 1;
+	public static final int	MENU_ITEM_NEW_PICTURE_ID	= 2;
+	public static final int	MENU_ITEM_NEW_LINK_ID		= 3;
 
 	public Context			mContext;
 	public Activity			mActivity;
 	public LayoutInflater	mLayoutInflater;
-	public String			mPrefTheme;
 
 	public Command			mCommand;
 	public Integer			mParentEntityId;
@@ -83,6 +92,8 @@ public class AircandiCommon {
 	protected ImageView		mButtonRefresh;
 	protected Dialog		mProgressDialog;
 	public ActionsWindow	mActionsWindow;
+	public String			mPrefTheme;
+	public IconContextMenu	mIconContextMenu			= null;
 
 	public AircandiCommon(Context context) {
 		mContext = context;
@@ -138,11 +149,50 @@ public class AircandiCommon {
 			setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
 		}
 
+		/* Dialogs */
 		mProgressDialog = new Dialog(mContext, R.style.progress_body);
 		mProgressDialog.setTitle(null);
 		mProgressDialog.setCancelable(true);
 		mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		mProgressDialog.setOnDismissListener(new OnDismissListener() {
 
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				final ImageView image = (ImageView) mProgressDialog.findViewById(R.id.image_body_progress_indicator);
+				image.setBackgroundResource(0);
+			}
+		});
+	}
+
+	public void initializeDialogs() {
+
+		/* New candi menu */
+		mIconContextMenu = new IconContextMenu(mActivity, CandiConstants.DIALOG_NEW_CANDI_ID);
+		Resources resources = mActivity.getResources();
+		mIconContextMenu.addItem(resources, resources.getString(R.string.dialog_new_post), mIconPost, MENU_ITEM_NEW_POST_ID);
+		mIconContextMenu.addItem(resources, resources.getString(R.string.dialog_new_picture), mIconPicture, MENU_ITEM_NEW_PICTURE_ID);
+		mIconContextMenu.addItem(resources, resources.getString(R.string.dialog_new_link), mIconLink, MENU_ITEM_NEW_LINK_ID);
+
+		//set onclick listener for context menu
+		mIconContextMenu.setOnClickListener(new IconContextMenu.IconContextMenuOnClickListener() {
+
+			@Override
+			public void onClick(int menuId) {
+
+				Command command = null;
+
+				if (menuId == MENU_ITEM_NEW_POST_ID) {
+					command = new Command(CommandVerb.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null, mEntityId, null);
+				}
+				else if (menuId == MENU_ITEM_NEW_PICTURE_ID) {
+					command = new Command(CommandVerb.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE, null, mEntityId, null);
+				}
+				else if (menuId == MENU_ITEM_NEW_LINK_ID) {
+					command = new Command(CommandVerb.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null, mEntityId, null);
+				}
+				doCommand(command);
+			}
+		});
 	}
 
 	public void unpackIntent() {
@@ -191,37 +241,44 @@ public class AircandiCommon {
 
 	public void doCommand(final Command command) {
 
-		try {
-			Class clazz = Class.forName(CandiConstants.APP_PACKAGE_NAME + command.activityName, false, mContext.getClass().getClassLoader());
-
-			if (command.verb == CommandVerb.New) {
-				String beaconId = ProxiExplorer.getInstance().getStrongestBeacon().id;
-				IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
-				intentBuilder.setCommand(command);
-				intentBuilder.setParentEntityId(command.entityParentId);
-				intentBuilder.setBeaconId(beaconId);
-				intentBuilder.setEntityType(command.entityType);
-				Intent intent = intentBuilder.create();
-				((Activity) mContext).startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-			}
-			else {
-				/* It might not be in the big model if this is part my candi */
-				Entity entity = ProxiExplorer.getInstance().getEntityById(command.entityId);
-				IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
-				intentBuilder.setCommand(command);
-				if (entity != null) {
-					intentBuilder.setEntity(entity);
-				}
-				else {
-					intentBuilder.setEntityId(command.entityId);
-				}
-				intentBuilder.setEntityType(command.entityType);
-				Intent intent = intentBuilder.create();
-				((Activity) mContext).startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
+		if (command.verb == CommandVerb.Dialog) {
+			String dialogName = command.activityName;
+			if (dialogName.toLowerCase().equals("newcandi")) {
+				mActivity.showDialog(CandiConstants.DIALOG_NEW_CANDI_ID);
 			}
 		}
-		catch (ClassNotFoundException exception) {
-			exception.printStackTrace();
+		else {
+			try {
+				Class clazz = Class.forName(CandiConstants.APP_PACKAGE_NAME + command.activityName, false, mContext.getClass().getClassLoader());
+				if (command.verb == CommandVerb.New) {
+					String beaconId = ProxiExplorer.getInstance().getStrongestBeacon().id;
+					IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
+					intentBuilder.setCommand(command);
+					intentBuilder.setParentEntityId(command.entityParentId);
+					intentBuilder.setBeaconId(beaconId);
+					intentBuilder.setEntityType(command.entityType);
+					Intent intent = intentBuilder.create();
+					((Activity) mContext).startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
+					((Activity) mContext).overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				}
+				else {
+					/*
+					 * We could try and pass the entity instead of the entity id so we don't have to
+					 * load it again but that would require handling cases where the entity doesn't always
+					 * exist in the proxi model.
+					 */
+					IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
+					intentBuilder.setCommand(command);
+					intentBuilder.setEntityId(command.entityId);
+					intentBuilder.setEntityType(command.entityType);
+					Intent intent = intentBuilder.create();
+					((Activity) mContext).startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
+					((Activity) mContext).overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				}
+			}
+			catch (ClassNotFoundException exception) {
+				exception.printStackTrace();
+			}
 		}
 	}
 
@@ -257,6 +314,8 @@ public class AircandiCommon {
 			Intent intent = intentBuilder.create();
 			mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_PROFILE);
 		}
+		mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+
 	}
 
 	public void doRefreshClick(View view) {}
@@ -324,10 +383,16 @@ public class AircandiCommon {
 
 	public void setUserPicture(String imageUri, String linkUri, final WebImageView imageView) {
 		if (imageUri != null && imageUri.length() != 0) {
-			ImageRequest imageRequest = new ImageRequest(imageUri, linkUri, ImageShape.Square, false, false,
-					CandiConstants.IMAGE_WIDTH_USER_SMALL, false, true, true, 1, this, null);
+			ImageRequestBuilder builder = new ImageRequestBuilder(imageView);
+			builder.setFromUris(imageUri, linkUri);
+			ImageRequest imageRequest = builder.create();
 			imageView.setImageRequest(imageRequest, null);
 		}
+	}
+
+	public void updateUserPicture() {
+		User user = Aircandi.getInstance().getUser();
+		setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
 	}
 
 	public ViewGroup configureActionButtonSet(ActionButtonSet actionButtonSet, Context context, Integer entityId) {
@@ -424,23 +489,134 @@ public class AircandiCommon {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	private void showNewCandiDialog(final Integer entityId) {
+
+		final CharSequence[] items = {
+												mActivity.getResources().getString(R.string.dialog_new_picture),
+												mActivity.getResources().getString(R.string.dialog_new_post),
+												mActivity.getResources().getString(R.string.dialog_new_link) };
+		AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+		builder.setTitle(mActivity.getResources().getString(R.string.dialog_new_message));
+		builder.setCancelable(true);
+		builder.setNegativeButton(mActivity.getResources().getString(R.string.dialog_new_negative), new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {}
+		});
+		builder.setItems(items, new DialogInterface.OnClickListener() {
+
+			public void onClick(final DialogInterface dialog, int item) {
+				Command command = null;
+				if (item == 0) {
+					command = new Command(CommandVerb.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null, entityId, null);
+				}
+				else if (item == 1) {
+					command = new Command(CommandVerb.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE, null, entityId, null);
+				}
+				else if (item == 2) {
+					command = new Command(CommandVerb.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null, entityId, null);
+				}
+				doCommand(command);
+			}
+		});
+		AlertDialog alert = builder.create();
+		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		alert.show();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Menu routines
+	// --------------------------------------------------------------------------------------------
+
+	public void doCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = mActivity.getMenuInflater();
+		inflater.inflate(R.menu.main_menu, menu);
+	}
+
+	public void doPrepareOptionsMenu(Menu menu) {
+		/* Hide the sign out option if we don't have a current session */
+		MenuItem itemOut = menu.findItem(R.id.signinout);
+		MenuItem itemProfile = menu.findItem(R.id.profile);
+		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
+			itemOut.setTitle("Sign Out");
+			itemProfile.setVisible(true);
+		}
+		else {
+			itemOut.setTitle("Sign In");
+			itemProfile.setVisible(false);
+		}
+	}
+
+	public void doOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.settings :
+				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
+				mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				return;
+			case R.id.profile :
+				doProfileClick(null);
+				return;
+			case R.id.signinout :
+				if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
+					showProgressDialog(true, "Signing out...");
+					Query query = new Query("Users").filter("Email eq 'anonymous@3meters.com'");
+
+					ServiceResponse serviceResponse = NetworkManager.getInstance().request(
+							new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+
+						String jsonResponse = (String) serviceResponse.data;
+
+						Aircandi.getInstance().setUser(
+								(User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService));
+						Aircandi.getInstance().getUser().anonymous = true;
+
+						Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, null);
+						Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, null);
+						Aircandi.settingsEditor.commit();
+
+						if (mActivity.findViewById(R.id.image_user) != null) {
+							User user = Aircandi.getInstance().getUser();
+							setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
+						}
+						showProgressDialog(false, null);
+						ImageUtils.showToastNotification("Signed out.", Toast.LENGTH_SHORT);
+					}
+				}
+				else {
+					mActivity.startActivityForResult(new Intent(mActivity, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
+					mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+
+				}
+				return;
+			default :
+				return;
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Utility routines
 	// --------------------------------------------------------------------------------------------
 
 	public void recycleImageViewDrawable(int resourceId) {
-		ImageView imageView = ((ImageView) mActivity.findViewById(resourceId));
-		if (imageView.getDrawable() != null) {
-			BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
-			if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null) {
-				bitmapDrawable.getBitmap().recycle();
-			}
+		WebImageView imageView = ((WebImageView) mActivity.findViewById(resourceId));
+		if (imageView != null) {
+			imageView.onDestroy();
 		}
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
+
+	public void reload() {
+		Intent intent = mActivity.getIntent();
+		//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+		mActivity.finish();
+		mActivity.startActivity(intent);
+	}
 
 	public void doDestroy() {
 	/* Nothing right now but stubbed for later. */
@@ -452,136 +628,6 @@ public class AircandiCommon {
 
 	public enum ActionButtonSet {
 		Radar, CandiForm, CandiList, CommentList
-	}
-
-	public static class IntentBuilder {
-
-		private Context		mContext;
-		private Entity		mEntity;
-		private Integer		mEntityId;
-		private Integer		mParentEntityId;
-		private String		mEntityType;
-		private String		mMessage;
-		private Command		mCommand;
-		private String		mBeaconId;
-		private Boolean		mStripChildEntities	= true;
-		private Class<?>	mClass;
-
-		public IntentBuilder() {}
-
-		public IntentBuilder(Context context, Class<?> clazz) {
-			this.mContext = context;
-			this.mClass = clazz;
-		}
-
-		public Intent create() {
-			Intent intent = new Intent(mContext, mClass);
-
-			/* We want to make sure that any child entities don't get serialized */
-			GsonBuilder gsonb = new GsonBuilder();
-
-			gsonb.setExclusionStrategies(new ExclusionStrategy() {
-
-				@Override
-				public boolean shouldSkipClass(Class<?> clazz) {
-					return false;
-					//return (clazz == (Class<List<Entity>>) (Class<?>) List.class);
-				}
-
-				@Override
-				public boolean shouldSkipField(FieldAttributes f) {
-					/* We always skip these fields because they produce circular references */
-					boolean skip = (f.getDeclaringClass() == Beacon.class && f.getName().equals("entities"))
-									|| (f.getDeclaringClass() == Command.class && f.getName().equals("entity"));
-
-					if (mStripChildEntities) {
-						skip = skip || (f.getDeclaringClass() == Entity.class && f.getName().equals("children"));
-					}
-					return skip;
-					//return (f.getDeclaredType() == (Class<List<Entity>>) (Class<?>) List.class);
-				}
-			});
-
-			Gson gson = gsonb.create();
-
-			if (mCommand != null) {
-				String jsonCommand = gson.toJson(mCommand);
-				intent.putExtra(mContext.getString(R.string.EXTRA_COMMAND), jsonCommand);
-			}
-
-			if (mParentEntityId != null) {
-				intent.putExtra(mContext.getString(R.string.EXTRA_PARENT_ENTITY_ID), mParentEntityId);
-			}
-
-			if (mEntityType != null) {
-				intent.putExtra(mContext.getString(R.string.EXTRA_ENTITY_TYPE), mEntityType);
-			}
-
-			if (mBeaconId != null) {
-				intent.putExtra(mContext.getString(R.string.EXTRA_BEACON_ID), mBeaconId);
-			}
-
-			if (mMessage != null) {
-				intent.putExtra(mContext.getString(R.string.EXTRA_MESSAGE), mMessage);
-			}
-
-			if (mEntity != null) {
-				String jsonEntity = gson.toJson(mEntity);
-				if (jsonEntity.length() > 0) {
-					intent.putExtra(mContext.getString(R.string.EXTRA_ENTITY), jsonEntity);
-				}
-			}
-
-			if (mEntityId != null) {
-				intent.putExtra(mContext.getString(R.string.EXTRA_ENTITY_ID), mEntityId);
-			}
-			return intent;
-		}
-
-		public IntentBuilder setContext(Context context) {
-			this.mContext = context;
-			return this;
-		}
-
-		public IntentBuilder setEntity(Entity entity) {
-			this.mEntity = entity;
-			return this;
-		}
-
-		public IntentBuilder setParentEntityId(Integer parentEntityId) {
-			this.mParentEntityId = parentEntityId;
-			return this;
-		}
-
-		public IntentBuilder setEntityType(String entityType) {
-			this.mEntityType = entityType;
-			return this;
-		}
-
-		public IntentBuilder setMessage(String message) {
-			this.mMessage = message;
-			return this;
-		}
-
-		public IntentBuilder setCommand(Command command) {
-			this.mCommand = command;
-			return this;
-		}
-
-		public IntentBuilder setBeaconId(String beaconId) {
-			this.mBeaconId = beaconId;
-			return this;
-		}
-
-		public IntentBuilder setClass(Class<?> _class) {
-			this.mClass = _class;
-			return this;
-		}
-
-		public IntentBuilder setEntityId(Integer entityId) {
-			this.mEntityId = entityId;
-			return this;
-		}
 	}
 
 	public static class EventHandler {
