@@ -3,6 +3,7 @@
 		<attr name="layout" format="integer"/>
 	<declare-styleable name="Global">
 		<attr name="themeTone" format="string"/>
+		<attr name="busy" format="string"/>
 	</declare-styleable>
 	<declare-styleable name="ViewPagerIndicator">
 		<attr name="textColorFocused" format="color"/>
@@ -42,6 +43,7 @@
 		<attr name="iconPicture" format="string"/>		
 		<attr name="iconLink" format="string"/>		
 		<attr name="iconProfile" format="string"/>		
+		<attr name="iconLocked" format="string"/>		
 		<attr name="logo" format="string"/>		
 		<attr name="imageSliderHandleSearch" format="string"/>
 		<attr name="backgroundSliderHandleSearch" format="string"/>

@@ -122,12 +122,12 @@
 
     <!-- Candi Search -->
 
-    <style name="search_slider_handle">
+    <style name="debug_slider_handle">
         <item name="android:src">?attr/imageSliderHandleSearch</item>
         <item name="android:background">?attr/backgroundSliderHandleSearch</item>
     </style>
 
-    <style name="search_slider_content">
+    <style name="debug_slider_content">
         <item name="android:background">?attr/backgroundSliderContentSearch</item>
     </style>
 

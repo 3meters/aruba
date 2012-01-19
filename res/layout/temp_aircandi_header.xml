@@ -46,7 +46,7 @@
                 android:layout_height="22dp"
                 android:layout_centerInParent="true"
                 android:adjustViewBounds="true"
-                android:background="@drawable/busy_anim"
+                android:background="?attr/busy"
                 android:maxHeight="22dp"
                 android:maxWidth="22dp"
                 android:minHeight="22dp"

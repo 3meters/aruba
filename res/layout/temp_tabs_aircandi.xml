@@ -23,7 +23,7 @@
                 android:layout_alignParentTop="true"
                 android:duplicateParentState="true"
                 android:gravity="center"
-                android:text="@string/search_tab_radar" />
+                android:text="@string/radar_tab_radar" />
 
             <ImageView
                 android:id="@+id/image_tab_image"
@@ -50,7 +50,7 @@
                 android:layout_alignParentTop="true"
                 android:duplicateParentState="true"
                 android:gravity="center" 
-                android:text="@string/search_tab_mycandi"/>
+                android:text="@string/radar_tab_mycandi"/>
 
             <ImageView
                 android:id="@+id/image_tab_image"

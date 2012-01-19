@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 
 import android.graphics.Bitmap;
 import android.os.CountDownTimer;
+import android.os.Debug;
 
 public class Utilities {
 
@@ -33,6 +34,22 @@ public class Utilities {
 
 		public long getMillisUntilFinished() {
 			return mMillisUntilFinished;
+		}
+	}
+
+	public static class Stopwatch {
+
+		{
+			Debug.startAllocCounting();
+		}
+		long	start	= System.nanoTime();
+
+		void stop() {
+			long elapsed = (System.nanoTime() - start) / 1000;
+			Debug.stopAllocCounting();
+			Logger.i(this, "CandiSearchActivity: " + elapsed + "us, "
+																+ Debug.getThreadAllocCount() + " allocations, "
+																+ Debug.getThreadAllocSize() + " bytes");
 		}
 	}
 

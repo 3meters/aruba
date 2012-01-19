@@ -39,12 +39,13 @@
 	<string name="network_message_connection_notready">Check network connection and retry</string>
 	<string name="network_message_connection_poor">Network connection is poor, retry later</string>
 	<string name="network_message_service_notready">Aircandi service is not available</string>
+	<string name="network_message_service_error">Aircandi service error</string>
 
-	<!-- Search -->
+	<!-- Radar -->
 
-	<string name="search_back_button">Back</string>
-	<string name="search_tab_radar">Radar</string>
-	<string name="search_tab_mycandi">My Candi</string>
+	<string name="radar_tab_radar">Radar</string>
+	<string name="radar_tab_mycandi">My Candi</string>
+	<string name="radar_button_new">Drop\nCandi</string>
 	
 	<string name="dialog_network_message_wifi_ready">Wifi enabled, ready for retry</string>
 	<string name="dialog_network_message_wifi_notready">Enable wifi and retry</string>

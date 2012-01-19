@@ -468,14 +468,14 @@ public class CandiInfo extends AircandiActivity {
 					if (dirtyBeaconId != null && !dirtyBeaconId.equals("")) {
 						for (Beacon beacon : ProxiExplorer.getInstance().getBeacons()) {
 							if (beacon.id.equals(dirtyBeaconId)) {
-								beacon.isDirty = true;
+								beacon.dirty = true;
 							}
 						}
 					}
 					else if (dirtyEntityId != null) {
 						for (EntityProxy entityProxy : ProxiExplorer.getInstance().getEntityProxiesFlat()) {
 							if (entityProxy.id.equals(dirtyEntityId)) {
-								entityProxy.isDirty = true;
+								entityProxy.dirty = true;
 							}
 						}
 					}

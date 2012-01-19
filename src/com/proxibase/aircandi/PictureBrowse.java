@@ -83,7 +83,7 @@ public class PictureBrowse extends FormActivity {
 		/* Author block */
 		if (entity.author != null) {
 			Integer dateToUse = entity.updatedDate != null ? entity.updatedDate : entity.createdDate;
-			((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, dateToUse);
+			((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, dateToUse, entity.locked);
 		}
 		else {
 			((View) findViewById(R.id.block_author)).setVisibility(View.GONE);

@@ -5,6 +5,7 @@
 
     <style name="aircandi_theme_midnight" parent="android:Theme">
         <item name="themeTone">dark</item>
+        <item name="busy">@drawable/busy_anim_dark</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:textColorHint">@color/edit_hint</item>
@@ -28,6 +29,7 @@
         <item name="iconPicture">@drawable/picture_dark</item>
         <item name="iconLink">@drawable/link_dark</item>
         <item name="iconProfile">@drawable/placeholder_user_dark</item>
+        <item name="iconLocked">@drawable/icon_lock_dark</item>
         <item name="pagerNotch">@drawable/indicator_current_dark</item>
         <item name="pagerBorder">#33ffffff</item>
         <item name="backgroundCandiInfo">@android:color/transparent</item>
@@ -67,6 +69,7 @@
 
     <style name="aircandi_theme_snow" parent="@android:style/Theme.Light">
         <item name="themeTone">light</item>
+        <item name="busy">@drawable/busy_anim_light</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:textColorHint">@color/edit_hint</item>
@@ -89,6 +92,7 @@
         <item name="iconPost">@drawable/post_light</item>
         <item name="iconPicture">@drawable/picture_light</item>
         <item name="iconLink">@drawable/link_light</item>
+        <item name="iconLocked">@drawable/icon_lock_light</item>
         <item name="iconProfile">@drawable/placeholder_user_light</item>
         <item name="pagerNotch">@drawable/indicator_current_light</item>
         <item name="pagerBorder">@color/rule_30_light</item>
@@ -142,6 +146,7 @@
 
     <style name="aircandi_theme_serene" parent="aircandi_theme_snow">
         <item name="themeTone">dark</item>
+        <item name="busy">@drawable/busy_anim_dark</item>
         <item name="android:windowBackground">@drawable/wallpaper_serene</item>
         <item name="textColorFocused">@color/text_dark</item>
         <item name="textColorUnfocused">@color/pager_indicator_text_unfocused_light</item>
@@ -153,6 +158,7 @@
         <item name="iconNew">@drawable/icon_new_dark</item>
         <item name="iconBack">@drawable/icon_back_dark</item>
         <item name="iconPost">@drawable/post_dark</item>
+        <item name="iconLocked">@drawable/icon_lock_dark</item>
         <item name="iconPicture">@drawable/picture_dark</item>
         <item name="iconLink">@drawable/link_dark</item>
         <item name="iconProfile">@drawable/placeholder_user_dark</item>

@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -23,6 +24,7 @@ public class AuthorBlock extends RelativeLayout {
 	public static final int	VERTICAL	= 1;
 	private ViewGroup		mBoundView;
 	private WebImageView	mImageUser;
+	private ImageView		mImageLocked;
 	private TextView		mTextFullname;
 	private TextView		mTextTimeSince;
 	private Author			mAuthor;
@@ -55,12 +57,13 @@ public class AuthorBlock extends RelativeLayout {
 		mImageUser = (WebImageView) mBoundView.findViewById(R.id.image_user_picture);
 		mTextFullname = (TextView) mBoundView.findViewById(R.id.text_user_fullname);
 		mTextTimeSince = (TextView) mBoundView.findViewById(R.id.text_user_timesince);
+		mImageLocked = (ImageView) mBoundView.findViewById(R.id.image_locked);
 
 		this.removeAllViews();
 		this.addView(mBoundView);
 	}
 
-	public void bindToAuthor(Author author, Integer date) {
+	public void bindToAuthor(Author author, Integer date, boolean locked) {
 		mAuthor = author;
 		if (mAuthor != null) {
 			if (mTextFullname != null) {
@@ -80,6 +83,14 @@ public class AuthorBlock extends RelativeLayout {
 					builder.setFromUris(mAuthor.imageUri, mAuthor.linkUri);
 					ImageRequest imageRequest = builder.create();
 					mImageUser.setImageRequest(imageRequest, null);
+				}
+			}
+			if (mImageLocked != null) {
+				if (locked) {
+					mImageLocked.setVisibility(View.VISIBLE);
+				}
+				else {
+					mImageLocked.setVisibility(View.GONE);
 				}
 			}
 		}

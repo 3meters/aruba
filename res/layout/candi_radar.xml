@@ -111,33 +111,33 @@
                 style="@style/candi_info_button"
                 android:layout_width="65dp"
                 android:layout_height="65dp"
-                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
                 android:layout_margin="15dp"
                 android:height="65dp"
                 android:onClick="onNewCandiClick"
                 android:padding="3dp"
-                android:text="@string/candi_button_new"
+                android:text="@string/radar_button_new"
                 android:width="65dp" />
         </RelativeLayout>
     </FrameLayout>
 
     <FrameLayout
-        android:id="@+id/slider_wrapper_search"
+        android:id="@+id/debug_wrapper_radar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:visibility="gone" >
 
         <SlidingDrawer
-            android:id="@+id/slider_drawer_search"
+            android:id="@+id/debug_drawer_radar"
             android:layout_width="fill_parent"
-            android:layout_height="180dp"
-            android:content="@+id/search_slider_content"
-            android:handle="@+id/search_slider_handle" >
+            android:layout_height="160dp"
+            android:content="@+id/debug_slider_content"
+            android:handle="@+id/debug_slider_handle" >
 
             <LinearLayout
-                android:id="@+id/search_slider_handle"
+                android:id="@+id/debug_slider_handle"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -147,19 +147,38 @@
                 android:paddingTop="30dp" >
 
                 <ImageButton
-                    style="@style/search_slider_handle"
+                    style="@style/debug_slider_handle"
                     android:layout_width="fill_parent"
                     android:layout_height="20dp"
                     android:duplicateParentState="true" />
             </LinearLayout>
 
-            <RelativeLayout
-                android:id="@+id/search_slider_content"
-                style="@style/search_slider_content"
+            <LinearLayout
+                android:id="@+id/debug_slider_content"
+                style="@style/debug_slider_content"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:padding="5dp" >
-            </RelativeLayout>
+                android:orientation="horizontal"
+                android:padding="0dp" >
+
+                <RelativeLayout
+                    android:id="@+id/debug_section_one"
+                    style="@style/debug_slider_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="5dp" >
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/debug_section_two"
+                    style="@style/debug_slider_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="5dp" >
+                </RelativeLayout>
+            </LinearLayout>
         </SlidingDrawer>
     </FrameLayout>
 

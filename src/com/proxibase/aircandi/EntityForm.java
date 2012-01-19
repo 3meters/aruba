@@ -257,7 +257,7 @@ public class EntityForm extends FormActivity {
 
 			if (entity != null && entity.author != null) {
 				Integer dateToUse = entity.updatedDate != null ? entity.updatedDate : entity.createdDate;
-				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, dateToUse);
+				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, dateToUse, entity.locked);
 			}
 			else {
 				((AuthorBlock) findViewById(R.id.block_author)).setVisibility(View.GONE);
@@ -392,7 +392,7 @@ public class EntityForm extends FormActivity {
 					});
 
 					Beacon beacon = ProxiExplorer.getInstance().getBeaconById(mCommon.mBeaconId);
-					if (beacon != null && beacon.isUnregistered) {
+					if (beacon != null && beacon.unregistered) {
 						beacon.registeredById = String.valueOf(Aircandi.getInstance().getUser().id);
 						beacon.beaconType = BeaconType.Fixed.name().toLowerCase();
 						beacon.beaconSetId = ProxiConstants.BEACONSET_WORLD;
@@ -407,7 +407,7 @@ public class EntityForm extends FormActivity {
 
 						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 						if (serviceResponse.responseCode == ResponseCode.Success) {
-							beacon.isUnregistered = false;
+							beacon.unregistered = false;
 						}
 					}
 
@@ -535,7 +535,17 @@ public class EntityForm extends FormActivity {
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mCommon.mEntity.getCollection());
 		serviceRequest.setRequestType(RequestType.Insert);
-		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson(mCommon.mEntity, GsonType.ProxibaseService));
+		
+		//mCommon.mEntity.description = "\u00a9 2012 Jay Gawker Media, LLC. All Rights Reserved. Privacy Policy | Full Site";
+		String jsonString = ProxibaseService.convertObjectToJson(mCommon.mEntity, GsonType.ProxibaseService);
+		
+//		jsonString = StringEscapeUtils.ESCAPE_JAVA..escapeJava(jsonString);
+		
+//		if (jsonString.contains("©")) {
+//			jsonString = jsonString.replace("©", "\u00A9");
+//		}
+		serviceRequest.setRequestBody(jsonString);
+		Logger.v(this, serviceRequest.getRequestBody());
 		serviceRequest.setResponseFormat(ResponseFormat.Json);
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);

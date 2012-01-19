@@ -80,7 +80,7 @@ public abstract class BaseModel extends Observable implements IModel {
 		return false;
 	}
 
-	public int visibleChildrenNext() {
+	public int visibleChildrenNextCount() {
 		int visibleCount = 0;
 		for (IModel model : mChildren) {
 			if (model.getViewStateNext().isVisible()) {
@@ -166,8 +166,8 @@ public abstract class BaseModel extends Observable implements IModel {
 			return (!isCulled(camera));
 		}
 
-		public boolean isWithinHalo(Camera camera, float lastX) {
-			mLastWithinHalo = !isOutsideHalo(camera, lastX);
+		public boolean isWithinHalo(Camera camera) {
+			mLastWithinHalo = !isOutsideHalo(camera);
 			return (mLastWithinHalo);
 		}
 
@@ -177,7 +177,7 @@ public abstract class BaseModel extends Observable implements IModel {
 					|| mY + (mHeight * mScale) < camera.getMinY();
 		}
 
-		private boolean isOutsideHalo(Camera camera, float lastX) {
+		private boolean isOutsideHalo(Camera camera) {
 			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
 			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
 //			if (haloMinX < 0) {

@@ -101,47 +101,51 @@ public class NetworkManager {
 			return new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, response, null);
 		}
 		catch (ProxibaseException exception) {
+			
+			String notification = null;
+			ServiceResponse serviceResponse = null;
 
 			if (exception.getErrorCode() == ProxiErrorCode.IOException) {
 				/* Recoverable if the connection improves */
+				notification = "Transport exception: " + serviceRequest.getUri();
+				serviceResponse = new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.TransportException, null, exception);
 				if (!serviceRequest.isSuppressUI()) {
 					ImageUtils.showToastNotification(R.string.network_message_connection_poor, Toast.LENGTH_LONG);
 				}
-				Logger.d(this, "Transport exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.TransportException, null, exception);
-
 			}
 			else if (exception.getErrorCode() == ProxiErrorCode.NotFoundException) {
 				/* Recoverable if the service is down and on the way back */
+				notification = "Service not found exception: " + serviceRequest.getUri();
+				serviceResponse = new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceNotFoundException, null, exception);
 				if (!serviceRequest.isSuppressUI()) {
 					ImageUtils.showToastNotification(R.string.network_message_service_notready, Toast.LENGTH_LONG);
 				}
-				Logger.d(this, "Service not found exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceNotFoundException, null, exception);
 			}
 			else if (exception.getErrorCode() == ProxiErrorCode.AircandiServiceException) {
 				/* Unrecoverable */
-				Logger.d(this, "Service exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResponseCode.Unrecoverable, ResultCodeDetail.ServiceException, null, exception);
+				notification = "Service exception: " + serviceRequest.getUri();
+				serviceResponse =  new ServiceResponse(ResponseCode.Unrecoverable, ResultCodeDetail.ServiceException, null, exception);
+				if (!serviceRequest.isSuppressUI()) {
+					ImageUtils.showToastNotification(R.string.network_message_service_error, Toast.LENGTH_LONG);
+				}
 			}
 			else if (exception.getErrorCode() == ProxiErrorCode.ClientProtocolException) {
 				/* Unrecoverable */
-				Exceptions.Handle(exception);
 				Logger.d(this, "Protocol exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResponseCode.Unrecoverable, ResultCodeDetail.ProtocolException, null, exception);
+				Exceptions.Handle(exception);
 			}
 			else if (exception.getErrorCode() == ProxiErrorCode.URISyntaxException) {
 				/* Unrecoverable */
-				Exceptions.Handle(exception);
 				Logger.d(this, "URI syntax exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResponseCode.Unrecoverable, ResultCodeDetail.ProtocolException, null, exception);
+				Exceptions.Handle(exception);
 			}
 			else {
 				/* Unrecoverable */
-				Exceptions.Handle(exception);
 				Logger.d(this, "Unknown exception: " + serviceRequest.getUri());
-				return new ServiceResponse(ResponseCode.Unrecoverable, ResultCodeDetail.UnknownException, null, exception);
+				Exceptions.Handle(exception);
 			}
+			Logger.w(this, notification);
+			return serviceResponse;
 		}
 	}
 

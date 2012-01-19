@@ -218,6 +218,7 @@
                         android:onClick="onCommandButtonClick"
                         android:padding="3dp"
                         android:text="@string/candi_button_new"
+                        android:visibility="gone"
                         android:width="65dp" />
 
                     <Button
@@ -232,6 +233,7 @@
                         android:onClick="onCommandButtonClick"
                         android:padding="3dp"
                         android:text="@string/candi_button_edit"
+                        android:visibility="gone"
                         android:width="65dp" />
 
                     <ImageView
@@ -244,10 +246,11 @@
                         android:height="65dp"
                         android:minHeight="65dp"
                         android:minWidth="65dp"
-                        android:src="?attr/imageForwardInfo"
                         android:onClick="onCandiInfoClick"
                         android:padding="3dp"
                         android:scaleType="center"
+                        android:src="?attr/imageForwardInfo"
+                        android:visibility="gone"
                         android:width="65dp" />
                 </RelativeLayout>
 
@@ -307,7 +310,7 @@
                 android:paddingLeft="90dp" >
             </RelativeLayout>
         </SlidingDrawer>
-    </FrameLayout>
+    </FrameLayout>
     -->
 
 </RelativeLayout>

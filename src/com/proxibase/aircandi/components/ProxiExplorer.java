@@ -15,7 +15,7 @@ import android.os.Bundle;
 
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.Preferences;
-import com.proxibase.aircandi.CandiSearchActivity.EventBus;
+import com.proxibase.aircandi.CandiRadar.EventBus;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
@@ -175,8 +175,8 @@ public class ProxiExplorer {
 		ServiceResponse serviceResponse = new ServiceResponse();
 		for (Beacon beacon : mBeacons) {
 
-			if (beacon.isDirty) {
-				beacon.isDirty = false;
+			if (beacon.dirty) {
+				beacon.dirty = false;
 				beacon.entities.clear();
 
 				if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
@@ -227,7 +227,7 @@ public class ProxiExplorer {
 						break;
 					}
 					Entity entity = beacon.entities.get(i);
-					if (entity.isDirty) {
+					if (entity.dirty) {
 						/*
 						 * Includes call to rebuildEntityList()
 						 */
@@ -239,7 +239,7 @@ public class ProxiExplorer {
 					else {
 						for (int j = entity.children.size() - 1; j >= 0; j--) {
 							Entity childEntity = entity.children.get(j);
-							if (childEntity.isDirty) {
+							if (childEntity.dirty) {
 								serviceResponse = doRefreshEntity(childEntity.id);
 								if (serviceResponse.responseCode != ResponseCode.Success) {
 									break;
@@ -615,10 +615,10 @@ public class ProxiExplorer {
 		for (Beacon beacon : mBeacons) {
 			for (Entity entity : beacon.entities) {
 				for (Entity childEntity : entity.children) {
-					childEntity.isHidden = entity.isHidden;
+					childEntity.hidden = entity.hidden;
 
 					/* If child is going to inherit visibility then perform its own personal visibility check. */
-					if (!childEntity.isHidden) {
+					if (!childEntity.hidden) {
 						setEntityVisibility(childEntity, beacon);
 					}
 				}
@@ -627,8 +627,8 @@ public class ProxiExplorer {
 	}
 
 	private void setEntityVisibility(Entity entity, Beacon beacon) {
-		boolean oldIsHidden = entity.isHidden;
-		entity.isHidden = false;
+		boolean oldIsHidden = entity.hidden;
+		entity.hidden = false;
 		/*
 		 * Make it harder to fade out than it is to fade in.
 		 * Entities are only New for the first scan that discovers them.
@@ -639,7 +639,7 @@ public class ProxiExplorer {
 
 		/* Hide entities that are not within entity declared virtual range */
 		if (Aircandi.settings.getBoolean(Preferences.PREF_ENTITY_FENCING, true) && beacon.getAvgBeaconLevel() < signalThresholdFluid) {
-			entity.isHidden = true;
+			entity.hidden = true;
 			return;
 		}
 	}

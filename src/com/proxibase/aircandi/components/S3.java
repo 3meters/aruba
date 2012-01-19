@@ -40,7 +40,7 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
-import com.proxibase.aircandi.CandiSearchActivity;
+import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxiErrorCode;
@@ -65,7 +65,7 @@ public class S3 {
 
 	public static AmazonS3 getInstance() {
 		if (s3 == null) {
-			s3 = new AmazonS3Client(CandiSearchActivity.mAwsCredentials);
+			s3 = new AmazonS3Client(CandiRadar.mAwsCredentials);
 		}
 
 		return s3;

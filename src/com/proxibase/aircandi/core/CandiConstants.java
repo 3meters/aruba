@@ -26,6 +26,7 @@ public interface CandiConstants {
 	public static final int				NETWORK_INTERVAL_PHONEY				= 3000;
 
 	public static final float			CANDI_VIEW_HALO						= 2.0f;
+	
 	public static final int				CANDI_VIEW_WIDTH					= 250;
 	public static final int				CANDI_VIEW_SPACING					= 20;
 	public static final int				CANDI_VIEW_BODY_HEIGHT				= 250;
@@ -104,9 +105,8 @@ public interface CandiConstants {
 	public static final int				RESULT_PROFILE_UPDATED				= 310;
 	public static final int				RESULT_USER_SIGNED_IN				= 400;
 
-	public static final int				VISIBILITY_PRIVATE					= 0;
-	public static final int				VISIBILITY_PASSWORD_PROTECTED		= 1;
-	public static final int				VISIBILITY_PUBLIC					= 2;
+	public static final int				VISIBILITY_PUBLIC					= 0;
+	public static final int				VISIBILITY_PRIVATE					= 1;
 
 	public static final float			DURATION_MULTIPLIER					= 1.0f;
 	public static final float			DURATION_ZOOM						= 0.5f * DURATION_MULTIPLIER;
@@ -118,7 +118,7 @@ public interface CandiConstants {
 	public static final float			DURATION_CANDIBODY_COLLAPSE			= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_CANDIBODY_EXPAND			= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_REFLECTION_HIDESHOW		= 0.8f * DURATION_MULTIPLIER;
-	public static final float			DURATION_PLACEHOLDER_HIDESHOW		= 0.8f * DURATION_MULTIPLIER;
+	public static final float			DURATION_PLACEHOLDER_HIDESHOW		= 0.3f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_OVERFLOW_FADE	= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_FADE			= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_FADE_TEST		= 5.0f * DURATION_MULTIPLIER;

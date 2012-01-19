@@ -59,7 +59,7 @@ public abstract class CandiActivity extends Activity {
 		mCommon.setActiveTab(view);
 		if (view.getTag().equals("radar")) {
 			Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
-			Intent intent = new Intent(this, CandiSearchActivity.class);
+			Intent intent = new Intent(this, CandiRadar.class);
 			startActivity(intent);
 			overridePendingTransition(R.anim.fade_in_short, R.anim.fade_out_short);
 		}

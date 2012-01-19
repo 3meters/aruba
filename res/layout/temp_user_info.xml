@@ -8,8 +8,8 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:layout_marginRight="5dp"
         android:scaleType="centerCrop" />
 
@@ -21,20 +21,31 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/image_user_picture"
-        android:paddingTop="5dp"
         android:gravity="bottom"
+        android:paddingTop="5dp"
         android:text="Jay Massena" />
 
     <TextView
         android:id="@+id/text_user_timesince"
         style="@style/app_user_timesince"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/image_user_picture"
         android:layout_below="@+id/text_user_fullname"
+        android:layout_toRightOf="@+id/image_user_picture"
         android:gravity="top"
         android:text="10 hours ago" />
+
+    <ImageView
+        android:id="@+id/image_locked"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:padding="1dp"
+        android:layout_marginLeft="4dp"
+        android:layout_toRightOf="@+id/text_user_timesince"
+        android:layout_alignTop="@+id/text_user_timesince"
+        android:layout_alignBottom="@+id/text_user_timesince"
+        android:visibility="gone"
+        android:scaleType="centerCrop"
+        android:src="?attr/iconLocked" />
 
 </RelativeLayout>

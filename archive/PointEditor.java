@@ -105,7 +105,7 @@ public class PointEditor extends AircandiActivity {
 		if (changedRipplePoint) {
 			Bundle parameters = new Bundle();
 			if (mEntityProxy.isTagged) {
-				mEntityProxy.isDirty = true;
+				mEntityProxy.dirty = true;
 				mEntityProxy.isTagged = true;
 				// parameters.putString("bssid", mEntity.bssid);
 				// parameters.putString("ssid", mEntity.ssid);

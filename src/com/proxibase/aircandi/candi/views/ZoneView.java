@@ -44,7 +44,7 @@ public class ZoneView extends BaseView {
 	public void initialize() {
 		super.initialize();
 
-		updateTextureSources();
+		updateTextureRegions();
 
 		if (mBodyTextureRegion != null) {
 			makeBodySprite();
@@ -59,7 +59,7 @@ public class ZoneView extends BaseView {
 	public void initializeModel() {
 		super.initializeModel();
 
-		updateTextureSources();
+		updateTextureRegions();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -85,6 +85,7 @@ public class ZoneView extends BaseView {
 			@Override
 			public void run() {
 				clearEntityModifiers();
+				clearSpriteModifiers();
 				doViewActions();
 				doViewModifiers();
 			}
@@ -169,7 +170,7 @@ public class ZoneView extends BaseView {
 	public void resetTextureSources() {
 		super.resetTextureSources();
 
-		updateTextureSources();
+		updateTextureRegions();
 	}
 
 	@Override
@@ -181,8 +182,8 @@ public class ZoneView extends BaseView {
 	}
 
 	@Override
-	protected void updateTextureSources() {
-		super.updateTextureSources();
+	protected void updateTextureRegions() {
+		super.updateTextureRegions();
 
 		mBodyTextureRegion = mCandiPatchPresenter.mZoneBodyTextureRegion.clone();
 		mReflectionTextureRegion = mCandiPatchPresenter.mZoneReflectionTextureRegion.clone();

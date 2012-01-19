@@ -36,7 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.Aircandi;
-import com.proxibase.aircandi.CandiSearchActivity;
+import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.Preferences;
 import com.proxibase.aircandi.ProfileForm;
 import com.proxibase.aircandi.R;
@@ -152,7 +152,8 @@ public class AircandiCommon {
 		/* Dialogs */
 		mProgressDialog = new Dialog(mContext, R.style.progress_body);
 		mProgressDialog.setTitle(null);
-		mProgressDialog.setCancelable(true);
+		mProgressDialog.setCancelable(false);
+		mProgressDialog.setCanceledOnTouchOutside(false);
 		mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 		mProgressDialog.setOnDismissListener(new OnDismissListener() {
 
@@ -233,7 +234,7 @@ public class AircandiCommon {
 	// --------------------------------------------------------------------------------------------	
 	public void doHomeClick(View view) {
 
-		Intent intent = new Intent(mContext, CandiSearchActivity.class);
+		Intent intent = new Intent(mContext, CandiRadar.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		mContext.startActivity(intent);
@@ -342,7 +343,7 @@ public class AircandiCommon {
 
 				@Override
 				public void run() {
-					image.setBackgroundResource(R.drawable.busy_anim);
+					image.setBackgroundResource(R.drawable.busy_anim_dark);
 					final AnimationDrawable animation = (AnimationDrawable) image.getBackground();
 					animation.start();
 				}

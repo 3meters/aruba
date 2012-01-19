@@ -102,7 +102,7 @@ public class CandiPatchModel extends Observable {
 		mCandiModels.add(candiModel);
 
 		/* Only assign to a zone if the model is visible */
-		if (candiModel.getEntity().isHidden) {
+		if (candiModel.getEntity().hidden) {
 			candiModel.getViewStateCurrent().setVisible(false);
 			candiModel.getViewStateNext().setVisible(false);
 		}
@@ -145,14 +145,16 @@ public class CandiPatchModel extends Observable {
 		candiModelManaged.setTitleText(entity.label);
 
 		if (candiModelManaged.getReasonInactive() != ReasonInactive.Navigation) {
-			if (entity.isHidden)
+			if (entity.hidden)
 				candiModelManaged.getViewStateNext().setVisible(false);
 			else
 				candiModelManaged.getViewStateNext().setVisible(true);
 		}
 
-		if (candiModelManaged.getViewStateCurrent().isVisible())
-			candiModelManaged.setRookie(false);
+//		if (candiModelManaged.getViewStateCurrent().isVisible()) {
+//			candiModelManaged.setRookie(false);
+//			candiModelManaged.getEntity().rookie = false;
+//		}
 
 		candiModelManaged.setDisplayExtra(displayExtra);
 
@@ -214,7 +216,7 @@ public class CandiPatchModel extends Observable {
 				}
 				else {
 					candiModel.setReasonInactive(ReasonInactive.None);
-					if (candiModel.getEntity().isHidden) {
+					if (candiModel.getEntity().hidden) {
 						/* Assign hidden candies to the inactive zone */
 						candiModel.getViewStateNext().setVisible(false);
 						candiModel.setReasonInactive(ReasonInactive.Hidden);
@@ -253,11 +255,11 @@ public class CandiPatchModel extends Observable {
 			focusedZoneIndex = mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex();
 		}
 
-		int visibleCandiNext = ((CandiModel) mCandiRootNext).visibleChildrenNext();
+		int visibleCandiNextCount = ((CandiModel) mCandiRootNext).visibleChildrenNextCount();
 
 		int zoneIndex = 0;
-		if (visibleCandiNext < (focusedZoneIndex + 1)) {
-			zoneIndex = (focusedZoneIndex + 1) - visibleCandiNext;
+		if (visibleCandiNextCount < (focusedZoneIndex + 1)) {
+			zoneIndex = (focusedZoneIndex + 1) - visibleCandiNextCount;
 			zoneIndex++;
 		}
 
@@ -303,7 +305,7 @@ public class CandiPatchModel extends Observable {
 		 * If needed, move the candi model with the current focus back to the
 		 * slot the user is currently looking at.
 		 */
-		if (mCandiModelFocused != null) {
+		if (mCandiModelFocused != null && focusedZoneIndex != 0) {
 			if (!mCandiModelFocused.getZoneStateCurrent().getZone().isInactive() && !mCandiModelFocused.getZoneStateNext().getZone().isInactive()) {
 				if (mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex() != mCandiModelFocused.getZoneStateNext().getZone()
 						.getZoneIndex()) {
@@ -424,9 +426,8 @@ public class CandiPatchModel extends Observable {
 		}
 	}
 
-	public void sortCandiModels() {
-		Collections.sort(mCandiModels, new SortEntitiesByDiscoveryTime());
-		Collections.sort(mCandiModels, new SortEntitiesByEntityType());
+	public void sortCandiModels(List list) {
+		Collections.sort(list, new SortEntitiesByDiscoveryTime());
 	}
 
 	public ZoneModel getZoneNeighbor(ZoneModel targetZoneModel, boolean forward) {
@@ -557,9 +558,9 @@ public class CandiPatchModel extends Observable {
 
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {
-			if (!object1.getEntity().beacon.isUnregistered && object2.getEntity().beacon.isUnregistered)
+			if (!object1.getEntity().beacon.unregistered && object2.getEntity().beacon.unregistered)
 				return -1;
-			else if (!object2.getEntity().beacon.isUnregistered && object1.getEntity().beacon.isUnregistered)
+			else if (!object2.getEntity().beacon.unregistered && object1.getEntity().beacon.unregistered)
 				return 1;
 			else
 				return object2.getEntity().beacon.getAvgBeaconLevel() - object1.getEntity().beacon.getAvgBeaconLevel();
@@ -570,20 +571,27 @@ public class CandiPatchModel extends Observable {
 
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {
-			if (!object1.getEntity().beacon.isUnregistered && object2.getEntity().beacon.isUnregistered)
-				return -1;
-			else if (!object2.getEntity().beacon.isUnregistered && object1.getEntity().beacon.isUnregistered)
+			
+			Entity entity1 = object1.getEntity();
+			Entity entity2 = object2.getEntity();
+			if (!entity1.beacon.unregistered && entity2.beacon.unregistered)
 				return 1;
+			else if (!entity2.beacon.unregistered && entity1.beacon.unregistered)
+				return -1;
 			else {
-				if ((object2.getEntity().beacon.discoveryTime.getTime() / 100) - (object1.getEntity().beacon.discoveryTime.getTime() / 100) < 0)
+				/* Rounded to produce a bucket that will get further sorted by recent activity */
+				if ((entity1.discoveryTime.getTime() / 1000) > (entity2.discoveryTime.getTime() / 1000))
 					return -1;
-				else if ((object2.getEntity().beacon.discoveryTime.getTime() / 100) - (object1.getEntity().beacon.discoveryTime.getTime() / 100) > 0)
+				if ((entity1.discoveryTime.getTime() / 1000) < (entity2.discoveryTime.getTime() / 1000))
 					return 1;
 				else {
-					if (object2.getEntity().label.compareToIgnoreCase(object1.getEntity().label) < 0)
-						return 1;
-					else if (object2.getEntity().label.compareToIgnoreCase(object1.getEntity().label) > 0)
+					Integer dateToUse1 = entity1.updatedDate != null ? entity1.updatedDate : entity1.createdDate;
+					Integer dateToUse2 = entity2.updatedDate != null ? entity2.updatedDate : entity2.createdDate;
+
+					if (dateToUse1 > dateToUse2)
 						return -1;
+					else if (dateToUse1 < dateToUse2)
+						return 1;
 					else
 						return 0;
 				}

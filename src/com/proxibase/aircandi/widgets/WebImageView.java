@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -36,6 +37,7 @@ public class WebImageView extends RelativeLayout {
 	private boolean		mShowBusy;
 	private Integer		mLayoutId;
 	private ScaleType	mScaleType;
+	private String		mThemeTone;
 
 	public WebImageView(Context context) {
 		this(context, null);
@@ -55,6 +57,11 @@ public class WebImageView extends RelativeLayout {
 		mMaxWidth = ta.getDimensionPixelSize(R.styleable.WebImageView_maxWidth, Integer.MAX_VALUE);
 		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.temp_webimageview);
+
+		TypedValue resourceName = new TypedValue();
+		if (context.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
+			mThemeTone = (String) resourceName.coerceToString();
+		}
 
 		int scaleTypeValue = attributes.getAttributeIntValue("http://schemas.android.com/apk/res/android", "scaleType", 0);
 		mScaleType = ScaleType.values()[scaleTypeValue];
@@ -171,7 +178,13 @@ public class WebImageView extends RelativeLayout {
 
 				@Override
 				public void run() {
-					mImageViewLoading.setBackgroundResource(R.drawable.busy_anim);
+					if (mThemeTone.equals("dark")) {
+						mImageViewLoading.setBackgroundResource(R.drawable.busy_anim_dark);
+					}
+					else if (mThemeTone.equals("light")) {
+						mImageViewLoading.setBackgroundResource(R.drawable.busy_anim_light);
+					}
+
 					final AnimationDrawable animation = (AnimationDrawable) mImageViewLoading.getBackground();
 					animation.start();
 					mImageViewLoading.setVisibility(View.VISIBLE);

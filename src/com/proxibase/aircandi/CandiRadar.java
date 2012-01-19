@@ -31,16 +31,12 @@ import org.anddev.andengine.util.modifier.ease.EaseCircularIn;
 import org.anddev.andengine.util.modifier.ease.EaseLinear;
 import org.anddev.andengine.util.modifier.ease.EaseQuartInOut;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.net.Uri;
@@ -51,14 +47,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -96,6 +89,7 @@ import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.Command;
+import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageCache;
 import com.proxibase.aircandi.components.ImageManager;
@@ -180,51 +174,38 @@ import com.proxibase.sdk.android.util.ProxiConstants;
  * is paused.
  */
 
-@SuppressWarnings("unused")
-public class CandiSearchActivity extends AircandiGameActivity implements TextureListener {
+public class CandiRadar extends AircandiGameActivity implements TextureListener {
 
-	private static String				COMPONENT_NAME				= "CandiSearch";
+	private boolean						mFirstRun				= true;
+	private Boolean						mReadyToRun				= false;
+	private Boolean						mFullUpdateSuccess		= false;
+	private Boolean						mScanActive				= false;
+	private Handler						mMyHandler				= new Handler();
+	public static BasicAWSCredentials	mAwsCredentials			= null;
 
-	private boolean						mFirstRun					= true;
-	private Boolean						mReadyToRun					= false;
-	private Boolean						mFullUpdateSuccess			= false;
-	private Boolean						mScanActive					= false;
-	private Handler						mMyHandler					= new Handler();
-	private Boolean						mCredentialsFound			= false;
-	public static BasicAWSCredentials	mAwsCredentials				= null;
-
-	public Boolean						mPrefAutoscan				= false;
-	public int							mPrefAutoscanInterval		= 5000;
-	public boolean						mPrefDemoMode				= false;
-	public boolean						mPrefGlobalBeacons			= true;
-	public DisplayExtra					mPrefDisplayExtras			= DisplayExtra.None;
-	public boolean						mPrefEntityFencing			= true;
-	public boolean						mPrefShowDebug				= false;
-	public boolean						mPrefSoundEffects			= true;
+	public Boolean						mPrefAutoscan			= false;
+	public int							mPrefAutoscanInterval	= 5000;
+	public boolean						mPrefDemoMode			= false;
+	public boolean						mPrefGlobalBeacons		= true;
+	public DisplayExtra					mPrefDisplayExtras		= DisplayExtra.None;
+	public boolean						mPrefEntityFencing		= true;
+	public boolean						mPrefShowDebug			= false;
+	public boolean						mPrefSoundEffects		= true;
 
 	private List<Entity>				mEntities;
-	private List<Entity>				mEntitiesFlat;
 	private ProxiHandlerManager			mEntityHandlerManager;
 
 	private CandiPatchModel				mCandiPatchModel;
 	private CandiPatchPresenter			mCandiPatchPresenter;
 	private RenderSurfaceView			mCandiSurfaceView;
 
-	private FrameLayout					mSliderWrapperSearch;
-
 	private ActionsWindow				mActionsWindow;
-	private boolean						mCandiActivityActive		= false;
-	private AnimType					mAnimTypeCandiInfo			= AnimType.RotateCandi;
+	private AnimType					mAnimTypeCandiInfo		= AnimType.RotateCandi;
 	private Sound						mCandiAlertSound;
-	private Rotate3dAnimation			mRotate3dAnimation;
-	private boolean						mFirstTimeSliderInfoShow	= true;
-	private boolean						mSliderInfoOpen				= true;
-	private ScreenOrientation			mScreenOrientation			= ScreenOrientation.PORTRAIT;
-	private PackageReceiver				mPackageReceiver			= new PackageReceiver();
-	private boolean						mIgnoreInput				= false;
-	private boolean						mUsingEmulator				= false;
+	private ScreenOrientation			mScreenOrientation		= ScreenOrientation.PORTRAIT;
+	private PackageReceiver				mPackageReceiver		= new PackageReceiver();
+	private boolean						mUsingEmulator			= false;
 
-	private int							mRenderMode;
 	private Options						mScanOptions;
 
 	@Override
@@ -258,7 +239,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		mRenderSurfaceView.setZOrderOnTop(true);
 
 		/* TODO: Rendering only when dirty is more battery efficient */
-		mRenderSurfaceView.setRenderMode(mRenderMode = RenderSurfaceView.RENDERMODE_WHEN_DIRTY);
+		mRenderSurfaceView.setRenderMode(RenderSurfaceView.RENDERMODE_WHEN_DIRTY);
 	}
 
 	private void initialize() {
@@ -270,7 +251,6 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		updatePreferences();
 
 		/* Debug footer */
-		mSliderWrapperSearch = (FrameLayout) findViewById(R.id.slider_wrapper_search);
 		debugSliderShow(mPrefShowDebug);
 		if (mPrefShowDebug) {
 			updateDebugInfo();
@@ -319,8 +299,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		mCandiSurfaceView.requestFocus();
 		mCandiSurfaceView.setFocusableInTouchMode(true);
 
-		/* Animation */
-		mRotate3dAnimation = new Rotate3dAnimation();
+		new Rotate3dAnimation();
 
 		/* Check to see if we already have a signed in user */
 		if (findViewById(R.id.image_user) != null && Aircandi.getInstance().getUser() != null) {
@@ -348,17 +327,14 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 							|| (secretKey == null)
 							|| (secretKey.equals(""))
 							|| (secretKey.equals("CHANGEME"))) {
-						Logger.e(CandiSearchActivity.this, "Aws Credentials not configured correctly.");
-						mCredentialsFound = false;
+						Logger.e(CandiRadar.this, "Aws Credentials not configured correctly.");
 					}
 					else {
 						mAwsCredentials = new BasicAWSCredentials(properties.getProperty("accessKey"), properties.getProperty("secretKey"));
-						mCredentialsFound = true;
 					}
 				}
 				catch (Exception exception) {
-					Logger.e(CandiSearchActivity.this, exception.getMessage(), exception);
-					mCredentialsFound = false;
+					Logger.e(CandiRadar.this, exception.getMessage(), exception);
 				}
 			}
 		};
@@ -401,7 +377,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		if (view.getTag().equals("radar")) {
 			Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
 
-			Intent intent = new Intent(this, CandiSearchActivity.class);
+			Intent intent = new Intent(this, CandiRadar.class);
 			startActivity(intent);
 			overridePendingTransition(R.anim.fade_in_short, R.anim.fade_out_short);
 		}
@@ -426,7 +402,8 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		Tracker.trackEvent("Clicks", "Button", "refresh", 0);
 
 		if (mReadyToRun) {
-			doRefresh(RefreshType.BeaconScanPlusCurrent);
+			doRefresh(RefreshType.BeaconScan);
+			//			doRefresh(RefreshType.BeaconScanPlusCurrent);
 		}
 		updateDebugInfo();
 	}
@@ -517,6 +494,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 								public void run() {
 
 									if (serviceResponse.responseCode == ResponseCode.Success) {
+
 										/* Wrap-up */
 										if (mScanOptions.refreshAllBeacons && !mFullUpdateSuccess) {
 											mFullUpdateSuccess = true;
@@ -610,12 +588,45 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 						}
 
 						if (serviceResponse.responseCode == ResponseCode.Success) {
+
 							List<Entity> entities = ProxiExplorer.getInstance().mEntities;
+							/*
+							 * Set discovery time. Our goal is to base it on when the
+							 * user first sees it. So found but hidden doesn't count.
+							 * Rookie gets set to false on second time around for an entity.
+							 */
+							boolean rookieHit = false;
+							for (Entity entity : entities) {
+								/*
+								 * We keep bumping the date up until the entity is finally
+								 * visible.
+								 */
+								if (entity.rookie) {
+									entity.discoveryTime = DateUtils.nowDate();
+									if (!entity.hidden) {
+										entity.rookie = false;
+										rookieHit = true;
+									}
+								}
+								for (Entity childEntity : entity.children) {
+									/*
+									 * We keep bumping the date up until the entity is finally
+									 * visible.
+									 */
+									if (childEntity.rookie) {
+										childEntity.discoveryTime = DateUtils.nowDate();
+										if (!childEntity.hidden) {
+											childEntity.rookie = false;
+											rookieHit = true;
+										}
+									}
+								}
+							}
 
 							/* Check to see if we have any visible entities */
 							boolean visibleEntity = false;
 							for (Entity entity : entities) {
-								if (!entity.isHidden) {
+								if (!entity.hidden) {
 									visibleEntity = true;
 									break;
 								}
@@ -628,13 +639,8 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 								mCandiPatchPresenter.renderingActivate(5000);
 
 								/* Check for rookies and play a sound */
-								if (mPrefSoundEffects) {
-									for (CandiModel candiModel : mCandiPatchModel.getCandiModels()) {
-										if (candiModel.isRookie() && candiModel.getViewStateNext().isVisible()) {
-											mCandiAlertSound.play();
-											break;
-										}
-									}
+								if (mPrefSoundEffects && rookieHit) {
+									mCandiAlertSound.play();
 								}
 							}
 						}
@@ -648,6 +654,9 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		public void start(Options options) {
 			mOptions = options;
 			new AsyncTask() {
+
+				@Override
+				protected void onPreExecute() {}
 
 				@Override
 				protected Object doInBackground(Object... params) {
@@ -695,26 +704,6 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		mCandiPatchPresenter.updateCandiData(mEntities, fullUpdate, delayObserverUpdate);
 	}
 
-	private void doEntityUpdate(Entity freshEntity, Entity staleEntity) {
-		/*
-		 * Replace the entity in our master collection.
-		 */
-		for (int i = mEntities.size() - 1; i >= 0; i--) {
-			Entity entity = mEntities.get(i);
-			if (entity.id == staleEntity.id) {
-				if (freshEntity == null) {
-					mEntities.remove(i);
-				}
-				else {
-					mEntities.set(i, freshEntity);
-				}
-			}
-		}
-
-		/* Push the new and updated entities into the system */
-		mCandiPatchPresenter.updateCandiData(mEntities, false, false);
-	}
-
 	private void doRefresh(RefreshType refreshType) {
 
 		NetworkManager.getInstance().reset();
@@ -727,6 +716,11 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 			Logger.i(this, "User starting full beacon scan");
 			Tracker.trackEvent("Search", "Refresh", "All", 0);
 			scanForBeacons(new Options(true, false), true);
+		}
+		else if (refreshType == RefreshType.AutoScan) {
+			Logger.i(this, "User starting lightweight beacon scan");
+			Tracker.trackEvent("Search", "Refresh", "BeaconScan", 0);
+			scanForBeacons(new Options(false, false), false);
 		}
 		else if (refreshType == RefreshType.BeaconScan) {
 			Logger.i(this, "User starting lightweight beacon scan");
@@ -754,7 +748,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 				/* Scan could have caused the current candi to go away or be hidden */
 				Entity entity = ProxiExplorer.getInstance().getEntityById(idOfEntityToRefresh);
-				if (entity != null && !entity.isHidden) {
+				if (entity != null && !entity.hidden) {
 
 					/* Refresh candi view texture */
 					Logger.v(this, "Update texture: " + candiModelFocused.getTitleText());
@@ -784,7 +778,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 			return false;
 		}
 		for (Entity entity : mEntities) {
-			if (!entity.isHidden) {
+			if (!entity.hidden) {
 				return true;
 			}
 		}
@@ -818,7 +812,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 							 */
 							Beacon beacon = ProxiExplorer.getInstance().getBeaconById(entityDeleted.beaconId);
 							if (beacon != null) {
-								beacon.isDirty = true;
+								beacon.dirty = true;
 								mRefreshNeeded = true;
 							}
 						}
@@ -837,7 +831,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 							 * We will end up with the latest version of the entity
 							 * even if we also have an update stacked up in EntitiesUpdated.
 							 */
-							beacon.isDirty = true;
+							beacon.dirty = true;
 							mRefreshNeeded = true;
 						}
 						ProxiExplorer.getInstance().mEntitiesUpdated.remove(entityInserted.id);
@@ -852,7 +846,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 						for (Entity entity : ProxiExplorer.getInstance().getEntitiesFlat()) {
 							if (entity.id.equals(entityUpdated.id)) {
-								entity.isDirty = true;
+								entity.dirty = true;
 								mRefreshNeeded = true;
 
 								/* Refresh the texture */
@@ -871,6 +865,36 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 					ServiceResponse serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						List<Entity> freshEntityProxies = (List<Entity>) serviceResponse.data;
+
+						@SuppressWarnings("unused")
+						boolean rookieHit = false;
+						for (Entity entity : freshEntityProxies) {
+							/*
+							 * We keep bumping the date up until the entity is finally
+							 * visible.
+							 */
+							if (entity.rookie) {
+								entity.discoveryTime = DateUtils.nowDate();
+								if (!entity.hidden) {
+									entity.rookie = false;
+									rookieHit = true;
+								}
+							}
+							for (Entity childEntity : entity.children) {
+								/*
+								 * We keep bumping the date up until the entity is finally
+								 * visible.
+								 */
+								if (childEntity.rookie) {
+									childEntity.discoveryTime = DateUtils.nowDate();
+									if (!childEntity.hidden) {
+										childEntity.rookie = false;
+										rookieHit = true;
+									}
+								}
+							}
+						}
+
 						doUpdateEntities(freshEntityProxies, false, false);
 						mCandiPatchModel.getCandiModelFocused().setChanged();
 					}
@@ -909,6 +933,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		startActivity(intent);
 	}
 
+	@SuppressWarnings("unused")
 	private void showCandiFormFancy(final CandiModel candiModel) {
 
 		mCandiPatchPresenter.renderingActivate();
@@ -917,15 +942,10 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 			debugSliderShow(false);
 		}
 
-		float scaleFrom = 1.0f;
-		float scaleTo = 0.5f;
 		float alphaFrom = 1.0f;
-		float alphaTo = 0.0f;
 		final IEntity candiView = (IEntity) mCandiPatchPresenter.getCandiViewsHash().get(
 				String.valueOf(mCandiPatchModel.getCandiModelSelected().getModelId()));
 
-		scaleTo = 1.3f;
-		alphaTo = 0.0f;
 		//mEngine.getScene().registerEntityModifier(new AlphaModifier(duration, 1.0f, 0.0f, EaseLinear.getInstance()));
 
 		final ViewState viewState = candiModel.getViewStateCurrent();
@@ -951,7 +971,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 					}
 				});
 
-				CandiSearchActivity.this.runOnUiThread(new Runnable() {
+				CandiRadar.this.runOnUiThread(new Runnable() {
 
 					public void run() {
 
@@ -993,6 +1013,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		}, move, scale, new AlphaModifier(0.5f, alphaFrom, 0.0f, EaseCircularIn.getInstance())));
 	}
 
+	@SuppressWarnings("unused")
 	private void hideCandiInfo() {
 
 		mCandiPatchPresenter.renderingActivate();
@@ -1031,12 +1052,13 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 	}
 
+	@SuppressWarnings("unused")
 	private void hideGLSurfaceView(float duration) {
 		mEngine.getScene().registerEntityModifier(new ParallelEntityModifier(new IEntityModifierListener() {
 
 			@Override
 			public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-				CandiSearchActivity.this.runOnUiThread(new Runnable() {
+				CandiRadar.this.runOnUiThread(new Runnable() {
 
 					public void run() {
 						mCandiSurfaceView.setVisibility(View.GONE);
@@ -1050,6 +1072,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		}, new AlphaModifier(duration, 1.0f, 0.0f, EaseLinear.getInstance())));
 	}
 
+	@SuppressWarnings("unused")
 	private void showGLSurfaceView(float duration) {
 		mEngine.getScene().registerEntityModifier(new ParallelEntityModifier(new IEntityModifierListener() {
 
@@ -1058,7 +1081,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 			@Override
 			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-				CandiSearchActivity.this.runOnUiThread(new Runnable() {
+				CandiRadar.this.runOnUiThread(new Runnable() {
 
 					public void run() {
 						mCandiSurfaceView.setVisibility(View.VISIBLE);
@@ -1067,37 +1090,6 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 			}
 
 		}, new AlphaModifier(duration, 0.0f, 1.0f, EaseLinear.getInstance())));
-	}
-
-	private void infoSliderVisible(final boolean visible, final View view) {
-		if (view == null) {
-			return;
-		}
-		int animationResource = visible ? R.anim.fade_in_medium : R.anim.fade_out_short;
-		Animation animation = AnimationUtils.loadAnimation(CandiSearchActivity.this, animationResource);
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		animation.setAnimationListener(new AnimationListener() {
-
-			@Override
-			public void onAnimationEnd(Animation animation) {
-				if (!visible) {
-					view.setVisibility(View.GONE);
-				}
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation) {
-			}
-
-			@Override
-			public void onAnimationStart(Animation animation) {
-				if (visible) {
-					view.setVisibility(View.INVISIBLE);
-				}
-			}
-		});
-		view.startAnimation(animation);
 	}
 
 	class PackageReceiver extends BroadcastReceiver {
@@ -1116,6 +1108,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void checkEntityHandler() {
 	// EntityHandler entityHandler = candiModel.getEntity().entityHandler;
 	// boolean startedProxiHandler = mProxiHandlerManager.startProxiHandler(entityHandler.action,
@@ -1145,7 +1138,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 	public void debugSliderShow(final boolean visible) {
 
-		final ViewGroup slider = (ViewGroup) findViewById(R.id.slider_wrapper_search);
+		final ViewGroup slider = (ViewGroup) findViewById(R.id.debug_wrapper_radar);
 		if (slider != null) {
 
 			int animationResource = visible ? R.anim.fade_in_medium : R.anim.fade_out_medium;
@@ -1158,7 +1151,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 				public void onAnimationEnd(Animation animation) {
 					if (!visible) {
 						slider.setVisibility(View.GONE);
-						slider.findViewById(R.id.slider_drawer_search).setVisibility(View.GONE);
+						slider.findViewById(R.id.debug_drawer_radar).setVisibility(View.GONE);
 					}
 				}
 
@@ -1170,7 +1163,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 				public void onAnimationStart(Animation animation) {
 					if (visible) {
 						slider.setVisibility(View.INVISIBLE);
-						slider.findViewById(R.id.slider_drawer_search).setVisibility(View.VISIBLE);
+						slider.findViewById(R.id.debug_drawer_radar).setVisibility(View.VISIBLE);
 					}
 				}
 			});
@@ -1180,17 +1173,16 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 	public void updateDebugInfo() {
 
-		final ViewGroup slider = (ViewGroup) findViewById(R.id.slider_wrapper_search);
+		final ViewGroup slider = (ViewGroup) findViewById(R.id.debug_wrapper_radar);
 		if (slider != null) {
 
 			if (mPrefShowDebug) {
 
-				ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
 				Debug.MemoryInfo memoryInfo = new Debug.MemoryInfo();
 				Debug.getMemoryInfo(memoryInfo);
 
-				((RelativeLayout) findViewById(R.id.search_slider_content)).removeAllViews();
-				final TableLayout table = new TableLayout(this);
+				((RelativeLayout) findViewById(R.id.debug_section_one)).removeAllViews();
+				TableLayout table = new TableLayout(this);
 				TableLayout.LayoutParams tableLp = new TableLayout.LayoutParams();
 				tableLp.setMargins(0, 0, 0, 0);
 
@@ -1230,7 +1222,65 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 						(float) ((float) memoryInfo.getTotalPrivateDirty() / 1024)));
 				table.addView(tableRow, tableLp);
 
-				((RelativeLayout) findViewById(R.id.search_slider_content)).addView(table);
+				((RelativeLayout) findViewById(R.id.debug_section_one)).addView(table);
+
+				/*
+				 * Monitor textures
+				 * 
+				 * Global textures: 1
+				 * Textures per zone: 1
+				 * Textures per candi: 3
+				 */
+				((RelativeLayout) findViewById(R.id.debug_section_two)).removeAllViews();
+				table = new TableLayout(this);
+				tableLp = new TableLayout.LayoutParams();
+				tableLp.setMargins(0, 0, 0, 0);
+
+				int candiPooledCount = 0;
+				int candiLoanedCount = 0;
+				int zones = 0;
+				int globalTexturesCount = 1;
+
+				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+				((TextView) tableRow.findViewById(R.id.text_label)).setText("Candi pooled: ");
+				if (mCandiPatchPresenter != null && mCandiPatchPresenter.mCandiViewPool != null) {
+					candiPooledCount = mCandiPatchPresenter.mCandiViewPool.pooledCount();
+					((TextView) tableRow.findViewById(R.id.text_value)).setText(String.valueOf(mCandiPatchPresenter.mCandiViewPool.pooledCount()));
+				}
+				table.addView(tableRow, tableLp);
+
+				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+				((TextView) tableRow.findViewById(R.id.text_label)).setText("Candi loaned: ");
+				if (mCandiPatchPresenter != null && mCandiPatchPresenter.mCandiViewPool != null) {
+					candiLoanedCount = mCandiPatchPresenter.mCandiViewPool.loanedCount();
+					((TextView) tableRow.findViewById(R.id.text_value))
+							.setText(String.valueOf(mCandiPatchPresenter.mCandiViewPool.loanedCount()));
+				}
+				table.addView(tableRow, tableLp);
+
+				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+				((TextView) tableRow.findViewById(R.id.text_label)).setText("Zones: ");
+				if (mCandiPatchPresenter != null && mCandiPatchPresenter.mCandiViewPool != null) {
+					((TextView) tableRow.findViewById(R.id.text_value)).setText(String.valueOf(mCandiPatchPresenter.mZoneViews.size()));
+					zones = mCandiPatchPresenter.mZoneViews.size();
+				}
+				table.addView(tableRow, tableLp);
+
+				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+				((TextView) tableRow.findViewById(R.id.text_label)).setText("Txts managed: ");
+				if (mEngine != null && mEngine.getTextureManager() != null && mEngine.getTextureManager().mTexturesManaged != null) {
+					((TextView) tableRow.findViewById(R.id.text_value)).setText(String.valueOf(mEngine.getTextureManager().mTexturesManaged
+							.size()));
+				}
+				table.addView(tableRow, tableLp);
+
+				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+				((TextView) tableRow.findViewById(R.id.text_label)).setText("Txts expected: ");
+				((TextView) tableRow.findViewById(R.id.text_value)).setText(String.valueOf(((candiPooledCount + candiLoanedCount) * 3) + (zones * 1)
+																							+ globalTexturesCount));
+				table.addView(tableRow, tableLp);
+
+				((RelativeLayout) findViewById(R.id.debug_section_two)).addView(table);
 			}
 		}
 	}
@@ -1405,11 +1455,11 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 					if (isChecked) {
-						Logger.i(CandiSearchActivity.this, "Enable wifi from activity");
+						Logger.i(CandiRadar.this, "Enable wifi from activity");
 						NetworkManager.getInstance().enableWifi(true);
 					}
 					else {
-						Logger.i(CandiSearchActivity.this, "Disable wifi from activity");
+						Logger.i(CandiRadar.this, "Disable wifi from activity");
 						NetworkManager.getInstance().enableWifi(false);
 					}
 				}
@@ -1426,13 +1476,14 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 	// Dialogs
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("unused")
 	private void showInstallDialog(final CandiModel candi) {
 
 		runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
-				final Dialog dialog = new Dialog(CandiSearchActivity.this, R.style.aircandi_theme_dialog);
+				final Dialog dialog = new Dialog(CandiRadar.this, R.style.aircandi_theme_dialog);
 				final RelativeLayout installDialog = (RelativeLayout) getLayoutInflater().inflate(R.layout.dialog_install, null);
 				dialog.setContentView(installDialog, new FrameLayout.LayoutParams(400, 300, Gravity.CENTER));
 				dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
@@ -1489,9 +1540,6 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 	public Engine onLoadEngine() {
 
 		Logger.d(this, "Initializing animation engine");
-
-		int rotation = getWindowManager().getDefaultDisplay().getOrientation();
-
 		/*
 		 * For now, we only support portait orientation. Supporting orientation
 		 * changes will likely require some fancy scaling transformation since the
@@ -1570,7 +1618,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 			@Override
 			public void onSingleTap(CandiModel candi) {
-				CandiSearchActivity.this.onCandiSingleTap(candi);
+				CandiRadar.this.onCandiSingleTap(candi);
 			}
 		});
 
@@ -1635,7 +1683,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.candi_search;
+		return R.layout.candi_radar;
 	}
 
 	@Override
@@ -1693,29 +1741,60 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 		/* We control window focus messages that trigger the engine from here. */
 		super.onWindowFocusChanged(true);
+		final WebImageView imageUser = (WebImageView) findViewById(R.id.image_user);
 
 		/* We run a fake modifier so we can trigger texture loading */
-		mEngine.getScene().registerEntityModifier(new AlphaModifier(0, 0.0f, 1.0f, new IEntityModifierListener() {
+		new AsyncTask() {
 
 			@Override
-			public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-				onTexturesReady();
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, "Loading...");
 			}
 
 			@Override
-			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-				mCandiPatchPresenter.renderingActivate();
+			protected Object doInBackground(Object... params) {
+				mEngine.getScene().registerEntityModifier(
+						new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, new IEntityModifierListener() {
+
+							@Override
+							public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+								onTexturesReady();
+							}
+
+							@Override
+							public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+								mCandiPatchPresenter.renderingActivate();
+							}
+						}, EaseLinear.getInstance()));
+
+				/* User or user picture could have changed in another activity */
+				if (imageUser != null && Aircandi.getInstance().getUser() != null) {
+					User user = Aircandi.getInstance().getUser();
+					mCommon.setUserPicture(user.imageUri, user.linkUri, imageUser);
+				}
+
+				/* Entities could have been inserted, updated or deleted by another activity so refresh our model */
+				refreshModel();
+
+				/* Restart autoscan if enabled */
+				if (mPrefAutoscan) {
+					mMyHandler.postDelayed(new Runnable() {
+
+						public void run() {
+							scanForBeacons(new Options(false, false), false);
+						}
+					}, mPrefAutoscanInterval);
+				}
+				return null;
 			}
-		}, EaseLinear.getInstance()));
 
-		/* User or user picture could have changed in another activity */
-		if (findViewById(R.id.image_user) != null && Aircandi.getInstance().getUser() != null) {
-			User user = Aircandi.getInstance().getUser();
-			mCommon.setUserPicture(user.imageUri, user.linkUri, (WebImageView) findViewById(R.id.image_user));
-		}
+			@Override
+			protected void onPostExecute(Object result) {
+				mCommon.showProgressDialog(false, null);
+			}
 
-		/* Entities could have been inserted, updated or deleted by another activity so refresh our model */
-		refreshModel();
+		}.execute();
+
 	}
 
 	@Override
@@ -1737,8 +1816,6 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 		ProxiExplorer.getInstance().onResume();
 		NetworkManager.getInstance().onResume();
-		mIgnoreInput = false;
-
 		/*
 		 * CandiPatchPresenter is created in onLoadScene which gets called
 		 * after the first onResume
@@ -1794,6 +1871,9 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		/* We control window focus messages that trigger the engine from here. */
 		super.onWindowFocusChanged(false);
 
+		/* Make sure autoscan is stopped if we are not in the foreground */
+		mMyHandler.removeMessages(0);
+
 		if (CandiConstants.DEBUG_TRACE) {
 			Debug.stopMethodTracing();
 		}
@@ -1845,12 +1925,6 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		 * called in BaseGameActivity.
 		 */
 		Logger.d(this, "onConfigurationChanged called: " + newConfig.orientation);
-
-		boolean landscape = false;
-		Display getOrient = getWindowManager().getDefaultDisplay();
-		if (getOrient.getOrientation() == Surface.ROTATION_90 || getOrient.getOrientation() == Surface.ROTATION_270)
-			landscape = true;
-
 		super.onConfigurationChanged(newConfig);
 	}
 
@@ -1882,6 +1956,10 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		if (mPrefShowDebug != Aircandi.settings.getBoolean(Preferences.PREF_SHOW_DEBUG, false)) {
 			prefResponse = PrefResponse.Change;
 			mPrefShowDebug = Aircandi.settings.getBoolean(Preferences.PREF_SHOW_DEBUG, false);
+			debugSliderShow(mPrefShowDebug);
+			if (mPrefShowDebug) {
+				updateDebugInfo();
+			}
 		}
 
 		mPrefSoundEffects = Aircandi.settings.getBoolean(Preferences.PREF_SOUND_EFFECTS, true);
@@ -1889,9 +1967,6 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
 			prefResponse = PrefResponse.Restart;
 			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
-			//			mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
-			//			int themeResourceId = this.getResources().getIdentifier(mPrefTheme, "style", "com.proxibase.aircandi");
-			//			this.setTheme(themeResourceId);
 		}
 		return prefResponse;
 	}
@@ -1947,6 +2022,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("unused")
 	private void recycleBitmaps() {
 		mCommon.recycleImageViewDrawable(R.id.image_public);
 		mCommon.recycleImageViewDrawable(R.id.image_public_reflection);
@@ -1963,7 +2039,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 
 			String jsonResponse = (String) serviceResponse.data;
 			VersionInfo versionInfo = (VersionInfo) ProxibaseService.convertJsonToObject(jsonResponse, VersionInfo.class, GsonType.ProxibaseService);
-			String currentVersionName = Aircandi.getVersionName(this, CandiSearchActivity.class);
+			String currentVersionName = Aircandi.getVersionName(this, CandiRadar.class);
 
 			if (!currentVersionName.equals(versionInfo.versionName)) {
 
@@ -2026,22 +2102,6 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 		}
 	}
 
-	private class Stopwatch {
-
-		{
-			Debug.startAllocCounting();
-		}
-		long	start	= System.nanoTime();
-
-		void stop() {
-			long elapsed = (System.nanoTime() - start) / 1000;
-			Debug.stopAllocCounting();
-			Logger.i(CandiSearchActivity.this, "CandiSearchActivity: " + elapsed + "us, "
-																+ Debug.getThreadAllocCount() + " allocations, "
-																+ Debug.getThreadAllocSize() + " bytes");
-		}
-	}
-
 	public enum AnimType {
 		Fade,
 		CrossFade,
@@ -2066,6 +2126,7 @@ public class CandiSearchActivity extends AircandiGameActivity implements Texture
 	}
 
 	public enum RefreshType {
+		AutoScan,
 		BeaconScan,
 		BeaconScanPlusCurrent,
 		All
