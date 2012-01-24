@@ -270,13 +270,23 @@ public class CandiPatchModel extends Observable {
 			if (candiModel.getViewStateNext().isVisible()) {
 
 				/* Allocate new zone if needed */
-				if (mZoneModels.size() < zoneIndex + 1)
+				if (mZoneModels.size() < zoneIndex + 1) {
 					mZoneModels.add(new ZoneModel(zoneIndex, this));
+				}
 
 				/* Hookup */
 				ZoneModel zone = mZoneModels.get(zoneIndex);
 				zone.getCandiesNext().add(candiModel);
 				candiModel.getZoneStateNext().setZone(zone);
+				
+				/* 
+				 * Special treatment for zone one. If the user is currently focused on a
+				 * candi in zone one we make sure their focus stays on whatever candi
+				 * ends up in zone one next. 
+				 */
+				if (zoneIndex == 0 && focusedZoneIndex == 0) {
+					mCandiModelFocused = candiModel;
+				}
 
 				/* Hookup any children */
 				if (!candiModel.hasVisibleChildrenNext()) {
@@ -558,9 +568,9 @@ public class CandiPatchModel extends Observable {
 
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {
-			if (!object1.getEntity().beacon.unregistered && object2.getEntity().beacon.unregistered)
+			if (!object1.getEntity().beacon.registered && object2.getEntity().beacon.registered)
 				return -1;
-			else if (!object2.getEntity().beacon.unregistered && object1.getEntity().beacon.unregistered)
+			else if (!object2.getEntity().beacon.registered && object1.getEntity().beacon.registered)
 				return 1;
 			else
 				return object2.getEntity().beacon.getAvgBeaconLevel() - object1.getEntity().beacon.getAvgBeaconLevel();
@@ -574,9 +584,9 @@ public class CandiPatchModel extends Observable {
 			
 			Entity entity1 = object1.getEntity();
 			Entity entity2 = object2.getEntity();
-			if (!entity1.beacon.unregistered && entity2.beacon.unregistered)
+			if (!entity1.beacon.registered && entity2.beacon.registered)
 				return 1;
-			else if (!entity2.beacon.unregistered && entity1.beacon.unregistered)
+			else if (!entity2.beacon.registered && entity1.beacon.registered)
 				return -1;
 			else {
 				/* Rounded to produce a bucket that will get further sorted by recent activity */

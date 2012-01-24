@@ -72,7 +72,6 @@ public class Aircandi extends Application {
 
 	private static Aircandi					singletonObject;
 
-	public Location							currentLocation;
 	public static SharedPreferences			settings;
 	public static SharedPreferences.Editor	settingsEditor;
 	public static Context					applicationContext;
@@ -81,6 +80,7 @@ public class Aircandi extends Application {
 	private Boolean							mToolstripOpen		= false;
 	private Boolean							mFirstTimeCandiForm	= true;
 	private CandiTask						mCandiTask			= CandiTask.RadarCandi;
+	private Location						mCurrentLocation;
 
 	public static Aircandi getInstance() {
 		return singletonObject;
@@ -214,6 +214,14 @@ public class Aircandi extends Application {
 
 	public CandiTask getCandiTask() {
 		return mCandiTask;
+	}
+
+	public void setCurrentLocation(Location currentLocation) {
+		this.mCurrentLocation = currentLocation;
+	}
+
+	public Location getCurrentLocation() {
+		return mCurrentLocation;
 	}
 
 	public enum CandiTask {

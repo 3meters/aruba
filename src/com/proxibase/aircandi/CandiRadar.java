@@ -205,11 +205,29 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	private ScreenOrientation			mScreenOrientation		= ScreenOrientation.PORTRAIT;
 	private PackageReceiver				mPackageReceiver		= new PackageReceiver();
 	private boolean						mUsingEmulator			= false;
+	private Runnable					mScanRunnable;
 
 	private Options						mScanOptions;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		
+//		if (!isTaskRoot()) {
+//		    final Intent intent = getIntent();
+//		    final String intentAction = intent.getAction();
+//		    if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) &&
+//		            intentAction != null && intentAction.equals(Intent.ACTION_MAIN)) {
+//		        finish();
+//		    }
+//		}
+		
+//	    if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+//	        // Activity was brought to front and not created,
+//	        // Thus finishing this will get us to the last viewed activity
+//	        finish();
+//	        return;
+//	    }		
+		
 		Logger.i(this, "CandiSearchActivity created");
 		super.onCreate(savedInstanceState);
 		if (CandiConstants.DEBUG_TRACE) {
@@ -249,6 +267,22 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		/* Initialize preferences */
 		updatePreferences();
+
+		/* Setup scan runnable */
+		mScanRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+				if (mCandiPatchModel == null
+						|| mCandiPatchModel.getCandiRootCurrent() == null
+						|| mCandiPatchModel.getCandiRootCurrent().isSuperRoot()) {
+					scanForBeacons(new Options(false, false), false);
+				}
+				else if (mPrefAutoscan) {
+					mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
+				}
+			}
+		};
 
 		/* Debug footer */
 		debugSliderShow(mPrefShowDebug);
@@ -376,8 +410,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		mCommon.setActiveTab(view);
 		if (view.getTag().equals("radar")) {
 			Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
-
 			Intent intent = new Intent(this, CandiRadar.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 			startActivity(intent);
 			overridePendingTransition(R.anim.fade_in_short, R.anim.fade_out_short);
 		}
@@ -386,7 +421,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
 			Intent intent = intentBuilder.create();
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
 			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 		}
@@ -402,7 +436,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Tracker.trackEvent("Clicks", "Button", "refresh", 0);
 
 		if (mReadyToRun) {
-			doRefresh(RefreshType.BeaconScan);
+			doRefresh(RefreshType.BeaconScanPlusCurrent);
 			//			doRefresh(RefreshType.BeaconScanPlusCurrent);
 		}
 		updateDebugInfo();
@@ -518,12 +552,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 										 * unless we discover a new beacon.
 										 */
 										if (mPrefAutoscan) {
-											mMyHandler.postDelayed(new Runnable() {
-
-												public void run() {
-													scanForBeacons(new Options(false, false), false);
-												}
-											}, mPrefAutoscanInterval);
+											mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
 										}
 										mScanActive = false;
 									}
@@ -583,68 +612,80 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 
-						if (mOptions.refreshDirty) {
-							serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
-						}
+						/*
+						 * In case the user navigated in while we were doing an autoscan refresh, skip
+						 * the data processing, wrap this up, and schedule another scan. Auto scheduled
+						 * scans will keep getting skipped and rescheduled as long as the user is
+						 * drilled in.
+						 */
 
-						if (serviceResponse.responseCode == ResponseCode.Success) {
+						if (!mPrefAutoscan || (mCandiPatchModel == null
+												|| mCandiPatchModel.getCandiRootCurrent() == null
+								|| mCandiPatchModel.getCandiRootCurrent().isSuperRoot())) {
 
-							List<Entity> entities = ProxiExplorer.getInstance().mEntities;
-							/*
-							 * Set discovery time. Our goal is to base it on when the
-							 * user first sees it. So found but hidden doesn't count.
-							 * Rookie gets set to false on second time around for an entity.
-							 */
-							boolean rookieHit = false;
-							for (Entity entity : entities) {
+							if (mOptions.refreshDirty) {
+								serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
+							}
+
+							if (serviceResponse.responseCode == ResponseCode.Success) {
+
+								List<Entity> entities = ProxiExplorer.getInstance().mEntities;
 								/*
-								 * We keep bumping the date up until the entity is finally
-								 * visible.
+								 * Set discovery time. Our goal is to base it on when the
+								 * user first sees it. So found but hidden doesn't count.
+								 * Rookie gets set to false on second time around for an entity.
 								 */
-								if (entity.rookie) {
-									entity.discoveryTime = DateUtils.nowDate();
-									if (!entity.hidden) {
-										entity.rookie = false;
-										rookieHit = true;
-									}
-								}
-								for (Entity childEntity : entity.children) {
+								boolean rookieHit = false;
+								for (Entity entity : entities) {
 									/*
 									 * We keep bumping the date up until the entity is finally
 									 * visible.
 									 */
-									if (childEntity.rookie) {
-										childEntity.discoveryTime = DateUtils.nowDate();
-										if (!childEntity.hidden) {
-											childEntity.rookie = false;
+									if (entity.rookie) {
+										entity.discoveryTime = DateUtils.nowDate();
+										if (!entity.hidden) {
+											entity.rookie = false;
 											rookieHit = true;
 										}
+									}
+									for (Entity childEntity : entity.children) {
+										/*
+										 * We keep bumping the date up until the entity is finally
+										 * visible.
+										 */
+										if (childEntity.rookie) {
+											childEntity.discoveryTime = DateUtils.nowDate();
+											if (!childEntity.hidden) {
+												childEntity.rookie = false;
+												rookieHit = true;
+											}
+										}
+									}
+								}
+
+								/* Check to see if we have any visible entities */
+								boolean visibleEntity = false;
+								for (Entity entity : entities) {
+									if (!entity.hidden) {
+										visibleEntity = true;
+										break;
+									}
+								}
+
+								if (visibleEntity) {
+									mCandiPatchPresenter.renderingActivate();
+									doUpdateEntities(entities, mScanOptions.refreshAllBeacons, false);
+									Logger.d(this, "Model updated with entities");
+									mCandiPatchPresenter.renderingActivate(5000);
+
+									/* Check for rookies and play a sound */
+									if (mPrefSoundEffects && rookieHit) {
+										mCandiAlertSound.play();
 									}
 								}
 							}
 
-							/* Check to see if we have any visible entities */
-							boolean visibleEntity = false;
-							for (Entity entity : entities) {
-								if (!entity.hidden) {
-									visibleEntity = true;
-									break;
-								}
-							}
-
-							if (visibleEntity) {
-								mCandiPatchPresenter.renderingActivate();
-								doUpdateEntities(entities, mScanOptions.refreshAllBeacons, false);
-								Logger.d(this, "Model updated with entities");
-								mCandiPatchPresenter.renderingActivate(5000);
-
-								/* Check for rookies and play a sound */
-								if (mPrefSoundEffects && rookieHit) {
-									mCandiAlertSound.play();
-								}
-							}
 						}
-
 					}
 					EventBus.onBeaconScanComplete(serviceResponse);
 				}
@@ -793,7 +834,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Updating...");
+			//mCommon.showProgressDialog(true, "Updating...");
 			}
 
 			@Override
@@ -906,7 +947,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			@Override
 			protected void onPostExecute(Object result) {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
-				mCommon.showProgressDialog(false, null);
+				//mCommon.showProgressDialog(false, null);
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					ProxiExplorer.getInstance().mEntitiesInserted.clear();
@@ -1527,7 +1568,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		if (id == CandiConstants.DIALOG_NEW_CANDI_ID) {
-			return mCommon.mIconContextMenu.createMenu(getString(R.string.dialog_new_message));
+			return mCommon.mIconContextMenu.createMenu(getString(R.string.dialog_new_message), this);
 		}
 		return super.onCreateDialog(id);
 	}
@@ -1738,63 +1779,47 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 */
 		Logger.i(this, "CandiSearchActivity restarting");
 		super.onRestart();
+		
+		/* Theme might have changed since we were away */
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+			Logger.d(this, "Restarting because of theme change");
+			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+			mCommon.reload();
+		}
+		else{
+			/* We control window focus messages that trigger the engine from here. */
+			super.onWindowFocusChanged(true);
+			final WebImageView imageUser = (WebImageView) findViewById(R.id.image_user);
 
-		/* We control window focus messages that trigger the engine from here. */
-		super.onWindowFocusChanged(true);
-		final WebImageView imageUser = (WebImageView) findViewById(R.id.image_user);
+			/* We run a fake modifier so we can trigger texture loading */
+			mEngine.getScene().registerEntityModifier(
+					new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, new IEntityModifierListener() {
 
-		/* We run a fake modifier so we can trigger texture loading */
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Loading...");
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				mEngine.getScene().registerEntityModifier(
-						new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, new IEntityModifierListener() {
-
-							@Override
-							public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-								onTexturesReady();
-							}
-
-							@Override
-							public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-								mCandiPatchPresenter.renderingActivate();
-							}
-						}, EaseLinear.getInstance()));
-
-				/* User or user picture could have changed in another activity */
-				if (imageUser != null && Aircandi.getInstance().getUser() != null) {
-					User user = Aircandi.getInstance().getUser();
-					mCommon.setUserPicture(user.imageUri, user.linkUri, imageUser);
-				}
-
-				/* Entities could have been inserted, updated or deleted by another activity so refresh our model */
-				refreshModel();
-
-				/* Restart autoscan if enabled */
-				if (mPrefAutoscan) {
-					mMyHandler.postDelayed(new Runnable() {
-
-						public void run() {
-							scanForBeacons(new Options(false, false), false);
+						@Override
+						public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+							onTexturesReady();
 						}
-					}, mPrefAutoscanInterval);
-				}
-				return null;
+
+						@Override
+						public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+							mCandiPatchPresenter.renderingActivate();
+						}
+					}, EaseLinear.getInstance()));
+
+			/* User or user picture could have changed in another activity */
+			if (imageUser != null && Aircandi.getInstance().getUser() != null) {
+				User user = Aircandi.getInstance().getUser();
+				mCommon.setUserPicture(user.imageUri, user.linkUri, imageUser);
 			}
 
-			@Override
-			protected void onPostExecute(Object result) {
-				mCommon.showProgressDialog(false, null);
+			/* Entities could have been inserted, updated or deleted by another activity so refresh our model */
+			refreshModel();
+
+			/* Restart autoscan if enabled */
+			if (mPrefAutoscan) {
+				mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
 			}
-
-		}.execute();
-
+		}
 	}
 
 	@Override

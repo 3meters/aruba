@@ -55,6 +55,10 @@ public class SignUpForm extends FormActivity {
 		bind();
 		draw();
 		Tracker.trackPageView("/SignUpForm");
+
+		if (savedInstanceState != null) {
+			doRestoreInstanceState(savedInstanceState);
+		}
 	}
 
 	protected void initialize() {
@@ -282,6 +286,34 @@ public class SignUpForm extends FormActivity {
 			return false;
 		}
 		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Persistence routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		Logger.d(this, "onSaveInstanceState called");
+
+		if (mTextFullname != null) {
+			savedInstanceState.putString("fullname", mTextFullname.getText().toString());
+		}
+		if (mTextEmail != null) {
+			savedInstanceState.putString("email", mTextEmail.getText().toString());
+		}
+	}
+
+	private void doRestoreInstanceState(Bundle savedInstanceState) {
+		Logger.d(this, "Restoring previous state");
+
+		if (mTextFullname != null) {
+			mTextFullname.setText(savedInstanceState.getString("fullname"));
+		}
+		if (mTextEmail != null) {
+			mTextEmail.setText(savedInstanceState.getString("email"));
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

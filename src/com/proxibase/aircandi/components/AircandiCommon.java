@@ -94,6 +94,7 @@ public class AircandiCommon {
 	public ActionsWindow	mActionsWindow;
 	public String			mPrefTheme;
 	public IconContextMenu	mIconContextMenu			= null;
+	public Integer			mTabIndex;
 
 	public AircandiCommon(Context context) {
 		mContext = context;
@@ -117,21 +118,21 @@ public class AircandiCommon {
 		if (mActivity.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
 			mThemeTone = (String) resourceName.coerceToString();
 			if (mThemeTone.equals("dark")) {
-				mIconPost = R.drawable.post_dark;
-				mIconPicture = R.drawable.picture_dark;
-				mIconLink = R.drawable.link_dark;
-				mIconComment = R.drawable.post_dark;
+				mIconPost = R.drawable.icon_post;
+				mIconPicture = R.drawable.icon_picture;
+				mIconLink = R.drawable.icon_link;
+				mIconComment = R.drawable.icon_post;
 			}
 			else if (mThemeTone.equals("light")) {
-				mIconPost = R.drawable.post_light;
-				mIconPicture = R.drawable.picture_light;
-				mIconLink = R.drawable.link_light;
-				mIconComment = R.drawable.post_light;
+				mIconPost = R.drawable.icon_post;
+				mIconPicture = R.drawable.icon_picture;
+				mIconLink = R.drawable.icon_link;
+				mIconComment = R.drawable.icon_post;
 			}
 		}
 
 		mHeightActive = ImageUtils.getRawPixelsForDisplayPixels(6);
-		mHeightInactive = ImageUtils.getRawPixelsForDisplayPixels(2);
+		mHeightInactive = ImageUtils.getRawPixelsForDisplayPixels(1);
 
 		/* Get view references */
 		mProgressIndicator = (ImageView) mActivity.findViewById(R.id.image_progress_indicator);
@@ -236,7 +237,6 @@ public class AircandiCommon {
 
 		Intent intent = new Intent(mContext, CandiRadar.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		mContext.startActivity(intent);
 	}
 
@@ -475,55 +475,45 @@ public class AircandiCommon {
 			View tab = tabHost.getChildAt(i);
 			TextView label = (TextView) tab.findViewById(R.id.image_tab_label);
 			ImageView image = (ImageView) tab.findViewById(R.id.image_tab_image);
-			if (tab == view) {
-				label.setTextColor(mTextColorFocused);
-				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightActive);
-				params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-				image.setLayoutParams(params);
-			}
-			else {
-				label.setTextColor(mTextColorUnfocused);
-				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightInactive);
-				params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-				image.setLayoutParams(params);
+			if (label != null) {
+				if (tab == view) {
+					mTabIndex = i;
+					label.setTextColor(mTextColorFocused);
+					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightActive);
+					params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+					image.setLayoutParams(params);
+				}
+				else {
+					label.setTextColor(mTextColorUnfocused);
+					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightInactive);
+					params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+					image.setLayoutParams(params);
+				}
 			}
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private void showNewCandiDialog(final Integer entityId) {
-
-		final CharSequence[] items = {
-												mActivity.getResources().getString(R.string.dialog_new_picture),
-												mActivity.getResources().getString(R.string.dialog_new_post),
-												mActivity.getResources().getString(R.string.dialog_new_link) };
-		AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-		builder.setTitle(mActivity.getResources().getString(R.string.dialog_new_message));
-		builder.setCancelable(true);
-		builder.setNegativeButton(mActivity.getResources().getString(R.string.dialog_new_negative), new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {}
-		});
-		builder.setItems(items, new DialogInterface.OnClickListener() {
-
-			public void onClick(final DialogInterface dialog, int item) {
-				Command command = null;
-				if (item == 0) {
-					command = new Command(CommandVerb.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null, entityId, null);
+	public void setActiveTab(ViewGroup tabHost, Integer tabIndex) {
+		for (int i = 0; i < tabHost.getChildCount(); i++) {
+			View tab = tabHost.getChildAt(i);
+			TextView label = (TextView) tab.findViewById(R.id.image_tab_label);
+			ImageView image = (ImageView) tab.findViewById(R.id.image_tab_image);
+			if (label != null) {
+				if (i == tabIndex) {
+					mTabIndex = i;
+					label.setTextColor(mTextColorFocused);
+					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightActive);
+					params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+					image.setLayoutParams(params);
 				}
-				else if (item == 1) {
-					command = new Command(CommandVerb.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE, null, entityId, null);
+				else {
+					label.setTextColor(mTextColorUnfocused);
+					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightInactive);
+					params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+					image.setLayoutParams(params);
 				}
-				else if (item == 2) {
-					command = new Command(CommandVerb.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null, entityId, null);
-				}
-				doCommand(command);
 			}
-		});
-		AlertDialog alert = builder.create();
-		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-		alert.show();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -549,15 +539,15 @@ public class AircandiCommon {
 		}
 	}
 
-	public void doOptionsItemSelected(MenuItem item) {
+	public boolean doOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.settings :
 				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
 				mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-				return;
+				return false;
 			case R.id.profile :
 				doProfileClick(null);
-				return;
+				return false;
 			case R.id.signinout :
 				if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
 					showProgressDialog(true, "Signing out...");
@@ -584,17 +574,17 @@ public class AircandiCommon {
 						}
 						showProgressDialog(false, null);
 						ImageUtils.showToastNotification("Signed out.", Toast.LENGTH_SHORT);
+						return true;
 					}
+					return false;
 				}
 				else {
 					mActivity.startActivityForResult(new Intent(mActivity, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
 					mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-
+					return false;
 				}
-				return;
-			default :
-				return;
 		}
+		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -613,8 +603,17 @@ public class AircandiCommon {
 	// --------------------------------------------------------------------------------------------
 
 	public void reload() {
+		/*
+		 * If the activity was called using startActivityForResult,
+		 * the ActivityResult will ripple back down the chain.
+		 * This process seems to kill the previous activities since their
+		 * work appears to be completed. The back stack still exists though
+		 * so hitting the back button launches new activities instead of
+		 * bring the existing ones to the front. User also sees forward
+		 * slide animation and loading just like a forward launching
+		 * sequence.
+		 */
 		Intent intent = mActivity.getIntent();
-		//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 		mActivity.finish();
 		mActivity.startActivity(intent);
 	}

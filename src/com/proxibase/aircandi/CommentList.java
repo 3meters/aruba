@@ -88,6 +88,7 @@ public class CommentList extends CandiActivity {
 					mListViewComments.setAdapter(new ListAdapter(CommentList.this, 0, mListComments));
 				}
 				mCommon.showProgressDialog(false, null);
+				mCommon.stopTitlebarProgress();
 			}
 		}.execute();
 	}
@@ -111,6 +112,7 @@ public class CommentList extends CandiActivity {
 	}
 
 	public void onRefreshClick(View view) {
+		mCommon.startTitlebarProgress();
 		bind();
 	}
 

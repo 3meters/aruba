@@ -5,6 +5,10 @@
     <color name="application_titlebar_separator_center">@color/rule_dark</color>
     <color name="application_titlebar_separator_end">@color/rule_dark</color>
     
+    <color name="tab_separator_start">@color/rule_60_dark</color>
+    <color name="tab_separator_center">@color/rule_60_dark</color>
+    <color name="tab_separator_end">@color/rule_60_dark</color>
+    
     <color name="progress_start">#ffffd300</color>
     <color name="progress_end">#ffffd300</color>
     
@@ -60,4 +64,6 @@
     <color name="rule_light">#ff000000</color>
     <color name="rule_30_dark">#33ffffff</color>
     <color name="rule_30_light">#33000000</color>    
+    <color name="rule_60_dark">#88ffffff</color>
+    <color name="rule_60_light">#88000000</color>    
 </resources>

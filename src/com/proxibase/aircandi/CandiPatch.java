@@ -7,11 +7,9 @@ import java.util.List;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
-import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.components.CandiListAdapter;
 import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.IntentBuilder;
@@ -31,7 +29,7 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
 
-public class CandiList extends CandiActivity {
+public class CandiPatch extends CandiActivity {
 
 	public enum MethodType {
 		CandiByUser, CandiForParent
@@ -50,7 +48,7 @@ public class CandiList extends CandiActivity {
 	}
 
 	@Override
-	public void bind() {
+	protected void bind() {
 		super.bind();
 
 		mListView = (ListView) findViewById(R.id.list_candi);
@@ -102,13 +100,14 @@ public class CandiList extends CandiActivity {
 			protected void onPostExecute(Object result) {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					if (mListEntities != null) {
+					if (mListEntities != null && mListEntities.size() > 0) {
 						Collections.sort(mListEntities, new SortEntitiesByUpdatedTime());
-						mListView.setAdapter(new CandiListAdapter(CandiList.this, Aircandi.getInstance().getUser(), mListEntities));
+						mListView.setAdapter(new CandiListAdapter(CandiPatch.this, Aircandi.getInstance().getUser(), mListEntities));
 					}
 				}
 				mCommon.showProgressDialog(false, null);
 				mCommon.stopTitlebarProgress();
+
 			}
 		}.execute();
 	}
@@ -147,21 +146,6 @@ public class CandiList extends CandiActivity {
 		}
 	}
 
-	public void onBackPressed() {
-		if (mMethodType == MethodType.CandiByUser) {
-			Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
-			Intent intent = new Intent(this, CandiRadar.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-			startActivity(intent);
-			overridePendingTransition(R.anim.fade_in_short, R.anim.fade_out_short);
-		}
-		else {
-			setResult(mLastResultCode);
-			super.onBackPressed();
-		}
-	}
-
 	public void onRefreshClick(View view) {
 		mCommon.startTitlebarProgress();
 		bind();
@@ -183,26 +167,7 @@ public class CandiList extends CandiActivity {
 		}
 		else if (resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
 			mCommon.updateUserPicture();
-
-			/* Need to rebind if showing my candi */
-			if (mMethodType == MethodType.CandiByUser) {
-				mCommon.startTitlebarProgress();
-				bind();
-			}
 		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		boolean rebind = mCommon.doOptionsItemSelected(item);
-		if (rebind) {
-			bind();
-		}
-		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -220,7 +185,7 @@ public class CandiList extends CandiActivity {
 		public int compare(Entity object1, Entity object2) {
 			int dateObject1 = object1.updatedDate != null ? object1.updatedDate : object1.createdDate;
 			int dateObject2 = object2.updatedDate != null ? object2.updatedDate : object2.createdDate;
-
+			
 			if (dateObject1 < dateObject2) {
 				return 1;
 			}

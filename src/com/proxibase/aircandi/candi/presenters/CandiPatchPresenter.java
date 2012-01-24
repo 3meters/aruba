@@ -500,7 +500,7 @@ public class CandiPatchPresenter implements Observer {
 				}
 			}
 		}
-		
+
 		/* Restore the previous root if it still has visible children */
 		boolean foundRoot = false;
 		if (candiRootPrev != null) {
@@ -556,7 +556,7 @@ public class CandiPatchPresenter implements Observer {
 		Logger.d(null, "Starting model navigation.");
 
 		mCandiPatchModel.setCandiRootNext(candiRootNext);
-		
+
 		/* Need to sort the candi before assigning to zones */
 
 		/* Updates */
@@ -652,6 +652,18 @@ public class CandiPatchPresenter implements Observer {
 
 			/* Add view to scene (starts out hidden using transparency). */
 			mEngine.getScene().getChild(CandiConstants.LAYER_ZONES).attachChild(zoneView);
+			
+			/* 
+			 * If not camera visible, go ahead and make it visible.
+			 * We don't show it because it causes a flash when it pops in and 
+			 * is then replace by a cand fade in. 
+			 */
+			if (!zoneView.isVisibleToCamera(mCamera)) {
+				synchronized (zoneModel.getViewModifiers()) {
+					zoneModel.getViewModifiers().addLast(
+								new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
+				}
+			}
 
 			return zoneView;
 		}
@@ -769,7 +781,7 @@ public class CandiPatchPresenter implements Observer {
 			synchronized (zoneModel.getViewModifiers()) {
 				zoneModel.getViewModifiers().clear();
 				zoneModel.getViewModifiers().addLast(
-						new CandiAlphaModifier(null, CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
+						new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
 			}
 			zoneModel.getViewStateCurrent().setVisible(false);
 			zoneModel.setChanged();
@@ -784,8 +796,8 @@ public class CandiPatchPresenter implements Observer {
 		 * We monitor current visible state because transition logic won't fade in if it
 		 * thinks it is already supposed to be visible.
 		 */
-		
-		/* 
+
+		/*
 		 * Defers to navigate for animation if localUpdate = false.
 		 * Defers to candi for animation if localUpdate = true.
 		 * Problem: candi got an animation from first navigation that stacks with the candi self animation.
@@ -794,9 +806,7 @@ public class CandiPatchPresenter implements Observer {
 		if (localUpdate || candiModel.getViewStateCurrent().isVisible()) {
 			if (CandiConstants.TRANSITIONS_ACTIVE) {
 				synchronized (candiModel.getViewModifiers()) {
-										candiModel.getViewModifiers().clear();
-					//					candiModel.getViewModifiers().addLast(
-					//							new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
+					candiModel.getViewModifiers().clear();
 				}
 				synchronized (candiModel.getViewActions()) {
 					candiModel.getViewActions().clear();
@@ -895,12 +905,14 @@ public class CandiPatchPresenter implements Observer {
 		if (localUpdate) {
 			if (candiModelFocused.getViewStateCurrent().isVisible() && !mCandiViewsActiveHash.containsKey(candiModelFocused.getModelIdAsString())) {
 				getCandiViewFromPool(candiModelFocused, localUpdate, useNext);
-				for (IModel candiModelChildFocused : candiModelFocused.getChildren()) {
-					if (candiModelChildFocused.getViewStateCurrent().isVisible() && !mCandiViewsActiveHash
+				synchronized (candiModelFocused.getChildren()) {
+					for (IModel candiModelChildFocused : candiModelFocused.getChildren()) {
+						if (candiModelChildFocused.getViewStateCurrent().isVisible() && !mCandiViewsActiveHash
 								.containsKey(((CandiModel) candiModelChildFocused)
 										.getModelIdAsString())) {
-						getCandiViewFromPool((CandiModel) candiModelChildFocused, localUpdate, useNext);
-						loanedCount++;
+							getCandiViewFromPool((CandiModel) candiModelChildFocused, localUpdate, useNext);
+							loanedCount++;
+						}
 					}
 				}
 			}
@@ -1044,30 +1056,15 @@ public class CandiPatchPresenter implements Observer {
 	// --------------------------------------------------------------------------------------------
 
 	private void doTransitionAnimations() {
-
 		/*
 		 * Zone transitions
 		 * 
 		 * The zone might already have a fade out modifier because manageViews() populated
 		 * it with a full size candi view.
 		 */
-
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
 			synchronized (zoneModel.getViewActions()) {
 				zoneModel.getViewActions().addLast(new ViewAction(ViewActionType.Visibility));
-			}
-		}
-
-		/* Clear out any left over actions and modifiers */
-		for (CandiModel candiModel : mCandiPatchModel.getCandiModels()) {
-			synchronized (candiModel.getViewModifiers()) {
-				//candiModel.getViewModifiers().clear();
-			}
-			for (IModel childModel : candiModel.getChildren()) {
-				CandiModel childCandiModel = (CandiModel) childModel;
-				synchronized (childCandiModel.getViewModifiers()) {
-					//childCandiModel.getViewModifiers().clear();
-				}
 			}
 		}
 
@@ -1218,22 +1215,20 @@ public class CandiPatchPresenter implements Observer {
 							}
 							else if (transition == Transition.FadeIn) {
 
-								//if (candiModel.getViewStateNext().isLastWithinHalo()) {
 								if (needDelay) {
 									candiModel.getViewModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
 								}
 
 								candiModel.getViewModifiers().addLast(
-																			new CandiAlphaModifier(null,
-																					CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f,
-																					CandiConstants.EASE_FADE_IN));
+										new CandiAlphaModifier(null,
+												CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f,
+												CandiConstants.EASE_FADE_IN));
 								synchronized (candiModel.getViewActions()) {
 									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.Position));
 									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.Scale));
 									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ExpandCollapse));
 									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ReflectionHideShow));
 								}
-								//							}
 							}
 							else if (transition == Transition.Move) {
 

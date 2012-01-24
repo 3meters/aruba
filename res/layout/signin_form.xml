@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="?attr/backgroundCandiInfo" >
+     >
 
     <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
 
@@ -70,6 +70,7 @@
         android:layout_above="@+id/form_footer"
         android:layout_below="@id/activity_header"
         android:layout_weight="1"
+        android:background="?attr/backgroundCandiInfo"
         android:fillViewport="true" >
 
         <!-- Content -->

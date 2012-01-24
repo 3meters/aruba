@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -37,7 +38,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	@Override
-	protected void bind() {
+	public void bind() {
 		super.bind();
 
 		/* We always get the freshest version because the data could be stale */
@@ -58,6 +59,8 @@ public class CandiForm extends CandiActivity {
 			protected void onPostExecute(Object result) {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				mCommon.showProgressDialog(false, null);
+				mCommon.stopTitlebarProgress();
+
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mCommon.mEntity = (Entity) serviceResponse.data;
 					ViewGroup candiInfoView = (ViewGroup) findViewById(R.id.candi_form);
@@ -116,6 +119,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onRefreshClick(View view) {
+		mCommon.startTitlebarProgress();
 		bind();
 	}
 
@@ -138,6 +142,19 @@ public class CandiForm extends CandiActivity {
 			mCommon.updateUserPicture();
 			bind();
 		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		boolean rebind = mCommon.doOptionsItemSelected(item);
+		if (rebind) {
+			bind();
+		}
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -311,7 +328,7 @@ public class CandiForm extends CandiActivity {
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		if (id == CandiConstants.DIALOG_NEW_CANDI_ID) {
-			return mCommon.mIconContextMenu.createMenu(getString(R.string.dialog_new_message));
+			return mCommon.mIconContextMenu.createMenu(getString(R.string.dialog_new_message), this);
 		}
 		return super.onCreateDialog(id);
 	}

@@ -60,9 +60,22 @@ public class ProfileForm extends FormActivity {
 		super.onCreate(savedInstanceState);
 
 		initialize();
+
+		/* Restore current tab */
+		if (savedInstanceState != null) {
+			if (findViewById(R.id.image_tab_host) != null) {
+				mCommon.setActiveTab((ViewGroup) findViewById(R.id.image_tab_host), savedInstanceState.getInt("tab_index"));
+				mViewFlipper.setDisplayedChild(mCommon.mTabIndex);
+			}
+		}
+
 		bind();
 		draw();
 		Tracker.trackPageView("/ProfileForm");
+
+		if (savedInstanceState != null) {
+			doRestoreInstanceState(savedInstanceState);
+		}
 	}
 
 	protected void initialize() {
@@ -122,7 +135,7 @@ public class ProfileForm extends FormActivity {
 
 		if (mViewFlipper != null) {
 			if (mCommon.mCommand.verb == CommandVerb.New) {
-				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(1));
+				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(2));
 			}
 			else {
 				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
@@ -346,6 +359,37 @@ public class ProfileForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
+
+	// --------------------------------------------------------------------------------------------
+	// Persistence routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		Logger.d(this, "onSaveInstanceState called");
+
+		if (mTextFullname != null) {
+			savedInstanceState.putString("fullname", mTextFullname.getText().toString());
+		}
+		if (mTextEmail != null) {
+			savedInstanceState.putString("email", mTextEmail.getText().toString());
+		}
+		if (findViewById(R.id.image_tab_host) != null) {
+			savedInstanceState.putInt("tab_index", mCommon.mTabIndex);
+		}
+	}
+
+	private void doRestoreInstanceState(Bundle savedInstanceState) {
+		Logger.d(this, "Restoring previous state");
+
+		if (mTextFullname != null) {
+			mTextFullname.setText(savedInstanceState.getString("fullname"));
+		}
+		if (mTextEmail != null) {
+			mTextEmail.setText(savedInstanceState.getString("email"));
+		}
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines

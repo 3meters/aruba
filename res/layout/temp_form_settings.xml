@@ -9,7 +9,7 @@
 
         <Spinner
             android:id="@+id/cbo_visibility"
-            android:layout_width="240dp"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:drawSelectorOnTop="true"
             android:entries="@array/form_visibility_values_list"
@@ -17,21 +17,21 @@
 
         <CheckBox
             android:id="@+id/chk_locked"
-            android:layout_width="240dp"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:text="@string/form_label_locked" />
         
         <CheckBox
             android:id="@+id/chk_html_zoom"
-            android:layout_width="240dp"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:text="@string/web_label_html_zoom" />
         
         <CheckBox
             android:id="@+id/chk_html_javascript"
-            android:layout_width="240dp"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:text="@string/web_label_javascript" />

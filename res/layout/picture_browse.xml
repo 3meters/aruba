@@ -3,7 +3,7 @@
     xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="?attr/backgroundCandiInfo" >
+     >
 
     <!-- Header -->
 
@@ -43,7 +43,9 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/activity_header"
+        android:layout_alignParentBottom="true"
         android:layout_weight="1"
+        android:background="?attr/backgroundCandiInfo"
         android:fillViewport="true" >
 
         <LinearLayout

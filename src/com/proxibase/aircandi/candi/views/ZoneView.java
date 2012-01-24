@@ -19,9 +19,9 @@ public class ZoneView extends BaseView {
 	private ViewTexturesLoadedListener	mTexturesLoadedListener;
 
 	private TextureRegion				mBodyTextureRegion;
-	private CandiSprite					mBodySprite;
+	public CandiSprite					mBodySprite;
 	private TextureRegion				mReflectionTextureRegion;
-	private CandiSprite					mReflectionSprite;
+	public CandiSprite					mReflectionSprite;
 
 	// --------------------------------------------------------------------------------------------
 	// Initialization
@@ -37,7 +37,7 @@ public class ZoneView extends BaseView {
 
 	public ZoneView(Object model, CandiPatchPresenter candiPatchPresenter) {
 		super(model, candiPatchPresenter);
-		mVisible = false;
+		setVisible(false);
 	}
 
 	@Override
@@ -147,6 +147,7 @@ public class ZoneView extends BaseView {
 		mBodySprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBodyTextureRegion);
 		mBodySprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mBodySprite.setZIndex(0);
+		mBodySprite.setVisible(false);
 		attachChild(mBodySprite);
 	}
 
@@ -155,6 +156,7 @@ public class ZoneView extends BaseView {
 				mReflectionTextureRegion);
 		mReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mReflectionSprite.setZIndex(0);
+		mReflectionSprite.setVisible(false);
 		attachChild(mReflectionSprite);
 	}
 

@@ -3,7 +3,7 @@
     xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:id="@+id/candi_form"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent">
 
     <!-- Header -->
 
@@ -14,17 +14,6 @@
         android:layout_alignParentTop="true" >
 
         <include layout="@layout/temp_aircandi_header" />
-    </LinearLayout>
-
-    <!-- Tabs -->
-
-    <LinearLayout
-        android:id="@+id/form_tabs"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/activity_header" >
-
-        <include layout="@layout/temp_tabs_aircandi" />
     </LinearLayout>
 
     <!-- Body -->
@@ -133,7 +122,6 @@
                             android:clickable="true"
                             aircandi:layout="@layout/temp_webimageview_framed_fill"
                             aircandi:minWidth="250px"
-                            aircandi:minHeight="250px"
                             android:onClick="onImageClick"
                             android:scaleType="centerCrop" />
 
@@ -178,7 +166,7 @@
                         android:id="@+id/block_author"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
+                        android:layout_below="@+id/button_comments"
                         android:layout_marginLeft="3dp"
                         aircandi:layout="@layout/temp_user_info_text_only" />
 
@@ -191,8 +179,8 @@
                         android:clickable="true"
                         android:gravity="left"
                         android:onClick="onCommentsClick"
-                        android:paddingBottom="15dp"
-                        android:paddingTop="0dp"
+                        android:paddingBottom="10dp"
+                        android:paddingTop="10dp"
                         android:text="0 Comments" />
                 </LinearLayout>
 
@@ -311,7 +299,7 @@
                 android:paddingLeft="90dp" >
             </RelativeLayout>
         </SlidingDrawer>
-    </FrameLayout>
+    </FrameLayout>
     -->
 
 </RelativeLayout>

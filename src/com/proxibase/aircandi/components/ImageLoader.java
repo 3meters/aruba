@@ -206,6 +206,7 @@ public class ImageLoader {
 			byte[] imageBytes = (byte[]) serviceResponse.data;
 
 			/* Turn byte array into bitmap that fits in our desired max size */
+			Logger.v(null, url + ": " + String.valueOf(imageBytes.length) + " bytes received");
 			Bitmap bitmap = ImageManager.getInstance().bitmapForByteArraySampled(imageBytes, imageRequest, CandiConstants.IMAGE_BYTES_MAX);
 
 			if (bitmap == null) {

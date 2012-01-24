@@ -50,16 +50,16 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	protected CandiRectangle		mProgressBarSprite;
 
 	protected TextureRegion			mPlaceholderTextureRegion;
-	protected CandiSprite			mPlaceholderSprite;
+	public CandiSprite				mPlaceholderSprite;
 	private TextureRegion			mPlaceholderReflectionTextureRegion;
-	protected CandiSprite			mPlaceholderReflectionSprite;
+	public CandiSprite				mPlaceholderReflectionSprite;
 
 	protected boolean				mBound							= false;
 	protected boolean				mRecycled						= false;
 
 	protected Texture				mTitleTexture;
 	private TextureRegion			mTitleTextureRegion;
-	protected CandiSprite			mTitleSprite;
+	public CandiSprite				mTitleSprite;
 
 	protected String				mTitleText;
 	protected int					mTitleTextColor;
@@ -112,7 +112,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	private void makeTitleSprite() {
 		mTitleSprite = new CandiSprite(0, 0, mTitleTextureRegion);
 		mTitleSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
-		mTitleSprite.setVisible(true);
+		mTitleSprite.setVisible(false);
 		mTitleSprite.setZIndex(0);
 		attachChild(mTitleSprite);
 	}
@@ -148,6 +148,9 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public void clearSpriteModifiers() {
+		/* 
+		 * Must always be called from the engine update thread.
+		 */
 		if (mPlaceholderSprite != null) {
 			mPlaceholderSprite.clearEntityModifiers();
 			mPlaceholderReflectionSprite.clearEntityModifiers();

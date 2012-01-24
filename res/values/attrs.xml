@@ -20,6 +20,8 @@
 		<attr name="busyWidth" format="dimension"/>
 		<attr name="minWidth" format="dimension"/>
 		<attr name="maxWidth" format="dimension"/>
+		<attr name="minHeight" format="dimension"/>
+		<attr name="maxHeight" format="dimension"/>
 	</declare-styleable>
 	<declare-styleable name="CandiSearch">
 		<attr name="textureBodyZone" format="string"/>

@@ -27,6 +27,7 @@ import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
@@ -114,8 +115,8 @@ public abstract class FormActivity extends Activity {
 		switch (item.getItemId()) {
 			case R.id.settings :
 				startActivity(new Intent(this, Preferences.class));
-				overridePendingTransition(R.anim.form_in, R.anim.browse_out);		
-				
+				overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+
 				return (true);
 			default :
 				return (super.onOptionsItemSelected(item));
@@ -130,7 +131,7 @@ public abstract class FormActivity extends Activity {
 		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK);
 		picturePickerIntent.setType("image/*");
 		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
-		
+
 	}
 
 	public void pickVideo() {
@@ -158,7 +159,7 @@ public abstract class FormActivity extends Activity {
 	public void pickAircandiPicture() {
 		Intent candigramPickerIntent = new Intent(this, PictureSearch.class);
 		startActivityForResult(candigramPickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_AIRCANDI);
-		overridePendingTransition(R.anim.form_in, R.anim.browse_out);		
+		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 
 	}
 
@@ -168,7 +169,7 @@ public abstract class FormActivity extends Activity {
 		 */
 		final User user = Aircandi.getInstance().getUser();
 		user.imageUri = "https://graph.facebook.com/" + user.facebookId + "/picture?type=large";
-		
+
 		ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
 		builder.setFromUris(user.imageUri, user.linkUri);
 		builder.setRequestListener(new RequestListener() {
@@ -242,7 +243,7 @@ public abstract class FormActivity extends Activity {
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
 					builder.setFromUris(imageUri, null);
 					ImageRequest imageRequest = builder.create();
-					
+
 					mImageRequestWebImageView.setImageRequest(imageRequest, null);
 
 					if (mImageRequestListener != null) {
@@ -263,6 +264,7 @@ public abstract class FormActivity extends Activity {
 		alert.show();
 	}
 
+
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
@@ -280,7 +282,7 @@ public abstract class FormActivity extends Activity {
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
 					final String imageUri = extras.getString(getString(R.string.EXTRA_URI));
-					
+
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
 					builder.setFromUris(imageUri, null);
 					builder.setRequestListener(new RequestListener() {
@@ -374,6 +376,7 @@ public abstract class FormActivity extends Activity {
 
 	protected void onDestroy() {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
+		Logger.d(this, "onDestroy called");
 		try {
 			if (mCommon.mEntity != null && mCommon.mEntity.imageBitmap != null) {
 				mCommon.mEntity.imageBitmap.recycle();

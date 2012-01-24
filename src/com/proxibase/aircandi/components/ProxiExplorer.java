@@ -308,12 +308,14 @@ public class ProxiExplorer {
 		mScanRequestProcessing = true;
 
 		/* Clear beacon collection for a complete rebuild */
-		if (refreshAllBeacons)
+		if (refreshAllBeacons) {
 			mBeacons.clear();
+		}
 
 		/* Reset detection flag */
-		for (Beacon beacon : mBeacons)
+		for (Beacon beacon : mBeacons) {
 			beacon.detectedLastPass = false;
+		}
 
 		/* Walk all the latest wifi scan hits */
 		for (int i = 0; i < mWifiList.size(); i++) {
@@ -409,6 +411,7 @@ public class ProxiExplorer {
 							if (beacon.id.equals(freshEntity.beaconId)) {
 
 								beacon.entities.add(freshEntity);
+								beacon.registered = true;
 								freshEntity.state = EntityState.New;
 								freshEntity.beacon = beacon;
 								for (Entity childEntity : freshEntity.children) {
@@ -419,6 +422,8 @@ public class ProxiExplorer {
 						}
 					}
 				}
+
+				/* Any beacon that didn't get entities could be unregistered */
 			}
 		}
 
@@ -485,6 +490,7 @@ public class ProxiExplorer {
 							Entity freshEntity = (Entity) obj;
 
 							freshEntity.beacon = beacon;
+							freshEntity.beacon.registered = true;
 							freshEntity.state = EntityState.Refreshed;
 							setEntityVisibility(freshEntity, beacon);
 							for (Entity childEntity : freshEntity.children) {
@@ -538,6 +544,7 @@ public class ProxiExplorer {
 								for (Object obj : freshEntities) {
 									Entity freshEntity = (Entity) obj;
 									freshEntity.beacon = beacon;
+									freshEntity.beacon.registered = true;
 									freshEntity.state = EntityState.Refreshed;
 									setEntityVisibility(freshEntity, beacon);
 									entity.children.set(entity.children.indexOf(childEntity), freshEntity);
@@ -583,6 +590,18 @@ public class ProxiExplorer {
 								GsonType.ProxibaseService);
 			if (entities.size() > 0) {
 				Entity entity = entities.get(0);
+
+				/* Attach the beacon */
+				for (Beacon beacon : mBeacons) {
+					if (beacon.id.equals(entity.beaconId)) {
+						beacon.registered = true;
+						entity.beacon = beacon;
+						for (Entity childEntity : entity.children) {
+							childEntity.beacon = beacon;
+						}
+					}
+				}
+
 				serviceResponse.data = entity;
 			}
 		}

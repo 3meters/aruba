@@ -118,10 +118,10 @@ public interface CandiConstants {
 	public static final float			DURATION_CANDIBODY_COLLAPSE			= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_CANDIBODY_EXPAND			= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_REFLECTION_HIDESHOW		= 0.8f * DURATION_MULTIPLIER;
-	public static final float			DURATION_PLACEHOLDER_HIDESHOW		= 0.3f * DURATION_MULTIPLIER;
+	public static final float			DURATION_PLACEHOLDER_HIDESHOW		= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_OVERFLOW_FADE	= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_FADE			= 0.8f * DURATION_MULTIPLIER;
-	public static final float			DURATION_TRANSITIONS_FADE_TEST		= 5.0f * DURATION_MULTIPLIER;
+	public static final float			DURATION_TRANSITIONS_FADE_TEST		= 3.0f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_MOVE			= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_DELAY			= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_INSTANT					= 0.0f;

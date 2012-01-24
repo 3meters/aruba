@@ -43,8 +43,8 @@
 
 	<!-- Radar -->
 
-	<string name="radar_tab_radar">Radar</string>
-	<string name="radar_tab_mycandi">My Candi</string>
+	<string name="radar_tab_radar">RADAR</string>
+	<string name="radar_tab_mycandi">MY CANDI</string>
 	<string name="radar_button_new">Drop\nCandi</string>
 	
 	<string name="dialog_network_message_wifi_ready">Wifi enabled, ready for retry</string>
@@ -87,10 +87,10 @@
 	<string name="form_title_picture_search">Picture search</string>
 	<string name="form_title_comment">Comment</string>
 	
-	<string name="form_tab_content">Content</string>
-	<string name="form_tab_settings">Settings</string>
-	<string name="profile_tab_profile">Profile</string>
-	<string name="profile_tab_account">Account</string>
+	<string name="form_tab_content">CONTENT</string>
+	<string name="form_tab_settings">SETTINGS</string>
+	<string name="profile_tab_profile">PROFILE</string>
+	<string name="profile_tab_account">ACCOUNT</string>
 	
 	<string name="form_button_change_picture">Change</string>
 	<string name="form_button_signup">Sign Up</string>

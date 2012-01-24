@@ -34,6 +34,8 @@ public class WebImageView extends RelativeLayout {
 	private Integer		mBusyWidth;
 	private Integer		mMinWidth;
 	private Integer		mMaxWidth;
+	private Integer		mMinHeight;
+	private Integer		mMaxHeight;
 	private boolean		mShowBusy;
 	private Integer		mLayoutId;
 	private ScaleType	mScaleType;
@@ -55,6 +57,8 @@ public class WebImageView extends RelativeLayout {
 		mBusyWidth = ta.getDimensionPixelSize(R.styleable.WebImageView_busyWidth, 30);
 		mMinWidth = ta.getDimensionPixelSize(R.styleable.WebImageView_minWidth, 0);
 		mMaxWidth = ta.getDimensionPixelSize(R.styleable.WebImageView_maxWidth, Integer.MAX_VALUE);
+		mMinHeight = ta.getDimensionPixelSize(R.styleable.WebImageView_minHeight, 0);
+		mMaxHeight = ta.getDimensionPixelSize(R.styleable.WebImageView_maxHeight, Integer.MAX_VALUE);
 		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.temp_webimageview);
 
@@ -79,6 +83,8 @@ public class WebImageView extends RelativeLayout {
 			mImageView.setScaleType((ScaleType) mScaleType);
 			mImageView.setMinimumWidth(mMinWidth);
 			mImageView.setMaxWidth(mMaxWidth);
+			mImageView.setMinimumHeight(mMinHeight);
+			mImageView.setMaxHeight(mMaxHeight);
 		}
 		mImageViewLoading = (ImageView) findViewById(R.id.image_loading);
 

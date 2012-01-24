@@ -6,8 +6,13 @@ import org.jsoup.nodes.Element;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -58,15 +63,19 @@ import com.proxibase.sdk.android.util.ProxiConstants;
 
 public class EntityForm extends FormActivity {
 
-	private ViewFlipper		mViewFlipper;
-	protected WebImageView	mImagePicture;
-	private EditText		mTextUri;
-	private boolean			mUriValidated	= false;
+	private ViewFlipper			mViewFlipper;
+	protected WebImageView		mImagePicture;
+	private EditText			mTextUri;
+	private Beacon				mBeacon;
+	private boolean				mUriValidated	= false;
+	private LocationManager		mLocationManager;
+	private LocationListener	mLocationListener;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
+		Logger.d(this, "onCreate called");
 
 		User user = Aircandi.getInstance().getUser();
 		if (user != null && user.anonymous) {
@@ -77,23 +86,98 @@ public class EntityForm extends FormActivity {
 			Intent intent = intentBuilder.create();
 
 			startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-			overridePendingTransition(R.anim.form_in, R.anim.browse_out);		
-			
+			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+
 		}
 
 		initialize();
 
-		if (bind()) {
+		/* Restore current tab */
+		if (savedInstanceState != null) {
+			if (findViewById(R.id.image_tab_host) != null) {
+				mCommon.setActiveTab((ViewGroup) findViewById(R.id.image_tab_host), savedInstanceState.getInt("tab_index"));
+				mViewFlipper.setDisplayedChild(mCommon.mTabIndex);
+			}
+		}
+
+		if (bind(savedInstanceState)) {
 			draw();
 			/* Tracking */
 			Tracker.trackPageView("/" + mCommon.mCommand.activityName);
 			Tracker.trackEvent("Entity", mCommon.mCommand.verb.toString(), mCommon.mEntityType, 0);
+
+			/* Can overwrite any values from the original intent */
+			if (savedInstanceState != null) {
+				doRestoreInstanceState(savedInstanceState);
+			}
 		}
 	}
 
 	protected void initialize() {
+
+		/*
+		 * Starting determining the users location if the beacon is unregistered]
+		 * and we are creating new candi.
+		 */
+		if (mCommon.mCommand.verb == CommandVerb.New) {
+			
+			mBeacon = ProxiExplorer.getInstance().getBeaconById(mCommon.mBeaconId);
+
+			if (mBeacon != null && !mBeacon.registered) {
+				mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+				mLocationListener = new LocationListener() {
+
+					@Override
+					public void onLocationChanged(Location location) {
+						if (Aircandi.isBetterLocation(location, Aircandi.getInstance().getCurrentLocation())) {
+							Aircandi.getInstance().setCurrentLocation(location);
+							TextView mTextDebug = (TextView) findViewById(R.id.text_header_debug);
+							mTextDebug.setVisibility(View.VISIBLE);
+							if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
+								mTextDebug.setText(String.valueOf(Aircandi.getInstance().getCurrentLocation().getAccuracy()));
+							}
+						}
+					}
+
+					@Override
+					public void onProviderDisabled(String provider) {
+						ImageUtils.showToastNotification(provider + ": disabled", Toast.LENGTH_SHORT);
+					}
+
+					@Override
+					public void onProviderEnabled(String provider) {
+						ImageUtils.showToastNotification(provider + ": enabled", Toast.LENGTH_SHORT);
+					}
+
+					@Override
+					public void onStatusChanged(String provider, int status, Bundle extras) {
+						if (status == LocationProvider.AVAILABLE) {
+							ImageUtils.showToastNotification(provider + ": available", Toast.LENGTH_SHORT);
+						}
+						else if (status == LocationProvider.OUT_OF_SERVICE) {
+							ImageUtils.showToastNotification(provider + ": out of service", Toast.LENGTH_SHORT);
+						}
+						else if (status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
+							ImageUtils.showToastNotification(provider + ": temporarily unavailable", Toast.LENGTH_SHORT);
+						}
+					}
+				};
+
+				Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+				if (Aircandi.isBetterLocation(lastKnownLocationNetwork, Aircandi.getInstance().getCurrentLocation())) {
+					Aircandi.getInstance().setCurrentLocation(lastKnownLocationNetwork);
+				}
+
+				Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+				if (Aircandi.isBetterLocation(lastKnownLocationGPS, Aircandi.getInstance().getCurrentLocation())) {
+					Aircandi.getInstance().setCurrentLocation(lastKnownLocationGPS);
+				}
+			}
+		}
+
 		mImagePicture = (WebImageView) findViewById(R.id.image_picture);
 		mTextUri = (EditText) findViewById(R.id.text_uri);
+
 		if (mTextUri != null) {
 			mTextUri.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -110,7 +194,7 @@ public class EntityForm extends FormActivity {
 		}
 	}
 
-	protected boolean bind() {
+	protected boolean bind(final Bundle savedInstanceState) {
 		/*
 		 * Fill in the system and default properties for the base entity properties. The activities
 		 * that subclass this will set any additional properties beyond the base ones.
@@ -161,11 +245,18 @@ public class EntityForm extends FormActivity {
 						ServiceResponse serviceResponse = (ServiceResponse) response;
 						mCommon.showProgressDialog(false, null);
 						if (serviceResponse.responseCode == ResponseCode.Success) {
+
 							mCommon.mEntity = (Entity) serviceResponse.data;
 							mImageUriOriginal = mCommon.mEntity.imageUri;
+
 							draw();
 							Tracker.trackPageView("/" + mCommon.mCommand.activityName);
 							Tracker.trackEvent("Entity", mCommon.mCommand.verb.toString(), mCommon.mEntityType, 0);
+
+							/* Can overwrite any values from the original intent */
+							if (savedInstanceState != null) {
+								doRestoreInstanceState(savedInstanceState);
+							}
 						}
 					}
 				}.execute();
@@ -195,7 +286,7 @@ public class EntityForm extends FormActivity {
 						mImagePicture.setVisibility(View.VISIBLE);
 					}
 					else {
-						
+
 						ImageRequestBuilder builder = new ImageRequestBuilder(mImagePicture);
 						builder.setFromEntity(entity);
 						builder.setRequestListener(new RequestListener() {
@@ -327,7 +418,7 @@ public class EntityForm extends FormActivity {
 			}
 			else {
 				initialize();
-				bind();
+				bind(null);
 				draw();
 
 				/* Tracking */
@@ -341,6 +432,22 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
+
+	private void setLocation(Beacon beacon) {
+
+		/* Bail if we don't have a location or the one we have is more than five minutes old */
+
+		Location location = new Location("Fake");
+		location.setLatitude(37.41977799657014);
+		location.setLongitude(-122.21218228340149);
+
+		if (Aircandi.getInstance().getCurrentLocation() != null) {
+			location = Aircandi.getInstance().getCurrentLocation();
+		}
+
+		beacon.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
+		beacon.longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
+	}
 
 	protected void doSave(final boolean updateImages) {
 
@@ -391,23 +498,36 @@ public class EntityForm extends FormActivity {
 						}
 					});
 
-					Beacon beacon = ProxiExplorer.getInstance().getBeaconById(mCommon.mBeaconId);
-					if (beacon != null && beacon.unregistered) {
-						beacon.registeredById = String.valueOf(Aircandi.getInstance().getUser().id);
-						beacon.beaconType = BeaconType.Fixed.name().toLowerCase();
-						beacon.beaconSetId = ProxiConstants.BEACONSET_WORLD;
-						beacon.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+					/*
+					 * The user could have moved since we grabbed the target beacon that
+					 * was passed to the form but we still target the beacon based on when
+					 * the create started.
+					 */
+
+					if (mCommon.mCommand.verb == CommandVerb.New && mBeacon != null && !mBeacon.registered) {
+						setLocation(mBeacon);
+
+						mBeacon.registeredById = Integer.parseInt(Aircandi.getInstance().getUser().id);
+						mBeacon.beaconType = BeaconType.Fixed.name().toLowerCase();
+						mBeacon.beaconSetId = ProxiConstants.BEACONSET_WORLD;
+						mBeacon.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+						mBeacon.locked = false;
 
 						Logger.i(this, "Inserting beacon: " + mCommon.mBeaconId);
 						ServiceRequest serviceRequest = new ServiceRequest();
-						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + beacon.getCollection());
+						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mBeacon.getCollection());
 						serviceRequest.setRequestType(RequestType.Insert);
-						serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) this, GsonType.ProxibaseService));
+						serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mBeacon,
+								GsonType.ProxibaseService));
 						serviceRequest.setResponseFormat(ResponseFormat.Json);
 
 						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+						/*
+						 * A beacon could show as not registered but still exist so check the
+						 * response we get from the service when an insert fails.
+						 */
 						if (serviceResponse.responseCode == ResponseCode.Success) {
-							beacon.unregistered = false;
+							mBeacon.registered = true;
 						}
 					}
 
@@ -535,15 +655,15 @@ public class EntityForm extends FormActivity {
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mCommon.mEntity.getCollection());
 		serviceRequest.setRequestType(RequestType.Insert);
-		
+
 		//mCommon.mEntity.description = "\u00a9 2012 Jay Gawker Media, LLC. All Rights Reserved. Privacy Policy | Full Site";
 		String jsonString = ProxibaseService.convertObjectToJson(mCommon.mEntity, GsonType.ProxibaseService);
-		
-//		jsonString = StringEscapeUtils.ESCAPE_JAVA..escapeJava(jsonString);
-		
-//		if (jsonString.contains("©")) {
-//			jsonString = jsonString.replace("©", "\u00A9");
-//		}
+
+		//		jsonString = StringEscapeUtils.ESCAPE_JAVA..escapeJava(jsonString);
+
+		//		if (jsonString.contains("©")) {
+		//			jsonString = jsonString.replace("©", "\u00A9");
+		//		}
 		serviceRequest.setRequestBody(jsonString);
 		Logger.v(this, serviceRequest.getRequestBody());
 		serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -660,8 +780,8 @@ public class EntityForm extends FormActivity {
 		intent.setComponent(cm);
 		try {
 			startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
-			overridePendingTransition(R.anim.form_in, R.anim.browse_out);		
-			
+			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+
 		}
 		catch (Exception exception) {
 			/* We fallback to try a different way to construct the component */
@@ -764,8 +884,92 @@ public class EntityForm extends FormActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Persistence routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		Logger.d(this, "onSaveInstanceState called");
+
+		if (findViewById(R.id.text_title) != null) {
+			savedInstanceState.putString("title", ((TextView) findViewById(R.id.text_title)).getText().toString());
+		}
+		if (findViewById(R.id.text_content) != null) {
+			savedInstanceState.putString("content", ((TextView) findViewById(R.id.text_content)).getText().toString());
+		}
+		if (findViewById(R.id.text_uri) != null) {
+			savedInstanceState.putString("uri", ((TextView) findViewById(R.id.text_uri)).getText().toString());
+		}
+		if (findViewById(R.id.cbo_visibility) != null) {
+			savedInstanceState.putInt("visibility", ((Spinner) findViewById(R.id.cbo_visibility)).getSelectedItemPosition());
+		}
+		if (findViewById(R.id.chk_html_javascript) != null) {
+			savedInstanceState.putBoolean("html_javascript", ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked());
+		}
+		if (findViewById(R.id.chk_html_zoom) != null) {
+			savedInstanceState.putBoolean("html_zoom", ((CheckBox) findViewById(R.id.chk_html_zoom)).isChecked());
+		}
+		if (findViewById(R.id.chk_locked) != null) {
+			savedInstanceState.putBoolean("locked", ((CheckBox) findViewById(R.id.chk_locked)).isChecked());
+		}
+		if (findViewById(R.id.image_tab_host) != null) {
+			savedInstanceState.putInt("tab_index", mCommon.mTabIndex);
+		}
+	}
+
+	private void doRestoreInstanceState(Bundle savedInstanceState) {
+		Logger.d(this, "Restoring previous state");
+
+		if (findViewById(R.id.text_title) != null) {
+			((TextView) findViewById(R.id.text_title)).setText(savedInstanceState.getString("title"));
+		}
+		if (findViewById(R.id.text_content) != null) {
+			((TextView) findViewById(R.id.text_content)).setText(savedInstanceState.getString("content"));
+		}
+		if (findViewById(R.id.text_uri) != null) {
+			((TextView) findViewById(R.id.text_uri)).setText(savedInstanceState.getString("uri"));
+		}
+		if (findViewById(R.id.cbo_visibility) != null) {
+			((Spinner) findViewById(R.id.cbo_visibility)).setSelection(savedInstanceState.getInt("visibility"));
+		}
+		if (findViewById(R.id.chk_html_zoom) != null) {
+			((CheckBox) findViewById(R.id.chk_html_zoom)).setChecked(savedInstanceState.getBoolean("html_zoom"));
+		}
+
+		if (findViewById(R.id.chk_html_javascript) != null) {
+			((CheckBox) findViewById(R.id.chk_html_javascript)).setChecked(savedInstanceState.getBoolean("html_javascript"));
+		}
+		if (findViewById(R.id.chk_locked) != null) {
+			((CheckBox) findViewById(R.id.chk_locked)).setChecked(savedInstanceState.getBoolean("locked"));
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (mLocationManager != null) {
+			mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mLocationListener);
+			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, mLocationListener);
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if (mLocationManager != null) {
+			mLocationManager.removeUpdates(mLocationListener);
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
+	
 	@Override
 	protected int getLayoutID() {
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {

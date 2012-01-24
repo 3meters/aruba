@@ -76,6 +76,7 @@
             android:layout_height="wrap_content"
             android:clickable="true"
             android:gravity="left"
+            android:paddingTop="5dp"
             android:onClick="onCommentsClick"
             android:text="0 Comments" />
     </LinearLayout>

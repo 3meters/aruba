@@ -19,15 +19,15 @@ package com.proxibase.aircandi.components;
 
 import java.util.ArrayList;
 
-import com.proxibase.aircandi.R;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
-import android.content.res.Resources.Theme;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.View;
@@ -36,10 +36,12 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.proxibase.aircandi.R;
+
 public class IconContextMenu implements DialogInterface.OnCancelListener,
 										DialogInterface.OnDismissListener {
 
-	private static final int				LIST_PREFERED_HEIGHT	= 65;
+	private static final int				LIST_PREFERED_HEIGHT	= 70;
 
 	private IconMenuAdapter					menuAdapter				= null;
 	private Activity						parentActivity			= null;
@@ -68,10 +70,10 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 		clickHandler = listener;
 	}
 
-	public Dialog createMenu(String menuItitle) {
+	public Dialog createMenu(String menuItitle, Context context) {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(parentActivity);
-		builder.setTitle(menuItitle);
-		builder.setIcon(R.drawable.icon_app);
+		View titleView = ((Activity) context).getLayoutInflater().inflate(R.layout.temp_dialog_newcandi_header, null);
+		builder.setCustomTitle(titleView);
 		builder.setAdapter(menuAdapter, new DialogInterface.OnClickListener() {
 
 			@Override
@@ -141,25 +143,34 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 		public View getView(int position, View convertView, ViewGroup parent) {
 			IconContextMenuItem item = (IconContextMenuItem) getItem(position);
 
-			Resources resources = parentActivity.getResources();
+			Resources res = parentActivity.getResources();
 
 			if (convertView == null) {
+
 				TextView textView = new TextView(context);
-				AbsListView.LayoutParams param = new AbsListView.LayoutParams(AbsListView.LayoutParams.FILL_PARENT,
-																				AbsListView.LayoutParams.WRAP_CONTENT);
+				AbsListView.LayoutParams param = new AbsListView.LayoutParams(
+						AbsListView.LayoutParams.FILL_PARENT,
+						AbsListView.LayoutParams.WRAP_CONTENT);
 				textView.setLayoutParams(param);
-				textView.setPadding((int) toPixel(resources, 15), (int) toPixel(resources, 5), (int) toPixel(resources, 15), (int) toPixel(resources, 5));
+				textView.setPadding((int) toPixel(res, 15), (int) toPixel(res, 5), (int) toPixel(res, 15), (int) toPixel(res, 5));
 				textView.setGravity(android.view.Gravity.CENTER_VERTICAL);
+				textView.setTextColor(Color.BLACK);
 
-				Theme th = context.getTheme();
-				TypedValue tv = new TypedValue();
+//								Theme th = context.getTheme();
+//								TypedValue tv = new TypedValue();
+//								if (th.resolveAttribute(android.R.attr.te.textAppearanceLargeInverse, tv, true)) {
+//									textView.setTextAppearance(context, tv.resourceId);
+//								}
 
-				if (th.resolveAttribute(android.R.attr.textAppearanceLargeInverse, tv, true)) {
-					textView.setTextAppearance(context, tv.resourceId);
-				}
-
+				textView.setTextSize(16);
 				textView.setMinHeight(LIST_PREFERED_HEIGHT);
-				textView.setCompoundDrawablePadding((int) toPixel(resources, 14));
+				textView.setMaxHeight(LIST_PREFERED_HEIGHT);
+				textView.setCompoundDrawablePadding((int) toPixel(res, 14));
+
+				BitmapDrawable bitmapDrawable = (BitmapDrawable) item.image;
+				Bitmap bitmap = Bitmap.createScaledBitmap(bitmapDrawable.getBitmap(), (int) toPixel(res, 60), (int) toPixel(res, 55), false);
+				item.image = new BitmapDrawable(bitmap);
+
 				convertView = textView;
 			}
 
@@ -180,7 +191,7 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 	protected class IconContextMenuItem {
 
 		public final CharSequence	text;
-		public final Drawable		image;
+		public Drawable				image;
 		public final int			actionTag;
 
 		public IconContextMenuItem(Resources res, int textResourceId, int imageResourceId, int actionTag) {

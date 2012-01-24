@@ -34,6 +34,13 @@
                 android:adjustViewBounds="true" />
         </RelativeLayout>
 
+        <View
+            style="@style/form_tab_rule_vertical"
+            android:layout_width="@dimen/application_button_separator_width"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp" />
+
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -49,8 +56,8 @@
                 android:layout_height="fill_parent"
                 android:layout_alignParentTop="true"
                 android:duplicateParentState="true"
-                android:gravity="center" 
-                android:text="@string/radar_tab_mycandi"/>
+                android:gravity="center"
+                android:text="@string/radar_tab_mycandi" />
 
             <ImageView
                 android:id="@+id/image_tab_image"

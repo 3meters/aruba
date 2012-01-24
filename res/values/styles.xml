@@ -8,7 +8,7 @@
     </style>
 
     <style name="app_text_appearance_large" parent="@android:style/TextAppearance">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="app_text_appearance_medium" parent="@android:style/TextAppearance">
@@ -56,7 +56,7 @@
     </style>
 
     <style name="app_checkbox" parent="android:Widget.CompoundButton.CheckBox">
-        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
 
     <style name="app_edittext" parent="@android:style/Widget.EditText">
@@ -91,7 +91,7 @@
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical|left</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">?attr/textColorButtonHeader</item>
     </style>
 
@@ -138,6 +138,14 @@
     </style>
 
     <style name="search_dialog_text">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <style name="dialog_title">
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:textColor">?attr/textColorButtonHeader</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
 
@@ -179,7 +187,7 @@
         <item name="android:background">?attr/backgroundButton</item>
         <item name="android:layout_height">65dp</item>
         <item name="android:layout_width">65dp</item>
-    </style>
+    </style>
     -->
 
     <style name="candi_info_button" parent="android:Widget.Button">
@@ -219,7 +227,7 @@
     <style name="candi_list_image">
         <item name="android:scaleType">fitCenter</item>
         <item name="android:adjustViewBounds">true</item>
-    </style>
+    </style>
     -->
 
     <style name="candi_list_title">
@@ -243,24 +251,29 @@
     <!-- CandiInfo: Pager Indicator -->
 
     <style name="candi_info_pager_text">
-        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxWidth">100dp</item>
         <item name="android:gravity">center</item>
     </style>
 
+    <!-- Tabs -->
+
+    <style name="form_tab_highlight">
+        <item name="android:background">?attr/tabColorHighlight</item>
+    </style>
+
+    <style name="form_tab_label">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:background">@drawable/button_nooutline_selector</item>
+    </style>
+
+    <style name="form_tab_rule_vertical">
+        <item name="android:background">@drawable/tab_separator</item>
+    </style>
+
     <!-- Aircandi Gallery -->
-
-
-    <!--
-    <style name="gallery_image">
-        <item name="android:scaleType">centerCrop</item>
-        <item name="android:adjustViewBounds">true</item>
-        <item name="android:background">?attr/backgroundHeader</item>
-    </style>
-    -->
 
     <style name="gallery_image_placeholder">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
@@ -272,27 +285,18 @@
     <style name="form_title" parent="android:Widget.TextView">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">?attr/textColorFormTitle</item>
     </style>
 
     <style name="form_label">
-        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:paddingLeft">2dp</item>
     </style>
 
     <style name="form_error" parent="android:Widget.TextView">
         <item name="android:textColor">#ffff8844</item>
         <item name="android:background">?attr/backgroundHeader</item>
-    </style>
-
-    <style name="form_tab_highlight">
-        <item name="android:background">?attr/tabColorHighlight</item>
-    </style>
-
-    <style name="form_tab_label">
-        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
-        <item name="android:background">@drawable/button_nooutline_selector</item>
     </style>
 
     <style name="form_picture">

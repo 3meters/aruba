@@ -12,6 +12,7 @@ import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.IntentBuilder;
+import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
 
@@ -30,6 +31,7 @@ public abstract class CandiActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		mCommon.initialize();
 		mCommon.initializeDialogs();
+		Logger.i(this, "CandiActivity created");
 	}
 
 	protected void bind() {
@@ -37,8 +39,15 @@ public abstract class CandiActivity extends Activity {
 			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
 		}
 		else {
-			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(1));
+			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(2));
 		}
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		Logger.i(this, "CandiActivity got new intent");
+		setContentView(getLayoutId());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -60,6 +69,8 @@ public abstract class CandiActivity extends Activity {
 		if (view.getTag().equals("radar")) {
 			Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
 			Intent intent = new Intent(this, CandiRadar.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 			startActivity(intent);
 			overridePendingTransition(R.anim.fade_in_short, R.anim.fade_out_short);
 		}
@@ -67,8 +78,7 @@ public abstract class CandiActivity extends Activity {
 			Aircandi.getInstance().setCandiTask(CandiTask.MyCandi);
 			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
 			Intent intent = intentBuilder.create();
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
+			//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 		}
@@ -124,20 +134,35 @@ public abstract class CandiActivity extends Activity {
 
 	@Override
 	protected void onRestart() {
+		Logger.d(this, "CandiActivity restarting");
 		super.onRestart();
-		if (findViewById(R.id.image_user) != null && Aircandi.getInstance().getUser() != null) {
-			User user = Aircandi.getInstance().getUser();
-			mCommon.setUserPicture(user.imageUri, user.linkUri, (WebImageView) findViewById(R.id.image_user));
+
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+			Logger.d(this, "Restarting because of theme change");
+			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+			mCommon.reload();
+		}
+		else {
+
+			/* User could have changed */
+			if (findViewById(R.id.image_user) != null && Aircandi.getInstance().getUser() != null) {
+				User user = Aircandi.getInstance().getUser();
+				mCommon.setUserPicture(user.imageUri, user.linkUri, (WebImageView) findViewById(R.id.image_user));
+			}
+
+			/* Currrent tab could have changed */
+			if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
+				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
+			}
+			else {
+				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(2));
+			}
 		}
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
-			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
-			mCommon.reload();
-		}
 	}
 
 	protected int getLayoutId() {
@@ -148,5 +173,6 @@ public abstract class CandiActivity extends Activity {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 		super.onDestroy();
 		mCommon.doDestroy();
+		Logger.d(this, "CandiActivity destroyed");
 	}
 }

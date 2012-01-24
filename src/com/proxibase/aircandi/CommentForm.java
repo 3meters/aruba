@@ -58,6 +58,12 @@ public class CommentForm extends FormActivity {
 		initialize();
 		bind();
 		draw();
+		
+		/* Can overwrite any values from the original intent */
+		if (savedInstanceState != null) {
+			doRestoreInstanceState(savedInstanceState);
+		}
+		
 		Tracker.trackPageView("/SignUpForm");
 	}
 
@@ -177,6 +183,29 @@ public class CommentForm extends FormActivity {
 		}
 		return false;
 	}
+	
+	// --------------------------------------------------------------------------------------------
+	// Persistence routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		Logger.d(this, "onSaveInstanceState called");
+		
+		if (mContent != null) {
+			savedInstanceState.putString("content", mContent.getText().toString());
+		}
+	}
+
+	private void doRestoreInstanceState(Bundle savedInstanceState) {
+		Logger.d(this, "Restoring previous state");
+
+		if (mContent != null) {
+			mContent.setText(savedInstanceState.getString("content"));
+		}
+	}
+
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
