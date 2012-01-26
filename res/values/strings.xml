@@ -45,6 +45,7 @@
 
 	<string name="radar_tab_radar">RADAR</string>
 	<string name="radar_tab_mycandi">MY CANDI</string>
+	<string name="radar_tab_map">MAP</string>
 	<string name="radar_button_new">Drop\nCandi</string>
 	
 	<string name="dialog_network_message_wifi_ready">Wifi enabled, ready for retry</string>
@@ -86,6 +87,7 @@
 	<string name="form_title_signup">Sign up</string>
 	<string name="form_title_picture_search">Picture search</string>
 	<string name="form_title_comment">Comment</string>
+	<string name="form_title_map">Candi map</string>
 	
 	<string name="form_tab_content">CONTENT</string>
 	<string name="form_tab_settings">SETTINGS</string>

@@ -78,7 +78,13 @@ public abstract class CandiActivity extends Activity {
 			Aircandi.getInstance().setCandiTask(CandiTask.MyCandi);
 			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
 			Intent intent = intentBuilder.create();
-			//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+		}
+		else if (view.getTag().equals("map")) {
+			Aircandi.getInstance().setCandiTask(CandiTask.Map);
+			IntentBuilder intentBuilder = new IntentBuilder(this, CandiMap.class);
+			Intent intent = intentBuilder.create();
 			startActivity(intent);
 			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 		}

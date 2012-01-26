@@ -45,6 +45,7 @@
 		<attr name="iconPicture" format="string"/>		
 		<attr name="iconLink" format="string"/>		
 		<attr name="iconProfile" format="string"/>		
+		<attr name="iconMap" format="string"/>		
 		<attr name="iconLocked" format="string"/>		
 		<attr name="logo" format="string"/>		
 		<attr name="imageSliderHandleSearch" format="string"/>

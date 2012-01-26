@@ -1093,10 +1093,6 @@ public class CandiPatchPresenter implements Observer {
 
 				for (CandiModel candiModel : zone.getCandiesCurrent()) {
 					synchronized (candiModel.getViewModifiers()) {
-						if (!candiModel.getViewModifiers().isEmpty()) {
-							Logger.v(this, "Transition skipped because modifiers not empty: " + candiModel.getTitleText());
-						}
-
 						if (candiModel.getViewModifiers().isEmpty()) {
 
 							Transition transition = candiModel.getTransition();
@@ -1172,9 +1168,6 @@ public class CandiPatchPresenter implements Observer {
 
 				for (CandiModel candiModel : zone.getCandiesNext()) {
 					synchronized (candiModel.getViewModifiers()) {
-						if (!candiModel.getViewModifiers().isEmpty()) {
-							Logger.v(this, "Transition skipped because modifiers not empty: " + candiModel.getTitleText());
-						}
 						if (candiModel.getViewModifiers().isEmpty()) {
 
 							Transition transition = candiModel.getTransition();
@@ -1186,12 +1179,6 @@ public class CandiPatchPresenter implements Observer {
 																					+ ": "
 																					+ candiModel.getTitleText());
 							}
-
-							//							if (transition != Transition.None && candiModel.getViewStateNext().isLastWithinHalo()) {
-							//								Logger.v(this, "Transition To: " + transition.toString()
-							//																					+ ": "
-							//																					+ candiModel.getTitleText());
-							//							}
 
 							if (transition == Transition.FadeOut) {
 								// viewStateNext.setVisible(false);

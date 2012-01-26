@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <!-- Header -->
+
+    <LinearLayout
+        android:id="@+id/activity_header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" >
+
+        <include layout="@layout/temp_aircandi_header" />
+    </LinearLayout>
+
+    <!-- Tabs -->
+
+    <LinearLayout
+        android:id="@+id/form_tabs"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_header" >
+
+        <include layout="@layout/temp_tabs_aircandi" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/map_holder"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/form_tabs" />
+
+</RelativeLayout>

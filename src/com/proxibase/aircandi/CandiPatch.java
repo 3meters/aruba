@@ -15,7 +15,6 @@ import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.AircandiCommon.ActionButtonSet;
 import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
@@ -126,12 +125,6 @@ public class CandiPatch extends CandiActivity {
 		Intent intent = intentBuilder.create();
 
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_INFO);
-	}
-
-	public void onActionsClick(View view) {
-		if (mCommon.mEntity == null || !mCommon.mEntity.locked) {
-			mCommon.doActionsClick(view, mCommon.mEntity != null, ActionButtonSet.CandiList);
-		}
 	}
 
 	public void onCommentsClick(View view) {

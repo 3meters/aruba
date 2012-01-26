@@ -21,7 +21,6 @@ import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.AircandiCommon.ActionButtonSet;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -96,12 +95,6 @@ public class CommentList extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
-
-	public void onActionsClick(View view) {
-		if (mCommon.mEntity == null || !mCommon.mEntity.locked) {
-			mCommon.doActionsClick(view, mCommon.mEntity != null, ActionButtonSet.CommentList);
-		}
-	}
 
 	public void onCommandButtonClick(View view) {
 		if (mCommon.mActionsWindow != null) {

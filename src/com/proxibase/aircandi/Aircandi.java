@@ -225,7 +225,7 @@ public class Aircandi extends Application {
 	}
 
 	public enum CandiTask {
-		None, MyCandi, RadarCandi
+		None, MyCandi, RadarCandi, Map
 	}
 
 }

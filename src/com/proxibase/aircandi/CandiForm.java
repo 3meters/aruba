@@ -94,6 +94,15 @@ public class CandiForm extends CandiActivity {
 		}
 	}
 
+	public void onMapClick(View view) {
+		String beaconId = (String) view.getTag();
+		IntentBuilder intentBuilder = new IntentBuilder(this, MapBrowse.class);
+		intentBuilder.setCommand(new Command(CommandVerb.View));
+		intentBuilder.setBeaconId(beaconId);
+		Intent intent = intentBuilder.create();
+		startActivityForResult(intent, 0);
+	}
+
 	public void onImageClick(View view) {
 
 		Intent intent = null;
@@ -109,13 +118,6 @@ public class CandiForm extends CandiActivity {
 		}
 		startActivity(intent);
 		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-	}
-
-	public void onActionsClick(View view) {
-		showDialog(CandiConstants.DIALOG_NEW_CANDI_ID);
-		//		if (!mCommon.mEntity.locked) {
-		//			mCommon.doActionsClick(view, true, ActionButtonSet.CandiForm);
-		//		}
 	}
 
 	public void onRefreshClick(View view) {
@@ -203,6 +205,7 @@ public class CandiForm extends CandiActivity {
 		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
 		final ImageView navigate = (ImageView) candiInfoView.findViewById(R.id.image_forward);
 		final Button comments = (Button) candiInfoView.findViewById(R.id.button_comments);
+		final ImageView map = (ImageView) candiInfoView.findViewById(R.id.button_map);
 		final Button newComment = (Button) candiInfoView.findViewById(R.id.button_comment);
 		final Button newCandi = (Button) candiInfoView.findViewById(R.id.button_new);
 		final Button editCandi = (Button) candiInfoView.findViewById(R.id.button_edit);
@@ -293,6 +296,9 @@ public class CandiForm extends CandiActivity {
 		else {
 			comments.setVisibility(View.GONE);
 		}
+
+		/* Map */
+		map.setTag(entity.beaconId);
 
 		/* Candi text */
 

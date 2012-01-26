@@ -677,7 +677,11 @@ public class CandiView extends BaseView implements OnGestureListener {
 			@Override
 			public Bitmap reloadBitmap() {
 
-				/* We could be in recycled state without a bound model. */
+				/* 
+				 * We could be in recycled state without a bound model.
+				 * The engine could also be requesting a bitmap for a candi
+				 * that has been deleted (including the bitmap in S3). 
+				 */
 				if (mModel != null || !mRecycled) {
 
 					/* TextureSource needs to refresh a recycled bitmap. */

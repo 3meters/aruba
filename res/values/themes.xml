@@ -28,6 +28,7 @@
         <item name="iconPost">@drawable/icon_post</item>
         <item name="iconPicture">@drawable/icon_picture</item>
         <item name="iconLink">@drawable/icon_link</item>
+        <item name="iconMap">@drawable/icon_map_32</item>
         <item name="iconProfile">@drawable/placeholder_user_dark</item>
         <item name="iconLocked">@drawable/icon_lock_dark</item>
         <item name="pagerNotch">@drawable/indicator_current_dark</item>
@@ -92,6 +93,7 @@
         <item name="iconPost">@drawable/icon_post</item>
         <item name="iconPicture">@drawable/icon_picture</item>
         <item name="iconLink">@drawable/icon_link</item>
+        <item name="iconMap">@drawable/icon_map_32</item>
         <item name="iconLocked">@drawable/icon_lock_light</item>
         <item name="iconProfile">@drawable/placeholder_user_light</item>
         <item name="pagerNotch">@drawable/indicator_current_light</item>

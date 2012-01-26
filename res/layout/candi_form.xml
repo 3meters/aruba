@@ -132,8 +132,8 @@
                             android:background="@drawable/app_image_selector"
                             android:clickable="true"
                             aircandi:layout="@layout/temp_webimageview_framed_fill"
-                            aircandi:minWidth="250px"
                             aircandi:minHeight="250px"
+                            aircandi:minWidth="250px"
                             android:onClick="onImageClick"
                             android:scaleType="centerCrop" />
 
@@ -182,18 +182,40 @@
                         android:layout_marginLeft="3dp"
                         aircandi:layout="@layout/temp_user_info_text_only" />
 
-                    <Button
-                        android:id="@+id/button_comments"
-                        style="@style/comments_button"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/group_content"
+                        android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="3dp"
-                        android:clickable="true"
-                        android:gravity="left"
-                        android:onClick="onCommentsClick"
-                        android:paddingBottom="15dp"
-                        android:paddingTop="0dp"
-                        android:text="0 Comments" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp" >
+
+                        <Button
+                            android:id="@+id/button_comments"
+                            style="@style/comments_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="3dp"
+                            android:layout_marginRight="15dp"
+                            android:clickable="true"
+                            android:gravity="left"
+                            android:onClick="onCommentsClick"
+                            android:paddingBottom="0dp"
+                            android:paddingTop="0dp"
+                            android:text="0 Comments" />
+
+                        <ImageView
+                            android:id="@+id/button_map"
+                            style="@style/comments_button"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:background="@drawable/app_image_selector"
+                            android:clickable="true"
+                            android:gravity="left"
+                            android:onClick="onMapClick"
+                            android:padding="3dp"
+                            android:src="@drawable/icon_map_32" />
+                    </LinearLayout>
                 </LinearLayout>
 
                 <RelativeLayout
@@ -311,7 +333,7 @@
                 android:paddingLeft="90dp" >
             </RelativeLayout>
         </SlidingDrawer>
-    </FrameLayout>
+    </FrameLayout>
     -->
 
 </RelativeLayout>

@@ -38,8 +38,8 @@
             style="@style/form_tab_rule_vertical"
             android:layout_width="@dimen/application_button_separator_width"
             android:layout_height="fill_parent"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp" />
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -67,6 +67,39 @@
                 android:layout_alignParentBottom="true"
                 android:adjustViewBounds="true" />
         </RelativeLayout>
-    </LinearLayout>
+        <View
+            style="@style/form_tab_rule_vertical"
+            android:layout_width="@dimen/application_button_separator_width"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:onClick="onTabClick"
+            android:tag="map" >
+
+            <TextView
+                android:id="@+id/image_tab_label"
+                style="@style/form_tab_label"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_alignParentTop="true"
+                android:duplicateParentState="true"
+                android:gravity="center"
+                android:text="@string/radar_tab_map" />
+
+            <ImageView
+                android:id="@+id/image_tab_image"
+                style="@style/form_tab_highlight"
+                android:layout_width="fill_parent"
+                android:layout_height="2dp"
+                android:layout_alignParentBottom="true"
+                android:adjustViewBounds="true" />
+        </RelativeLayout>
+        </LinearLayout>
 
 </merge>

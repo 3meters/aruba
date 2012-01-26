@@ -211,23 +211,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		
-//		if (!isTaskRoot()) {
-//		    final Intent intent = getIntent();
-//		    final String intentAction = intent.getAction();
-//		    if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) &&
-//		            intentAction != null && intentAction.equals(Intent.ACTION_MAIN)) {
-//		        finish();
-//		    }
-//		}
-		
-//	    if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
-//	        // Activity was brought to front and not created,
-//	        // Thus finishing this will get us to the last viewed activity
-//	        finish();
-//	        return;
-//	    }		
-		
+
 		Logger.i(this, "CandiSearchActivity created");
 		super.onCreate(savedInstanceState);
 		if (CandiConstants.DEBUG_TRACE) {
@@ -420,6 +404,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			Aircandi.getInstance().setCandiTask(CandiTask.MyCandi);
 
 			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
+			Intent intent = intentBuilder.create();
+			startActivity(intent);
+			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+		}
+		else if (view.getTag().equals("map")) {
+			Aircandi.getInstance().setCandiTask(CandiTask.Map);
+
+			IntentBuilder intentBuilder = new IntentBuilder(this, CandiMap.class);
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
 			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
@@ -1779,14 +1771,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 */
 		Logger.i(this, "CandiSearchActivity restarting");
 		super.onRestart();
-		
+
 		/* Theme might have changed since we were away */
 		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
 			Logger.d(this, "Restarting because of theme change");
 			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
 			mCommon.reload();
 		}
-		else{
+		else {
 			/* We control window focus messages that trigger the engine from here. */
 			super.onWindowFocusChanged(true);
 			final WebImageView imageUser = (WebImageView) findViewById(R.id.image_user);

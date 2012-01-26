@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.proxibase.aircandi.components.AircandiCommon;
-import com.proxibase.aircandi.components.AircandiCommon.ActionButtonSet;
 
 public abstract class AircandiGameActivity extends LayoutGameActivity {
 
@@ -35,10 +34,6 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	public void onAttachedToWindow() {
 		super.onAttachedToWindow();
 		mCommon.doAttachedToWindow();
-	}
-
-	public void onActionsClick(View view) {
-		mCommon.doActionsClick(view, false, ActionButtonSet.Radar);
 	}
 
 	public void onProfileClick(View view) {
