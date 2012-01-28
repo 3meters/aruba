@@ -1,6 +1,5 @@
 package com.proxibase.aircandi.components;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -14,9 +13,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -28,9 +25,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -86,7 +81,6 @@ public class AircandiCommon {
 	private int				mIconPost;
 	private int				mIconPicture;
 	private int				mIconLink;
-	private int				mIconComment;
 
 	protected ImageView		mProgressIndicator;
 	protected ImageView		mButtonRefresh;
@@ -121,13 +115,11 @@ public class AircandiCommon {
 				mIconPost = R.drawable.icon_post;
 				mIconPicture = R.drawable.icon_picture;
 				mIconLink = R.drawable.icon_link;
-				mIconComment = R.drawable.icon_post;
 			}
 			else if (mThemeTone.equals("light")) {
 				mIconPost = R.drawable.icon_post;
 				mIconPicture = R.drawable.icon_picture;
 				mIconLink = R.drawable.icon_link;
-				mIconComment = R.drawable.icon_post;
 			}
 		}
 
@@ -283,27 +275,6 @@ public class AircandiCommon {
 		}
 	}
 
-	public void doActionsClick(View view, boolean includeEntityId, ActionButtonSet actionButtonSet) {
-
-		if (mActionsWindow == null) {
-			mActionsWindow = new ActionsWindow(mContext);
-		}
-		else {
-			long dismissInterval = System.currentTimeMillis() - mActionsWindow.getActionStripToggleTime();
-			if (dismissInterval <= 200) {
-				return;
-			}
-		}
-
-		int[] coordinates = { 0, 0 };
-
-		view.getLocationInWindow(coordinates);
-		final Rect rect = new Rect(coordinates[0], coordinates[1], coordinates[0] + view.getWidth(), coordinates[1] + view.getHeight());
-		View content = configureActionButtonSet(actionButtonSet, mContext, includeEntityId ? mEntity.id : null);
-
-		mActionsWindow.show(rect, content, view, 0, -10, -72);
-	}
-
 	public void doProfileClick(View view) {
 
 		if (Aircandi.getInstance().getUser().anonymous) {
@@ -396,62 +367,6 @@ public class AircandiCommon {
 		setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
 	}
 
-	public ViewGroup configureActionButtonSet(ActionButtonSet actionButtonSet, Context context, Integer entityId) {
-		List<Command> commands = new ArrayList<Command>();
-		if (actionButtonSet == ActionButtonSet.Radar
-				|| actionButtonSet == ActionButtonSet.CandiForm
-				|| actionButtonSet == ActionButtonSet.CandiList) {
-			commands.add(new Command(CommandVerb.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null, entityId, mIconPost));
-			commands.add(new Command(CommandVerb.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE, null, entityId, mIconPicture));
-			commands.add(new Command(CommandVerb.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null, entityId, mIconLink));
-		}
-		else if (actionButtonSet == ActionButtonSet.CommentList) {
-			commands.add(new Command(CommandVerb.New, "Comment", "CommentForm", CandiConstants.TYPE_CANDI_LINK, null, entityId, mIconComment));
-		}
-
-		ViewGroup viewGroup = configureActionButtons(commands, null, context, null);
-		return viewGroup;
-	}
-
-	public ViewGroup configureActionButtons(List<Command> commands, Entity entity, Context context, User user) {
-
-		if (commands == null || commands.size() == 0) {
-			return null;
-		}
-		/* Get the table we use for grouping and clear it */
-		ViewGroup viewGroup = new LinearLayout(context);
-
-		/* Loop the commands */
-		for (Command command : commands) {
-			/*
-			 * TODO: This is a temporary hack. The service shouldn't pass commands
-			 * that this user doesn't have sufficient permissions for.
-			 */
-			if (command.verb == CommandVerb.Edit && user != null) {
-				if (entity.createdById != null && !entity.createdById.toString().equals(user.id)) {
-					continue;
-				}
-			}
-
-			/* Make a button and configure it */
-			Button commandButton = (Button) mLayoutInflater.inflate(R.layout.temp_actionstrip_button, null);
-			commandButton.setText(command.label);
-
-			Drawable icon = context.getResources().getDrawable(command.iconResourceId);
-			if (command.verb == CommandVerb.Edit && user != null) {
-				icon = context.getResources().getDrawable(R.drawable.icon_edit_dark);
-			}
-
-			icon.setBounds(0, 0, 40, 40);
-			commandButton.setCompoundDrawables(null, icon, null, null);
-
-			commandButton.setTag(command);
-			viewGroup.addView(commandButton);
-		}
-
-		return viewGroup;
-	}
-
 	public static void showAlertDialog(int iconResource, String title, String message, Context context, OnClickListener listener) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle(title);
@@ -477,29 +392,6 @@ public class AircandiCommon {
 			ImageView image = (ImageView) tab.findViewById(R.id.image_tab_image);
 			if (label != null) {
 				if (tab == view) {
-					mTabIndex = i;
-					label.setTextColor(mTextColorFocused);
-					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightActive);
-					params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-					image.setLayoutParams(params);
-				}
-				else {
-					label.setTextColor(mTextColorUnfocused);
-					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightInactive);
-					params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-					image.setLayoutParams(params);
-				}
-			}
-		}
-	}
-
-	public void setActiveTab(ViewGroup tabHost, Integer tabIndex) {
-		for (int i = 0; i < tabHost.getChildCount(); i++) {
-			View tab = tabHost.getChildAt(i);
-			TextView label = (TextView) tab.findViewById(R.id.image_tab_label);
-			ImageView image = (ImageView) tab.findViewById(R.id.image_tab_image);
-			if (label != null) {
-				if (i == tabIndex) {
 					mTabIndex = i;
 					label.setTextColor(mTextColorFocused);
 					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightActive);

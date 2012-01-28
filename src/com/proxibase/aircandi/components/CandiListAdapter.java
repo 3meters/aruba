@@ -107,8 +107,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 
 			if (holder.itemAuthor != null) {
 				if (entity.author != null) {
-					Integer dateToUse = entity.updatedDate != null ? entity.updatedDate : entity.createdDate;
-					holder.itemAuthor.bindToAuthor(entity.author, dateToUse, entity.locked);
+					holder.itemAuthor.bindToAuthor(entity.author, entity.updatedDate, entity.locked);
 					holder.itemAuthor.setVisibility(View.VISIBLE);
 				}
 				else {

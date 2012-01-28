@@ -38,8 +38,11 @@ public abstract class CandiActivity extends Activity {
 		if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
 			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
 		}
-		else {
+		else if (Aircandi.getInstance().getCandiTask() == CandiTask.MyCandi) {
 			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(2));
+		}
+		else if (Aircandi.getInstance().getCandiTask() == CandiTask.Map) {
+			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(4));
 		}
 	}
 
@@ -160,8 +163,11 @@ public abstract class CandiActivity extends Activity {
 			if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
 				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
 			}
-			else {
+			else if (Aircandi.getInstance().getCandiTask() == CandiTask.MyCandi) {
 				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(2));
+			}
+			else if (Aircandi.getInstance().getCandiTask() == CandiTask.Map) {
+				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(4));
 			}
 		}
 	}

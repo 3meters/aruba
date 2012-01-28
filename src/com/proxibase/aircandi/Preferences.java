@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.core.CandiConstants;
 
 public class Preferences extends PreferenceActivity {
 
@@ -28,7 +27,7 @@ public class Preferences extends PreferenceActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (CandiConstants.MODE_DEV) {
+		if (Aircandi.getInstance().getUser().developer) {
 			addPreferencesFromResource(R.xml.preferences_dev);
 			Tracker.trackPageView("/Preferences");
 		}

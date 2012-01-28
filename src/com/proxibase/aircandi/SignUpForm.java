@@ -2,7 +2,6 @@ package com.proxibase.aircandi;
 
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -21,6 +20,7 @@ import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -131,7 +131,8 @@ public class SignUpForm extends FormActivity {
 					public void onComplete(Object response) {
 						ServiceResponse serviceResponse = (ServiceResponse) response;
 						if (serviceResponse.responseCode == ResponseCode.Success) {
-							mUser.imageBitmap = (Bitmap) serviceResponse.data;
+							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+							mUser.imageBitmap = imageResponse.bitmap;
 						}
 					}
 				});
@@ -160,10 +161,10 @@ public class SignUpForm extends FormActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					Bitmap bitmap = (Bitmap) serviceResponse.data;
+					ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 					String imageUri = (String) extra;
 					mUser.imageUri = imageUri;
-					mUser.imageBitmap = bitmap;
+					mUser.imageBitmap = imageResponse.bitmap;
 				}
 			}
 		});
@@ -196,6 +197,7 @@ public class SignUpForm extends FormActivity {
 		mUser.fullname = mTextFullname.getText().toString().trim();
 		mUser.password = mTextPassword.getText().toString().trim();
 		mUser.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+		mUser.updatedDate = mUser.createdDate;
 
 		Logger.i(this, "Insert user: " + mUser.fullname);
 

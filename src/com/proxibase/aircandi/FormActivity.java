@@ -29,6 +29,7 @@ import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -292,13 +293,13 @@ public abstract class FormActivity extends Activity {
 
 							final ServiceResponse serviceResponse = (ServiceResponse) response;
 							if (serviceResponse.responseCode == ResponseCode.Success) {
-								final Bitmap bitmap = (Bitmap) serviceResponse.data;
+								final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 								runOnUiThread(new Runnable() {
 
 									@Override
 									public void run() {
 										if (mImageRequestListener != null) {
-											mImageRequestListener.onComplete(serviceResponse, imageUri, null, bitmap);
+											mImageRequestListener.onComplete(serviceResponse, imageUri, null, imageResponse.bitmap);
 										}
 									}
 								});

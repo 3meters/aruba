@@ -51,19 +51,19 @@ public class CommentForm extends FormActivity {
 			Intent intent = intentBuilder.create();
 
 			startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-			overridePendingTransition(R.anim.form_in, R.anim.browse_out);		
+			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 
 		}
 
 		initialize();
 		bind();
 		draw();
-		
+
 		/* Can overwrite any values from the original intent */
 		if (savedInstanceState != null) {
 			doRestoreInstanceState(savedInstanceState);
 		}
-		
+
 		Tracker.trackPageView("/SignUpForm");
 	}
 
@@ -83,7 +83,8 @@ public class CommentForm extends FormActivity {
 
 	protected void bind() {
 		mCommon.mComment = new Comment();
-		mCommon.mComment.createdById = String.valueOf(Aircandi.getInstance().getUser().id);
+		mCommon.mComment.createdById = Aircandi.getInstance().getUser().id;
+		mCommon.mComment.updatedById = Aircandi.getInstance().getUser().id;
 		mCommon.mComment.entityId = mCommon.mParentEntityId;
 	}
 
@@ -140,6 +141,7 @@ public class CommentForm extends FormActivity {
 
 		mCommon.mComment.description = mContent.getText().toString().trim();
 		mCommon.mComment.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+		mCommon.mComment.updatedDate = mCommon.mComment.createdDate;
 
 		Logger.i(this, "Insert comment for: " + String.valueOf(mCommon.mComment.entityId));
 
@@ -183,7 +185,7 @@ public class CommentForm extends FormActivity {
 		}
 		return false;
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Persistence routines
 	// --------------------------------------------------------------------------------------------
@@ -192,7 +194,7 @@ public class CommentForm extends FormActivity {
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
 		Logger.d(this, "onSaveInstanceState called");
-		
+
 		if (mContent != null) {
 			savedInstanceState.putString("content", mContent.getText().toString());
 		}
@@ -205,7 +207,6 @@ public class CommentForm extends FormActivity {
 			mContent.setText(savedInstanceState.getString("content"));
 		}
 	}
-
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines

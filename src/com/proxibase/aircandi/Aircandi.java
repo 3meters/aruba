@@ -12,10 +12,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.Location;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
+import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.consumer.User;
 
@@ -72,15 +76,17 @@ public class Aircandi extends Application {
 
 	private static Aircandi					singletonObject;
 
+	public final static int					DEBUG_SIGNATURE_HASH	= -2026043354;
 	public static SharedPreferences			settings;
 	public static SharedPreferences.Editor	settingsEditor;
 	public static Context					applicationContext;
 	public static Handler					applicationHandler;
 	private User							mUser;
-	private Boolean							mToolstripOpen		= false;
-	private Boolean							mFirstTimeCandiForm	= true;
-	private CandiTask						mCandiTask			= CandiTask.RadarCandi;
+	private Boolean							mToolstripOpen			= false;
+	private Boolean							mFirstTimeCandiForm		= true;
+	private CandiTask						mCandiTask				= CandiTask.RadarCandi;
 	private Location						mCurrentLocation;
+	private static Boolean					mIsDebugBuild;
 
 	public static Aircandi getInstance() {
 		return singletonObject;
@@ -104,6 +110,29 @@ public class Aircandi extends Application {
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
+	}
+
+	public static Boolean isDebugBuild(Context context) {
+		/*
+		 * Checks if this apk was built using the debug certificate
+		 */
+		if (mIsDebugBuild == null) {
+			try {
+				mIsDebugBuild = false;
+				Signature[] sigs = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_SIGNATURES).signatures;
+				for (int i = 0; i < sigs.length; i++) {
+					if (sigs[i].hashCode() == DEBUG_SIGNATURE_HASH) {
+						Logger.d(applicationContext, "This is a debug build!");
+						mIsDebugBuild = true;
+						break;
+					}
+				}
+			}
+			catch (NameNotFoundException exception) {
+				exception.printStackTrace();
+			}
+		}
+		return mIsDebugBuild;
 	}
 
 	/**

@@ -20,6 +20,7 @@ import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -99,6 +100,7 @@ public class WebImageView extends RelativeLayout {
 	}
 
 	public void setImageRequest(final ImageRequest imageRequest, final ImageView imageReflection) {
+		mImageUri = imageRequest.getImageUri();
 
 		final RequestListener originalImageReadyListener = imageRequest.getRequestListener();
 
@@ -122,29 +124,28 @@ public class WebImageView extends RelativeLayout {
 				/* Who's looking for imageUri? */
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 
-					final Bitmap bitmap = (Bitmap) serviceResponse.data;
-					@SuppressWarnings("unused")
-					String imageFileUri = ImageManager.getInstance().getImageCache().getImageFileUri(imageRequest.getImageUri());
-					mImageView.setTag(imageRequest.getImageUri());
+					final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+					if (imageResponse.imageUri.equals(mImageUri)) {
+						mImageView.setTag(mImageUri);
 
-					if (bitmap != null) {
-						mThreadHandler.post(new Runnable() {
+						if (imageResponse.bitmap != null) {
+							mThreadHandler.post(new Runnable() {
 
-							@Override
-							public void run() {
-								if (imageRequest.getMakeReflection() && imageReflection != null) {
-									String cacheName = ImageManager.getInstance().resolveCacheName(imageRequest.getImageUri());
-									Bitmap bitmapReflection = ImageManager.getInstance().getImage(cacheName + ".reflection");
-									ImageUtils.showImageInImageView(bitmap, bitmapReflection, mImageView, imageReflection);
+								@Override
+								public void run() {
+									if (imageRequest.getMakeReflection() && imageReflection != null) {
+										String cacheName = ImageManager.getInstance().resolveCacheName(imageRequest.getImageUri());
+										Bitmap bitmapReflection = ImageManager.getInstance().getImage(cacheName + ".reflection");
+										ImageUtils.showImageInImageView(imageResponse.bitmap, bitmapReflection, mImageView, imageReflection);
+									}
+									else {
+										ImageUtils.showImageInImageView(imageResponse.bitmap, mImageView);
+									}
 								}
-								else {
-									ImageUtils.showImageInImageView(bitmap, mImageView);
-								}
-							}
-						});
+							});
+						}
 					}
 				}
 				else {

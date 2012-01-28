@@ -1,5 +1,7 @@
 package com.proxibase.aircandi.components;
 
+import android.graphics.Bitmap;
+
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
@@ -98,7 +100,7 @@ public class ImageRequest {
 		this.mLinkJavascriptEnabled = linkJavascriptEnabled;
 	}
 
-	public Boolean getUpdateCache() {
+	public Boolean doUpdateCache() {
 		return this.mUpdateCache;
 	}
 
@@ -106,7 +108,7 @@ public class ImageRequest {
 		this.mUpdateCache = updateCache;
 	}
 
-	public Boolean getSearchCache() {
+	public Boolean doSearchCache() {
 		return this.mSearchCache;
 	}
 
@@ -120,6 +122,17 @@ public class ImageRequest {
 
 	public void setRequestListener(RequestListener requestListener) {
 		this.mRequestListener = requestListener;
+	}
+
+	public static class ImageResponse {
+
+		public Bitmap	bitmap;
+		public String	imageUri;
+		
+		public ImageResponse(Bitmap bitmap, String imageUri) {
+			this.bitmap = bitmap;
+			this.imageUri = imageUri; 
+		}
 	}
 
 	public enum ImageFormat {

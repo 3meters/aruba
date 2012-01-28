@@ -185,7 +185,7 @@ public class ProxiExplorer {
 
 				Bundle parameters = new Bundle();
 				parameters.putString("beaconBssid", beacon.id);
-				parameters.putInt("userId", Integer.parseInt(Aircandi.getInstance().getUser().id));
+				parameters.putInt("userId", Aircandi.getInstance().getUser().id);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
 				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesForBeacon");
@@ -385,7 +385,7 @@ public class ProxiExplorer {
 
 			Bundle parameters = new Bundle();
 			parameters.putStringArrayList("beaconBssids", refreshBeaconIds);
-			parameters.putInt("userId", Integer.parseInt(Aircandi.getInstance().getUser().id));
+			parameters.putInt("userId", Aircandi.getInstance().getUser().id);
 
 			ServiceRequest serviceRequest = new ServiceRequest();
 			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesForBeacons");

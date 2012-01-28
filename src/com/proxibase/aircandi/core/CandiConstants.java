@@ -14,10 +14,11 @@ import android.graphics.Bitmap.Config;
 
 public interface CandiConstants {
 
-	public static final boolean			MODE_DEV							= true;
 	public static final boolean			DEBUG_TRACE							= false;
 	public static final String			APP_NAME							= "Aircandi";
 	public static final String			APP_PACKAGE_NAME					= "com.proxibase.aircandi.";
+	public static final String			GOOGLE_API_KEY_RELEASE				= "0NLNz2BjIntPUuNQrqaiA6J8TTFflv_PHQ2cTdQ";
+	public static final String			GOOGLE_API_KEY_DEBUG				= "0NLNz2BjIntNt_gkO2_iEs5wIIxNGrG_pmHjPbA";
 
 	public static final int				LAYER_GENERAL						= 0;
 	public static final int				LAYER_ZONES							= 1;

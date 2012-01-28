@@ -31,6 +31,7 @@ import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -553,7 +554,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 			mActiveImageRequest = true;
 			final Entity entity = candiModel.getEntity();
 
-			ImageRequestBuilder builder = new ImageRequestBuilder(this);
+			final ImageRequestBuilder builder = new ImageRequestBuilder(this);
 			builder.setFromEntity(entity);
 			builder.setSearchCache(!skipCache);
 			builder.setMakeReflection(true);
@@ -569,35 +570,41 @@ public class CandiView extends BaseView implements OnGestureListener {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
-						Bitmap bodyBitmap = (Bitmap) serviceResponse.data;
-						if (bodyBitmap != null) {
-
+						/*
+						 * The view could have been recycled while we were busy and won't have a bound
+						 * model.
+						 */
+						if (mModel != null && !mRecycled) {
 							/*
-							 * The view could have been recycled while we were busy and won't have a bound
-							 * model.
+							 * The view could have been recycled and put back into service targeting
+							 * a different bitmap.
 							 */
-							if (mModel != null && !mRecycled) {
+							final CandiModel candiModel = (CandiModel) mModel;
+							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+							String imageUri = ImageRequestBuilder.getImageUriFromEntity(candiModel.getEntity());
+							
+							if (imageResponse.imageUri.equals(imageUri) && imageResponse.bitmap != null) {
 								Logger.v(this, "Texture request complete: " + ((CandiModel) mModel).getTitleText());
 								mHasBitmap = true;
-								updateTextureRegions(bodyBitmap);
+								updateTextureRegions(imageResponse.bitmap);
 								if (candiModel.getViewStateCurrent().isVisible()) {
 									showBodyAndReflectionAnimated();
 								}
-								progressVisible(false);
 							}
-							else {
-								if (mModel != null) {
-									String modelTitle = ((CandiModel) mModel).getTitleText();
-									Logger.v(this, "Texture request complete but requestor recycled : " + modelTitle);
-								}
+							progressVisible(false);
+						}
+						else {
+							if (mModel != null) {
+								String modelTitle = ((CandiModel) mModel).getTitleText();
+								Logger.v(this, "Texture request complete but requestor recycled : " + modelTitle);
 							}
 						}
 					}
 					else {
-						if (!mHasBitmap) {
+						if (!mHasBitmap && mModel != null && !mRecycled) {
 							Logger.w(this, "Broken image: " + entity.imagePreviewUri);
 							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
-							if (bitmap != null && mModel != null && !mRecycled) {
+							if (bitmap != null) {
 								mHasBitmap = false;
 								updateTextureRegions(bitmap);
 								if (candiModel.getViewStateCurrent().isVisible()) {
@@ -677,10 +684,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 			@Override
 			public Bitmap reloadBitmap() {
 
-				/* 
+				/*
 				 * We could be in recycled state without a bound model.
 				 * The engine could also be requesting a bitmap for a candi
-				 * that has been deleted (including the bitmap in S3). 
+				 * that has been deleted (including the bitmap in S3).
 				 */
 				if (mModel != null || !mRecycled) {
 

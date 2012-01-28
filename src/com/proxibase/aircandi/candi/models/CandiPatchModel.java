@@ -595,12 +595,9 @@ public class CandiPatchModel extends Observable {
 				if ((entity1.discoveryTime.getTime() / 1000) < (entity2.discoveryTime.getTime() / 1000))
 					return 1;
 				else {
-					Integer dateToUse1 = entity1.updatedDate != null ? entity1.updatedDate : entity1.createdDate;
-					Integer dateToUse2 = entity2.updatedDate != null ? entity2.updatedDate : entity2.createdDate;
-
-					if (dateToUse1 > dateToUse2)
+					if (entity1.updatedDate > entity2.updatedDate)
 						return -1;
-					else if (dateToUse1 < dateToUse2)
+					else if (entity1.updatedDate < entity2.updatedDate)
 						return 1;
 					else
 						return 0;

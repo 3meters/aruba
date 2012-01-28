@@ -36,7 +36,7 @@
         <TextView
             android:id="@+id/text_header_title"
             style="@style/form_title"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@+id/text_header_debug"
@@ -49,11 +49,11 @@
         <TextView
             android:id="@+id/text_header_debug"
             style="@style/form_title"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:gravity="center_vertical|left"
+            android:gravity="center_vertical|right"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:visibility="gone" />

@@ -95,7 +95,7 @@ public class ImageRequestBuilder {
 			}
 		}
 	}
-
+	
 	public static String getImageUriFromEntity(Entity entity) {
 		String imageUri = null;
 		if (entity.imagePreviewUri != null && !entity.imagePreviewUri.equals("")) {

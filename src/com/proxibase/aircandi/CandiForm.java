@@ -242,8 +242,7 @@ public class CandiForm extends CandiActivity {
 		/* Author block */
 
 		if (entity.author != null) {
-			Integer dateToUse = entity.updatedDate != null ? entity.updatedDate : entity.createdDate;
-			authorBlock.bindToAuthor(entity.author, dateToUse, entity.locked);
+			authorBlock.bindToAuthor(entity.author, entity.updatedDate, entity.locked);
 			authorBlock.setVisibility(View.VISIBLE);
 		}
 		else {
@@ -278,7 +277,7 @@ public class CandiForm extends CandiActivity {
 			newComment.setVisibility(View.VISIBLE);
 			newComment.setTag(new Command(CommandVerb.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
 		}
-		if (entity.createdById.equals(Integer.parseInt(Aircandi.getInstance().getUser().id))) {
+		if (entity.createdById.equals(Aircandi.getInstance().getUser().id)) {
 			editCandi.setVisibility(View.VISIBLE);
 			editCandi.setTag(new Command(CommandVerb.Edit, "Edit", "EntityForm", entity.entityType, entity.id, null, null));
 		}

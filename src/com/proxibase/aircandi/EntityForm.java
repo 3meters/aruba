@@ -41,6 +41,7 @@ import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.Command.CommandVerb;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResultCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
@@ -95,7 +96,7 @@ public class EntityForm extends FormActivity {
 		/* Restore current tab */
 		if (savedInstanceState != null) {
 			if (findViewById(R.id.image_tab_host) != null) {
-				mCommon.setActiveTab((ViewGroup) findViewById(R.id.image_tab_host), savedInstanceState.getInt("tab_index"));
+				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(savedInstanceState.getInt("tab_index")));
 				mViewFlipper.setDisplayedChild(mCommon.mTabIndex);
 			}
 		}
@@ -120,17 +121,17 @@ public class EntityForm extends FormActivity {
 		 * and we are creating new candi.
 		 */
 		if (mCommon.mCommand.verb == CommandVerb.New) {
-			
+
 			mBeacon = ProxiExplorer.getInstance().getBeaconById(mCommon.mBeaconId);
 
-			if (mBeacon != null && !mBeacon.registered) {
-				mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-				mLocationListener = new LocationListener() {
+			mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+			mLocationListener = new LocationListener() {
 
-					@Override
-					public void onLocationChanged(Location location) {
-						if (Aircandi.isBetterLocation(location, Aircandi.getInstance().getCurrentLocation())) {
-							Aircandi.getInstance().setCurrentLocation(location);
+				@Override
+				public void onLocationChanged(Location location) {
+					if (Aircandi.isBetterLocation(location, Aircandi.getInstance().getCurrentLocation())) {
+						Aircandi.getInstance().setCurrentLocation(location);
+						if (Aircandi.getInstance().getUser().developer) {
 							TextView mTextDebug = (TextView) findViewById(R.id.text_header_debug);
 							mTextDebug.setVisibility(View.VISIBLE);
 							if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
@@ -138,40 +139,40 @@ public class EntityForm extends FormActivity {
 							}
 						}
 					}
-
-					@Override
-					public void onProviderDisabled(String provider) {
-						ImageUtils.showToastNotification(provider + ": disabled", Toast.LENGTH_SHORT);
-					}
-
-					@Override
-					public void onProviderEnabled(String provider) {
-						ImageUtils.showToastNotification(provider + ": enabled", Toast.LENGTH_SHORT);
-					}
-
-					@Override
-					public void onStatusChanged(String provider, int status, Bundle extras) {
-						if (status == LocationProvider.AVAILABLE) {
-							ImageUtils.showToastNotification(provider + ": available", Toast.LENGTH_SHORT);
-						}
-						else if (status == LocationProvider.OUT_OF_SERVICE) {
-							ImageUtils.showToastNotification(provider + ": out of service", Toast.LENGTH_SHORT);
-						}
-						else if (status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
-							ImageUtils.showToastNotification(provider + ": temporarily unavailable", Toast.LENGTH_SHORT);
-						}
-					}
-				};
-
-				Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-				if (Aircandi.isBetterLocation(lastKnownLocationNetwork, Aircandi.getInstance().getCurrentLocation())) {
-					Aircandi.getInstance().setCurrentLocation(lastKnownLocationNetwork);
 				}
 
-				Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-				if (Aircandi.isBetterLocation(lastKnownLocationGPS, Aircandi.getInstance().getCurrentLocation())) {
-					Aircandi.getInstance().setCurrentLocation(lastKnownLocationGPS);
+				@Override
+				public void onProviderDisabled(String provider) {
+					ImageUtils.showToastNotification(provider + ": disabled", Toast.LENGTH_SHORT);
 				}
+
+				@Override
+				public void onProviderEnabled(String provider) {
+					ImageUtils.showToastNotification(provider + ": enabled", Toast.LENGTH_SHORT);
+				}
+
+				@Override
+				public void onStatusChanged(String provider, int status, Bundle extras) {
+					if (status == LocationProvider.AVAILABLE) {
+						ImageUtils.showToastNotification(provider + ": available", Toast.LENGTH_SHORT);
+					}
+					else if (status == LocationProvider.OUT_OF_SERVICE) {
+						ImageUtils.showToastNotification(provider + ": out of service", Toast.LENGTH_SHORT);
+					}
+					else if (status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
+						ImageUtils.showToastNotification(provider + ": temporarily unavailable", Toast.LENGTH_SHORT);
+					}
+				}
+			};
+
+			Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			if (Aircandi.isBetterLocation(lastKnownLocationNetwork, Aircandi.getInstance().getCurrentLocation())) {
+				Aircandi.getInstance().setCurrentLocation(lastKnownLocationNetwork);
+			}
+
+			Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			if (Aircandi.isBetterLocation(lastKnownLocationGPS, Aircandi.getInstance().getCurrentLocation())) {
+				Aircandi.getInstance().setCurrentLocation(lastKnownLocationGPS);
 			}
 		}
 
@@ -204,7 +205,8 @@ public class EntityForm extends FormActivity {
 			entity = new Entity();
 			entity.beaconId = mCommon.mBeaconId;
 			entity.signalFence = -100.0f;
-			entity.createdById = Integer.parseInt(Aircandi.getInstance().getUser().id);
+			entity.createdById = Aircandi.getInstance().getUser().id;
+			entity.updatedById = Aircandi.getInstance().getUser().id;
 			entity.enabled = true;
 			entity.locked = false;
 			entity.linkJavascriptEnabled = false;
@@ -295,8 +297,8 @@ public class EntityForm extends FormActivity {
 							public void onComplete(Object response) {
 								ServiceResponse serviceResponse = (ServiceResponse) response;
 								if (serviceResponse.responseCode == ResponseCode.Success) {
-									Bitmap bitmap = (Bitmap) serviceResponse.data;
-									entity.imageBitmap = bitmap;
+									ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+									entity.imageBitmap = imageResponse.bitmap;
 								}
 							}
 						});
@@ -347,8 +349,7 @@ public class EntityForm extends FormActivity {
 			/* Author */
 
 			if (entity != null && entity.author != null) {
-				Integer dateToUse = entity.updatedDate != null ? entity.updatedDate : entity.createdDate;
-				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, dateToUse, entity.locked);
+				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, entity.updatedDate, entity.locked);
 			}
 			else {
 				((AuthorBlock) findViewById(R.id.block_author)).setVisibility(View.GONE);
@@ -433,22 +434,6 @@ public class EntityForm extends FormActivity {
 	// Service routines
 	// --------------------------------------------------------------------------------------------
 
-	private void setLocation(Beacon beacon) {
-
-		/* Bail if we don't have a location or the one we have is more than five minutes old */
-
-		Location location = new Location("Fake");
-		location.setLatitude(37.41977799657014);
-		location.setLongitude(-122.21218228340149);
-
-		if (Aircandi.getInstance().getCurrentLocation() != null) {
-			location = Aircandi.getInstance().getCurrentLocation();
-		}
-
-		beacon.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
-		beacon.longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
-	}
-
 	protected void doSave(final boolean updateImages) {
 
 		new AsyncTask() {
@@ -505,12 +490,18 @@ public class EntityForm extends FormActivity {
 					 */
 
 					if (mCommon.mCommand.verb == CommandVerb.New && mBeacon != null && !mBeacon.registered) {
-						setLocation(mBeacon);
 
-						mBeacon.registeredById = Integer.parseInt(Aircandi.getInstance().getUser().id);
+						if (Aircandi.getInstance().getCurrentLocation() != null) {
+							mBeacon.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
+							mBeacon.longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
+						}
+
 						mBeacon.beaconType = BeaconType.Fixed.name().toLowerCase();
 						mBeacon.beaconSetId = ProxiConstants.BEACONSET_WORLD;
 						mBeacon.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+						mBeacon.updatedDate = mBeacon.createdDate;
+						mBeacon.createdById = Aircandi.getInstance().getUser().id;
+						mBeacon.updatedById = Aircandi.getInstance().getUser().id;
 						mBeacon.locked = false;
 
 						Logger.i(this, "Inserting beacon: " + mCommon.mBeaconId);
@@ -650,22 +641,36 @@ public class EntityForm extends FormActivity {
 
 		Logger.i(this, "Inserting entity: " + mCommon.mEntity.title);
 		Tracker.trackEvent("Entity", "Insert", mCommon.mEntity.entityType, 0);
+
 		mCommon.mEntity.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+		mCommon.mEntity.updatedDate = mCommon.mEntity.createdDate;
+
+		if (Aircandi.getInstance().getCurrentLocation() != null) {
+			mCommon.mEntity.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
+			mCommon.mEntity.longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
+			if (Aircandi.getInstance().getCurrentLocation().hasAltitude()) {
+				mCommon.mEntity.altitude = Aircandi.getInstance().getCurrentLocation().getAltitude();
+			}
+			if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
+				/* In meters. */
+				mCommon.mEntity.accuracy = Aircandi.getInstance().getCurrentLocation().getAccuracy(); 
+			}
+			if (Aircandi.getInstance().getCurrentLocation().hasBearing()) {
+				/* Direction of travel in degrees East of true North. */
+				mCommon.mEntity.bearing = Aircandi.getInstance().getCurrentLocation().getBearing();
+			}
+			if (Aircandi.getInstance().getCurrentLocation().hasSpeed()) {
+				/* Speed of the device over ground in meters/second. */
+				mCommon.mEntity.speed = Aircandi.getInstance().getCurrentLocation().getSpeed();
+			}
+		}
 
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mCommon.mEntity.getCollection());
 		serviceRequest.setRequestType(RequestType.Insert);
 
-		//mCommon.mEntity.description = "\u00a9 2012 Jay Gawker Media, LLC. All Rights Reserved. Privacy Policy | Full Site";
 		String jsonString = ProxibaseService.convertObjectToJson(mCommon.mEntity, GsonType.ProxibaseService);
-
-		//		jsonString = StringEscapeUtils.ESCAPE_JAVA..escapeJava(jsonString);
-
-		//		if (jsonString.contains("©")) {
-		//			jsonString = jsonString.replace("©", "\u00A9");
-		//		}
 		serviceRequest.setRequestBody(jsonString);
-		Logger.v(this, serviceRequest.getRequestBody());
 		serviceRequest.setResponseFormat(ResponseFormat.Json);
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
@@ -675,7 +680,7 @@ public class EntityForm extends FormActivity {
 
 	protected ServiceResponse update() {
 
-		mCommon.mEntity.updatedById = Integer.parseInt(Aircandi.getInstance().getUser().id);
+		mCommon.mEntity.updatedById = Aircandi.getInstance().getUser().id;
 		mCommon.mEntity.updatedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
 		Logger.i(this, "Updating entity: " + mCommon.mEntity.title);
 		Tracker.trackEvent("Entity", "Update", mCommon.mEntity.entityType, 0);
@@ -969,7 +974,7 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
 	protected int getLayoutID() {
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {

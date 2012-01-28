@@ -613,7 +613,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 						if (!mPrefAutoscan || (mCandiPatchModel == null
 												|| mCandiPatchModel.getCandiRootCurrent() == null
-								|| mCandiPatchModel.getCandiRootCurrent().isSuperRoot())) {
+												|| mCandiPatchModel.getCandiRootCurrent().isSuperRoot())) {
 
 							if (mOptions.refreshDirty) {
 								serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
@@ -669,6 +669,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 									doUpdateEntities(entities, mScanOptions.refreshAllBeacons, false);
 									Logger.d(this, "Model updated with entities");
 									mCandiPatchPresenter.renderingActivate(5000);
+									if (mScanOptions.refreshAllBeacons) {
+										mCandiPatchPresenter.manageViewsAsync();
+									}
 
 									/* Check for rookies and play a sound */
 									if (mPrefSoundEffects && rookieHit) {
@@ -1673,7 +1676,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 			if (mFirstRun) {
 				Logger.i(this, "Starting first run full beacon scan");
-				scanForBeacons(new Options(mFirstRun, false), true);
+				scanForBeacons(new Options(true, false), true);
 				mFirstRun = false;
 			}
 			else {

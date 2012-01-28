@@ -24,6 +24,7 @@ import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.Command.CommandVerb;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResultCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
@@ -64,7 +65,7 @@ public class ProfileForm extends FormActivity {
 		/* Restore current tab */
 		if (savedInstanceState != null) {
 			if (findViewById(R.id.image_tab_host) != null) {
-				mCommon.setActiveTab((ViewGroup) findViewById(R.id.image_tab_host), savedInstanceState.getInt("tab_index"));
+				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(savedInstanceState.getInt("tab_index")));
 				mViewFlipper.setDisplayedChild(mCommon.mTabIndex);
 			}
 		}
@@ -185,7 +186,8 @@ public class ProfileForm extends FormActivity {
 					public void onComplete(Object response) {
 						ServiceResponse serviceResponse = (ServiceResponse) response;
 						if (serviceResponse.responseCode == ResponseCode.Success) {
-							mUser.imageBitmap = (Bitmap) serviceResponse.data;
+							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+							mUser.imageBitmap = imageResponse.bitmap;
 						}
 					}
 				});
@@ -311,6 +313,7 @@ public class ProfileForm extends FormActivity {
 		mUser.email = mTextEmail.getText().toString().trim();
 		mUser.fullname = mTextFullname.getText().toString().trim();
 		mUser.updatedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+		mUser.updatedById = Aircandi.getInstance().getUser().id;
 
 		if (mTextPassword.getText().toString().length() != 0) {
 			mUser.password = mTextPassword.getText().toString().trim();

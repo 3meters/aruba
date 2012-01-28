@@ -65,7 +65,7 @@ public class CandiList extends CandiActivity {
 		}
 		else if (mCommon.mEntity == null) {
 			mMethodType = MethodType.CandiByUser;
-			parameters.putInt("userId", Integer.parseInt(Aircandi.getInstance().getUser().id));
+			parameters.putInt("userId", Aircandi.getInstance().getUser().id);
 			parameters.putBoolean("includeChildren", false);
 			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesForUser");
 		}
@@ -211,13 +211,10 @@ public class CandiList extends CandiActivity {
 
 		@Override
 		public int compare(Entity object1, Entity object2) {
-			int dateObject1 = object1.updatedDate != null ? object1.updatedDate : object1.createdDate;
-			int dateObject2 = object2.updatedDate != null ? object2.updatedDate : object2.createdDate;
-
-			if (dateObject1 < dateObject2) {
+			if (object1.updatedDate < object2.updatedDate) {
 				return 1;
 			}
-			else if (dateObject1 == dateObject2) {
+			else if (object1.updatedDate == object2.updatedDate) {
 				return 0;
 			}
 			return -1;

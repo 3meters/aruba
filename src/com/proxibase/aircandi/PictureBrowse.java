@@ -1,6 +1,5 @@
 package com.proxibase.aircandi;
 
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -13,6 +12,7 @@ import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
@@ -58,7 +58,8 @@ public class PictureBrowse extends FormActivity {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.d(PictureBrowse.this, "Image fetched: " + entity.imageUri);
-						entity.imageBitmap = (Bitmap) serviceResponse.data;
+						ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+						entity.imageBitmap = imageResponse.bitmap;
 						runOnUiThread(new Runnable() {
 
 							@Override
@@ -82,8 +83,7 @@ public class PictureBrowse extends FormActivity {
 
 		/* Author block */
 		if (entity.author != null) {
-			Integer dateToUse = entity.updatedDate != null ? entity.updatedDate : entity.createdDate;
-			((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, dateToUse, entity.locked);
+			((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, entity.updatedDate, entity.locked);
 		}
 		else {
 			((View) findViewById(R.id.block_author)).setVisibility(View.GONE);

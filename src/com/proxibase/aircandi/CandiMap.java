@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -30,11 +31,15 @@ import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
+import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.sdk.android.proxi.consumer.Beacon;
+import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.aircandi.widgets.WebImageView;
+import com.proxibase.sdk.android.proxi.consumer.EntityPoint;
+import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
@@ -45,7 +50,7 @@ import com.proxibase.sdk.android.util.ProxiConstants;
 public class CandiMap extends MapActivity {
 
 	protected AircandiCommon		mCommon;
-	private List<Object>			mBeacons		= new ArrayList<Object>();
+	private List<Object>			mEntityPoints	= new ArrayList<Object>();
 	private MapView					mMapView		= null;
 	private MapController			mMapController	= null;
 	private MyLocationOverlay		mMyLocationOverlay;
@@ -76,7 +81,7 @@ public class CandiMap extends MapActivity {
 
 	private void initialize() {
 
-		mMapView = new MapView(this, "0NLNz2BjIntNt_gkO2_iEs5wIIxNGrG_pmHjPbA");
+		mMapView = new MapView(this, Aircandi.isDebugBuild(this) ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
 		mMapView.setBuiltInZoomControls(true);
 		mMapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
 		mMapView.setClickable(true);
@@ -87,7 +92,6 @@ public class CandiMap extends MapActivity {
 		mMyLocationOverlay.runOnFirstFix(new Runnable() {
 
 			public void run() {
-				mMapController.setZoom(13);
 				mMapController.animateTo(mMyLocationOverlay.getMyLocation());
 			}
 		});
@@ -137,21 +141,23 @@ public class CandiMap extends MapActivity {
 		};
 
 		Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		if (Aircandi.isBetterLocation(lastKnownLocationNetwork, Aircandi.getInstance().getCurrentLocation())) {
-			Aircandi.getInstance().setCurrentLocation(lastKnownLocationNetwork);
+		if (lastKnownLocationNetwork != null) {
+			if (Aircandi.isBetterLocation(lastKnownLocationNetwork, Aircandi.getInstance().getCurrentLocation())) {
+				Aircandi.getInstance().setCurrentLocation(lastKnownLocationNetwork);
+			}
 		}
 
 		Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (Aircandi.isBetterLocation(lastKnownLocationGPS, Aircandi.getInstance().getCurrentLocation())) {
-			Aircandi.getInstance().setCurrentLocation(lastKnownLocationGPS);
+		if (lastKnownLocationGPS != null) {
+			if (Aircandi.isBetterLocation(lastKnownLocationGPS, Aircandi.getInstance().getCurrentLocation())) {
+				Aircandi.getInstance().setCurrentLocation(lastKnownLocationGPS);
+			}
 		}
 	}
 
 	private void bind() {
-		/*
-		 * This form is always for editing. We always reload the user to make sure
-		 * we have the freshest data.
-		 */
+
+		mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(4));
 		new AsyncTask() {
 
 			@Override
@@ -165,10 +171,11 @@ public class CandiMap extends MapActivity {
 				Bundle parameters = new Bundle();
 				parameters.putDouble("latitude", Aircandi.getInstance().getCurrentLocation().getLatitude());
 				parameters.putDouble("longitude", Aircandi.getInstance().getCurrentLocation().getLongitude());
-				parameters.putDouble("radiusInKilometers", 1d);
+				parameters.putDouble("radiusInMeters", 5000d);
+				parameters.putInt("userId", Aircandi.getInstance().getUser().id);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetBeaconsNearLocation");
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesNearLocation");
 				serviceRequest.setRequestType(RequestType.Method);
 				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -177,7 +184,7 @@ public class CandiMap extends MapActivity {
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) serviceResponse.data;
-					mBeacons = ProxibaseService.convertJsonToObjects(jsonResponse, Beacon.class, GsonType.ProxibaseService);
+					mEntityPoints = ProxibaseService.convertJsonToObjects(jsonResponse, EntityPoint.class, GsonType.ProxibaseService);
 				}
 				return serviceResponse;
 			}
@@ -265,19 +272,75 @@ public class CandiMap extends MapActivity {
 		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi);
 		mItemizedOverlay = new CandiItemizedOverlay(drawable);
 
-		for (Object beaconObject : mBeacons) {
-			Beacon beacon = (Beacon) beaconObject;
-			GeoPoint point = new GeoPoint((int) (beacon.latitude * 1E6), (int) (beacon.longitude * 1E6));
-			OverlayItem overlayitem = new OverlayItem(point, "Candi", "");
+		for (Object entityPointObject : mEntityPoints) {
+			EntityPoint entityPoint = (EntityPoint) entityPointObject;
+			GeoPoint point = new GeoPoint((int) (entityPoint.latitude * 1E6), (int) (entityPoint.longitude * 1E6));
+			OverlayItem overlayitem = new OverlayItem(point, entityPoint.label, entityPoint.label);
+
+			/* User custom marker */
+//			if (entityPoint.imagePreviewUri != null && !entityPoint.imagePreviewUri.equals("")) {
+//				/*
+//				 * If we find it in the cache we'll use it otherwise we fall back to the
+//				 * default marker. It would be expensive to deal with images way outside the users
+//				 * current radar range.
+//				 */
+//				//				Bitmap bitmap = ImageManager.getInstance().getImageLoader().getImageCache().get(entityPoint.imagePreviewUri);
+//				//				if (bitmap != null) {
+//				//					BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
+//				//					bitmapDrawable.setBounds(0, 0, 80, 80);
+//				//					overlayitem.setMarker(bitmapDrawable);
+//				//				}
+//				//				else {
+//				Drawable marker = getResources().getDrawable(R.drawable.icon_picture);
+//				marker.setBounds(0, 0, 40, 35);
+//				overlayitem.setMarker(marker);
+//				//				}
+//			}
+//			else if (entityPoint.linkUri != null && !entityPoint.linkUri.equals("")) {
+//				Drawable marker = getResources().getDrawable(R.drawable.icon_link);
+//				marker.setBounds(0, 0, 40, 40);
+//				overlayitem.setMarker(marker);
+//			}
+//			else {
+//				Drawable marker = getResources().getDrawable(R.drawable.icon_post);
+//				marker.setBounds(0, 0, 40, 35);
+//				overlayitem.setMarker(marker);
+//			}
+
 			mItemizedOverlay.addOverlay(overlayitem);
 		}
 		mMapOverlays.add(mItemizedOverlay);
+		mMapController.zoomToSpan(mItemizedOverlay.getLatSpanE6() + 1500, mItemizedOverlay.getLonSpanE6() + 1500);
 		mMapView.invalidate();
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onRestart() {
+		Logger.d(this, "CandiActivity restarting");
+		super.onRestart();
+
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+			Logger.d(this, "Restarting because of theme change");
+			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+			mCommon.reload();
+		}
+		else {
+
+			/* User could have changed */
+			if (findViewById(R.id.image_user) != null && Aircandi.getInstance().getUser() != null) {
+				User user = Aircandi.getInstance().getUser();
+				mCommon.setUserPicture(user.imageUri, user.linkUri, (WebImageView) findViewById(R.id.image_user));
+			}
+
+			/* Currrent tab could have changed */
+			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(4));
+		}
+	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -340,6 +403,13 @@ public class CandiMap extends MapActivity {
 		public void addOverlay(OverlayItem overlay) {
 			mOverlays.add(overlay);
 			populate();
+		}
+
+		@Override
+		public void draw(Canvas canvas, MapView mapView, boolean shadow) {
+			if (!shadow) {
+				super.draw(canvas, mapView, false);
+			}
 		}
 	}
 }
