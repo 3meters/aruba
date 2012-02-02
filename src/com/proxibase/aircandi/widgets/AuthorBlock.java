@@ -25,7 +25,7 @@ public class AuthorBlock extends RelativeLayout {
 	private ViewGroup		mBoundView;
 	private WebImageView	mImageUser;
 	private ImageView		mImageLocked;
-	private TextView		mTextFullname;
+	private TextView		mTextName;
 	private TextView		mTextTimeSince;
 	private Author			mAuthor;
 	private User			mUser;
@@ -55,7 +55,7 @@ public class AuthorBlock extends RelativeLayout {
 	private void bindToView() {
 
 		mImageUser = (WebImageView) mBoundView.findViewById(R.id.image_user_picture);
-		mTextFullname = (TextView) mBoundView.findViewById(R.id.text_user_fullname);
+		mTextName = (TextView) mBoundView.findViewById(R.id.text_user_fullname);
 		mTextTimeSince = (TextView) mBoundView.findViewById(R.id.text_user_timesince);
 		mImageLocked = (ImageView) mBoundView.findViewById(R.id.image_locked);
 
@@ -66,8 +66,8 @@ public class AuthorBlock extends RelativeLayout {
 	public void bindToAuthor(Author author, Integer date, boolean locked) {
 		mAuthor = author;
 		if (mAuthor != null) {
-			if (mTextFullname != null) {
-				mTextFullname.setText(mAuthor.fullname);
+			if (mTextName != null) {
+				mTextName.setText(mAuthor.name);
 			}
 			if (mTextTimeSince != null) {
 				if (date != null) {
@@ -99,8 +99,8 @@ public class AuthorBlock extends RelativeLayout {
 	public void bindToUser(User user, Integer date) {
 		mUser = user;
 		if (mUser != null) {
-			if (mTextFullname != null) {
-				mTextFullname.setText(mUser.fullname);
+			if (mTextName != null) {
+				mTextName.setText(mUser.name);
 			}
 			if (mTextTimeSince != null) {
 				if (date != null) {

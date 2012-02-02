@@ -64,7 +64,7 @@ public class AircandiCommon {
 	public LayoutInflater	mLayoutInflater;
 
 	public Command			mCommand;
-	public Integer			mParentEntityId;
+	public Integer			mParent;
 	public Entity			mEntity;
 	public Integer			mEntityId;
 	public String			mEntityType;
@@ -194,7 +194,7 @@ public class AircandiCommon {
 		Bundle extras = mActivity.getIntent().getExtras();
 		if (extras != null) {
 
-			mParentEntityId = extras.getInt(mContext.getString(R.string.EXTRA_PARENT_ENTITY_ID));
+			mParent = extras.getInt(mContext.getString(R.string.EXTRA_PARENT_ENTITY_ID));
 			mBeaconId = extras.getString(mContext.getString(R.string.EXTRA_BEACON_ID));
 			mEntityType = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_TYPE));
 			mEntityId = extras.getInt(mContext.getString(R.string.EXTRA_ENTITY_ID));
@@ -203,6 +203,7 @@ public class AircandiCommon {
 			String json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY));
 			if (json != null && json.length() > 0) {
 				mEntity = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Entity.class);
+				mEntityId = mEntity.id;
 			}
 
 			json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_LIST));

@@ -151,10 +151,10 @@ public class CandiPatchModel extends Observable {
 				candiModelManaged.getViewStateNext().setVisible(true);
 		}
 
-//		if (candiModelManaged.getViewStateCurrent().isVisible()) {
-//			candiModelManaged.setRookie(false);
-//			candiModelManaged.getEntity().rookie = false;
-//		}
+		//		if (candiModelManaged.getViewStateCurrent().isVisible()) {
+		//			candiModelManaged.setRookie(false);
+		//			candiModelManaged.getEntity().rookie = false;
+		//		}
 
 		candiModelManaged.setDisplayExtra(displayExtra);
 
@@ -242,7 +242,7 @@ public class CandiPatchModel extends Observable {
 		}
 	}
 
-	public void updateZonesNext() {
+	public void updateZonesNext(boolean navigating) {
 
 		/* Clear candies from zones that already exist (new ones might be created later). */
 		for (ZoneModel zoneModel : mZoneModels) {
@@ -278,13 +278,13 @@ public class CandiPatchModel extends Observable {
 				ZoneModel zone = mZoneModels.get(zoneIndex);
 				zone.getCandiesNext().add(candiModel);
 				candiModel.getZoneStateNext().setZone(zone);
-				
-				/* 
+
+				/*
 				 * Special treatment for zone one. If the user is currently focused on a
 				 * candi in zone one we make sure their focus stays on whatever candi
-				 * ends up in zone one next. 
+				 * ends up in zone one next. Does not apply if we are drilling in.
 				 */
-				if (zoneIndex == 0 && focusedZoneIndex == 0) {
+				if (zoneIndex == 0 && focusedZoneIndex == 0 && mCandiRootNext.isSuperRoot()) {
 					mCandiModelFocused = candiModel;
 				}
 
@@ -315,7 +315,7 @@ public class CandiPatchModel extends Observable {
 		 * If needed, move the candi model with the current focus back to the
 		 * slot the user is currently looking at.
 		 */
-		if (mCandiModelFocused != null && focusedZoneIndex != 0) {
+		if (mCandiModelFocused != null && (focusedZoneIndex != 0 || !mCandiRootNext.isSuperRoot())) {
 			if (!mCandiModelFocused.getZoneStateCurrent().getZone().isInactive() && !mCandiModelFocused.getZoneStateNext().getZone().isInactive()) {
 				if (mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex() != mCandiModelFocused.getZoneStateNext().getZone()
 						.getZoneIndex()) {
@@ -415,7 +415,11 @@ public class CandiPatchModel extends Observable {
 				}
 			}
 			else if (zoneModel.getCandiesNext().size() == 1) {
-				zoneModel.setTitleText(zoneModel.getCandiesNext().get(0).getTitleText());
+				/* We don't need the title if the candi model has a candi view */
+				CandiModel candiModel = zoneModel.getCandiesNext().get(0);
+				if (candiModel.countObservers() == 0) {
+					zoneModel.setTitleText(zoneModel.getCandiesNext().get(0).getTitleText());
+				}
 			}
 		}
 
@@ -581,7 +585,7 @@ public class CandiPatchModel extends Observable {
 
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {
-			
+
 			Entity entity1 = object1.getEntity();
 			Entity entity2 = object2.getEntity();
 			if (!entity1.beacon.registered && entity2.beacon.registered)
@@ -595,9 +599,9 @@ public class CandiPatchModel extends Observable {
 				if ((entity1.discoveryTime.getTime() / 1000) < (entity2.discoveryTime.getTime() / 1000))
 					return 1;
 				else {
-					if (entity1.updatedDate > entity2.updatedDate)
+					if (entity1.modifiedDate > entity2.modifiedDate)
 						return -1;
-					else if (entity1.updatedDate < entity2.updatedDate)
+					else if (entity1.modifiedDate < entity2.modifiedDate)
 						return 1;
 					else
 						return 0;
@@ -606,12 +610,12 @@ public class CandiPatchModel extends Observable {
 		}
 	}
 
-	class SortEntitiesByEntityType implements Comparator<CandiModel> {
+	class SortEntitiesByType implements Comparator<CandiModel> {
 
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {
 
-			return object1.getEntity().entityType.compareToIgnoreCase(object2.getEntity().entityType);
+			return object1.getEntity().type.compareToIgnoreCase(object2.getEntity().type);
 		}
 	}
 }

@@ -185,7 +185,7 @@ public class CommentList extends CandiActivity {
 			if (itemData != null) {
 				Comment comment = itemData;
 				if (holder.itemAuthorName != null) {
-					holder.itemAuthorName.setText(comment.author.fullname);
+					holder.itemAuthorName.setText(comment.author.name);
 				}
 
 				if (holder.itemAuthorLocation != null) {

@@ -34,8 +34,8 @@ public class CandiModel extends BaseModel {
 	}
 
 	public String getEntityType() {
-		if (mEntity != null && mEntity.entityType != null) {
-			String entityType = mEntity.entityType;
+		if (mEntity != null && mEntity.type != null) {
+			String entityType = mEntity.type;
 			if (entityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
 				return "Link";
 			}

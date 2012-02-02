@@ -121,7 +121,7 @@ public class CandiPatch extends CandiActivity {
 		IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class);
 		intentBuilder.setCommand(new Command(CommandVerb.View));
 		intentBuilder.setEntity(entity);
-		intentBuilder.setEntityType(entity.entityType);
+		intentBuilder.setEntityType(entity.type);
 		Intent intent = intentBuilder.create();
 
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_INFO);
@@ -176,10 +176,10 @@ public class CandiPatch extends CandiActivity {
 
 		@Override
 		public int compare(Entity object1, Entity object2) {
-			if (object1.updatedDate < object2.updatedDate) {
+			if (object1.modifiedDate < object2.modifiedDate) {
 				return 1;
 			}
-			else if (object1.updatedDate == object2.updatedDate) {
+			else if (object1.modifiedDate == object2.modifiedDate) {
 				return 0;
 			}
 			return -1;

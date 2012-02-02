@@ -75,12 +75,13 @@ public class CandiForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onCandiInfoClick(View v) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
-		intentBuilder.setCommand(new Command(CommandVerb.View));
-		intentBuilder.setEntity(mCommon.mEntity);
-		Intent intent = intentBuilder.create();
-
-		startActivity(intent);
+		startCandiList();
+		//		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
+		//		intentBuilder.setCommand(new Command(CommandVerb.View));
+		//		intentBuilder.setEntity(mCommon.mEntity);
+		//		Intent intent = intentBuilder.create();
+		//
+		//		startActivity(intent);
 	}
 
 	public void onCommentsClick(View view) {
@@ -95,10 +96,10 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onMapClick(View view) {
-		String beaconId = (String) view.getTag();
+		Integer entityId = (Integer) view.getTag();
 		IntentBuilder intentBuilder = new IntentBuilder(this, MapBrowse.class);
 		intentBuilder.setCommand(new Command(CommandVerb.View));
-		intentBuilder.setBeaconId(beaconId);
+		intentBuilder.setEntityId(entityId);
 		Intent intent = intentBuilder.create();
 		startActivityForResult(intent, 0);
 	}
@@ -134,6 +135,10 @@ public class CandiForm extends CandiActivity {
 				|| resultCode == CandiConstants.RESULT_ENTITY_INSERTED
 				|| resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
 			bind();
+			if (resultCode == CandiConstants.RESULT_ENTITY_INSERTED) {
+				startCandiList();
+			}
+
 		}
 		else if (resultCode == CandiConstants.RESULT_ENTITY_DELETED) {
 			setResult(CandiConstants.RESULT_ENTITY_DELETED);
@@ -242,7 +247,7 @@ public class CandiForm extends CandiActivity {
 		/* Author block */
 
 		if (entity.author != null) {
-			authorBlock.bindToAuthor(entity.author, entity.updatedDate, entity.locked);
+			authorBlock.bindToAuthor(entity.author, entity.modifiedDate, entity.locked);
 			authorBlock.setVisibility(View.VISIBLE);
 		}
 		else {
@@ -270,16 +275,16 @@ public class CandiForm extends CandiActivity {
 		editCandi.setVisibility(View.GONE);
 		listCandi.setVisibility(View.GONE);
 		if (!entity.locked) {
-			if (entity.parentEntityId == null) {
+			if (entity.parent == null) {
 				newCandi.setVisibility(View.VISIBLE);
-				newCandi.setTag(new Command(CommandVerb.Dialog, "Add\nCandi", "NewCandi", entity.entityType, entity.id, entity.id, null));
+				newCandi.setTag(new Command(CommandVerb.Dialog, "Add\nCandi", "NewCandi", entity.type, entity.id, entity.id, null));
 			}
 			newComment.setVisibility(View.VISIBLE);
 			newComment.setTag(new Command(CommandVerb.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
 		}
-		if (entity.createdById.equals(Aircandi.getInstance().getUser().id)) {
+		if (entity.creator.equals(Aircandi.getInstance().getUser().id)) {
 			editCandi.setVisibility(View.VISIBLE);
-			editCandi.setTag(new Command(CommandVerb.Edit, "Edit", "EntityForm", entity.entityType, entity.id, null, null));
+			editCandi.setTag(new Command(CommandVerb.Edit, "Edit", "EntityForm", entity.type, entity.id, null, null));
 		}
 		if (visibleChildren) {
 			listCandi.setVisibility(View.VISIBLE);
@@ -297,7 +302,7 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Map */
-		map.setTag(entity.beaconId);
+		map.setTag(entity.id);
 
 		/* Candi text */
 
@@ -336,6 +341,16 @@ public class CandiForm extends CandiActivity {
 			return mCommon.mIconContextMenu.createMenu(getString(R.string.dialog_new_message), this);
 		}
 		return super.onCreateDialog(id);
+	}
+
+	private void startCandiList() {
+		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
+		intentBuilder.setCommand(new Command(CommandVerb.View));
+		intentBuilder.setEntity(mCommon.mEntity);
+		Intent intent = intentBuilder.create();
+
+		startActivity(intent);
+		overridePendingTransition(R.anim.slide_in_right_long, R.anim.slide_out_left_long);
 	}
 
 	// --------------------------------------------------------------------------------------------

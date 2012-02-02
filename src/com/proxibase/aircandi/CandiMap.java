@@ -6,6 +6,10 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -13,6 +17,8 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextPaint;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +90,8 @@ public class CandiMap extends MapActivity {
 		mMapView = new MapView(this, Aircandi.isDebugBuild(this) ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
 		mMapView.setBuiltInZoomControls(true);
 		mMapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
+		mMapView.setSatellite(false);
+		mMapView.setStreetView(false);
 		mMapView.setClickable(true);
 
 		mMapController = mMapView.getController();
@@ -267,10 +275,16 @@ public class CandiMap extends MapActivity {
 		mMapView.invalidate();
 	}
 
+	public void moveToGeoPoint(GeoPoint geoPoint) {
+		mMapController.animateTo(geoPoint);
+		mMapView.invalidate();
+	}
+
 	public void showCandi() {
 		mMapOverlays = mMapView.getOverlays();
 		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi);
-		mItemizedOverlay = new CandiItemizedOverlay(drawable);
+		//drawable.setBounds(0, 0, 40, 40);
+		mItemizedOverlay = new CandiItemizedOverlay(drawable, false);
 
 		for (Object entityPointObject : mEntityPoints) {
 			EntityPoint entityPoint = (EntityPoint) entityPointObject;
@@ -278,35 +292,36 @@ public class CandiMap extends MapActivity {
 			OverlayItem overlayitem = new OverlayItem(point, entityPoint.label, entityPoint.label);
 
 			/* User custom marker */
-//			if (entityPoint.imagePreviewUri != null && !entityPoint.imagePreviewUri.equals("")) {
-//				/*
-//				 * If we find it in the cache we'll use it otherwise we fall back to the
-//				 * default marker. It would be expensive to deal with images way outside the users
-//				 * current radar range.
-//				 */
-//				//				Bitmap bitmap = ImageManager.getInstance().getImageLoader().getImageCache().get(entityPoint.imagePreviewUri);
-//				//				if (bitmap != null) {
-//				//					BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
-//				//					bitmapDrawable.setBounds(0, 0, 80, 80);
-//				//					overlayitem.setMarker(bitmapDrawable);
-//				//				}
-//				//				else {
-//				Drawable marker = getResources().getDrawable(R.drawable.icon_picture);
-//				marker.setBounds(0, 0, 40, 35);
-//				overlayitem.setMarker(marker);
-//				//				}
-//			}
-//			else if (entityPoint.linkUri != null && !entityPoint.linkUri.equals("")) {
-//				Drawable marker = getResources().getDrawable(R.drawable.icon_link);
-//				marker.setBounds(0, 0, 40, 40);
-//				overlayitem.setMarker(marker);
-//			}
-//			else {
-//				Drawable marker = getResources().getDrawable(R.drawable.icon_post);
-//				marker.setBounds(0, 0, 40, 35);
-//				overlayitem.setMarker(marker);
-//			}
+			//			if (entityPoint.imagePreviewUri != null && !entityPoint.imagePreviewUri.equals("")) {
+			//				/*
+			//				 * If we find it in the cache we'll use it otherwise we fall back to the
+			//				 * default marker. It would be expensive to deal with images way outside the users
+			//				 * current radar range.
+			//				 */
+			//				//				Bitmap bitmap = ImageManager.getInstance().getImageLoader().getImageCache().get(entityPoint.imagePreviewUri);
+			//				//				if (bitmap != null) {
+			//				//					BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
+			//				//					bitmapDrawable.setBounds(0, 0, 80, 80);
+			//				//					overlayitem.setMarker(bitmapDrawable);
+			//				//				}
+			//				//				else {
+			//				Drawable marker = getResources().getDrawable(R.drawable.icon_picture);
+			//				marker.setBounds(0, 0, 40, 35);
+			//				overlayitem.setMarker(marker);
+			//				//				}
+			//			}
+			//			else if (entityPoint.linkUri != null && !entityPoint.linkUri.equals("")) {
+			//				Drawable marker = getResources().getDrawable(R.drawable.icon_link);
+			//				marker.setBounds(0, 0, 40, 40);
+			//				overlayitem.setMarker(marker);
+			//			}
+			//			else {
+			//				Drawable marker = getResources().getDrawable(R.drawable.icon_post);
+			//				marker.setBounds(0, 0, 40, 35);
+			//				overlayitem.setMarker(marker);
+			//			}
 
+			overlayitem.setMarker(drawable);
 			mItemizedOverlay.addOverlay(overlayitem);
 		}
 		mMapOverlays.add(mItemizedOverlay);
@@ -382,12 +397,15 @@ public class CandiMap extends MapActivity {
 		return false;
 	}
 
-	public class CandiItemizedOverlay extends ItemizedOverlay {
+	public static class CandiItemizedOverlay extends ItemizedOverlay {
 
 		private ArrayList<OverlayItem>	mOverlays	= new ArrayList<OverlayItem>();
+		private boolean					mShowTitles = false;
 
-		public CandiItemizedOverlay(Drawable defaultMarker) {
+		public CandiItemizedOverlay(Drawable defaultMarker, Boolean showTitles) {
 			super(boundCenterBottom(defaultMarker));
+			mShowTitles = showTitles;
+			populate();
 		}
 
 		@Override
@@ -400,6 +418,11 @@ public class CandiMap extends MapActivity {
 			return mOverlays.size();
 		}
 
+		@Override
+		protected boolean onTap(int index) {
+			return true;
+		}
+
 		public void addOverlay(OverlayItem overlay) {
 			mOverlays.add(overlay);
 			populate();
@@ -407,8 +430,43 @@ public class CandiMap extends MapActivity {
 
 		@Override
 		public void draw(Canvas canvas, MapView mapView, boolean shadow) {
-			if (!shadow) {
-				super.draw(canvas, mapView, false);
+
+			super.draw(canvas, mapView, shadow);
+
+			if (!shadow && mShowTitles) {
+				for (OverlayItem item : mOverlays) {
+					/*
+					 * Converts latitude & longitude of this overlay item to coordinates on screen.
+					 * As we have called boundCenterBottom() in constructor, so these coordinates
+					 * will be of the bottom center position of the displayed marker.
+					 */
+					GeoPoint point = item.getPoint();
+					Point markerBottomCenterCoords = new Point();
+					mapView.getProjection().toPixels(point, markerBottomCenterCoords);
+
+					/* Find the width and height of the title */
+					TextPaint paintText = new TextPaint();
+					Paint paintRect = new Paint();
+
+					Rect rect = new Rect();
+					paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);
+					String title = (String) TextUtils.ellipsize(item.getTitle(), paintText, CandiConstants.MAP_VIEW_TITLE_LENGTH_MAX,
+							TextUtils.TruncateAt.END);
+					paintText.getTextBounds(title, 0, title.length(), rect);
+
+					rect.inset(-CandiConstants.MAP_VIEW_TITLE_MARGIN, -CandiConstants.MAP_VIEW_TITLE_MARGIN);
+					rect.offsetTo(markerBottomCenterCoords.x - rect.width() / 2, markerBottomCenterCoords.y - CandiConstants.MAP_VIEW_MARKER_HEIGHT
+																					- rect.height());
+
+					paintText.setTextAlign(Paint.Align.CENTER);
+					paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);
+					paintText.setARGB(255, 255, 255, 255);
+					paintText.setAntiAlias(true);
+					paintRect.setARGB(130, 0, 0, 0);
+
+					canvas.drawRoundRect(new RectF(rect), 4, 4, paintRect);
+					canvas.drawText(title, rect.left + rect.width() / 2, rect.bottom - CandiConstants.MAP_VIEW_TITLE_MARGIN, paintText);
+				}
 			}
 		}
 	}

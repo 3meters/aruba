@@ -100,6 +100,7 @@ public abstract class CandiActivity extends Activity {
 	public void onBackPressed() {
 		setResult(mLastResultCode);
 		super.onBackPressed();
+		overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
 	}
 
 	public void onCommandButtonClick(View view) {

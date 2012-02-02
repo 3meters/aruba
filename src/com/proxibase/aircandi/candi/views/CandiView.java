@@ -19,6 +19,7 @@ import android.view.GestureDetector.OnGestureListener;
 import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
+import com.proxibase.aircandi.candi.models.CandiModel.ReasonInactive;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
@@ -177,6 +178,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		setPosition(0, 1000); /* Offscreen */
 		setScale(1);
 		configureCollapsed(false);
+		mTitleSprite.setLocked(false);
 		mTitleSprite.setVisible(true);
 		if (mBodySprite != null) {
 			mBodySprite.setVisible(false);
@@ -229,7 +231,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 		final CandiModel candiModel = (CandiModel) this.mModel;
 		if (collapsed) {
 			if (mTitleSprite != null) {
+				mTitleSprite.setLocked(false);
 				mTitleSprite.setVisible(false);
+				mTitleSprite.setLocked(true);
 			}
 
 			/* Positioning */
@@ -254,7 +258,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}
 		else {
 			if (mTitleSprite != null) {
+				mTitleSprite.setLocked(false);
 				mTitleSprite.setVisible(true);
+				mTitleSprite.setLocked(true);
 			}
 
 			/* Positioning */
@@ -306,6 +312,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		mCollapsed = collapsed;
 		if (collapsed) {
 
+			mTitleSprite.setLocked(false);
 			mTitleSprite.registerEntityModifier(new CandiAlphaModifier(mTitleSprite, duration, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
 
 			if (mBodySprite != null) {
@@ -345,6 +352,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 			}
 		}
 		else {
+			mTitleSprite.setLocked(false);
 			mTitleSprite.registerEntityModifier(new CandiAlphaModifier(mTitleSprite, duration, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
 
 			if (mBodySprite != null) {
@@ -699,11 +707,12 @@ public class CandiView extends BaseView implements OnGestureListener {
 						return bodyBitmap;
 					}
 
-					/* Cached bitmap is gone so load it again. */
-					Logger.v(this, "Engine request: texture not in cache: request it: " + ((CandiModel) mModel).getTitleText());
-					requestTextureSources(false, true);
+					if (((CandiModel)mModel).getReasonInactive() != ReasonInactive.Deleting) {
+						/* Cached bitmap is gone so load it again. */
+						Logger.v(this, "Engine request: texture not in cache: request it: " + ((CandiModel) mModel).getTitleText());
+						requestTextureSources(false, true);
+					}
 				}
-
 				return null;
 			}
 		}), 0, 0);
@@ -749,7 +758,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	public Bitmap decorateTexture(Bitmap bitmap, boolean isReflection) {
 		final CandiModel candiModel = (CandiModel) this.mModel;
-		if (candiModel != null && candiModel.getEntity().entityType.equals(CandiConstants.TYPE_CANDI_POST) &&
+		if (candiModel != null && candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_POST) &&
 				candiModel.getEntity().description != null &&
 				candiModel.getEntity().description.length() > 0) {
 			if (!isReflection) {

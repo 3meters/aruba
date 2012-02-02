@@ -1,10 +1,10 @@
 package com.proxibase.aircandi;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,35 +12,30 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
 
 import com.google.android.maps.GeoPoint;
-import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
+import com.proxibase.aircandi.CandiMap.CandiItemizedOverlay;
 import com.proxibase.aircandi.components.AircandiCommon;
-import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.consumer.Beacon;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService;
-import com.proxibase.sdk.android.proxi.service.Query;
-import com.proxibase.sdk.android.proxi.service.ServiceRequest;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
-import com.proxibase.sdk.android.util.ProxiConstants;
+import com.proxibase.sdk.android.proxi.consumer.Entity;
 
 public class MapBrowse extends MapActivity {
 
 	protected AircandiCommon		mCommon;
-	private List<Beacon>			mBeacons		= new ArrayList<Beacon>();
 	private MapView					mMapView		= null;
 	private MapController			mMapController	= null;
 	private List<Overlay>			mMapOverlays;
 	private CandiItemizedOverlay	mItemizedOverlay;
+	private GeoPoint				mGeoPoint;
+	private String					mTitle;
+	private String					mDescription;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -66,6 +61,8 @@ public class MapBrowse extends MapActivity {
 		mMapView = new MapView(this, Aircandi.isDebugBuild(this) ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
 		mMapView.setBuiltInZoomControls(true);
 		mMapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
+		mMapView.setSatellite(false);
+		mMapView.setStreetView(false);		
 		mMapView.setClickable(true);
 		mMapController = mMapView.getController();
 		ViewGroup mapHolder = (ViewGroup) findViewById(R.id.map_holder);
@@ -75,23 +72,35 @@ public class MapBrowse extends MapActivity {
 	}
 
 	private void bind() {
-		/*
-		 * This form is always for editing. We always reload the user to make sure
-		 * we have the freshest data.
-		 */
-		if (mCommon.mBeaconId != null) {
-			mBeacons.clear();
-			Query query = new Query("Beacons").filter("Id eq '" + mCommon.mBeaconId + "'");
+		if (mCommon.mEntity == null && mCommon.mEntityId != null) {
 
-			ServiceResponse serviceResponse = NetworkManager.getInstance().request(
-					new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+			new AsyncTask() {
 
-			if (serviceResponse.responseCode == ResponseCode.Success) {
-				String jsonResponse = (String) serviceResponse.data;
-				Beacon beacon = (Beacon) ProxibaseService.convertJsonToObject(jsonResponse, Beacon.class, GsonType.ProxibaseService);
-				mBeacons.add(beacon);
-				showCandi();
-			}
+				@Override
+				protected void onPreExecute() {
+					mCommon.showProgressDialog(true, "Loading...");
+				}
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntityId, false);
+					return serviceResponse;
+				}
+
+				@Override
+				protected void onPostExecute(Object response) {
+					ServiceResponse serviceResponse = (ServiceResponse) response;
+					mCommon.showProgressDialog(false, null);
+
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						mCommon.mEntity = (Entity) serviceResponse.data;
+						mGeoPoint = new GeoPoint((int) (mCommon.mEntity.latitude * 1E6), (int) (mCommon.mEntity.longitude * 1E6));
+						mTitle = mCommon.mEntity.label;
+						mDescription = mCommon.mEntity.description;
+						showCandi();
+					}
+				}
+			}.execute();
 		}
 	}
 
@@ -136,14 +145,10 @@ public class MapBrowse extends MapActivity {
 	public void showCandi() {
 		mMapOverlays = mMapView.getOverlays();
 		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi);
-		mItemizedOverlay = new CandiItemizedOverlay(drawable);
-
-		for (Beacon beacon : mBeacons) {
-			GeoPoint point = new GeoPoint((int) (beacon.latitude * 1E6), (int) (beacon.longitude * 1E6));
-			OverlayItem overlayitem = new OverlayItem(point, "Candi", "");
-			mItemizedOverlay.addOverlay(overlayitem);
-			zoomToGeoPoint(point);
-		}
+		mItemizedOverlay = new CandiItemizedOverlay(drawable, true);
+		OverlayItem overlayitem = new OverlayItem(mGeoPoint, mTitle, mDescription);
+		mItemizedOverlay.addOverlay(overlayitem);
+		zoomToGeoPoint(mGeoPoint);
 		mMapOverlays.add(mItemizedOverlay);
 		mMapView.invalidate();
 	}
@@ -179,27 +184,4 @@ public class MapBrowse extends MapActivity {
 		return false;
 	}
 
-	public class CandiItemizedOverlay extends ItemizedOverlay {
-
-		private ArrayList<OverlayItem>	mOverlays	= new ArrayList<OverlayItem>();
-
-		public CandiItemizedOverlay(Drawable defaultMarker) {
-			super(boundCenterBottom(defaultMarker));
-		}
-
-		@Override
-		protected OverlayItem createItem(int i) {
-			return mOverlays.get(i);
-		}
-
-		@Override
-		public int size() {
-			return mOverlays.size();
-		}
-
-		public void addOverlay(OverlayItem overlay) {
-			mOverlays.add(overlay);
-			populate();
-		}
-	}
 }

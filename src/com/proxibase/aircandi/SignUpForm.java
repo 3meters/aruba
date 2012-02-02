@@ -194,12 +194,12 @@ public class SignUpForm extends FormActivity {
 	protected void insert() {
 
 		mUser.email = mTextEmail.getText().toString().trim();
-		mUser.fullname = mTextFullname.getText().toString().trim();
+		mUser.name = mTextFullname.getText().toString().trim();
 		mUser.password = mTextPassword.getText().toString().trim();
 		mUser.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-		mUser.updatedDate = mUser.createdDate;
+		mUser.modifiedDate = mUser.createdDate;
 
-		Logger.i(this, "Insert user: " + mUser.fullname);
+		Logger.i(this, "Insert user: " + mUser.name);
 
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mUser.getCollection());
@@ -251,7 +251,7 @@ public class SignUpForm extends FormActivity {
 							NetworkManager.getInstance().request(serviceRequest);
 						}
 
-						Logger.i(SignUpForm.this, "Inserted new user: " + mUser.fullname + " (" + mUser.id + ")");
+						Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 						mCommon.stopTitlebarProgress();
 						AircandiCommon.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),
 										getResources().getString(R.string.signup_alert_new_user_message),

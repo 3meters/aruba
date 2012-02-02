@@ -112,7 +112,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	private void makeTitleSprite() {
 		mTitleSprite = new CandiSprite(0, 0, mTitleTextureRegion);
 		mTitleSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
-		mTitleSprite.setVisible(false);
+		mTitleSprite.setVisible(true);
 		mTitleSprite.setZIndex(0);
 		attachChild(mTitleSprite);
 	}

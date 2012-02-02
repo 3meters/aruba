@@ -3,6 +3,7 @@ package com.proxibase.aircandi.candi.sprites;
 import javax.microedition.khronos.opengles.GL10;
 
 import org.anddev.andengine.engine.camera.Camera;
+import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.buffer.BufferObjectManager;
@@ -14,8 +15,8 @@ import android.view.GestureDetector;
 import com.proxibase.aircandi.core.CandiConstants;
 
 public class CandiSprite extends Sprite {
-	
-	private GestureDetector				mGestureDetector;
+
+	private GestureDetector	mGestureDetector;
 
 	public CandiSprite(final float x, final float y, final TextureRegion textureRegion) {
 		super(x, y, textureRegion);
@@ -34,13 +35,13 @@ public class CandiSprite extends Sprite {
 			final float rotationCenterY = this.mRotationCenterY;
 
 			pGL.glTranslatef(rotationCenterX, rotationCenterY, 0);
-			
+
 			/* Note we are applying rotation around the y-axis and not the z-axis anymore! */
 			pGL.glRotatef(rotation, 0, 1, 0);
 			pGL.glTranslatef(-rotationCenterX, -rotationCenterY, 0);
 		}
 	}
-	
+
 	@Override
 	public boolean onAreaTouched(final TouchEvent sceneTouchEvent, final float touchAreaLocalX, final float touchAreaLocalY) {
 		if (getGestureDetector() != null)
@@ -67,8 +68,9 @@ public class CandiSprite extends Sprite {
 		super.setColor(alpha, alpha, alpha);
 
 		for (int i = 0; i < getChildCount(); i++) {
-			getChild(i).setAlpha(alpha);
-			getChild(i).setColor(alpha, alpha, alpha);
+			Entity child = (Entity) getChild(i);
+			child.setAlpha(alpha);
+			child.setColor(alpha, alpha, alpha);
 		}
 	}
 
@@ -84,7 +86,7 @@ public class CandiSprite extends Sprite {
 	public void removeResources() {
 		BufferObjectManager.getActiveInstance().unloadBufferObject(this.getVertexBuffer());
 	}
-	
+
 	public void setGestureDetector(GestureDetector gestureDetector) {
 		this.mGestureDetector = gestureDetector;
 	}
@@ -92,5 +94,5 @@ public class CandiSprite extends Sprite {
 	public GestureDetector getGestureDetector() {
 		return mGestureDetector;
 	}
-	
+
 }

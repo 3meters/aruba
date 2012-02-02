@@ -112,7 +112,7 @@ public class SignInForm extends FormActivity {
 
 				Aircandi.getInstance().setUser(user);
 				ImageUtils.showToastNotification(
-						getResources().getString(R.string.alert_signed_in) + " " + Aircandi.getInstance().getUser().fullname, Toast.LENGTH_SHORT);
+						getResources().getString(R.string.alert_signed_in) + " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
 				Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, Aircandi.getInstance().getUser().email);
 				Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, Aircandi.getInstance().getUser().password);

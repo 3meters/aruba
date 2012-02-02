@@ -107,7 +107,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 
 			if (holder.itemAuthor != null) {
 				if (entity.author != null) {
-					holder.itemAuthor.bindToAuthor(entity.author, entity.updatedDate, entity.locked);
+					holder.itemAuthor.bindToAuthor(entity.author, entity.modifiedDate, entity.locked);
 					holder.itemAuthor.setVisibility(View.VISIBLE);
 				}
 				else {
@@ -130,7 +130,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 			//				boolean activeCommand = false;
 			//				for (Command command : entity.commands) {
 			//					if (command.name.toLowerCase().contains("edit")) {
-			//						if (entity.createdById != null && entity.createdById.toString().equals(mUser.id)) {
+			//						if (entity.creator != null && entity.creator.toString().equals(mUser.id)) {
 			//							activeCommand = true;
 			//							command.entity = entity;
 			//						}

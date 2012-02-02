@@ -78,7 +78,7 @@ public class ZoneView extends BaseView {
 				setVisible(viewStateNext.isVisible());
 			}
 		}
-		
+
 		mCandiPatchPresenter.renderingActivate();
 		mCandiPatchPresenter.getEngine().runOnUpdateThread(new Runnable() {
 
@@ -128,13 +128,16 @@ public class ZoneView extends BaseView {
 	@Override
 	public boolean isVisibleToCamera(final Camera camera) {
 
-		if (super.isVisibleToCamera(camera))
+		if (super.isVisibleToCamera(camera)) {
 			return true;
+		}
 		else {
-			if (mBodySprite != null && mBodySprite.isVisibleToCamera(camera))
+			if (mBodySprite != null && mBodySprite.isVisibleToCamera(camera)) {
 				return true;
-			if (mReflectionSprite != null && mReflectionSprite.isVisibleToCamera(camera))
+			}
+			if (mReflectionSprite != null && mReflectionSprite.isVisibleToCamera(camera)) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -147,16 +150,17 @@ public class ZoneView extends BaseView {
 		mBodySprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mBodyTextureRegion);
 		mBodySprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mBodySprite.setZIndex(0);
-		mBodySprite.setVisible(false);
+		mBodySprite.setVisible(true);
 		attachChild(mBodySprite);
 	}
 
 	private void makeReflectionSprite() {
-		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_REFLECTION_GAP,
+		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT
+												+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
 				mReflectionTextureRegion);
 		mReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mReflectionSprite.setZIndex(0);
-		mReflectionSprite.setVisible(false);
+		mReflectionSprite.setVisible(true);
 		attachChild(mReflectionSprite);
 	}
 
@@ -179,8 +183,9 @@ public class ZoneView extends BaseView {
 	public void loadHardwareTextures() {
 		super.loadHardwareTextures();
 
-		if (mTexturesLoadedListener != null)
+		if (mTexturesLoadedListener != null) {
 			mTexturesLoadedListener.onTexturesLoaded(this);
+		}
 	}
 
 	@Override
@@ -196,16 +201,19 @@ public class ZoneView extends BaseView {
 		super.unloadResources();
 
 		/* Completely remove all resources associated with this sprite. */
-		if (mReflectionSprite != null)
+		if (mReflectionSprite != null) {
 			mReflectionSprite.removeResources();
+		}
 		if (mBodySprite != null) {
 			mBodySprite.removeResources();
 		}
 
-		if (mReflectionTextureRegion != null)
+		if (mReflectionTextureRegion != null) {
 			BufferObjectManager.getActiveInstance().unloadBufferObject(mReflectionTextureRegion.getTextureBuffer());
-		if (mBodyTextureRegion != null)
+		}
+		if (mBodyTextureRegion != null) {
 			BufferObjectManager.getActiveInstance().unloadBufferObject(mBodyTextureRegion.getTextureBuffer());
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

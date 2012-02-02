@@ -27,7 +27,7 @@ public interface CandiConstants {
 	public static final int				NETWORK_INTERVAL_PHONEY				= 3000;
 
 	public static final float			CANDI_VIEW_HALO						= 2.0f;
-	
+
 	public static final int				CANDI_VIEW_WIDTH					= 250;
 	public static final int				CANDI_VIEW_SPACING					= 20;
 	public static final int				CANDI_VIEW_BODY_HEIGHT				= 250;
@@ -39,6 +39,11 @@ public interface CandiConstants {
 	public static final int				CANDI_VIEW_HEIGHT					= CANDI_VIEW_BODY_HEIGHT + CANDI_VIEW_TITLE_HEIGHT
 																				+ CANDI_VIEW_TITLE_SPACER_HEIGHT;
 	public static final int				CANDI_VIEW_ZOOMED_PADDING			= 10;
+
+	public static final int				MAP_VIEW_FONT_SIZE					= 20;
+	public static final int				MAP_VIEW_TITLE_MARGIN				= 6;
+	public static final int				MAP_VIEW_MARKER_HEIGHT				= 50;
+	public static final int				MAP_VIEW_TITLE_LENGTH_MAX			= 150;
 
 	/* Dimensions at mdpi */
 	public static final int				CANDI_TITLEBAR_HEIGHT				= 40;
@@ -52,7 +57,7 @@ public interface CandiConstants {
 	public static final int				DIALOG_INSTALL_ID					= 1;
 	public static final int				DIALOG_WIFIENABLE_ID				= 2;
 	public static final int				DIALOG_NEW_CANDI_ID					= 3;
-	
+
 	public static final int				VERTEX_INDEX_X						= 0;
 	public static final int				VERTEX_INDEX_Y						= 1;
 

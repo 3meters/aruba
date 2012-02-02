@@ -27,7 +27,7 @@ public class Preferences extends PreferenceActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (Aircandi.getInstance().getUser().developer) {
+		if (Aircandi.getInstance().getUser().isDeveloper) {
 			addPreferencesFromResource(R.xml.preferences_dev);
 			Tracker.trackPageView("/Preferences");
 		}

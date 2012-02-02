@@ -170,7 +170,7 @@ public class ProfileForm extends FormActivity {
 
 	protected void draw() {
 
-		mTextFullname.setText(mUser.fullname);
+		mTextFullname.setText(mUser.name);
 		mTextEmail.setText(mUser.email);
 
 		if (mUser.imageUri != null && mUser.imageUri.length() > 0) {
@@ -311,15 +311,15 @@ public class ProfileForm extends FormActivity {
 	protected ServiceResponse update() {
 
 		mUser.email = mTextEmail.getText().toString().trim();
-		mUser.fullname = mTextFullname.getText().toString().trim();
-		mUser.updatedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-		mUser.updatedById = Aircandi.getInstance().getUser().id;
+		mUser.name = mTextFullname.getText().toString().trim();
+		mUser.modifiedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+		mUser.modifier = Aircandi.getInstance().getUser().id;
 
 		if (mTextPassword.getText().toString().length() != 0) {
 			mUser.password = mTextPassword.getText().toString().trim();
 		}
 
-		Logger.i(this, "Updating user: " + mUser.fullname);
+		Logger.i(this, "Updating user: " + mUser.name);
 
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setUri(mUser.getEntryUri());

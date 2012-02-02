@@ -131,7 +131,7 @@ public class EntityForm extends FormActivity {
 				public void onLocationChanged(Location location) {
 					if (Aircandi.isBetterLocation(location, Aircandi.getInstance().getCurrentLocation())) {
 						Aircandi.getInstance().setCurrentLocation(location);
-						if (Aircandi.getInstance().getUser().developer) {
+						if (Aircandi.getInstance().getUser().isDeveloper) {
 							TextView mTextDebug = (TextView) findViewById(R.id.text_header_debug);
 							mTextDebug.setVisibility(View.VISIBLE);
 							if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
@@ -166,13 +166,17 @@ public class EntityForm extends FormActivity {
 			};
 
 			Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			if (Aircandi.isBetterLocation(lastKnownLocationNetwork, Aircandi.getInstance().getCurrentLocation())) {
-				Aircandi.getInstance().setCurrentLocation(lastKnownLocationNetwork);
+			if (lastKnownLocationNetwork != null) {
+				if (Aircandi.isBetterLocation(lastKnownLocationNetwork, Aircandi.getInstance().getCurrentLocation())) {
+					Aircandi.getInstance().setCurrentLocation(lastKnownLocationNetwork);
+				}
 			}
 
 			Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			if (Aircandi.isBetterLocation(lastKnownLocationGPS, Aircandi.getInstance().getCurrentLocation())) {
-				Aircandi.getInstance().setCurrentLocation(lastKnownLocationGPS);
+			if (lastKnownLocationGPS != null) {
+				if (Aircandi.isBetterLocation(lastKnownLocationGPS, Aircandi.getInstance().getCurrentLocation())) {
+					Aircandi.getInstance().setCurrentLocation(lastKnownLocationGPS);
+				}
 			}
 		}
 
@@ -205,18 +209,18 @@ public class EntityForm extends FormActivity {
 			entity = new Entity();
 			entity.beaconId = mCommon.mBeaconId;
 			entity.signalFence = -100.0f;
-			entity.createdById = Aircandi.getInstance().getUser().id;
-			entity.updatedById = Aircandi.getInstance().getUser().id;
+			entity.creator = Aircandi.getInstance().getUser().id;
+			entity.modifier = Aircandi.getInstance().getUser().id;
 			entity.enabled = true;
 			entity.locked = false;
 			entity.linkJavascriptEnabled = false;
 			entity.linkZoom = false;
 			entity.visibility = Visibility.Public.ordinal();
-			entity.entityType = mCommon.mEntityType;
-			entity.parentEntityId = null;
+			entity.type = mCommon.mEntityType;
+			entity.parent = null;
 
-			if (mCommon.mParentEntityId != 0) {
-				entity.parentEntityId = mCommon.mParentEntityId;
+			if (mCommon.mParent != 0) {
+				entity.parent = mCommon.mParent;
 			}
 
 			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
@@ -349,7 +353,7 @@ public class EntityForm extends FormActivity {
 			/* Author */
 
 			if (entity != null && entity.author != null) {
-				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, entity.updatedDate, entity.locked);
+				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, entity.modifiedDate, entity.locked);
 			}
 			else {
 				((AuthorBlock) findViewById(R.id.block_author)).setVisibility(View.GONE);
@@ -497,11 +501,11 @@ public class EntityForm extends FormActivity {
 						}
 
 						mBeacon.beaconType = BeaconType.Fixed.name().toLowerCase();
-						mBeacon.beaconSetId = ProxiConstants.BEACONSET_WORLD;
+						mBeacon.beaconSet = ProxiConstants.BEACONSET_WORLD;
 						mBeacon.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-						mBeacon.updatedDate = mBeacon.createdDate;
-						mBeacon.createdById = Aircandi.getInstance().getUser().id;
-						mBeacon.updatedById = Aircandi.getInstance().getUser().id;
+						mBeacon.modifiedDate = mBeacon.createdDate;
+						mBeacon.creator = Aircandi.getInstance().getUser().id;
+						mBeacon.modifier = Aircandi.getInstance().getUser().id;
 						mBeacon.locked = false;
 
 						Logger.i(this, "Inserting beacon: " + mCommon.mBeaconId);
@@ -640,10 +644,10 @@ public class EntityForm extends FormActivity {
 	protected ServiceResponse insert() {
 
 		Logger.i(this, "Inserting entity: " + mCommon.mEntity.title);
-		Tracker.trackEvent("Entity", "Insert", mCommon.mEntity.entityType, 0);
+		Tracker.trackEvent("Entity", "Insert", mCommon.mEntity.type, 0);
 
 		mCommon.mEntity.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-		mCommon.mEntity.updatedDate = mCommon.mEntity.createdDate;
+		mCommon.mEntity.modifiedDate = mCommon.mEntity.createdDate;
 
 		if (Aircandi.getInstance().getCurrentLocation() != null) {
 			mCommon.mEntity.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
@@ -653,7 +657,7 @@ public class EntityForm extends FormActivity {
 			}
 			if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
 				/* In meters. */
-				mCommon.mEntity.accuracy = Aircandi.getInstance().getCurrentLocation().getAccuracy(); 
+				mCommon.mEntity.accuracy = Aircandi.getInstance().getCurrentLocation().getAccuracy();
 			}
 			if (Aircandi.getInstance().getCurrentLocation().hasBearing()) {
 				/* Direction of travel in degrees East of true North. */
@@ -680,10 +684,10 @@ public class EntityForm extends FormActivity {
 
 	protected ServiceResponse update() {
 
-		mCommon.mEntity.updatedById = Aircandi.getInstance().getUser().id;
-		mCommon.mEntity.updatedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+		mCommon.mEntity.modifier = Aircandi.getInstance().getUser().id;
+		mCommon.mEntity.modifiedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
 		Logger.i(this, "Updating entity: " + mCommon.mEntity.title);
-		Tracker.trackEvent("Entity", "Update", mCommon.mEntity.entityType, 0);
+		Tracker.trackEvent("Entity", "Update", mCommon.mEntity.type, 0);
 
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setUri(mCommon.mEntity.getEntryUri());
@@ -714,15 +718,18 @@ public class EntityForm extends FormActivity {
 			protected Object doInBackground(Object... params) {
 
 				/* If there is an image stored with S3 then delete it */
-				Tracker.trackEvent("Entity", "Delete", mCommon.mEntity.entityType, 0);
+				Tracker.trackEvent("Entity", "Delete", mCommon.mEntity.type, 0);
 
 				if (mCommon.mEntity.imagePreviewUri != null && !mCommon.mEntity.imagePreviewUri.equals("")
 					&& !ImageManager.isLocalImage(mCommon.mEntity.imagePreviewUri)) {
 					String imageKey = mCommon.mEntity.imagePreviewUri.substring(mCommon.mEntity.imagePreviewUri.lastIndexOf("/") + 1);
 					try {
 						S3.deleteImage(imageKey);
-						ImageManager.getInstance().deleteImage(mCommon.mEntity.imagePreviewUri);
-						ImageManager.getInstance().deleteImage(mCommon.mEntity.imagePreviewUri + ".reflection");
+
+						/*
+						 * Associated images are removed from the local image cache when the candi model is finally
+						 * removed and the cand view is killed or recycled
+						 */
 					}
 					catch (ProxibaseException exception) {
 						return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceException, null, exception);

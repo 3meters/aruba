@@ -83,9 +83,9 @@ public class CommentForm extends FormActivity {
 
 	protected void bind() {
 		mCommon.mComment = new Comment();
-		mCommon.mComment.createdById = Aircandi.getInstance().getUser().id;
-		mCommon.mComment.updatedById = Aircandi.getInstance().getUser().id;
-		mCommon.mComment.entityId = mCommon.mParentEntityId;
+		mCommon.mComment.creator = Aircandi.getInstance().getUser().id;
+		mCommon.mComment.modifier = Aircandi.getInstance().getUser().id;
+		mCommon.mComment.entity = mCommon.mParent;
 	}
 
 	protected void draw() {
@@ -141,9 +141,9 @@ public class CommentForm extends FormActivity {
 
 		mCommon.mComment.description = mContent.getText().toString().trim();
 		mCommon.mComment.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-		mCommon.mComment.updatedDate = mCommon.mComment.createdDate;
+		mCommon.mComment.modifiedDate = mCommon.mComment.createdDate;
 
-		Logger.i(this, "Insert comment for: " + String.valueOf(mCommon.mComment.entityId));
+		Logger.i(this, "Insert comment for: " + String.valueOf(mCommon.mComment.entity));
 
 		new AsyncTask() {
 
