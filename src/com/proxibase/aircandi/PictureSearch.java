@@ -46,6 +46,7 @@ public class PictureSearch extends FormActivity {
 	private long					mOffset		= 0;
 	private String					mQuery;
 	private LayoutInflater			mInflater;
+	private String					mTitleOptional;
 	private static long				PAGE_SIZE	= 20L;
 	private static long				LIST_MAX	= 100L;
 
@@ -61,6 +62,7 @@ public class PictureSearch extends FormActivity {
 
 	protected void bind() {
 		String query = Aircandi.settings.getString(Preferences.SETTING_PICTURE_SEARCH, null);
+		mTitleOptional = query;
 		if (query == null || query.equals("")) {
 			query = "trending now site:yahoo.com";
 		}
@@ -85,8 +87,11 @@ public class PictureSearch extends FormActivity {
 
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				String imageUri = mImages.get(position).getMediaUrl();
+				String imageDescription = mImages.get(position).getTitle();
 				Intent intent = new Intent();
 				intent.putExtra(getString(R.string.EXTRA_URI), imageUri);
+				intent.putExtra(getString(R.string.EXTRA_URI_TITLE), mTitleOptional);
+				intent.putExtra(getString(R.string.EXTRA_URI_DESCRIPTION), imageDescription);
 				setResult(Activity.RESULT_OK, intent);
 				finish();
 			}
@@ -128,6 +133,7 @@ public class PictureSearch extends FormActivity {
 	public void onSearchClick(View view) {
 
 		String query = mSearch.getText().toString();
+		mTitleOptional = query;
 		mOffset = 0;
 		Aircandi.settingsEditor.putString(Preferences.SETTING_PICTURE_SEARCH, query);
 		Aircandi.settingsEditor.commit();

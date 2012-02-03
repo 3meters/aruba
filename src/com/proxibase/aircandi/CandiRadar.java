@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.net.NetworkInfo.State;
@@ -171,6 +170,7 @@ import com.proxibase.sdk.android.util.ProxiConstants;
 public class CandiRadar extends AircandiGameActivity implements TextureListener {
 
 	private boolean						mFirstRun				= true;
+	private boolean						mPaused					= false;
 	private Boolean						mReadyToRun				= false;
 	private Boolean						mFullUpdateSuccess		= false;
 	private Boolean						mScanActive				= false;
@@ -368,7 +368,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		if (mCandiPatchModel != null && mCandiPatchModel.getCandiRootCurrent() != null
 				&& mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
 			mCandiPatchPresenter.renderingActivate();
-			mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, true);
+			mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, true);
 		}
 		else {
 			super.onBackPressed();
@@ -380,7 +380,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			if (mCandiPatchModel != null && mCandiPatchModel.getCandiRootCurrent() != null
 					&& mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
 				mCandiPatchPresenter.renderingActivate();
-				mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, true);
+				mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, true);
 				return;
 			}
 		}
@@ -821,6 +821,10 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	}
 
 	private void refreshModel() {
+		
+		Logger.d(this, "Deleted entities: " + String.valueOf(ProxiExplorer.getInstance().mEntitiesDeleted.size()));
+		Logger.d(this, "Inserted entities: " + String.valueOf(ProxiExplorer.getInstance().mEntitiesInserted.size()));
+		Logger.d(this, "Updated entities: " + String.valueOf(ProxiExplorer.getInstance().mEntitiesUpdated.size()));
 
 		new AsyncTask() {
 
@@ -833,11 +837,17 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				
 				if (ProxiExplorer.getInstance().mEntitiesDeleted.size() > 0) {
 					Iterator it = ProxiExplorer.getInstance().mEntitiesDeleted.entrySet().iterator();
 					while (it.hasNext()) {
 						Map.Entry entry = (Map.Entry) it.next();
 						Entity entityDeleted = (Entity) entry.getValue();
+						
+						CandiModel candiModel = mCandiPatchModel.getCandiModelForEntity(entityDeleted.id);
+						if (candiModel != null) {
+							candiModel.setDeleted(true);
+						}
 
 						ProxiExplorer.getInstance().mEntitiesUpdated.remove(entityDeleted.id);
 						if (ProxiExplorer.getInstance().mEntitiesInserted.remove(entityDeleted.id) == null) {
@@ -874,6 +884,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				}
 
 				if (ProxiExplorer.getInstance().mEntitiesUpdated.size() > 0) {
+					
 					Iterator it = ProxiExplorer.getInstance().mEntitiesUpdated.entrySet().iterator();
 					while (it.hasNext()) {
 						Map.Entry entry = (Map.Entry) it.next();
@@ -897,6 +908,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 				if (mRefreshNeeded) {
 
+					Logger.d(this, "Refreshing model");
 					ServiceResponse serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						List<Entity> freshEntityProxies = (List<Entity>) serviceResponse.data;
@@ -1589,51 +1601,49 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Logger.i(this, "CandiSearchActivity restarting");
 		super.onRestart();
 
-		/* Theme might have changed since we were away */
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
-			Logger.d(this, "Restarting because of theme change");
-			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
-			mCommon.reload();
-		}
-		else {
-			/* We control window focus messages that trigger the engine from here. */
-			super.onWindowFocusChanged(true);
-			final WebImageView imageUser = (WebImageView) findViewById(R.id.image_user);
-
-			/* We run a fake modifier so we can trigger texture loading */
-			mEngine.getScene().registerEntityModifier(
-					new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, new IEntityModifierListener() {
-
-						@Override
-						public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-							onTexturesReady();
-						}
-
-						@Override
-						public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-							mCandiPatchPresenter.renderingActivate();
-						}
-					}, EaseLinear.getInstance()));
-
-			/* User or user picture could have changed in another activity */
-			if (imageUser != null && Aircandi.getInstance().getUser() != null) {
-				User user = Aircandi.getInstance().getUser();
-				mCommon.setUserPicture(user.imageUri, user.linkUri, imageUser);
-			}
-
-			/* Entities could have been inserted, updated or deleted by another activity so refresh our model */
-			refreshModel();
-
-			/* Restart autoscan if enabled */
-			if (mPrefAutoscan) {
-				mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
-			}
-		}
+//		/* Theme might have changed since we were away */
+//		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+//			Logger.d(this, "Restarting because of theme change");
+//			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+//			mCommon.reload();
+//		}
+//		else {
+//			/* We control window focus messages that trigger the engine from here. */
+//			super.onWindowFocusChanged(true);
+//			final WebImageView imageUser = (WebImageView) findViewById(R.id.image_user);
+//
+//			/* We run a fake modifier so we can trigger texture loading */
+//			mEngine.getScene().registerEntityModifier(
+//					new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, new IEntityModifierListener() {
+//
+//						@Override
+//						public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+//							onTexturesReady();
+//						}
+//
+//						@Override
+//						public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+//							mCandiPatchPresenter.renderingActivate();
+//						}
+//					}, EaseLinear.getInstance()));
+//
+//			/* User or user picture could have changed in another activity */
+//			if (imageUser != null && Aircandi.getInstance().getUser() != null) {
+//				mCommon.updateUserPicture();
+//			}
+//
+//			/* Entities could have been inserted, updated or deleted by another activity so refresh our model */
+//			refreshModel();
+//
+//			/* Restart autoscan if enabled */
+//			if (mPrefAutoscan) {
+//				mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
+//			}
+//		}
 	}
 
 	@Override
 	protected void onResume() {
-		Logger.i(this, "CandiSearchActivity resumed");
 		super.onResume();
 		/*
 		 * OnResume gets called after OnCreate (always) and whenever the activity is being brought back to the
@@ -1647,6 +1657,60 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * 
 		 * Game engine is started/restarted in BaseGameActivity class if we currently have the window focus.
 		 */
+		
+		
+		/* 
+		 * Logic that should only run if the activity is resuming after having been paused.
+		 * This used to be in restart but it wasn't getting called reliably when returning
+		 * from another activity. 
+		 */
+		if (mPaused) {
+			Logger.i(this, "CandiSearchActivity resuming after pause");
+			
+			/* Theme might have changed since we were away */
+			if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+				Logger.d(this, "Restarting because of theme change");
+				mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+				mCommon.reload();
+			}
+			else {
+				/* We control window focus messages that trigger the engine from here. */
+				super.onWindowFocusChanged(true);
+				final WebImageView imageUser = (WebImageView) findViewById(R.id.image_user);
+
+				/* We run a fake modifier so we can trigger texture loading */
+				mEngine.getScene().registerEntityModifier(
+						new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, new IEntityModifierListener() {
+
+							@Override
+							public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+								onTexturesReady();
+							}
+
+							@Override
+							public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+								mCandiPatchPresenter.renderingActivate();
+							}
+						}, EaseLinear.getInstance()));
+
+				/* User or user picture could have changed in another activity */
+				if (imageUser != null && Aircandi.getInstance().getUser() != null) {
+					mCommon.updateUserPicture();
+				}
+
+				/* Entities could have been inserted, updated or deleted by another activity so refresh our model */
+				refreshModel();
+
+				/* Restart autoscan if enabled */
+				if (mPrefAutoscan) {
+					mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
+				}
+			}
+			mPaused = false;
+		}
+		else {
+			Logger.i(this, "CandiSearchActivity resuming for first time");
+		}
 
 		ProxiExplorer.getInstance().onResume();
 		NetworkManager.getInstance().onResume();
@@ -1688,6 +1752,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			NetworkManager.getInstance().onPause();
 
 			mCommon.stopTitlebarProgress();
+			mPaused = true;
 		}
 		catch (Exception exception) {
 			Exceptions.Handle(exception);
@@ -1737,29 +1802,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	public void onLowMemory() {
 		Logger.i(this, "CandiSearchActivity memory is low");
 		super.onLowMemory();
-	}
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		/*
-		 * Called before onResume. If we are returning from the market app, we
-		 * get a zero result code whether the user decided to start an install
-		 * or not.
-		 */
-		if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED) {
-			mCommon.updateUserPicture();
-		}
-		Logger.i(this, "Activity result returned to CandiSearchActivity: " + String.valueOf(requestCode));
-	}
-
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		/*
-		 * TODO: Not getting called because setRequestedOrientation() is beinging
-		 * called in BaseGameActivity.
-		 */
-		Logger.d(this, "onConfigurationChanged called: " + newConfig.orientation);
-		super.onConfigurationChanged(newConfig);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1864,7 +1906,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	private void checkForUpdate() {
 
-		Query query = new Query("Versions").filter("Target eq 'aircandi'");
+		Query query = new Query("Documents").filter("Type eq 'version' and Target eq 'aircandi'");
 		ServiceRequest serviceRequest = new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json);
 		serviceRequest.setSuppressUI(true);
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);

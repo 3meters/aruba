@@ -25,6 +25,7 @@ public class CandiModel extends BaseModel {
 	private DisplayExtra	mDisplayExtra		= DisplayExtra.None;
 	private boolean			mTouchAreaActive	= false;
 	private boolean			mRookie				= true;
+	private boolean			mDeleted			= false;
 	private ReasonInactive	mReasonInactive		= ReasonInactive.None;
 
 	public CandiModel(int modelId, CandiPatchModel candiPatchModel) {
@@ -217,6 +218,14 @@ public class CandiModel extends BaseModel {
 
 	public void setZoneStateNext(ZoneState zoneStateNext) {
 		this.mZoneStateNext = zoneStateNext;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.mDeleted = deleted;
+	}
+
+	public boolean isDeleted() {
+		return mDeleted;
 	}
 
 	public class ZoneState {

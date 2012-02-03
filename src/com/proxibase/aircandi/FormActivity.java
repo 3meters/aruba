@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.components.AircandiCommon;
@@ -283,6 +284,8 @@ public abstract class FormActivity extends Activity {
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
 					final String imageUri = extras.getString(getString(R.string.EXTRA_URI));
+					final String imageTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
+					final String imageDescription = extras.getString(getString(R.string.EXTRA_URI_DESCRIPTION));
 
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
 					builder.setFromUris(imageUri, null);
@@ -307,6 +310,20 @@ public abstract class FormActivity extends Activity {
 						}
 					});
 
+					if (imageTitle != null && !imageTitle.equals("")) {
+						EditText title = (EditText) findViewById(R.id.text_title);
+						if (title != null && title.getText().toString().equals("")) {
+							title.setText(imageTitle);
+						}
+					}
+
+					if (imageDescription != null && !imageDescription.equals("")) {
+						EditText description = (EditText) findViewById(R.id.text_content);
+						if (description != null && description.getText().toString().equals("")) {
+							description.setText(imageDescription);
+						}
+					}
+					
 					ImageRequest imageRequest = builder.create();
 					mImageRequestWebImageView.setImageRequest(imageRequest, null);
 				}

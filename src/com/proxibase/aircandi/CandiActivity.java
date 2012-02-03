@@ -46,12 +46,12 @@ public abstract class CandiActivity extends Activity {
 		}
 	}
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		Logger.i(this, "CandiActivity got new intent");
-		setContentView(getLayoutId());
-	}
+//	@Override
+//	protected void onNewIntent(Intent intent) {
+//		super.onNewIntent(intent);
+//		Logger.i(this, "CandiActivity got new intent");
+//		setContentView(getLayoutId());
+//	}
 
 	// --------------------------------------------------------------------------------------------
 	// Events routines
@@ -114,9 +114,6 @@ public abstract class CandiActivity extends Activity {
 	public void onRefreshClick(View view) {
 		mCommon.doRefreshClick(view);
 	}
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {}
 
 	// --------------------------------------------------------------------------------------------
 	// Application menu routines (settings)

@@ -7,8 +7,6 @@
 	<classpathentry kind="lib" path="lib/acra-4.2.3.jar" sourcepath="C:/Users/Jayma/Desktop/Proxibase/Android/acra/acra-4.2.3/src/acra-4.2.3-sources.jar"/>
 	<classpathentry kind="lib" path="lib/andengine.jar"/>
 	<classpathentry kind="lib" path="lib/android-support-v4.jar" sourcepath="C:/Users/Jayma/Desktop/Proxibase/Android/android-sdk-windows/extras/android/compatibility/v4/src/java"/>
-	<classpathentry kind="lib" path="lib/aws-android-sdk-1.0.0-core.jar"/>
-	<classpathentry kind="lib" path="lib/aws-android-sdk-1.0.0-s3.jar" sourcepath="C:/Users/Jayma/Desktop/Proxibase/Android/amazonaws/aws-android-sdk-1.0.0/src"/>
 	<classpathentry kind="lib" path="lib/gson-1.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/guava.jar"/>
 	<classpathentry kind="lib" path="lib/proxibase.jar"/>
@@ -20,5 +18,11 @@
 	<classpathentry kind="lib" path="lib/google-analytics-1.4.2.jar"/>
 	<classpathentry kind="lib" path="lib/bing-search-java-sdk.jar" sourcepath="C:/Users/Jayma/Desktop/Proxibase/Android/bing-search/bing-search-java-sdk"/>
 	<classpathentry kind="lib" path="lib/cwac-adapter-wrapper.jar"/>
+	<classpathentry kind="lib" path="lib/aws-android-sdk-1.1.1-core.jar" sourcepath="C:/Users/Jayma/Desktop/Proxibase/Android/amazonaws/aws-android-sdk-1.1.1/src">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Users/Jayma/Desktop/Proxibase/Android/amazonaws/aws-android-sdk-1.1.1/documentation/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/aws-android-sdk-1.1.1-s3.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

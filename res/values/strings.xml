@@ -17,6 +17,8 @@
 	<string name="EXTRA_USER_ID">com.proxibase.aircandi.EXTRA_USER_ID</string>
 	<string name="EXTRA_COMMENT">com.proxibase.aircandi.EXTRA_COMMENT</string>
 	<string name="EXTRA_URI">com.proxibase.aircandi.EXTRA_URI</string>
+	<string name="EXTRA_URI_TITLE">com.proxibase.aircandi.EXTRA_URI_TITLE</string>
+	<string name="EXTRA_URI_DESCRIPTION">com.proxibase.aircandi.EXTRA_URI_DESCRIPTION</string>
 	<string name="EXTRA_MESSAGE">com.proxibase.aircandi.EXTRA_MESSAGE</string>
 	<string name="EXTRA_BEACON_DIRTY">com.proxibase.aircandi.EXTRA_BEACON_DIRTY</string>
 	<string name="EXTRA_ENTITY_DIRTY">com.proxibase.aircandi.EXTRA_ENTITY_DIRTY</string>

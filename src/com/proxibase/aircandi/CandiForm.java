@@ -76,12 +76,6 @@ public class CandiForm extends CandiActivity {
 
 	public void onCandiInfoClick(View v) {
 		startCandiList();
-		//		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
-		//		intentBuilder.setCommand(new Command(CommandVerb.View));
-		//		intentBuilder.setEntity(mCommon.mEntity);
-		//		Intent intent = intentBuilder.create();
-		//
-		//		startActivity(intent);
 	}
 
 	public void onCommentsClick(View view) {
@@ -138,11 +132,9 @@ public class CandiForm extends CandiActivity {
 			if (resultCode == CandiConstants.RESULT_ENTITY_INSERTED) {
 				startCandiList();
 			}
-
 		}
 		else if (resultCode == CandiConstants.RESULT_ENTITY_DELETED) {
-			setResult(CandiConstants.RESULT_ENTITY_DELETED);
-			finish();
+			onBackPressed();
 		}
 		else if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED
 					|| resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
@@ -360,7 +352,6 @@ public class CandiForm extends CandiActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		//Aircandi.getInstance().setToolstripOpen(mSlidingDrawer.isOpened());
 	}
 
 	// --------------------------------------------------------------------------------------------

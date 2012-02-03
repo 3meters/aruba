@@ -757,6 +757,7 @@ public class EntityForm extends FormActivity {
 
 				mCommon.showProgressDialog(false, null);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					Logger.i(this, "Deleted entity: " + mCommon.mEntity.title);
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 					ProxiExplorer.getInstance().mEntitiesDeleted.put(mCommon.mEntity.id, mCommon.mEntity);
 					setResult(CandiConstants.RESULT_ENTITY_DELETED);

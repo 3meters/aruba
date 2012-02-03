@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Picture;
 import android.graphics.Bitmap.CompressFormat;
+import android.os.Message;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -208,7 +209,7 @@ public class ImageLoader {
 		return serviceResponse;
 	}
 
-	private void getWebPageAsBitmap(String uri, final ImageRequest imageRequest, final RequestListener listener) {
+	private void getWebPageAsBitmap(final String uri, final ImageRequest imageRequest, final RequestListener listener) {
 
 		//String webViewContent = "";
 		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);
@@ -234,12 +235,23 @@ public class ImageLoader {
 		if (imageRequest.getLinkZoom()) {
 			mWebView.getSettings().setUseWideViewPort(false);
 		}
-		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
+		
+		mWebView.getSettings().setUserAgentString("Mozilla/5.0 (Macintosh; " +
+	               "U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, " +
+	               "like Gecko) Version/5.0 Safari/533.16");		
+		//mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
 		mWebView.getSettings().setJavaScriptEnabled(imageRequest.getLinkJavascriptEnabled());
 		mWebView.getSettings().setLoadWithOverviewMode(true);
+		mWebView.getSettings().setDomStorageEnabled(true);
 		mWebView.refreshDrawableState();
 
 		mWebView.setWebViewClient(new WebViewClient() {
+
+			@Override
+			public void onTooManyRedirects(WebView view, Message cancelMsg, Message continueMsg) {
+				super.onTooManyRedirects(view, cancelMsg, continueMsg);
+				Logger.v(this, "Too many redirects: " + uri);
+			}
 
 			@Override
 			public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -253,37 +265,18 @@ public class ImageLoader {
 				Logger.v(this, "Page finished: " + url);
 				ready.set(true);
 			}
+
+			public boolean shouldOverrideUrlLoading(WebView view, String url) {
+				view.loadUrl(url);
+				Logger.v(this, "Url intercepted and loaded: " + url);
+				return false;
+			}
 		});
 		mWebView.setWebChromeClient(new WebChromeClient() {
 
 			@Override
 			public void onProgressChanged(WebView view, int progress) {
 				listener.onProgressChanged(progress);
-				/*
-				 * Somehow I am getting called here even though the web view is still
-				 * showing content from previous site. Is draw pulling from drawing cache?
-				 */
-				//				if (!imageSent.get() && ready.get() && progress == 100)
-				//				{
-				//					//Picture picture = mWebView.capturePicture();
-				//					final Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
-				//							CandiConstants.IMAGE_CONFIG_DEFAULT);
-				//					Canvas canvas = new Canvas(bitmap);
-				//
-				//					Matrix matrix = new Matrix();
-				//					float scale = (float) CandiConstants.CANDI_VIEW_WIDTH / (float) view.getWidth();
-				//					matrix.postScale(scale, scale);
-				//
-				//					canvas.setMatrix(matrix);
-				//					//view.destroyDrawingCache();
-				//					view.draw(canvas);
-				//					//canvas.drawPicture(picture);
-				//
-				//					/* Release */
-				//					canvas = null;
-				//					listener.onImageReady(bitmap);
-				//					imageSent.set(true);
-				//				}
 			}
 		});
 		mWebView.setPictureListener(new PictureListener() {
