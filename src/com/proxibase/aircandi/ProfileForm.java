@@ -26,16 +26,16 @@ import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
-import com.proxibase.aircandi.components.NetworkManager.ResultCodeDetail;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
 import com.proxibase.sdk.android.proxi.service.Query;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
@@ -286,8 +286,8 @@ public class ProfileForm extends FormActivity {
 					ImageManager.getInstance().deleteImage(mImageUriOriginal);
 					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
 				}
-				catch (ProxibaseException exception) {
-					return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceException, null, exception);
+				catch (ProxibaseServiceException exception) {
+					return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
 				}
 			}
 		}
@@ -301,8 +301,8 @@ public class ProfileForm extends FormActivity {
 				S3.putImage(imageKey, mUser.imageBitmap);
 				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
 			}
-			catch (ProxibaseException exception) {
-				return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceException, null, exception);
+			catch (ProxibaseServiceException exception) {
+				return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
 			}
 		}
 		return serviceResponse;

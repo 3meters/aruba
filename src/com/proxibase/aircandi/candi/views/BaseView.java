@@ -347,6 +347,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 	public void loadHardwareTextures() {
 		mTitleTexture = new Texture(256, 128, CandiConstants.GL_TEXTURE_OPTION);
+		mTitleTexture.setName("Title: " + ((BaseModel)this.mModel).getTitleText());
 		mCandiPatchPresenter.getEngine().getTextureManager().loadTexture(mTitleTexture);
 	}
 

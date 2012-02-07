@@ -21,6 +21,7 @@ import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.TextureManager.TextureListener;
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 import org.anddev.andengine.util.modifier.IModifier;
@@ -75,6 +76,7 @@ import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
 import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.models.CandiModel.DisplayExtra;
+import com.proxibase.aircandi.candi.models.CandiPatchModel.Navigation;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.ICandiListener;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.TextureReset;
@@ -178,7 +180,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	public static BasicAWSCredentials	mAwsCredentials			= null;
 
 	public Boolean						mPrefAutoscan			= false;
-	public int							mPrefAutoscanInterval	= 5000;
+	public String						mPrefAutoscanInterval	= "5000";
 	public boolean						mPrefDemoMode			= false;
 	public boolean						mPrefGlobalBeacons		= true;
 	public DisplayExtra					mPrefDisplayExtras		= DisplayExtra.None;
@@ -256,7 +258,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					scanForBeacons(new Options(false, false), false);
 				}
 				else if (mPrefAutoscan) {
-					mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
+					Logger.d(this, "Scheduling an autoscan in: " + mPrefAutoscanInterval + " ms");
+					mMyHandler.postDelayed(mScanRunnable, Integer.parseInt(mPrefAutoscanInterval));
 				}
 			}
 		};
@@ -368,10 +371,18 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		if (mCandiPatchModel != null && mCandiPatchModel.getCandiRootCurrent() != null
 				&& mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
 			mCandiPatchPresenter.renderingActivate();
-			mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, true);
+			mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, Navigation.Up);
 		}
 		else {
 			super.onBackPressed();
+		}
+	}
+
+	public void onHomeClick(View view) {
+		if (mEngine != null && mEngine.getTextureManager() != null) {
+			for (Texture texture : mEngine.getTextureManager().mTexturesLoaded) {
+				Logger.v(this, texture.toString());
+			}
 		}
 	}
 
@@ -380,7 +391,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			if (mCandiPatchModel != null && mCandiPatchModel.getCandiRootCurrent() != null
 					&& mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
 				mCandiPatchPresenter.renderingActivate();
-				mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, true);
+				mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, Navigation.Up);
 				return;
 			}
 		}
@@ -445,7 +456,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				 * the first CandiInfo view in the flipper.
 				 */
 				mCandiPatchModel.setCandiModelSelected(candiModel);
-				showCandiForm(candiModel);
+				if (!candiModel.isDeleted()) {
+					showCandiForm(candiModel);
+				}
 			}
 		});
 	}
@@ -461,6 +474,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * UI is still responsive because most of the UI is being handled
 		 * by the 2d engine thread.
 		 */
+
+		/* Make sure there aren't any extra runnables waiting to run */
+		mMyHandler.removeCallbacks(mScanRunnable);
 
 		/* Check that wifi is enabled and we have a network connection */
 		mScanOptions = options;
@@ -499,6 +515,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						}
 					}
 
+					/*
+					 * We track the progress of a full scan because it effects
+					 * lots of async processes like candi view management.
+					 */
+					Aircandi.getInstance().setRebuildingDataModel(options.refreshAllBeacons);
 					BeaconScanWatcher watcher = new BeaconScanWatcher();
 					watcher.start(mScanOptions);
 
@@ -543,7 +564,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 										 * unless we discover a new beacon.
 										 */
 										if (mPrefAutoscan) {
-											mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
+											Logger.d(this, "Scheduling an autoscan in: " + mPrefAutoscanInterval + " ms");
+											mMyHandler.postDelayed(mScanRunnable, Integer.parseInt(mPrefAutoscanInterval));
 										}
 										mScanActive = false;
 									}
@@ -821,7 +843,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	}
 
 	private void refreshModel() {
-		
+
 		Logger.d(this, "Deleted entities: " + String.valueOf(ProxiExplorer.getInstance().mEntitiesDeleted.size()));
 		Logger.d(this, "Inserted entities: " + String.valueOf(ProxiExplorer.getInstance().mEntitiesInserted.size()));
 		Logger.d(this, "Updated entities: " + String.valueOf(ProxiExplorer.getInstance().mEntitiesUpdated.size()));
@@ -837,13 +859,13 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				
+
 				if (ProxiExplorer.getInstance().mEntitiesDeleted.size() > 0) {
 					Iterator it = ProxiExplorer.getInstance().mEntitiesDeleted.entrySet().iterator();
 					while (it.hasNext()) {
 						Map.Entry entry = (Map.Entry) it.next();
 						Entity entityDeleted = (Entity) entry.getValue();
-						
+
 						CandiModel candiModel = mCandiPatchModel.getCandiModelForEntity(entityDeleted.id);
 						if (candiModel != null) {
 							candiModel.setDeleted(true);
@@ -884,7 +906,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				}
 
 				if (ProxiExplorer.getInstance().mEntitiesUpdated.size() > 0) {
-					
+
 					Iterator it = ProxiExplorer.getInstance().mEntitiesUpdated.entrySet().iterator();
 					while (it.hasNext()) {
 						Map.Entry entry = (Map.Entry) it.next();
@@ -1093,6 +1115,15 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				 * Textures per zone: 1
 				 * Textures per candi: 3
 				 */
+
+				/* Determine total size of textures loaded */
+				int totalTextureSize = 0;
+				if (mEngine != null && mEngine.getTextureManager() != null && mEngine.getTextureManager().mTexturesManaged != null) {
+					for (Texture texture : mEngine.getTextureManager().mTexturesLoaded) {
+						totalTextureSize += (texture.getWidth() * texture.getHeight()) * 4;
+					}
+				}
+
 				((RelativeLayout) findViewById(R.id.debug_section_two)).removeAllViews();
 				table = new TableLayout(this);
 				tableLp = new TableLayout.LayoutParams();
@@ -1140,6 +1171,12 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				((TextView) tableRow.findViewById(R.id.text_label)).setText("Txts expected: ");
 				((TextView) tableRow.findViewById(R.id.text_value)).setText(String.valueOf(((candiPooledCount + candiLoanedCount) * 3) + (zones * 1)
 																							+ globalTexturesCount));
+				table.addView(tableRow, tableLp);
+
+				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
+				((TextView) tableRow.findViewById(R.id.text_label)).setText("Txts tot size: ");
+				((TextView) tableRow.findViewById(R.id.text_value)).setText(String.format("%2.2f MB",
+						(float) ((float) totalTextureSize / 1048576)));
 				table.addView(tableRow, tableLp);
 
 				((RelativeLayout) findViewById(R.id.debug_section_two)).addView(table);
@@ -1577,6 +1614,18 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		if (mFirstRun) {
 			super.onWindowFocusChanged(hasWindowFocus);
 		}
+		else {
+			/* Restart autoscan if enabled */
+			if (hasWindowFocus) {
+				if (mPrefAutoscan) {
+					mMyHandler.post(mScanRunnable);
+				}
+			}
+			else {
+				/* Make sure autoscan is stopped if we are not in the foreground */
+				mMyHandler.removeCallbacks(mScanRunnable);
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1601,45 +1650,45 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Logger.i(this, "CandiSearchActivity restarting");
 		super.onRestart();
 
-//		/* Theme might have changed since we were away */
-//		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
-//			Logger.d(this, "Restarting because of theme change");
-//			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
-//			mCommon.reload();
-//		}
-//		else {
-//			/* We control window focus messages that trigger the engine from here. */
-//			super.onWindowFocusChanged(true);
-//			final WebImageView imageUser = (WebImageView) findViewById(R.id.image_user);
-//
-//			/* We run a fake modifier so we can trigger texture loading */
-//			mEngine.getScene().registerEntityModifier(
-//					new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, new IEntityModifierListener() {
-//
-//						@Override
-//						public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-//							onTexturesReady();
-//						}
-//
-//						@Override
-//						public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-//							mCandiPatchPresenter.renderingActivate();
-//						}
-//					}, EaseLinear.getInstance()));
-//
-//			/* User or user picture could have changed in another activity */
-//			if (imageUser != null && Aircandi.getInstance().getUser() != null) {
-//				mCommon.updateUserPicture();
-//			}
-//
-//			/* Entities could have been inserted, updated or deleted by another activity so refresh our model */
-//			refreshModel();
-//
-//			/* Restart autoscan if enabled */
-//			if (mPrefAutoscan) {
-//				mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
-//			}
-//		}
+		//		/* Theme might have changed since we were away */
+		//		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+		//			Logger.d(this, "Restarting because of theme change");
+		//			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+		//			mCommon.reload();
+		//		}
+		//		else {
+		//			/* We control window focus messages that trigger the engine from here. */
+		//			super.onWindowFocusChanged(true);
+		//			final WebImageView imageUser = (WebImageView) findViewById(R.id.image_user);
+		//
+		//			/* We run a fake modifier so we can trigger texture loading */
+		//			mEngine.getScene().registerEntityModifier(
+		//					new AlphaModifier(CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f, new IEntityModifierListener() {
+		//
+		//						@Override
+		//						public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+		//							onTexturesReady();
+		//						}
+		//
+		//						@Override
+		//						public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+		//							mCandiPatchPresenter.renderingActivate();
+		//						}
+		//					}, EaseLinear.getInstance()));
+		//
+		//			/* User or user picture could have changed in another activity */
+		//			if (imageUser != null && Aircandi.getInstance().getUser() != null) {
+		//				mCommon.updateUserPicture();
+		//			}
+		//
+		//			/* Entities could have been inserted, updated or deleted by another activity so refresh our model */
+		//			refreshModel();
+		//
+		//			/* Restart autoscan if enabled */
+		//			if (mPrefAutoscan) {
+		//				mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
+		//			}
+		//		}
 	}
 
 	@Override
@@ -1657,16 +1706,15 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * 
 		 * Game engine is started/restarted in BaseGameActivity class if we currently have the window focus.
 		 */
-		
-		
-		/* 
+
+		/*
 		 * Logic that should only run if the activity is resuming after having been paused.
 		 * This used to be in restart but it wasn't getting called reliably when returning
-		 * from another activity. 
+		 * from another activity.
 		 */
 		if (mPaused) {
 			Logger.i(this, "CandiSearchActivity resuming after pause");
-			
+
 			/* Theme might have changed since we were away */
 			if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
 				Logger.d(this, "Restarting because of theme change");
@@ -1701,10 +1749,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				/* Entities could have been inserted, updated or deleted by another activity so refresh our model */
 				refreshModel();
 
-				/* Restart autoscan if enabled */
-				if (mPrefAutoscan) {
-					mMyHandler.postDelayed(mScanRunnable, mPrefAutoscanInterval);
-				}
+				/* Restarting autoscan happens when we gain window focus */
 			}
 			mPaused = false;
 		}
@@ -1771,7 +1816,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		super.onWindowFocusChanged(false);
 
 		/* Make sure autoscan is stopped if we are not in the foreground */
-		mMyHandler.removeMessages(0);
+		mMyHandler.removeCallbacks(mScanRunnable);
 
 		if (CandiConstants.DEBUG_TRACE) {
 			Debug.stopMethodTracing();
@@ -1813,10 +1858,24 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		PrefResponse prefResponse = PrefResponse.None;
 
 		if (mPrefAutoscan != Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
-			prefResponse = PrefResponse.Refresh;
+			prefResponse = PrefResponse.Change;
 			mPrefAutoscan = Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false);
+			if (mPrefAutoscan) {
+				mMyHandler.post(mScanRunnable);
+			}
+			else {
+				mMyHandler.removeCallbacks(mScanRunnable);
+			}
 		}
-		if (mPrefDisplayExtras != DisplayExtra.valueOf(Aircandi.settings.getString(Preferences.PREF_DISPLAY_EXTRAS, "None"))) {
+		if (!mPrefAutoscanInterval.equals(Aircandi.settings.getString(Preferences.PREF_AUTOSCAN_INTERVAL, "5000"))) {
+			prefResponse = PrefResponse.Change;
+			mPrefAutoscanInterval = Aircandi.settings.getString(Preferences.PREF_AUTOSCAN_INTERVAL, "5000");
+			if (mPrefAutoscan) {
+				mMyHandler.removeCallbacks(mScanRunnable);
+				mMyHandler.post(mScanRunnable);
+			}
+		}
+		if (!mPrefDisplayExtras.equals(DisplayExtra.valueOf(Aircandi.settings.getString(Preferences.PREF_DISPLAY_EXTRAS, "None")))) {
 			prefResponse = PrefResponse.Refresh;
 			mPrefDisplayExtras = DisplayExtra.valueOf(Aircandi.settings.getString(Preferences.PREF_DISPLAY_EXTRAS, "None"));
 		}

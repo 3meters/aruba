@@ -19,7 +19,7 @@ import com.proxibase.aircandi.components.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
-import com.proxibase.aircandi.components.NetworkManager.ResultCodeDetail;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
@@ -212,7 +212,7 @@ public class ImageLoader {
 	private void getWebPageAsBitmap(final String uri, final ImageRequest imageRequest, final RequestListener listener) {
 
 		//String webViewContent = "";
-		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, null, null);
+		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResponseCodeDetail.Success, null, null);
 		final AtomicBoolean ready = new AtomicBoolean(false);
 		final AtomicInteger pictureCount = new AtomicInteger(0);
 
@@ -236,10 +236,7 @@ public class ImageLoader {
 			mWebView.getSettings().setUseWideViewPort(false);
 		}
 		
-		mWebView.getSettings().setUserAgentString("Mozilla/5.0 (Macintosh; " +
-	               "U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, " +
-	               "like Gecko) Version/5.0 Safari/533.16");		
-		//mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT);
+		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT_MOBILE);
 		mWebView.getSettings().setJavaScriptEnabled(imageRequest.getLinkJavascriptEnabled());
 		mWebView.getSettings().setLoadWithOverviewMode(true);
 		mWebView.getSettings().setDomStorageEnabled(true);

@@ -27,10 +27,10 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
 import com.proxibase.sdk.android.proxi.service.Query;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
@@ -233,7 +233,7 @@ public class SignUpForm extends FormActivity {
 							try {
 								S3.putImage(imageKey, mUser.imageBitmap);
 							}
-							catch (ProxibaseException exception) {
+							catch (ProxibaseServiceException exception) {
 								if (!Exceptions.Handle(exception)) {
 									ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
 								}

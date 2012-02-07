@@ -146,6 +146,9 @@ public interface CandiConstants {
 	public static final int				GL_BLEND_FUNCTION_SOURCE			= GL10.GL_ONE;
 	public static final int				GL_BLEND_FUNCTION_DESTINATION		= GL10.GL_ONE_MINUS_SRC_ALPHA;
 	public static final TextureOptions	GL_TEXTURE_OPTION					= TextureOptions.BILINEAR_PREMULTIPLYALPHA;
-	public static final String			USER_AGENT							= "Mozilla/5.0 (Linux; U; Android 2.2.1; fr-ch; A43 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
+	public static final String			USER_AGENT_MOBILE					= "Mozilla/5.0 (Linux; U; Android 2.1.3; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
+	public static final String			USER_AGENT_DESKTOP					= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16";
+	public static final String			USER_AGENT_BACK						= "Mozilla/5.0 (Linux; U; Android 2.2.1; fr-ch; A43 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
+	public static final String			USER_AGENT_NEXUS_S					= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 
 }

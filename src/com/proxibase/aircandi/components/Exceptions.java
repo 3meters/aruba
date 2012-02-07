@@ -1,6 +1,6 @@
 package com.proxibase.aircandi.components;
 
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
 
 public class Exceptions {
 
@@ -12,7 +12,7 @@ public class Exceptions {
 		throw new RuntimeException(exception);
 	}
 	
-	public static boolean Handle(ProxibaseException exception) {
+	public static boolean Handle(ProxibaseServiceException exception) {
 		throw new RuntimeException(exception);
 	}
 }

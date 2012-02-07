@@ -16,6 +16,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.GestureDetector.OnGestureListener;
 
+import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
@@ -577,48 +578,54 @@ public class CandiView extends BaseView implements OnGestureListener {
 					 */
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						/*
-						 * The view could have been recycled while we were busy and won't have a bound
-						 * model.
-						 */
-						if (mModel != null && !mRecycled) {
+					/* 
+					 * We could be coming back while the data model is getting rebuilt which
+					 * makes the current work expendable. 
+					 */
+					if (!Aircandi.getInstance().isRebuildingDataModel()) {
+						if (serviceResponse.responseCode == ResponseCode.Success) {
 							/*
-							 * The view could have been recycled and put back into service targeting
-							 * a different bitmap.
+							 * The view could have been recycled while we were busy and won't have a bound
+							 * model.
 							 */
-							final CandiModel candiModel = (CandiModel) mModel;
-							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-							String imageUri = ImageRequestBuilder.getImageUriFromEntity(candiModel.getEntity());
-							
-							if (imageResponse.imageUri.equals(imageUri) && imageResponse.bitmap != null) {
-								Logger.v(this, "Texture request complete: " + ((CandiModel) mModel).getTitleText());
-								mHasBitmap = true;
-								updateTextureRegions(imageResponse.bitmap);
-								if (candiModel.getViewStateCurrent().isVisible()) {
-									showBodyAndReflectionAnimated();
-								}
-							}
-							progressVisible(false);
-						}
-						else {
-							if (mModel != null) {
-								String modelTitle = ((CandiModel) mModel).getTitleText();
-								Logger.v(this, "Texture request complete but requestor recycled : " + modelTitle);
-							}
-						}
-					}
-					else {
-						if (!mHasBitmap && mModel != null && !mRecycled) {
-							Logger.w(this, "Broken image: " + entity.imagePreviewUri);
-							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
-							if (bitmap != null) {
-								mHasBitmap = false;
-								updateTextureRegions(bitmap);
-								if (candiModel.getViewStateCurrent().isVisible()) {
-									showBodyAndReflectionAnimated();
+							if (mModel != null && !mRecycled) {
+								/*
+								 * The view could have been recycled and put back into service targeting
+								 * a different bitmap.
+								 */
+								final CandiModel candiModel = (CandiModel) mModel;
+								ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+								String imageUri = ImageRequestBuilder.getImageUriFromEntity(candiModel.getEntity());
+
+								if (imageResponse.imageUri.equals(imageUri) && imageResponse.bitmap != null) {
+									Logger.v(this, "Texture request complete: " + ((CandiModel) mModel).getTitleText());
+									mHasBitmap = true;
+									updateTextureRegions(imageResponse.bitmap);
+									if (candiModel.getViewStateCurrent().isVisible()) {
+										showBodyAndReflectionAnimated();
+									}
 								}
 								progressVisible(false);
+							}
+							else {
+								if (mModel != null) {
+									String modelTitle = ((CandiModel) mModel).getTitleText();
+									Logger.v(this, "Texture request complete but requestor recycled : " + modelTitle);
+								}
+							}
+						}
+						else {
+							if (!mHasBitmap && mModel != null && !mRecycled) {
+								Logger.w(this, "Broken image: " + entity.imagePreviewUri);
+								Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
+								if (bitmap != null) {
+									mHasBitmap = false;
+									updateTextureRegions(bitmap);
+									if (candiModel.getViewStateCurrent().isVisible()) {
+										showBodyAndReflectionAnimated();
+									}
+									progressVisible(false);
+								}
 							}
 						}
 					}
@@ -664,10 +671,11 @@ public class CandiView extends BaseView implements OnGestureListener {
 	private void updateTextureRegions(Bitmap bodyBitmap) {
 
 		final CandiModel candiModel = (CandiModel) this.mModel;
-		Entity entity = candiModel.getEntity();
 		if (candiModel == null) {
-			throw new IllegalStateException("Trying to update texture regions with null model");
+			Logger.d(this, "Trying to update texture regions for candi view that has no model");
+			return;
 		}
+		Entity entity = candiModel.getEntity();
 
 		mCandiPatchPresenter.renderingActivate();
 		mBodyTexture.clearTextureSources();
@@ -707,7 +715,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 						return bodyBitmap;
 					}
 
-					if (((CandiModel)mModel).getReasonInactive() != ReasonInactive.Deleting) {
+					if (((CandiModel) mModel).getReasonInactive() != ReasonInactive.Deleting) {
 						/* Cached bitmap is gone so load it again. */
 						Logger.v(this, "Engine request: texture not in cache: request it: " + ((CandiModel) mModel).getTitleText());
 						requestTextureSources(false, true);
@@ -786,9 +794,13 @@ public class CandiView extends BaseView implements OnGestureListener {
 		super.loadHardwareTextures();
 
 		mReflectionTexture = new Texture(256, 128, CandiConstants.GL_TEXTURE_OPTION);
+		mReflectionTexture.setName("Reflection: " + ((BaseModel) this.mModel).getTitleText());
 		mCandiPatchPresenter.getEngine().getTextureManager().loadTexture(mReflectionTexture);
+
 		mBodyTexture = new Texture(256, 256, CandiConstants.GL_TEXTURE_OPTION);
+		mReflectionTexture.setName("Body: " + ((BaseModel) this.mModel).getTitleText());
 		mCandiPatchPresenter.getEngine().getTextureManager().loadTexture(mBodyTexture);
+
 		mHardwareTexturesInitialized = true;
 	}
 

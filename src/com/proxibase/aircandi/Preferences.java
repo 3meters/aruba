@@ -32,7 +32,7 @@ public class Preferences extends PreferenceActivity {
 			Tracker.trackPageView("/Preferences");
 		}
 		else {
-			addPreferencesFromResource(R.xml.preferences);
+			addPreferencesFromResource(R.xml.preferences_dev);
 			Tracker.trackPageView("/PreferencesDev");
 		}
 	}

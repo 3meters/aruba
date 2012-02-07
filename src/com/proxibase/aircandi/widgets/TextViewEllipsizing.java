@@ -113,6 +113,7 @@ public class TextViewEllipsizing extends TextView {
 		int maxLines = getMaxLines();
 		String workingText = fullText;
 		boolean ellipsized = false;
+		try {
 		if (maxLines != -1) {
 			Layout layout = createWorkingLayout(workingText);
 			if (layout.getLineCount() > maxLines) {
@@ -143,6 +144,13 @@ public class TextViewEllipsizing extends TextView {
 			for (EllipsizeListener listener : ellipsizeListeners) {
 				listener.ellipsizeStateChanged(ellipsized);
 			}
+		}
+		}
+		catch (Exception exception) {
+			/* 
+			 * Most likely happened because of rebuilding/recycling so we eat it
+			 * i.e. StringIndexOutOfBoundsException 
+			 */
 		}
 	}
 

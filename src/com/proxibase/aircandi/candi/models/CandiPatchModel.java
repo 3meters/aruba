@@ -242,7 +242,7 @@ public class CandiPatchModel extends Observable {
 		}
 	}
 
-	public void updateZonesNext(boolean navigating) {
+	public void updateZonesNext(Navigation navigation) {
 
 		/* Clear candies from zones that already exist (new ones might be created later). */
 		for (ZoneModel zoneModel : mZoneModels) {
@@ -284,7 +284,7 @@ public class CandiPatchModel extends Observable {
 				 * candi in zone one we make sure their focus stays on whatever candi
 				 * ends up in zone one next. Does not apply if we are drilling in.
 				 */
-				if (zoneIndex == 0 && focusedZoneIndex == 0 && mCandiRootNext.isSuperRoot()) {
+				if (zoneIndex == 0 && focusedZoneIndex == 0 && navigation == Navigation.None) {
 					mCandiModelFocused = candiModel;
 				}
 
@@ -315,7 +315,11 @@ public class CandiPatchModel extends Observable {
 		 * If needed, move the candi model with the current focus back to the
 		 * slot the user is currently looking at.
 		 */
-		if (mCandiModelFocused != null && (focusedZoneIndex != 0 || !mCandiRootNext.isSuperRoot())) {
+		boolean swappingEnabled = true;
+		if (mCandiModelFocused == null || (focusedZoneIndex == 0 && navigation != Navigation.None)) {
+			swappingEnabled = true;
+		}
+		if (swappingEnabled) {
 			if (!mCandiModelFocused.getZoneStateCurrent().getZone().isInactive() && !mCandiModelFocused.getZoneStateNext().getZone().isInactive()) {
 				if (mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex() != mCandiModelFocused.getZoneStateNext().getZone()
 						.getZoneIndex()) {
@@ -567,6 +571,12 @@ public class CandiPatchModel extends Observable {
 	public int getScreenWidth() {
 		return mScreenWidth;
 	}
+	
+	public enum Navigation {
+		Up,
+		Down,
+		None
+	}
 
 	class SortEntitiesByTagLevelDb implements Comparator<CandiModel> {
 
@@ -588,23 +598,23 @@ public class CandiPatchModel extends Observable {
 
 			Entity entity1 = object1.getEntity();
 			Entity entity2 = object2.getEntity();
-			if (!entity1.beacon.registered && entity2.beacon.registered)
-				return 1;
-			else if (!entity2.beacon.registered && entity1.beacon.registered)
+			
+			/* Rounded to produce a bucket that will get further sorted by recent activity */
+			if ((entity1.discoveryTime.getTime() / 1000) > (entity2.discoveryTime.getTime() / 1000)) {
 				return -1;
+			}
+			if ((entity1.discoveryTime.getTime() / 1000) < (entity2.discoveryTime.getTime() / 1000)) {
+				return 1;
+			}
 			else {
-				/* Rounded to produce a bucket that will get further sorted by recent activity */
-				if ((entity1.discoveryTime.getTime() / 1000) > (entity2.discoveryTime.getTime() / 1000))
+				if (entity1.modifiedDate > entity2.modifiedDate) {
 					return -1;
-				if ((entity1.discoveryTime.getTime() / 1000) < (entity2.discoveryTime.getTime() / 1000))
+				}
+				else if (entity1.modifiedDate < entity2.modifiedDate) {
 					return 1;
+				}
 				else {
-					if (entity1.modifiedDate > entity2.modifiedDate)
-						return -1;
-					else if (entity1.modifiedDate < entity2.modifiedDate)
-						return 1;
-					else
-						return 0;
+					return 0;
 				}
 			}
 		}

@@ -82,6 +82,7 @@ public class Aircandi extends Application {
 	public static Context					applicationContext;
 	public static Handler					applicationHandler;
 	private User							mUser;
+	private Boolean							mRebuildingDataModel			= false;
 	private Boolean							mToolstripOpen			= false;
 	private Boolean							mFirstTimeCandiForm		= true;
 	private CandiTask						mCandiTask				= CandiTask.RadarCandi;
@@ -251,6 +252,14 @@ public class Aircandi extends Application {
 
 	public Location getCurrentLocation() {
 		return mCurrentLocation;
+	}
+
+	public void setRebuildingDataModel(Boolean rebuildingDataModel) {
+		this.mRebuildingDataModel = rebuildingDataModel;
+	}
+
+	public Boolean isRebuildingDataModel() {
+		return mRebuildingDataModel;
 	}
 
 	public enum CandiTask {

@@ -7,6 +7,7 @@ import org.jsoup.nodes.Element;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -43,7 +44,7 @@ import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
-import com.proxibase.aircandi.components.NetworkManager.ResultCodeDetail;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
@@ -54,9 +55,9 @@ import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.consumer.Beacon.BeaconType;
 import com.proxibase.sdk.android.proxi.consumer.Entity.Visibility;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
@@ -71,6 +72,7 @@ public class EntityForm extends FormActivity {
 	private boolean				mUriValidated	= false;
 	private LocationManager		mLocationManager;
 	private LocationListener	mLocationListener;
+	private AsyncTask			mAsyncTask = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -491,13 +493,31 @@ public class EntityForm extends FormActivity {
 					 * The user could have moved since we grabbed the target beacon that
 					 * was passed to the form but we still target the beacon based on when
 					 * the create started.
+					 * 
+					 * Whether a beacon is registered is unknown if we didn't discover any associated
+					 * entities.
 					 */
-
+					
 					if (mCommon.mCommand.verb == CommandVerb.New && mBeacon != null && !mBeacon.registered) {
 
 						if (Aircandi.getInstance().getCurrentLocation() != null) {
 							mBeacon.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
 							mBeacon.longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
+							if (Aircandi.getInstance().getCurrentLocation().hasAltitude()) {
+								mBeacon.altitude = Aircandi.getInstance().getCurrentLocation().getAltitude();
+							}
+							if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
+								/* In meters. */
+								mBeacon.accuracy = Aircandi.getInstance().getCurrentLocation().getAccuracy();
+							}
+							if (Aircandi.getInstance().getCurrentLocation().hasBearing()) {
+								/* Direction of travel in degrees East of true North. */
+								mBeacon.bearing = Aircandi.getInstance().getCurrentLocation().getBearing();
+							}
+							if (Aircandi.getInstance().getCurrentLocation().hasSpeed()) {
+								/* Speed of the device over ground in meters/second. */
+								mBeacon.speed = Aircandi.getInstance().getCurrentLocation().getSpeed();
+							}
 						}
 
 						mBeacon.beaconType = BeaconType.Fixed.name().toLowerCase();
@@ -519,7 +539,8 @@ public class EntityForm extends FormActivity {
 						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 						/*
 						 * A beacon could show as not registered but still exist so check the
-						 * response we get from the service when an insert fails.
+						 * response we get from the service. A duplicate exception returns as success
+						 * and ResponseDetailCode = UpdateException.
 						 */
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 							mBeacon.registered = true;
@@ -616,8 +637,8 @@ public class EntityForm extends FormActivity {
 					ImageManager.getInstance().deleteImage(mCommon.mEntity.imagePreviewUri);
 					ImageManager.getInstance().deleteImage(mCommon.mEntity.imagePreviewUri + ".reflection");
 				}
-				catch (ProxibaseException exception) {
-					return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceException, null, exception);
+				catch (ProxibaseServiceException exception) {
+					return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
 				}
 			}
 		}
@@ -634,8 +655,8 @@ public class EntityForm extends FormActivity {
 					mCommon.mEntity.imageUri = mCommon.mEntity.imagePreviewUri;
 				}
 			}
-			catch (ProxibaseException exception) {
-				return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceException, null, exception);
+			catch (ProxibaseServiceException exception) {
+				return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
 			}
 		}
 		return serviceResponse;
@@ -731,8 +752,8 @@ public class EntityForm extends FormActivity {
 						 * removed and the cand view is killed or recycled
 						 */
 					}
-					catch (ProxibaseException exception) {
-						return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceException, null, exception);
+					catch (ProxibaseServiceException exception) {
+						return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
 					}
 				}
 
@@ -811,18 +832,33 @@ public class EntityForm extends FormActivity {
 		final EditText textDescription = (EditText) findViewById(R.id.text_content);
 
 		textUri.setText(linkUri);
-
-		new AsyncTask() {
+		
+		mAsyncTask = new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
+				mCommon.mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+
+					public void onCancel(DialogInterface dialog) {
+						mAsyncTask.cancel(true);
+						ImageUtils.showToastNotification("Validation canceled", Toast.LENGTH_SHORT);					}
+				});
 				mCommon.showProgressDialog(true, "Validating...");
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				ServiceResponse serviceResponse = validateUri(mTextUri.getText().toString());
+				if (!validateUriSyntax(linkUri)) {
+					ImageUtils.showToastNotification("Invalid link specified", Toast.LENGTH_SHORT);
+					return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ProtocolException, null, null);
+				}
+
+				ServiceRequest serviceRequest = new ServiceRequest();
+				serviceRequest.setUri(linkUri);
+				serviceRequest.setRequestType(RequestType.Get);
+				serviceRequest.setResponseFormat(ResponseFormat.Html);
+				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 				return serviceResponse;
 			}
 
@@ -830,18 +866,13 @@ public class EntityForm extends FormActivity {
 			protected void onPostExecute(Object result) {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-
 					mUriValidated = true;
 
 					/* We only push values if the user hasn't already supplied some */
-
 					Document document = Jsoup.parse((String) serviceResponse.data);
 
-					//if (textTitle.getText().toString().equals("")) {
 					((EditText) findViewById(R.id.text_title)).setText(document.title());
-					//}
-
-					//if (textDescription.getText().toString().equals("")) {
+					
 					String description = null;
 					Element element = document.select("meta[name=description]").first();
 					if (element != null) {
@@ -867,7 +898,6 @@ public class EntityForm extends FormActivity {
 					else {
 						((EditText) findViewById(R.id.text_content)).setText("");
 					}
-					//}
 				}
 				else {
 					ImageUtils.showToastNotification(getResources().getString(R.string.web_alert_website_unavailable),
@@ -883,7 +913,7 @@ public class EntityForm extends FormActivity {
 
 		if (!validateUriSyntax(linkUri)) {
 			ImageUtils.showToastNotification("Invalid link specified", Toast.LENGTH_SHORT);
-			return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ProtocolException, null, null);
+			return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ProtocolException, null, null);
 		}
 
 		ServiceRequest serviceRequest = new ServiceRequest();

@@ -23,9 +23,9 @@ import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.consumer.Beacon.BeaconState;
 import com.proxibase.sdk.android.proxi.consumer.Entity.EntityState;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.sdk.android.util.ProxiConstants;
@@ -163,9 +163,8 @@ public class ProxiExplorer {
 	 * Refreshes only beacons and entities that have been flagged as dirty.
 	 * 
 	 * @return Updated master entity list which includes all entities refreshed or not.
-	 * @throws ProxibaseException
+	 * @throws ProxibaseServiceException
 	 */
-
 	public ServiceResponse refreshDirtyEntities() {
 		/*
 		 * For beacons:
@@ -334,6 +333,9 @@ public class ProxiExplorer {
 				mBeacons.add(beaconNew);
 			}
 			else {
+				/*
+				 * Should we update the beacons levelDb
+				 */
 				beaconMatch.detectedLastPass = true;
 				beaconMatch.state = BeaconState.Normal;
 				beaconMatch.addScanPass(scanResult.level);
@@ -653,8 +655,9 @@ public class ProxiExplorer {
 		 * Entities are only New for the first scan that discovers them.
 		 */
 		float signalThresholdFluid = entity.signalFence;
-		if (oldIsHidden == false && entity.beacon.state != BeaconState.New)
+		if (oldIsHidden == false && entity.beacon.state != BeaconState.New) {
 			signalThresholdFluid = entity.signalFence - 5;
+		}
 
 		/* Hide entities that are not within entity declared virtual range */
 		if (Aircandi.settings.getBoolean(Preferences.PREF_ENTITY_FENCING, true) && beacon.getAvgBeaconLevel() < signalThresholdFluid) {
@@ -751,8 +754,9 @@ public class ProxiExplorer {
 		for (Beacon proxiBeacon : mBeacons)
 			for (Entity entity : proxiBeacon.entities) {
 				entitiesFlat.add(entity);
-				for (Entity childEntity : entity.children)
+				for (Entity childEntity : entity.children) {
 					entitiesFlat.add(childEntity);
+				}
 			}
 		return entitiesFlat;
 	}
@@ -766,9 +770,9 @@ public class ProxiExplorer {
 				demoBeacon = beacon;
 			}
 			else {
-				if (!beacon.id.equals(globalBssid) && beacon.levelDb > strongestLevelDb) {
+				if (!beacon.id.equals(globalBssid) && beacon.getAvgBeaconLevel() > strongestLevelDb) {
 					strongestBeacon = beacon;
-					strongestLevelDb = beacon.levelDb;
+					strongestLevelDb = beacon.getAvgBeaconLevel();
 				}
 			}
 		}
@@ -887,6 +891,6 @@ public class ProxiExplorer {
 		 * Called when the server-side Proxibase method fails.
 		 * Executed by a background thread: do not update the UI in this method.
 		 */
-		public void onProxibaseException(ProxibaseException exception);
+		public void onProxibaseServiceException(ProxibaseServiceException exception);
 	}
 }

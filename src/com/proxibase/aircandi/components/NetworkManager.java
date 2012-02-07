@@ -13,9 +13,10 @@ import android.widget.Toast;
 
 import com.proxibase.aircandi.R;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxiErrorCode;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorCode;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorType;
 
 public class NetworkManager {
 
@@ -92,59 +93,75 @@ public class NetworkManager {
 				}
 			}
 			Logger.d(this, "Connection exception: " + serviceRequest.getUri());
-			return new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ConnectionException, null, null);
+			return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ConnectionException, null, null);
 		}
 
-		/* We have a network connection so give it a try */
+		/* 
+		 * We have a network connection so give it a try. Request processing
+		 * will retry using an exponential backoff scheme if needed and possible. 
+		 */
 		try {
 			Object response = ProxibaseService.getInstance().request(serviceRequest);
-			return new ServiceResponse(ResponseCode.Success, ResultCodeDetail.Success, response, null);
+			return new ServiceResponse(ResponseCode.Success, ResponseCodeDetail.Success, response, null);
 		}
-		catch (ProxibaseException exception) {
-			
-			String notification = null;
-			ServiceResponse serviceResponse = null;
+		catch (ProxibaseServiceException exception) {
+			/*
+			 * We got a service side error that either stopped us in our tracks or
+			 * we gave up after performing a series or retries.
+			 */
+			String logMessage = null;
+			int toastMessageId = 0;
+			boolean suppressUI = serviceRequest.isSuppressUI();
+			ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
 
-			if (exception.getErrorCode() == ProxiErrorCode.IOException) {
-				/* Recoverable if the connection improves */
-				notification = "Transport exception: " + serviceRequest.getUri();
-				serviceResponse = new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.TransportException, null, exception);
-				if (!serviceRequest.isSuppressUI()) {
-					ImageUtils.showToastNotification(R.string.network_message_connection_poor, Toast.LENGTH_LONG);
+			if (exception.getErrorType() == ErrorType.Service) {
+				if (exception.getErrorCode() == ErrorCode.NotFoundException) {
+					logMessage = "Service not found exception: " + serviceRequest.getUri();
+					toastMessageId = R.string.network_message_service_notready;
+					serviceResponse.responseCodeDetail = ResponseCodeDetail.ServiceNotFoundException;
+				}
+				else if (exception.getErrorCode() == ErrorCode.UpdateException) {
+					logMessage = "Duplicate key: " + serviceRequest.getUri();
+					suppressUI = true;
+					serviceResponse.responseCode = ResponseCode.Success;
+					serviceResponse.responseCodeDetail = ResponseCodeDetail.UpdateException;
+				}
+				else {
+					logMessage = "Service exception: " + serviceRequest.getUri();
+					toastMessageId = R.string.network_message_service_error;
+					serviceResponse.responseCodeDetail = ResponseCodeDetail.ServiceException;
 				}
 			}
-			else if (exception.getErrorCode() == ProxiErrorCode.NotFoundException) {
-				/* Recoverable if the service is down and on the way back */
-				notification = "Service not found exception: " + serviceRequest.getUri();
-				serviceResponse = new ServiceResponse(ResponseCode.Recoverable, ResultCodeDetail.ServiceNotFoundException, null, exception);
-				if (!serviceRequest.isSuppressUI()) {
-					ImageUtils.showToastNotification(R.string.network_message_service_notready, Toast.LENGTH_LONG);
+			/*
+			 * Client errors occur when we are unable to get a response from a service, or when the client is unable to
+			 * understand a response from a service. This includes protocol, network and timeout errors.
+			 */
+			else if (exception.getErrorType() == ErrorType.Client) {
+				if (exception.getErrorCode() == ErrorCode.IOException) {
+					logMessage = "Transport exception: " + serviceRequest.getUri();
+					toastMessageId = R.string.network_message_connection_poor;
+					serviceResponse.responseCodeDetail = ResponseCodeDetail.TransportException;
+				}
+				else if (exception.getErrorCode() == ErrorCode.ClientProtocolException) {
+					logMessage = "Protocol exception: " + serviceRequest.getUri();
+					toastMessageId = R.string.network_message_client_error;
+					serviceResponse.responseCodeDetail = ResponseCodeDetail.ProtocolException;
+				}
+				else if (exception.getErrorCode() == ErrorCode.URISyntaxException) {
+					logMessage = "Uri syntax exception: " + serviceRequest.getUri();
+					toastMessageId = R.string.network_message_client_error;
+					serviceResponse.responseCodeDetail = ResponseCodeDetail.RequestException;
+				}
+				else {
+					logMessage = "Request exception: " + serviceRequest.getUri();
+					toastMessageId = R.string.network_message_client_error;
+					serviceResponse.responseCodeDetail = ResponseCodeDetail.RequestException;
 				}
 			}
-			else if (exception.getErrorCode() == ProxiErrorCode.AircandiServiceException) {
-				/* Unrecoverable */
-				notification = "Service exception: " + serviceRequest.getUri();
-				serviceResponse =  new ServiceResponse(ResponseCode.Unrecoverable, ResultCodeDetail.ServiceException, null, exception);
-				if (!serviceRequest.isSuppressUI()) {
-					ImageUtils.showToastNotification(R.string.network_message_service_error, Toast.LENGTH_LONG);
-				}
+			if (!suppressUI) {
+				ImageUtils.showToastNotification(toastMessageId, Toast.LENGTH_LONG);
 			}
-			else if (exception.getErrorCode() == ProxiErrorCode.ClientProtocolException) {
-				/* Unrecoverable */
-				Logger.d(this, "Protocol exception: " + serviceRequest.getUri());
-				Exceptions.Handle(exception);
-			}
-			else if (exception.getErrorCode() == ProxiErrorCode.URISyntaxException) {
-				/* Unrecoverable */
-				Logger.d(this, "URI syntax exception: " + serviceRequest.getUri());
-				Exceptions.Handle(exception);
-			}
-			else {
-				/* Unrecoverable */
-				Logger.d(this, "Unknown exception: " + serviceRequest.getUri());
-				Exceptions.Handle(exception);
-			}
-			Logger.w(this, notification);
+			Logger.w(this, logMessage);
 			return serviceResponse;
 		}
 	}
@@ -349,26 +366,35 @@ public class NetworkManager {
 
 	public static class ServiceResponse {
 
-		public Object				data;
-		public ResponseCode			responseCode			= ResponseCode.Success;
-		public ResultCodeDetail		resultCodeDetail	= ResultCodeDetail.Success;
-		public ProxibaseException	exception;
+		public Object						data;
+		public ResponseCode					responseCode		= ResponseCode.Success;
+		public ResponseCodeDetail			responseCodeDetail	= ResponseCodeDetail.Success;
+		public ProxibaseServiceException	exception;
 
 		public ServiceResponse() {}
 
-		public ServiceResponse(ResponseCode resultCode, ResultCodeDetail resultCodeDetail, Object data, ProxibaseException exception) {
+		public ServiceResponse(ResponseCode resultCode, ResponseCodeDetail responseCodeDetail, Object data, ProxibaseServiceException exception) {
 			this.responseCode = resultCode;
-			this.resultCodeDetail = resultCodeDetail;
+			this.responseCodeDetail = responseCodeDetail;
 			this.data = data;
 			this.exception = exception;
 		}
 	}
 
-	public enum ResultCodeDetail {
-		Success, ServiceException, ServiceNotFoundException, ConnectionException, TransportException, ProtocolException, UnknownException
+	public enum ResponseCode {
+		Success, Failed
 	}
 
-	public enum ResponseCode {
-		Success, Recoverable, Unrecoverable
+	public enum ResponseCodeDetail {
+		Success,
+		ServiceException,
+		RequestException,
+		ServiceNotFoundException,
+		UpdateException,
+		ConnectionException,
+		TransportException,
+		ProtocolException,
+		UnknownException
 	}
+
 }

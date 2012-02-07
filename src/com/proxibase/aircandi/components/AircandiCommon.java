@@ -84,7 +84,7 @@ public class AircandiCommon {
 
 	protected ImageView		mProgressIndicator;
 	protected ImageView		mButtonRefresh;
-	protected Dialog		mProgressDialog;
+	public Dialog		mProgressDialog;
 	public ActionsWindow	mActionsWindow;
 	public String			mPrefTheme;
 	public IconContextMenu	mIconContextMenu			= null;
@@ -145,8 +145,8 @@ public class AircandiCommon {
 		/* Dialogs */
 		mProgressDialog = new Dialog(mContext, R.style.progress_body);
 		mProgressDialog.setTitle(null);
-		mProgressDialog.setCancelable(false);
-		mProgressDialog.setCanceledOnTouchOutside(false);
+		mProgressDialog.setCancelable(true);
+		mProgressDialog.setCanceledOnTouchOutside(true);
 		mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 		mProgressDialog.setOnDismissListener(new OnDismissListener() {
 

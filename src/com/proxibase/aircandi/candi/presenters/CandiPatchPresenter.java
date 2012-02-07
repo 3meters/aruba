@@ -59,6 +59,7 @@ import com.proxibase.aircandi.candi.models.ZoneModel;
 import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
 import com.proxibase.aircandi.candi.models.CandiModel.ReasonInactive;
 import com.proxibase.aircandi.candi.models.CandiModel.Transition;
+import com.proxibase.aircandi.candi.models.CandiPatchModel.Navigation;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
 import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
 import com.proxibase.aircandi.candi.sprites.CameraTargetSprite;
@@ -146,6 +147,9 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Rendering timer */
 		mRenderingTimer = new RenderCountDownTimer(5000, 500);
+		
+		/* Textures */
+		loadHardwareTextures();
 
 		initialize();
 	}
@@ -171,8 +175,6 @@ public class CandiPatchPresenter implements Observer {
 		/* Resource references per theme */
 		loadStyles();
 
-		/* Textures */
-		loadTextures();
 		loadTextureSources();
 	}
 
@@ -506,15 +508,12 @@ public class CandiPatchPresenter implements Observer {
 			mCandiPatchModel.setCandiRootNext(candiRootNext);
 		}
 
-		/* Sort the candi by discovery time */
-		mCandiPatchModel.sortCandiModels(mCandiPatchModel.getCandiRootNext().getChildren());
-
 		/* Navigate to make sure we are completely configured */
-		navigateModel(mCandiPatchModel.getCandiRootNext(), delayObserverUpdate, fullUpdate, false);
+		navigateModel(mCandiPatchModel.getCandiRootNext(), delayObserverUpdate, fullUpdate, Navigation.None);
 
 	}
 
-	public void navigateModel(IModel candiRootNext, boolean delayObserverUpdate, boolean fullUpdate, boolean navigating) {
+	public void navigateModel(IModel candiRootNext, boolean delayObserverUpdate, boolean fullUpdate, Navigation navigation) {
 
 		long startTime = System.nanoTime();
 		Logger.d(null, "Starting model navigation.");
@@ -522,6 +521,11 @@ public class CandiPatchPresenter implements Observer {
 		mCandiPatchModel.setCandiRootNext(candiRootNext);
 
 		/* Need to sort the candi before assigning to zones */
+		/* Sort the candi by discovery time */
+		mCandiPatchModel.sortCandiModels(mCandiPatchModel.getCandiRootNext().getChildren());
+		for (IModel candiModel : mCandiPatchModel.getCandiRootNext().getChildren()) {
+			mCandiPatchModel.sortCandiModels(candiModel.getChildren());
+		}
 
 		/*
 		 * Set candi visible state, move candi to inactive zone if appropriate.
@@ -534,7 +538,7 @@ public class CandiPatchPresenter implements Observer {
 		 * needed to keep candi with focus in the zone the user is
 		 * slotted on. Set visible for zones based on candi count.
 		 */
-		mCandiPatchModel.updateZonesNext(navigating);
+		mCandiPatchModel.updateZonesNext(navigation);
 
 		/* Set x, y, scale and alignment for all candi */
 		mCandiPatchModel.updatePositionsNext();
@@ -551,12 +555,23 @@ public class CandiPatchPresenter implements Observer {
 		 * Reset focus to primary if we are navigating up to root and currently
 		 * focused on a child
 		 */
-		if (candiRootNext.isSuperRoot() && mCandiPatchModel.getCandiModelFocused() != null) {
+		if (navigation == Navigation.Up && mCandiPatchModel.getCandiModelFocused() != null) {
 			if (!mCandiPatchModel.getCandiModelFocused().getParent().isSuperRoot()) {
 				mCandiPatchModel.setCandiModelFocused((CandiModel) mCandiPatchModel.getCandiModelFocused().getParent());
 			}
 		}
+//		else if (navigation == Navigation.Down) {
+//			if (!mCandiPatchModel.getCandiModelFocused().getParent().isSuperRoot()) {
+//				mCandiPatchModel.setCandiModelFocused((CandiModel) mCandiPatchModel.getCandiModelFocused().getParent());
+//			}
+//		}
 
+		/* 
+		 * OK to stop blocking async processes that are on hold because the
+		 * data model is being rebuilt.
+		 */
+		Aircandi.getInstance().setRebuildingDataModel(false);
+		
 		/* For animations, we need to create views in advance. */
 		if (CandiConstants.TRANSITIONS_ACTIVE) {
 
@@ -651,12 +666,13 @@ public class CandiPatchPresenter implements Observer {
 			}
 
 			manageViews(false, true);
-			doZoneAnimations(navigating);
-			doTransitionAnimations(navigating);
+			doZoneAnimations(navigation);
+			doTransitionAnimations(navigation);
 		}
 
 		/* Candies come and go so make sure our zone positioning is correct */
 		ensureZoneFocus();
+		
 
 		/* Trigger epoch observer updates */
 		if (!delayObserverUpdate) {
@@ -1064,7 +1080,7 @@ public class CandiPatchPresenter implements Observer {
 
 									@Override
 									public void run() {
-										navigateModel(candiModel.getParent(), false, false, true);
+										navigateModel(candiModel.getParent(), false, false, Navigation.Down);
 										mIgnoreInput = false;
 									}
 								});
@@ -1082,7 +1098,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 		else {
 			if (candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Secondary) {
-				navigateModel(candiModel.getParent(), false, false, true);
+				navigateModel(candiModel.getParent(), false, false, Navigation.Down);
 				mIgnoreInput = false;
 			}
 			else {
@@ -1117,7 +1133,7 @@ public class CandiPatchPresenter implements Observer {
 	// Animation
 	// --------------------------------------------------------------------------------------------
 
-	private void doZoneAnimations(boolean navigating) {
+	private void doZoneAnimations(Navigation navigation) {
 		/*
 		 * This always gets called as part of a navigation operation either
 		 * drilling in or out.
@@ -1125,7 +1141,7 @@ public class CandiPatchPresenter implements Observer {
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
 			for (ZoneView zoneView : mZoneViews) {
 				if (zoneView.getModel() == zoneModel) {
-					if (navigating) {
+					if (navigation != Navigation.None) {
 						if (zoneModel.getCandiesNext().size() == 1 && zoneModel.getCandiesCurrent().size() > 1) {
 							synchronized (zoneModel.getViewModifiers()) {
 								zoneModel.getViewModifiers().addLast(
@@ -1163,7 +1179,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	private void doTransitionAnimations(boolean navigating) {
+	private void doTransitionAnimations(Navigation navigation) {
 		/*
 		 * Zone transitions
 		 * 
@@ -1548,8 +1564,9 @@ public class CandiPatchPresenter implements Observer {
 	// Textures
 	// --------------------------------------------------------------------------------------------
 
-	public void loadTextures() {
+	public void loadHardwareTextures() {
 		mTexture = new Texture(512, 512, CandiConstants.GL_TEXTURE_OPTION);
+		mTexture.setName("Global placeholder");
 		mEngine.getTextureManager().loadTexture(mTexture);
 	}
 

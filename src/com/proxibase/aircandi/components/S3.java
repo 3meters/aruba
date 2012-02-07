@@ -39,11 +39,11 @@ import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-
 import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxibaseException;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ProxiErrorCode;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorCode;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorType;
 
 public class S3 {
 
@@ -170,8 +170,8 @@ public class S3 {
 	}
 
 	/* Jayma: Added routines */
-	
-	public static void putImage(String imageKey, Bitmap bitmap) throws ProxibaseException {
+
+	public static void putImage(String imageKey, Bitmap bitmap) throws ProxibaseServiceException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
 		byte[] bitmapBytes = outputStream.toByteArray();
@@ -185,10 +185,10 @@ public class S3 {
 			S3.getInstance().setObjectAcl(CandiConstants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
 		}
 		catch (final AmazonServiceException exception) {
-			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.AmazonServiceException, exception);
+			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Service, ErrorCode.AmazonServiceException, exception);
 		}
 		catch (final AmazonClientException exception) {
-			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.AmazonClientException, exception);
+			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Client, ErrorCode.AmazonClientException, exception);
 		}
 		finally {
 			try {
@@ -196,22 +196,22 @@ public class S3 {
 				inputStream.close();
 			}
 			catch (IOException exception) {
-				throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.IOException, exception);
+				throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Client, ErrorCode.IOException, exception);
 			}
 		}
 	}
 
-	public static void deleteImage(String imageKey) throws ProxibaseException {
+	public static void deleteImage(String imageKey) throws ProxibaseServiceException {
 
 		/* If the image is stored with S3 then it will be deleted */
 		try {
 			S3.getInstance().deleteObject(CandiConstants.S3_BUCKET_IMAGES, imageKey);
 		}
 		catch (final AmazonServiceException exception) {
-			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.AmazonServiceException, exception);
+			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Service, ErrorCode.AmazonServiceException, exception);
 		}
 		catch (final AmazonClientException exception) {
-			throw new ProxibaseException(exception.getMessage(), ProxiErrorCode.AmazonClientException, exception);
+			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Client, ErrorCode.AmazonClientException, exception);
 		}
 	}
 
