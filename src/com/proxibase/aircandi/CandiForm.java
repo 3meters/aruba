@@ -193,7 +193,6 @@ public class CandiForm extends CandiActivity {
 	public ViewGroup buildCandiInfo(final Entity entity, final ViewGroup candiInfoView, boolean refresh) {
 
 		final WebImageView imageAuthor = (WebImageView) candiInfoView.findViewById(R.id.image_author);
-		final ImageView imageAuthorReflection = (ImageView) candiInfoView.findViewById(R.id.image_author_reflection);
 		final TextView title = (TextView) candiInfoView.findViewById(R.id.candi_info_title);
 		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_info_subtitle);
 		final WebImageView image = (WebImageView) candiInfoView.findViewById(R.id.candi_info_image);
@@ -215,9 +214,8 @@ public class CandiForm extends CandiActivity {
 				if (entity.author.imageUri != null && !entity.author.imageUri.equals("")) {
 					ImageRequestBuilder builder = new ImageRequestBuilder(imageAuthor);
 					builder.setFromUris(entity.author.imageUri, null);
-					builder.setMakeReflection(true);
 					ImageRequest imageRequest = builder.create();
-					imageAuthor.setImageRequest(imageRequest, imageAuthorReflection);
+					imageAuthor.setImageRequest(imageRequest);
 				}
 			}
 		}
@@ -226,10 +224,12 @@ public class CandiForm extends CandiActivity {
 
 		if (entity.imageUri != null || entity.linkUri != null) {
 			ImageRequestBuilder builder = new ImageRequestBuilder(image);
-			builder.setFromEntity(entity);
-			builder.setMakeReflection(true);
+			builder.setImageUri(entity.getMasterImageUri());
+			builder.setImageFormat(entity.getMasterImageFormat());
+			builder.setLinkZoom(entity.linkZoom);
+			builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
 			ImageRequest imageRequest = builder.create();
-			image.setImageRequest(imageRequest, null);
+			image.setImageRequest(imageRequest);
 			imageHolder.setVisibility(View.VISIBLE);
 		}
 		else {

@@ -43,7 +43,7 @@ public class Preferences extends PreferenceActivity {
 		overridePendingTransition(R.anim.browse_in, R.anim.form_out);
 	}
 
-	public enum PrefResponse {
+	public static enum PrefResponse {
 		None, Change, Refresh, Restart
 	}
 }

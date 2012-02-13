@@ -107,8 +107,8 @@
                         android:layout_width="100dp"
                         android:layout_height="100dp"
                         aircandi:layout="@layout/temp_webimageview_framed_fill"
-                        aircandi:minHeight="100dp"
-                        aircandi:minWidth="100dp"
+                        aircandi:maxWidth="100dp"
+                        aircandi:maxHeight="100dp"
                         android:scaleType="centerCrop"
                         android:tag="resource:placeholder_user" />
 

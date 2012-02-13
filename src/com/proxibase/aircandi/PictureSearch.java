@@ -7,6 +7,7 @@ import java.util.Properties;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,8 +48,8 @@ public class PictureSearch extends FormActivity {
 	private String					mQuery;
 	private LayoutInflater			mInflater;
 	private String					mTitleOptional;
-	private static long				PAGE_SIZE	= 20L;
-	private static long				LIST_MAX	= 100L;
+	private static long				PAGE_SIZE	= 30L;
+	private static long				LIST_MAX	= 300L;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -129,7 +130,7 @@ public class PictureSearch extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
-	
+
 	public void onSearchClick(View view) {
 
 		String query = mSearch.getText().toString();
@@ -171,7 +172,7 @@ public class PictureSearch extends FormActivity {
 		protected boolean cacheInBackground() {
 			/* What happens if there is a connectivity error? */
 			moreImages.clear();
-			moreImages = loadImages(mQuery, PAGE_SIZE, mOffset + 5);
+			moreImages = loadImages(mQuery, PAGE_SIZE, mOffset);
 			Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
 							+ " new total = "
 							+ String.valueOf(getWrappedAdapter().getCount() + moreImages.size()));
@@ -191,7 +192,7 @@ public class PictureSearch extends FormActivity {
 		}
 	}
 
-	public class ImageAdapter extends ArrayAdapter<ImageResult> {
+	private class ImageAdapter extends ArrayAdapter<ImageResult> {
 
 		public ImageAdapter(ArrayList<ImageResult> list) {
 			super(PictureSearch.this, 0, list);
@@ -216,16 +217,15 @@ public class PictureSearch extends FormActivity {
 
 			if (itemData != null) {
 				holder.data = itemData;
-				unbindDrawables(holder.itemImage);
-				holder.itemImage.setImageBitmap(null);
 				holder.itemImage.setTag(itemData.getThumbnail().getUrl());
+				holder.itemImage.setImageBitmap(null);
 				mDrawableManager.fetchDrawableOnThread(itemData.getThumbnail().getUrl(), holder);
 			}
 			return view;
 		}
 	}
 
-	public class ViewHolder {
+	public static class ViewHolder {
 
 		public ImageView	itemImage;
 		public Object		data;
@@ -257,6 +257,16 @@ public class PictureSearch extends FormActivity {
 			catch (Throwable e) {
 				// NOP
 			}
+		}
+	}
+
+	protected void unbindImageViewDrawables(ImageView imageView) {
+		if (imageView.getBackground() != null) {
+			imageView.getBackground().setCallback(null);
+		}
+		if (imageView.getDrawable() != null) {
+			imageView.getDrawable().setCallback(null);
+			((BitmapDrawable) imageView.getDrawable()).getBitmap().recycle();
 		}
 	}
 

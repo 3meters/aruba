@@ -99,7 +99,30 @@ public class WebImageView extends RelativeLayout {
 		}
 	}
 
-	public void setImageRequest(final ImageRequest imageRequest, final ImageView imageReflection) {
+	/**
+	 * Handles the image request to set the internal ImageView. Creates a separate
+	 * scaled bitmap based on maxWidth and maxHeight or defaults if not set. The original
+	 * bitmap supplied to satisfy the image request may be recycled. If an image
+	 * is not supplied by the image request, the standard broken image is used.
+	 * 
+	 * @param imageRequest
+	 * @param imageReflection
+	 */
+	public void setImageRequest(final ImageRequest imageRequest) {
+		setImageRequest(imageRequest, true);
+	}
+
+	/**
+	 * Handles the image request to set the internal ImageView. Creates a separate
+	 * scaled bitmap based on maxWidth and maxHeight or defaults if not set. The original
+	 * bitmap supplied to satisfy the image request may be recycled unless !okToRecycle. If an image
+	 * is not supplied by the image request, the standard broken image is used.
+	 * 
+	 * @param imageRequest
+	 * @param imageReflection
+	 * @param okToRecycle
+	 */
+	public void setImageRequest(final ImageRequest imageRequest, final boolean okToRecycle) {
 		mImageUri = imageRequest.getImageUri();
 
 		final RequestListener originalImageReadyListener = imageRequest.getRequestListener();
@@ -120,49 +143,73 @@ public class WebImageView extends RelativeLayout {
 
 			@Override
 			public void onComplete(Object response) {
-
-				/* Who's looking for imageUri? */
-
 				ServiceResponse serviceResponse = (ServiceResponse) response;
+
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 
 					final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+					final Bitmap bitmap = ((ImageResponse) serviceResponse.data).bitmap;
+
+					/* Make sure this is the right target for the image */
 					if (imageResponse.imageUri.equals(mImageUri)) {
 						mImageView.setTag(mImageUri);
 
-						if (imageResponse.bitmap != null) {
-							mThreadHandler.post(new Runnable() {
+						if (bitmap != null) {
 
-								@Override
-								public void run() {
-									if (imageRequest.getMakeReflection() && imageReflection != null) {
-										String cacheName = ImageManager.getInstance().resolveCacheName(imageRequest.getImageUri());
-										Bitmap bitmapReflection = ImageManager.getInstance().getImage(cacheName + ".reflection");
-										ImageUtils.showImageInImageView(imageResponse.bitmap, bitmapReflection, mImageView, imageReflection);
-									}
-									else {
-										ImageUtils.showImageInImageView(imageResponse.bitmap, mImageView);
-									}
+							if (okToRecycle) {
+								boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
+								final Bitmap bitmapScaled = scaleBitmap ? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true) : bitmap;
+								if (scaleBitmap) {
+									bitmap.recycle();
 								}
-							});
+								mThreadHandler.post(new Runnable() {
+
+									@Override
+									public void run() {
+										ImageUtils.showImageInImageView(bitmapScaled, mImageView);
+									}
+								});
+							}
+							else {
+								boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
+								final Bitmap bitmapScaled = scaleBitmap
+																		? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true)
+																		: Bitmap.createScaledBitmap(bitmap,
+																				CandiConstants.IMAGE_WIDTH_DEFAULT,
+																				CandiConstants.IMAGE_WIDTH_DEFAULT, true);
+
+								mThreadHandler.post(new Runnable() {
+
+									@Override
+									public void run() {
+										ImageUtils.showImageInImageView(bitmapScaled, mImageView);
+									}
+								});
+							}
+
 						}
 					}
 				}
 				else {
-					final Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
+					Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
+
 					if (bitmap != null) {
+
+						boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
+						final Bitmap bitmapScaled = scaleBitmap
+																? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true)
+																: Bitmap.createScaledBitmap(bitmap,
+																		CandiConstants.IMAGE_WIDTH_DEFAULT,
+																		CandiConstants.IMAGE_WIDTH_DEFAULT, true);
+
+						/* OK to recycle original because nothing else is dependent on it */
+						bitmap.recycle();
+
 						mThreadHandler.post(new Runnable() {
 
 							@Override
 							public void run() {
-								if (imageRequest.getMakeReflection() && imageReflection != null) {
-									String cacheName = ImageManager.getInstance().resolveCacheName(imageRequest.getImageUri());
-									Bitmap bitmapReflection = ImageManager.getInstance().getImage(cacheName + ".reflection");
-									ImageUtils.showImageInImageView(bitmap, bitmapReflection, mImageView, imageReflection);
-								}
-								else {
-									ImageUtils.showImageInImageView(bitmap, mImageView);
-								}
+								ImageUtils.showImageInImageView(bitmapScaled, mImageView);
 							}
 						});
 					}

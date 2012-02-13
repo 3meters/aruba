@@ -33,7 +33,7 @@ public class AircandiException extends Throwable {
 		return mInnerException;
 	}
 
-	public enum CandiErrorCode {
+	public static enum CandiErrorCode {
 		WifiDisabled, WifiEnabling, NetworkError, IOException, URISyntaxException, ClientProtocolException, UnsupportedEncodingException, IllegalStateException, OperationFailed, AmazonServiceException, AmazonClientException, FileNotFoundException, RejectedExecutionException
 	}
 }

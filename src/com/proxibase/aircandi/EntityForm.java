@@ -72,7 +72,7 @@ public class EntityForm extends FormActivity {
 	private boolean				mUriValidated	= false;
 	private LocationManager		mLocationManager;
 	private LocationListener	mLocationListener;
-	private AsyncTask			mAsyncTask = null;
+	private AsyncTask			mAsyncTask		= null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -296,7 +296,10 @@ public class EntityForm extends FormActivity {
 					else {
 
 						ImageRequestBuilder builder = new ImageRequestBuilder(mImagePicture);
-						builder.setFromEntity(entity);
+						builder.setImageUri(entity.getMasterImageUri());
+						builder.setImageFormat(entity.getMasterImageFormat());
+						builder.setLinkZoom(entity.linkZoom);
+						builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
 						builder.setRequestListener(new RequestListener() {
 
 							@Override
@@ -310,7 +313,7 @@ public class EntityForm extends FormActivity {
 						});
 
 						ImageRequest imageRequest = builder.create();
-						mImagePicture.setImageRequest(imageRequest, null);
+						mImagePicture.setImageRequest(imageRequest);
 					}
 				}
 			}
@@ -403,7 +406,34 @@ public class EntityForm extends FormActivity {
 
 	public void onSaveButtonClick(View view) {
 		mCommon.startTitlebarProgress();
-		doSave(true);
+		/*
+		 * The user could have moved since we grabbed the target beacon that
+		 * was passed to the form so we do a quick wifi sniff.
+		 */
+		if (mCommon.mCommand.verb == CommandVerb.New && mCommon.mEntity.parent == null) {
+			mCommon.showProgressDialog(true, "Scanning...");
+			ProxiExplorer.getInstance().quickScanForBeacons(new RequestListener() {
+
+				@Override
+				public void onComplete(Object response) {
+					ServiceResponse serviceResponse = (ServiceResponse) response;
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						/*
+						 * Doing a quick scan, find the strongest current beacon.
+						 * 
+						 * FIXME: Quick scan doesn't validate with the service so the 
+						 * beacon may be disabled so an insert would be rejected.
+						 */
+						Beacon beacon = ProxiExplorer.getInstance().getStrongestQuickBeacon();
+						mBeacon = beacon;
+						doSave(true);
+					}
+				}
+			});
+		}
+		else {
+			doSave(true);
+		}
 	}
 
 	public void onDeleteButtonClick(View view) {
@@ -490,20 +520,16 @@ public class EntityForm extends FormActivity {
 					});
 
 					/*
-					 * The user could have moved since we grabbed the target beacon that
-					 * was passed to the form but we still target the beacon based on when
-					 * the create started.
-					 * 
 					 * Whether a beacon is registered is unknown if we didn't discover any associated
 					 * entities.
 					 */
-					
 					if (mCommon.mCommand.verb == CommandVerb.New && mBeacon != null && !mBeacon.registered) {
 
 						if (Aircandi.getInstance().getCurrentLocation() != null) {
 							mBeacon.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
 							mBeacon.longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
 							if (Aircandi.getInstance().getCurrentLocation().hasAltitude()) {
+								/* In meters. */
 								mBeacon.altitude = Aircandi.getInstance().getCurrentLocation().getAltitude();
 							}
 							if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
@@ -533,7 +559,7 @@ public class EntityForm extends FormActivity {
 						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mBeacon.getCollection());
 						serviceRequest.setRequestType(RequestType.Insert);
 						serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mBeacon,
-								GsonType.ProxibaseService));
+										GsonType.ProxibaseService));
 						serviceRequest.setResponseFormat(ResponseFormat.Json);
 
 						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
@@ -628,20 +654,26 @@ public class EntityForm extends FormActivity {
 	protected ServiceResponse updateImages() {
 
 		/* Delete image from S3 if it has been orphaned */
+		/*
+		 * TODO: We are going with a garbage collection scheme for orphaned images. We
+		 * need to use an extended property on S3 items that is set to a date when
+		 * collection is ok. This allows downloaded entities to keep working even if
+		 * an image for entity has changed.
+		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
-		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
-			if (!mCommon.mEntity.imageUri.equals(mImageUriOriginal) && mCommon.mEntity.imagePreviewUri != null
-				&& !mCommon.mEntity.imagePreviewUri.equals("")) {
-				try {
-					S3.deleteImage(mCommon.mEntity.imagePreviewUri.substring(mCommon.mEntity.imagePreviewUri.lastIndexOf("/") + 1));
-					ImageManager.getInstance().deleteImage(mCommon.mEntity.imagePreviewUri);
-					ImageManager.getInstance().deleteImage(mCommon.mEntity.imagePreviewUri + ".reflection");
-				}
-				catch (ProxibaseServiceException exception) {
-					return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
-				}
-			}
-		}
+		//		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
+		//			if (!mCommon.mEntity.imageUri.equals(mImageUriOriginal) && mCommon.mEntity.imagePreviewUri != null
+		//				&& !mCommon.mEntity.imagePreviewUri.equals("")) {
+		//				try {
+		//					S3.deleteImage(mCommon.mEntity.imagePreviewUri.substring(mCommon.mEntity.imagePreviewUri.lastIndexOf("/") + 1));
+		//					ImageManager.getInstance().deleteImage(mCommon.mEntity.imagePreviewUri);
+		//					ImageManager.getInstance().deleteImage(mCommon.mEntity.imagePreviewUri + ".reflection");
+		//				}
+		//				catch (ProxibaseServiceException exception) {
+		//					return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
+		//				}
+		//			}
+		//		}
 
 		/* Put image to S3 if we have a new one. */
 		if (mCommon.mEntity.imageBitmap != null) {
@@ -832,7 +864,7 @@ public class EntityForm extends FormActivity {
 		final EditText textDescription = (EditText) findViewById(R.id.text_content);
 
 		textUri.setText(linkUri);
-		
+
 		mAsyncTask = new AsyncTask() {
 
 			@Override
@@ -841,7 +873,8 @@ public class EntityForm extends FormActivity {
 
 					public void onCancel(DialogInterface dialog) {
 						mAsyncTask.cancel(true);
-						ImageUtils.showToastNotification("Validation canceled", Toast.LENGTH_SHORT);					}
+						ImageUtils.showToastNotification("Validation canceled", Toast.LENGTH_SHORT);
+					}
 				});
 				mCommon.showProgressDialog(true, "Validating...");
 			}
@@ -872,7 +905,7 @@ public class EntityForm extends FormActivity {
 					Document document = Jsoup.parse((String) serviceResponse.data);
 
 					((EditText) findViewById(R.id.text_title)).setText(document.title());
-					
+
 					String description = null;
 					Element element = document.select("meta[name=description]").first();
 					if (element != null) {

@@ -82,7 +82,7 @@ public class AuthorBlock extends RelativeLayout {
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
 					builder.setFromUris(mAuthor.imageUri, mAuthor.linkUri);
 					ImageRequest imageRequest = builder.create();
-					mImageUser.setImageRequest(imageRequest, null);
+					mImageUser.setImageRequest(imageRequest);
 				}
 			}
 			if (mImageLocked != null) {
@@ -115,7 +115,7 @@ public class AuthorBlock extends RelativeLayout {
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
 					builder.setFromUris(mUser.imageUri, mUser.linkUri);
 					ImageRequest imageRequest = builder.create();
-					mImageUser.setImageRequest(imageRequest, null);
+					mImageUser.setImageRequest(imageRequest);
 				}
 			}
 		}

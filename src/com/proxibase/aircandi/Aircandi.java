@@ -262,7 +262,7 @@ public class Aircandi extends Application {
 		return mRebuildingDataModel;
 	}
 
-	public enum CandiTask {
+	public static enum CandiTask {
 		None, MyCandi, RadarCandi, Map
 	}
 

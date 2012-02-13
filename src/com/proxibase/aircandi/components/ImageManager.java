@@ -20,6 +20,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Bitmap.CompressFormat;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -55,7 +56,6 @@ public class ImageManager {
 	 */
 	private ImageManager() {
 		setImageLoader(new ImageLoader());
-		getImageLoader().setImageCache(mImageCache);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -168,9 +168,7 @@ public class ImageManager {
 		return bitmapBytes;
 	}
 
-	public Bitmap bitmapForByteArraySampled(byte[] imageBytes, ImageRequest imageRequest, int imageByteMax) {
-
-		//		if (imageBytes.length > imageByteMax) {
+	public Bitmap bitmapForByteArraySampled(byte[] imageBytes, ImageRequest imageRequest, int imageMemoryBytesMax) {
 
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
@@ -179,15 +177,16 @@ public class ImageManager {
 		/* Initial decode is just to get the bitmap dimensions */
 		BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
 
-		int width_tmp = options.outWidth, height_tmp = options.outHeight;
-		int originalSize = width_tmp * width_tmp;
+		int targetWidth = options.outWidth;
+		int targetHeight = options.outHeight;
+		int originalSize = (targetWidth * targetHeight) * 4;
 		int scale = 1;
 		while (true) {
-			if ((width_tmp * height_tmp) < imageByteMax) {
+			if ((targetWidth * targetHeight) * 4 < imageMemoryBytesMax) {
 				break;
 			}
-			width_tmp /= 2;
-			height_tmp /= 2;
+			targetWidth /= 2;
+			targetHeight /= 2;
 			scale *= 2;
 		}
 
@@ -195,11 +194,11 @@ public class ImageManager {
 		options.inJustDecodeBounds = false;
 
 		Bitmap bitmapSampled = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
-		int newSize = bitmapSampled.getHeight() * bitmapSampled.getWidth();
+		int newSize = (bitmapSampled.getHeight() * bitmapSampled.getWidth()) * 4;
 		if (newSize != originalSize) {
 			Logger.v(this, "Image downsampled: from " + String.valueOf(originalSize)
 							+ " to "
-							+ String.valueOf(bitmapSampled.getHeight() * bitmapSampled.getWidth())
+							+ String.valueOf(newSize)
 							+ ": "
 							+ imageRequest.getImageUri());
 		}
@@ -222,7 +221,7 @@ public class ImageManager {
 		int heightFinal = 0;
 
 		if (imageWidthMax.toLowerCase().equals("original")) {
-			if (imageBytes.length > CandiConstants.IMAGE_BYTES_MAX) {
+			if (imageBytes.length > CandiConstants.IMAGE_MEMORY_BYTES_MAX) {
 				float finWidth = 1000;
 				int sample = 0;
 
@@ -517,29 +516,45 @@ public class ImageManager {
 	// --------------------------------------------------------------------------------------------
 
 	public Bitmap getImage(String key) {
-		return mImageCache.get(key);
+		String keyHashed = Utilities.md5(key);		
+		return mImageCache.get(keyHashed);
 	}
 
 	public boolean hasImage(String key) {
-		return mImageCache.containsKey(key);
+		String keyHashed = Utilities.md5(key);
+		return mImageCache.containsKey(keyHashed);
 	}
 
 	public void deleteImage(String key) {
 		/* Removes the image from the memory and file caches. */
-		mImageCache.remove(key);
+		String keyHashed = Utilities.md5(key);
+		mImageCache.remove(keyHashed);
+	}
+
+	public void putImage(String key, Bitmap bitmap) {
+		String keyHashed = Utilities.md5(key);
+		mImageCache.put(keyHashed, bitmap);
+	}
+
+	public void putImage(String key, Bitmap bitmap, CompressFormat compressFormat) {
+		String keyHashed = Utilities.md5(key);
+		mImageCache.put(keyHashed, bitmap);
+	}
+
+	public void setFileCacheOnly(boolean fileCacheOnly) {
+		mImageCache.setFileCacheOnly(fileCacheOnly);
+	}
+
+	public void cleanCacheAsync(Context context) {
+		mImageCache.cleanCacheAsync(context);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Setters/Getters routines
 	// --------------------------------------------------------------------------------------------
 
-	public ImageCache getImageCache() {
-		return mImageCache;
-	}
-
 	public void setImageCache(ImageCache imageCache) {
 		mImageCache = imageCache;
-		getImageLoader().setImageCache(imageCache);
 	}
 
 	public void setImageLoader(ImageLoader imageLoader) {

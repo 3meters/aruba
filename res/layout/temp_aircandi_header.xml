@@ -86,6 +86,8 @@
             aircandi:busyWidth="30dp"
             android:clickable="true"
             aircandi:layout="@layout/temp_webimageview"
+            aircandi:maxHeight="40dp"
+            aircandi:maxWidth="40dp"
             android:onClick="onProfileClick"
             android:scaleType="centerCrop"
             aircandi:showBusy="true" />

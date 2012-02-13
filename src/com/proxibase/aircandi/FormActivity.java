@@ -187,7 +187,7 @@ public abstract class FormActivity extends Activity {
 		});
 
 		ImageRequest imageRequest = builder.create();
-		mImageRequestWebImageView.setImageRequest(imageRequest, null);
+		mImageRequestWebImageView.setImageRequest(imageRequest);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ public abstract class FormActivity extends Activity {
 					builder.setFromUris(imageUri, null);
 					ImageRequest imageRequest = builder.create();
 
-					mImageRequestWebImageView.setImageRequest(imageRequest, null);
+					mImageRequestWebImageView.setImageRequest(imageRequest);
 
 					if (mImageRequestListener != null) {
 						mImageRequestListener.onComplete(new ServiceResponse(), null, null, null);
@@ -324,7 +324,7 @@ public abstract class FormActivity extends Activity {
 					}
 					
 					ImageRequest imageRequest = builder.create();
-					mImageRequestWebImageView.setImageRequest(imageRequest, null);
+					mImageRequestWebImageView.setImageRequest(imageRequest, false);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {

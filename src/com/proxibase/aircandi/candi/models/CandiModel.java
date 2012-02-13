@@ -18,7 +18,7 @@ import com.proxibase.sdk.android.proxi.consumer.Entity;
 
 public class CandiModel extends BaseModel {
 
-	private Entity		mEntity		= null;
+	private Entity			mEntity				= null;
 	private int				mModelId;
 	private ZoneState		mZoneStateCurrent	= new ZoneState();
 	private ZoneState		mZoneStateNext		= new ZoneState();
@@ -26,6 +26,7 @@ public class CandiModel extends BaseModel {
 	private boolean			mTouchAreaActive	= false;
 	private boolean			mRookie				= true;
 	private boolean			mDeleted			= false;
+	private boolean			mMasterImageUpdated	= false;
 	private ReasonInactive	mReasonInactive		= ReasonInactive.None;
 
 	public CandiModel(int modelId, CandiPatchModel candiPatchModel) {
@@ -158,7 +159,6 @@ public class CandiModel extends BaseModel {
 		mEntity = entity;
 	}
 
-
 	public void setTouchAreaActive(boolean touchAreaActive) {
 		mTouchAreaActive = touchAreaActive;
 	}
@@ -228,7 +228,15 @@ public class CandiModel extends BaseModel {
 		return mDeleted;
 	}
 
-	public class ZoneState {
+	public void setMasterImageUpdated(boolean masterImageUpdated) {
+		this.mMasterImageUpdated = masterImageUpdated;
+	}
+
+	public boolean isMasterImageUpdated() {
+		return mMasterImageUpdated;
+	}
+
+	public static class ZoneState {
 
 		private ZoneModel		mZone		= null;
 		private ZoneStatus		mStatus		= ZoneStatus.Normal;

@@ -1,8 +1,8 @@
 package com.proxibase.aircandi.components;
 
-import com.proxibase.aircandi.components.ImageRequest.ImageFormat;
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.sdk.android.proxi.consumer.Entity;
+import com.proxibase.sdk.android.proxi.consumer.Entity.ImageFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 public class ImageRequestBuilder {
@@ -13,7 +13,6 @@ public class ImageRequestBuilder {
 	public ImageShape		mImageShape;
 	public Integer			mPriority;
 	public Integer			mScaleToWidth;
-	public Boolean			mMakeReflection;
 	public Boolean			mLinkZoom;
 	public Boolean			mLinkJavascriptEnabled;
 	public Boolean			mUpdateCache;
@@ -50,9 +49,6 @@ public class ImageRequestBuilder {
 		if (mScaleToWidth != null) {
 			imageRequest.setScaleToWidth(mScaleToWidth);
 		}
-		if (mMakeReflection != null) {
-			imageRequest.setMakeReflection(mMakeReflection);
-		}
 		if (mLinkZoom != null) {
 			imageRequest.setLinkZoom(mLinkZoom);
 		}
@@ -71,31 +67,31 @@ public class ImageRequestBuilder {
 		return imageRequest;
 	}
 
-	public void setFromEntity(Entity entity) {
-		if (entity.imagePreviewUri != null && !entity.imagePreviewUri.equals("")) {
-			this.mImageUri = entity.imagePreviewUri;
-			this.mImageFormat = ImageFormat.Binary;
-		}
-		else if (entity.linkUri != null && !entity.linkUri.equals("")) {
-			this.mImageUri = entity.linkUri;
-			this.mImageFormat = ImageFormat.Html;
-			this.mLinkZoom = entity.linkZoom;
-			this.mLinkJavascriptEnabled = entity.linkJavascriptEnabled;
-		}
-		else if (entity.author != null) {
-			if (entity.author.imageUri != null && !entity.author.imageUri.equals("")) {
-				this.mImageUri = entity.author.imageUri;
-				this.mImageFormat = ImageFormat.Binary;
-			}
-			else if (entity.author.linkUri != null && !entity.author.linkUri.equals("")) {
-				this.mImageUri = entity.author.linkUri;
-				this.mImageFormat = ImageFormat.Html;
-				this.mLinkZoom = entity.linkZoom;
-				this.mLinkJavascriptEnabled = entity.linkJavascriptEnabled;
-			}
-		}
-	}
-	
+//	public void setFromEntity(Entity entity) {
+//		if (entity.imagePreviewUri != null && !entity.imagePreviewUri.equals("")) {
+//			this.mImageUri = entity.imagePreviewUri;
+//			this.mImageFormat = ImageFormat.Binary;
+//		}
+//		else if (entity.linkUri != null && !entity.linkUri.equals("")) {
+//			this.mImageUri = entity.linkUri;
+//			this.mImageFormat = ImageFormat.Html;
+//			this.mLinkZoom = entity.linkZoom;
+//			this.mLinkJavascriptEnabled = entity.linkJavascriptEnabled;
+//		}
+//		else if (entity.author != null) {
+//			if (entity.author.imageUri != null && !entity.author.imageUri.equals("")) {
+//				this.mImageUri = entity.author.imageUri;
+//				this.mImageFormat = ImageFormat.Binary;
+//			}
+//			else if (entity.author.linkUri != null && !entity.author.linkUri.equals("")) {
+//				this.mImageUri = entity.author.linkUri;
+//				this.mImageFormat = ImageFormat.Html;
+//				this.mLinkZoom = entity.linkZoom;
+//				this.mLinkJavascriptEnabled = entity.linkJavascriptEnabled;
+//			}
+//		}
+//	}
+
 	public static String getImageUriFromEntity(Entity entity) {
 		String imageUri = null;
 		if (entity.imagePreviewUri != null && !entity.imagePreviewUri.equals("")) {
@@ -153,11 +149,6 @@ public class ImageRequestBuilder {
 
 	public ImageRequestBuilder setScaleToWidth(Integer scaleToWidth) {
 		this.mScaleToWidth = scaleToWidth;
-		return this;
-	}
-
-	public ImageRequestBuilder setMakeReflection(Boolean makeReflection) {
-		this.mMakeReflection = makeReflection;
 		return this;
 	}
 

@@ -386,11 +386,11 @@ public class ZoneModel extends BaseModel {
 		return mInactive;
 	}
 
-	public enum ZoneAlignment {
+	public static enum ZoneAlignment {
 		None, Bottom, Center, Left, Right, Top
 	}
 
-	public enum ZoneStatus {
+	public static enum ZoneStatus {
 		Primary, Secondary, Normal
 	}
 }

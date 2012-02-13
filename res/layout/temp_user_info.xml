@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" >
 
@@ -11,6 +12,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginRight="5dp"
+        aircandi:maxHeight="40dp"
+        aircandi:maxWidth="40dp"
         android:scaleType="centerCrop" />
 
     <TextView
@@ -39,13 +42,13 @@
         android:id="@+id/image_locked"
         android:layout_width="10dp"
         android:layout_height="10dp"
-        android:padding="1dp"
+        android:layout_alignBottom="@+id/text_user_timesince"
+        android:layout_alignTop="@+id/text_user_timesince"
         android:layout_marginLeft="4dp"
         android:layout_toRightOf="@+id/text_user_timesince"
-        android:layout_alignTop="@+id/text_user_timesince"
-        android:layout_alignBottom="@+id/text_user_timesince"
-        android:visibility="gone"
+        android:padding="1dp"
         android:scaleType="centerCrop"
-        android:src="?attr/iconLocked" />
+        android:src="?attr/iconLocked"
+        android:visibility="gone" />
 
 </RelativeLayout>

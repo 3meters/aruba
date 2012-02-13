@@ -359,7 +359,7 @@ public class AircandiCommon {
 			ImageRequestBuilder builder = new ImageRequestBuilder(imageView);
 			builder.setFromUris(imageUri, linkUri);
 			ImageRequest imageRequest = builder.create();
-			imageView.setImageRequest(imageRequest, null);
+			imageView.setImageRequest(imageRequest);
 		}
 	}
 
@@ -519,7 +519,7 @@ public class AircandiCommon {
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
 
-	public enum ActionButtonSet {
+	public static enum ActionButtonSet {
 		Radar, CandiForm, CandiList, CommentList
 	}
 

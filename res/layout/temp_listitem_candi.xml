@@ -22,7 +22,8 @@
         android:layout_alignParentTop="true"
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
-        android:scaleType="centerCrop" />
+        aircandi:maxHeight="60dp"
+        aircandi:maxWidth="60dp" />
 
     <TextView
         android:id="@+id/item_title"
@@ -76,8 +77,8 @@
             android:layout_height="wrap_content"
             android:clickable="true"
             android:gravity="left"
-            android:paddingTop="5dp"
             android:onClick="onCommentsClick"
+            android:paddingTop="5dp"
             android:text="0 Comments" />
     </LinearLayout>
 

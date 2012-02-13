@@ -1,7 +1,7 @@
 package com.proxibase.aircandi.components;
 
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.lang.ref.SoftReference;
+import java.util.HashMap;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,17 +18,26 @@ import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
 
 public class DrawableManager {
+	/*
+	 * Serves up BitmapDrawables but caches just the bitmap. The cache holds
+	 * a soft reference to the bitmap that allows the gc to collect it if memory
+	 * needs to be freed. If collected, we download the bitmap again.
+	 */
 
-	private final Map	drawableMap;
+	private final HashMap<String, SoftReference<Bitmap>>	bitmapCache;
 
 	public DrawableManager() {
-		drawableMap = new WeakHashMap();
+		bitmapCache = new HashMap<String, SoftReference<Bitmap>>();
 	}
 
 	public void fetchDrawableOnThread(final String uri, final PictureSearch.ViewHolder holder) {
-		if (drawableMap.containsKey(uri)) {
-			ImageUtils.showDrawableInImageView((Drawable) drawableMap.get(uri), holder.itemImage, false);
-			return;
+
+		synchronized (bitmapCache) {
+			if (bitmapCache.containsKey(uri) && bitmapCache.get(uri).get() != null) {
+				BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmapCache.get(uri).get());
+				ImageUtils.showDrawableInImageView(bitmapDrawable, holder.itemImage, false);
+				return;
+			}
 		}
 
 		final Handler handler = new Handler() {
@@ -71,7 +80,7 @@ public class DrawableManager {
 				throw new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);
 			}
 			BitmapDrawable drawable = new BitmapDrawable(bitmap);
-			drawableMap.put(uri, drawable);
+			bitmapCache.put(uri, new SoftReference(bitmap));
 			return drawable;
 		}
 		return null;

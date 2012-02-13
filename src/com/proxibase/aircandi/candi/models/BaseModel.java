@@ -144,7 +144,7 @@ public abstract class BaseModel extends Observable implements IModel {
 		return mViewActions;
 	}
 
-	public class ViewState {
+	public static class ViewState {
 
 		private float	mX;
 		private float	mY;
@@ -178,16 +178,21 @@ public abstract class BaseModel extends Observable implements IModel {
 		}
 
 		private boolean isOutsideHalo(Camera camera) {
-			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
-			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
-//			if (haloMinX < 0) {
-//				haloMaxX += Math.abs(haloMinX);
-//				haloMinX = 0;
-//			}
-//			else if (haloMaxX > lastX) {
-//				haloMinX -= Math.abs(lastX - haloMaxX);
-//				haloMaxX = lastX;
-//			}
+//			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
+//			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
+
+			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * camera.getWidth());
+			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * camera.getWidth());
+			
+			
+			//			if (haloMinX < 0) {
+			//				haloMaxX += Math.abs(haloMinX);
+			//				haloMinX = 0;
+			//			}
+			//			else if (haloMaxX > lastX) {
+			//				haloMinX -= Math.abs(lastX - haloMaxX);
+			//				haloMaxX = lastX;
+			//			}
 
 			return mX + (mWidth * mScale) < haloMinX || mX > haloMaxX;
 		}
@@ -341,7 +346,7 @@ public abstract class BaseModel extends Observable implements IModel {
 
 	}
 
-	public enum ModelType {
+	public static enum ModelType {
 		Root, Entity
 	}
 }

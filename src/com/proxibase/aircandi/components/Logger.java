@@ -19,7 +19,7 @@ public class Logger {
 	private static int		LOG_LEVEL		= Log.VERBOSE;
 	private static boolean	INCLUDE_MODULE	= false;
 
-	private enum LogLevel {
+	private static enum LogLevel {
 		Error,
 		Warning,
 		Info,

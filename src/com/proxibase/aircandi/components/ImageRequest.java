@@ -3,6 +3,7 @@ package com.proxibase.aircandi.components;
 import android.graphics.Bitmap;
 
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.sdk.android.proxi.consumer.Entity.ImageFormat;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 public class ImageRequest {
@@ -14,7 +15,6 @@ public class ImageRequest {
 	private ImageShape		mImageShape				= ImageShape.Square;
 	private Integer			mPriority				= 1;
 	private Integer			mScaleToWidth			= CandiConstants.IMAGE_WIDTH_DEFAULT;
-	private Boolean			mMakeReflection			= false;
 	private Boolean			mLinkZoom				= false;
 	private Boolean			mLinkJavascriptEnabled	= false;
 	private Boolean			mUpdateCache			= true;
@@ -76,14 +76,6 @@ public class ImageRequest {
 		this.mScaleToWidth = scaleToWidth;
 	}
 
-	public Boolean getMakeReflection() {
-		return this.mMakeReflection;
-	}
-
-	public void setMakeReflection(Boolean makeReflection) {
-		this.mMakeReflection = makeReflection;
-	}
-
 	public Boolean getLinkZoom() {
 		return this.mLinkZoom;
 	}
@@ -135,11 +127,7 @@ public class ImageRequest {
 		}
 	}
 
-	public enum ImageFormat {
-		Binary, Html
-	}
-
-	public enum ImageShape {
+	public static enum ImageShape {
 		Native, Square
 	}
 }

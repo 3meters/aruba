@@ -76,6 +76,7 @@ import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.BitmapTextureSource;
 import com.proxibase.aircandi.components.CandiList;
 import com.proxibase.aircandi.components.CountDownTimer;
+import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
@@ -91,7 +92,7 @@ public class CandiPatchPresenter implements Observer {
 	public CandiPatchModel			mCandiPatchModel;
 	private HashMap					mCandiViewsActiveHash	= new HashMap();
 	public List<ZoneView>			mZoneViews				= new ArrayList<ZoneView>();
-	public CandiViewPool			mCandiViewPool;
+	private CandiViewPool			mCandiViewPool;
 
 	private GestureDetector			mGestureDetector;
 	public boolean					mIgnoreInput			= false;
@@ -147,7 +148,7 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Rendering timer */
 		mRenderingTimer = new RenderCountDownTimer(5000, 500);
-		
+
 		/* Textures */
 		loadHardwareTextures();
 
@@ -460,6 +461,16 @@ public class CandiPatchPresenter implements Observer {
 				candiRootNext.getChildren().add(candiModel);
 			}
 			else {
+				/*
+				 * We keep bumping the date up until the entity is finally
+				 * visible.
+				 */
+				if (entity.rookie) {
+					entity.discoveryTime = DateUtils.nowDate();
+					if (!entity.hidden) {
+						entity.rookie = false;
+					}
+				}
 				candiModel = CandiModelFactory.newCandiModel(entity.id, entity, mCandiPatchModel);
 				candiModel.setDisplayExtra(mCandiActivity.mPrefDisplayExtras);
 				mCandiPatchModel.addCandiModel(candiModel);
@@ -476,6 +487,12 @@ public class CandiPatchPresenter implements Observer {
 					childCandiModel.setParent(candiModel);
 				}
 				else {
+					if (childEntity.rookie) {
+						childEntity.discoveryTime = DateUtils.nowDate();
+						if (!childEntity.hidden) {
+							childEntity.rookie = false;
+						}
+					}
 					childCandiModel = CandiModelFactory.newCandiModel(childEntity.id, childEntity, mCandiPatchModel);
 					childCandiModel.setDisplayExtra(mCandiActivity.mPrefDisplayExtras);
 					mCandiPatchModel.addCandiModel(childCandiModel);
@@ -560,18 +577,18 @@ public class CandiPatchPresenter implements Observer {
 				mCandiPatchModel.setCandiModelFocused((CandiModel) mCandiPatchModel.getCandiModelFocused().getParent());
 			}
 		}
-//		else if (navigation == Navigation.Down) {
-//			if (!mCandiPatchModel.getCandiModelFocused().getParent().isSuperRoot()) {
-//				mCandiPatchModel.setCandiModelFocused((CandiModel) mCandiPatchModel.getCandiModelFocused().getParent());
-//			}
-//		}
+		//		else if (navigation == Navigation.Down) {
+		//			if (!mCandiPatchModel.getCandiModelFocused().getParent().isSuperRoot()) {
+		//				mCandiPatchModel.setCandiModelFocused((CandiModel) mCandiPatchModel.getCandiModelFocused().getParent());
+		//			}
+		//		}
 
-		/* 
+		/*
 		 * OK to stop blocking async processes that are on hold because the
 		 * data model is being rebuilt.
 		 */
 		Aircandi.getInstance().setRebuildingDataModel(false);
-		
+
 		/* For animations, we need to create views in advance. */
 		if (CandiConstants.TRANSITIONS_ACTIVE) {
 
@@ -672,7 +689,6 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Candies come and go so make sure our zone positioning is correct */
 		ensureZoneFocus();
-		
 
 		/* Trigger epoch observer updates */
 		if (!delayObserverUpdate) {
@@ -751,6 +767,10 @@ public class CandiPatchPresenter implements Observer {
 	public void update(Observable observable, Object data) {}
 
 	public class CandiViewPool extends GenericPool<CandiView> {
+
+		/*
+		 * Only used internally
+		 */
 
 		public CandiViewPool(int initialSize, int growth) {
 			super(initialSize, growth);
@@ -934,7 +954,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	public class ManageViewsThread extends Thread {
+	private class ManageViewsThread extends Thread {
 
 		@Override
 		public void run() {
@@ -1080,6 +1100,7 @@ public class CandiPatchPresenter implements Observer {
 
 									@Override
 									public void run() {
+										mCandiActivity.showButtonCandi(false);
 										navigateModel(candiModel.getParent(), false, false, Navigation.Down);
 										mIgnoreInput = false;
 									}
@@ -1092,12 +1113,12 @@ public class CandiPatchPresenter implements Observer {
 						}
 
 						@Override
-						public void onMoveStarted() {
-						}
+						public void onMoveStarted() {}
 					});
 		}
 		else {
 			if (candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Secondary) {
+				mCandiActivity.showButtonCandi(false);
 				navigateModel(candiModel.getParent(), false, false, Navigation.Down);
 				mIgnoreInput = false;
 			}
@@ -1164,11 +1185,13 @@ public class CandiPatchPresenter implements Observer {
 							 * We don't show it because it causes a flash when it pops in and
 							 * is then replace by a cand fade in.
 							 */
-							if (zoneModel.getCandiesNext().size() > 1 || !zoneView.isVisibleToCamera(mCamera)) {
-								synchronized (zoneModel.getViewModifiers()) {
-									zoneModel.getViewModifiers().addLast(
-											new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f,
-													CandiConstants.EASE_FADE_IN));
+							if (!zoneModel.getViewStateCurrent().isVisible()) {
+								if (zoneModel.getCandiesNext().size() > 1 || !zoneView.isVisibleToCamera(mCamera)) {
+									synchronized (zoneModel.getViewModifiers()) {
+										zoneModel.getViewModifiers().addLast(
+												new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f,
+														CandiConstants.EASE_FADE_IN));
+									}
 								}
 							}
 						}
@@ -1293,6 +1316,7 @@ public class CandiPatchPresenter implements Observer {
 			if (zone.isOccupiedNext()) {
 
 				for (CandiModel candiModel : zone.getCandiesNext()) {
+
 					synchronized (candiModel.getViewModifiers()) {
 						if (candiModel.getViewModifiers().isEmpty()) {
 
@@ -1369,6 +1393,16 @@ public class CandiPatchPresenter implements Observer {
 
 								}
 							}
+						}
+					}
+
+					/*
+					 * If the candi is staying visible and has an image change then refresh texture
+					 */
+					if (candiModel.getViewStateNext().isVisible() && candiModel.isMasterImageUpdated()) {
+						synchronized (candiModel.getViewActions()) {
+							candiModel.getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
+							candiModel.setMasterImageUpdated(false);
 						}
 					}
 				}
@@ -1768,6 +1802,14 @@ public class CandiPatchPresenter implements Observer {
 		return mCommon;
 	}
 
+	public void setCandiViewPool(CandiViewPool candiViewPool) {
+		this.mCandiViewPool = candiViewPool;
+	}
+
+	public CandiViewPool getCandiViewPool() {
+		return mCandiViewPool;
+	}
+
 	public boolean isRenderingActive() {
 		return mRenderingActive;
 	}
@@ -1811,13 +1853,12 @@ public class CandiPatchPresenter implements Observer {
 		return mRenderingTimer.getMillisUntilFinished();
 	}
 
-	public class RenderCountDownTimer extends CountDownTimer {
+	private class RenderCountDownTimer extends CountDownTimer {
 
+		/*
+		 * Only used interally
+		 */
 		private long	mMillisUntilFinished;
-
-		public RenderCountDownTimer(long millisInFuture) {
-			this(millisInFuture, millisInFuture);
-		}
 
 		public RenderCountDownTimer(long millisInFuture, long countDownInterval) {
 			super(millisInFuture, countDownInterval);
@@ -1841,7 +1882,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	class SingleTapGestureDetector implements GestureDetector.OnGestureListener {
+	private class SingleTapGestureDetector implements GestureDetector.OnGestureListener {
 
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -1952,7 +1993,8 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	class DoubleTapGestureDetector extends SimpleOnGestureListener {
+	@SuppressWarnings("unused")
+	private class DoubleTapGestureDetector extends SimpleOnGestureListener {
 
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {

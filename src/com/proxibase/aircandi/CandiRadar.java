@@ -83,6 +83,7 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.TextureReset;
 import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
@@ -176,7 +177,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	private Boolean						mReadyToRun				= false;
 	private Boolean						mFullUpdateSuccess		= false;
 	private Boolean						mScanActive				= false;
-	private Handler						mMyHandler				= new Handler();
+	private Handler						mHandler				= new Handler();
 	public static BasicAWSCredentials	mAwsCredentials			= null;
 
 	public Boolean						mPrefAutoscan			= false;
@@ -201,7 +202,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	private PackageReceiver				mPackageReceiver		= new PackageReceiver();
 	private boolean						mUsingEmulator			= false;
 	private Runnable					mScanRunnable;
-
 	private Options						mScanOptions;
 
 	@Override
@@ -255,11 +255,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				if (mCandiPatchModel == null
 						|| mCandiPatchModel.getCandiRootCurrent() == null
 						|| mCandiPatchModel.getCandiRootCurrent().isSuperRoot()) {
-					scanForBeacons(new Options(false, false), false);
+					scanForBeacons(new Options(false, false, false));
 				}
 				else if (mPrefAutoscan) {
 					Logger.d(this, "Scheduling an autoscan in: " + mPrefAutoscanInterval + " ms");
-					mMyHandler.postDelayed(mScanRunnable, Integer.parseInt(mPrefAutoscanInterval));
+					mHandler.postDelayed(mScanRunnable, Integer.parseInt(mPrefAutoscanInterval));
 				}
 			}
 		};
@@ -296,7 +296,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		/* Image cache */
 		ImageManager.getInstance().setImageCache(new ImageCache(getApplicationContext(), CandiConstants.CACHE_PATH, 100, 16));
-		ImageManager.getInstance().getImageCache().setFileCacheOnly(true);
+		ImageManager.getInstance().setFileCacheOnly(true);
 		ImageManager.getInstance().getImageLoader().setWebView((WebView) findViewById(R.id.webview));
 		ImageManager.getInstance().setActivity(this);
 		ImageManager.getInstance().setDisplayMetrics(getResources().getDisplayMetrics());
@@ -372,6 +372,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				&& mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
 			mCandiPatchPresenter.renderingActivate();
 			mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, Navigation.Up);
+			mHandler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					showButtonCandi(true);
+				}
+			}, 500);
+
 		}
 		else {
 			super.onBackPressed();
@@ -432,8 +440,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Tracker.trackEvent("Clicks", "Button", "refresh", 0);
 
 		if (mReadyToRun) {
-			doRefresh(RefreshType.BeaconScanPlusCurrent);
-			//			doRefresh(RefreshType.BeaconScanPlusCurrent);
+			doRefresh(RefreshType.BeaconScanPlusCurrent, null);
 		}
 		updateDebugInfo();
 	}
@@ -467,7 +474,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	// Entity routines
 	// --------------------------------------------------------------------------------------------
 
-	private void scanForBeacons(final Options options, final boolean showProgress) {
+	private void scanForBeacons(final Options options) {
 
 		/*
 		 * Everything associated with this call is on the main thread but the
@@ -476,7 +483,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 */
 
 		/* Make sure there aren't any extra runnables waiting to run */
-		mMyHandler.removeCallbacks(mScanRunnable);
+		mHandler.removeCallbacks(mScanRunnable);
 
 		/* Check that wifi is enabled and we have a network connection */
 		mScanOptions = options;
@@ -488,8 +495,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			public void onWifiReady() {
 
 				/* Time to turn on the progress indicators */
-				if (showProgress) {
-					mCommon.showProgressDialog(true, "Searching...");
+				if (options.showProgress) {
+					mCommon.showProgressDialog(true, "Scanning...");
 					if (!isVisibleEntity() && mCandiPatchPresenter != null) {
 						mCandiPatchPresenter.renderingActivate(30000);
 					}
@@ -565,7 +572,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 										 */
 										if (mPrefAutoscan) {
 											Logger.d(this, "Scheduling an autoscan in: " + mPrefAutoscanInterval + " ms");
-											mMyHandler.postDelayed(mScanRunnable, Integer.parseInt(mPrefAutoscanInterval));
+											mHandler.postDelayed(mScanRunnable, Integer.parseInt(mPrefAutoscanInterval));
 										}
 										mScanActive = false;
 									}
@@ -589,7 +596,40 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		});
 	}
 
-	public class BeaconScanWatcher {
+	private boolean rookieHit(List<Entity> entities) {
+		boolean rookieHit = false;
+		for (Entity entity : entities) {
+			/*
+			 * We keep bumping the date up until the entity is finally
+			 * visible.
+			 */
+			if (mCandiPatchModel.hasCandiModelForEntity(entity.id)) {
+				CandiModel candiModelManaged = mCandiPatchModel.getCandiModels().getByKey(String.valueOf(entity.id));
+				Entity originalEntity = candiModelManaged.getEntity();
+				if (originalEntity.hidden && !entity.hidden) {
+					rookieHit = true;
+				}
+			}
+			else {
+				if (!entity.hidden) {
+					rookieHit = true;
+					break;
+				}
+				for (Entity childEntity : entity.children) {
+					if (!childEntity.hidden) {
+						rookieHit = true;
+						break;
+					}
+				}
+				if (rookieHit) {
+					break;
+				}
+			}
+		}
+		return rookieHit;
+	}
+
+	private class BeaconScanWatcher {
 
 		private Options	mOptions;
 
@@ -643,38 +683,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 							if (serviceResponse.responseCode == ResponseCode.Success) {
 
 								List<Entity> entities = ProxiExplorer.getInstance().mEntities;
-								/*
-								 * Set discovery time. Our goal is to base it on when the
-								 * user first sees it. So found but hidden doesn't count.
-								 * Rookie gets set to false on second time around for an entity.
-								 */
-								boolean rookieHit = false;
-								for (Entity entity : entities) {
-									/*
-									 * We keep bumping the date up until the entity is finally
-									 * visible.
-									 */
-									if (entity.rookie) {
-										entity.discoveryTime = DateUtils.nowDate();
-										if (!entity.hidden) {
-											entity.rookie = false;
-											rookieHit = true;
-										}
-									}
-									for (Entity childEntity : entity.children) {
-										/*
-										 * We keep bumping the date up until the entity is finally
-										 * visible.
-										 */
-										if (childEntity.rookie) {
-											childEntity.discoveryTime = DateUtils.nowDate();
-											if (!childEntity.hidden) {
-												childEntity.rookie = false;
-												rookieHit = true;
-											}
-										}
-									}
-								}
+
+								/* Check to see if there is a brand new entity in the collection */
+								boolean rookieHit = rookieHit(entities);
 
 								/* Check to see if we have any visible entities */
 								boolean visibleEntity = false;
@@ -687,7 +698,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 								if (visibleEntity) {
 									mCandiPatchPresenter.renderingActivate();
+
 									doUpdateEntities(entities, mScanOptions.refreshAllBeacons, false);
+
 									Logger.d(this, "Model updated with entities");
 									mCandiPatchPresenter.renderingActivate(5000);
 									if (mScanOptions.refreshAllBeacons) {
@@ -761,28 +774,28 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		mCandiPatchPresenter.updateCandiData(mEntities, fullUpdate, delayObserverUpdate);
 	}
 
-	private void doRefresh(RefreshType refreshType) {
+	public void doRefresh(RefreshType refreshType, Options options) {
 
 		NetworkManager.getInstance().reset();
 		if (!mFullUpdateSuccess) {
 			Logger.i(this, "User starting first beacon scan");
 			Tracker.trackEvent("Search", "Refresh", "All", 0);
-			scanForBeacons(new Options(true, false), true);
+			scanForBeacons(options == null ? new Options(true, false, true) : options);
 		}
 		else if (refreshType == RefreshType.All) {
 			Logger.i(this, "User starting full beacon scan");
 			Tracker.trackEvent("Search", "Refresh", "All", 0);
-			scanForBeacons(new Options(true, false), true);
+			scanForBeacons(options == null ? new Options(true, false, true) : options);
 		}
 		else if (refreshType == RefreshType.AutoScan) {
 			Logger.i(this, "User starting lightweight beacon scan");
 			Tracker.trackEvent("Search", "Refresh", "BeaconScan", 0);
-			scanForBeacons(new Options(false, false), false);
+			scanForBeacons(options == null ? new Options(false, false, false) : options);
 		}
 		else if (refreshType == RefreshType.BeaconScan) {
 			Logger.i(this, "User starting lightweight beacon scan");
 			Tracker.trackEvent("Search", "Refresh", "BeaconScan", 0);
-			scanForBeacons(new Options(false, false), true);
+			scanForBeacons(options == null ? new Options(false, false, true) : options);
 		}
 		else if (refreshType == RefreshType.BeaconScanPlusCurrent) {
 
@@ -791,21 +804,30 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			final CandiModel candiModelFocused = mCandiPatchModel.getCandiModelFocused();
 
 			if (candiModelFocused == null || !candiModelFocused.getViewStateCurrent().isVisible()) {
-				scanForBeacons(new Options(false, false), true);
+				scanForBeacons(options == null ? new Options(false, false, true) : options);
 			}
 			else {
 				final int idOfEntityToRefresh = candiModelFocused.getEntity().id;
+
+				for (Entity entity : ProxiExplorer.getInstance().getEntitiesFlat()) {
+					if (entity.id.equals(idOfEntityToRefresh)) {
+						entity.dirty = true;
+					}
+				}
+
 				Logger.i(this, "User starting current entity refresh");
 
 				/*
 				 * This will come back before we really know if the candi we want to
 				 * refresh textures for is still around.
 				 */
-				scanForBeacons(new Options(false, true), true);
+				scanForBeacons(options == null ? new Options(false, true, true) : options);
 
 				/* Scan could have caused the current candi to go away or be hidden */
 				Entity entity = ProxiExplorer.getInstance().getEntityById(idOfEntityToRefresh);
-				if (entity != null && !entity.hidden) {
+
+				/* We refresh the image if it's using a linkUri */
+				if (entity != null && !entity.hidden && entity.linkUri != null && !entity.linkUri.equals("")) {
 
 					/* Refresh candi view texture */
 					Logger.v(this, "Update texture: " + candiModelFocused.getTitleText());
@@ -819,11 +841,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 					for (IModel childModel : candiModelFocused.getChildren()) {
 						CandiModel childCandiModel = (CandiModel) childModel;
-						synchronized (childCandiModel.getViewActions()) {
-							childCandiModel.getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
+						Entity childEntity = childCandiModel.getEntity();
+						if (childEntity != null && !childEntity.hidden && childEntity.linkUri != null && !childEntity.linkUri.equals("")) {
+							synchronized (childCandiModel.getViewActions()) {
+								childCandiModel.getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
+							}
+							childCandiModel.setChanged();
+							childCandiModel.update();
 						}
-						childCandiModel.setChanged();
-						childCandiModel.update();
 					}
 				}
 			}
@@ -1136,24 +1161,25 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
 				((TextView) tableRow.findViewById(R.id.text_label)).setText("Candi pooled: ");
-				if (mCandiPatchPresenter != null && mCandiPatchPresenter.mCandiViewPool != null) {
-					candiPooledCount = mCandiPatchPresenter.mCandiViewPool.pooledCount();
-					((TextView) tableRow.findViewById(R.id.text_value)).setText(String.valueOf(mCandiPatchPresenter.mCandiViewPool.pooledCount()));
+				if (mCandiPatchPresenter != null && mCandiPatchPresenter.getCandiViewPool() != null) {
+					candiPooledCount = mCandiPatchPresenter.getCandiViewPool().pooledCount();
+					((TextView) tableRow.findViewById(R.id.text_value))
+							.setText(String.valueOf(mCandiPatchPresenter.getCandiViewPool().pooledCount()));
 				}
 				table.addView(tableRow, tableLp);
 
 				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
 				((TextView) tableRow.findViewById(R.id.text_label)).setText("Candi loaned: ");
-				if (mCandiPatchPresenter != null && mCandiPatchPresenter.mCandiViewPool != null) {
-					candiLoanedCount = mCandiPatchPresenter.mCandiViewPool.loanedCount();
+				if (mCandiPatchPresenter != null && mCandiPatchPresenter.getCandiViewPool() != null) {
+					candiLoanedCount = mCandiPatchPresenter.getCandiViewPool().loanedCount();
 					((TextView) tableRow.findViewById(R.id.text_value))
-							.setText(String.valueOf(mCandiPatchPresenter.mCandiViewPool.loanedCount()));
+							.setText(String.valueOf(mCandiPatchPresenter.getCandiViewPool().loanedCount()));
 				}
 				table.addView(tableRow, tableLp);
 
 				tableRow = (TableRow) getLayoutInflater().inflate(R.layout.temp_tablerow_debug, null);
 				((TextView) tableRow.findViewById(R.id.text_label)).setText("Zones: ");
-				if (mCandiPatchPresenter != null && mCandiPatchPresenter.mCandiViewPool != null) {
+				if (mCandiPatchPresenter != null && mCandiPatchPresenter.getCandiViewPool() != null) {
 					((TextView) tableRow.findViewById(R.id.text_value)).setText(String.valueOf(mCandiPatchPresenter.mZoneViews.size()));
 					zones = mCandiPatchPresenter.mZoneViews.size();
 				}
@@ -1181,6 +1207,26 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 				((RelativeLayout) findViewById(R.id.debug_section_two)).addView(table);
 			}
+		}
+	}
+
+	public void showButtonCandi(boolean show) {
+		View buttonFrame = (View) findViewById(R.id.button_layer);
+		if (show) {
+			buttonFrame.setAnimation(null);
+			Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+			animation.setFillEnabled(true);
+			animation.setFillAfter(true);
+			buttonFrame.startAnimation(animation);
+			//buttonFrame.setVisibility(View.VISIBLE);
+		}
+		else {
+			buttonFrame.setAnimation(null);
+			Animation animation = AnimUtils.loadAnimation(R.anim.fade_out_medium);
+			animation.setFillEnabled(true);
+			animation.setFillAfter(true);
+			buttonFrame.startAnimation(animation);
+			//buttonFrame.setVisibility(View.INVISIBLE);
 		}
 	}
 
@@ -1539,14 +1585,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 			if (mFirstRun) {
 				Logger.i(this, "Starting first run full beacon scan");
-				scanForBeacons(new Options(true, false), true);
+				scanForBeacons(new Options(true, false, true));
 				mFirstRun = false;
 			}
 			else {
 				PrefResponse prefResponse = updatePreferences();
 				if (prefResponse == PrefResponse.Refresh) {
 					Logger.i(this, "Starting full beacon scan because of preference change");
-					scanForBeacons(new Options(true, false), true);
+					scanForBeacons(new Options(true, false, true));
 				}
 				else if (prefResponse == PrefResponse.Restart) {
 					mCommon.reload();
@@ -1618,12 +1664,12 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			/* Restart autoscan if enabled */
 			if (hasWindowFocus) {
 				if (mPrefAutoscan) {
-					mMyHandler.post(mScanRunnable);
+					mHandler.post(mScanRunnable);
 				}
 			}
 			else {
 				/* Make sure autoscan is stopped if we are not in the foreground */
-				mMyHandler.removeCallbacks(mScanRunnable);
+				mHandler.removeCallbacks(mScanRunnable);
 			}
 		}
 	}
@@ -1816,14 +1862,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		super.onWindowFocusChanged(false);
 
 		/* Make sure autoscan is stopped if we are not in the foreground */
-		mMyHandler.removeCallbacks(mScanRunnable);
+		mHandler.removeCallbacks(mScanRunnable);
 
 		if (CandiConstants.DEBUG_TRACE) {
 			Debug.stopMethodTracing();
 		}
 
 		/* Start thread to check and manage the file cache. */
-		ImageManager.getInstance().getImageLoader().getImageCache().cleanCacheAsync(getApplicationContext());
+		ImageManager.getInstance().cleanCacheAsync(getApplicationContext());
 	}
 
 	@Override
@@ -1861,18 +1907,18 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			prefResponse = PrefResponse.Change;
 			mPrefAutoscan = Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false);
 			if (mPrefAutoscan) {
-				mMyHandler.post(mScanRunnable);
+				mHandler.post(mScanRunnable);
 			}
 			else {
-				mMyHandler.removeCallbacks(mScanRunnable);
+				mHandler.removeCallbacks(mScanRunnable);
 			}
 		}
 		if (!mPrefAutoscanInterval.equals(Aircandi.settings.getString(Preferences.PREF_AUTOSCAN_INTERVAL, "5000"))) {
 			prefResponse = PrefResponse.Change;
 			mPrefAutoscanInterval = Aircandi.settings.getString(Preferences.PREF_AUTOSCAN_INTERVAL, "5000");
 			if (mPrefAutoscan) {
-				mMyHandler.removeCallbacks(mScanRunnable);
-				mMyHandler.post(mScanRunnable);
+				mHandler.removeCallbacks(mScanRunnable);
+				mHandler.post(mScanRunnable);
 			}
 		}
 		if (!mPrefDisplayExtras.equals(DisplayExtra.valueOf(Aircandi.settings.getString(Preferences.PREF_DISPLAY_EXTRAS, "None")))) {
@@ -1921,11 +1967,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		if (item.getItemId() == RefreshType.BeaconScanPlusCurrent.ordinal()) {
-			doRefresh(RefreshType.BeaconScanPlusCurrent);
+			doRefresh(RefreshType.BeaconScanPlusCurrent, null);
 		}
 		else if (item.getItemId() == RefreshType.All.ordinal()) {
 			mFullUpdateSuccess = false;
-			doRefresh(RefreshType.All);
+			doRefresh(RefreshType.All, null);
 		}
 		else {
 			return false;
@@ -2037,7 +2083,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		}
 	}
 
-	public enum AnimType {
+	public static enum AnimType {
 		Fade,
 		CrossFade,
 		CrossFadeFlipper,
@@ -2046,13 +2092,13 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Zoom
 	}
 
-	public enum PagerView {
+	public static enum PagerView {
 		CandiInfo,
 		CandiList,
 		CandiInfoChild
 	}
 
-	public enum Theme {
+	public static enum Theme {
 		Blueray,
 		Midnight,
 		Serene,
@@ -2060,7 +2106,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Snow
 	}
 
-	public enum RefreshType {
+	public static enum RefreshType {
 		AutoScan,
 		BeaconScan,
 		BeaconScanPlusCurrent,

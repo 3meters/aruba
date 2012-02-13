@@ -15,7 +15,6 @@ import android.widget.ViewFlipper;
 
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
-import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
@@ -193,7 +192,7 @@ public class ProfileForm extends FormActivity {
 				});
 
 				ImageRequest imageRequest = builder.create();
-				mImageUser.setImageRequest(imageRequest, null);
+				mImageUser.setImageRequest(imageRequest);
 			}
 		}
 	}
@@ -278,19 +277,26 @@ public class ProfileForm extends FormActivity {
 	protected ServiceResponse updateImages() {
 
 		/* Delete image from S3 if it has been orphaned */
+		/*
+		 * TODO: We are going with a garbage collection scheme for orphaned images. We
+		 * need to use an extended property on S3 items that is set to a date when
+		 * collection is ok. This allows downloaded entities to keep working even if 
+		 * an image for entity has changed.
+		 */
+		
 		ServiceResponse serviceResponse = new ServiceResponse();
-		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
-			if (!mUser.imageUri.equals(mImageUriOriginal)) {
-				try {
-					S3.deleteImage(mImageUriOriginal.substring(mImageUriOriginal.lastIndexOf("/") + 1));
-					ImageManager.getInstance().deleteImage(mImageUriOriginal);
-					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
-				}
-				catch (ProxibaseServiceException exception) {
-					return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
-				}
-			}
-		}
+//		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
+//			if (!mUser.imageUri.equals(mImageUriOriginal)) {
+//				try {
+//					S3.deleteImage(mImageUriOriginal.substring(mImageUriOriginal.lastIndexOf("/") + 1));
+//					ImageManager.getInstance().deleteImage(mImageUriOriginal);
+//					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
+//				}
+//				catch (ProxibaseServiceException exception) {
+//					return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
+//				}
+//			}
+//		}
 
 		/* Put image to S3 if we have a new one. */
 		if (mUser.imageBitmap != null) {

@@ -24,7 +24,6 @@ import com.proxibase.aircandi.core.CandiConstants;
 public class ImageUtils {
 
 	private static Paint			mPaint	= new Paint();
-	//private static Canvas			mCanvas	= new Canvas();
 	private static LinearGradient	mShader	= new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x88ffffff, 0x00ffffff,
 													TileMode.CLAMP);
 
@@ -147,7 +146,6 @@ public class ImageUtils {
 		canvas.setBitmap(reflectionBitmap);
 
 		/* Set the paint to use this shader (linear gradient) */
-		//LinearGradient shader = new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x88ffffff, 0x00ffffff, TileMode.CLAMP);
 		mPaint.setShader(mShader);
 
 		/* Set the Transfer mode to be porter duff and destination in */
@@ -172,60 +170,21 @@ public class ImageUtils {
 	}
 
 	public static void showImageInImageView(Bitmap bitmap, ImageView imageView) {
-		showImageInImageView(bitmap, null, imageView, null);
-	}
-
-	public static void showImageInImageView(Bitmap bitmap, Bitmap bitmapReflection, ImageView imageView, ImageView imageViewReflection) {
-		//		if (imageView.getDrawable() != null) {
-		//			imageView.setImageBitmap(bitmap);
-		//			if (bitmapReflection != null && imageViewReflection != null) {
-		//				imageViewReflection.setImageBitmap(bitmapReflection);
-		//			}
-		//		}
-		//		else {
-
 		imageView.setImageBitmap(bitmap);
 		Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
 		animation.setFillEnabled(true);
 		animation.setFillAfter(true);
 		imageView.startAnimation(animation);
-
-		if (bitmapReflection != null && imageViewReflection != null) {
-			imageViewReflection.setImageBitmap(bitmapReflection);
-			imageViewReflection.startAnimation(animation);
-		}
-		//		}
 	}
 
 	public static void showDrawableInImageView(Drawable drawable, ImageView imageView, boolean animate) {
-		showDrawableInImageView(drawable, null, imageView, null, animate);
-	}
-
-	public static void showDrawableInImageView(final Drawable drawable, final Drawable drawableReflection, final ImageView imageView,
-			final ImageView imageViewReflection,
-			final boolean animate) {
-
-//		/* We could get called from a thread other than the main UI thread */
-//		Aircandi.applicationHandler.post(new Runnable() {
-//
-//			@Override
-//			public void run() {
-				imageView.setImageDrawable(drawable);
-				Animation animation = null;
-				if (animate) {
-					animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
-					animation.setFillEnabled(true);
-					animation.setFillAfter(true);
-					imageView.startAnimation(animation);
-				}
-
-				if (drawableReflection != null && imageViewReflection != null) {
-					imageViewReflection.setImageDrawable(drawableReflection);
-					if (animate) {
-						imageViewReflection.startAnimation(animation);
-					}
-				}
-//			}
-//		});
+		imageView.setImageDrawable(drawable);
+		Animation animation = null;
+		if (animate) {
+			animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+			animation.setFillEnabled(true);
+			animation.setFillAfter(true);
+			imageView.startAnimation(animation);
+		}
 	}
 }

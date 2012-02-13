@@ -138,7 +138,7 @@ public class SignUpForm extends FormActivity {
 				});
 
 				ImageRequest imageRequest = builder.create();
-				mImageUser.setImageRequest(imageRequest, null);
+				mImageUser.setImageRequest(imageRequest);
 			}
 		}
 	}

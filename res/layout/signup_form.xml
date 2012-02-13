@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-     >
+    android:layout_height="fill_parent" >
 
     <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
 
@@ -86,6 +86,8 @@
                     android:id="@+id/image_picture"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
+                    aircandi:maxHeight="100dp"
+                    aircandi:maxWidth="100dp"
                     android:tag="resource:placeholder_user" />
 
                 <Button

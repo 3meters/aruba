@@ -16,10 +16,11 @@
         android:id="@+id/item_author_image"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:scaleType="centerCrop"
         android:layout_alignParentTop="true"
         android:layout_marginRight="10dp"
-        android:layout_marginTop="5dp" />
+        android:layout_marginTop="5dp"
+        aircandi:maxHeight="60dp"
+        aircandi:maxWidth="60dp" />
 
     <RelativeLayout
         android:id="@+id/group_author"

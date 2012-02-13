@@ -13,6 +13,7 @@ import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.components.CandiList;
+import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.sdk.android.proxi.consumer.Entity;
 
@@ -128,7 +129,7 @@ public class CandiPatchModel extends Observable {
 		/*
 		 * This only gets called when doing a partial update and a candi model already exists. A partial
 		 * update only pulls in entities for new beacons but does not pick up service side changes for the
-		 * entitis for old beacons. There can however be local changes to existing entities which include
+		 * entities for old beacons. There can however be local changes to existing entities which include
 		 * hidden status based on signal fencing and visibleTime property.
 		 */
 
@@ -139,22 +140,38 @@ public class CandiPatchModel extends Observable {
 		 * - Beacon properties (these get pulled in with the entity)
 		 */
 
-		/* Transfer the entire entity proxy */
+		/*
+		 * Transfer the entire entity proxy.
+		 * 
+		 * Before we replace the old entity, we need to note any changes that should
+		 * be flagged for later handling.
+		 */
 		CandiModel candiModelManaged = mCandiModels.getByKey(String.valueOf(entity.id));
+		Entity originalEntity = candiModelManaged.getEntity();
+		if (!entity.getMasterImageUri().equals(originalEntity.getMasterImageUri())) {
+			candiModelManaged.setMasterImageUpdated(true);
+		}
+		
+		entity.rookie = originalEntity.rookie;
+		entity.discoveryTime = originalEntity.discoveryTime;
+		if (entity.rookie) {
+			entity.discoveryTime = DateUtils.nowDate();
+			if (!entity.hidden) {
+				entity.rookie = false;
+			}
+		}
+
 		candiModelManaged.setEntity(entity);
 		candiModelManaged.setTitleText(entity.label);
 
 		if (candiModelManaged.getReasonInactive() != ReasonInactive.Navigation) {
-			if (entity.hidden)
+			if (entity.hidden) {
 				candiModelManaged.getViewStateNext().setVisible(false);
-			else
+			}
+			else {
 				candiModelManaged.getViewStateNext().setVisible(true);
+			}
 		}
-
-		//		if (candiModelManaged.getViewStateCurrent().isVisible()) {
-		//			candiModelManaged.setRookie(false);
-		//			candiModelManaged.getEntity().rookie = false;
-		//		}
 
 		candiModelManaged.setDisplayExtra(displayExtra);
 
@@ -315,10 +332,11 @@ public class CandiPatchModel extends Observable {
 		 * If needed, move the candi model with the current focus back to the
 		 * slot the user is currently looking at.
 		 */
-		boolean swappingEnabled = true;
-		if (mCandiModelFocused == null || (focusedZoneIndex == 0 && navigation != Navigation.None)) {
+		boolean swappingEnabled = false;
+		if (mCandiModelFocused == null || (focusedZoneIndex == 0 && navigation != Navigation.None) || focusedZoneIndex != 0) {
 			swappingEnabled = true;
 		}
+		
 		if (swappingEnabled) {
 			if (!mCandiModelFocused.getZoneStateCurrent().getZone().isInactive() && !mCandiModelFocused.getZoneStateNext().getZone().isInactive()) {
 				if (mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex() != mCandiModelFocused.getZoneStateNext().getZone()
@@ -571,8 +589,8 @@ public class CandiPatchModel extends Observable {
 	public int getScreenWidth() {
 		return mScreenWidth;
 	}
-	
-	public enum Navigation {
+
+	public static enum Navigation {
 		Up,
 		Down,
 		None
@@ -598,7 +616,7 @@ public class CandiPatchModel extends Observable {
 
 			Entity entity1 = object1.getEntity();
 			Entity entity2 = object2.getEntity();
-			
+
 			/* Rounded to produce a bucket that will get further sorted by recent activity */
 			if ((entity1.discoveryTime.getTime() / 1000) > (entity2.discoveryTime.getTime() / 1000)) {
 				return -1;

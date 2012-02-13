@@ -39,6 +39,9 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="top"
+                    aircandi:maxHeight="80dp"
+                    aircandi:maxWidth="80dp"
+                        
                         android:paddingTop="5dp" />
 
                     <ImageView

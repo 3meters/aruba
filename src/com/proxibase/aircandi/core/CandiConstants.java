@@ -68,7 +68,7 @@ public interface CandiConstants {
 	public static final int				TWO_MINUTES							= 1000 * 60 * 2;
 	public static final int				FIVE_MINUTES						= 1000 * 60 * 5;
 
-	public static final int				IMAGE_BYTES_MAX						= 500000;
+	public static final int				IMAGE_MEMORY_BYTES_MAX				= 2048000;
 	public static final Config			IMAGE_CONFIG_DEFAULT				= Config.ARGB_8888;
 	public static final int				IMAGE_WIDTH_SMALL					= 60;
 	public static final int				IMAGE_WIDTH_DEFAULT					= 250;

@@ -564,9 +564,11 @@ public class CandiView extends BaseView implements OnGestureListener {
 			final Entity entity = candiModel.getEntity();
 
 			final ImageRequestBuilder builder = new ImageRequestBuilder(this);
-			builder.setFromEntity(entity);
+			builder.setImageUri(entity.getMasterImageUri());
+			builder.setImageFormat(entity.getMasterImageFormat());
+			builder.setLinkZoom(entity.linkZoom);
+			builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
 			builder.setSearchCache(!skipCache);
-			builder.setMakeReflection(true);
 			builder.setRequestListener(new RequestListener() {
 
 				@Override
@@ -688,7 +690,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		if (reflectionBitmap == null) {
 			if (bodyBitmap != null && !bodyBitmap.isRecycled()) {
 				reflectionBitmap = ImageUtils.makeReflection(bodyBitmap, true);
-				ImageManager.getInstance().getImageCache().put(cacheName + ".reflection", reflectionBitmap, CompressFormat.PNG);
+				ImageManager.getInstance().putImage(cacheName + ".reflection", reflectionBitmap, CompressFormat.PNG);
 			}
 		}
 

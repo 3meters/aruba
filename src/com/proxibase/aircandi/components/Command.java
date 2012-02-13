@@ -33,7 +33,7 @@ public class Command {
 		this.iconResourceId = iconResourceId;
 	}
 
-	public enum CommandVerb {
+	public static enum CommandVerb {
 		None, View, Edit, New, Dialog
 	}
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -147,7 +148,7 @@ public class CommentList extends CandiActivity {
 	// Inner classes/enums
 	// --------------------------------------------------------------------------------------------
 
-	public class ListAdapter extends ArrayAdapter<Object> {
+	private class ListAdapter extends ArrayAdapter<Object> {
 
 		private List<Object>	items;
 
@@ -217,11 +218,18 @@ public class CommentList extends CandiActivity {
 				}
 
 				if (holder.itemAuthorImage != null) {
+					/*
+					 * We are aggresive about recycling bitmaps when we can.
+					 */
+					BitmapDrawable bitmapDrawable = (BitmapDrawable) holder.itemAuthorImage.getImageView().getDrawable();
+					if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null) {
+						bitmapDrawable.getBitmap().recycle();
+					}
 					if (comment.author.imageUri != null && comment.author.imageUri.length() != 0) {
 						ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemAuthorImage);
 						builder.setFromUris(comment.author.imageUri, null);
 						ImageRequest imageRequest = builder.create();
-						holder.itemAuthorImage.setImageRequest(imageRequest, null);
+						holder.itemAuthorImage.setImageRequest(imageRequest);
 					}
 				}
 

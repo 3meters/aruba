@@ -3,6 +3,7 @@ package com.proxibase.aircandi.components;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -116,41 +117,23 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 			}
 
 			if (holder.itemImage != null) {
+				/*
+				 * The WebImageView sets the current bitmap ref being held
+				 * by the internal image view to null before doing the work
+				 * to satisfy the new request.
+				 */
+				BitmapDrawable bitmapDrawable = (BitmapDrawable) holder.itemImage.getImageView().getDrawable();
+				if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null) {
+					bitmapDrawable.getBitmap().recycle();
+				}
 				ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemImage);
-				builder.setFromEntity(entity);
+				builder.setImageUri(entity.getMasterImageUri());
+				builder.setImageFormat(entity.getMasterImageFormat());
+				builder.setLinkZoom(entity.linkZoom);
+				builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
 				ImageRequest imageRequest = builder.create();
-				holder.itemImage.setImageRequest(imageRequest, null);
+				holder.itemImage.setImageRequest(imageRequest);
 			}
-
-			/* Loop the streams */
-			if (holder.itemActionButton != null) {
-				holder.itemActionButton.setVisibility(View.GONE);
-			}
-			//			if (entity.commands != null && holder.itemActionButton != null) {
-			//				boolean activeCommand = false;
-			//				for (Command command : entity.commands) {
-			//					if (command.name.toLowerCase().contains("edit")) {
-			//						if (entity.creator != null && entity.creator.toString().equals(mUser.id)) {
-			//							activeCommand = true;
-			//							command.entity = entity;
-			//						}
-			//					}
-			//					else {
-			//						activeCommand = true;
-			//						command.entity = entity;
-			//					}
-			//				}
-			//				if (!activeCommand) {
-			//					holder.itemActionButton.setVisibility(View.GONE);
-			//				}
-			//				else {
-			//					holder.itemActionButton.setVisibility(View.VISIBLE);
-			//					holder.itemActionButton.setTag(itemData);
-			//				}
-			//			}
-			//			else {
-			//				holder.itemActionButton.setVisibility(View.GONE);
-			//			}
 		}
 		return view;
 	}
@@ -163,7 +146,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 		return false;
 	}
 
-	public class CandiListViewHolder {
+	public static class CandiListViewHolder {
 
 		public WebImageView			itemImage;
 		public TextView				itemTitle;

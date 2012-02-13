@@ -30,7 +30,7 @@ import com.proxibase.sdk.android.util.ProxiConstants;
 
 public class CandiPatch extends CandiActivity {
 
-	public enum MethodType {
+	public static enum MethodType {
 		CandiByUser, CandiForParent
 	}
 

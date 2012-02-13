@@ -16,7 +16,7 @@ public class ViewAction {
 		return mViewActionType;
 	}
 
-	public enum ViewActionType {
+	public static enum ViewActionType {
 		ExpandCollapse, ExpandCollapseAnim, ReflectionHideShow, ReflectionHideShowAnim, UpdateTextures, 
 		UpdateTexturesForce, Position, Visibility, Scale, ZIndex
 	}

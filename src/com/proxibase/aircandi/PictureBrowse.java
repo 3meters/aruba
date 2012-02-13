@@ -78,7 +78,7 @@ public class PictureBrowse extends FormActivity {
 
 			ImageRequest imageRequest = builder.create();
 			Logger.d(this, "Requesting Image: " + entity.imageUri);
-			mediaImageView.setImageRequest(imageRequest, null);
+			mediaImageView.setImageRequest(imageRequest);
 		}
 
 		/* Author block */

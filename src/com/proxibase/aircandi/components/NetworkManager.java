@@ -96,9 +96,9 @@ public class NetworkManager {
 			return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ConnectionException, null, null);
 		}
 
-		/* 
+		/*
 		 * We have a network connection so give it a try. Request processing
-		 * will retry using an exponential backoff scheme if needed and possible. 
+		 * will retry using an exponential backoff scheme if needed and possible.
 		 */
 		try {
 			Object response = ProxibaseService.getInstance().request(serviceRequest);
@@ -295,7 +295,7 @@ public class NetworkManager {
 		void onRequestFailed();
 	}
 
-	public class ConnectionReceiver extends BroadcastReceiver {
+	private class ConnectionReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -381,11 +381,11 @@ public class NetworkManager {
 		}
 	}
 
-	public enum ResponseCode {
+	public static enum ResponseCode {
 		Success, Failed
 	}
 
-	public enum ResponseCodeDetail {
+	public static enum ResponseCodeDetail {
 		Success,
 		ServiceException,
 		RequestException,
