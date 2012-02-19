@@ -1,10 +1,16 @@
 package com.proxibase.aircandi.components;
 
+import java.net.UnknownHostException;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,7 +20,10 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,10 +44,12 @@ import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.Preferences;
 import com.proxibase.aircandi.ProfileForm;
 import com.proxibase.aircandi.R;
+import com.proxibase.aircandi.ScanService;
 import com.proxibase.aircandi.SignInForm;
 import com.proxibase.aircandi.components.Command.CommandVerb;
-import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.Events.EventHandler;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.ProxiExplorer.WifiScanResult;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.ActionsWindow;
 import com.proxibase.aircandi.widgets.WebImageView;
@@ -46,49 +57,51 @@ import com.proxibase.sdk.android.proxi.consumer.Comment;
 import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
-import com.proxibase.sdk.android.proxi.service.Query;
-import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
-import com.proxibase.sdk.android.util.ProxiConstants;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorCode;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorType;
 
 public class AircandiCommon {
 
-	public static final int	MENU_ITEM_NEW_POST_ID		= 1;
-	public static final int	MENU_ITEM_NEW_PICTURE_ID	= 2;
-	public static final int	MENU_ITEM_NEW_LINK_ID		= 3;
+	public static final int				MENU_ITEM_NEW_POST_ID		= 1;
+	public static final int				MENU_ITEM_NEW_PICTURE_ID	= 2;
+	public static final int				MENU_ITEM_NEW_LINK_ID		= 3;
 
-	public Context			mContext;
-	public Activity			mActivity;
-	public LayoutInflater	mLayoutInflater;
+	public Context						mContext;
+	public Activity						mActivity;
+	public static NotificationManager	mNotificationManager;
+	public static LayoutInflater		mLayoutInflater;
 
-	public Command			mCommand;
-	public Integer			mParent;
-	public Entity			mEntity;
-	public Integer			mEntityId;
-	public String			mEntityType;
-	public List<Entity>		mEntities;
-	public Comment			mComment;
-	public String			mMessage;
-	public String			mBeaconId;
+	public Command						mCommand;
+	public Integer						mParent;
+	public Entity						mEntity;
+	public Integer						mEntityId;
+	public String						mEntityType;
+	public List<Entity>					mEntities;
+	public Comment						mComment;
+	public String						mMessage;
+	public String						mBeaconId;
 
-	private int				mTextColorFocused;
-	private int				mTextColorUnfocused;
-	private int				mHeightActive;
-	private int				mHeightInactive;
-	private String			mThemeTone;
-	private int				mIconPost;
-	private int				mIconPicture;
-	private int				mIconLink;
+	private int							mTextColorFocused;
+	private int							mTextColorUnfocused;
+	private int							mHeightActive;
+	private int							mHeightInactive;
+	private String						mThemeTone;
+	private int							mIconPost;
+	private int							mIconPicture;
+	private int							mIconLink;
 
-	protected ImageView		mProgressIndicator;
-	protected ImageView		mButtonRefresh;
-	public Dialog		mProgressDialog;
-	public ActionsWindow	mActionsWindow;
-	public String			mPrefTheme;
-	public IconContextMenu	mIconContextMenu			= null;
-	public Integer			mTabIndex;
+	protected ImageView					mProgressIndicator;
+	protected TextView					mBeaconIndicator;
+	protected TextView					mTitle;
+	protected ImageView					mButtonRefresh;
+	public Dialog						mProgressDialog;
+	public ActionsWindow				mActionsWindow;
+	public String						mPrefTheme;
+	public IconContextMenu				mIconContextMenu			= null;
+	public Integer						mTabIndex;
+	private EventHandler				mEventScanReceived;
+	private EventHandler				mEventLocationChanged;
 
 	public AircandiCommon(Context context) {
 		mContext = context;
@@ -98,6 +111,7 @@ public class AircandiCommon {
 	public void initialize() {
 
 		mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
 
 		/* Tabs */
 		TypedValue resourceName = new TypedValue();
@@ -132,6 +146,31 @@ public class AircandiCommon {
 			mProgressIndicator.setVisibility(View.INVISIBLE);
 		}
 
+		mTitle = (TextView) mActivity.findViewById(R.id.text_title);
+		showLocationAccuracy();
+
+		/* Beacon indicator */
+		mBeaconIndicator = (TextView) mActivity.findViewById(R.id.beacon_indicator);
+		if (mBeaconIndicator != null) {
+			updateBeaconIndicator(ProxiExplorer.getInstance().mWifiList);
+			mEventScanReceived = new EventHandler() {
+
+				@Override
+				public void onEvent(Object data) {
+					List<WifiScanResult> scanList = (List<WifiScanResult>) data;
+					updateBeaconIndicator(scanList);
+				}
+			};
+		}
+
+		mEventLocationChanged = new EventHandler() {
+
+			@Override
+			public void onEvent(Object data) {
+				showLocationAccuracy();
+			}
+		};
+
 		mButtonRefresh = (ImageView) mActivity.findViewById(R.id.image_refresh_button);
 		if (mButtonRefresh != null) {
 			mButtonRefresh.setVisibility(View.VISIBLE);
@@ -146,8 +185,9 @@ public class AircandiCommon {
 		mProgressDialog = new Dialog(mContext, R.style.progress_body);
 		mProgressDialog.setTitle(null);
 		mProgressDialog.setCancelable(true);
-		mProgressDialog.setCanceledOnTouchOutside(true);
+		mProgressDialog.setCanceledOnTouchOutside(false);
 		mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		mProgressDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
 		mProgressDialog.setOnDismissListener(new OnDismissListener() {
 
 			@Override
@@ -156,6 +196,7 @@ public class AircandiCommon {
 				image.setBackgroundResource(0);
 			}
 		});
+
 	}
 
 	public void initializeDialogs() {
@@ -227,10 +268,7 @@ public class AircandiCommon {
 	// Event routines
 	// --------------------------------------------------------------------------------------------	
 	public void doHomeClick(View view) {
-
-		Intent intent = new Intent(mContext, CandiRadar.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		mContext.startActivity(intent);
+		startRadar();
 	}
 
 	public void doCommand(final Command command) {
@@ -277,17 +315,18 @@ public class AircandiCommon {
 	}
 
 	public void doProfileClick(View view) {
-
-		if (Aircandi.getInstance().getUser().anonymous) {
-			mActivity.startActivityForResult(new Intent(mContext, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
+		if (Aircandi.getInstance().getUser() != null) {
+			if (Aircandi.getInstance().getUser().anonymous) {
+				mActivity.startActivityForResult(new Intent(mContext, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
+			}
+			else {
+				IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
+				intentBuilder.setCommand(new Command(CommandVerb.Edit));
+				Intent intent = intentBuilder.create();
+				mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_PROFILE);
+			}
+			mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 		}
-		else {
-			IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
-			intentBuilder.setCommand(new Command(CommandVerb.Edit));
-			Intent intent = intentBuilder.create();
-			mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_PROFILE);
-		}
-		mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 
 	}
 
@@ -298,13 +337,166 @@ public class AircandiCommon {
 		window.setFormat(PixelFormat.RGBA_8888);
 	}
 
+	public void doBeaconIndicatorClick(View view) {
+		if (mBeaconIndicator != null) {
+			int messageId = R.string.alert_beacons_zero;
+			synchronized (ProxiExplorer.getInstance().mWifiList) {
+				int beaconCount = ProxiExplorer.getInstance().mWifiList.size();
+				if (beaconCount > 0) {
+					messageId = R.string.alert_beacons_available;
+				}
+			}
+			AircandiCommon.showAlertDialog(R.drawable.icon_app, "Aircandi beacons", mActivity.getString(messageId), mActivity, new
+					DialogInterface.OnClickListener() {
+
+						public void onClick(DialogInterface dialog, int which) {}
+					});
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
+	public void showLocationAccuracy() {
+		Location location = Aircandi.getInstance().getCurrentLocation();
+		if (Aircandi.getInstance().getUser() != null && Aircandi.getInstance().getUser().isDeveloper) {
+			if (location.hasAccuracy()) {
+				TextView textView = (TextView) mActivity.findViewById(R.id.text_header_debug);
+				if (textView != null) {
+					textView.setVisibility(View.VISIBLE);
+					textView.setText(String.valueOf(location.getAccuracy()));
+				}
+				else if (mTitle != null) {
+					String title = mActivity.getString(R.string.app_name);
+					mTitle.setText(title + "  " + String.valueOf(location.getAccuracy()));
+				}
+			}
+		}
+	}
+
+	public void updateBeaconIndicator(List<WifiScanResult> scanList) {
+
+		synchronized (scanList) {
+			Drawable drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_stop);
+			mBeaconIndicator.setText(String.valueOf(scanList.size()));
+
+			WifiScanResult wifiStrongest = null;
+
+			for (WifiScanResult wifi : scanList) {
+				if (wifi.global || wifi.demo) {
+					continue;
+				}
+				else {
+					if (wifiStrongest == null) {
+						wifiStrongest = wifi;
+					}
+					else if (wifi.level > wifiStrongest.level) {
+						wifiStrongest = wifi;
+					}
+				}
+			}
+
+			if (scanList.size() > 0) {
+				drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
+			}
+			if (wifiStrongest != null && wifiStrongest.level > -80) {
+				drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_go);
+			}
+			mBeaconIndicator.setBackgroundDrawable(drawable);
+		}
+	}
+
+	public void handleServiceError(ServiceResponse serviceResponse) {
+		handleServiceError(serviceResponse, ServiceOperation.Unknown, null);
+	}
+
+	public void handleServiceError(ServiceResponse serviceResponse, ServiceOperation serviceOperation, Context context) {
+
+		ErrorType errorType = serviceResponse.exception.getErrorType();
+		ErrorCode errorCode = serviceResponse.exception.getErrorCode();
+		String errorMessage = serviceResponse.exception.getMessage();
+		String logMessage = null;
+		String friendlyMessage = "Network is unavailable or busy";
+		//String friendlyMessage = "Sorry, failed to reach Aircandi servers, Please check your network connection or try again later.";
+		Boolean showAlert = false;
+
+		if (errorType == ErrorType.Service) {
+			if (errorCode == ErrorCode.NotFoundException) {
+				logMessage = "Service not found exception: " + errorMessage;
+			}
+			else {
+				logMessage = "Service exception: " + errorMessage;
+			}
+		}
+		/*
+		 * Client errors occur when we are unable to get a response from a service,
+		 * or when the client is unable to understand a response from a service.
+		 * This includes protocol, network and timeout errors.
+		 */
+		else if (errorType == ErrorType.Client) {
+			if (errorCode == ErrorCode.IOException) {
+				if (serviceResponse.exception.getCause() instanceof UnknownHostException) {
+					logMessage = "Unknown host exception: " + errorMessage;
+					friendlyMessage = "The website you entered can't be found.";
+					showAlert = true;
+				}
+				else {
+					logMessage = "Transport exception: " + errorMessage;
+				}
+			}
+			else if (errorCode == ErrorCode.ConnectionException) {
+				logMessage = "Connection not ready: " + errorMessage;
+			}
+			else if (errorCode == ErrorCode.UnknownHostException) {
+				logMessage = "Unknown host: " + errorMessage;
+				friendlyMessage = "The website you entered can't be found.";
+			}
+			else if (errorCode == ErrorCode.ClientProtocolException) {
+				logMessage = "Protocol exception: " + errorMessage;
+			}
+			else if (errorCode == ErrorCode.URISyntaxException) {
+				logMessage = "Uri syntax exception: " + errorMessage;
+			}
+			else {
+				logMessage = "Request exception: " + errorMessage;
+			}
+		}
+		Logger.w(context, logMessage);
+		if (showAlert && context != null) {
+			showProgressDialog(false, null);
+			stopTitlebarProgress();
+			AircandiCommon.showAlertDialog(R.drawable.icon_app, "Candi service",
+					friendlyMessage, context, new
+					DialogInterface.OnClickListener() {
+
+						public void onClick(DialogInterface dialog, int which) {}
+					});
+		}
+		else {
+			Notification note = new Notification(R.drawable.icon_app, "Network problem", System.currentTimeMillis());
+			Intent intent = new Intent(mContext, CandiRadar.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+			note.setLatestEventInfo(mContext, "Aircandi", friendlyMessage, pendingIntent);
+
+			ImageUtils.showToastNotification(friendlyMessage, Toast.LENGTH_SHORT);
+			showProgressDialog(false, null);
+			stopTitlebarProgress();
+			mNotificationManager.notify(CandiConstants.NOTIFICATION_NETWORK, note);
+		}
+	}
+
 	public void showProgressDialog(boolean visible, String message) {
+		showProgressDialog(visible, message, null);
+	}
+
+	public void showProgressDialog(boolean visible, String message, Activity ownerActivity) {
 
 		if (visible) {
+			if (ownerActivity != null) {
+				mProgressDialog.setOwnerActivity(ownerActivity);
+			}
 			mProgressDialog.setContentView(R.layout.dialog_progress);
 			final ImageView image = (ImageView) mProgressDialog.findViewById(R.id.image_body_progress_indicator);
 			TextView text = (TextView) mProgressDialog.findViewById(R.id.text_progress_message);
@@ -325,6 +517,18 @@ public class AircandiCommon {
 		else {
 			mProgressDialog.dismiss();
 		}
+	}
+
+	public static void showAlertDialog(int iconResource, String title, String message, Context context, OnClickListener listener) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle(title);
+		builder.setMessage(message);
+		builder.setIcon(iconResource);
+		if (listener != null) {
+			builder.setPositiveButton(android.R.string.ok, listener);
+		}
+		AlertDialog alert = builder.show();
+		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 	}
 
 	public void startTitlebarProgress() {
@@ -368,17 +572,6 @@ public class AircandiCommon {
 		setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
 	}
 
-	public static void showAlertDialog(int iconResource, String title, String message, Context context, OnClickListener listener) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle(title);
-		builder.setMessage(message);
-		builder.setIcon(iconResource);
-		if (listener != null) {
-			builder.setPositiveButton(android.R.string.ok, listener);
-		}
-		builder.show();
-	}
-
 	public void setTheme() {
 		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
 		int themeResourceId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
@@ -409,6 +602,80 @@ public class AircandiCommon {
 		}
 	}
 
+	public void signinAuto() {
+		String jsonUser = Aircandi.settings.getString(Preferences.PREF_USER, null);
+		Logger.i(this, "Auto sign in...");
+
+		User user = null;
+		if (jsonUser != null) {
+			user = (User) ProxibaseService.convertJsonToObject(jsonUser, User.class, GsonType.ProxibaseService);
+		}
+		else {
+			jsonUser = CandiConstants.USER_ANONYMOUS;
+			user = (User) ProxibaseService.convertJsonToObject(jsonUser, User.class, GsonType.ProxibaseService);
+			user.anonymous = true;
+		}
+		Aircandi.getInstance().setUser(user);
+		ImageUtils.showToastNotification("Signed in as " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+
+		if (mActivity.findViewById(R.id.image_user) != null) {
+			mActivity.runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					User user = Aircandi.getInstance().getUser();
+					setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
+				}
+			});
+		}
+	}
+
+	public void signout() {
+		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
+			showProgressDialog(true, "Signing out...");
+			User user = (User) ProxibaseService.convertJsonToObject(CandiConstants.USER_ANONYMOUS, User.class, GsonType.ProxibaseService);
+			user.anonymous = true;
+			Aircandi.getInstance().setUser(user);
+			if (mActivity.findViewById(R.id.image_user) != null) {
+				setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
+			}
+			ImageUtils.showToastNotification("Signed out.", Toast.LENGTH_SHORT);
+			showProgressDialog(false, null);
+		}
+	}
+
+	public void signin() {
+		mActivity.startActivityForResult(new Intent(mActivity, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
+		mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+	}
+
+	public void startScanService() {
+		AlarmManager alarmManager = (AlarmManager) mActivity.getSystemService(Service.ALARM_SERVICE);
+		Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
+		PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
+		alarmManager.cancel(pendingIntent);
+		if (CandiConstants.INTERVAL_SCAN > 0) {
+			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+					SystemClock.elapsedRealtime() + CandiConstants.INTERVAL_SCAN,
+					CandiConstants.INTERVAL_SCAN, pendingIntent);
+		}
+	}
+
+	public void stopScanService() {
+		AlarmManager alarmManager = (AlarmManager) mActivity.getSystemService(Service.ALARM_SERVICE);
+		Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
+		PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
+		alarmManager.cancel(pendingIntent);
+	}
+
+	public void updateLocation() {}
+
+	public void startRadar() {
+		Intent intent = new Intent(mContext, CandiRadar.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		mContext.startActivity(intent);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Menu routines
 	// --------------------------------------------------------------------------------------------
@@ -420,15 +687,15 @@ public class AircandiCommon {
 
 	public void doPrepareOptionsMenu(Menu menu) {
 		/* Hide the sign out option if we don't have a current session */
-		MenuItem itemOut = menu.findItem(R.id.signinout);
-		MenuItem itemProfile = menu.findItem(R.id.profile);
 		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
-			itemOut.setTitle("Sign Out");
-			itemProfile.setVisible(true);
+			((MenuItem) menu.findItem(R.id.signin)).setVisible(false);
+			((MenuItem) menu.findItem(R.id.signout)).setVisible(true);
+			((MenuItem) menu.findItem(R.id.profile)).setVisible(true);
 		}
 		else {
-			itemOut.setTitle("Sign In");
-			itemProfile.setVisible(false);
+			((MenuItem) menu.findItem(R.id.signin)).setVisible(true);
+			((MenuItem) menu.findItem(R.id.signout)).setVisible(false);
+			((MenuItem) menu.findItem(R.id.profile)).setVisible(false);
 		}
 	}
 
@@ -441,41 +708,12 @@ public class AircandiCommon {
 			case R.id.profile :
 				doProfileClick(null);
 				return false;
-			case R.id.signinout :
-				if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
-					showProgressDialog(true, "Signing out...");
-					Query query = new Query("Users").filter("Email eq 'anonymous@3meters.com'");
-
-					ServiceResponse serviceResponse = NetworkManager.getInstance().request(
-							new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
-
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-
-						String jsonResponse = (String) serviceResponse.data;
-
-						Aircandi.getInstance().setUser(
-								(User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService));
-						Aircandi.getInstance().getUser().anonymous = true;
-
-						Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, null);
-						Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, null);
-						Aircandi.settingsEditor.commit();
-
-						if (mActivity.findViewById(R.id.image_user) != null) {
-							User user = Aircandi.getInstance().getUser();
-							setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
-						}
-						showProgressDialog(false, null);
-						ImageUtils.showToastNotification("Signed out.", Toast.LENGTH_SHORT);
-						return true;
-					}
-					return false;
-				}
-				else {
-					mActivity.startActivityForResult(new Intent(mActivity, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
-					mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-					return false;
-				}
+			case R.id.signout :
+				signout();
+				return false;
+			case R.id.signin :
+				signin();
+				return false;
 		}
 		return false;
 	}
@@ -512,19 +750,47 @@ public class AircandiCommon {
 	}
 
 	public void doDestroy() {
-	/* Nothing right now but stubbed for later. */
+		System.gc();
+	}
+
+	public void doPause() {
+		stopTitlebarProgress();
+		Events.EventBus.locationChanged.remove(mEventLocationChanged);
+		Events.EventBus.wifiScanReceived.remove(mEventScanReceived);
+	}
+
+	public void doResume() {
+		Events.EventBus.locationChanged.add(mEventLocationChanged);
+		Events.EventBus.wifiScanReceived.add(mEventScanReceived);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
 
+	public enum ServiceOperation {
+		Login,
+		Logout,
+		BeaconScan,
+		ProfileBrowse,
+		ProfileSave,
+		CandiForm,
+		CandiList,
+		CandiBrowse,
+		CandiSave,
+		CandiDelete,
+		ImageLoad,
+		CommentBrowse,
+		CommentSave,
+		PictureBrowse,
+		PictureSearch,
+		MapBrowse,
+		LinkLookup,
+		Unknown
+	}
+
 	public static enum ActionButtonSet {
 		Radar, CandiForm, CandiList, CommentList
 	}
 
-	public static class EventHandler {
-
-		public void onEvent(Object data) {}
-	}
 }

@@ -6,14 +6,9 @@ import org.jsoup.nodes.Element;
 
 import android.app.Activity;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -29,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageManager;
@@ -41,6 +37,7 @@ import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.AircandiCommon.ServiceOperation;
 import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
@@ -65,14 +62,12 @@ import com.proxibase.sdk.android.util.ProxiConstants;
 
 public class EntityForm extends FormActivity {
 
-	private ViewFlipper			mViewFlipper;
-	protected WebImageView		mImagePicture;
-	private EditText			mTextUri;
-	private Beacon				mBeacon;
-	private boolean				mUriValidated	= false;
-	private LocationManager		mLocationManager;
-	private LocationListener	mLocationListener;
-	private AsyncTask			mAsyncTask		= null;
+	private ViewFlipper		mViewFlipper;
+	protected WebImageView	mImagePicture;
+	private EditText		mTextUri;
+	private Beacon			mBeacon;
+	private boolean			mUriValidated	= false;
+	private AsyncTask		mAsyncTask		= null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -123,63 +118,9 @@ public class EntityForm extends FormActivity {
 		 * and we are creating new candi.
 		 */
 		if (mCommon.mCommand.verb == CommandVerb.New) {
-
+			/* Get location fix */
+			Aircandi.getInstance().startLocationUpdates(CandiConstants.LOCATION_SCAN_TIME_LIMIT, CandiConstants.LOCATION_EXPIRATION);
 			mBeacon = ProxiExplorer.getInstance().getBeaconById(mCommon.mBeaconId);
-
-			mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-			mLocationListener = new LocationListener() {
-
-				@Override
-				public void onLocationChanged(Location location) {
-					if (Aircandi.isBetterLocation(location, Aircandi.getInstance().getCurrentLocation())) {
-						Aircandi.getInstance().setCurrentLocation(location);
-						if (Aircandi.getInstance().getUser().isDeveloper) {
-							TextView mTextDebug = (TextView) findViewById(R.id.text_header_debug);
-							mTextDebug.setVisibility(View.VISIBLE);
-							if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
-								mTextDebug.setText(String.valueOf(Aircandi.getInstance().getCurrentLocation().getAccuracy()));
-							}
-						}
-					}
-				}
-
-				@Override
-				public void onProviderDisabled(String provider) {
-					ImageUtils.showToastNotification(provider + ": disabled", Toast.LENGTH_SHORT);
-				}
-
-				@Override
-				public void onProviderEnabled(String provider) {
-					ImageUtils.showToastNotification(provider + ": enabled", Toast.LENGTH_SHORT);
-				}
-
-				@Override
-				public void onStatusChanged(String provider, int status, Bundle extras) {
-					if (status == LocationProvider.AVAILABLE) {
-						ImageUtils.showToastNotification(provider + ": available", Toast.LENGTH_SHORT);
-					}
-					else if (status == LocationProvider.OUT_OF_SERVICE) {
-						ImageUtils.showToastNotification(provider + ": out of service", Toast.LENGTH_SHORT);
-					}
-					else if (status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
-						ImageUtils.showToastNotification(provider + ": temporarily unavailable", Toast.LENGTH_SHORT);
-					}
-				}
-			};
-
-			Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			if (lastKnownLocationNetwork != null) {
-				if (Aircandi.isBetterLocation(lastKnownLocationNetwork, Aircandi.getInstance().getCurrentLocation())) {
-					Aircandi.getInstance().setCurrentLocation(lastKnownLocationNetwork);
-				}
-			}
-
-			Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			if (lastKnownLocationGPS != null) {
-				if (Aircandi.isBetterLocation(lastKnownLocationGPS, Aircandi.getInstance().getCurrentLocation())) {
-					Aircandi.getInstance().setCurrentLocation(lastKnownLocationGPS);
-				}
-			}
 		}
 
 		mImagePicture = (WebImageView) findViewById(R.id.image_picture);
@@ -251,9 +192,9 @@ public class EntityForm extends FormActivity {
 					@Override
 					protected void onPostExecute(Object response) {
 						ServiceResponse serviceResponse = (ServiceResponse) response;
-						mCommon.showProgressDialog(false, null);
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 
+							mCommon.showProgressDialog(false, null);
 							mCommon.mEntity = (Entity) serviceResponse.data;
 							mImageUriOriginal = mCommon.mEntity.imageUri;
 
@@ -265,6 +206,9 @@ public class EntityForm extends FormActivity {
 							if (savedInstanceState != null) {
 								doRestoreInstanceState(savedInstanceState);
 							}
+						}
+						else {
+							mCommon.handleServiceError(serviceResponse);
 						}
 					}
 				}.execute();
@@ -412,7 +356,7 @@ public class EntityForm extends FormActivity {
 		 */
 		if (mCommon.mCommand.verb == CommandVerb.New && mCommon.mEntity.parent == null) {
 			mCommon.showProgressDialog(true, "Scanning...");
-			ProxiExplorer.getInstance().quickScanForBeacons(new RequestListener() {
+			ProxiExplorer.getInstance().scanForWifi(new RequestListener() {
 
 				@Override
 				public void onComplete(Object response) {
@@ -421,12 +365,24 @@ public class EntityForm extends FormActivity {
 						/*
 						 * Doing a quick scan, find the strongest current beacon.
 						 * 
-						 * FIXME: Quick scan doesn't validate with the service so the 
+						 * FIXME: Quick scan doesn't validate with the service so the
 						 * beacon may be disabled so an insert would be rejected.
 						 */
-						Beacon beacon = ProxiExplorer.getInstance().getStrongestQuickBeacon();
-						mBeacon = beacon;
-						doSave(true);
+						Beacon beacon = ProxiExplorer.getInstance().getStrongestWifiAsBeacon();
+						if (beacon == null) {
+							AircandiCommon.showAlertDialog(R.drawable.icon_app, "No beacons nearby",
+									"There are no beacons nearby to attach your candi to. Please try again when the beacon detector is green.",
+									EntityForm.this, new
+									DialogInterface.OnClickListener() {
+
+										public void onClick(DialogInterface dialog, int which) {
+									}
+									});
+						}
+						else {
+							mBeacon = beacon;
+							doSave(true);
+						}
 					}
 				}
 			});
@@ -493,18 +449,27 @@ public class EntityForm extends FormActivity {
 						linkUri = "http://" + linkUri;
 					}
 
-					serviceResponse = validateUri(linkUri);
+					if (!validateUriSyntax(linkUri)) {
+						ImageUtils.showToastNotification("Invalid link specified", Toast.LENGTH_SHORT);
+						serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ProtocolException, null, null);
+					}
+
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 
-						mCommon.mEntity.linkUri = linkUri;
-						mCommon.mEntity.imageUri = null;
-						mCommon.mEntity.imageBitmap = null;
+						ServiceRequest serviceRequest = new ServiceRequest();
+						serviceRequest.setUri(linkUri);
+						serviceRequest.setRequestType(RequestType.Get);
+						serviceRequest.setResponseFormat(ResponseFormat.Html);
+						serviceRequest.setSuppressUI(true);
 
-						mUriValidated = true;
-					}
-					else {
-						ImageUtils.showToastNotification(getResources().getString(R.string.web_alert_website_unavailable),
-								Toast.LENGTH_SHORT);
+						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+						if (serviceResponse.responseCode == ResponseCode.Success) {
+
+							mCommon.mEntity.linkUri = linkUri;
+							mCommon.mEntity.imageUri = null;
+							mCommon.mEntity.imageBitmap = null;
+							mUriValidated = true;
+						}
 					}
 				}
 
@@ -612,9 +577,12 @@ public class EntityForm extends FormActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				mCommon.showProgressDialog(false, null);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					mCommon.showProgressDialog(false, null);
 					finish();
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
 				}
 			}
 		}.execute();
@@ -702,9 +670,13 @@ public class EntityForm extends FormActivity {
 		mCommon.mEntity.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
 		mCommon.mEntity.modifiedDate = mCommon.mEntity.createdDate;
 
-		if (Aircandi.getInstance().getCurrentLocation() != null) {
+		/* Lat/lon are left null if we don't have an accurate fix */
+		if (Aircandi.getInstance().getCurrentLocation() != null 
+				&& Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
+			
 			mCommon.mEntity.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
 			mCommon.mEntity.longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
+			
 			if (Aircandi.getInstance().getCurrentLocation().hasAltitude()) {
 				mCommon.mEntity.altitude = Aircandi.getInstance().getCurrentLocation().getAltitude();
 			}
@@ -769,6 +741,7 @@ public class EntityForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				ServiceResponse serviceResponse = new ServiceResponse();
 
 				/* If there is an image stored with S3 then delete it */
 				Tracker.trackEvent("Entity", "Delete", mCommon.mEntity.type, 0);
@@ -778,29 +751,31 @@ public class EntityForm extends FormActivity {
 					String imageKey = mCommon.mEntity.imagePreviewUri.substring(mCommon.mEntity.imagePreviewUri.lastIndexOf("/") + 1);
 					try {
 						S3.deleteImage(imageKey);
-
 						/*
 						 * Associated images are removed from the local image cache when the candi model is finally
 						 * removed and the cand view is killed or recycled
 						 */
 					}
 					catch (ProxibaseServiceException exception) {
-						return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
+						serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
 					}
 				}
 
-				/* Delete the entity from the service */
-				Bundle parameters = new Bundle();
-				parameters.putInt("entityId", mCommon.mEntity.id);
-				Logger.i(this, "Deleting entity: " + mCommon.mEntity.title);
+				if (serviceResponse.responseCode == ResponseCode.Success) {
 
-				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "DeleteEntityWithChildren");
-				serviceRequest.setParameters(parameters);
-				serviceRequest.setRequestType(RequestType.Method);
-				serviceRequest.setResponseFormat(ResponseFormat.Json);
+					/* Delete the entity from the service */
+					Bundle parameters = new Bundle();
+					parameters.putInt("entityId", mCommon.mEntity.id);
+					Logger.i(this, "Deleting entity: " + mCommon.mEntity.title);
 
-				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+					ServiceRequest serviceRequest = new ServiceRequest();
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "DeleteEntityWithChildren");
+					serviceRequest.setParameters(parameters);
+					serviceRequest.setRequestType(RequestType.Method);
+					serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+					serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+				}
 				return serviceResponse;
 			}
 
@@ -808,13 +783,16 @@ public class EntityForm extends FormActivity {
 			protected void onPostExecute(Object response) {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 
-				mCommon.showProgressDialog(false, null);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					mCommon.showProgressDialog(false, null);
 					Logger.i(this, "Deleted entity: " + mCommon.mEntity.title);
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 					ProxiExplorer.getInstance().mEntitiesDeleted.put(mCommon.mEntity.id, mCommon.mEntity);
 					setResult(CandiConstants.RESULT_ENTITY_DELETED);
 					finish();
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiDelete, EntityForm.this);
 				}
 			}
 		}.execute();
@@ -847,7 +825,6 @@ public class EntityForm extends FormActivity {
 		try {
 			startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
 			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-
 		}
 		catch (Exception exception) {
 			/* We fallback to try a different way to construct the component */
@@ -931,32 +908,14 @@ public class EntityForm extends FormActivity {
 					else {
 						((EditText) findViewById(R.id.text_content)).setText("");
 					}
+					mCommon.showProgressDialog(false, null);
 				}
 				else {
-					ImageUtils.showToastNotification(getResources().getString(R.string.web_alert_website_unavailable),
-							Toast.LENGTH_SHORT);
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.LinkLookup, EntityForm.this);
 				}
-				mCommon.showProgressDialog(false, null);
 			}
 		}.execute();
 
-	}
-
-	private ServiceResponse validateUri(String linkUri) {
-
-		if (!validateUriSyntax(linkUri)) {
-			ImageUtils.showToastNotification("Invalid link specified", Toast.LENGTH_SHORT);
-			return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ProtocolException, null, null);
-		}
-
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(linkUri);
-		serviceRequest.setRequestType(RequestType.Get);
-		serviceRequest.setResponseFormat(ResponseFormat.Html);
-
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-		return serviceResponse;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1028,20 +987,18 @@ public class EntityForm extends FormActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (mLocationManager != null) {
-			mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mLocationListener);
-			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, mLocationListener);
-		}
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (mLocationManager != null) {
-			mLocationManager.removeUpdates(mLocationListener);
-		}
 	}
 
+	protected void onDestroy() {
+		Aircandi.getInstance().stopLocationUpdates();
+		super.onPause();
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------

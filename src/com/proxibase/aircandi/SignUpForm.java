@@ -2,17 +2,16 @@ package com.proxibase.aircandi;
 
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.DateUtils;
-import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
@@ -22,6 +21,7 @@ import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
@@ -175,10 +175,9 @@ public class SignUpForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	protected void doSave() {
-		if (!validate()) {
-			return;
+		if (validate()) {
+			insert();
 		}
-		insert();
 	}
 
 	private boolean validate() {
@@ -201,23 +200,31 @@ public class SignUpForm extends FormActivity {
 
 		Logger.i(this, "Insert user: " + mUser.name);
 
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mUser.getCollection());
-		serviceRequest.setRequestType(RequestType.Insert);
-		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
-		serviceRequest.setResponseFormat(ResponseFormat.Json);
-		serviceRequest.setRequestListener(new RequestListener() {
+		new AsyncTask() {
 
 			@Override
-			public void onComplete(Object response) {
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, "Signing up...");
+			}
 
-				ServiceResponse serviceResponse = (ServiceResponse) response;
+			@Override
+			protected Object doInBackground(Object... params) {
+
+				ServiceRequest serviceRequest = new ServiceRequest();
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mUser.getCollection());
+				serviceRequest.setRequestType(RequestType.Insert);
+				serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
+				serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+				/* Insert user */
+				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 
 					/* Load the just insert user to get the user id */
 					Query query = new Query("Users").filter("Email eq '" + mUser.email + "'");
 					serviceResponse = NetworkManager.getInstance().request(
-							new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+									new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 
@@ -228,47 +235,58 @@ public class SignUpForm extends FormActivity {
 						/* Upload images to S3 as needed. */
 						if (mUser.imageUri != null && !mUser.imageUri.contains("resource:") && mUser.imageBitmap != null) {
 							String imageKey = String.valueOf(mUser.id) + "_"
-														+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-														+ ".jpg";
+																+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
+																+ ".jpg";
 							try {
 								S3.putImage(imageKey, mUser.imageBitmap);
 							}
 							catch (ProxibaseServiceException exception) {
-								if (!Exceptions.Handle(exception)) {
-									ImageUtils.showToastNotification(getString(R.string.alert_update_failed), Toast.LENGTH_SHORT);
-								}
+								serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.UnknownException, null, exception);
 							}
-							mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
 
-							/* Need to update the user to capture the uri for the image we saved */
-							ServiceRequest serviceRequest = new ServiceRequest();
-							serviceRequest.setUri(mUser.getEntryUri());
-							serviceRequest.setRequestType(RequestType.Update);
-							serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
-							serviceRequest.setResponseFormat(ResponseFormat.Json);
+							if (serviceResponse.responseCode == ResponseCode.Success) {
 
-							/* Doing an insert so we don't need anything back */
-							NetworkManager.getInstance().request(serviceRequest);
+								mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
+
+								/* Need to update the user to capture the uri for the image we saved */
+								serviceRequest = new ServiceRequest();
+								serviceRequest.setUri(mUser.getEntryUri());
+								serviceRequest.setRequestType(RequestType.Update);
+								serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
+								serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+								/* Doing an insert so we don't need anything back */
+								serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+							}
 						}
-
-						Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
-						mCommon.stopTitlebarProgress();
-						AircandiCommon.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),
-										getResources().getString(R.string.signup_alert_new_user_message),
-										SignUpForm.this, new OnClickListener() {
-
-											public void onClick(DialogInterface dialog, int which) {
-												setResult(CandiConstants.RESULT_PROFILE_INSERTED);
-												finish();
-											}
-										});
 					}
 				}
-
+				return serviceResponse;
 			}
-		});
 
-		NetworkManager.getInstance().requestAsync(serviceRequest);
+			@Override
+			protected void onPostExecute(Object response) {
+
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					mCommon.showProgressDialog(false, null);
+					Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
+					AircandiCommon.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),
+							getResources().getString(R.string.signup_alert_new_user_message),
+							SignUpForm.this, new OnClickListener() {
+
+								public void onClick(DialogInterface dialog, int which) {
+									setResult(CandiConstants.RESULT_PROFILE_INSERTED);
+									finish();
+								}
+							});
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse);
+				}
+			}
+		}.execute();
+
 	}
 
 	private boolean isValid() {

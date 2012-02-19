@@ -55,6 +55,9 @@ public abstract class FormActivity extends Activity {
 		 * style attributes.
 		 */
 		mCommon = new AircandiCommon(this);
+		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
+			mCommon.startRadar();
+		}		
 		mCommon.setTheme();
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		mCommon.unpackIntent();
@@ -92,22 +95,24 @@ public abstract class FormActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
-
-		/* Hide the sign out option if we don't have a current session */
-		MenuItem item = menu.findItem(R.id.signinout);
-		item.setVisible(false);
 		return true;
 	}
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-
 		/* Hide the sign out option if we don't have a current session */
-		MenuItem item = menu.findItem(R.id.signinout);
-		item.setVisible(false);
+		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
+			((MenuItem) menu.findItem(R.id.signin)).setVisible(false);
+			((MenuItem) menu.findItem(R.id.signout)).setVisible(true);
+			((MenuItem) menu.findItem(R.id.profile)).setVisible(true);
+		}
+		else {
+			((MenuItem) menu.findItem(R.id.signin)).setVisible(true);
+			((MenuItem) menu.findItem(R.id.signout)).setVisible(false);
+			((MenuItem) menu.findItem(R.id.profile)).setVisible(false);
+		}
 		return true;
 	}
 
@@ -322,7 +327,7 @@ public abstract class FormActivity extends Activity {
 							description.setText(imageDescription);
 						}
 					}
-					
+
 					ImageRequest imageRequest = builder.create();
 					mImageRequestWebImageView.setImageRequest(imageRequest, false);
 				}
@@ -385,10 +390,17 @@ public abstract class FormActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		mCommon.doResume();
 		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
 			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
 			mCommon.reload();
 		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mCommon.doPause();
 	}
 
 	protected void onDestroy() {
@@ -408,7 +420,6 @@ public abstract class FormActivity extends Activity {
 			super.onDestroy();
 		}
 		mCommon.doDestroy();
-		super.onDestroy();
 	}
 
 	protected int getLayoutID() {

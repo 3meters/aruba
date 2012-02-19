@@ -32,6 +32,9 @@
     	- dark suffix means a theme where backgrounds are generally dark in tone. 
     <color name="edit_hint">#ffffa01c</color>
     -->
+    <color name="stop">#99990000</color>
+    <color name="caution">#99999900</color>
+    <color name="go">#99009900</color>
     
     <color name="accent">#ffffaa00</color>
     <color name="accent_darker">#ffbb7700</color>

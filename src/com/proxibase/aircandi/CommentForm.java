@@ -169,11 +169,14 @@ public class CommentForm extends FormActivity {
 			protected void onPostExecute(Object response) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				mCommon.showProgressDialog(false, null);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					mCommon.showProgressDialog(false, null);
 					ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 					setResult(CandiConstants.RESULT_COMMENT_INSERTED);
 					finish();
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse);
 				}
 			}
 		}.execute();

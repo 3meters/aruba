@@ -1,6 +1,7 @@
 package com.proxibase.aircandi;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -94,34 +95,53 @@ public class SignInForm extends FormActivity {
 
 	public void onSignInButtonClick(View view) {
 		mTextError.setVisibility(View.GONE);
-		String email = mTextEmail.getText().toString();
-		Query query = new Query("Users").filter("Email eq '" + email + "'");
+		final String email = mTextEmail.getText().toString();
+		
+		new AsyncTask() {
 
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
-				new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
-
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-			String jsonResponse = (String) serviceResponse.data;
-			User user = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
-
-			if (user == null) {
-				mTextError.setVisibility(View.VISIBLE);
-				mTextPassword.setText("");
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, "Signing in...");
 			}
-			else {
 
-				Aircandi.getInstance().setUser(user);
-				ImageUtils.showToastNotification(
-						getResources().getString(R.string.alert_signed_in) + " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
-
-				Aircandi.settingsEditor.putString(Preferences.PREF_USERNAME, Aircandi.getInstance().getUser().email);
-				Aircandi.settingsEditor.putString(Preferences.PREF_PASSWORD, Aircandi.getInstance().getUser().password);
-				Aircandi.settingsEditor.commit();
-
-				setResult(CandiConstants.RESULT_USER_SIGNED_IN);
-				finish();
+			@Override
+			protected Object doInBackground(Object... params) {
+				Query query = new Query("Users").filter("Email eq '" + email + "'");
+				ServiceResponse serviceResponse = NetworkManager.getInstance().request(
+						new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+				return serviceResponse;
 			}
-		}
+
+			@Override
+			protected void onPostExecute(Object response) {
+
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				mCommon.showProgressDialog(false, null);
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					String jsonResponse = (String) serviceResponse.data;
+					User user = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
+
+					if (user == null) {
+						mTextError.setVisibility(View.VISIBLE);
+						mTextPassword.setText("");
+					}
+					else {
+						Aircandi.getInstance().setUser(user);
+						ImageUtils.showToastNotification(
+								getResources().getString(R.string.alert_signed_in) + " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+
+						Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonResponse);
+						Aircandi.settingsEditor.commit();
+
+						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
+						finish();
+					}
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse);
+				}
+			}
+		}.execute();
 	}
 
 	// --------------------------------------------------------------------------------------------

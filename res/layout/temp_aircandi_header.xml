@@ -14,7 +14,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/group_refresh"
+            android:layout_toLeftOf="@+id/beacon_indicator"
             android:background="@drawable/button_nooutline_selector"
             android:clickable="true"
             android:onClick="onHomeClick"
@@ -26,6 +26,7 @@
                 android:src="?attr/logo" />
 
             <TextView
+                android:id="@+id/text_title"
                 style="@style/actionbar_title"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
@@ -34,6 +35,34 @@
                 android:lines="1"
                 android:text="@string/app_name" />
         </LinearLayout>
+
+        <View
+            style="@style/actionbar_rule_vertical"
+            android:layout_width="@dimen/application_button_separator_width"
+            android:layout_height="fill_parent"
+            android:layout_toLeftOf="@+id/group_beacon" />
+
+        <RelativeLayout
+            android:id="@+id/group_beacon"
+            style="@style/actionbar_button"
+            android:layout_width="40dp"
+            android:layout_height="fill_parent"
+            android:layout_toLeftOf="@+id/group_refresh"
+            android:clickable="true"
+            android:onClick="onBeaconIndicatorClick" >
+
+            <TextView
+                android:id="@+id/beacon_indicator"
+                style="@style/actionbar_title"
+                android:layout_width="26dp"
+                android:layout_height="fill_parent"
+                android:layout_margin="7dp"
+                android:layout_centerInParent="true"
+                android:background="@drawable/beacon_indicator_off"
+                android:gravity="center"
+                android:lines="1"
+                android:text="0" />
+        </RelativeLayout>
 
         <View
             style="@style/actionbar_rule_vertical"

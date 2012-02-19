@@ -58,13 +58,17 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected void onPostExecute(Object result) {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
-				mCommon.showProgressDialog(false, null);
-				mCommon.stopTitlebarProgress();
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mCommon.mEntity = (Entity) serviceResponse.data;
 					ViewGroup candiInfoView = (ViewGroup) findViewById(R.id.candi_form);
 					buildCandiInfo(mCommon.mEntity, candiInfoView, false);
+					((ViewGroup) findViewById(R.id.group_candi_content)).setVisibility(View.VISIBLE);
+					mCommon.showProgressDialog(false, null);
+					mCommon.stopTitlebarProgress();
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse);
 				}
 			}
 		}.execute();
@@ -159,32 +163,6 @@ public class CandiForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
-
-	protected void refreshEntity() {
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Loading...");
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntity.id, false);
-				return serviceResponse;
-			}
-
-			@Override
-			protected void onPostExecute(Object result) {
-				ServiceResponse serviceResponse = (ServiceResponse) result;
-				mCommon.showProgressDialog(false, null);
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mCommon.mEntity = (Entity) serviceResponse.data;
-				}
-			}
-		}.execute();
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// UI routines
@@ -294,7 +272,13 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Map */
-		map.setTag(entity.id);
+		if (entity.latitude == null || entity.longitude == null) {
+			map.setVisibility(View.GONE);
+		}
+		else {
+			map.setVisibility(View.VISIBLE);
+			map.setTag(entity.id);
+		}
 
 		/* Candi text */
 
@@ -346,17 +330,9 @@ public class CandiForm extends CandiActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-	}
-
-	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
+
 	@Override
 	protected int getLayoutId() {
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {

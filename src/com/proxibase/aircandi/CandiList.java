@@ -45,7 +45,6 @@ public class CandiList extends CandiActivity {
 		super.onCreate(savedInstanceState);
 
 		bind();
-		Tracker.trackPageView("/MyCandiList");
 	}
 
 	@Override
@@ -62,12 +61,14 @@ public class CandiList extends CandiActivity {
 			parameters.putInt("entityId", mCommon.mEntity.id);
 			parameters.putBoolean("includeChildren", true);
 			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntity");
+			Tracker.trackPageView("/CandiList");
 		}
 		else if (mCommon.mEntity == null) {
 			mMethodType = MethodType.CandiByUser;
 			parameters.putInt("userId", Aircandi.getInstance().getUser().id);
 			parameters.putBoolean("includeChildren", false);
 			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesForUser");
+			Tracker.trackPageView("/MyCandiList");
 		}
 
 		new AsyncTask() {
@@ -105,9 +106,12 @@ public class CandiList extends CandiActivity {
 						Collections.sort(mListEntities, new SortEntitiesByUpdatedTime());
 						mListView.setAdapter(new CandiListAdapter(CandiList.this, Aircandi.getInstance().getUser(), mListEntities));
 					}
+					mCommon.showProgressDialog(false, null);
+					mCommon.stopTitlebarProgress();
 				}
-				mCommon.showProgressDialog(false, null);
-				mCommon.stopTitlebarProgress();
+				else {
+					mCommon.handleServiceError(serviceResponse);
+				}
 			}
 		}.execute();
 	}
@@ -127,7 +131,7 @@ public class CandiList extends CandiActivity {
 
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_INFO);
 		overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-		
+
 	}
 
 	public void onCommentsClick(View view) {
@@ -194,9 +198,7 @@ public class CandiList extends CandiActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		boolean rebind = mCommon.doOptionsItemSelected(item);
-		if (rebind) {
-			bind();
-		}
+		if (rebind) bind();
 		return true;
 	}
 

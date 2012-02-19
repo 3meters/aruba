@@ -201,10 +201,15 @@ public class CandiMap extends MapActivity {
 			protected void onPostExecute(Object result) {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
 					showCandi();
+					mCommon.showProgressDialog(false, null);
+					mCommon.stopTitlebarProgress();
 				}
-				mCommon.showProgressDialog(false, null);
-				mCommon.stopTitlebarProgress();
+				else {
+					mCommon.handleServiceError(serviceResponse);
+				}
+
 			}
 		}.execute();
 	}
@@ -241,6 +246,10 @@ public class CandiMap extends MapActivity {
 			startActivity(intent);
 			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 		}
+	}
+
+	public void onHomeClick(View view) {
+		mCommon.doHomeClick(view);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -359,6 +368,7 @@ public class CandiMap extends MapActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		mCommon.doResume();
 		if (mLocationManager != null) {
 			mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mLocationListener);
 			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, mLocationListener);
@@ -371,6 +381,7 @@ public class CandiMap extends MapActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		mCommon.doPause();
 		if (mLocationManager != null) {
 			mLocationManager.removeUpdates(mLocationListener);
 		}
@@ -400,7 +411,7 @@ public class CandiMap extends MapActivity {
 	public static class CandiItemizedOverlay extends ItemizedOverlay {
 
 		private ArrayList<OverlayItem>	mOverlays	= new ArrayList<OverlayItem>();
-		private boolean					mShowTitles = false;
+		private boolean					mShowTitles	= false;
 
 		public CandiItemizedOverlay(Drawable defaultMarker, Boolean showTitles) {
 			super(boundCenterBottom(defaultMarker));

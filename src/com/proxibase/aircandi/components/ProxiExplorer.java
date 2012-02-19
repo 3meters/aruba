@@ -3,6 +3,7 @@ package com.proxibase.aircandi.components;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,7 +16,6 @@ import android.os.Bundle;
 
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.Preferences;
-import com.proxibase.aircandi.CandiRadar.EventBus;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
@@ -42,8 +42,8 @@ public class ProxiExplorer {
 	public HashMap					mEntitiesInserted		= new HashMap();
 	public HashMap					mEntitiesDeleted		= new HashMap();
 
-	private Boolean					mScanRequestActive		= false;
-	private Boolean					mScanRequestProcessing	= false;
+	private AtomicBoolean			mScanRequestActive		= new AtomicBoolean(false);
+	private AtomicBoolean			mScanRequestProcessing	= new AtomicBoolean(false);
 
 	public List<WifiScanResult>		mWifiList				= new ArrayList<WifiScanResult>();
 	private WifiManager				mWifiManager;
@@ -56,9 +56,6 @@ public class ProxiExplorer {
 	private final static String		globalBssid				= "00:00:00:00:00:00";
 	private final static String		globalSsid				= "candi_feed";
 
-	public List<WifiScanResult>		mQuickWifiList			= new ArrayList<WifiScanResult>();
-	private List<Beacon>			mQuickBeacons			= new ArrayList<Beacon>();
-
 	public static synchronized ProxiExplorer getInstance() {
 		if (singletonObject == null) {
 			singletonObject = new ProxiExplorer();
@@ -66,85 +63,87 @@ public class ProxiExplorer {
 		return singletonObject;
 	}
 
-	/**
-	 * Designed as a singleton. The private Constructor prevents any other class from instantiating.
-	 */
 	private ProxiExplorer() {}
 
-	public void scanForBeacons(Options options) {
-
-		mWifiList.clear();
-
-		if (!mUsingEmulator) {
-			if (mContext == null) {
-				throw new IllegalStateException("Context must be set before calling scanForBeaconsAsync");
-			}
-
-			mScanRequestActive = true;
-
-			mContext.registerReceiver(new BroadcastReceiver() {
-
-				@Override
-				public void onReceive(Context context, Intent intent) {
-
-					/* We only process scan results we have requested */
-					if (mScanRequestActive && !mScanRequestProcessing) {
-
-						mScanRequestActive = false;
-						wifiReleaseLock();
-
-						/* Get the latest scan results */
-						mWifiList.clear();
-						boolean demoBeaconFound = false;
-						for (ScanResult scanResult : mWifiManager.getScanResults()) {
-							mWifiList.add(new WifiScanResult(scanResult));
-							if (scanResult.BSSID.equals(demoBssid))
-								demoBeaconFound = true;
-						}
-
-						/* Insert wifi results if in demo mode */
-						if (Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false) && !demoBeaconFound) {
-							mWifiList.add(new WifiScanResult(demoBssid, demoSsid, demoLevel));
-						}
-
-						if (Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true)) {
-							mWifiList.add(new WifiScanResult(globalBssid, globalSsid, globalLevel));
-						}
-
-						Logger.d(this, "Received wifi scan results");
-						mContext.unregisterReceiver(this);
-						EventBus.onWifiScanReceived(null);
-					}
-				}
-			}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-
-			/*
-			 * WIFI_MODE_FULL: Keeps the wifi radio active and behaving normally per user settings.
-			 * 
-			 * WIFI_MODE_SCAN_ONLY: Wi-Fi will be kept active, but the only operation that will be supported is
-			 * initiation of scans, and the subsequent reporting of scan results. This would work fine
-			 * but auto-refresh will not keep the device awake and when it sleeps, any auto-refresh
-			 * that results in new beacons and service requests will find the wifi connection dead.
-			 * 
-			 * Acquiring a wifilock requires WakeLock permission.
-			 */
-			if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
-				wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
-			}
-
-			for (ScanResult scanResult : mWifiManager.getScanResults()) {
-				mWifiList.add(new WifiScanResult(scanResult));
-			}
-
-			Logger.d(this, "Requesting system wifi scan");
-
-			/* Beacon and entity processing start when we recieve the scan results */
-			mWifiManager.startScan();
+	public void scanForWifi(final RequestListener requestListener) {
+		/*
+		 * If context is null then we probably crashed and the scan
+		 * service is still calling.
+		 */
+		if (mContext == null) {
+			return;
 		}
-		else {
-			Logger.d(this, "Emulator enabled so using dummy scan results");
-			mWifiList.add(new WifiScanResult(demoBssid, demoSsid, demoLevel));
-			EventBus.wifiScanReceived.onEvent(null);
+
+		if (!mScanRequestActive.get()) {
+			mScanRequestActive.set(true);
+
+			synchronized (mWifiList) {
+
+				if (!mUsingEmulator) {
+
+					mContext.registerReceiver(new BroadcastReceiver() {
+
+						@Override
+						public void onReceive(Context context, Intent intent) {
+
+							Logger.d(this, "Received wifi scan results");
+							mContext.unregisterReceiver(this);
+							wifiReleaseLock();
+
+							/* Get the latest scan results */
+							mWifiList.clear();
+							boolean demoBeaconFound = false;
+							for (ScanResult scanResult : mWifiManager.getScanResults()) {
+								mWifiList.add(new WifiScanResult(scanResult));
+								if (scanResult.BSSID.equals(demoBssid)) {
+									demoBeaconFound = true;
+								}
+							}
+
+							/* Insert wifi results if in demo mode */
+							if (Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false) && !demoBeaconFound) {
+								mWifiList.add(new WifiScanResult(demoBssid, demoSsid, demoLevel));
+							}
+
+							if (Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true)) {
+								mWifiList.add(new WifiScanResult(globalBssid, globalSsid, globalLevel));
+							}
+
+							Events.EventBus.onWifiScanReceived(mWifiList);
+							if (requestListener != null) {
+								requestListener.onComplete(new ServiceResponse());
+							}
+							mScanRequestActive.set(false);
+						}
+					}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+
+					/*
+					 * WIFI_MODE_FULL: Keeps the wifi radio active and behaving normally per user settings.
+					 * 
+					 * WIFI_MODE_SCAN_ONLY: Wi-Fi will be kept active, but the only operation that will be supported is
+					 * initiation of scans, and the subsequent reporting of scan results. This would work fine
+					 * but auto-refresh will not keep the device awake and when it sleeps, any auto-refresh
+					 * that results in new beacons and service requests will find the wifi connection dead.
+					 * 
+					 * Acquiring a wifilock requires WakeLock permission.
+					 */
+					if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
+						wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
+					}
+
+					mWifiManager.startScan();
+				}
+				else {
+					mWifiList.clear();
+					Logger.d(this, "Emulator enabled so using dummy scan results");
+					mWifiList.add(new WifiScanResult(demoBssid, demoSsid, demoLevel));
+					Events.EventBus.onWifiScanReceived(mWifiList);
+					if (requestListener != null) {
+						requestListener.onComplete(new ServiceResponse());
+					}
+					mScanRequestActive.set(false);
+				}
+			}
 		}
 	}
 
@@ -247,78 +246,6 @@ public class ProxiExplorer {
 		return serviceResponse;
 	}
 
-	public void quickScanForBeacons(final RequestListener requestListener) {
-
-		mQuickWifiList.clear();
-
-		if (!mUsingEmulator) {
-			
-			/* 
-			 * Registers a second broadcast receiver to handle quickscans.
-			 */
-			mContext.registerReceiver(new BroadcastReceiver() {
-
-				@Override
-				public void onReceive(Context context, Intent intent) {
-
-					/* We only process scan results we have requested */
-					wifiReleaseLock();
-
-					/* Get the latest scan results */
-					mQuickWifiList.clear();
-					boolean demoBeaconFound = false;
-					for (ScanResult scanResult : mWifiManager.getScanResults()) {
-						mQuickWifiList.add(new WifiScanResult(scanResult));
-						if (scanResult.BSSID.equals(demoBssid)) {
-							demoBeaconFound = true;
-						}
-					}
-
-					/* Insert wifi results if in demo mode */
-					if (Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false) && !demoBeaconFound) {
-						mQuickWifiList.add(new WifiScanResult(demoBssid, demoSsid, demoLevel));
-					}
-
-					if (Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true)) {
-						mQuickWifiList.add(new WifiScanResult(globalBssid, globalSsid, globalLevel));
-					}
-
-					Logger.d(this, "Received quick wifi scan results");
-					mContext.unregisterReceiver(this);
-					requestListener.onComplete(new ServiceResponse());
-				}
-			}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-
-			/*
-			 * WIFI_MODE_FULL: Keeps the wifi radio active and behaving normally per user settings.
-			 * 
-			 * WIFI_MODE_SCAN_ONLY: Wi-Fi will be kept active, but the only operation that will be supported is
-			 * initiation of scans, and the subsequent reporting of scan results. This would work fine
-			 * but auto-refresh will not keep the device awake and when it sleeps, any auto-refresh
-			 * that results in new beacons and service requests will find the wifi connection dead.
-			 * 
-			 * Acquiring a wifilock requires WakeLock permission.
-			 */
-			if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
-				wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
-			}
-
-			for (ScanResult scanResult : mWifiManager.getScanResults()) {
-				mQuickWifiList.add(new WifiScanResult(scanResult));
-			}
-
-			Logger.d(this, "Requesting quick wifi scan");
-
-			/* Beacon and entity processing start when we recieve the scan results */
-			mWifiManager.startScan();
-		}
-		else {
-			Logger.d(this, "Emulator enabled so using dummy scan results");
-			mQuickWifiList.add(new WifiScanResult(demoBssid, demoSsid, demoLevel));
-			EventBus.wifiScanReceived.onEvent(null);
-		}
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Entities
 	// --------------------------------------------------------------------------------------------
@@ -329,178 +256,155 @@ public class ProxiExplorer {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private boolean scanResultsContain(String bsid) {
-		for (WifiScanResult wifiScanResult : mWifiList) {
-			if (wifiScanResult.BSSID.equals(bsid)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@SuppressWarnings("unused")
-	private void updateOrInsertDemoBeacon(Beacon beacon, String bssid, String label) {
-
-		/* Keep method until we are sure we won't be using it. */
-		if (beacon == null) {
-			Beacon beaconNew = new Beacon(bssid, label, label, demoLevel, DateUtils.nowDate());
-			beaconNew.detectedLastPass = true;
-			beaconNew.state = BeaconState.New;
-			beaconNew.addScanPass(demoLevel);
-			mBeacons.add(beaconNew);
-		}
-		else {
-			beacon.detectedLastPass = true;
-			beacon.state = BeaconState.Normal;
-			beacon.addScanPass(demoLevel);
-		}
-	}
-
 	public void processBeaconsFromScan(boolean refreshAllBeacons) {
-		/*
-		 * Full update: Queries service for entities for every discovered beacon.
-		 * Partial update: Queries service for entities for beacons that were not discovered on previous scans.
-		 * Entities from previous scans will still be updated for local changes in visibility.
-		 */
-		Logger.d(this, "Processing beacons from scan");
-		ServiceResponse serviceResponse = new ServiceResponse();
-		mScanRequestProcessing = true;
 
-		/* Clear beacon collection for a complete rebuild */
-		if (refreshAllBeacons) {
-			mBeacons.clear();
-		}
+		if (!mScanRequestProcessing.get()) {
+			mScanRequestProcessing.set(true);
+			/*
+			 * Full update: Queries service for entities for every discovered beacon.
+			 * Partial update: Queries service for entities for beacons that were not discovered on previous scans.
+			 * Entities from previous scans will still be updated for local changes in visibility.
+			 */
+			Logger.d(this, "Processing beacons from scan");
+			ServiceResponse serviceResponse = new ServiceResponse();
 
-		/* Reset detection flag */
-		for (Beacon beacon : mBeacons) {
-			beacon.detectedLastPass = false;
-		}
-
-		/* Walk all the latest wifi scan hits */
-		for (int i = 0; i < mWifiList.size(); i++) {
-
-			final WifiScanResult scanResult = mWifiList.get(i);
-
-			/* See if we are already tracking the beacon */
-			Beacon beaconMatch = findBeaconById(scanResult.BSSID);
-
-			/* Add it if we aren't */
-			if (beaconMatch == null) {
-				Beacon beaconNew = new Beacon(scanResult.BSSID, scanResult.SSID, scanResult.SSID, scanResult.level, DateUtils.nowDate());
-				beaconNew.detectedLastPass = true;
-				beaconNew.state = BeaconState.New;
-				beaconNew.addScanPass(scanResult.level);
-				mBeacons.add(beaconNew);
+			/* Clear beacon collection for a complete rebuild */
+			if (refreshAllBeacons) {
+				mBeacons.clear();
 			}
-			else {
-				/*
-				 * Should we update the beacons levelDb
-				 */
-				beaconMatch.detectedLastPass = true;
-				beaconMatch.state = BeaconState.Normal;
-				beaconMatch.addScanPass(scanResult.level);
-			}
-		}
 
-		/* Remove beacons that have too many scan misses */
-		for (int i = mBeacons.size() - 1; i >= 0; i--) {
-			Beacon beacon = mBeacons.get(i);
-			if (!beacon.detectedLastPass) {
-				beacon.scanMisses++;
-				if (beacon.scanMisses >= 3) {
-					mBeacons.remove(i);
+			/* Reset detection flag */
+			for (Beacon beacon : mBeacons) {
+				beacon.detectedLastPass = false;
+			}
+
+			/* Walk all the latest wifi scan hits */
+			synchronized (mWifiList) {
+				for (int i = 0; i < mWifiList.size(); i++) {
+
+					final WifiScanResult scanResult = mWifiList.get(i);
+
+					/* See if we are already tracking the beacon */
+					Beacon beaconMatch = findBeaconById(scanResult.BSSID);
+
+					/* Add it if we aren't */
+					if (beaconMatch == null) {
+						Beacon beaconNew = new Beacon(scanResult.BSSID, scanResult.SSID, scanResult.SSID, scanResult.level, DateUtils.nowDate());
+						beaconNew.detectedLastPass = true;
+						beaconNew.state = BeaconState.New;
+						beaconNew.addScanPass(scanResult.level);
+						mBeacons.add(beaconNew);
+					}
+					else {
+						/*
+						 * Should we update the beacons levelDb
+						 */
+						beaconMatch.detectedLastPass = true;
+						beaconMatch.state = BeaconState.Normal;
+						beaconMatch.addScanPass(scanResult.level);
+					}
 				}
 			}
-		}
 
-		/*
-		 * Call the proxi service to see if the new beacons have been tagged with any entities.
-		 * If call comes back null then there was a network or service problem.
-		 * The user got a toast notification from the service. We are making synchronous calls inside
-		 * an asynchronous thread.
-		 */
-
-		/* Set state of all pre-existing entities to Normal */
-		for (Beacon beacon : mBeacons) {
-			for (Entity entity : beacon.entities) {
-				entity.state = EntityState.Normal;
-				for (Entity childEntity : entity.children) {
-					childEntity.state = EntityState.Normal;
+			/* Remove beacons that have too many scan misses */
+			for (int i = mBeacons.size() - 1; i >= 0; i--) {
+				Beacon beacon = mBeacons.get(i);
+				if (!beacon.detectedLastPass) {
+					beacon.scanMisses++;
+					if (beacon.scanMisses >= 3) {
+						mBeacons.remove(i);
+					}
 				}
 			}
-		}
 
-		/* Construct string array of the beacon ids */
-		ArrayList<String> refreshBeaconIds = new ArrayList<String>();
-		for (Beacon beacon : mBeacons) {
-			if (beacon.state == BeaconState.New) {
-				beacon.state = BeaconState.Normal;
-				refreshBeaconIds.add(beacon.id);
+			/*
+			 * Call the proxi service to see if the new beacons have been tagged with any entities.
+			 * If call comes back null then there was a network or service problem.
+			 * The user got a toast notification from the service. We are making synchronous calls inside
+			 * an asynchronous thread.
+			 */
+
+			/* Set state of all pre-existing entities to Normal */
+			for (Beacon beacon : mBeacons) {
+				for (Entity entity : beacon.entities) {
+					entity.state = EntityState.Normal;
+					for (Entity childEntity : entity.children) {
+						childEntity.state = EntityState.Normal;
+					}
+				}
 			}
-		}
 
-		if (refreshBeaconIds.size() > 0) {
-
-			if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
-				wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
+			/* Construct string array of the beacon ids */
+			ArrayList<String> refreshBeaconIds = new ArrayList<String>();
+			for (Beacon beacon : mBeacons) {
+				if (beacon.state == BeaconState.New) {
+					beacon.state = BeaconState.Normal;
+					refreshBeaconIds.add(beacon.id);
+				}
 			}
 
-			Bundle parameters = new Bundle();
-			parameters.putStringArrayList("beaconBssids", refreshBeaconIds);
-			parameters.putInt("userId", Aircandi.getInstance().getUser().id);
+			if (refreshBeaconIds.size() > 0) {
 
-			ServiceRequest serviceRequest = new ServiceRequest();
-			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesForBeacons");
-			serviceRequest.setRequestType(RequestType.Method);
-			serviceRequest.setParameters(parameters);
-			serviceRequest.setResponseFormat(ResponseFormat.Json);
+				if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
+					wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
+				}
 
-			serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+				Bundle parameters = new Bundle();
+				parameters.putStringArrayList("beaconBssids", refreshBeaconIds);
+				parameters.putInt("userId", Aircandi.getInstance().getUser().id);
 
-			wifiReleaseLock();
+				ServiceRequest serviceRequest = new ServiceRequest();
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesForBeacons");
+				serviceRequest.setRequestType(RequestType.Method);
+				serviceRequest.setParameters(parameters);
+				serviceRequest.setResponseFormat(ResponseFormat.Json);
 
-			if (serviceResponse.responseCode == ResponseCode.Success) {
+				serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-				String jsonResponse = (String) serviceResponse.data;
-				List<Object> freshEntities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+				wifiReleaseLock();
 
-				/* Match returned entities back to beacons */
-				if (freshEntities != null && freshEntities.size() > 0) {
-					for (Object obj : freshEntities) {
-						Entity freshEntity = (Entity) obj;
+				if (serviceResponse.responseCode == ResponseCode.Success) {
 
-						for (Beacon beacon : mBeacons) {
-							if (beacon.id.equals(freshEntity.beaconId)) {
+					String jsonResponse = (String) serviceResponse.data;
+					List<Object> freshEntities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
 
-								beacon.entities.add(freshEntity);
-								beacon.registered = true;
-								freshEntity.state = EntityState.New;
-								freshEntity.beacon = beacon;
-								for (Entity childEntity : freshEntity.children) {
-									childEntity.beacon = beacon;
-									childEntity.state = EntityState.New;
+					/* Match returned entities back to beacons */
+					if (freshEntities != null && freshEntities.size() > 0) {
+						for (Object obj : freshEntities) {
+							Entity freshEntity = (Entity) obj;
+
+							for (Beacon beacon : mBeacons) {
+								if (beacon.id.equals(freshEntity.beaconId)) {
+
+									beacon.entities.add(freshEntity);
+									beacon.registered = true;
+									freshEntity.state = EntityState.New;
+									freshEntity.beacon = beacon;
+									for (Entity childEntity : freshEntity.children) {
+										childEntity.beacon = beacon;
+										childEntity.state = EntityState.New;
+									}
 								}
 							}
 						}
 					}
+
+					/* Any beacon that didn't get entities could be unregistered */
 				}
-
-				/* Any beacon that didn't get entities could be unregistered */
 			}
-		}
 
-		/* Rebuild the top level entity list */
-		mEntities.clear();
-		for (Beacon beacon : mBeacons) {
-			for (Entity entity : beacon.entities) {
-				mEntities.add(entity);
+			/* Rebuild the top level entity list */
+			mEntities.clear();
+			for (Beacon beacon : mBeacons) {
+				for (Entity entity : beacon.entities) {
+					mEntities.add(entity);
+				}
 			}
-		}
 
-		manageEntityVisibility();
-		EventBus.onEntitiesLoaded(serviceResponse);
-		mScanRequestProcessing = false;
+			manageEntityVisibility();
+			Events.EventBus.onEntitiesLoaded(serviceResponse);
+			mScanRequestProcessing.set(false);
+		}
 		return;
 	}
 
@@ -759,8 +663,10 @@ public class ProxiExplorer {
 	 */
 	public void onPause() {
 		try {
-			/* Start blocking the processing of any scan messages even if we have an active request */
-			mScanRequestActive = false;
+			/*
+			 * TODO: Do we need to do anything to clean up processes that might
+			 * be ongoing? What happens to flags for scanning and processing?
+			 */
 		}
 		catch (Exception exception) {
 			/*
@@ -787,17 +693,6 @@ public class ProxiExplorer {
 		}
 	}
 
-	/**
-	 * Call this method when an activity holding a reference to ProxiExplorer is being
-	 * resumed by the system. This ensures that the component is re-initialized properly.
-	 */
-	public void onResume() {
-	/*
-	 * This is a placeholder for any future work that should be done
-	 * when a parent activity is resumed.
-	 */
-	}
-
 	public Context getContext() {
 		return this.mContext;
 	}
@@ -808,10 +703,6 @@ public class ProxiExplorer {
 
 	public List<Beacon> getBeacons() {
 		return this.mBeacons;
-	}
-
-	public List<Beacon> getQuickBeacons() {
-		return mQuickBeacons;
 	}
 
 	public List<Entity> getEntitiesFlat() {
@@ -827,49 +718,67 @@ public class ProxiExplorer {
 	}
 
 	public Beacon getStrongestBeacon() {
-		int strongestLevelDb = -1000;
-		Beacon strongestBeacon = null;
-		Beacon demoBeacon = null;
+
+		Beacon beaconStrongest = null;
+		Beacon beaconDemo = null;
+
 		for (Beacon beacon : mBeacons) {
+			if (beacon.id.equals(globalBssid)) {
+				continue;
+			}
 			if (beacon.id.equals(demoBssid)) {
-				demoBeacon = beacon;
+				beaconDemo = beacon;
 			}
 			else {
-				if (!beacon.id.equals(globalBssid) && beacon.getAvgBeaconLevel() > strongestLevelDb) {
-					strongestBeacon = beacon;
-					strongestLevelDb = beacon.getAvgBeaconLevel();
+				if (beaconStrongest == null) {
+					beaconStrongest = beacon;
+				}
+				else if (beacon.getAvgBeaconLevel() > beaconStrongest.getAvgBeaconLevel()) {
+					beaconStrongest = beacon;
 				}
 			}
 		}
-		if (strongestBeacon == null && demoBeacon != null) {
-			strongestBeacon = demoBeacon;
+		if (beaconStrongest == null && beaconDemo != null) {
+			beaconStrongest = beaconDemo;
 		}
 
-		return strongestBeacon;
+		return beaconStrongest;
 	}
 
-	public Beacon getStrongestQuickBeacon() {
-		int levelDbStrongest = -1000;
+	public Beacon getStrongestWifiAsBeacon() {
+
 		WifiScanResult wifiStrongest = null;
 		WifiScanResult demoWifi = null;
-		for (WifiScanResult wifi : mQuickWifiList) {
-			if (wifi.BSSID.equals(demoBssid)) {
-				demoWifi = wifi;
-			}
-			else {
-				if (!wifi.BSSID.equals(globalBssid) && wifi.level > levelDbStrongest) {
-					wifiStrongest = wifi;
-					levelDbStrongest = wifi.level;
+
+		synchronized (mWifiList) {
+			for (WifiScanResult wifi : mWifiList) {
+				if (wifi.global) {
+					continue;
+				}
+				if (wifi.demo) {
+					demoWifi = wifi;
+				}
+				else {
+					if (wifiStrongest == null) {
+						wifiStrongest = wifi;
+					}
+					else if (wifi.level > wifiStrongest.level) {
+						wifiStrongest = wifi;
+					}
 				}
 			}
 		}
+
 		if (wifiStrongest == null && demoWifi != null) {
 			wifiStrongest = demoWifi;
 		}
 
-		Beacon beaconStrongest = getBeaconById(wifiStrongest.BSSID);
-		if (beaconStrongest == null) {
-			beaconStrongest = new Beacon(wifiStrongest.BSSID, wifiStrongest.SSID, wifiStrongest.SSID, wifiStrongest.level, DateUtils.nowDate());
+		Beacon beaconStrongest = null;
+		if (wifiStrongest != null) {
+			beaconStrongest = getBeaconById(wifiStrongest.BSSID);
+			if (beaconStrongest == null) {
+				beaconStrongest = new Beacon(wifiStrongest.BSSID, wifiStrongest.SSID, wifiStrongest.SSID, wifiStrongest.level, DateUtils.nowDate());
+			}
 		}
 
 		return beaconStrongest;
@@ -956,11 +865,20 @@ public class ProxiExplorer {
 		public String	BSSID;
 		public String	SSID;
 		public int		level	= 0;
+		public Boolean	demo	= false;
+		public Boolean	global	= false;
 
 		public WifiScanResult(String bssid, String ssid, int level) {
 			this.BSSID = bssid;
 			this.SSID = ssid;
 			this.level = level;
+
+			if (bssid.equals(globalBssid)) {
+				this.global = true;
+			}
+			if (bssid.equals(demoBssid)) {
+				this.demo = true;
+			}
 		}
 
 		public WifiScanResult(ScanResult scanResult) {

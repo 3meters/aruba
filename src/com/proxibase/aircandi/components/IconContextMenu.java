@@ -32,6 +32,7 @@ import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
@@ -89,6 +90,8 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 		builder.setInverseBackgroundForced(false);
 
 		AlertDialog dialog = builder.create();
+		dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+
 		dialog.setOnCancelListener(this);
 		dialog.setOnDismissListener(this);
 		return dialog;

@@ -86,9 +86,12 @@ public class CommentList extends CandiActivity {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mListViewComments.setAdapter(new ListAdapter(CommentList.this, 0, mListComments));
+					mCommon.showProgressDialog(false, null);
+					mCommon.stopTitlebarProgress();					
 				}
-				mCommon.showProgressDialog(false, null);
-				mCommon.stopTitlebarProgress();
+				else {
+					mCommon.handleServiceError(serviceResponse);
+				}
 			}
 		}.execute();
 	}

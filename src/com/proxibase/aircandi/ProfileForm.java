@@ -70,7 +70,6 @@ public class ProfileForm extends FormActivity {
 		}
 
 		bind();
-		draw();
 		Tracker.trackPageView("/ProfileForm");
 
 		if (savedInstanceState != null) {
@@ -148,23 +147,43 @@ public class ProfileForm extends FormActivity {
 		 * This form is always for editing. We always reload the user to make sure
 		 * we have the freshest data.
 		 */
-		Query query = null;
-		if (mUser != null) {
-			query = new Query("Users").filter("Email eq '" + ((User) mUser).email + "'");
-		}
-		else {
-			query = new Query("Users").filter("Id eq '" + String.valueOf(mUserId) + "'");
-		}
+		new AsyncTask() {
 
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(
-				new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, "Loading...");
+			}
 
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-			String jsonResponse = (String) serviceResponse.data;
-			mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
-			mImageUriOriginal = mUser.imageUri;
-			Tracker.dispatch();
-		}
+			@Override
+			protected Object doInBackground(Object... params) {
+
+				Query query = new Query("Users").filter("Id eq '" + String.valueOf(mUserId) + "'");
+				if (mUser != null) {
+					query = new Query("Users").filter("Email eq '" + ((User) mUser).email + "'");
+				}
+
+				ServiceResponse serviceResponse = NetworkManager.getInstance().request(
+						new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+				return serviceResponse;
+			}
+
+			@Override
+			protected void onPostExecute(Object result) {
+				ServiceResponse serviceResponse = (ServiceResponse) result;
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					String jsonResponse = (String) serviceResponse.data;
+					mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
+					mImageUriOriginal = mUser.imageUri;
+					mCommon.showProgressDialog(false, null);
+					mCommon.stopTitlebarProgress();					
+					draw();
+					Tracker.dispatch();
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse);
+				}
+			}
+		}.execute();
 	}
 
 	protected void draw() {
@@ -195,6 +214,8 @@ public class ProfileForm extends FormActivity {
 				mImageUser.setImageRequest(imageRequest);
 			}
 		}
+		((ViewGroup) findViewById(R.id.flipper_form)).setVisibility(View.VISIBLE);
+
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -242,99 +263,75 @@ public class ProfileForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, "Saving...");
+					mCommon.showProgressDialog(true, "Saving profile...");
 				}
 
 				@Override
 				protected Object doInBackground(Object... params) {
 
-					/* Delete or upload images to S3 as needed. */
-					ServiceResponse serviceResponse = updateImages();
+					/*
+					 * TODO: We are going with a garbage collection scheme for orphaned images. We
+					 * need to use an extended property on S3 items that is set to a date when
+					 * collection is ok. This allows downloaded entities to keep working even if
+					 * an image for entity has changed.
+					 */
+					ServiceResponse serviceResponse = new ServiceResponse();
 
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						serviceResponse = update();
+					/* Put image to S3 if we have a new one. */
+					if (mUser.imageBitmap != null) {
+						try {
+							String imageKey = String.valueOf(((User) mUser).id) + "_"
+												+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
+												+ ".jpg";
+							S3.putImage(imageKey, mUser.imageBitmap);
+							mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
+						}
+						catch (ProxibaseServiceException exception) {
+							serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
+						}
 					}
 
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+
+						mUser.email = mTextEmail.getText().toString().trim();
+						mUser.name = mTextFullname.getText().toString().trim();
+						mUser.modifiedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+						mUser.modifier = Aircandi.getInstance().getUser().id;
+
+						if (mTextPassword.getText().toString().length() != 0) {
+							mUser.password = mTextPassword.getText().toString().trim();
+						}
+
+						Logger.i(this, "Updating user: " + mUser.name);
+
+						ServiceRequest serviceRequest = new ServiceRequest();
+						serviceRequest.setUri(mUser.getEntryUri());
+						serviceRequest.setRequestType(RequestType.Update);
+						serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
+						serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+					}
 					return serviceResponse;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
-					mCommon.showProgressDialog(false, null);
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
+						mCommon.showProgressDialog(false, null);
 						Aircandi.getInstance().setUser(mUser);
 						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_PROFILE_UPDATED);
 						finish();
 					}
+					else {
+						mCommon.handleServiceError(serviceResponse);
+					}
 				}
 			}.execute();
 		}
-	}
-
-	protected ServiceResponse updateImages() {
-
-		/* Delete image from S3 if it has been orphaned */
-		/*
-		 * TODO: We are going with a garbage collection scheme for orphaned images. We
-		 * need to use an extended property on S3 items that is set to a date when
-		 * collection is ok. This allows downloaded entities to keep working even if 
-		 * an image for entity has changed.
-		 */
-		
-		ServiceResponse serviceResponse = new ServiceResponse();
-//		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
-//			if (!mUser.imageUri.equals(mImageUriOriginal)) {
-//				try {
-//					S3.deleteImage(mImageUriOriginal.substring(mImageUriOriginal.lastIndexOf("/") + 1));
-//					ImageManager.getInstance().deleteImage(mImageUriOriginal);
-//					ImageManager.getInstance().deleteImage(mImageUriOriginal + ".reflection");
-//				}
-//				catch (ProxibaseServiceException exception) {
-//					return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
-//				}
-//			}
-//		}
-
-		/* Put image to S3 if we have a new one. */
-		if (mUser.imageBitmap != null) {
-			try {
-				String imageKey = String.valueOf(((User) mUser).id) + "_"
-									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-									+ ".jpg";
-				S3.putImage(imageKey, mUser.imageBitmap);
-				mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
-			}
-			catch (ProxibaseServiceException exception) {
-				return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
-			}
-		}
-		return serviceResponse;
-	}
-
-	protected ServiceResponse update() {
-
-		mUser.email = mTextEmail.getText().toString().trim();
-		mUser.name = mTextFullname.getText().toString().trim();
-		mUser.modifiedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-		mUser.modifier = Aircandi.getInstance().getUser().id;
-
-		if (mTextPassword.getText().toString().length() != 0) {
-			mUser.password = mTextPassword.getText().toString().trim();
-		}
-
-		Logger.i(this, "Updating user: " + mUser.name);
-
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(mUser.getEntryUri());
-		serviceRequest.setRequestType(RequestType.Update);
-		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
-		serviceRequest.setResponseFormat(ResponseFormat.Json);
-
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-		return serviceResponse;
 	}
 
 	private boolean validate() {

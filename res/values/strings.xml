@@ -24,9 +24,12 @@
 	<string name="EXTRA_ENTITY_DIRTY">com.proxibase.aircandi.EXTRA_ENTITY_DIRTY</string>
 	<string name="EXTRA_CANDI_TASK">com.proxibase.aircandi.EXTRA_CANDI_TASK</string>
 	
-	<string name="menu_settings_title">Settings</string>
-	<string name="menu_signout_title">Sign out</string>
-	<string name="menu_profile_title">Profile</string>
+	<string name="menu_settings_item">Settings</string>
+	<string name="menu_signout_item">Sign out</string>
+	<string name="menu_signin_item">Sign in</string>
+	<string name="menu_profile_item">Profile</string>
+	<string name="menu_refresh_item">Refresh</string>
+	<string name="menu_about_item">About</string>
 	
 	<string name="menu_refresh_title">Refresh Options</string>
 	<string name="menu_refresh_beacon_plus_current">Refresh</string>
@@ -35,6 +38,11 @@
 	<!-- Testing -->
 	
 	<string name="testing">Just some random string for testing</string>
+	
+	<!-- Alerts -->
+	
+	<string name="alert_beacons_zero">The beacon detecter shows green when there are beacons nearby you can add new candi to.</string>
+	<string name="alert_beacons_available">There are beacons nearby you can add new candi to.</string>
 	
 	<!-- Network -->
 

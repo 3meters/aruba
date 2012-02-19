@@ -1,5 +1,7 @@
 package com.proxibase.aircandi.components;
 
+import java.net.UnknownHostException;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +14,7 @@ import android.os.AsyncTask;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.R;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
@@ -27,7 +30,6 @@ public class NetworkManager {
 	private WifiStateChangedReceiver	mWifiStateChangedReceiver	= new WifiStateChangedReceiver();
 	private IConnectivityListener		mConnectivityListener;
 	private WifiManager					mWifiManager;
-	private boolean						mIsConnectedFailurePrevious	= false;
 
 	public static synchronized NetworkManager getInstance() {
 		if (singletonObject == null) {
@@ -50,15 +52,12 @@ public class NetworkManager {
 		return cm.getActiveNetworkInfo().isConnectedOrConnecting();
 	}
 
-	public void reset() {
-		mIsConnectedFailurePrevious = false;
-	}
+	public void reset() {}
 
 	public void initialize() {
 		mContext.registerReceiver(mConnectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 		mContext.registerReceiver(mWifiStateChangedReceiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 		mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-		mIsConnectedFailurePrevious = false;
 	}
 
 	public void requestAsync(final ServiceRequest serviceRequest) {
@@ -80,18 +79,52 @@ public class NetworkManager {
 	}
 
 	public ServiceResponse request(ServiceRequest serviceRequest) {
+		return request(serviceRequest, null);
+	}
+
+	public ServiceResponse request(ServiceRequest serviceRequest, Context context) {
+		/*
+		 * Don't assume this is being called from the UI thread.
+		 */
+		ServiceResponse serviceResponse = new ServiceResponse();
+		AircandiCommon.mNotificationManager.cancel(CandiConstants.NOTIFICATION_NETWORK);
+
+		/* Make sure we have a network connection */
+		if (!verifyIsConnected()) {
+			serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ConnectionException, null,
+					new ProxibaseServiceException(serviceRequest.getUri(), ErrorType.Client, ErrorCode.ConnectionException, null));
+		}
+		else {
+			/*
+			 * We have a network connection so give it a try. Request processing
+			 * will retry using an exponential backoff scheme if needed and possible.
+			 */
+			try {
+				Object response = ProxibaseService.getInstance().request(serviceRequest);
+				serviceResponse = new ServiceResponse(ResponseCode.Success, ResponseCodeDetail.Success, response, null);
+			}
+			catch (ProxibaseServiceException exception) {
+				/*
+				 * We got a service side error that either stopped us in our tracks or
+				 * we gave up after performing a series of retries.
+				 */
+				serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
+				if (exception.getErrorCode() == ErrorCode.UpdateException) {
+					serviceResponse.responseCode = ResponseCode.Success;
+					serviceResponse.responseCodeDetail = ResponseCodeDetail.UpdateException;
+				}
+			}
+		}
+		return serviceResponse;
+	}
+
+	public ServiceResponse requestOld(ServiceRequest serviceRequest) {
 		/*
 		 * Don't assume this is being called from the UI thread.
 		 */
 
 		/* Make sure we have a network connection */
 		if (!verifyIsConnected()) {
-			if (!mIsConnectedFailurePrevious) {
-				mIsConnectedFailurePrevious = true;
-				if (!serviceRequest.isSuppressUI()) {
-					ImageUtils.showToastNotification(R.string.network_message_connection_notready, Toast.LENGTH_LONG);
-				}
-			}
 			Logger.d(this, "Connection exception: " + serviceRequest.getUri());
 			return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ConnectionException, null, null);
 		}
@@ -116,19 +149,13 @@ public class NetworkManager {
 
 			if (exception.getErrorType() == ErrorType.Service) {
 				if (exception.getErrorCode() == ErrorCode.NotFoundException) {
-					logMessage = "Service not found exception: " + serviceRequest.getUri();
-					toastMessageId = R.string.network_message_service_notready;
 					serviceResponse.responseCodeDetail = ResponseCodeDetail.ServiceNotFoundException;
 				}
 				else if (exception.getErrorCode() == ErrorCode.UpdateException) {
-					logMessage = "Duplicate key: " + serviceRequest.getUri();
-					suppressUI = true;
 					serviceResponse.responseCode = ResponseCode.Success;
 					serviceResponse.responseCodeDetail = ResponseCodeDetail.UpdateException;
 				}
 				else {
-					logMessage = "Service exception: " + serviceRequest.getUri();
-					toastMessageId = R.string.network_message_service_error;
 					serviceResponse.responseCodeDetail = ResponseCodeDetail.ServiceException;
 				}
 			}
@@ -138,9 +165,21 @@ public class NetworkManager {
 			 */
 			else if (exception.getErrorType() == ErrorType.Client) {
 				if (exception.getErrorCode() == ErrorCode.IOException) {
-					logMessage = "Transport exception: " + serviceRequest.getUri();
-					toastMessageId = R.string.network_message_connection_poor;
-					serviceResponse.responseCodeDetail = ResponseCodeDetail.TransportException;
+					if (exception.getCause() instanceof UnknownHostException) {
+						logMessage = "Unknown host exception: " + serviceRequest.getUri();
+						toastMessageId = R.string.network_message_connection_poor;
+						serviceResponse.responseCodeDetail = ResponseCodeDetail.UnknownHostException;
+					}
+					else {
+						logMessage = "Transport exception: " + serviceRequest.getUri();
+						toastMessageId = R.string.network_message_connection_poor;
+						serviceResponse.responseCodeDetail = ResponseCodeDetail.TransportException;
+					}
+				}
+				else if (exception.getErrorCode() == ErrorCode.UnknownHostException) {
+					logMessage = "Unknown host: " + serviceRequest.getUri();
+					toastMessageId = R.string.network_message_client_error;
+					serviceResponse.responseCodeDetail = ResponseCodeDetail.ProtocolException;
 				}
 				else if (exception.getErrorCode() == ErrorCode.ClientProtocolException) {
 					logMessage = "Protocol exception: " + serviceRequest.getUri();
@@ -169,9 +208,6 @@ public class NetworkManager {
 	private boolean verifyIsConnected() {
 		int attempts = 0;
 		while (!NetworkManager.getInstance().isConnected()) {
-			if (mIsConnectedFailurePrevious) {
-				return false;
-			}
 			attempts++;
 			Logger.v(this, "No network connection: attempt: " + String.valueOf(attempts));
 
@@ -185,7 +221,6 @@ public class NetworkManager {
 				return false;
 			}
 		}
-		mIsConnectedFailurePrevious = false;
 		return true;
 	}
 
@@ -393,6 +428,7 @@ public class NetworkManager {
 		UpdateException,
 		ConnectionException,
 		TransportException,
+		UnknownHostException,
 		ProtocolException,
 		UnknownException
 	}

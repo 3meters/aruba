@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +32,12 @@ import com.proxibase.aircandi.components.DrawableManager;
 import com.proxibase.aircandi.components.EndlessAdapter;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
+import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorCode;
+import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorType;
 
 /*
  * We often will get duplicates because the ordering of images isn't
@@ -57,27 +64,8 @@ public class PictureSearch extends FormActivity {
 
 		initialize();
 		bind();
-		draw();
 		Tracker.trackPageView("/AircandiGallery");
 	}
-
-	protected void bind() {
-		String query = Aircandi.settings.getString(Preferences.SETTING_PICTURE_SEARCH, null);
-		mTitleOptional = query;
-		if (query == null || query.equals("")) {
-			query = "trending now site:yahoo.com";
-		}
-		else {
-			mSearch.setText(query);
-			query = "wallpaper " + query;
-		}
-		mImages = loadImages(query, PAGE_SIZE, 0);
-		mOffset += PAGE_SIZE;
-		mQuery = query;
-		mGridView.setAdapter(new EndlessImageAdapter(mImages));
-	}
-
-	protected void draw() {}
 
 	private void initialize() {
 		mDrawableManager = new DrawableManager();
@@ -99,10 +87,58 @@ public class PictureSearch extends FormActivity {
 		});
 
 		mSearch = (EditText) findViewById(R.id.text_uri);
+		String query = Aircandi.settings.getString(Preferences.SETTING_PICTURE_SEARCH, null);
+		mSearch.setText(query);
 	}
 
-	private ArrayList<ImageResult> loadImages(String query, long count, long offset) {
+	protected void bind() {
 
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, "Searching...");
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+
+				String query = mSearch.getText().toString();
+				mOffset = 0;
+				mTitleOptional = query;
+				if (query == null || query.equals("")) {
+					query = "trending now site:yahoo.com";
+				}
+				else {
+					query = "wallpaper " + query;
+				}
+
+				mQuery = query;
+				ServiceResponse serviceResponse = loadImages(query, PAGE_SIZE, 0);
+				return serviceResponse;
+			}
+
+			@Override
+			protected void onPostExecute(Object result) {
+				ServiceResponse serviceResponse = (ServiceResponse) result;
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					mImages = (ArrayList<ImageResult>) serviceResponse.data;
+					mOffset += PAGE_SIZE;
+					mCommon.showProgressDialog(false, null);
+					mCommon.stopTitlebarProgress();
+					mGridView.setAdapter(new EndlessImageAdapter(mImages));
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse);
+				}
+			}
+		}.execute();
+
+	}
+
+	private ServiceResponse loadImages(String query, long count, long offset) {
+
+		ServiceResponse serviceResponse = new ServiceResponse();
 		BingSearchServiceClientFactory factory = BingSearchServiceClientFactory.newInstance();
 
 		BingSearchClient client = factory.createBingSearchClient();
@@ -112,19 +148,23 @@ public class PictureSearch extends FormActivity {
 		builder.withQuery(query);
 		builder.withSourceType(SourceType.IMAGE);
 		builder.withVersion("2.2");
-		//builder.withMarket("en-us");
 		builder.withAdultOption(AdultOption.MODERATE);
 		builder.withImageRequestFilter("Size:Large");
 		builder.withImageRequestCount(count);
 		builder.withImageRequestOffset(offset);
 
-		SearchResponse response = client.search(builder.getResult());
-		if (response == null) {
-			return null;
+		SearchResponse searchResponse = null;
+		try {
+			searchResponse = client.search(builder.getResult());
+			ArrayList<ImageResult> images = (ArrayList<ImageResult>) searchResponse.getImage().getResults();
+			serviceResponse.data = images;
+			return serviceResponse;
 		}
-
-		ArrayList<ImageResult> images = (ArrayList<ImageResult>) response.getImage().getResults();
-		return images;
+		catch (Exception exception) {
+			serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.UnknownException, null,
+					new ProxibaseServiceException(query, ErrorType.Client, ErrorCode.UnknownException, exception));
+			return serviceResponse;
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -132,26 +172,74 @@ public class PictureSearch extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onSearchClick(View view) {
+		bind();
+	}
 
-		String query = mSearch.getText().toString();
-		mTitleOptional = query;
-		mOffset = 0;
-		Aircandi.settingsEditor.putString(Preferences.SETTING_PICTURE_SEARCH, query);
-		Aircandi.settingsEditor.commit();
-		if (query.equals("")) {
-			query = "trending now site:yahoo.com";
-		}
-		else {
-			query = "wallpaper " + query;
-		}
-		mImages = loadImages(query, PAGE_SIZE, 0);
-		mOffset += PAGE_SIZE;
-		mQuery = query;
-		mGridView.setAdapter(new EndlessImageAdapter(mImages));
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		System.gc();
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
+	// --------------------------------------------------------------------------------------------
+
+	private String getBingId() {
+		Properties properties = new Properties();
+		try {
+			properties.load(getClass().getResourceAsStream("bing_api.properties"));
+			String appId = properties.getProperty("appId");
+			return appId;
+		}
+		catch (IOException exception) {
+			throw new IllegalStateException("Unable to retrieve bing appId");
+		}
+	}
+
+	protected void unbindDrawables(View view) {
+		if (view.getBackground() != null) {
+			view.getBackground().setCallback(null);
+		}
+		if (view instanceof ViewGroup) {
+			for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+				unbindDrawables(((ViewGroup) view).getChildAt(i));
+			}
+			try {
+				((ViewGroup) view).removeAllViews();
+			}
+			catch (Throwable e) {
+				// NOP
+			}
+		}
+	}
+
+	protected void unbindImageViewDrawables(ImageView imageView) {
+		if (imageView.getBackground() != null) {
+			imageView.getBackground().setCallback(null);
+		}
+		if (imageView.getDrawable() != null) {
+			imageView.getDrawable().setCallback(null);
+			((BitmapDrawable) imageView.getDrawable()).getBitmap().recycle();
+		}
+	}
+
+	@Override
+	protected int getLayoutID() {
+		return R.layout.picture_search;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Inner classes
 	// --------------------------------------------------------------------------------------------
 
 	class EndlessImageAdapter extends EndlessAdapter {
@@ -172,12 +260,20 @@ public class PictureSearch extends FormActivity {
 		protected boolean cacheInBackground() {
 			/* What happens if there is a connectivity error? */
 			moreImages.clear();
-			moreImages = loadImages(mQuery, PAGE_SIZE, mOffset);
-			Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
-							+ " new total = "
-							+ String.valueOf(getWrappedAdapter().getCount() + moreImages.size()));
-			mOffset += PAGE_SIZE;
-			return ((getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX);
+
+			ServiceResponse serviceResponse = loadImages(mQuery, PAGE_SIZE, mOffset);
+			if (serviceResponse.responseCode == ResponseCode.Success) {
+				moreImages = (ArrayList<ImageResult>) serviceResponse.data;
+				Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
+								+ " new total = "
+								+ String.valueOf(getWrappedAdapter().getCount() + moreImages.size()));
+				mOffset += PAGE_SIZE;
+				return ((getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX);
+			}
+			else {
+				mCommon.handleServiceError(serviceResponse);
+				return false;
+			}
 		}
 
 		@Override
@@ -231,58 +327,4 @@ public class PictureSearch extends FormActivity {
 		public Object		data;
 	}
 
-	private String getBingId() {
-		Properties properties = new Properties();
-		try {
-			properties.load(getClass().getResourceAsStream("bing_api.properties"));
-			String appId = properties.getProperty("appId");
-			return appId;
-		}
-		catch (IOException exception) {
-			throw new IllegalStateException("Unable to retrieve bing appId");
-		}
-	}
-
-	protected void unbindDrawables(View view) {
-		if (view.getBackground() != null) {
-			view.getBackground().setCallback(null);
-		}
-		if (view instanceof ViewGroup) {
-			for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-				unbindDrawables(((ViewGroup) view).getChildAt(i));
-			}
-			try {
-				((ViewGroup) view).removeAllViews();
-			}
-			catch (Throwable e) {
-				// NOP
-			}
-		}
-	}
-
-	protected void unbindImageViewDrawables(ImageView imageView) {
-		if (imageView.getBackground() != null) {
-			imageView.getBackground().setCallback(null);
-		}
-		if (imageView.getDrawable() != null) {
-			imageView.getDrawable().setCallback(null);
-			((BitmapDrawable) imageView.getDrawable()).getBitmap().recycle();
-		}
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		System.gc();
-	}
-
-	@Override
-	public void onBackPressed() {
-		super.onBackPressed();
-	}
-
-	@Override
-	protected int getLayoutID() {
-		return R.layout.picture_search;
-	}
 }

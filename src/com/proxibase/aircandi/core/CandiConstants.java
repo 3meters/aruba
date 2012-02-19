@@ -24,7 +24,10 @@ public interface CandiConstants {
 	public static final int				LAYER_ZONES							= 1;
 	public static final int				LAYER_CANDI							= 2;
 
-	public static final int				NETWORK_INTERVAL_PHONEY				= 3000;
+	public static final int				INTERVAL_NETWORK_PHONEY				= 3000;
+	public static final int				INTERVAL_SCAN						= 60000;
+	public static final int				LOCATION_SCAN_TIME_LIMIT			= 45000;
+	public static final int				LOCATION_EXPIRATION					= 30000;
 
 	public static final float			CANDI_VIEW_HALO						= 2.0f;
 
@@ -87,6 +90,8 @@ public interface CandiConstants {
 	public static final String			TYPE_CANDI_PICTURE					= "com.proxibase.aircandi.candi.picture";
 	public static final String			TYPE_CANDI_LINK						= "com.proxibase.aircandi.candi.link";
 
+	public static final String			USER_ANONYMOUS						= "{\"d\" : {\"__metadata\": {\"uri\": \"http://dev.aircandi.com/Airodata.svc/Users(1003)\", \"type\": \"Aircandi.User\"}, \"Id\": 1003, \"Name\": \"Anonymous\", \"Email\": \"anonymous@3meters.com\", \"Role\": null, \"Password\": \"12345678\", \"ImageUri\": \"resource:placeholder_user\", \"LinkUri\": null, \"Location\": null, \"FacebookId\": null, \"IsDeveloper\": false, \"Creator\": null, \"CreatedDate\": 1317427200, \"Modifier\": null, \"ModifiedDate\": 1317427200}}";
+
 	public static final int				ACTIVITY_ENTITY_HANDLER				= 100;
 	public static final int				ACTIVITY_MARKET						= 200;
 	public static final int				ACTIVITY_PICTURE_PICK_DEVICE		= 300;
@@ -113,6 +118,8 @@ public interface CandiConstants {
 
 	public static final int				VISIBILITY_PUBLIC					= 0;
 	public static final int				VISIBILITY_PRIVATE					= 1;
+
+	public static final int				NOTIFICATION_NETWORK				= 1000;
 
 	public static final float			DURATION_MULTIPLIER					= 1.0f;
 	public static final float			DURATION_ZOOM						= 0.5f * DURATION_MULTIPLIER;

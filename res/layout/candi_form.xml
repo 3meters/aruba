@@ -50,6 +50,7 @@
                 android:background="@drawable/button_nooutline_selector"
                 android:onClick="onCandiInfoClick"
                 android:paddingBottom="15dp"
+                android:visibility="invisible"
                 android:paddingLeft="2dp"
                 android:paddingTop="7dp" >
 

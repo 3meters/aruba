@@ -1,6 +1,7 @@
 package com.proxibase.aircandi;
 
 import java.util.Calendar;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.acra.ACRA;
 import org.acra.ReportField;
@@ -16,10 +17,18 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
+import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
+import com.proxibase.aircandi.components.Events;
+import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.Events.EventHandler;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.consumer.User;
 
@@ -82,12 +91,19 @@ public class Aircandi extends Application {
 	public static Context					applicationContext;
 	public static Handler					applicationHandler;
 	private User							mUser;
-	private Boolean							mRebuildingDataModel			= false;
+	private Boolean							mRebuildingDataModel	= false;
 	private Boolean							mToolstripOpen			= false;
 	private Boolean							mFirstTimeCandiForm		= true;
 	private CandiTask						mCandiTask				= CandiTask.RadarCandi;
 	private Location						mCurrentLocation;
 	private static Boolean					mIsDebugBuild;
+	private Boolean							mLaunchedFromRadar		= false;
+
+	private LocationManager					mLocationManager;
+	private LocationListener				mLocationListener;
+	private EventHandler					mEventLocationChanged;
+	private AtomicBoolean					mLocationScanActive		= new AtomicBoolean(false);
+	private Runnable						mLocationScanRunnable;
 
 	public static Aircandi getInstance() {
 		return singletonObject;
@@ -111,6 +127,122 @@ public class Aircandi extends Application {
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
+
+		/* Location */
+		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		mLocationListener = new LocationListener() {
+
+			@Override
+			public void onLocationChanged(Location location) {
+				if (Aircandi.isBetterLocation(location, Aircandi.getInstance().getCurrentLocation())) {
+					Aircandi.getInstance().setCurrentLocation(location);
+					location.setTime(System.currentTimeMillis());
+					Events.EventBus.onLocationChanged(location);
+				}
+			}
+
+			@Override
+			public void onProviderDisabled(String provider) {
+				ImageUtils.showToastNotification(provider + ": disabled", Toast.LENGTH_SHORT);
+			}
+
+			@Override
+			public void onProviderEnabled(String provider) {
+				ImageUtils.showToastNotification(provider + ": enabled", Toast.LENGTH_SHORT);
+			}
+
+			@Override
+			public void onStatusChanged(String provider, int status, Bundle extras) {
+				if (status == LocationProvider.AVAILABLE) {
+					ImageUtils.showToastNotification(provider + ": available", Toast.LENGTH_SHORT);
+				}
+				else if (status == LocationProvider.OUT_OF_SERVICE) {
+					ImageUtils.showToastNotification(provider + ": out of service", Toast.LENGTH_SHORT);
+				}
+				else if (status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
+					ImageUtils.showToastNotification(provider + ": temporarily unavailable", Toast.LENGTH_SHORT);
+				}
+			}
+		};
+
+		/* Location */
+
+		mLocationScanRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+				if (mLocationScanActive.get()) {
+					Logger.d(this, "Location scan stopped: time limit");
+					stopLocationUpdates();
+				}
+			}
+		};
+		
+		mEventLocationChanged = new EventHandler() {
+
+			@Override
+			public void onEvent(Object data) {
+
+				Location location = Aircandi.getInstance().getCurrentLocation();
+				if (location.hasAccuracy() && location.getAccuracy() <= 30) {
+					Logger.d(this, "Location scan stopped: accurate fix obtained");
+					stopLocationUpdates();
+					return;
+				}
+			}
+		};
+		Events.EventBus.locationChanged.add(mEventLocationChanged);
+
+		/*
+		 * We grab the last known location if it is less than two minutes old.
+		 */
+		Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		if (lastKnownLocationNetwork != null && timeSinceLocationInMillis(lastKnownLocationNetwork) >= CandiConstants.LOCATION_EXPIRATION) {
+			if (Aircandi.isBetterLocation(lastKnownLocationNetwork, Aircandi.getInstance().getCurrentLocation())) {
+				Logger.d(this, "Location stored: last known network location");
+				Aircandi.getInstance().setCurrentLocation(lastKnownLocationNetwork);
+			}
+		}
+
+		Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		if (lastKnownLocationGPS != null && timeSinceLocationInMillis(lastKnownLocationGPS) >= CandiConstants.LOCATION_EXPIRATION) {
+			if (Aircandi.isBetterLocation(lastKnownLocationGPS, Aircandi.getInstance().getCurrentLocation())) {
+				Logger.d(this, "Location stored: last known GPS location");
+				Aircandi.getInstance().setCurrentLocation(lastKnownLocationGPS);
+			}
+		}
+	}
+
+	public void startLocationUpdates(int scanDurationInMillis, int locationExpirationInMillis) {
+
+		if (!mLocationScanActive.get()) {
+
+			Location location = Aircandi.getInstance().getCurrentLocation();
+			/*
+			 * If a provider is disabled, we won't get any updates. If the user enables the provider
+			 * during our time window, we will start getting updates.
+			 */
+			int locationAge = Aircandi.timeSinceLocationInMillis(location);
+			if (location != null && locationAge >= locationExpirationInMillis) {
+				mLocationScanActive.set(true);
+				Logger.d(this, "Location scan started");
+				Aircandi.getInstance().setCurrentLocation(null);
+				Aircandi.getInstance().getLocationManager().requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
+						Aircandi.getInstance().getLocationListener());
+				Aircandi.getInstance().getLocationManager().requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,
+						Aircandi.getInstance().getLocationListener());
+				Aircandi.applicationHandler.postDelayed(mLocationScanRunnable, scanDurationInMillis);
+			}
+			else {
+				Logger.d(this, "Location scan skipped: current location still good: " + String.valueOf(locationAge) + "ms");
+			}
+		}
+	}
+
+	public void stopLocationUpdates() {
+		mLocationScanActive.set(false);
+		Aircandi.applicationHandler.removeCallbacks(mLocationScanRunnable);
+		mLocationManager.removeUpdates(Aircandi.getInstance().getLocationListener());
 	}
 
 	public static Boolean isDebugBuild(Context context) {
@@ -136,11 +268,21 @@ public class Aircandi extends Application {
 		return mIsDebugBuild;
 	}
 
+	public static int timeSinceLocationInMillis(Location location) {
+		if (location == null) {
+			return Integer.MAX_VALUE;
+		}
+		long locationTime = location.getTime();
+		long currentTime = System.currentTimeMillis();
+		long timeDelta = currentTime - locationTime;
+		return (int) timeDelta;
+	}
+
 	/**
 	 * Determines whether one Location reading is better than the current Location fix *
 	 * 
-	 * @param location The new Location that you want to evaluate * @param currentBestLocation The current Location fix,
-	 *            to which you want to compare the new one
+	 * @param location The new Location that you want to evaluate
+	 * @param currentBestLocation The current Location fix, to which you want to compare the new one
 	 */
 	public static boolean isBetterLocation(Location location, Location currentBestLocation) {
 
@@ -260,6 +402,30 @@ public class Aircandi extends Application {
 
 	public Boolean isRebuildingDataModel() {
 		return mRebuildingDataModel;
+	}
+
+	public void setLocationManager(LocationManager locationManager) {
+		this.mLocationManager = locationManager;
+	}
+
+	public LocationManager getLocationManager() {
+		return mLocationManager;
+	}
+
+	public void setLocationListener(LocationListener locationListener) {
+		this.mLocationListener = locationListener;
+	}
+
+	public LocationListener getLocationListener() {
+		return mLocationListener;
+	}
+
+	public void setLaunchedFromRadar(Boolean launchedFromRadar) {
+		this.mLaunchedFromRadar = launchedFromRadar;
+	}
+
+	public Boolean getLaunchedFromRadar() {
+		return mLaunchedFromRadar;
 	}
 
 	public static enum CandiTask {

@@ -189,32 +189,8 @@ public class WebImageView extends RelativeLayout {
 
 						}
 					}
+					showLoading(false);
 				}
-				else {
-					Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
-
-					if (bitmap != null) {
-
-						boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
-						final Bitmap bitmapScaled = scaleBitmap
-																? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true)
-																: Bitmap.createScaledBitmap(bitmap,
-																		CandiConstants.IMAGE_WIDTH_DEFAULT,
-																		CandiConstants.IMAGE_WIDTH_DEFAULT, true);
-
-						/* OK to recycle original because nothing else is dependent on it */
-						bitmap.recycle();
-
-						mThreadHandler.post(new Runnable() {
-
-							@Override
-							public void run() {
-								ImageUtils.showImageInImageView(bitmapScaled, mImageView);
-							}
-						});
-					}
-				}
-				showLoading(false);
 
 				if (originalImageReadyListener != null) {
 					originalImageReadyListener.onComplete(serviceResponse);

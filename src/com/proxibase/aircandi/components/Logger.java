@@ -16,7 +16,7 @@ public class Logger {
 	 * VERBOSE = 2
 	 */
 
-	private static int		LOG_LEVEL		= Log.VERBOSE;
+	private static int		LOG_LEVEL		= Log.DEBUG;
 	private static boolean	INCLUDE_MODULE	= false;
 
 	private static enum LogLevel {
@@ -137,13 +137,13 @@ public class Logger {
 	 * This level of logging should be used for everything else. This level will only be logged on debug builds.
 	 */
 	static public void v(Object taskContext, String msgFormat) {
-		if (LOG_LEVEL <= Log.DEBUG) {
+		if (LOG_LEVEL <= Log.VERBOSE) {
 			Log(LogLevel.Verbose, taskContext, msgFormat);
 		}
 	}
 
 	static public void v(Object taskContext, String msgFormat, Throwable t) {
-		if (LOG_LEVEL <= Log.DEBUG) {
+		if (LOG_LEVEL <= Log.VERBOSE) {
 			Log(LogLevel.Verbose, taskContext, msgFormat, t);
 		}
 	}

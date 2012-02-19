@@ -2,30 +2,17 @@ package com.proxibase.aircandi;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.webkit.WebView;
 import android.widget.TextView;
-import android.widget.ViewFlipper;
 
 import com.proxibase.aircandi.components.Exceptions;
-import com.proxibase.aircandi.components.ImageRequest;
-import com.proxibase.aircandi.components.ImageRequestBuilder;
-import com.proxibase.aircandi.components.ImageUtils;
-import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
-import com.proxibase.aircandi.components.ImageRequest.ImageShape;
-import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
-import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
-import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.Entity;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
 
 public class PictureBrowse extends FormActivity {
 
-	private ViewFlipper	mViewFlipper;
-	private ProgressBar	mProgressBar;
+	private WebView	mWebView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -39,47 +26,7 @@ public class PictureBrowse extends FormActivity {
 	}
 
 	protected void bind() {
-
-		WebImageView mediaImageView = (WebImageView) findViewById(R.id.image_media);
 		final Entity entity = mCommon.mEntity;
-
-		if (entity.imageUri != null && !entity.imageUri.equals("")) {
-			ImageRequestBuilder builder = new ImageRequestBuilder(mediaImageView);
-			builder.setFromUris(entity.imageUri, entity.linkUri);
-			builder.setImageShape(ImageShape.Native);
-			builder.setScaleToWidth(CandiConstants.IMAGE_WIDTH_ORIGINAL);
-			builder.setSearchCache(false);
-			builder.setUpdateCache(false);
-			builder.setRequestListener(new RequestListener() {
-
-				@Override
-				public void onComplete(Object response) {
-
-					ServiceResponse serviceResponse = (ServiceResponse) response;
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						Logger.d(PictureBrowse.this, "Image fetched: " + entity.imageUri);
-						ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-						entity.imageBitmap = imageResponse.bitmap;
-						runOnUiThread(new Runnable() {
-
-							@Override
-							public void run() {
-								mViewFlipper.setDisplayedChild(0);
-							}
-						});
-					}
-				}
-
-				@Override
-				public void onProgressChanged(int progress) {
-					mProgressBar.setProgress(progress);
-				}
-			});
-
-			ImageRequest imageRequest = builder.create();
-			Logger.d(this, "Requesting Image: " + entity.imageUri);
-			mediaImageView.setImageRequest(imageRequest);
-		}
 
 		/* Author block */
 		if (entity.author != null) {
@@ -89,8 +36,21 @@ public class PictureBrowse extends FormActivity {
 			((View) findViewById(R.id.block_author)).setVisibility(View.GONE);
 		}
 
-		Tracker.dispatch();
+		String imageUri = entity.imageUri;
+		String html = null;
 
+		html = "<html>";
+		html += "	<body bgcolor=\"transparent\" style=\"margin:0; background-color:transparent\">";
+//		html += "		<div style=\"width:100%;height:100%;display:table\">";
+//		html += "		<div style=\"display:table-cell;vertical-align:middle;width:100%;text-align:center\">";
+		html += "		<img style=\"width:100%\" src=\"" + imageUri + "\">";
+//		html += "		</div>";
+//		html += "		</div>";
+		html += "	</body>";
+		html += "</html>";
+		
+		mWebView.loadDataWithBaseURL("fake://not/needed", html, "text/html", "utf-8", "fake://not/needed");
+		mWebView.setBackgroundColor(0x00000000);
 	}
 
 	protected void draw() {
@@ -98,32 +58,22 @@ public class PictureBrowse extends FormActivity {
 		if (findViewById(R.id.text_title) != null) {
 			((TextView) findViewById(R.id.text_title)).setText(mCommon.mEntity.title);
 		}
-
-		WebImageView webImageView = (WebImageView) findViewById(R.id.image_media);
-		if (mCommon.mEntity.imageBitmap != null) {
-			ImageUtils.showImageInImageView(mCommon.mEntity.imageBitmap, webImageView.getImageView());
-			webImageView.setVisibility(View.VISIBLE);
-		}
-		else {
-			webImageView.getImageView().setImageBitmap(null);
-			webImageView.getImageView().setAnimation(null);
-			webImageView.setVisibility(View.GONE);
-		}
 	}
 
 	private void initialize() {
-		//mPhotoPlaceholderProgress = (ImageView) findViewById(R.id.image_photo_progress_indicator);
-		mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-
-		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
-		mViewFlipper.setDisplayedChild(1);
-		mViewFlipper.setInAnimation(this, R.anim.fade_in_medium);
-		mViewFlipper.setOutAnimation(this, R.anim.fade_out_medium);
+		mWebView = (WebView) findViewById(R.id.webview);
+		mWebView.setBackgroundColor(0x00000000);
+		mWebView.getSettings().setLoadWithOverviewMode(true);
+		mWebView.getSettings().setUseWideViewPort(true);
+		mWebView.getSettings().setSupportZoom(true);
+		mWebView.getSettings().setBuiltInZoomControls(true);
+		mWebView.setVerticalScrollbarOverlay(true);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
+	
 	protected void onDestroy() {
 
 		/* This activity gets destroyed everytime we leave using back or finish(). */

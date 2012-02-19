@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-     >
+    android:layout_height="fill_parent" >
 
     <!-- Header -->
 
@@ -39,73 +38,35 @@
             android:text="@string/form_title_picture" />
     </RelativeLayout>
 
-    <ScrollView
-        android:layout_width="fill_parent"
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/activity_header"
+        android:background="#00000000" />
+
+    <LinearLayout
+        style="@style/actionbar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_weight="1"
-        android:background="?attr/backgroundCandiInfo"
-        android:fillViewport="true" >
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:background="#66000000" >
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/text_title"
+            style="@style/form_title"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:gravity="center_vertical|top"
-            android:orientation="vertical"
-            android:padding="10dp" >
+            android:layout_height="wrap_content"
+            android:text="Violette Heymann"
+            android:textColor="#ffffffff" />
 
-            <!-- Title and Content -->
-
-            <TextView
-                android:id="@+id/text_title"
-                style="@style/form_title"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="5dp"
-                android:text="Violette Heymann" />
-
-            <ViewFlipper
-                android:id="@+id/flipper_form"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" >
-
-                <com.proxibase.aircandi.widgets.WebImageView
-                    android:id="@+id/image_media"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    aircandi:layout="@layout/temp_webimageview_framed_wrap"
-                    android:scaleType="fitCenter" />
-
-                <RelativeLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content" >
-
-                    <ImageView
-                        android:id="@+id/form_picture_placeholder"
-                        style="@style/form_picture_placeholder"
-                        android:layout_width="250px"
-                        android:layout_height="250px" />
-
-                    <ProgressBar
-                        android:id="@+id/progressBar"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="250px"
-                        android:layout_height="10dp"
-                        android:layout_alignParentTop="true"
-                        android:progress="0"
-                        android:progressDrawable="@drawable/progress" />
-                </RelativeLayout>
-            </ViewFlipper>
-
-            <com.proxibase.aircandi.widgets.AuthorBlock
-                android:id="@+id/block_author"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                aircandi:layout="@layout/temp_user_info_text_only" />
-        </LinearLayout>
-    </ScrollView>
+        <com.proxibase.aircandi.widgets.AuthorBlock
+            android:id="@+id/block_author"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            aircandi:layout="@layout/temp_user_info_text_only_dark" />
+    </LinearLayout>
 
 </RelativeLayout>

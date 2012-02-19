@@ -194,13 +194,15 @@ public class ImageManager {
 		options.inJustDecodeBounds = false;
 
 		Bitmap bitmapSampled = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
-		int newSize = (bitmapSampled.getHeight() * bitmapSampled.getWidth()) * 4;
-		if (newSize != originalSize) {
-			Logger.v(this, "Image downsampled: from " + String.valueOf(originalSize)
-							+ " to "
-							+ String.valueOf(newSize)
-							+ ": "
-							+ imageRequest.getImageUri());
+		if (bitmapSampled != null) {
+			int newSize = (bitmapSampled.getHeight() * bitmapSampled.getWidth()) * 4;
+			if (newSize != originalSize) {
+				Logger.v(this, "Image downsampled: from " + String.valueOf(originalSize)
+								+ " to "
+								+ String.valueOf(newSize)
+								+ ": "
+								+ imageRequest.getImageUri());
+			}
 		}
 
 		return bitmapSampled;
@@ -516,7 +518,7 @@ public class ImageManager {
 	// --------------------------------------------------------------------------------------------
 
 	public Bitmap getImage(String key) {
-		String keyHashed = Utilities.md5(key);		
+		String keyHashed = Utilities.md5(key);
 		return mImageCache.get(keyHashed);
 	}
 

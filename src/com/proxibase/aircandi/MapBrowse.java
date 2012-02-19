@@ -62,7 +62,7 @@ public class MapBrowse extends MapActivity {
 		mMapView.setBuiltInZoomControls(true);
 		mMapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
 		mMapView.setSatellite(false);
-		mMapView.setStreetView(false);		
+		mMapView.setStreetView(false);
 		mMapView.setClickable(true);
 		mMapController = mMapView.getController();
 		ViewGroup mapHolder = (ViewGroup) findViewById(R.id.map_holder);
@@ -90,14 +90,19 @@ public class MapBrowse extends MapActivity {
 				@Override
 				protected void onPostExecute(Object response) {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
-					mCommon.showProgressDialog(false, null);
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						mCommon.mEntity = (Entity) serviceResponse.data;
 						mGeoPoint = new GeoPoint((int) (mCommon.mEntity.latitude * 1E6), (int) (mCommon.mEntity.longitude * 1E6));
 						mTitle = mCommon.mEntity.label;
 						mDescription = mCommon.mEntity.description;
+						((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
 						showCandi();
+						mCommon.showProgressDialog(false, null);
+						mCommon.stopTitlebarProgress();						
+					}
+					else {
+						mCommon.handleServiceError(serviceResponse);
 					}
 				}
 			}.execute();
@@ -109,6 +114,10 @@ public class MapBrowse extends MapActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onRefreshClick(View view) {}
+
+	public void onProfileClick(View view) {
+		mCommon.doProfileClick(view);
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Application menu routines (settings)
@@ -151,19 +160,6 @@ public class MapBrowse extends MapActivity {
 		zoomToGeoPoint(mGeoPoint);
 		mMapOverlays.add(mItemizedOverlay);
 		mMapView.invalidate();
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
-	// --------------------------------------------------------------------------------------------
-	@Override
-	protected void onResume() {
-		super.onResume();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
 	}
 
 	// --------------------------------------------------------------------------------------------

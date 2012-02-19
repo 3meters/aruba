@@ -23,8 +23,10 @@ public abstract class CandiActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-
 		mCommon = new AircandiCommon(this);
+		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
+			mCommon.startRadar();
+		}
 		mCommon.setTheme();
 		mCommon.unpackIntent();
 		setContentView(getLayoutId());
@@ -46,12 +48,12 @@ public abstract class CandiActivity extends Activity {
 		}
 	}
 
-//	@Override
-//	protected void onNewIntent(Intent intent) {
-//		super.onNewIntent(intent);
-//		Logger.i(this, "CandiActivity got new intent");
-//		setContentView(getLayoutId());
-//	}
+	//	@Override
+	//	protected void onNewIntent(Intent intent) {
+	//		super.onNewIntent(intent);
+	//		Logger.i(this, "CandiActivity got new intent");
+	//		setContentView(getLayoutId());
+	//	}
 
 	// --------------------------------------------------------------------------------------------
 	// Events routines
@@ -115,6 +117,10 @@ public abstract class CandiActivity extends Activity {
 		mCommon.doRefreshClick(view);
 	}
 
+	public void onBeaconIndicatorClick(View view) {
+		mCommon.doBeaconIndicatorClick(view);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
@@ -172,7 +178,14 @@ public abstract class CandiActivity extends Activity {
 
 	@Override
 	protected void onResume() {
+		mCommon.doResume();
 		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		mCommon.doPause();
+		super.onPause();
 	}
 
 	protected int getLayoutId() {
