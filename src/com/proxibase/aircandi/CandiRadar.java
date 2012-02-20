@@ -209,7 +209,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
-		Logger.i(this, "CandiSearchActivity created");
+		Logger.i(this, "CandiRadarActivity created");
 		super.onCreate(savedInstanceState);
 		if (CandiConstants.DEBUG_TRACE) {
 			Debug.startMethodTracing("candi_search", 100000000);
@@ -314,9 +314,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		mCandiSurfaceView = (RenderSurfaceView) findViewById(R.id.view_rendersurface);
 		mCandiSurfaceView.requestFocus();
 		mCandiSurfaceView.setFocusableInTouchMode(true);
-
-		/* Start scan service */
-		mCommon.startScanService();
 
 		/* Get location fix */
 		Aircandi.getInstance().startLocationUpdates(CandiConstants.LOCATION_SCAN_TIME_LIMIT, CandiConstants.LOCATION_EXPIRATION);
@@ -1647,7 +1644,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		/*
 		 * Only called first time activity is started.
 		 */
-		Logger.i(this, "CandiSearchActivity starting");
+		Logger.i(this, "CandiRadarActivity starting");
 		super.onStart();
 	}
 
@@ -1657,7 +1654,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * This only gets called when the activity was stopped and
 		 * is now coming back.
 		 */
-		Logger.i(this, "CandiSearchActivity restarting");
+		Logger.i(this, "CandiRadarActivity restarting");
 		super.onRestart();
 	}
 
@@ -1683,7 +1680,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * from another activity.
 		 */
 		if (mPaused) {
-			Logger.i(this, "CandiSearchActivity resuming after pause");
+			Logger.i(this, "CandiRadarActivity resuming after pause");
 
 			/* Theme might have changed since we were away */
 			if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
@@ -1724,11 +1721,12 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			mPaused = false;
 		}
 		else {
-			Logger.i(this, "CandiSearchActivity resuming for first time");
+			Logger.i(this, "CandiRadarActivity resuming for first time");
 		}
 
 		NetworkManager.getInstance().onResume();
 		mCommon.doResume();
+		mCommon.startScanService();
 
 		/*
 		 * CandiPatchPresenter is created in onLoadScene which gets called
@@ -1749,7 +1747,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	@Override
 	protected void onPause() {
-		Logger.i(this, "CandiSearchActivity paused");
+		Logger.i(this, "CandiRadarActivity paused");
+		mCommon.stopScanService();
 		super.onPause();
 		/*
 		 * Fired when we lose focus and have been moved into the background.
@@ -1780,7 +1779,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		/*
 		 * Fired when starting another activity and we lose our window.
 		 */
-		Logger.i(this, "CandiSearchActivity stopped");
+		Logger.i(this, "CandiRadarActivity stopped");
 		super.onStop();
 
 		/* We control window focus messages that trigger the engine from here. */
@@ -1799,7 +1798,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	@Override
 	protected void onDestroy() {
-		Logger.i(this, "CandiSearchActivity destroyed");
+		Logger.i(this, "CandiRadarActivity destroyed");
 		super.onDestroy();
 		mCommon.doDestroy();
 		Aircandi.getInstance().stopLocationUpdates();
@@ -1818,7 +1817,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	@Override
 	public void onLowMemory() {
-		Logger.i(this, "CandiSearchActivity memory is low");
+		Logger.i(this, "CandiRadarActivity memory is low");
 		super.onLowMemory();
 	}
 

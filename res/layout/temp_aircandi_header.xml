@@ -5,7 +5,7 @@
     <RelativeLayout
         style="@style/actionbar"
         android:layout_width="fill_parent"
-        android:layout_height="40dp" >
+        android:layout_height="40dp">
 
         <LinearLayout
             android:id="@+id/btn_logo"
@@ -14,7 +14,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/beacon_indicator"
+            android:layout_toLeftOf="@+id/group_beacon"
             android:background="@drawable/button_nooutline_selector"
             android:clickable="true"
             android:onClick="onHomeClick"
@@ -56,8 +56,8 @@
                 style="@style/actionbar_title"
                 android:layout_width="26dp"
                 android:layout_height="fill_parent"
-                android:layout_margin="7dp"
                 android:layout_centerInParent="true"
+                android:layout_margin="7dp"
                 android:background="@drawable/beacon_indicator_off"
                 android:gravity="center"
                 android:lines="1"

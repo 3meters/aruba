@@ -71,10 +71,12 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 		clickHandler = listener;
 	}
 
-	public Dialog createMenu(String menuItitle, Context context) {
+	public Dialog createMenu(String titleText, Context context) {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(parentActivity);
-		View titleView = ((Activity) context).getLayoutInflater().inflate(R.layout.temp_dialog_newcandi_header, null);
+		View titleView = ((Activity) context).getLayoutInflater().inflate(R.layout.temp_dialog_title, null);
+		((TextView) titleView.findViewById(R.id.dialog_title_text)).setText(titleText);
 		builder.setCustomTitle(titleView);
+		
 		builder.setAdapter(menuAdapter, new DialogInterface.OnClickListener() {
 
 			@Override

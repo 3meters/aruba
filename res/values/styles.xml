@@ -141,14 +141,24 @@
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
 
-    <style name="dialog_title">
+    <style name="dialog_title_text">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical|left</item>
         <item name="android:textColor">?attr/textColorButtonHeader</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
-
+    
+    <style name="dialog_body_layout">
+        <item name="android:background">#ffffffff</item>
+    </style>
+        
+    <style name="dialog_body_text">
+        <item name="android:textColor">#ff000000</item>
+        <item name="android:background">#00000000</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+    </style>
+    
     <!-- ActionStrip -->
 
     <style name="actionstrip_button" parent="android:Widget.Button">

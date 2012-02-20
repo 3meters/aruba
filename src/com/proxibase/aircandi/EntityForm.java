@@ -355,37 +355,21 @@ public class EntityForm extends FormActivity {
 		 * was passed to the form so we do a quick wifi sniff.
 		 */
 		if (mCommon.mCommand.verb == CommandVerb.New && mCommon.mEntity.parent == null) {
-			mCommon.showProgressDialog(true, "Scanning...");
-			ProxiExplorer.getInstance().scanForWifi(new RequestListener() {
 
-				@Override
-				public void onComplete(Object response) {
-					ServiceResponse serviceResponse = (ServiceResponse) response;
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						/*
-						 * Doing a quick scan, find the strongest current beacon.
-						 * 
-						 * FIXME: Quick scan doesn't validate with the service so the
-						 * beacon may be disabled so an insert would be rejected.
-						 */
-						Beacon beacon = ProxiExplorer.getInstance().getStrongestWifiAsBeacon();
-						if (beacon == null) {
-							AircandiCommon.showAlertDialog(R.drawable.icon_app, "No beacons nearby",
-									"There are no beacons nearby to attach your candi to. Please try again when the beacon detector is green.",
-									EntityForm.this, new
-									DialogInterface.OnClickListener() {
+			Beacon beacon = ProxiExplorer.getInstance().getStrongestWifiAsBeacon();
+			if (beacon == null) {
+				AircandiCommon.showAlertDialog(R.drawable.icon_app, "Aircandi beacons", getString(R.string.alert_beacons_zero),
+						EntityForm.this, new
+						DialogInterface.OnClickListener() {
 
-										public void onClick(DialogInterface dialog, int which) {
-									}
-									});
+							public void onClick(DialogInterface dialog, int which) {
 						}
-						else {
-							mBeacon = beacon;
-							doSave(true);
-						}
-					}
-				}
-			});
+						});
+			}
+			else {
+				mBeacon = beacon;
+				doSave(true);
+			}
 		}
 		else {
 			doSave(true);
@@ -671,12 +655,12 @@ public class EntityForm extends FormActivity {
 		mCommon.mEntity.modifiedDate = mCommon.mEntity.createdDate;
 
 		/* Lat/lon are left null if we don't have an accurate fix */
-		if (Aircandi.getInstance().getCurrentLocation() != null 
+		if (Aircandi.getInstance().getCurrentLocation() != null
 				&& Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
-			
+
 			mCommon.mEntity.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
 			mCommon.mEntity.longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
-			
+
 			if (Aircandi.getInstance().getCurrentLocation().hasAltitude()) {
 				mCommon.mEntity.altitude = Aircandi.getInstance().getCurrentLocation().getAltitude();
 			}
@@ -987,10 +971,12 @@ public class EntityForm extends FormActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		mCommon.startScanService();
 	}
 
 	@Override
 	protected void onPause() {
+		mCommon.stopScanService();
 		super.onPause();
 	}
 
@@ -998,7 +984,7 @@ public class EntityForm extends FormActivity {
 		Aircandi.getInstance().stopLocationUpdates();
 		super.onPause();
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------

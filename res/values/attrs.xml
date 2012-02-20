@@ -23,7 +23,7 @@
 		<attr name="minHeight" format="dimension"/>
 		<attr name="maxHeight" format="dimension"/>
 	</declare-styleable>
-	<declare-styleable name="CandiSearch">
+	<declare-styleable name="CandiRadar">
 		<attr name="textureBodyZone" format="string"/>
 		<attr name="textureBusyIndicator" format="string"/>
 		<attr name="textColorTitle" format="string"/>

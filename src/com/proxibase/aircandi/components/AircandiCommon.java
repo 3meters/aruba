@@ -268,7 +268,7 @@ public class AircandiCommon {
 	// Event routines
 	// --------------------------------------------------------------------------------------------	
 	public void doHomeClick(View view) {
-		startRadar();
+		startRadarActivity();
 	}
 
 	public void doCommand(final Command command) {
@@ -330,6 +330,14 @@ public class AircandiCommon {
 
 	}
 
+	public void doInfoClick() {
+		AircandiCommon.showAlertDialog(R.drawable.icon_app, "About", mActivity.getString(R.string.dialog_info), mActivity, new
+				DialogInterface.OnClickListener() {
+
+					public void onClick(DialogInterface dialog, int which) {}
+				});
+	}
+	
 	public void doRefreshClick(View view) {}
 
 	public void doAttachedToWindow() {
@@ -519,11 +527,22 @@ public class AircandiCommon {
 		}
 	}
 
-	public static void showAlertDialog(int iconResource, String title, String message, Context context, OnClickListener listener) {
+	public static void showAlertDialog(Integer iconResource, String titleText, String message, Context context, OnClickListener listener) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle(title);
-		builder.setMessage(message);
-		builder.setIcon(iconResource);
+
+		View titleView = ((Activity) context).getLayoutInflater().inflate(R.layout.temp_dialog_title, null);
+		((TextView) titleView.findViewById(R.id.dialog_title_text)).setText(titleText);
+		if (iconResource != null) {
+			Drawable icon = context.getResources().getDrawable(iconResource);
+			((ImageView) titleView.findViewById(R.id.dialog_title_image)).setImageDrawable(icon);
+		}
+		builder.setCustomTitle(titleView);
+
+		View bodyView = ((Activity) context).getLayoutInflater().inflate(R.layout.temp_dialog_body, null);
+		((TextView) bodyView.findViewById(R.id.dialog_body_text)).setText(message);
+		builder.setView(bodyView);
+		builder.setInverseBackgroundForced(true);
+
 		if (listener != null) {
 			builder.setPositiveButton(android.R.string.ok, listener);
 		}
@@ -650,11 +669,17 @@ public class AircandiCommon {
 	}
 
 	public void startScanService() {
-		AlarmManager alarmManager = (AlarmManager) mActivity.getSystemService(Service.ALARM_SERVICE);
+
+		/* Start first scan right away */
+		Logger.d(this, "Starting wifi scan service");
 		Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
-		PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
-		alarmManager.cancel(pendingIntent);
+		mActivity.startService(scanIntent);
+
+		/* Setup a scanning schedule */
 		if (CandiConstants.INTERVAL_SCAN > 0) {
+			AlarmManager alarmManager = (AlarmManager) mActivity.getSystemService(Service.ALARM_SERVICE);
+			PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
+			alarmManager.cancel(pendingIntent);
 			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
 					SystemClock.elapsedRealtime() + CandiConstants.INTERVAL_SCAN,
 					CandiConstants.INTERVAL_SCAN, pendingIntent);
@@ -666,11 +691,10 @@ public class AircandiCommon {
 		Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
 		PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
 		alarmManager.cancel(pendingIntent);
+		Logger.d(this, "Stopped wifi scan service");
 	}
 
-	public void updateLocation() {}
-
-	public void startRadar() {
+	public void startRadarActivity() {
 		Intent intent = new Intent(mContext, CandiRadar.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		mContext.startActivity(intent);
@@ -713,6 +737,9 @@ public class AircandiCommon {
 				return false;
 			case R.id.signin :
 				signin();
+				return false;
+			case R.id.about :
+				doInfoClick();
 				return false;
 		}
 		return false;

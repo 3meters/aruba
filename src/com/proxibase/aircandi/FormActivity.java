@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.components.AircandiCommon;
@@ -56,7 +57,7 @@ public abstract class FormActivity extends Activity {
 		 */
 		mCommon = new AircandiCommon(this);
 		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			mCommon.startRadar();
+			mCommon.startRadarActivity();
 		}		
 		mCommon.setTheme();
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -203,6 +204,8 @@ public abstract class FormActivity extends Activity {
 
 		mImageRequestListener = listener;
 		mImageRequestWebImageView = webImageView;
+		
+		
 
 		int listId = R.array.dialog_list_picture_sources;
 		if (showFacebookOption) {
@@ -210,8 +213,11 @@ public abstract class FormActivity extends Activity {
 		}
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(FormActivity.this);
+		
+		View titleView = getLayoutInflater().inflate(R.layout.temp_dialog_title, null);
+		((TextView) titleView.findViewById(R.id.dialog_title_text)).setText(getResources().getString(R.string.dialog_change_picture_title));
+		builder.setCustomTitle(titleView);
 
-		builder.setTitle(getResources().getString(R.string.dialog_change_picture_title));
 		builder.setCancelable(true);
 		builder.setNegativeButton(getResources().getString(R.string.dialog_change_picture_button_negative), null);
 

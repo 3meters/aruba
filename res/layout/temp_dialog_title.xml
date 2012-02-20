@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/btn_logo"
+    android:id="@+id/dialog_title_layout"
     style="@style/actionbar_logo"
     android:layout_width="fill_parent"
     android:layout_height="44dp"
@@ -10,19 +10,20 @@
     android:paddingTop="2dp" >
 
     <ImageView
+    	android:id="@+id/dialog_title_image"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginRight="5dp"
         android:src="?attr/logo" />
 
     <TextView
-        style="@style/dialog_title"
+    	android:id="@+id/dialog_title_text"
+        style="@style/dialog_title_text"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="40dp"
         android:layout_marginLeft="3dp"
         android:gravity="center_vertical"
         android:lines="1"
-        android:text="@string/dialog_new_message"
         android:textColor="#ffffffff" />
 
 </LinearLayout>

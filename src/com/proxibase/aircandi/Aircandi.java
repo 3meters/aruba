@@ -165,8 +165,6 @@ public class Aircandi extends Application {
 			}
 		};
 
-		/* Location */
-
 		mLocationScanRunnable = new Runnable() {
 
 			@Override

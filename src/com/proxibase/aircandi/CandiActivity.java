@@ -25,7 +25,7 @@ public abstract class CandiActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		mCommon = new AircandiCommon(this);
 		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			mCommon.startRadar();
+			mCommon.startRadarActivity();
 		}
 		mCommon.setTheme();
 		mCommon.unpackIntent();

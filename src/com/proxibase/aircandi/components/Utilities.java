@@ -47,7 +47,7 @@ public class Utilities {
 		void stop() {
 			long elapsed = (System.nanoTime() - start) / 1000;
 			Debug.stopAllocCounting();
-			Logger.i(this, "CandiSearchActivity: " + elapsed + "us, "
+			Logger.i(this, "CandiRadarActivity: " + elapsed + "us, "
 																+ Debug.getThreadAllocCount() + " allocations, "
 																+ Debug.getThreadAllocSize() + " bytes");
 		}

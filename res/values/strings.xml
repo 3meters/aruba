@@ -35,6 +35,11 @@
 	<string name="menu_refresh_beacon_plus_current">Refresh</string>
 	<string name="menu_refresh_all">Refresh All</string>
 
+	<string name="dialog_info">
+		<p>Version 1.0.0\n</p>
+		<p>Copyright 3meters LLC 2012</p>
+	</string>
+	
 	<!-- Testing -->
 	
 	<string name="testing">Just some random string for testing</string>
