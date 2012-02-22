@@ -180,10 +180,10 @@ public class CandiMap extends MapActivity {
 				parameters.putDouble("latitude", Aircandi.getInstance().getCurrentLocation().getLatitude());
 				parameters.putDouble("longitude", Aircandi.getInstance().getCurrentLocation().getLongitude());
 				parameters.putDouble("radiusInMeters", 5000d);
-				parameters.putInt("userId", Aircandi.getInstance().getUser().id);
+				parameters.putString("userId", Aircandi.getInstance().getUser().id);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesNearLocation");
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntitiesNearLocation");
 				serviceRequest.setRequestType(RequestType.Method);
 				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -297,7 +297,7 @@ public class CandiMap extends MapActivity {
 
 		for (Object entityPointObject : mEntityPoints) {
 			EntityPoint entityPoint = (EntityPoint) entityPointObject;
-			GeoPoint point = new GeoPoint((int) (entityPoint.latitude * 1E6), (int) (entityPoint.longitude * 1E6));
+			GeoPoint point = new GeoPoint((int) (entityPoint.latitude.doubleValue() * 1E6), (int) (entityPoint.longitude.doubleValue() * 1E6));
 			OverlayItem overlayitem = new OverlayItem(point, entityPoint.label, entityPoint.label);
 
 			/* User custom marker */

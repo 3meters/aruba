@@ -172,10 +172,10 @@ public class ProxiExplorer {
 
 				Bundle parameters = new Bundle();
 				parameters.putString("beaconBssid", beacon.id);
-				parameters.putInt("userId", Aircandi.getInstance().getUser().id);
+				parameters.putString("userId", Aircandi.getInstance().getUser().id);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesForBeacon");
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntitiesForBeacon");
 				serviceRequest.setRequestType(RequestType.Method);
 				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -258,6 +258,8 @@ public class ProxiExplorer {
 
 	public void processBeaconsFromScan(boolean refreshAllBeacons) {
 
+		
+		mScanRequestProcessing.set(true);
 		if (!mScanRequestProcessing.get()) {
 			mScanRequestProcessing.set(true);
 			/*
@@ -350,11 +352,11 @@ public class ProxiExplorer {
 				}
 
 				Bundle parameters = new Bundle();
-				parameters.putStringArrayList("beaconBssids", refreshBeaconIds);
-				parameters.putInt("userId", Aircandi.getInstance().getUser().id);
+				parameters.putStringArrayList("beacons", refreshBeaconIds);
+				parameters.putString("userId", Aircandi.getInstance().getUser().id);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesForBeacons");
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntitiesForBeacons");
 				serviceRequest.setRequestType(RequestType.Method);
 				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -374,7 +376,7 @@ public class ProxiExplorer {
 							Entity freshEntity = (Entity) obj;
 
 							for (Beacon beacon : mBeacons) {
-								if (beacon.id.equals(freshEntity.beaconId)) {
+								if (beacon.id.equals(freshEntity.beacon.id)) {
 
 									beacon.entities.add(freshEntity);
 									beacon.registered = true;
@@ -417,7 +419,7 @@ public class ProxiExplorer {
 		return null;
 	}
 
-	private ServiceResponse doRefreshEntity(int entityId) {
+	private ServiceResponse doRefreshEntity(String entityId) {
 
 		ServiceResponse serviceResponse = new ServiceResponse();
 		Entity targetEntity = getEntityById(entityId);
@@ -433,11 +435,11 @@ public class ProxiExplorer {
 				}
 
 				Bundle parameters = new Bundle();
-				parameters.putInt("entityId", entity.id);
+				parameters.putString("entityId", entity.id);
 				parameters.putBoolean("includeChildren", true);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntity");
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntity");
 				serviceRequest.setRequestType(RequestType.Method);
 				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -487,11 +489,11 @@ public class ProxiExplorer {
 						}
 
 						Bundle parameters = new Bundle();
-						parameters.putInt("entityId", childEntity.id);
+						parameters.putString("entityId", childEntity.id);
 						parameters.putBoolean("includeChildren", false);
 
 						ServiceRequest serviceRequest = new ServiceRequest();
-						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntity");
+						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntity");
 						serviceRequest.setRequestType(RequestType.Method);
 						serviceRequest.setParameters(parameters);
 						serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -531,7 +533,7 @@ public class ProxiExplorer {
 		return serviceResponse;
 	}
 
-	public ServiceResponse getEntityFromService(int entityId, boolean includeChildren) {
+	public ServiceResponse getEntityFromService(String entityId, boolean includeChildren) {
 		final ServiceRequest serviceRequest = new ServiceRequest();
 		final Bundle parameters = new Bundle();
 
@@ -539,9 +541,9 @@ public class ProxiExplorer {
 			wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
 		}
 
-		parameters.putInt("entityId", entityId);
+		parameters.putString("entityId", entityId);
 		parameters.putBoolean("includeChildren", includeChildren);
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntity");
+		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntity");
 
 		serviceRequest.setRequestType(RequestType.Method);
 		serviceRequest.setParameters(parameters);
@@ -560,7 +562,7 @@ public class ProxiExplorer {
 
 				/* Attach the beacon */
 				for (Beacon beacon : mBeacons) {
-					if (beacon.id.equals(entity.beaconId)) {
+					if (beacon.id.equals(entity.beacon.id)) {
 						beacon.registered = true;
 						entity.beacon = beacon;
 						for (Entity childEntity : entity.children) {
@@ -619,9 +621,9 @@ public class ProxiExplorer {
 		 * Make it harder to fade out than it is to fade in.
 		 * Entities are only New for the first scan that discovers them.
 		 */
-		float signalThresholdFluid = entity.signalFence;
+		float signalThresholdFluid = entity.signalFence.floatValue();
 		if (oldIsHidden == false && entity.beacon.state != BeaconState.New) {
-			signalThresholdFluid = entity.signalFence - 5;
+			signalThresholdFluid = entity.signalFence.floatValue() - 5;
 		}
 
 		/* Hide entities that are not within entity declared virtual range */
@@ -793,7 +795,7 @@ public class ProxiExplorer {
 		return null;
 	}
 
-	public Entity getEntityById(Integer entityId) {
+	public Entity getEntityById(String entityId) {
 		if (entityId != null) {
 			for (Beacon beacon : mBeacons) {
 				for (Entity entity : beacon.entities) {

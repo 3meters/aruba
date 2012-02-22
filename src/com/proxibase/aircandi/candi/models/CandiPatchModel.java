@@ -502,7 +502,7 @@ public class CandiPatchModel extends Observable {
 		return contains;
 	}
 
-	public boolean hasCandiModelForEntity(Integer entityId) {
+	public boolean hasCandiModelForEntity(String entityId) {
 		for (CandiModel candiModel : mCandiModels) {
 			if (candiModel.getEntity().id.equals(entityId))
 				return true;
@@ -510,7 +510,7 @@ public class CandiPatchModel extends Observable {
 		return false;
 	}
 
-	public CandiModel getCandiModelForEntity(Integer entityId) {
+	public CandiModel getCandiModelForEntity(String entityId) {
 		for (CandiModel candiModel : mCandiModels) {
 			if (candiModel.getEntity().id.equals(entityId))
 				return candiModel;
@@ -625,10 +625,10 @@ public class CandiPatchModel extends Observable {
 				return 1;
 			}
 			else {
-				if (entity1.modifiedDate > entity2.modifiedDate) {
+				if (entity1.modifiedDate.longValue() > entity2.modifiedDate.longValue()) {
 					return -1;
 				}
-				else if (entity1.modifiedDate < entity2.modifiedDate) {
+				else if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
 					return 1;
 				}
 				else {

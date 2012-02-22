@@ -73,9 +73,9 @@ public class AircandiCommon {
 	public static LayoutInflater		mLayoutInflater;
 
 	public Command						mCommand;
-	public Integer						mParent;
+	public String						mParent;
 	public Entity						mEntity;
-	public Integer						mEntityId;
+	public String						mEntityId;
 	public String						mEntityType;
 	public List<Entity>					mEntities;
 	public Comment						mComment;
@@ -235,10 +235,10 @@ public class AircandiCommon {
 		Bundle extras = mActivity.getIntent().getExtras();
 		if (extras != null) {
 
-			mParent = extras.getInt(mContext.getString(R.string.EXTRA_PARENT_ENTITY_ID));
+			mParent = extras.getString(mContext.getString(R.string.EXTRA_PARENT_ENTITY_ID));
 			mBeaconId = extras.getString(mContext.getString(R.string.EXTRA_BEACON_ID));
 			mEntityType = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_TYPE));
-			mEntityId = extras.getInt(mContext.getString(R.string.EXTRA_ENTITY_ID));
+			mEntityId = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_ID));
 			mMessage = extras.getString(mContext.getString(R.string.EXTRA_MESSAGE));
 
 			String json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY));
@@ -625,6 +625,8 @@ public class AircandiCommon {
 		String jsonUser = Aircandi.settings.getString(Preferences.PREF_USER, null);
 		Logger.i(this, "Auto sign in...");
 
+		jsonUser = null;
+		
 		User user = null;
 		if (jsonUser != null) {
 			user = (User) ProxibaseService.convertJsonToObject(jsonUser, User.class, GsonType.ProxibaseService);

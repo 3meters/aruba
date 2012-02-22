@@ -47,6 +47,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.Beacon;
+import com.proxibase.sdk.android.proxi.consumer.Drop;
 import com.proxibase.sdk.android.proxi.consumer.Entity;
 import com.proxibase.sdk.android.proxi.consumer.User;
 import com.proxibase.sdk.android.proxi.consumer.Beacon.BeaconType;
@@ -149,8 +150,8 @@ public class EntityForm extends FormActivity {
 		 */
 		if (mCommon.mCommand.verb == CommandVerb.New) {
 			Entity entity = new Entity();
-			entity = new Entity();
-			entity.beaconId = mCommon.mBeaconId;
+			entity.drops.add(new Drop());
+			entity.drops.get(0).beacon = mCommon.mBeaconId;
 			entity.signalFence = -100.0f;
 			entity.creator = Aircandi.getInstance().getUser().id;
 			entity.modifier = Aircandi.getInstance().getUser().id;
@@ -158,11 +159,11 @@ public class EntityForm extends FormActivity {
 			entity.locked = false;
 			entity.linkJavascriptEnabled = false;
 			entity.linkZoom = false;
-			entity.visibility = Visibility.Public.ordinal();
+			entity.visibility = Visibility.Public.toString().toLowerCase();
 			entity.type = mCommon.mEntityType;
 			entity.parent = null;
 
-			if (mCommon.mParent != 0) {
+			if (mCommon.mParent != null && !mCommon.mParent.equals("")) {
 				entity.parent = mCommon.mParent;
 			}
 
@@ -277,7 +278,7 @@ public class EntityForm extends FormActivity {
 			/* Settings */
 
 			if (findViewById(R.id.cbo_visibility) != null) {
-				((Spinner) findViewById(R.id.cbo_visibility)).setSelection(entity.visibility);
+				((Spinner) findViewById(R.id.cbo_visibility)).setSelection(Visibility.valueOf(entity.visibility).ordinal());
 			}
 
 			if (findViewById(R.id.chk_html_zoom) != null) {
@@ -302,7 +303,7 @@ public class EntityForm extends FormActivity {
 			/* Author */
 
 			if (entity != null && entity.author != null) {
-				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, entity.modifiedDate, entity.locked);
+				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, entity.modifiedDate.longValue(), entity.locked);
 			}
 			else {
 				((AuthorBlock) findViewById(R.id.block_author)).setVisibility(View.GONE);
@@ -505,7 +506,7 @@ public class EntityForm extends FormActivity {
 
 						Logger.i(this, "Inserting beacon: " + mCommon.mBeaconId);
 						ServiceRequest serviceRequest = new ServiceRequest();
-						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mBeacon.getCollection());
+						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mBeacon.getCollection());
 						serviceRequest.setRequestType(RequestType.Insert);
 						serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mBeacon,
 										GsonType.ProxibaseService));
@@ -590,7 +591,8 @@ public class EntityForm extends FormActivity {
 			mCommon.mEntity.description = ((TextView) findViewById(R.id.text_content)).getText().toString().trim();
 		}
 		if (findViewById(R.id.cbo_visibility) != null) {
-			mCommon.mEntity.visibility = ((Spinner) findViewById(R.id.cbo_visibility)).getSelectedItemPosition();
+			Visibility visibility = Visibility.values()[((Spinner) findViewById(R.id.cbo_visibility)).getSelectedItemPosition()];
+			mCommon.mEntity.visibility = visibility.toString();
 		}
 		if (findViewById(R.id.chk_html_javascript) != null) {
 			mCommon.mEntity.linkJavascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
@@ -658,28 +660,28 @@ public class EntityForm extends FormActivity {
 		if (Aircandi.getInstance().getCurrentLocation() != null
 				&& Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
 
-			mCommon.mEntity.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
-			mCommon.mEntity.longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
+			mCommon.mEntity.drops.get(0).latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
+			mCommon.mEntity.drops.get(0).longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
 
 			if (Aircandi.getInstance().getCurrentLocation().hasAltitude()) {
-				mCommon.mEntity.altitude = Aircandi.getInstance().getCurrentLocation().getAltitude();
+				mCommon.mEntity.drops.get(0).altitude = Aircandi.getInstance().getCurrentLocation().getAltitude();
 			}
 			if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
 				/* In meters. */
-				mCommon.mEntity.accuracy = Aircandi.getInstance().getCurrentLocation().getAccuracy();
+				mCommon.mEntity.drops.get(0).accuracy = Aircandi.getInstance().getCurrentLocation().getAccuracy();
 			}
 			if (Aircandi.getInstance().getCurrentLocation().hasBearing()) {
 				/* Direction of travel in degrees East of true North. */
-				mCommon.mEntity.bearing = Aircandi.getInstance().getCurrentLocation().getBearing();
+				mCommon.mEntity.drops.get(0).bearing = Aircandi.getInstance().getCurrentLocation().getBearing();
 			}
 			if (Aircandi.getInstance().getCurrentLocation().hasSpeed()) {
 				/* Speed of the device over ground in meters/second. */
-				mCommon.mEntity.speed = Aircandi.getInstance().getCurrentLocation().getSpeed();
+				mCommon.mEntity.drops.get(0).speed = Aircandi.getInstance().getCurrentLocation().getSpeed();
 			}
 		}
 
 		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mCommon.mEntity.getCollection());
+		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mCommon.mEntity.getCollection());
 		serviceRequest.setRequestType(RequestType.Insert);
 
 		String jsonString = ProxibaseService.convertObjectToJson(mCommon.mEntity, GsonType.ProxibaseService);
@@ -749,11 +751,11 @@ public class EntityForm extends FormActivity {
 
 					/* Delete the entity from the service */
 					Bundle parameters = new Bundle();
-					parameters.putInt("entityId", mCommon.mEntity.id);
+					parameters.putString("entityId", mCommon.mEntity.id);
 					Logger.i(this, "Deleting entity: " + mCommon.mEntity.title);
 
 					ServiceRequest serviceRequest = new ServiceRequest();
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "DeleteEntityWithChildren");
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "DeleteEntityWithChildren");
 					serviceRequest.setParameters(parameters);
 					serviceRequest.setRequestType(RequestType.Method);
 					serviceRequest.setResponseFormat(ResponseFormat.Json);

@@ -15,8 +15,8 @@ public class IntentBuilder {
 
 	private Context		mContext;
 	private Entity		mEntity;
-	private Integer		mEntityId;
-	private Integer		mParentEntityId;
+	private String		mEntityId;
+	private String		mParentEntityId;
 	private String		mEntityType;
 	private String		mMessage;
 	private Command		mCommand;
@@ -105,7 +105,7 @@ public class IntentBuilder {
 		return this;
 	}
 
-	public IntentBuilder setParentEntityId(Integer parentEntityId) {
+	public IntentBuilder setParentEntityId(String parentEntityId) {
 		this.mParentEntityId = parentEntityId;
 		return this;
 	}
@@ -135,7 +135,7 @@ public class IntentBuilder {
 		return this;
 	}
 
-	public IntentBuilder setEntityId(Integer entityId) {
+	public IntentBuilder setEntityId(String entityId) {
 		this.mEntityId = entityId;
 		return this;
 	}

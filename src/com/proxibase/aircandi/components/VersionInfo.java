@@ -1,15 +1,15 @@
 package com.proxibase.aircandi.components;
 
 import com.google.gson.annotations.Expose;
+import com.proxibase.sdk.android.proxi.consumer.ServiceEntry;
 
 /**
  * @author Jayma
  */
-public class VersionInfo {
+public class VersionInfo extends ServiceEntry {
 
-	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 	@Expose
-	public int		id;
+	public String	type;
 	@Expose
 	public String	target;
 	@Expose
@@ -25,7 +25,10 @@ public class VersionInfo {
 	@Expose
 	public boolean	updateRequired;
 
-	/* For client use only */
-
 	public VersionInfo() {}
+
+	@Override
+	public String getCollection() {
+		return "documents";
+	}
 }

@@ -503,6 +503,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * UI is still responsive because most of the UI is being handled
 		 * by the 2d engine thread.
 		 */
+		//if (!mScanActive) return;
 
 		/* Make sure there aren't any extra runnables waiting to run */
 		mHandler.removeCallbacks(mScanRunnable);
@@ -829,7 +830,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				scanForBeacons(options == null ? new Options(false, false, true) : options);
 			}
 			else {
-				final int idOfEntityToRefresh = candiModelFocused.getEntity().id;
+				final String idOfEntityToRefresh = candiModelFocused.getEntity().id;
 
 				for (Entity entity : ProxiExplorer.getInstance().getEntitiesFlat()) {
 					if (entity.id.equals(idOfEntityToRefresh)) {
@@ -924,7 +925,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 							 * Because of 'my candi', an entity could be deleted that isn't currently being
 							 * tracked in the big model (beacon might not be tracked either).
 							 */
-							Beacon beacon = ProxiExplorer.getInstance().getBeaconById(entityDeleted.beaconId);
+							Beacon beacon = ProxiExplorer.getInstance().getBeaconById(entityDeleted.drops.get(0).beacon);
 							if (beacon != null) {
 								beacon.dirty = true;
 								mRefreshNeeded = true;
@@ -939,7 +940,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						Map.Entry entry = (Map.Entry) it.next();
 						Entity entityInserted = (Entity) entry.getValue();
 
-						Beacon beacon = ProxiExplorer.getInstance().getBeaconById(entityInserted.beaconId);
+						Beacon beacon = ProxiExplorer.getInstance().getBeaconById(entityInserted.drops.get(0).beacon);
 						if (beacon != null) {
 							/*
 							 * We will end up with the latest version of the entity
@@ -1395,9 +1396,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 					@Override
 					public void onClick(View v) {
-						Intent goToMarket = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(candi.getEntity().entityHandler.code));
-						startActivityForResult(goToMarket, CandiConstants.ACTIVITY_MARKET);
-						dialog.dismiss();
+//						Intent goToMarket = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(candi.getEntity().entityHandler.code));
+//						startActivityForResult(goToMarket, CandiConstants.ACTIVITY_MARKET);
+//						dialog.dismiss();
 					}
 				});
 				((Button) installDialog.findViewById(R.id.btn_install_cancel)).setOnClickListener(new OnClickListener() {
@@ -1543,7 +1544,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			if (mFirstRun) {
 				Logger.i(this, "Starting first run full beacon scan");
 				scanForBeacons(new Options(true, false, true));
-				mFirstRun = false;
 			}
 			else {
 				PrefResponse prefResponse = updatePreferences();
@@ -1937,8 +1937,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	private void checkForUpdate() {
 
-		Query query = new Query("Documents").filter("Type eq 'version' and Target eq 'aircandi'");
-		ServiceRequest serviceRequest = new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json);
+		Query query = new Query("documents").filter("{\"type\":\"version\",\"target\":\"aircandi\"}");
+
+		ServiceRequest serviceRequest = new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json);
 		serviceRequest.setSuppressUI(true);
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 

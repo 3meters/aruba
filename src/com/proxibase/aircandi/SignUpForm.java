@@ -211,7 +211,7 @@ public class SignUpForm extends FormActivity {
 			protected Object doInBackground(Object... params) {
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mUser.getCollection());
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mUser.getCollection());
 				serviceRequest.setRequestType(RequestType.Insert);
 				serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -224,7 +224,7 @@ public class SignUpForm extends FormActivity {
 					/* Load the just insert user to get the user id */
 					Query query = new Query("Users").filter("Email eq '" + mUser.email + "'");
 					serviceResponse = NetworkManager.getInstance().request(
-									new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+									new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json));
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 

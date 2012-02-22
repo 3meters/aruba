@@ -19,7 +19,7 @@ import com.proxibase.sdk.android.proxi.consumer.Entity;
 public class CandiModel extends BaseModel {
 
 	private Entity			mEntity				= null;
-	private int				mModelId;
+	private String			mModelId;
 	private ZoneState		mZoneStateCurrent	= new ZoneState();
 	private ZoneState		mZoneStateNext		= new ZoneState();
 	private DisplayExtra	mDisplayExtra		= DisplayExtra.None;
@@ -29,7 +29,7 @@ public class CandiModel extends BaseModel {
 	private boolean			mMasterImageUpdated	= false;
 	private ReasonInactive	mReasonInactive		= ReasonInactive.None;
 
-	public CandiModel(int modelId, CandiPatchModel candiPatchModel) {
+	public CandiModel(String modelId, CandiPatchModel candiPatchModel) {
 		super();
 		setModelId(modelId);
 		mCandiPatchModel = candiPatchModel;
@@ -118,7 +118,7 @@ public class CandiModel extends BaseModel {
 		return mDisplayExtra;
 	}
 
-	public int getModelId() {
+	public String getModelId() {
 		return mModelId;
 	}
 
@@ -163,7 +163,7 @@ public class CandiModel extends BaseModel {
 		mTouchAreaActive = touchAreaActive;
 	}
 
-	public void setModelId(int modelId) {
+	public void setModelId(String modelId) {
 		mModelId = modelId;
 	}
 

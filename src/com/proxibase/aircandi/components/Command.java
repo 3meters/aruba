@@ -11,9 +11,9 @@ public class Command {
 
 	public CommandVerb	verb	= CommandVerb.View;
 	public String		label;
-	public Integer		entityId;
+	public String		entityId;
 	public String		entityType;
-	public Integer		entityParentId;
+	public String		entityParentId;
 	public String		activityName;
 	public Integer		iconResourceId;
 
@@ -23,7 +23,7 @@ public class Command {
 		this.verb = verb;
 	}
 
-	public Command(CommandVerb verb, String label, String activityName, String entityType, Integer entityId, Integer entityParentId, Integer iconResourceId) {
+	public Command(CommandVerb verb, String label, String activityName, String entityType, String entityId, String entityParentId, Integer iconResourceId) {
 		this.verb = verb;
 		this.label = label;
 		this.activityName = activityName;

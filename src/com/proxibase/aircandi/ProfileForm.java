@@ -163,7 +163,7 @@ public class ProfileForm extends FormActivity {
 				}
 
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(
-						new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+						new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json));
 				return serviceResponse;
 			}
 

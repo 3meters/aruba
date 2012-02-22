@@ -90,7 +90,7 @@ public interface CandiConstants {
 	public static final String			TYPE_CANDI_PICTURE					= "com.proxibase.aircandi.candi.picture";
 	public static final String			TYPE_CANDI_LINK						= "com.proxibase.aircandi.candi.link";
 
-	public static final String			USER_ANONYMOUS						= "{\"d\" : {\"__metadata\": {\"uri\": \"http://dev.aircandi.com/Airodata.svc/Users(1003)\", \"type\": \"Aircandi.User\"}, \"Id\": 1003, \"Name\": \"Anonymous\", \"Email\": \"anonymous@3meters.com\", \"Role\": null, \"Password\": \"12345678\", \"ImageUri\": \"resource:placeholder_user\", \"LinkUri\": null, \"Location\": null, \"FacebookId\": null, \"IsDeveloper\": false, \"Creator\": null, \"CreatedDate\": 1317427200, \"Modifier\": null, \"ModifiedDate\": 1317427200}}";
+	public static final String			USER_ANONYMOUS						= "{\"data\": [{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\",\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\",\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\",\"imageUri\": \"resource:placeholder_user\", \"isDeveloper\": false, \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}], \"count\": 1, \"moreRecords\": false}";
 
 	public static final int				ACTIVITY_ENTITY_HANDLER				= 100;
 	public static final int				ACTIVITY_MARKET						= 200;

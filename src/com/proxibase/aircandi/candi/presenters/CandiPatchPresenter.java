@@ -442,7 +442,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		CandiModel candiRootPrev = (CandiModel) mCandiPatchModel.getCandiRootCurrent();
-		CandiModel candiRootNext = new CandiModel(-1, mCandiPatchModel);
+		CandiModel candiRootNext = new CandiModel("0", mCandiPatchModel);
 		candiRootNext.setSuperRoot(true);
 
 		/* Strip linkages */

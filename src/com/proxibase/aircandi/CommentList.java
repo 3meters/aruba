@@ -63,10 +63,10 @@ public class CommentList extends CandiActivity {
 			protected Object doInBackground(Object... params) {
 
 				Bundle parameters = new Bundle();
-				parameters.putInt("entityId", mCommon.mEntity.id);
+				parameters.putString("entityId", mCommon.mEntity.id);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetCommentsForEntity");
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetCommentsForEntity");
 				serviceRequest.setRequestType(RequestType.Method);
 				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -213,7 +213,7 @@ public class CommentList extends CandiActivity {
 
 				if (holder.itemCreatedDate != null) {
 					if (comment.createdDate != null) {
-						holder.itemCreatedDate.setText(DateUtils.timeSince(comment.createdDate, (int) (DateUtils.nowDate().getTime() / 1000L)));
+						holder.itemCreatedDate.setText(DateUtils.timeSince(comment.createdDate.longValue(), DateUtils.nowDate().getTime()));
 					}
 					else {
 						holder.itemCreatedDate.setVisibility(View.GONE);

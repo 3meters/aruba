@@ -74,10 +74,10 @@ public class DateUtils {
 		return output.getTime();
 	}
 
-	public static String timeSince(Integer dateOldSeconds, Integer dateNewSeconds) {
+	public static String timeSince(Long dateOldMillis, Long dateNewMillis) {
 
-		Long dateNewLong = dateNewSeconds * 1000L;
-		Long dateOldLong = dateOldSeconds * 1000L;
+		Long dateNewLong = dateNewMillis;
+		Long dateOldLong = dateOldMillis;
 
 		Date dateNew = new Date(new Long(dateNewLong));
 		Date dateOld = new Date(new Long(dateOldLong));

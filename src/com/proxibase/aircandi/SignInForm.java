@@ -107,13 +107,9 @@ public class SignInForm extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				
-//				String uri = "https://api.proxibase.com/users?__find={\"email\":\"" + email + "\"";
-//				ServiceResponse serviceResponse = NetworkManager.getInstance().request(new ServiceRequest(uri, RequestType.Get, ResponseFormat.Json));
-//				return serviceResponse;
-				
-				Query query = new Query("Users").filter("Email eq '" + email + "'");
+				Query query = new Query("users").filter("{\"email\":\"" + email + "\"}");
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(
-						new ServiceRequest(ProxiConstants.URL_AIRCANDI_SERVICE_ODATA, query, RequestType.Get, ResponseFormat.Json));
+						new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json));
 				return serviceResponse;
 			}
 

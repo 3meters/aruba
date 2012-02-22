@@ -58,16 +58,16 @@ public class CandiList extends CandiActivity {
 
 		if (mCommon.mEntity != null) {
 			mMethodType = MethodType.CandiForParent;
-			parameters.putInt("entityId", mCommon.mEntity.id);
+			parameters.putString("entityId", mCommon.mEntity.id);
 			parameters.putBoolean("includeChildren", true);
-			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntity");
+			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntity");
 			Tracker.trackPageView("/CandiList");
 		}
 		else if (mCommon.mEntity == null) {
 			mMethodType = MethodType.CandiByUser;
-			parameters.putInt("userId", Aircandi.getInstance().getUser().id);
+			parameters.putString("userId", Aircandi.getInstance().getUser().id);
 			parameters.putBoolean("includeChildren", false);
-			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "GetEntitiesForUser");
+			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntitiesForUser");
 			Tracker.trackPageView("/MyCandiList");
 		}
 
@@ -215,10 +215,10 @@ public class CandiList extends CandiActivity {
 
 		@Override
 		public int compare(Entity object1, Entity object2) {
-			if (object1.modifiedDate < object2.modifiedDate) {
+			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
 				return 1;
 			}
-			else if (object1.modifiedDate == object2.modifiedDate) {
+			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
 				return 0;
 			}
 			return -1;

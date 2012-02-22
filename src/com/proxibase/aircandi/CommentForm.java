@@ -156,7 +156,7 @@ public class CommentForm extends FormActivity {
 			protected Object doInBackground(Object... params) {
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_ODATA + mCommon.mComment.getCollection());
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mCommon.mComment.getCollection());
 				serviceRequest.setRequestType(RequestType.Insert);
 				serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mCommon.mComment, GsonType.ProxibaseService));
 				serviceRequest.setResponseFormat(ResponseFormat.Json);

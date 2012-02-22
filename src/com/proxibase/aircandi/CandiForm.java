@@ -94,7 +94,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onMapClick(View view) {
-		Integer entityId = (Integer) view.getTag();
+		String entityId = (String) view.getTag();
 		IntentBuilder intentBuilder = new IntentBuilder(this, MapBrowse.class);
 		intentBuilder.setCommand(new Command(CommandVerb.View));
 		intentBuilder.setEntityId(entityId);
@@ -217,7 +217,7 @@ public class CandiForm extends CandiActivity {
 		/* Author block */
 
 		if (entity.author != null) {
-			authorBlock.bindToAuthor(entity.author, entity.modifiedDate, entity.locked);
+			authorBlock.bindToAuthor(entity.author, entity.modifiedDate.longValue(), entity.locked);
 			authorBlock.setVisibility(View.VISIBLE);
 		}
 		else {
@@ -272,7 +272,7 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Map */
-		if (entity.latitude == null || entity.longitude == null) {
+		if (entity.drops.get(0).latitude == null || entity.drops.get(0).longitude == null) {
 			map.setVisibility(View.GONE);
 		}
 		else {

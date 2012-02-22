@@ -93,7 +93,7 @@ public class MapBrowse extends MapActivity {
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						mCommon.mEntity = (Entity) serviceResponse.data;
-						mGeoPoint = new GeoPoint((int) (mCommon.mEntity.latitude * 1E6), (int) (mCommon.mEntity.longitude * 1E6));
+						mGeoPoint = new GeoPoint((int) (mCommon.mEntity.drops.get(0).latitude.doubleValue() * 1E6), (int) (mCommon.mEntity.drops.get(0).longitude.doubleValue() * 1E6));
 						mTitle = mCommon.mEntity.label;
 						mDescription = mCommon.mEntity.description;
 						((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);

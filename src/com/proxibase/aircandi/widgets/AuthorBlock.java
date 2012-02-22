@@ -63,7 +63,7 @@ public class AuthorBlock extends RelativeLayout {
 		this.addView(mBoundView);
 	}
 
-	public void bindToAuthor(Author author, Integer date, boolean locked) {
+	public void bindToAuthor(Author author, Long date, boolean locked) {
 		mAuthor = author;
 		if (mAuthor != null) {
 			if (mTextName != null) {
@@ -71,7 +71,7 @@ public class AuthorBlock extends RelativeLayout {
 			}
 			if (mTextTimeSince != null) {
 				if (date != null) {
-					mTextTimeSince.setText(DateUtils.timeSince(date, (int) (DateUtils.nowDate().getTime() / 1000L)));
+					mTextTimeSince.setText(DateUtils.timeSince(date, DateUtils.nowDate().getTime()));
 				}
 				else {
 					mTextTimeSince.setVisibility(View.GONE);
@@ -96,7 +96,7 @@ public class AuthorBlock extends RelativeLayout {
 		}
 	}
 
-	public void bindToUser(User user, Integer date) {
+	public void bindToUser(User user, Long date) {
 		mUser = user;
 		if (mUser != null) {
 			if (mTextName != null) {
@@ -104,7 +104,7 @@ public class AuthorBlock extends RelativeLayout {
 			}
 			if (mTextTimeSince != null) {
 				if (date != null) {
-					mTextTimeSince.setText(DateUtils.timeSince(date, (int) (DateUtils.nowDate().getTime() / 1000L)));
+					mTextTimeSince.setText(DateUtils.timeSince(date, DateUtils.nowDate().getTime()));
 				}
 				else {
 					mTextTimeSince.setVisibility(View.GONE);
