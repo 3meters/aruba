@@ -58,8 +58,10 @@ public class CandiAlphaModifier extends AlphaModifier {
 							view.mReflectionSprite.setAlpha(1);
 							view.mReflectionSprite.setVisible(false);
 						}
-						view.mTitleSprite.setAlpha(1);
-						view.mTitleSprite.setVisible(false);
+						if (view.mTitleSprite != null) {
+							view.mTitleSprite.setAlpha(1);
+							view.mTitleSprite.setVisible(false);
+						}
 					}
 				}
 				else if (mEntity instanceof ZoneView) {
@@ -72,8 +74,10 @@ public class CandiAlphaModifier extends AlphaModifier {
 							view.mReflectionSprite.setAlpha(1);
 							view.mReflectionSprite.setVisible(false);
 						}
-						view.mTitleSprite.setAlpha(1);
-						view.mTitleSprite.setVisible(false);
+						if (view.mTitleSprite != null) {
+							view.mTitleSprite.setAlpha(1);
+							view.mTitleSprite.setVisible(false);
+						}
 					}
 				}
 			}
@@ -97,8 +101,10 @@ public class CandiAlphaModifier extends AlphaModifier {
 							view.mReflectionSprite.setAlpha(0);
 							view.mReflectionSprite.setVisible(true);
 						}
-						view.mTitleSprite.setAlpha(0);
-						view.mTitleSprite.setVisible(true);
+						if (view.mTitleSprite != null) {
+							view.mTitleSprite.setAlpha(0);
+							view.mTitleSprite.setVisible(true);
+						}
 					}
 				}
 				else if (mEntity instanceof ZoneView) {
@@ -111,8 +117,10 @@ public class CandiAlphaModifier extends AlphaModifier {
 							view.mReflectionSprite.setAlpha(0);
 							view.mReflectionSprite.setVisible(true);
 						}
-						view.mTitleSprite.setAlpha(0);
-						view.mTitleSprite.setVisible(true);
+						if (view.mTitleSprite != null) {
+							view.mTitleSprite.setAlpha(0);
+							view.mTitleSprite.setVisible(true);
+						}
 					}
 				}
 			}

@@ -179,8 +179,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 		setPosition(0, 1000); /* Offscreen */
 		setScale(1);
 		configureCollapsed(false);
-		mTitleSprite.setLocked(false);
-		mTitleSprite.setVisible(true);
+		if (mTitleSprite != null) {
+			mTitleSprite.setLocked(false);
+			mTitleSprite.setVisible(true);
+		}
 		if (mBodySprite != null) {
 			mBodySprite.setVisible(false);
 		}
@@ -313,8 +315,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 		mCollapsed = collapsed;
 		if (collapsed) {
 
-			mTitleSprite.setLocked(false);
-			mTitleSprite.registerEntityModifier(new CandiAlphaModifier(mTitleSprite, duration, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
+			if (mTitleSprite != null) {
+				mTitleSprite.setLocked(false);
+				mTitleSprite.registerEntityModifier(new CandiAlphaModifier(mTitleSprite, duration, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
+			}
 
 			if (mBodySprite != null) {
 				mBodySprite.registerEntityModifier(new MoveYModifier(duration, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0));
@@ -353,8 +357,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 			}
 		}
 		else {
-			mTitleSprite.setLocked(false);
-			mTitleSprite.registerEntityModifier(new CandiAlphaModifier(mTitleSprite, duration, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
+			if (mTitleSprite != null) {
+				mTitleSprite.setLocked(false);
+				mTitleSprite.registerEntityModifier(new CandiAlphaModifier(mTitleSprite, duration, 0.0f, 1.0f, CandiConstants.EASE_FADE_IN));
+			}
 
 			if (mBodySprite != null) {
 				mBodySprite.registerEntityModifier(new MoveYModifier(duration, 0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT));
@@ -580,9 +586,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 					 */
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 
-					/* 
+					/*
 					 * We could be coming back while the data model is getting rebuilt which
-					 * makes the current work expendable. 
+					 * makes the current work expendable.
 					 */
 					if (!Aircandi.getInstance().isRebuildingDataModel()) {
 						if (serviceResponse.responseCode == ResponseCode.Success) {

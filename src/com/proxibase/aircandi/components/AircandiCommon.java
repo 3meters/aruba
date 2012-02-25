@@ -80,7 +80,7 @@ public class AircandiCommon {
 	public List<Entity>					mEntities;
 	public Comment						mComment;
 	public String						mMessage;
-	public String						mBeaconId;
+	public String						mBeaconName;
 
 	private int							mTextColorFocused;
 	private int							mTextColorUnfocused;
@@ -236,7 +236,7 @@ public class AircandiCommon {
 		if (extras != null) {
 
 			mParent = extras.getString(mContext.getString(R.string.EXTRA_PARENT_ENTITY_ID));
-			mBeaconId = extras.getString(mContext.getString(R.string.EXTRA_BEACON_ID));
+			mBeaconName = extras.getString(mContext.getString(R.string.EXTRA_BEACON_ID));
 			mEntityType = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_TYPE));
 			mEntityId = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_ID));
 			mMessage = extras.getString(mContext.getString(R.string.EXTRA_MESSAGE));
@@ -283,11 +283,11 @@ public class AircandiCommon {
 			try {
 				Class clazz = Class.forName(CandiConstants.APP_PACKAGE_NAME + command.activityName, false, mContext.getClass().getClassLoader());
 				if (command.verb == CommandVerb.New) {
-					String beaconId = ProxiExplorer.getInstance().getStrongestBeacon().id;
+					String beaconName = ProxiExplorer.getInstance().getStrongestBeacon().name;
 					IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
 					intentBuilder.setCommand(command);
 					intentBuilder.setParentEntityId(command.entityParentId);
-					intentBuilder.setBeaconId(beaconId);
+					intentBuilder.setBeaconName(beaconName);
 					intentBuilder.setEntityType(command.entityType);
 					Intent intent = intentBuilder.create();
 					((Activity) mContext).startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
@@ -337,7 +337,7 @@ public class AircandiCommon {
 					public void onClick(DialogInterface dialog, int which) {}
 				});
 	}
-	
+
 	public void doRefreshClick(View view) {}
 
 	public void doAttachedToWindow() {
@@ -626,7 +626,7 @@ public class AircandiCommon {
 		Logger.i(this, "Auto sign in...");
 
 		jsonUser = null;
-		
+
 		User user = null;
 		if (jsonUser != null) {
 			user = (User) ProxibaseService.convertJsonToObject(jsonUser, User.class, GsonType.ProxibaseService);

@@ -38,6 +38,7 @@ import com.proxibase.aircandi.candi.sprites.CandiRectangle;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.components.BitmapTextureSource;
 import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
@@ -90,6 +91,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public void initializeModel() {
+		
 		updateTextureRegions();
 		mBound = true;
 	}
@@ -148,18 +150,23 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public void clearSpriteModifiers() {
-		/* 
+		/*
 		 * Must always be called from the engine update thread.
 		 */
 		if (mPlaceholderSprite != null) {
 			mPlaceholderSprite.clearEntityModifiers();
-			mPlaceholderReflectionSprite.clearEntityModifiers();
-			mTitleSprite.clearEntityModifiers();
+			if (mPlaceholderReflectionSprite != null) {
+				mPlaceholderReflectionSprite.clearEntityModifiers();
+			}
+			if (mTitleSprite != null) {
+				mTitleSprite.clearEntityModifiers();
+			}
 		}
 	}
 
 	protected void updateTextureRegions() {
 		if (((BaseModel) mModel).getTitleText() != null) {
+			Logger.v(this, "Model title text is null: ");
 
 			mTitleTexture.clearTextureSources();
 			Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, ((BaseModel) mModel)
@@ -347,7 +354,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 	public void loadHardwareTextures() {
 		mTitleTexture = new Texture(256, 128, CandiConstants.GL_TEXTURE_OPTION);
-		mTitleTexture.setName("Title: " + ((BaseModel)this.mModel).getTitleText());
+		mTitleTexture.setName("Title: " + ((BaseModel) this.mModel).getTitleText());
 		mCandiPatchPresenter.getEngine().getTextureManager().loadTexture(mTitleTexture);
 	}
 

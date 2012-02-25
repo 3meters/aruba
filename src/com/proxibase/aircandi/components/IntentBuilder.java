@@ -125,7 +125,7 @@ public class IntentBuilder {
 		return this;
 	}
 
-	public IntentBuilder setBeaconId(String beaconId) {
+	public IntentBuilder setBeaconName(String beaconId) {
 		this.mBeaconId = beaconId;
 		return this;
 	}

@@ -121,7 +121,7 @@ public class EntityForm extends FormActivity {
 		if (mCommon.mCommand.verb == CommandVerb.New) {
 			/* Get location fix */
 			Aircandi.getInstance().startLocationUpdates(CandiConstants.LOCATION_SCAN_TIME_LIMIT, CandiConstants.LOCATION_EXPIRATION);
-			mBeacon = ProxiExplorer.getInstance().getBeaconById(mCommon.mBeaconId);
+			mBeacon = ProxiExplorer.getInstance().getBeaconByName(mCommon.mBeaconName);
 		}
 
 		mImagePicture = (WebImageView) findViewById(R.id.image_picture);
@@ -151,7 +151,7 @@ public class EntityForm extends FormActivity {
 		if (mCommon.mCommand.verb == CommandVerb.New) {
 			Entity entity = new Entity();
 			entity.drops.add(new Drop());
-			entity.drops.get(0).beacon = mCommon.mBeaconId;
+			entity.drops.get(0).beacon = mCommon.mBeaconName;
 			entity.signalFence = -100.0f;
 			entity.creator = Aircandi.getInstance().getUser().id;
 			entity.modifier = Aircandi.getInstance().getUser().id;
@@ -504,7 +504,7 @@ public class EntityForm extends FormActivity {
 						mBeacon.modifier = Aircandi.getInstance().getUser().id;
 						mBeacon.locked = false;
 
-						Logger.i(this, "Inserting beacon: " + mCommon.mBeaconId);
+						Logger.i(this, "Inserting beacon: " + mCommon.mBeaconName);
 						ServiceRequest serviceRequest = new ServiceRequest();
 						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mBeacon.getCollection());
 						serviceRequest.setRequestType(RequestType.Insert);

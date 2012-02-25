@@ -16,8 +16,8 @@ public class Logger {
 	 * VERBOSE = 2
 	 */
 
-	private static int		LOG_LEVEL		= Log.DEBUG;
-	private static boolean	INCLUDE_MODULE	= false;
+	private static int		LOG_LEVEL		= Log.VERBOSE;
+	private static boolean	INCLUDE_MODULE	= true;
 
 	private static enum LogLevel {
 		Error,

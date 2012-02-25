@@ -86,7 +86,7 @@ public class ProxiExplorer {
 						@Override
 						public void onReceive(Context context, Intent intent) {
 
-							Logger.d(this, "Received wifi scan results");
+							Logger.d(ProxiExplorer.this, "Received wifi scan results");
 							mContext.unregisterReceiver(this);
 							wifiReleaseLock();
 
@@ -135,7 +135,7 @@ public class ProxiExplorer {
 				}
 				else {
 					mWifiList.clear();
-					Logger.d(this, "Emulator enabled so using dummy scan results");
+					Logger.d(ProxiExplorer.this, "Emulator enabled so using dummy scan results");
 					mWifiList.add(new WifiScanResult(demoBssid, demoSsid, demoLevel));
 					Events.EventBus.onWifiScanReceived(mWifiList);
 					if (requestListener != null) {
@@ -171,11 +171,13 @@ public class ProxiExplorer {
 				}
 
 				Bundle parameters = new Bundle();
-				parameters.putString("beaconBssid", beacon.id);
-				parameters.putString("userId", Aircandi.getInstance().getUser().id);
+				ArrayList<String> beacons = new ArrayList<String>();
+				beacons.add(beacon.name);
+				parameters.putStringArrayList("beaconBssids", beacons);
+				//parameters.putString("userId", Aircandi.getInstance().getUser().id);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntitiesForBeacon");
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForBeacons");
 				serviceRequest.setRequestType(RequestType.Method);
 				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -258,8 +260,6 @@ public class ProxiExplorer {
 
 	public void processBeaconsFromScan(boolean refreshAllBeacons) {
 
-		
-		mScanRequestProcessing.set(true);
 		if (!mScanRequestProcessing.get()) {
 			mScanRequestProcessing.set(true);
 			/*
@@ -287,7 +287,7 @@ public class ProxiExplorer {
 					final WifiScanResult scanResult = mWifiList.get(i);
 
 					/* See if we are already tracking the beacon */
-					Beacon beaconMatch = findBeaconById(scanResult.BSSID);
+					Beacon beaconMatch = findBeaconByName(scanResult.BSSID);
 
 					/* Add it if we aren't */
 					if (beaconMatch == null) {
@@ -337,26 +337,26 @@ public class ProxiExplorer {
 			}
 
 			/* Construct string array of the beacon ids */
-			ArrayList<String> refreshBeaconIds = new ArrayList<String>();
+			ArrayList<String> refreshBeaconNames = new ArrayList<String>();
 			for (Beacon beacon : mBeacons) {
 				if (beacon.state == BeaconState.New) {
 					beacon.state = BeaconState.Normal;
-					refreshBeaconIds.add(beacon.id);
+					refreshBeaconNames.add(beacon.name);
 				}
 			}
 
-			if (refreshBeaconIds.size() > 0) {
+			if (refreshBeaconNames.size() > 0) {
 
 				if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
 					wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
 				}
 
 				Bundle parameters = new Bundle();
-				parameters.putStringArrayList("beacons", refreshBeaconIds);
-				parameters.putString("userId", Aircandi.getInstance().getUser().id);
+				parameters.putStringArrayList("beaconBssids", refreshBeaconNames);
+				//parameters.putString("userId", Aircandi.getInstance().getUser().id);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntitiesForBeacons");
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForBeacons");
 				serviceRequest.setRequestType(RequestType.Method);
 				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -376,21 +376,31 @@ public class ProxiExplorer {
 							Entity freshEntity = (Entity) obj;
 
 							for (Beacon beacon : mBeacons) {
-								if (beacon.id.equals(freshEntity.beacon.id)) {
-
+								if (beacon.name.equals(freshEntity.drops.get(0).beaconBssid)) {
 									beacon.entities.add(freshEntity);
 									beacon.registered = true;
 									freshEntity.state = EntityState.New;
 									freshEntity.beacon = beacon;
+									if (freshEntity.visibility.equals("0")) {
+										freshEntity.visibility = "public";
+									}
+									else if (freshEntity.visibility.equals("1")) {
+										freshEntity.visibility = "private";
+									}
 									for (Entity childEntity : freshEntity.children) {
 										childEntity.beacon = beacon;
 										childEntity.state = EntityState.New;
+										if (childEntity.visibility.equals("0")) {
+											childEntity.visibility = "public";
+										}
+										else if (childEntity.visibility.equals("1")) {
+											childEntity.visibility = "private";
+										}
 									}
 								}
 							}
 						}
 					}
-
 					/* Any beacon that didn't get entities could be unregistered */
 				}
 			}
@@ -410,9 +420,9 @@ public class ProxiExplorer {
 		return;
 	}
 
-	private Beacon findBeaconById(String beaconId) {
+	private Beacon findBeaconByName(String beaconName) {
 		for (Beacon beacon : mBeacons) {
-			if (beacon.id.equals(beaconId)) {
+			if (beacon.name.equals(beaconName)) {
 				return beacon;
 			}
 		}
@@ -435,7 +445,7 @@ public class ProxiExplorer {
 				}
 
 				Bundle parameters = new Bundle();
-				parameters.putString("entityId", entity.id);
+				parameters.putString("entityBssid", entity.name);
 				parameters.putBoolean("includeChildren", true);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
@@ -562,7 +572,7 @@ public class ProxiExplorer {
 
 				/* Attach the beacon */
 				for (Beacon beacon : mBeacons) {
-					if (beacon.id.equals(entity.beacon.id)) {
+					if (beacon.name.equals(entity.drops.get(0).beaconBssid)) {
 						beacon.registered = true;
 						entity.beacon = beacon;
 						for (Entity childEntity : entity.children) {
@@ -725,10 +735,10 @@ public class ProxiExplorer {
 		Beacon beaconDemo = null;
 
 		for (Beacon beacon : mBeacons) {
-			if (beacon.id.equals(globalBssid)) {
+			if (beacon.name.equals(globalBssid)) {
 				continue;
 			}
-			if (beacon.id.equals(demoBssid)) {
+			if (beacon.name.equals(demoBssid)) {
 				beaconDemo = beacon;
 			}
 			else {
@@ -777,7 +787,7 @@ public class ProxiExplorer {
 
 		Beacon beaconStrongest = null;
 		if (wifiStrongest != null) {
-			beaconStrongest = getBeaconById(wifiStrongest.BSSID);
+			beaconStrongest = getBeaconByName(wifiStrongest.BSSID);
 			if (beaconStrongest == null) {
 				beaconStrongest = new Beacon(wifiStrongest.BSSID, wifiStrongest.SSID, wifiStrongest.SSID, wifiStrongest.level, DateUtils.nowDate());
 			}
@@ -786,9 +796,9 @@ public class ProxiExplorer {
 		return beaconStrongest;
 	}
 
-	public Beacon getBeaconById(String beaconId) {
+	public Beacon getBeaconByName(String beaconName) {
 		for (Beacon beacon : mBeacons) {
-			if (beacon.id.equals(beaconId)) {
+			if (beacon.name.equals(beaconName)) {
 				return beacon;
 			}
 		}

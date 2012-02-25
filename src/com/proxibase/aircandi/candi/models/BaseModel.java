@@ -52,13 +52,11 @@ public abstract class BaseModel extends Observable implements IModel {
 	}
 
 	public String getTitleText() {
-
 		String title = mTitleText;
 		return title;
 	}
 
 	public void setTitleText(String titleText) {
-
 		mTitleText = titleText;
 	}
 
@@ -178,13 +176,12 @@ public abstract class BaseModel extends Observable implements IModel {
 		}
 
 		private boolean isOutsideHalo(Camera camera) {
-//			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
-//			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
+			//			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
+			//			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
 
 			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * camera.getWidth());
 			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * camera.getWidth());
-			
-			
+
 			//			if (haloMinX < 0) {
 			//				haloMaxX += Math.abs(haloMinX);
 			//				haloMinX = 0;

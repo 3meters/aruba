@@ -28,6 +28,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.sdk.android.proxi.consumer.Comment;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
+import com.proxibase.sdk.android.proxi.service.Query;
 import com.proxibase.sdk.android.proxi.service.ServiceRequest;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
@@ -61,16 +62,9 @@ public class CommentList extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-
-				Bundle parameters = new Bundle();
-				parameters.putString("entityId", mCommon.mEntity.id);
-
-				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetCommentsForEntity");
-				serviceRequest.setRequestType(RequestType.Method);
-				serviceRequest.setParameters(parameters);
-				serviceRequest.setResponseFormat(ResponseFormat.Json);
-
+				
+				Query query = new Query("comments").filter("{\"_entity\":\"" + mCommon.mEntity.id + "\"}");
+				ServiceRequest serviceRequest = new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json);
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
