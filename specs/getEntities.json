@@ -1,35 +1,45 @@
 {
-    "data":[
-        {
-            "author":{
-                "_id":1001,
-                "name":"Jay Gecko",
-                "location":"Seattle, WA",
-                "imageUri":"https://s3.amazonaws.com/3meters_images/1001_20120211_103113.jpg",
-                "linkUri":null
-            },
-            "commentCount":5,
-            "childCount":2,
-            "_id":1251,
-            "_parent":null,
-            "uri":null,
-            "type":"com.proxibase.aircandi.candi.picture",
-            "label":"Beatles",
-            "title":"Beatles",
-            "subtitle":null,
-            "description":"",
-            "imageUri":"https://s3.amazonaws.com/3meters_images/1001_20111128_170241.jpg",
-            "imagePreviewUri":"https://s3.amazonaws.com/3meters_images/1001_20111128_170241.jpg",
-            "linkUri":null,
-            "linkZoom":null,
-            "linkJavascriptEnabled":null,
-            "signalFence":-56,
-            "visibility":“public”,
-            "enabled":true,
-            "locked":false,
-            "drops":[
-                {
-                    "_beacon":"48:5b:39:e6:d3:55",
+	"method":{
+		"name":"getEntities"
+	},
+	"post":{
+		"entityIds":[
+			"entityId1",
+			"entityId2"
+		],
+		"includeChildren":true
+	},
+	"response":[
+		{
+			"author":{
+				"_id":1001,
+				"name":"Jay Gecko",
+				"location":"Seattle, WA",
+				"imageUri":"https://s3.amazonaws.com/3meters_images/1001_20120211_103113.jpg",
+				"linkUri":null
+			},
+			"_id":1251,
+			"_parent":null,
+			"uri":null,
+			"type":"com.proxibase.aircandi.candi.picture",
+			"label":"Beatles",
+			"title":"Beatles",
+			"subtitle":null,
+			"description":"",
+			"imageUri":"https://s3.amazonaws.com/3meters_images/1001_20111128_170241.jpg",
+			"imagePreviewUri":"https://s3.amazonaws.com/3meters_images/1001_20111128_170241.jpg",
+			"linkUri":null,
+			"linkZoom":null,
+			"linkJavascriptEnabled":null,
+			"signalFence":-56,
+			"visibility":“public”,
+			"enabled":true,
+			"locked":false,
+			"dropCount":1,
+			"drops":[
+				{
+					"_beacon":"48:5b:39:e6:d3:55",
+					"_entity:"1251",
                     "latitude":47.65910480162213,
                     "longitude":-122.36079717906485,
                     "altitude":20,
@@ -38,27 +48,29 @@
                     "speed":0
                 }
             ],
+            "_owner":1001,
             "_creator":1001,
-            "createdDate":1320858540,
             "_modifier":1001,
+            "createdDate":1320858540,
             "modifiedDate":1320858540,
+            "commentCount":5,
+            "childCount":2,
             "children":[
                 {
                     "author":{
                         "_id":1001,
-                        "name":"Jay Gecko",
-                        "location":"Seattle, WA",
+                        "name":"JayGecko",
+                        "location":"Seattle,
+					WA",
                         "imageUri":"https://s3.amazonaws.com/3meters_images/1001_20120211_103113.jpg",
                         "linkUri":null
                     },
-                    "commentCount":0,
-                    "childCount":0,
                     "_id":1252,
                     "-parent":1251,
                     "uri":null,
                     "type":"com.proxibase.aircandi.candi.picture",
-                    "label":"More Beatles",
-                    "title":"More Beatles",
+                    "label":"MoreBeatles",
+                    "title":"MoreBeatles",
                     "subtitle":null,
                     "description":"",
                     "imageUri":"https://s3.amazonaws.com/3meters_images/1002_20111115_172235.jpg",
@@ -70,10 +82,13 @@
                     "visibility":“public”,
                     "enabled":true,
                     "locked":false,
+                    "_ownerr":1001,
                     "_creator":1001,
-                    "createdDate":1320861360,
                     "_modifier":1001,
+                    "createdDate":1320861360,
                     "modifiedDate":1320861360,
+                    "commentCount":0,
+            		"childCount":0,
                     "children":[
                         
                     ]
@@ -81,19 +96,18 @@
                 {
                     "author":{
                         "_id":1001,
-                        "name":"Jay Gecko",
-                        "location":"Seattle, WA",
+                        "name":"JayGecko",
+                        "location":"Seattle,
+					WA",
                         "imageUri":"https://s3.amazonaws.com/3meters_images/1001_20120211_103113.jpg",
                         "linkUri":null
                     },
-                    "commentCount":0,
-                    "childCount":0,
                     "_id":1253,
                     "_parent":1251,
                     "uri":null,
                     "type":"com.proxibase.aircandi.candi.picture",
-                    "label":"Early days",
-                    "title":"Early days",
+                    "label":"Earlydays",
+                    "title":"Earlydays",
                     "subtitle":null,
                     "description":"",
                     "imageUri":"https://s3.amazonaws.com/3meters_images/1000_20111109_175744.jpg",
@@ -106,9 +120,11 @@
                     "enabled":true,
                     "locked":false,
                     "_creator":1001,
-                    "createdDate":1320861420,
                     "_modifier":1001,
+                    "createdDate":1320861420,
                     "modifiedDate":1320861420,
+                    "commentCount":0,
+            		"childCount":0,
                     "children":[
                         
                     ]
