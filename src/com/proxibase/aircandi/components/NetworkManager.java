@@ -1,7 +1,5 @@
 package com.proxibase.aircandi.components;
 
-import java.net.UnknownHostException;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,9 +9,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.sdk.android.proxi.service.ProxibaseService;
 import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
@@ -116,93 +112,6 @@ public class NetworkManager {
 			}
 		}
 		return serviceResponse;
-	}
-
-	public ServiceResponse requestOld(ServiceRequest serviceRequest) {
-		/*
-		 * Don't assume this is being called from the UI thread.
-		 */
-
-		/* Make sure we have a network connection */
-		if (!verifyIsConnected()) {
-			Logger.d(this, "Connection exception: " + serviceRequest.getUri());
-			return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ConnectionException, null, null);
-		}
-
-		/*
-		 * We have a network connection so give it a try. Request processing
-		 * will retry using an exponential backoff scheme if needed and possible.
-		 */
-		try {
-			Object response = ProxibaseService.getInstance().request(serviceRequest);
-			return new ServiceResponse(ResponseCode.Success, ResponseCodeDetail.Success, response, null);
-		}
-		catch (ProxibaseServiceException exception) {
-			/*
-			 * We got a service side error that either stopped us in our tracks or
-			 * we gave up after performing a series or retries.
-			 */
-			String logMessage = null;
-			int toastMessageId = 0;
-			boolean suppressUI = serviceRequest.isSuppressUI();
-			ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
-
-			if (exception.getErrorType() == ErrorType.Service) {
-				if (exception.getErrorCode() == ErrorCode.NotFoundException) {
-					serviceResponse.responseCodeDetail = ResponseCodeDetail.ServiceNotFoundException;
-				}
-				else if (exception.getErrorCode() == ErrorCode.UpdateException) {
-					serviceResponse.responseCode = ResponseCode.Success;
-					serviceResponse.responseCodeDetail = ResponseCodeDetail.UpdateException;
-				}
-				else {
-					serviceResponse.responseCodeDetail = ResponseCodeDetail.ServiceException;
-				}
-			}
-			/*
-			 * Client errors occur when we are unable to get a response from a service, or when the client is unable to
-			 * understand a response from a service. This includes protocol, network and timeout errors.
-			 */
-			else if (exception.getErrorType() == ErrorType.Client) {
-				if (exception.getErrorCode() == ErrorCode.IOException) {
-					if (exception.getCause() instanceof UnknownHostException) {
-						logMessage = "Unknown host exception: " + serviceRequest.getUri();
-						toastMessageId = R.string.network_message_connection_poor;
-						serviceResponse.responseCodeDetail = ResponseCodeDetail.UnknownHostException;
-					}
-					else {
-						logMessage = "Transport exception: " + serviceRequest.getUri();
-						toastMessageId = R.string.network_message_connection_poor;
-						serviceResponse.responseCodeDetail = ResponseCodeDetail.TransportException;
-					}
-				}
-				else if (exception.getErrorCode() == ErrorCode.UnknownHostException) {
-					logMessage = "Unknown host: " + serviceRequest.getUri();
-					toastMessageId = R.string.network_message_client_error;
-					serviceResponse.responseCodeDetail = ResponseCodeDetail.ProtocolException;
-				}
-				else if (exception.getErrorCode() == ErrorCode.ClientProtocolException) {
-					logMessage = "Protocol exception: " + serviceRequest.getUri();
-					toastMessageId = R.string.network_message_client_error;
-					serviceResponse.responseCodeDetail = ResponseCodeDetail.ProtocolException;
-				}
-				else if (exception.getErrorCode() == ErrorCode.URISyntaxException) {
-					logMessage = "Uri syntax exception: " + serviceRequest.getUri();
-					toastMessageId = R.string.network_message_client_error;
-					serviceResponse.responseCodeDetail = ResponseCodeDetail.RequestException;
-				}
-				else {
-					logMessage = "Request exception: " + serviceRequest.getUri();
-					toastMessageId = R.string.network_message_client_error;
-					serviceResponse.responseCodeDetail = ResponseCodeDetail.RequestException;
-				}
-			}
-			if (!suppressUI) {
-				ImageUtils.showToastNotification(toastMessageId, Toast.LENGTH_LONG);
-			}
-			Logger.w(this, logMessage);
-			return serviceResponse;
-		}
 	}
 
 	private boolean verifyIsConnected() {

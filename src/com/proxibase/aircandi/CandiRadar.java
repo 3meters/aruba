@@ -564,7 +564,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 				@Override
 				public void onEvent(Object data) {
-					Logger.d(this, "Wifi scan received");
+					Logger.d(CandiRadar.this, "Wifi scan received");
 					Events.EventBus.wifiScanReceived.remove(this);
 					new AsyncTask() {
 

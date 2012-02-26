@@ -170,7 +170,7 @@ public class Aircandi extends Application {
 			@Override
 			public void run() {
 				if (mLocationScanActive.get()) {
-					Logger.d(this, "Location scan stopped: time limit");
+					Logger.d(Aircandi.this, "Location scan stopped: time limit");
 					stopLocationUpdates();
 				}
 			}
@@ -183,7 +183,7 @@ public class Aircandi extends Application {
 
 				Location location = Aircandi.getInstance().getCurrentLocation();
 				if (location.hasAccuracy() && location.getAccuracy() <= 30) {
-					Logger.d(this, "Location scan stopped: accurate fix obtained");
+					Logger.d(Aircandi.this, "Location scan stopped: accurate fix obtained");
 					stopLocationUpdates();
 					return;
 				}
