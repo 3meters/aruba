@@ -7,7 +7,7 @@
 	},
 	"response":[
 		{
-			"author":{
+			"creator":{
 				"_id":1001,
 				"name":"Jay Gecko",
 				"location":"Seattle, WA",

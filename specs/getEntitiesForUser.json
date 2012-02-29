@@ -16,7 +16,7 @@
 				"linkUri":null
 			},
 			"_id":1251,
-			"_parent":null,
+			"_entity":null,
 			"uri":null,
 			"type":"com.proxibase.aircandi.candi.picture",
 			"label":"Beatles",
@@ -32,7 +32,7 @@
 			"visibility":“public”,
 			"enabled":true,
 			"locked":false,
-			"dropCount":1,
+			"dropsCount":1,
 			"drops":[
 				{
 					"_beacon":"48:5b:39:e6:d3:55",
@@ -50,11 +50,11 @@
             "_modifier":1001,
             "createdDate":1320858540,
             "modifiedDate":1320858540,
-            "commentCount":5,
+            "commentsCount":5,
             "entitiesCount":2,
             "entities":[
                 {
-                    "author":{
+                    "creator":{
                         "_id":1001,
                         "name":"JayGecko",
                         "location":"Seattle",
@@ -62,7 +62,7 @@
                         "linkUri":null
                     },
                     "_id":1252,
-                    "-parent":1251,
+                    "_entity":1251,
                     "uri":null,
                     "type":"com.proxibase.aircandi.candi.picture",
                     "label":"MoreBeatles",
@@ -78,12 +78,12 @@
                     "visibility":“public”,
                     "enabled":true,
                     "locked":false,
-                    "_ownerr":1001,
+                    "_owner":1001,
                     "_creator":1001,
                     "_modifier":1001,
                     "createdDate":1320861360,
                     "modifiedDate":1320861360,
-                    "commentCount":0,
+                    "commentsCount":0,
             		"entitiesCount":0,
                     "entities":[]
                 },
@@ -96,7 +96,7 @@
                         "linkUri":null
                     },
                     "_id":1253,
-                    "_parent":1251,
+                    "_entity":1251,
                     "uri":null,
                     "type":"com.proxibase.aircandi.candi.picture",
                     "label":"Earlydays",
@@ -112,11 +112,12 @@
                     "visibility":“public”,
                     "enabled":true,
                     "locked":false,
+                    "_owner":1001,
                     "_creator":1001,
                     "_modifier":1001,
                     "createdDate":1320861420,
                     "modifiedDate":1320861420,
-                    "commentCount":0,
+                    "commentsCount":0,
             		"entitiesCount":0,
                     "entities":[]
                 }
