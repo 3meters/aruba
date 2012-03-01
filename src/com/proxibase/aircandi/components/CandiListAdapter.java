@@ -15,8 +15,8 @@ import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.sdk.android.proxi.consumer.Entity;
-import com.proxibase.sdk.android.proxi.consumer.User;
+import com.proxibase.service.consumer.Entity;
+import com.proxibase.service.consumer.User;
 
 public class CandiListAdapter extends ArrayAdapter<Entity> {
 

@@ -1,4 +1,4 @@
-package com.proxibase.sdk.android.proxi.service;
+package com.proxibase.service;
 
 /**
  * Base exception class for any errors that occur while attempting to use a

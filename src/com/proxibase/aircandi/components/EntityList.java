@@ -2,7 +2,7 @@ package com.proxibase.aircandi.components;
 
 import java.util.ArrayList;
 
-import com.proxibase.sdk.android.proxi.consumer.Entity;
+import com.proxibase.service.consumer.Entity;
 
 public class EntityList<T> extends ArrayList<T> {
 

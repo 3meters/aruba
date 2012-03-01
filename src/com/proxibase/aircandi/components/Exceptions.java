@@ -1,7 +1,7 @@
 package com.proxibase.aircandi.components;
 
 import com.proxibase.aircandi.Aircandi;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
+import com.proxibase.service.ProxibaseServiceException;
 
 public class Exceptions {
 

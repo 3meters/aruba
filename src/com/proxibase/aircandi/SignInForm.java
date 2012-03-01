@@ -18,14 +18,14 @@ import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.consumer.User;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService;
-import com.proxibase.sdk.android.proxi.service.Query;
-import com.proxibase.sdk.android.proxi.service.ServiceRequest;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
-import com.proxibase.sdk.android.util.ProxiConstants;
+import com.proxibase.service.ProxibaseService;
+import com.proxibase.service.Query;
+import com.proxibase.service.ServiceRequest;
+import com.proxibase.service.ProxibaseService.GsonType;
+import com.proxibase.service.ProxibaseService.RequestType;
+import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.consumer.User;
+import com.proxibase.service.util.ProxiConstants;
 
 public class SignInForm extends FormActivity {
 

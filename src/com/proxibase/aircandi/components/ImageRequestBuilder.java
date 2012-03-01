@@ -1,9 +1,9 @@
 package com.proxibase.aircandi.components;
 
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
-import com.proxibase.sdk.android.proxi.consumer.Entity;
-import com.proxibase.sdk.android.proxi.consumer.Entity.ImageFormat;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
+import com.proxibase.service.ProxibaseService.RequestListener;
+import com.proxibase.service.consumer.Entity;
+import com.proxibase.service.consumer.Entity.ImageFormat;
 
 public class ImageRequestBuilder {
 

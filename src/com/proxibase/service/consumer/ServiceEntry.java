@@ -1,8 +1,8 @@
-package com.proxibase.sdk.android.proxi.consumer;
+package com.proxibase.service.consumer;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.proxibase.sdk.android.util.ProxiConstants;
+import com.proxibase.service.util.ProxiConstants;
 
 /**
  * Bound by default to the proxibase odata service.

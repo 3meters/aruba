@@ -8,8 +8,8 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.proxibase.aircandi.R;
-import com.proxibase.sdk.android.proxi.consumer.Beacon;
-import com.proxibase.sdk.android.proxi.consumer.Entity;
+import com.proxibase.service.consumer.Beacon;
+import com.proxibase.service.consumer.Entity;
 
 public class IntentBuilder {
 

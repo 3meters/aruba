@@ -83,7 +83,7 @@ import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.consumer.Entity;
+import com.proxibase.service.consumer.Entity;
 
 public class CandiPatchPresenter implements Observer {
 

@@ -1,4 +1,4 @@
-package com.proxibase.sdk.android.util;
+package com.proxibase.service.util;
 
 public interface ProxiConstants {
 

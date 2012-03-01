@@ -13,9 +13,9 @@ import android.os.Message;
 import com.proxibase.aircandi.PictureSearch;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.sdk.android.proxi.service.ServiceRequest;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ServiceRequest;
+import com.proxibase.service.ProxibaseService.RequestType;
+import com.proxibase.service.ProxibaseService.ResponseFormat;
 
 public class DrawableManager {
 	/*

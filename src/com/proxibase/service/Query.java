@@ -1,8 +1,8 @@
-package com.proxibase.sdk.android.proxi.service;
+package com.proxibase.service;
 
 import java.net.URLEncoder;
 
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.UrlEncodingType;
+import com.proxibase.service.ProxibaseService.UrlEncodingType;
 
 public class Query {
 

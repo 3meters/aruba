@@ -24,7 +24,7 @@ import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
+import com.proxibase.service.ProxibaseService.RequestListener;
 
 public class WebImageView extends RelativeLayout {
 

@@ -1,4 +1,4 @@
-package com.proxibase.sdk.android.proxi.consumer;
+package com.proxibase.service.consumer;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

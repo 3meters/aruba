@@ -21,11 +21,11 @@ import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.consumer.Entity.ImageFormat;
-import com.proxibase.sdk.android.proxi.service.ServiceRequest;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestListener;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.RequestType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ServiceRequest;
+import com.proxibase.service.ProxibaseService.RequestListener;
+import com.proxibase.service.ProxibaseService.RequestType;
+import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.consumer.Entity.ImageFormat;
 
 public class ImageLoader {
 

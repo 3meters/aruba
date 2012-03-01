@@ -1,4 +1,4 @@
-package com.proxibase.sdk.android.proxi.consumer;
+package com.proxibase.service.consumer;
 
 import java.util.Date;
 import java.util.List;
@@ -7,7 +7,7 @@ import android.graphics.Bitmap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.proxibase.sdk.android.util.ProxiConstants;
+import com.proxibase.service.util.ProxiConstants;
 
 /**
  * Entity as described by the proxi protocol standards.

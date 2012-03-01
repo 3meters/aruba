@@ -24,7 +24,7 @@ import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.consumer.Entity;
+import com.proxibase.service.consumer.Entity;
 
 public class MapBrowse extends MapActivity {
 

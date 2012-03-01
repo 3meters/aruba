@@ -15,7 +15,7 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.components.CandiList;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Logger;
-import com.proxibase.sdk.android.proxi.consumer.Entity;
+import com.proxibase.service.consumer.Entity;
 
 /**
  * @author Jayma

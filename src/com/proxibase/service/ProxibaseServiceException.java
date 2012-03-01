@@ -1,4 +1,4 @@
-package com.proxibase.sdk.android.proxi.service;
+package com.proxibase.service;
 
 /**
  * Extension of ProxibaseClientException that represents an error response returned

@@ -53,13 +53,13 @@ import com.proxibase.aircandi.components.ProxiExplorer.WifiScanResult;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.ActionsWindow;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.sdk.android.proxi.consumer.Comment;
-import com.proxibase.sdk.android.proxi.consumer.Entity;
-import com.proxibase.sdk.android.proxi.consumer.User;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService;
-import com.proxibase.sdk.android.proxi.service.ProxibaseService.GsonType;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorCode;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorType;
+import com.proxibase.service.ProxibaseService;
+import com.proxibase.service.ProxibaseService.GsonType;
+import com.proxibase.service.ProxibaseServiceException.ErrorCode;
+import com.proxibase.service.ProxibaseServiceException.ErrorType;
+import com.proxibase.service.consumer.Comment;
+import com.proxibase.service.consumer.Entity;
+import com.proxibase.service.consumer.User;
 
 public class AircandiCommon {
 

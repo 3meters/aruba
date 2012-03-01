@@ -1,7 +1,7 @@
 package com.proxibase.aircandi.components;
 
 import com.google.gson.annotations.Expose;
-import com.proxibase.sdk.android.proxi.consumer.ServiceEntry;
+import com.proxibase.service.consumer.ServiceEntry;
 
 /**
  * @author Jayma

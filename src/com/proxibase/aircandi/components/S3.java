@@ -41,9 +41,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorCode;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorType;
+import com.proxibase.service.ProxibaseServiceException;
+import com.proxibase.service.ProxibaseServiceException.ErrorCode;
+import com.proxibase.service.ProxibaseServiceException.ErrorType;
 
 public class S3 {
 

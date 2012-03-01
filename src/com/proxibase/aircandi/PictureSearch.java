@@ -35,9 +35,9 @@ import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorCode;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorType;
+import com.proxibase.service.ProxibaseServiceException;
+import com.proxibase.service.ProxibaseServiceException.ErrorCode;
+import com.proxibase.service.ProxibaseServiceException.ErrorType;
 
 /*
  * We often will get duplicates because the ordering of images isn't

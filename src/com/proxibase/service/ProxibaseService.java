@@ -1,4 +1,4 @@
-package com.proxibase.sdk.android.proxi.service;
+package com.proxibase.service;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -63,10 +63,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorCode;
-import com.proxibase.sdk.android.proxi.service.ProxibaseServiceException.ErrorType;
-import com.proxibase.sdk.android.util.Logger;
-import com.proxibase.sdk.android.util.ProxiConstants;
+import com.proxibase.service.ProxibaseServiceException.ErrorCode;
+import com.proxibase.service.ProxibaseServiceException.ErrorType;
+import com.proxibase.service.util.Logger;
+import com.proxibase.service.util.ProxiConstants;
 
 /*
  * Http 1.1 Status Codes (subset)
