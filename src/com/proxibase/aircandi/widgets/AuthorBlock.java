@@ -15,7 +15,7 @@ import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
-import com.proxibase.service.consumer.User;
+import com.proxibase.service.objects.User;
 
 public class AuthorBlock extends RelativeLayout {
 

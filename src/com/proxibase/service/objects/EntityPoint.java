@@ -1,4 +1,4 @@
-package com.proxibase.service.consumer;
+package com.proxibase.service.objects;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

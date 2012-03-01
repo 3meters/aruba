@@ -27,7 +27,7 @@ import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.consumer.Entity;
+import com.proxibase.service.objects.Entity;
 import com.proxibase.service.util.ProxiConstants;
 
 public class CandiList extends CandiActivity {

@@ -30,7 +30,7 @@ import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.Events.EventHandler;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.consumer.User;
+import com.proxibase.service.objects.User;
 
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ", customReportContent = {
 																						ReportField.REPORT_ID,

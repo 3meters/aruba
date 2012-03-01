@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.consumer.Entity.ImageFormat;
+import com.proxibase.service.objects.Entity.ImageFormat;
 
 public class ImageRequest {
 

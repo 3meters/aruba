@@ -1,4 +1,4 @@
-package com.proxibase.service.consumer;
+package com.proxibase.service.objects;
 
 import java.util.ArrayList;
 import java.util.Date;

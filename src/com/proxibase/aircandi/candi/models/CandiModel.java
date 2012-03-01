@@ -7,7 +7,7 @@ import org.anddev.andengine.entity.modifier.IEntityModifier;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.consumer.Entity;
+import com.proxibase.service.objects.Entity;
 
 /**
  * @author Jayma

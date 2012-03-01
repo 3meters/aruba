@@ -115,9 +115,9 @@ import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.consumer.Beacon;
-import com.proxibase.service.consumer.Entity;
-import com.proxibase.service.consumer.User;
+import com.proxibase.service.objects.Beacon;
+import com.proxibase.service.objects.Entity;
+import com.proxibase.service.objects.User;
 import com.proxibase.service.util.ProxiConstants;
 
 /*

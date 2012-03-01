@@ -14,7 +14,7 @@ import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.service.consumer.User;
+import com.proxibase.service.objects.User;
 
 public abstract class CandiActivity extends Activity {
 

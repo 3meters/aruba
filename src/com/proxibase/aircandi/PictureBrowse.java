@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.widgets.AuthorBlock;
-import com.proxibase.service.consumer.Entity;
+import com.proxibase.service.objects.Entity;
 
 public class PictureBrowse extends FormActivity {
 

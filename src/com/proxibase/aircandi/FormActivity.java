@@ -37,7 +37,7 @@ import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.consumer.User;
+import com.proxibase.service.objects.User;
 
 public abstract class FormActivity extends Activity {
 

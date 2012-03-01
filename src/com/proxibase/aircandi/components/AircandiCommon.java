@@ -57,9 +57,9 @@ import com.proxibase.service.ProxibaseService;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
-import com.proxibase.service.consumer.Comment;
-import com.proxibase.service.consumer.Entity;
-import com.proxibase.service.consumer.User;
+import com.proxibase.service.objects.Comment;
+import com.proxibase.service.objects.Entity;
+import com.proxibase.service.objects.User;
 
 public class AircandiCommon {
 

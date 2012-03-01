@@ -63,9 +63,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.proxibase.aircandi.components.Logger;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
-import com.proxibase.service.util.Logger;
 import com.proxibase.service.util.ProxiConstants;
 
 /*

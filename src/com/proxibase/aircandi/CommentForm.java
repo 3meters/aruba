@@ -28,8 +28,8 @@ import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.consumer.Comment;
-import com.proxibase.service.consumer.User;
+import com.proxibase.service.objects.Comment;
+import com.proxibase.service.objects.User;
 import com.proxibase.service.util.ProxiConstants;
 
 public class CommentForm extends FormActivity {

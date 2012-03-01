@@ -25,7 +25,7 @@ import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.consumer.Entity.ImageFormat;
+import com.proxibase.service.objects.Entity.ImageFormat;
 
 public class ImageLoader {
 

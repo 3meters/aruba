@@ -38,7 +38,7 @@ import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.consumer.Entity;
+import com.proxibase.service.objects.Entity;
 
 // @SuppressWarnings("unused")
 public class CandiView extends BaseView implements OnGestureListener {

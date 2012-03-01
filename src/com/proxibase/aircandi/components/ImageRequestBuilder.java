@@ -2,8 +2,8 @@ package com.proxibase.aircandi.components;
 
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.consumer.Entity;
-import com.proxibase.service.consumer.Entity.ImageFormat;
+import com.proxibase.service.objects.Entity;
+import com.proxibase.service.objects.Entity.ImageFormat;
 
 public class ImageRequestBuilder {
 

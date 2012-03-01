@@ -16,7 +16,7 @@ import android.util.Log;
 
 import com.proxibase.service.ProxibaseService;
 import com.proxibase.service.ProxibaseService.GsonType;
-import com.proxibase.service.consumer.Entity;
+import com.proxibase.service.objects.Entity;
 
 public class ProxiHandlerManager {
 

@@ -53,12 +53,12 @@ import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.consumer.Beacon;
-import com.proxibase.service.consumer.Drop;
-import com.proxibase.service.consumer.Entity;
-import com.proxibase.service.consumer.User;
-import com.proxibase.service.consumer.Beacon.BeaconType;
-import com.proxibase.service.consumer.Entity.Visibility;
+import com.proxibase.service.objects.Beacon;
+import com.proxibase.service.objects.Drop;
+import com.proxibase.service.objects.Entity;
+import com.proxibase.service.objects.User;
+import com.proxibase.service.objects.Beacon.BeaconType;
+import com.proxibase.service.objects.Entity.Visibility;
 import com.proxibase.service.util.ProxiConstants;
 
 public class EntityForm extends FormActivity {
