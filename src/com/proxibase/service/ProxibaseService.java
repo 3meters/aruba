@@ -66,7 +66,6 @@ import com.google.gson.JsonPrimitive;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
-import com.proxibase.service.util.ProxiConstants;
 
 /*
  * Http 1.1 Status Codes (subset)

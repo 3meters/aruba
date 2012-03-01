@@ -1,4 +1,4 @@
-package com.proxibase.service.util;
+package com.proxibase.service;
 
 public interface ProxiConstants {
 

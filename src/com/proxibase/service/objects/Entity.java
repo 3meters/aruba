@@ -7,7 +7,7 @@ import android.graphics.Bitmap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.proxibase.service.util.ProxiConstants;
+import com.proxibase.service.ProxiConstants;
 
 /**
  * Entity as described by the proxi protocol standards.

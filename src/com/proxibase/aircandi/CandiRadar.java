@@ -109,6 +109,7 @@ import com.proxibase.aircandi.components.ProxiExplorer.Options;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.ActionsWindow;
 import com.proxibase.aircandi.widgets.WebImageView;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
 import com.proxibase.service.Query;
 import com.proxibase.service.ServiceRequest;
@@ -118,7 +119,6 @@ import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.objects.Beacon;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.User;
-import com.proxibase.service.util.ProxiConstants;
 
 /*
  * Texture Notes

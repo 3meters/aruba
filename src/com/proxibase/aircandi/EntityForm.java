@@ -46,6 +46,7 @@ import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
 import com.proxibase.service.ProxibaseServiceException;
 import com.proxibase.service.ServiceRequest;
@@ -59,7 +60,6 @@ import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.User;
 import com.proxibase.service.objects.Beacon.BeaconType;
 import com.proxibase.service.objects.Entity.Visibility;
-import com.proxibase.service.util.ProxiConstants;
 
 public class EntityForm extends FormActivity {
 

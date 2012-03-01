@@ -44,6 +44,7 @@ import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
 import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
@@ -51,7 +52,6 @@ import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.objects.EntityPoint;
 import com.proxibase.service.objects.User;
-import com.proxibase.service.util.ProxiConstants;
 
 public class CandiMap extends MapActivity {
 

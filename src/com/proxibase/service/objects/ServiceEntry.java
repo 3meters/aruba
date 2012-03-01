@@ -2,7 +2,7 @@ package com.proxibase.service.objects;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.proxibase.service.util.ProxiConstants;
+import com.proxibase.service.ProxiConstants;
 
 /**
  * Bound by default to the proxibase odata service.

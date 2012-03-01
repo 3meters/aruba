@@ -18,6 +18,7 @@ import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.Preferences;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
 import com.proxibase.service.ProxibaseServiceException;
 import com.proxibase.service.ServiceRequest;
@@ -29,7 +30,6 @@ import com.proxibase.service.objects.Beacon;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.Beacon.BeaconState;
 import com.proxibase.service.objects.Entity.EntityState;
-import com.proxibase.service.util.ProxiConstants;
 
 public class ProxiExplorer {
 
