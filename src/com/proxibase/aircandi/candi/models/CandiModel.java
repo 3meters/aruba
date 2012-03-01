@@ -134,7 +134,7 @@ public class CandiModel extends BaseModel {
 			title += " " + String.valueOf(getEntity().beacon.getAvgBeaconLevel());
 		}
 		else if (mDisplayExtra == DisplayExtra.Tag) {
-			title += " " + String.valueOf(getEntity().beacon.name);
+			title += " " + String.valueOf(getEntity().beacon.bssid);
 		}
 		else if (mDisplayExtra == DisplayExtra.Time) {
 			title += " " + String.valueOf(getEntity().beacon.discoveryTime.getTime() / 100);

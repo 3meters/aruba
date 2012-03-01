@@ -770,7 +770,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					rookieHit = true;
 					break;
 				}
-				for (Entity childEntity : entity.children) {
+				for (Entity childEntity : entity.entities) {
 					if (!childEntity.hidden) {
 						rookieHit = true;
 						break;
@@ -923,7 +923,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 							 * Because of 'my candi', an entity could be deleted that isn't currently being
 							 * tracked in the big model (beacon might not be tracked either).
 							 */
-							Beacon beacon = ProxiExplorer.getInstance().getBeaconByName(entityDeleted.drops.get(0).beacon);
+							Beacon beacon = ProxiExplorer.getInstance().getBeaconByBssid(entityDeleted.drops.get(0).beacon.bssid);
 							if (beacon != null) {
 								beacon.dirty = true;
 								mRefreshNeeded = true;
@@ -938,7 +938,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						Map.Entry entry = (Map.Entry) it.next();
 						Entity entityInserted = (Entity) entry.getValue();
 
-						Beacon beacon = ProxiExplorer.getInstance().getBeaconByName(entityInserted.drops.get(0).beacon);
+						Beacon beacon = ProxiExplorer.getInstance().getBeaconByBssid(entityInserted.drops.get(0).beacon.bssid);
 						if (beacon != null) {
 							/*
 							 * We will end up with the latest version of the entity
@@ -995,7 +995,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 									rookieHit = true;
 								}
 							}
-							for (Entity childEntity : entity.children) {
+							for (Entity childEntity : entity.entities) {
 								/*
 								 * We keep bumping the date up until the entity is finally
 								 * visible.

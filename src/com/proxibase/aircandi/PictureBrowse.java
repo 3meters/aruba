@@ -29,8 +29,8 @@ public class PictureBrowse extends FormActivity {
 		final Entity entity = mCommon.mEntity;
 
 		/* Author block */
-		if (entity.author != null) {
-			((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, entity.modifiedDate.longValue(), entity.locked);
+		if (entity.creator != null) {
+			((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.creator, entity.modifiedDate.longValue(), entity.locked);
 		}
 		else {
 			((View) findViewById(R.id.block_author)).setVisibility(View.GONE);

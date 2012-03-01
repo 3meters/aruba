@@ -83,9 +83,9 @@ public class CommentForm extends FormActivity {
 
 	protected void bind() {
 		mCommon.mComment = new Comment();
-		mCommon.mComment.creator = Aircandi.getInstance().getUser().id;
-		mCommon.mComment.modifier = Aircandi.getInstance().getUser().id;
-		mCommon.mComment.entity = mCommon.mParent;
+		mCommon.mComment.creatorId = Aircandi.getInstance().getUser().id;
+		mCommon.mComment.modifierId = Aircandi.getInstance().getUser().id;
+		mCommon.mComment.entityId = mCommon.mParent;
 	}
 
 	protected void draw() {

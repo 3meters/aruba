@@ -92,7 +92,7 @@ public class CandiList extends CandiActivity {
 								Entity.class,
 								GsonType.ProxibaseService);
 					if (mMethodType == MethodType.CandiForParent) {
-						mListEntities = mListEntities.get(0).children;
+						mListEntities = mListEntities.get(0).entities;
 					}
 				}
 				return serviceResponse;
@@ -136,7 +136,7 @@ public class CandiList extends CandiActivity {
 
 	public void onCommentsClick(View view) {
 		Entity entity = (Entity) view.getTag();
-		if (entity.commentCount > 0) {
+		if (entity.commentsCount > 0) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 			intentBuilder.setCommand(new Command(CommandVerb.View));

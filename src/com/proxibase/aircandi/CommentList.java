@@ -183,12 +183,12 @@ public class CommentList extends CandiActivity {
 			if (itemData != null) {
 				Comment comment = itemData;
 				if (holder.itemAuthorName != null) {
-					holder.itemAuthorName.setText(comment.author.name);
+					holder.itemAuthorName.setText(comment.creator.name);
 				}
 
 				if (holder.itemAuthorLocation != null) {
-					if (comment.author.location != null && comment.author.location.length() > 0) {
-						holder.itemAuthorLocation.setText(comment.author.location);
+					if (comment.creator.location != null && comment.creator.location.length() > 0) {
+						holder.itemAuthorLocation.setText(comment.creator.location);
 					}
 					else {
 						holder.itemAuthorLocation.setVisibility(View.GONE);
@@ -222,9 +222,9 @@ public class CommentList extends CandiActivity {
 					if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null) {
 						bitmapDrawable.getBitmap().recycle();
 					}
-					if (comment.author.imageUri != null && comment.author.imageUri.length() != 0) {
+					if (comment.creator.imageUri != null && comment.creator.imageUri.length() != 0) {
 						ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemAuthorImage);
-						builder.setFromUris(comment.author.imageUri, null);
+						builder.setFromUris(comment.creator.imageUri, null);
 						ImageRequest imageRequest = builder.create();
 						holder.itemAuthorImage.setImageRequest(imageRequest);
 					}

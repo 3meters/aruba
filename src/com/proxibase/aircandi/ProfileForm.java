@@ -296,7 +296,7 @@ public class ProfileForm extends FormActivity {
 						mUser.email = mTextEmail.getText().toString().trim();
 						mUser.name = mTextFullname.getText().toString().trim();
 						mUser.modifiedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-						mUser.modifier = Aircandi.getInstance().getUser().id;
+						mUser.modifierId = Aircandi.getInstance().getUser().id;
 
 						if (mTextPassword.getText().toString().length() != 0) {
 							mUser.password = mTextPassword.getText().toString().trim();

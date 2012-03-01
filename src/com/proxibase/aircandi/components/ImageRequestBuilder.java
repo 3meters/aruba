@@ -100,12 +100,12 @@ public class ImageRequestBuilder {
 		else if (entity.linkUri != null && !entity.linkUri.equals("")) {
 			imageUri = entity.linkUri;
 		}
-		else if (entity.author != null) {
-			if (entity.author.imageUri != null && !entity.author.imageUri.equals("")) {
-				imageUri = entity.author.imageUri;
+		else if (entity.creator != null) {
+			if (entity.creator.imageUri != null && !entity.creator.imageUri.equals("")) {
+				imageUri = entity.creator.imageUri;
 			}
-			else if (entity.author.linkUri != null && !entity.author.linkUri.equals("")) {
-				imageUri = entity.author.linkUri;
+			else if (entity.creator.linkUri != null && !entity.creator.linkUri.equals("")) {
+				imageUri = entity.creator.linkUri;
 			}
 		}
 		return imageUri;

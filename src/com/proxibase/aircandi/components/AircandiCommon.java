@@ -283,7 +283,7 @@ public class AircandiCommon {
 			try {
 				Class clazz = Class.forName(CandiConstants.APP_PACKAGE_NAME + command.activityName, false, mContext.getClass().getClassLoader());
 				if (command.verb == CommandVerb.New) {
-					String beaconName = ProxiExplorer.getInstance().getStrongestBeacon().name;
+					String beaconName = ProxiExplorer.getInstance().getStrongestBeacon().bssid;
 					IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
 					intentBuilder.setCommand(command);
 					intentBuilder.setParentEntityId(command.entityParentId);

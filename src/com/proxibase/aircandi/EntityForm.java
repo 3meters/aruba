@@ -121,7 +121,7 @@ public class EntityForm extends FormActivity {
 		if (mCommon.mCommand.verb == CommandVerb.New) {
 			/* Get location fix */
 			Aircandi.getInstance().startLocationUpdates(CandiConstants.LOCATION_SCAN_TIME_LIMIT, CandiConstants.LOCATION_EXPIRATION);
-			mBeacon = ProxiExplorer.getInstance().getBeaconByName(mCommon.mBeaconName);
+			mBeacon = ProxiExplorer.getInstance().getBeaconByBssid(mCommon.mBeaconName);
 		}
 
 		mImagePicture = (WebImageView) findViewById(R.id.image_picture);
@@ -151,20 +151,20 @@ public class EntityForm extends FormActivity {
 		if (mCommon.mCommand.verb == CommandVerb.New) {
 			Entity entity = new Entity();
 			entity.drops.add(new Drop());
-			entity.drops.get(0).beacon = mCommon.mBeaconName;
+			entity.drops.get(0).beaconId = mCommon.mBeaconName;
 			entity.signalFence = -100.0f;
-			entity.creator = Aircandi.getInstance().getUser().id;
-			entity.modifier = Aircandi.getInstance().getUser().id;
+			entity.creatorId = Aircandi.getInstance().getUser().id;
+			entity.modifierId = Aircandi.getInstance().getUser().id;
 			entity.enabled = true;
 			entity.locked = false;
 			entity.linkJavascriptEnabled = false;
 			entity.linkZoom = false;
 			entity.visibility = Visibility.Public.toString().toLowerCase();
 			entity.type = mCommon.mEntityType;
-			entity.parent = null;
+			entity.parentEntityId = null;
 
 			if (mCommon.mParent != null && !mCommon.mParent.equals("")) {
-				entity.parent = mCommon.mParent;
+				entity.parentEntityId = mCommon.mParent;
 			}
 
 			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
@@ -302,8 +302,8 @@ public class EntityForm extends FormActivity {
 
 			/* Author */
 
-			if (entity != null && entity.author != null) {
-				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.author, entity.modifiedDate.longValue(), entity.locked);
+			if (entity != null && entity.creator != null) {
+				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.creator, entity.modifiedDate.longValue(), entity.locked);
 			}
 			else {
 				((AuthorBlock) findViewById(R.id.block_author)).setVisibility(View.GONE);
@@ -355,7 +355,7 @@ public class EntityForm extends FormActivity {
 		 * The user could have moved since we grabbed the target beacon that
 		 * was passed to the form so we do a quick wifi sniff.
 		 */
-		if (mCommon.mCommand.verb == CommandVerb.New && mCommon.mEntity.parent == null) {
+		if (mCommon.mCommand.verb == CommandVerb.New && mCommon.mEntity.parentEntityId == null) {
 
 			Beacon beacon = ProxiExplorer.getInstance().getStrongestWifiAsBeacon();
 			if (beacon == null) {
@@ -497,11 +497,11 @@ public class EntityForm extends FormActivity {
 						}
 
 						mBeacon.beaconType = BeaconType.Fixed.name().toLowerCase();
-						mBeacon.beaconSet = ProxiConstants.BEACONSET_WORLD;
+						mBeacon.beaconSetId = ProxiConstants.BEACONSET_WORLD;
 						mBeacon.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
 						mBeacon.modifiedDate = mBeacon.createdDate;
-						mBeacon.creator = Aircandi.getInstance().getUser().id;
-						mBeacon.modifier = Aircandi.getInstance().getUser().id;
+						mBeacon.creatorId = Aircandi.getInstance().getUser().id;
+						mBeacon.modifierId = Aircandi.getInstance().getUser().id;
 						mBeacon.locked = false;
 
 						Logger.i(this, "Inserting beacon: " + mCommon.mBeaconName);
@@ -695,7 +695,7 @@ public class EntityForm extends FormActivity {
 
 	protected ServiceResponse update() {
 
-		mCommon.mEntity.modifier = Aircandi.getInstance().getUser().id;
+		mCommon.mEntity.modifierId = Aircandi.getInstance().getUser().id;
 		mCommon.mEntity.modifiedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
 		Logger.i(this, "Updating entity: " + mCommon.mEntity.title);
 		Tracker.trackEvent("Entity", "Update", mCommon.mEntity.type, 0);

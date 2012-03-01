@@ -172,7 +172,7 @@ public class ProxiExplorer {
 
 				Bundle parameters = new Bundle();
 				ArrayList<String> beacons = new ArrayList<String>();
-				beacons.add(beacon.name);
+				beacons.add(beacon.bssid);
 				parameters.putStringArrayList("beaconBssids", beacons);
 				//parameters.putString("userId", Aircandi.getInstance().getUser().id);
 
@@ -200,7 +200,7 @@ public class ProxiExplorer {
 							freshEntity.beacon = beacon;
 							setEntityVisibility(freshEntity, beacon);
 
-							for (Entity childEntity : freshEntity.children) {
+							for (Entity childEntity : freshEntity.entities) {
 								childEntity.beacon = beacon;
 								childEntity.state = EntityState.Refreshed;
 								setEntityVisibility(childEntity, beacon);
@@ -226,8 +226,8 @@ public class ProxiExplorer {
 						}
 					}
 					else {
-						for (int j = entity.children.size() - 1; j >= 0; j--) {
-							Entity childEntity = entity.children.get(j);
+						for (int j = entity.entities.size() - 1; j >= 0; j--) {
+							Entity childEntity = entity.entities.get(j);
 							if (childEntity.dirty) {
 								serviceResponse = doRefreshEntity(childEntity.id);
 								if (serviceResponse.responseCode != ResponseCode.Success) {
@@ -330,7 +330,7 @@ public class ProxiExplorer {
 			for (Beacon beacon : mBeacons) {
 				for (Entity entity : beacon.entities) {
 					entity.state = EntityState.Normal;
-					for (Entity childEntity : entity.children) {
+					for (Entity childEntity : entity.entities) {
 						childEntity.state = EntityState.Normal;
 					}
 				}
@@ -341,7 +341,7 @@ public class ProxiExplorer {
 			for (Beacon beacon : mBeacons) {
 				if (beacon.state == BeaconState.New) {
 					beacon.state = BeaconState.Normal;
-					refreshBeaconNames.add(beacon.name);
+					refreshBeaconNames.add(beacon.bssid);
 				}
 			}
 
@@ -376,7 +376,7 @@ public class ProxiExplorer {
 							Entity freshEntity = (Entity) obj;
 
 							for (Beacon beacon : mBeacons) {
-								if (beacon.name.equals(freshEntity.drops.get(0).beaconBssid)) {
+								if (beacon.bssid.equals(freshEntity.drops.get(0).beacon.bssid)) {
 									beacon.entities.add(freshEntity);
 									beacon.registered = true;
 									freshEntity.state = EntityState.New;
@@ -387,7 +387,7 @@ public class ProxiExplorer {
 									else if (freshEntity.visibility.equals("1")) {
 										freshEntity.visibility = "private";
 									}
-									for (Entity childEntity : freshEntity.children) {
+									for (Entity childEntity : freshEntity.entities) {
 										childEntity.beacon = beacon;
 										childEntity.state = EntityState.New;
 										if (childEntity.visibility.equals("0")) {
@@ -422,7 +422,7 @@ public class ProxiExplorer {
 
 	private Beacon findBeaconByName(String beaconName) {
 		for (Beacon beacon : mBeacons) {
-			if (beacon.name.equals(beaconName)) {
+			if (beacon.bssid.equals(beaconName)) {
 				return beacon;
 			}
 		}
@@ -445,8 +445,8 @@ public class ProxiExplorer {
 				}
 
 				Bundle parameters = new Bundle();
-				parameters.putString("entityBssid", entity.name);
-				parameters.putBoolean("includeChildren", true);
+				parameters.putString("entityId", entity.id);
+				parameters.putBoolean("getChildren", true);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
 				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntity");
@@ -472,7 +472,7 @@ public class ProxiExplorer {
 							freshEntity.beacon.registered = true;
 							freshEntity.state = EntityState.Refreshed;
 							setEntityVisibility(freshEntity, beacon);
-							for (Entity childEntity : freshEntity.children) {
+							for (Entity childEntity : freshEntity.entities) {
 								childEntity.beacon = beacon;
 								childEntity.state = EntityState.Refreshed;
 								setEntityVisibility(childEntity, beacon);
@@ -490,9 +490,9 @@ public class ProxiExplorer {
 			}
 			else {
 				for (Entity entity : beacon.entities) {
-					if (entity.children.contains(targetEntity)) {
+					if (entity.entities.contains(targetEntity)) {
 
-						Entity childEntity = entity.children.get(entity.children.indexOf(targetEntity));
+						Entity childEntity = entity.entities.get(entity.entities.indexOf(targetEntity));
 
 						if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
 							wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
@@ -526,12 +526,12 @@ public class ProxiExplorer {
 									freshEntity.beacon.registered = true;
 									freshEntity.state = EntityState.Refreshed;
 									setEntityVisibility(freshEntity, beacon);
-									entity.children.set(entity.children.indexOf(childEntity), freshEntity);
+									entity.entities.set(entity.entities.indexOf(childEntity), freshEntity);
 									break;
 								}
 							}
 							else {
-								entity.children.remove(entity.children.indexOf(childEntity));
+								entity.entities.remove(entity.entities.indexOf(childEntity));
 								break;
 							}
 						}
@@ -572,10 +572,10 @@ public class ProxiExplorer {
 
 				/* Attach the beacon */
 				for (Beacon beacon : mBeacons) {
-					if (beacon.name.equals(entity.drops.get(0).beaconBssid)) {
+					if (beacon.bssid.equals(entity.drops.get(0).beacon.bssid)) {
 						beacon.registered = true;
 						entity.beacon = beacon;
-						for (Entity childEntity : entity.children) {
+						for (Entity childEntity : entity.entities) {
 							childEntity.beacon = beacon;
 						}
 					}
@@ -612,7 +612,7 @@ public class ProxiExplorer {
 		/* Push hidden setting down to children */
 		for (Beacon beacon : mBeacons) {
 			for (Entity entity : beacon.entities) {
-				for (Entity childEntity : entity.children) {
+				for (Entity childEntity : entity.entities) {
 					childEntity.hidden = entity.hidden;
 
 					/* If child is going to inherit visibility then perform its own personal visibility check. */
@@ -722,7 +722,7 @@ public class ProxiExplorer {
 		for (Beacon proxiBeacon : mBeacons)
 			for (Entity entity : proxiBeacon.entities) {
 				entitiesFlat.add(entity);
-				for (Entity childEntity : entity.children) {
+				for (Entity childEntity : entity.entities) {
 					entitiesFlat.add(childEntity);
 				}
 			}
@@ -735,10 +735,10 @@ public class ProxiExplorer {
 		Beacon beaconDemo = null;
 
 		for (Beacon beacon : mBeacons) {
-			if (beacon.name.equals(globalBssid)) {
+			if (beacon.bssid.equals(globalBssid)) {
 				continue;
 			}
-			if (beacon.name.equals(demoBssid)) {
+			if (beacon.bssid.equals(demoBssid)) {
 				beaconDemo = beacon;
 			}
 			else {
@@ -787,7 +787,7 @@ public class ProxiExplorer {
 
 		Beacon beaconStrongest = null;
 		if (wifiStrongest != null) {
-			beaconStrongest = getBeaconByName(wifiStrongest.BSSID);
+			beaconStrongest = getBeaconByBssid(wifiStrongest.BSSID);
 			if (beaconStrongest == null) {
 				beaconStrongest = new Beacon(wifiStrongest.BSSID, wifiStrongest.SSID, wifiStrongest.SSID, wifiStrongest.level, DateUtils.nowDate());
 			}
@@ -796,9 +796,9 @@ public class ProxiExplorer {
 		return beaconStrongest;
 	}
 
-	public Beacon getBeaconByName(String beaconName) {
+	public Beacon getBeaconByBssid(String beaconBssid) {
 		for (Beacon beacon : mBeacons) {
-			if (beacon.name.equals(beaconName)) {
+			if (beacon.bssid.equals(beaconBssid)) {
 				return beacon;
 			}
 		}
@@ -812,7 +812,7 @@ public class ProxiExplorer {
 					if (entity.id.equals(entityId)) {
 						return entity;
 					}
-					for (Entity childEntity : entity.children) {
+					for (Entity childEntity : entity.entities) {
 						if (childEntity.id.equals(entityId)) {
 							return childEntity;
 						}

@@ -84,7 +84,7 @@ public class CandiForm extends CandiActivity {
 
 	public void onCommentsClick(View view) {
 		Entity entity = (Entity) view.getTag();
-		if (entity.commentCount > 0) {
+		if (entity.commentsCount > 0) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 			intentBuilder.setCommand(new Command(CommandVerb.View));
 			intentBuilder.setEntity(entity);
@@ -188,10 +188,10 @@ public class CandiForm extends CandiActivity {
 		/* Author image */
 
 		if (!refresh) {
-			if (entity.author != null) {
-				if (entity.author.imageUri != null && !entity.author.imageUri.equals("")) {
+			if (entity.creator != null) {
+				if (entity.creator.imageUri != null && !entity.creator.imageUri.equals("")) {
 					ImageRequestBuilder builder = new ImageRequestBuilder(imageAuthor);
-					builder.setFromUris(entity.author.imageUri, null);
+					builder.setFromUris(entity.creator.imageUri, null);
 					ImageRequest imageRequest = builder.create();
 					imageAuthor.setImageRequest(imageRequest);
 				}
@@ -216,8 +216,8 @@ public class CandiForm extends CandiActivity {
 
 		/* Author block */
 
-		if (entity.author != null) {
-			authorBlock.bindToAuthor(entity.author, entity.modifiedDate.longValue(), entity.locked);
+		if (entity.creator != null) {
+			authorBlock.bindToAuthor(entity.creator, entity.modifiedDate.longValue(), entity.locked);
 			authorBlock.setVisibility(View.VISIBLE);
 		}
 		else {
@@ -226,7 +226,7 @@ public class CandiForm extends CandiActivity {
 
 		/* Update any UI indicators related to child candies */
 
-		boolean visibleChildren = (entity.children != null && entity.hasVisibleChildren()) || entity.childCount > 0;
+		boolean visibleChildren = (entity.entities != null && entity.hasVisibleChildren()) || entity.entitiesCount > 0;
 		if (visibleChildren) {
 			((ViewGroup) candiInfoView.findViewById(R.id.group_candi_content)).setClickable(true);
 			navigate.setVisibility(View.VISIBLE);
@@ -245,7 +245,7 @@ public class CandiForm extends CandiActivity {
 		editCandi.setVisibility(View.GONE);
 		listCandi.setVisibility(View.GONE);
 		if (!entity.locked) {
-			if (entity.parent == null) {
+			if (entity.parentEntityId == null) {
 				newCandi.setVisibility(View.VISIBLE);
 				newCandi.setTag(new Command(CommandVerb.Dialog, "Add\nCandi", "NewCandi", entity.type, entity.id, entity.id, null));
 			}
@@ -262,8 +262,8 @@ public class CandiForm extends CandiActivity {
 
 		/* Comments */
 
-		if (entity.commentCount > 0) {
-			comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
+		if (entity.commentsCount > 0) {
+			comments.setText(String.valueOf(entity.commentsCount) + (entity.commentsCount == 1 ? " Comment" : " Comments"));
 			comments.setTag(entity);
 			comments.setVisibility(View.VISIBLE);
 		}

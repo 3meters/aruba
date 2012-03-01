@@ -352,7 +352,7 @@ public class CandiPatchPresenter implements Observer {
 			candiModel.getChildren().clear();
 			candiModel.setChanged();
 
-			for (Entity childEntity : entity.children) {
+			for (Entity childEntity : entity.entities) {
 
 				CandiModel childCandiModel = null;
 				if (mCandiPatchModel.hasCandiModelForEntity(childEntity.id)) {
@@ -427,7 +427,7 @@ public class CandiPatchPresenter implements Observer {
 						break;
 					}
 					else {
-						for (Entity childEntity : entity.children) {
+						for (Entity childEntity : entity.entities) {
 							if (childEntity.id.equals(candiModel.getEntity().id)) {
 								orphaned = false;
 								break;
@@ -478,7 +478,7 @@ public class CandiPatchPresenter implements Observer {
 				candiRootNext.getChildren().add(candiModel);
 			}
 
-			for (Entity childEntity : entity.children) {
+			for (Entity childEntity : entity.entities) {
 
 				CandiModel childCandiModel = null;
 				if (mCandiPatchModel.hasCandiModelForEntity(childEntity.id)) {

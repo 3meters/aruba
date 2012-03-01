@@ -15,7 +15,6 @@ import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
-import com.proxibase.sdk.android.proxi.consumer.Author;
 import com.proxibase.sdk.android.proxi.consumer.User;
 
 public class AuthorBlock extends RelativeLayout {
@@ -27,7 +26,7 @@ public class AuthorBlock extends RelativeLayout {
 	private ImageView		mImageLocked;
 	private TextView		mTextName;
 	private TextView		mTextTimeSince;
-	private Author			mAuthor;
+	private User			mAuthor;
 	private User			mUser;
 	private Activity		mActivity;
 
@@ -63,7 +62,7 @@ public class AuthorBlock extends RelativeLayout {
 		this.addView(mBoundView);
 	}
 
-	public void bindToAuthor(Author author, Long date, boolean locked) {
+	public void bindToAuthor(User author, Long date, boolean locked) {
 		mAuthor = author;
 		if (mAuthor != null) {
 			if (mTextName != null) {
@@ -130,11 +129,11 @@ public class AuthorBlock extends RelativeLayout {
 		super.onLayout(changed, left, top, right, bottom);
 	}
 
-	public void setAuthor(Author author) {
+	public void setAuthor(User author) {
 		this.mAuthor = author;
 	}
 
-	public Author getAuthor() {
+	public User getAuthor() {
 		return mAuthor;
 	}
 

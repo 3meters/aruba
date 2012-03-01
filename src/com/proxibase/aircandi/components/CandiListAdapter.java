@@ -96,8 +96,8 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 
 			/* Comments */
 			if (holder.itemComments != null) {
-				if (entity.commentCount > 0) {
-					holder.itemComments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
+				if (entity.commentsCount > 0) {
+					holder.itemComments.setText(String.valueOf(entity.commentsCount) + (entity.commentsCount == 1 ? " Comment" : " Comments"));
 					holder.itemComments.setTag(entity);
 					holder.itemComments.setVisibility(View.VISIBLE);
 				}
@@ -107,8 +107,8 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 			}
 
 			if (holder.itemAuthor != null) {
-				if (entity.author != null) {
-					holder.itemAuthor.bindToAuthor(entity.author, entity.modifiedDate.longValue(), entity.locked);
+				if (entity.creator != null) {
+					holder.itemAuthor.bindToAuthor(entity.creator, entity.modifiedDate.longValue(), entity.locked);
 					holder.itemAuthor.setVisibility(View.VISIBLE);
 				}
 				else {
