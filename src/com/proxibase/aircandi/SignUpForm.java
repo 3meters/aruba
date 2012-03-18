@@ -192,7 +192,7 @@ public class SignUpForm extends FormActivity {
 
 	protected void insert() {
 
-		mUser.email = mTextEmail.getText().toString().trim();
+		mUser.email = mTextEmail.getText().toString().trim().toLowerCase();
 		mUser.name = mTextFullname.getText().toString().trim();
 		mUser.password = mTextPassword.getText().toString().trim();
 		mUser.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
@@ -222,7 +222,7 @@ public class SignUpForm extends FormActivity {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 
 					/* Load the just insert user to get the user id */
-					Query query = new Query("Users").filter("Email eq '" + mUser.email + "'");
+					Query query = new Query("users").filter("{\"email\":\"" + mUser.email + "\"}");
 					serviceResponse = NetworkManager.getInstance().request(
 									new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json));
 

@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.proxibase.aircandi.R;
 import com.proxibase.service.objects.Beacon;
 import com.proxibase.service.objects.Entity;
+import com.proxibase.service.objects.GeoLocation;
 
 public class IntentBuilder {
 
@@ -17,6 +18,7 @@ public class IntentBuilder {
 	private Entity		mEntity;
 	private String		mEntityId;
 	private String		mParentEntityId;
+	private GeoLocation	mEntityLocation;
 	private String		mEntityType;
 	private String		mMessage;
 	private Command		mCommand;
@@ -66,6 +68,11 @@ public class IntentBuilder {
 			intent.putExtra(mContext.getString(R.string.EXTRA_COMMAND), jsonCommand);
 		}
 
+		if (mEntityLocation != null) {
+			String json = gson.toJson(mEntityLocation);
+			intent.putExtra(mContext.getString(R.string.EXTRA_ENTITY_LOCATION), json);
+		}
+		
 		if (mParentEntityId != null) {
 			intent.putExtra(mContext.getString(R.string.EXTRA_PARENT_ENTITY_ID), mParentEntityId);
 		}
@@ -125,7 +132,7 @@ public class IntentBuilder {
 		return this;
 	}
 
-	public IntentBuilder setBeaconName(String beaconId) {
+	public IntentBuilder setBeaconId(String beaconId) {
 		this.mBeaconId = beaconId;
 		return this;
 	}
@@ -137,6 +144,11 @@ public class IntentBuilder {
 
 	public IntentBuilder setEntityId(String entityId) {
 		this.mEntityId = entityId;
+		return this;
+	}
+
+	public IntentBuilder setEntityLocation(GeoLocation entityLocation) {
+		this.mEntityLocation = entityLocation;
 		return this;
 	}
 }

@@ -13,6 +13,7 @@ import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +31,6 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
@@ -63,6 +63,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
@@ -207,13 +208,13 @@ public class ProxibaseService {
 			else if (serviceRequest.getRequestType() == RequestType.Insert) {
 				httpRequest = new HttpPost();
 				if (serviceRequest.getRequestBody() != null) {
-					addEntity((HttpEntityEnclosingRequestBase) httpRequest, serviceRequest.getRequestBody());
+					addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + "}");
 				}
 			}
 			else if (serviceRequest.getRequestType() == RequestType.Update) {
-				httpRequest = new HttpPut();
+				httpRequest = new HttpPost();
 				if (serviceRequest.getRequestBody() != null) {
-					addEntity((HttpEntityEnclosingRequestBase) httpRequest, serviceRequest.getRequestBody());
+					addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + "}");
 				}
 			}
 			else if (serviceRequest.getRequestType() == RequestType.Delete) {
@@ -225,11 +226,11 @@ public class ProxibaseService {
 				/* Method parameters */
 				if (serviceRequest.getParameters() != null && serviceRequest.getParameters().size() != 0) {
 					if (jsonBody == null) {
-						jsonBody = "{\"data\":{";
-						for (String key : serviceRequest.getParameters().keySet())
+						jsonBody = "{";
+
+						for (String key : serviceRequest.getParameters().keySet()) {
 							if (serviceRequest.getParameters().get(key) != null) {
-								
-								if (key.equals("beaconBssids")) {
+								if (serviceRequest.getParameters().get(key) instanceof ArrayList<?>) {
 									ArrayList<String> items = serviceRequest.getParameters().getStringArrayList(key);
 									jsonBody += "\"" + key + "\":[";
 									for (String beaconId : items) {
@@ -237,11 +238,22 @@ public class ProxibaseService {
 									}
 									jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "],";
 								}
+								else if (serviceRequest.getParameters().get(key) instanceof String) {
+									String value = serviceRequest.getParameters().get(key).toString();
+									if (value.startsWith("object:")) {
+										jsonBody += "\"" + key + "\":" + serviceRequest.getParameters().get(key).toString().substring(7) + ",";
+									}
+									else {
+										jsonBody += "\"" + key + "\":\"" + serviceRequest.getParameters().get(key).toString() + "\",";
+									}
+								}
 								else {
-									jsonBody += "\"" + key + "\":\"" + serviceRequest.getParameters().get(key).toString() + "\",";
+									jsonBody += "\"" + key + "\":" + serviceRequest.getParameters().get(key).toString() + ",";
 								}
 							}
-						jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "}}";
+						}
+
+						jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "}";
 					}
 					addEntity((HttpEntityEnclosingRequestBase) httpRequest, jsonBody);
 				}
@@ -529,6 +541,11 @@ public class ProxibaseService {
 	private void addEntity(HttpEntityEnclosingRequestBase httpAction, String json) throws ProxibaseClientException {
 		try {
 			httpAction.setEntity(new StringEntity(json, HTTP.UTF_8));
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			JsonParser jp = new JsonParser();
+			JsonElement je = jp.parse(json);
+			String prettyJsonString = gson.toJson(je);
+			Logger.v(this, prettyJsonString);
 		}
 		catch (UnsupportedEncodingException exception) {
 			throw new ProxibaseClientException(exception.getMessage(), exception);
@@ -587,6 +604,17 @@ public class ProxibaseService {
 						+ " kbps: "
 						+ String.valueOf(downloadTimeMills)
 						+ "ms");
+	}
+
+	public String generateId(int schemaId, Long timeUtc) {
+
+		Date dateUtc = new Date(timeUtc);
+		Date midnightUtc = new Date(dateUtc.getYear(), dateUtc.getMonth(), dateUtc.getDate());
+		Integer secondsUtc = DateUtils.intervalInSeconds(midnightUtc, dateUtc);
+		Integer rand = (int) Math.floor(Math.random() * 1000000);
+
+		String id = String.format("%1$04d.%2$ty%2$tm%2$td.%3$05d.%2$tL.%4$06d", schemaId, timeUtc, secondsUtc, rand);
+		return id;
 	}
 
 	// ----------------------------------------------------------------------------------------

@@ -6,21 +6,15 @@ import com.google.gson.annotations.SerializedName;
 /**
  * @author Jayma
  */
-public class Drop extends ServiceEntry {
+public class Observation extends ServiceEntry {
 
 	@Expose
 	@SerializedName("_beacon")
 	public String	beaconId;
 
-	@Expose(serialize = false, deserialize = true)
-	public Beacon	beacon;
-
 	@Expose
 	@SerializedName("_entity")
 	public String	entityId;
-
-	@Expose(serialize = false, deserialize = true)
-	public Entity	entity;
 
 	@Expose
 	public Number	latitude;
@@ -35,7 +29,13 @@ public class Drop extends ServiceEntry {
 	@Expose
 	public Number	speed;
 
-	public Drop() {}
+	@Expose(serialize = false, deserialize = true)
+	public Beacon	beacon;
+
+	@Expose(serialize = false, deserialize = true)
+	public Entity	entity;
+
+	public Observation() {}
 
 	public String getCollection() {
 		return "drops";

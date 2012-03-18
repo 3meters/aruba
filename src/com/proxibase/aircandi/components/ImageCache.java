@@ -182,7 +182,7 @@ public class ImageCache implements Map<String, Bitmap> {
 				try {
 					File cacheDir = new File(mSecondLevelCacheDir);
 					cleanCache(cacheDir, CandiConstants.CACHE_TRIGGER_SIZE, CandiConstants.CACHE_TARGET_SIZE);
-					Logger.i(this, "Checked size of file cache");
+					Logger.i(ImageCache.this, "Checked size of file cache");
 				}
 				catch (Exception exception) {
 					Exceptions.Handle(exception);

@@ -70,64 +70,72 @@ public class ServiceRequest {
 		this.mResponseFormat = responseFormat;
 	}
 
-	public void setUri(String uri) {
+	public ServiceRequest setUri(String uri) {
 		this.mUri = uri;
+		return this;
 	}
 
 	public String getUri() {
 		return mUri;
 	}
 
-	public void setRequestType(RequestType requestType) {
+	public ServiceRequest setRequestType(RequestType requestType) {
 		this.mRequestType = requestType;
+		return this;
 	}
 
 	public RequestType getRequestType() {
 		return mRequestType;
 	}
 
-	public void setRequestListener(RequestListener requestListener) {
+	public ServiceRequest setRequestListener(RequestListener requestListener) {
 		this.mRequestListener = requestListener;
+		return this;
 	}
 
 	public RequestListener getRequestListener() {
 		return mRequestListener;
 	}
 
-	public void setResponseFormat(ResponseFormat responseFormat) {
+	public ServiceRequest setResponseFormat(ResponseFormat responseFormat) {
 		this.mResponseFormat = responseFormat;
+		return this;
 	}
 
 	public ResponseFormat getResponseFormat() {
 		return mResponseFormat;
 	}
 
-	public void setRequestBody(String requestBody) {
+	public ServiceRequest setRequestBody(String requestBody) {
 		this.mRequestBody = requestBody;
+		return this;
 	}
 
 	public String getRequestBody() {
 		return mRequestBody;
 	}
 
-	public void setQuery(Query query) {
+	public ServiceRequest setQuery(Query query) {
 		this.mQuery = query;
+		return this;
 	}
 
 	public Query getQuery() {
 		return mQuery;
 	}
 
-	public void setParameters(Bundle parameters) {
+	public ServiceRequest setParameters(Bundle parameters) {
 		this.mParameters = parameters;
+		return this;
 	}
 
 	public Bundle getParameters() {
 		return mParameters;
 	}
 
-	public void setSuppressUI(boolean suppressUI) {
+	public ServiceRequest setSuppressUI(boolean suppressUI) {
 		this.mSuppressUI = suppressUI;
+		return this;
 	}
 
 	public boolean isSuppressUI() {

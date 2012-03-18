@@ -156,12 +156,10 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-
-				Query query = new Query("Users").filter("Id eq '" + String.valueOf(mUserId) + "'");
+				Query query = new Query("users").filter("{\"_id\":\"" + String.valueOf(mUserId) + "\"}");
 				if (mUser != null) {
-					query = new Query("Users").filter("Email eq '" + ((User) mUser).email + "'");
+					query = new Query("users").filter("{\"email\":\"" + ((User) mUser).email + "\"}");
 				}
-
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 						new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json));
 				return serviceResponse;
@@ -175,7 +173,7 @@ public class ProfileForm extends FormActivity {
 					mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 					mImageUriOriginal = mUser.imageUri;
 					mCommon.showProgressDialog(false, null);
-					mCommon.stopTitlebarProgress();					
+					mCommon.stopTitlebarProgress();
 					draw();
 					Tracker.dispatch();
 				}
@@ -278,7 +276,7 @@ public class ProfileForm extends FormActivity {
 					ServiceResponse serviceResponse = new ServiceResponse();
 
 					/* Put image to S3 if we have a new one. */
-					if (mUser.imageBitmap != null) {
+					if (mUser.imageBitmap != null && !mUser.imageBitmap.isRecycled()) {
 						try {
 							String imageKey = String.valueOf(((User) mUser).id) + "_"
 												+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))

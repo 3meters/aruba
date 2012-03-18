@@ -11,6 +11,7 @@
 	<string name="EXTRA_ENTITY">com.proxibase.aircandi.EXTRA_ENTITY</string>
 	<string name="EXTRA_ENTITY_ID">com.proxibase.aircandi.EXTRA_ENTITY_ID</string>
 	<string name="EXTRA_ENTITY_TYPE">com.proxibase.aircandi.EXTRA_ENTITY_TYPE</string>
+	<string name="EXTRA_ENTITY_LOCATION">com.proxibase.aircandi.EXTRA_ENTITY_LOCATION</string>
 	<string name="EXTRA_ENTITY_LIST">com.proxibase.aircandi.EXTRA_ENTITY_LIST</string>
 	<string name="EXTRA_COMMAND">com.proxibase.aircandi.EXTRA_COMMAND</string>
 	<string name="EXTRA_USER">com.proxibase.aircandi.EXTRA_USER</string>

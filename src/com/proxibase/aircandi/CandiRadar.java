@@ -88,6 +88,7 @@ import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Events;
 import com.proxibase.aircandi.components.Exceptions;
+import com.proxibase.aircandi.components.GeoLocationManager;
 import com.proxibase.aircandi.components.ImageCache;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageUtils;
@@ -318,7 +319,15 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		mCandiSurfaceView.setFocusableInTouchMode(true);
 
 		/* Get location fix */
-		Aircandi.getInstance().startLocationUpdates(CandiConstants.LOCATION_SCAN_TIME_LIMIT, CandiConstants.LOCATION_EXPIRATION);
+		GeoLocationManager.getInstance().setContext(getApplicationContext());
+		GeoLocationManager.getInstance().initialize();
+		GeoLocationManager.getInstance().startLocationUpdates(CandiConstants.LOCATION_SCAN_TIME_LIMIT, CandiConstants.LOCATION_EXPIRATION);
+
+		/*
+		 * Initial user login - uses cached user or anonymous and
+		 * and does not call the service
+		 */
+		verifyUser();
 
 		/* Check to see if we already have a signed in user */
 		if (findViewById(R.id.image_user) != null && Aircandi.getInstance().getUser() != null) {
@@ -537,9 +546,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				 */
 				Aircandi.getInstance().setRebuildingDataModel(options.refreshAllBeacons);
 
-				if (mScanWatcher == null) {
-					mScanWatcher = new BeaconScanWatcher();
-				}
+				mScanWatcher = new BeaconScanWatcher();
 				mScanWatcher.start(mScanOptions);
 			}
 
@@ -560,144 +567,152 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			 * we unregister for them with the event bus.
 			 */
 
-			Events.EventBus.wifiScanReceived.add(new EventHandler() {
+			synchronized (Events.EventBus.wifiScanReceived) {
+				Events.EventBus.wifiScanReceived.add(new EventHandler() {
 
-				@Override
-				public void onEvent(Object data) {
-					Logger.d(CandiRadar.this, "Wifi scan received");
-					Events.EventBus.wifiScanReceived.remove(this);
-					new AsyncTask() {
-
-						@Override
-						protected Object doInBackground(Object... params) {
-							ProxiExplorer.getInstance().processBeaconsFromScan(mOptions.refreshAllBeacons);
-							return null;
+					@Override
+					public void onEvent(Object data) {
+						Logger.d(CandiRadar.this, "Wifi scan received");
+						synchronized (Events.EventBus.wifiScanReceived) {
+							Events.EventBus.wifiScanReceived.remove(this);
 						}
+						new AsyncTask() {
 
-						@Override
-						protected void onPostExecute(Object result) {}
+							@Override
+							protected Object doInBackground(Object... params) {
+								ProxiExplorer.getInstance().processBeaconsFromScan(mOptions.refreshAllBeacons);
+								return null;
+							}
 
-					}.execute();
-				}
-			});
+							@Override
+							protected void onPostExecute(Object result) {}
 
-			Events.EventBus.entitiesLoaded.add(new EventHandler() {
+						}.execute();
+					}
+				});
+			}
 
-				@Override
-				public void onEvent(Object data) {
-					Logger.d(CandiRadar.this, "Entities loaded from service");
-					Events.EventBus.entitiesLoaded.remove(this);
-					ServiceResponse serviceResponse = (ServiceResponse) data;
+			synchronized (Events.EventBus.entitiesLoaded) {
+				Events.EventBus.entitiesLoaded.add(new EventHandler() {
 
-					if (serviceResponse.responseCode == ResponseCode.Success) {
+					@Override
+					public void onEvent(Object data) {
+						Logger.d(CandiRadar.this, "Entities loaded from service");
+						Events.EventBus.entitiesLoaded.remove(this);
+						ServiceResponse serviceResponse = (ServiceResponse) data;
 
-						/*
-						 * In case the user navigated in while we were doing an autoscan refresh, skip
-						 * the data processing, wrap this up, and schedule another scan. Auto scheduled
-						 * scans will keep getting skipped and rescheduled as long as the user is
-						 * drilled in.
-						 */
+						if (serviceResponse.responseCode == ResponseCode.Success) {
 
-						if (!mPrefAutoscan || (mCandiPatchModel == null || mCandiPatchModel.getCandiRootCurrent() == null
+							/*
+							 * In case the user navigated in while we were doing an autoscan refresh, skip
+							 * the data processing, wrap this up, and schedule another scan. Auto scheduled
+							 * scans will keep getting skipped and rescheduled as long as the user is
+							 * drilled in.
+							 */
+
+							if (!mPrefAutoscan || (mCandiPatchModel == null || mCandiPatchModel.getCandiRootCurrent() == null
 										|| mCandiPatchModel.getCandiRootCurrent().isSuperRoot())) {
 
-							if (mOptions.refreshDirty) {
-								serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
-							}
-
-							if (serviceResponse.responseCode == ResponseCode.Success) {
-
-								List<Entity> entities = ProxiExplorer.getInstance().mEntities;
-
-								/* Check to see if there is a brand new entity in the collection */
-								boolean rookieHit = rookieHit(entities);
-
-								/* Check to see if we have any visible entities */
-								boolean visibleEntity = false;
-								for (Entity entity : entities) {
-									if (!entity.hidden) {
-										visibleEntity = true;
-										break;
-									}
+								if (mOptions.refreshDirty) {
+									serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
 								}
 
-								if (visibleEntity) {
-									mCandiPatchPresenter.renderingActivate();
+								if (serviceResponse.responseCode == ResponseCode.Success) {
 
-									doUpdateEntities(entities, mScanOptions.refreshAllBeacons, false);
+									List<Entity> entities = ProxiExplorer.getInstance().mEntities;
 
-									Logger.d(CandiRadar.this, "Model updated with entities");
-									mCandiPatchPresenter.renderingActivate(5000);
-									if (mScanOptions.refreshAllBeacons) {
-										mCandiPatchPresenter.manageViewsAsync();
+									/* Check to see if there is a brand new entity in the collection */
+									boolean rookieHit = rookieHit(entities);
+
+									/* Check to see if we have any visible entities */
+									boolean visibleEntity = false;
+									for (Entity entity : entities) {
+										if (!entity.hidden) {
+											visibleEntity = true;
+											break;
+										}
 									}
 
-									/* Check for rookies and play a sound */
-									if (mPrefSoundEffects && rookieHit) {
-										mCandiAlertSound.play();
+									if (visibleEntity) {
+										mCandiPatchPresenter.renderingActivate();
+
+										doUpdateEntities(entities, mScanOptions.refreshAllBeacons, false);
+
+										Logger.d(CandiRadar.this, "Model updated with entities");
+										mCandiPatchPresenter.renderingActivate(5000);
+										if (mScanOptions.refreshAllBeacons) {
+											mCandiPatchPresenter.manageViewsAsync();
+										}
+
+										/* Check for rookies and play a sound */
+										if (mPrefSoundEffects && rookieHit) {
+											mCandiAlertSound.play();
+										}
 									}
 								}
 							}
 						}
+						Events.EventBus.onBeaconScanComplete(serviceResponse);
 					}
-					Events.EventBus.onBeaconScanComplete(serviceResponse);
-				}
-			});
+				});
+			}
 
-			Events.EventBus.beaconScanComplete.add(new EventHandler() {
+			synchronized (Events.EventBus.beaconScanComplete) {
+				Events.EventBus.beaconScanComplete.add(new EventHandler() {
 
-				@Override
-				public void onEvent(Object data) {
+					@Override
+					public void onEvent(Object data) {
 
-					Events.EventBus.beaconScanComplete.remove(this);
-					final ServiceResponse serviceResponse = (ServiceResponse) data;
+						Events.EventBus.beaconScanComplete.remove(this);
+						final ServiceResponse serviceResponse = (ServiceResponse) data;
 
-					runOnUiThread(new Runnable() {
+						runOnUiThread(new Runnable() {
 
-						@Override
-						public void run() {
+							@Override
+							public void run() {
 
-							if (serviceResponse.responseCode == ResponseCode.Success) {
+								if (serviceResponse.responseCode == ResponseCode.Success) {
 
-								/* Wrap-up */
-								if (mFirstRun) {
-									mFirstRun = false;
+									/* Wrap-up */
+									if (mFirstRun) {
+										mFirstRun = false;
+									}
+
+									if (mScanOptions.refreshAllBeacons && !mFullUpdateSuccess) {
+										mFullUpdateSuccess = true;
+									}
+
+									/* Add a call to pass along analytics */
+									Tracker.dispatch();
+									updateDebugInfo();
+
+									mCandiPatchPresenter.setFullUpdateInProgress(false);
+									mCommon.stopTitlebarProgress();
+									mCommon.showProgressDialog(false, null);
+
+									/*
+									 * Schedule the next wifi scan run if autoscan is enabled
+									 * |
+									 * The autoscan will pick up new beacons and changes in visibility
+									 * of the entities associated with beacons that are already being tracked.
+									 * This is meant to be an efficient refresh that can run continuously without
+									 * a ton of data traffic. So there won't be any calls to the data service
+									 * unless we discover a new beacon.
+									 */
+									if (mPrefAutoscan) {
+										Logger.d(CandiRadar.this, "Scheduling an autoscan in: " + mPrefAutoscanInterval + " ms");
+										mHandler.postDelayed(mScanRunnable, Integer.parseInt(mPrefAutoscanInterval));
+									}
 								}
-
-								if (mScanOptions.refreshAllBeacons && !mFullUpdateSuccess) {
-									mFullUpdateSuccess = true;
+								else {
+									mCommon.handleServiceError(serviceResponse, ServiceOperation.BeaconScan, CandiRadar.this);
 								}
-
-								/* Add a call to pass along analytics */
-								Tracker.dispatch();
-								updateDebugInfo();
-
-								mCandiPatchPresenter.setFullUpdateInProgress(false);
-								mCommon.stopTitlebarProgress();
-								mCommon.showProgressDialog(false, null);
-
-								/*
-								 * Schedule the next wifi scan run if autoscan is enabled
-								 * |
-								 * The autoscan will pick up new beacons and changes in visibility
-								 * of the entities associated with beacons that are already being tracked.
-								 * This is meant to be an efficient refresh that can run continuously without
-								 * a ton of data traffic. So there won't be any calls to the data service
-								 * unless we discover a new beacon.
-								 */
-								if (mPrefAutoscan) {
-									Logger.d(CandiRadar.this, "Scheduling an autoscan in: " + mPrefAutoscanInterval + " ms");
-									mHandler.postDelayed(mScanRunnable, Integer.parseInt(mPrefAutoscanInterval));
-								}
+								mScanActive = false;
 							}
-							else {
-								mCommon.handleServiceError(serviceResponse, ServiceOperation.BeaconScan, CandiRadar.this);
-							}
-							mScanActive = false;
-						}
-					});
-				}
-			});
+						});
+					}
+				});
+			}
 		}
 
 		public void start(Options options) {
@@ -770,7 +785,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					rookieHit = true;
 					break;
 				}
-				for (Entity childEntity : entity.entities) {
+				for (Entity childEntity : entity.children) {
 					if (!childEntity.hidden) {
 						rookieHit = true;
 						break;
@@ -897,6 +912,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		new AsyncTask() {
 
 			private boolean	mRefreshNeeded	= false;
+			private boolean mBiggerRefreshNeeded = false;
 
 			@Override
 			protected void onPreExecute() {
@@ -910,22 +926,22 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					Iterator it = ProxiExplorer.getInstance().mEntitiesDeleted.entrySet().iterator();
 					while (it.hasNext()) {
 						Map.Entry entry = (Map.Entry) it.next();
-						Entity entityDeleted = (Entity) entry.getValue();
+						String entityId = (String) entry.getKey(); 
 
-						CandiModel candiModel = mCandiPatchModel.getCandiModelForEntity(entityDeleted.id);
+						CandiModel candiModel = mCandiPatchModel.getCandiModelForEntity(entityId);
 						if (candiModel != null) {
 							candiModel.setDeleted(true);
 						}
 
-						ProxiExplorer.getInstance().mEntitiesUpdated.remove(entityDeleted.id);
-						if (ProxiExplorer.getInstance().mEntitiesInserted.remove(entityDeleted.id) == null) {
+						ProxiExplorer.getInstance().mEntitiesUpdated.remove(entityId);
+						if (ProxiExplorer.getInstance().mEntitiesInserted.remove(entityId) == null) {
 							/*
 							 * Because of 'my candi', an entity could be deleted that isn't currently being
 							 * tracked in the big model (beacon might not be tracked either).
 							 */
-							Beacon beacon = ProxiExplorer.getInstance().getBeaconByBssid(entityDeleted.drops.get(0).beacon.bssid);
-							if (beacon != null) {
-								beacon.dirty = true;
+							Entity entity = ProxiExplorer.getInstance().getEntityById(entityId);
+							if (entity != null) {
+								entity.beacon.dirty = true;
 								mRefreshNeeded = true;
 							}
 						}
@@ -937,9 +953,17 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					while (it.hasNext()) {
 						Map.Entry entry = (Map.Entry) it.next();
 						Entity entityInserted = (Entity) entry.getValue();
-
-						Beacon beacon = ProxiExplorer.getInstance().getBeaconByBssid(entityInserted.drops.get(0).beacon.bssid);
-						if (beacon != null) {
+						
+						/* Inserted entities don't have a beacon reference yet so look it up. */
+						Beacon beacon = ProxiExplorer.getInstance().getBeaconById(entityInserted.beaconId);
+						if (beacon == null) {
+							/* 
+							 * The entity could have been linked to a beacon we aren't tracking yet
+							 * so trigger a light refresh.  
+							 */
+							mBiggerRefreshNeeded = true;
+						}
+						else {
 							/*
 							 * We will end up with the latest version of the entity
 							 * even if we also have an update stacked up in EntitiesUpdated.
@@ -956,34 +980,37 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					Iterator it = ProxiExplorer.getInstance().mEntitiesUpdated.entrySet().iterator();
 					while (it.hasNext()) {
 						Map.Entry entry = (Map.Entry) it.next();
-						Entity entityUpdated = (Entity) entry.getValue();
+						String entityId = (String) entry.getKey(); 
+						
+						Entity entity = ProxiExplorer.getInstance().getEntityById(entityId);
+						if (entity != null) {
+							entity.dirty = true;
+							mRefreshNeeded = true;
 
-						for (Entity entity : ProxiExplorer.getInstance().getEntitiesFlat()) {
-							if (entity.id.equals(entityUpdated.id)) {
-								entity.dirty = true;
-								mRefreshNeeded = true;
-
-								/* Refresh the texture */
-								CandiModel candiModel = mCandiPatchModel.getCandiModelForEntity(entity.id);
-								synchronized (candiModel.getViewActions()) {
-									candiModel.getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
-								}
+							/* Refresh the texture */
+							CandiModel candiModel = mCandiPatchModel.getCandiModelForEntity(entity.id);
+							synchronized (candiModel.getViewActions()) {
+								candiModel.getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
 							}
 						}
-						ProxiExplorer.getInstance().mEntitiesUpdated.remove(entityUpdated.id);
+						ProxiExplorer.getInstance().mEntitiesUpdated.remove(entityId);
 					}
 				}
 
-				if (mRefreshNeeded) {
+				if (mBiggerRefreshNeeded) {
+					Logger.d(this, "Refreshing model with autoscan pass");
+					mHandler.post(mScanRunnable);
+				}
+				else if (mRefreshNeeded) {
 
 					Logger.d(this, "Refreshing model");
 					ServiceResponse serviceResponse = ProxiExplorer.getInstance().refreshDirtyEntities();
 					if (serviceResponse.responseCode == ResponseCode.Success) {
-						List<Entity> freshEntityProxies = (List<Entity>) serviceResponse.data;
+						List<Entity> entities = (List<Entity>) serviceResponse.data;
 
 						@SuppressWarnings("unused")
 						boolean rookieHit = false;
-						for (Entity entity : freshEntityProxies) {
+						for (Entity entity : entities) {
 							/*
 							 * We keep bumping the date up until the entity is finally
 							 * visible.
@@ -995,7 +1022,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 									rookieHit = true;
 								}
 							}
-							for (Entity childEntity : entity.entities) {
+							for (Entity childEntity : entity.children) {
 								/*
 								 * We keep bumping the date up until the entity is finally
 								 * visible.
@@ -1010,7 +1037,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 							}
 						}
 
-						doUpdateEntities(freshEntityProxies, false, false);
+						doUpdateEntities(entities, false, false);
 						mCandiPatchModel.getCandiModelFocused().setChanged();
 					}
 					return serviceResponse;
@@ -1044,6 +1071,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		intentBuilder.setEntity(entity);
 		intentBuilder.setEntityId(entity.id);
 		intentBuilder.setEntityType(entity.type);
+		if (!entity.root) {
+			intentBuilder.setEntityLocation(entity.parent.location);
+		}
 		Intent intent = intentBuilder.create();
 
 		startActivity(intent);
@@ -1800,7 +1830,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Logger.i(this, "CandiRadarActivity destroyed");
 		super.onDestroy();
 		mCommon.doDestroy();
-		Aircandi.getInstance().stopLocationUpdates();
+		GeoLocationManager.getInstance().stopLocationUpdates();
 
 		Tracker.stopSession();
 

@@ -24,5 +24,4 @@ public class EntityPoint {
 	public String	linkUri;
 
 	public EntityPoint() {}
-
 }

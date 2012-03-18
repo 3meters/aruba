@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 
 /**
  * @author Jayma
@@ -13,12 +12,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class Beacon extends ServiceEntry {
 
-	@Expose
-	@SerializedName("_beaconSet")
-	public String			beaconSetId;
-
-	@Expose
-	public String			bssid;
 	@Expose
 	public String			ssid;
 	@Expose
@@ -58,7 +51,7 @@ public class Beacon extends ServiceEntry {
 	public Beacon() {}
 
 	public Beacon(String bssid, String ssid, String label, int levelDb, Date discoveryTime) {
-		this.bssid = bssid;
+		this.id = "0003:" + bssid;
 		this.ssid = ssid;
 		this.label = label;
 		this.levelDb = levelDb;

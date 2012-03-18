@@ -65,6 +65,12 @@ public class ProxiExplorer {
 
 	private ProxiExplorer() {}
 
+	public void initialize() {
+		if (!mUsingEmulator) {
+			mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+		}
+	}
+
 	public void scanForWifi(final RequestListener requestListener) {
 		/*
 		 * If context is null then we probably crashed and the scan
@@ -95,7 +101,7 @@ public class ProxiExplorer {
 							boolean demoBeaconFound = false;
 							for (ScanResult scanResult : mWifiManager.getScanResults()) {
 								mWifiList.add(new WifiScanResult(scanResult));
-								if (scanResult.BSSID.equals(demoBssid)) {
+								if ((scanResult.BSSID).equals(demoBssid)) {
 									demoBeaconFound = true;
 								}
 							}
@@ -147,116 +153,9 @@ public class ProxiExplorer {
 		}
 	}
 
-	/**
-	 * Refreshes only beacons and entities that have been flagged as dirty.
-	 * 
-	 * @return Updated master entity list which includes all entities refreshed or not.
-	 * @throws ProxibaseServiceException
-	 */
-	public ServiceResponse refreshDirtyEntities() {
-		/*
-		 * For beacons:
-		 * - first entity or addtional entities could be added.
-		 * - existing entities could be modified or gone.
-		 */
-		ServiceResponse serviceResponse = new ServiceResponse();
-		for (Beacon beacon : mBeacons) {
-
-			if (beacon.dirty) {
-				beacon.dirty = false;
-				beacon.entities.clear();
-
-				if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
-					wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
-				}
-
-				Bundle parameters = new Bundle();
-				ArrayList<String> beacons = new ArrayList<String>();
-				beacons.add(beacon.bssid);
-				parameters.putStringArrayList("beaconBssids", beacons);
-				//parameters.putString("userId", Aircandi.getInstance().getUser().id);
-
-				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForBeacons");
-				serviceRequest.setRequestType(RequestType.Method);
-				serviceRequest.setParameters(parameters);
-				serviceRequest.setResponseFormat(ResponseFormat.Json);
-
-				serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-				wifiReleaseLock();
-
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-
-					String jsonResponse = (String) serviceResponse.data;
-					List<Object> freshEntities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
-
-					if (freshEntities != null && freshEntities.size() > 0) {
-
-						for (Object obj : freshEntities) {
-							Entity freshEntity = (Entity) obj;
-
-							freshEntity.state = EntityState.Refreshed;
-							freshEntity.beacon = beacon;
-							setEntityVisibility(freshEntity, beacon);
-
-							for (Entity childEntity : freshEntity.entities) {
-								childEntity.beacon = beacon;
-								childEntity.state = EntityState.Refreshed;
-								setEntityVisibility(childEntity, beacon);
-							}
-							beacon.entities.add(freshEntity);
-						}
-					}
-				}
-			}
-			else {
-				for (int i = beacon.entities.size() - 1; i >= 0; i--) {
-					if (serviceResponse.responseCode != ResponseCode.Success) {
-						break;
-					}
-					Entity entity = beacon.entities.get(i);
-					if (entity.dirty) {
-						/*
-						 * Includes call to rebuildEntityList()
-						 */
-						serviceResponse = doRefreshEntity(entity.id);
-						if (serviceResponse.responseCode != ResponseCode.Success) {
-							break;
-						}
-					}
-					else {
-						for (int j = entity.entities.size() - 1; j >= 0; j--) {
-							Entity childEntity = entity.entities.get(j);
-							if (childEntity.dirty) {
-								serviceResponse = doRefreshEntity(childEntity.id);
-								if (serviceResponse.responseCode != ResponseCode.Success) {
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-			rebuildEntityList();
-			serviceResponse.data = mEntities;
-		}
-
-		return serviceResponse;
-	}
-
 	// --------------------------------------------------------------------------------------------
-	// Entities
+	// Public entry points for service calls
 	// --------------------------------------------------------------------------------------------
-
-	public void initialize() {
-		if (!mUsingEmulator) {
-			mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-		}
-	}
 
 	public void processBeaconsFromScan(boolean refreshAllBeacons) {
 
@@ -286,8 +185,8 @@ public class ProxiExplorer {
 
 					final WifiScanResult scanResult = mWifiList.get(i);
 
-					/* See if we are already tracking the beacon */
-					Beacon beaconMatch = findBeaconByName(scanResult.BSSID);
+					/* See if we are already a beacon for the wifi hit */
+					Beacon beaconMatch = getBeaconById("0003:" + scanResult.BSSID);
 
 					/* Add it if we aren't */
 					if (beaconMatch == null) {
@@ -330,30 +229,31 @@ public class ProxiExplorer {
 			for (Beacon beacon : mBeacons) {
 				for (Entity entity : beacon.entities) {
 					entity.state = EntityState.Normal;
-					for (Entity childEntity : entity.entities) {
+					for (Entity childEntity : entity.children) {
 						childEntity.state = EntityState.Normal;
 					}
 				}
 			}
 
 			/* Construct string array of the beacon ids */
-			ArrayList<String> refreshBeaconNames = new ArrayList<String>();
+			ArrayList<String> beaconIds = new ArrayList<String>();
 			for (Beacon beacon : mBeacons) {
 				if (beacon.state == BeaconState.New) {
 					beacon.state = BeaconState.Normal;
-					refreshBeaconNames.add(beacon.bssid);
+					beaconIds.add(beacon.id);
 				}
 			}
 
-			if (refreshBeaconNames.size() > 0) {
+			if (beaconIds.size() > 0) {
 
 				if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
 					wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
 				}
 
 				Bundle parameters = new Bundle();
-				parameters.putStringArrayList("beaconBssids", refreshBeaconNames);
-				//parameters.putString("userId", Aircandi.getInstance().getUser().id);
+				parameters.putStringArrayList("beaconIds", beaconIds);
+				parameters.putString("userId", Aircandi.getInstance().getUser().id);
+				parameters.putString("eagerLoad", "object:{\"children\":true,\"comments\":false}");
 
 				ServiceRequest serviceRequest = new ServiceRequest();
 				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForBeacons");
@@ -368,34 +268,25 @@ public class ProxiExplorer {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 
 					String jsonResponse = (String) serviceResponse.data;
-					List<Object> freshEntities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+					List<Object> entities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
 
 					/* Match returned entities back to beacons */
-					if (freshEntities != null && freshEntities.size() > 0) {
-						for (Object obj : freshEntities) {
-							Entity freshEntity = (Entity) obj;
+					if (entities != null && entities.size() > 0) {
+						for (Object obj : entities) {
+							Entity entity = (Entity) obj;
 
+							/* Attach beacon */
 							for (Beacon beacon : mBeacons) {
-								if (beacon.bssid.equals(freshEntity.drops.get(0).beacon.bssid)) {
-									beacon.entities.add(freshEntity);
+								if (beacon.id.equals(entity.beaconId)) {
+									entity.beacon = beacon;
+									entity.state = EntityState.New;
 									beacon.registered = true;
-									freshEntity.state = EntityState.New;
-									freshEntity.beacon = beacon;
-									if (freshEntity.visibility.equals("0")) {
-										freshEntity.visibility = "public";
-									}
-									else if (freshEntity.visibility.equals("1")) {
-										freshEntity.visibility = "private";
-									}
-									for (Entity childEntity : freshEntity.entities) {
+									beacon.entities.add(entity);
+									for (Entity childEntity : entity.children) {
 										childEntity.beacon = beacon;
+										childEntity.beaconId = beacon.id;
+										childEntity.parent = entity;
 										childEntity.state = EntityState.New;
-										if (childEntity.visibility.equals("0")) {
-											childEntity.visibility = "public";
-										}
-										else if (childEntity.visibility.equals("1")) {
-											childEntity.visibility = "private";
-										}
 									}
 								}
 							}
@@ -420,36 +311,34 @@ public class ProxiExplorer {
 		return;
 	}
 
-	private Beacon findBeaconByName(String beaconName) {
-		for (Beacon beacon : mBeacons) {
-			if (beacon.bssid.equals(beaconName)) {
-				return beacon;
-			}
-		}
-		return null;
-	}
-
-	private ServiceResponse doRefreshEntity(String entityId) {
-
+	public ServiceResponse refreshDirtyEntities() {
+		/*
+		 * Refreshes only beacons and entities that have been flagged as dirty.
+		 * 
+		 * For beacons:
+		 * - first entity or addtional entities could be added.
+		 * - existing entities could be modified or gone.
+		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
-		Entity targetEntity = getEntityById(entityId);
-
 		for (Beacon beacon : mBeacons) {
-			if (beacon.entities.contains(targetEntity)) {
 
-				/* We are doing a replace not a merge */
-				Entity entity = beacon.entities.get(beacon.entities.indexOf(targetEntity));
+			if (beacon.dirty) {
+				beacon.dirty = false;
+				beacon.entities.clear();
 
 				if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
 					wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
 				}
 
 				Bundle parameters = new Bundle();
-				parameters.putString("entityId", entity.id);
-				parameters.putBoolean("getChildren", true);
+				ArrayList<String> beacons = new ArrayList<String>();
+				beacons.add(beacon.id);
+				parameters.putStringArrayList("beaconIds", beacons);
+				parameters.putString("userId", Aircandi.getInstance().getUser().id);
+				parameters.putString("eagerLoad", "object:{\"children\":true,\"comments\":false}");
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntity");
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForBeacons");
 				serviceRequest.setRequestType(RequestType.Method);
 				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -461,28 +350,172 @@ public class ProxiExplorer {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 
 					String jsonResponse = (String) serviceResponse.data;
-					List<Object> freshEntities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+					List<Object> entities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
 
-					if (freshEntities != null && freshEntities.size() > 0) {
+					if (entities != null && entities.size() > 0) {
 
-						for (Object obj : freshEntities) {
-							Entity freshEntity = (Entity) obj;
+						for (Object obj : entities) {
+							Entity entity = (Entity) obj;
 
-							freshEntity.beacon = beacon;
-							freshEntity.beacon.registered = true;
-							freshEntity.state = EntityState.Refreshed;
-							setEntityVisibility(freshEntity, beacon);
-							for (Entity childEntity : freshEntity.entities) {
+							entity.beacon = beacon;
+							entity.state = EntityState.Refreshed;
+							setEntityVisibility(entity, beacon);
+
+							for (Entity childEntity : entity.children) {
 								childEntity.beacon = beacon;
+								childEntity.beaconId = beacon.id;
+								childEntity.parent = entity;
 								childEntity.state = EntityState.Refreshed;
 								setEntityVisibility(childEntity, beacon);
 							}
-							beacon.entities.set(beacon.entities.indexOf(entity), freshEntity);
+							beacon.entities.add(entity);
+						}
+					}
+				}
+			}
+			else {
+				for (int i = beacon.entities.size() - 1; i >= 0; i--) {
+
+					if (serviceResponse.responseCode != ResponseCode.Success) break;
+					Entity entity = beacon.entities.get(i);
+					if (entity.dirty) {
+						/*
+						 * Includes call to rebuildEntityList()
+						 */
+						serviceResponse = doRefreshEntity(entity.id);
+						if (serviceResponse.responseCode != ResponseCode.Success) break;
+					}
+					else {
+						for (int j = entity.children.size() - 1; j >= 0; j--) {
+							Entity childEntity = entity.children.get(j);
+							if (childEntity.dirty) {
+								serviceResponse = doRefreshEntity(childEntity.id);
+								if (serviceResponse.responseCode != ResponseCode.Success) break;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (serviceResponse.responseCode == ResponseCode.Success) {
+			rebuildEntityList();
+			serviceResponse.data = mEntities;
+		}
+
+		return serviceResponse;
+
+	}
+
+	public ServiceResponse getEntityFromService(String entityId, Boolean getChildren) {
+
+		if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
+			wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
+		}
+
+		final Bundle parameters = new Bundle();
+		ArrayList<String> entityIds = new ArrayList<String>();
+		entityIds.add(entityId);
+		parameters.putStringArrayList("entityIds", entityIds);
+		parameters.putString("eagerLoad", "object:{\"children\":" + getChildren.toString() + ",\"comments\":false}");
+
+		final ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities");
+		serviceRequest.setRequestType(RequestType.Method);
+		serviceRequest.setParameters(parameters);
+		serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
+		wifiReleaseLock();
+
+		if (serviceResponse.responseCode == ResponseCode.Success) {
+			String jsonResponse = (String) serviceResponse.data;
+			List<Object> entities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+
+			if (entities != null && entities.size() > 0) {
+				Entity entity = (Entity) entities.get(0);
+
+				/* Attach the beacon */
+				for (Beacon beacon : mBeacons) {
+					if (beacon.id.equals(entity.beaconId)) {
+						entity.beacon = beacon;
+						beacon.registered = true;
+						if (entity.children != null) {
+							for (Entity childEntity : entity.children) {
+								childEntity.beacon = beacon;
+								childEntity.parent = entity;
+							}
+						}
+					}
+				}
+
+				serviceResponse.data = entity;
+			}
+		}
+		return serviceResponse;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Private service calls
+	// --------------------------------------------------------------------------------------------	
+
+	private ServiceResponse doRefreshEntity(String entityId) {
+
+		ServiceResponse serviceResponse = new ServiceResponse();
+		Entity targetEntity = getEntityById(entityId);
+
+		for (Beacon beacon : mBeacons) {
+			if (beacon.entities.contains(targetEntity)) {
+
+				/* We are doing a replace not a merge */
+				Entity entityToRefresh = beacon.entities.get(beacon.entities.indexOf(targetEntity));
+
+				if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
+					wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
+				}
+
+				Bundle parameters = new Bundle();
+				ArrayList<String> entityIds = new ArrayList<String>();
+				entityIds.add(entityToRefresh.id);
+				parameters.putStringArrayList("entityIds", entityIds);
+				parameters.putString("eagerLoad", "object:{\"children\":true,\"comments\":false}");
+
+				ServiceRequest serviceRequest = new ServiceRequest();
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities");
+				serviceRequest.setRequestType(RequestType.Method);
+				serviceRequest.setParameters(parameters);
+				serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+				serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
+				wifiReleaseLock();
+
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					String jsonResponse = (String) serviceResponse.data;
+					List<Object> entities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+
+					if (entities != null && entities.size() > 0) {
+
+						for (Object obj : entities) {
+							Entity entity = (Entity) obj;
+
+							entity.beacon = beacon;
+							entity.beacon.registered = true;
+							entity.state = EntityState.Refreshed;
+							setEntityVisibility(entity, beacon);
+							for (Entity childEntity : entity.children) {
+								childEntity.beacon = beacon;
+								childEntity.parent = entity;
+								childEntity.state = EntityState.Refreshed;
+								setEntityVisibility(childEntity, beacon);
+							}
+							beacon.entities.set(beacon.entities.indexOf(entityToRefresh), entity);
 							break;
 						}
 					}
 					else {
-						beacon.entities.remove(beacon.entities.indexOf(entity));
+						beacon.entities.remove(beacon.entities.indexOf(entityToRefresh));
 						break;
 					}
 				}
@@ -490,20 +523,20 @@ public class ProxiExplorer {
 			}
 			else {
 				for (Entity entity : beacon.entities) {
-					if (entity.entities.contains(targetEntity)) {
+					if (entity.children.contains(targetEntity)) {
 
-						Entity childEntity = entity.entities.get(entity.entities.indexOf(targetEntity));
+						Entity childEntityToRefresh = entity.children.get(entity.children.indexOf(targetEntity));
 
 						if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
 							wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
 						}
 
 						Bundle parameters = new Bundle();
-						parameters.putString("entityId", childEntity.id);
-						parameters.putBoolean("includeChildren", false);
+						parameters.putString("entityId", childEntityToRefresh.id);
+						parameters.putString("eagerLoad", "object:{\"children\":false,\"comments\":false}");
 
 						ServiceRequest serviceRequest = new ServiceRequest();
-						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntity");
+						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntities");
 						serviceRequest.setRequestType(RequestType.Method);
 						serviceRequest.setParameters(parameters);
 						serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -515,23 +548,23 @@ public class ProxiExplorer {
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 
 							String jsonResponse = (String) serviceResponse.data;
-							List<Object> freshEntities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class,
-									GsonType.ProxibaseService);
+							List<Object> childEntities = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
 
-							if (freshEntities != null && freshEntities.size() > 0) {
+							if (childEntities != null && childEntities.size() > 0) {
 
-								for (Object obj : freshEntities) {
-									Entity freshEntity = (Entity) obj;
-									freshEntity.beacon = beacon;
-									freshEntity.beacon.registered = true;
-									freshEntity.state = EntityState.Refreshed;
-									setEntityVisibility(freshEntity, beacon);
-									entity.entities.set(entity.entities.indexOf(childEntity), freshEntity);
+								for (Object obj : childEntities) {
+									Entity childEntity = (Entity) obj;
+									childEntity.beacon = beacon;
+									childEntity.parent = entity;
+									childEntity.beacon.registered = true;
+									childEntity.state = EntityState.Refreshed;
+									setEntityVisibility(childEntity, beacon);
+									entity.children.set(entity.children.indexOf(childEntityToRefresh), childEntity);
 									break;
 								}
 							}
 							else {
-								entity.entities.remove(entity.entities.indexOf(childEntity));
+								entity.children.remove(entity.children.indexOf(childEntityToRefresh));
 								break;
 							}
 						}
@@ -543,49 +576,9 @@ public class ProxiExplorer {
 		return serviceResponse;
 	}
 
-	public ServiceResponse getEntityFromService(String entityId, boolean includeChildren) {
-		final ServiceRequest serviceRequest = new ServiceRequest();
-		final Bundle parameters = new Bundle();
-
-		if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
-			wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
-		}
-
-		parameters.putString("entityId", entityId);
-		parameters.putBoolean("includeChildren", includeChildren);
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntity");
-
-		serviceRequest.setRequestType(RequestType.Method);
-		serviceRequest.setParameters(parameters);
-		serviceRequest.setResponseFormat(ResponseFormat.Json);
-
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-		wifiReleaseLock();
-
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-			String jsonResponse = (String) serviceResponse.data;
-			List<Entity> entities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class,
-								GsonType.ProxibaseService);
-			if (entities.size() > 0) {
-				Entity entity = entities.get(0);
-
-				/* Attach the beacon */
-				for (Beacon beacon : mBeacons) {
-					if (beacon.bssid.equals(entity.drops.get(0).beacon.bssid)) {
-						beacon.registered = true;
-						entity.beacon = beacon;
-						for (Entity childEntity : entity.entities) {
-							childEntity.beacon = beacon;
-						}
-					}
-				}
-
-				serviceResponse.data = entity;
-			}
-		}
-		return serviceResponse;
-	}
+	// --------------------------------------------------------------------------------------------
+	// Entity routines
+	// --------------------------------------------------------------------------------------------	
 
 	private void rebuildEntityList() {
 
@@ -612,7 +605,7 @@ public class ProxiExplorer {
 		/* Push hidden setting down to children */
 		for (Beacon beacon : mBeacons) {
 			for (Entity entity : beacon.entities) {
-				for (Entity childEntity : entity.entities) {
+				for (Entity childEntity : entity.children) {
 					childEntity.hidden = entity.hidden;
 
 					/* If child is going to inherit visibility then perform its own personal visibility check. */
@@ -644,7 +637,7 @@ public class ProxiExplorer {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// WIFI routines
+	// Wifi routines
 	// --------------------------------------------------------------------------------------------
 
 	private void wifiLockAcquire(int lockType) {
@@ -665,7 +658,7 @@ public class ProxiExplorer {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// MISC routines
+	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
 
 	/**
@@ -705,6 +698,10 @@ public class ProxiExplorer {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Misc routines
+	// --------------------------------------------------------------------------------------------
+
 	public Context getContext() {
 		return this.mContext;
 	}
@@ -722,7 +719,7 @@ public class ProxiExplorer {
 		for (Beacon proxiBeacon : mBeacons)
 			for (Entity entity : proxiBeacon.entities) {
 				entitiesFlat.add(entity);
-				for (Entity childEntity : entity.entities) {
+				for (Entity childEntity : entity.children) {
 					entitiesFlat.add(childEntity);
 				}
 			}
@@ -735,10 +732,10 @@ public class ProxiExplorer {
 		Beacon beaconDemo = null;
 
 		for (Beacon beacon : mBeacons) {
-			if (beacon.bssid.equals(globalBssid)) {
+			if (beacon.id.equals("0003:" + globalBssid)) {
 				continue;
 			}
-			if (beacon.bssid.equals(demoBssid)) {
+			if (beacon.id.equals("0003:" + demoBssid)) {
 				beaconDemo = beacon;
 			}
 			else {
@@ -787,7 +784,7 @@ public class ProxiExplorer {
 
 		Beacon beaconStrongest = null;
 		if (wifiStrongest != null) {
-			beaconStrongest = getBeaconByBssid(wifiStrongest.BSSID);
+			beaconStrongest = getBeaconById("0003:" + wifiStrongest.BSSID);
 			if (beaconStrongest == null) {
 				beaconStrongest = new Beacon(wifiStrongest.BSSID, wifiStrongest.SSID, wifiStrongest.SSID, wifiStrongest.level, DateUtils.nowDate());
 			}
@@ -796,9 +793,9 @@ public class ProxiExplorer {
 		return beaconStrongest;
 	}
 
-	public Beacon getBeaconByBssid(String beaconBssid) {
+	public Beacon getBeaconById(String beaconId) {
 		for (Beacon beacon : mBeacons) {
-			if (beacon.bssid.equals(beaconBssid)) {
+			if (beacon.id.equals(beaconId)) {
 				return beacon;
 			}
 		}
@@ -812,7 +809,7 @@ public class ProxiExplorer {
 					if (entity.id.equals(entityId)) {
 						return entity;
 					}
-					for (Entity childEntity : entity.entities) {
+					for (Entity childEntity : entity.children) {
 						if (childEntity.id.equals(entityId)) {
 							return childEntity;
 						}

@@ -12,7 +12,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
@@ -84,8 +83,9 @@ public class CommentForm extends FormActivity {
 	protected void bind() {
 		mCommon.mComment = new Comment();
 		mCommon.mComment.creatorId = Aircandi.getInstance().getUser().id;
-		mCommon.mComment.modifierId = Aircandi.getInstance().getUser().id;
-		mCommon.mComment.entityId = mCommon.mParent;
+		mCommon.mComment.location = Aircandi.getInstance().getUser().location;
+		mCommon.mComment.imageUri = Aircandi.getInstance().getUser().imageUri;
+		mCommon.mComment.name = Aircandi.getInstance().getUser().name;
 	}
 
 	protected void draw() {
@@ -139,11 +139,10 @@ public class CommentForm extends FormActivity {
 
 	protected void insert() {
 
+		/* TODO: Add title */
 		mCommon.mComment.description = mContent.getText().toString().trim();
-		mCommon.mComment.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-		mCommon.mComment.modifiedDate = mCommon.mComment.createdDate;
 
-		Logger.i(this, "Insert comment for: " + String.valueOf(mCommon.mComment.entity));
+		Logger.i(this, "Insert comment for: " + String.valueOf(mCommon.mParentId));
 
 		new AsyncTask() {
 
@@ -154,11 +153,16 @@ public class CommentForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				
+				// Construct entity, link, and observation
+				Bundle parameters = new Bundle();
+				parameters.putString("entityId", mCommon.mParentId);
+				parameters.putString("comment", "object:" + ProxibaseService.convertObjectToJson(mCommon.mComment, GsonType.ProxibaseService));
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mCommon.mComment.getCollection());
-				serviceRequest.setRequestType(RequestType.Insert);
-				serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mCommon.mComment, GsonType.ProxibaseService));
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertComment");
+				serviceRequest.setRequestType(RequestType.Method);
+				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
 
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);

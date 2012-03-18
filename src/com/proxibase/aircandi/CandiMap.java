@@ -35,6 +35,7 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.GeoLocationManager;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
@@ -50,7 +51,7 @@ import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.objects.EntityPoint;
+import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.User;
 
 public class CandiMap extends MapActivity {
@@ -64,6 +65,8 @@ public class CandiMap extends MapActivity {
 	private CandiItemizedOverlay	mItemizedOverlay;
 	private LocationManager			mLocationManager;
 	private LocationListener		mLocationListener;
+	private static double			RADIUS_EARTH	= 6378000;					/* in meters */
+	private static double			SEARCH_RANGE	= 100;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -119,8 +122,8 @@ public class CandiMap extends MapActivity {
 
 			@Override
 			public void onLocationChanged(Location location) {
-				if (Aircandi.isBetterLocation(location, Aircandi.getInstance().getCurrentLocation())) {
-					Aircandi.getInstance().setCurrentLocation(location);
+				if (GeoLocationManager.isBetterLocation(location, GeoLocationManager.getInstance().getCurrentLocation())) {
+					GeoLocationManager.getInstance().setCurrentLocation(location);
 				}
 			}
 
@@ -150,15 +153,15 @@ public class CandiMap extends MapActivity {
 
 		Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		if (lastKnownLocationNetwork != null) {
-			if (Aircandi.isBetterLocation(lastKnownLocationNetwork, Aircandi.getInstance().getCurrentLocation())) {
-				Aircandi.getInstance().setCurrentLocation(lastKnownLocationNetwork);
+			if (GeoLocationManager.isBetterLocation(lastKnownLocationNetwork, GeoLocationManager.getInstance().getCurrentLocation())) {
+				GeoLocationManager.getInstance().setCurrentLocation(lastKnownLocationNetwork);
 			}
 		}
 
 		Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 		if (lastKnownLocationGPS != null) {
-			if (Aircandi.isBetterLocation(lastKnownLocationGPS, Aircandi.getInstance().getCurrentLocation())) {
-				Aircandi.getInstance().setCurrentLocation(lastKnownLocationGPS);
+			if (GeoLocationManager.isBetterLocation(lastKnownLocationGPS, GeoLocationManager.getInstance().getCurrentLocation())) {
+				GeoLocationManager.getInstance().setCurrentLocation(lastKnownLocationGPS);
 			}
 		}
 	}
@@ -177,13 +180,14 @@ public class CandiMap extends MapActivity {
 			protected Object doInBackground(Object... params) {
 
 				Bundle parameters = new Bundle();
-				parameters.putDouble("latitude", Aircandi.getInstance().getCurrentLocation().getLatitude());
-				parameters.putDouble("longitude", Aircandi.getInstance().getCurrentLocation().getLongitude());
-				parameters.putDouble("radiusInMeters", 5000d);
+				Location location = GeoLocationManager.getInstance().getCurrentLocation();
+				parameters.putDouble("latitude", location.getLatitude());
+				parameters.putDouble("longitude", location.getLongitude());
+				parameters.putDouble("radius", SEARCH_RANGE / RADIUS_EARTH); /* to radians */
 				parameters.putString("userId", Aircandi.getInstance().getUser().id);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntitiesNearLocation");
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesNearLocation");
 				serviceRequest.setRequestType(RequestType.Method);
 				serviceRequest.setParameters(parameters);
 				serviceRequest.setResponseFormat(ResponseFormat.Json);
@@ -192,7 +196,7 @@ public class CandiMap extends MapActivity {
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) serviceResponse.data;
-					mEntityPoints = ProxibaseService.convertJsonToObjects(jsonResponse, EntityPoint.class, GsonType.ProxibaseService);
+					mEntityPoints = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
 				}
 				return serviceResponse;
 			}
@@ -296,8 +300,9 @@ public class CandiMap extends MapActivity {
 		mItemizedOverlay = new CandiItemizedOverlay(drawable, false);
 
 		for (Object entityPointObject : mEntityPoints) {
-			EntityPoint entityPoint = (EntityPoint) entityPointObject;
-			GeoPoint point = new GeoPoint((int) (entityPoint.latitude.doubleValue() * 1E6), (int) (entityPoint.longitude.doubleValue() * 1E6));
+			Entity entityPoint = (Entity) entityPointObject;
+			GeoPoint point = new GeoPoint((int) (entityPoint.location.latitude.doubleValue() * 1E6), (int) (entityPoint.location.longitude
+					.doubleValue() * 1E6));
 			OverlayItem overlayitem = new OverlayItem(point, entityPoint.label, entityPoint.label);
 
 			/* User custom marker */
@@ -456,27 +461,31 @@ public class CandiMap extends MapActivity {
 					mapView.getProjection().toPixels(point, markerBottomCenterCoords);
 
 					/* Find the width and height of the title */
-					TextPaint paintText = new TextPaint();
-					Paint paintRect = new Paint();
+					if (item.getTitle() != null) {
+						TextPaint paintText = new TextPaint();
+						Paint paintRect = new Paint();
 
-					Rect rect = new Rect();
-					paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);
-					String title = (String) TextUtils.ellipsize(item.getTitle(), paintText, CandiConstants.MAP_VIEW_TITLE_LENGTH_MAX,
-							TextUtils.TruncateAt.END);
-					paintText.getTextBounds(title, 0, title.length(), rect);
+						Rect rect = new Rect();
+						paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);
 
-					rect.inset(-CandiConstants.MAP_VIEW_TITLE_MARGIN, -CandiConstants.MAP_VIEW_TITLE_MARGIN);
-					rect.offsetTo(markerBottomCenterCoords.x - rect.width() / 2, markerBottomCenterCoords.y - CandiConstants.MAP_VIEW_MARKER_HEIGHT
+						String title = (String) TextUtils.ellipsize(item.getTitle(), paintText, CandiConstants.MAP_VIEW_TITLE_LENGTH_MAX,
+								TextUtils.TruncateAt.END);
+						paintText.getTextBounds(title, 0, title.length(), rect);
+
+						rect.inset(-CandiConstants.MAP_VIEW_TITLE_MARGIN, -CandiConstants.MAP_VIEW_TITLE_MARGIN);
+						rect.offsetTo(markerBottomCenterCoords.x - rect.width() / 2,
+								markerBottomCenterCoords.y - CandiConstants.MAP_VIEW_MARKER_HEIGHT
 																					- rect.height());
 
-					paintText.setTextAlign(Paint.Align.CENTER);
-					paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);
-					paintText.setARGB(255, 255, 255, 255);
-					paintText.setAntiAlias(true);
-					paintRect.setARGB(130, 0, 0, 0);
+						paintText.setTextAlign(Paint.Align.CENTER);
+						paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);
+						paintText.setARGB(255, 255, 255, 255);
+						paintText.setAntiAlias(true);
+						paintRect.setARGB(130, 0, 0, 0);
 
-					canvas.drawRoundRect(new RectF(rect), 4, 4, paintRect);
-					canvas.drawText(title, rect.left + rect.width() / 2, rect.bottom - CandiConstants.MAP_VIEW_TITLE_MARGIN, paintText);
+						canvas.drawRoundRect(new RectF(rect), 4, 4, paintRect);
+						canvas.drawText(title, rect.left + rect.width() / 2, rect.bottom - CandiConstants.MAP_VIEW_TITLE_MARGIN, paintText);
+					}
 				}
 			}
 		}

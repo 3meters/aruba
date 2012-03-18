@@ -95,7 +95,7 @@ public class SignInForm extends FormActivity {
 
 	public void onSignInButtonClick(View view) {
 		mTextError.setVisibility(View.GONE);
-		final String email = mTextEmail.getText().toString();
+		final String email = mTextEmail.getText().toString().toLowerCase();
 		
 		new AsyncTask() {
 

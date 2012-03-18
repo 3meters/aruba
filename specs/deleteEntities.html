@@ -1,0 +1,20 @@
+Delete entity
+Delete all drops that reference entity
+If deleteChildren {
+	For each childEntity that has entity as the parent {
+		delete childEntity
+		delete all drops that reference the childEntity
+	}
+}
+else {
+	For each childEntity that has entity as the parent {
+		set parent to null
+		delete all drops that reference the childEntity and the parent entity
+	}
+}
+- For any entity deleted
+	- If imageUri points to an image on S3 then
+		- Set releaseDate property to date it is ok to delete the resource from S3
+		
+Open Issues
+- Should we move all linkage references to the drops?

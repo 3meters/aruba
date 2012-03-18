@@ -13,33 +13,41 @@ public class Events {
 		public static List<EventHandler>	locationChanged		= new ArrayList<EventHandler>();
 
 		public static void onWifiScanReceived(Object data) {
-			for (EventHandler eventHandler : wifiScanReceived) {
-				if (eventHandler != null) {
-					eventHandler.onEvent(data);
+			synchronized (wifiScanReceived) {
+				for (EventHandler eventHandler : wifiScanReceived) {
+					if (eventHandler != null) {
+						eventHandler.onEvent(data);
+					}
 				}
 			}
 		}
 
 		public static void onEntitiesLoaded(Object data) {
-			for (EventHandler eventHandler : entitiesLoaded) {
-				if (eventHandler != null) {
-					eventHandler.onEvent(data);
+			synchronized (entitiesLoaded) {
+				for (EventHandler eventHandler : entitiesLoaded) {
+					if (eventHandler != null) {
+						eventHandler.onEvent(data);
+					}
 				}
 			}
 		}
 
 		public static void onBeaconScanComplete(Object data) {
-			for (EventHandler eventHandler : beaconScanComplete) {
-				if (eventHandler != null) {
-					eventHandler.onEvent(data);
+			synchronized (beaconScanComplete) {
+				for (EventHandler eventHandler : beaconScanComplete) {
+					if (eventHandler != null) {
+						eventHandler.onEvent(data);
+					}
 				}
 			}
 		}
 
 		public static void onLocationChanged(Object data) {
-			for (EventHandler eventHandler : locationChanged) {
-				if (eventHandler != null) {
-					eventHandler.onEvent(data);
+			synchronized (locationChanged) {
+				for (EventHandler eventHandler : locationChanged) {
+					if (eventHandler != null) {
+						eventHandler.onEvent(data);
+					}
 				}
 			}
 		}

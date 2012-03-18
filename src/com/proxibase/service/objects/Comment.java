@@ -8,28 +8,26 @@ import com.google.gson.annotations.SerializedName;
 /**
  * @author Jayma
  */
-
-public class Comment extends ServiceEntry {
-
-	@Expose
-	@SerializedName("_entity")
-	public String	entityId;
-
-	@Expose(serialize = false, deserialize = true)
-	public User		entity;
+public class Comment {
 
 	@Expose
 	public String	title;
 	@Expose
 	public String	description;
+	@Expose
+	public String	name;
+	@Expose
+	public String	location;
+	@Expose
+	public String	imageUri;
+	@Expose
+	@SerializedName("_creator")
+	public String	creatorId;
+	@Expose
+	public Number	createdDate;
 
 	/* For client use only */
 	public Bitmap	imageBitmap;
 
 	public Comment() {}
-
-	@Override
-	public String getCollection() {
-		return "comments";
-	}
 }

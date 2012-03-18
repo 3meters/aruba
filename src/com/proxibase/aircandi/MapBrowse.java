@@ -25,6 +25,7 @@ import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Entity;
+import com.proxibase.service.objects.GeoLocation;
 
 public class MapBrowse extends MapActivity {
 
@@ -93,7 +94,8 @@ public class MapBrowse extends MapActivity {
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						mCommon.mEntity = (Entity) serviceResponse.data;
-						mGeoPoint = new GeoPoint((int) (mCommon.mEntity.drops.get(0).latitude.doubleValue() * 1E6), (int) (mCommon.mEntity.drops.get(0).longitude.doubleValue() * 1E6));
+						GeoLocation entityLocation = mCommon.mEntity.location != null ? mCommon.mEntity.location : mCommon.mEntityLocation;
+						mGeoPoint = new GeoPoint((int) (entityLocation.latitude.doubleValue() * 1E6), (int) (entityLocation.longitude.doubleValue() * 1E6));
 						mTitle = mCommon.mEntity.label;
 						mDescription = mCommon.mEntity.description;
 						((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);

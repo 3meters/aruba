@@ -26,6 +26,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.objects.Entity;
+import com.proxibase.service.objects.GeoLocation;
 
 public class CandiForm extends CandiActivity {
 
@@ -40,6 +41,7 @@ public class CandiForm extends CandiActivity {
 	@Override
 	public void bind() {
 		super.bind();
+		mCommon.mNewCandiIsRoot = false;
 
 		/* We always get the freshest version because the data could be stale */
 		new AsyncTask() {
@@ -98,6 +100,7 @@ public class CandiForm extends CandiActivity {
 		IntentBuilder intentBuilder = new IntentBuilder(this, MapBrowse.class);
 		intentBuilder.setCommand(new Command(CommandVerb.View));
 		intentBuilder.setEntityId(entityId);
+		intentBuilder.setEntityLocation(mCommon.mEntityLocation);
 		Intent intent = intentBuilder.create();
 		startActivityForResult(intent, 0);
 	}
@@ -226,7 +229,7 @@ public class CandiForm extends CandiActivity {
 
 		/* Update any UI indicators related to child candies */
 
-		boolean visibleChildren = (entity.entities != null && entity.hasVisibleChildren()) || entity.entitiesCount > 0;
+		boolean visibleChildren = (entity.children != null && entity.hasVisibleChildren()) || entity.childrenCount > 0;
 		if (visibleChildren) {
 			((ViewGroup) candiInfoView.findViewById(R.id.group_candi_content)).setClickable(true);
 			navigate.setVisibility(View.VISIBLE);
@@ -245,14 +248,14 @@ public class CandiForm extends CandiActivity {
 		editCandi.setVisibility(View.GONE);
 		listCandi.setVisibility(View.GONE);
 		if (!entity.locked) {
-			if (entity.parentEntityId == null) {
+			if (entity.root) {
 				newCandi.setVisibility(View.VISIBLE);
 				newCandi.setTag(new Command(CommandVerb.Dialog, "Add\nCandi", "NewCandi", entity.type, entity.id, entity.id, null));
 			}
 			newComment.setVisibility(View.VISIBLE);
 			newComment.setTag(new Command(CommandVerb.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
 		}
-		if (entity.creator.equals(Aircandi.getInstance().getUser().id)) {
+		if (entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
 			editCandi.setVisibility(View.VISIBLE);
 			editCandi.setTag(new Command(CommandVerb.Edit, "Edit", "EntityForm", entity.type, entity.id, null, null));
 		}
@@ -272,7 +275,8 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Map */
-		if (entity.drops.get(0).latitude == null || entity.drops.get(0).longitude == null) {
+		GeoLocation entityLocation = entity.location != null ? entity.location : mCommon.mEntityLocation;
+		if (entityLocation == null || entityLocation.latitude == null || entityLocation.longitude == null) {
 			map.setVisibility(View.GONE);
 		}
 		else {

@@ -1,5 +1,6 @@
 package com.proxibase.aircandi;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -38,6 +39,7 @@ public class CandiList extends CandiActivity {
 
 	private ListView		mListView;
 	protected List<Entity>	mListEntities;
+	private Entity			mListParentEntity;
 	private MethodType		mMethodType;
 
 	@Override
@@ -56,21 +58,6 @@ public class CandiList extends CandiActivity {
 		final Bundle parameters = new Bundle();
 		final ServiceRequest serviceRequest = new ServiceRequest();
 
-		if (mCommon.mEntity != null) {
-			mMethodType = MethodType.CandiForParent;
-			parameters.putString("entityId", mCommon.mEntity.id);
-			parameters.putBoolean("includeChildren", true);
-			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntity");
-			Tracker.trackPageView("/CandiList");
-		}
-		else if (mCommon.mEntity == null) {
-			mMethodType = MethodType.CandiByUser;
-			parameters.putString("userId", Aircandi.getInstance().getUser().id);
-			parameters.putBoolean("includeChildren", false);
-			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "GetEntitiesForUser");
-			Tracker.trackPageView("/MyCandiList");
-		}
-
 		new AsyncTask() {
 
 			@Override
@@ -81,18 +68,42 @@ public class CandiList extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				serviceRequest.setRequestType(RequestType.Method);
-				serviceRequest.setParameters(parameters);
-				serviceRequest.setResponseFormat(ResponseFormat.Json);
+				if (mCommon.mEntity != null) {
+					
+					mMethodType = MethodType.CandiForParent;
+					ArrayList<String> entityIds = new ArrayList<String>();
+					entityIds.add(mCommon.mEntity.id);
+					parameters.putStringArrayList("entityIds", entityIds);
+					parameters.putString("eagerLoad", "object:{\"children\":true,\"comments\":false}");
+
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
+							.setRequestType(RequestType.Method)
+							.setParameters(parameters)
+							.setResponseFormat(ResponseFormat.Json);
+					Tracker.trackPageView("/CandiList");
+				}
+				else if (mCommon.mEntity == null) {
+					mMethodType = MethodType.CandiByUser;
+					parameters.putString("userId", Aircandi.getInstance().getUser().id);
+					parameters.putString("eagerLoad", "object:{\"children\":false,\"comments\":false}");
+
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForUser")
+							.setRequestType(RequestType.Method)
+							.setParameters(parameters)
+							.setResponseFormat(ResponseFormat.Json);
+					Tracker.trackPageView("/MyCandiList");
+				}
 
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+				
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) serviceResponse.data;
 					mListEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(jsonResponse,
 								Entity.class,
 								GsonType.ProxibaseService);
 					if (mMethodType == MethodType.CandiForParent) {
-						mListEntities = mListEntities.get(0).entities;
+						mListParentEntity = mListEntities.get(0);
+						mListEntities = mListEntities.get(0).children;
 					}
 				}
 				return serviceResponse;
@@ -127,6 +138,9 @@ public class CandiList extends CandiActivity {
 		intentBuilder.setCommand(new Command(CommandVerb.View));
 		intentBuilder.setEntity(entity);
 		intentBuilder.setEntityType(entity.type);
+		if (!entity.root) {
+			intentBuilder.setEntityLocation(mListParentEntity.location);
+		}		
 		Intent intent = intentBuilder.create();
 
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_INFO);

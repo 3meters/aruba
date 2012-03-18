@@ -26,15 +26,15 @@ public abstract class ServiceEntry {
 
 	/* Lookup Ids */
 	
-	@Expose(serialize = false, deserialize = true)
+	@Expose
 	@SerializedName("_owner")
 	public String		ownerId;
 
-	@Expose(serialize = false, deserialize = true)
+	@Expose
 	@SerializedName("_creator")
 	public String		creatorId;
 
-	@Expose(serialize = false, deserialize = true)
+	@Expose
 	@SerializedName("_modifier")
 	public String		modifierId;
 

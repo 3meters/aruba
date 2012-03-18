@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -27,6 +28,7 @@ import android.widget.ViewFlipper;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
+import com.proxibase.aircandi.components.GeoLocationManager;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
@@ -55,8 +57,10 @@ import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.objects.Beacon;
-import com.proxibase.service.objects.Drop;
 import com.proxibase.service.objects.Entity;
+import com.proxibase.service.objects.Link;
+import com.proxibase.service.objects.Observation;
+import com.proxibase.service.objects.Result;
 import com.proxibase.service.objects.User;
 import com.proxibase.service.objects.Beacon.BeaconType;
 import com.proxibase.service.objects.Entity.Visibility;
@@ -66,9 +70,9 @@ public class EntityForm extends FormActivity {
 	private ViewFlipper		mViewFlipper;
 	protected WebImageView	mImagePicture;
 	private EditText		mTextUri;
-	private Beacon			mBeacon;
 	private boolean			mUriValidated	= false;
 	private AsyncTask		mAsyncTask		= null;
+	private Observation		mObservation;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -114,14 +118,9 @@ public class EntityForm extends FormActivity {
 
 	protected void initialize() {
 
-		/*
-		 * Starting determining the users location if the beacon is unregistered]
-		 * and we are creating new candi.
-		 */
+		/* Starting determining the users location if we are creating new candi. */
 		if (mCommon.mCommand.verb == CommandVerb.New) {
-			/* Get location fix */
-			Aircandi.getInstance().startLocationUpdates(CandiConstants.LOCATION_SCAN_TIME_LIMIT, CandiConstants.LOCATION_EXPIRATION);
-			mBeacon = ProxiExplorer.getInstance().getBeaconByBssid(mCommon.mBeaconName);
+			GeoLocationManager.getInstance().startLocationUpdates(CandiConstants.LOCATION_SCAN_TIME_LIMIT, CandiConstants.LOCATION_EXPIRATION);
 		}
 
 		mImagePicture = (WebImageView) findViewById(R.id.image_picture);
@@ -149,9 +148,8 @@ public class EntityForm extends FormActivity {
 		 * that subclass this will set any additional properties beyond the base ones.
 		 */
 		if (mCommon.mCommand.verb == CommandVerb.New) {
+
 			Entity entity = new Entity();
-			entity.drops.add(new Drop());
-			entity.drops.get(0).beaconId = mCommon.mBeaconName;
 			entity.signalFence = -100.0f;
 			entity.creatorId = Aircandi.getInstance().getUser().id;
 			entity.modifierId = Aircandi.getInstance().getUser().id;
@@ -161,11 +159,6 @@ public class EntityForm extends FormActivity {
 			entity.linkZoom = false;
 			entity.visibility = Visibility.Public.toString().toLowerCase();
 			entity.type = mCommon.mEntityType;
-			entity.parentEntityId = null;
-
-			if (mCommon.mParent != null && !mCommon.mParent.equals("")) {
-				entity.parentEntityId = mCommon.mParent;
-			}
 
 			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
 				entity.imagePreviewUri = "resource:placeholder_picture";
@@ -278,7 +271,12 @@ public class EntityForm extends FormActivity {
 			/* Settings */
 
 			if (findViewById(R.id.cbo_visibility) != null) {
-				((Spinner) findViewById(R.id.cbo_visibility)).setSelection(Visibility.valueOf(entity.visibility).ordinal());
+				if (entity.visibility.toLowerCase().equals(Visibility.Private.toString().toLowerCase())) {
+					((Spinner) findViewById(R.id.cbo_visibility)).setSelection(Visibility.Private.ordinal());
+				}
+				else if (entity.visibility.toLowerCase().equals(Visibility.Public.toString().toLowerCase())) {
+					((Spinner) findViewById(R.id.cbo_visibility)).setSelection(Visibility.Public.ordinal());
+				}
 			}
 
 			if (findViewById(R.id.chk_html_zoom) != null) {
@@ -351,30 +349,7 @@ public class EntityForm extends FormActivity {
 
 	public void onSaveButtonClick(View view) {
 		mCommon.startTitlebarProgress();
-		/*
-		 * The user could have moved since we grabbed the target beacon that
-		 * was passed to the form so we do a quick wifi sniff.
-		 */
-		if (mCommon.mCommand.verb == CommandVerb.New && mCommon.mEntity.parentEntityId == null) {
-
-			Beacon beacon = ProxiExplorer.getInstance().getStrongestWifiAsBeacon();
-			if (beacon == null) {
-				AircandiCommon.showAlertDialog(R.drawable.icon_app, "Aircandi beacons", getString(R.string.alert_beacons_zero),
-						EntityForm.this, new
-						DialogInterface.OnClickListener() {
-
-							public void onClick(DialogInterface dialog, int which) {
-						}
-						});
-			}
-			else {
-				mBeacon = beacon;
-				doSave(true);
-			}
-		}
-		else {
-			doSave(true);
-		}
+		doSave();
 	}
 
 	public void onDeleteButtonClick(View view) {
@@ -411,7 +386,7 @@ public class EntityForm extends FormActivity {
 	// Service routines
 	// --------------------------------------------------------------------------------------------
 
-	protected void doSave(final boolean updateImages) {
+	protected void doSave() {
 
 		new AsyncTask() {
 
@@ -469,89 +444,32 @@ public class EntityForm extends FormActivity {
 						}
 					});
 
-					/*
-					 * Whether a beacon is registered is unknown if we didn't discover any associated
-					 * entities.
-					 */
-					if (mCommon.mCommand.verb == CommandVerb.New && mBeacon != null && !mBeacon.registered) {
-
-						if (Aircandi.getInstance().getCurrentLocation() != null) {
-							mBeacon.latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
-							mBeacon.longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
-							if (Aircandi.getInstance().getCurrentLocation().hasAltitude()) {
-								/* In meters. */
-								mBeacon.altitude = Aircandi.getInstance().getCurrentLocation().getAltitude();
-							}
-							if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
-								/* In meters. */
-								mBeacon.accuracy = Aircandi.getInstance().getCurrentLocation().getAccuracy();
-							}
-							if (Aircandi.getInstance().getCurrentLocation().hasBearing()) {
-								/* Direction of travel in degrees East of true North. */
-								mBeacon.bearing = Aircandi.getInstance().getCurrentLocation().getBearing();
-							}
-							if (Aircandi.getInstance().getCurrentLocation().hasSpeed()) {
-								/* Speed of the device over ground in meters/second. */
-								mBeacon.speed = Aircandi.getInstance().getCurrentLocation().getSpeed();
-							}
-						}
-
-						mBeacon.beaconType = BeaconType.Fixed.name().toLowerCase();
-						mBeacon.beaconSetId = ProxiConstants.BEACONSET_WORLD;
-						mBeacon.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-						mBeacon.modifiedDate = mBeacon.createdDate;
-						mBeacon.creatorId = Aircandi.getInstance().getUser().id;
-						mBeacon.modifierId = Aircandi.getInstance().getUser().id;
-						mBeacon.locked = false;
-
-						Logger.i(this, "Inserting beacon: " + mCommon.mBeaconName);
-						ServiceRequest serviceRequest = new ServiceRequest();
-						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mBeacon.getCollection());
-						serviceRequest.setRequestType(RequestType.Insert);
-						serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mBeacon,
-										GsonType.ProxibaseService));
-						serviceRequest.setResponseFormat(ResponseFormat.Json);
-
-						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-						/*
-						 * A beacon could show as not registered but still exist so check the
-						 * response we get from the service. A duplicate exception returns as success
-						 * and ResponseDetailCode = UpdateException.
-						 */
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							mBeacon.registered = true;
-						}
-					}
+					/* Pull all the control values back into the entity object */
+					gather();
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
-
-						/* Pull all the control values back into the entity object */
-						gather();
-
-						/* Delete or upload images to S3 as needed. */
-						if (updateImages) {
-							serviceResponse = updateImages();
-						}
-
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							if (mCommon.mCommand.verb == CommandVerb.New) {
-								serviceResponse = insert();
-								if (serviceResponse.responseCode == ResponseCode.Success) {
-									ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
-									ProxiExplorer.getInstance().mEntitiesInserted.put(mCommon.mEntity.id, mCommon.mEntity);
-									setResult(CandiConstants.RESULT_ENTITY_INSERTED);
-									Tracker.dispatch();
-								}
+						if (mCommon.mCommand.verb == CommandVerb.New) {
+							serviceResponse = insert();
+							if (serviceResponse.responseCode == ResponseCode.Success) {
+								
+								/* Parse out the id that was assigned to the inserted entity */
+								String json = (String) serviceResponse.data; // Array
+								Result result = (Result)ProxibaseService.convertJsonToObject(json, Result.class, GsonType.ProxibaseService);;
+								
+								ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
+								ProxiExplorer.getInstance().mEntitiesInserted.put(result._id, mCommon.mEntity);
+								setResult(CandiConstants.RESULT_ENTITY_INSERTED);
+								Tracker.dispatch();
 							}
-							else if (mCommon.mCommand.verb == CommandVerb.Edit) {
-								serviceResponse = update();
-								if (serviceResponse.responseCode == ResponseCode.Success) {
-									ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-									/* Replaces if it is already in the collection */
-									ProxiExplorer.getInstance().mEntitiesUpdated.put(mCommon.mEntity.id, mCommon.mEntity);
-									setResult(CandiConstants.RESULT_ENTITY_UPDATED);
-									Tracker.dispatch();
-								}
+						}
+						else if (mCommon.mCommand.verb == CommandVerb.Edit) {
+							serviceResponse = update();
+							if (serviceResponse.responseCode == ResponseCode.Success) {
+								ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+								/* Replaces if it is already in the collection */
+								ProxiExplorer.getInstance().mEntitiesUpdated.put(mCommon.mEntity.id, null);
+								setResult(CandiConstants.RESULT_ENTITY_UPDATED);
+								Tracker.dispatch();
 							}
 						}
 					}
@@ -592,7 +510,7 @@ public class EntityForm extends FormActivity {
 		}
 		if (findViewById(R.id.cbo_visibility) != null) {
 			Visibility visibility = Visibility.values()[((Spinner) findViewById(R.id.cbo_visibility)).getSelectedItemPosition()];
-			mCommon.mEntity.visibility = visibility.toString();
+			mCommon.mEntity.visibility = visibility.toString().toLowerCase();
 		}
 		if (findViewById(R.id.chk_html_javascript) != null) {
 			mCommon.mEntity.linkJavascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
@@ -605,108 +523,116 @@ public class EntityForm extends FormActivity {
 		}
 	}
 
-	protected ServiceResponse updateImages() {
+	protected ServiceResponse insert() {
+		
+		Entity entity = mCommon.mEntity;
 
-		/* Delete image from S3 if it has been orphaned */
-		/*
-		 * TODO: We are going with a garbage collection scheme for orphaned images. We
-		 * need to use an extended property on S3 items that is set to a date when
-		 * collection is ok. This allows downloaded entities to keep working even if
-		 * an image for entity has changed.
-		 */
+		Logger.i(this, "Inserting entity: " + entity.title);
+		Tracker.trackEvent("Entity", "Insert", entity.type, 0);
 		ServiceResponse serviceResponse = new ServiceResponse();
-		//		if (mImageUriOriginal != null && !ImageManager.isLocalImage(mImageUriOriginal)) {
-		//			if (!mCommon.mEntity.imageUri.equals(mImageUriOriginal) && mCommon.mEntity.imagePreviewUri != null
-		//				&& !mCommon.mEntity.imagePreviewUri.equals("")) {
-		//				try {
-		//					S3.deleteImage(mCommon.mEntity.imagePreviewUri.substring(mCommon.mEntity.imagePreviewUri.lastIndexOf("/") + 1));
-		//					ImageManager.getInstance().deleteImage(mCommon.mEntity.imagePreviewUri);
-		//					ImageManager.getInstance().deleteImage(mCommon.mEntity.imagePreviewUri + ".reflection");
-		//				}
-		//				catch (ProxibaseServiceException exception) {
-		//					return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
-		//				}
-		//			}
-		//		}
 
-		/* Put image to S3 if we have a new one. */
-		if (mCommon.mEntity.imageBitmap != null) {
-			try {
-				String imageKey = String.valueOf(Aircandi.getInstance().getUser().id) + "_"
-									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-									+ ".jpg";
-				S3.putImage(imageKey, mCommon.mEntity.imageBitmap);
-				mCommon.mEntity.imagePreviewUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
-				if (mCommon.mEntity.imageUri == null || mCommon.mEntity.imageUri.equals("")) {
-					mCommon.mEntity.imageUri = mCommon.mEntity.imagePreviewUri;
+		/* Get strongest nearby beacon */
+		Beacon beacon = ProxiExplorer.getInstance().getStrongestWifiAsBeacon();
+		if (beacon == null && mCommon.mParentId == null) {
+			AircandiCommon.showAlertDialog(R.drawable.icon_app, "Aircandi beacons", getString(R.string.alert_beacons_zero),
+					EntityForm.this, new
+					DialogInterface.OnClickListener() {
+
+						public void onClick(DialogInterface dialog, int which) {}
+					});
+			return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.UnknownException, null, null);
+		}
+		else if (!beacon.registered) {
+			serviceResponse = insertBeacon(beacon);
+			/*
+			 * Whether a beacon is registered is unknown if we didn't discover any associated
+			 * entities so we try to insert.
+			 * 
+			 * A beacon could show as not registered but still exist so check the
+			 * response we get from the service. A duplicate exception returns as success
+			 * and ResponseDetailCode = UpdateException.
+			 */
+			if (serviceResponse.responseCode == ResponseCode.Success) {
+				beacon.registered = true;
+			}
+		}
+
+		if (mCommon.mParentId != null) {
+			Entity parentEntity = ProxiExplorer.getInstance().getEntityById(mCommon.mParentId);
+			entity.root = false;
+			entity.parentId = parentEntity.id;
+			entity.beaconId = parentEntity.beaconId;
+		}
+		else {
+			entity.root = true;
+			entity.parentId = null;
+			entity.beaconId = beacon.id;
+		}
+		
+		if (serviceResponse.responseCode == ResponseCode.Success) {
+			/* Upload images to S3 as needed. */
+			serviceResponse = updateImages();
+		}
+
+		if (serviceResponse.responseCode == ResponseCode.Success) {
+
+			// Construct entity, link, and observation
+			Bundle parameters = new Bundle();
+
+			/* User */
+			parameters.putString("userId", Aircandi.getInstance().getUser().id);
+
+			/* We record an observation if we found a nearby beacon */
+			if (beacon != null) {
+				mObservation = GeoLocationManager.getInstance().getObservation();
+				if (mObservation != null) {
+					mObservation.beaconId = beacon.id;
+					parameters.putString("observation", "object:" + ProxibaseService.convertObjectToJson(mObservation, GsonType.ProxibaseService));
 				}
 			}
-			catch (ProxibaseServiceException exception) {
-				return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
-			}
+
+			/* Link */
+			Link link = new Link();
+			link.toId = mCommon.mParentId == null ? beacon.id : entity.parentId;
+			parameters.putString("link", "object:" + ProxibaseService.convertObjectToJson(link, GsonType.ProxibaseService));
+
+			/* Entity */
+			parameters.putString("entity", "object:" + ProxibaseService.convertObjectToJson(entity, GsonType.ProxibaseService));
+
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity");
+			serviceRequest.setRequestType(RequestType.Method);
+			serviceRequest.setParameters(parameters);
+			serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+			serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 		}
-		return serviceResponse;
-	}
-
-	protected ServiceResponse insert() {
-
-		Logger.i(this, "Inserting entity: " + mCommon.mEntity.title);
-		Tracker.trackEvent("Entity", "Insert", mCommon.mEntity.type, 0);
-
-		mCommon.mEntity.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-		mCommon.mEntity.modifiedDate = mCommon.mEntity.createdDate;
-
-		/* Lat/lon are left null if we don't have an accurate fix */
-		if (Aircandi.getInstance().getCurrentLocation() != null
-				&& Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
-
-			mCommon.mEntity.drops.get(0).latitude = Aircandi.getInstance().getCurrentLocation().getLatitude();
-			mCommon.mEntity.drops.get(0).longitude = Aircandi.getInstance().getCurrentLocation().getLongitude();
-
-			if (Aircandi.getInstance().getCurrentLocation().hasAltitude()) {
-				mCommon.mEntity.drops.get(0).altitude = Aircandi.getInstance().getCurrentLocation().getAltitude();
-			}
-			if (Aircandi.getInstance().getCurrentLocation().hasAccuracy()) {
-				/* In meters. */
-				mCommon.mEntity.drops.get(0).accuracy = Aircandi.getInstance().getCurrentLocation().getAccuracy();
-			}
-			if (Aircandi.getInstance().getCurrentLocation().hasBearing()) {
-				/* Direction of travel in degrees East of true North. */
-				mCommon.mEntity.drops.get(0).bearing = Aircandi.getInstance().getCurrentLocation().getBearing();
-			}
-			if (Aircandi.getInstance().getCurrentLocation().hasSpeed()) {
-				/* Speed of the device over ground in meters/second. */
-				mCommon.mEntity.drops.get(0).speed = Aircandi.getInstance().getCurrentLocation().getSpeed();
-			}
-		}
-
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mCommon.mEntity.getCollection());
-		serviceRequest.setRequestType(RequestType.Insert);
-
-		String jsonString = ProxibaseService.convertObjectToJson(mCommon.mEntity, GsonType.ProxibaseService);
-		serviceRequest.setRequestBody(jsonString);
-		serviceRequest.setResponseFormat(ResponseFormat.Json);
-
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 		return serviceResponse;
 	}
 
 	protected ServiceResponse update() {
 
-		mCommon.mEntity.modifierId = Aircandi.getInstance().getUser().id;
-		mCommon.mEntity.modifiedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
-		Logger.i(this, "Updating entity: " + mCommon.mEntity.title);
-		Tracker.trackEvent("Entity", "Update", mCommon.mEntity.type, 0);
+		ServiceResponse serviceResponse = new ServiceResponse();
 
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(mCommon.mEntity.getEntryUri());
-		serviceRequest.setRequestType(RequestType.Update);
-		serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson(mCommon.mEntity, GsonType.ProxibaseService));
-		serviceRequest.setResponseFormat(ResponseFormat.Json);
+		/* Upload new images to S3 as needed. */
+		if (serviceResponse.responseCode == ResponseCode.Success) {
+			serviceResponse = updateImages();
+		}
 
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		if (serviceResponse.responseCode == ResponseCode.Success) {
+			mCommon.mEntity.modifierId = Aircandi.getInstance().getUser().id;
+			Logger.i(this, "Updating entity: " + mCommon.mEntity.title);
+			Tracker.trackEvent("Entity", "Update", mCommon.mEntity.type, 0);
+
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setUri(mCommon.mEntity.getEntryUri());
+			serviceRequest.setRequestType(RequestType.Update);
+			serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson(mCommon.mEntity, GsonType.ProxibaseService));
+			serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+			serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		}
 
 		return serviceResponse;
 	}
@@ -729,7 +655,11 @@ public class EntityForm extends FormActivity {
 			protected Object doInBackground(Object... params) {
 				ServiceResponse serviceResponse = new ServiceResponse();
 
-				/* If there is an image stored with S3 then delete it */
+				/*
+				 * If there is an image stored with S3 then delete it
+				 * TODO: Flag image for garbage collection but don't delete it because
+				 * because it might be needed while aircandi users have current sessions.
+				 */
 				Tracker.trackEvent("Entity", "Delete", mCommon.mEntity.type, 0);
 
 				if (mCommon.mEntity.imagePreviewUri != null && !mCommon.mEntity.imagePreviewUri.equals("")
@@ -747,21 +677,22 @@ public class EntityForm extends FormActivity {
 					}
 				}
 
-				if (serviceResponse.responseCode == ResponseCode.Success) {
+				/*
+				 * Delete the entity and all links and observations it is associated with.
+				 * We attempt to continue even if the call to delete the image failed.
+				 */
+				Logger.i(this, "Deleting entity: " + mCommon.mEntity.title);
 
-					/* Delete the entity from the service */
-					Bundle parameters = new Bundle();
-					parameters.putString("entityId", mCommon.mEntity.id);
-					Logger.i(this, "Deleting entity: " + mCommon.mEntity.title);
+				Bundle parameters = new Bundle();
+				parameters.putString("entityId", mCommon.mEntity.id);
+				parameters.putBoolean("deleteChildren", true);
 
-					ServiceRequest serviceRequest = new ServiceRequest();
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "DeleteEntityWithChildren");
-					serviceRequest.setParameters(parameters);
-					serviceRequest.setRequestType(RequestType.Method);
-					serviceRequest.setResponseFormat(ResponseFormat.Json);
-
-					serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-				}
+				ServiceRequest serviceRequest = new ServiceRequest();
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteEntity");
+				serviceRequest.setRequestType(RequestType.Method);
+				serviceRequest.setParameters(parameters);
+				serviceRequest.setResponseFormat(ResponseFormat.Json);
+				serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 				return serviceResponse;
 			}
 
@@ -773,7 +704,7 @@ public class EntityForm extends FormActivity {
 					mCommon.showProgressDialog(false, null);
 					Logger.i(this, "Deleted entity: " + mCommon.mEntity.title);
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
-					ProxiExplorer.getInstance().mEntitiesDeleted.put(mCommon.mEntity.id, mCommon.mEntity);
+					ProxiExplorer.getInstance().mEntitiesDeleted.put(mCommon.mEntity.id, null);
 					setResult(CandiConstants.RESULT_ENTITY_DELETED);
 					finish();
 				}
@@ -782,6 +713,78 @@ public class EntityForm extends FormActivity {
 				}
 			}
 		}.execute();
+	}
+
+	protected ServiceResponse updateImages() {
+
+		/*
+		 * Delete image from S3 if it has been orphaned
+		 * 
+		 * TODO: We are going with a garbage collection scheme for orphaned images. We
+		 * need to use an extended property on S3 items that is set to a date when
+		 * collection is ok. This allows downloaded entities to keep working even if
+		 * an image for entity has changed.
+		 */
+		ServiceResponse serviceResponse = new ServiceResponse();
+
+		/* Upload image to S3 if we have a new one. */
+		if (mCommon.mEntity.imageBitmap != null) {
+			try {
+				String imageKey = String.valueOf(Aircandi.getInstance().getUser().id) + "_"
+									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
+									+ ".jpg";
+				S3.putImage(imageKey, mCommon.mEntity.imageBitmap);
+				mCommon.mEntity.imagePreviewUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
+				if (mCommon.mEntity.imageUri == null || mCommon.mEntity.imageUri.equals("")) {
+					mCommon.mEntity.imageUri = mCommon.mEntity.imagePreviewUri;
+				}
+			}
+			catch (ProxibaseServiceException exception) {
+				return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
+			}
+		}
+		return serviceResponse;
+	}
+
+	private ServiceResponse insertBeacon(Beacon beacon) {
+		if (GeoLocationManager.getInstance().getCurrentLocation() != null) {
+			Location currentLocation = GeoLocationManager.getInstance().getCurrentLocation();
+
+			beacon.latitude = currentLocation.getLatitude();
+			beacon.longitude = currentLocation.getLongitude();
+			if (currentLocation.hasAltitude()) {
+				/* In meters. */
+				beacon.altitude = currentLocation.getAltitude();
+			}
+			if (currentLocation.hasAccuracy()) {
+				/* In meters. */
+				beacon.accuracy = currentLocation.getAccuracy();
+			}
+			if (currentLocation.hasBearing()) {
+				/* Direction of travel in degrees East of true North. */
+				beacon.bearing = currentLocation.getBearing();
+			}
+			if (currentLocation.hasSpeed()) {
+				/* Speed of the device over ground in meters/second. */
+				beacon.speed = currentLocation.getSpeed();
+			}
+		}
+
+		beacon.beaconType = BeaconType.Fixed.name().toLowerCase();
+		beacon.ownerId = Aircandi.getInstance().getUser().id;
+		beacon.creatorId = Aircandi.getInstance().getUser().id;
+		beacon.modifierId = Aircandi.getInstance().getUser().id;
+		beacon.locked = false;
+
+		Logger.i(this, "Inserting beacon: " + mCommon.mBeaconId);
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + beacon.getCollection())
+				.setRequestType(RequestType.Insert)
+				.setRequestBody(ProxibaseService.convertObjectToJson((Object) beacon, GsonType.ProxibaseService))
+				.setResponseFormat(ResponseFormat.Json);
+
+		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		return serviceResponse;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -983,7 +986,7 @@ public class EntityForm extends FormActivity {
 	}
 
 	protected void onDestroy() {
-		Aircandi.getInstance().stopLocationUpdates();
+		GeoLocationManager.getInstance().stopLocationUpdates();
 		super.onPause();
 	}
 

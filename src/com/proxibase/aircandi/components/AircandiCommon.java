@@ -60,6 +60,7 @@ import com.proxibase.service.ProxibaseServiceException.ErrorType;
 import com.proxibase.service.objects.Comment;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.User;
+import com.proxibase.service.objects.GeoLocation;
 
 public class AircandiCommon {
 
@@ -73,14 +74,16 @@ public class AircandiCommon {
 	public static LayoutInflater		mLayoutInflater;
 
 	public Command						mCommand;
-	public String						mParent;
+	public String						mParentId;
 	public Entity						mEntity;
 	public String						mEntityId;
 	public String						mEntityType;
+	public GeoLocation					mEntityLocation;
 	public List<Entity>					mEntities;
 	public Comment						mComment;
 	public String						mMessage;
-	public String						mBeaconName;
+	public String						mBeaconId;
+	public Boolean						mNewCandiIsRoot = true;
 
 	private int							mTextColorFocused;
 	private int							mTextColorUnfocused;
@@ -216,14 +219,15 @@ public class AircandiCommon {
 
 				Command command = null;
 
+				String parentId = mNewCandiIsRoot ? null : mEntityId;
 				if (menuId == MENU_ITEM_NEW_POST_ID) {
-					command = new Command(CommandVerb.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null, mEntityId, null);
+					command = new Command(CommandVerb.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null, parentId, null);
 				}
 				else if (menuId == MENU_ITEM_NEW_PICTURE_ID) {
-					command = new Command(CommandVerb.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE, null, mEntityId, null);
+					command = new Command(CommandVerb.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE, null, parentId, null);
 				}
 				else if (menuId == MENU_ITEM_NEW_LINK_ID) {
-					command = new Command(CommandVerb.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null, mEntityId, null);
+					command = new Command(CommandVerb.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null, parentId, null);
 				}
 				doCommand(command);
 			}
@@ -235,8 +239,8 @@ public class AircandiCommon {
 		Bundle extras = mActivity.getIntent().getExtras();
 		if (extras != null) {
 
-			mParent = extras.getString(mContext.getString(R.string.EXTRA_PARENT_ENTITY_ID));
-			mBeaconName = extras.getString(mContext.getString(R.string.EXTRA_BEACON_ID));
+			mParentId = extras.getString(mContext.getString(R.string.EXTRA_PARENT_ENTITY_ID));
+			mBeaconId = extras.getString(mContext.getString(R.string.EXTRA_BEACON_ID));
 			mEntityType = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_TYPE));
 			mEntityId = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_ID));
 			mMessage = extras.getString(mContext.getString(R.string.EXTRA_MESSAGE));
@@ -250,6 +254,11 @@ public class AircandiCommon {
 			json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_LIST));
 			if (json != null && json.length() > 0) {
 				mEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(json, Entity.class, GsonType.Internal);
+			}
+
+			json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_LOCATION));
+			if (json != null && !json.equals("")) {
+				mEntityLocation = ProxibaseService.getGson(GsonType.Internal).fromJson(json, GeoLocation.class);
 			}
 
 			json = extras.getString(mContext.getString(R.string.EXTRA_COMMAND));
@@ -283,11 +292,11 @@ public class AircandiCommon {
 			try {
 				Class clazz = Class.forName(CandiConstants.APP_PACKAGE_NAME + command.activityName, false, mContext.getClass().getClassLoader());
 				if (command.verb == CommandVerb.New) {
-					String beaconName = ProxiExplorer.getInstance().getStrongestBeacon().bssid;
+					String beaconId = ProxiExplorer.getInstance().getStrongestBeacon().id;
 					IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
 					intentBuilder.setCommand(command);
 					intentBuilder.setParentEntityId(command.entityParentId);
-					intentBuilder.setBeaconName(beaconName);
+					intentBuilder.setBeaconId(beaconId);
 					intentBuilder.setEntityType(command.entityType);
 					Intent intent = intentBuilder.create();
 					((Activity) mContext).startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
@@ -348,13 +357,18 @@ public class AircandiCommon {
 	public void doBeaconIndicatorClick(View view) {
 		if (mBeaconIndicator != null) {
 			int messageId = R.string.alert_beacons_zero;
+			String beaconMessage = mActivity.getString(messageId);
 			synchronized (ProxiExplorer.getInstance().mWifiList) {
 				int beaconCount = ProxiExplorer.getInstance().mWifiList.size();
 				if (beaconCount > 0) {
 					messageId = R.string.alert_beacons_available;
+					beaconMessage = mActivity.getString(messageId) + "\n";
+					for (WifiScanResult wifi : ProxiExplorer.getInstance().mWifiList) {
+						beaconMessage += wifi.SSID + ": " + wifi.BSSID + "\n";
+					}
 				}
 			}
-			AircandiCommon.showAlertDialog(R.drawable.icon_app, "Aircandi beacons", mActivity.getString(messageId), mActivity, new
+			AircandiCommon.showAlertDialog(R.drawable.icon_app, "Aircandi beacons", beaconMessage, mActivity, new
 					DialogInterface.OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {}
@@ -367,8 +381,11 @@ public class AircandiCommon {
 	// --------------------------------------------------------------------------------------------
 
 	public void showLocationAccuracy() {
-		Location location = Aircandi.getInstance().getCurrentLocation();
-		if (Aircandi.getInstance().getUser() != null && Aircandi.getInstance().getUser().isDeveloper) {
+		Location location = GeoLocationManager.getInstance().getCurrentLocation();
+		if (location != null 
+				&& Aircandi.getInstance().getUser() != null 
+				&& Aircandi.getInstance().getUser().isDeveloper != null 
+				&& Aircandi.getInstance().getUser().isDeveloper) {
 			if (location.hasAccuracy()) {
 				TextView textView = (TextView) mActivity.findViewById(R.id.text_header_debug);
 				if (textView != null) {
@@ -523,7 +540,9 @@ public class AircandiCommon {
 
 		}
 		else {
-			mProgressDialog.dismiss();
+			if (mProgressDialog.isShowing()) {
+				mProgressDialog.dismiss();
+			}
 		}
 	}
 
@@ -624,8 +643,6 @@ public class AircandiCommon {
 	public void signinAuto() {
 		String jsonUser = Aircandi.settings.getString(Preferences.PREF_USER, null);
 		Logger.i(this, "Auto sign in...");
-
-		jsonUser = null;
 
 		User user = null;
 		if (jsonUser != null) {
@@ -784,13 +801,21 @@ public class AircandiCommon {
 
 	public void doPause() {
 		stopTitlebarProgress();
-		Events.EventBus.locationChanged.remove(mEventLocationChanged);
-		Events.EventBus.wifiScanReceived.remove(mEventScanReceived);
+		synchronized (Events.EventBus.locationChanged) {
+			Events.EventBus.locationChanged.remove(mEventLocationChanged);
+		}
+		synchronized (Events.EventBus.wifiScanReceived) {
+			Events.EventBus.wifiScanReceived.remove(mEventScanReceived);
+		}
 	}
 
 	public void doResume() {
-		Events.EventBus.locationChanged.add(mEventLocationChanged);
-		Events.EventBus.wifiScanReceived.add(mEventScanReceived);
+		synchronized (Events.EventBus.locationChanged) {
+			Events.EventBus.locationChanged.add(mEventLocationChanged);
+		}
+		synchronized (Events.EventBus.wifiScanReceived) {
+			Events.EventBus.wifiScanReceived.add(mEventScanReceived);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

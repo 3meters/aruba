@@ -16,80 +16,78 @@ import com.proxibase.service.ProxiConstants;
  */
 public class Entity extends ServiceEntry {
 
-	protected String	mServiceUri	= ProxiConstants.URL_PROXIBASE_SERVICE;
+	protected String		mServiceUri	= ProxiConstants.URL_PROXIBASE_SERVICE;
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 
 	/* Database fields */
 
 	@Expose
-	@SerializedName("_entity")
-	public String		parentEntityId;											// id
+	public String			type;
+	@Expose
+	public Boolean			root;
+	@Expose
+	public String			uri;
+	@Expose
+	public String			label;
+	@Expose
+	public String			title;
+	@Expose
+	public String			subtitle;
+	@Expose
+	public String			description;
+	@Expose
+	public String			imageUri;
+	@Expose
+	public String			imagePreviewUri;
+	@Expose
+	public String			linkUri;
+	@Expose
+	public Boolean			linkZoom;
+	@Expose
+	public Boolean			linkJavascriptEnabled;
+	@Expose
+	public Number			signalFence	= -200f;
+	@Expose
+	public Boolean			locked;
+	@Expose
+	public Boolean			enabled;
+	@Expose
+	public String			visibility;
+	@Expose
+	public List<Comment>	comments;
+
+	/* Synthetic service fields */
 
 	@Expose(serialize = false, deserialize = true)
-	@SerializedName("entity")
-	public Entity		parentEntity;
-
-	@Expose
-	public String		type;												// required
-	@Expose
-	public String		uri;
-	@Expose
-	public String		label;
-	@Expose
-	public String		title;
-	@Expose
-	public String		subtitle;
-	@Expose
-	public String		description;
-	@Expose
-	public String		imageUri;
-	@Expose
-	public String		imagePreviewUri;
-	@Expose
-	public String		linkUri;
-	@Expose
-	public Boolean		linkZoom;
-	@Expose
-	public Boolean		linkJavascriptEnabled;
-	@Expose
-	public Number		signalFence	= -200f;
-	@Expose
-	public Boolean		locked;
-	@Expose
-	public Boolean		enabled;
-	@Expose
-	public String		visibility;
-
-	/* Non database fields */
+	@SerializedName("_beacon")
+	public String			beaconId;											/* Used to connect beacon object */
 
 	@Expose(serialize = false, deserialize = true)
-	public List<Drop>	comments;
+	public GeoLocation		location;
 
 	@Expose(serialize = false, deserialize = true)
-	public Integer		commentsCount;
+	public Integer			commentsCount;
 
 	@Expose(serialize = false, deserialize = true)
-	public List<Drop>	drops;
+	public List<Entity>		children;
 
 	@Expose(serialize = false, deserialize = true)
-	public Integer		dropsCount;
-
-	@Expose(serialize = false, deserialize = true)
-	public List<Entity>	entities;
-
-	@Expose(serialize = false, deserialize = true)
-	public Integer		entitiesCount;
+	public Integer			childrenCount;
 
 	/* For client use only */
 
-	public Beacon		beacon;
-	public Boolean		hidden		= false;
-	public Boolean		dirty		= false;
-	public Boolean		rookie		= true;
-	public EntityState	state		= EntityState.Normal;
-	public Date			discoveryTime;
-	public Bitmap		imageBitmap;
+	public Beacon			beacon;
+	public Entity			parent;
+	/* So we don't have to serialize the parent across activities */	
+	public String			parentId;											
+
+	public Boolean			hidden		= false;
+	public Boolean			dirty		= false;
+	public Boolean			rookie		= true;
+	public EntityState		state		= EntityState.Normal;
+	public Date				discoveryTime;
+	public Bitmap			imageBitmap;
 
 	public Entity() {}
 
@@ -98,7 +96,7 @@ public class Entity extends ServiceEntry {
 	}
 
 	public boolean hasVisibleChildren() {
-		for (Entity childEntity : this.entities) {
+		for (Entity childEntity : this.children) {
 			if (!childEntity.hidden) {
 				return true;
 			}

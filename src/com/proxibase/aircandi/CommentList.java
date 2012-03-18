@@ -1,5 +1,6 @@
 package com.proxibase.aircandi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -28,17 +29,17 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.Query;
 import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.objects.Comment;
+import com.proxibase.service.objects.Entity;
 
 public class CommentList extends CandiActivity {
 
 	private ListView		mListViewComments;
-	private List<Object>	mListComments;
+	private List<Comment>	mListComments;
 	protected int			mLastResultCode	= Activity.RESULT_OK;
 
 	@Override
@@ -62,16 +63,21 @@ public class CommentList extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				
-				Query query = new Query("comments").filter("{\"_entity\":\"" + mCommon.mEntity.id + "\"}");
-				ServiceRequest serviceRequest = new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json);
+
+				final Bundle parameters = new Bundle();
+				ArrayList<String> entityIds = new ArrayList<String>();
+				entityIds.add(mCommon.mEntity.id);
+				parameters.putStringArrayList("entityIds", entityIds);
+				parameters.putString("eagerLoad", "object:{\"children\":false,\"comments\":true}");
+
+				final ServiceRequest serviceRequest = new ServiceRequest();
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
+						.setRequestType(RequestType.Method)
+						.setParameters(parameters)
+						.setResponseFormat(ResponseFormat.Json);
+
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					String jsonResponse = (String) serviceResponse.data;
-					mListComments = ProxibaseService.convertJsonToObjects(jsonResponse, Comment.class, GsonType.ProxibaseService);
-					Tracker.dispatch();
-				}
 				return serviceResponse;
 			}
 
@@ -79,9 +85,17 @@ public class CommentList extends CandiActivity {
 			protected void onPostExecute(Object result) {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mListViewComments.setAdapter(new ListAdapter(CommentList.this, 0, mListComments));
+
+					String jsonResponse = (String) serviceResponse.data;
+					List<Entity> listEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(jsonResponse,
+									Entity.class,
+									GsonType.ProxibaseService);
+					if (listEntities != null && listEntities.get(0).comments != null) {
+						mListComments = listEntities.get(0).comments;
+						mListViewComments.setAdapter(new ListAdapter(CommentList.this, 0, mListComments));
+					}
 					mCommon.showProgressDialog(false, null);
-					mCommon.stopTitlebarProgress();					
+					mCommon.stopTitlebarProgress();
 				}
 				else {
 					mCommon.handleServiceError(serviceResponse);
@@ -145,17 +159,17 @@ public class CommentList extends CandiActivity {
 	// Inner classes/enums
 	// --------------------------------------------------------------------------------------------
 
-	private class ListAdapter extends ArrayAdapter<Object> {
+	private class ListAdapter extends ArrayAdapter<Comment> {
 
-		private List<Object>	items;
+		private List<Comment>	items;
 
-		public ListAdapter(Context context, int textViewResourceId, List<Object> items) {
+		public ListAdapter(Context context, int textViewResourceId, List<Comment> items) {
 			super(context, textViewResourceId, items);
 			this.items = items;
 		}
 
 		@Override
-		public Object getItem(int position) {
+		public Comment getItem(int position) {
 			return items.get(position);
 		}
 
@@ -183,12 +197,12 @@ public class CommentList extends CandiActivity {
 			if (itemData != null) {
 				Comment comment = itemData;
 				if (holder.itemAuthorName != null) {
-					holder.itemAuthorName.setText(comment.creator.name);
+					holder.itemAuthorName.setText(comment.name);
 				}
 
 				if (holder.itemAuthorLocation != null) {
-					if (comment.creator.location != null && comment.creator.location.length() > 0) {
-						holder.itemAuthorLocation.setText(comment.creator.location);
+					if (comment.location != null && comment.location.length() > 0) {
+						holder.itemAuthorLocation.setText(comment.location);
 					}
 					else {
 						holder.itemAuthorLocation.setVisibility(View.GONE);
@@ -222,9 +236,9 @@ public class CommentList extends CandiActivity {
 					if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null) {
 						bitmapDrawable.getBitmap().recycle();
 					}
-					if (comment.creator.imageUri != null && comment.creator.imageUri.length() != 0) {
+					if (comment.imageUri != null && comment.imageUri.length() != 0) {
 						ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemAuthorImage);
-						builder.setFromUris(comment.creator.imageUri, null);
+						builder.setFromUris(comment.imageUri, null);
 						ImageRequest imageRequest = builder.create();
 						holder.itemAuthorImage.setImageRequest(imageRequest);
 					}
