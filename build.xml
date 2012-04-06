@@ -154,7 +154,7 @@
 	<property name="gen.absolute.dir" location="gen" />
 	<property name="resource.absolute.dir" location="res" />
 	<property name="asset.absolute.dir" location="assets" />
-	<property name="jar.libs.dir" value="lib" />
+	<property name="jar.libs.dir" value="libs" />
 	<property name="jar.libs.absolute.dir" location="${jar.libs.dir}" />
 	<property name="native.libs.absolute.dir" location="lib" />
 
@@ -653,6 +653,7 @@
 				<property name="obfuscate.absolute.dir" location="${out.absolute.dir}/proguard" />
 				<property name="preobfuscate.jar.file" value="${obfuscate.absolute.dir}/original.jar" />
 				<property name="obfuscated.jar.file" value="${obfuscate.absolute.dir}/obfuscated.jar" />
+				
 				<!-- input for dex will be proguard's output -->
 				<property name="out.dex.input.absolute.dir" value="${obfuscated.jar.file}" />
 
@@ -660,9 +661,10 @@
 				<property name="proguard.jar" location="${android.tools.dir}/proguard/lib/proguard.jar" />
 				<taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpath="${proguard.jar}" />
 
-				<!-- Set the android classpath Path object into a single property. It'll be
-                     all the jar files separated by a platform path-separator.
-                     Each path must be quoted if it contains spaces.
+				<!-- 
+					Set the android classpath Path object into a single property. It'll be
+					all the jar files separated by a platform path-separator.
+					Each path must be quoted if it contains spaces.
                 -->
 				<pathconvert property="android.libraryjars" refid="android.target.classpath">
 					<firstmatchmapper>
@@ -670,17 +672,23 @@
 						<identitymapper />
 					</firstmatchmapper>
 				</pathconvert>
+				
 
-				<!-- Build a path object with all the jar files that must be obfuscated.
-                     This include the project compiled source code and any 3rd party jar
-                     files. -->
+				<!-- 
+					Build a path object with all the jar files that must be obfuscated.
+                    This include the project compiled source code and any 3rd party jar
+                    files. 
+                -->
 				<path id="project.jars.ref">
 					<pathelement location="${preobfuscate.jar.file}" />
 					<path refid="jar.libs.ref" />
 				</path>
-				<!-- Set the project jar files Path object into a single property. It'll be
-                     all the jar files separated by a platform path-separator.
-                     Each path must be quoted if it contains spaces.
+				
+				
+				<!-- 
+					Set the project jar files Path object into a single property. It'll be
+                    all the jar files separated by a platform path-separator.
+                    Each path must be quoted if it contains spaces.
                 -->
 				<pathconvert property="project.jars" refid="project.jars.ref">
 					<firstmatchmapper>
@@ -872,6 +880,11 @@
 	<!-- Builds debug output package -->
 	<target name="debug" depends="-set-debug-files, -do-debug" description="Builds the application and signs it with a debug key.">
 		<record-build-info />
+		
+		<!-- Extra copy to website -->
+		<copy file="${out.final.file}" toDir="${web.dir}" overwrite="true" />				
+		<copy file="${out.final.file}" toDir="${web.local.dir}" overwrite="true" />				
+		
 	</target>
 
 

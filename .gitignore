@@ -3,3 +3,6 @@ bin/
 gen/
 archive/
 /AndroidUnusedResources1.4.1.jar
+
+/lint.xml
+/archive
