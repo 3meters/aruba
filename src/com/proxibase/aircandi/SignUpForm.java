@@ -13,27 +13,27 @@ import android.widget.EditText;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
-import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseServiceException;
-import com.proxibase.service.Query;
-import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ProxibaseServiceException;
+import com.proxibase.service.Query;
+import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.User;
 
 public class SignUpForm extends FormActivity {
@@ -54,7 +54,6 @@ public class SignUpForm extends FormActivity {
 		initialize();
 		bind();
 		draw();
-		Tracker.trackPageView("/SignUpForm");
 
 		if (savedInstanceState != null) {
 			doRestoreInstanceState(savedInstanceState);
@@ -62,6 +61,7 @@ public class SignUpForm extends FormActivity {
 	}
 
 	protected void initialize() {
+		mCommon.track();
 		mImageUser = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
@@ -109,7 +109,6 @@ public class SignUpForm extends FormActivity {
 	protected void bind() {
 		mUser = new User();
 		mUser.imageUri = (String) mImageUser.getTag();
-		Tracker.dispatch();
 	}
 
 	protected void draw() {
@@ -269,6 +268,7 @@ public class SignUpForm extends FormActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					Tracker.trackEvent("User", "Insert", null, 0);
 					mCommon.showProgressDialog(false, null);
 					Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 					AircandiCommon.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),

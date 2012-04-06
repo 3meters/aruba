@@ -21,17 +21,22 @@ import com.proxibase.aircandi.core.CandiConstants;
 
 /**
  * <p>
- * A simple 2-level cache for bitmap images consisting of a small and fast in-memory cache (1st level cache) and a
- * slower but bigger disk cache (2nd level cache). For second level caching, the application's cache directory will be
- * used. Please note that Android may at any point decide to wipe that directory.
+ * A simple 2-level cache for bitmap images consisting of a small and fast
+ * in-memory cache (1st level cache) and a slower but bigger disk cache (2nd
+ * level cache). For second level caching, the application's cache directory
+ * will be used. Please note that Android may at any point decide to wipe that
+ * directory.
  * </p>
  * <p>
- * When pulling from the cache, it will first attempt to load the image from memory. If that fails, it will try to load
- * it from disk. If that succeeds, the image will be put in the 1st level cache and returned. Otherwise it's a cache
- * miss, and the caller is responsible for loading the image from elsewhere (probably the Internet).
+ * When pulling from the cache, it will first attempt to load the image from
+ * memory. If that fails, it will try to load it from disk. If that succeeds,
+ * the image will be put in the 1st level cache and returned. Otherwise it's a
+ * cache miss, and the caller is responsible for loading the image from
+ * elsewhere (probably the Internet).
  * </p>
  * <p>
- * Pushes to the cache are always write-through (i.e., the image will be stored both on disk and in memory).
+ * Pushes to the cache are always write-through (i.e., the image will be stored
+ * both on disk and in memory).
  * </p>
  */
 
@@ -62,10 +67,13 @@ public class ImageCache implements Map<String, Bitmap> {
 	}
 
 	/**
-	 * The image format that should be used when caching images on disk. The default value is {@link CompressFormat#PNG}
-	 * . Note that when switching to a format like JPEG, you will lose any transparency that was part of the image.
+	 * The image format that should be used when caching images on disk. The
+	 * default value is {@link CompressFormat#PNG} . Note that when switching to
+	 * a format like JPEG, you will lose any transparency that was part of the
+	 * image.
 	 * 
-	 * @param compressedImageFormat the {@link CompressFormat}
+	 * @param compressedImageFormat
+	 *            the {@link CompressFormat}
 	 */
 	public void setCompressedImageFormat(CompressFormat compressedImageFormat) {
 		this.mCompressedImageFormat = compressedImageFormat;
@@ -76,8 +84,9 @@ public class ImageCache implements Map<String, Bitmap> {
 	}
 
 	/**
-	 * @param cachedImageQuality the quality of images being compressed and written to disk (2nd level cache) as a
-	 *            number in [0..100]
+	 * @param cachedImageQuality
+	 *            the quality of images being compressed and written to disk
+	 *            (2nd level cache) as a number in [0..100]
 	 */
 	public void setCachedImageQuality(int cachedImageQuality) {
 		this.mCachedImageQuality = cachedImageQuality;
@@ -205,10 +214,10 @@ public class ImageCache implements Map<String, Bitmap> {
 			Arrays.sort(files, new SortFilesByModified());
 			long cacheSize = cacheSize(files);
 			Logger.d(this, "Cache size: " + String.valueOf(cacheSize)
-							+ " trigger size: "
-							+ String.valueOf(triggerSize)
-							+ " target size: "
-							+ String.valueOf(targetSize));
+					+ " trigger size: "
+					+ String.valueOf(triggerSize)
+					+ " target size: "
+					+ String.valueOf(targetSize));
 			if (cacheSize > triggerSize) {
 				Logger.d(this, "Trimming file cache");
 				cleanCache(files, targetSize);
@@ -265,6 +274,9 @@ public class ImageCache implements Map<String, Bitmap> {
 				deletes++;
 				Logger.v(this, "Deleting from file cache: " + f.getAbsolutePath());
 			}
+		}
+		if (deletes > 0) {
+			Logger.i(this, "File cache deletes: " + String.valueOf(deletes));
 		}
 	}
 

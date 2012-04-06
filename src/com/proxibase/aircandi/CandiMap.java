@@ -22,8 +22,8 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import android.widget.FrameLayout.LayoutParams;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
@@ -40,17 +40,16 @@ import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
-import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.User;
 
@@ -65,8 +64,8 @@ public class CandiMap extends MapActivity {
 	private CandiItemizedOverlay	mItemizedOverlay;
 	private LocationManager			mLocationManager;
 	private LocationListener		mLocationListener;
-	private static double			RADIUS_EARTH	= 6378000;					/* in meters */
-	private static double			SEARCH_RANGE	= 100;
+	private static double			RADIUS_EARTH	= 6378000;					// meters
+	private static double			SEARCH_RANGE	= 100;						// meters
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -83,9 +82,14 @@ public class CandiMap extends MapActivity {
 
 		initialize();
 		initializeLocation();
-		bind();
+		if (GeoLocationManager.getInstance().getCurrentLocation() != null) {
+			/* 
+			 * TODO: What should we do to get get a location?
+			 */
+			bind();
+		}
 
-		Tracker.trackPageView("/CandiMap");
+		mCommon.track();
 	}
 
 	private void initialize() {
@@ -183,7 +187,9 @@ public class CandiMap extends MapActivity {
 				Location location = GeoLocationManager.getInstance().getCurrentLocation();
 				parameters.putDouble("latitude", location.getLatitude());
 				parameters.putDouble("longitude", location.getLongitude());
-				parameters.putDouble("radius", SEARCH_RANGE / RADIUS_EARTH); /* to radians */
+				parameters.putDouble("radius", SEARCH_RANGE / RADIUS_EARTH); /*
+																			 * to radians
+																			 */
 				parameters.putString("userId", Aircandi.getInstance().getUser().id);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
@@ -256,6 +262,14 @@ public class CandiMap extends MapActivity {
 		mCommon.doHomeClick(view);
 	}
 
+	public void onBeaconIndicatorClick(View view) {
+		mCommon.doBeaconIndicatorClick(view);
+	}
+
+	public void onProfileClick(View view) {
+		mCommon.doProfileClick(view);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
@@ -263,8 +277,7 @@ public class CandiMap extends MapActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		boolean rebind = mCommon.doOptionsItemSelected(item);
-		if (rebind) {
-		}
+		if (rebind) {}
 		return true;
 	}
 
@@ -275,6 +288,7 @@ public class CandiMap extends MapActivity {
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
+
 	public void zoomToCurrentLocation(Location location) {
 		GeoPoint point = new GeoPoint((int) (location.getLatitude() * 1E6), (int) (location.getLongitude() * 1E6));
 		mMapController.animateTo(point);
@@ -296,7 +310,7 @@ public class CandiMap extends MapActivity {
 	public void showCandi() {
 		mMapOverlays = mMapView.getOverlays();
 		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi);
-		//drawable.setBounds(0, 0, 40, 40);
+		// drawable.setBounds(0, 0, 40, 40);
 		mItemizedOverlay = new CandiItemizedOverlay(drawable, false);
 
 		for (Object entityPointObject : mEntityPoints) {
@@ -306,34 +320,42 @@ public class CandiMap extends MapActivity {
 			OverlayItem overlayitem = new OverlayItem(point, entityPoint.label, entityPoint.label);
 
 			/* User custom marker */
-			//			if (entityPoint.imagePreviewUri != null && !entityPoint.imagePreviewUri.equals("")) {
-			//				/*
-			//				 * If we find it in the cache we'll use it otherwise we fall back to the
-			//				 * default marker. It would be expensive to deal with images way outside the users
-			//				 * current radar range.
-			//				 */
-			//				//				Bitmap bitmap = ImageManager.getInstance().getImageLoader().getImageCache().get(entityPoint.imagePreviewUri);
-			//				//				if (bitmap != null) {
-			//				//					BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
-			//				//					bitmapDrawable.setBounds(0, 0, 80, 80);
-			//				//					overlayitem.setMarker(bitmapDrawable);
-			//				//				}
-			//				//				else {
-			//				Drawable marker = getResources().getDrawable(R.drawable.icon_picture);
-			//				marker.setBounds(0, 0, 40, 35);
-			//				overlayitem.setMarker(marker);
-			//				//				}
-			//			}
-			//			else if (entityPoint.linkUri != null && !entityPoint.linkUri.equals("")) {
-			//				Drawable marker = getResources().getDrawable(R.drawable.icon_link);
-			//				marker.setBounds(0, 0, 40, 40);
-			//				overlayitem.setMarker(marker);
-			//			}
-			//			else {
-			//				Drawable marker = getResources().getDrawable(R.drawable.icon_post);
-			//				marker.setBounds(0, 0, 40, 35);
-			//				overlayitem.setMarker(marker);
-			//			}
+			// if (entityPoint.imagePreviewUri != null &&
+			// !entityPoint.imagePreviewUri.equals("")) {
+			// /*
+			// * If we find it in the cache we'll use it otherwise we fall back
+			// to the
+			// * default marker. It would be expensive to deal with images way
+			// outside the users
+			// * current radar range.
+			// */
+			// // Bitmap bitmap =
+			// ImageManager.getInstance().getImageLoader().getImageCache().get(entityPoint.imagePreviewUri);
+			// // if (bitmap != null) {
+			// // BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
+			// // bitmapDrawable.setBounds(0, 0, 80, 80);
+			// // overlayitem.setMarker(bitmapDrawable);
+			// // }
+			// // else {
+			// Drawable marker =
+			// getResources().getDrawable(R.drawable.icon_picture);
+			// marker.setBounds(0, 0, 40, 35);
+			// overlayitem.setMarker(marker);
+			// // }
+			// }
+			// else if (entityPoint.linkUri != null &&
+			// !entityPoint.linkUri.equals("")) {
+			// Drawable marker =
+			// getResources().getDrawable(R.drawable.icon_link);
+			// marker.setBounds(0, 0, 40, 40);
+			// overlayitem.setMarker(marker);
+			// }
+			// else {
+			// Drawable marker =
+			// getResources().getDrawable(R.drawable.icon_post);
+			// marker.setBounds(0, 0, 40, 35);
+			// overlayitem.setMarker(marker);
+			// }
 
 			overlayitem.setMarker(drawable);
 			mItemizedOverlay.addOverlay(overlayitem);
@@ -452,9 +474,9 @@ public class CandiMap extends MapActivity {
 			if (!shadow && mShowTitles) {
 				for (OverlayItem item : mOverlays) {
 					/*
-					 * Converts latitude & longitude of this overlay item to coordinates on screen.
-					 * As we have called boundCenterBottom() in constructor, so these coordinates
-					 * will be of the bottom center position of the displayed marker.
+					 * Converts latitude & longitude of this overlay item to coordinates on screen. As we have called
+					 * boundCenterBottom() in constructor, so these coordinates will be of the bottom center position of
+					 * the displayed marker.
 					 */
 					GeoPoint point = item.getPoint();
 					Point markerBottomCenterCoords = new Point();
@@ -475,7 +497,7 @@ public class CandiMap extends MapActivity {
 						rect.inset(-CandiConstants.MAP_VIEW_TITLE_MARGIN, -CandiConstants.MAP_VIEW_TITLE_MARGIN);
 						rect.offsetTo(markerBottomCenterCoords.x - rect.width() / 2,
 								markerBottomCenterCoords.y - CandiConstants.MAP_VIEW_MARKER_HEIGHT
-																					- rect.height());
+										- rect.height());
 
 						paintText.setTextAlign(Paint.Align.CENTER);
 						paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);

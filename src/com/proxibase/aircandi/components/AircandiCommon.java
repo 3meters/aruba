@@ -36,6 +36,7 @@ import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,6 +74,7 @@ public class AircandiCommon {
 	public static NotificationManager	mNotificationManager;
 	public static LayoutInflater		mLayoutInflater;
 
+	/* Parameters */
 	public Command						mCommand;
 	public String						mParentId;
 	public Entity						mEntity;
@@ -83,8 +85,9 @@ public class AircandiCommon {
 	public Comment						mComment;
 	public String						mMessage;
 	public String						mBeaconId;
-	public Boolean						mNewCandiIsRoot = true;
+	public Boolean						mNewCandiIsRoot				= true;
 
+	/* Theme */
 	private int							mTextColorFocused;
 	private int							mTextColorUnfocused;
 	private int							mHeightActive;
@@ -94,6 +97,7 @@ public class AircandiCommon {
 	private int							mIconPicture;
 	private int							mIconLink;
 
+	/* UI */
 	protected ImageView					mProgressIndicator;
 	protected TextView					mBeaconIndicator;
 	protected TextView					mTitle;
@@ -103,12 +107,16 @@ public class AircandiCommon {
 	public String						mPrefTheme;
 	public IconContextMenu				mIconContextMenu			= null;
 	public Integer						mTabIndex;
+
+	/* Other */
 	private EventHandler				mEventScanReceived;
 	private EventHandler				mEventLocationChanged;
+	private String						mPageName;
 
 	public AircandiCommon(Context context) {
 		mContext = context;
 		mActivity = (Activity) context;
+		mPageName = this.getClass().getSimpleName();
 	}
 
 	public void initialize() {
@@ -190,7 +198,8 @@ public class AircandiCommon {
 		mProgressDialog.setCancelable(true);
 		mProgressDialog.setCanceledOnTouchOutside(false);
 		mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-		mProgressDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+		mProgressDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+				WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
 		mProgressDialog.setOnDismissListener(new OnDismissListener() {
 
 			@Override
@@ -202,6 +211,18 @@ public class AircandiCommon {
 
 	}
 
+	public void track() {
+		track(null);
+	}
+
+	public void track(String pageName) {
+		if (pageName != null) {
+			mPageName = pageName;
+		}
+		Tracker.trackPageView("/" + mPageName);
+		Tracker.dispatch();
+	}
+
 	public void initializeDialogs() {
 
 		/* New candi menu */
@@ -211,7 +232,7 @@ public class AircandiCommon {
 		mIconContextMenu.addItem(resources, resources.getString(R.string.dialog_new_picture), mIconPicture, MENU_ITEM_NEW_PICTURE_ID);
 		mIconContextMenu.addItem(resources, resources.getString(R.string.dialog_new_link), mIconLink, MENU_ITEM_NEW_LINK_ID);
 
-		//set onclick listener for context menu
+		// set onclick listener for context menu
 		mIconContextMenu.setOnClickListener(new IconContextMenu.IconContextMenuOnClickListener() {
 
 			@Override
@@ -221,13 +242,16 @@ public class AircandiCommon {
 
 				String parentId = mNewCandiIsRoot ? null : mEntityId;
 				if (menuId == MENU_ITEM_NEW_POST_ID) {
-					command = new Command(CommandVerb.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null, parentId, null);
+					command = new Command(CommandVerb.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null,
+							parentId, null);
 				}
 				else if (menuId == MENU_ITEM_NEW_PICTURE_ID) {
-					command = new Command(CommandVerb.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE, null, parentId, null);
+					command = new Command(CommandVerb.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE,
+							null, parentId, null);
 				}
 				else if (menuId == MENU_ITEM_NEW_LINK_ID) {
-					command = new Command(CommandVerb.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null, parentId, null);
+					command = new Command(CommandVerb.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null,
+							parentId, null);
 				}
 				doCommand(command);
 			}
@@ -253,7 +277,8 @@ public class AircandiCommon {
 
 			json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_LIST));
 			if (json != null && json.length() > 0) {
-				mEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(json, Entity.class, GsonType.Internal);
+				mEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(json, Entity.class,
+						GsonType.Internal);
 			}
 
 			json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_LOCATION));
@@ -275,7 +300,7 @@ public class AircandiCommon {
 
 	// --------------------------------------------------------------------------------------------
 	// Event routines
-	// --------------------------------------------------------------------------------------------	
+	// --------------------------------------------------------------------------------------------
 	public void doHomeClick(View view) {
 		startRadarActivity();
 	}
@@ -290,7 +315,8 @@ public class AircandiCommon {
 		}
 		else {
 			try {
-				Class clazz = Class.forName(CandiConstants.APP_PACKAGE_NAME + command.activityName, false, mContext.getClass().getClassLoader());
+				Class clazz = Class.forName(CandiConstants.APP_PACKAGE_NAME + command.activityName, false, mContext
+						.getClass().getClassLoader());
 				if (command.verb == CommandVerb.New) {
 					String beaconId = ProxiExplorer.getInstance().getStrongestBeacon().id;
 					IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
@@ -304,9 +330,10 @@ public class AircandiCommon {
 				}
 				else {
 					/*
-					 * We could try and pass the entity instead of the entity id so we don't have to
-					 * load it again but that would require handling cases where the entity doesn't always
-					 * exist in the proxi model.
+					 * We could try and pass the entity instead of the entity id
+					 * so we don't have to load it again but that would require
+					 * handling cases where the entity doesn't always exist in
+					 * the proxi model.
 					 */
 					IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
 					intentBuilder.setCommand(command);
@@ -326,7 +353,8 @@ public class AircandiCommon {
 	public void doProfileClick(View view) {
 		if (Aircandi.getInstance().getUser() != null) {
 			if (Aircandi.getInstance().getUser().anonymous) {
-				mActivity.startActivityForResult(new Intent(mContext, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
+				mActivity
+						.startActivityForResult(new Intent(mContext, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
 			}
 			else {
 				IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
@@ -340,7 +368,8 @@ public class AircandiCommon {
 	}
 
 	public void doInfoClick() {
-		AircandiCommon.showAlertDialog(R.drawable.icon_app, "About", mActivity.getString(R.string.dialog_info), mActivity, new
+		AircandiCommon.showAlertDialog(R.drawable.icon_app, "About", mActivity.getString(R.string.dialog_info),
+				mActivity, new
 				DialogInterface.OnClickListener() {
 
 					public void onClick(DialogInterface dialog, int which) {}
@@ -362,9 +391,18 @@ public class AircandiCommon {
 				int beaconCount = ProxiExplorer.getInstance().mWifiList.size();
 				if (beaconCount > 0) {
 					messageId = R.string.alert_beacons_available;
-					beaconMessage = mActivity.getString(messageId) + "\n";
-					for (WifiScanResult wifi : ProxiExplorer.getInstance().mWifiList) {
-						beaconMessage += wifi.SSID + ": " + wifi.BSSID + "\n";
+					if (Aircandi.getInstance().getUser() != null
+							&& Aircandi.getInstance().getUser().isDeveloper != null
+							&& Aircandi.getInstance().getUser().isDeveloper) {
+						beaconMessage = mActivity.getString(messageId) + "\n\n";
+						for (WifiScanResult wifi : ProxiExplorer.getInstance().mWifiList) {
+							if (!wifi.SSID.equals("candi_feed")) {
+								beaconMessage += wifi.SSID + ": " + wifi.BSSID + "\n";
+							}
+						}
+					}
+					else {
+						beaconMessage = mActivity.getString(messageId);
 					}
 				}
 			}
@@ -381,10 +419,10 @@ public class AircandiCommon {
 	// --------------------------------------------------------------------------------------------
 
 	public void showLocationAccuracy() {
-		Location location = GeoLocationManager.getInstance().getCurrentLocation();
-		if (location != null 
-				&& Aircandi.getInstance().getUser() != null 
-				&& Aircandi.getInstance().getUser().isDeveloper != null 
+		final Location location = GeoLocationManager.getInstance().getCurrentLocation();
+		if (location != null
+				&& Aircandi.getInstance().getUser() != null
+				&& Aircandi.getInstance().getUser().isDeveloper != null
 				&& Aircandi.getInstance().getUser().isDeveloper) {
 			if (location.hasAccuracy()) {
 				TextView textView = (TextView) mActivity.findViewById(R.id.text_header_debug);
@@ -393,9 +431,33 @@ public class AircandiCommon {
 					textView.setText(String.valueOf(location.getAccuracy()));
 				}
 				else if (mTitle != null) {
-					String title = mActivity.getString(R.string.app_name);
-					mTitle.setText(title + "  " + String.valueOf(location.getAccuracy()));
+					final String title = mActivity.getString(R.string.app_name);
+					mActivity.runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							mTitle.setText(title + "  " + location.getProvider().substring(0, 1).toUpperCase()
+									+ String.valueOf(location.getAccuracy()));
+						}
+					});
 				}
+			}
+		}
+		else {
+			/* Clear location info */
+			TextView textView = (TextView) mActivity.findViewById(R.id.text_header_debug);
+			if (textView != null) {
+				textView.setVisibility(View.GONE);
+			}
+			else if (mTitle != null) {
+				final String title = mActivity.getString(R.string.app_name);
+				mActivity.runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						mTitle.setText(title);
+					}
+				});
 			}
 		}
 	}
@@ -408,11 +470,13 @@ public class AircandiCommon {
 
 			WifiScanResult wifiStrongest = null;
 
+			int wifiCount = 0;
 			for (WifiScanResult wifi : scanList) {
-				if (wifi.global || wifi.demo) {
+				if (wifi.global || wifi.demo ) {
 					continue;
 				}
 				else {
+					wifiCount++;
 					if (wifiStrongest == null) {
 						wifiStrongest = wifi;
 					}
@@ -422,7 +486,8 @@ public class AircandiCommon {
 				}
 			}
 
-			if (scanList.size() > 0) {
+			if (wifiCount > 0) {
+				mBeaconIndicator.setText(String.valueOf(wifiCount));
 				drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
 			}
 			if (wifiStrongest != null && wifiStrongest.level > -80) {
@@ -441,10 +506,14 @@ public class AircandiCommon {
 		ErrorType errorType = serviceResponse.exception.getErrorType();
 		ErrorCode errorCode = serviceResponse.exception.getErrorCode();
 		String errorMessage = serviceResponse.exception.getMessage();
+		String responseMessage = serviceResponse.exception.getResponseMessage();
 		String logMessage = null;
 		String friendlyMessage = "Network is unavailable or busy";
-		//String friendlyMessage = "Sorry, failed to reach Aircandi servers, Please check your network connection or try again later.";
 		Boolean showAlert = false;
+		Boolean isDeveloper = false;
+		if (Aircandi.getInstance().getUser().isDeveloper != null && Aircandi.getInstance().getUser().isDeveloper) {
+			isDeveloper = true;
+		}
 
 		if (errorType == ErrorType.Service) {
 			if (errorCode == ErrorCode.NotFoundException) {
@@ -455,9 +524,9 @@ public class AircandiCommon {
 			}
 		}
 		/*
-		 * Client errors occur when we are unable to get a response from a service,
-		 * or when the client is unable to understand a response from a service.
-		 * This includes protocol, network and timeout errors.
+		 * Client errors occur when we are unable to get a response from a
+		 * service, or when the client is unable to understand a response from a
+		 * service. This includes protocol, network and timeout errors.
 		 */
 		else if (errorType == ErrorType.Client) {
 			if (errorCode == ErrorCode.IOException) {
@@ -499,11 +568,25 @@ public class AircandiCommon {
 					});
 		}
 		else {
+			if (isDeveloper) {
+				friendlyMessage = responseMessage;
+			}
+
 			Notification note = new Notification(R.drawable.icon_app, "Network problem", System.currentTimeMillis());
+
+			RemoteViews contentView = new RemoteViews(mActivity.getPackageName(), R.layout.custom_notification);
+			contentView.setImageViewResource(R.id.image, R.drawable.icon_app);
+			if (isDeveloper) {
+				contentView.setViewVisibility(R.id.title, View.GONE);
+			}
+			contentView.setTextViewText(R.id.title, "Aircandi");
+			contentView.setTextViewText(R.id.text, friendlyMessage);
+			note.contentView = contentView;
+
 			Intent intent = new Intent(mContext, CandiRadar.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
-			note.setLatestEventInfo(mContext, "Aircandi", friendlyMessage, pendingIntent);
+			note.contentIntent = pendingIntent;
 
 			ImageUtils.showToastNotification(friendlyMessage, Toast.LENGTH_SHORT);
 			showProgressDialog(false, null);
@@ -540,13 +623,14 @@ public class AircandiCommon {
 
 		}
 		else {
-			if (mProgressDialog.isShowing()) {
+			if (mProgressDialog.isShowing() && mProgressDialog.getWindow().getWindowManager() != null) {
 				mProgressDialog.dismiss();
 			}
 		}
 	}
 
-	public static void showAlertDialog(Integer iconResource, String titleText, String message, Context context, OnClickListener listener) {
+	public static void showAlertDialog(Integer iconResource, String titleText, String message, Context context,
+			OnClickListener listener) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
 		View titleView = ((Activity) context).getLayoutInflater().inflate(R.layout.temp_dialog_title, null);
@@ -612,7 +696,8 @@ public class AircandiCommon {
 
 	public void setTheme() {
 		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
-		int themeResourceId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
+		int themeResourceId = mContext.getApplicationContext().getResources()
+				.getIdentifier(mPrefTheme, "style", mContext.getPackageName());
 		((Activity) mContext).setTheme(themeResourceId);
 	}
 
@@ -626,13 +711,15 @@ public class AircandiCommon {
 				if (tab == view) {
 					mTabIndex = i;
 					label.setTextColor(mTextColorFocused);
-					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightActive);
+					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT,
+							mHeightActive);
 					params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
 					image.setLayoutParams(params);
 				}
 				else {
 					label.setTextColor(mTextColorUnfocused);
-					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, mHeightInactive);
+					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT,
+							mHeightInactive);
 					params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
 					image.setLayoutParams(params);
 				}
@@ -671,13 +758,15 @@ public class AircandiCommon {
 	public void signout() {
 		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
 			showProgressDialog(true, "Signing out...");
-			User user = (User) ProxibaseService.convertJsonToObject(CandiConstants.USER_ANONYMOUS, User.class, GsonType.ProxibaseService);
+			User user = (User) ProxibaseService.convertJsonToObject(CandiConstants.USER_ANONYMOUS, User.class,
+					GsonType.ProxibaseService);
 			user.anonymous = true;
 			Aircandi.getInstance().setUser(user);
 			if (mActivity.findViewById(R.id.image_user) != null) {
 				setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
 			}
 			ImageUtils.showToastNotification("Signed out.", Toast.LENGTH_SHORT);
+			Tracker.trackEvent("User", "Signout", null, 0);
 			showProgressDialog(false, null);
 		}
 	}
@@ -744,22 +833,23 @@ public class AircandiCommon {
 
 	public boolean doOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.settings :
-				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
-				mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-				return false;
-			case R.id.profile :
-				doProfileClick(null);
-				return false;
-			case R.id.signout :
-				signout();
-				return false;
-			case R.id.signin :
-				signin();
-				return false;
-			case R.id.about :
-				doInfoClick();
-				return false;
+		case R.id.settings:
+			mActivity.startActivityForResult(new Intent(mActivity, Preferences.class),
+					CandiConstants.ACTIVITY_PREFERENCES);
+			mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+			return false;
+		case R.id.profile:
+			doProfileClick(null);
+			return false;
+		case R.id.signout:
+			signout();
+			return false;
+		case R.id.signin:
+			signin();
+			return false;
+		case R.id.about:
+			doInfoClick();
+			return false;
 		}
 		return false;
 	}
@@ -781,14 +871,13 @@ public class AircandiCommon {
 
 	public void reload() {
 		/*
-		 * If the activity was called using startActivityForResult,
-		 * the ActivityResult will ripple back down the chain.
-		 * This process seems to kill the previous activities since their
-		 * work appears to be completed. The back stack still exists though
-		 * so hitting the back button launches new activities instead of
-		 * bring the existing ones to the front. User also sees forward
-		 * slide animation and loading just like a forward launching
-		 * sequence.
+		 * If the activity was called using startActivityForResult, the
+		 * ActivityResult will ripple back down the chain. This process seems to
+		 * kill the previous activities since their work appears to be
+		 * completed. The back stack still exists though so hitting the back
+		 * button launches new activities instead of bring the existing ones to
+		 * the front. User also sees forward slide animation and loading just
+		 * like a forward launching sequence.
 		 */
 		Intent intent = mActivity.getIntent();
 		mActivity.finish();
@@ -796,6 +885,9 @@ public class AircandiCommon {
 	}
 
 	public void doDestroy() {
+		if (mEntity != null && mEntity.imageBitmap != null) {
+			mEntity.imageBitmap.recycle();
+		}
 		System.gc();
 	}
 
@@ -821,6 +913,14 @@ public class AircandiCommon {
 	// --------------------------------------------------------------------------------------------
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
+
+	public String getPageName() {
+		return mPageName;
+	}
+
+	public void setPageName(String pageName) {
+		mPageName = pageName;
+	}
 
 	public enum ServiceOperation {
 		Login,

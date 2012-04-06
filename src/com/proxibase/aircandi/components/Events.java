@@ -14,7 +14,8 @@ public class Events {
 
 		public static void onWifiScanReceived(Object data) {
 			synchronized (wifiScanReceived) {
-				for (EventHandler eventHandler : wifiScanReceived) {
+				List<EventHandler> eventHandlers = (List<EventHandler>) ((ArrayList<EventHandler>) wifiScanReceived).clone();
+				for (EventHandler eventHandler : eventHandlers) {
 					if (eventHandler != null) {
 						eventHandler.onEvent(data);
 					}
@@ -24,7 +25,8 @@ public class Events {
 
 		public static void onEntitiesLoaded(Object data) {
 			synchronized (entitiesLoaded) {
-				for (EventHandler eventHandler : entitiesLoaded) {
+				List<EventHandler> eventHandlers = (List<EventHandler>) ((ArrayList<EventHandler>) entitiesLoaded).clone();
+				for (EventHandler eventHandler : eventHandlers) {
 					if (eventHandler != null) {
 						eventHandler.onEvent(data);
 					}
@@ -34,7 +36,8 @@ public class Events {
 
 		public static void onBeaconScanComplete(Object data) {
 			synchronized (beaconScanComplete) {
-				for (EventHandler eventHandler : beaconScanComplete) {
+				List<EventHandler> eventHandlers = (List<EventHandler>) ((ArrayList<EventHandler>) beaconScanComplete).clone();
+				for (EventHandler eventHandler : eventHandlers) {
 					if (eventHandler != null) {
 						eventHandler.onEvent(data);
 					}
@@ -44,7 +47,8 @@ public class Events {
 
 		public static void onLocationChanged(Object data) {
 			synchronized (locationChanged) {
-				for (EventHandler eventHandler : locationChanged) {
+				List<EventHandler> eventHandlers = (List<EventHandler>) ((ArrayList<EventHandler>) locationChanged).clone();
+				for (EventHandler eventHandler : eventHandlers) {
 					if (eventHandler != null) {
 						eventHandler.onEvent(data);
 					}

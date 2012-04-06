@@ -26,6 +26,8 @@ public class NetworkManager {
 	private WifiStateChangedReceiver	mWifiStateChangedReceiver	= new WifiStateChangedReceiver();
 	private IConnectivityListener		mConnectivityListener;
 	private WifiManager					mWifiManager;
+	private static int					CONNECT_TRIES				= 10;
+	private static int					CONNECT_WAIT				= 500;
 
 	public static synchronized NetworkManager getInstance() {
 		if (singletonObject == null) {
@@ -89,6 +91,9 @@ public class NetworkManager {
 		if (!verifyIsConnected()) {
 			serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ConnectionException, null,
 					new ProxibaseServiceException(serviceRequest.getUri(), ErrorType.Client, ErrorCode.ConnectionException, null));
+			serviceResponse.exception.setResponseMessage("Device is not connected to a network: "
+															+ String.valueOf(CONNECT_TRIES) + " tries over "
+															+ String.valueOf(CONNECT_WAIT * CONNECT_TRIES / 1000) + " second window");
 		}
 		else {
 			/*
@@ -120,11 +125,11 @@ public class NetworkManager {
 			attempts++;
 			Logger.v(this, "No network connection: attempt: " + String.valueOf(attempts));
 
-			if (attempts >= 10) {
+			if (attempts >= CONNECT_TRIES) {
 				return false;
 			}
 			try {
-				Thread.sleep(500);
+				Thread.sleep(CONNECT_WAIT);
 			}
 			catch (InterruptedException exception) {
 				return false;
@@ -339,7 +344,8 @@ public class NetworkManager {
 		TransportException,
 		UnknownHostException,
 		ProtocolException,
-		UnknownException
+		UnknownException,
+		IllegalStateException
 	}
 
 }

@@ -92,7 +92,7 @@ public class ProxiExplorer {
 						@Override
 						public void onReceive(Context context, Intent intent) {
 
-							Logger.d(ProxiExplorer.this, "Received wifi scan results");
+							Logger.v(ProxiExplorer.this, "Received wifi scan results");
 							mContext.unregisterReceiver(this);
 							wifiReleaseLock();
 
@@ -407,7 +407,7 @@ public class ProxiExplorer {
 
 	}
 
-	public ServiceResponse getEntityFromService(String entityId, Boolean getChildren) {
+	public ServiceResponse getEntityFromService(String entityId, String jsonEagerLoad, String jsonFields) {
 
 		if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
 			wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
@@ -417,7 +417,8 @@ public class ProxiExplorer {
 		ArrayList<String> entityIds = new ArrayList<String>();
 		entityIds.add(entityId);
 		parameters.putStringArrayList("entityIds", entityIds);
-		parameters.putString("eagerLoad", "object:{\"children\":" + getChildren.toString() + ",\"comments\":false}");
+		parameters.putString("eagerLoad", "object:" + jsonEagerLoad);
+		parameters.putString("fields", "object:" + jsonFields);
 
 		final ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities");
@@ -594,7 +595,7 @@ public class ProxiExplorer {
 	private void manageEntityVisibility() {
 
 		/* Visibility status effects all entities regardless of whether this is a full or partial update. */
-		Logger.d(this, "Managing entity visibility");
+		Logger.v(this, "Managing entity visibility");
 
 		for (Beacon beacon : mBeacons) {
 			for (Entity entity : beacon.entities) {

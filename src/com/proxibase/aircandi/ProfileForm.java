@@ -13,31 +13,31 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
-import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.Command.CommandVerb;
-import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseServiceException;
-import com.proxibase.service.Query;
-import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ProxibaseServiceException;
+import com.proxibase.service.Query;
+import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.User;
 
 public class ProfileForm extends FormActivity {
@@ -70,7 +70,6 @@ public class ProfileForm extends FormActivity {
 		}
 
 		bind();
-		Tracker.trackPageView("/ProfileForm");
 
 		if (savedInstanceState != null) {
 			doRestoreInstanceState(savedInstanceState);
@@ -78,7 +77,7 @@ public class ProfileForm extends FormActivity {
 	}
 
 	protected void initialize() {
-
+		mCommon.track();
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mUserId = extras.getInt(getString(R.string.EXTRA_USER_ID));
@@ -175,7 +174,6 @@ public class ProfileForm extends FormActivity {
 					mCommon.showProgressDialog(false, null);
 					mCommon.stopTitlebarProgress();
 					draw();
-					Tracker.dispatch();
 				}
 				else {
 					mCommon.handleServiceError(serviceResponse);
@@ -318,6 +316,7 @@ public class ProfileForm extends FormActivity {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
+						Tracker.trackEvent("User", "Update", null, 0);
 						mCommon.showProgressDialog(false, null);
 						Aircandi.getInstance().setUser(mUser);
 						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);

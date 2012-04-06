@@ -69,42 +69,25 @@ import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
 
 /*
- * Http 1.1 Status Codes (subset)
- * - 200: OK
- * - 201: Created
- * - 202: Accepted
- * - 203: Non-authoritative information
- * - 204: Request fulfilled but no content returned (message body empty).
- * - 3xx: Redirection
- * - 400: Bad request. Malformed syntax.
- * - 401: Unauthorized. Request requires user authentication.
- * - 403: Forbidden
- * - 404: Not found
- * - 405: Method not allowed
- * - 408: Request timeout
- * - 415: Unsupported media type
- * - 500: Internal server error
- * - 503: Service unavailable. Caused by temporary overloading or maintenance.
- * 
- * Notes:
- * - We get a 403 from amazon when trying to fetch something from S3 that isn't there.
+ * Http 1.1 Status Codes (subset) - 200: OK - 201: Created - 202: Accepted - 203: Non-authoritative information - 204:
+ * Request fulfilled but no content returned (message body empty). - 3xx: Redirection - 400: Bad request. Malformed
+ * syntax. - 401: Unauthorized. Request requires user authentication. - 403: Forbidden - 404: Not found - 405: Method
+ * not allowed - 408: Request timeout - 415: Unsupported media type - 500: Internal server error - 503: Service
+ * unavailable. Caused by temporary overloading or maintenance. Notes: - We get a 403 from amazon when trying to fetch
+ * something from S3 that isn't there.
  */
 
 /*
- * Timeouts
- * - Connection timeout is the max time allowed to make initial connection with the remove server.
- * - Socket timeout is the max inactivity time allowed between two consecutive data packets.
- * - AndroidHttpClient sets both to 60 seconds.
+ * Timeouts - Connection timeout is the max time allowed to make initial connection with the remove server. - Socket
+ * timeout is the max inactivity time allowed between two consecutive data packets. - AndroidHttpClient sets both to 60
+ * seconds.
  */
 
 /*
- * Exceptions when executing HTTP methods using HttpClient
- * 
- * - IOException: Generic transport exceptions (unreliable connection, socket timeout, generally non-fatal.
- * ClientProtocolException, SocketException and InterruptedIOException are sub classes of IOException.
- * 
- * - HttpException: Protocol exceptions. These tend to be fatal and suggest something fundamental is wrong with the
- * request such as a violation of the http protocol.
+ * Exceptions when executing HTTP methods using HttpClient - IOException: Generic transport exceptions (unreliable
+ * connection, socket timeout, generally non-fatal. ClientProtocolException, SocketException and InterruptedIOException
+ * are sub classes of IOException. - HttpException: Protocol exceptions. These tend to be fatal and suggest something
+ * fundamental is wrong with the request such as a violation of the http protocol.
  */
 
 /**
@@ -182,8 +165,8 @@ public class ProxibaseService {
 		mHttpClient = new DefaultHttpClient(connectionManager, mHttpParams);
 
 		/* Start a thread to monitor for expired or idle connections */
-		//mIdleConnectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
-		//mIdleConnectionMonitorThread.start();
+		// mIdleConnectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
+		// mIdleConnectionMonitorThread.start();
 	}
 
 	// ----------------------------------------------------------------------------------------
@@ -292,8 +275,8 @@ public class ProxibaseService {
 				}
 				else if (isTemporaryRedirect(response)) {
 					/*
-					 * If we get a 307 Temporary Redirect, we'll point the HTTP method to the redirected
-					 * location, and let the next retry deliver the request to the right location.
+					 * If we get a 307 Temporary Redirect, we'll point the HTTP method to the redirected location, and
+					 * let the next retry deliver the request to the right location.
 					 */
 					Header[] locationHeaders = response.getHeaders("location");
 					String redirectedLocation = locationHeaders[0].getValue();
@@ -302,8 +285,9 @@ public class ProxibaseService {
 				}
 				else {
 					ProxibaseServiceException exception = handleErrorResponse(response);
-					String errorResponse = convertStreamToString(response.getEntity().getContent());
+					String errorResponse = "Service Response: " + convertStreamToString(response.getEntity().getContent());
 					Logger.d(this, errorResponse);
+					exception.setResponseMessage(errorResponse);
 					if (!shouldRetry(httpRequest, exception, retryCount)) {
 						throw exception;
 					}
@@ -311,20 +295,26 @@ public class ProxibaseService {
 			}
 			catch (ClientProtocolException exception) {
 				/* Can't recover from this with a retry. */
-				Logger.w(this, "Unable to execute Http request: " + exception.getMessage());
-				throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Client, ErrorCode.ClientProtocolException, exception);
+				String message = "Unable to execute Http request: ClientProtocolException: " + exception.getMessage();
+				Logger.w(this, message);
+				ProxibaseServiceException proxibaseException = new ProxibaseServiceException(message, ErrorType.Client, ErrorCode.ClientProtocolException,
+						exception);
+				proxibaseException.setResponseMessage(message);
+				throw proxibaseException;
 			}
 			catch (IOException exception) {
 				/*
-				 * This could be any of these:
-				 * - SocketTimeoutException: timeout expired on a socket
-				 * - SocketException: thrown during socket creation or setting options
-				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
-				 * - UnknownHostException: hostname didn't exist in the dns system
+				 * This could be any of these: - ConnectTimeoutException: timeout expired trying to connect to service -
+				 * SocketTimeoutException: timeout expired on a socket - SocketException: thrown during socket creation
+				 * or setting options - NoHttpResponseException: target server failed to respond with a valid HTTP
+				 * response - UnknownHostException: hostname didn't exist in the dns system
 				 */
 				if (!shouldRetry(httpRequest, exception, retryCount)) {
-					Logger.w(this, "Unable to execute Http request: " + exception.getMessage());
-					throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Client, ErrorCode.IOException, exception);
+					String message = exception.getClass().getSimpleName() + ": " + exception.getMessage();
+					Logger.w(this, message);
+					ProxibaseServiceException proxibaseException = new ProxibaseServiceException(message, ErrorType.Client, ErrorCode.IOException, exception);
+					proxibaseException.setResponseMessage(message);
+					throw proxibaseException;
 				}
 			}
 		}
@@ -383,6 +373,15 @@ public class ProxibaseService {
 			exception.setErrorCode(ErrorCode.NotFoundException);
 			exception.setHttpStatusCode(statusCode);
 		}
+		else if (statusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
+			/*
+			 * This can happen if service crashes during request
+			 */
+			exception = new ProxibaseServiceException("Gateway timeout");
+			exception.setErrorType(ErrorType.Service);
+			exception.setErrorCode(ErrorCode.AircandiServiceException);
+			exception.setHttpStatusCode(statusCode);
+		}
 		else if (statusCode == HttpStatus.SC_CONFLICT) {
 			exception = new ProxibaseServiceException("Duplicate key");
 			exception.setErrorType(ErrorType.Service);
@@ -415,8 +414,8 @@ public class ProxibaseService {
 	private boolean isTemporaryRedirect(HttpResponse response) {
 		int status = response.getStatusLine().getStatusCode();
 		return status == HttpStatus.SC_TEMPORARY_REDIRECT &&
-						response.getHeaders("Location") != null &&
-						response.getHeaders("Location").length > 0;
+				response.getHeaders("Location") != null &&
+				response.getHeaders("Location").length > 0;
 	}
 
 	public boolean shouldRetry(HttpRequestBase httpAction, Exception exception, int retries) {
@@ -433,8 +432,8 @@ public class ProxibaseService {
 		}
 
 		if (exception instanceof NoHttpResponseException
-						|| exception instanceof SocketException
-						|| exception instanceof SocketTimeoutException) {
+				|| exception instanceof SocketException
+				|| exception instanceof SocketTimeoutException) {
 			Logger.d(this, "Retrying on " + exception.getClass().getName() + ": " + exception.getMessage());
 			return true;
 		}
@@ -443,15 +442,15 @@ public class ProxibaseService {
 			ProxibaseServiceException pse = (ProxibaseServiceException) exception;
 
 			/*
-			 * For 500 internal server errors and 503 service
-			 * unavailable errors, we want to retry, but we need to use
-			 * an exponential back-off strategy so that we don't overload
-			 * a server with a flood of retries. If we've surpassed our
-			 * retry limit we handle the error response as a non-retryable
-			 * error and go ahead and throw it back to the user as an exception.
+			 * For 500 internal server errors and 503 service unavailable errors, we want to retry, but we need to use
+			 * an exponential back-off strategy so that we don't overload a server with a flood of retries. If we've
+			 * surpassed our retry limit we handle the error response as a non-retryable error and go ahead and throw it
+			 * back to the user as an exception. We also retry 504 gateway timeout errors because this could have been
+			 * caused by service crash during the request and the service will be restarted.
 			 */
 			if (pse.getHttpStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR
-							|| pse.getHttpStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE) {
+					|| pse.getHttpStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE
+					|| pse.getHttpStatusCode() == HttpStatus.SC_GATEWAY_TIMEOUT) {
 				return true;
 			}
 		}
@@ -541,11 +540,6 @@ public class ProxibaseService {
 	private void addEntity(HttpEntityEnclosingRequestBase httpAction, String json) throws ProxibaseClientException {
 		try {
 			httpAction.setEntity(new StringEntity(json, HTTP.UTF_8));
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			JsonParser jp = new JsonParser();
-			JsonElement je = jp.parse(json);
-			String prettyJsonString = gson.toJson(je);
-			Logger.v(this, prettyJsonString);
 		}
 		catch (UnsupportedEncodingException exception) {
 			throw new ProxibaseClientException(exception.getMessage(), exception);
@@ -598,12 +592,9 @@ public class ProxibaseService {
 		float downloadTimeMills = elapsedTime / 1000000;
 		float bitspersecond = ((bytesDownloaded * 8) * (1000 / downloadTimeMills)) / 1000;
 		Logger.v(this, subject + ": Downloaded "
-						+ String.valueOf(bytesDownloaded)
-						+ " bytes @ "
-						+ String.valueOf(Math.round(bitspersecond))
-						+ " kbps: "
-						+ String.valueOf(downloadTimeMills)
-						+ "ms");
+				+ String.valueOf(bytesDownloaded) + " bytes @ "
+				+ String.valueOf(Math.round(bitspersecond)) + " kbps: "
+				+ String.valueOf(downloadTimeMills) + "ms");
 	}
 
 	public String generateId(int schemaId, Long timeUtc) {
@@ -643,8 +634,8 @@ public class ProxibaseService {
 		Gson gson = ProxibaseService.getGson(gsonType);
 
 		/*
-		 * In general, gson deserializer will ignore elements (fields or classes) in the string that
-		 * do not exist on the object type. Collections should be treated as generic lists on the target object.
+		 * In general, gson deserializer will ignore elements (fields or classes) in the string that do not exist on the
+		 * object type. Collections should be treated as generic lists on the target object.
 		 */
 		try {
 
@@ -697,8 +688,8 @@ public class ProxibaseService {
 		GsonBuilder gsonb = new GsonBuilder();
 
 		/*
-		 * Converting objects to/from json for passing between the client and the service
-		 * we need to apply some additional behavior on top of the defaults
+		 * Converting objects to/from json for passing between the client and the service we need to apply some
+		 * additional behavior on top of the defaults
 		 */
 		if (gsonType == GsonType.ProxibaseService) {
 			gsonb.excludeFieldsWithoutExposeAnnotation();

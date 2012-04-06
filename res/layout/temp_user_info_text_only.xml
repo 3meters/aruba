@@ -10,7 +10,6 @@
         style="@style/app_user_fullname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:gravity="center_vertical"
         android:text="Jay Massena" />
 
@@ -18,7 +17,6 @@
         style="@style/app_bullet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:gravity="center_vertical"
         android:paddingLeft="3dp"
         android:paddingRight="3dp"
@@ -29,7 +27,6 @@
         style="@style/app_user_timesince"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:gravity="center_vertical"
         android:text="10 hours ago" />
 

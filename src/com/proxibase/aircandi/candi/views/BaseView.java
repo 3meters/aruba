@@ -37,9 +37,8 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiRectangle;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.components.BitmapTextureSource;
-import com.proxibase.aircandi.components.ImageUtils;
-import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
+import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 
@@ -166,13 +165,12 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 	protected void updateTextureRegions() {
 		if (((BaseModel) mModel).getTitleText() != null) {
-			Logger.v(this, "Model title text is null: ");
 
 			mTitleTexture.clearTextureSources();
-			Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, ((BaseModel) mModel)
-					.getTitleText());
+			BaseModel model = (BaseModel) mModel;
+			Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, model.getTitleText());
 
-			mTitleTextureRegion = TextureRegionFactory.createFromSource(mTitleTexture, new BitmapTextureSource(titleBitmap, new IBitmapAdapter() {
+			mTitleTextureRegion = TextureRegionFactory.createFromSource(mTitleTexture, new BitmapTextureSource(titleBitmap, model.getTitleText(), new IBitmapAdapter() {
 
 				@Override
 				public Bitmap reloadBitmap() {

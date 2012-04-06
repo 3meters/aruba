@@ -19,10 +19,9 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.proxibase.aircandi.CandiMap.CandiItemizedOverlay;
 import com.proxibase.aircandi.components.AircandiCommon;
-import com.proxibase.aircandi.components.ProxiExplorer;
-import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.GeoLocation;
@@ -53,12 +52,11 @@ public class MapBrowse extends MapActivity {
 
 		initialize();
 		bind();
-
-		Tracker.trackPageView("/CandiMap");
 	}
 
 	private void initialize() {
 
+		mCommon.track();
 		mMapView = new MapView(this, Aircandi.isDebugBuild(this) ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
 		mMapView.setBuiltInZoomControls(true);
 		mMapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
@@ -84,7 +82,9 @@ public class MapBrowse extends MapActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
-					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntityId, false);
+					String jsonEagerLoad = "{\"children\":false,\"comments\":false}";
+					String jsonFields = "{\"entities\":{},\"children\":{},\"comments\":{}}";
+					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntityId, jsonEagerLoad, jsonFields);
 					return serviceResponse;
 				}
 

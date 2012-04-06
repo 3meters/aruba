@@ -14,16 +14,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.AdapterView.OnItemClickListener;
 
 import com.google.code.bing.search.client.BingSearchClient;
-import com.google.code.bing.search.client.BingSearchServiceClientFactory;
 import com.google.code.bing.search.client.BingSearchClient.SearchRequestBuilder;
+import com.google.code.bing.search.client.BingSearchServiceClientFactory;
 import com.google.code.bing.search.schema.AdultOption;
 import com.google.code.bing.search.schema.SearchResponse;
 import com.google.code.bing.search.schema.SourceType;
@@ -31,7 +31,6 @@ import com.google.code.bing.search.schema.multimedia.ImageResult;
 import com.proxibase.aircandi.components.DrawableManager;
 import com.proxibase.aircandi.components.EndlessAdapter;
 import com.proxibase.aircandi.components.Logger;
-import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
@@ -64,10 +63,10 @@ public class PictureSearch extends FormActivity {
 
 		initialize();
 		bind();
-		Tracker.trackPageView("/AircandiGallery");
 	}
 
 	private void initialize() {
+		mCommon.track();
 		mDrawableManager = new DrawableManager();
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mGridView = (GridView) findViewById(R.id.grid_gallery);
@@ -93,7 +92,7 @@ public class PictureSearch extends FormActivity {
 
 	protected void bind() {
 
-		new AsyncTask() {
+		new AsyncTask<Object, Object, Object>() {
 
 			@Override
 			protected void onPreExecute() {
@@ -104,6 +103,9 @@ public class PictureSearch extends FormActivity {
 			protected Object doInBackground(Object... params) {
 
 				String query = mSearch.getText().toString();
+				Aircandi.settingsEditor.putString(Preferences.SETTING_PICTURE_SEARCH, query);
+				Aircandi.settingsEditor.commit();
+
 				mOffset = 0;
 				mTitleOptional = query;
 				if (query == null || query.equals("")) {
@@ -265,8 +267,8 @@ public class PictureSearch extends FormActivity {
 			if (serviceResponse.responseCode == ResponseCode.Success) {
 				moreImages = (ArrayList<ImageResult>) serviceResponse.data;
 				Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
-								+ " new total = "
-								+ String.valueOf(getWrappedAdapter().getCount() + moreImages.size()));
+						+ " new total = "
+						+ String.valueOf(getWrappedAdapter().getCount() + moreImages.size()));
 				mOffset += PAGE_SIZE;
 				return ((getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX);
 			}

@@ -11,20 +11,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.components.Command;
+import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.Query;
-import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.Query;
+import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.User;
 
 public class SignInForm extends FormActivity {
@@ -43,12 +43,11 @@ public class SignInForm extends FormActivity {
 
 		initialize();
 		draw();
-		Tracker.trackPageView("/SignInForm");
-		Tracker.dispatch();
 	}
 
 	private void initialize() {
 
+		mCommon.track();
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextMessage = (TextView) findViewById(R.id.form_message);
@@ -119,6 +118,7 @@ public class SignInForm extends FormActivity {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				mCommon.showProgressDialog(false, null);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					Tracker.trackEvent("User", "Signin", null, 0);			
 					String jsonResponse = (String) serviceResponse.data;
 					User user = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
 

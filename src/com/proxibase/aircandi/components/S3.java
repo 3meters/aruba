@@ -35,6 +35,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -95,7 +96,7 @@ public class S3 {
 
 	public static List<String> getObjectNamesForBucket(String bucketName, int numItems) {
 		ListObjectsRequest req = new ListObjectsRequest();
-		req.setMaxKeys(new Integer(numItems));
+		req.setMaxKeys(Integer.valueOf(numItems));
 		req.setBucketName(bucketName);
 		ObjectListing objects = getInstance().listObjects(req);
 		objListing = objects;
@@ -215,4 +216,21 @@ public class S3 {
 		}
 	}
 
+	public static void flagImageForDeletion(String imageKey, long deleteDate) throws ProxibaseServiceException {
+
+		/* If the image is stored with S3 then it will be deleted */
+		try {
+			CopyObjectRequest req = new CopyObjectRequest(CandiConstants.S3_BUCKET_IMAGES, imageKey, CandiConstants.S3_BUCKET_IMAGES, imageKey);
+			ObjectMetadata metadata = S3.getInstance().getObjectMetadata(CandiConstants.S3_BUCKET_IMAGES, imageKey);
+			metadata.addUserMetadata("deleteDate", String.valueOf(deleteDate));
+			req.setNewObjectMetadata(metadata);
+			S3.getInstance().copyObject(req);
+		}
+		catch (final AmazonServiceException exception) {
+			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Service, ErrorCode.AmazonServiceException, exception);
+		}
+		catch (final AmazonClientException exception) {
+			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Client, ErrorCode.AmazonClientException, exception);
+		}
+	}
 }

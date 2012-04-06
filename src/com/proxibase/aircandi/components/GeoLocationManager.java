@@ -1,22 +1,52 @@
 package com.proxibase.aircandi.components;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Bundle;
-import android.widget.Toast;
+import android.os.SystemClock;
 
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.components.Events.EventHandler;
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.objects.Observation;
 
 public class GeoLocationManager {
+
+	/*
+	 * Current location strategy
+	 * 
+	 * We only use location when inserting a beacon or entity.
+	 * 
+	 * When the entity form is created for a new candi we refresh the current
+	 * location using a combination of last known and a single coarse update (if
+	 * needed). The coarse update is almost guaranteed to use the network
+	 * provider if available and enabled. Last known will only consider gps if
+	 * the gps provider is currently enabled even if a good gps fix was
+	 * performed before it was disabled.
+	 * 
+	 * If network is disabled and gps is enabled, a single update request will
+	 * take longer to complete.
+	 * 
+	 * Additional work: If more accuracy is needed, we can launch a fine update
+	 * after the coarse update that will be working while the user is completing
+	 * the candi form.
+	 * 
+	 * Altitude and accuracy are in meters.
+	 * Bearing is direction of travel in degrees East of true North.
+	 * Speed is movement of the device over ground in meters/second.
+	 */
 
 	private static GeoLocationManager	singletonObject;
 
@@ -24,9 +54,14 @@ public class GeoLocationManager {
 	private Location					mCurrentLocation;
 	private LocationManager				mLocationManager;
 	private LocationListener			mLocationListener;
+	@SuppressWarnings("unused")
+	private Runnable					mLocationScanRunnable;
+	protected PendingIntent				mPendingIntentSingleUpdate;
+	@SuppressWarnings("unused")
 	private EventHandler				mEventLocationChanged;
 	private AtomicBoolean				mLocationScanActive	= new AtomicBoolean(false);
-	private Runnable					mLocationScanRunnable;
+
+	protected Criteria					mCriteria;
 
 	public static synchronized GeoLocationManager getInstance() {
 		if (singletonObject == null) {
@@ -35,9 +70,6 @@ public class GeoLocationManager {
 		return singletonObject;
 	}
 
-	/**
-	 * Designed as a singleton. The private Constructor prevents any other class from instantiating.
-	 */
 	private GeoLocationManager() {}
 
 	public void setContext(Context context) {
@@ -45,51 +77,34 @@ public class GeoLocationManager {
 	}
 
 	public void initialize() {
-
-		/* Location */
 		mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
 		mLocationListener = new LocationListener() {
 
 			@Override
 			public void onLocationChanged(Location location) {
-				if (isBetterLocation(location, getCurrentLocation())) {
-					setCurrentLocation(location);
+				if (isBetterLocation(location, mCurrentLocation)) {
+					mCurrentLocation = location;
 					location.setTime(System.currentTimeMillis());
 					Events.EventBus.onLocationChanged(location);
 				}
 			}
 
 			@Override
-			public void onProviderDisabled(String provider) {
-				ImageUtils.showToastNotification(provider + ": disabled", Toast.LENGTH_SHORT);
-			}
+			public void onProviderDisabled(String provider) {}
 
 			@Override
-			public void onProviderEnabled(String provider) {
-				ImageUtils.showToastNotification(provider + ": enabled", Toast.LENGTH_SHORT);
-			}
+			public void onProviderEnabled(String provider) {}
 
 			@Override
-			public void onStatusChanged(String provider, int status, Bundle extras) {
-				if (status == LocationProvider.AVAILABLE) {
-					ImageUtils.showToastNotification(provider + ": available", Toast.LENGTH_SHORT);
-				}
-				else if (status == LocationProvider.OUT_OF_SERVICE) {
-					ImageUtils.showToastNotification(provider + ": out of service", Toast.LENGTH_SHORT);
-				}
-				else if (status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
-					ImageUtils.showToastNotification(provider + ": temporarily unavailable", Toast.LENGTH_SHORT);
-				}
-			}
+			public void onStatusChanged(String provider, int status, Bundle extras) {}
 		};
-
 		mLocationScanRunnable = new Runnable() {
 
 			@Override
 			public void run() {
 				if (mLocationScanActive.get()) {
 					Logger.d(GeoLocationManager.this, "Location scan stopped: time limit");
-					stopLocationUpdates();
+					stopLocationPolling();
 				}
 			}
 		};
@@ -99,38 +114,58 @@ public class GeoLocationManager {
 			@Override
 			public void onEvent(Object data) {
 
-				Location location = getCurrentLocation();
-				if (location.hasAccuracy() && location.getAccuracy() <= 30) {
+				if (mCurrentLocation.hasAccuracy() && mCurrentLocation.getAccuracy() <= 30) {
 					Logger.d(GeoLocationManager.this, "Location scan stopped: accurate fix obtained");
-					stopLocationUpdates();
+					stopLocationPolling();
 					return;
 				}
 			}
 		};
 
 		synchronized (Events.EventBus.locationChanged) {
-			Events.EventBus.locationChanged.add(mEventLocationChanged);
+			// Events.EventBus.locationChanged.add(mEventLocationChanged);
 		}
 
-		/*
-		 * We grab the last known location if it is less than two minutes old.
-		 */
-		Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		if (lastKnownLocationNetwork != null && timeSinceLocationInMillis(lastKnownLocationNetwork) >= CandiConstants.LOCATION_EXPIRATION) {
-			if (isBetterLocation(lastKnownLocationNetwork, getCurrentLocation())) {
-				Logger.d(this, "Location stored: last known network location");
-				setCurrentLocation(lastKnownLocationNetwork);
-			}
-		}
+		mCriteria = new Criteria();
+		// Coarse accuracy is specified here to get the fastest possible result.
+		// The calling Activity will likely (or have already) request ongoing
+		// updates using the Fine location provider.
+		mCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
+	}
 
-		Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (lastKnownLocationGPS != null && timeSinceLocationInMillis(lastKnownLocationGPS) >= CandiConstants.LOCATION_EXPIRATION) {
-			if (isBetterLocation(lastKnownLocationGPS, getCurrentLocation())) {
-				Logger.d(this, "Location stored: last known GPS location");
-				setCurrentLocation(lastKnownLocationGPS);
-			}
+	// --------------------------------------------------------------------------------------------
+	// Location polling routines
+	// --------------------------------------------------------------------------------------------
+
+	public void startLocationPolling() {
+
+		/* Start first scan right away */
+		Logger.d(this, "Starting location polling scan service");
+		Intent locationIntent = new Intent(Aircandi.applicationContext, LocationPollingService.class);
+		mContext.startService(locationIntent);
+
+		/* Setup a polling schedule */
+		if (CandiConstants.LOCATION_POLLING_INTERVAL > 0) {
+			AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Service.ALARM_SERVICE);
+			PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, locationIntent, 0);
+			alarmManager.cancel(pendingIntent);
+			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+					SystemClock.elapsedRealtime() + CandiConstants.LOCATION_POLLING_INTERVAL,
+					CandiConstants.LOCATION_POLLING_INTERVAL, pendingIntent);
 		}
 	}
+
+	public void stopLocationPolling() {
+		AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Service.ALARM_SERVICE);
+		Intent locationIntent = new Intent(Aircandi.applicationContext, LocationPollingService.class);
+		PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, locationIntent, 0);
+		alarmManager.cancel(pendingIntent);
+		Logger.d(this, "Stopped location polling service");
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Location snapshot routines
+	// --------------------------------------------------------------------------------------------
 
 	public Observation getObservation() {
 
@@ -162,38 +197,6 @@ public class GeoLocationManager {
 		return observation;
 	}
 
-	public void startLocationUpdates(int scanDurationInMillis, int locationExpirationInMillis) {
-
-		if (!mLocationScanActive.get()) {
-
-			Location location = getCurrentLocation();
-			/*
-			 * If a provider is disabled, we won't get any updates. If the user enables the provider
-			 * during our time window, we will start getting updates.
-			 */
-			int locationAge = timeSinceLocationInMillis(location);
-			if (location != null && locationAge >= locationExpirationInMillis) {
-				mLocationScanActive.set(true);
-				Logger.d(this, "Location scan started");
-				setCurrentLocation(null);
-				mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
-						getLocationListener());
-				mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,
-						getLocationListener());
-				Aircandi.applicationHandler.postDelayed(mLocationScanRunnable, scanDurationInMillis);
-			}
-			else {
-				Logger.d(this, "Location scan skipped: current location still good: " + String.valueOf(locationAge) + "ms");
-			}
-		}
-	}
-
-	public void stopLocationUpdates() {
-		mLocationScanActive.set(false);
-		Aircandi.applicationHandler.removeCallbacks(mLocationScanRunnable);
-		mLocationManager.removeUpdates(getLocationListener());
-	}
-
 	public static int timeSinceLocationInMillis(Location location) {
 		if (location == null) {
 			return Integer.MAX_VALUE;
@@ -204,13 +207,7 @@ public class GeoLocationManager {
 		return (int) timeDelta;
 	}
 
-	/**
-	 * Determines whether one Location reading is better than the current Location fix *
-	 * 
-	 * @param location The new Location that you want to evaluate
-	 * @param currentBestLocation The current Location fix, to which you want to compare the new one
-	 */
-	public static boolean isBetterLocation(Location location, Location currentBestLocation) {
+	public static boolean isBetterLocation(Location locationToEvaluate, Location currentBestLocation) {
 
 		if (currentBestLocation == null) {
 			/* A new location is always better than no location */
@@ -218,17 +215,20 @@ public class GeoLocationManager {
 		}
 
 		/* Check whether the new location fix is newer or older */
-		long timeDelta = location.getTime() - currentBestLocation.getTime();
+		long timeDelta = locationToEvaluate.getTime() - currentBestLocation.getTime();
 		boolean isSignificantlyNewer = timeDelta > CandiConstants.TWO_MINUTES;
 		boolean isSignificantlyOlder = timeDelta < -CandiConstants.TWO_MINUTES;
 		boolean isNewer = timeDelta > 0;
 
 		/*
-		 * If it's been more than two minutes since the current location, use the new location
-		 * because the user has likely moved
+		 * If it's been more than two minutes since the current location, use
+		 * the new location because the user has likely moved
 		 */
 		if (isSignificantlyNewer) {
-			/* If the new location is more than two minutes older, it must be worse */
+			/*
+			 * If the new location is more than two minutes older, it must be
+			 * worse
+			 */
 			return true;
 		}
 		else if (isSignificantlyOlder) {
@@ -236,15 +236,18 @@ public class GeoLocationManager {
 		}
 
 		/* Check whether the new location fix is more or less accurate */
-		int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
+		int accuracyDelta = (int) (locationToEvaluate.getAccuracy() - currentBestLocation.getAccuracy());
 		boolean isLessAccurate = accuracyDelta > 0;
 		boolean isMoreAccurate = accuracyDelta < 0;
 		boolean isSignificantlyLessAccurate = accuracyDelta > 200;
 
 		/* Check if the old and new location are from the same provider */
-		boolean isFromSameProvider = isSameProvider(location.getProvider(), currentBestLocation.getProvider());
+		boolean isFromSameProvider = isSameProvider(locationToEvaluate.getProvider(), currentBestLocation.getProvider());
 
-		/* Determine location quality using a combination of timeliness and accuracy */
+		/*
+		 * Determine location quality using a combination of timeliness and
+		 * accuracy
+		 */
 		if (isMoreAccurate) {
 			return true;
 		}
@@ -263,20 +266,11 @@ public class GeoLocationManager {
 		return timeDelta;
 	}
 
-	/** Checks whether two providers are the same */
 	private static boolean isSameProvider(String provider1, String provider2) {
 		if (provider1 == null) {
 			return provider2 == null;
 		}
 		return provider1.equals(provider2);
-	}
-
-	public void setLocationListener(LocationListener locationListener) {
-		this.mLocationListener = locationListener;
-	}
-
-	public LocationListener getLocationListener() {
-		return mLocationListener;
 	}
 
 	public void setCurrentLocation(Location currentLocation) {
@@ -287,4 +281,108 @@ public class GeoLocationManager {
 		return mCurrentLocation;
 	}
 
+	public void getSingleLocationUpdate(final RequestListener listener, Criteria criteria) {
+		String provider = mLocationManager.getBestProvider(criteria, true);
+		if (provider != null) {
+			mLocationManager.requestLocationUpdates(provider, 0, 0, new LocationListener() {
+
+				@Override
+				public void onLocationChanged(Location location) {
+					Logger.d(this, "Single location update received: "
+							+ location.getLatitude() + ","
+							+ location.getLongitude());
+					if (mLocationListener != null && location != null) {
+						mLocationListener.onLocationChanged(location);
+					}
+					mLocationManager.removeUpdates(this);
+					if (listener != null) {
+						listener.onComplete(location);
+					}
+				}
+
+				@Override
+				public void onProviderDisabled(String provider) {}
+
+				@Override
+				public void onProviderEnabled(String provider) {}
+
+				@Override
+				public void onStatusChanged(String provider, int status, Bundle extras) {}
+			}, mContext.getMainLooper());
+		}
+		else {
+			if (listener != null) {
+				listener.onComplete(null);
+			}
+		}
+	}
+
+	public void getLastBestLocation(int minAccuracy, long maxTimeAgo, Criteria criteria, final RequestListener listener) {
+		/*
+		 * Returns the most accurate and timely previously detected location.
+		 * When the last result is beyond the specified maximum distance or
+		 * latency a one-off location update is returned.
+		 */
+		Location bestLocation = null;
+		float bestAccuracy = Float.MAX_VALUE;
+		long bestTime = Long.MIN_VALUE;
+		long minTime = System.currentTimeMillis() - maxTimeAgo;
+		/*
+		 * Iterate through all the providers on the system, keeping note of the
+		 * most accurate result within the acceptable time limit. If no result
+		 * is found within maxTime, return the newest Location.
+		 */
+		List<String> matchingProviders = mLocationManager.getAllProviders();
+		for (String provider : matchingProviders) {
+			Location location = mLocationManager.getLastKnownLocation(provider);
+			if (location != null) {
+				float accuracy = location.getAccuracy();
+				long time = location.getTime();
+				if ((time > minTime && accuracy < bestAccuracy)) {
+					bestLocation = location;
+					bestAccuracy = accuracy;
+					bestTime = time;
+				}
+				else if (time < minTime && bestAccuracy == Float.MAX_VALUE && time > bestTime) {
+					bestLocation = location;
+					bestTime = time;
+				}
+			}
+		}
+		/*
+		 * If the best result is beyond the allowed time limit, or the accuracy
+		 * of the best result is wider than the acceptable maximum distance,
+		 * request a single update.
+		 */
+		if (bestTime < minTime || bestAccuracy > minAccuracy) {
+			getSingleLocationUpdate(listener, criteria);
+		}
+		else {
+			if (mLocationListener != null && bestLocation != null) {
+				mLocationListener.onLocationChanged(bestLocation);
+			}
+			if (listener != null) {
+				listener.onComplete(bestLocation);
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void cancel() {
+		/* call removeUpdates for any registered and active listeners */
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle routines
+	// --------------------------------------------------------------------------------------------
+
+	public void onPause() {
+		// GeoLocationManager.getInstance().stopLocationPolling();
+	}
+
+	public void onResume() {
+		// GeoLocationManager.getInstance().startLocationPolling();
+	}
 }

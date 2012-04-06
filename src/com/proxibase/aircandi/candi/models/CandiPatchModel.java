@@ -2,7 +2,6 @@ package com.proxibase.aircandi.candi.models;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 
@@ -463,7 +462,7 @@ public class CandiPatchModel extends Observable {
 	}
 
 	public void sortCandiModels(List list) {
-		Collections.sort(list, new SortEntitiesByDiscoveryTime());
+		Collections.sort(list, new Entity.SortEntitiesByDiscoveryTime());
 	}
 
 	public ZoneModel getZoneNeighbor(ZoneModel targetZoneModel, boolean forward) {
@@ -596,54 +595,4 @@ public class CandiPatchModel extends Observable {
 		None
 	}
 
-	class SortEntitiesByTagLevelDb implements Comparator<CandiModel> {
-
-		@Override
-		public int compare(CandiModel object1, CandiModel object2) {
-			if (!object1.getEntity().beacon.registered && object2.getEntity().beacon.registered)
-				return -1;
-			else if (!object2.getEntity().beacon.registered && object1.getEntity().beacon.registered)
-				return 1;
-			else
-				return object2.getEntity().beacon.getAvgBeaconLevel() - object1.getEntity().beacon.getAvgBeaconLevel();
-		}
-	}
-
-	class SortEntitiesByDiscoveryTime implements Comparator<CandiModel> {
-
-		@Override
-		public int compare(CandiModel object1, CandiModel object2) {
-
-			Entity entity1 = object1.getEntity();
-			Entity entity2 = object2.getEntity();
-
-			/* Rounded to produce a bucket that will get further sorted by recent activity */
-			if ((entity1.discoveryTime.getTime() / 1000) > (entity2.discoveryTime.getTime() / 1000)) {
-				return -1;
-			}
-			if ((entity1.discoveryTime.getTime() / 1000) < (entity2.discoveryTime.getTime() / 1000)) {
-				return 1;
-			}
-			else {
-				if (entity1.modifiedDate.longValue() > entity2.modifiedDate.longValue()) {
-					return -1;
-				}
-				else if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
-					return 1;
-				}
-				else {
-					return 0;
-				}
-			}
-		}
-	}
-
-	class SortEntitiesByType implements Comparator<CandiModel> {
-
-		@Override
-		public int compare(CandiModel object1, CandiModel object2) {
-
-			return object1.getEntity().type.compareToIgnoreCase(object2.getEntity().type);
-		}
-	}
 }

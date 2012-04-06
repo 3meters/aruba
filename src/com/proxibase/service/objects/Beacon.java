@@ -15,6 +15,8 @@ public class Beacon extends ServiceEntry {
 	@Expose
 	public String			ssid;
 	@Expose
+	public String			bssid;
+	@Expose
 	public String			label;
 	@Expose
 	public Boolean			locked;
@@ -36,7 +38,7 @@ public class Beacon extends ServiceEntry {
 	public Number			speed;
 
 	// For client use only
-	public int				levelDb;
+	public int				scanLevelDb;
 	public boolean			serviceVerified		= false;
 	public boolean			registered			= false;
 	public boolean			hidden				= false;
@@ -53,8 +55,9 @@ public class Beacon extends ServiceEntry {
 	public Beacon(String bssid, String ssid, String label, int levelDb, Date discoveryTime) {
 		this.id = "0003:" + bssid;
 		this.ssid = ssid;
+		this.bssid = bssid;
 		this.label = label;
-		this.levelDb = levelDb;
+		this.scanLevelDb = levelDb;
 		this.discoveryTime = discoveryTime;
 	}
 

@@ -104,12 +104,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 	public void update(Observable observable, Object data) {
 		super.update(observable, data);
 		/*
-		 * Changes to the properties of this entity will get picked up by
-		 * the next update cycle.
+		 * Changes to the properties of this entity will get picked up by the next update cycle.
 		 */
 		/*
-		 * TODO: This may be getting called more than we want while doing
-		 * a partial refresh (new beacons only).
+		 * TODO: This may be getting called more than we want while doing a partial refresh (new beacons only).
 		 */
 
 		final CandiModel candiModel = (CandiModel) this.mModel;
@@ -137,9 +135,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}
 
 		/*
-		 * Animation and touch support
-		 * 
-		 * Update thread isn't running unless rendering is active.
+		 * Animation and touch support Update thread isn't running unless rendering is active.
 		 */
 		mCandiPatchPresenter.renderingActivate();
 		mCandiPatchPresenter.getEngine().runOnUpdateThread(new Runnable() {
@@ -157,8 +153,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 	@Override
 	public void reset() {
 		/*
-		 * We keep the touch and gesture listeners though they
-		 * aren't active becase we remove the touch area.
+		 * We keep the touch and gesture listeners though they aren't active becase we remove the touch area.
 		 */
 
 		/* Engine resources */
@@ -271,7 +266,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 				mBodySprite.setPosition(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT);
 				if (mReflectionSprite != null) {
 					mReflectionSprite.setPosition(0, CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT
-														+ CandiConstants.CANDI_VIEW_REFLECTION_GAP);
+							+ CandiConstants.CANDI_VIEW_REFLECTION_GAP);
 				}
 			}
 			if (mPlaceholderSprite != null) {
@@ -280,7 +275,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 						);
 				if (mPlaceholderReflectionSprite != null) {
 					mPlaceholderReflectionSprite.setPosition(0, CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT
-																+ CandiConstants.CANDI_VIEW_REFLECTION_GAP);
+							+ CandiConstants.CANDI_VIEW_REFLECTION_GAP);
 				}
 			}
 		}
@@ -295,14 +290,14 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	public void highlight(boolean highlight) {
 		return;
-		//		if (mBodySprite != null) {
-		//			if (highlight) {
-		//				mBodySprite.setColor(1.0f, 0.7f, 0.0f);
-		//			}
-		//			else {
-		//				mBodySprite.setColor(1.0f, 1.0f, 1.0f);
-		//			}
-		//		}
+		// if (mBodySprite != null) {
+		// if (highlight) {
+		// mBodySprite.setColor(1.0f, 0.7f, 0.0f);
+		// }
+		// else {
+		// mBodySprite.setColor(1.0f, 1.0f, 1.0f);
+		// }
+		// }
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -328,7 +323,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 						mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new DelayModifier(duration * 0.5f), new MoveYModifier(
 								duration * 0.5f, CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT
-													+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
+										+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
 								CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_REFLECTION_GAP)));
 					}
 					else {
@@ -336,14 +331,14 @@ public class CandiView extends BaseView implements OnGestureListener {
 							mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new DelayModifier(duration * 0.5f),
 									new MoveYModifier(
 											duration * 0.5f, CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT
-																+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
+													+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
 											CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_REFLECTION_GAP)));
 						}
 						else {
 							mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new DelayModifier(duration * 0.5f),
 									new MoveYModifier(
 											duration * 0.5f, CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_TITLE_HEIGHT
-																+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
+													+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
 											CandiConstants.CANDI_VIEW_BODY_HEIGHT + CandiConstants.CANDI_VIEW_REFLECTION_GAP + 2)));
 						}
 					}
@@ -394,11 +389,12 @@ public class CandiView extends BaseView implements OnGestureListener {
 				}
 			}
 			else {
-				//				if (!mPlaceholderReflectionSprite.isVisible()) {
-				//					mPlaceholderReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new DelayModifier(duration * 0.1f),
-				//							new CandiAlphaModifier(
-				//									mPlaceholderReflectionSprite, duration * 0.5f, 0.0f, 1.0f)));
-				//				}
+				// if (!mPlaceholderReflectionSprite.isVisible()) {
+				// mPlaceholderReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new
+				// DelayModifier(duration * 0.1f),
+				// new CandiAlphaModifier(
+				// mPlaceholderReflectionSprite, duration * 0.5f, 0.0f, 1.0f)));
+				// }
 			}
 		}
 		else {
@@ -418,27 +414,27 @@ public class CandiView extends BaseView implements OnGestureListener {
 	private void showBodyAndReflectionAnimated() {
 		if (mPlaceholderSprite.isVisible()) {
 			mPlaceholderSprite.registerEntityModifier(
-						new CandiAlphaModifier(mPlaceholderSprite,
-								CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 1.0f, 0.0f,
-								CandiConstants.EASE_FADE_OUT));
+					new CandiAlphaModifier(mPlaceholderSprite,
+							CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 1.0f, 0.0f,
+							CandiConstants.EASE_FADE_OUT));
 			if (mPlaceholderReflectionSprite.isVisible()) {
 				mPlaceholderReflectionSprite.registerEntityModifier(
-							new CandiAlphaModifier(mPlaceholderReflectionSprite,
-									CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 1.0f, 0.0f,
-									CandiConstants.EASE_FADE_OUT));
+						new CandiAlphaModifier(mPlaceholderReflectionSprite,
+								CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 1.0f, 0.0f,
+								CandiConstants.EASE_FADE_OUT));
 			}
 		}
 
 		mBodySprite.registerEntityModifier(
-					new CandiAlphaModifier(mBodySprite,
-							CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 0.0f, 1.0f,
-							CandiConstants.EASE_FADE_IN));
+				new CandiAlphaModifier(mBodySprite,
+						CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 0.0f, 1.0f,
+						CandiConstants.EASE_FADE_IN));
 
 		if (mModel != null && ((BaseModel) mModel).getViewStateCurrent().reflectionActive() && mReflectionSprite != null) {
 			mReflectionSprite.registerEntityModifier(
-						new CandiAlphaModifier(mReflectionSprite,
-								CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 0.0f, 1.0f,
-								CandiConstants.EASE_FADE_IN));
+					new CandiAlphaModifier(mReflectionSprite,
+							CandiConstants.DURATION_PLACEHOLDER_HIDESHOW, 0.0f, 1.0f,
+							CandiConstants.EASE_FADE_IN));
 		}
 	}
 
@@ -455,11 +451,11 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	@Override
 	public void clearSpriteModifiers() {
-	//		super.clearSpriteModifiers();
-	//		if (mBodySprite != null) {
-	//			mBodySprite.clearEntityModifiers();
-	//			mReflectionSprite.clearEntityModifiers();
-	//		}
+		// super.clearSpriteModifiers();
+		// if (mBodySprite != null) {
+		// mBodySprite.clearEntityModifiers();
+		// mReflectionSprite.clearEntityModifiers();
+		// }
 	}
 
 	protected void doViewActions() {
@@ -527,7 +523,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	private void makeReflectionSprite() {
 		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT
-												+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
+				+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
 				mReflectionTextureRegion);
 		mReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mReflectionSprite.setVisible(false);
@@ -559,12 +555,12 @@ public class CandiView extends BaseView implements OnGestureListener {
 	private void requestTextureSources(final boolean skipCache, final boolean showBody) {
 
 		final CandiModel candiModel = (CandiModel) this.mModel;
-		Logger.v(this, "Requesting texture source: " + ((CandiModel) this.mModel).getTitleText());
+		Logger.v(this, "Requesting texture source: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 
 		if (!mActiveImageRequest) {
 			/*
-			 * TODO: We'd like to prioritize highest the candi views that are currently visible
-			 * but position hasn't been assigned when this first gets called.
+			 * TODO: We'd like to prioritize highest the candi views that are currently visible but position hasn't been
+			 * assigned when this first gets called.
 			 */
 			mActiveImageRequest = true;
 			final Entity entity = candiModel.getEntity();
@@ -580,33 +576,32 @@ public class CandiView extends BaseView implements OnGestureListener {
 				@Override
 				public void onComplete(Object response) {
 					/*
-					 * Executes on the ViewManager thread (which has the lowest possible priority).
-					 * First time for a candiview is more expensive because the body and reflection sprites
-					 * are created.
+					 * Executes on the ViewManager thread (which has the lowest possible priority). First time for a
+					 * candiview is more expensive because the body and reflection sprites are created.
 					 */
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 
 					/*
-					 * We could be coming back while the data model is getting rebuilt which
-					 * makes the current work expendable.
+					 * We could be coming back while the data model is getting rebuilt which makes the current work
+					 * expendable.
 					 */
 					if (!Aircandi.getInstance().isRebuildingDataModel()) {
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 							/*
-							 * The view could have been recycled while we were busy and won't have a bound
-							 * model.
+							 * The view could have been recycled while we were busy and won't have a bound model.
 							 */
 							if (mModel != null && !mRecycled) {
 								/*
-								 * The view could have been recycled and put back into service targeting
-								 * a different bitmap.
+								 * The view could have been recycled and put back into service targeting a different
+								 * bitmap.
 								 */
 								final CandiModel candiModel = (CandiModel) mModel;
 								ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 								String imageUri = ImageRequestBuilder.getImageUriFromEntity(candiModel.getEntity());
 
 								if (imageResponse.imageUri.equals(imageUri) && imageResponse.bitmap != null) {
-									Logger.v(this, "Texture request complete: " + ((CandiModel) mModel).getTitleText());
+									Logger.v(CandiView.this, "Texture request complete: "
+											+ (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 									mHasBitmap = true;
 									updateTextureRegions(imageResponse.bitmap);
 									if (candiModel.getViewStateCurrent().isVisible()) {
@@ -618,13 +613,13 @@ public class CandiView extends BaseView implements OnGestureListener {
 							else {
 								if (mModel != null) {
 									String modelTitle = ((CandiModel) mModel).getTitleText();
-									Logger.v(this, "Texture request complete but requestor recycled : " + modelTitle);
+									Logger.v(CandiView.this, "Texture request complete but requestor recycled : " + modelTitle);
 								}
 							}
 						}
 						else {
 							if (!mHasBitmap && mModel != null && !mRecycled) {
-								Logger.w(this, "Broken image: " + entity.imagePreviewUri);
+								Logger.w(CandiView.this, "Broken image: " + entity.imagePreviewUri);
 								Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
 								if (bitmap != null) {
 									mHasBitmap = false;
@@ -671,7 +666,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 			}
 
 			progressVisible(true);
-			Logger.v(this, "Requesting image: " + candiModel.getTitleText());
+			Logger.v(this, "Requesting image: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
 		}
 	}
@@ -703,29 +698,31 @@ public class CandiView extends BaseView implements OnGestureListener {
 		/* Process any decorations like text overlays */
 		bodyBitmap = decorateTexture(bodyBitmap, false);
 
-		mBodyTextureRegion = TextureRegionFactory.createFromSource(mBodyTexture, new BitmapTextureSource(bodyBitmap, new IBitmapAdapter() {
+		mBodyTextureRegion = TextureRegionFactory.createFromSource(mBodyTexture, new BitmapTextureSource(bodyBitmap, cacheName, new IBitmapAdapter() {
 
 			@Override
 			public Bitmap reloadBitmap() {
 
 				/*
-				 * We could be in recycled state without a bound model.
-				 * The engine could also be requesting a bitmap for a candi
-				 * that has been deleted (including the bitmap in S3).
+				 * We could be in recycled state without a bound model. The engine could also be requesting a bitmap for
+				 * a candi that has been deleted (including the bitmap in S3).
 				 */
 				if (mModel != null || !mRecycled) {
 
 					/* TextureSource needs to refresh a recycled bitmap. */
 					Bitmap bodyBitmap = ImageManager.getInstance().getImage(cacheName);
+					CandiModel candiModel = ((CandiModel) mModel);
 					if (bodyBitmap != null) {
-						Logger.v(this, "Engine request: texture refreshed from cache: " + ((CandiModel) mModel).getTitleText());
+						Logger.v(this, "Engine request: texture refreshed from cache: "
+								+ (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 						bodyBitmap = decorateTexture(bodyBitmap, false);
 						return bodyBitmap;
 					}
 
 					if (((CandiModel) mModel).getReasonInactive() != ReasonInactive.Deleting) {
 						/* Cached bitmap is gone so load it again. */
-						Logger.v(this, "Engine request: texture not in cache: request it: " + ((CandiModel) mModel).getTitleText());
+						Logger.v(this, "Engine request: texture not in cache: request it: "
+								+ (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 						requestTextureSources(false, true);
 					}
 				}
@@ -736,7 +733,8 @@ public class CandiView extends BaseView implements OnGestureListener {
 		if (reflectionBitmap != null) {
 			reflectionBitmap = decorateTexture(reflectionBitmap, true);
 			mReflectionTexture.clearTextureSources();
-			mReflectionTextureRegion = TextureRegionFactory.createFromSource(mReflectionTexture, new BitmapTextureSource(reflectionBitmap,
+			mReflectionTextureRegion = TextureRegionFactory.createFromSource(mReflectionTexture, new BitmapTextureSource(reflectionBitmap, cacheName
+					+ ".reflection",
 					new IBitmapAdapter() {
 
 						@Override
@@ -758,8 +756,8 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}
 
 		/*
-		 * This is where the primary sprites get created so we also need to
-		 * do some management that couldn't be done until their were created.
+		 * This is where the primary sprites get created so we also need to do some management that couldn't be done
+		 * until their were created.
 		 */
 		if (mBodySprite == null) {
 			makeBodySprite();
@@ -817,8 +815,8 @@ public class CandiView extends BaseView implements OnGestureListener {
 		super.unloadResources();
 
 		/*
-		 * Completely remove all resources associated with this sprite.
-		 * This should only be called from the engine update thread.
+		 * Completely remove all resources associated with this sprite. This should only be called from the engine
+		 * update thread.
 		 */
 		String associatedModel = mModel != null ? ((CandiModel) mModel).getEntity().label : "Recycled";
 		Logger.v(this, "Unloading resources: " + associatedModel);

@@ -11,8 +11,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.Signature;
 import android.location.Location;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -21,54 +21,61 @@ import com.proxibase.aircandi.components.Logger;
 import com.proxibase.service.objects.User;
 
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ", customReportContent = {
-																						ReportField.REPORT_ID,
-																						ReportField.APP_VERSION_CODE,
-																						ReportField.APP_VERSION_NAME,
-																						ReportField.PACKAGE_NAME,
-																						ReportField.FILE_PATH,
-																						ReportField.PHONE_MODEL,
-																						ReportField.BRAND,
-																						ReportField.PRODUCT,
-																						ReportField.ANDROID_VERSION,
-																						ReportField.BUILD,
-																						ReportField.TOTAL_MEM_SIZE,
-																						ReportField.AVAILABLE_MEM_SIZE,
-																						ReportField.CUSTOM_DATA,
-																						ReportField.IS_SILENT,
-																						ReportField.STACK_TRACE,
-																						ReportField.INITIAL_CONFIGURATION,
-																						ReportField.CRASH_CONFIGURATION,
-																						ReportField.DISPLAY,
-																						ReportField.USER_COMMENT,
-																						ReportField.USER_EMAIL,
-																						ReportField.USER_APP_START_DATE,
-																						ReportField.USER_CRASH_DATE,
-																						ReportField.DUMPSYS_MEMINFO,
-																						ReportField.DROPBOX,
-																						ReportField.LOGCAT,
-																						ReportField.RADIOLOG,
-																						ReportField.DEVICE_ID,
-																						ReportField.INSTALLATION_ID,
-																						ReportField.DEVICE_FEATURES,
-																						ReportField.ENVIRONMENT,
-																						ReportField.SHARED_PREFERENCES,
-																						ReportField.SETTINGS_SYSTEM,
-																						ReportField.SETTINGS_SECURE }, mode = ReportingInteractionMode.NOTIFICATION, resToastText = R.string.crash_toast_text, resNotifTickerText = R.string.crash_notif_ticker_text, resNotifTitle = R.string.crash_notif_title, resNotifText = R.string.crash_notif_text, resNotifIcon = android.R.drawable.stat_notify_error, resDialogText = R.string.crash_dialog_text, resDialogIcon = android.R.drawable.ic_dialog_info, resDialogTitle = R.string.crash_dialog_title, resDialogCommentPrompt = R.string.crash_dialog_comment_prompt, resDialogOkToast = R.string.crash_dialog_ok_toast, logcatArguments = { "-t",
-																																																																																																																																																																																"100",
-																																																																																																																																																																																"-v",
-																																																																																																																																																																																"long",
-																																																																																																																																																																																"ActivityManager:I",
-																																																																																																																																																																																"Aircandi:D",
-																																																																																																																																																																																"Proxibase:D",
-																																																																																																																																																																																"*:S" } /*
-																																																																																																																																																																																		 * Filter
-																																																																																																																																																																																		 * format
-																																																																																																																																																																																		 * :
-																																																																																																																																																																																		 * tag
-																																																																																																																																																																																		 * :
-																																																																																																																																																																																		 * priority
-																																																																																																																																																																																		 */
+		ReportField.REPORT_ID,
+		ReportField.APP_VERSION_CODE,
+		ReportField.APP_VERSION_NAME,
+		ReportField.PACKAGE_NAME,
+		ReportField.FILE_PATH,
+		ReportField.PHONE_MODEL,
+		ReportField.BRAND,
+		ReportField.PRODUCT,
+		ReportField.ANDROID_VERSION,
+		ReportField.BUILD,
+		ReportField.TOTAL_MEM_SIZE,
+		ReportField.AVAILABLE_MEM_SIZE,
+		ReportField.CUSTOM_DATA,
+		ReportField.IS_SILENT,
+		ReportField.STACK_TRACE,
+		ReportField.INITIAL_CONFIGURATION,
+		ReportField.CRASH_CONFIGURATION,
+		ReportField.DISPLAY,
+		ReportField.USER_COMMENT,
+		ReportField.USER_EMAIL,
+		ReportField.USER_APP_START_DATE,
+		ReportField.USER_CRASH_DATE,
+		ReportField.DUMPSYS_MEMINFO,
+		ReportField.DROPBOX,
+		ReportField.LOGCAT,
+		ReportField.RADIOLOG,
+		ReportField.DEVICE_ID,
+		ReportField.INSTALLATION_ID,
+		ReportField.DEVICE_FEATURES,
+		ReportField.ENVIRONMENT,
+		ReportField.SHARED_PREFERENCES,
+		ReportField.SETTINGS_SYSTEM,
+		ReportField.SETTINGS_SECURE },
+		mode = ReportingInteractionMode.NOTIFICATION,
+		resToastText = R.string.crash_toast_text,
+		resNotifTickerText = R.string.crash_notif_ticker_text,
+		resNotifTitle = R.string.crash_notif_title,
+		resNotifText = R.string.crash_notif_text,
+		resNotifIcon = android.R.drawable.stat_notify_error,
+		resDialogText = R.string.crash_dialog_text,
+		resDialogIcon = android.R.drawable.ic_dialog_info,
+		resDialogTitle = R.string.crash_dialog_title,
+		resDialogCommentPrompt = R.string.crash_dialog_comment_prompt,
+		resDialogOkToast = R.string.crash_dialog_ok_toast,
+		logcatArguments = {
+				"-t",
+				"100",
+				"-v",
+				"long",
+				"ActivityManager:I",
+				"Aircandi:D",
+				"Proxibase:D",
+				"*:S" } // Filter format : tag : priority
 )
+
 public class Aircandi extends Application {
 
 	private static Aircandi					singletonObject;

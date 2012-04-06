@@ -4,8 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.proxibase.aircandi.components.Logger;
-
 public class PagerTextView extends TextView {
 
 	private int		mInitialCenterX;
@@ -28,7 +26,6 @@ public class PagerTextView extends TextView {
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		if (mFirstLayout) {
-			Logger.v(this, "onLayout performed");
 			super.onLayout(changed, left, top, right, bottom);
 			mInitialCenterX = this.getCenterX();
 			mInitialLeft = this.getLeft();

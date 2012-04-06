@@ -12,15 +12,14 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.ImageView.ScaleType;
+import android.widget.RelativeLayout;
 
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
-import com.proxibase.aircandi.components.ImageUtils;
-import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
+import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -198,7 +197,6 @@ public class WebImageView extends RelativeLayout {
 			}
 		});
 
-		Logger.v(this, "Fetching Image: " + imageRequest.getImageUri());
 		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
 	}
 

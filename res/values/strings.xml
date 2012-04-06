@@ -103,7 +103,8 @@
 	<string name="form_title_signin">Sign in</string>
 	<string name="form_title_signup">Sign up</string>
 	<string name="form_title_picture_search">Picture search</string>
-	<string name="form_title_comment">Comment</string>
+	<string name="form_title_bookmarks">Bookmarks</string>
+		<string name="form_title_comment">Comment</string>
 	<string name="form_title_map">Candi map</string>
 	
 	<string name="form_tab_content">CONTENT</string>
@@ -140,12 +141,12 @@
 	<string name="alert_updated">Saved</string>
 	<string name="alert_insert_failed">Save failed</string>
 	<string name="alert_inserted">Saved</string>
-	<string name="alert_signing_in">Signing in...</string>
+	<string name="alert_signing_in">Signing in…</string>
 	<string name="alert_signed_in">Signed in as</string>
 
 	<string name="post_label_image">Post Badge</string>
 	
-	<string name="dialog_change_picture_title">Select picture...</string>
+	<string name="dialog_change_picture_title">Select picture…</string>
 	<string name="dialog_change_picture_button_negative">Cancel</string>
 	
 	<string name="signin_message">Please sign-in to create and edit candi.</string>
@@ -162,23 +163,23 @@
 	<string name="profile_alert_missing_old_password">Please enter your old password</string>
 	<string name="profile_alert_missmatched_passwords">Passwords do not match</string>
 
-	<string name="web_dialog_link_message">Build link...</string>
+	<string name="web_dialog_link_message">Build link…</string>
 	<string name="web_dialog_link_bookmark">Select a bookmark</string>
 	<string name="web_dialog_link_search">Web search</string>
 	<string name="web_dialog_link_negative">Cancel</string>
-	<string name="web_progress_validating">Validating website...</string>
+	<string name="web_progress_validating">Validating website…</string>
 	<string name="web_alert_website_unavailable">Website unavailable</string>
 	<string name="web_label_html_zoom">Zoom html</string>
 	<string name="web_label_javascript">Javascript enabled</string>
 	
 	<string name="picture_search_query_hint">Search</string>
-	<string name="picture_search_loading">Loading...</string>
+	<string name="picture_search_loading">Loading…</string>
 	
 	<!--  Crash reporting -->
 	
 	<string name="crash_toast_text">Rats! I crashed, but a report has been sent to my developer to help him fix the issue!</string> 
-	<string name="crash_notif_ticker_text">Unexpected error, please send a report...</string> 
-	<string name="crash_notif_title">Aircandi has crashed...</string> 
+	<string name="crash_notif_ticker_text">Unexpected error, please send a report…</string> 
+	<string name="crash_notif_title">Aircandi has crashed…</string> 
 	<string name="crash_notif_text">Please click here to help fix the issue.</string>      
 	<string name="crash_dialog_title">Aircandi has crashed</string> 
 	<string name="crash_dialog_text">An unexpected error occurred forcing the application to stop. Please help us fix this by sending us error data, all you have to do is click \'OK\'.</string> 

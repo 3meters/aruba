@@ -17,6 +17,7 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 	private ErrorCode			mErrorCode			= ErrorCode.AircandiServiceException;
 	private ErrorType			mErrorType			= ErrorType.Unknown;
 	private int					mHttpStatusCode;
+	private String				mResponseMessage;
 
 	public ProxibaseServiceException(String message) {
 		this(message, ErrorType.Unknown, ErrorCode.AircandiServiceException);
@@ -31,7 +32,7 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 		mErrorCode = errorCode;
 		mErrorType = errorType;
 	}
-	
+
 	public void setErrorCode(ErrorCode errorCode) {
 		this.mErrorCode = errorCode;
 	}
@@ -54,6 +55,14 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 
 	public int getHttpStatusCode() {
 		return mHttpStatusCode;
+	}
+
+	public void setResponseMessage(String responseMessage) {
+		this.mResponseMessage = responseMessage;
+	}
+
+	public String getResponseMessage() {
+		return mResponseMessage;
 	}
 
 	/**

@@ -69,7 +69,6 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
         android:layout_below="@id/activity_header"
-        android:layout_weight="1"
         android:background="?attr/backgroundCandiInfo"
         android:fillViewport="true" >
 
@@ -77,7 +76,7 @@
 
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:gravity="center_vertical|top"
             android:orientation="vertical"
             android:paddingBottom="5dp"
@@ -149,7 +148,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:enabled="false"
+            android:state_enabled="false"
             android:onClick="onSignInButtonClick"
             android:text="@string/signin_button_signin" />
 

@@ -11,12 +11,13 @@ public class BitmapTextureSource implements ITextureSource {
 	private int				mWidth;
 	private IBitmapAdapter	mBitmapAdapter;
 	private Bitmap			mBitmap;
+	private String			mName;
 
-	public BitmapTextureSource(Bitmap bitmap) {
-		this(bitmap, null);
+	public BitmapTextureSource(Bitmap bitmap, String name) {
+		this(bitmap, name, null);
 	}
 
-	public BitmapTextureSource(Bitmap bitmap, IBitmapAdapter bitmapAdapter) {
+	public BitmapTextureSource(Bitmap bitmap, String name, IBitmapAdapter bitmapAdapter) {
 
 		mBitmap = bitmap;
 		mBitmapAdapter = bitmapAdapter;
@@ -58,8 +59,9 @@ public class BitmapTextureSource implements ITextureSource {
 
 		/* Andengine throws an IllegalArgumentException if we return null. */
 		if (mBitmap != null && mBitmap.isRecycled()) {
+			Logger.v(this, "AndEngine requesting bitmap that has been recycled: " + this.mName);
 			if (this.mBitmapAdapter != null) {
-				//Log.v("AndEngine", "Reloading recycled texture for Andengine");
+				Logger.v(this, "Reloading recycled texture for AndEngine: " + this.mName);
 				Bitmap bitmap = this.mBitmapAdapter.reloadBitmap();
 				if (bitmap != null)
 					mBitmap = bitmap;
@@ -74,5 +76,14 @@ public class BitmapTextureSource implements ITextureSource {
 	public static interface IBitmapAdapter {
 
 		public Bitmap reloadBitmap();
+	}
+
+	@Override
+	public String getName() {
+		return mName;
+	}
+
+	public void setName(String name) {
+		mName = name;
 	}
 }

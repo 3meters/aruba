@@ -38,6 +38,27 @@
             android:text="@string/form_title_picture" />
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_header" >
+
+        <ImageView
+            android:id="@+id/form_picture_placeholder"
+            style="@style/form_picture_placeholder"
+            android:layout_width="fill_parent"
+            android:layout_height="10dp" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="10dp"
+            android:layout_alignParentTop="true"
+            android:progress="0"
+            android:progressDrawable="@drawable/progress" />
+    </RelativeLayout>
+
     <WebView
         android:id="@+id/webview"
         android:layout_width="wrap_content"
@@ -50,16 +71,15 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:background="#66000000"
         android:orientation="vertical"
-        android:padding="10dp"
-        android:background="#66000000" >
+        android:padding="10dp" >
 
         <TextView
             android:id="@+id/text_title"
             style="@style/form_title"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Violette Heymann"
             android:textColor="#ffffffff" />
 
         <com.proxibase.aircandi.widgets.AuthorBlock

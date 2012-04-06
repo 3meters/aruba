@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -50,22 +51,31 @@ public abstract class FormActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		/*
-		 * Theme has to be set before any UI is constructed. We also
-		 * have to do it for each activity so they pickup our custom
-		 * style attributes.
-		 */
-		mCommon = new AircandiCommon(this);
 		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			mCommon.startRadarActivity();
-		}		
-		mCommon.setTheme();
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		mCommon.unpackIntent();
-		super.onCreate(savedInstanceState);
-		super.setContentView(this.getLayoutID());
-
-		mCommon.initialize();
+			/* 
+			 * Try to detect case where this is being created after
+			 * a crash and bail out.
+			 */
+			super.onCreate(savedInstanceState);
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+		}
+		else {
+			/*
+			 * Theme has to be set before any UI is constructed. We also have to do it for each activity so they pickup
+			 * our custom style attributes.
+			 */
+			mCommon = new AircandiCommon(this);
+			if (!Aircandi.getInstance().getLaunchedFromRadar()) {
+				mCommon.startRadarActivity();
+			}
+			mCommon.setTheme();
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			mCommon.unpackIntent();
+			super.onCreate(savedInstanceState);
+			super.setContentView(this.getLayoutID());
+			mCommon.initialize();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -121,13 +131,13 @@ public abstract class FormActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
-			case R.id.settings :
-				startActivity(new Intent(this, Preferences.class));
-				overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		case R.id.settings:
+			startActivity(new Intent(this, Preferences.class));
+			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 
-				return (true);
-			default :
-				return (super.onOptionsItemSelected(item));
+			return (true);
+		default:
+			return (super.onOptionsItemSelected(item));
 		}
 	}
 
@@ -156,7 +166,8 @@ public abstract class FormActivity extends Activity {
 	public void takePicture() {
 		Intent takePictureFromCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		if (ImageManager.getInstance().hasImageCaptureBug()) {
-			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File("/sdcard/tmp/foo.jpeg")));
+			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
+					Uri.fromFile(new File(Environment.getExternalStorageDirectory().getPath() + "/tmp/foo.jpeg")));
 		}
 		else
 			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
@@ -166,7 +177,7 @@ public abstract class FormActivity extends Activity {
 
 	public void pickAircandiPicture() {
 		Intent candigramPickerIntent = new Intent(this, PictureSearch.class);
-		startActivityForResult(candigramPickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_AIRCANDI);
+		startActivityForResult(candigramPickerIntent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
 		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 
 	}
@@ -204,8 +215,6 @@ public abstract class FormActivity extends Activity {
 
 		mImageRequestListener = listener;
 		mImageRequestWebImageView = webImageView;
-		
-		
 
 		int listId = R.array.dialog_list_picture_sources;
 		if (showFacebookOption) {
@@ -213,7 +222,7 @@ public abstract class FormActivity extends Activity {
 		}
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(FormActivity.this);
-		
+
 		View titleView = getLayoutInflater().inflate(R.layout.temp_dialog_title, null);
 		((TextView) titleView.findViewById(R.id.dialog_title_text)).setText(getResources().getString(R.string.dialog_change_picture_title));
 		builder.setCustomTitle(titleView);
@@ -284,12 +293,11 @@ public abstract class FormActivity extends Activity {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		/*
-		 * Called before onResume. If we are returning from the market app, we
-		 * get a zero result code whether the user decided to start an install
-		 * or not.
+		 * Called before onResume. If we are returning from the market app, we get a zero result code whether the user
+		 * decided to start an install or not.
 		 */
 		if (resultCode == Activity.RESULT_OK) {
-			if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_AIRCANDI) {
+			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
 
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
@@ -356,13 +364,12 @@ public abstract class FormActivity extends Activity {
 				mImageRequestWebImageView.getImageView().setImageBitmap(null);
 				Uri imageUri = null;
 				if (ImageManager.getInstance().hasImageCaptureBug()) {
-					File imageFile = new File("/sdcard/tmp/foo.jpeg");
+					File imageFile = new File(Environment.getExternalStorageDirectory().getPath() + "/tmp/foo.jpeg");
 					try {
 						imageUri = Uri.parse(android.provider.MediaStore.Images.Media.insertImage(getContentResolver(), imageFile
-									.getAbsolutePath(),
-									null, null));
-						if (!imageFile.delete()) {
-						}
+								.getAbsolutePath(),
+								null, null));
+						if (!imageFile.delete()) {}
 					}
 					catch (FileNotFoundException exception) {
 						Exceptions.Handle(exception);
@@ -380,9 +387,12 @@ public abstract class FormActivity extends Activity {
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_LINK_PICK) {
-
-				if (intent != null) {
-					String linkUri = intent.getAction();
+				
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					final String linkUri = extras.getString(getString(R.string.EXTRA_URI));
+					@SuppressWarnings("unused")
+					final String linkTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
 					if (linkUri != null && !linkUri.equals("")) {
 						if (mImageRequestListener != null) {
 							mImageRequestListener.onComplete(new ServiceResponse(), null, linkUri, null);
@@ -413,11 +423,11 @@ public abstract class FormActivity extends Activity {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 		Logger.d(this, "onDestroy called");
 		try {
-			if (mCommon.mEntity != null && mCommon.mEntity.imageBitmap != null) {
-				mCommon.mEntity.imageBitmap.recycle();
+			if (mCommon != null) {
+				mCommon.recycleImageViewDrawable(R.id.image_picture);
+				mCommon.recycleImageViewDrawable(R.id.image_user);
+				mCommon.doDestroy();
 			}
-			mCommon.recycleImageViewDrawable(R.id.image_picture);
-			mCommon.recycleImageViewDrawable(R.id.image_user);
 		}
 		catch (Exception exception) {
 			exception.printStackTrace();
@@ -425,7 +435,6 @@ public abstract class FormActivity extends Activity {
 		finally {
 			super.onDestroy();
 		}
-		mCommon.doDestroy();
 	}
 
 	protected int getLayoutID() {

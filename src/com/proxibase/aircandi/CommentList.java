@@ -22,17 +22,16 @@ import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
-import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.Comment;
 import com.proxibase.service.objects.Entity;
 
@@ -46,8 +45,12 @@ public class CommentList extends CandiActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		initialize();
 		bind();
-		Tracker.trackPageView("/CommentList");
+	}
+
+	protected void initialize() {
+		mCommon.track();
 	}
 
 	protected void bind() {
@@ -88,8 +91,8 @@ public class CommentList extends CandiActivity {
 
 					String jsonResponse = (String) serviceResponse.data;
 					List<Entity> listEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(jsonResponse,
-									Entity.class,
-									GsonType.ProxibaseService);
+							Entity.class,
+							GsonType.ProxibaseService);
 					if (listEntities != null && listEntities.get(0).comments != null) {
 						mListComments = listEntities.get(0).comments;
 						mListViewComments.setAdapter(new ListAdapter(CommentList.this, 0, mListComments));

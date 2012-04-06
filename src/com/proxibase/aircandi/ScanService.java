@@ -42,7 +42,7 @@ public class ScanService extends Service {
 			 * Kicks off the scan but we won't know if it was completed. Will exit
 			 * early if a scan is already active.
 			 */
-			Logger.d(this, "Wifi scan service: requesting wifi scan");
+			Logger.v(ScanService.this, "Wifi scan service: requesting wifi scan");
 			ProxiExplorer.getInstance().scanForWifi(null);
 			return null;
 		}

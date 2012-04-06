@@ -2,6 +2,23 @@ package com.proxibase.aircandi.components;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
+/*
+ * Tracker strategy
+ * 
+ * - Every activity is a page view when initialized.
+ * - Page views and events info is dispatched to google service when a page view is created.
+ * 	
+ * - Select events are tracked
+ * 		- Insert, update, delete entity
+ * 		- User clicks refresh
+ * 		- Insert, update user
+ * 		- Comment created
+ * 		- User signin, signout
+ * 
+ * 		More candidates
+ * 		- Preferences modified
+ */
+
 public class Tracker {
 
 	public static void trackEvent(String arg0, String arg1, String arg2, int arg3) {

@@ -23,17 +23,29 @@ public abstract class CandiActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		mCommon = new AircandiCommon(this);
 		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			mCommon.startRadarActivity();
+			/* 
+			 * Try to detect case where this is being created after
+			 * a crash and bail out.
+			 */			
+			super.onCreate(savedInstanceState);
+			setResult(Activity.RESULT_CANCELED);
+			finish();
 		}
-		mCommon.setTheme();
-		mCommon.unpackIntent();
-		setContentView(getLayoutId());
-		super.onCreate(savedInstanceState);
-		mCommon.initialize();
-		mCommon.initializeDialogs();
-		Logger.i(this, "CandiActivity created");
+		else {
+			mCommon = new AircandiCommon(this);
+			// if (!Aircandi.getInstance().getLaunchedFromRadar()) {
+			// mCommon.startRadarActivity();
+			// }
+			mCommon.setTheme();
+			mCommon.unpackIntent();
+			setContentView(getLayoutId());
+			super.onCreate(savedInstanceState);
+			mCommon.initialize();
+			mCommon.initializeDialogs();
+			Logger.i(this, "CandiActivity created");
+			Logger.d(this, "Started from radar flag: " + String.valueOf(Aircandi.getInstance().getLaunchedFromRadar()));
+		}
 	}
 
 	protected void bind() {
@@ -48,12 +60,12 @@ public abstract class CandiActivity extends Activity {
 		}
 	}
 
-	//	@Override
-	//	protected void onNewIntent(Intent intent) {
-	//		super.onNewIntent(intent);
-	//		Logger.i(this, "CandiActivity got new intent");
-	//		setContentView(getLayoutId());
-	//	}
+	// @Override
+	// protected void onNewIntent(Intent intent) {
+	// super.onNewIntent(intent);
+	// Logger.i(this, "CandiActivity got new intent");
+	// setContentView(getLayoutId());
+	// }
 
 	// --------------------------------------------------------------------------------------------
 	// Events routines
@@ -195,7 +207,9 @@ public abstract class CandiActivity extends Activity {
 	protected void onDestroy() {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 		super.onDestroy();
-		mCommon.doDestroy();
+		if (mCommon != null) {
+			mCommon.doDestroy();
+		}
 		Logger.d(this, "CandiActivity destroyed");
 	}
 }

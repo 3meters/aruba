@@ -27,15 +27,14 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 
 	private List<Entity>	mItems;
 	private Context			mContext;
-	@SuppressWarnings("unused")
-	private User			mUser;
 	private LayoutInflater	mInflater;
+	private int				mLayoutResource;
 
-	public CandiListAdapter(Context context, User user, List<Entity> items) {
+	public CandiListAdapter(Context context, User user, int layoutResource, List<Entity> items) {
 		super(context, 0, items);
 		this.mItems = items;
 		this.mContext = context;
-		this.mUser = user;
+		this.mLayoutResource = layoutResource;
 		mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
@@ -46,7 +45,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 		Entity itemData = (Entity) mItems.get(position);
 
 		if (view == null) {
-			view = mInflater.inflate(R.layout.temp_listitem_candi, null);
+			view = mInflater.inflate(mLayoutResource, null);
 			holder = new CandiListViewHolder();
 			holder.itemImage = (WebImageView) view.findViewById(R.id.item_image);
 			holder.itemTitle = (TextView) view.findViewById(R.id.item_title);
@@ -123,7 +122,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 				 * to satisfy the new request.
 				 */
 				BitmapDrawable bitmapDrawable = (BitmapDrawable) holder.itemImage.getImageView().getDrawable();
-				if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null) {
+				if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null && !bitmapDrawable.getBitmap().isRecycled()) {
 					bitmapDrawable.getBitmap().recycle();
 				}
 				ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemImage);

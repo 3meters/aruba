@@ -12,22 +12,22 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.components.Command;
+import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.Comment;
 import com.proxibase.service.objects.User;
 
@@ -62,11 +62,10 @@ public class CommentForm extends FormActivity {
 		if (savedInstanceState != null) {
 			doRestoreInstanceState(savedInstanceState);
 		}
-
-		Tracker.trackPageView("/SignUpForm");
 	}
 
 	protected void initialize() {
+		mCommon.track();
 		mContent = (EditText) findViewById(R.id.text_content);
 		mButtonSave = (Button) findViewById(R.id.button_save);
 		mButtonSave.setEnabled(false);
@@ -114,7 +113,6 @@ public class CommentForm extends FormActivity {
 				initialize();
 				bind();
 				draw();
-				Tracker.trackPageView("/CommentForm");
 			}
 		}
 	}
@@ -174,6 +172,7 @@ public class CommentForm extends FormActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					Tracker.trackEvent("Comment", "Insert", null, 0);
 					mCommon.showProgressDialog(false, null);
 					ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 					setResult(CandiConstants.RESULT_COMMENT_INSERTED);

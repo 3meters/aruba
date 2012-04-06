@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore.Images;
 import android.util.DisplayMetrics;
+import android.util.FloatMath;
 import android.util.TypedValue;
 
 import com.proxibase.aircandi.core.CandiConstants;
@@ -52,7 +53,8 @@ public class ImageManager {
 	}
 
 	/**
-	 * Designed as a singleton. The private Constructor prevents any other class from instantiating.
+	 * Designed as a singleton. The private Constructor prevents any other class
+	 * from instantiating.
 	 */
 	private ImageManager() {
 		setImageLoader(new ImageLoader());
@@ -128,8 +130,10 @@ public class ImageManager {
 			return null;
 		}
 
-		// imageOrientation = getExifOrientation(imageUri.getPath(), imageOrientation);
-		// imageOrientation = getExifOrientation(imageFile.getAbsolutePath(), imageOrientation);
+		// imageOrientation = getExifOrientation(imageUri.getPath(),
+		// imageOrientation);
+		// imageOrientation = getExifOrientation(imageFile.getAbsolutePath(),
+		// imageOrientation);
 		Bitmap bitmap = bitmapForByteArray(imageBytes, imageWidthMax, rotation);
 		return bitmap;
 	}
@@ -198,10 +202,7 @@ public class ImageManager {
 			int newSize = (bitmapSampled.getHeight() * bitmapSampled.getWidth()) * 4;
 			if (newSize != originalSize) {
 				Logger.v(this, "Image downsampled: from " + String.valueOf(originalSize)
-								+ " to "
-								+ String.valueOf(newSize)
-								+ ": "
-								+ imageRequest.getImageUri());
+						+ " to " + String.valueOf(newSize) + ": " + imageRequest.getImageUri());
 			}
 		}
 
@@ -228,7 +229,7 @@ public class ImageManager {
 				int sample = 0;
 
 				float fWidth = widthRaw;
-				sample = new Double(Math.ceil(fWidth / finWidth)).intValue();
+				sample = (int) FloatMath.ceil(fWidth / finWidth);
 
 				if (sample == 3) {
 					sample = 4;
@@ -276,7 +277,7 @@ public class ImageManager {
 				int sample = 0;
 
 				float fWidth = widthRaw;
-				sample = new Double(Math.ceil(fWidth / 1200)).intValue();
+				sample = (int) FloatMath.ceil(fWidth / 1200);
 
 				if (sample == 3) {
 					sample = 4;
@@ -412,8 +413,10 @@ public class ImageManager {
 	private String getExifOrientation(String imagePath, String imageOrientation) {
 
 		/*
-		 * Return image EXIF orientation using reflection (if Android 2.0 or higher)
-		 * http://developer.android.com/resources/articles/backward-compatibility.html
+		 * Return image EXIF orientation using reflection (if Android 2.0 or
+		 * higher)
+		 * http://developer.android.com/resources/articles/backward-compatibility
+		 * .html
 		 */
 		Method exifGetAttribute;
 		Constructor<ExifInterface> exifConstructor;
@@ -484,10 +487,10 @@ public class ImageManager {
 
 	public boolean hasImageCaptureBug() {
 		/*
-		 * List of known devices that have the bug where the
-		 * OK button does nothing when using MediaStore.ACTION_IMAGE_CAPTURE intent.
-		 * http://code.google.com/p/android/issues/detail?id=1480
-		 * Nexus S fingerprint: google/soju/crespo
+		 * List of known devices that have the bug where the OK button does
+		 * nothing when using MediaStore.ACTION_IMAGE_CAPTURE intent.
+		 * http://code.google.com/p/android/issues/detail?id=1480 Nexus S
+		 * fingerprint: google/soju/crespo
 		 */
 		ArrayList<String> devices = new ArrayList<String>();
 		devices.add("android-devphone1/dream_devphone/dream");

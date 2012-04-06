@@ -15,21 +15,25 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebView.PictureListener;
 
+import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.service.ProxibaseServiceException;
 import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ProxibaseServiceException.ErrorCode;
+import com.proxibase.service.ProxibaseServiceException.ErrorType;
 import com.proxibase.service.objects.Entity.ImageFormat;
 
 public class ImageLoader {
 
-	//private ImageCache		mImageCache;
+	// private ImageCache mImageCache;
 	private ImagesQueue		mImagesQueue		= new ImagesQueue();
 	private ImagesLoader	mImageLoaderThread	= new ImagesLoader();
 	private WebView			mWebView;
@@ -62,8 +66,8 @@ public class ImageLoader {
 				if (bitmap != null) {
 					if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.getScaleToWidth() != bitmap.getWidth()) {
 						/*
-						 * We might have cached a large version of an image so we
-						 * need to make sure we honor the image request specifications.
+						 * We might have cached a large version of an image so we need to make sure we honor the image
+						 * request specifications.
 						 */
 						bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 					}
@@ -73,15 +77,14 @@ public class ImageLoader {
 				}
 			}
 
-			int resourceId = ImageManager.getInstance().getActivity().getResources().getIdentifier(resolvedResourceName, "drawable",
-					"com.proxibase.aircandi");
+			int resourceId = ImageManager.getInstance().getActivity().getResources().getIdentifier(resolvedResourceName, "drawable", "com.proxibase.aircandi");
 			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(resourceId);
 
 			if (bitmap != null) {
 				if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.getScaleToWidth() != bitmap.getWidth()) {
 					/*
-					 * We might have cached a large version of an image so we
-					 * need to make sure we honor the image request specifications.
+					 * We might have cached a large version of an image so we need to make sure we honor the image
+					 * request specifications.
 					 */
 					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 				}
@@ -128,8 +131,8 @@ public class ImageLoader {
 					Logger.v(this, "Image request satisfied from cache: " + imageRequest.getImageUri());
 					if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.getScaleToWidth() != bitmap.getWidth()) {
 						/*
-						 * We might have cached a large version of an image so we
-						 * need to make sure we honor the image request specifications.
+						 * We might have cached a large version of an image so we need to make sure we honor the image
+						 * request specifications.
 						 */
 						bitmap = scaleAndCropBitmap(bitmap, imageRequest);
 					}
@@ -149,8 +152,8 @@ public class ImageLoader {
 
 	private void queueImage(ImageRequest imageRequest) {
 		/*
-		 * The image requestor may have called for other images before. So there may be some old tasks
-		 * in the queue. We need to discard them.
+		 * The image requestor may have called for other images before. So there may be some old tasks in the queue. We
+		 * need to discard them.
 		 */
 		mImagesQueue.Clean(imageRequest.getImageRequestor());
 		synchronized (mImagesQueue.mImagesToLoad) {
@@ -167,8 +170,7 @@ public class ImageLoader {
 
 	private static ServiceResponse getBitmap(String url, ImageRequest imageRequest, RequestListener listener) {
 		/*
-		 * We request a byte array for decoding because of a bug
-		 * in pre 2.3 versions of android.
+		 * We request a byte array for decoding because of a bug in pre 2.3 versions of android.
 		 */
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setUri(url);
@@ -187,7 +189,12 @@ public class ImageLoader {
 			Bitmap bitmap = ImageManager.getInstance().bitmapForByteArraySampled(imageBytes, imageRequest, CandiConstants.IMAGE_MEMORY_BYTES_MAX);
 
 			if (bitmap == null) {
-				throw new IllegalStateException("Stream could not be decoded to a bitmap: " + url);
+				Logger.w(null, url + ": stream could not be decoded to a bitmap");
+				serviceResponse.responseCode = ResponseCode.Failed;
+				serviceResponse.responseCodeDetail = ResponseCodeDetail.IllegalStateException;
+				String message = "Stream could not be decoded to a bitmap: " + url;
+				serviceResponse.exception = new ProxibaseServiceException(message, ErrorType.Client, ErrorCode.IllegalStateException,
+						new IllegalStateException("Stream could not be decoded to a bitmap: " + url));
 			}
 			else {
 				serviceResponse.data = bitmap;
@@ -198,108 +205,108 @@ public class ImageLoader {
 
 	private void getWebPageAsBitmap(final String uri, final ImageRequest imageRequest, final RequestListener listener) {
 
-		//String webViewContent = "";
+		// String webViewContent = "";
 		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResponseCodeDetail.Success, null, null);
 		final AtomicBoolean ready = new AtomicBoolean(false);
 		final AtomicInteger pictureCount = new AtomicInteger(0);
 
 		/*
-		 * Setting WideViewPort to false will cause html text to layout to try and fit the sizing of the
-		 * webview though our screen capture will still be cover the full page width. Ju
-		 * 
-		 * Setting to true will handle text nicely but will show the full width
-		 * of the webview even if the page content only fills a portion of it.
-		 * 
-		 * We might have to have a property to control the desired result when
-		 * using html for the tile display image.
-		 * 
-		 * Makes the Webview have a normal viewport (such as a normal desktop browser), while when false the webview
-		 * will have a viewport constrained to it's own dimensions (so if the webview is 50px*50px the viewport will be
-		 * the same size)
+		 * Setting WideViewPort to false will cause html text to layout to try and fit the sizing of the webview though
+		 * our screen capture will still be cover the full page width. Ju Setting to true will handle text nicely but
+		 * will show the full width of the webview even if the page content only fills a portion of it. We might have to
+		 * have a property to control the desired result when using html for the tile display image. Makes the Webview
+		 * have a normal viewport (such as a normal desktop browser), while when false the webview will have a viewport
+		 * constrained to it's own dimensions (so if the webview is 50px*50px the viewport will be the same size)
 		 */
 
-		mWebView.getSettings().setUseWideViewPort(true);
-		if (imageRequest.getLinkZoom()) {
-			mWebView.getSettings().setUseWideViewPort(false);
-		}
-
-		mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT_MOBILE);
-		mWebView.getSettings().setJavaScriptEnabled(imageRequest.getLinkJavascriptEnabled());
-		mWebView.getSettings().setLoadWithOverviewMode(true);
-		mWebView.getSettings().setDomStorageEnabled(true);
-		mWebView.refreshDrawableState();
-
-		mWebView.setWebViewClient(new WebViewClient() {
+		Aircandi.applicationHandler.post(new Runnable(){
 
 			@Override
-			public void onTooManyRedirects(WebView view, Message cancelMsg, Message continueMsg) {
-				super.onTooManyRedirects(view, cancelMsg, continueMsg);
-				Logger.v(this, "Too many redirects: " + uri);
-			}
-
-			@Override
-			public void onPageStarted(WebView view, String url, Bitmap favicon) {
-				super.onPageStarted(view, url, favicon);
-				Logger.v(this, "Page started: " + url);
-			}
-
-			@Override
-			public void onPageFinished(WebView view, String url) {
-				super.onPageFinished(view, url);
-				Logger.v(this, "Page finished: " + url);
-				ready.set(true);
-			}
-
-			public boolean shouldOverrideUrlLoading(WebView view, String url) {
-				view.loadUrl(url);
-				Logger.v(this, "Url intercepted and loaded: " + url);
-				return false;
-			}
-		});
-		mWebView.setWebChromeClient(new WebChromeClient() {
-
-			@Override
-			public void onProgressChanged(WebView view, int progress) {
-				listener.onProgressChanged(progress);
-			}
-		});
-		mWebView.setPictureListener(new PictureListener() {
-
-			@Override
-			public void onNewPicture(WebView view, Picture picture) {
-				/*
-				 * Sometimes the first call isn't finished with layout but the
-				 * second one is correct. How can we tell the difference?
-				 */
-
-				if (ready.get()) {
-					pictureCount.getAndIncrement();
-
-					final Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
-													CandiConstants.IMAGE_CONFIG_DEFAULT);
-					Canvas canvas = new Canvas(bitmap);
-
-					Matrix matrix = new Matrix();
-					float scale = (float) CandiConstants.CANDI_VIEW_WIDTH / (float) picture.getWidth();
-					matrix.postScale(scale, scale);
-
-					canvas.setMatrix(matrix);
-					canvas.drawPicture(picture);
-
-					/* Release */
-					canvas = null;
-					serviceResponse.data = bitmap;
-					listener.onComplete(serviceResponse);
-
-					/* We only allow a maximum of two picture calls */
-					if (pictureCount.get() >= 2) {
-						mWebView.setPictureListener(null);
-					}
+			public void run() {
+				mWebView.getSettings().setUseWideViewPort(true);
+				if (imageRequest.getLinkZoom()) {
+					mWebView.getSettings().setUseWideViewPort(false);
 				}
-			}
-		});
 
-		mWebView.loadUrl(uri);
+				mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT_MOBILE);
+				mWebView.getSettings().setJavaScriptEnabled(imageRequest.getLinkJavascriptEnabled());
+				mWebView.getSettings().setLoadWithOverviewMode(true);
+				mWebView.getSettings().setDomStorageEnabled(true);
+				mWebView.refreshDrawableState();
+
+				mWebView.setWebViewClient(new WebViewClient() {
+
+					@Override
+					public void onTooManyRedirects(WebView view, Message cancelMsg, Message continueMsg) {
+						super.onTooManyRedirects(view, cancelMsg, continueMsg);
+						Logger.v(this, "Too many redirects: " + uri);
+					}
+
+					@Override
+					public void onPageStarted(WebView view, String url, Bitmap favicon) {
+						super.onPageStarted(view, url, favicon);
+						Logger.v(this, "Page started: " + url);
+					}
+
+					@Override
+					public void onPageFinished(WebView view, String url) {
+						super.onPageFinished(view, url);
+						Logger.v(this, "Page finished: " + url);
+						ready.set(true);
+					}
+
+					public boolean shouldOverrideUrlLoading(WebView view, String url) {
+						view.loadUrl(url);
+						Logger.v(this, "Url intercepted and loaded: " + url);
+						return false;
+					}
+				});
+				mWebView.setWebChromeClient(new WebChromeClient() {
+
+					@Override
+					public void onProgressChanged(WebView view, int progress) {
+						listener.onProgressChanged(progress);
+					}
+				});
+				mWebView.setPictureListener(new PictureListener() {
+
+					@Override
+					public void onNewPicture(WebView view, Picture picture) {
+						/*
+						 * Sometimes the first call isn't finished with layout but the second one is correct. How can we tell
+						 * the difference?
+						 */
+
+						if (ready.get()) {
+							pictureCount.getAndIncrement();
+
+							final Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
+									CandiConstants.IMAGE_CONFIG_DEFAULT);
+							Canvas canvas = new Canvas(bitmap);
+
+							Matrix matrix = new Matrix();
+							float scale = (float) CandiConstants.CANDI_VIEW_WIDTH / (float) picture.getWidth();
+							matrix.postScale(scale, scale);
+
+							canvas.setMatrix(matrix);
+							canvas.drawPicture(picture);
+
+							/* Release */
+							canvas = null;
+							serviceResponse.data = bitmap;
+							listener.onComplete(serviceResponse);
+
+							/* We only allow a maximum of two picture calls */
+							if (pictureCount.get() >= 2) {
+								mWebView.setPictureListener(null);
+							}
+						}
+					}
+				});
+
+				mWebView.loadUrl(uri);
+			}});
+		
 	}
 
 	private Bitmap scaleAndCropBitmap(Bitmap bitmap, ImageRequest imageRequest) {
@@ -468,8 +475,8 @@ public class ImageLoader {
 							Logger.v(this, imageRequest.getImageUri() + ": Download started...");
 
 							/*
-							 * Gets bitmap at native size and downsamples if necessary to stay within
-							 * the max size in memory.
+							 * Gets bitmap at native size and downsamples if necessary to stay within the max size in
+							 * memory.
 							 */
 							serviceResponse = getBitmap(imageRequest.getImageUri(), imageRequest, new RequestListener() {
 
@@ -501,8 +508,8 @@ public class ImageLoader {
 								Logger.v(this, imageRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000) + "ms");
 
 								/*
-								 * Stuff it into the cache. Overwrites if it already exists.
-								 * This is a perf hit in the process because writing files is slow.
+								 * Stuff it into the cache. Overwrites if it already exists. This is a perf hit in the
+								 * process because writing files is slow.
 								 */
 								if (imageRequest.doUpdateCache()) {
 									Logger.v(this, imageRequest.getImageUri() + ": Pushing into cache...");
@@ -513,6 +520,14 @@ public class ImageLoader {
 								Logger.v(this, imageRequest.getImageUri() + ": Progress complete");
 								serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
 								imageRequest.getRequestListener().onProgressChanged(100);
+							}
+							else if (serviceResponse.responseCodeDetail == ResponseCodeDetail.IllegalStateException) {
+								/* 
+								 * Data couldn't be successfully decoded into a bitmap so substitute
+								 * the broken image placeholder
+								 */
+								imageRequest.setImageUri("resource:placeholder_picture");
+								fetchImage(imageRequest);
 							}
 							imageRequest.getRequestListener().onComplete(serviceResponse);
 						}

@@ -109,6 +109,23 @@
         <item name="android:background">@drawable/app_header_separator</item>
     </style>
 
+    <!-- Notifications -->
+
+    <style name="notification_text">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="notification_title">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!--
+         If you want a slightly different color for some text,
+         consider using ?android:attr/textColorSecondary
+    -->
+
+
     <!-- Progress -->
 
     <style name="progress_body" parent="android:Theme.Dialog">
@@ -148,17 +165,17 @@
         <item name="android:textColor">?attr/textColorButtonHeader</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
-    
+
     <style name="dialog_body_layout">
         <item name="android:background">#ffffffff</item>
     </style>
-        
+
     <style name="dialog_body_text">
         <item name="android:textColor">#ff000000</item>
         <item name="android:background">#00000000</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
-    
+
     <!-- ActionStrip -->
 
     <style name="actionstrip_button" parent="android:Widget.Button">
@@ -188,17 +205,6 @@
     </style>
 
     <!-- Candi Info -->
-
-
-    <!--
-    <style name="candi_info_button" parent="android:Widget.Button">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textColor">?attr/textColorButton</item>
-        <item name="android:background">?attr/backgroundButton</item>
-        <item name="android:layout_height">65dp</item>
-        <item name="android:layout_width">65dp</item>
-    </style>
-    -->
 
     <style name="candi_info_button" parent="android:Widget.Button">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
@@ -232,14 +238,6 @@
 
     <!-- Candi List -->
 
-
-    <!--
-    <style name="candi_list_image">
-        <item name="android:scaleType">fitCenter</item>
-        <item name="android:adjustViewBounds">true</item>
-    </style>
-    -->
-
     <style name="candi_list_title">
         <item name="android:textAppearance">@style/app_text_appearance_title2</item>
     </style>
@@ -256,6 +254,17 @@
     <style name="candi_list_button">
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/app_button_selector</item>
+    </style>
+
+    <!-- Bookmark List -->
+
+    <style name="bookmark_list_title">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="bookmark_list_uri">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
 
     <!-- CandiInfo: Pager Indicator -->

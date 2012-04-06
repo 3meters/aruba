@@ -2,9 +2,9 @@ package com.proxibase.aircandi;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,21 +14,20 @@ import android.widget.ListView;
 
 import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.components.CandiListAdapter;
+import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.proxibase.aircandi.components.Command;
+import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
-import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
-import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.Entity;
 
 public class CandiList extends CandiActivity {
@@ -45,8 +44,17 @@ public class CandiList extends CandiActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		bind();
+		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
+			/* 
+			 * Try to detect case where this is being created after
+			 * a crash and bail out.
+			 */
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+		}
+		else {
+			bind();
+		}
 	}
 
 	@Override
@@ -69,38 +77,33 @@ public class CandiList extends CandiActivity {
 			protected Object doInBackground(Object... params) {
 
 				if (mCommon.mEntity != null) {
-					
+
 					mMethodType = MethodType.CandiForParent;
 					ArrayList<String> entityIds = new ArrayList<String>();
 					entityIds.add(mCommon.mEntity.id);
 					parameters.putStringArrayList("entityIds", entityIds);
 					parameters.putString("eagerLoad", "object:{\"children\":true,\"comments\":false}");
 
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
-							.setRequestType(RequestType.Method)
-							.setParameters(parameters)
-							.setResponseFormat(ResponseFormat.Json);
-					Tracker.trackPageView("/CandiList");
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities").setRequestType(RequestType.Method)
+							.setParameters(parameters).setResponseFormat(ResponseFormat.Json);
+					mCommon.track("/CandiList");
 				}
 				else if (mCommon.mEntity == null) {
 					mMethodType = MethodType.CandiByUser;
 					parameters.putString("userId", Aircandi.getInstance().getUser().id);
 					parameters.putString("eagerLoad", "object:{\"children\":false,\"comments\":false}");
 
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForUser")
-							.setRequestType(RequestType.Method)
-							.setParameters(parameters)
-							.setResponseFormat(ResponseFormat.Json);
-					Tracker.trackPageView("/MyCandiList");
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForUser").setRequestType(RequestType.Method)
+							.setParameters(parameters).setResponseFormat(ResponseFormat.Json);
+					mCommon.track("/MyCandiList");
 				}
 
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-				
+
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) serviceResponse.data;
-					mListEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(jsonResponse,
-								Entity.class,
-								GsonType.ProxibaseService);
+					mListEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class,
+							GsonType.ProxibaseService);
 					if (mMethodType == MethodType.CandiForParent) {
 						mListParentEntity = mListEntities.get(0);
 						mListEntities = mListEntities.get(0).children;
@@ -114,8 +117,9 @@ public class CandiList extends CandiActivity {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					if (mListEntities != null) {
-						Collections.sort(mListEntities, new SortEntitiesByUpdatedTime());
-						mListView.setAdapter(new CandiListAdapter(CandiList.this, Aircandi.getInstance().getUser(), mListEntities));
+						Collections.sort(mListEntities, new Entity.SortEntitiesByUpdatedTime());
+						mListView.setAdapter(new CandiListAdapter(CandiList.this, Aircandi.getInstance().getUser(), R.layout.temp_listitem_candi,
+								mListEntities));
 					}
 					mCommon.showProgressDialog(false, null);
 					mCommon.stopTitlebarProgress();
@@ -140,7 +144,10 @@ public class CandiList extends CandiActivity {
 		intentBuilder.setEntityType(entity.type);
 		if (!entity.root) {
 			intentBuilder.setEntityLocation(mListParentEntity.location);
-		}		
+		}
+		else {
+			intentBuilder.setBeaconId(entity.beaconId);
+		}
 		Intent intent = intentBuilder.create();
 
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_INFO);
@@ -184,11 +191,12 @@ public class CandiList extends CandiActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		mLastResultCode = resultCode;
-		if (resultCode == CandiConstants.RESULT_ENTITY_UPDATED
-				|| resultCode == CandiConstants.RESULT_ENTITY_DELETED
-				|| resultCode == CandiConstants.RESULT_ENTITY_INSERTED
-				|| resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
+		if (resultCode == CandiConstants.RESULT_ENTITY_UPDATED || resultCode == CandiConstants.RESULT_ENTITY_DELETED
+				|| resultCode == CandiConstants.RESULT_ENTITY_INSERTED || resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
 			bind();
+			if (resultCode == CandiConstants.RESULT_ENTITY_DELETED) {
+				mLastResultCode = CandiConstants.RESULT_ENTITY_CHILD_DELETED;
+			}
 		}
 		else if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED) {
 			mCommon.updateUserPicture();
@@ -225,17 +233,4 @@ public class CandiList extends CandiActivity {
 		return R.layout.candi_list;
 	}
 
-	class SortEntitiesByUpdatedTime implements Comparator<Entity> {
-
-		@Override
-		public int compare(Entity object1, Entity object2) {
-			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
-				return 1;
-			}
-			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
-				return 0;
-			}
-			return -1;
-		}
-	}
 }

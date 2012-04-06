@@ -1,5 +1,8 @@
 package com.proxibase.aircandi;
 
+import java.util.Collections;
+
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -14,14 +17,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.components.Command;
+import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.IntentBuilder;
-import com.proxibase.aircandi.components.ProxiExplorer;
-import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.Command.CommandVerb;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
@@ -33,9 +35,18 @@ public class CandiForm extends CandiActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		bind();
-		Tracker.trackPageView("/CandiForm");
+		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
+			/* 
+			 * Try to detect case where this is being created after
+			 * a crash and bail out.
+			 */
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+		}
+		else {
+			mCommon.track();
+			bind();
+		}
 	}
 
 	@Override
@@ -53,7 +64,9 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntity.id, false);
+				String jsonEagerLoad = "{\"children\":true,\"comments\":false}";
+				String jsonFields = "{\"entities\":{},\"children\":{\"imagePreviewUri\":true,\"linkUri\":true,\"linkZoom\":true,\"linkJavascriptEnabled\":true,\"_creator\":true,\"creator\":true,\"modifiedDate\":true},\"comments\":{}}";
+				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntity.id, jsonEagerLoad, jsonFields);
 				return serviceResponse;
 			}
 
@@ -63,6 +76,12 @@ public class CandiForm extends CandiActivity {
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mCommon.mEntity = (Entity) serviceResponse.data;
+
+					/* Sort the children if there are any */
+					if (mCommon.mEntity.children != null && mCommon.mEntity.children.size() > 1) {
+						Collections.sort(mCommon.mEntity.children, new Entity.SortEntitiesByUpdatedTime());
+					}
+
 					ViewGroup candiInfoView = (ViewGroup) findViewById(R.id.candi_form);
 					buildCandiInfo(mCommon.mEntity, candiInfoView, false);
 					((ViewGroup) findViewById(R.id.group_candi_content)).setVisibility(View.VISIBLE);
@@ -137,14 +156,19 @@ public class CandiForm extends CandiActivity {
 				|| resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
 			bind();
 			if (resultCode == CandiConstants.RESULT_ENTITY_INSERTED) {
-				startCandiList();
+				/*
+				 * Make sure the user has a chance to see the new candi appear in the candi list button.
+				 */
 			}
+		}
+		else if (resultCode == CandiConstants.RESULT_ENTITY_CHILD_DELETED) {
+			bind();
 		}
 		else if (resultCode == CandiConstants.RESULT_ENTITY_DELETED) {
 			onBackPressed();
 		}
 		else if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED
-					|| resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
+				|| resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
 			mCommon.updateUserPicture();
 			bind();
 		}
@@ -186,7 +210,10 @@ public class CandiForm extends CandiActivity {
 		final Button newComment = (Button) candiInfoView.findViewById(R.id.button_comment);
 		final Button newCandi = (Button) candiInfoView.findViewById(R.id.button_new);
 		final Button editCandi = (Button) candiInfoView.findViewById(R.id.button_edit);
-		final ImageView listCandi = (ImageView) candiInfoView.findViewById(R.id.button_list);
+
+		final View holderChildren = (View) candiInfoView.findViewById(R.id.holder_button_children);
+		final WebImageView imageChildren = (WebImageView) candiInfoView.findViewById(R.id.button_children_image);
+		final TextView textChildren = (TextView) candiInfoView.findViewById(R.id.button_children_text);
 
 		/* Author image */
 
@@ -246,7 +273,7 @@ public class CandiForm extends CandiActivity {
 		newCandi.setVisibility(View.GONE);
 		newComment.setVisibility(View.GONE);
 		editCandi.setVisibility(View.GONE);
-		listCandi.setVisibility(View.GONE);
+		holderChildren.setVisibility(View.GONE);
 		if (!entity.locked) {
 			if (entity.root) {
 				newCandi.setVisibility(View.VISIBLE);
@@ -255,12 +282,28 @@ public class CandiForm extends CandiActivity {
 			newComment.setVisibility(View.VISIBLE);
 			newComment.setTag(new Command(CommandVerb.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
 		}
+
 		if (entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
 			editCandi.setVisibility(View.VISIBLE);
 			editCandi.setTag(new Command(CommandVerb.Edit, "Edit", "EntityForm", entity.type, entity.id, null, null));
 		}
+
 		if (visibleChildren) {
-			listCandi.setVisibility(View.VISIBLE);
+			Entity childEntity = entity.children.get(0);
+
+			/* image */
+			ImageRequestBuilder builder = new ImageRequestBuilder(imageChildren);
+			builder.setImageUri(childEntity.getMasterImageUri());
+			builder.setImageFormat(childEntity.getMasterImageFormat());
+			builder.setLinkZoom(childEntity.linkZoom);
+			builder.setLinkJavascriptEnabled(childEntity.linkJavascriptEnabled);
+			ImageRequest imageRequest = builder.create();
+			imageChildren.setImageRequest(imageRequest);
+
+			/* child count */
+			textChildren.setText(String.valueOf(entity.childrenCount));
+
+			holderChildren.setVisibility(View.VISIBLE);
 		}
 
 		/* Comments */
@@ -329,7 +372,7 @@ public class CandiForm extends CandiActivity {
 		intentBuilder.setEntity(mCommon.mEntity);
 		Intent intent = intentBuilder.create();
 
-		startActivity(intent);
+		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_LIST);
 		overridePendingTransition(R.anim.slide_in_right_long, R.anim.slide_out_left_long);
 	}
 

@@ -14,15 +14,12 @@
         <ScrollView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1"
             android:fillViewport="true" >
 
             <RelativeLayout
                 android:id="@+id/group_candi_content"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentTop="true"
+                android:layout_height="wrap_content"
                 android:background="@drawable/button_nooutline_selector"
                 android:onClick="onCandiInfoClick"
                 android:paddingBottom="10dp" >
@@ -140,7 +137,6 @@
                 android:id="@+id/candi_info_slider_handle"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:clickable="true"
                 android:orientation="vertical"
                 android:paddingBottom="0dp"

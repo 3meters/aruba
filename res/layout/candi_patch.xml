@@ -23,19 +23,17 @@
         android:id="@+id/info_body"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/form_tabs"
         android:background="?attr/backgroundCandiInfo" >
 
         <ScrollView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1"
             android:fillViewport="true" >
 
             <RelativeLayout
                 android:id="@+id/group_candi_content"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="wrap_content"
                 android:background="@drawable/button_nooutline_selector"
                 android:onClick="onCandiInfoClick"
                 android:paddingBottom="15dp"
@@ -166,7 +164,6 @@
                         android:id="@+id/block_author"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/button_comments"
                         android:layout_marginLeft="3dp"
                         aircandi:layout="@layout/temp_user_info_text_only" />
 
@@ -299,7 +296,35 @@
                 android:paddingLeft="90dp" >
             </RelativeLayout>
         </SlidingDrawer>
-    </FrameLayout>
+    </FrameLayout>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     -->
 
 </RelativeLayout>

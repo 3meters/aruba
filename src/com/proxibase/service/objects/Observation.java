@@ -17,6 +17,8 @@ public class Observation extends ServiceEntry {
 	public String	entityId;
 
 	@Expose
+	public Number	levelDb;
+	@Expose
 	public Number	latitude;
 	@Expose
 	public Number	longitude;
@@ -38,6 +40,6 @@ public class Observation extends ServiceEntry {
 	public Observation() {}
 
 	public String getCollection() {
-		return "drops";
+		return "observations";
 	}
 }
