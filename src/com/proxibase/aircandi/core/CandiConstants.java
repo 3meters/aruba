@@ -68,6 +68,8 @@ public interface CandiConstants {
 	public static final int				VERTEX_INDEX_X							= 0;
 	public static final int				VERTEX_INDEX_Y							= 1;
 
+	public static final String			IMAGE_CAPTURE_PATH						= "/aircandi/images/";
+
 	public static final String			CACHE_PATH								= "/imagecache/aircandi";
 	public static final long			CACHE_TARGET_SIZE						= 8000000;
 	public static final long			CACHE_TRIGGER_SIZE						= 10000000;
@@ -99,7 +101,7 @@ public interface CandiConstants {
 	public static final int				ACTIVITY_ENTITY_HANDLER					= 100;
 	public static final int				ACTIVITY_MARKET							= 200;
 	public static final int				ACTIVITY_PICTURE_PICK_DEVICE			= 300;
-	public static final int				ACTIVITY_PICTURE_SEARCH			= 305;
+	public static final int				ACTIVITY_PICTURE_SEARCH					= 305;
 	public static final int				ACTIVITY_PICTURE_MAKE					= 310;
 	public static final int				ACTIVITY_VIDEO_PICK						= 320;
 	public static final int				ACTIVITY_VIDEO_MAKE						= 330;

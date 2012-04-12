@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.R;
+import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.core.CandiConstants;
 
 public class ImageUtils {
@@ -104,6 +105,60 @@ public class ImageUtils {
 		Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, xStart, yStart, xEnd, yEnd);
 		return croppedBitmap;
 	}
+	
+	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, ImageRequest imageRequest) {
+
+		/* Scale if needed */
+		Bitmap bitmapScaled = bitmap;
+		if (imageRequest.getScaleToWidth() > 0) {
+			boolean portrait = bitmap.getHeight() > bitmap.getWidth();
+			if (portrait) {
+				if (bitmap.getWidth() != imageRequest.getScaleToWidth()) {
+					float scalingRatio = (float) imageRequest.getScaleToWidth() / (float) bitmap.getWidth();
+					float newHeight = (float) bitmap.getHeight() * scalingRatio;
+					bitmapScaled = Bitmap.createScaledBitmap(bitmap, imageRequest.getScaleToWidth(), (int) (newHeight), true);
+					if (!bitmapScaled.equals(bitmap)) {
+						bitmap.recycle();
+					}
+				}
+			}
+			else {
+				if (bitmap.getHeight() != imageRequest.getScaleToWidth()) {
+					float scalingRatio = (float) imageRequest.getScaleToWidth() / (float) bitmap.getHeight();
+					float newWidth = (float) bitmap.getWidth() * scalingRatio;
+					bitmapScaled = Bitmap.createScaledBitmap(bitmap, (int) (newWidth), imageRequest.getScaleToWidth(), true);
+					if (!bitmapScaled.equals(bitmap)) {
+						bitmap.recycle();
+					}
+				}
+			}
+		}
+
+		/* Crop if requested */
+		Bitmap bitmapScaledAndCropped = bitmapScaled;
+		if (imageRequest.getImageShape() == ImageShape.Square) {
+			bitmapScaledAndCropped = ImageUtils.cropToSquare(bitmapScaled);
+			if (!bitmapScaledAndCropped.equals(bitmapScaled)) {
+				bitmapScaled.recycle();
+			}
+		}
+
+		/* Make sure the bitmap format is right */
+		Bitmap bitmapFinal = bitmapScaledAndCropped;
+		if (!bitmapScaledAndCropped.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString())) {
+			bitmapFinal = bitmapScaledAndCropped.copy(CandiConstants.IMAGE_CONFIG_DEFAULT, false);
+			if (!bitmapFinal.equals(bitmapScaledAndCropped)) {
+				bitmapScaledAndCropped.recycle();
+			}
+		}
+
+		if (bitmapFinal.isRecycled()) {
+			throw new IllegalArgumentException("bitmapFinal has been recycled");
+		}
+
+		return bitmapFinal;
+	}
+	
 
 	public static Bitmap makeReflection(Bitmap originalBitmap, boolean applyReflectionGradient) {
 

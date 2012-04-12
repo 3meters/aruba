@@ -633,7 +633,10 @@
 
 	<!-- Obfuscate target
         This is only active in release builds when proguard.config is defined
-        in default.properties.
+        in project.properties.
+        
+        Jayma: comment/uncomment line in project.properties to enable proguard 
+        processing for 'release' ant target
 
         To replace Proguard with a different obfuscation engine:
         Override the following targets in your build.xml, before the call to <setup>

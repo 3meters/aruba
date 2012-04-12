@@ -83,7 +83,7 @@ public class CandiMap extends MapActivity {
 		initialize();
 		initializeLocation();
 		if (GeoLocationManager.getInstance().getCurrentLocation() != null) {
-			/* 
+			/*
 			 * TODO: What should we do to get get a location?
 			 */
 			bind();
@@ -315,50 +315,52 @@ public class CandiMap extends MapActivity {
 
 		for (Object entityPointObject : mEntityPoints) {
 			Entity entityPoint = (Entity) entityPointObject;
-			GeoPoint point = new GeoPoint((int) (entityPoint.location.latitude.doubleValue() * 1E6), (int) (entityPoint.location.longitude
-					.doubleValue() * 1E6));
-			OverlayItem overlayitem = new OverlayItem(point, entityPoint.label, entityPoint.label);
+			if (entityPoint.location != null) {
+				GeoPoint point = new GeoPoint((int) (entityPoint.location.latitude.doubleValue() * 1E6), (int) (entityPoint.location.longitude
+						.doubleValue() * 1E6));
+				OverlayItem overlayitem = new OverlayItem(point, entityPoint.label, entityPoint.label);
 
-			/* User custom marker */
-			// if (entityPoint.imagePreviewUri != null &&
-			// !entityPoint.imagePreviewUri.equals("")) {
-			// /*
-			// * If we find it in the cache we'll use it otherwise we fall back
-			// to the
-			// * default marker. It would be expensive to deal with images way
-			// outside the users
-			// * current radar range.
-			// */
-			// // Bitmap bitmap =
-			// ImageManager.getInstance().getImageLoader().getImageCache().get(entityPoint.imagePreviewUri);
-			// // if (bitmap != null) {
-			// // BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
-			// // bitmapDrawable.setBounds(0, 0, 80, 80);
-			// // overlayitem.setMarker(bitmapDrawable);
-			// // }
-			// // else {
-			// Drawable marker =
-			// getResources().getDrawable(R.drawable.icon_picture);
-			// marker.setBounds(0, 0, 40, 35);
-			// overlayitem.setMarker(marker);
-			// // }
-			// }
-			// else if (entityPoint.linkUri != null &&
-			// !entityPoint.linkUri.equals("")) {
-			// Drawable marker =
-			// getResources().getDrawable(R.drawable.icon_link);
-			// marker.setBounds(0, 0, 40, 40);
-			// overlayitem.setMarker(marker);
-			// }
-			// else {
-			// Drawable marker =
-			// getResources().getDrawable(R.drawable.icon_post);
-			// marker.setBounds(0, 0, 40, 35);
-			// overlayitem.setMarker(marker);
-			// }
+				/* User custom marker */
+				// if (entityPoint.imagePreviewUri != null &&
+				// !entityPoint.imagePreviewUri.equals("")) {
+				// /*
+				// * If we find it in the cache we'll use it otherwise we fall back
+				// to the
+				// * default marker. It would be expensive to deal with images way
+				// outside the users
+				// * current radar range.
+				// */
+				// // Bitmap bitmap =
+				// ImageManager.getInstance().getImageLoader().getImageCache().get(entityPoint.imagePreviewUri);
+				// // if (bitmap != null) {
+				// // BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
+				// // bitmapDrawable.setBounds(0, 0, 80, 80);
+				// // overlayitem.setMarker(bitmapDrawable);
+				// // }
+				// // else {
+				// Drawable marker =
+				// getResources().getDrawable(R.drawable.icon_picture);
+				// marker.setBounds(0, 0, 40, 35);
+				// overlayitem.setMarker(marker);
+				// // }
+				// }
+				// else if (entityPoint.linkUri != null &&
+				// !entityPoint.linkUri.equals("")) {
+				// Drawable marker =
+				// getResources().getDrawable(R.drawable.icon_link);
+				// marker.setBounds(0, 0, 40, 40);
+				// overlayitem.setMarker(marker);
+				// }
+				// else {
+				// Drawable marker =
+				// getResources().getDrawable(R.drawable.icon_post);
+				// marker.setBounds(0, 0, 40, 35);
+				// overlayitem.setMarker(marker);
+				// }
 
-			overlayitem.setMarker(drawable);
-			mItemizedOverlay.addOverlay(overlayitem);
+				overlayitem.setMarker(drawable);
+				mItemizedOverlay.addOverlay(overlayitem);
+			}
 		}
 		mMapOverlays.add(mItemizedOverlay);
 		mMapController.zoomToSpan(mItemizedOverlay.getLatSpanE6() + 1500, mItemizedOverlay.getLonSpanE6() + 1500);

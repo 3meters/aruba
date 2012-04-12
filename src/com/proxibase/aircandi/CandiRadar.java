@@ -1948,12 +1948,19 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 			if (!currentVersionName.equals(versionInfo.versionName)) {
 
-				AircandiCommon.showAlertDialog(R.drawable.icon_app, "New Aircandi version",
-						"A newer version of Aircandi is available. Please download and install as soon possible.", this, new
-						DialogInterface.OnClickListener() {
+				this.runOnUiThread(new Runnable() {
 
-							public void onClick(DialogInterface dialog, int which) {}
-						});
+					@Override
+					public void run() {
+						AircandiCommon.showAlertDialog(R.drawable.icon_app, "New Aircandi version",
+								"A newer version of Aircandi is available. Please download and install as soon possible.", CandiRadar.this, new
+								DialogInterface.OnClickListener() {
+
+									public void onClick(DialogInterface dialog, int which) {}
+								});
+
+					}
+				});
 
 			}
 		}

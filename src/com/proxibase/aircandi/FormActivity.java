@@ -2,16 +2,20 @@ package com.proxibase.aircandi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Images.Media;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -25,16 +29,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.components.AircandiCommon;
-import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
+import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
-import com.proxibase.aircandi.components.Tracker;
-import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxibaseService.RequestListener;
@@ -45,16 +49,16 @@ public abstract class FormActivity extends Activity {
 	protected Boolean			mBeaconUnregistered;
 	protected String			mImageUriOriginal;
 	protected AircandiCommon	mCommon;
-
 	protected RequestListener	mImageRequestListener;
 	protected WebImageView		mImageRequestWebImageView;
+	protected String			mImagePath;
+	protected String			mImageName;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			/* 
-			 * Try to detect case where this is being created after
-			 * a crash and bail out.
+			/*
+			 * Try to detect case where this is being created after a crash and bail out.
 			 */
 			super.onCreate(savedInstanceState);
 			setResult(Activity.RESULT_CANCELED);
@@ -75,6 +79,7 @@ public abstract class FormActivity extends Activity {
 			super.onCreate(savedInstanceState);
 			super.setContentView(this.getLayoutID());
 			mCommon.initialize();
+			mImagePath = Environment.getExternalStorageDirectory() + CandiConstants.IMAGE_CAPTURE_PATH;
 		}
 	}
 
@@ -141,6 +146,142 @@ public abstract class FormActivity extends Activity {
 		}
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		/*
+		 * Called before onResume. If we are returning from the market app, we get a zero result code whether the user
+		 * decided to start an install or not.
+		 */
+		if (resultCode == Activity.RESULT_OK) {
+			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
+
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					final String imageUri = extras.getString(getString(R.string.EXTRA_URI));
+					final String imageTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
+					final String imageDescription = extras.getString(getString(R.string.EXTRA_URI_DESCRIPTION));
+
+					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
+					builder.setFromUris(imageUri, null);
+					builder.setRequestListener(new RequestListener() {
+
+						@Override
+						public void onComplete(Object response) {
+
+							final ServiceResponse serviceResponse = (ServiceResponse) response;
+							if (serviceResponse.responseCode == ResponseCode.Success) {
+								final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+								runOnUiThread(new Runnable() {
+
+									@Override
+									public void run() {
+										if (mImageRequestListener != null) {
+											mImageRequestListener.onComplete(serviceResponse, imageUri, null, imageResponse.bitmap);
+										}
+									}
+								});
+							}
+						}
+					});
+
+					if (imageTitle != null && !imageTitle.equals("")) {
+						EditText title = (EditText) findViewById(R.id.text_title);
+						if (title != null && title.getText().toString().equals("")) {
+							title.setText(imageTitle);
+						}
+					}
+
+					if (imageDescription != null && !imageDescription.equals("")) {
+						EditText description = (EditText) findViewById(R.id.text_content);
+						if (description != null && description.getText().toString().equals("")) {
+							description.setText(imageDescription);
+						}
+					}
+
+					ImageRequest imageRequest = builder.create();
+					mImageRequestWebImageView.setImageRequest(imageRequest, false);
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
+
+				Uri imageUri = intent.getData();
+				Bitmap bitmap = null;
+
+				bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_DEFAULT));
+				if (bitmap != null && mImageRequestListener != null) {
+					mImageRequestWebImageView.getImageView().setImageBitmap(null);
+					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView());
+					mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap);
+					Tracker.trackEvent("Entity", "PickPicture", "None", 0);
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
+
+				try {
+					/* Get bitmap */
+					Bitmap bitmap = Media.getBitmap(getContentResolver(), Uri.fromFile(getTempFile()));
+
+					/* Scale and crop */
+					ImageRequest imageRequest = new ImageRequest();
+					imageRequest.setImageShape(ImageShape.Square);
+					imageRequest.setScaleToWidth(CandiConstants.IMAGE_WIDTH_DEFAULT);
+					bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
+					
+					/* Adjust rotation using file Exif information */
+					ExifInterface exif = new ExifInterface(getTempFile().getAbsolutePath());
+					int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+					int rotate = 0;
+					switch (orientation) {
+					case ExifInterface.ORIENTATION_ROTATE_270:
+						rotate = 270;
+						break;
+					case ExifInterface.ORIENTATION_ROTATE_180:
+						rotate = 180;
+						break;
+					case ExifInterface.ORIENTATION_ROTATE_90:
+						rotate = 90;
+						break;
+					}
+					
+					// create a matrix object
+					Matrix matrix = new Matrix();
+					matrix.postRotate(rotate); // anti-clockwise by 90 degrees
+
+					// create a new bitmap from the original using the matrix to transform the result
+					bitmap = Bitmap.createBitmap(bitmap , 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+					//bitmap.recycle();
+
+					mImageRequestWebImageView.getImageView().setImageBitmap(null);
+					if (mImageRequestListener != null) {
+						ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView());
+						mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap);
+						Tracker.trackEvent("Entity", "TakePicture", "None", 0);
+					}
+				}
+				catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_LINK_PICK) {
+
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					final String linkUri = extras.getString(getString(R.string.EXTRA_URI));
+					@SuppressWarnings("unused")
+					final String linkTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
+					if (linkUri != null && !linkUri.equals("")) {
+						if (mImageRequestListener != null) {
+							mImageRequestListener.onComplete(new ServiceResponse(), null, linkUri, null);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Picker routines
 	// --------------------------------------------------------------------------------------------
@@ -164,15 +305,9 @@ public abstract class FormActivity extends Activity {
 	}
 
 	public void takePicture() {
-		Intent takePictureFromCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		if (ImageManager.getInstance().hasImageCaptureBug()) {
-			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
-					Uri.fromFile(new File(Environment.getExternalStorageDirectory().getPath() + "/tmp/foo.jpeg")));
-		}
-		else
-			takePictureFromCameraIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
-					android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		startActivityForResult(takePictureFromCameraIntent, CandiConstants.ACTIVITY_PICTURE_MAKE);
+		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile()));
+		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
 	}
 
 	public void pickAircandiPicture() {
@@ -205,6 +340,14 @@ public abstract class FormActivity extends Activity {
 
 		ImageRequest imageRequest = builder.create();
 		mImageRequestWebImageView.setImageRequest(imageRequest);
+	}
+
+	private File getTempFile() {
+		File path = new File(Environment.getExternalStorageDirectory(), this.getPackageName());
+		if (!path.exists()) {
+			path.mkdir();
+		}
+		return new File(path, "image_capture.tmp");
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -289,119 +432,6 @@ public abstract class FormActivity extends Activity {
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		/*
-		 * Called before onResume. If we are returning from the market app, we get a zero result code whether the user
-		 * decided to start an install or not.
-		 */
-		if (resultCode == Activity.RESULT_OK) {
-			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
-
-				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-					final String imageUri = extras.getString(getString(R.string.EXTRA_URI));
-					final String imageTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
-					final String imageDescription = extras.getString(getString(R.string.EXTRA_URI_DESCRIPTION));
-
-					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
-					builder.setFromUris(imageUri, null);
-					builder.setRequestListener(new RequestListener() {
-
-						@Override
-						public void onComplete(Object response) {
-
-							final ServiceResponse serviceResponse = (ServiceResponse) response;
-							if (serviceResponse.responseCode == ResponseCode.Success) {
-								final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-								runOnUiThread(new Runnable() {
-
-									@Override
-									public void run() {
-										if (mImageRequestListener != null) {
-											mImageRequestListener.onComplete(serviceResponse, imageUri, null, imageResponse.bitmap);
-										}
-									}
-								});
-							}
-						}
-					});
-
-					if (imageTitle != null && !imageTitle.equals("")) {
-						EditText title = (EditText) findViewById(R.id.text_title);
-						if (title != null && title.getText().toString().equals("")) {
-							title.setText(imageTitle);
-						}
-					}
-
-					if (imageDescription != null && !imageDescription.equals("")) {
-						EditText description = (EditText) findViewById(R.id.text_content);
-						if (description != null && description.getText().toString().equals("")) {
-							description.setText(imageDescription);
-						}
-					}
-
-					ImageRequest imageRequest = builder.create();
-					mImageRequestWebImageView.setImageRequest(imageRequest, false);
-				}
-			}
-			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
-
-				Uri imageUri = intent.getData();
-				Bitmap bitmap = null;
-
-				bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_DEFAULT));
-				if (bitmap != null && mImageRequestListener != null) {
-					mImageRequestWebImageView.getImageView().setImageBitmap(null);
-					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView());
-					mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap);
-					Tracker.trackEvent("Entity", "PickPicture", "None", 0);
-				}
-			}
-			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
-
-				mImageRequestWebImageView.getImageView().setImageBitmap(null);
-				Uri imageUri = null;
-				if (ImageManager.getInstance().hasImageCaptureBug()) {
-					File imageFile = new File(Environment.getExternalStorageDirectory().getPath() + "/tmp/foo.jpeg");
-					try {
-						imageUri = Uri.parse(android.provider.MediaStore.Images.Media.insertImage(getContentResolver(), imageFile
-								.getAbsolutePath(),
-								null, null));
-						if (!imageFile.delete()) {}
-					}
-					catch (FileNotFoundException exception) {
-						Exceptions.Handle(exception);
-					}
-				}
-				else {
-					imageUri = intent.getData();
-				}
-
-				Bitmap bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_DEFAULT));
-				if (mImageRequestListener != null) {
-					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView());
-					mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap);
-					Tracker.trackEvent("Entity", "TakePicture", "None", 0);
-				}
-			}
-			else if (requestCode == CandiConstants.ACTIVITY_LINK_PICK) {
-				
-				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-					final String linkUri = extras.getString(getString(R.string.EXTRA_URI));
-					@SuppressWarnings("unused")
-					final String linkTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
-					if (linkUri != null && !linkUri.equals("")) {
-						if (mImageRequestListener != null) {
-							mImageRequestListener.onComplete(new ServiceResponse(), null, linkUri, null);
-						}
-					}
-				}
-			}
-		}
-	}
 
 	@Override
 	protected void onResume() {

@@ -5,30 +5,29 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Picture;
-import android.graphics.Bitmap.CompressFormat;
 import android.os.Message;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.webkit.WebView.PictureListener;
+import android.webkit.WebViewClient;
 
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
-import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxibaseServiceException;
-import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ProxibaseServiceException;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
+import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.Entity.ImageFormat;
 
 public class ImageLoader {
@@ -69,7 +68,7 @@ public class ImageLoader {
 						 * We might have cached a large version of an image so we need to make sure we honor the image
 						 * request specifications.
 						 */
-						bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+						bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
 					}
 					serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
 					imageRequest.getRequestListener().onComplete(serviceResponse);
@@ -86,7 +85,7 @@ public class ImageLoader {
 					 * We might have cached a large version of an image so we need to make sure we honor the image
 					 * request specifications.
 					 */
-					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+					bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
 				}
 
 				/* We put resource images into the cache so they are consistent */
@@ -109,7 +108,7 @@ public class ImageLoader {
 			Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(assetName);
 			if (bitmap != null) {
 				if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.getScaleToWidth() != bitmap.getWidth()) {
-					bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+					bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
 				}
 
 				/* We put resource images into the cache so they are consistent */
@@ -134,7 +133,7 @@ public class ImageLoader {
 						 * We might have cached a large version of an image so we need to make sure we honor the image
 						 * request specifications.
 						 */
-						bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+						bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
 					}
 					serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
 					imageRequest.getRequestListener().onComplete(serviceResponse);
@@ -309,59 +308,6 @@ public class ImageLoader {
 		
 	}
 
-	private Bitmap scaleAndCropBitmap(Bitmap bitmap, ImageRequest imageRequest) {
-
-		/* Scale if needed */
-		Bitmap bitmapScaled = bitmap;
-		if (imageRequest.getScaleToWidth() > 0) {
-			boolean portrait = bitmap.getHeight() > bitmap.getWidth();
-			if (portrait) {
-				if (bitmap.getWidth() != imageRequest.getScaleToWidth()) {
-					float scalingRatio = (float) imageRequest.getScaleToWidth() / (float) bitmap.getWidth();
-					float newHeight = (float) bitmap.getHeight() * scalingRatio;
-					bitmapScaled = Bitmap.createScaledBitmap(bitmap, imageRequest.getScaleToWidth(), (int) (newHeight), true);
-					if (!bitmapScaled.equals(bitmap)) {
-						bitmap.recycle();
-					}
-				}
-			}
-			else {
-				if (bitmap.getHeight() != imageRequest.getScaleToWidth()) {
-					float scalingRatio = (float) imageRequest.getScaleToWidth() / (float) bitmap.getHeight();
-					float newWidth = (float) bitmap.getWidth() * scalingRatio;
-					bitmapScaled = Bitmap.createScaledBitmap(bitmap, (int) (newWidth), imageRequest.getScaleToWidth(), true);
-					if (!bitmapScaled.equals(bitmap)) {
-						bitmap.recycle();
-					}
-				}
-			}
-		}
-
-		/* Crop if requested */
-		Bitmap bitmapScaledAndCropped = bitmapScaled;
-		if (imageRequest.getImageShape() == ImageShape.Square) {
-			bitmapScaledAndCropped = ImageUtils.cropToSquare(bitmapScaled);
-			if (!bitmapScaledAndCropped.equals(bitmapScaled)) {
-				bitmapScaled.recycle();
-			}
-		}
-
-		/* Make sure the bitmap format is right */
-		Bitmap bitmapFinal = bitmapScaledAndCropped;
-		if (!bitmapScaledAndCropped.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString())) {
-			bitmapFinal = bitmapScaledAndCropped.copy(CandiConstants.IMAGE_CONFIG_DEFAULT, false);
-			if (!bitmapFinal.equals(bitmapScaledAndCropped)) {
-				bitmapScaledAndCropped.recycle();
-			}
-		}
-
-		if (bitmapFinal.isRecycled()) {
-			throw new IllegalArgumentException("bitmapFinal has been recycled");
-		}
-
-		return bitmapFinal;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Setter/Getter routines
 	// --------------------------------------------------------------------------------------------
@@ -448,7 +394,7 @@ public class ImageLoader {
 
 										/* Perform requested post processing */
 										Bitmap bitmap = (Bitmap) serviceResponse.data;
-										bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+										bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
 
 										/* Stuff it into the cache. Overwrites if it already exists. */
 										ImageManager.getInstance().putImage(imageRequest.getImageUri(), bitmap, CompressFormat.JPEG);
@@ -500,7 +446,7 @@ public class ImageLoader {
 
 								/* Perform requested post processing */
 								if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL) {
-									bitmap = scaleAndCropBitmap(bitmap, imageRequest);
+									bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
 								}
 
 								estimatedTime = System.nanoTime() - startTime;
