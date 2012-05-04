@@ -11,7 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.Command.CommandVerb;
+import com.proxibase.aircandi.components.Command.CommandType;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.Tracker;
@@ -84,7 +84,7 @@ public class SignInForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onSignUpButtonClick(View view) {
-		String json = ProxibaseService.getGson(GsonType.Internal).toJson(new Command(CommandVerb.New));
+		String json = ProxibaseService.getGson(GsonType.Internal).toJson(new Command(CommandType.New));
 		Intent intent = new Intent(this, SignUpForm.class);
 		intent.putExtra(getString(R.string.EXTRA_COMMAND), json);
 		startActivity(intent);
@@ -120,7 +120,7 @@ public class SignInForm extends FormActivity {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					Tracker.trackEvent("User", "Signin", null, 0);			
 					String jsonResponse = (String) serviceResponse.data;
-					User user = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
+					User user = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService).data;
 
 					if (user == null) {
 						mTextError.setVisibility(View.VISIBLE);

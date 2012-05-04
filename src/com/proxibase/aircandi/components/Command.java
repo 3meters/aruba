@@ -9,7 +9,7 @@ package com.proxibase.aircandi.components;
  */
 public class Command {
 
-	public CommandVerb	verb	= CommandVerb.View;
+	public CommandType	type	= CommandType.View;
 	public String		label;
 	public String		entityId;
 	public String		entityType;
@@ -19,12 +19,12 @@ public class Command {
 
 	public Command() {}
 
-	public Command(CommandVerb verb) {
-		this.verb = verb;
+	public Command(CommandType type) {
+		this.type = type;
 	}
 
-	public Command(CommandVerb verb, String label, String activityName, String entityType, String entityId, String entityParentId, Integer iconResourceId) {
-		this.verb = verb;
+	public Command(CommandType type, String label, String activityName, String entityType, String entityId, String entityParentId, Integer iconResourceId) {
+		this.type = type;
 		this.label = label;
 		this.activityName = activityName;
 		this.entityType = entityType;
@@ -33,7 +33,13 @@ public class Command {
 		this.iconResourceId = iconResourceId;
 	}
 
-	public static enum CommandVerb {
-		None, View, Edit, New, Dialog
+	public static enum CommandType {
+		None,
+		View,
+		Edit,
+		New,
+		Dialog,
+		ChunkEntities,
+		ChunkChildEntities
 	}
 }

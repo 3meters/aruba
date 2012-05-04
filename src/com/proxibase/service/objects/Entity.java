@@ -1,5 +1,7 @@
 package com.proxibase.service.objects;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -8,7 +10,11 @@ import android.graphics.Bitmap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.candi.models.CandiModel;
+import com.proxibase.aircandi.components.Command;
+import com.proxibase.aircandi.components.DateUtils;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxiConstants;
 
 /**
@@ -16,7 +22,7 @@ import com.proxibase.service.ProxiConstants;
  * 
  * @author Jayma
  */
-public class Entity extends ServiceEntry {
+public class Entity extends ServiceEntry implements Cloneable {
 
 	protected String		mServiceUri	= ProxiConstants.URL_PROXIBASE_SERVICE;
 
@@ -58,12 +64,14 @@ public class Entity extends ServiceEntry {
 	public String			visibility;
 	@Expose
 	public List<Comment>	comments;
+	@Expose(serialize = false, deserialize = true)
+	public Number			activityDate;
 
 	/* Synthetic service fields */
 
 	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_beacon")
-	public String			beaconId;											/* Used to connect beacon object */
+	public String			beaconId;											// Used to connect beacon object
 
 	@Expose(serialize = false, deserialize = true)
 	public GeoLocation		location;
@@ -72,26 +80,49 @@ public class Entity extends ServiceEntry {
 	public Integer			commentsCount;
 
 	@Expose(serialize = false, deserialize = true)
+	public Boolean			commentsMore;
+
+	@Expose(serialize = false, deserialize = true)
 	public List<Entity>		children;
 
 	@Expose(serialize = false, deserialize = true)
 	public Integer			childrenCount;
 
+	@Expose(serialize = false, deserialize = true)
+	public Boolean			childrenMore;
+
 	/* For client use only */
 
 	public Beacon			beacon;
 	public Entity			parent;
-	/* So we don't have to serialize the parent across activities */
-	public String			parentId;
-
+	public String			parentId;											// Instead of serializing parent
 	public Boolean			hidden		= false;
 	public Boolean			dirty		= false;
 	public Boolean			rookie		= true;
+	public Command			command;											// For command entities
+	public String			data;
 	public EntityState		state		= EntityState.Normal;
 	public Date				discoveryTime;
 	public Bitmap			imageBitmap;
 
 	public Entity() {}
+
+	@Override
+	public Entity clone() {
+		try {
+			final Entity entity = (Entity) super.clone();
+			if (this.children != null) {
+				entity.children = (List<Entity>) ((ArrayList) this.children).clone();
+			}
+			if (this.comments != null) {
+				entity.comments = (List<Comment>) ((ArrayList) this.comments).clone();
+			}
+			return entity;
+		}
+		catch (final CloneNotSupportedException ex) {
+			throw new AssertionError();
+		}
+	}
 
 	public String getCollection() {
 		return "entities";
@@ -144,6 +175,40 @@ public class Entity extends ServiceEntry {
 		return imageFormat;
 	}
 
+	public static Entity getCommandEntity(Command command) {
+
+		Entity entity = new Entity();
+		entity.id = String.valueOf(DateUtils.nowDate().getTime());
+		entity.signalFence = -100.0f;
+		entity.creatorId = Aircandi.getInstance().getUser().id;
+		entity.modifierId = Aircandi.getInstance().getUser().id;
+
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.MONTH, Calendar.JANUARY);
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		cal.set(Calendar.YEAR, 2000);
+
+		entity.modifiedDate = cal.getTime().getTime();
+		entity.discoveryTime = cal.getTime();
+
+		entity.enabled = true;
+		entity.label = "Tap for more candi";
+		entity.title = "Tap for more candi";
+		entity.locked = false;
+		entity.linkJavascriptEnabled = false;
+		entity.linkZoom = false;
+		entity.rookie = false;
+		entity.command = command;
+		entity.visibility = Visibility.Public.toString().toLowerCase();
+		entity.children = new ArrayList<Entity>();
+		entity.type = CandiConstants.TYPE_CANDI_COMMAND;
+		if (entity.type.equals(CandiConstants.TYPE_CANDI_COMMAND)) {
+			entity.imagePreviewUri = "resource:placeholder_logo";
+			entity.imageUri = entity.imagePreviewUri;
+		}
+		return entity;
+	}
+
 	public static class SortEntitiesByUpdatedTime implements Comparator<Entity> {
 
 		@Override
@@ -158,20 +223,7 @@ public class Entity extends ServiceEntry {
 		}
 	}
 
-	public static class SortEntitiesByTagLevelDb implements Comparator<CandiModel> {
-
-		@Override
-		public int compare(CandiModel object1, CandiModel object2) {
-			if (!object1.getEntity().beacon.registered && object2.getEntity().beacon.registered)
-				return -1;
-			else if (!object2.getEntity().beacon.registered && object1.getEntity().beacon.registered)
-				return 1;
-			else
-				return object2.getEntity().beacon.getAvgBeaconLevel() - object1.getEntity().beacon.getAvgBeaconLevel();
-		}
-	}
-
-	public static class SortEntitiesByDiscoveryTime implements Comparator<CandiModel> {
+	public static class SortEntitiesByDiscoveryTimeModifiedTime implements Comparator<CandiModel> {
 
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {

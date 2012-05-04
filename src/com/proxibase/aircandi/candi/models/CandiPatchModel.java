@@ -14,6 +14,7 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.components.CandiList;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Entity;
 
 /**
@@ -150,7 +151,7 @@ public class CandiPatchModel extends Observable {
 		if (!entity.getMasterImageUri().equals(originalEntity.getMasterImageUri())) {
 			candiModelManaged.setMasterImageUpdated(true);
 		}
-		
+
 		entity.rookie = originalEntity.rookie;
 		entity.discoveryTime = originalEntity.discoveryTime;
 		if (entity.rookie) {
@@ -221,7 +222,7 @@ public class CandiPatchModel extends Observable {
 			}
 			else {
 				boolean underNextRoot = mCandiRootNext.getChildren().containsKey(String.valueOf(candiModel.getModelId())) || mCandiRootNext
-												.getChildren().containsKey(String.valueOf(((CandiModel) candiModel.getParent()).getModelId()));
+						.getChildren().containsKey(String.valueOf(((CandiModel) candiModel.getParent()).getModelId()));
 				if (!underNextRoot) {
 					/* Assign candies being hidden because of navigation to the inactive zone */
 					candiModel.getViewStateNext().setVisible(false);
@@ -279,6 +280,16 @@ public class CandiPatchModel extends Observable {
 			zoneIndex++;
 		}
 
+		if (navigation == Navigation.Down && mCandiModelFocused != null) {
+			CandiModel candiRootNext = (CandiModel) mCandiRootNext;
+			if (candiRootNext.getChildren().size() >= focusedZoneIndex) {
+				CandiModel childModel = (CandiModel) ((CandiModel) mCandiRootNext).getChildren().get(focusedZoneIndex);
+				if (childModel.getEntity().type == CandiConstants.TYPE_CANDI_COMMAND) {
+					zoneIndex++;
+				}
+			}
+		}
+
 		for (IModel model : mCandiRootNext.getChildren()) {
 
 			CandiModel candiModel = (CandiModel) model;
@@ -328,6 +339,10 @@ public class CandiPatchModel extends Observable {
 		}
 
 		/*
+		 * If navigation is down and focusedZone now has command candi then shift everything one zone to the right
+		 */
+
+		/*
 		 * If needed, move the candi model with the current focus back to the
 		 * slot the user is currently looking at.
 		 */
@@ -335,7 +350,7 @@ public class CandiPatchModel extends Observable {
 		if (mCandiModelFocused == null || (focusedZoneIndex == 0 && navigation != Navigation.None) || focusedZoneIndex != 0) {
 			swappingEnabled = true;
 		}
-		
+
 		if (swappingEnabled) {
 			if (!mCandiModelFocused.getZoneStateCurrent().getZone().isInactive() && !mCandiModelFocused.getZoneStateNext().getZone().isInactive()) {
 				if (mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex() != mCandiModelFocused.getZoneStateNext().getZone()
@@ -462,7 +477,7 @@ public class CandiPatchModel extends Observable {
 	}
 
 	public void sortCandiModels(List list) {
-		Collections.sort(list, new Entity.SortEntitiesByDiscoveryTime());
+		Collections.sort(list, new Entity.SortEntitiesByDiscoveryTimeModifiedTime());
 	}
 
 	public ZoneModel getZoneNeighbor(ZoneModel targetZoneModel, boolean forward) {

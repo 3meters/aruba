@@ -28,7 +28,7 @@ import android.widget.ViewFlipper;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AircandiCommon.ServiceOperation;
 import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.Command.CommandVerb;
+import com.proxibase.aircandi.components.Command.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.GeoLocationManager;
 import com.proxibase.aircandi.components.ImageManager;
@@ -62,7 +62,7 @@ import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.Entity.Visibility;
 import com.proxibase.service.objects.Link;
 import com.proxibase.service.objects.Observation;
-import com.proxibase.service.objects.Result;
+import com.proxibase.service.objects.ServiceData;
 import com.proxibase.service.objects.User;
 
 public class EntityForm extends FormActivity {
@@ -83,7 +83,7 @@ public class EntityForm extends FormActivity {
 		User user = Aircandi.getInstance().getUser();
 		if (user != null && user.anonymous) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
-			intentBuilder.setCommand(new Command(CommandVerb.Edit));
+			intentBuilder.setCommand(new Command(CommandType.Edit));
 			intentBuilder.setMessage(getString(R.string.signin_message_new_candi));
 			Intent intent = intentBuilder.create();
 
@@ -115,7 +115,7 @@ public class EntityForm extends FormActivity {
 	protected void initialize() {
 
 		/* Starting determining the users location if we are creating new candi. */
-		if (mCommon.mCommand.verb == CommandVerb.New) {
+		if (mCommon.mCommand.type == CommandType.New) {
 			GeoLocationManager.getInstance().setCurrentLocation(null);
 			Criteria criteria = new Criteria();
 			criteria.setAccuracy(Criteria.ACCURACY_COARSE);
@@ -149,11 +149,10 @@ public class EntityForm extends FormActivity {
 
 	protected boolean bind(final Bundle savedInstanceState) {
 		/*
-		 * Fill in the system and default properties for the base entity
-		 * properties. The activities that subclass this will set any additional
-		 * properties beyond the base ones.
+		 * Fill in the system and default properties for the base entity properties. The activities that subclass this
+		 * will set any additional properties beyond the base ones.
 		 */
-		if (mCommon.mCommand.verb == CommandVerb.New) {
+		if (mCommon.mCommand.type == CommandType.New) {
 
 			Entity entity = new Entity();
 			entity.signalFence = -100.0f;
@@ -186,9 +185,7 @@ public class EntityForm extends FormActivity {
 					@Override
 					protected Object doInBackground(Object... params) {
 						String jsonEagerLoad = "{\"children\":false,\"comments\":false}";
-						String jsonFields = "{\"entities\":{},\"children\":{},\"comments\":{}}";
-						ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(
-								mCommon.mEntityId, jsonEagerLoad, jsonFields);
+						ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, null, null);
 						return serviceResponse;
 					}
 
@@ -198,7 +195,7 @@ public class EntityForm extends FormActivity {
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 
 							mCommon.showProgressDialog(false, null);
-							mCommon.mEntity = (Entity) serviceResponse.data;
+							mCommon.mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
 							mImageUriOriginal = mCommon.mEntity.imageUri;
 
 							draw();
@@ -235,7 +232,7 @@ public class EntityForm extends FormActivity {
 			if (mImagePicture != null) {
 				if (entity.imageUri != null && !entity.imageUri.equals("")) {
 					if (entity.imageBitmap != null) {
-						ImageUtils.showImageInImageView(entity.imageBitmap, mImagePicture.getImageView());
+						ImageUtils.showImageInImageView(entity.imageBitmap, mImagePicture.getImageView(), true, R.anim.fade_in_medium);
 						mImagePicture.setVisibility(View.VISIBLE);
 					}
 					else {
@@ -317,7 +314,7 @@ public class EntityForm extends FormActivity {
 
 			/* Configure UI */
 
-			if (mCommon.mCommand.verb == CommandVerb.New) {
+			if (mCommon.mCommand.type == CommandType.New) {
 				if (findViewById(R.id.btn_delete_post) != null) {
 					((Button) findViewById(R.id.btn_delete_post)).setVisibility(View.GONE);
 				}
@@ -453,30 +450,17 @@ public class EntityForm extends FormActivity {
 					gather();
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
-						if (mCommon.mCommand.verb == CommandVerb.New) {
+						if (mCommon.mCommand.type == CommandType.New) {
 							serviceResponse = insert();
 							if (serviceResponse.responseCode == ResponseCode.Success) {
-
-								/*
-								 * Parse out the id that was assigned to the
-								 * inserted entity
-								 */
-								String json = (String) serviceResponse.data; // Array
-								Result result = (Result) ProxibaseService.convertJsonToObject(json, Result.class,
-										GsonType.ProxibaseService);;
-
-								ImageUtils
-										.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
-								ProxiExplorer.getInstance().mEntitiesInserted.put(result._id, mCommon.mEntity);
+								ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 								setResult(CandiConstants.RESULT_ENTITY_INSERTED);
 							}
 						}
-						else if (mCommon.mCommand.verb == CommandVerb.Edit) {
+						else if (mCommon.mCommand.type == CommandType.Edit) {
 							serviceResponse = update();
 							if (serviceResponse.responseCode == ResponseCode.Success) {
 								ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-								/* Replaces if it is already in the collection */
-								ProxiExplorer.getInstance().mEntitiesUpdated.put(mCommon.mEntity.id, null);
 								setResult(CandiConstants.RESULT_ENTITY_UPDATED);
 							}
 						}
@@ -545,7 +529,7 @@ public class EntityForm extends FormActivity {
 		if (beacon == null && mCommon.mParentId == null) {
 			AircandiCommon.showAlertDialog(R.drawable.icon_app, "Aircandi beacons",
 					getString(R.string.alert_beacons_zero),
-					EntityForm.this, new
+					EntityForm.this, android.R.string.ok, null, new
 					DialogInterface.OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {}
@@ -576,10 +560,9 @@ public class EntityForm extends FormActivity {
 			/* User */
 			parameters.putString("userId", Aircandi.getInstance().getUser().id);
 
-			/* 
-			 * We record an observation if we found a nearby beacon.
-			 * Beacon might not be registered with proxibase but will be 
-			 * after the call. 
+			/*
+			 * We record an observation if we found a nearby beacon. Beacon might not be registered with proxibase but
+			 * will be after the call.
 			 */
 			if (beacon != null) {
 				mObservation = GeoLocationManager.getInstance().getObservation();
@@ -661,16 +644,20 @@ public class EntityForm extends FormActivity {
 			Logger.i(this, "Updating entity: " + mCommon.mEntity.title);
 			Tracker.trackEvent("Entity", "Update", mCommon.mEntity.type, 0);
 
-			ServiceRequest serviceRequest = new ServiceRequest();
-			serviceRequest.setUri(mCommon.mEntity.getEntryUri());
-			serviceRequest.setRequestType(RequestType.Update);
-			serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson(mCommon.mEntity,
-					GsonType.ProxibaseService));
-			serviceRequest.setResponseFormat(ResponseFormat.Json);
+			// Construct entity, link, and observation
+			Bundle parameters = new Bundle();
+			parameters.putBoolean("skipActivityDate", false);
+			parameters.putString("entity",
+					"object:" + ProxibaseService.convertObjectToJson(mCommon.mEntity, GsonType.ProxibaseService));
 
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity");
+			serviceRequest.setRequestType(RequestType.Method);
+			serviceRequest.setParameters(parameters);
+			serviceRequest.setResponseFormat(ResponseFormat.Json);
 			serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 		}
-		
+
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			Tracker.trackEvent("Entity", "Update", mCommon.mEntityType, 0);
 		}
@@ -680,10 +667,8 @@ public class EntityForm extends FormActivity {
 
 	protected void delete() {
 		/*
-		 * TODO: We need to update the service so the recursive entity delete
-		 * also deletes any associated resources stored with S3. As currently
-		 * coded, we will be orphaning any images associated with child
-		 * entities.
+		 * TODO: We need to update the service so the recursive entity delete also deletes any associated resources
+		 * stored with S3. As currently coded, we will be orphaning any images associated with child entities.
 		 */
 
 		new AsyncTask() {
@@ -698,35 +683,31 @@ public class EntityForm extends FormActivity {
 				ServiceResponse serviceResponse = new ServiceResponse();
 
 				/*
-				 * If there is an image stored with S3 then delete it TODO: Flag
-				 * image for garbage collection but don't delete it because
-				 * because it might be needed while aircandi users have current
-				 * sessions.
+				 * If there is an image stored with S3 then delete it.
+				 * TODO: Flag image for garbage collection but don't
+				 * delete it because because it might be needed while aircandi users have current sessions.
 				 */
-				Tracker.trackEvent("Entity", "Delete", mCommon.mEntity.type, 0);
-
-				if (mCommon.mEntity.imagePreviewUri != null && !mCommon.mEntity.imagePreviewUri.equals("")
+				if (mCommon.mEntity.imagePreviewUri != null
+						&& !mCommon.mEntity.imagePreviewUri.equals("")
 						&& !ImageManager.isLocalImage(mCommon.mEntity.imagePreviewUri)) {
-					String imageKey = mCommon.mEntity.imagePreviewUri.substring(mCommon.mEntity.imagePreviewUri
-							.lastIndexOf("/") + 1);
 					try {
-						S3.deleteImage(imageKey);
+						// String imageKey =
+						// mCommon.mEntity.imagePreviewUri.substring(mCommon.mEntity.imagePreviewUri.lastIndexOf("/") +
+						// 1);
+						// S3.deleteImage(imageKey);
 						/*
-						 * Associated images are removed from the local image
-						 * cache when the candi model is finally removed and the
-						 * cand view is killed or recycled
+						 * Associated images are removed from the local image cache when the candi model is finally
+						 * removed and the cand view is killed or recycled
 						 */
 					}
 					catch (ProxibaseServiceException exception) {
-						serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException,
-								null, exception);
+						serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
 					}
 				}
 
 				/*
-				 * Delete the entity and all links and observations it is
-				 * associated with. We attempt to continue even if the call to
-				 * delete the image failed.
+				 * Delete the entity and all links and observations it is associated with. We attempt to continue even
+				 * if the call to delete the image failed.
 				 */
 				Logger.i(this, "Deleting entity: " + mCommon.mEntity.title);
 
@@ -749,10 +730,10 @@ public class EntityForm extends FormActivity {
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					Tracker.trackEvent("Entity", "Delete", mCommon.mEntityType, 0);
-					mCommon.showProgressDialog(false, null);
 					Logger.i(this, "Deleted entity: " + mCommon.mEntity.title);
+
+					mCommon.showProgressDialog(false, null);
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
-					ProxiExplorer.getInstance().mEntitiesDeleted.put(mCommon.mEntity.id, null);
 					setResult(CandiConstants.RESULT_ENTITY_DELETED);
 					finish();
 				}
@@ -766,12 +747,9 @@ public class EntityForm extends FormActivity {
 	protected ServiceResponse updateImages() {
 
 		/*
-		 * Delete image from S3 if it has been orphaned
-		 * 
-		 * TODO: We are going with a garbage collection scheme for orphaned
-		 * images. We need to use an extended property on S3 items that is set
-		 * to a date when collection is ok. This allows downloaded entities to
-		 * keep working even if an image for entity has changed.
+		 * Delete image from S3 if it has been orphaned TODO: We are going with a garbage collection scheme for orphaned
+		 * images. We need to use an extended property on S3 items that is set to a date when collection is ok. This
+		 * allows downloaded entities to keep working even if an image for entity has changed.
 		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
 
@@ -800,7 +778,7 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private void showBookmarkActivity() {
-		
+
 		Intent intent = new Intent(this, BookmarkList.class);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
 		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
@@ -882,8 +860,7 @@ public class EntityForm extends FormActivity {
 					mUriValidated = true;
 
 					/*
-					 * We only push values if the user hasn't already supplied
-					 * some
+					 * We only push values if the user hasn't already supplied some
 					 */
 					Document document = Jsoup.parse((String) serviceResponse.data);
 

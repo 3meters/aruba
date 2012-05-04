@@ -25,6 +25,7 @@ import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.GeoLocation;
+import com.proxibase.service.objects.ServiceData;
 
 public class MapBrowse extends MapActivity {
 
@@ -83,8 +84,7 @@ public class MapBrowse extends MapActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					String jsonEagerLoad = "{\"children\":false,\"comments\":false}";
-					String jsonFields = "{\"entities\":{},\"children\":{},\"comments\":{}}";
-					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntityId, jsonEagerLoad, jsonFields);
+					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntity.id, jsonEagerLoad, null, null);
 					return serviceResponse;
 				}
 
@@ -93,7 +93,7 @@ public class MapBrowse extends MapActivity {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
-						mCommon.mEntity = (Entity) serviceResponse.data;
+						mCommon.mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
 						GeoLocation entityLocation = mCommon.mEntity.location != null ? mCommon.mEntity.location : mCommon.mEntityLocation;
 						mGeoPoint = new GeoPoint((int) (entityLocation.latitude.doubleValue() * 1E6), (int) (entityLocation.longitude.doubleValue() * 1E6));
 						mTitle = mCommon.mEntity.label;

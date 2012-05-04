@@ -36,10 +36,7 @@
 	<string name="menu_refresh_beacon_plus_current">Refresh</string>
 	<string name="menu_refresh_all">Refresh All</string>
 
-	<string name="dialog_info">
-		<p>Version 1.0.0\n</p>
-		<p>Copyright 3meters LLC 2012</p>
-	</string>
+	<string name="dialog_info">Copyright 3meters LLC 2012</string>
 	
 	<!-- Testing -->
 	
@@ -49,7 +46,16 @@
 	
 	<string name="alert_beacons_zero">The beacon detecter shows green when there are beacons nearby you can add new candi to.</string>
 	<string name="alert_beacons_available">There are beacons nearby you can add new candi to.</string>
+	<string name="alert_upgrade_title">New Aircandi version</string>
+	<string name="alert_upgrade_body">A newer version of Aircandi is available. Please download and install as soon possible.</string>
+	<string name="alert_upgrade_ok">Info</string>
+	<string name="alert_upgrade_cancel">Cancel</string>
+				
+	<!-- UI General -->
 	
+	<string name="progress_scanning">Scanning...</string>
+	<string name="progress_more">Paging...</string>
+		
 	<!-- Network -->
 
 	<string name="network_message_connection_notready">Check network connection and retry</string>

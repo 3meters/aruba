@@ -249,7 +249,7 @@ public class PictureSearch extends FormActivity {
 		ArrayList<ImageResult>	moreImages	= new ArrayList<ImageResult>();
 
 		EndlessImageAdapter(ArrayList<ImageResult> list) {
-			super(new ImageAdapter(list));
+			super(new ListAdapter(list));
 		}
 
 		@Override
@@ -290,9 +290,9 @@ public class PictureSearch extends FormActivity {
 		}
 	}
 
-	private class ImageAdapter extends ArrayAdapter<ImageResult> {
+	private class ListAdapter extends ArrayAdapter<ImageResult> {
 
-		public ImageAdapter(ArrayList<ImageResult> list) {
+		public ListAdapter(ArrayList<ImageResult> list) {
 			super(PictureSearch.this, 0, list);
 		}
 

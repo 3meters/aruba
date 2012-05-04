@@ -24,6 +24,8 @@ public class VersionInfo extends ServiceEntry {
 	public Integer	versionCode;
 	@Expose
 	public boolean	updateRequired;
+	@Expose
+	public String	updateUri;
 
 	public VersionInfo() {}
 

@@ -101,6 +101,7 @@ public class NetworkManager {
 			 * will retry using an exponential backoff scheme if needed and possible.
 			 */
 			try {
+				/* Could be string, input stream, or array of bytes */
 				Object response = ProxibaseService.getInstance().request(serviceRequest);
 				serviceResponse = new ServiceResponse(ResponseCode.Success, ResponseCodeDetail.Success, response, null);
 			}

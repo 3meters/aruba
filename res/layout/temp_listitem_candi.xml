@@ -23,7 +23,8 @@
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
         aircandi:maxHeight="60dp"
-        aircandi:maxWidth="60dp" />
+        aircandi:maxWidth="60dp"
+        aircandi:animation="@anim/fade_in_medium" />
 
     <TextView
         android:id="@+id/item_title"

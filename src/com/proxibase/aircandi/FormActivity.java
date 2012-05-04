@@ -210,7 +210,7 @@ public abstract class FormActivity extends Activity {
 				bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_DEFAULT));
 				if (bitmap != null && mImageRequestListener != null) {
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);
-					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView());
+					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, R.anim.fade_in_medium);
 					mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap);
 					Tracker.trackEvent("Entity", "PickPicture", "None", 0);
 				}
@@ -253,7 +253,7 @@ public abstract class FormActivity extends Activity {
 
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);
 					if (mImageRequestListener != null) {
-						ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView());
+						ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, R.anim.fade_in_medium);
 						mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap);
 						Tracker.trackEvent("Entity", "TakePicture", "None", 0);
 					}

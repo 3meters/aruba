@@ -67,6 +67,7 @@ import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
+import com.proxibase.service.objects.ServiceData;
 
 /*
  * Http 1.1 Status Codes (subset) - 200: OK - 201: Created - 202: Accepted - 203: Non-authoritative information - 204:
@@ -618,20 +619,23 @@ public class ProxibaseService {
 		return json;
 	}
 
-	public static Object convertJsonToObject(String jsonString, Class type, GsonType gsonType) {
-		List<Object> array = convertJsonToObjects(jsonString, type, gsonType);
+	public static ServiceData convertJsonToObject(String jsonString, Class type, GsonType gsonType) {
+		ServiceData serviceData = convertJsonToObjects(jsonString, type, gsonType);
+		List<Object> array = (List<Object>) serviceData.data;
 		if (array != null && array.size() > 0) {
-			return array.get(0);
+			serviceData.data = array.get(0);
+			return serviceData;
 		}
 		else {
 			return null;
 		}
 	}
 
-	public static List<Object> convertJsonToObjects(String jsonString, Class type, GsonType gsonType) {
+	public static ServiceData convertJsonToObjects(String jsonString, Class type, GsonType gsonType) {
 
 		List<Object> array = new ArrayList<Object>();
 		Gson gson = ProxibaseService.getGson(gsonType);
+		ServiceData serviceData = new ServiceData();
 
 		/*
 		 * In general, gson deserializer will ignore elements (fields or classes) in the string that do not exist on the
@@ -644,6 +648,18 @@ public class ProxibaseService {
 			if (jsonElement.isJsonObject()) {
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				jsonElement = jsonObject.get("data");
+				if (jsonObject.has("date")) {
+					serviceData.date = jsonObject.get("date").getAsJsonPrimitive().getAsNumber();
+				}
+				if (jsonObject.has("count")) {
+					serviceData.count = jsonObject.get("count").getAsJsonPrimitive().getAsNumber();
+				}
+				if (jsonObject.has("info")) {
+					serviceData.info = jsonObject.get("info").getAsJsonPrimitive().getAsString();
+				}
+				if (jsonObject.has("more")) {
+					serviceData.more = jsonObject.get("more").getAsJsonPrimitive().getAsBoolean();
+				}
 			}
 
 			if (jsonElement.isJsonPrimitive()) {
@@ -669,8 +685,9 @@ public class ProxibaseService {
 				Object obj = gson.fromJson(jsonElement.toString(), type);
 				array.add(obj);
 			}
+			serviceData.data = array;
 
-			return array;
+			return serviceData;
 		}
 		catch (JsonParseException exception) {
 			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());

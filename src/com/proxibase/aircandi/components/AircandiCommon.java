@@ -47,7 +47,7 @@ import com.proxibase.aircandi.ProfileForm;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.ScanService;
 import com.proxibase.aircandi.SignInForm;
-import com.proxibase.aircandi.components.Command.CommandVerb;
+import com.proxibase.aircandi.components.Command.CommandType;
 import com.proxibase.aircandi.components.Events.EventHandler;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer.WifiScanResult;
@@ -242,15 +242,15 @@ public class AircandiCommon {
 
 				String parentId = mNewCandiIsRoot ? null : mEntityId;
 				if (menuId == MENU_ITEM_NEW_POST_ID) {
-					command = new Command(CommandVerb.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null,
+					command = new Command(CommandType.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null,
 							parentId, null);
 				}
 				else if (menuId == MENU_ITEM_NEW_PICTURE_ID) {
-					command = new Command(CommandVerb.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE,
+					command = new Command(CommandType.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE,
 							null, parentId, null);
 				}
 				else if (menuId == MENU_ITEM_NEW_LINK_ID) {
-					command = new Command(CommandVerb.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null,
+					command = new Command(CommandType.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null,
 							parentId, null);
 				}
 				doCommand(command);
@@ -301,13 +301,14 @@ public class AircandiCommon {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
+
 	public void doHomeClick(View view) {
 		startRadarActivity();
 	}
 
 	public void doCommand(final Command command) {
 
-		if (command.verb == CommandVerb.Dialog) {
+		if (command.type == CommandType.Dialog) {
 			String dialogName = command.activityName;
 			if (dialogName.toLowerCase().equals("newcandi")) {
 				mActivity.showDialog(CandiConstants.DIALOG_NEW_CANDI_ID);
@@ -317,8 +318,8 @@ public class AircandiCommon {
 			try {
 				Class clazz = Class.forName(CandiConstants.APP_PACKAGE_NAME + command.activityName, false, mContext
 						.getClass().getClassLoader());
-				if (command.verb == CommandVerb.New) {
-					String beaconId = ProxiExplorer.getInstance().getStrongestBeacon().id;
+				if (command.type == CommandType.New) {
+					String beaconId = ProxiExplorer.getInstance().getEntityModel().getStrongestBeacon().id;
 					IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
 					intentBuilder.setCommand(command);
 					intentBuilder.setParentEntityId(command.entityParentId);
@@ -358,7 +359,7 @@ public class AircandiCommon {
 			}
 			else {
 				IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
-				intentBuilder.setCommand(new Command(CommandVerb.Edit));
+				intentBuilder.setCommand(new Command(CommandType.Edit));
 				Intent intent = intentBuilder.create();
 				mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_PROFILE);
 			}
@@ -368,10 +369,11 @@ public class AircandiCommon {
 	}
 
 	public void doInfoClick() {
-		AircandiCommon.showAlertDialog(R.drawable.icon_app, "About", mActivity.getString(R.string.dialog_info),
-				mActivity, new
-				DialogInterface.OnClickListener() {
-
+		String message = "Version: "
+				+ Aircandi.getVersionName(mContext, CandiRadar.class) + "\n"
+				+ mActivity.getString(R.string.dialog_info);
+		AircandiCommon.showAlertDialog(R.drawable.icon_app, "About", message,
+				mActivity, android.R.string.ok, null, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {}
 				});
 	}
@@ -397,7 +399,7 @@ public class AircandiCommon {
 						beaconMessage = mActivity.getString(messageId) + "\n\n";
 						for (WifiScanResult wifi : ProxiExplorer.getInstance().mWifiList) {
 							if (!wifi.SSID.equals("candi_feed")) {
-								beaconMessage += wifi.SSID + ": " + wifi.BSSID + "\n";
+								beaconMessage += wifi.SSID + ": (" + String.valueOf(wifi.level) + ") " + wifi.BSSID + "\n";
 							}
 						}
 					}
@@ -406,7 +408,7 @@ public class AircandiCommon {
 					}
 				}
 			}
-			AircandiCommon.showAlertDialog(R.drawable.icon_app, "Aircandi beacons", beaconMessage, mActivity, new
+			AircandiCommon.showAlertDialog(R.drawable.icon_app, "Aircandi beacons", beaconMessage, mActivity, android.R.string.ok, null, new
 					DialogInterface.OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {}
@@ -472,7 +474,7 @@ public class AircandiCommon {
 
 			int wifiCount = 0;
 			for (WifiScanResult wifi : scanList) {
-				if (wifi.global || wifi.demo ) {
+				if (wifi.global || wifi.demo) {
 					continue;
 				}
 				else {
@@ -561,7 +563,7 @@ public class AircandiCommon {
 			showProgressDialog(false, null);
 			stopTitlebarProgress();
 			AircandiCommon.showAlertDialog(R.drawable.icon_app, "Candi service",
-					friendlyMessage, context, new
+					friendlyMessage, context, android.R.string.ok, null, new
 					DialogInterface.OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {}
@@ -629,7 +631,7 @@ public class AircandiCommon {
 		}
 	}
 
-	public static void showAlertDialog(Integer iconResource, String titleText, String message, Context context,
+	public static void showAlertDialog(Integer iconResource, String titleText, String message, Context context, Integer okButtonId, Integer cancelButtonId,
 			OnClickListener listener) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
@@ -646,9 +648,14 @@ public class AircandiCommon {
 		builder.setView(bodyView);
 		builder.setInverseBackgroundForced(true);
 
-		if (listener != null) {
-			builder.setPositiveButton(android.R.string.ok, listener);
+		if (okButtonId != null) {
+			builder.setPositiveButton(okButtonId, listener);
 		}
+
+		if (cancelButtonId != null) {
+			builder.setNegativeButton(cancelButtonId, listener);
+		}
+
 		AlertDialog alert = builder.show();
 		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 	}
@@ -733,11 +740,11 @@ public class AircandiCommon {
 
 		User user = null;
 		if (jsonUser != null) {
-			user = (User) ProxibaseService.convertJsonToObject(jsonUser, User.class, GsonType.ProxibaseService);
+			user = (User) ProxibaseService.convertJsonToObject(jsonUser, User.class, GsonType.ProxibaseService).data;
 		}
 		else {
 			jsonUser = CandiConstants.USER_ANONYMOUS;
-			user = (User) ProxibaseService.convertJsonToObject(jsonUser, User.class, GsonType.ProxibaseService);
+			user = (User) ProxibaseService.convertJsonToObject(jsonUser, User.class, GsonType.ProxibaseService).data;
 			user.anonymous = true;
 		}
 		Aircandi.getInstance().setUser(user);
@@ -758,8 +765,7 @@ public class AircandiCommon {
 	public void signout() {
 		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
 			showProgressDialog(true, "Signing out...");
-			User user = (User) ProxibaseService.convertJsonToObject(CandiConstants.USER_ANONYMOUS, User.class,
-					GsonType.ProxibaseService);
+			User user = (User) ProxibaseService.convertJsonToObject(CandiConstants.USER_ANONYMOUS, User.class, GsonType.ProxibaseService).data;
 			user.anonymous = true;
 			Aircandi.getInstance().setUser(user);
 			if (mActivity.findViewById(R.id.image_user) != null) {
@@ -926,6 +932,7 @@ public class AircandiCommon {
 		Login,
 		Logout,
 		BeaconScan,
+		Chunking,
 		ProfileBrowse,
 		ProfileSave,
 		CandiForm,

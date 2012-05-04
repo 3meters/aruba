@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.Command.CommandVerb;
+import com.proxibase.aircandi.components.Command.CommandType;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.IntentBuilder;
@@ -29,6 +29,7 @@ import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.GeoLocation;
+import com.proxibase.service.objects.ServiceData;
 
 public class CandiForm extends CandiActivity {
 
@@ -64,9 +65,8 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				String jsonEagerLoad = "{\"children\":true,\"comments\":false}";
 				String jsonFields = "{\"entities\":{},\"children\":{\"imagePreviewUri\":true,\"linkUri\":true,\"linkZoom\":true,\"linkJavascriptEnabled\":true,\"_creator\":true,\"creator\":true,\"modifiedDate\":true},\"comments\":{}}";
-				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityFromService(mCommon.mEntity.id, jsonEagerLoad, jsonFields);
+				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntity.id, null, jsonFields, null);
 				return serviceResponse;
 			}
 
@@ -75,7 +75,7 @@ public class CandiForm extends CandiActivity {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mCommon.mEntity = (Entity) serviceResponse.data;
+					mCommon.mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
 
 					/* Sort the children if there are any */
 					if (mCommon.mEntity.children != null && mCommon.mEntity.children.size() > 1) {
@@ -107,7 +107,7 @@ public class CandiForm extends CandiActivity {
 		Entity entity = (Entity) view.getTag();
 		if (entity.commentsCount > 0) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
-			intentBuilder.setCommand(new Command(CommandVerb.View));
+			intentBuilder.setCommand(new Command(CommandType.View));
 			intentBuilder.setEntity(entity);
 			Intent intent = intentBuilder.create();
 			startActivityForResult(intent, 0);
@@ -117,7 +117,7 @@ public class CandiForm extends CandiActivity {
 	public void onMapClick(View view) {
 		String entityId = (String) view.getTag();
 		IntentBuilder intentBuilder = new IntentBuilder(this, MapBrowse.class);
-		intentBuilder.setCommand(new Command(CommandVerb.View));
+		intentBuilder.setCommand(new Command(CommandType.View));
 		intentBuilder.setEntityId(entityId);
 		intentBuilder.setEntityLocation(mCommon.mEntityLocation);
 		Intent intent = intentBuilder.create();
@@ -129,7 +129,7 @@ public class CandiForm extends CandiActivity {
 		Intent intent = null;
 		if (mCommon.mEntity.imageUri != null && !mCommon.mEntity.imageUri.equals("")) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
-			intentBuilder.setCommand(new Command(CommandVerb.View));
+			intentBuilder.setCommand(new Command(CommandType.View));
 			intentBuilder.setEntity(mCommon.mEntity);
 			intent = intentBuilder.create();
 		}
@@ -277,15 +277,15 @@ public class CandiForm extends CandiActivity {
 		if (!entity.locked) {
 			if (entity.root) {
 				newCandi.setVisibility(View.VISIBLE);
-				newCandi.setTag(new Command(CommandVerb.Dialog, "Add\nCandi", "NewCandi", entity.type, entity.id, entity.id, null));
+				newCandi.setTag(new Command(CommandType.Dialog, "Add\nCandi", "NewCandi", entity.type, entity.id, entity.id, null));
 			}
 			newComment.setVisibility(View.VISIBLE);
-			newComment.setTag(new Command(CommandVerb.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
+			newComment.setTag(new Command(CommandType.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
 		}
 
 		if (entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
 			editCandi.setVisibility(View.VISIBLE);
-			editCandi.setTag(new Command(CommandVerb.Edit, "Edit", "EntityForm", entity.type, entity.id, null, null));
+			editCandi.setTag(new Command(CommandType.Edit, "Edit", "EntityForm", entity.type, entity.id, null, null));
 		}
 
 		if (visibleChildren) {
@@ -308,7 +308,7 @@ public class CandiForm extends CandiActivity {
 
 		/* Comments */
 
-		if (entity.commentsCount > 0) {
+		if (entity.commentsCount != null && entity.commentsCount > 0) {
 			comments.setText(String.valueOf(entity.commentsCount) + (entity.commentsCount == 1 ? " Comment" : " Comments"));
 			comments.setTag(entity);
 			comments.setVisibility(View.VISIBLE);
@@ -368,7 +368,7 @@ public class CandiForm extends CandiActivity {
 
 	private void startCandiList() {
 		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
-		intentBuilder.setCommand(new Command(CommandVerb.View));
+		intentBuilder.setCommand(new Command(CommandType.View));
 		intentBuilder.setEntity(mCommon.mEntity);
 		Intent intent = intentBuilder.create();
 

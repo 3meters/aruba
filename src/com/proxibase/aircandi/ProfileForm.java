@@ -13,7 +13,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.proxibase.aircandi.components.Command.CommandVerb;
+import com.proxibase.aircandi.components.Command.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageRequest;
@@ -132,7 +132,7 @@ public class ProfileForm extends FormActivity {
 		});
 
 		if (mViewFlipper != null) {
-			if (mCommon.mCommand.verb == CommandVerb.New) {
+			if (mCommon.mCommand.type == CommandType.New) {
 				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(2));
 			}
 			else {
@@ -169,7 +169,7 @@ public class ProfileForm extends FormActivity {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) serviceResponse.data;
-					mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
+					mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService).data;
 					mImageUriOriginal = mUser.imageUri;
 					mCommon.showProgressDialog(false, null);
 					mCommon.stopTitlebarProgress();
@@ -189,7 +189,7 @@ public class ProfileForm extends FormActivity {
 
 		if (mUser.imageUri != null && mUser.imageUri.length() > 0) {
 			if (mUser.imageBitmap != null) {
-				ImageUtils.showImageInImageView(mUser.imageBitmap, mImageUser.getImageView());
+				ImageUtils.showImageInImageView(mUser.imageBitmap, mImageUser.getImageView(), true, R.anim.fade_in_medium);
 			}
 			else {
 				ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);

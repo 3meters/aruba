@@ -105,7 +105,7 @@ public class ImageUtils {
 		Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, xStart, yStart, xEnd, yEnd);
 		return croppedBitmap;
 	}
-	
+
 	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, ImageRequest imageRequest) {
 
 		/* Scale if needed */
@@ -158,7 +158,6 @@ public class ImageUtils {
 
 		return bitmapFinal;
 	}
-	
 
 	public static Bitmap makeReflection(Bitmap originalBitmap, boolean applyReflectionGradient) {
 
@@ -224,19 +223,20 @@ public class ImageUtils {
 		return hexColor;
 	}
 
-	public static void showImageInImageView(Bitmap bitmap, ImageView imageView) {
+	public static void showImageInImageView(Bitmap bitmap, ImageView imageView, boolean animate, int animationId) {
 		imageView.setImageBitmap(bitmap);
-		Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		imageView.startAnimation(animation);
+		if (animate) {
+			Animation animation = AnimUtils.loadAnimation(animationId);
+			animation.setFillEnabled(true);
+			animation.setFillAfter(true);
+			imageView.startAnimation(animation);
+		}
 	}
 
 	public static void showDrawableInImageView(Drawable drawable, ImageView imageView, boolean animate) {
 		imageView.setImageDrawable(drawable);
-		Animation animation = null;
 		if (animate) {
-			animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+			Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			imageView.startAnimation(animation);

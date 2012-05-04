@@ -38,6 +38,7 @@ public class WebImageView extends RelativeLayout {
 	private Integer		mMaxHeight;
 	private boolean		mShowBusy;
 	private Integer		mLayoutId;
+	private Integer		mAnimationId;
 	private ScaleType	mScaleType;
 	private String		mThemeTone;
 
@@ -61,6 +62,7 @@ public class WebImageView extends RelativeLayout {
 		mMaxHeight = ta.getDimensionPixelSize(R.styleable.WebImageView_maxHeight, Integer.MAX_VALUE);
 		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.temp_webimageview);
+		mAnimationId = ta.getResourceId(R.styleable.WebImageView_animation, R.anim.fade_in_medium);
 
 		TypedValue resourceName = new TypedValue();
 		if (context.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
@@ -157,7 +159,9 @@ public class WebImageView extends RelativeLayout {
 
 							if (okToRecycle) {
 								boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
-								final Bitmap bitmapScaled = scaleBitmap ? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true) : bitmap;
+								final Bitmap bitmapScaled = scaleBitmap
+										? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true)
+										: bitmap;
 								if (scaleBitmap) {
 									bitmap.recycle();
 								}
@@ -165,23 +169,23 @@ public class WebImageView extends RelativeLayout {
 
 									@Override
 									public void run() {
-										ImageUtils.showImageInImageView(bitmapScaled, mImageView);
+										ImageUtils.showImageInImageView(bitmapScaled, mImageView, true, mAnimationId);
 									}
 								});
 							}
 							else {
 								boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
 								final Bitmap bitmapScaled = scaleBitmap
-																		? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true)
-																		: Bitmap.createScaledBitmap(bitmap,
-																				CandiConstants.IMAGE_WIDTH_DEFAULT,
-																				CandiConstants.IMAGE_WIDTH_DEFAULT, true);
+										? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true)
+										: Bitmap.createScaledBitmap(bitmap,
+												CandiConstants.IMAGE_WIDTH_DEFAULT,
+												CandiConstants.IMAGE_WIDTH_DEFAULT, true);
 
 								mThreadHandler.post(new Runnable() {
 
 									@Override
 									public void run() {
-										ImageUtils.showImageInImageView(bitmapScaled, mImageView);
+										ImageUtils.showImageInImageView(bitmapScaled, mImageView, true, mAnimationId);
 									}
 								});
 							}

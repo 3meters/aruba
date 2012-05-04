@@ -202,7 +202,7 @@ public class CandiMap extends MapActivity {
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) serviceResponse.data;
-					mEntityPoints = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+					mEntityPoints = (List<Object>) ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService).data;
 				}
 				return serviceResponse;
 			}

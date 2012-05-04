@@ -118,7 +118,7 @@ public class SignUpForm extends FormActivity {
 		 */
 		if (mUser.imageUri != null && !mUser.imageUri.equals("")) {
 			if (mUser.imageBitmap != null) {
-				ImageUtils.showImageInImageView(mUser.imageBitmap, mImageUser.getImageView());
+				ImageUtils.showImageInImageView(mUser.imageBitmap, mImageUser.getImageView(), true, R.anim.fade_in_medium);
 			}
 			else {
 
@@ -183,7 +183,7 @@ public class SignUpForm extends FormActivity {
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, getResources().getString(
 					R.string.signup_alert_missmatched_passwords_title),
-					getResources().getString(R.string.signup_alert_missmatched_passwords_message), this, null);
+					getResources().getString(R.string.signup_alert_missmatched_passwords_message), this, android.R.string.ok, null,null);
 			return false;
 		}
 		return true;
@@ -223,19 +223,19 @@ public class SignUpForm extends FormActivity {
 					/* Load the just insert user to get the user id */
 					Query query = new Query("users").filter("{\"email\":\"" + mUser.email + "\"}");
 					serviceResponse = NetworkManager.getInstance().request(
-									new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json));
+							new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json));
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 
 						/* Jayma: We might have succeeded inserting user but not the user picture */
 						String jsonResponse = (String) serviceResponse.data;
-						mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService);
+						mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService).data;
 
 						/* Upload images to S3 as needed. */
 						if (mUser.imageUri != null && !mUser.imageUri.contains("resource:") && mUser.imageBitmap != null) {
 							String imageKey = String.valueOf(mUser.id) + "_"
-																+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-																+ ".jpg";
+									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
+									+ ".jpg";
 							try {
 								S3.putImage(imageKey, mUser.imageBitmap);
 							}
@@ -273,7 +273,7 @@ public class SignUpForm extends FormActivity {
 					Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 					AircandiCommon.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),
 							getResources().getString(R.string.signup_alert_new_user_message),
-							SignUpForm.this, new OnClickListener() {
+							SignUpForm.this, android.R.string.ok, null,new OnClickListener() {
 
 								public void onClick(DialogInterface dialog, int which) {
 									setResult(CandiConstants.RESULT_PROFILE_INSERTED);

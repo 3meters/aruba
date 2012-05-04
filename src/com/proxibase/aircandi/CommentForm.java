@@ -12,7 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.Command.CommandVerb;
+import com.proxibase.aircandi.components.Command.CommandType;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
@@ -45,7 +45,7 @@ public class CommentForm extends FormActivity {
 		if (user != null && user.anonymous) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
-			intentBuilder.setCommand(new Command(CommandVerb.Edit));
+			intentBuilder.setCommand(new Command(CommandType.Edit));
 			intentBuilder.setMessage(getString(R.string.signin_message_new_candi));
 			Intent intent = intentBuilder.create();
 

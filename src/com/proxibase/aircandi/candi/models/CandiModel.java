@@ -129,15 +129,22 @@ public class CandiModel extends BaseModel {
 	@Override
 	public String getTitleText() {
 		String title = super.getTitleText();
+		String displayExtra = null;
+		
+		if (mEntity.beacon != null) {
+			if (mDisplayExtra == DisplayExtra.Level) {
+				displayExtra = String.valueOf(mEntity.beacon.getAvgBeaconLevel());
+			}
+			else if (mDisplayExtra == DisplayExtra.Tag) {
+				displayExtra = String.valueOf(mEntity.beacon.id);
+			}
+			else if (mDisplayExtra == DisplayExtra.Time) {
+				displayExtra = String.valueOf(mEntity.beacon.discoveryTime.getTime() / 100);
+			}
+		}
 
-		if (mDisplayExtra == DisplayExtra.Level) {
-			title += " " + String.valueOf(getEntity().beacon.getAvgBeaconLevel());
-		}
-		else if (mDisplayExtra == DisplayExtra.Tag) {
-			title += " " + String.valueOf(getEntity().beacon.id);
-		}
-		else if (mDisplayExtra == DisplayExtra.Time) {
-			title += " " + String.valueOf(getEntity().beacon.discoveryTime.getTime() / 100);
+		if (displayExtra != null) {
+			title += " " + displayExtra;
 		}
 
 		return title;

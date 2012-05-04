@@ -40,7 +40,6 @@ public class Beacon extends ServiceEntry {
 	// For client use only
 	public int				scanLevelDb;
 	public boolean			serviceVerified		= false;
-	public boolean			registered			= false;
 	public boolean			hidden				= false;
 	public boolean			dirty				= false;
 	public Date				discoveryTime;

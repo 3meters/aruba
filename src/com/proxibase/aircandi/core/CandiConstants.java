@@ -28,8 +28,8 @@ public interface CandiConstants {
 	public static final int				INTERVAL_NETWORK_PHONEY					= 3000;
 	public static final int				INTERVAL_SCAN							= 60000;
 
-	public static final int				LOCATION_POLLING_INTERVAL				= 300000;																																																																																																																// 5
-																																																																																																																																						// minutes
+	public static final int				LOCATION_POLLING_INTERVAL				= 300000;																																																																																																														// 5
+																																																																																																																																				// minutes
 	public static final int				LOCATION_POLLING_TIMEOUT				= 60000;
 
 	public static final float			CANDI_VIEW_HALO							= 2.0f;
@@ -88,15 +88,21 @@ public interface CandiConstants {
 
 	public static final String			URL_AIRCANDI_SERVICE_ODATA				= "http://dev.aircandi.com/airodata.svc/";
 	public static final String			URL_AIRCANDI_SERVICE					= "http://dev.aircandi.com/airlogic.asmx/";
+	public static final String			URL_AIRCANDI_UPGRADE					= "http://dev.aircandi.com/candiinstall.aspx/";
 	public static final String			URL_AIRCANDI_BLOG						= "http://devblog.proxibase.com/";
 	public static final String			URL_AIRCANDI_MEDIA						= "https://s3.amazonaws.com/";
 	public static final String			S3_BUCKET_IMAGES						= "3meters_images";
 
+	public static final int				RADAR_ENTITY_LIMIT						= 6;
+	public static final int				RADAR_CHILDENTITY_LIMIT					= 5;
+	public static final int				RADAR_COMMENT_LIMIT						= 5;
+
 	public static final String			TYPE_CANDI_POST							= "com.proxibase.aircandi.candi.post";
 	public static final String			TYPE_CANDI_PICTURE						= "com.proxibase.aircandi.candi.picture";
 	public static final String			TYPE_CANDI_LINK							= "com.proxibase.aircandi.candi.link";
+	public static final String			TYPE_CANDI_COMMAND						= "com.proxibase.aircandi.candi.command";
 
-	public static final String			USER_ANONYMOUS							= "{\"data\": [{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\",\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\",\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\",\"imageUri\": \"resource:placeholder_user\", \"isDeveloper\": false, \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}], \"count\": 1, \"moreRecords\": false}";
+	public static final String			USER_ANONYMOUS							= "{\"data\": [{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\",\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\",\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\",\"imageUri\": \"resource:placeholder_user\", \"isDeveloper\": false, \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}], \"count\": 1, \"more\": false}";
 
 	public static final int				ACTIVITY_ENTITY_HANDLER					= 100;
 	public static final int				ACTIVITY_MARKET							= 200;
