@@ -37,7 +37,7 @@ public class CandiForm extends CandiActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			/* 
+			/*
 			 * Try to detect case where this is being created after
 			 * a crash and bail out.
 			 */
@@ -65,8 +65,12 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				String jsonFields = "{\"entities\":{},\"children\":{\"imagePreviewUri\":true,\"linkUri\":true,\"linkZoom\":true,\"linkJavascriptEnabled\":true,\"_creator\":true,\"creator\":true,\"modifiedDate\":true},\"comments\":{}}";
-				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntity.id, null, jsonFields, null);
+				String jsonFields = "{\"entities\":{},";
+				jsonFields += "\"children\":{\"imagePreviewUri\":true,\"linkUri\":true,\"linkZoom\":true,\"linkJavascriptEnabled\":true,\"_creator\":true,\"creator\":true,\"modifiedDate\":true},";
+				jsonFields += "\"parents\":{\"imagePreviewUri\":true,\"linkUri\":true,\"linkZoom\":true,\"linkJavascriptEnabled\":true,\"_creator\":true,\"creator\":true,\"modifiedDate\":true},";
+				jsonFields += "\"comments\":{}}";
+				String jsonEagerLoad = "{\"children\":true,\"parents\":true,\"comments\":false}";
+				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntity.id, jsonEagerLoad, jsonFields, null);
 				return serviceResponse;
 			}
 
@@ -79,7 +83,7 @@ public class CandiForm extends CandiActivity {
 
 					/* Sort the children if there are any */
 					if (mCommon.mEntity.children != null && mCommon.mEntity.children.size() > 1) {
-						Collections.sort(mCommon.mEntity.children, new Entity.SortEntitiesByUpdatedTime());
+						Collections.sort(mCommon.mEntity.children, new Entity.SortEntitiesByModifiedDate());
 					}
 
 					ViewGroup candiInfoView = (ViewGroup) findViewById(R.id.candi_form);
@@ -105,13 +109,17 @@ public class CandiForm extends CandiActivity {
 
 	public void onCommentsClick(View view) {
 		Entity entity = (Entity) view.getTag();
-		if (entity.commentsCount > 0) {
+		if (entity.commentCount > 0) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 			intentBuilder.setCommand(new Command(CommandType.View));
 			intentBuilder.setEntity(entity);
 			Intent intent = intentBuilder.create();
 			startActivityForResult(intent, 0);
 		}
+	}
+
+	public void onMoveButtonClick(View view) {
+		showCandiPicker();
 	}
 
 	public void onMapClick(View view) {
@@ -147,8 +155,8 @@ public class CandiForm extends CandiActivity {
 	}
 
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
 
 		mLastResultCode = resultCode;
 		if (resultCode == CandiConstants.RESULT_ENTITY_UPDATED
@@ -171,6 +179,18 @@ public class CandiForm extends CandiActivity {
 				|| resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
 			mCommon.updateUserPicture();
 			bind();
+		}
+
+		if (requestCode == CandiConstants.ACTIVITY_CANDI_PICK) {
+			if (intent != null && intent.getExtras() != null) {
+				Bundle extras = intent.getExtras();
+				final String parentEntityId = extras.getString(getString(R.string.EXTRA_ENTITY_ID));
+				if (parentEntityId != null && !parentEntityId.equals("")) {
+					/*
+					 * Update entity link and refresh parent entity info
+					 */
+				}
+			}
 		}
 	}
 
@@ -197,14 +217,13 @@ public class CandiForm extends CandiActivity {
 
 	public ViewGroup buildCandiInfo(final Entity entity, final ViewGroup candiInfoView, boolean refresh) {
 
-		final WebImageView imageAuthor = (WebImageView) candiInfoView.findViewById(R.id.image_author);
+		final WebImageView imageParent = (WebImageView) candiInfoView.findViewById(R.id.image_parent);
 		final TextView title = (TextView) candiInfoView.findViewById(R.id.candi_info_title);
 		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_info_subtitle);
-		final WebImageView image = (WebImageView) candiInfoView.findViewById(R.id.candi_info_image);
-		final ViewGroup imageHolder = (ViewGroup) candiInfoView.findViewById(R.id.candi_info_image_holder);
+		final WebImageView imageCandi = (WebImageView) candiInfoView.findViewById(R.id.candi_info_image);
+		final ViewGroup imageCandiHolder = (ViewGroup) candiInfoView.findViewById(R.id.candi_info_image_holder);
 		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_info_description);
 		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
-		final ImageView navigate = (ImageView) candiInfoView.findViewById(R.id.image_forward);
 		final Button comments = (Button) candiInfoView.findViewById(R.id.button_comments);
 		final ImageView map = (ImageView) candiInfoView.findViewById(R.id.button_map);
 		final Button newComment = (Button) candiInfoView.findViewById(R.id.button_comment);
@@ -215,33 +234,36 @@ public class CandiForm extends CandiActivity {
 		final WebImageView imageChildren = (WebImageView) candiInfoView.findViewById(R.id.button_children_image);
 		final TextView textChildren = (TextView) candiInfoView.findViewById(R.id.button_children_text);
 
-		/* Author image */
+		/* Parent image */
 
-		if (!refresh) {
-			if (entity.creator != null) {
-				if (entity.creator.imageUri != null && !entity.creator.imageUri.equals("")) {
-					ImageRequestBuilder builder = new ImageRequestBuilder(imageAuthor);
-					builder.setFromUris(entity.creator.imageUri, null);
-					ImageRequest imageRequest = builder.create();
-					imageAuthor.setImageRequest(imageRequest);
-				}
-			}
+		if (entity.parent != null && (entity.parent.imagePreviewUri != null || entity.parent.imageUri != null || entity.parent.linkUri != null)) {
+			ImageRequestBuilder builder = new ImageRequestBuilder(imageParent);
+			builder.setImageUri(entity.parent.getMasterImageUri());
+			builder.setImageFormat(entity.parent.getMasterImageFormat());
+			builder.setLinkZoom(entity.parent.linkZoom);
+			builder.setLinkJavascriptEnabled(entity.parent.linkJavascriptEnabled);
+			ImageRequest imageRequest = builder.create();
+			imageParent.setImageRequest(imageRequest);
+			imageParent.setVisibility(View.VISIBLE);
 		}
-
+		else {
+			imageParent.setVisibility(View.GONE);
+		}
+		
 		/* Candi image */
 
 		if (entity.imageUri != null || entity.linkUri != null) {
-			ImageRequestBuilder builder = new ImageRequestBuilder(image);
+			ImageRequestBuilder builder = new ImageRequestBuilder(imageCandi);
 			builder.setImageUri(entity.getMasterImageUri());
 			builder.setImageFormat(entity.getMasterImageFormat());
 			builder.setLinkZoom(entity.linkZoom);
 			builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
 			ImageRequest imageRequest = builder.create();
-			image.setImageRequest(imageRequest);
-			imageHolder.setVisibility(View.VISIBLE);
+			imageCandi.setImageRequest(imageRequest);
+			imageCandiHolder.setVisibility(View.VISIBLE);
 		}
 		else {
-			imageHolder.setVisibility(View.GONE);
+			imageCandiHolder.setVisibility(View.GONE);
 		}
 
 		/* Author block */
@@ -252,20 +274,6 @@ public class CandiForm extends CandiActivity {
 		}
 		else {
 			authorBlock.setVisibility(View.GONE);
-		}
-
-		/* Update any UI indicators related to child candies */
-
-		boolean visibleChildren = (entity.children != null && entity.hasVisibleChildren()) || entity.childrenCount > 0;
-		if (visibleChildren) {
-			((ViewGroup) candiInfoView.findViewById(R.id.group_candi_content)).setClickable(true);
-			navigate.setVisibility(View.VISIBLE);
-			navigate.setClickable(true);
-		}
-		else {
-			((ViewGroup) candiInfoView.findViewById(R.id.group_candi_content)).setClickable(false);
-			navigate.setVisibility(View.GONE);
-			navigate.setClickable(false);
 		}
 
 		/* Adjust buttons */
@@ -288,6 +296,7 @@ public class CandiForm extends CandiActivity {
 			editCandi.setTag(new Command(CommandType.Edit, "Edit", "EntityForm", entity.type, entity.id, null, null));
 		}
 
+		boolean visibleChildren = (entity.children != null && entity.hasVisibleChildren()) || entity.childCount > 0;
 		if (visibleChildren) {
 			Entity childEntity = entity.children.get(0);
 
@@ -301,15 +310,15 @@ public class CandiForm extends CandiActivity {
 			imageChildren.setImageRequest(imageRequest);
 
 			/* child count */
-			textChildren.setText(String.valueOf(entity.childrenCount));
+			textChildren.setText(String.valueOf(entity.childCount));
 
 			holderChildren.setVisibility(View.VISIBLE);
 		}
 
 		/* Comments */
 
-		if (entity.commentsCount != null && entity.commentsCount > 0) {
-			comments.setText(String.valueOf(entity.commentsCount) + (entity.commentsCount == 1 ? " Comment" : " Comments"));
+		if (entity.commentCount != null && entity.commentCount > 0) {
+			comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
 			comments.setTag(entity);
 			comments.setVisibility(View.VISIBLE);
 		}
@@ -374,6 +383,12 @@ public class CandiForm extends CandiActivity {
 
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_LIST);
 		overridePendingTransition(R.anim.slide_in_right_long, R.anim.slide_out_left_long);
+	}
+
+	private void showCandiPicker() {
+		Intent intent = new Intent(this, CandiPicker.class);
+		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_PICK);
+		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 	}
 
 	// --------------------------------------------------------------------------------------------

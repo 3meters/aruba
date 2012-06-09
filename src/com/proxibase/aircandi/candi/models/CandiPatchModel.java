@@ -282,10 +282,12 @@ public class CandiPatchModel extends Observable {
 
 		if (navigation == Navigation.Down && mCandiModelFocused != null) {
 			CandiModel candiRootNext = (CandiModel) mCandiRootNext;
-			if (candiRootNext.getChildren().size() >= focusedZoneIndex) {
-				CandiModel childModel = (CandiModel) ((CandiModel) mCandiRootNext).getChildren().get(focusedZoneIndex);
-				if (childModel.getEntity().type == CandiConstants.TYPE_CANDI_COMMAND) {
-					zoneIndex++;
+			synchronized (candiRootNext.getChildren()) {
+				if (candiRootNext.getChildren().size() > focusedZoneIndex) {
+					CandiModel childModel = (CandiModel) ((CandiModel) mCandiRootNext).getChildren().get(focusedZoneIndex);
+					if (childModel.getEntity().type == CandiConstants.TYPE_CANDI_COMMAND) {
+						zoneIndex++;
+					}
 				}
 			}
 		}
@@ -477,7 +479,7 @@ public class CandiPatchModel extends Observable {
 	}
 
 	public void sortCandiModels(List list) {
-		Collections.sort(list, new Entity.SortEntitiesByDiscoveryTimeModifiedTime());
+		Collections.sort(list, new Entity.SortEntitiesByDiscoveryTimeModifiedDate());
 	}
 
 	public ZoneModel getZoneNeighbor(ZoneModel targetZoneModel, boolean forward) {

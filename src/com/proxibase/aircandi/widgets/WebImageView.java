@@ -130,7 +130,9 @@ public class WebImageView extends RelativeLayout {
 
 		/* Start the busy indicator */
 
-		showLoading(true);
+		if (mShowBusy) {
+			showLoading(true);
+		}
 		mImageView.setImageBitmap(null);
 
 		imageRequest.setRequestListener(new RequestListener() {
@@ -192,7 +194,9 @@ public class WebImageView extends RelativeLayout {
 
 						}
 					}
-					showLoading(false);
+					if (mShowBusy) {
+						showLoading(false);
+					}
 				}
 
 				if (originalImageReadyListener != null) {
@@ -204,6 +208,16 @@ public class WebImageView extends RelativeLayout {
 		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
 	}
 
+	public void clearImage(final boolean animate, final Integer animationId) {
+		mThreadHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				ImageUtils.clearImageInImageView(mImageView, animate, animationId);
+			}
+		});
+	}
+	
 	public void showLoading(boolean loading) {
 		if (loading) {
 			mImageViewLoading.post(new Runnable() {

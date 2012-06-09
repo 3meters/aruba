@@ -352,6 +352,12 @@ public class ProxiExplorer {
 			List<Object> entities = (List<Object>) ((ServiceData) serviceResponse.data).data;
 			if (entities != null && entities.size() > 0) {
 				Entity entity = (Entity) entities.get(0);
+				/*
+				 * For now we only expect a single parent to grab the first one.
+				 */
+				if (entity.parents != null && entity.parents.size() > 0) {
+					entity.parent = entity.parents.get(0);
+				}
 				((ServiceData) serviceResponse.data).data = entity;
 			}
 		}
@@ -365,7 +371,7 @@ public class ProxiExplorer {
 		}
 
 		if (jsonEagerLoad == null) {
-			jsonEagerLoad = "{\"children\":true,\"comments\":false}";
+			jsonEagerLoad = "{\"children\":true,\"parents\":false,\"comments\":false}";
 		}
 
 		if (jsonOptions == null) {
@@ -381,7 +387,7 @@ public class ProxiExplorer {
 		}
 
 		if (jsonFields == null) {
-			jsonFields = "{\"entities\":{},\"children\":{},\"comments\":{}}";
+			jsonFields = "{\"entities\":{},\"children\":{},\"parents\":{},\"comments\":{}}";
 		}
 
 		final Bundle parameters = new Bundle();
@@ -480,7 +486,7 @@ public class ProxiExplorer {
 		Logger.v(this, "Chunking child entities");
 		ServiceResponse serviceResponse = new ServiceResponse();
 		Entity entity = mEntityModel.getEntityById(parentEntityId);
-		String jsonEagerLoad = "{\"children\":true,\"comments\":false}";
+		String jsonEagerLoad = "{\"children\":true,\"parents\":false,\"comments\":false}";
 		String jsonOptions = "{\"limit\":"
 				+ String.valueOf(CandiConstants.RADAR_ENTITY_LIMIT)
 				+ ",\"skip\":0"
@@ -550,7 +556,7 @@ public class ProxiExplorer {
 					 * Append new children to existing entity and do fixups.
 					 */
 					entityTemp.childrenMore = entity.childrenMore;
-					entityTemp.childrenCount = entity.childrenCount;
+					entityTemp.childCount = entity.childCount;
 					for (Entity childEntity : entity.children) {
 						childEntity.beacon = beacon;
 						childEntity.beaconId = beacon.id;

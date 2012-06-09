@@ -61,7 +61,7 @@
                     android:orientation="vertical" >
 
                     <com.proxibase.aircandi.widgets.WebImageView
-                        android:id="@+id/image_author"
+                        android:id="@+id/image_parent"
                         android:layout_width="65dp"
                         android:layout_height="65dp"
                         android:layout_marginTop="3dp"
@@ -93,7 +93,6 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:layout_alignWithParentIfMissing="true"
-                    android:layout_toLeftOf="@+id/image_forward"
                     android:layout_toRightOf="@+id/group_controls"
                     android:duplicateParentState="false"
                     android:orientation="vertical"
@@ -110,11 +109,11 @@
                             android:id="@+id/candi_info_image"
                             android:layout_width="250px"
                             android:layout_height="250px"
-                            android:background="@drawable/app_image_selector"
-                            android:clickable="true"
                             aircandi:layout="@layout/temp_webimageview_framed_fill"
                             aircandi:maxHeight="250px"
                             aircandi:maxWidth="250px"
+                            android:background="@drawable/app_image_selector"
+                            android:clickable="true"
                             android:onClick="onImageClick"
                             android:scaleType="centerCrop" />
 
@@ -158,10 +157,10 @@
                     <com.proxibase.aircandi.widgets.AuthorBlock
                         android:id="@+id/block_author"
                         android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="40dp"
                         android:layout_marginBottom="10dp"
                         android:layout_marginLeft="3dp"
-                        aircandi:layout="@layout/temp_user_info_text_only" />
+                        aircandi:layout="@layout/temp_user_info" />
 
                     <LinearLayout
                         android:id="@+id/group_content"
@@ -205,7 +204,6 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_below="@+id/group_content"
-                    android:layout_toLeftOf="@+id/image_forward"
                     android:layout_toRightOf="@+id/group_controls"
                     android:gravity="bottom"
                     android:orientation="horizontal"
@@ -246,18 +244,18 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
                         android:layout_toRightOf="@+id/button_edit"
+                        android:background="?attr/backgroundButton"
                         android:onClick="onCandiInfoClick"
-                		android:background="?attr/backgroundButton"
                         android:visibility="gone" >
 
                         <com.proxibase.aircandi.widgets.WebImageView
                             android:id="@+id/button_children_image"
                             android:layout_width="65dp"
                             android:layout_height="65dp"
-                            android:background="@drawable/app_image_selector"
                             aircandi:layout="@layout/temp_webimageview"
                             aircandi:maxHeight="65dp"
                             aircandi:maxWidth="65dp"
+                            android:background="@drawable/app_image_selector"
                             android:scaleType="centerCrop" />
 
                         <LinearLayout
@@ -279,12 +277,11 @@
                             android:gravity="center|right" >
 
                             <ImageView
-                                android:id="@+id/image_forward"
                                 android:layout_width="8dp"
                                 android:layout_height="fill_parent"
-                                android:layout_marginTop="2dp"
                                 android:layout_marginBottom="2dp"
                                 android:layout_marginRight="3dp"
+                                android:layout_marginTop="2dp"
                                 android:onClick="onCandiInfoClick"
                                 android:scaleType="center"
                                 android:src="?attr/imageForwardInfo" />
@@ -292,18 +289,6 @@
                     </FrameLayout>
                 </RelativeLayout>
 
-                <ImageView
-                    android:id="@+id/image_forward"
-                    android:layout_width="10dp"
-                    android:layout_height="50dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:duplicateParentState="true"
-                    android:onClick="onCandiInfoClick"
-                    android:paddingRight="3dp"
-                    android:scaleType="center"
-                    android:visibility="gone"
-                    android:src="?attr/imageForwardInfo" />
             </RelativeLayout>
         </ScrollView>
     </FrameLayout>

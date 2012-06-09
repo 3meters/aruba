@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="layout" format="integer" />
+    <attr name="itemLayout" format="integer" />
     <attr name="animation" format="integer" />
     <declare-styleable name="Global">
         <attr name="themeTone" format="string" />
@@ -24,6 +25,9 @@
         <attr name="maxWidth" format="dimension" />
         <attr name="minHeight" format="dimension" />
         <attr name="maxHeight" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="CandiListView">
+        <attr name="itemLayout" />
     </declare-styleable>
     <declare-styleable name="CandiRadar">
         <attr name="textureBodyZone" format="string" />

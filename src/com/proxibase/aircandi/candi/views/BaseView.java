@@ -254,7 +254,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	protected Bitmap makeTextBitmap(int width, int height, int padding, CharSequence text) {
 
 		if (mTextView == null) {
-			mTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiActivity);
+			mTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiRadarActivity);
 		}
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
 		mTextView.setLayoutParams(layoutParams);
@@ -288,7 +288,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		int height = bitmap.getHeight();
 
 		if (mTextView == null) {
-			mTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiActivity);
+			mTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiRadarActivity);
 		}
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, (int) (height - textOffsetY));
 		mTextView.setLayoutParams(layoutParams);

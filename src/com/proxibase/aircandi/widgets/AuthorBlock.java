@@ -52,14 +52,15 @@ public class AuthorBlock extends RelativeLayout {
 	}
 
 	private void bindToView() {
+		if (!this.isInEditMode()) {
+			mImageUser = (WebImageView) mBoundView.findViewById(R.id.image_user_picture);
+			mTextName = (TextView) mBoundView.findViewById(R.id.text_user_fullname);
+			mTextTimeSince = (TextView) mBoundView.findViewById(R.id.text_user_timesince);
+			mImageLocked = (ImageView) mBoundView.findViewById(R.id.image_locked);
 
-		mImageUser = (WebImageView) mBoundView.findViewById(R.id.image_user_picture);
-		mTextName = (TextView) mBoundView.findViewById(R.id.text_user_fullname);
-		mTextTimeSince = (TextView) mBoundView.findViewById(R.id.text_user_timesince);
-		mImageLocked = (ImageView) mBoundView.findViewById(R.id.image_locked);
-
-		this.removeAllViews();
-		this.addView(mBoundView);
+			this.removeAllViews();
+			this.addView(mBoundView);
+		}
 	}
 
 	public void bindToAuthor(User author, Long date, boolean locked) {

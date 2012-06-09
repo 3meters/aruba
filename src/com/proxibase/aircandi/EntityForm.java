@@ -184,8 +184,12 @@ public class EntityForm extends FormActivity {
 
 					@Override
 					protected Object doInBackground(Object... params) {
-						String jsonEagerLoad = "{\"children\":false,\"comments\":false}";
-						ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, null, null);
+						String jsonFields = "{\"entities\":{},";
+						jsonFields += "\"children\":{},";
+						jsonFields += "\"parents\":{\"imagePreviewUri\":true,\"linkUri\":true,\"linkZoom\":true,\"linkJavascriptEnabled\":true,\"_creator\":true,\"creator\":true,\"modifiedDate\":true},";
+						jsonFields += "\"comments\":{}}";
+						String jsonEagerLoad = "{\"children\":false,\"parents\":true,\"comments\":false}";
+						ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, jsonFields, null);
 						return serviceResponse;
 					}
 

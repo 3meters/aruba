@@ -117,7 +117,7 @@ public class CandiPatchPresenter implements Observer {
 	public TextureRegion			mZoneBodyTextureRegion;
 	public TextureRegion			mZoneReflectionTextureRegion;
 
-	public CandiRadar				mCandiActivity;
+	public CandiRadar				mCandiRadarActivity;
 	private AircandiCommon			mCommon;
 	public RenderSurfaceView		mRenderSurfaceView;
 	private ManageViewsThread		mManageViewsThread;
@@ -147,7 +147,7 @@ public class CandiPatchPresenter implements Observer {
 		mEngine = engine;
 		mCamera = (ChaseCamera) engine.getCamera();
 		mRenderSurfaceView = renderSurfaceView;
-		mCandiActivity = (CandiRadar) activity;
+		mCandiRadarActivity = (CandiRadar) activity;
 		mGestureDetector = new GestureDetector(mContext, new SingleTapGestureDetector());
 
 		/* Rendering timer */
@@ -390,7 +390,7 @@ public class CandiPatchPresenter implements Observer {
 						entity.discoveryTime = entity.beacon.discoveryTime;
 					}
 				}
-				for (Entity childEntity: entity.children) {
+				for (Entity childEntity : entity.children) {
 					if (childEntity.type != CandiConstants.TYPE_CANDI_COMMAND) {
 						if (!childEntity.hidden) {
 							childEntity.rookie = false;
@@ -476,7 +476,7 @@ public class CandiPatchPresenter implements Observer {
 
 			CandiModel candiModel = null;
 			if (mCandiPatchModel.hasCandiModelForEntity(entity.id)) {
-				candiModel = mCandiPatchModel.updateCandiModel(entity, mCandiActivity.mPrefDisplayExtras);
+				candiModel = mCandiPatchModel.updateCandiModel(entity, mCandiRadarActivity.mPrefDisplayExtras);
 				candiModel.setParent(candiRootNext);
 				candiRootNext.getChildren().add(candiModel);
 			}
@@ -491,7 +491,7 @@ public class CandiPatchPresenter implements Observer {
 					}
 				}
 				candiModel = CandiModelFactory.newCandiModel(entity.id, entity, mCandiPatchModel);
-				candiModel.setDisplayExtra(mCandiActivity.mPrefDisplayExtras);
+				candiModel.setDisplayExtra(mCandiRadarActivity.mPrefDisplayExtras);
 				mCandiPatchModel.addCandiModel(candiModel);
 				candiModel.setParent(candiRootNext);
 				candiRootNext.getChildren().add(candiModel);
@@ -501,7 +501,7 @@ public class CandiPatchPresenter implements Observer {
 
 				CandiModel childCandiModel = null;
 				if (mCandiPatchModel.hasCandiModelForEntity(childEntity.id)) {
-					childCandiModel = mCandiPatchModel.updateCandiModel(childEntity, mCandiActivity.mPrefDisplayExtras);
+					childCandiModel = mCandiPatchModel.updateCandiModel(childEntity, mCandiRadarActivity.mPrefDisplayExtras);
 					candiModel.getChildren().add(childCandiModel);
 					childCandiModel.setParent(candiModel);
 				}
@@ -513,7 +513,7 @@ public class CandiPatchPresenter implements Observer {
 						}
 					}
 					childCandiModel = CandiModelFactory.newCandiModel(childEntity.id, childEntity, mCandiPatchModel);
-					childCandiModel.setDisplayExtra(mCandiActivity.mPrefDisplayExtras);
+					childCandiModel.setDisplayExtra(mCandiRadarActivity.mPrefDisplayExtras);
 					mCandiPatchModel.addCandiModel(childCandiModel);
 					candiModel.getChildren().add(childCandiModel);
 					childCandiModel.setParent(candiModel);
@@ -820,11 +820,11 @@ public class CandiPatchPresenter implements Observer {
 			candiView.setTitleTextFillColor(Color.TRANSPARENT);
 			mEngine.getScene().getChild(CandiConstants.LAYER_CANDI).attachChild(candiView);
 
-			mCandiActivity.runOnUiThread(new Runnable() {
+			mCandiRadarActivity.runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
-					candiView.setGestureDetector(new GestureDetector(mCandiActivity, candiView));
+					candiView.setGestureDetector(new GestureDetector(mCandiRadarActivity, candiView));
 				}
 			});
 
@@ -1059,12 +1059,12 @@ public class CandiPatchPresenter implements Observer {
 		// Logger.d(this, "Loaned views: " + String.valueOf(loanedCount));
 
 		/* update debug info */
-		mCandiActivity.runOnUiThread(new Runnable() {
+		mCandiRadarActivity.runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
 				if (Aircandi.settings.getBoolean(Preferences.PREF_SHOW_DEBUG, false)) {
-					mCandiActivity.updateDebugInfo();
+					mCandiRadarActivity.updateDebugInfo();
 				}
 			}
 		});
@@ -1115,11 +1115,13 @@ public class CandiPatchPresenter implements Observer {
 						@Override
 						public void onMoveFinished() {
 							if (candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Secondary) {
-								mCandiActivity.runOnUiThread(new Runnable() {
+								mCandiRadarActivity.runOnUiThread(new Runnable() {
 
 									@Override
 									public void run() {
-										mCandiActivity.showButtonCandi(false);
+										CandiModel candiParent = (CandiModel) candiModel.getParent();
+										Entity entityParent = candiParent.getEntity();
+										mCandiRadarActivity.setParentButtonImage(entityParent);
 										navigateModel(candiModel.getParent(), false, false, Navigation.Down);
 										mIgnoreInput = false;
 									}
@@ -1138,7 +1140,9 @@ public class CandiPatchPresenter implements Observer {
 		}
 		else {
 			if (candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Secondary) {
-				mCandiActivity.showButtonCandi(false);
+				CandiModel candiParent = (CandiModel) candiModel.getParent();
+				Entity entityParent = candiParent.getEntity();
+				mCandiRadarActivity.setParentButtonImage(entityParent);
 				navigateModel(candiModel.getParent(), false, false, Navigation.Down);
 				mIgnoreInput = false;
 			}

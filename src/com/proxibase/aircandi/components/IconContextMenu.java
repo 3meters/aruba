@@ -39,52 +39,47 @@ import android.widget.TextView;
 
 import com.proxibase.aircandi.R;
 
-public class IconContextMenu implements DialogInterface.OnCancelListener,
-										DialogInterface.OnDismissListener {
+public class IconContextMenu implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
 
 	private static final int				LIST_PREFERED_HEIGHT	= 70;
 
-	private IconMenuAdapter					menuAdapter				= null;
-	private Activity						parentActivity			= null;
-	private int								dialogId				= 0;
-
-	private IconContextMenuOnClickListener	clickHandler			= null;
+	private IconMenuAdapter					mMenuAdapter			= null;
+	private Activity						mParentActivity			= null;
+	private int								mDialogId				= 0;
+	private IconContextMenuOnClickListener	mClickHandler			= null;
 
 	public IconContextMenu(Activity parent, int id) {
-		this.parentActivity = parent;
-		this.dialogId = id;
-
-		menuAdapter = new IconMenuAdapter(parentActivity);
+		mParentActivity = parent;
+		mDialogId = id;
+		mMenuAdapter = new IconMenuAdapter(mParentActivity);
 	}
 
-	public void addItem(Resources res, CharSequence title,
-			int imageResourceId, int actionTag) {
-		menuAdapter.addItem(new IconContextMenuItem(res, title, imageResourceId, actionTag));
+	public void addItem(Resources res, CharSequence title, int imageResourceId, int actionTag) {
+		mMenuAdapter.addItem(new IconContextMenuItem(res, title, imageResourceId, actionTag));
 	}
 
-	public void addItem(Resources res, int textResourceId,
-			int imageResourceId, int actionTag) {
-		menuAdapter.addItem(new IconContextMenuItem(res, textResourceId, imageResourceId, actionTag));
+	public void addItem(Resources res, int textResourceId, int imageResourceId, int actionTag) {
+		mMenuAdapter.addItem(new IconContextMenuItem(res, textResourceId, imageResourceId, actionTag));
 	}
 
 	public void setOnClickListener(IconContextMenuOnClickListener listener) {
-		clickHandler = listener;
+		mClickHandler = listener;
 	}
 
 	public Dialog createMenu(String titleText, Context context) {
-		final AlertDialog.Builder builder = new AlertDialog.Builder(parentActivity);
+		final AlertDialog.Builder builder = new AlertDialog.Builder(mParentActivity);
 		View titleView = ((Activity) context).getLayoutInflater().inflate(R.layout.temp_dialog_title, null);
 		((TextView) titleView.findViewById(R.id.dialog_title_text)).setText(titleText);
 		builder.setCustomTitle(titleView);
-		
-		builder.setAdapter(menuAdapter, new DialogInterface.OnClickListener() {
+
+		builder.setAdapter(mMenuAdapter, new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialoginterface, int i) {
-				IconContextMenuItem item = (IconContextMenuItem) menuAdapter.getItem(i);
+				IconContextMenuItem item = (IconContextMenuItem) mMenuAdapter.getItem(i);
 
-				if (clickHandler != null) {
-					clickHandler.onClick(item.actionTag);
+				if (mClickHandler != null) {
+					mClickHandler.onClick(item.actionTag);
 				}
 			}
 		});
@@ -106,7 +101,7 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 	public void onDismiss(DialogInterface dialog) {}
 
 	private void cleanup() {
-		parentActivity.dismissDialog(dialogId);
+		mParentActivity.dismissDialog(mDialogId);
 	}
 
 	public interface IconContextMenuOnClickListener {
@@ -148,7 +143,7 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 		public View getView(int position, View convertView, ViewGroup parent) {
 			IconContextMenuItem item = (IconContextMenuItem) getItem(position);
 
-			Resources res = parentActivity.getResources();
+			Resources res = mParentActivity.getResources();
 
 			if (convertView == null) {
 
@@ -161,11 +156,11 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 				textView.setGravity(android.view.Gravity.CENTER_VERTICAL);
 				textView.setTextColor(Color.BLACK);
 
-//								Theme th = context.getTheme();
-//								TypedValue tv = new TypedValue();
-//								if (th.resolveAttribute(android.R.attr.te.textAppearanceLargeInverse, tv, true)) {
-//									textView.setTextAppearance(context, tv.resourceId);
-//								}
+				// Theme th = context.getTheme();
+				// TypedValue tv = new TypedValue();
+				// if (th.resolveAttribute(android.R.attr.te.textAppearanceLargeInverse, tv, true)) {
+				// textView.setTextAppearance(context, tv.resourceId);
+				// }
 
 				textView.setTextSize(16);
 				textView.setMinHeight(LIST_PREFERED_HEIGHT);

@@ -83,7 +83,7 @@ public class MapBrowse extends MapActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
-					String jsonEagerLoad = "{\"children\":false,\"comments\":false}";
+					String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":false}";
 					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntity.id, jsonEagerLoad, null, null);
 					return serviceResponse;
 				}

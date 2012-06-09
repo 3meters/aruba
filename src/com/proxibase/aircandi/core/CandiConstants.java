@@ -93,9 +93,10 @@ public interface CandiConstants {
 	public static final String			URL_AIRCANDI_MEDIA						= "https://s3.amazonaws.com/";
 	public static final String			S3_BUCKET_IMAGES						= "3meters_images";
 
-	public static final int				RADAR_ENTITY_LIMIT						= 6;
-	public static final int				RADAR_CHILDENTITY_LIMIT					= 5;
-	public static final int				RADAR_COMMENT_LIMIT						= 5;
+	public static final int				RADAR_ENTITY_LIMIT						= 10;
+	public static final int				RADAR_CHILDENTITY_LIMIT					= 20;
+	public static final int				RADAR_COMMENT_LIMIT						= 50;
+	public static final int				RADAR_ENTITY_MAX_LIMIT					= 300;
 
 	public static final String			TYPE_CANDI_POST							= "com.proxibase.aircandi.candi.post";
 	public static final String			TYPE_CANDI_PICTURE						= "com.proxibase.aircandi.candi.picture";
@@ -119,6 +120,7 @@ public interface CandiConstants {
 	public static final int				ACTIVITY_CANDI_INFO						= 440;
 	public static final int				ACTIVITY_CANDI_LIST						= 450;
 	public static final int				ACTIVITY_LINK_PICK						= 500;
+	public static final int				ACTIVITY_CANDI_PICK						= 550;
 	public static final int				ACTIVITY_PREFERENCES					= 600;
 
 	public static final int				RESULT_ENTITY_INSERTED					= 100;

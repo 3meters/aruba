@@ -77,7 +77,7 @@ public class Entity extends ServiceEntry implements Cloneable {
 	public GeoLocation		location;
 
 	@Expose(serialize = false, deserialize = true)
-	public Integer			commentsCount;
+	public Integer			commentCount;
 
 	@Expose(serialize = false, deserialize = true)
 	public Boolean			commentsMore;
@@ -86,19 +86,35 @@ public class Entity extends ServiceEntry implements Cloneable {
 	public List<Entity>		children;
 
 	@Expose(serialize = false, deserialize = true)
-	public Integer			childrenCount;
+	public Integer			childCount;
 
 	@Expose(serialize = false, deserialize = true)
 	public Boolean			childrenMore;
 
-	/* For client use only */
+	@Expose(serialize = false, deserialize = true)
+	public List<Entity>		parents;
+
+	@Expose(serialize = false, deserialize = true)
+	public Integer			parentCount;
+
+	@Expose(serialize = false, deserialize = true)
+	public Boolean			parentsMore;
+
+	/* 
+	 * For client use only
+	 * 
+	 * The service can return multiple parents but we but we always work in the context
+	 * of a single parent and beacon
+	 */
 
 	public Beacon			beacon;
-	public Entity			parent;
+	public Entity			parent;  
 	public String			parentId;											// Instead of serializing parent
+	
 	public Boolean			hidden		= false;
 	public Boolean			dirty		= false;
 	public Boolean			rookie		= true;
+	
 	public Command			command;											// For command entities
 	public String			data;
 	public EntityState		state		= EntityState.Normal;
@@ -209,7 +225,7 @@ public class Entity extends ServiceEntry implements Cloneable {
 		return entity;
 	}
 
-	public static class SortEntitiesByUpdatedTime implements Comparator<Entity> {
+	public static class SortEntitiesByModifiedDate implements Comparator<Entity> {
 
 		@Override
 		public int compare(Entity object1, Entity object2) {
@@ -223,7 +239,7 @@ public class Entity extends ServiceEntry implements Cloneable {
 		}
 	}
 
-	public static class SortEntitiesByDiscoveryTimeModifiedTime implements Comparator<CandiModel> {
+	public static class SortEntitiesByDiscoveryTimeModifiedDate implements Comparator<CandiModel> {
 
 		@Override
 		public int compare(CandiModel object1, CandiModel object2) {

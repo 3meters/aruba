@@ -47,6 +47,8 @@ import com.proxibase.aircandi.ProfileForm;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.ScanService;
 import com.proxibase.aircandi.SignInForm;
+import com.proxibase.aircandi.candi.models.CandiModel;
+import com.proxibase.aircandi.candi.models.CandiPatchModel;
 import com.proxibase.aircandi.components.Command.CommandType;
 import com.proxibase.aircandi.components.Events.EventHandler;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
@@ -112,6 +114,7 @@ public class AircandiCommon {
 	private EventHandler				mEventScanReceived;
 	private EventHandler				mEventLocationChanged;
 	private String						mPageName;
+	private CandiPatchModel				mCandiPatchModel;
 
 	public AircandiCommon(Context context) {
 		mContext = context;
@@ -239,19 +242,27 @@ public class AircandiCommon {
 			public void onClick(int menuId) {
 
 				Command command = null;
-
-				String parentId = mNewCandiIsRoot ? null : mEntityId;
+				String parentId = null;
+				/*
+				 * We use the state of the candi patch model if available otherwise we fall
+				 * back on internal settings.
+				 */
+				if (mCandiPatchModel != null && !mCandiPatchModel.getCandiRootCurrent().isSuperRoot()) {
+					CandiModel candiModel = (CandiModel) mCandiPatchModel.getCandiRootCurrent();
+					parentId = candiModel.getEntity().id;
+				}
+				else if (mEntityId != null) {
+					parentId = mEntityId;
+				}
+				
 				if (menuId == MENU_ITEM_NEW_POST_ID) {
-					command = new Command(CommandType.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null,
-							parentId, null);
+					command = new Command(CommandType.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null, parentId, null);
 				}
 				else if (menuId == MENU_ITEM_NEW_PICTURE_ID) {
-					command = new Command(CommandType.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE,
-							null, parentId, null);
+					command = new Command(CommandType.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE, null, parentId, null);
 				}
 				else if (menuId == MENU_ITEM_NEW_LINK_ID) {
-					command = new Command(CommandType.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null,
-							parentId, null);
+					command = new Command(CommandType.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null, parentId, null);
 				}
 				doCommand(command);
 			}
@@ -926,6 +937,14 @@ public class AircandiCommon {
 
 	public void setPageName(String pageName) {
 		mPageName = pageName;
+	}
+
+	public CandiPatchModel getCandiPatchModel() {
+		return mCandiPatchModel;
+	}
+
+	public void setCandiPatchModel(CandiPatchModel candiPatchModel) {
+		mCandiPatchModel = candiPatchModel;
 	}
 
 	public enum ServiceOperation {

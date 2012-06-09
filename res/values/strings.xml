@@ -99,6 +99,12 @@
 	<string name="candi_button_comment">Comment</string>
 	<string name="candi_button_new">Add\nCandi</string>
 	<string name="candi_button_edit">Edit</string>
+	<string name="candi_button_move">Move</string>
+		
+	<!-- Pickers -->
+	
+	<string name="form_tab_mycandi">MY CANDI</string>
+	<string name="form_tab_radar">RADAR</string>
 	
 	<!-- Forms -->
 	
@@ -110,7 +116,8 @@
 	<string name="form_title_signup">Sign up</string>
 	<string name="form_title_picture_search">Picture search</string>
 	<string name="form_title_bookmarks">Bookmarks</string>
-		<string name="form_title_comment">Comment</string>
+	<string name="form_title_candi">Move this candi to a different parent.</string>
+	<string name="form_title_comment">Comment</string>
 	<string name="form_title_map">Candi map</string>
 	
 	<string name="form_tab_content">CONTENT</string>

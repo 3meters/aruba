@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+
+    <LinearLayout
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
+    <!-- Header -->
+
+    <RelativeLayout
+        android:id="@+id/activity_header"
+        style="@style/actionbar"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentTop="true"
+        android:paddingBottom="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp" >
+
+        <ImageView
+            android:id="@+id/btn_logo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="?attr/iconLink" />
+
+        <TextView
+            android:id="@+id/text_header_title"
+            style="@style/form_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/text_header_debug"
+            android:layout_toRightOf="@+id/btn_logo"
+            android:gravity="center_vertical|left"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="@string/form_title_candi" />
+
+        <TextView
+            android:id="@+id/text_header_debug"
+            style="@style/form_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:gravity="center_vertical|right"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="40.0"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <!-- Child candi -->
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:layout_below="@+id/activity_header"
+        android:background="?attr/ruleColor" />
+
+    <!--
+    <RelativeLayout
+        android:id="@+id/candi_child"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_header"
+        android:background="@drawable/button_nooutline_selector" >
+
+        <com.proxibase.aircandi.widgets.WebImageView
+            android:id="@+id/item_image"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            aircandi:animation="@anim/fade_in_medium"
+            aircandi:maxHeight="60dp"
+            aircandi:maxWidth="60dp" />
+
+        <TextView
+            android:id="@+id/item_title"
+            style="@style/candi_list_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_toRightOf="@id/item_image" />
+
+        <com.proxibase.aircandi.widgets.TextViewEllipsizing
+            android:id="@+id/item_description"
+            style="@style/candi_list_description"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_below="@+id/item_title"
+            android:layout_toLeftOf="@+id/image_forward"
+            android:layout_toRightOf="@id/item_image" />
+    </RelativeLayout>
+    -->
+
+
+    <!-- Tabs -->
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:layout_below="@+id/activity_header"
+        android:background="?attr/ruleColor" />
+
+    <LinearLayout
+        android:id="@+id/form_tabs"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_header" >
+
+        <include layout="@layout/temp_tabs_candi_picker" />
+    </LinearLayout>
+
+    <ViewFlipper
+        android:id="@+id/flipper_form"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/form_footer"
+        android:layout_below="@+id/form_tabs"
+        android:clipChildren="false"
+        android:gravity="center_vertical"
+        android:visibility="visible" >
+
+        <ListView
+            android:id="@+id/list_radar_candi"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="?attr/backgroundCandiInfo"
+            android:cacheColorHint="#00000000"
+            android:listSelector="#00000000" >
+
+            <!-- Preview: listitem=@layout/temp_listitem_candi_picker -->
+        </ListView>
+
+        <ListView
+            android:id="@+id/list_user_candi"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="?attr/backgroundCandiInfo"
+            android:cacheColorHint="#00000000"
+            android:listSelector="#00000000" >
+
+            <!-- Preview: listitem=@layout/temp_listitem_candi_picker -->
+        </ListView>
+    </ViewFlipper>
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/form_footer"
+        style="@style/form_footer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal" >
+
+        <Button
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="150dp"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
+    </LinearLayout>
+
+</RelativeLayout>

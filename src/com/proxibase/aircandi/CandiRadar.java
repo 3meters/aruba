@@ -91,6 +91,8 @@ import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.GeoLocationManager;
 import com.proxibase.aircandi.components.ImageCache;
 import com.proxibase.aircandi.components.ImageManager;
+import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
@@ -299,6 +301,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		/* Candi patch */
 		mCandiPatchModel = new CandiPatchModel();
 		mCandiPatchModel.setScreenWidth(ImageManager.getInstance().getDisplayMetrics().widthPixels);
+		mCommon.setCandiPatchModel(mCandiPatchModel); 
 
 		/* Proxi activities */
 		mEntityHandlerManager = new ProxiHandlerManager(this);
@@ -380,14 +383,18 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 				@Override
 				public void run() {
-					showButtonCandi(true);
+					showParentButton(false, true);
 				}
-			}, 500);
+			}, 200);
 
 		}
 		else {
 			super.onBackPressed();
 		}
+	}
+
+	public void onParentCandiClick(View view) {
+		onBackPressed();
 	}
 
 	public void onHomeClick(View view) {
@@ -1054,7 +1061,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		}
 	}
 
-	public void showButtonCandi(boolean show) {
+	public void showNewCandiButton(boolean show) {
 		View buttonFrame = (View) findViewById(R.id.button_layer);
 		if (show) {
 			buttonFrame.setAnimation(null);
@@ -1062,7 +1069,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			buttonFrame.startAnimation(animation);
-			// buttonFrame.setVisibility(View.VISIBLE);
 		}
 		else {
 			buttonFrame.setAnimation(null);
@@ -1070,8 +1076,44 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			buttonFrame.startAnimation(animation);
-			// buttonFrame.setVisibility(View.INVISIBLE);
 		}
+	}
+
+	public void showParentButton(boolean show, boolean animate) {
+		View buttonFrame = (View) findViewById(R.id.parent_layer);
+		if (show) {
+			if (animate) {
+				buttonFrame.setAnimation(null);
+				Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_instant);
+				animation.setFillEnabled(true);
+				animation.setFillAfter(true);
+				buttonFrame.startAnimation(animation);
+			}
+			else {
+				buttonFrame.setVisibility(View.VISIBLE);
+			}
+		}
+		else {
+			if (animate) {
+				WebImageView imageViewParent = (WebImageView) findViewById(R.id.image_parent);
+				imageViewParent.clearImage(true, R.anim.parent_button_out);
+			}
+			else {
+				WebImageView imageViewParent = (WebImageView) findViewById(R.id.image_parent);
+				imageViewParent.clearImage(false, null);
+			}
+		}
+	}
+
+	public void setParentButtonImage(Entity entity) {
+		WebImageView imageViewParent = (WebImageView) findViewById(R.id.image_parent);
+		ImageRequestBuilder builder = new ImageRequestBuilder(imageViewParent);
+		builder.setImageUri(entity.getMasterImageUri());
+		builder.setImageFormat(entity.getMasterImageFormat());
+		builder.setLinkZoom(entity.linkZoom);
+		builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
+		ImageRequest imageRequest = builder.create();
+		imageViewParent.setImageRequest(imageRequest);
 	}
 
 	// --------------------------------------------------------------------------------------------

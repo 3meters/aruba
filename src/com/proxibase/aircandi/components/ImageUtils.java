@@ -233,6 +233,19 @@ public class ImageUtils {
 		}
 	}
 
+	public static void clearImageInImageView(ImageView imageView, boolean animate, int animationId) {
+		if (animate) {
+			Animation animation = AnimUtils.loadAnimation(animationId);
+			animation.setFillEnabled(true);
+			animation.setFillAfter(true);
+			imageView.startAnimation(animation);
+		}
+		else {
+			imageView.setAnimation(null);
+			imageView.setImageBitmap(null);
+		}
+	}
+	
 	public static void showDrawableInImageView(Drawable drawable, ImageView imageView, boolean animate) {
 		imageView.setImageDrawable(drawable);
 		if (animate) {
