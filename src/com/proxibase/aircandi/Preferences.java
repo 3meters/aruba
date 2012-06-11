@@ -2,11 +2,11 @@ package com.proxibase.aircandi;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.proxibase.aircandi.components.Tracker;
 
-public class Preferences extends PreferenceActivity {
+public class Preferences extends SherlockPreferenceActivity {
 
 	SharedPreferences			prefs;
 
@@ -23,6 +23,7 @@ public class Preferences extends PreferenceActivity {
 	public static final String	SETTING_VERSION_NAME	= "Setting_Version_Name";
 	public static final String	SETTING_PICTURE_SEARCH	= "Setting_Picture_Search";
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

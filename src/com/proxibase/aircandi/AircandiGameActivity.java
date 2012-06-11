@@ -2,7 +2,6 @@ package com.proxibase.aircandi;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.ui.activity.LayoutGameActivity;
 
 import android.os.Bundle;
 import android.view.View;

@@ -6,13 +6,13 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
 
+import com.actionbarsherlock.app.SherlockMapActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
@@ -27,7 +27,7 @@ import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.GeoLocation;
 import com.proxibase.service.objects.ServiceData;
 
-public class MapBrowse extends MapActivity {
+public class MapBrowse extends SherlockMapActivity {
 
 	protected AircandiCommon		mCommon;
 	private MapView					mMapView		= null;
@@ -55,6 +55,7 @@ public class MapBrowse extends MapActivity {
 		bind();
 	}
 
+	@SuppressWarnings("deprecation")
 	private void initialize() {
 
 		mCommon.track();

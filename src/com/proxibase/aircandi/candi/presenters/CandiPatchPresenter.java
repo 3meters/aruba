@@ -1144,6 +1144,7 @@ public class CandiPatchPresenter implements Observer {
 				Entity entityParent = candiParent.getEntity();
 				mCandiRadarActivity.setParentButtonImage(entityParent);
 				navigateModel(candiModel.getParent(), false, false, Navigation.Down);
+				mCandiRadarActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 				mIgnoreInput = false;
 			}
 			else {

@@ -18,9 +18,6 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Images.Media;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -28,6 +25,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
@@ -44,7 +42,7 @@ import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.objects.User;
 
-public abstract class FormActivity extends Activity {
+public abstract class FormActivity extends SherlockActivity {
 
 	protected Boolean			mBeaconUnregistered;
 	protected String			mImageUriOriginal;
@@ -107,43 +105,6 @@ public abstract class FormActivity extends Activity {
 
 	public void onHomeClick(View view) {
 		mCommon.doHomeClick(view);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.main_menu, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		/* Hide the sign out option if we don't have a current session */
-		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
-			((MenuItem) menu.findItem(R.id.signin)).setVisible(false);
-			((MenuItem) menu.findItem(R.id.signout)).setVisible(true);
-			((MenuItem) menu.findItem(R.id.profile)).setVisible(true);
-		}
-		else {
-			((MenuItem) menu.findItem(R.id.signin)).setVisible(true);
-			((MenuItem) menu.findItem(R.id.signout)).setVisible(false);
-			((MenuItem) menu.findItem(R.id.profile)).setVisible(false);
-		}
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		switch (item.getItemId()) {
-		case R.id.settings:
-			startActivity(new Intent(this, Preferences.class));
-			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-
-			return (true);
-		default:
-			return (super.onOptionsItemSelected(item));
-		}
 	}
 
 	@Override

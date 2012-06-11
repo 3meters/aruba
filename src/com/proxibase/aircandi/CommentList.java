@@ -10,14 +10,14 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EndlessAdapter;
@@ -173,10 +173,10 @@ public class CommentList extends CandiActivity {
 			bind();
 		}
 		else if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED) {
-			mCommon.updateUserPicture();
+			invalidateOptionsMenu();
 		}
 		else if (resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
-			mCommon.updateUserPicture();
+			invalidateOptionsMenu();
 		}
 	}
 

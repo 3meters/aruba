@@ -3,10 +3,10 @@
 
     <!-- Themes -->
 
-    <style name="aircandi_theme_midnight" parent="android:Theme">
+    <style name="aircandi_theme_midnight" parent="Theme.Sherlock">
         <item name="themeTone">dark</item>
         <item name="busy">@drawable/busy_anim_dark</item>
-        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowNoTitle">false</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:textColorHint">@color/edit_hint</item>
         <item name="textColorFocused">@color/pager_indicator_text_focused_dark</item>
@@ -68,10 +68,10 @@
         <item name="android:editTextStyle">@style/app_edittext</item>
     </style>
 
-    <style name="aircandi_theme_snow" parent="@android:style/Theme.Light">
+    <style name="aircandi_theme_snow" parent="Theme.Sherlock.Light">
         <item name="themeTone">light</item>
         <item name="busy">@drawable/busy_anim_light</item>
-        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowNoTitle">false</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:textColorHint">@color/edit_hint</item>
         <item name="textColorFocused">@color/pager_indicator_text_focused_light</item>
@@ -174,7 +174,7 @@
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_serene</item>
     </style>
 
-    <style name="aircandi_theme_dialog" parent="@android:style/Theme.Dialog">
+    <style name="aircandi_theme_dialog" parent="Theme.Sherlock.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">true</item>

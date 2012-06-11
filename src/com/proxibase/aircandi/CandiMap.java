@@ -19,15 +19,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockMapActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
-import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
@@ -53,7 +53,7 @@ import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.User;
 
-public class CandiMap extends MapActivity {
+public class CandiMap extends SherlockMapActivity {
 
 	protected AircandiCommon		mCommon;
 	private List<Object>			mEntityPoints	= new ArrayList<Object>();
@@ -92,6 +92,7 @@ public class CandiMap extends MapActivity {
 		mCommon.track();
 	}
 
+	@SuppressWarnings("deprecation")
 	private void initialize() {
 
 		mMapView = new MapView(this, Aircandi.isDebugBuild(this) ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
@@ -262,10 +263,6 @@ public class CandiMap extends MapActivity {
 		mCommon.doHomeClick(view);
 	}
 
-	public void onBeaconIndicatorClick(View view) {
-		mCommon.doBeaconIndicatorClick(view);
-	}
-
 	public void onProfileClick(View view) {
 		mCommon.doProfileClick(view);
 	}
@@ -384,10 +381,7 @@ public class CandiMap extends MapActivity {
 		else {
 
 			/* User could have changed */
-			if (findViewById(R.id.image_user) != null && Aircandi.getInstance().getUser() != null) {
-				User user = Aircandi.getInstance().getUser();
-				mCommon.setUserPicture(user.imageUri, user.linkUri, (WebImageView) findViewById(R.id.image_user));
-			}
+			invalidateOptionsMenu();
 
 			/* Currrent tab could have changed */
 			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(4));

@@ -3,11 +3,12 @@ package com.proxibase.aircandi;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.Command;
@@ -16,7 +17,7 @@ import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.objects.User;
 
-public abstract class CandiActivity extends Activity {
+public abstract class CandiActivity extends SherlockActivity {
 
 	protected int				mLastResultCode	= Activity.RESULT_OK;
 	protected AircandiCommon	mCommon;
@@ -129,10 +130,6 @@ public abstract class CandiActivity extends Activity {
 		mCommon.doRefreshClick(view);
 	}
 
-	public void onBeaconIndicatorClick(View view) {
-		mCommon.doBeaconIndicatorClick(view);
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
@@ -170,12 +167,9 @@ public abstract class CandiActivity extends Activity {
 		else {
 
 			/* User could have changed */
-			if (findViewById(R.id.image_user) != null && Aircandi.getInstance().getUser() != null) {
-				User user = Aircandi.getInstance().getUser();
-				mCommon.setUserPicture(user.imageUri, user.linkUri, (WebImageView) findViewById(R.id.image_user));
-			}
+			invalidateOptionsMenu();
 
-			/* Currrent tab could have changed */
+			/* Current tab could have changed */
 			if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
 				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
 			}

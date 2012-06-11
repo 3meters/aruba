@@ -13,9 +13,9 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -26,20 +26,20 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.Preferences;
@@ -62,8 +62,8 @@ import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
 import com.proxibase.service.objects.Comment;
 import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.User;
 import com.proxibase.service.objects.GeoLocation;
+import com.proxibase.service.objects.User;
 
 public class AircandiCommon {
 
@@ -190,11 +190,6 @@ public class AircandiCommon {
 			mButtonRefresh.setVisibility(View.VISIBLE);
 		}
 
-		if (mActivity.findViewById(R.id.image_user) != null && Aircandi.getInstance().getUser() != null) {
-			User user = Aircandi.getInstance().getUser();
-			setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
-		}
-
 		/* Dialogs */
 		mProgressDialog = new Dialog(mContext, R.style.progress_body);
 		mProgressDialog.setTitle(null);
@@ -254,7 +249,7 @@ public class AircandiCommon {
 				else if (mEntityId != null) {
 					parentId = mEntityId;
 				}
-				
+
 				if (menuId == MENU_ITEM_NEW_POST_ID) {
 					command = new Command(CommandType.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null, parentId, null);
 				}
@@ -317,6 +312,7 @@ public class AircandiCommon {
 		startRadarActivity();
 	}
 
+	@SuppressWarnings("deprecation")
 	public void doCommand(final Command command) {
 
 		if (command.type == CommandType.Dialog) {
@@ -396,7 +392,7 @@ public class AircandiCommon {
 		window.setFormat(PixelFormat.RGBA_8888);
 	}
 
-	public void doBeaconIndicatorClick(View view) {
+	public void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
 			int messageId = R.string.alert_beacons_zero;
 			String beaconMessage = mActivity.getString(messageId);
@@ -514,6 +510,7 @@ public class AircandiCommon {
 		handleServiceError(serviceResponse, ServiceOperation.Unknown, null);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void handleServiceError(ServiceResponse serviceResponse, ServiceOperation serviceOperation, Context context) {
 
 		ErrorType errorType = serviceResponse.exception.getErrorType();
@@ -698,20 +695,6 @@ public class AircandiCommon {
 		}
 	}
 
-	public void setUserPicture(String imageUri, String linkUri, final WebImageView imageView) {
-		if (imageUri != null && imageUri.length() != 0) {
-			ImageRequestBuilder builder = new ImageRequestBuilder(imageView);
-			builder.setFromUris(imageUri, linkUri);
-			ImageRequest imageRequest = builder.create();
-			imageView.setImageRequest(imageRequest);
-		}
-	}
-
-	public void updateUserPicture() {
-		User user = Aircandi.getInstance().getUser();
-		setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
-	}
-
 	public void setTheme() {
 		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
 		int themeResourceId = mContext.getApplicationContext().getResources()
@@ -761,16 +744,8 @@ public class AircandiCommon {
 		Aircandi.getInstance().setUser(user);
 		ImageUtils.showToastNotification("Signed in as " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
-		if (mActivity.findViewById(R.id.image_user) != null) {
-			mActivity.runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					User user = Aircandi.getInstance().getUser();
-					setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
-				}
-			});
-		}
+		/* Make sure onPrepareOptionsMenu gets called */
+		mActivity.invalidateOptionsMenu();
 	}
 
 	public void signout() {
@@ -779,9 +754,10 @@ public class AircandiCommon {
 			User user = (User) ProxibaseService.convertJsonToObject(CandiConstants.USER_ANONYMOUS, User.class, GsonType.ProxibaseService).data;
 			user.anonymous = true;
 			Aircandi.getInstance().setUser(user);
-			if (mActivity.findViewById(R.id.image_user) != null) {
-				setUserPicture(user.imageUri, user.linkUri, (WebImageView) mActivity.findViewById(R.id.image_user));
-			}
+
+			/* Make sure onPrepareOptionsMenu gets called */
+			mActivity.invalidateOptionsMenu();
+
 			ImageUtils.showToastNotification("Signed out.", Toast.LENGTH_SHORT);
 			Tracker.trackEvent("User", "Signout", null, 0);
 			showProgressDialog(false, null);
@@ -830,8 +806,20 @@ public class AircandiCommon {
 	// --------------------------------------------------------------------------------------------
 
 	public void doCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = mActivity.getMenuInflater();
-		inflater.inflate(R.menu.main_menu, menu);
+		SherlockActivity activity = (SherlockActivity) mActivity;
+		activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+		activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
+
+		MenuItem menuItem = menu.findItem(R.id.beacons);
+		if (menuItem != null) {
+			mBeaconIndicator = (TextView) menuItem.getActionView().findViewById(R.id.beacon_indicator);
+			mBeaconIndicator.findViewById(R.id.beacon_indicator).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					doBeaconIndicatorClick();
+				}
+			});
+		}
 	}
 
 	public void doPrepareOptionsMenu(Menu menu) {
@@ -848,25 +836,35 @@ public class AircandiCommon {
 		}
 	}
 
-	public boolean doOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.settings:
-			mActivity.startActivityForResult(new Intent(mActivity, Preferences.class),
-					CandiConstants.ACTIVITY_PREFERENCES);
-			mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-			return false;
-		case R.id.profile:
-			doProfileClick(null);
-			return false;
-		case R.id.signout:
-			signout();
-			return false;
-		case R.id.signin:
-			signin();
-			return false;
-		case R.id.about:
-			doInfoClick();
-			return false;
+	public boolean doOptionsItemSelected(MenuItem menuItem) {
+
+		switch (menuItem.getItemId()) {
+	        case android.R.id.home:
+	            /*
+	             * If this doesn't get handled directly by the activity then
+	             * it falls through to here and we want to go to the top of the app.
+	             */
+	            Intent intent = new Intent(mActivity, CandiRadar.class);
+	            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	            mActivity.startActivity(intent);
+	            return true;			
+			case R.id.settings:
+				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
+				mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				return true;
+			case R.id.profile:
+				doProfileClick(null);
+				return true;
+			case R.id.signout:
+				signout();
+				return true;
+			case R.id.signin:
+				signin();
+				return true;
+			case R.id.about:
+				doInfoClick();
+				return true;
 		}
 		return false;
 	}

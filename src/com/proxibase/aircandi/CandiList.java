@@ -6,10 +6,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.proxibase.aircandi.components.Command;
@@ -160,12 +160,12 @@ public class CandiList extends CandiActivity {
 			}
 		}
 		else if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED) {
-			mCommon.updateUserPicture();
+			invalidateOptionsMenu();
 			mEntityProvider.reset();
 			bind();
 		}
 		else if (resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
-			mCommon.updateUserPicture();
+			invalidateOptionsMenu();
 
 			/* Need to rebind if showing my candi */
 			if (mMethodType == MethodType.CandiByUser) {

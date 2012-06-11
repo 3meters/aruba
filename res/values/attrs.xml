@@ -53,7 +53,7 @@
         <attr name="iconProfile" format="string" />
         <attr name="iconMap" format="string" />
         <attr name="iconLocked" format="string" />
-        <attr name="logo" format="string" />
+        <attr name="xlogo" format="string" />
         <attr name="imageSliderHandleSearch" format="string" />
         <attr name="backgroundSliderHandleSearch" format="string" />
         <attr name="backgroundSliderContentSearch" format="string" />
