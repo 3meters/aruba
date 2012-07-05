@@ -1,21 +1,14 @@
 package com.proxibase.aircandi;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.components.AircandiCommon;
-import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
-import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.service.objects.User;
 
 public abstract class CandiActivity extends SherlockActivity {
 
@@ -25,56 +18,26 @@ public abstract class CandiActivity extends SherlockActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			/* 
-			 * Try to detect case where this is being created after
-			 * a crash and bail out.
-			 */			
+			/* Try to detect case where this is being created after a crash and bail out. */
 			super.onCreate(savedInstanceState);
-			setResult(Activity.RESULT_CANCELED);
 			finish();
 		}
 		else {
 			mCommon = new AircandiCommon(this);
-			// if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			// mCommon.startRadarActivity();
-			// }
-			mCommon.setTheme();
+			mCommon.setTheme(null);
 			mCommon.unpackIntent();
 			setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
 			mCommon.initialize();
-			mCommon.initializeDialogs();
+
 			Logger.i(this, "CandiActivity created");
 			Logger.d(this, "Started from radar flag: " + String.valueOf(Aircandi.getInstance().getLaunchedFromRadar()));
 		}
 	}
 
-	protected void bind() {
-		if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
-			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
-		}
-		else if (Aircandi.getInstance().getCandiTask() == CandiTask.MyCandi) {
-			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(2));
-		}
-		else if (Aircandi.getInstance().getCandiTask() == CandiTask.Map) {
-			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(4));
-		}
-	}
-
-	// @Override
-	// protected void onNewIntent(Intent intent) {
-	// super.onNewIntent(intent);
-	// Logger.i(this, "CandiActivity got new intent");
-	// setContentView(getLayoutId());
-	// }
-
 	// --------------------------------------------------------------------------------------------
 	// Events routines
 	// --------------------------------------------------------------------------------------------
-
-	public void onHomeClick(View view) {
-		mCommon.doHomeClick(view);
-	}
 
 	@Override
 	public void onAttachedToWindow() {
@@ -82,52 +45,15 @@ public abstract class CandiActivity extends SherlockActivity {
 		mCommon.doAttachedToWindow();
 	}
 
-	public void onTabClick(View view) {
-		mCommon.setActiveTab(view);
-		if (view.getTag().equals("radar")) {
-			Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
-			Intent intent = new Intent(this, CandiRadar.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-			startActivity(intent);
-			overridePendingTransition(R.anim.fade_in_short, R.anim.fade_out_short);
-		}
-		else if (view.getTag().equals("mycandi")) {
-			Aircandi.getInstance().setCandiTask(CandiTask.MyCandi);
-			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-		}
-		else if (view.getTag().equals("map")) {
-			Aircandi.getInstance().setCandiTask(CandiTask.Map);
-			IntentBuilder intentBuilder = new IntentBuilder(this, CandiMap.class);
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-		}
-	}
-
-	public void onProfileClick(View view) {
-		mCommon.doProfileClick(view);
-	}
-
 	public void onBackPressed() {
-		setResult(mLastResultCode);
 		super.onBackPressed();
 		overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
 	}
 
-	public void onCommandButtonClick(View view) {
-		if (mCommon.mActionsWindow != null) {
-			mCommon.mActionsWindow.dismiss();
-		}
-		Command command = (Command) view.getTag();
-		mCommon.doCommand(command);
-	}
-
-	public void onRefreshClick(View view) {
-		mCommon.doRefreshClick(view);
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		Logger.i(this, "Configuration changed");
+		super.onConfigurationChanged(newConfig);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -163,22 +89,6 @@ public abstract class CandiActivity extends SherlockActivity {
 			Logger.d(this, "Restarting because of theme change");
 			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
 			mCommon.reload();
-		}
-		else {
-
-			/* User could have changed */
-			invalidateOptionsMenu();
-
-			/* Current tab could have changed */
-			if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
-				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
-			}
-			else if (Aircandi.getInstance().getCandiTask() == CandiTask.MyCandi) {
-				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(2));
-			}
-			else if (Aircandi.getInstance().getCandiTask() == CandiTask.Map) {
-				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(4));
-			}
 		}
 	}
 

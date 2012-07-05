@@ -37,11 +37,23 @@ public class Beacon extends ServiceEntry {
 	@Expose
 	public Number			speed;
 
+	/* Synthetic service fields */
+
+	@Expose(serialize = false, deserialize = true)
+	public Integer			entityCount;									
+	@Expose(serialize = false, deserialize = true)
+	public Integer			pictureCount;									
+	@Expose(serialize = false, deserialize = true)
+	public Integer			postCount;									
+	@Expose(serialize = false, deserialize = true)
+	public Integer			linkCount;									
+
 	// For client use only
 	public int				scanLevelDb;
 	public boolean			serviceVerified		= false;
 	public boolean			hidden				= false;
 	public boolean			dirty				= false;
+	public boolean			radarHit			= false;
 	public Date				discoveryTime;
 	public boolean			detectedLastPass	= false;
 	public BeaconState		state				= BeaconState.Normal;

@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/beacon_frame"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:gravity="center" >
+    android:gravity="center"
+    android:clickable="true"
+    android:addStatesFromChildren="true"
+    android:background="@drawable/abs__item_background_holo_dark" >
 
     <TextView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/beacon_indicator"
         style="@style/actionbar_title"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
         android:background="@drawable/beacon_indicator_off"
         android:gravity="center"
         android:lines="1"

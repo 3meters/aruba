@@ -16,48 +16,63 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockMapActivity;
+import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.proxibase.aircandi.Aircandi;
+import com.proxibase.aircandi.Aircandi.CandiTask;
+import com.proxibase.aircandi.CandiForm;
+import com.proxibase.aircandi.CandiList;
+import com.proxibase.aircandi.CandiMap;
 import com.proxibase.aircandi.CandiRadar;
+import com.proxibase.aircandi.CandiRadar.RefreshType;
+import com.proxibase.aircandi.CommentList;
 import com.proxibase.aircandi.Preferences;
 import com.proxibase.aircandi.ProfileForm;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.ScanService;
 import com.proxibase.aircandi.SignInForm;
-import com.proxibase.aircandi.candi.models.CandiModel;
+import com.proxibase.aircandi.TemplatePicker;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
-import com.proxibase.aircandi.components.Command.CommandType;
+import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
+import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.Events.EventHandler;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
 import com.proxibase.aircandi.components.ProxiExplorer.WifiScanResult;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.widgets.ActionsWindow;
 import com.proxibase.aircandi.widgets.WebImageView;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
 import com.proxibase.service.ProxibaseService.GsonType;
+import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
 import com.proxibase.service.objects.Comment;
@@ -65,7 +80,7 @@ import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.GeoLocation;
 import com.proxibase.service.objects.User;
 
-public class AircandiCommon {
+public class AircandiCommon implements ActionBar.TabListener {
 
 	public static final int				MENU_ITEM_NEW_POST_ID		= 1;
 	public static final int				MENU_ITEM_NEW_PICTURE_ID	= 2;
@@ -73,13 +88,13 @@ public class AircandiCommon {
 
 	public Context						mContext;
 	public Activity						mActivity;
+	public String						mActivityName;
 	public static NotificationManager	mNotificationManager;
 	public static LayoutInflater		mLayoutInflater;
 
 	/* Parameters */
-	public Command						mCommand;
+	public CommandType					mCommandType;
 	public String						mParentId;
-	public Entity						mEntity;
 	public String						mEntityId;
 	public String						mEntityType;
 	public GeoLocation					mEntityLocation;
@@ -87,39 +102,40 @@ public class AircandiCommon {
 	public Comment						mComment;
 	public String						mMessage;
 	public String						mBeaconId;
-	public Boolean						mNewCandiIsRoot				= true;
+	public String						mCollectionId;
+	public CollectionType				mCollectionType;
 
 	/* Theme */
-	private int							mTextColorFocused;
-	private int							mTextColorUnfocused;
-	private int							mHeightActive;
-	private int							mHeightInactive;
-	private String						mThemeTone;
-	private int							mIconPost;
-	private int							mIconPicture;
-	private int							mIconLink;
+	public String						mThemeTone;
+	public Integer						mThemeId;
 
 	/* UI */
 	protected ImageView					mProgressIndicator;
-	protected TextView					mBeaconIndicator;
+	public TextView						mBeaconIndicator;
 	protected TextView					mTitle;
 	protected ImageView					mButtonRefresh;
 	public Dialog						mProgressDialog;
-	public ActionsWindow				mActionsWindow;
 	public String						mPrefTheme;
-	public IconContextMenu				mIconContextMenu			= null;
+	public Boolean						mUsingCustomTheme			= false;
 	public Integer						mTabIndex;
+	public ActionBar					mActionBar;
+	private ViewFlipper					mViewFlipper;
+
+	/* Animations */
+	private Animation					mAnimFadeIn;
+	private Animation					mAnimFadeOut;
 
 	/* Other */
-	private EventHandler				mEventScanReceived;
+	public EventHandler					mEventScanReceived;
 	private EventHandler				mEventLocationChanged;
-	private String						mPageName;
+	public String						mPageName;
 	private CandiPatchModel				mCandiPatchModel;
+	private CandiPatchPresenter			mCandiPatchPresenter;
 
 	public AircandiCommon(Context context) {
 		mContext = context;
 		mActivity = (Activity) context;
-		mPageName = this.getClass().getSimpleName();
+		mPageName = mActivity.getClass().getSimpleName();
 	}
 
 	public void initialize() {
@@ -127,32 +143,21 @@ public class AircandiCommon {
 		mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
 
-		/* Tabs */
+		/* Stash the action bar */
+		if (mPageName.equals("CandiMap") || mPageName.equals("MapBrowse")) {
+			mActionBar = ((SherlockMapActivity) mActivity).getSupportActionBar();
+		}
+		else {
+			mActionBar = ((SherlockActivity) mActivity).getSupportActionBar();
+		}
+
+		/* Theme info */
 		TypedValue resourceName = new TypedValue();
-		if (mActivity.getTheme().resolveAttribute(R.attr.textColorFocused, resourceName, true)) {
-			mTextColorFocused = Color.parseColor((String) resourceName.coerceToString());
-		}
-
-		if (mActivity.getTheme().resolveAttribute(R.attr.textColorUnfocused, resourceName, true)) {
-			mTextColorUnfocused = Color.parseColor((String) resourceName.coerceToString());
-		}
-
 		if (mActivity.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
 			mThemeTone = (String) resourceName.coerceToString();
-			if (mThemeTone.equals("dark")) {
-				mIconPost = R.drawable.icon_post;
-				mIconPicture = R.drawable.icon_picture;
-				mIconLink = R.drawable.icon_link;
-			}
-			else if (mThemeTone.equals("light")) {
-				mIconPost = R.drawable.icon_post;
-				mIconPicture = R.drawable.icon_picture;
-				mIconLink = R.drawable.icon_link;
-			}
+			if (mThemeTone.equals("dark")) {}
+			else if (mThemeTone.equals("light")) {}
 		}
-
-		mHeightActive = ImageUtils.getRawPixelsForDisplayPixels(6);
-		mHeightInactive = ImageUtils.getRawPixelsForDisplayPixels(1);
 
 		/* Get view references */
 		mProgressIndicator = (ImageView) mActivity.findViewById(R.id.image_progress_indicator);
@@ -162,6 +167,17 @@ public class AircandiCommon {
 
 		mTitle = (TextView) mActivity.findViewById(R.id.text_title);
 		showLocationAccuracy();
+
+		/* Tabs: setup tabs if appropriate */
+		manageTabs();
+
+		/* Cache animations */
+		mAnimFadeOut = AnimUtils.loadAnimation(R.anim.fade_out_medium);
+		mAnimFadeOut.setFillEnabled(true);
+		mAnimFadeOut.setFillAfter(true);
+		mAnimFadeIn = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+		mAnimFadeIn.setFillEnabled(true);
+		mAnimFadeIn.setFillAfter(true);
 
 		/* Beacon indicator */
 		mBeaconIndicator = (TextView) mActivity.findViewById(R.id.beacon_indicator);
@@ -221,49 +237,6 @@ public class AircandiCommon {
 		Tracker.dispatch();
 	}
 
-	public void initializeDialogs() {
-
-		/* New candi menu */
-		mIconContextMenu = new IconContextMenu(mActivity, CandiConstants.DIALOG_NEW_CANDI_ID);
-		Resources resources = mActivity.getResources();
-		mIconContextMenu.addItem(resources, resources.getString(R.string.dialog_new_post), mIconPost, MENU_ITEM_NEW_POST_ID);
-		mIconContextMenu.addItem(resources, resources.getString(R.string.dialog_new_picture), mIconPicture, MENU_ITEM_NEW_PICTURE_ID);
-		mIconContextMenu.addItem(resources, resources.getString(R.string.dialog_new_link), mIconLink, MENU_ITEM_NEW_LINK_ID);
-
-		// set onclick listener for context menu
-		mIconContextMenu.setOnClickListener(new IconContextMenu.IconContextMenuOnClickListener() {
-
-			@Override
-			public void onClick(int menuId) {
-
-				Command command = null;
-				String parentId = null;
-				/*
-				 * We use the state of the candi patch model if available otherwise we fall
-				 * back on internal settings.
-				 */
-				if (mCandiPatchModel != null && !mCandiPatchModel.getCandiRootCurrent().isSuperRoot()) {
-					CandiModel candiModel = (CandiModel) mCandiPatchModel.getCandiRootCurrent();
-					parentId = candiModel.getEntity().id;
-				}
-				else if (mEntityId != null) {
-					parentId = mEntityId;
-				}
-
-				if (menuId == MENU_ITEM_NEW_POST_ID) {
-					command = new Command(CommandType.New, "Post", "EntityForm", CandiConstants.TYPE_CANDI_POST, null, parentId, null);
-				}
-				else if (menuId == MENU_ITEM_NEW_PICTURE_ID) {
-					command = new Command(CommandType.New, "Picture", "EntityForm", CandiConstants.TYPE_CANDI_PICTURE, null, parentId, null);
-				}
-				else if (menuId == MENU_ITEM_NEW_LINK_ID) {
-					command = new Command(CommandType.New, "Link", "EntityForm", CandiConstants.TYPE_CANDI_LINK, null, parentId, null);
-				}
-				doCommand(command);
-			}
-		});
-	}
-
 	public void unpackIntent() {
 
 		Bundle extras = mActivity.getIntent().getExtras();
@@ -274,27 +247,22 @@ public class AircandiCommon {
 			mEntityType = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_TYPE));
 			mEntityId = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_ID));
 			mMessage = extras.getString(mContext.getString(R.string.EXTRA_MESSAGE));
+			mThemeId = extras.getInt(mContext.getString(R.string.EXTRA_THEME_ID));
+			mCollectionId = extras.getString(mContext.getString(R.string.EXTRA_COLLECTION_ID));
 
-			String json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY));
-			if (json != null && json.length() > 0) {
-				mEntity = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Entity.class);
-				mEntityId = mEntity.id;
+			String collectionType = extras.getString(mContext.getString(R.string.EXTRA_COLLECTION_TYPE));
+			if (collectionType != null) {
+				mCollectionType = ProxiExplorer.CollectionType.valueOf(collectionType);
 			}
 
-			json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_LIST));
-			if (json != null && json.length() > 0) {
-				mEntities = (List<Entity>) (List<?>) ProxibaseService.convertJsonToObjects(json, Entity.class,
-						GsonType.Internal);
+			String commandType = extras.getString(mContext.getString(R.string.EXTRA_COMMAND_TYPE));
+			if (commandType != null) {
+				mCommandType = CommandType.valueOf(commandType);
 			}
-
-			json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_LOCATION));
+			
+			String json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_LOCATION));
 			if (json != null && !json.equals("")) {
 				mEntityLocation = ProxibaseService.getGson(GsonType.Internal).fromJson(json, GeoLocation.class);
-			}
-
-			json = extras.getString(mContext.getString(R.string.EXTRA_COMMAND));
-			if (json != null && !json.equals("")) {
-				mCommand = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Command.class);
 			}
 
 			json = extras.getString(mContext.getString(R.string.EXTRA_COMMENT));
@@ -312,67 +280,19 @@ public class AircandiCommon {
 		startRadarActivity();
 	}
 
-	@SuppressWarnings("deprecation")
-	public void doCommand(final Command command) {
-
-		if (command.type == CommandType.Dialog) {
-			String dialogName = command.activityName;
-			if (dialogName.toLowerCase().equals("newcandi")) {
-				mActivity.showDialog(CandiConstants.DIALOG_NEW_CANDI_ID);
-			}
-		}
-		else {
-			try {
-				Class clazz = Class.forName(CandiConstants.APP_PACKAGE_NAME + command.activityName, false, mContext
-						.getClass().getClassLoader());
-				if (command.type == CommandType.New) {
-					String beaconId = ProxiExplorer.getInstance().getEntityModel().getStrongestBeacon().id;
-					IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
-					intentBuilder.setCommand(command);
-					intentBuilder.setParentEntityId(command.entityParentId);
-					intentBuilder.setBeaconId(beaconId);
-					intentBuilder.setEntityType(command.entityType);
-					Intent intent = intentBuilder.create();
-					((Activity) mContext).startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-					((Activity) mContext).overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-				}
-				else {
-					/*
-					 * We could try and pass the entity instead of the entity id
-					 * so we don't have to load it again but that would require
-					 * handling cases where the entity doesn't always exist in
-					 * the proxi model.
-					 */
-					IntentBuilder intentBuilder = new IntentBuilder(mContext, clazz);
-					intentBuilder.setCommand(command);
-					intentBuilder.setEntityId(command.entityId);
-					intentBuilder.setEntityType(command.entityType);
-					Intent intent = intentBuilder.create();
-					((Activity) mContext).startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_HANDLER);
-					((Activity) mContext).overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-				}
-			}
-			catch (ClassNotFoundException exception) {
-				exception.printStackTrace();
-			}
-		}
-	}
-
 	public void doProfileClick(View view) {
 		if (Aircandi.getInstance().getUser() != null) {
 			if (Aircandi.getInstance().getUser().anonymous) {
-				mActivity
-						.startActivityForResult(new Intent(mContext, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
+				mActivity.startActivityForResult(new Intent(mContext, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
 			}
 			else {
 				IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
-				intentBuilder.setCommand(new Command(CommandType.Edit));
+				intentBuilder.setCommandType(CommandType.Edit);
 				Intent intent = intentBuilder.create();
-				mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_PROFILE);
+				mActivity.startActivity(intent);
 			}
 			mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 		}
-
 	}
 
 	public void doInfoClick() {
@@ -427,48 +347,63 @@ public class AircandiCommon {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
+	public void showTemplatePicker() {
+		/*
+		 * Dialogs
+		 * 
+		 * To get the dialog activity to overlay the calling activity, the theme needs to be set on the activity in the
+		 * manifest in order to get the correct window features. The theme can then be modified by passing the desired
+		 * theme id to the dialog activity.
+		 */
+		Intent intent = new Intent(mActivity, TemplatePicker.class);
+		intent.putExtra(mActivity.getString(R.string.EXTRA_THEME_ID), mThemeTone.equals("dark") ? R.style.Theme_Sherlock_Dialog
+				: R.style.Theme_Sherlock_Light_Dialog);
+		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_TEMPLATE_PICK);
+	}
+
+	@SuppressWarnings("unused")
 	public void showLocationAccuracy() {
 		final Location location = GeoLocationManager.getInstance().getCurrentLocation();
-		if (location != null
-				&& Aircandi.getInstance().getUser() != null
-				&& Aircandi.getInstance().getUser().isDeveloper != null
-				&& Aircandi.getInstance().getUser().isDeveloper) {
-			if (location.hasAccuracy()) {
-				TextView textView = (TextView) mActivity.findViewById(R.id.text_header_debug);
-				if (textView != null) {
-					textView.setVisibility(View.VISIBLE);
-					textView.setText(String.valueOf(location.getAccuracy()));
-				}
-				else if (mTitle != null) {
-					final String title = mActivity.getString(R.string.app_name);
-					mActivity.runOnUiThread(new Runnable() {
-
-						@Override
-						public void run() {
-							mTitle.setText(title + "  " + location.getProvider().substring(0, 1).toUpperCase()
-									+ String.valueOf(location.getAccuracy()));
-						}
-					});
-				}
-			}
-		}
-		else {
-			/* Clear location info */
-			TextView textView = (TextView) mActivity.findViewById(R.id.text_header_debug);
-			if (textView != null) {
-				textView.setVisibility(View.GONE);
-			}
-			else if (mTitle != null) {
-				final String title = mActivity.getString(R.string.app_name);
-				mActivity.runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						mTitle.setText(title);
-					}
-				});
-			}
-		}
+		// if (location != null
+		// && Aircandi.getInstance().getUser() != null
+		// && Aircandi.getInstance().getUser().isDeveloper != null
+		// && Aircandi.getInstance().getUser().isDeveloper) {
+		// if (location.hasAccuracy()) {
+		// TextView textView = (TextView) mActivity.findViewById(R.id.text_header_debug);
+		// if (textView != null) {
+		// textView.setVisibility(View.VISIBLE);
+		// textView.setText(String.valueOf(location.getAccuracy()));
+		// }
+		// else if (mTitle != null) {
+		// final String title = mActivity.getString(R.string.app_name);
+		// mActivity.runOnUiThread(new Runnable() {
+		//
+		// @Override
+		// public void run() {
+		// mTitle.setText(title + "  " + location.getProvider().substring(0, 1).toUpperCase()
+		// + String.valueOf(location.getAccuracy()));
+		// }
+		// });
+		// }
+		// }
+		// }
+		// else {
+		// /* Clear location info */
+		// TextView textView = (TextView) mActivity.findViewById(R.id.text_header_debug);
+		// if (textView != null) {
+		// textView.setVisibility(View.GONE);
+		// }
+		// else if (mTitle != null) {
+		// final String title = mActivity.getString(R.string.app_name);
+		// mActivity.runOnUiThread(new Runnable() {
+		//
+		// @Override
+		// public void run() {
+		// mTitle.setText(title);
+		// }
+		// });
+		// }
+		// }
 	}
 
 	public void updateBeaconIndicator(List<WifiScanResult> scanList) {
@@ -641,20 +576,8 @@ public class AircandiCommon {
 
 	public static void showAlertDialog(Integer iconResource, String titleText, String message, Context context, Integer okButtonId, Integer cancelButtonId,
 			OnClickListener listener) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-		View titleView = ((Activity) context).getLayoutInflater().inflate(R.layout.temp_dialog_title, null);
-		((TextView) titleView.findViewById(R.id.dialog_title_text)).setText(titleText);
-		if (iconResource != null) {
-			Drawable icon = context.getResources().getDrawable(iconResource);
-			((ImageView) titleView.findViewById(R.id.dialog_title_image)).setImageDrawable(icon);
-		}
-		builder.setCustomTitle(titleView);
-
-		View bodyView = ((Activity) context).getLayoutInflater().inflate(R.layout.temp_dialog_body, null);
-		((TextView) bodyView.findViewById(R.id.dialog_body_text)).setText(message);
-		builder.setView(bodyView);
-		builder.setInverseBackgroundForced(true);
+		AlertDialog.Builder builder = new AlertDialog.Builder(context).setTitle(titleText).setMessage(message);
 
 		if (okButtonId != null) {
 			builder.setPositiveButton(okButtonId, listener);
@@ -665,6 +588,12 @@ public class AircandiCommon {
 		}
 
 		AlertDialog alert = builder.show();
+
+		/* Hardcoded size for body text in the alert */
+		TextView textView = (TextView) alert.findViewById(android.R.id.message);
+		textView.setTextSize(14);
+
+		/* Prevent dimming the background */
 		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 	}
 
@@ -695,37 +624,15 @@ public class AircandiCommon {
 		}
 	}
 
-	public void setTheme() {
-		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
-		int themeResourceId = mContext.getApplicationContext().getResources()
-				.getIdentifier(mPrefTheme, "style", mContext.getPackageName());
-		((Activity) mContext).setTheme(themeResourceId);
-	}
-
-	public void setActiveTab(View view) {
-		ViewGroup tabHost = (ViewGroup) view.getParent();
-		for (int i = 0; i < tabHost.getChildCount(); i++) {
-			View tab = tabHost.getChildAt(i);
-			TextView label = (TextView) tab.findViewById(R.id.image_tab_label);
-			ImageView image = (ImageView) tab.findViewById(R.id.image_tab_image);
-			if (label != null) {
-				if (tab == view) {
-					mTabIndex = i;
-					label.setTextColor(mTextColorFocused);
-					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT,
-							mHeightActive);
-					params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-					image.setLayoutParams(params);
-				}
-				else {
-					label.setTextColor(mTextColorUnfocused);
-					RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT,
-							mHeightInactive);
-					params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-					image.setLayoutParams(params);
-				}
-			}
+	public void setTheme(Integer themeResId) {
+		mUsingCustomTheme = true;
+		if (themeResId == null) {
+			mUsingCustomTheme = false;
+			mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+			themeResId = mContext.getApplicationContext().getResources()
+					.getIdentifier(mPrefTheme, "style", mContext.getPackageName());
 		}
+		((Activity) mContext).setTheme(themeResId);
 	}
 
 	public void signinAuto() {
@@ -806,17 +713,74 @@ public class AircandiCommon {
 	// --------------------------------------------------------------------------------------------
 
 	public void doCreateOptionsMenu(Menu menu) {
-		SherlockActivity activity = (SherlockActivity) mActivity;
-		activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-		activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
 
+		if (mPageName.equals("CandiMap")) {
+			SherlockMapActivity mapActivity = (SherlockMapActivity) mActivity;
+			mapActivity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
+		}
+		else {
+			SherlockActivity activity = (SherlockActivity) mActivity;
+			activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
+		}
+
+		/* Beacon indicator */
 		MenuItem menuItem = menu.findItem(R.id.beacons);
 		if (menuItem != null) {
 			mBeaconIndicator = (TextView) menuItem.getActionView().findViewById(R.id.beacon_indicator);
-			mBeaconIndicator.findViewById(R.id.beacon_indicator).setOnClickListener(new View.OnClickListener() {
+			menuItem.getActionView().findViewById(R.id.beacon_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
 					doBeaconIndicatorClick();
+				}
+			});
+
+			updateBeaconIndicator(ProxiExplorer.getInstance().mWifiList);
+			mEventScanReceived = new EventHandler() {
+
+				@Override
+				public void onEvent(Object data) {
+					List<WifiScanResult> scanList = (List<WifiScanResult>) data;
+					updateBeaconIndicator(scanList);
+				}
+			};
+
+		}
+
+		/* Refresh with action mode support */
+		menuItem = menu.findItem(R.id.refresh);
+		if (menuItem != null) {
+			menuItem.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					if (mPageName.equals("CandiRadar")) {
+						((CandiRadar) mActivity).doRefresh(RefreshType.Standard);
+					}
+					else if (mPageName.equals("CandiList")) {
+						((CandiList) mActivity).doRefresh();
+					}
+					else if (mPageName.equals("CandiForm")) {
+						((CandiForm) mActivity).doRefresh();
+					}
+					else if (mPageName.equals("CandiMap")) {
+						((CandiMap) mActivity).doRefresh();
+					}
+					else if (mPageName.equals("CommentList")) {
+						((CommentList) mActivity).doRefresh();
+					}
+				}
+			});
+			menuItem.getActionView().findViewById(R.id.refresh_frame).setOnLongClickListener(new View.OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View view) {
+					if (mPageName.equals("CandiMap")) {
+						SherlockMapActivity mapActivity = (SherlockMapActivity) mActivity;
+						mapActivity.startActionMode(new ActionModeRefresh());
+					}
+					else {
+						SherlockActivity activity = (SherlockActivity) mActivity;
+						activity.startActionMode(new ActionModeRefresh());
+					}
+					return true;
 				}
 			});
 		}
@@ -836,37 +800,397 @@ public class AircandiCommon {
 		}
 	}
 
-	public boolean doOptionsItemSelected(MenuItem menuItem) {
+	public void doOptionsItemSelected(MenuItem menuItem) {
 
 		switch (menuItem.getItemId()) {
-	        case android.R.id.home:
-	            /*
-	             * If this doesn't get handled directly by the activity then
-	             * it falls through to here and we want to go to the top of the app.
-	             */
-	            Intent intent = new Intent(mActivity, CandiRadar.class);
-	            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-	            mActivity.startActivity(intent);
-	            return true;			
+			case android.R.id.home:
+				/*
+				 * If this doesn't get handled directly by the activity then
+				 * it falls through to here and we want to go to the top of the app.
+				 */
+				mActivity.onBackPressed();
+				// Intent intent = new Intent(mActivity, CandiRadar.class);
+				// intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				// intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				// mActivity.startActivity(intent);
+				return;
 			case R.id.settings:
 				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
 				mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-				return true;
+				return;
 			case R.id.profile:
 				doProfileClick(null);
-				return true;
+				return;
 			case R.id.signout:
 				signout();
-				return true;
+				return;
 			case R.id.signin:
 				signin();
-				return true;
+				return;
 			case R.id.about:
 				doInfoClick();
-				return true;
+				return;
 		}
-		return false;
+	}
+
+	public void setActionBarTitleAndIcon(final Integer resIdIcon, final Integer resIdTitle, final boolean showUpIndicator) {
+		if (resIdIcon != null) {
+			final ImageView imageView = (ImageView) mActivity.findViewById(android.R.id.home);
+
+			/* Fade out the current icon */
+			imageView.setAnimation(null);
+			mAnimFadeOut.setAnimationListener(new AnimationListener() {
+
+				@Override
+				public void onAnimationStart(Animation animation) {}
+
+				@Override
+				public void onAnimationEnd(Animation animation) {
+
+					imageView.setImageResource(resIdIcon);
+
+					/* Fade in the new icon */
+					imageView.setAnimation(null);
+					mAnimFadeIn.setAnimationListener(new AnimationListener() {
+
+						@Override
+						public void onAnimationStart(Animation animation) {}
+
+						@Override
+						public void onAnimationEnd(Animation animation) {}
+
+						@Override
+						public void onAnimationRepeat(Animation animation) {}
+					});
+
+					imageView.startAnimation(mAnimFadeIn);
+					if (resIdTitle != null) {
+						mActionBar.setTitle(resIdTitle);
+					}
+					mActionBar.setDisplayHomeAsUpEnabled(showUpIndicator);
+				}
+
+				@Override
+				public void onAnimationRepeat(Animation animation) {}
+			});
+
+			imageView.startAnimation(mAnimFadeOut);
+		}
+		else {
+			if (resIdTitle != null) {
+				mActionBar.setTitle(resIdTitle);
+				mActionBar.setDisplayHomeAsUpEnabled(showUpIndicator);
+			}
+		}
+	}
+
+	public void setActionBarTitleAndIcon(final Entity entity, final boolean showUpIndicator) {
+
+		final ImageView imageView = (ImageView) mActivity.findViewById(android.R.id.home);
+		final ImageRequestBuilder builder = new ImageRequestBuilder(imageView);
+
+		/* Fade out the current icon */
+		imageView.setAnimation(null);
+		Animation animation = AnimUtils.loadAnimation(R.anim.fade_out_medium);
+		animation.setFillEnabled(true);
+		animation.setFillAfter(true);
+		animation.setAnimationListener(new AnimationListener() {
+
+			@Override
+			public void onAnimationStart(Animation animation) {}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+
+				builder.setImageUri(entity.getMasterImageUri());
+				builder.setImageFormat(entity.getMasterImageFormat());
+				builder.setLinkZoom(entity.linkZoom);
+				builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
+				builder.setSearchCache(true);
+				builder.setRequestListener(new RequestListener() {
+
+					@Override
+					public void onComplete(Object response) {
+						ServiceResponse serviceResponse = (ServiceResponse) response;
+
+						if (serviceResponse.responseCode == ResponseCode.Success) {
+							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+							if (imageResponse.bitmap != null) {
+								Drawable drawable = new BitmapDrawable(mActivity.getResources(), imageResponse.bitmap);
+								imageView.setImageDrawable(drawable);
+
+								/* Fade in the new icon */
+								imageView.setAnimation(null);
+								Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+								animation.setFillEnabled(true);
+								animation.setFillAfter(true);
+								animation.setAnimationListener(new AnimationListener() {
+
+									@Override
+									public void onAnimationStart(Animation animation) {}
+
+									@Override
+									public void onAnimationEnd(Animation animation) {}
+
+									@Override
+									public void onAnimationRepeat(Animation animation) {}
+								});
+
+								imageView.startAnimation(animation);
+								mActionBar.setTitle(entity.title);
+								mActionBar.setDisplayHomeAsUpEnabled(showUpIndicator);
+							}
+						}
+					}
+				});
+
+				ImageRequest imageRequest = builder.create();
+				ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {}
+		});
+
+		imageView.startAnimation(animation);
+	}
+
+	public final class ActionModeRefresh implements ActionMode.Callback {
+
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			((SherlockActivity) mActivity).getSupportMenuInflater().inflate(
+					mThemeTone.equals("light") ? R.menu.menu_context_refresh_light : R.menu.menu_context_refresh_dark, menu);
+			return true;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			return false;
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			if (mPageName.equals("CandiRadar")) {
+				if (item.getItemId() == R.id.refresh) {
+					((CandiRadar) mActivity).doRefresh(RefreshType.Standard);
+				}
+				else if (item.getItemId() == R.id.refresh_all) {
+					((CandiRadar) mActivity).doRefresh(RefreshType.FullBuild);
+				}
+			}
+			else if (item.getItemId() == R.id.refresh || item.getItemId() == R.id.refresh_all) {
+				if (mPageName.equals("CandiList")) {
+					((CandiList) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("CandiForm")) {
+					((CandiForm) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("CandiMap")) {
+					((CandiMap) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("CommentList")) {
+					((CommentList) mActivity).doRefresh();
+				}
+			}
+			mode.finish();
+			return true;
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Tab routines
+	// --------------------------------------------------------------------------------------------
+
+	public void manageTabs() {
+		if (mPageName.equals("CandiRadar")) {
+			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
+			setActiveTab(0);
+		}
+		else if (mPageName.equals("CandiList")) {
+			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
+			if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
+				setActiveTab(0);
+			}
+			else if (Aircandi.getInstance().getCandiTask() == CandiTask.MyCandi) {
+				setActiveTab(1);
+			}
+		}
+		else if (mPageName.equals("CandiMap")) {
+			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
+			setActiveTab(2);
+		}
+		else if (mPageName.equals("CandiForm")) {
+			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
+			if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
+				setActiveTab(0);
+			}
+			else if (Aircandi.getInstance().getCandiTask() == CandiTask.MyCandi) {
+				setActiveTab(1);
+			}
+		}
+		else if (mPageName.equals("CommentList")) {
+			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
+			if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
+				setActiveTab(0);
+			}
+			else if (Aircandi.getInstance().getCandiTask() == CandiTask.MyCandi) {
+				setActiveTab(1);
+			}
+		}
+		else if (mPageName.equals("ProfileForm")) {
+			addTabsToActionBar(this, CandiConstants.TABS_PROFILE_FORM_ID);
+			setActionBarTitleAndIcon(null, R.string.form_title_profile, false);
+		}
+		else if (mPageName.equals("EntityForm")) {
+			addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
+		}
+	}
+
+	public void addTabsToActionBar(ActionBar.TabListener tabListener, int tabsId)
+	{
+		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+		if (tabsId == CandiConstants.TABS_PRIMARY_ID) {
+
+			ActionBar.Tab tab = mActionBar.newTab();
+			tab.setText(R.string.radar_tab_radar);
+			tab.setTag(R.string.radar_tab_radar);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+
+			tab = mActionBar.newTab();
+			tab.setText(R.string.radar_tab_mycandi);
+			tab.setTag(R.string.radar_tab_mycandi);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+
+			tab = mActionBar.newTab();
+			tab.setText(R.string.radar_tab_map);
+			tab.setTag(R.string.radar_tab_map);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+		}
+		else if (tabsId == CandiConstants.TABS_ENTITY_FORM_ID) {
+
+			ActionBar.Tab tab = mActionBar.newTab();
+			tab.setText(R.string.form_tab_content);
+			tab.setTag(R.string.form_tab_content);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+
+			tab = mActionBar.newTab();
+			tab.setText(R.string.form_tab_settings);
+			tab.setTag(R.string.form_tab_settings);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+		}
+		else if (tabsId == CandiConstants.TABS_PROFILE_FORM_ID) {
+
+			ActionBar.Tab tab = mActionBar.newTab();
+			tab.setText(R.string.profile_tab_profile);
+			tab.setTag(R.string.profile_tab_profile);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+
+			tab = mActionBar.newTab();
+			tab.setText(R.string.profile_tab_account);
+			tab.setTag(R.string.profile_tab_account);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+		}
+	}
+
+	public void setActiveTab(int position) {
+		mActionBar.getTabAt(position).select();
+	}
+
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		if (tab.getTag().equals(R.string.radar_tab_radar)) {
+			if (Aircandi.getInstance().getCandiTask() != CandiTask.RadarCandi) {
+				Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
+				Intent intent = new Intent(mActivity, CandiRadar.class);
+				/* Flags let us use existing instance of radar if its already around */
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+				mActivity.startActivity(intent);
+				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+			}
+		}
+		else if (tab.getTag().equals(R.string.radar_tab_mycandi)) {
+			if (Aircandi.getInstance().getCandiTask() != CandiTask.MyCandi) {
+				Aircandi.getInstance().setCandiTask(CandiTask.MyCandi);
+				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiList.class);
+				intentBuilder.setCollectionType(ProxiExplorer.CollectionType.CandiByUser);
+				intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
+				Intent intent = intentBuilder.create();
+				mActivity.startActivity(intent);
+				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+			}
+		}
+		else if (tab.getTag().equals(R.string.radar_tab_map)) {
+			if (Aircandi.getInstance().getCandiTask() != CandiTask.Map) {
+				Aircandi.getInstance().setCandiTask(CandiTask.Map);
+				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiMap.class);
+				Intent intent = intentBuilder.create();
+				mActivity.startActivity(intent);
+				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+			}
+		}
+		else {
+			/* Currently handles tab switching in all forms with view flippers */
+			if (mViewFlipper != null) {
+				mViewFlipper.setDisplayedChild(tab.getPosition());
+			}
+		}
+	}
+
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {}
+
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+		/*
+		 * Reselecting a tab should take the user to the top of the
+		 * hierarchy but not refresh data.
+		 * 
+		 * This seems to get fired without user interaction when first
+		 * displayed in landscape mode.
+		 */
+		// if (tab.getTag().equals(R.string.radar_tab_radar)) {
+		// if (mPageName.equals("CandiRadar")) {
+		// if (mCandiPatchModel != null && mCandiPatchModel.getCandiRootCurrent() != null
+		// && mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
+		// ((CandiRadar) mActivity).navigateUp();
+		// }
+		// }
+		// else {
+		// Intent intent = new Intent(mActivity, CandiRadar.class);
+		// /* Flags let us use existing instance of radar if its already around */
+		// intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		// intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		// mActivity.startActivity(intent);
+		// mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+		// }
+		// }
+		// else if (tab.getTag().equals(R.string.radar_tab_mycandi)) {
+		// IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiList.class);
+		// intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
+		// intentBuilder.setCollectionType(mCollectionType);
+		// Intent intent = intentBuilder.create();
+		// mActivity.startActivity(intent);
+		// mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+		// }
+		// else if (tab.getTag().equals(R.string.radar_tab_map)) {
+		// IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiMap.class);
+		// Intent intent = intentBuilder.create();
+		// mActivity.startActivity(intent);
+		// mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+		// }
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -899,12 +1223,7 @@ public class AircandiCommon {
 		mActivity.startActivity(intent);
 	}
 
-	public void doDestroy() {
-		if (mEntity != null && mEntity.imageBitmap != null) {
-			mEntity.imageBitmap.recycle();
-		}
-		System.gc();
-	}
+	public void doDestroy() {}
 
 	public void doPause() {
 		stopTitlebarProgress();
@@ -922,6 +1241,26 @@ public class AircandiCommon {
 		}
 		synchronized (Events.EventBus.wifiScanReceived) {
 			Events.EventBus.wifiScanReceived.add(mEventScanReceived);
+		}
+	}
+
+	public void doSaveInstanceState(Bundle savedInstanceState) {
+		/*
+		 * This gets called from comment, profile and entity forms
+		 */
+		if (mActionBar != null && mActionBar.getTabCount() > 0) {
+			savedInstanceState.putInt("tab_index", mActionBar.getSelectedTab() != null ? mActionBar.getSelectedTab().getPosition() : 0);
+		}
+	}
+
+	public void doRestoreInstanceState(Bundle savedInstanceState) {
+		/*
+		 * This gets called from comment, profile and entity forms
+		 */
+		if (savedInstanceState != null) {
+			if (mActionBar != null && mActionBar.getTabCount() > 0) {
+				setActiveTab(savedInstanceState.getInt("tab_index"));
+			}
 		}
 	}
 
@@ -943,6 +1282,22 @@ public class AircandiCommon {
 
 	public void setCandiPatchModel(CandiPatchModel candiPatchModel) {
 		mCandiPatchModel = candiPatchModel;
+	}
+
+	public CandiPatchPresenter getCandiPatchPresenter() {
+		return mCandiPatchPresenter;
+	}
+
+	public void setCandiPatchPresenter(CandiPatchPresenter candiPatchPresenter) {
+		mCandiPatchPresenter = candiPatchPresenter;
+	}
+
+	public ViewFlipper getViewFlipper() {
+		return mViewFlipper;
+	}
+
+	public void setViewFlipper(ViewFlipper viewFlipper) {
+		mViewFlipper = viewFlipper;
 	}
 
 	public enum ServiceOperation {

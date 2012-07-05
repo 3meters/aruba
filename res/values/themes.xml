@@ -5,10 +5,12 @@
 
     <style name="aircandi_theme_midnight" parent="Theme.Sherlock">
         <item name="themeTone">dark</item>
-        <item name="busy">@drawable/busy_anim_dark</item>
+        <item name="actionBarTone">dark</item>
+        <item name="android:windowBackground">@android:color/black</item>
         <item name="android:windowNoTitle">false</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:textColorHint">@color/edit_hint</item>
+        <item name="busy">@drawable/busy_anim_dark</item>
         <item name="textColorFocused">@color/pager_indicator_text_focused_dark</item>
         <item name="textColorUnfocused">@color/pager_indicator_text_unfocused_dark</item>
         <item name="textureBodyZone">gfx/trans_30_dark.png</item>
@@ -52,7 +54,11 @@
         <item name="textColor">@color/text_dark</item>
         <item name="sectionHeaderFillStart">@color/fill_30_dark</item>
         <item name="sectionHeaderFillEnd">@color/transparent</item>
-        <item name="tabColorHighlight">@color/tab_highlight</item>
+        
+        <item name="tabColorActive">@color/tab_rule_active</item>
+        <item name="tabColorInactive">@color/tab_rule_inactive_dark</item>
+        <item name="tabColorBackground">@color/tab_background_dark</item>
+        
         <item name="backgroundPicture">@drawable/picture_bg_dark</item>
         <item name="backgroundProgress">@drawable/progress_bg_dark</item>
         <item name="placeholder_forum">placeholder_forum_dark</item>
@@ -66,13 +72,18 @@
         <item name="android:textAppearanceSmall">@style/app_text_appearance_small</item>
         <item name="android:textAppearance">@style/app_text_appearance</item>
         <item name="android:editTextStyle">@style/app_edittext</item>
+        
+        <item name="actionModeBackground">@drawable/app_header_bg_dark</item>
+        <item name="android:actionModeBackground">@drawable/app_header_bg_dark</item>
     </style>
 
     <style name="aircandi_theme_snow" parent="Theme.Sherlock.Light">
         <item name="themeTone">light</item>
-        <item name="busy">@drawable/busy_anim_light</item>
+        <item name="actionBarTone">light</item>
         <item name="android:windowNoTitle">false</item>
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowActionBarOverlay">false</item>
+        <item name="busy">@drawable/busy_anim_light</item>
         <item name="android:textColorHint">@color/edit_hint</item>
         <item name="textColorFocused">@color/pager_indicator_text_focused_light</item>
         <item name="textColorUnfocused">@color/pager_indicator_text_unfocused_light</item>
@@ -117,7 +128,11 @@
         <item name="textColor">@color/text_light</item>
         <item name="sectionHeaderFillStart">@color/fill_30_light</item>
         <item name="sectionHeaderFillEnd">@color/transparent</item>
-        <item name="tabColorHighlight">@color/tab_highlight</item>
+        
+        <item name="tabColorActive">@color/tab_rule_active</item>
+        <item name="tabColorInactive">@color/tab_rule_inactive_light</item>
+        <item name="tabColorBackground">@color/tab_background_light</item>
+        
         <item name="backgroundPicture">@drawable/picture_bg_light</item>
         <item name="backgroundProgress">@drawable/progress_bg_light</item>
         <item name="placeholder_forum">placeholder_forum_light</item>
@@ -131,6 +146,13 @@
         <item name="android:textAppearanceSmall">@style/app_text_appearance_small</item>
         <item name="android:textAppearance">@style/app_text_appearance</item>
         <item name="android:editTextStyle">@style/app_edittext</item>
+        
+        <!-- Following two are to override the default solid background -->
+        <item name="actionBarStyle">@style/Widget.Sherlock.Light.ActionBar</item>
+        <item name="android:actionBarStyle">@style/Widget.Sherlock.Light.ActionBar</item>
+        <item name="actionModeBackground">@drawable/app_header_bg_light</item>
+        <item name="android:actionModeBackground">@drawable/app_header_bg_light</item>
+        
     </style>
 
     <style name="aircandi_theme_blueray" parent="aircandi_theme_midnight">
@@ -148,6 +170,7 @@
 
     <style name="aircandi_theme_serene" parent="aircandi_theme_snow">
         <item name="themeTone">dark</item>
+        <item name="actionBarTone">dark</item>
         <item name="busy">@drawable/busy_anim_dark</item>
         <item name="android:windowBackground">@drawable/wallpaper_serene</item>
         <item name="textColorFocused">@color/text_dark</item>
@@ -172,6 +195,9 @@
         <item name="backgroundSliderContentSearch">@drawable/slider_content_search_bg_dark</item>
         <item name="backgroundSliderHandleInfo">@drawable/slider_handle_info_bg_serene</item>
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_serene</item>
+        
+        <item name="actionModeBackground">@drawable/app_header_bg_dark</item>
+        <item name="android:actionModeBackground">@drawable/app_header_bg_dark</item>
     </style>
 
     <style name="aircandi_theme_dialog" parent="Theme.Sherlock.Dialog">

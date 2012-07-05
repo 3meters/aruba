@@ -3,24 +3,24 @@ package com.proxibase.aircandi;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.scene.Scene;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.Logger;
 
 public abstract class AircandiGameActivity extends LayoutGameActivity {
 
-	protected AircandiCommon	mCommon;
+	private AircandiCommon	mCommon;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
 		mCommon = new AircandiCommon(this);
-		mCommon.setTheme();
+		mCommon.setTheme(null);
 		super.onCreate(savedInstanceState);
 		mCommon.initialize();
-		mCommon.initializeDialogs();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -39,13 +39,20 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 		mCommon.doProfileClick(view);
 	}
 
+	public void onRefresh() {}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		Logger.i(this, "Configuration changed");
+		super.onConfigurationChanged(newConfig);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
 	}
 
 	@Override
@@ -67,5 +74,13 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	@Override
 	public Scene onLoadScene() {
 		return null;
+	}
+
+	public AircandiCommon getCommon() {
+		return mCommon;
+	}
+
+	public void setCommon(AircandiCommon common) {
+		mCommon = common;
 	}
 }

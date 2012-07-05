@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <!-- Header -->
+
+    <LinearLayout
+        android:id="@+id/form_header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:padding="15dp" >
+
+        <TextView
+            android:id="@+id/header_text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Share some candi with other Aircandi users." />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/form_list"
+        android:layout_width="fill_parent"
+        android:layout_height="180dp"
+        android:layout_below="@+id/form_header"
+        android:paddingLeft="10dp" 
+        android:paddingRight="10dp">
+
+        <!-- Preview: listitem=@layout/temp_listitem_template -->
+    </ListView>
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/form_footer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/form_list"
+        android:gravity="center_horizontal" >
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="150dp"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/dialog_button_cancel" />
+    </LinearLayout>
+
+</RelativeLayout>

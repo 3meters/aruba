@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -18,11 +17,11 @@ import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
-import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.S3;
+import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
@@ -48,7 +47,6 @@ public class SignUpForm extends FormActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 
 		initialize();
@@ -194,7 +192,7 @@ public class SignUpForm extends FormActivity {
 		mUser.email = mTextEmail.getText().toString().trim().toLowerCase();
 		mUser.name = mTextFullname.getText().toString().trim();
 		mUser.password = mTextPassword.getText().toString().trim();
-		mUser.createdDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+		mUser.createdDate = DateUtils.nowDate().getTime();
 		mUser.modifiedDate = mUser.createdDate;
 
 		Logger.i(this, "Insert user: " + mUser.name);

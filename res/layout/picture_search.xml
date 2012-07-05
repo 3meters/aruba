@@ -3,40 +3,6 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <!-- Header -->
-
-    <RelativeLayout
-        android:id="@+id/activity_header"
-        style="@style/actionbar"
-        android:layout_width="fill_parent"
-        android:layout_height="40dp"
-        android:layout_alignParentTop="true"
-        android:paddingBottom="5dp"
-        android:paddingRight="5dp"
-        android:paddingTop="5dp" >
-
-        <ImageView
-            android:id="@+id/btn_logo"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:src="?attr/iconPicture" />
-
-        <TextView
-            android:id="@+id/text_header_title"
-            style="@style/form_title"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/btn_logo"
-            android:gravity="center_vertical|left"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/form_title_picture_search" />
-    </RelativeLayout>
-
     <!--
     <Spinner
         android:id="@+id/cbo_category"
@@ -52,7 +18,7 @@
         android:id="@+id/cbo_category"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/activity_header"
+        android:layout_alignParentTop="true"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
         android:layout_marginTop="5dp"

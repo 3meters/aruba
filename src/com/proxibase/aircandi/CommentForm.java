@@ -6,20 +6,18 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.Command.CommandType;
+import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
-import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.service.ProxiConstants;
@@ -38,14 +36,13 @@ public class CommentForm extends FormActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 
 		User user = Aircandi.getInstance().getUser();
 		if (user != null && user.anonymous) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
-			intentBuilder.setCommand(new Command(CommandType.Edit));
+			intentBuilder.setCommandType(CommandType.Edit);
 			intentBuilder.setMessage(getString(R.string.signin_message_new_candi));
 			Intent intent = intentBuilder.create();
 
@@ -201,6 +198,7 @@ public class CommentForm extends FormActivity {
 		super.onSaveInstanceState(savedInstanceState);
 		Logger.d(this, "onSaveInstanceState called");
 
+		mCommon.doSaveInstanceState(savedInstanceState);
 		if (mContent != null) {
 			savedInstanceState.putString("content", mContent.getText().toString());
 		}
@@ -209,6 +207,7 @@ public class CommentForm extends FormActivity {
 	private void doRestoreInstanceState(Bundle savedInstanceState) {
 		Logger.d(this, "Restoring previous state");
 
+		mCommon.doRestoreInstanceState(savedInstanceState);
 		if (mContent != null) {
 			mContent.setText(savedInstanceState.getString("content"));
 		}

@@ -53,9 +53,8 @@ public interface CandiConstants {
 	public static final int				MAP_VIEW_TITLE_LENGTH_MAX				= 150;
 
 	/* Dimensions at mdpi */
-	public static final int				CANDI_TITLEBAR_HEIGHT					= 40;
-	public static final int				CANDI_TABBAR_HEIGHT						= 40;
 	public static final int				ANDROID_STATUSBAR_HEIGHT				= 25;
+	public static final int				ANDROID_ACTIONBAR_HEIGHT				= 48;
 
 	public static final int				SWIPE_MAX_OFF_PATH						= 500;
 	public static final float			SWIPE_SMALL_FLING						= 100;
@@ -64,6 +63,10 @@ public interface CandiConstants {
 	public static final int				DIALOG_INSTALL_ID						= 1;
 	public static final int				DIALOG_WIFIENABLE_ID					= 2;
 	public static final int				DIALOG_NEW_CANDI_ID						= 3;
+
+	public static final int				TABS_PRIMARY_ID							= 1;
+	public static final int				TABS_PROFILE_FORM_ID					= 2;
+	public static final int				TABS_ENTITY_FORM_ID						= 3;
 
 	public static final int				VERTEX_INDEX_X							= 0;
 	public static final int				VERTEX_INDEX_Y							= 1;
@@ -94,7 +97,7 @@ public interface CandiConstants {
 	public static final String			S3_BUCKET_IMAGES						= "3meters_images";
 
 	public static final int				RADAR_ENTITY_LIMIT						= 10;
-	public static final int				RADAR_CHILDENTITY_LIMIT					= 20;
+	public static final int				RADAR_CHILDENTITY_LIMIT					= 5;
 	public static final int				RADAR_COMMENT_LIMIT						= 50;
 	public static final int				RADAR_ENTITY_MAX_LIMIT					= 300;
 
@@ -121,6 +124,7 @@ public interface CandiConstants {
 	public static final int				ACTIVITY_CANDI_LIST						= 450;
 	public static final int				ACTIVITY_LINK_PICK						= 500;
 	public static final int				ACTIVITY_CANDI_PICK						= 550;
+	public static final int				ACTIVITY_TEMPLATE_PICK					= 560;
 	public static final int				ACTIVITY_PREFERENCES					= 600;
 
 	public static final int				RESULT_ENTITY_INSERTED					= 100;

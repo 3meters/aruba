@@ -17,8 +17,8 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
-import com.proxibase.aircandi.CandiMap.CandiItemizedOverlay;
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.CandiItemizedOverlay;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
@@ -34,22 +34,19 @@ public class MapBrowse extends SherlockMapActivity {
 	private MapController			mMapController	= null;
 	private List<Overlay>			mMapOverlays;
 	private CandiItemizedOverlay	mItemizedOverlay;
-	private GeoPoint				mGeoPoint;
-	private String					mTitle;
-	private String					mDescription;
+	private Entity					mEntity;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
 		mCommon = new AircandiCommon(this);
-		mCommon.setTheme();
+		mCommon.setTheme(null);
 		mCommon.unpackIntent();
 
 		setContentView(getLayoutId());
 		super.onCreate(savedInstanceState);
 
 		mCommon.initialize();
-		mCommon.initializeDialogs();
 
 		initialize();
 		bind();
@@ -65,7 +62,9 @@ public class MapBrowse extends SherlockMapActivity {
 		mMapView.setSatellite(false);
 		mMapView.setStreetView(false);
 		mMapView.setClickable(true);
+		
 		mMapController = mMapView.getController();
+		
 		ViewGroup mapHolder = (ViewGroup) findViewById(R.id.map_holder);
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		mapHolder.addView(mMapView, params);
@@ -73,7 +72,7 @@ public class MapBrowse extends SherlockMapActivity {
 	}
 
 	private void bind() {
-		if (mCommon.mEntity == null && mCommon.mEntityId != null) {
+		if (mEntity == null && mCommon.mEntityId != null) {
 
 			new AsyncTask() {
 
@@ -85,7 +84,7 @@ public class MapBrowse extends SherlockMapActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":false}";
-					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntity.id, jsonEagerLoad, null, null);
+					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, null, null);
 					return serviceResponse;
 				}
 
@@ -94,15 +93,12 @@ public class MapBrowse extends SherlockMapActivity {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
-						mCommon.mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
-						GeoLocation entityLocation = mCommon.mEntity.location != null ? mCommon.mEntity.location : mCommon.mEntityLocation;
-						mGeoPoint = new GeoPoint((int) (entityLocation.latitude.doubleValue() * 1E6), (int) (entityLocation.longitude.doubleValue() * 1E6));
-						mTitle = mCommon.mEntity.label;
-						mDescription = mCommon.mEntity.description;
-						((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
+						mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
+						ViewGroup mapHolder = (ViewGroup) findViewById(R.id.map_holder);
+						mapHolder.setVisibility(View.VISIBLE);
 						showCandi();
 						mCommon.showProgressDialog(false, null);
-						mCommon.stopTitlebarProgress();						
+						mCommon.stopTitlebarProgress();
 					}
 					else {
 						mCommon.handleServiceError(serviceResponse);
@@ -128,9 +124,7 @@ public class MapBrowse extends SherlockMapActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		boolean rebind = mCommon.doOptionsItemSelected(item);
-		if (rebind) {
-		}
+		mCommon.doOptionsItemSelected(item);
 		return true;
 	}
 
@@ -156,11 +150,17 @@ public class MapBrowse extends SherlockMapActivity {
 
 	public void showCandi() {
 		mMapOverlays = mMapView.getOverlays();
-		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi);
-		mItemizedOverlay = new CandiItemizedOverlay(drawable, true);
-		OverlayItem overlayitem = new OverlayItem(mGeoPoint, mTitle, mDescription);
-		mItemizedOverlay.addOverlay(overlayitem);
-		zoomToGeoPoint(mGeoPoint);
+		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi_ii);
+		mItemizedOverlay = new CandiItemizedOverlay(drawable, mMapView, true);
+
+		GeoLocation entityLocation = mEntity.location != null ? mEntity.location : mCommon.mEntityLocation;
+		GeoPoint geoPoint = new GeoPoint((int) (entityLocation.latitude.doubleValue() * 1E6), (int) (entityLocation.longitude.doubleValue() * 1E6));
+
+		
+		OverlayItem overlayItem = new OverlayItem(geoPoint, mEntity.title, mEntity.description);
+		overlayItem.setMarker(drawable);
+		mItemizedOverlay.addOverlay(overlayItem);
+		zoomToGeoPoint(geoPoint);
 		mMapOverlays.add(mItemizedOverlay);
 		mMapView.invalidate();
 	}

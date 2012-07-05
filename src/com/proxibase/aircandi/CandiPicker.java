@@ -1,32 +1,33 @@
 package com.proxibase.aircandi;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ViewFlipper;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.ViewFlipper;
 
-import com.proxibase.aircandi.CandiList.MethodType;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
 import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.proxibase.aircandi.components.EndlessCandiListAdapter;
-import com.proxibase.aircandi.components.EntityProvider;
+import com.proxibase.aircandi.components.EntityList;
+import com.proxibase.aircandi.components.ProxiExplorer;
+import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.objects.Entity;
 
-public class CandiPicker extends FormActivity implements OnItemClickListener {
+public class CandiPicker extends FormActivity implements OnItemClickListener, ActionBar.TabListener {
 
-	private ListView		mListViewUserCandi;
-	private ListView		mListViewRadarCandi;
-	private EntityProvider	mEntityProviderUserCandi;
-	private EntityProvider	mEntityProviderRadarCandi;
-	private ViewFlipper		mViewFlipper;
-	private MethodType		mMethodType	= MethodType.CandiByRadar;
+	private ListView			mListViewUserCandi;
+	private ListView			mListViewRadarCandi;
+	private EntityList<Entity>	mEntitiesUserCandi;
+	private EntityList<Entity>	mEntitiesRadarCandi;
+	private ViewFlipper			mViewFlipper;
+	private CollectionType		mMethodType	= CollectionType.CandiByRadar;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -41,62 +42,30 @@ public class CandiPicker extends FormActivity implements OnItemClickListener {
 		mListViewRadarCandi = (ListView) findViewById(R.id.list_radar_candi);
 		mListViewRadarCandi.setOnItemClickListener(this);
 		mListViewRadarCandi.setDivider(null);
-		mEntityProviderRadarCandi = new EntityProvider(MethodType.CandiByRadar
-				, Aircandi.getInstance().getUser().id
-				, mCommon.mEntity != null ? mCommon.mEntity.id : null);
+		mEntitiesRadarCandi = ProxiExplorer.getInstance().getEntityModel().getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, CollectionType.CandiByRadar);
 
 		mListViewUserCandi = (ListView) findViewById(R.id.list_user_candi);
 		mListViewUserCandi.setOnItemClickListener(this);
 		mListViewUserCandi.setDivider(null);
-		mEntityProviderUserCandi = new EntityProvider(MethodType.CandiByUser
-				, Aircandi.getInstance().getUser().id
-				, mCommon.mEntity != null ? mCommon.mEntity.id: null);
-		
+		mEntitiesUserCandi = ProxiExplorer.getInstance().getEntityModel().getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, CollectionType.CandiByUser);
+
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
-		
+
 		if (mViewFlipper != null) {
-			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
-			mMethodType = MethodType.CandiByRadar;
+			mCommon.setActiveTab(0);
+			mMethodType = ProxiExplorer.CollectionType.CandiByRadar;
 			bind();
 		}
 	}
 
 	public void bind() {
 
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Loading...");
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				List<Entity> entities = null;
-				if (mMethodType == MethodType.CandiByUser) {
-					entities = mEntityProviderUserCandi.loadEntities();
-				}
-				else if (mMethodType == MethodType.CandiByRadar) {
-					entities = mEntityProviderRadarCandi.loadEntities();
-				}
-				return entities;
-			}
-
-			@Override
-			protected void onPostExecute(Object entities) {
-				if (entities != null) {
-					if (mMethodType == MethodType.CandiByRadar) {
-						mListViewRadarCandi.setAdapter(new EndlessCandiListAdapter(CandiPicker.this, (List<Entity>) entities, mEntityProviderRadarCandi,
-								R.layout.temp_listitem_candi));
-					}
-					else if (mMethodType == MethodType.CandiByUser) {
-						mListViewUserCandi.setAdapter(new EndlessCandiListAdapter(CandiPicker.this, (List<Entity>) entities, mEntityProviderUserCandi,
-								R.layout.temp_listitem_candi));
-					}
-				}
-				mCommon.showProgressDialog(false, null);
-			}
-		}.execute();
+		if (mMethodType == ProxiExplorer.CollectionType.CandiByRadar) {
+			mListViewRadarCandi.setAdapter(new EndlessCandiListAdapter(CandiPicker.this, mEntitiesRadarCandi, R.layout.temp_listitem_candi));
+		}
+		else if (mMethodType == ProxiExplorer.CollectionType.CandiByUser) {
+			mListViewUserCandi.setAdapter(new EndlessCandiListAdapter(CandiPicker.this, mEntitiesUserCandi, R.layout.temp_listitem_candi));
+		}
 	}
 
 	@Override
@@ -112,23 +81,7 @@ public class CandiPicker extends FormActivity implements OnItemClickListener {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	public void onTabClick(View view) {
-		mCommon.setActiveTab(view);
-		if (view.getTag().equals("radar")) {
-			mViewFlipper.setDisplayedChild(0);
-			mMethodType = MethodType.CandiByRadar;
-			if (mListViewRadarCandi.getAdapter() == null) {
-				bind();
-			}
-		}
-		else if (view.getTag().equals("mycandi")) {
-			mViewFlipper.setDisplayedChild(1);
-			mMethodType = MethodType.CandiByUser;
-			if (mListViewUserCandi.getAdapter() == null) {
-				bind();
-			}
-		}
-	}
+	public void onTabClick(View view) {}
 
 	@Override
 	public void onBackPressed() {
@@ -147,5 +100,35 @@ public class CandiPicker extends FormActivity implements OnItemClickListener {
 	@Override
 	protected int getLayoutID() {
 		return R.layout.candi_picker;
+	}
+
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		if (tab.getTag().equals("radar")) {
+			mViewFlipper.setDisplayedChild(0);
+			mMethodType = ProxiExplorer.CollectionType.CandiByRadar;
+			if (mListViewRadarCandi.getAdapter() == null) {
+				bind();
+			}
+		}
+		else if (tab.getTag().equals("mycandi")) {
+			mViewFlipper.setDisplayedChild(1);
+			mMethodType = ProxiExplorer.CollectionType.CandiByUser;
+			if (mListViewUserCandi.getAdapter() == null) {
+				bind();
+			}
+		}
+	}
+
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+		// TODO Auto-generated method stub
+
 	}
 }

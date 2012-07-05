@@ -1,13 +1,15 @@
 package com.proxibase.aircandi;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +17,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.MenuItem;
-import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.Command.CommandType;
+import com.proxibase.aircandi.candi.models.CandiModel;
+import com.proxibase.aircandi.components.CandiPagerAdapter;
+import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.IntentBuilder;
@@ -27,94 +29,151 @@ import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.GeoLocation;
 import com.proxibase.service.objects.ServiceData;
+import com.proxibase.service.objects.User;
 
 public class CandiForm extends CandiActivity {
+
+	private List<Entity>	mEntitiesForPaging	= new ArrayList<Entity>();
+	private ViewPager		mViewPager;
+	private Entity			mEntity;
+	private Number			mEntityModelRefreshDate;
+	private Number			mEntityModelActivityDate;
+	private User			mEntityModelUser;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			/*
-			 * Try to detect case where this is being created after
-			 * a crash and bail out.
-			 */
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-		}
-		else {
-			mCommon.track();
-			bind();
+		if (!isFinishing()) {
+			initialize();
+			bind(true);
 		}
 	}
 
-	@Override
-	public void bind() {
-		super.bind();
-		mCommon.mNewCandiIsRoot = false;
+	public void initialize() {}
 
-		/* We always get the freshest version because the data could be stale */
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Loading...");
+	public void bind(Boolean useProxiExplorer) {
+		/*
+		 * Navigation setup for action bar icon and title
+		 */
+		if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
+			if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByRadar) {
+				mCommon.setActionBarTitleAndIcon(null, R.string.navigation_radar, true);
 			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				String jsonFields = "{\"entities\":{},";
-				jsonFields += "\"children\":{\"imagePreviewUri\":true,\"linkUri\":true,\"linkZoom\":true,\"linkJavascriptEnabled\":true,\"_creator\":true,\"creator\":true,\"modifiedDate\":true},";
-				jsonFields += "\"parents\":{\"imagePreviewUri\":true,\"linkUri\":true,\"linkZoom\":true,\"linkJavascriptEnabled\":true,\"_creator\":true,\"creator\":true,\"modifiedDate\":true},";
-				jsonFields += "\"comments\":{}}";
-				String jsonEagerLoad = "{\"children\":true,\"parents\":true,\"comments\":false}";
-				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntity.id, jsonEagerLoad, jsonFields, null);
-				return serviceResponse;
+			else if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByUser) {
+				mCommon.setActionBarTitleAndIcon(null, R.string.navigation_mycandi, true);
 			}
+		}
+		else {
+			Entity collectionEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, mCommon.mCollectionType);
+			mCommon.setActionBarTitleAndIcon(collectionEntity, true);
+		}
 
-			@Override
-			protected void onPostExecute(Object result) {
-				ServiceResponse serviceResponse = (ServiceResponse) result;
+		if (useProxiExplorer) {
+			/*
+			 * Entity is coming from entity model.
+			 */
+			mEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mCollectionType);
+			mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
+			mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
+			mEntityModelUser = Aircandi.getInstance().getUser();
 
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mCommon.mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
+			/* Was likely deleted from the entity model */
+			if (mEntity == null) {
+				onBackPressed();
+			}
+			else {
+				/* Get the view pager configured */
+				updateViewPager();
+			}
+		}
+		else {
+			/*
+			 * Entity is coming from service.
+			 */
+			new AsyncTask() {
 
-					/* Sort the children if there are any */
-					if (mCommon.mEntity.children != null && mCommon.mEntity.children.size() > 1) {
-						Collections.sort(mCommon.mEntity.children, new Entity.SortEntitiesByModifiedDate());
+				@Override
+				protected void onPreExecute() {
+					mCommon.showProgressDialog(true, "Loading...");
+				}
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					String jsonFields = "{\"entities\":{},\"children\":{},\"parents\":{},\"comments\":{}}";
+					String jsonEagerLoad = "{\"children\":true,\"parents\":true,\"comments\":false}";
+					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, jsonFields, null);
+					return serviceResponse;
+				}
+
+				@Override
+				protected void onPostExecute(Object result) {
+					ServiceResponse serviceResponse = (ServiceResponse) result;
+
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
+
+						/* Sort the children if there are any */
+						if (mEntity.children != null && mEntity.children.size() > 1) {
+							Collections.sort(mEntity.children, new Entity.SortEntitiesByModifiedDate());
+						}
+
+						/* Get the view pager configured */
+						updateViewPager();
+
+						mCommon.showProgressDialog(false, null);
+						mCommon.stopTitlebarProgress();
 					}
+					else {
+						mCommon.handleServiceError(serviceResponse);
+					}
+				}
+			}.execute();
+		}
+	}
 
-					ViewGroup candiInfoView = (ViewGroup) findViewById(R.id.candi_form);
-					buildCandiInfo(mCommon.mEntity, candiInfoView, false);
-					((ViewGroup) findViewById(R.id.group_candi_content)).setVisibility(View.VISIBLE);
-					mCommon.showProgressDialog(false, null);
-					mCommon.stopTitlebarProgress();
-				}
-				else {
-					mCommon.handleServiceError(serviceResponse);
-				}
-			}
-		}.execute();
+	public void doRefresh() {
+		/*
+		 * Called from AircandiCommon
+		 * 
+		 * Refresh causes us to pull the freshest data from the service but
+		 * we do not merge it into the entity model and it is only for the
+		 * current entity. Other entities in the same collection are not
+		 * refreshed.
+		 */
+		mCommon.startTitlebarProgress();
+		bind(false);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	public void onCandiInfoClick(View v) {
-		startCandiList();
+	public void onChildrenButtonClick(View v) {
+		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
+
+		intentBuilder.setCommandType(CommandType.View);
+		intentBuilder.setCollectionId(mCommon.mEntityId);
+		intentBuilder.setCollectionType(mCommon.mCollectionType);
+
+		Intent intent = intentBuilder.create();
+		startActivity(intent);
+		overridePendingTransition(R.anim.slide_in_right_long, R.anim.slide_out_left_long);
 	}
 
-	public void onCommentsClick(View view) {
+	public void onBrowseCommentsButtonClick(View view) {
 		Entity entity = (Entity) view.getTag();
 		if (entity.commentCount > 0) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
-			intentBuilder.setCommand(new Command(CommandType.View));
-			intentBuilder.setEntity(entity);
+			intentBuilder.setCommandType(CommandType.View);
+			intentBuilder.setEntityId(entity.id);
+			intentBuilder.setCollectionId(entity.id);
+			intentBuilder.setCollectionType(mCommon.mCollectionType);
 			Intent intent = intentBuilder.create();
-			startActivityForResult(intent, 0);
+			startActivity(intent);
 		}
 	}
 
@@ -122,102 +181,115 @@ public class CandiForm extends CandiActivity {
 		showCandiPicker();
 	}
 
-	public void onMapClick(View view) {
+	public void onMapButtonClick(View view) {
 		String entityId = (String) view.getTag();
 		IntentBuilder intentBuilder = new IntentBuilder(this, MapBrowse.class);
-		intentBuilder.setCommand(new Command(CommandType.View));
+		intentBuilder.setCommandType(CommandType.View);
 		intentBuilder.setEntityId(entityId);
 		intentBuilder.setEntityLocation(mCommon.mEntityLocation);
 		Intent intent = intentBuilder.create();
-		startActivityForResult(intent, 0);
+		startActivity(intent);
 	}
 
 	public void onImageClick(View view) {
 
 		Intent intent = null;
-		if (mCommon.mEntity.imageUri != null && !mCommon.mEntity.imageUri.equals("")) {
+		if (mEntity.imageUri != null && !mEntity.imageUri.equals("")) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
-			intentBuilder.setCommand(new Command(CommandType.View));
-			intentBuilder.setEntity(mCommon.mEntity);
+			intentBuilder.setCommandType(CommandType.View);
+			intentBuilder.setEntityId(mEntity.id);
+			intentBuilder.setCollectionType(mCommon.mCollectionType);
 			intent = intentBuilder.create();
 		}
 		else {
 			intent = new Intent(android.content.Intent.ACTION_VIEW);
-			intent.setData(Uri.parse(mCommon.mEntity.linkUri));
+			intent.setData(Uri.parse(mEntity.linkUri));
 		}
 		startActivity(intent);
 		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 	}
 
-	public void onRefreshClick(View view) {
-		mCommon.startTitlebarProgress();
-		bind();
+	public void onAddCandiButtonClick(View view) {
+		mCommon.showTemplatePicker();
+	}
+
+	public void onEditCandiButtonClick(View view) {
+		IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class);
+		intentBuilder.setCommandType(CommandType.Edit);
+		intentBuilder.setEntityId(mEntity.id);
+		intentBuilder.setEntityType(mEntity.type);
+		intentBuilder.setCollectionType(mCommon.mCollectionType);
+		Intent intent = intentBuilder.create();
+		startActivity(intent);
+		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+	}
+
+	public void onNewCommentButtonClick(View view) {
+		IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
+		intentBuilder.setParentEntityId(mEntity.id);
+		Intent intent = intentBuilder.create();
+		startActivity(intent);
+		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 
-		mLastResultCode = resultCode;
-		if (resultCode == CandiConstants.RESULT_ENTITY_UPDATED
-				|| resultCode == CandiConstants.RESULT_ENTITY_INSERTED
-				|| resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
-			bind();
-			if (resultCode == CandiConstants.RESULT_ENTITY_INSERTED) {
-				/*
-				 * Make sure the user has a chance to see the new candi appear in the candi list button.
-				 */
-			}
-		}
-		else if (resultCode == CandiConstants.RESULT_ENTITY_CHILD_DELETED) {
-			bind();
-		}
-		else if (resultCode == CandiConstants.RESULT_ENTITY_DELETED) {
-			onBackPressed();
-		}
-		else if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED
-				|| resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
-			invalidateOptionsMenu();
-			bind();
-		}
+		/*
+		 * Cases that use activity result
+		 * 
+		 * - Candi picker returns entity id for a move
+		 * - Template picker returns type of candi to add as a child
+		 */
+		if (resultCode != Activity.RESULT_CANCELED) {
+			if (requestCode == CandiConstants.ACTIVITY_TEMPLATE_PICK) {
+				if (intent != null && intent.getExtras() != null) {
 
-		if (requestCode == CandiConstants.ACTIVITY_CANDI_PICK) {
-			if (intent != null && intent.getExtras() != null) {
-				Bundle extras = intent.getExtras();
-				final String parentEntityId = extras.getString(getString(R.string.EXTRA_ENTITY_ID));
-				if (parentEntityId != null && !parentEntityId.equals("")) {
-					/*
-					 * Update entity link and refresh parent entity info
-					 */
+					Bundle extras = intent.getExtras();
+					final String entityType = extras.getString(getString(R.string.EXTRA_ENTITY_TYPE));
+					if (entityType != null && !entityType.equals("")) {
+
+						String parentId = null;
+
+						if (mCommon.getCandiPatchModel() != null && !mCommon.getCandiPatchModel().getCandiRootCurrent().isSuperRoot()) {
+							CandiModel candiModel = (CandiModel) mCommon.getCandiPatchModel().getCandiRootCurrent();
+							parentId = candiModel.getEntity().id;
+						}
+						else if (mCommon.mEntityId != null) {
+							parentId = mCommon.mEntityId;
+						}
+
+						IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class);
+						intentBuilder.setCommandType(CommandType.New);
+						intentBuilder.setParentEntityId(parentId);
+						intentBuilder.setEntityType(entityType);
+						Intent redirectIntent = intentBuilder.create();
+						startActivity(redirectIntent);
+						overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+					}
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_CANDI_PICK) {
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					final String parentEntityId = extras.getString(getString(R.string.EXTRA_ENTITY_ID));
+					if (parentEntityId != null && !parentEntityId.equals("")) {
+						/*
+						 * Update entity link and refresh parent entity info
+						 */
+					}
 				}
 			}
 		}
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		boolean rebind = mCommon.doOptionsItemSelected(item);
-		if (rebind) {
-			bind();
-		}
-		return true;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Service routines
-	// --------------------------------------------------------------------------------------------
-
-	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	public ViewGroup buildCandiInfo(final Entity entity, final ViewGroup candiInfoView, boolean refresh) {
+	static public ViewGroup buildCandiInfo(final Entity entity, final ViewGroup candiInfoView, GeoLocation mLocation, boolean refresh) {
 
-		final WebImageView imageParent = (WebImageView) candiInfoView.findViewById(R.id.image_parent);
 		final TextView title = (TextView) candiInfoView.findViewById(R.id.candi_info_title);
 		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_info_subtitle);
 		final WebImageView imageCandi = (WebImageView) candiInfoView.findViewById(R.id.candi_info_image);
@@ -234,22 +306,6 @@ public class CandiForm extends CandiActivity {
 		final WebImageView imageChildren = (WebImageView) candiInfoView.findViewById(R.id.button_children_image);
 		final TextView textChildren = (TextView) candiInfoView.findViewById(R.id.button_children_text);
 
-		/* Parent image */
-
-		if (entity.parent != null && (entity.parent.imagePreviewUri != null || entity.parent.imageUri != null || entity.parent.linkUri != null)) {
-			ImageRequestBuilder builder = new ImageRequestBuilder(imageParent);
-			builder.setImageUri(entity.parent.getMasterImageUri());
-			builder.setImageFormat(entity.parent.getMasterImageFormat());
-			builder.setLinkZoom(entity.parent.linkZoom);
-			builder.setLinkJavascriptEnabled(entity.parent.linkJavascriptEnabled);
-			ImageRequest imageRequest = builder.create();
-			imageParent.setImageRequest(imageRequest);
-			imageParent.setVisibility(View.VISIBLE);
-		}
-		else {
-			imageParent.setVisibility(View.GONE);
-		}
-		
 		/* Candi image */
 
 		if (entity.imageUri != null || entity.linkUri != null) {
@@ -285,18 +341,15 @@ public class CandiForm extends CandiActivity {
 		if (!entity.locked) {
 			if (entity.root) {
 				newCandi.setVisibility(View.VISIBLE);
-				newCandi.setTag(new Command(CommandType.Dialog, "Add\nCandi", "NewCandi", entity.type, entity.id, entity.id, null));
 			}
 			newComment.setVisibility(View.VISIBLE);
-			newComment.setTag(new Command(CommandType.New, "Comment", "CommentForm", null, entity.id, entity.id, null));
 		}
 
 		if (entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
 			editCandi.setVisibility(View.VISIBLE);
-			editCandi.setTag(new Command(CommandType.Edit, "Edit", "EntityForm", entity.type, entity.id, null, null));
 		}
 
-		boolean visibleChildren = (entity.children != null && entity.hasVisibleChildren()) || entity.childCount > 0;
+		boolean visibleChildren = (entity.children != null && (entity.hasVisibleChildren()) || (entity.childCount != null && entity.childCount > 0));
 		if (visibleChildren) {
 			Entity childEntity = entity.children.get(0);
 
@@ -327,7 +380,7 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Map */
-		GeoLocation entityLocation = entity.location != null ? entity.location : mCommon.mEntityLocation;
+		GeoLocation entityLocation = entity.location != null ? entity.location : mLocation;
 		if (entityLocation == null || entityLocation.latitude == null || entityLocation.longitude == null) {
 			map.setVisibility(View.GONE);
 		}
@@ -367,28 +420,90 @@ public class CandiForm extends CandiActivity {
 		return candiInfoView;
 	}
 
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		if (id == CandiConstants.DIALOG_NEW_CANDI_ID) {
-			return mCommon.mIconContextMenu.createMenu(getString(R.string.dialog_new_message), this);
+	private void updateViewPager()
+	{
+		if (mViewPager == null) {
+
+			mViewPager = (ViewPager) CandiForm.this.findViewById(R.id.view_pager);
+
+			List<Entity> entitiesForPaging = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, mCommon.mCollectionType);
+
+			/*
+			 * We clone the collection so our updates don't impact the entity model that
+			 * radar relies on. When radar resumes, it should pickup any changes made so it
+			 * stays consistent with what the user sees in candi form.
+			 */
+			for (Entity entity : entitiesForPaging) {
+				mEntitiesForPaging.add(entity);
+			}
+
+			mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+
+				@Override
+				public void onPageSelected(int position) {
+					mEntity = mEntitiesForPaging.get(position);
+				}
+			});
+
+			mViewPager.setAdapter(new CandiPagerAdapter(CandiForm.this, mViewPager, mEntitiesForPaging));
+
+			synchronized (mEntitiesForPaging) {
+				for (int i = 0; i < mEntitiesForPaging.size(); i++) {
+					if (mEntitiesForPaging.get(i).id.equals(mEntity.id)) {
+						mViewPager.setCurrentItem(i, false);
+						break;
+					}
+				}
+			}
+
 		}
-		return super.onCreateDialog(id);
-	}
+		else {
 
-	private void startCandiList() {
-		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
-		intentBuilder.setCommand(new Command(CommandType.View));
-		intentBuilder.setEntity(mCommon.mEntity);
-		Intent intent = intentBuilder.create();
+			/* Replace the entity in our local collection */
+			for (int i = 0; i < mEntitiesForPaging.size(); i++) {
+				Entity entityOld = mEntitiesForPaging.get(i);
+				if (entityOld.id.equals(mEntity.id)) {
+					mEntitiesForPaging.set(i, mEntity);
+					break;
+				}
+			}
 
-		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_LIST);
-		overridePendingTransition(R.anim.slide_in_right_long, R.anim.slide_out_left_long);
+			mViewPager.getAdapter().notifyDataSetChanged();
+		}
 	}
 
 	private void showCandiPicker() {
 		Intent intent = new Intent(this, CandiPicker.class);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_PICK);
 		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		/*
+		 * We have to be pretty aggressive about refreshing the UI because
+		 * there are lots of actions that could have happened while this activity
+		 * was stopped that change what the user would expect to see.
+		 * 
+		 * - Entity deleted or modified
+		 * - Entity children modified
+		 * - New comments
+		 * - Change in user which effects which candi and UI should be visible.
+		 * - User profile could have been updated and we don't catch that.
+		 */
+		if (!isFinishing()) {
+			if (!Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
+					|| ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
+					|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+				invalidateOptionsMenu();
+				bind(true);
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

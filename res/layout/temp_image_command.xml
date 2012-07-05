@@ -7,7 +7,6 @@
     android:minHeight="65dp"
     android:layout_height="65dp"
     android:height="65dp"
-    android:onClick="onCandiInfoClick"
     android:padding="3dp"
     android:scaleType="center"
     android:width="65dp" />

@@ -39,21 +39,22 @@ public class Query {
 		return this;
 	}
 
+	@SuppressWarnings("deprecation")
 	public String queryString() {
 		String query = this.entityName;
 		Boolean atRoot = true;
 
 		if (this.filter != null) {
-			query += "?__find=" + URLEncoder.encode(this.filter);
+			query += "?find=" + URLEncoder.encode(this.filter);
 			atRoot = false;
 		}
 
 		if (this.lookups) {
 			if (atRoot) {
-				query += "?__lookups=true";
+				query += "?lookups=true";
 			}
 			else {
-				query += "&__lookups=true";
+				query += "&lookups=true";
 			}
 			atRoot = false;
 		}

@@ -25,7 +25,7 @@ public abstract class ServiceEntry {
 	public String		id;
 
 	/* Lookup Ids */
-	
+
 	@Expose
 	@SerializedName("_owner")
 	public String		ownerId;
@@ -39,7 +39,7 @@ public abstract class ServiceEntry {
 	public String		modifierId;
 
 	/* Lookups */
-	
+
 	@Expose(serialize = false, deserialize = true)
 	public User			owner;
 
@@ -48,7 +48,7 @@ public abstract class ServiceEntry {
 
 	@Expose(serialize = false, deserialize = true)
 	public User			modifier;
-	
+
 	/* Dates */
 
 	@Expose(serialize = false, deserialize = true)
@@ -58,12 +58,12 @@ public abstract class ServiceEntry {
 	public Number		modifiedDate;
 
 	/* Client use only */
-	public String 	timeSince;
-	
+	public String		timeSince;
+
 	public String getEntryUri() {
 		String root = mServiceUri;
 		String entity = this.getCollection();
-		String uri = root + entity + "/__ids:" + id;
+		String uri = root + entity + "/ids:" + id;
 		return uri;
 	}
 

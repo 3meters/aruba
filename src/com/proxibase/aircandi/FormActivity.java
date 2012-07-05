@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
@@ -19,7 +20,6 @@ import android.provider.MediaStore.Images.Media;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -55,9 +55,7 @@ public abstract class FormActivity extends SherlockActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			/*
-			 * Try to detect case where this is being created after a crash and bail out.
-			 */
+			/* Try to detect case where this is being created after a crash and bail out. */
 			super.onCreate(savedInstanceState);
 			setResult(Activity.RESULT_CANCELED);
 			finish();
@@ -68,12 +66,8 @@ public abstract class FormActivity extends SherlockActivity {
 			 * our custom style attributes.
 			 */
 			mCommon = new AircandiCommon(this);
-			if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-				mCommon.startRadarActivity();
-			}
-			mCommon.setTheme();
-			requestWindowFeature(Window.FEATURE_NO_TITLE);
 			mCommon.unpackIntent();
+			mCommon.setTheme(getCustomTheme());
 			super.onCreate(savedInstanceState);
 			super.setContentView(this.getLayoutID());
 			mCommon.initialize();
@@ -82,7 +76,7 @@ public abstract class FormActivity extends SherlockActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Events routines
+	// Events
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -92,7 +86,6 @@ public abstract class FormActivity extends SherlockActivity {
 	}
 
 	public void onCancelButtonClick(View view) {
-		setResult(Activity.RESULT_CANCELED);
 		finish();
 		overridePendingTransition(R.anim.browse_in, R.anim.form_out);
 	}
@@ -103,8 +96,10 @@ public abstract class FormActivity extends SherlockActivity {
 		mCommon.doAttachedToWindow();
 	}
 
-	public void onHomeClick(View view) {
-		mCommon.doHomeClick(view);
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		Logger.i(this, "Configuration changed");
+		super.onConfigurationChanged(newConfig);
 	}
 
 	@Override
@@ -187,30 +182,30 @@ public abstract class FormActivity extends SherlockActivity {
 					imageRequest.setImageShape(ImageShape.Square);
 					imageRequest.setScaleToWidth(CandiConstants.IMAGE_WIDTH_DEFAULT);
 					bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
-					
+
 					/* Adjust rotation using file Exif information */
 					ExifInterface exif = new ExifInterface(getTempFile().getAbsolutePath());
 					int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 					int rotate = 0;
 					switch (orientation) {
-					case ExifInterface.ORIENTATION_ROTATE_270:
-						rotate = 270;
-						break;
-					case ExifInterface.ORIENTATION_ROTATE_180:
-						rotate = 180;
-						break;
-					case ExifInterface.ORIENTATION_ROTATE_90:
-						rotate = 90;
-						break;
+						case ExifInterface.ORIENTATION_ROTATE_270:
+							rotate = 270;
+							break;
+						case ExifInterface.ORIENTATION_ROTATE_180:
+							rotate = 180;
+							break;
+						case ExifInterface.ORIENTATION_ROTATE_90:
+							rotate = 90;
+							break;
 					}
-					
+
 					// create a matrix object
 					Matrix matrix = new Matrix();
 					matrix.postRotate(rotate); // anti-clockwise by 90 degrees
 
 					// create a new bitmap from the original using the matrix to transform the result
-					bitmap = Bitmap.createBitmap(bitmap , 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-					//bitmap.recycle();
+					bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+					// bitmap.recycle();
 
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);
 					if (mImageRequestListener != null) {
@@ -332,7 +327,7 @@ public abstract class FormActivity extends SherlockActivity {
 		builder.setCustomTitle(titleView);
 
 		builder.setCancelable(true);
-		builder.setNegativeButton(getResources().getString(R.string.dialog_change_picture_button_negative), null);
+		builder.setNegativeButton(getResources().getString(R.string.dialog_button_cancel), null);
 
 		builder.setItems(listId, new DialogInterface.OnClickListener() {
 
@@ -390,6 +385,10 @@ public abstract class FormActivity extends SherlockActivity {
 		alert.show();
 	}
 
+	protected Integer getCustomTheme() {
+		return null;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
@@ -398,9 +397,11 @@ public abstract class FormActivity extends SherlockActivity {
 	protected void onResume() {
 		super.onResume();
 		mCommon.doResume();
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
-			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
-			mCommon.reload();
+		if (!mCommon.mUsingCustomTheme) {
+			if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+				mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+				mCommon.reload();
+			}
 		}
 	}
 

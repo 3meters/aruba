@@ -3,35 +3,13 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <!-- Header -->
-
-    <LinearLayout
-        android:id="@+id/activity_header"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" >
-
-        <include layout="@layout/temp_aircandi_header" />
-    </LinearLayout>
-
-    <!-- Tabs -->
-
-    <LinearLayout
-        android:id="@+id/form_tabs"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/activity_header" >
-
-        <include layout="@layout/temp_tabs_aircandi" />
-    </LinearLayout>
-
     <!-- Body -->
 
     <ListView
         android:id="@+id/list_candi"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/form_tabs"
+        android:layout_alignParentTop="true"
         android:background="?attr/backgroundCandiInfo"
         android:cacheColorHint="#00000000"
         android:listSelector="#00000000" />

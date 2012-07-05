@@ -598,6 +598,7 @@ public class ProxibaseService {
 				+ String.valueOf(downloadTimeMills) + "ms");
 	}
 
+	@SuppressWarnings("deprecation")
 	public String generateId(int schemaId, Long timeUtc) {
 
 		Date dateUtc = new Date(timeUtc);
@@ -648,6 +649,15 @@ public class ProxibaseService {
 			if (jsonElement.isJsonObject()) {
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				jsonElement = jsonObject.get("data");
+				
+				if (jsonObject.has("cursor")) {
+					JsonArray jsonArray = jsonObject.get("cursor").getAsJsonArray();
+					List<String> cursorIds = new ArrayList<String>();
+					for (int i = 0; i < jsonArray.size(); i++) {
+						cursorIds.add(jsonArray.get(i).getAsString());
+					}
+					serviceData.cursor = cursorIds;
+				}
 				if (jsonObject.has("date")) {
 					serviceData.date = jsonObject.get("date").getAsJsonPrimitive().getAsNumber();
 				}

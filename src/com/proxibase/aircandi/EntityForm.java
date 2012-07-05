@@ -14,8 +14,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -27,8 +25,7 @@ import android.widget.ViewFlipper;
 
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AircandiCommon.ServiceOperation;
-import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.Command.CommandType;
+import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.GeoLocationManager;
 import com.proxibase.aircandi.components.ImageManager;
@@ -43,6 +40,7 @@ import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
+import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
 import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -62,6 +60,7 @@ import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.Entity.Visibility;
 import com.proxibase.service.objects.Link;
 import com.proxibase.service.objects.Observation;
+import com.proxibase.service.objects.Result;
 import com.proxibase.service.objects.ServiceData;
 import com.proxibase.service.objects.User;
 
@@ -73,17 +72,18 @@ public class EntityForm extends FormActivity {
 	private boolean			mUriValidated	= false;
 	private AsyncTask		mAsyncTask		= null;
 	private Observation		mObservation;
+	private Bitmap			mEntityBitmap;
+	private Entity			mEntityForForm;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 		Logger.d(this, "onCreate called");
 
 		User user = Aircandi.getInstance().getUser();
 		if (user != null && user.anonymous) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
-			intentBuilder.setCommand(new Command(CommandType.Edit));
+			intentBuilder.setCommandType(CommandType.Edit);
 			intentBuilder.setMessage(getString(R.string.signin_message_new_candi));
 			Intent intent = intentBuilder.create();
 
@@ -93,16 +93,7 @@ public class EntityForm extends FormActivity {
 
 		initialize();
 
-		/* Restore current tab */
-		if (savedInstanceState != null) {
-			if (findViewById(R.id.image_tab_host) != null) {
-				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(savedInstanceState
-						.getInt("tab_index")));
-				mViewFlipper.setDisplayedChild(mCommon.mTabIndex);
-			}
-		}
-
-		if (bind(savedInstanceState)) {
+		if (bind(savedInstanceState, true)) {
 			draw();
 
 			/* Can overwrite any values from the original intent */
@@ -115,14 +106,11 @@ public class EntityForm extends FormActivity {
 	protected void initialize() {
 
 		/* Starting determining the users location if we are creating new candi. */
-		if (mCommon.mCommand.type == CommandType.New) {
+		if (mCommon.mCommandType == CommandType.New) {
 			GeoLocationManager.getInstance().setCurrentLocation(null);
 			Criteria criteria = new Criteria();
 			criteria.setAccuracy(Criteria.ACCURACY_COARSE);
 			GeoLocationManager.getInstance().getSingleLocationUpdate(null, criteria);
-			// GeoLocationManager.getInstance().getLastBestLocation(CandiConstants.LOCATION_MAX_DISTANCE,
-			// System.currentTimeMillis() - CandiConstants.LOCATION_MAX_TIME,
-			// criteria, null);
 		}
 
 		/* Tracking */
@@ -142,17 +130,15 @@ public class EntityForm extends FormActivity {
 		}
 
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
-		if (mViewFlipper != null) {
-			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
-		}
+		mCommon.setViewFlipper(mViewFlipper);
 	}
 
-	protected boolean bind(final Bundle savedInstanceState) {
+	protected boolean bind(final Bundle savedInstanceState, Boolean useProxiExplorer) {
 		/*
 		 * Fill in the system and default properties for the base entity properties. The activities that subclass this
 		 * will set any additional properties beyond the base ones.
 		 */
-		if (mCommon.mCommand.type == CommandType.New) {
+		if (mCommon.mCommandType == CommandType.New) {
 
 			Entity entity = new Entity();
 			entity.signalFence = -100.0f;
@@ -169,56 +155,78 @@ public class EntityForm extends FormActivity {
 				entity.imagePreviewUri = "resource:placeholder_picture";
 				entity.imageUri = entity.imagePreviewUri;
 			}
-			mCommon.mEntity = entity;
+			mEntityForForm = entity;
 			return true;
 		}
 		else {
-			if (mCommon.mEntity == null && mCommon.mEntityId != null) {
 
-				new AsyncTask() {
+			if (mEntityForForm == null && mCommon.mEntityId != null) {
 
-					@Override
-					protected void onPreExecute() {
-						mCommon.showProgressDialog(true, "Loading...");
+				if (useProxiExplorer) {
+					/*
+					 * Entity is coming from entity model. We want to create a clone so
+					 * that any changes only show up in the entity model if the changes make it
+					 * to the service.
+					 */
+					Entity entityForModel = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mCollectionType);
+					if (entityForModel != null) {
+						mEntityForForm = entityForModel.clone();
+						mImageUriOriginal = mEntityForForm.imageUri;
 					}
 
-					@Override
-					protected Object doInBackground(Object... params) {
-						String jsonFields = "{\"entities\":{},";
-						jsonFields += "\"children\":{},";
-						jsonFields += "\"parents\":{\"imagePreviewUri\":true,\"linkUri\":true,\"linkZoom\":true,\"linkJavascriptEnabled\":true,\"_creator\":true,\"creator\":true,\"modifiedDate\":true},";
-						jsonFields += "\"comments\":{}}";
-						String jsonEagerLoad = "{\"children\":false,\"parents\":true,\"comments\":false}";
-						ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, jsonFields, null);
-						return serviceResponse;
+					draw();
+
+					/* Can overwrite any values from the original intent */
+					if (savedInstanceState != null) {
+						doRestoreInstanceState(savedInstanceState);
 					}
+				}
+				else {
+					new AsyncTask() {
 
-					@Override
-					protected void onPostExecute(Object response) {
-						ServiceResponse serviceResponse = (ServiceResponse) response;
-						if (serviceResponse.responseCode == ResponseCode.Success) {
+						@Override
+						protected void onPreExecute() {
+							mCommon.showProgressDialog(true, "Loading...");
+						}
 
-							mCommon.showProgressDialog(false, null);
-							mCommon.mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
-							mImageUriOriginal = mCommon.mEntity.imageUri;
+						@Override
+						protected Object doInBackground(Object... params) {
+							String jsonFields = "{\"entities\":{},";
+							jsonFields += "\"children\":{},";
+							jsonFields += "\"parents\":{\"imagePreviewUri\":true,\"linkUri\":true,\"linkZoom\":true,\"linkJavascriptEnabled\":true,\"_creator\":true,\"creator\":true,\"modifiedDate\":true},";
+							jsonFields += "\"comments\":{}}";
+							String jsonEagerLoad = "{\"children\":false,\"parents\":true,\"comments\":false}";
+							ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, jsonFields, null);
+							return serviceResponse;
+						}
 
-							draw();
+						@Override
+						protected void onPostExecute(Object response) {
+							ServiceResponse serviceResponse = (ServiceResponse) response;
+							if (serviceResponse.responseCode == ResponseCode.Success) {
 
-							/* Can overwrite any values from the original intent */
-							if (savedInstanceState != null) {
-								doRestoreInstanceState(savedInstanceState);
+								mCommon.showProgressDialog(false, null);
+								mEntityForForm = (Entity) ((ServiceData) serviceResponse.data).data;
+								mImageUriOriginal = mEntityForForm.imageUri;
+
+								draw();
+
+								/* Can overwrite any values from the original intent */
+								if (savedInstanceState != null) {
+									doRestoreInstanceState(savedInstanceState);
+								}
+							}
+							else {
+								mCommon.handleServiceError(serviceResponse);
 							}
 						}
-						else {
-							mCommon.handleServiceError(serviceResponse);
-						}
-					}
-				}.execute();
+					}.execute();
+				}
 				return false;
 			}
 			else {
-				if (mCommon.mEntity != null) {
-					mImageUriOriginal = mCommon.mEntity.imageUri;
+				if (mEntityForForm != null) {
+					mImageUriOriginal = mEntityForForm.imageUri;
 				}
 				return true;
 			}
@@ -227,16 +235,16 @@ public class EntityForm extends FormActivity {
 
 	protected void draw() {
 
-		if (mCommon.mEntity != null) {
+		if (mEntityForForm != null) {
 
-			final Entity entity = mCommon.mEntity;
+			final Entity entity = mEntityForForm;
 
 			/* Content */
 
 			if (mImagePicture != null) {
 				if (entity.imageUri != null && !entity.imageUri.equals("")) {
-					if (entity.imageBitmap != null) {
-						ImageUtils.showImageInImageView(entity.imageBitmap, mImagePicture.getImageView(), true, R.anim.fade_in_medium);
+					if (mEntityBitmap != null) {
+						ImageUtils.showImageInImageView(mEntityBitmap, mImagePicture.getImageView(), true, R.anim.fade_in_medium);
 						mImagePicture.setVisibility(View.VISIBLE);
 					}
 					else {
@@ -253,7 +261,7 @@ public class EntityForm extends FormActivity {
 								ServiceResponse serviceResponse = (ServiceResponse) response;
 								if (serviceResponse.responseCode == ResponseCode.Success) {
 									ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-									entity.imageBitmap = imageResponse.bitmap;
+									mEntityBitmap = imageResponse.bitmap;
 								}
 							}
 						});
@@ -318,7 +326,7 @@ public class EntityForm extends FormActivity {
 
 			/* Configure UI */
 
-			if (mCommon.mCommand.type == CommandType.New) {
+			if (mCommon.mCommandType == CommandType.New) {
 				if (findViewById(R.id.btn_delete_post) != null) {
 					((Button) findViewById(R.id.btn_delete_post)).setVisibility(View.GONE);
 				}
@@ -330,16 +338,6 @@ public class EntityForm extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	public void onTabClick(View view) {
-		mCommon.setActiveTab(view);
-		if (view.getTag().equals("content")) {
-			mViewFlipper.setDisplayedChild(0);
-		}
-		else if (view.getTag().equals("settings")) {
-			mViewFlipper.setDisplayedChild(1);
-		}
-	}
-
 	public void onChangePictureButtonClick(View view) {
 		showChangePictureDialog(false, mImagePicture, new RequestListener() {
 
@@ -348,9 +346,9 @@ public class EntityForm extends FormActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mCommon.mEntity.imageBitmap = imageBitmap;
-					mCommon.mEntity.imageUri = imageUri;
-					mCommon.mEntity.linkUri = linkUri;
+					mEntityBitmap = imageBitmap;
+					mEntityForForm.imageUri = imageUri;
+					mEntityForForm.linkUri = linkUri;
 				}
 			}
 		});
@@ -380,7 +378,7 @@ public class EntityForm extends FormActivity {
 			}
 			else {
 				initialize();
-				bind(null);
+				bind(null, true);
 				draw();
 			}
 		}
@@ -416,8 +414,7 @@ public class EntityForm extends FormActivity {
 
 					if (!validateUriSyntax(linkUri)) {
 						ImageUtils.showToastNotification("Invalid link specified", Toast.LENGTH_SHORT);
-						serviceResponse = new ServiceResponse(ResponseCode.Failed,
-								ResponseCodeDetail.ProtocolException, null, null);
+						serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ProtocolException, null, null);
 					}
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -431,9 +428,9 @@ public class EntityForm extends FormActivity {
 						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 
-							mCommon.mEntity.linkUri = linkUri;
-							mCommon.mEntity.imageUri = null;
-							mCommon.mEntity.imageBitmap = null;
+							mEntityForForm.linkUri = linkUri;
+							mEntityForForm.imageUri = null;
+							mEntityBitmap = null;
 							mUriValidated = true;
 						}
 					}
@@ -450,20 +447,86 @@ public class EntityForm extends FormActivity {
 						}
 					});
 
-					/* Pull all the control values back into the entity object */
-					gather();
-
 					if (serviceResponse.responseCode == ResponseCode.Success) {
-						if (mCommon.mCommand.type == CommandType.New) {
+						if (mCommon.mCommandType == CommandType.New) {
+							/*
+							 * Pull all the control values back into the entity object
+							 */
+							gather(mEntityForForm);
+
 							serviceResponse = insert();
 							if (serviceResponse.responseCode == ResponseCode.Success) {
+								/*
+								 * Insert new entity into the entity model.
+								 * 
+								 * We need to do a reasonable job of filling out the fields that
+								 * normally get set by the service.
+								 */
+								Entity entity = mEntityForForm;
+								Entity parentEntity = null;
+								if (entity.parentId != null) {
+									parentEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entity.parentId, CollectionType.CandiByRadar);
+								}
+								Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeaconById(entity.beaconId);
+								String jsonResponse = (String) serviceResponse.data;
+								ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, Result.class, GsonType.ProxibaseService);
+								Result result = (Result) serviceData.data;
+
+								entity.id = result._id;
+								entity.createdDate = DateUtils.nowDate().getTime();
+								entity.modifiedDate = entity.createdDate;
+								entity.ownerId = Aircandi.getInstance().getUser().id;
+								entity.creatorId = entity.ownerId;
+								entity.modifierId = entity.ownerId;
+
+								ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, CollectionType.CandiByRadar);
+								ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, CollectionType.CandiByUser);
+								ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
+
 								ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 								setResult(CandiConstants.RESULT_ENTITY_INSERTED);
 							}
 						}
-						else if (mCommon.mCommand.type == CommandType.Edit) {
-							serviceResponse = update();
+						else if (mCommon.mCommandType == CommandType.Edit) {
+							/*
+							 * Pull all the control values back into the entity object being used to
+							 * update the service. Because the entity reference comes from an entity model
+							 * collection, that entity gets updated.
+							 */
+							gather(mEntityForForm);
+							mEntityForForm.modifierId = Aircandi.getInstance().getUser().id;
+							mEntityForForm.modifiedDate = DateUtils.nowDate().getTime();
+							serviceResponse = update(mEntityForForm);
+
 							if (serviceResponse.responseCode == ResponseCode.Success) {
+								/*
+								 * Now that we know the entity has been updated with the service, go ahead
+								 * and update the appropriate entities in the entity model to match.
+								 */
+								Entity entityByRadar = ProxiExplorer.getInstance().getEntityModel()
+										.getEntityById(mCommon.mEntityId, CollectionType.CandiByRadar);
+
+								if (entityByRadar != null) {
+									gather(entityByRadar);
+									entityByRadar.modifierId = mEntityForForm.modifierId;
+									entityByRadar.modifiedDate = mEntityForForm.modifiedDate;
+									entityByRadar.imagePreviewUri = mEntityForForm.imagePreviewUri;
+									entityByRadar.imageUri = mEntityForForm.imageUri;
+								}
+								/*
+								 * The entity could also be in the mycandi collection.
+								 */
+								Entity entityByUser = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, CollectionType.CandiByUser);
+
+								if (entityByUser != null) {
+									gather(entityByUser);
+									entityByUser.modifierId = mEntityForForm.modifierId;
+									entityByUser.modifiedDate = mEntityForForm.modifiedDate;
+									entityByUser.imagePreviewUri = mEntityForForm.imagePreviewUri;
+									entityByUser.imageUri = mEntityForForm.imageUri;
+								}
+
+								ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 								ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 								setResult(CandiConstants.RESULT_ENTITY_UPDATED);
 							}
@@ -496,36 +559,34 @@ public class EntityForm extends FormActivity {
 		return true;
 	}
 
-	protected void gather() {
+	protected void gather(Entity entity) {
 		if (findViewById(R.id.text_title) != null) {
-			mCommon.mEntity.title = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
-			mCommon.mEntity.label = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
+			entity.title = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
+			entity.label = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
 		}
 		if (findViewById(R.id.text_content) != null) {
-			mCommon.mEntity.description = ((TextView) findViewById(R.id.text_content)).getText().toString().trim();
+			entity.description = ((TextView) findViewById(R.id.text_content)).getText().toString().trim();
 		}
 		if (findViewById(R.id.cbo_visibility) != null) {
 			Visibility visibility = Visibility.values()[((Spinner) findViewById(R.id.cbo_visibility))
 					.getSelectedItemPosition()];
-			mCommon.mEntity.visibility = visibility.toString().toLowerCase();
+			entity.visibility = visibility.toString().toLowerCase();
 		}
 		if (findViewById(R.id.chk_html_javascript) != null) {
-			mCommon.mEntity.linkJavascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
+			entity.linkJavascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
 		}
 		if (findViewById(R.id.chk_html_zoom) != null) {
-			mCommon.mEntity.linkZoom = ((CheckBox) findViewById(R.id.chk_html_zoom)).isChecked();
+			entity.linkZoom = ((CheckBox) findViewById(R.id.chk_html_zoom)).isChecked();
 		}
 		if (findViewById(R.id.chk_locked) != null) {
-			mCommon.mEntity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
+			entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
 		}
 	}
 
 	protected ServiceResponse insert() {
 
-		Entity entity = mCommon.mEntity;
-
-		Logger.i(this, "Inserting entity: " + entity.title);
-		Tracker.trackEvent("Entity", "Insert", entity.type, 0);
+		Logger.i(this, "Inserting entity: " + mEntityForForm.title);
+		Tracker.trackEvent("Entity", "Insert", mEntityForForm.type, 0);
 		ServiceResponse serviceResponse = new ServiceResponse();
 
 		/* Get strongest nearby beacon and alert if none */
@@ -543,13 +604,13 @@ public class EntityForm extends FormActivity {
 
 		/* If parent id then this is a child */
 		if (mCommon.mParentId != null) {
-			entity.root = false;
-			entity.parentId = mCommon.mParentId;
+			mEntityForForm.root = false;
+			mEntityForForm.parentId = mCommon.mParentId;
 		}
 		else {
-			entity.root = true;
-			entity.parentId = null;
-			entity.beaconId = beacon.id;
+			mEntityForForm.root = true;
+			mEntityForForm.parentId = null;
+			mEntityForForm.beaconId = beacon.id;
 		}
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -610,13 +671,13 @@ public class EntityForm extends FormActivity {
 
 			/* Link */
 			Link link = new Link();
-			link.toId = mCommon.mParentId == null ? beacon.id : entity.parentId;
+			link.toId = mCommon.mParentId == null ? beacon.id : mEntityForForm.parentId;
 			parameters.putString("link",
 					"object:" + ProxibaseService.convertObjectToJson(link, GsonType.ProxibaseService));
 
 			/* Entity */
 			parameters.putString("entity",
-					"object:" + ProxibaseService.convertObjectToJson(entity, GsonType.ProxibaseService));
+					"object:" + ProxibaseService.convertObjectToJson(mEntityForForm, GsonType.ProxibaseService));
 
 			ServiceRequest serviceRequest = new ServiceRequest();
 			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity");
@@ -634,7 +695,7 @@ public class EntityForm extends FormActivity {
 		return serviceResponse;
 	}
 
-	protected ServiceResponse update() {
+	protected ServiceResponse update(Entity entity) {
 
 		ServiceResponse serviceResponse = new ServiceResponse();
 
@@ -644,15 +705,13 @@ public class EntityForm extends FormActivity {
 		}
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
-			mCommon.mEntity.modifierId = Aircandi.getInstance().getUser().id;
-			Logger.i(this, "Updating entity: " + mCommon.mEntity.title);
-			Tracker.trackEvent("Entity", "Update", mCommon.mEntity.type, 0);
+			Logger.i(this, "Updating entity: " + entity.title);
+			Tracker.trackEvent("Entity", "Update", entity.type, 0);
 
 			// Construct entity, link, and observation
 			Bundle parameters = new Bundle();
 			parameters.putBoolean("skipActivityDate", false);
-			parameters.putString("entity",
-					"object:" + ProxibaseService.convertObjectToJson(mCommon.mEntity, GsonType.ProxibaseService));
+			parameters.putString("entity", "object:" + ProxibaseService.convertObjectToJson(entity, GsonType.ProxibaseService));
 
 			ServiceRequest serviceRequest = new ServiceRequest();
 			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity");
@@ -663,7 +722,7 @@ public class EntityForm extends FormActivity {
 		}
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
-			Tracker.trackEvent("Entity", "Update", mCommon.mEntityType, 0);
+			Tracker.trackEvent("Entity", "Update", entity.type, 0);
 		}
 
 		return serviceResponse;
@@ -691,9 +750,9 @@ public class EntityForm extends FormActivity {
 				 * TODO: Flag image for garbage collection but don't
 				 * delete it because because it might be needed while aircandi users have current sessions.
 				 */
-				if (mCommon.mEntity.imagePreviewUri != null
-						&& !mCommon.mEntity.imagePreviewUri.equals("")
-						&& !ImageManager.isLocalImage(mCommon.mEntity.imagePreviewUri)) {
+				if (mEntityForForm.imagePreviewUri != null
+						&& !mEntityForForm.imagePreviewUri.equals("")
+						&& !ImageManager.isLocalImage(mEntityForForm.imagePreviewUri)) {
 					try {
 						// String imageKey =
 						// mCommon.mEntity.imagePreviewUri.substring(mCommon.mEntity.imagePreviewUri.lastIndexOf("/") +
@@ -713,10 +772,10 @@ public class EntityForm extends FormActivity {
 				 * Delete the entity and all links and observations it is associated with. We attempt to continue even
 				 * if the call to delete the image failed.
 				 */
-				Logger.i(this, "Deleting entity: " + mCommon.mEntity.title);
+				Logger.i(this, "Deleting entity: " + mEntityForForm.title);
 
 				Bundle parameters = new Bundle();
-				parameters.putString("entityId", mCommon.mEntity.id);
+				parameters.putString("entityId", mEntityForForm.id);
 				parameters.putBoolean("deleteChildren", true);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
@@ -733,8 +792,12 @@ public class EntityForm extends FormActivity {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					Tracker.trackEvent("Entity", "Delete", mCommon.mEntityType, 0);
-					Logger.i(this, "Deleted entity: " + mCommon.mEntity.title);
+					Tracker.trackEvent("Entity", "Delete", mEntityForForm.type, 0);
+					Logger.i(this, "Deleted entity: " + mEntityForForm.title);
+
+					ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm, CollectionType.CandiByRadar);
+					ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm, CollectionType.CandiByUser);
+					ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 
 					mCommon.showProgressDialog(false, null);
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
@@ -758,16 +821,16 @@ public class EntityForm extends FormActivity {
 		ServiceResponse serviceResponse = new ServiceResponse();
 
 		/* Upload image to S3 if we have a new one. */
-		if (mCommon.mEntity.imageBitmap != null) {
+		if (mEntityBitmap != null) {
 			try {
 				String imageKey = String.valueOf(Aircandi.getInstance().getUser().id) + "_"
 						+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
 						+ ".jpg";
-				S3.putImage(imageKey, mCommon.mEntity.imageBitmap);
-				mCommon.mEntity.imagePreviewUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES
+				S3.putImage(imageKey, mEntityBitmap);
+				mEntityForForm.imagePreviewUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES
 						+ "/" + imageKey;
-				if (mCommon.mEntity.imageUri == null || mCommon.mEntity.imageUri.equals("")) {
-					mCommon.mEntity.imageUri = mCommon.mEntity.imagePreviewUri;
+				if (mEntityForForm.imageUri == null || mEntityForForm.imageUri.equals("")) {
+					mEntityForForm.imageUri = mEntityForForm.imagePreviewUri;
 				}
 			}
 			catch (ProxibaseServiceException exception) {
@@ -783,7 +846,7 @@ public class EntityForm extends FormActivity {
 
 	private void showBookmarkActivity() {
 
-		Intent intent = new Intent(this, BookmarkList.class);
+		Intent intent = new Intent(this, BookmarkPicker.class);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
 		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 
@@ -794,9 +857,9 @@ public class EntityForm extends FormActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mCommon.mEntity.linkUri = linkUri;
-					mCommon.mEntity.imageUri = null;
-					mCommon.mEntity.imageBitmap = null;
+					mEntityForForm.linkUri = linkUri;
+					mEntityForForm.imageUri = null;
+					mEntityBitmap = null;
 					updateLinkFields(linkUri);
 				}
 			}
@@ -914,6 +977,7 @@ public class EntityForm extends FormActivity {
 		super.onSaveInstanceState(savedInstanceState);
 		Logger.d(this, "onSaveInstanceState called");
 
+		mCommon.doSaveInstanceState(savedInstanceState);
 		if (findViewById(R.id.text_title) != null) {
 			savedInstanceState.putString("title", ((TextView) findViewById(R.id.text_title)).getText().toString());
 		}
@@ -945,6 +1009,7 @@ public class EntityForm extends FormActivity {
 	private void doRestoreInstanceState(Bundle savedInstanceState) {
 		Logger.d(this, "Restoring previous state");
 
+		mCommon.doRestoreInstanceState(savedInstanceState);
 		if (findViewById(R.id.text_title) != null) {
 			((TextView) findViewById(R.id.text_title)).setText(savedInstanceState.getString("title"));
 		}
@@ -987,7 +1052,11 @@ public class EntityForm extends FormActivity {
 	}
 
 	protected void onDestroy() {
-		super.onPause();
+		super.onDestroy();
+		if (mEntityBitmap != null && !mEntityBitmap.isRecycled()) {
+			mEntityBitmap.recycle();
+		}
+		System.gc();
 	}
 
 	// --------------------------------------------------------------------------------------------

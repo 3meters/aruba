@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="DuplicateIds" >
 
     <LinearLayout
         android:id="@+id/image_tab_host"
+        style="@style/form_tab_background"
         android:layout_width="fill_parent"
         android:layout_height="40dp"
         android:orientation="horizontal" >
@@ -27,7 +30,7 @@
 
             <ImageView
                 android:id="@+id/image_tab_image"
-                style="@style/form_tab_highlight"
+                style="@style/form_tab_active"
                 android:layout_width="fill_parent"
                 android:layout_height="5dp"
                 android:layout_alignParentBottom="true"
@@ -61,12 +64,13 @@
 
             <ImageView
                 android:id="@+id/image_tab_image"
-                style="@style/form_tab_highlight"
+                style="@style/form_tab_inactive"
                 android:layout_width="fill_parent"
                 android:layout_height="2dp"
                 android:layout_alignParentBottom="true"
                 android:adjustViewBounds="true" />
         </RelativeLayout>
+
         <View
             style="@style/form_tab_rule_vertical"
             android:layout_width="@dimen/application_button_separator_width"
@@ -94,12 +98,12 @@
 
             <ImageView
                 android:id="@+id/image_tab_image"
-                style="@style/form_tab_highlight"
+                style="@style/form_tab_inactive"
                 android:layout_width="fill_parent"
                 android:layout_height="2dp"
                 android:layout_alignParentBottom="true"
                 android:adjustViewBounds="true" />
         </RelativeLayout>
-        </LinearLayout>
+    </LinearLayout>
 
 </merge>

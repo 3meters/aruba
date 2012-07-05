@@ -5,6 +5,7 @@
     <attr name="animation" format="integer" />
     <declare-styleable name="Global">
         <attr name="themeTone" format="string" />
+        <attr name="actionBarTone" format="string" />
         <attr name="busy" format="string" />
     </declare-styleable>
     <declare-styleable name="ViewPagerIndicator">
@@ -69,7 +70,9 @@
         <attr name="textColorFormTitle" format="color" />
         <attr name="sectionHeaderFillStart" format="color" />
         <attr name="sectionHeaderFillEnd" format="color" />
-        <attr name="tabColorHighlight" format="color" />
+        <attr name="tabColorActive" format="color" />
+        <attr name="tabColorInactive" format="color" />
+        <attr name="tabColorBackground" format="color" />
         <attr name="backgroundPicture" format="string" />
     </declare-styleable>
     <declare-styleable name="CandiInfo">

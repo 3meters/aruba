@@ -201,7 +201,7 @@ public class CandiPatchModel extends Observable {
 		return candiModelManaged;
 	}
 
-	public void updateVisibilityNext() {
+	public void updateVisibilityNext(boolean chunking) {
 
 		/* Reset inactive zone */
 		mZoneInactive.getCandiesNext().clear();
@@ -259,7 +259,7 @@ public class CandiPatchModel extends Observable {
 		}
 	}
 
-	public void updateZonesNext(Navigation navigation) {
+	public void updateZonesNext(Navigation navigation, boolean chunking) {
 
 		/* Clear candies from zones that already exist (new ones might be created later). */
 		for (ZoneModel zoneModel : mZoneModels) {
@@ -290,6 +290,11 @@ public class CandiPatchModel extends Observable {
 					}
 				}
 			}
+		}
+		else if (chunking) {
+			/* We want the starting zone index to remain unchanged. */
+			CandiModel candiModelFirst = (CandiModel) ((CandiModel) mCandiRootNext).getChildren().get(0);
+			zoneIndex = candiModelFirst.getZoneStateCurrent().getZone().getZoneIndex();
 		}
 
 		for (IModel model : mCandiRootNext.getChildren()) {
@@ -349,7 +354,7 @@ public class CandiPatchModel extends Observable {
 		 * slot the user is currently looking at.
 		 */
 		boolean swappingEnabled = false;
-		if (mCandiModelFocused == null || (focusedZoneIndex == 0 && navigation != Navigation.None) || focusedZoneIndex != 0) {
+		if (chunking == false && (mCandiModelFocused == null || (focusedZoneIndex == 0 && navigation != Navigation.None) || focusedZoneIndex != 0)) {
 			swappingEnabled = true;
 		}
 

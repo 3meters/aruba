@@ -409,7 +409,7 @@ public class ImageManager {
 		return 0;
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "deprecation" })
 	private String getExifOrientation(String imagePath, String imageOrientation) {
 
 		/*

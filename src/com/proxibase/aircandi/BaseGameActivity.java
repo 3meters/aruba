@@ -240,6 +240,7 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	}
 
 	protected LayoutParams createSurfaceViewLayoutParams() {
+		@SuppressWarnings("deprecation")
 		final LayoutParams layoutParams = new LayoutParams(FILL_PARENT, FILL_PARENT);
 		layoutParams.gravity = Gravity.CENTER;
 		return layoutParams;

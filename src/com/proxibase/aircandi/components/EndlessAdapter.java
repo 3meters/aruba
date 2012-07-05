@@ -84,7 +84,6 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 		if (keepOnAppending.get()) {
 			return (super.getCount() + 1); // one more for "pending"
 		}
-
 		return (super.getCount());
 	}
 
@@ -96,7 +95,6 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 		if (position == getWrappedAdapter().getCount()) {
 			return (IGNORE_ITEM_VIEW_TYPE);
 		}
-
 		return (super.getItemViewType(position));
 	}
 
@@ -118,18 +116,19 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 * off the background task to append more data to the
 	 * wrapped adapter.
 	 * 
-	 * @param position Position of the item whose data we want
-	 * @param convertView View to recycle, if not null
-	 * @param parent ViewGroup containing the returned View
+	 * @param position
+	 *            Position of the item whose data we want
+	 * @param convertView
+	 *            View to recycle, if not null
+	 * @param parent
+	 *            ViewGroup containing the returned View
 	 */
 	@Override
 	public View getView(int position, View convertView,
-					ViewGroup parent) {
-		if (position == super.getCount() &&
-			keepOnAppending.get()) {
+			ViewGroup parent) {
+		if (position == super.getCount() && keepOnAppending.get()) {
 			if (pendingView == null) {
 				pendingView = getPendingView(parent);
-
 				new AppendTask().execute();
 			}
 
@@ -144,8 +143,10 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 * to allow the UI to deal with the exception on the
 	 * main application thread.
 	 * 
-	 * @param pendingView View representing the pending row
-	 * @param e Exception that was raised by cacheInBackground()
+	 * @param pendingView
+	 *            View representing the pending row
+	 * @param e
+	 *            Exception that was raised by cacheInBackground()
 	 * @return true if should allow retrying appending new data, false otherwise
 	 */
 	protected boolean onException(View pendingView, Exception e) {
@@ -186,7 +187,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 			}
 
 			pendingView = null;
-			//notifyDataSetChanged();
+			// notifyDataSetChanged();
 		}
 	}
 

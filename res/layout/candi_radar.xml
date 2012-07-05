@@ -4,29 +4,10 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <LinearLayout
-        android:id="@+id/activity_header"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" >
-
-        <include layout="@layout/temp_aircandi_header" />
-    </LinearLayout>
-
-    <!-- Tabs -->
-
-    <LinearLayout
-        android:id="@+id/form_tabs"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/activity_header" >
-
-        <include layout="@layout/temp_tabs_aircandi" />
-    </LinearLayout>
-
     <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_alignParentTop="true"
         android:layout_below="@+id/form_tabs" >
 
         <RelativeLayout
@@ -116,33 +97,10 @@
                 android:layout_alignParentTop="true"
                 android:layout_margin="15dp"
                 android:height="65dp"
-                android:onClick="onNewCandiClick"
+                android:onClick="onNewCandiButtonClick"
                 android:padding="3dp"
                 android:text="@string/radar_button_new"
                 android:width="65dp" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/parent_layer"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:visibility="visible" >
-
-            <com.proxibase.aircandi.widgets.WebImageView
-                android:id="@+id/image_parent"
-                android:layout_width="65dp"
-                android:layout_height="65dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_margin="15dp"
-                aircandi:animation="@anim/parent_button_in"
-                aircandi:layout="@layout/temp_webimageview"
-                aircandi:maxHeight="65dp"
-                aircandi:maxWidth="65dp"
-                aircandi:showBusy="false"
-                android:background="@drawable/app_image_selector"
-                android:onClick="onParentCandiClick"
-                android:scaleType="centerCrop" />
         </RelativeLayout>
     </FrameLayout>
 

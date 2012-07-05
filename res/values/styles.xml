@@ -76,7 +76,17 @@
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
-    <!-- Actionbar -->
+    <!-- Actionbar (not currently used or being deprecated) -->
+
+    <style name="widget_actionbar_dark" parent="Widget.Sherlock.ActionBar">
+        <item name="actionModeBackground">@color/transparent</item>
+        <item name="android:actionModeBackground">@color/transparent</item>
+    </style>
+
+    <style name="widget_actionbar_light" parent="Widget.Sherlock.Light.ActionBar">
+        <item name="actionModeBackground">@color/transparent</item>
+        <item name="android:actionModeBackground">@color/transparent</item>
+    </style>
 
     <style name="actionbar">
         <item name="android:background">?attr/backgroundHeader</item>
@@ -122,9 +132,7 @@
 
     <!--
          If you want a slightly different color for some text,
-         consider using ?android:attr/textColorSecondary
-    -->
-
+         consider using ?android:attr/textColorSecondary    -->
 
     <!-- Progress -->
 
@@ -279,13 +287,22 @@
 
     <!-- Tabs -->
 
-    <style name="form_tab_highlight">
-        <item name="android:background">?attr/tabColorHighlight</item>
+    <style name="form_tab_active">
+        <item name="android:background">?attr/tabColorActive</item>
+    </style>
+
+    <style name="form_tab_inactive">
+        <item name="android:background">?attr/tabColorInactive</item>
+    </style>
+
+    <style name="form_tab_background">
+        <item name="android:background">?attr/tabColorBackground</item>
     </style>
 
     <style name="form_tab_label">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:background">@drawable/button_nooutline_selector</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="form_tab_rule_vertical">

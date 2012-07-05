@@ -30,6 +30,7 @@ import com.proxibase.service.objects.Beacon;
 import com.proxibase.service.objects.Beacon.BeaconState;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.Entity.EntityState;
+import com.proxibase.service.objects.Observation;
 import com.proxibase.service.objects.ServiceData;
 
 public class ProxiExplorer {
@@ -37,6 +38,7 @@ public class ProxiExplorer {
 	private static ProxiExplorer	singletonObject;
 	private Context					mContext;
 	private EntityModel				mEntityModel			= new EntityModel();
+	private Observation				mObservation;
 
 	private AtomicBoolean			mScanRequestActive		= new AtomicBoolean(false);
 	private AtomicBoolean			mScanRequestProcessing	= new AtomicBoolean(false);
@@ -49,7 +51,7 @@ public class ProxiExplorer {
 	private final static String		demoBssid				= "48:5b:39:e6:d3:55";
 	private final static String		demoSsid				= "demo_dolly";
 	private final static int		globalLevel				= -20;
-	private final static String		globalBssid				= "00:00:00:00:00:00";
+	public final static String		globalBssid				= "00:00:00:00:00:00";
 	private final static String		globalSsid				= "candi_feed";
 
 	public static synchronized ProxiExplorer getInstance() {
@@ -155,16 +157,19 @@ public class ProxiExplorer {
 		if (!mScanRequestProcessing.get()) {
 			mScanRequestProcessing.set(true);
 			/*
-			 * All current beacons ids are sent to the service. Previously discovered beacons are
-			 * included in separate array along with a their freshness date.
+			 * All current beacons ids are sent to the service. Previously discovered beacons are included in separate
+			 * array along with a their freshness date.
 			 * 
 			 * To force a full rebuild of all entities for all beacons, clear the beacon collection.
 			 * 
-			 * The service returns all entities for new beacons and entities that have had activity since
-			 * the freshness date for old beacons. Unchanged entities from previous scans will
-			 * still be updated for local changes in visibility.
+			 * The service returns all entities for new beacons and entities that have had activity since the freshness
+			 * date for old beacons. Unchanged entities from previous scans will still be updated for local changes in
+			 * visibility.
 			 */
 			Logger.d(this, "Processing beacons from scan");
+
+			/* Stash latest observation */
+			Observation observation = GeoLocationManager.getInstance().getObservation();
 
 			/* Reset detection flag */
 			for (Beacon beacon : mEntityModel.getBeacons()) {
@@ -184,7 +189,12 @@ public class ProxiExplorer {
 					if (beaconMatch == null) {
 						Beacon beaconNew = new Beacon(scanResult.BSSID, scanResult.SSID, scanResult.SSID, scanResult.level, DateUtils.nowDate());
 						beaconNew.detectedLastPass = true;
+						beaconNew.radarHit = true;
 						beaconNew.state = BeaconState.New;
+						if (observation != null) {
+							beaconNew.latitude = observation.latitude;
+							beaconNew.longitude = observation.longitude;
+						}
 						beaconNew.addScanPass(scanResult.level);
 						mEntityModel.getBeacons().add(beaconNew);
 					}
@@ -229,49 +239,31 @@ public class ProxiExplorer {
 			}
 
 			/* Construct string array of the beacon ids */
-			ArrayList<String> beaconIds = new ArrayList<String>();
-			ArrayList<String> refreshIds = new ArrayList<String>();
+			ArrayList<String> beaconIdsNew = new ArrayList<String>();
+			ArrayList<String> beaconIdsRefresh = new ArrayList<String>();
 			for (Beacon beacon : mEntityModel.getBeacons()) {
 				if (beacon.state == BeaconState.New) {
 					beacon.state = BeaconState.Normal;
-					beaconIds.add(beacon.id);
+					beaconIdsNew.add(beacon.id);
 				}
 				else if (beacon.state == BeaconState.Normal) {
-					refreshIds.add(beacon.id);
+					beaconIdsRefresh.add(beacon.id);
 				}
 			}
 
 			ServiceResponse serviceResponse = new ServiceResponse();
-			if (beaconIds.size() > 0 || refreshIds.size() > 0) {
+			if (beaconIdsNew.size() > 0 || beaconIdsRefresh.size() > 0) {
 
-				serviceResponse = getEntitiesForBeacons(beaconIds, refreshIds, mEntityModel.getLastRefreshDate(), false);
+				serviceResponse = getEntitiesForBeacons(beaconIdsNew, beaconIdsRefresh, mEntityModel.getLastRefreshDate());
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					ServiceData serviceData = (ServiceData) serviceResponse.data;
-					/*
-					 * Chunking for entities
-					 * 
-					 * - serviceData.more reflects the total set of entities even if this was a smart refresh.
-					 * - Stash the beaconIds so we can reproduce the same call for chunking.
-					 */
 					mEntityModel.setLastRefreshDate(serviceData.date.longValue());
-					if (serviceData.more != null && serviceData.more) {
-						mEntityModel.setMore(serviceData.more);
-						mEntityModel.setBeaconIdsLast(beaconIds);
-						mEntityModel.setRefreshIdsLast(refreshIds);
-						mEntityModel.setLastRefreshDateLast(mEntityModel.getLastRefreshDate());
-					}
-					else {
-						mEntityModel.setMore(false);
-						mEntityModel.setBeaconIdsLast(null);
-						mEntityModel.setRefreshIdsLast(null);
-						mEntityModel.setLastRefreshDateLast(null);
-					}
 				}
 			}
 			/*
 			 * Rebuild the top level entity list and manage visibility
 			 */
-			rebuildEntityList();
+			mEntityModel.rebuildEntityList();
 			manageEntityVisibility();
 			Events.EventBus.onEntitiesLoaded(serviceResponse);
 			mScanRequestProcessing.set(false);
@@ -279,41 +271,39 @@ public class ProxiExplorer {
 		return;
 	}
 
-	public ServiceResponse getEntitiesForBeacons(ArrayList<String> beaconIds, ArrayList<String> refreshIds, Number lastRefreshDate, Boolean chunkMore) {
-
+	public ServiceResponse getEntitiesForBeacons(ArrayList<String> beaconIdsNew, ArrayList<String> beaconIdsRefresh, Number lastRefreshDate) {
+		/*
+		 * For all refresh types, calling this will reset entity collections.
+		 */
 		if (Aircandi.settings.getBoolean(Preferences.PREF_AUTOSCAN, false)) {
 			wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
 		}
 
 		Bundle parameters = new Bundle();
+		ServiceRequest serviceRequest = new ServiceRequest();
+		ServiceResponse serviceResponse = new ServiceResponse();
 
-		/*
-		 * If skipping then we need to send all as beaconIds to force
-		 * retrieve more entities even if they aren't stale.
-		 */
-		if (chunkMore) {
-			ArrayList<String> beaconIdsAll = (ArrayList<String>) beaconIds.clone();
-			beaconIdsAll.addAll(refreshIds);
-			if (beaconIdsAll.size() > 0) {
-				parameters.putStringArrayList("beaconIds", beaconIdsAll);
-			}
+		/* Set method parameters */
+		if (beaconIdsNew.size() > 0) {
+			parameters.putStringArrayList("beaconIdsNew", beaconIdsNew);
 		}
-		else {
-			if (beaconIds.size() > 0) {
-				parameters.putStringArrayList("beaconIds", beaconIds);
-			}
 
-			if (refreshIds.size() > 0) {
-				parameters.putStringArrayList("refreshIds", refreshIds);
-				parameters.putLong("refreshDate", lastRefreshDate.longValue());
-			}
+		if (beaconIdsRefresh.size() > 0) {
+			parameters.putStringArrayList("beaconIdsRefresh", beaconIdsRefresh);
+			parameters.putLong("refreshDate", lastRefreshDate.longValue());
+		}
+
+		mObservation = GeoLocationManager.getInstance().getObservation();
+		if (mObservation != null) {
+			parameters.putString("observation",
+					"object:" + ProxibaseService.convertObjectToJson(mObservation, GsonType.ProxibaseService));
 		}
 
 		parameters.putString("userId", Aircandi.getInstance().getUser().id);
 		parameters.putString("eagerLoad", "object:{\"children\":true,\"comments\":false}");
 		parameters.putString("options", "object:{\"limit\":"
 				+ String.valueOf(CandiConstants.RADAR_ENTITY_LIMIT)
-				+ ",\"skip\":" + (chunkMore ? String.valueOf(mEntityModel.getEntities().size()) : "0")
+				+ ",\"skip\":0"
 				+ ",\"sort\":{\"modifiedDate\":-1} "
 				+ ",\"children\":{\"limit\":"
 				+ String.valueOf(CandiConstants.RADAR_CHILDENTITY_LIMIT)
@@ -321,13 +311,12 @@ public class ProxiExplorer {
 				+ ",\"sort\":{\"modifiedDate\":-1}}"
 				+ "}");
 
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForBeacons");
-		serviceRequest.setRequestType(RequestType.Method);
-		serviceRequest.setParameters(parameters);
-		serviceRequest.setResponseFormat(ResponseFormat.Json);
+		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForBeacons")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setResponseFormat(ResponseFormat.Json);
 
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 		wifiReleaseLock();
 
@@ -338,8 +327,20 @@ public class ProxiExplorer {
 			serviceResponse.data = serviceData;
 			List<Object> entities = (List<Object>) serviceData.data;
 
+			/* Do some fixup migrating settings to the children collection */
+			for (Object obj : entities) {
+				Entity rawEntity = (Entity) obj;
+				if (rawEntity.children != null) {
+					rawEntity.children.setCollectionEntity(rawEntity);
+					rawEntity.children.setCollectionType(CollectionType.CandiByRadar);
+					rawEntity.children.setCursorIds(rawEntity.childCursor); // resets cursorIndex
+				}
+			}
+
 			/* Merge entities into data model */
-			mergeEntities(entities, beaconIds, refreshIds, mEntityModel.isMore());
+			mEntityModel.mergeEntities(entities, beaconIdsNew, beaconIdsRefresh, false);
+			ProxiExplorer.getInstance().getEntityModel().getEntities().setCollectionType(CollectionType.CandiByRadar);
+			ProxiExplorer.getInstance().getEntityModel().getEntities().setCursorIds(serviceData.cursor); // resets cursorIndex
 		}
 		return serviceResponse;
 	}
@@ -435,248 +436,10 @@ public class ProxiExplorer {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Chunking
+	// Entity management
 	// --------------------------------------------------------------------------------------------
 
-	public ServiceResponse chunkEntities() {
-		/*
-		 * If this gets called it means either:
-		 * 
-		 * mSkip > 0 which means that there are more top level entities to be chunked or
-		 * parentEntityId.skip > 0 which means there are more child entities to be chunked.
-		 */
-		Logger.v(this, "Chunking entities");
-		ServiceResponse serviceResponse = new ServiceResponse();
-		if (mEntityModel.getBeaconIdsLast().size() > 0 || mEntityModel.getRefreshIdsLast().size() > 0) {
-
-			serviceResponse = getEntitiesForBeacons(mEntityModel.getBeaconIdsLast(), mEntityModel.getRefreshIdsLast(),
-					mEntityModel.getLastRefreshDateLast(), mEntityModel.isMore());
-			if (serviceResponse.responseCode == ResponseCode.Success) {
-				ServiceData serviceData = (ServiceData) serviceResponse.data;
-
-				/* Keep track of whether there are still more entities to chunk */
-				if (serviceData.more != null && serviceData.more) {
-					mEntityModel.setMore(serviceData.more);
-				}
-				else {
-					mEntityModel.setMore(false);
-					mEntityModel.setBeaconIdsLast(null);
-					mEntityModel.setRefreshIdsLast(null);
-					mEntityModel.setLastRefreshDateLast(null);
-				}
-			}
-		}
-		/*
-		 * Rebuild the top level entity list. Causes any entities not
-		 * associated with beacons to be cleared out.
-		 */
-		rebuildEntityList();
-		/*
-		 * Shouldn't cause any changes in previously fetched entities
-		 * because we didn't update signal levels.
-		 */
-		manageEntityVisibility();
-		return serviceResponse;
-	}
-
-	public ServiceResponse chunkChildEntities(String parentEntityId) {
-		/*
-		 * Chunk more children for an entity
-		 */
-		Logger.v(this, "Chunking child entities");
-		ServiceResponse serviceResponse = new ServiceResponse();
-		Entity entity = mEntityModel.getEntityById(parentEntityId);
-		String jsonEagerLoad = "{\"children\":true,\"parents\":false,\"comments\":false}";
-		String jsonOptions = "{\"limit\":"
-				+ String.valueOf(CandiConstants.RADAR_ENTITY_LIMIT)
-				+ ",\"skip\":0"
-				+ ",\"sort\":{\"modifiedDate\":-1} "
-				+ ",\"children\":{\"limit\":"
-				+ String.valueOf(CandiConstants.RADAR_CHILDENTITY_LIMIT)
-				+ ",\"skip\":" + String.valueOf(entity.children.size())
-				+ ",\"sort\":{\"modifiedDate\":-1}}"
-				+ "}";
-
-		serviceResponse = ProxiExplorer.getInstance().getEntity(entity.id, jsonEagerLoad, null, jsonOptions);
-
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-			Entity rawEntity = (Entity) ((ServiceData) serviceResponse.data).data;
-			ArrayList<Object> entities = new ArrayList<Object>();
-			entities.add(rawEntity);
-			ArrayList<String> refreshIds = new ArrayList<String>();
-			refreshIds.add(rawEntity.beaconId);
-			mergeEntities(entities, null, refreshIds, true);
-		}
-		/*
-		 * Need to handle the visibility status of newly chunked entities.
-		 * This shouldn't cause any changes in previously fetched entities
-		 * because we didn't update signal levels.
-		 */
-		manageEntityVisibility();
-		return serviceResponse;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Entity routines
-	// --------------------------------------------------------------------------------------------
-
-	private void insertEntity(Entity entity, Beacon beacon) {
-		entity.beacon = beacon;
-		entity.state = EntityState.New;
-		synchronized (beacon.entities) {
-			beacon.entities.add(entity);
-		}
-		for (Entity childEntity : entity.children) {
-			childEntity.beacon = beacon;
-			childEntity.beaconId = beacon.id;
-			childEntity.parent = entity;
-			childEntity.state = EntityState.New;
-		}
-	}
-
-	private void updateEntity(Entity entity, Beacon beacon, boolean chunked) {
-		entity.beacon = beacon;
-		entity.state = EntityState.Refreshed;
-		for (Entity entityTemp : beacon.entities) {
-			if (entityTemp.id.equals(entity.id)) {
-				if (!chunked) {
-					/*
-					 * Replace existing entity and do fixups.
-					 */
-					beacon.entities.set(beacon.entities.indexOf(entityTemp), entity);
-					for (Entity childEntity : entity.children) {
-						childEntity.beacon = beacon;
-						childEntity.beaconId = beacon.id;
-						childEntity.parent = entity;
-						childEntity.state = EntityState.Refreshed;
-					}
-				}
-				else {
-					/*
-					 * Append new children to existing entity and do fixups.
-					 */
-					entityTemp.childrenMore = entity.childrenMore;
-					entityTemp.childCount = entity.childCount;
-					for (Entity childEntity : entity.children) {
-						childEntity.beacon = beacon;
-						childEntity.beaconId = beacon.id;
-						childEntity.parent = entityTemp;
-						childEntity.state = EntityState.New;
-						entityTemp.children.add(childEntity);
-					}
-				}
-			}
-		}
-	}
-
-	private void mergeEntities(List<Object> entities, ArrayList<String> beaconIds, ArrayList<String> refreshIds, Boolean chunking) {
-
-		/* Match returned entities back to beacons */
-		List<Beacon> refreshedBeacons = new ArrayList<Beacon>();
-		if (entities != null && entities.size() > 0) {
-
-			/* First find out which beacons got updated */
-
-			for (Object obj : entities) {
-				Entity rawEntity = (Entity) obj;
-				if (beaconIds != null && beaconIds.contains(rawEntity.beaconId)) {
-					/*
-					 * This is a new entity for a new beacon.
-					 */
-					for (Beacon beacon : mEntityModel.getBeacons()) {
-						if (beacon.id.equals(rawEntity.beaconId)) {
-							insertEntity(rawEntity, beacon);
-						}
-					}
-				}
-				else if (refreshIds.contains(rawEntity.beaconId)) {
-					/*
-					 * This is either a new or updated entity for an existing beacon.
-					 */
-					for (Beacon beacon : mEntityModel.getBeacons()) {
-						if (beacon.id.equals(rawEntity.beaconId)) {
-
-							if (!refreshedBeacons.contains(beacon)) {
-								refreshedBeacons.add(beacon);
-							}
-
-							boolean updateHit = false;
-							synchronized (beacon.entities) {
-								for (Entity entity : beacon.entities) {
-									if (entity.id.equals(rawEntity.id)) {
-										/*
-										 * This is an updated entity
-										 */
-										updateHit = true;
-										updateEntity(rawEntity, beacon, chunking);
-										break;
-									}
-								}
-							}
-							if (!updateHit) {
-								/*
-								 * This is new entity
-								 */
-								insertEntity(rawEntity, beacon);
-							}
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		/*
-		 * Now we need to remove any entities for refreshed beacons that didn't
-		 * come back in the results.
-		 * 
-		 * TODO: How do we know the different between an entity that was deleted
-		 * and an entity that didn't fit the limit. If we remove it, then we should
-		 * still get it back when paging to it.
-		 */
-		if (!chunking) {
-			for (Beacon beacon : refreshedBeacons) {
-
-				synchronized (beacon.entities) {
-					for (int i = beacon.entities.size() - 1; i >= 0; i--) {
-						Entity entity = beacon.entities.get(i);
-						boolean hit = false;
-						for (Object obj : entities) {
-							Entity rawEntity = (Entity) obj;
-							if (rawEntity.id.equals(entity.id)) {
-								hit = true;
-								break;
-							}
-						}
-						if (!hit) {
-							/* Remove it */
-							beacon.entities.remove(i);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private void rebuildEntityList() {
-
-		/* Rebuild the top level entity list when there could have been a top level change */
-		mEntityModel.getEntities().clear();
-		for (Beacon beacon : mEntityModel.getBeacons()) {
-			synchronized (beacon.entities) {
-				for (Entity entityTemp : beacon.entities) {
-					mEntityModel.getEntities().add(entityTemp);
-					for (int i = entityTemp.children.size() - 1; i >= 0; i--) {
-						if (entityTemp.children.get(i).beacon == null) {
-							entityTemp.children.remove(i);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private void manageEntityVisibility() {
+	public void manageEntityVisibility() {
 
 		/* Visibility status effects all entities regardless of whether this is a full or partial update. */
 		Logger.v(this, "Managing entity visibility");
@@ -883,17 +646,377 @@ public class ProxiExplorer {
 
 	public static class EntityModel {
 
-		private List<Beacon>		mBeacons	= new ArrayList<Beacon>();
-		private List<Entity>		mEntities	= new ArrayList<Entity>();
-		private Number				mLastRefreshDate;
+		private EntityList<Entity>	mEntities			= new EntityList<Entity>(CollectionType.CandiByRadar);
+		private EntityList<Entity>	mMyEntities			= new EntityList<Entity>(CollectionType.CandiByUser);
+		private List<Object>		mMapEntities		= new ArrayList<Object>();
 
-		private Boolean				mMore		= false;
-		private ArrayList<String>	mBeaconIdsLast;
-		private ArrayList<String>	mRefreshIdsLast;
-		private Number				mLastRefreshDateLast;
-		private Boolean				mRookieHit	= false;
+		private List<Beacon>		mBeacons			= new ArrayList<Beacon>();
+		private List<Beacon>		mMapBeacons			= new ArrayList<Beacon>();
+
+		private Number				mLastRefreshDate;
+		private Number				mLastActivityDate	= DateUtils.nowDate().getTime();
+		private Boolean				mRookieHit			= false;
 
 		public EntityModel() {}
+
+		public EntityModel clone() {
+
+			/*
+			 * Shallow copy so entities are by value but any entity object properties like beacon are by ref from the
+			 * original.
+			 */
+			EntityModel entityModel = new EntityModel();
+
+			entityModel.mBeacons = new ArrayList(mBeacons);
+			entityModel.mEntities = mEntities.clone();
+			entityModel.mMyEntities = mMyEntities.clone();
+			entityModel.mMapEntities = new ArrayList(mMapEntities);
+			entityModel.mLastRefreshDate = mLastRefreshDate;
+			entityModel.mRookieHit = mRookieHit;
+
+			return entityModel;
+		}
+
+		// --------------------------------------------------------------------------------------------
+		// Entity routines
+		// --------------------------------------------------------------------------------------------
+
+		public ServiceResponse chunkEntities(EntityList<Entity> entities) {
+			/*
+			 * More entities are chunked from the service by this method. Just the new chunk of entities are returned to
+			 * the caller.
+			 */
+			Bundle parameters = new Bundle();
+			ServiceRequest serviceRequest = new ServiceRequest();
+			ServiceResponse serviceResponse = new ServiceResponse();
+			Entity collectionParent = entities.getCollectionEntity();
+
+			/* Determine the index range to chunk */
+			int startIndex = entities.getStartIndex();
+			int endIndex = entities.getEndIndex();
+
+			/* Load parameters */
+			ArrayList<String> entityIds = new ArrayList<String>();
+			for (int i = startIndex; i < endIndex; i++) {
+				entityIds.add(entities.getCursorIds().get(i));
+			}
+			parameters.putStringArrayList("entityIds", entityIds);
+			parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
+
+			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
+					.setRequestType(RequestType.Method)
+					.setParameters(parameters)
+					.setResponseFormat(ResponseFormat.Json);
+
+			serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
+			if (serviceResponse.responseCode == ResponseCode.Success) {
+
+				String jsonResponse = (String) serviceResponse.data;
+				ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+				List<Entity> chunkEntities = (List<Entity>) serviceData.data;
+
+				/* Add decorations and insert into the entity model */
+				for (Entity entity : chunkEntities) {
+					Beacon beacon = null;
+					if (entity.beaconId != null) {
+						beacon = ProxiExplorer.getInstance().getEntityModel().getBeaconById(entity.beaconId);
+					}
+					this.insertEntity(entity, beacon, collectionParent, entities.getCollectionType());
+				}
+
+				/* Push the cursor index */
+				entities.setCursorIndex(endIndex);
+
+				/* 
+				 * More housekeeping! We only do this for radar candi because user candi should be filtered out
+				 * based on signal and they aren't part of the collection managed by rebuildEntityList.
+				 */
+				if (entities.getCollectionType() == CollectionType.CandiByRadar) {
+					rebuildEntityList();
+					ProxiExplorer.getInstance().manageEntityVisibility();
+				}
+
+				serviceResponse.data = chunkEntities;
+				return serviceResponse;
+			}
+			return null;
+		}
+
+		public boolean replaceEntity(Entity entityNew)
+		{
+			/*
+			 * Need to replace the children too
+			 */
+			if (entityNew != null) {
+				for (Beacon beacon : mBeacons) {
+					synchronized (beacon.entities) {
+						for (int i = 0; i < beacon.entities.size(); i++) {
+							Entity entityOld = beacon.entities.get(i);
+							if (entityOld.id.equals(entityNew.id)) {
+								beacon.entities.set(i, entityNew);
+								return true;
+							}
+							for (int j = 0; j < entityOld.children.size(); j++) {
+								Entity childEntityOld = entityOld.children.get(j);
+								if (childEntityOld.id.equals(entityNew.id)) {
+									entityOld.children.set(j, entityNew);
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		public void insertEntity(Entity entity, Beacon beacon, Entity parentEntity, CollectionType collectionType) {
+			if (collectionType == CollectionType.CandiByRadar) {
+				/*
+				 * Radar candi are associated with beacons currently in radar proximity.
+				 * 
+				 * Linkages: beacon, parent
+				 */
+				entity.state = EntityState.New;
+				if (parentEntity == null) {
+					entity.beacon = beacon;
+					synchronized (beacon.entities) {
+						beacon.entities.add(entity);
+					}
+					for (Entity childEntity : entity.children) {
+						childEntity.beacon = beacon;
+						childEntity.beaconId = beacon.id;
+						childEntity.parent = entity;
+						childEntity.state = EntityState.New;
+					}
+				}
+				else {
+					entity.beacon = parentEntity.beacon;
+					entity.beaconId = parentEntity.beacon.id;
+					entity.parent = parentEntity;
+					synchronized (parentEntity.children) {
+						parentEntity.children.add(entity);
+					}
+				}
+			}
+			else if (collectionType == CollectionType.CandiByUser) {
+				/*
+				 * User candi are beacon independent for our purposes for now. Long term
+				 * they could be linked to multiple beacons and that info could be part
+				 * of the entity
+				 * 
+				 * Linkages: parent
+				 */
+				List<Entity> myEntities = mMyEntities;
+				entity.state = EntityState.New;
+				if (parentEntity == null) {
+					synchronized (myEntities) {
+						myEntities.add(entity);
+					}
+					for (Entity childEntity : entity.children) {
+						childEntity.state = EntityState.New;
+						childEntity.parent = entity;
+					}
+				}
+				else {
+					entity.parent = parentEntity;
+					synchronized (parentEntity.children) {
+						parentEntity.children.add(entity);
+					}
+				}
+			}
+		}
+
+		public void updateEntity(Entity entity, Beacon beacon, boolean chunked) {
+			entity.beacon = beacon;
+			entity.state = EntityState.Refreshed;
+			for (Entity entityTemp : beacon.entities) {
+				if (entityTemp.id.equals(entity.id)) {
+					if (!chunked) {
+						/*
+						 * Replace existing entity and do fixups.
+						 */
+						beacon.entities.set(beacon.entities.indexOf(entityTemp), entity);
+						for (Entity childEntity : entity.children) {
+							childEntity.beacon = beacon;
+							childEntity.beaconId = beacon.id;
+							childEntity.parent = entity;
+							childEntity.state = EntityState.Refreshed;
+						}
+					}
+					else {
+						/*
+						 * Append new children to existing entity and do fixups.
+						 */
+						entityTemp.childrenMore = entity.childrenMore;
+						entityTemp.childCount = entity.childCount;
+						for (Entity childEntity : entity.children) {
+							childEntity.beacon = beacon;
+							childEntity.beaconId = beacon.id;
+							childEntity.parent = entityTemp;
+							childEntity.state = EntityState.New;
+							entityTemp.children.add(childEntity);
+						}
+					}
+				}
+			}
+		}
+
+		public void deleteEntity(Entity deleteEntity, CollectionType collectionType) {
+			/*
+			 * Need to replace the children too
+			 */
+			if (collectionType == CollectionType.CandiByRadar) {
+				for (Beacon beacon : mBeacons) {
+					synchronized (beacon.entities) {
+						for (int i = 0; i < beacon.entities.size(); i++) {
+							Entity entity = beacon.entities.get(i);
+							if (entity.id.equals(deleteEntity.id)) {
+								beacon.entities.remove(i);
+								return;
+							}
+							for (int j = 0; j < entity.children.size(); j++) {
+								Entity childEntity = entity.children.get(j);
+								if (childEntity.id.equals(deleteEntity.id)) {
+									entity.children.remove(j);
+									entity.childCount = entity.children.size();
+									return;
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (collectionType == CollectionType.CandiByUser) {
+				synchronized (mMyEntities) {
+					for (int i = 0; i < mMyEntities.size(); i++) {
+						Entity entity = mMyEntities.get(i);
+						if (entity.id.equals(deleteEntity.id)) {
+							mMyEntities.remove(i);
+							return;
+						}
+						for (int j = 0; j < entity.children.size(); j++) {
+							Entity childEntity = entity.children.get(j);
+							if (childEntity.id.equals(deleteEntity.id)) {
+								entity.children.remove(j);
+								entity.childCount = entity.children.size();
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		private void mergeEntities(List<Object> entities, ArrayList<String> beaconIds, ArrayList<String> refreshIds, Boolean chunking) {
+
+			/* Match returned entities back to beacons */
+			List<Beacon> refreshedBeacons = new ArrayList<Beacon>();
+			if (entities != null && entities.size() > 0) {
+
+				/* First find out which beacons got updated */
+
+				for (Object obj : entities) {
+					Entity rawEntity = (Entity) obj;
+					if (beaconIds != null && beaconIds.contains(rawEntity.beaconId)) {
+						/*
+						 * This is a new entity for a new beacon.
+						 */
+						for (Beacon beacon : mBeacons) {
+							if (beacon.id.equals(rawEntity.beaconId)) {
+								insertEntity(rawEntity, beacon, null, CollectionType.CandiByRadar);
+							}
+						}
+					}
+					else if (refreshIds.contains(rawEntity.beaconId)) {
+						/*
+						 * This is either a new or updated entity for an existing beacon.
+						 */
+						for (Beacon beacon : mBeacons) {
+							if (beacon.id.equals(rawEntity.beaconId)) {
+
+								if (!refreshedBeacons.contains(beacon)) {
+									refreshedBeacons.add(beacon);
+								}
+
+								boolean updateHit = false;
+								synchronized (beacon.entities) {
+									for (Entity entity : beacon.entities) {
+										if (entity.id.equals(rawEntity.id)) {
+											/*
+											 * This is an updated entity
+											 */
+											updateHit = true;
+											updateEntity(rawEntity, beacon, chunking);
+											break;
+										}
+									}
+								}
+								if (!updateHit) {
+									/*
+									 * This is new entity
+									 */
+									insertEntity(rawEntity, beacon, null, CollectionType.CandiByRadar);
+								}
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			/*
+			 * Now we need to remove any entities for refreshed beacons that didn't come back in the results.
+			 * 
+			 * TODO: How do we know the different between an entity that was deleted and an entity that didn't fit the
+			 * limit. If we remove it, then we should still get it back when paging to it.
+			 */
+			if (!chunking) {
+				for (Beacon beacon : refreshedBeacons) {
+
+					synchronized (beacon.entities) {
+						for (int i = beacon.entities.size() - 1; i >= 0; i--) {
+							Entity entity = beacon.entities.get(i);
+							boolean hit = false;
+							for (Object obj : entities) {
+								Entity rawEntity = (Entity) obj;
+								if (rawEntity.id.equals(entity.id)) {
+									hit = true;
+									break;
+								}
+							}
+							if (!hit) {
+								/* Remove it */
+								beacon.entities.remove(i);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		public void rebuildEntityList() {
+
+			/* Rebuild the top level entity list when there could have been a top level change */
+			mEntities.clear();
+			for (Beacon beacon : mBeacons) {
+				synchronized (beacon.entities) {
+					for (Entity entityTemp : beacon.entities) {
+						mEntities.add(entityTemp);
+						for (int i = entityTemp.children.size() - 1; i >= 0; i--) {
+							if (entityTemp.children.get(i).beacon == null) {
+								entityTemp.children.remove(i);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// --------------------------------------------------------------------------------------------
+		// Lookup routines
+		// --------------------------------------------------------------------------------------------
 
 		public Beacon getBeaconById(String beaconId) {
 			for (Beacon beacon : mBeacons) {
@@ -904,18 +1027,112 @@ public class ProxiExplorer {
 			return null;
 		}
 
-		public Entity getEntityById(String entityId) {
+		public Beacon getMapBeaconById(String beaconId) {
+			for (Beacon beacon : mMapBeacons) {
+				if (beacon.id.equals(beaconId)) {
+					return beacon;
+				}
+			}
+			return null;
+		}
+
+		public Entity getEntityById(String entityId, CollectionType collectionType) {
 			if (entityId != null) {
-				for (Beacon beacon : mBeacons) {
-					synchronized (beacon.entities) {
-						for (Entity entity : beacon.entities) {
-							if (entity.id.equals(entityId)) {
-								return entity;
-							}
-							for (Entity childEntity : entity.children) {
-								if (childEntity.id.equals(entityId)) {
-									return childEntity;
+				if (entityId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
+					Entity entity = new Entity();
+					entity.id = entityId;
+					entity.superRoot = true;
+					return entity;
+				}
+				else {
+					if (collectionType == ProxiExplorer.CollectionType.CandiByRadar) {
+						for (Beacon beacon : mBeacons) {
+							synchronized (beacon.entities) {
+								for (Entity entity : beacon.entities) {
+									if (entity.id.equals(entityId)) {
+										return entity;
+									}
+									for (Entity childEntity : entity.children) {
+										if (childEntity.id.equals(entityId)) {
+											return childEntity;
+										}
+									}
 								}
+							}
+						}
+					}
+					else if (collectionType == ProxiExplorer.CollectionType.CandiByUser) {
+						synchronized (mMyEntities) {
+							for (Entity entity : mMyEntities) {
+								if (entity.id.equals(entityId)) {
+									return entity;
+								}
+								for (Entity childEntity : entity.children) {
+									if (childEntity.id.equals(entityId)) {
+										return childEntity;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		public List<Entity> getCollectionContainsEntityById(String entityId, ProxiExplorer.CollectionType collectionType) {
+			if (entityId != null) {
+				List<Entity> entities = mEntities;
+				if (collectionType == ProxiExplorer.CollectionType.CandiByUser) {
+					entities = mMyEntities;
+				}
+				synchronized (entities) {
+					for (Entity entity : entities) {
+						if (entity.id.equals(entityId)) {
+							return entities;
+						}
+						for (Entity childEntity : entity.children) {
+							if (childEntity.id.equals(entityId)) {
+								return entity.children;
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		public EntityList<Entity> getCollectionById(String collectionId, ProxiExplorer.CollectionType collectionType) {
+			/*
+			 * Returns the children of the entity where id == collectionId Returns null if no match is found.
+			 */
+			EntityList<Entity> entities = null;
+			if (collectionType == ProxiExplorer.CollectionType.CandiByRadar) {
+				entities = mEntities;
+			}
+			else if (collectionType == ProxiExplorer.CollectionType.CandiByUser) {
+				entities = mMyEntities;
+			}
+
+			/* No need to go further if we are looking for a root collection */
+			if (collectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
+				return entities;
+			}
+
+			return doCollectionById(entities, collectionId);
+		}
+
+		private EntityList<Entity> doCollectionById(EntityList<Entity> entities, String collectionId) {
+			synchronized (entities) {
+				for (Entity entity : entities) {
+					if (entity.id.equals(collectionId)) {
+						return entity.children;
+					}
+					else {
+						if (entity.children != null && entity.children.size() > 0) {
+							EntityList<Entity> childEntities = doCollectionById(entity.children, collectionId);
+							if (childEntities != null) {
+								return childEntities;
 							}
 						}
 					}
@@ -952,31 +1169,9 @@ public class ProxiExplorer {
 			return beaconStrongest;
 		}
 
-		public EntityModel clone() {
-
-			/*
-			 * Shallow copy so entities are by value but any entity object properties
-			 * like beacon are by ref from the original.
-			 */
-			EntityModel entityModel = new EntityModel();
-			entityModel.mEntities = new ArrayList();
-			for (Entity entity : mEntities) {
-				entityModel.mEntities.add(entity.clone());
-			}
-			entityModel.mBeacons = new ArrayList(mBeacons);
-			entityModel.mLastRefreshDate = mLastRefreshDate;
-			entityModel.mMore = mMore;
-			if (mBeaconIdsLast != null) {
-				entityModel.mBeaconIdsLast = (ArrayList<String>) mBeaconIdsLast.clone();
-			}
-			if (mRefreshIdsLast != null) {
-				entityModel.mRefreshIdsLast = (ArrayList<String>) mRefreshIdsLast.clone();
-			}
-			entityModel.mLastRefreshDateLast = mLastRefreshDateLast;
-			entityModel.mRookieHit = mRookieHit;
-
-			return entityModel;
-		}
+		// --------------------------------------------------------------------------------------------
+		// Set/Get routines
+		// --------------------------------------------------------------------------------------------
 
 		public List<Entity> getEntitiesFlat() {
 			List<Entity> entitiesFlat = new ArrayList<Entity>();
@@ -1000,44 +1195,12 @@ public class ProxiExplorer {
 			mBeacons = beacons;
 		}
 
-		public List<Entity> getEntities() {
+		public EntityList<Entity> getEntities() {
 			return mEntities;
 		}
 
-		public void setEntities(List<Entity> entities) {
+		public void setEntities(EntityList<Entity> entities) {
 			mEntities = entities;
-		}
-
-		public Boolean isMore() {
-			return mMore;
-		}
-
-		public void setMore(Boolean more) {
-			mMore = more;
-		}
-
-		public ArrayList<String> getBeaconIdsLast() {
-			return mBeaconIdsLast;
-		}
-
-		public void setBeaconIdsLast(ArrayList<String> beaconIdsLast) {
-			mBeaconIdsLast = beaconIdsLast;
-		}
-
-		public ArrayList<String> getRefreshIdsLast() {
-			return mRefreshIdsLast;
-		}
-
-		public void setRefreshIdsLast(ArrayList<String> refreshIdsLast) {
-			mRefreshIdsLast = refreshIdsLast;
-		}
-
-		public Number getLastRefreshDateLast() {
-			return mLastRefreshDateLast;
-		}
-
-		public void setLastRefreshDateLast(Number lastRefreshDateLast) {
-			mLastRefreshDateLast = lastRefreshDateLast;
 		}
 
 		public Number getLastRefreshDate() {
@@ -1055,6 +1218,39 @@ public class ProxiExplorer {
 		public void setRookieHit(Boolean rookieHit) {
 			mRookieHit = rookieHit;
 		}
+
+		public EntityList<Entity> getMyEntities() {
+			return mMyEntities;
+		}
+
+		public void setMyEntities(EntityList<Entity> myEntities) {
+			mMyEntities = myEntities;
+		}
+
+		public List<Object> getMapEntities() {
+			return mMapEntities;
+		}
+
+		public void setMapEntities(List<Object> mapEntities) {
+			mMapEntities = mapEntities;
+		}
+
+		public List<Beacon> getMapBeacons() {
+			return mMapBeacons;
+		}
+
+		public void setMapBeacons(List<Beacon> mapBeacons) {
+			mMapBeacons = mapBeacons;
+		}
+
+		public Number getLastActivityDate() {
+			return mLastActivityDate;
+		}
+
+		public void setLastActivityDate(Number lastActivityDate) {
+			mLastActivityDate = lastActivityDate;
+		}
+
 	}
 
 	public static class ScanOptions {
@@ -1112,5 +1308,9 @@ public class ProxiExplorer {
 		 * this method.
 		 */
 		public void onProxibaseServiceException(ProxibaseServiceException exception);
+	}
+
+	public static enum CollectionType {
+		CandiByUser, CandiByRadar
 	}
 }

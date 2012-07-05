@@ -1,5 +1,7 @@
 package com.proxibase.service.objects;
 
+import java.util.List;
+
 import com.google.gson.annotations.Expose;
 
 /**
@@ -8,15 +10,17 @@ import com.google.gson.annotations.Expose;
 public class ServiceData {
 
 	@Expose
-	public Object	data;
+	public Object		data;
 	@Expose
-	public Number	date;
+	public List<String>	cursor;
 	@Expose
-	public Number	count;
+	public Number		date;
 	@Expose
-	public Boolean	more;
+	public Number		count;
 	@Expose
-	public String	info;
+	public Boolean		more;
+	@Expose
+	public String		info;
 
 	public ServiceData() {}
 }

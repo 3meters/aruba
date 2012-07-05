@@ -10,13 +10,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.Command.CommandType;
+import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
-import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.ProxiExplorer;
+import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
@@ -84,18 +85,17 @@ public class SignInForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onSignUpButtonClick(View view) {
-		String json = ProxibaseService.getGson(GsonType.Internal).toJson(new Command(CommandType.New));
-		Intent intent = new Intent(this, SignUpForm.class);
-		intent.putExtra(getString(R.string.EXTRA_COMMAND), json);
+		IntentBuilder intentBuilder = new IntentBuilder(this, SignUpForm.class);
+		intentBuilder.setCommandType(CommandType.New);
+		Intent intent = intentBuilder.create();
 		startActivity(intent);
 		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-
 	}
 
 	public void onSignInButtonClick(View view) {
 		mTextError.setVisibility(View.GONE);
 		final String email = mTextEmail.getText().toString().toLowerCase();
-		
+
 		new AsyncTask() {
 
 			@Override
@@ -105,7 +105,7 @@ public class SignInForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				
+
 				Query query = new Query("users").filter("{\"email\":\"" + email + "\"}");
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(
 						new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json));
@@ -118,7 +118,7 @@ public class SignInForm extends FormActivity {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				mCommon.showProgressDialog(false, null);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					Tracker.trackEvent("User", "Signin", null, 0);			
+					Tracker.trackEvent("User", "Signin", null, 0);
 					String jsonResponse = (String) serviceResponse.data;
 					User user = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService).data;
 
@@ -133,6 +133,13 @@ public class SignInForm extends FormActivity {
 
 						Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonResponse);
 						Aircandi.settingsEditor.commit();
+
+						/*
+						 * Sign-in needs to clear data collections that should be refreshed
+						 * TODO: do we need to do something with the entities used by radar?
+						 */
+						ProxiExplorer.getInstance().getEntityModel().getMyEntities().clear();
+						ProxiExplorer.getInstance().getEntityModel().getMapEntities().clear();
 
 						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
 						finish();

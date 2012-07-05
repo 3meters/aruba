@@ -247,6 +247,7 @@ public class NetworkManager {
 
 	private class ConnectionReceiver extends BroadcastReceiver {
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void onReceive(Context context, Intent intent) {
 

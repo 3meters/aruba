@@ -7,13 +7,12 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.proxibase.aircandi.components.Command.CommandType;
+import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageRequest;
@@ -22,11 +21,11 @@ import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
-import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.S3;
+import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
@@ -48,27 +47,15 @@ public class ProfileForm extends FormActivity {
 	private EditText		mTextEmail;
 	private EditText		mTextPassword;
 	private EditText		mTextPasswordConfirm;
-	@SuppressWarnings("unused")
-	private EditText		mTextPasswordOld;
 	private Button			mButtonSave;
 	private User			mUser;
 	private Integer			mUserId;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 
 		initialize();
-
-		/* Restore current tab */
-		if (savedInstanceState != null) {
-			if (findViewById(R.id.image_tab_host) != null) {
-				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(savedInstanceState.getInt("tab_index")));
-				mViewFlipper.setDisplayedChild(mCommon.mTabIndex);
-			}
-		}
-
 		bind();
 
 		if (savedInstanceState != null) {
@@ -77,6 +64,7 @@ public class ProfileForm extends FormActivity {
 	}
 
 	protected void initialize() {
+
 		mCommon.track();
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -90,12 +78,12 @@ public class ProfileForm extends FormActivity {
 		}
 
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
+		mCommon.setViewFlipper(mViewFlipper);
 
 		mImageUser = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
-		mTextPasswordOld = (EditText) findViewById(R.id.text_password_old);
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
 		mButtonSave = (Button) findViewById(R.id.btn_save);
 
@@ -132,11 +120,11 @@ public class ProfileForm extends FormActivity {
 		});
 
 		if (mViewFlipper != null) {
-			if (mCommon.mCommand.type == CommandType.New) {
-				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(2));
+			if (mCommon.mCommandType == CommandType.New) {
+				mCommon.setActiveTab(1);
 			}
 			else {
-				mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(0));
+				mCommon.setActiveTab(0);
 			}
 		}
 	}
@@ -218,16 +206,6 @@ public class ProfileForm extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	public void onTabClick(View view) {
-		mCommon.setActiveTab(view);
-		if (view.getTag().equals("profile")) {
-			mViewFlipper.setDisplayedChild(0);
-		}
-		else if (view.getTag().equals("account")) {
-			mViewFlipper.setDisplayedChild(1);
-		}
-	}
-
 	public void onSaveButtonClick(View view) {
 		doSave();
 	}
@@ -277,8 +255,8 @@ public class ProfileForm extends FormActivity {
 					if (mUser.imageBitmap != null && !mUser.imageBitmap.isRecycled()) {
 						try {
 							String imageKey = String.valueOf(((User) mUser).id) + "_"
-												+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-												+ ".jpg";
+									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
+									+ ".jpg";
 							S3.putImage(imageKey, mUser.imageBitmap);
 							mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
 						}
@@ -291,7 +269,7 @@ public class ProfileForm extends FormActivity {
 
 						mUser.email = mTextEmail.getText().toString().trim();
 						mUser.name = mTextFullname.getText().toString().trim();
-						mUser.modifiedDate = (int) (DateUtils.nowDate().getTime() / 1000L);
+						mUser.modifiedDate = DateUtils.nowDate().getTime();
 						mUser.modifierId = Aircandi.getInstance().getUser().id;
 
 						if (mTextPassword.getText().toString().length() != 0) {
@@ -360,42 +338,7 @@ public class ProfileForm extends FormActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// UI routines
-	// --------------------------------------------------------------------------------------------
-
-	// --------------------------------------------------------------------------------------------
-	// Persistence routines
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		super.onSaveInstanceState(savedInstanceState);
-		Logger.d(this, "onSaveInstanceState called");
-
-		if (mTextFullname != null) {
-			savedInstanceState.putString("fullname", mTextFullname.getText().toString());
-		}
-		if (mTextEmail != null) {
-			savedInstanceState.putString("email", mTextEmail.getText().toString());
-		}
-		if (findViewById(R.id.image_tab_host) != null) {
-			savedInstanceState.putInt("tab_index", mCommon.mTabIndex);
-		}
-	}
-
-	private void doRestoreInstanceState(Bundle savedInstanceState) {
-		Logger.d(this, "Restoring previous state");
-
-		if (mTextFullname != null) {
-			mTextFullname.setText(savedInstanceState.getString("fullname"));
-		}
-		if (mTextEmail != null) {
-			mTextEmail.setText(savedInstanceState.getString("email"));
-		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Misc routines
+	// Lifecycle events
 	// --------------------------------------------------------------------------------------------
 
 	protected void onDestroy() {
@@ -414,6 +357,40 @@ public class ProfileForm extends FormActivity {
 			super.onDestroy();
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Persistence routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		Logger.d(this, "onSaveInstanceState called");
+
+		mCommon.doSaveInstanceState(savedInstanceState);
+		if (mTextFullname != null) {
+			savedInstanceState.putString("fullname", mTextFullname.getText().toString());
+		}
+		if (mTextEmail != null) {
+			savedInstanceState.putString("email", mTextEmail.getText().toString());
+		}
+	}
+
+	private void doRestoreInstanceState(Bundle savedInstanceState) {
+		Logger.d(this, "Restoring previous state");
+
+		mCommon.doRestoreInstanceState(savedInstanceState);
+		if (mTextFullname != null) {
+			mTextFullname.setText(savedInstanceState.getString("fullname"));
+		}
+		if (mTextEmail != null) {
+			mTextEmail.setText(savedInstanceState.getString("email"));
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Misc routines
+	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected int getLayoutID() {

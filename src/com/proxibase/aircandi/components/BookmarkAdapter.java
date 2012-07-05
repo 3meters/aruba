@@ -2,7 +2,7 @@ package com.proxibase.aircandi.components;
 
 import java.io.ByteArrayOutputStream;
 
-import com.proxibase.aircandi.BookmarkList;
+import com.proxibase.aircandi.BookmarkPicker;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -27,14 +27,14 @@ public class BookmarkAdapter extends BaseAdapter {
 	private ChangeObserver		mChangeObserver;
 	private DataSetObserver		mDataSetObserver;
 	private boolean				mDataValid;
-	private BookmarkList		mBookmarkList;
+	private BookmarkPicker		mBookmarkList;
 	private final IconReceiver	mIconReceiver	= new IconReceiver();
 
-	public BookmarkAdapter(BookmarkList bookmarkList, String curPage) {
+	public BookmarkAdapter(BookmarkPicker bookmarkList, String curPage) {
 		this(bookmarkList, curPage, false);
 	}
 
-	public BookmarkAdapter(BookmarkList bookmarkList, String curPage, boolean createShortcut) {
+	public BookmarkAdapter(BookmarkPicker bookmarkList, String curPage, boolean createShortcut) {
 		mDataValid = false;
 		mBookmarkList = bookmarkList;
 		mContentResolver = bookmarkList.getContentResolver();

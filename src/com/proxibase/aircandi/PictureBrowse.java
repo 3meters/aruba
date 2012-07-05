@@ -8,6 +8,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.components.Exceptions;
+import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.service.objects.Entity;
 
@@ -45,8 +46,8 @@ public class PictureBrowse extends FormActivity {
 	}
 
 	protected void draw() {
-
-		final Entity entity = mCommon.mEntity;
+		
+		final Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mCollectionType);
 
 		/* Title */
 		if (findViewById(R.id.text_title) != null) {

@@ -72,12 +72,10 @@ import com.proxibase.aircandi.candi.views.IView.ViewTouchListener;
 import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.candi.views.ZoneView;
-import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.BitmapTextureSource;
 import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.components.CandiList;
-import com.proxibase.aircandi.components.Command;
-import com.proxibase.aircandi.components.Command.CommandType;
+import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.CountDownTimer;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageManager;
@@ -118,7 +116,6 @@ public class CandiPatchPresenter implements Observer {
 	public TextureRegion			mZoneReflectionTextureRegion;
 
 	public CandiRadar				mCandiRadarActivity;
-	private AircandiCommon			mCommon;
 	public RenderSurfaceView		mRenderSurfaceView;
 	private ManageViewsThread		mManageViewsThread;
 	public boolean					mFullUpdateInProgress	= true;
@@ -359,26 +356,6 @@ public class CandiPatchPresenter implements Observer {
 		 */
 		mEntityModelSnapshot = entityModel.clone();
 
-		/* Paging indication for top candi */
-		if (mEntityModelSnapshot.isMore()) {
-			/*
-			 * This indicator entity will be removed when the main entity list
-			 * is rebuilt for any reason because they are not associated with
-			 * any beacons. It will get added back if needed again by this code.
-			 */
-			Entity commandEntity = Entity.getCommandEntity(new Command(CommandType.ChunkEntities));
-			mEntityModelSnapshot.getEntities().add(commandEntity);
-		}
-
-		/* Paging indication for child candi */
-		for (Entity entity : mEntityModelSnapshot.getEntities()) {
-			if (entity.childrenMore != null && entity.childrenMore) {
-				Entity commandEntityChild = Entity.getCommandEntity(new Command(CommandType.ChunkChildEntities));
-				commandEntityChild.command.entityParentId = entity.id;
-				entity.children.add(commandEntityChild);
-			}
-		}
-
 		if (chunking) {
 			/*
 			 * None should be considered rookies and we need to synchronize the discoveryTime.
@@ -521,6 +498,39 @@ public class CandiPatchPresenter implements Observer {
 			}
 		}
 
+		/* Paging indication for top candi */
+		CandiModel commandCandiModel = null;
+		if (mEntityModelSnapshot.getEntities().isMore()) {
+			/*
+			 * This indicator entity will be removed when the main entity list
+			 * is rebuilt for any reason because they are not associated with
+			 * any beacons. It will get added back if needed again by this code.
+			 */
+			Entity commandEntity = Entity.getCommandEntity(CommandType.ChunkEntities);
+			commandCandiModel = CandiModelFactory.newCandiModel(commandEntity.id, commandEntity, mCandiPatchModel);
+			commandCandiModel.setDisplayExtra(mCandiRadarActivity.mPrefDisplayExtras);
+			mCandiPatchModel.addCandiModel(commandCandiModel);
+			commandCandiModel.setParent(candiRootNext);
+			candiRootNext.getChildren().add(commandCandiModel);
+		}
+
+		/* Paging indication for child candi */
+		for (Entity entity : mEntityModelSnapshot.getEntities()) {
+			if (entity.children != null && entity.children.isMore()) {
+				Entity commandEntityChild = Entity.getCommandEntity(CommandType.ChunkChildEntities);
+
+				CandiModel commandCandiModelChild = CandiModelFactory.newCandiModel(commandEntityChild.id, commandEntityChild, mCandiPatchModel);
+				CandiModel candiModelParent = mCandiPatchModel.getCandiModelForEntity(entity.id);
+				
+				commandCandiModelChild.setDisplayExtra(mCandiRadarActivity.mPrefDisplayExtras);
+				mCandiPatchModel.addCandiModel(commandCandiModelChild);
+				candiModelParent.getChildren().add(commandCandiModelChild);
+				commandCandiModelChild.setParent(candiModelParent);
+				/* So chunking logic can figure which entity to chunk children for */
+				commandCandiModelChild.getEntity().parentId = candiModelParent.getEntity().id;
+			}
+		}
+
 		/* Restore the previous root if it still has visible children */
 		boolean foundRoot = false;
 		if (candiRootPrev != null) {
@@ -545,7 +555,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Navigate to make sure we are completely configured */
-		navigateModel(mCandiPatchModel.getCandiRootNext(), delayObserverUpdate, fullBuild, Navigation.None);
+		navigateModel(mCandiPatchModel.getCandiRootNext(), delayObserverUpdate, fullBuild, Navigation.None, chunking);
 
 		if (fullBuild) {
 			manageViewsAsync();
@@ -554,14 +564,20 @@ public class CandiPatchPresenter implements Observer {
 		Logger.d(this, "Model updated with entities");
 	}
 
-	public void navigateModel(IModel candiRootNext, boolean delayObserverUpdate, boolean fullUpdate, Navigation navigation) {
-
+	public void navigateModel(IModel candiRootNext, boolean delayObserverUpdate, boolean fullUpdate, Navigation navigation, boolean chunking) {
+		/*
+		 * navigation = None always comes from updateCandiData.
+		 * navigation = Up comes from candi radar navigateUp.
+		 * navigation = Down comes from doCandiViewSingleTap.
+		 * 
+		 * updateCandiData gets called from radar chunking and beacon scans.
+		 */
 		Logger.d(null, "Starting model navigation.");
 
 		mCandiPatchModel.setCandiRootNext(candiRootNext);
 
 		/* Need to sort the candi before assigning to zones */
-		/* Sort the candi by discovery time */
+		/* Sort the candi by discovery time then modified time */
 		mCandiPatchModel.sortCandiModels(mCandiPatchModel.getCandiRootNext().getChildren());
 		for (IModel candiModel : mCandiPatchModel.getCandiRootNext().getChildren()) {
 			mCandiPatchModel.sortCandiModels(candiModel.getChildren());
@@ -571,12 +587,12 @@ public class CandiPatchPresenter implements Observer {
 		 * Set candi visible state, move candi to inactive zone if appropriate. Set candiModelFocused to null if candi
 		 * with current focus will not be visible in next update.
 		 */
-		mCandiPatchModel.updateVisibilityNext();
+		mCandiPatchModel.updateVisibilityNext(chunking);
 		/*
 		 * Clear zones and re-assign candi to zones. Swap zones if needed to keep candi with focus in the zone the user
 		 * is slotted on. Set visible for zones based on candi count.
 		 */
-		mCandiPatchModel.updateZonesNext(navigation);
+		mCandiPatchModel.updateZonesNext(navigation, chunking);
 
 		/* Set x, y, scale and alignment for all candi */
 		mCandiPatchModel.updatePositionsNext();
@@ -597,14 +613,6 @@ public class CandiPatchPresenter implements Observer {
 				mCandiPatchModel.setCandiModelFocused((CandiModel) mCandiPatchModel.getCandiModelFocused().getParent());
 			}
 		}
-		// else if (navigation == Navigation.Down) {
-		// if
-		// (!mCandiPatchModel.getCandiModelFocused().getParent().isSuperRoot())
-		// {
-		// mCandiPatchModel.setCandiModelFocused((CandiModel)
-		// mCandiPatchModel.getCandiModelFocused().getParent());
-		// }
-		// }
 
 		/*
 		 * OK to stop blocking async processes that are on hold because the data model is being rebuilt.
@@ -725,8 +733,7 @@ public class CandiPatchPresenter implements Observer {
 		/*
 		 * Now that all the view entities have updated we can do global operations like z sorting.
 		 */
-		IEntity layer = mEngine.getScene().getChild(CandiConstants.LAYER_CANDI);
-		layer.sortChildren();
+		mEngine.getScene().getChild(CandiConstants.LAYER_CANDI).sortChildren();
 
 		/* Without animations, we can lazy create views. */
 		if (!CandiConstants.TRANSITIONS_ACTIVE) {
@@ -1121,8 +1128,8 @@ public class CandiPatchPresenter implements Observer {
 									public void run() {
 										CandiModel candiParent = (CandiModel) candiModel.getParent();
 										Entity entityParent = candiParent.getEntity();
-										mCandiRadarActivity.setParentButtonImage(entityParent);
-										navigateModel(candiModel.getParent(), false, false, Navigation.Down);
+										navigateModel(candiModel.getParent(), false, false, Navigation.Down, false);
+										mCandiRadarActivity.getCommon().setActionBarTitleAndIcon(entityParent, true);
 										mIgnoreInput = false;
 									}
 								});
@@ -1142,9 +1149,8 @@ public class CandiPatchPresenter implements Observer {
 			if (candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Secondary) {
 				CandiModel candiParent = (CandiModel) candiModel.getParent();
 				Entity entityParent = candiParent.getEntity();
-				mCandiRadarActivity.setParentButtonImage(entityParent);
-				navigateModel(candiModel.getParent(), false, false, Navigation.Down);
-				mCandiRadarActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+				navigateModel(candiModel.getParent(), false, false, Navigation.Down, false);
+				mCandiRadarActivity.getCommon().setActionBarTitleAndIcon(entityParent, true);
 				mIgnoreInput = false;
 			}
 			else {
@@ -1867,14 +1873,6 @@ public class CandiPatchPresenter implements Observer {
 
 	public Context getContext() {
 		return mContext;
-	}
-
-	public void setCommon(AircandiCommon common) {
-		this.mCommon = common;
-	}
-
-	public AircandiCommon getCommon() {
-		return mCommon;
 	}
 
 	public void setCandiViewPool(CandiViewPool candiViewPool) {

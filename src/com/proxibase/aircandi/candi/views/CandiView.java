@@ -555,6 +555,8 @@ public class CandiView extends BaseView implements OnGestureListener {
 	private void requestTextureSources(final boolean skipCache, final boolean showBody) {
 
 		final CandiModel candiModel = (CandiModel) this.mModel;
+		if (candiModel == null) return;
+
 		Logger.v(this, "Requesting texture source: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 
 		if (!mActiveImageRequest) {

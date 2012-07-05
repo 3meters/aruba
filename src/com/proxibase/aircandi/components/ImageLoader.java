@@ -30,6 +30,7 @@ import com.proxibase.service.ProxibaseServiceException.ErrorType;
 import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.Entity.ImageFormat;
 
+@SuppressWarnings("deprecation")
 public class ImageLoader {
 
 	// private ImageCache mImageCache;

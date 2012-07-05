@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
+    android:id="@+id/item_row"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <ImageView
+        android:id="@+id/item_image"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="6dp"
+        android:layout_marginTop="3dp"
+        android:focusable="false"
+        android:padding="0dp"
+        android:src="@drawable/icon_post" />
+
+    <com.proxibase.aircandi.widgets.TextViewEllipsizing
+        android:id="@+id/item_title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="3dp"
+        android:layout_toRightOf="@+id/item_image"
+        android:text="Place" />
+
+    <!--
+    <com.proxibase.aircandi.widgets.TextViewEllipsizing
+        android:id="@+id/item_description"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/item_title"
+        android:paddingBottom="3dp"
+        android:layout_toRightOf="@+id/item_image" 
+        android:text="This is just some sample text showing what a template description might look like in the user interface."/>
+
+    -->
+
+</RelativeLayout>

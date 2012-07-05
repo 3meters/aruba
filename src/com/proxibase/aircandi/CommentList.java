@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,14 +15,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.proxibase.aircandi.components.Command;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EndlessAdapter;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -42,7 +39,7 @@ public class CommentList extends CandiActivity {
 
 	private ListView		mListView;
 	private List<Comment>	mComments		= new ArrayList<Comment>();
-	private Entity			mParentEntity;
+	private Entity			mEntity;
 
 	protected int			mLastResultCode	= Activity.RESULT_OK;
 	private LayoutInflater	mInflater;
@@ -52,29 +49,35 @@ public class CommentList extends CandiActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			/*
-			 * Try to detect case where this is being created after
-			 * a crash and bail out.
-			 */
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-		}
-		else {
+		if (!isFinishing()) {
 			initialize();
 			bind();
 		}
 	}
 
 	protected void initialize() {
-		mCommon.track();
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mListView = (ListView) findViewById(R.id.list_comments);
 	}
 
 	protected void bind() {
 
-		mListView = (ListView) findViewById(R.id.list_comments);
-
+		/*
+		 * Navigation setup for action bar icon and title
+		 */
+		if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
+			if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByRadar) {
+				mCommon.setActionBarTitleAndIcon(null, R.string.navigation_radar, true);
+			}
+			else if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByUser) {
+				mCommon.mActionBar.setHomeButtonEnabled(false);
+			}
+		}
+		else {
+			Entity collectionEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, mCommon.mCollectionType);
+			mCommon.setActionBarTitleAndIcon(collectionEntity, true);
+		}
+		
 		new AsyncTask() {
 
 			@Override
@@ -96,9 +99,9 @@ public class CommentList extends CandiActivity {
 					ServiceData serviceData = (ServiceData) serviceResponse.data;
 					List<Entity> entities = (List<Entity>) serviceData.data;
 					if (entities != null && entities.get(0).comments != null) {
-						mParentEntity = entities.get(0);
-						mComments = mParentEntity.comments;
-						mMore = mParentEntity.commentsMore;
+						mEntity = entities.get(0);
+						mComments = mEntity.comments;
+						mMore = mEntity.commentsMore;
 					}
 
 					if (mComments != null) {
@@ -108,6 +111,7 @@ public class CommentList extends CandiActivity {
 				mCommon.showProgressDialog(false, null);
 				mCommon.stopTitlebarProgress();
 			}
+
 		}.execute();
 	}
 
@@ -115,7 +119,7 @@ public class CommentList extends CandiActivity {
 
 		final Bundle parameters = new Bundle();
 		ArrayList<String> entityIds = new ArrayList<String>();
-		entityIds.add(mCommon.mEntity.id);
+		entityIds.add(mCommon.mEntityId);
 		parameters.putStringArrayList("entityIds", entityIds);
 		parameters.putString("eagerLoad", "object:{\"children\":false,\"comments\":true}");
 		parameters.putString("fields", "object:{\"entities\":{},\"comments\":{},\"children\":{}}");
@@ -149,55 +153,11 @@ public class CommentList extends CandiActivity {
 		return serviceResponse;
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Event routines
-	// --------------------------------------------------------------------------------------------
-
-	public void onCommandButtonClick(View view) {
-		if (mCommon.mActionsWindow != null) {
-			mCommon.mActionsWindow.dismiss();
-		}
-		Command command = (Command) view.getTag();
-		mCommon.doCommand(command);
-	}
-
-	public void onRefreshClick(View view) {
+	public void doRefresh() {
+		/* Called from AircandiCommon */
 		mCommon.startTitlebarProgress();
+		mComments.clear();
 		bind();
-	}
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		mLastResultCode = resultCode;
-		if (resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
-			bind();
-		}
-		else if (resultCode == CandiConstants.RESULT_PROFILE_UPDATED) {
-			invalidateOptionsMenu();
-		}
-		else if (resultCode == CandiConstants.RESULT_USER_SIGNED_IN) {
-			invalidateOptionsMenu();
-		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
-	// --------------------------------------------------------------------------------------------
-
-	public boolean onCreateOptionsMenu(Menu menu) {
-		mCommon.doCreateOptionsMenu(menu);
-		return true;
-	}
-
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		mCommon.doPrepareOptionsMenu(menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		mCommon.doOptionsItemSelected(item);
-		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -227,9 +187,9 @@ public class CommentList extends CandiActivity {
 					ServiceData serviceData = (ServiceData) serviceResponse.data;
 					List<Entity> entities = (List<Entity>) serviceData.data;
 
-					mParentEntity = entities.get(0);
-					moreComments = mParentEntity.comments;
-					mMore = mParentEntity.commentsMore;
+					mEntity = entities.get(0);
+					moreComments = mEntity.comments;
+					mMore = mEntity.commentsMore;
 
 					if (mMore) {
 						return ((getWrappedAdapter().getCount() + moreComments.size()) < LIST_MAX);

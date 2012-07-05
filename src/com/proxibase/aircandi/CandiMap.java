@@ -1,15 +1,9 @@
 package com.proxibase.aircandi;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.graphics.RectF;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -17,46 +11,42 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.TextPaint;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockMapActivity;
+import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.android.maps.GeoPoint;
-import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
-import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.CandiItemizedOverlay;
 import com.proxibase.aircandi.components.GeoLocationManager;
 import com.proxibase.aircandi.components.ImageUtils;
-import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
 import com.proxibase.service.ProxibaseService.GsonType;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.ServiceRequest;
+import com.proxibase.service.objects.Beacon;
 import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.User;
 
 public class CandiMap extends SherlockMapActivity {
 
 	protected AircandiCommon		mCommon;
-	private List<Object>			mEntityPoints	= new ArrayList<Object>();
 	private MapView					mMapView		= null;
 	private MapController			mMapController	= null;
 	private MyLocationOverlay		mMyLocationOverlay;
@@ -64,32 +54,34 @@ public class CandiMap extends SherlockMapActivity {
 	private CandiItemizedOverlay	mItemizedOverlay;
 	private LocationManager			mLocationManager;
 	private LocationListener		mLocationListener;
-	private static double			RADIUS_EARTH	= 6378000;					// meters
-	private static double			SEARCH_RANGE	= 100;						// meters
+	private static double			RADIUS_EARTH	= 6378000;	// meters
+	private static double			SEARCH_RANGE	= 100;		// meters
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
-		mCommon = new AircandiCommon(this);
-		mCommon.setTheme();
-		mCommon.unpackIntent();
-
-		setContentView(getLayoutId());
-		super.onCreate(savedInstanceState);
-
-		mCommon.initialize();
-		mCommon.initializeDialogs();
-
-		initialize();
-		initializeLocation();
-		if (GeoLocationManager.getInstance().getCurrentLocation() != null) {
-			/*
-			 * TODO: What should we do to get get a location?
-			 */
-			bind();
+		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
+			/* Try to detect case where this is being created after a crash and bail out. */
+			super.onCreate(savedInstanceState);
+			finish();
 		}
+		else {
+			mCommon = new AircandiCommon(this);
+			mCommon.setTheme(null);
+			mCommon.unpackIntent();
 
-		mCommon.track();
+			setContentView(getLayoutId());
+			super.onCreate(savedInstanceState);
+
+			mCommon.initialize();
+
+			initialize();
+			initializeLocation();
+
+			if (GeoLocationManager.getInstance().getCurrentLocation() != null) {
+				bind();
+			}
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -99,7 +91,6 @@ public class CandiMap extends SherlockMapActivity {
 		mMapView.setBuiltInZoomControls(true);
 		mMapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
 		mMapView.setSatellite(false);
-		mMapView.setStreetView(false);
 		mMapView.setClickable(true);
 
 		mMapController = mMapView.getController();
@@ -109,6 +100,7 @@ public class CandiMap extends SherlockMapActivity {
 
 			public void run() {
 				mMapController.animateTo(mMyLocationOverlay.getMyLocation());
+				mMapController.setZoom(18);
 			}
 		});
 
@@ -173,108 +165,100 @@ public class CandiMap extends SherlockMapActivity {
 
 	private void bind() {
 
-		mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(4));
-		new AsyncTask() {
+		/*
+		 * If user is anonymous we will only get back candi that are flagged as public
+		 */
+		if (ProxiExplorer.getInstance().getEntityModel().getMapBeacons().size() == 0) {
 
-			@Override
-			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Loading...");
-			}
+			new AsyncTask() {
 
-			@Override
-			protected Object doInBackground(Object... params) {
-
-				Bundle parameters = new Bundle();
-				Location location = GeoLocationManager.getInstance().getCurrentLocation();
-				parameters.putDouble("latitude", location.getLatitude());
-				parameters.putDouble("longitude", location.getLongitude());
-				parameters.putDouble("radius", SEARCH_RANGE / RADIUS_EARTH); /*
-																			 * to radians
-																			 */
-				parameters.putString("userId", Aircandi.getInstance().getUser().id);
-
-				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesNearLocation");
-				serviceRequest.setRequestType(RequestType.Method);
-				serviceRequest.setParameters(parameters);
-				serviceRequest.setResponseFormat(ResponseFormat.Json);
-
-				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					String jsonResponse = (String) serviceResponse.data;
-					mEntityPoints = (List<Object>) ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService).data;
-				}
-				return serviceResponse;
-			}
-
-			@Override
-			protected void onPostExecute(Object result) {
-				ServiceResponse serviceResponse = (ServiceResponse) result;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
-					showCandi();
-					mCommon.showProgressDialog(false, null);
-					mCommon.stopTitlebarProgress();
-				}
-				else {
-					mCommon.handleServiceError(serviceResponse);
+				@Override
+				protected void onPreExecute() {
+					mCommon.showProgressDialog(true, "Loading...");
 				}
 
-			}
-		}.execute();
+				@Override
+				protected Object doInBackground(Object... params) {
+
+					Bundle parameters = new Bundle();
+					Location location = GeoLocationManager.getInstance().getCurrentLocation();
+					parameters.putDouble("latitude", location.getLatitude());
+					parameters.putDouble("longitude", location.getLongitude());
+					parameters.putDouble("radius", SEARCH_RANGE / RADIUS_EARTH); // to radians
+					parameters.putString("userId", Aircandi.getInstance().getUser().id);
+
+					ServiceRequest serviceRequest = new ServiceRequest();
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getBeaconsNearLocation");
+					serviceRequest.setRequestType(RequestType.Method);
+					serviceRequest.setParameters(parameters);
+					serviceRequest.setResponseFormat(ResponseFormat.Json);
+
+					ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						String jsonResponse = (String) serviceResponse.data;
+						List<Beacon> beacons = (List<Beacon>) ProxibaseService.convertJsonToObjects(jsonResponse, Beacon.class, GsonType.ProxibaseService).data;
+						ProxiExplorer.getInstance().getEntityModel().setMapBeacons(beacons);
+					}
+					return serviceResponse;
+				}
+
+				@Override
+				protected void onPostExecute(Object result) {
+					ServiceResponse serviceResponse = (ServiceResponse) result;
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
+						showBeacons();
+						mCommon.showProgressDialog(false, null);
+						mCommon.stopTitlebarProgress();
+					}
+					else {
+						mCommon.handleServiceError(serviceResponse);
+					}
+
+				}
+			}.execute();
+		}
+		else {
+			((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
+			showBeacons();
+		}
+	}
+
+	public void doRefresh() {
+		bind();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		Logger.i(this, "Configuration changed");
+		super.onConfigurationChanged(newConfig);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	public void onRefreshClick(View view) {
-		bind();
-	}
-
-	public void onTabClick(View view) {
-		mCommon.setActiveTab(view);
-		if (view.getTag().equals("radar")) {
-			Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
-			Intent intent = new Intent(this, CandiRadar.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-			startActivity(intent);
-			overridePendingTransition(R.anim.fade_in_short, R.anim.fade_out_short);
-		}
-		else if (view.getTag().equals("mycandi")) {
-			Aircandi.getInstance().setCandiTask(CandiTask.MyCandi);
-			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-		}
-		else if (view.getTag().equals("map")) {
-			Aircandi.getInstance().setCandiTask(CandiTask.Map);
-			IntentBuilder intentBuilder = new IntentBuilder(this, CandiMap.class);
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-		}
-	}
-
-	public void onHomeClick(View view) {
-		mCommon.doHomeClick(view);
-	}
-
-	public void onProfileClick(View view) {
-		mCommon.doProfileClick(view);
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
 
+	/*
+	 * These are here because CandiMap does not extend CandiActivity
+	 */
+	public boolean onCreateOptionsMenu(Menu menu) {
+		mCommon.doCreateOptionsMenu(menu);
+		return true;
+	}
+
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		mCommon.doPrepareOptionsMenu(menu);
+		return true;
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		boolean rebind = mCommon.doOptionsItemSelected(item);
-		if (rebind) {}
+		mCommon.doOptionsItemSelected(item);
 		return true;
 	}
 
@@ -308,59 +292,97 @@ public class CandiMap extends SherlockMapActivity {
 		mMapOverlays = mMapView.getOverlays();
 		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi);
 		// drawable.setBounds(0, 0, 40, 40);
-		mItemizedOverlay = new CandiItemizedOverlay(drawable, false);
+		mItemizedOverlay = new CandiItemizedOverlay(drawable, mMapView, false);
 
-		for (Object entityPointObject : mEntityPoints) {
+		for (Object entityPointObject : ProxiExplorer.getInstance().getEntityModel().getMapEntities()) {
 			Entity entityPoint = (Entity) entityPointObject;
 			if (entityPoint.location != null) {
-				GeoPoint point = new GeoPoint((int) (entityPoint.location.latitude.doubleValue() * 1E6), (int) (entityPoint.location.longitude
-						.doubleValue() * 1E6));
+				/*
+				 * If there are entities to map that are attached to beacons we have scanned then
+				 * we want to override the location info from the service with our fresher location info.
+				 * Important because a beacon could have moved and this is the only way to show things
+				 * correctly.
+				 * 
+				 * This will cause all the candi from scanned beacons to stack on the same location.
+				 * 
+				 * We might want to show map indicators for beacons with a candi count instead of
+				 * for each candi.
+				 */
+				Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeaconById(entityPoint.beaconId);
+				if (beacon != null) {
+					Location currentLocation = GeoLocationManager.getInstance().getCurrentLocation();
+					entityPoint.location.latitude = currentLocation.getLatitude();
+					entityPoint.location.longitude = currentLocation.getLongitude();
+				}
+				GeoPoint point = new GeoPoint((int) (entityPoint.location.latitude.doubleValue() * 1E6),
+						(int) (entityPoint.location.longitude.doubleValue() * 1E6));
 				OverlayItem overlayitem = new OverlayItem(point, entityPoint.label, entityPoint.label);
-
-				/* User custom marker */
-				// if (entityPoint.imagePreviewUri != null &&
-				// !entityPoint.imagePreviewUri.equals("")) {
-				// /*
-				// * If we find it in the cache we'll use it otherwise we fall back
-				// to the
-				// * default marker. It would be expensive to deal with images way
-				// outside the users
-				// * current radar range.
-				// */
-				// // Bitmap bitmap =
-				// ImageManager.getInstance().getImageLoader().getImageCache().get(entityPoint.imagePreviewUri);
-				// // if (bitmap != null) {
-				// // BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmap);
-				// // bitmapDrawable.setBounds(0, 0, 80, 80);
-				// // overlayitem.setMarker(bitmapDrawable);
-				// // }
-				// // else {
-				// Drawable marker =
-				// getResources().getDrawable(R.drawable.icon_picture);
-				// marker.setBounds(0, 0, 40, 35);
-				// overlayitem.setMarker(marker);
-				// // }
-				// }
-				// else if (entityPoint.linkUri != null &&
-				// !entityPoint.linkUri.equals("")) {
-				// Drawable marker =
-				// getResources().getDrawable(R.drawable.icon_link);
-				// marker.setBounds(0, 0, 40, 40);
-				// overlayitem.setMarker(marker);
-				// }
-				// else {
-				// Drawable marker =
-				// getResources().getDrawable(R.drawable.icon_post);
-				// marker.setBounds(0, 0, 40, 35);
-				// overlayitem.setMarker(marker);
-				// }
-
 				overlayitem.setMarker(drawable);
 				mItemizedOverlay.addOverlay(overlayitem);
 			}
 		}
 		mMapOverlays.add(mItemizedOverlay);
-		mMapController.zoomToSpan(mItemizedOverlay.getLatSpanE6() + 1500, mItemizedOverlay.getLonSpanE6() + 1500);
+		// mMapController.zoomToSpan(mItemizedOverlay.getLatSpanE6() + 1500, mItemizedOverlay.getLonSpanE6() + 1500);
+		mMapView.invalidate();
+	}
+
+	public void showBeacons() {
+
+		mMapOverlays = mMapView.getOverlays();
+		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi_ii);
+		mItemizedOverlay = new CandiItemizedOverlay(drawable, mMapView, true);
+
+		/*
+		 * First check to see if radar is seeing a beacon that didn't come back
+		 * in the service call.
+		 */
+
+		for (Beacon beaconByRadar : ProxiExplorer.getInstance().getEntityModel().getBeacons()) {
+			if (beaconByRadar.entities != null && beaconByRadar.entities.size() > 0) {
+				beaconByRadar.entityCount = beaconByRadar.entities.size();
+				boolean beaconHit = false;
+				for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getMapBeacons()) {
+					if (beaconByLocation.id.equals(beaconByRadar.id)) {
+						beaconHit = true;
+						break;
+					}
+				}
+				if (!beaconHit) {
+					ProxiExplorer.getInstance().getEntityModel().getMapBeacons().add(beaconByRadar);
+				}
+			}
+		}
+
+		for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getMapBeacons()) {
+			if (beaconByLocation.entityCount.intValue() > 0
+					&& !beaconByLocation.bssid.equals(ProxiExplorer.globalBssid)
+					&& beaconByLocation.latitude != null
+					&& beaconByLocation.longitude != null) {
+				/*
+				 * If a beacon is currently within radar detection range we want to
+				 * override any lat/lon settings using the users current location.
+				 * 
+				 * Multiple beacons in radar range will stack on the same map location unless
+				 * we do something to offset them.
+				 */
+				Beacon beaconByRadar = ProxiExplorer.getInstance().getEntityModel().getBeaconById(beaconByLocation.id);
+				if (beaconByRadar != null) {
+					Location currentLocation = GeoLocationManager.getInstance().getCurrentLocation();
+					if (currentLocation != null) {
+						beaconByLocation.latitude = currentLocation.getLatitude();
+						beaconByLocation.longitude = currentLocation.getLongitude();
+					}
+				}
+				GeoPoint point = new GeoPoint((int) (beaconByLocation.latitude.doubleValue() * 1E6),
+						(int) (beaconByLocation.longitude.doubleValue() * 1E6));
+				String title = String.valueOf(beaconByLocation.entityCount);
+				String message = beaconByLocation.id;
+				OverlayItem overlayItem = new OverlayItem(point, title, message);
+				overlayItem.setMarker(drawable);
+				mItemizedOverlay.addOverlay(overlayItem);
+			}
+		}
+		mMapOverlays.add(mItemizedOverlay);
 		mMapView.invalidate();
 	}
 
@@ -382,9 +404,6 @@ public class CandiMap extends SherlockMapActivity {
 
 			/* User could have changed */
 			invalidateOptionsMenu();
-
-			/* Currrent tab could have changed */
-			mCommon.setActiveTab(((ViewGroup) findViewById(R.id.image_tab_host)).getChildAt(4));
 		}
 	}
 
@@ -431,81 +450,4 @@ public class CandiMap extends SherlockMapActivity {
 		return false;
 	}
 
-	public static class CandiItemizedOverlay extends ItemizedOverlay {
-
-		private ArrayList<OverlayItem>	mOverlays	= new ArrayList<OverlayItem>();
-		private boolean					mShowTitles	= false;
-
-		public CandiItemizedOverlay(Drawable defaultMarker, Boolean showTitles) {
-			super(boundCenterBottom(defaultMarker));
-			mShowTitles = showTitles;
-			populate();
-		}
-
-		@Override
-		protected OverlayItem createItem(int i) {
-			return mOverlays.get(i);
-		}
-
-		@Override
-		public int size() {
-			return mOverlays.size();
-		}
-
-		@Override
-		protected boolean onTap(int index) {
-			return true;
-		}
-
-		public void addOverlay(OverlayItem overlay) {
-			mOverlays.add(overlay);
-			populate();
-		}
-
-		@Override
-		public void draw(Canvas canvas, MapView mapView, boolean shadow) {
-
-			super.draw(canvas, mapView, shadow);
-
-			if (!shadow && mShowTitles) {
-				for (OverlayItem item : mOverlays) {
-					/*
-					 * Converts latitude & longitude of this overlay item to coordinates on screen. As we have called
-					 * boundCenterBottom() in constructor, so these coordinates will be of the bottom center position of
-					 * the displayed marker.
-					 */
-					GeoPoint point = item.getPoint();
-					Point markerBottomCenterCoords = new Point();
-					mapView.getProjection().toPixels(point, markerBottomCenterCoords);
-
-					/* Find the width and height of the title */
-					if (item.getTitle() != null) {
-						TextPaint paintText = new TextPaint();
-						Paint paintRect = new Paint();
-
-						Rect rect = new Rect();
-						paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);
-
-						String title = (String) TextUtils.ellipsize(item.getTitle(), paintText, CandiConstants.MAP_VIEW_TITLE_LENGTH_MAX,
-								TextUtils.TruncateAt.END);
-						paintText.getTextBounds(title, 0, title.length(), rect);
-
-						rect.inset(-CandiConstants.MAP_VIEW_TITLE_MARGIN, -CandiConstants.MAP_VIEW_TITLE_MARGIN);
-						rect.offsetTo(markerBottomCenterCoords.x - rect.width() / 2,
-								markerBottomCenterCoords.y - CandiConstants.MAP_VIEW_MARKER_HEIGHT
-										- rect.height());
-
-						paintText.setTextAlign(Paint.Align.CENTER);
-						paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);
-						paintText.setARGB(255, 255, 255, 255);
-						paintText.setAntiAlias(true);
-						paintRect.setARGB(130, 0, 0, 0);
-
-						canvas.drawRoundRect(new RectF(rect), 4, 4, paintRect);
-						canvas.drawText(title, rect.left + rect.width() / 2, rect.bottom - CandiConstants.MAP_VIEW_TITLE_MARGIN, paintText);
-					}
-				}
-			}
-		}
-	}
 }

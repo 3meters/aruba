@@ -35,7 +35,7 @@
 
         <activity
             android:name=".CandiRadar"
-            android:configChanges="orientation|keyboardHidden"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:launchMode="standard" >
             <intent-filter>
@@ -55,91 +55,97 @@
         
         <activity
             android:name=".SignInForm"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".CandiForm"
-            android:configChanges="orientation"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".CandiList"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".CandiMap"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".MapBrowse"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".CommentForm"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".CommentList"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".PictureSearch"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".BookmarkList"
-            android:configChanges="orientation"
+            android:name=".BookmarkPicker"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name=".TemplatePicker"
+            android:theme="@style/Theme.Sherlock.Dialog"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".CandiPicker"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".SignUpForm"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".ProfileForm"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".EntityForm"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".PictureBrowse"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".Preferences"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:theme="@android:style/Theme" >
             <intent-filter>

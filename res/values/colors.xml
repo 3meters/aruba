@@ -5,9 +5,14 @@
     <color name="application_titlebar_separator_center">@color/rule_dark</color>
     <color name="application_titlebar_separator_end">@color/rule_dark</color>
     
-    <color name="tab_separator_start">@color/rule_60_dark</color>
-    <color name="tab_separator_center">@color/rule_60_dark</color>
-    <color name="tab_separator_end">@color/rule_60_dark</color>
+    <color name="tab_separator_start">@color/rule_30_dark</color>
+    <color name="tab_separator_center">@color/rule_30_dark</color>
+    <color name="tab_separator_end">@color/rule_30_dark</color>
+    <color name="tab_rule_active">#ff63A9E2</color>
+    <color name="tab_rule_inactive_dark">#44ffffff</color>
+    <color name="tab_rule_inactive_light">#11000000</color>
+    <color name="tab_background_dark">#22ffffff</color>
+    <color name="tab_background_light">#22000000</color>
     
     <color name="progress_start">#ffffd300</color>
     <color name="progress_end">#ffffd300</color>
@@ -21,10 +26,10 @@
     <color name="actionstrip_background_fill_serene">@color/fill_shadelight_serene</color>
     <color name="actionstrip_background_stroke_serene">@color/rule_dark</color>
     
-    <color name="pager_indicator_text_unfocused_dark">@color/text_unfocused_dark</color>
-    <color name="pager_indicator_text_unfocused_light">@color/text_unfocused_light</color>
-    <color name="pager_indicator_text_focused_dark">@color/accent</color>
-    <color name="pager_indicator_text_focused_light">@color/accent</color>
+    <color name="pager_indicator_text_unfocused_dark">@color/text_dark</color>
+    <color name="pager_indicator_text_unfocused_light">@color/text_light</color>
+    <color name="pager_indicator_text_focused_dark">@color/text_dark</color>
+    <color name="pager_indicator_text_focused_light">@color/text_light</color>
     
     <!-- 
     Theme Colors
@@ -39,7 +44,6 @@
     <color name="accent">#ffffaa00</color>
     <color name="accent_darker">#ffbb7700</color>
     <color name="accent_lighter">#ffffcc00</color>
-    <color name="tab_highlight">#ff63A9E2</color>
     <color name="edit_hint">#ff888888</color>
     <color name="transparent">#00000000</color>
     <color name="text_pressed">#ff000000</color>

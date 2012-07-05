@@ -3,6 +3,7 @@
 
     <LinearLayout
         android:id="@+id/image_tab_host"
+        style="@style/form_tab_background"
         android:layout_width="fill_parent"
         android:layout_height="40dp"
         android:orientation="horizontal" >
@@ -27,7 +28,7 @@
 
             <ImageView
                 android:id="@+id/image_tab_image"
-                style="@style/form_tab_highlight"
+                style="@style/form_tab_active"
                 android:layout_width="fill_parent"
                 android:layout_height="5dp"
                 android:layout_alignParentBottom="true"
@@ -61,7 +62,7 @@
 
             <ImageView
                 android:id="@+id/image_tab_image"
-                style="@style/form_tab_highlight"
+                style="@style/form_tab_active"
                 android:layout_width="fill_parent"
                 android:layout_height="2dp"
                 android:layout_alignParentBottom="true"

@@ -30,6 +30,7 @@ public class DrawableManager {
 		bitmapCache = new HashMap<String, SoftReference<Bitmap>>();
 	}
 
+	@SuppressWarnings("deprecation")
 	public void fetchDrawableOnThread(final String uri, final PictureSearch.ViewHolder holder) {
 
 		synchronized (bitmapCache) {
@@ -62,6 +63,7 @@ public class DrawableManager {
 		thread.start();
 	}
 
+	@SuppressWarnings("deprecation")
 	private Drawable fetchDrawable(final String uri) {
 
 		ServiceRequest serviceRequest = new ServiceRequest();
