@@ -148,6 +148,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 	// TODO: implement
 	}
 
+	@SuppressWarnings("deprecation")
 	private void addAndMeasureChild(final View child, int viewPos) {
 		LayoutParams params = child.getLayoutParams();
 		if (params == null) {
