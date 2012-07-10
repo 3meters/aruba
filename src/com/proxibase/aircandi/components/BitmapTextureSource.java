@@ -21,6 +21,7 @@ public class BitmapTextureSource implements ITextureSource {
 
 		mBitmap = bitmap;
 		mBitmapAdapter = bitmapAdapter;
+		mName = name;
 		if (mBitmap != null) {
 			mHeight = mBitmap.getHeight();
 			mWidth = mBitmap.getWidth();

@@ -5,16 +5,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 
 import com.google.common.collect.MapMaker;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -94,13 +92,6 @@ public class ImageCache implements Map<String, Bitmap> {
 
 	public int getCachedImageQuality() {
 		return mCachedImageQuality;
-	}
-
-	public void recycleBitmaps() {
-		final Enumeration<String> strEnum = Collections.enumeration(mCache.keySet());
-		while (strEnum.hasMoreElements()) {
-			mCache.get(strEnum.nextElement()).recycle();
-		}
 	}
 
 	public synchronized Bitmap get(Object key) {

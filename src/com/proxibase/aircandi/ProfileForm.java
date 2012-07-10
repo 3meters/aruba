@@ -1,6 +1,10 @@
 package com.proxibase.aircandi;
 
+import org.apache.http.HttpStatus;
+
 import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,10 +16,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
@@ -39,14 +45,16 @@ import com.proxibase.service.Query;
 import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.User;
 
+@SuppressWarnings("unused")
 public class ProfileForm extends FormActivity {
 
 	private ViewFlipper		mViewFlipper;
 	private WebImageView	mImageUser;
 	private EditText		mTextFullname;
+	private EditText		mTextBio;
+	private EditText		mTextLink;
+	private EditText		mTextLocation;
 	private EditText		mTextEmail;
-	private EditText		mTextPassword;
-	private EditText		mTextPasswordConfirm;
 	private Button			mButtonSave;
 	private User			mUser;
 	private Integer			mUserId;
@@ -66,6 +74,7 @@ public class ProfileForm extends FormActivity {
 	protected void initialize() {
 
 		mCommon.track();
+		mCommon.mActionBar.setTitle(R.string.form_title_profile);
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mUserId = extras.getInt(getString(R.string.EXTRA_USER_ID));
@@ -82,9 +91,10 @@ public class ProfileForm extends FormActivity {
 
 		mImageUser = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
+		mTextBio = (EditText) findViewById(R.id.text_bio);
+		mTextLink = (EditText) findViewById(R.id.text_link);
+		mTextLocation = (EditText) findViewById(R.id.text_location);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
-		mTextPassword = (EditText) findViewById(R.id.text_password);
-		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
 		mButtonSave = (Button) findViewById(R.id.btn_save);
 
 		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
@@ -103,30 +113,6 @@ public class ProfileForm extends FormActivity {
 			}
 		});
 
-		mTextPassword.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(isValid());
-			}
-		});
-
-		mTextPasswordConfirm.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(isValid());
-			}
-		});
-
-		if (mViewFlipper != null) {
-			if (mCommon.mCommandType == CommandType.New) {
-				mCommon.setActiveTab(1);
-			}
-			else {
-				mCommon.setActiveTab(0);
-			}
-		}
 	}
 
 	protected void bind() {
@@ -138,7 +124,7 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Loading...");
+				mCommon.showProgressDialog(true, getString(R.string.progress_loading));
 			}
 
 			@Override
@@ -147,8 +133,14 @@ public class ProfileForm extends FormActivity {
 				if (mUser != null) {
 					query = new Query("users").filter("{\"email\":\"" + ((User) mUser).email + "\"}");
 				}
-				ServiceResponse serviceResponse = NetworkManager.getInstance().request(
-						new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json));
+
+				ServiceRequest serviceRequest = new ServiceRequest();
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE)
+						.setRequestType(RequestType.Get)
+						.setQuery(query)
+						.setResponseFormat(ResponseFormat.Json);
+
+				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 				return serviceResponse;
 			}
 
@@ -173,6 +165,9 @@ public class ProfileForm extends FormActivity {
 	protected void draw() {
 
 		mTextFullname.setText(mUser.name);
+		mTextBio.setText(mUser.bio);
+		mTextLink.setText(mUser.webUri);
+		mTextLocation.setText(mUser.location);
 		mTextEmail.setText(mUser.email);
 
 		if (mUser.imageUri != null && mUser.imageUri.length() > 0) {
@@ -225,6 +220,14 @@ public class ProfileForm extends FormActivity {
 		});
 	}
 
+	public void onChangePasswordButtonClick(View view) {
+		IntentBuilder intentBuilder = new IntentBuilder(this, PasswordForm.class);
+		intentBuilder.setCommandType(CommandType.Edit);
+		Intent intent = intentBuilder.create();
+		startActivity(intent);
+		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
@@ -237,7 +240,7 @@ public class ProfileForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, "Saving profile...");
+					mCommon.showProgressDialog(true, getString(R.string.progress_saving));
 				}
 
 				@Override
@@ -269,20 +272,20 @@ public class ProfileForm extends FormActivity {
 
 						mUser.email = mTextEmail.getText().toString().trim();
 						mUser.name = mTextFullname.getText().toString().trim();
+						mUser.bio = mTextBio.getText().toString().trim();
+						mUser.location = mTextLocation.getText().toString().trim();
+						mUser.webUri = mTextLink.getText().toString().trim();
 						mUser.modifiedDate = DateUtils.nowDate().getTime();
 						mUser.modifierId = Aircandi.getInstance().getUser().id;
 
-						if (mTextPassword.getText().toString().length() != 0) {
-							mUser.password = mTextPassword.getText().toString().trim();
-						}
-
-						Logger.i(this, "Updating user: " + mUser.name);
+						Logger.i(this, "Updating user profile: " + mUser.name);
 
 						ServiceRequest serviceRequest = new ServiceRequest();
-						serviceRequest.setUri(mUser.getEntryUri());
-						serviceRequest.setRequestType(RequestType.Update);
-						serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
-						serviceRequest.setResponseFormat(ResponseFormat.Json);
+						serviceRequest.setUri(mUser.getEntryUri())
+								.setRequestType(RequestType.Update)
+								.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService))
+								.setSession(Aircandi.getInstance().getUser().session)
+								.setResponseFormat(ResponseFormat.Json);
 
 						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 					}
@@ -302,7 +305,23 @@ public class ProfileForm extends FormActivity {
 						finish();
 					}
 					else {
-						mCommon.handleServiceError(serviceResponse);
+						/*
+						 * This could have been caused any problem while updating the user and the user image. We look
+						 * first for ones that are known responses from the service.
+						 * 
+						 * - 400: email not valid
+						 * - 400: email not unique
+						 */
+						if (serviceResponse.exception.getHttpStatusCode() == HttpStatus.SC_BAD_REQUEST) {
+							String message = serviceResponse.exception.getResponseMessage();
+							AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
+									ProfileForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
+										public void onClick(DialogInterface dialog, int which) {}
+									});
+						}
+						else {
+							mCommon.handleServiceError(serviceResponse);
+						}
 					}
 				}
 			}.execute();
@@ -310,20 +329,11 @@ public class ProfileForm extends FormActivity {
 	}
 
 	private boolean validate() {
-		String alertMessage = "";
-		if (mTextPassword.getText().toString().length() > 0) {
-			if (mTextPassword.getText().toString().length() == 0) {
-				alertMessage = getResources().getString(R.string.profile_alert_missing_old_password);
-			}
-			if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
-				alertMessage = getResources().getString(R.string.profile_alert_missmatched_passwords);
-			}
-			if (alertMessage.length() != 0) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setMessage(alertMessage).setCancelable(true).show();
-				return false;
-			}
-		}
+		/*
+		 * Might want to do extra validation:
+		 * - valid web link
+		 * - valid email address
+		 */
 		return true;
 	}
 

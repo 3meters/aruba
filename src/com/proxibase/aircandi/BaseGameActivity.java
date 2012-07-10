@@ -95,9 +95,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	protected void onPause() {
 		super.onPause();
 
-		if(!this.mPaused) {
-			this.doPause();
-		}
+//		if(!this.mPaused) {
+//			this.doPause();
+//		}
 	}
 
 	@Override
@@ -169,7 +169,7 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 
 		this.mPaused = false;
 		this.acquireWakeLock(this.mEngine.getEngineOptions().getWakeLockOptions());
-		Log.v("BaseGameActivity", "Resuming engine and glsurfaceview rendering thread");
+		Log.i("AndEngine", "Resuming engine and glsurfaceview rendering thread");
 		this.mEngine.onResume();
 
 		this.mRenderSurfaceView.onResume();
@@ -181,7 +181,7 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		this.mPaused = true;
 		this.releaseWakeLock();
 
-		Log.v("BaseGameActivity", "Stopping engine and pausing glsurfaceview rendering thread");
+		Log.i("AndEngine", "Stopping engine and pausing glsurfaceview rendering thread");
 		this.mEngine.onPause();
 		this.mEngine.stop();
 		this.mRenderSurfaceView.onPause();

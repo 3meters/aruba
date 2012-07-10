@@ -39,6 +39,9 @@ public class CandiPicker extends FormActivity implements OnItemClickListener, Ac
 	private void initialize() {
 		mCommon.track();
 
+		/* Action bar */
+		mCommon.mActionBar.setTitle(R.string.form_title_candi);
+		
 		mListViewRadarCandi = (ListView) findViewById(R.id.list_radar_candi);
 		mListViewRadarCandi.setOnItemClickListener(this);
 		mListViewRadarCandi.setDivider(null);

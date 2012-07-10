@@ -89,11 +89,14 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 		AmazonServiceException,
 		AmazonClientException,
 		NotFoundException,
+		UnauthorizedException,
 		UpdateException,
 		RejectedExecutionException,
 		InterruptedException,
 		UnknownHostException,
-		UnknownException
+		UnknownException,
+		SessionException,
+		PasswordException
 	}
 
 	/**
@@ -115,9 +118,9 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 	 * will be set.
 	 */
 	public static enum ErrorType {
-			Client,
-			Service,
-			Unknown
+		Client,
+		Service,
+		Unknown
 	}
 
 }

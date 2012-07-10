@@ -66,7 +66,6 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.Preferences.PrefResponse;
 import com.proxibase.aircandi.candi.camera.ChaseCamera;
@@ -160,6 +159,49 @@ import com.proxibase.service.objects.User;
  * AsyncTasks are hard-coded with a low priority and continue their work even if the activity is paused.
  */
 
+/*
+ * Bitmap Management
+ * 
+ * Explicit gc calls to free bitmap memory:
+ * 
+ * - EntityForm: onDestroy.
+ * - PictureSearch: onDestroy.
+ * - AndEngine: at the end of an updateTextures pass.
+ * 
+ * Explicit bitmap recycling
+ * 
+ * - Anyplace where a new bitmap has been processed from another bitmap.
+ * - Releasing bitmaps when forms are destroyed.
+ * - Releasing bitmaps when list items are reused.
+ * 
+ * - AndEngine: after a bitmap has been pushed to hardware
+ * - AndEngine: after a placeholder bitmap has been pushed to hardware
+ */
+
+/*
+ * Lifecycle event sequences
+ * 
+ * Alert Dialog: None, focus toggle
+ * Dialog Activity: Pause->LoseFocus->Resume->GainFocus
+ * Overflow menu: None, focus toggle
+ * Preferences: Pause->Stop->Restart->Start->Resume->GainFocus
+ * Profile: Pause->LoseFocus->Stop->Restart->Start->Resume->GainFocus
+ * ProgressIndicator: None, focus toggle
+ * Home: Pause->LoseFocus->Stop->Restart->Start->Resume->GainFocus
+ * Back: Pause->LoseFocus->Stop->Destroyed
+ * First Launch: Created-Start-Resume->AttachToWindow->GainFocus
+ */
+
+/*
+ * Game engine management
+ * 
+ * Changes have been made so andengine is only told to pause/resume using window focus
+ * event. We are blocking the pause event to prevent it from dumping all the textures.
+ * We allow focus=true to go through on first gain of window focus and focus=false on destroy. The
+ * game engine isn't actually working when still up because of our dirty rendering logic.
+ */
+
+@SuppressWarnings("unused")
 public class CandiRadar extends AircandiGameActivity implements TextureListener {
 
 	private boolean						mFirstRun				= true;
@@ -268,7 +310,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		}
 
 		/* Analytics tracker */
-		GoogleAnalyticsTracker.getInstance().startNewSession(getAnalyticsId(), this);
+		Tracker.startNewSession(getAnalyticsId(), Aircandi.applicationContext);
 		getCommon().track();
 
 		/* Check for emulator */
@@ -1081,16 +1123,16 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						}
 					}
 					else if (wifiState == WifiManager.WIFI_STATE_ENABLING) {
-						ImageUtils.showToastNotification("Wifi state enabling...", Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification(getString(R.string.toast_wifi_enabling), Toast.LENGTH_SHORT);
 					}
 					else if (wifiState == WifiManager.WIFI_STATE_DISABLING) {
-						ImageUtils.showToastNotification("Wifi state disabling...", Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification(getString(R.string.toast_wifi_disabling), Toast.LENGTH_SHORT);
 					}
 					else if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
 						((CheckBox) findViewById(R.id.wifi_enabled_checkbox)).setChecked(false);
 						txtMessage.setText(getString(R.string.dialog_network_message_wifi_notready));
 						retryButton.setEnabled(false);
-						ImageUtils.showToastNotification("Wifi state disabled.", Toast.LENGTH_SHORT);
+						ImageUtils.showToastNotification(getString(R.string.toast_wifi_disabled), Toast.LENGTH_SHORT);
 					}
 				}
 			});
@@ -1152,7 +1194,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	// Dialogs
 	// --------------------------------------------------------------------------------------------
 
-	@SuppressWarnings("unused")
 	private void showInstallDialog(final CandiModel candi) {
 
 		runOnUiThread(new Runnable() {
@@ -1359,16 +1400,20 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * Parent class will trigger pause or resume for the game engine based on hasWindowFocus. We control when this
 		 * message get through to prevent unnecessary restarts. We block it if we lost focus becase of a pop up like a
 		 * dialog or an android menu (which do not trigger this.onPause which in turns stops the engine).
-		 */
-
-		/*
+		 * 
 		 * Losing focus: BaseGameActivity will pause the game engine
-		 * Gaining focus: BaseGameActivity will resume the
-		 * game engine if currently paused First life run we pass through window focus change here instead of onResume
-		 * because the engine isn't ready after first run resume. First life resume starts engine.
+		 * Gaining focus: BaseGameActivity will resume the game engine if currently paused
+		 * 
+		 * First life run: we pass through window focus change here instead of onResume because the engine isn't ready
+		 * after 'first run' resume.
+		 * 
+		 * First life resume starts engine.
 		 */
-		Logger.v(this, hasWindowFocus ? "Activity has window focus" : "Activity lost window focus");
+		Logger.i(this, hasWindowFocus ? "Activity has window focus" : "Activity lost window focus");
 		if (mFirstWindow.get()) {
+			/*
+			 * This can also be called in onResume or onStop
+			 */
 			super.onWindowFocusChanged(hasWindowFocus);
 			mFirstWindow.set(false);
 		}
@@ -1387,6 +1432,12 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				mHandler.removeCallbacks(mScanRunnable);
 			}
 		}
+	}
+
+	@Override
+	public void onAttachedToWindow() {
+		Logger.i(this, "CandiRadarActivity attached to window");
+		super.onAttachedToWindow();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1443,25 +1494,25 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				getCommon().reload();
 			}
 			else {
-				/*
-				 * We control window focus messages that trigger the engine from here.
-				 */
-				super.onWindowFocusChanged(true);
-
-				/* We run a fake modifier so we can trigger texture loading */
-				mEngine.getScene().registerEntityModifier(
-						new AlphaModifier(CandiConstants.DURATION_INSTANT, 0.0f, 1.0f, new IEntityModifierListener() {
-
-							@Override
-							public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-								onTexturesReady();
-							}
-
-							@Override
-							public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-								mCandiPatchPresenter.renderingActivate();
-							}
-						}, EaseLinear.getInstance()));
+				//				/*
+				//				 * We control window focus messages that trigger the engine from here.
+				//				 */
+				//				super.onWindowFocusChanged(true);
+				//
+				//				/* We run a fake modifier so we can trigger texture loading */
+				//				mEngine.getScene().registerEntityModifier(
+				//						new AlphaModifier(CandiConstants.DURATION_INSTANT, 0.0f, 1.0f, new IEntityModifierListener() {
+				//
+				//							@Override
+				//							public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+				//								onTexturesReady();
+				//							}
+				//
+				//							@Override
+				//							public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+				//								mCandiPatchPresenter.renderingActivate();
+				//							}
+				//						}, EaseLinear.getInstance()));
 
 				/*
 				 * We have to be pretty aggressive about refreshing the UI because
@@ -1516,7 +1567,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * - Fires when we lose focus and have been moved into the background. This will
 		 * be followed by onStop if we are not visible.
 		 * 
-		 * - Calling onPause on super will cause the engine to pause if it hasn't already
+		 * - Calling onPause on super (BaseGameActivity) will cause the engine to pause if it hasn't already
 		 * been paused because of losing window focus.
 		 * 
 		 * - onPause does not fire if the activity window loses focus but the activity is still active.
@@ -1545,10 +1596,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * Fired when starting another activity and we lose our window.
 		 */
 		Logger.i(this, "CandiRadarActivity stopped");
-		super.onStop();
-
-		/* We control window focus messages that trigger the engine from here. */
-		super.onWindowFocusChanged(false);
+		super.onStop(); /* Goes to Sherlock */
 
 		/* Make sure autoscan is stopped if we are not in the foreground */
 		mHandler.removeCallbacks(mScanRunnable);
@@ -1564,6 +1612,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	@Override
 	protected void onDestroy() {
 		Logger.i(this, "CandiRadarActivity destroyed");
+		super.onWindowFocusChanged(false); /* To stop game engine */
 		super.onDestroy();
 		if (getCommon() != null) {
 			getCommon().doDestroy();
@@ -1680,7 +1729,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
 
-	@SuppressWarnings("unused")
 	private void recycleBitmaps() {
 		// mCommon.recycleImageViewDrawable(R.id.image_public);
 		// mCommon.recycleImageViewDrawable(R.id.image_public_reflection);

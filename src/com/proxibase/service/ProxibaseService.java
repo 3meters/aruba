@@ -68,6 +68,8 @@ import com.proxibase.aircandi.components.Logger;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
 import com.proxibase.service.objects.ServiceData;
+import com.proxibase.service.objects.Session;
+import com.proxibase.service.objects.User;
 
 /*
  * Http 1.1 Status Codes (subset) - 200: OK - 201: Created - 202: Accepted - 203: Non-authoritative information - 204:
@@ -242,7 +244,7 @@ public class ProxibaseService {
 					addEntity((HttpEntityEnclosingRequestBase) httpRequest, jsonBody);
 				}
 			}
-
+			
 			/* Add headers and set the Uri */
 			addHeaders(httpRequest, serviceRequest.getResponseFormat());
 			if (redirectedUri != null) {
@@ -251,6 +253,18 @@ public class ProxibaseService {
 			else {
 				Query query = serviceRequest.getQuery();
 				String uriString = query == null ? serviceRequest.getUri() : serviceRequest.getUri() + query.queryString();
+				
+				/* Add session info to uri if supplied */
+				String sessionInfo = sessionInfo(serviceRequest);
+				if (!sessionInfo.equals("")){
+					if (uriString.contains("?")) {
+						uriString += "&" + sessionInfo;
+					}
+					else {
+						uriString += "?" + sessionInfo;
+					}
+				}
+				
 				httpRequest.setURI(uriFromString(uriString));
 			}
 
@@ -369,9 +383,15 @@ public class ProxibaseService {
 		ProxibaseServiceException exception = null;
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode == HttpStatus.SC_NOT_FOUND) {
-			exception = new ProxibaseServiceException("Service not found");
+			exception = new ProxibaseServiceException("Service or target not found");
 			exception.setErrorType(ErrorType.Service);
 			exception.setErrorCode(ErrorCode.NotFoundException);
+			exception.setHttpStatusCode(statusCode);
+		}
+		if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+			exception = new ProxibaseServiceException("Service not found");
+			exception.setErrorType(ErrorType.Service);
+			exception.setErrorCode(ErrorCode.UnauthorizedException);
 			exception.setHttpStatusCode(statusCode);
 		}
 		else if (statusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
@@ -393,6 +413,18 @@ public class ProxibaseService {
 			exception = new ProxibaseServiceException("Request entity too large");
 			exception.setErrorType(ErrorType.Client);
 			exception.setErrorCode(ErrorCode.AircandiServiceException);
+			exception.setHttpStatusCode(statusCode);
+		}
+		else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_CUSTOM_SESSION_EXPIRED) {
+			exception = new ProxibaseServiceException("Session expired");
+			exception.setErrorType(ErrorType.Service);
+			exception.setErrorCode(ErrorCode.SessionException);
+			exception.setHttpStatusCode(statusCode);
+		}
+		else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_CUSTOM_PASSWORD_STRENGTH) {
+			exception = new ProxibaseServiceException("Weak password");
+			exception.setErrorType(ErrorType.Client);
+			exception.setErrorCode(ErrorCode.PasswordException);
 			exception.setHttpStatusCode(statusCode);
 		}
 		else {
@@ -610,6 +642,14 @@ public class ProxibaseService {
 		return id;
 	}
 
+	public String sessionInfo(ServiceRequest serviceRequest) {
+		String sessionInfo = "";
+		if (serviceRequest.getSession() != null) {
+			sessionInfo = "user=" + serviceRequest.getSession().id + "&";
+			sessionInfo += "session=" + serviceRequest.getSession().key;
+		}
+		return sessionInfo;
+	}
 	// ----------------------------------------------------------------------------------------
 	// Json methods
 	// ----------------------------------------------------------------------------------------
@@ -622,19 +662,17 @@ public class ProxibaseService {
 
 	public static ServiceData convertJsonToObject(String jsonString, Class type, GsonType gsonType) {
 		ServiceData serviceData = convertJsonToObjects(jsonString, type, gsonType);
-		List<Object> array = (List<Object>) serviceData.data;
-		if (array != null && array.size() > 0) {
-			serviceData.data = array.get(0);
-			return serviceData;
+		if (serviceData.data != null) {
+			List<Object> array = (List<Object>) serviceData.data;
+			if (array != null && array.size() > 0) {
+				serviceData.data = array.get(0);
+			}
 		}
-		else {
-			return null;
-		}
+		return serviceData;
 	}
 
 	public static ServiceData convertJsonToObjects(String jsonString, Class type, GsonType gsonType) {
 
-		List<Object> array = new ArrayList<Object>();
 		Gson gson = ProxibaseService.getGson(gsonType);
 		ServiceData serviceData = new ServiceData();
 
@@ -648,8 +686,36 @@ public class ProxibaseService {
 			JsonElement jsonElement = parser.parse(jsonString);
 			if (jsonElement.isJsonObject()) {
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
-				jsonElement = jsonObject.get("data");
-				
+
+				if (jsonObject.has("data")) {
+					jsonElement = jsonObject.get("data");
+					List<Object> array = new ArrayList<Object>();
+					if (jsonElement.isJsonPrimitive()) {
+						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+						if (primitive.isString()) {
+							array.add(primitive.getAsString());
+						}
+						else if (primitive.isNumber()) {
+							array.add(primitive.getAsNumber());
+						}
+						else if (primitive.isBoolean()) {
+							array.add(primitive.getAsBoolean());
+						}
+					}
+					else if (jsonElement.isJsonArray()) {
+						JsonArray jsonArray = jsonElement.getAsJsonArray();
+						for (int i = 0; i < jsonArray.size(); i++) {
+							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
+							array.add(gson.fromJson(jsonObjectNew.toString(), type));
+						}
+					}
+					else if (jsonElement.isJsonObject()) {
+						Object obj = gson.fromJson(jsonElement.toString(), type);
+						array.add(obj);
+					}
+					serviceData.data = array;
+				}
+
 				if (jsonObject.has("cursor")) {
 					JsonArray jsonArray = jsonObject.get("cursor").getAsJsonArray();
 					List<String> cursorIds = new ArrayList<String>();
@@ -661,6 +727,14 @@ public class ProxibaseService {
 				if (jsonObject.has("date")) {
 					serviceData.date = jsonObject.get("date").getAsJsonPrimitive().getAsNumber();
 				}
+				if (jsonObject.has("user")) {
+					User user = gson.fromJson(jsonObject.get("user").toString(), User.class);
+					serviceData.user = user;
+				}
+				if (jsonObject.has("session")) {
+					Session session = gson.fromJson(jsonObject.get("session").toString(), Session.class);
+					serviceData.session = session;
+				}
 				if (jsonObject.has("count")) {
 					serviceData.count = jsonObject.get("count").getAsJsonPrimitive().getAsNumber();
 				}
@@ -670,34 +744,11 @@ public class ProxibaseService {
 				if (jsonObject.has("more")) {
 					serviceData.more = jsonObject.get("more").getAsJsonPrimitive().getAsBoolean();
 				}
+				if (jsonObject.has("time")) {
+					serviceData.time = jsonObject.get("time").getAsJsonPrimitive().getAsNumber();
+				}
 			}
 
-			if (jsonElement.isJsonPrimitive()) {
-				JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
-				if (primitive.isString()) {
-					array.add(primitive.getAsString());
-				}
-				else if (primitive.isNumber()) {
-					array.add(primitive.getAsNumber());
-				}
-				else if (primitive.isBoolean()) {
-					array.add(primitive.getAsBoolean());
-				}
-			}
-			else if (jsonElement.isJsonArray()) {
-				JsonArray jsonArray = jsonElement.getAsJsonArray();
-				for (int i = 0; i < jsonArray.size(); i++) {
-					JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
-					array.add(gson.fromJson(jsonObjectNew.toString(), type));
-				}
-			}
-			else if (jsonElement.isJsonObject()) {
-				Object obj = gson.fromJson(jsonElement.toString(), type);
-				array.add(obj);
-			}
-			serviceData.data = array;
-
-			return serviceData;
 		}
 		catch (JsonParseException exception) {
 			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
@@ -708,7 +759,7 @@ public class ProxibaseService {
 		catch (Exception exception) {
 			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
 		}
-		return null;
+		return serviceData;
 	}
 
 	public static Gson getGson(GsonType gsonType) {

@@ -1,5 +1,7 @@
 package com.proxibase.aircandi;
 
+import org.apache.http.HttpStatus;
+
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.AsyncTask;
@@ -31,7 +33,6 @@ import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.ProxibaseServiceException;
-import com.proxibase.service.Query;
 import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.User;
 
@@ -60,6 +61,7 @@ public class SignUpForm extends FormActivity {
 
 	protected void initialize() {
 		mCommon.track();
+		mCommon.mActionBar.setTitle(R.string.form_title_signup);
 		mImageUser = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
@@ -149,17 +151,25 @@ public class SignUpForm extends FormActivity {
 		doSave();
 	}
 
+	public void onViewTermsButtonClick(View view) {
+
+		AircandiCommon.showAlertDialog(R.drawable.icon_app
+				, getResources().getString(R.string.alert_terms_title)
+				, getResources().getString(R.string.alert_terms_message)
+				, SignUpForm.this, android.R.string.ok, null, null);
+	}
+	
 	public void onChangePictureButtonClick(View view) {
 
 		showChangePictureDialog(true, mImageUser, new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, Object extra) {
+			public void onComplete(Object response) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-					String imageUri = (String) extra;
+					String imageUri = (String) imageResponse.imageUri;
 					mUser.imageUri = imageUri;
 					mUser.imageBitmap = imageResponse.bitmap;
 				}
@@ -181,7 +191,8 @@ public class SignUpForm extends FormActivity {
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, getResources().getString(
 					R.string.signup_alert_missmatched_passwords_title),
-					getResources().getString(R.string.signup_alert_missmatched_passwords_message), this, android.R.string.ok, null,null);
+					getResources().getString(R.string.signup_alert_missmatched_passwords_message), this, android.R.string.ok, null, null);
+			mTextPasswordConfirm.setText("");
 			return false;
 		}
 		return true;
@@ -201,60 +212,62 @@ public class SignUpForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Signing up...");
+				mCommon.showProgressDialog(true, getString(R.string.progress_signing_up));
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mUser.getCollection());
-				serviceRequest.setRequestType(RequestType.Insert);
-				serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
-				serviceRequest.setResponseFormat(ResponseFormat.Json);
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mUser.getCollection())
+						.setRequestType(RequestType.Insert)
+						.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService))
+						.setResponseFormat(ResponseFormat.Json);
 
-				/* Insert user */
+				/* 
+				 * Insert user.
+				 */
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 
-					/* Load the just insert user to get the user id */
-					Query query = new Query("users").filter("{\"email\":\"" + mUser.email + "\"}");
-					serviceResponse = NetworkManager.getInstance().request(
-							new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE, query, RequestType.Get, ResponseFormat.Json));
+					String jsonResponse = (String) serviceResponse.data;
+					User userStub = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService).data;
+					mUser.id = userStub.id;
+					/* 
+					 * Upload images to S3 as needed. 
+					 */
+					if (mUser.imageUri != null && !mUser.imageUri.contains("resource:") && mUser.imageBitmap != null) {
+						String imageKey = String.valueOf(mUser.id) + "_"
+								+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
+								+ ".jpg";
+						try {
+							S3.putImage(imageKey, mUser.imageBitmap);
+						}
+						catch (ProxibaseServiceException exception) {
+							serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.UnknownException, null, exception);
+						}
 
-					if (serviceResponse.responseCode == ResponseCode.Success) {
+						if (serviceResponse.responseCode == ResponseCode.Success) {
+							/*
+							 * Update user.
+							 *  
+							 * Need to update the user to capture the uri for the image we saved. Must strip out the password
+							 * because service only allows password updates through a different service call. 
+							 */
+							mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
+							mUser.creatorId = mUser.id;
+							mUser.ownerId = mUser.id;
+							mUser.modifierId = mUser.id;
+							mUser.password = null;
+							serviceRequest = new ServiceRequest();
+							serviceRequest.setUri(mUser.getEntryUri())
+									.setRequestType(RequestType.Update)
+									.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService))
+									.setResponseFormat(ResponseFormat.Json);
 
-						/* Jayma: We might have succeeded inserting user but not the user picture */
-						String jsonResponse = (String) serviceResponse.data;
-						mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService).data;
-
-						/* Upload images to S3 as needed. */
-						if (mUser.imageUri != null && !mUser.imageUri.contains("resource:") && mUser.imageBitmap != null) {
-							String imageKey = String.valueOf(mUser.id) + "_"
-									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-									+ ".jpg";
-							try {
-								S3.putImage(imageKey, mUser.imageBitmap);
-							}
-							catch (ProxibaseServiceException exception) {
-								serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.UnknownException, null, exception);
-							}
-
-							if (serviceResponse.responseCode == ResponseCode.Success) {
-
-								mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
-
-								/* Need to update the user to capture the uri for the image we saved */
-								serviceRequest = new ServiceRequest();
-								serviceRequest.setUri(mUser.getEntryUri());
-								serviceRequest.setRequestType(RequestType.Update);
-								serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService));
-								serviceRequest.setResponseFormat(ResponseFormat.Json);
-
-								/* Doing an insert so we don't need anything back */
-								serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-							}
+							/* Doing an insert so we don't need anything back */
+							serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 						}
 					}
 				}
@@ -266,12 +279,14 @@ public class SignUpForm extends FormActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+
 					Tracker.trackEvent("User", "Insert", null, 0);
 					mCommon.showProgressDialog(false, null);
 					Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
+
 					AircandiCommon.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.signup_alert_new_user_title),
 							getResources().getString(R.string.signup_alert_new_user_message),
-							SignUpForm.this, android.R.string.ok, null,new OnClickListener() {
+							SignUpForm.this, android.R.string.ok, null, new OnClickListener() {
 
 								public void onClick(DialogInterface dialog, int which) {
 									setResult(CandiConstants.RESULT_PROFILE_INSERTED);
@@ -280,7 +295,25 @@ public class SignUpForm extends FormActivity {
 							});
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse);
+					/*
+					 * This could have been caused any problem while inserting/updating the user and the user image. We look
+					 * first for ones that are known responses from the service.
+					 * 
+					 * - 400: password not strong enough
+					 * - 400: email not valid
+					 * - 400: email not unique
+					 */
+					if (serviceResponse.exception.getHttpStatusCode() == HttpStatus.SC_BAD_REQUEST) {
+						String message = serviceResponse.exception.getResponseMessage();
+						//String message = getString(R.string.signin_alert_invalid_signin);
+						AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
+								SignUpForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int which) {}
+								});
+					}
+					else {
+						mCommon.handleServiceError(serviceResponse);
+					}
 				}
 			}
 		}.execute();
@@ -289,7 +322,8 @@ public class SignUpForm extends FormActivity {
 
 	private boolean isValid() {
 		/*
-		 * Could be either a check for a new user or an update to an existing user
+		 * Client validation logic is handle here. The service may still reject based on
+		 * additional validation rules.
 		 */
 		if (mTextFullname.getText().length() == 0) {
 			return false;
@@ -297,14 +331,16 @@ public class SignUpForm extends FormActivity {
 		if (mTextEmail.getText().length() == 0) {
 			return false;
 		}
-		if (mTextPassword.getText().length() == 0) {
+		if (mTextPassword.getText().length() < 6) {
 			return false;
 		}
-		if (mTextPasswordConfirm.getText().length() == 0) {
+		if (mTextPasswordConfirm.getText().length() < 6) {
 			return false;
 		}
+		
 		return true;
 	}
+
 
 	// --------------------------------------------------------------------------------------------
 	// Persistence routines

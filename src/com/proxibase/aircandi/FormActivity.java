@@ -29,7 +29,6 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
-import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
@@ -126,13 +125,12 @@ public abstract class FormActivity extends SherlockActivity {
 
 							final ServiceResponse serviceResponse = (ServiceResponse) response;
 							if (serviceResponse.responseCode == ResponseCode.Success) {
-								final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 								runOnUiThread(new Runnable() {
 
 									@Override
 									public void run() {
 										if (mImageRequestListener != null) {
-											mImageRequestListener.onComplete(serviceResponse, imageUri, null, imageResponse.bitmap);
+											mImageRequestListener.onComplete(serviceResponse);
 										}
 									}
 								});
@@ -205,7 +203,6 @@ public abstract class FormActivity extends SherlockActivity {
 
 					// create a new bitmap from the original using the matrix to transform the result
 					bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-					// bitmap.recycle();
 
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);
 					if (mImageRequestListener != null) {

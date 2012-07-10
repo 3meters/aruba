@@ -8,35 +8,35 @@
     </style>
 
     <style name="app_text_appearance_large" parent="@android:style/TextAppearance">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">22sp</item>
     </style>
 
     <style name="app_text_appearance_medium" parent="@android:style/TextAppearance">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="app_text_appearance_small" parent="@android:style/TextAppearance">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="app_text_appearance_micro" parent="@android:style/TextAppearance">
         <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="app_text_appearance_tiny" parent="@android:style/TextAppearance">
-        <item name="android:textSize">10sp</item>
-    </style>
-
     <style name="app_text_appearance_title1" parent="@android:style/TextAppearance">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">22sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="app_text_appearance_title2" parent="@android:style/TextAppearance">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="app_button">
         <item name="android:minWidth">80dp</item>
         <item name="android:maxWidth">200dp</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
     <style name="app_picture">
@@ -56,7 +56,7 @@
     </style>
 
     <style name="app_checkbox" parent="android:Widget.CompoundButton.CheckBox">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
     <style name="app_edittext" parent="@android:style/Widget.EditText">
@@ -69,14 +69,14 @@
     </style>
 
     <style name="app_user_fullname" parent="android:Widget.TextView">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
     </style>
 
     <style name="app_user_timesince" parent="android:Widget.TextView">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
     </style>
 
-    <!-- Actionbar (not currently used or being deprecated) -->
+    <!-- Actionbar (not currently used or being deprecated) 
 
     <style name="widget_actionbar_dark" parent="Widget.Sherlock.ActionBar">
         <item name="actionModeBackground">@color/transparent</item>
@@ -88,20 +88,27 @@
         <item name="android:actionModeBackground">@color/transparent</item>
     </style>
 
-    <style name="actionbar">
-        <item name="android:background">?attr/backgroundHeader</item>
-    </style>
-
     <style name="actionbar_button">
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/app_button_selector</item>
+    </style>
+
+
+    <style name="actionbar_rule_vertical">
+        <item name="android:background">@drawable/app_header_separator</item>
+    </style>
+    
+	-->
+	
+    <style name="actionbar">
+        <item name="android:background">?attr/backgroundHeader</item>
     </style>
 
     <style name="actionbar_title">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical|left</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?attr/textColorButtonHeader</item>
     </style>
 
@@ -114,11 +121,7 @@
         <item name="android:background">@drawable/button_nooutline_selector</item>
         <item name="android:textColor">?attr/textColorButtonHeader</item>
     </style>
-
-    <style name="actionbar_rule_vertical">
-        <item name="android:background">@drawable/app_header_separator</item>
-    </style>
-
+    	
     <!-- Notifications -->
 
     <style name="notification_text">
@@ -163,7 +166,7 @@
     </style>
 
     <style name="search_dialog_text">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
     <style name="dialog_title_text">
@@ -171,7 +174,7 @@
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical|left</item>
         <item name="android:textColor">?attr/textColorButtonHeader</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
 
     <style name="dialog_body_layout">
@@ -181,28 +184,7 @@
     <style name="dialog_body_text">
         <item name="android:textColor">#ff000000</item>
         <item name="android:background">#00000000</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
-    </style>
-
-    <!-- ActionStrip -->
-
-    <style name="actionstrip_button" parent="android:Widget.Button">
-        <item name="android:textColor">?attr/textColorButton</item>
-        <item name="android:background">@drawable/button_nooutline_selector</item>
-        <item name="android:minWidth">60dp</item>
-        <item name="android:padding">5dp</item>
-        <item name="android:drawablePadding">3dp</item>
-        <item name="android:gravity">bottom|center_horizontal</item>
-    </style>
-
-    <style name="actionstrip_above_animation">
-        <item name="android:windowEnterAnimation">@anim/quickcontact_above_enter</item>
-        <item name="android:windowExitAnimation">@anim/quickcontact_above_exit</item>
-    </style>
-
-    <style name="actionstrip_below_animation">
-        <item name="android:windowEnterAnimation">@anim/quickcontact_below_enter</item>
-        <item name="android:windowExitAnimation">@anim/quickcontact_below_exit</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
 
     <!-- Comments -->
@@ -215,7 +197,7 @@
     <!-- Candi Info -->
 
     <style name="candi_info_button" parent="android:Widget.Button">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
         <item name="android:textColor">?attr/textColorButton</item>
         <item name="android:background">?attr/backgroundButton</item>
         <item name="android:layout_height">65dp</item>
@@ -232,7 +214,7 @@
     </style>
 
     <style name="candi_info_description">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
     <style name="candi_info_slider_handle">
@@ -251,12 +233,12 @@
     </style>
 
     <style name="candi_list_subtitle">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textStyle">italic</item>
     </style>
 
     <style name="candi_list_description">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
     <style name="candi_list_button">
@@ -267,18 +249,18 @@
     <!-- Bookmark List -->
 
     <style name="bookmark_list_title">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="bookmark_list_uri">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
     <!-- CandiInfo: Pager Indicator -->
 
     <style name="candi_info_pager_text">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxWidth">100dp</item>
@@ -326,10 +308,20 @@
     </style>
 
     <style name="form_label">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:paddingLeft">2dp</item>
     </style>
 
+    <style name="form_hint">
+        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
+        <item name="android:paddingLeft">2dp</item>
+    </style>
+    
+    <style name="form_text">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:paddingLeft">2dp</item>
+    </style>
+    
     <style name="form_error" parent="android:Widget.TextView">
         <item name="android:textColor">#ffff8844</item>
         <item name="android:background">?attr/backgroundHeader</item>

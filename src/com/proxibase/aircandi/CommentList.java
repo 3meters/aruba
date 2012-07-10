@@ -82,7 +82,7 @@ public class CommentList extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Loading...");
+				mCommon.showProgressDialog(true, getString(R.string.progress_loading));
 			}
 
 			@Override

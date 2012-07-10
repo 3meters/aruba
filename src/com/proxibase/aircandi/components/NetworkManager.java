@@ -305,7 +305,6 @@ public class NetworkManager {
 						break;
 					case WifiManager.WIFI_STATE_DISABLING :
 						Logger.d(this, "Wifi state disabling");
-						//ImageUtils.showToastNotification(CandiRadarActivity.this, "Wifi state disabling...", Toast.LENGTH_SHORT);
 						break;
 					case WifiManager.WIFI_STATE_UNKNOWN :
 						Logger.d(this, "Wifi state unknown");

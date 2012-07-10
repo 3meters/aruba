@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-     >
+    android:layout_height="fill_parent" >
 
     <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
 
@@ -36,13 +35,13 @@
 
             <TextView
                 android:id="@+id/form_message"
-                style="@style/form_label"
+                style="@style/form_text"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="15dp"
                 android:paddingLeft="2dp"
                 android:paddingRight="2dp"
-                android:text="@string/signin_message" />
+                android:visibility="gone" />
 
             <TextView
                 style="@style/form_label"
@@ -54,7 +53,7 @@
                 android:id="@+id/text_email"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"/>
+                android:inputType="textEmailAddress" />
 
             <TextView
                 style="@style/form_label"
@@ -68,15 +67,15 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPassword" />
 
-            <TextView
-                android:id="@+id/text_signin_error"
-                style="@style/form_error"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="3dp"
-                android:padding="5dp"
-                android:text="@string/signin_alert_invalid_signin"
-                android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_send_password"
+                    style="@style/app_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:onClick="onSendPasswordButtonClick"
+                    android:text="@string/form_button_send_password" />
         </LinearLayout>
     </ScrollView>
 
@@ -96,8 +95,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:state_enabled="false"
             android:onClick="onSignInButtonClick"
+            android:state_enabled="false"
             android:text="@string/signin_button_signin" />
 
         <Button

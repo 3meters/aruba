@@ -30,7 +30,7 @@
             android:paddingBottom="5dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:paddingTop="15dp" >
+            android:paddingTop="10dp" >
 
             <!-- User picture -->
 
@@ -40,10 +40,11 @@
                 android:layout_height="wrap_content"
                 android:text="@string/form_label_picture" />
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="3dp"
+                android:layout_marginBottom="12dp"
+                android:layout_marginLeft="2dp"
                 android:gravity="left"
                 android:orientation="horizontal" >
 
@@ -51,8 +52,11 @@
                     android:id="@+id/image_picture"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
+                    android:layout_weight="0"
+                    aircandi:layout="@layout/temp_webimageview_framed_fill"
                     aircandi:maxHeight="100dp"
                     aircandi:maxWidth="100dp"
+                    android:scaleType="centerCrop"
                     android:tag="resource:placeholder_user" />
 
                 <Button
@@ -60,12 +64,18 @@
                     style="@style/app_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignTop="@+id/image_picture"
                     android:layout_marginLeft="10dp"
-                    android:layout_toRightOf="@+id/image_picture"
+                    android:layout_marginTop="-3dp"
+                    android:layout_weight="0"
+                    android:maxWidth="150dp"
                     android:onClick="onChangePictureButtonClick"
                     android:text="@string/form_button_change_picture" />
-            </RelativeLayout>
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
 
             <!-- Full name -->
 
@@ -81,23 +91,55 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName" />
 
-            <TextView
-                style="@style/form_label"
+            <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/form_label_email" />
+                android:orientation="horizontal" >
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="@string/form_label_email" />
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:text="@string/form_label_email_hint"
+                    android:textSize="12sp" />
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/text_email"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content" 
-                android:inputType="textEmailAddress"/>
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress" />
 
-            <TextView
-                style="@style/form_label"
+            <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/form_label_password" />
+                android:orientation="horizontal" >
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="@string/form_label_password" />
+
+                <TextView
+                    style="@style/form_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:text="@string/form_label_password_hint"
+                    android:textSize="12sp" />
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/text_password"
@@ -116,6 +158,30 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:layout_weight="1"
+                    android:text="@string/form_label_terms" />
+
+                <Button
+                    android:id="@+id/btn_view_terms"
+                    style="@style/app_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minWidth="200dp"
+                    android:onClick="onViewTermsButtonClick"
+                    android:text="@string/form_button_terms" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

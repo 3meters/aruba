@@ -63,6 +63,7 @@ public class CommentForm extends FormActivity {
 
 	protected void initialize() {
 		mCommon.track();
+		mCommon.mActionBar.setTitle(R.string.form_title_comment);
 		mContent = (EditText) findViewById(R.id.text_content);
 		mButtonSave = (Button) findViewById(R.id.button_save);
 		mButtonSave.setEnabled(false);
@@ -143,7 +144,7 @@ public class CommentForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Saving...");
+				mCommon.showProgressDialog(true, getString(R.string.progress_saving));
 			}
 
 			@Override
@@ -155,10 +156,11 @@ public class CommentForm extends FormActivity {
 				parameters.putString("comment", "object:" + ProxibaseService.convertObjectToJson(mCommon.mComment, GsonType.ProxibaseService));
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertComment");
-				serviceRequest.setRequestType(RequestType.Method);
-				serviceRequest.setParameters(parameters);
-				serviceRequest.setResponseFormat(ResponseFormat.Json);
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertComment")
+						.setRequestType(RequestType.Method)
+						.setParameters(parameters)
+						.setSession(Aircandi.getInstance().getUser().session)
+						.setResponseFormat(ResponseFormat.Json);
 
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 				return serviceResponse;

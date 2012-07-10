@@ -60,7 +60,7 @@ public class Entity extends ServiceEntry implements Cloneable {
 	@Expose
 	public Boolean				enabled;
 	@Expose
-	public String				visibility;
+	public String				visibility = "public";
 	@Expose
 	public List<Comment>		comments;
 	@Expose(serialize = false, deserialize = true)

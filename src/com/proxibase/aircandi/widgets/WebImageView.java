@@ -27,20 +27,31 @@ import com.proxibase.service.ProxibaseService.RequestListener;
 
 public class WebImageView extends RelativeLayout {
 
-	private String		mImageUri;
-	private Handler		mThreadHandler	= new Handler();
-	private ImageView	mImageView;
-	private ImageView	mImageViewLoading;
-	private Integer		mBusyWidth;
-	private Integer		mMinWidth;
-	private Integer		mMaxWidth;
-	private Integer		mMinHeight;
-	private Integer		mMaxHeight;
-	private boolean		mShowBusy;
-	private Integer		mLayoutId;
-	private Integer		mAnimationId;
-	private ScaleType	mScaleType;
-	private String		mThemeTone;
+	private String						mImageUri;
+	private Handler						mThreadHandler	= new Handler();
+	private ImageView					mImageView;
+	private ImageView					mImageViewLoading;
+	private Integer						mBusyWidth;
+	private Integer						mMinWidth;
+	private Integer						mMaxWidth;
+	private Integer						mMinHeight;
+	private Integer						mMaxHeight;
+	private boolean						mShowBusy;
+	private Integer						mLayoutId;
+	private Integer						mAnimationId;
+	private ScaleType					mScaleType		= ScaleType.CENTER_CROP;
+	private String						mThemeTone;
+
+	private static final ScaleType[]	sScaleTypeArray	= {
+														ScaleType.MATRIX,
+														ScaleType.FIT_XY,
+														ScaleType.FIT_START,
+														ScaleType.FIT_CENTER,
+														ScaleType.FIT_END,
+														ScaleType.CENTER,
+														ScaleType.CENTER_CROP,
+														ScaleType.CENTER_INSIDE
+														};
 
 	public WebImageView(Context context) {
 		this(context, null);
@@ -69,8 +80,12 @@ public class WebImageView extends RelativeLayout {
 			mThemeTone = (String) resourceName.coerceToString();
 		}
 
-		int scaleTypeValue = attributes.getAttributeIntValue("http://schemas.android.com/apk/res/android", "scaleType", 0);
-		mScaleType = ScaleType.values()[scaleTypeValue];
+		if (!isInEditMode()) {
+			int scaleTypeValue = attributes.getAttributeIntValue("http://schemas.android.com/apk/res/android", "scaleType", 6);
+			if (scaleTypeValue >= 0) {
+				mScaleType = sScaleTypeArray[scaleTypeValue];
+			}
+		}
 
 		ta.recycle();
 
@@ -87,6 +102,9 @@ public class WebImageView extends RelativeLayout {
 			mImageView.setMaxWidth(mMaxWidth);
 			mImageView.setMinimumHeight(mMinHeight);
 			mImageView.setMaxHeight(mMaxHeight);
+			if (isInEditMode()) {
+				mImageView.setImageResource(R.drawable.jaymassena);
+			}
 		}
 		mImageViewLoading = (ImageView) findViewById(R.id.image_loading);
 
@@ -217,7 +235,7 @@ public class WebImageView extends RelativeLayout {
 			}
 		});
 	}
-	
+
 	public void showLoading(boolean loading) {
 		if (loading) {
 			mImageViewLoading.post(new Runnable() {

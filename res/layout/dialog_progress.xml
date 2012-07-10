@@ -13,7 +13,7 @@
         android:layout_centerInParent="true"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
-
+
     <TextView
         android:id="@+id/text_progress_message"
         style="@style/progress_text"
@@ -23,6 +23,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="5dp"
         android:gravity="center"
-        android:text="Loading..." />
+        android:text="@string/progress_loading" />
 
 </RelativeLayout>

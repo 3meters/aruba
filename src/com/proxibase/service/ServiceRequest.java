@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.objects.Session;
 
 /**
  * Here is the typical code to construct a service request:
@@ -36,6 +37,7 @@ public class ServiceRequest {
 	private RequestType		mRequestType;
 	private ResponseFormat	mResponseFormat;
 	private RequestListener	mRequestListener;
+	private Session 		mSession;
 	private boolean			mSuppressUI = false;
 
 	public ServiceRequest() {}
@@ -140,5 +142,14 @@ public class ServiceRequest {
 
 	public boolean isSuppressUI() {
 		return mSuppressUI;
+	}
+
+	public Session getSession() {
+		return mSession;
+	}
+
+	public ServiceRequest setSession(Session session) {
+		mSession = session;
+		return this;
 	}
 }

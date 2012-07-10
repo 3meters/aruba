@@ -98,7 +98,7 @@ public class CandiForm extends CandiActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, "Loading...");
+					mCommon.showProgressDialog(true, getString(R.string.progress_loading));
 				}
 
 				@Override
@@ -483,8 +483,8 @@ public class CandiForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	protected void onRestart() {
-		super.onRestart();
+	protected void onResume() {
+		super.onResume();
 		/*
 		 * We have to be pretty aggressive about refreshing the UI because
 		 * there are lots of actions that could have happened while this activity
@@ -496,7 +496,7 @@ public class CandiForm extends CandiActivity {
 		 * - Change in user which effects which candi and UI should be visible.
 		 * - User profile could have been updated and we don't catch that.
 		 */
-		if (!isFinishing()) {
+		if (!isFinishing() && mEntityModelUser != null) {
 			if (!Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
 					|| ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
 					|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {

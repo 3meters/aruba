@@ -22,5 +22,12 @@ public class ServiceData {
 	@Expose
 	public String		info;
 
+	@Expose
+	public User			user;
+	@Expose
+	public Session		session;
+	@Expose
+	public Number		time;
+
 	public ServiceData() {}
 }

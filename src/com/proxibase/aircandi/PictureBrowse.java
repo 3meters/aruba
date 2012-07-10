@@ -26,7 +26,8 @@ public class PictureBrowse extends FormActivity {
 	}
 
 	private void initialize() {
-		mCommon.setPageName("/PictureBrowse");
+		mCommon.mActionBar.setTitle(R.string.form_title_picture_browse);
+
 		mProgress = (ProgressBar) findViewById(R.id.progressBar);
 		mWebView = (WebView) findViewById(R.id.webview);
 		mWebView.setBackgroundColor(0x00000000);

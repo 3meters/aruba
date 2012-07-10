@@ -7,6 +7,7 @@ import org.jsoup.nodes.Element;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.DialogInterface.OnClickListener;
 import android.graphics.Bitmap;
 import android.location.Criteria;
 import android.location.Location;
@@ -18,7 +19,6 @@ import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -53,6 +53,7 @@ import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.ProxibaseServiceException;
+import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.Beacon;
 import com.proxibase.service.objects.Beacon.BeaconType;
@@ -104,8 +105,10 @@ public class EntityForm extends FormActivity {
 	}
 
 	protected void initialize() {
-
-		/* Starting determining the users location if we are creating new candi. */
+		/*
+		 * Starting determining the users location if we are creating new candi. We are pulling
+		 * a single shot coarse location which is usually based on network location method.
+		 */
 		if (mCommon.mCommandType == CommandType.New) {
 			GeoLocationManager.getInstance().setCurrentLocation(null);
 			Criteria criteria = new Criteria();
@@ -115,6 +118,16 @@ public class EntityForm extends FormActivity {
 
 		/* Tracking */
 		mCommon.track();
+
+		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
+			mCommon.mActionBar.setTitle(R.string.form_title_link);
+		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
+			mCommon.mActionBar.setTitle(R.string.form_title_picture);
+		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
+			mCommon.mActionBar.setTitle(R.string.form_title_post);
+		}
 
 		mImagePicture = (WebImageView) findViewById(R.id.image_picture);
 		mTextUri = (EditText) findViewById(R.id.text_uri);
@@ -186,7 +199,7 @@ public class EntityForm extends FormActivity {
 
 						@Override
 						protected void onPreExecute() {
-							mCommon.showProgressDialog(true, "Loading...");
+							mCommon.showProgressDialog(true, getString(R.string.progress_loading));
 						}
 
 						@Override
@@ -286,14 +299,14 @@ public class EntityForm extends FormActivity {
 
 			/* Settings */
 
-			if (findViewById(R.id.cbo_visibility) != null) {
-				if (entity.visibility.toLowerCase().equals(Visibility.Private.toString().toLowerCase())) {
-					((Spinner) findViewById(R.id.cbo_visibility)).setSelection(Visibility.Private.ordinal());
-				}
-				else if (entity.visibility.toLowerCase().equals(Visibility.Public.toString().toLowerCase())) {
-					((Spinner) findViewById(R.id.cbo_visibility)).setSelection(Visibility.Public.ordinal());
-				}
-			}
+			//			if (findViewById(R.id.cbo_visibility) != null) {
+			//				if (entity.visibility.toLowerCase().equals(Visibility.Private.toString().toLowerCase())) {
+			//					((Spinner) findViewById(R.id.cbo_visibility)).setSelection(Visibility.Private.ordinal());
+			//				}
+			//				else if (entity.visibility.toLowerCase().equals(Visibility.Public.toString().toLowerCase())) {
+			//					((Spinner) findViewById(R.id.cbo_visibility)).setSelection(Visibility.Public.ordinal());
+			//				}
+			//			}
 
 			if (findViewById(R.id.chk_html_zoom) != null) {
 				if (entity.linkUri != null) {
@@ -396,7 +409,7 @@ public class EntityForm extends FormActivity {
 			@Override
 			protected void onPreExecute() {
 				if (mTextUri != null && !mUriValidated) {
-					mCommon.showProgressDialog(true, "Validating...");
+					mCommon.showProgressDialog(true, getString(R.string.progress_validating));
 				}
 			}
 
@@ -420,10 +433,10 @@ public class EntityForm extends FormActivity {
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 
 						ServiceRequest serviceRequest = new ServiceRequest();
-						serviceRequest.setUri(linkUri);
-						serviceRequest.setRequestType(RequestType.Get);
-						serviceRequest.setResponseFormat(ResponseFormat.Html);
-						serviceRequest.setSuppressUI(true);
+						serviceRequest.setUri(linkUri)
+								.setRequestType(RequestType.Get)
+								.setResponseFormat(ResponseFormat.Html)
+								.setSuppressUI(true);
 
 						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 						if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -443,7 +456,7 @@ public class EntityForm extends FormActivity {
 
 						@Override
 						public void run() {
-							mCommon.showProgressDialog(true, "Saving...");
+							mCommon.showProgressDialog(true, getString(R.string.progress_saving));
 						}
 					});
 
@@ -539,12 +552,26 @@ public class EntityForm extends FormActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
+				mCommon.showProgressDialog(false, null);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mCommon.showProgressDialog(false, null);
 					finish();
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
+					if (serviceResponse.exception.getErrorCode() == ErrorCode.SessionException) {
+						AircandiCommon.showAlertDialog(R.drawable.icon_app
+								, getResources().getString(R.string.alert_session_expired_title)
+								, getResources().getString(R.string.alert_session_expired_message)
+								, EntityForm.this, android.R.string.ok, null, new OnClickListener() {
+
+									public void onClick(DialogInterface dialog, int which) {
+										setResult(CandiConstants.RESULT_PROFILE_INSERTED);
+										finish();
+									}
+								});
+					}
+					else {
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
+					}
 				}
 			}
 		}.execute();
@@ -567,11 +594,11 @@ public class EntityForm extends FormActivity {
 		if (findViewById(R.id.text_content) != null) {
 			entity.description = ((TextView) findViewById(R.id.text_content)).getText().toString().trim();
 		}
-		if (findViewById(R.id.cbo_visibility) != null) {
-			Visibility visibility = Visibility.values()[((Spinner) findViewById(R.id.cbo_visibility))
-					.getSelectedItemPosition()];
-			entity.visibility = visibility.toString().toLowerCase();
-		}
+		//		if (findViewById(R.id.cbo_visibility) != null) {
+		//			Visibility visibility = Visibility.values()[((Spinner) findViewById(R.id.cbo_visibility))
+		//					.getSelectedItemPosition()];
+		//			entity.visibility = visibility.toString().toLowerCase();
+		//		}
 		if (findViewById(R.id.chk_html_javascript) != null) {
 			entity.linkJavascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
 		}
@@ -680,10 +707,11 @@ public class EntityForm extends FormActivity {
 					"object:" + ProxibaseService.convertObjectToJson(mEntityForForm, GsonType.ProxibaseService));
 
 			ServiceRequest serviceRequest = new ServiceRequest();
-			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity");
-			serviceRequest.setRequestType(RequestType.Method);
-			serviceRequest.setParameters(parameters);
-			serviceRequest.setResponseFormat(ResponseFormat.Json);
+			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
+					.setRequestType(RequestType.Method)
+					.setParameters(parameters)
+					.setSession(Aircandi.getInstance().getUser().session)
+					.setResponseFormat(ResponseFormat.Json);
 
 			serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 		}
@@ -714,10 +742,12 @@ public class EntityForm extends FormActivity {
 			parameters.putString("entity", "object:" + ProxibaseService.convertObjectToJson(entity, GsonType.ProxibaseService));
 
 			ServiceRequest serviceRequest = new ServiceRequest();
-			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity");
-			serviceRequest.setRequestType(RequestType.Method);
-			serviceRequest.setParameters(parameters);
-			serviceRequest.setResponseFormat(ResponseFormat.Json);
+			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
+					.setRequestType(RequestType.Method)
+					.setParameters(parameters)
+					.setSession(Aircandi.getInstance().getUser().session)
+					.setResponseFormat(ResponseFormat.Json);
+
 			serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 		}
 
@@ -738,7 +768,7 @@ public class EntityForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, "Deleting...");
+				mCommon.showProgressDialog(true, getString(R.string.progress_deleting));
 			}
 
 			@Override
@@ -779,10 +809,12 @@ public class EntityForm extends FormActivity {
 				parameters.putBoolean("deleteChildren", true);
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteEntity");
-				serviceRequest.setRequestType(RequestType.Method);
-				serviceRequest.setParameters(parameters);
-				serviceRequest.setResponseFormat(ResponseFormat.Json);
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteEntity")
+						.setRequestType(RequestType.Method)
+						.setParameters(parameters)
+						.setSession(Aircandi.getInstance().getUser().session)
+						.setResponseFormat(ResponseFormat.Json);
+
 				serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 				return serviceResponse;
 			}
@@ -901,7 +933,7 @@ public class EntityForm extends FormActivity {
 						ImageUtils.showToastNotification("Validation canceled", Toast.LENGTH_SHORT);
 					}
 				});
-				mCommon.showProgressDialog(true, "Validating...");
+				mCommon.showProgressDialog(true, getString(R.string.progress_validating));
 			}
 
 			@Override
@@ -913,9 +945,10 @@ public class EntityForm extends FormActivity {
 				}
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(linkUri);
-				serviceRequest.setRequestType(RequestType.Get);
-				serviceRequest.setResponseFormat(ResponseFormat.Html);
+				serviceRequest.setUri(linkUri)
+						.setRequestType(RequestType.Get)
+						.setResponseFormat(ResponseFormat.Html);
+
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 				return serviceResponse;
 			}
@@ -987,10 +1020,10 @@ public class EntityForm extends FormActivity {
 		if (findViewById(R.id.text_uri) != null) {
 			savedInstanceState.putString("uri", ((TextView) findViewById(R.id.text_uri)).getText().toString());
 		}
-		if (findViewById(R.id.cbo_visibility) != null) {
-			savedInstanceState.putInt("visibility",
-					((Spinner) findViewById(R.id.cbo_visibility)).getSelectedItemPosition());
-		}
+		//		if (findViewById(R.id.cbo_visibility) != null) {
+		//			savedInstanceState.putInt("visibility",
+		//					((Spinner) findViewById(R.id.cbo_visibility)).getSelectedItemPosition());
+		//		}
 		if (findViewById(R.id.chk_html_javascript) != null) {
 			savedInstanceState.putBoolean("html_javascript",
 					((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked());
@@ -1000,9 +1033,6 @@ public class EntityForm extends FormActivity {
 		}
 		if (findViewById(R.id.chk_locked) != null) {
 			savedInstanceState.putBoolean("locked", ((CheckBox) findViewById(R.id.chk_locked)).isChecked());
-		}
-		if (findViewById(R.id.image_tab_host) != null) {
-			savedInstanceState.putInt("tab_index", mCommon.mTabIndex);
 		}
 	}
 
@@ -1019,9 +1049,9 @@ public class EntityForm extends FormActivity {
 		if (findViewById(R.id.text_uri) != null) {
 			((TextView) findViewById(R.id.text_uri)).setText(savedInstanceState.getString("uri"));
 		}
-		if (findViewById(R.id.cbo_visibility) != null) {
-			((Spinner) findViewById(R.id.cbo_visibility)).setSelection(savedInstanceState.getInt("visibility"));
-		}
+		//		if (findViewById(R.id.cbo_visibility) != null) {
+		//			((Spinner) findViewById(R.id.cbo_visibility)).setSelection(savedInstanceState.getInt("visibility"));
+		//		}
 		if (findViewById(R.id.chk_html_zoom) != null) {
 			((CheckBox) findViewById(R.id.chk_html_zoom)).setChecked(savedInstanceState.getBoolean("html_zoom"));
 		}

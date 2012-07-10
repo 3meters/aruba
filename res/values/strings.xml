@@ -34,6 +34,7 @@
 	<string name="menu_settings_item">Settings</string>
 	<string name="menu_signin_item">Sign in</string>
 	<string name="menu_signout_item">Sign out</string>
+	<string name="menu_signup_item">Sign up</string>
 	<string name="menu_about_item">About</string>
 	
 	<string name="menu_refresh_title">Refresh Options</string>
@@ -60,8 +61,17 @@
 	<!-- UI General -->
 	
 	<string name="progress_scanning">Scanning...</string>
+	<string name="progress_loading">Loading...</string>
 	<string name="progress_more">Paging...</string>
-	
+	<string name="progress_signing_out">Signing out...</string>
+	<string name="progress_saving">Saving...</string>
+	<string name="progress_validating">Validating...</string>
+	<string name="progress_deleting">Deleting...</string>
+	<string name="progress_changing_password">Changing...</string>
+	<string name="progress_searching">Searching...</string>
+	<string name="progress_signing_in">Signing in...</string>
+	<string name="progress_signing_up">Creating...</string>
+								
 	<!-- Navigation -->
 	
 	<string name="navigation_radar">Radar</string>
@@ -121,12 +131,30 @@
 	<string name="form_tab_mycandi">MY CANDI</string>
 	<string name="form_tab_radar">RADAR</string>
 	
+	<!-- Toast -->
+	
+	<string name="toast_wifi_enabling">Wifi state enabling...</string>
+	<string name="toast_wifi_disabling">Wifi state disabling...</string>
+	<string name="toast_wifi_disabled">Wifi state disabled.</string>
+	<string name="toast_signed_in">Signed in as </string>
+	<string name="toast_signed_out">Signed out.</string>
+					
+	<!-- Notifications -->
+	
+	<string name="notification_error_network_message">Network problem...</string>
+	
+	<!-- Errors -->
+	
+	<string name="error_service_general">Network is unavailable or busy.</string>
+	<string name="error_client_unknown_host">The website you entered can\'t be found.</string>
+	
 	<!-- Forms -->
 	
 	<string name="form_title_picture">Picture</string>
 	<string name="form_title_post">Post</string>
 	<string name="form_title_link">Link</string>
 	<string name="form_title_profile">Profile settings</string>
+	<string name="form_title_password">Change password</string>
 	<string name="form_title_signin">Sign in</string>
 	<string name="form_title_signup">Sign up</string>
 	<string name="form_title_picture_search">Picture search</string>
@@ -134,29 +162,41 @@
 	<string name="form_title_candi">Move this candi to a different parent.</string>
 	<string name="form_title_comment">Comment</string>
 	<string name="form_title_map">Candi map</string>
-	
+	<string name="form_title_picture_browse">Picture viewer</string>
+	<string name="form_title_templates">Templates</string>
+			
 	<string name="form_tab_content">CONTENT</string>
 	<string name="form_tab_settings">SETTINGS</string>
+	
 	<string name="profile_tab_profile">PROFILE</string>
 	<string name="profile_tab_account">ACCOUNT</string>
-	
-	<string name="form_button_change_picture">Change</string>
+	<string name="profile_tab_password">PASSWORD</string>
+		
+	<string name="form_button_change_picture">Select</string>
+	<string name="form_button_change_password">Change password</string>
 	<string name="form_button_signup">Sign Up</string>
 	<string name="form_button_save">Save</string>
 	<string name="form_button_delete">Delete</string>
 	<string name="form_button_cancel">Cancel</string>
 	<string name="form_button_back">Back</string>
-	
+	<string name="form_button_terms">Terms of service</string>
+	<string name="form_button_send_password">Forgot password?</string>
+			
 	<string name="form_label_picture">Picture</string>
 	<string name="form_label_fullname">Full name</string>
+	<string name="form_label_bio">Bio</string>
+	<string name="form_label_link">Web</string>
+	<string name="form_label_location">Location</string>
 	<string name="form_label_password">Password</string>
+	<string name="form_label_terms">By clicking the button, you agree to the terms of service:</string>
 	<string name="form_label_password_confirm">Confirm password</string>
 	<string name="form_label_password_old">Old password</string>
 	<string name="form_label_email">Email</string>
+	<string name="form_label_email_hint">(We will email you a confirmation.)</string>
 	<string name="form_label_locked">Locked</string>
 	<string name="form_label_visibility">Visibility</string>
-	<string name="form_label_password_hint">Password (optional)</string>
-	
+	<string name="form_label_password_hint">(Minimum of 6 characters.)</string>
+		
 	<string name="form_title_hint">Subject</string>
 	<string name="form_subtitle_hint">Subtitle</string>
 	<string name="form_description_hint">Description</string>
@@ -171,19 +211,39 @@
 	<string name="alert_inserted">Saved</string>
 	<string name="alert_signing_in">Signing in…</string>
 	<string name="alert_signed_in">Signed in as</string>
-
+	<string name="alert_password_changed">Password changed for</string>
+	
+	<string name="alert_error_title">Aircandi service</string>
+	<string name="alert_about_title">About</string>
+	<string name="alert_about_message">Version:</string>
+	<string name="alert_beacons_title">Aircandi beacons</string>
+	<string name="alert_session_expired_title">Session expired</string>
+	<string name="alert_session_expired_message">Your login session expired. Please re-sign in.</string>
+	<string name="alert_send_password_title">Forgot password</string>
+	<string name="alert_send_password_message">A message has been sent to your email address with your current password.</string>
+	<string name="alert_terms_title">Terms of service</string>
+	<string name="alert_terms_message">
+	    These Terms of Service ("Terms") govern your access to and use of the services, including our various websites, 
+	    SMS, APIs, email notifications, applications, buttons, and widgets, (the "Services" or “Aircandi”), and any 
+	    information, text, graphics, photos or other materials uploaded, downloaded or appearing on the 
+	    Services (collectively referred to as "Content"). Your access to and use of the Services are conditioned 
+	    on your acceptance of and compliance with these Terms. By accessing or using the Services you agree to 
+	    be bound by these Terms.
+	</string>
+	
 	<string name="post_label_image">Post Badge</string>
 	
 	<string name="dialog_button_cancel">Cancel</string>
 	<string name="dialog_change_picture_title">Select picture…</string>
 	<string name="dialog_template_picker_title">Select template</string>
 		
-	<string name="signin_message">Please sign-in to create and edit candi.</string>
-	<string name="signin_message_new_candi">Please sign-in to create a new</string>
+	<string name="signin_message">Please sign in to create and edit candi.</string>
+	<string name="signin_message_new_candi">Please sign in to create a new</string>
 	<string name="signin_alert_invalid_signin">Wrong email and password combination.</string>
 	
 	<string name="signin_button_signin">Sign In</string>
-	
+	<string name="password_alert_invalid_password">Old password is invalid.</string>
+		
 	<string name="signup_alert_new_user_title">New user created</string>
 	<string name="signup_alert_new_user_message">A message has been sent to your email address with instructions on how to activate your account.</string>
 	<string name="signup_alert_missmatched_passwords_title">Password</string>

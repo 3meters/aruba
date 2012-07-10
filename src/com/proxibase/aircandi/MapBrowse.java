@@ -78,7 +78,7 @@ public class MapBrowse extends SherlockMapActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, "Loading...");
+					mCommon.showProgressDialog(true, getString(R.string.progress_loading));
 				}
 
 				@Override
