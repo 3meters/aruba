@@ -11,8 +11,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.ImageUtils;
@@ -35,8 +33,6 @@ import com.proxibase.service.objects.User;
 
 public class SignInForm extends FormActivity {
 
-	protected String	mMessage;
-
 	private EditText	mTextEmail;
 	private EditText	mTextPassword;
 	private TextView	mTextMessage;
@@ -45,7 +41,6 @@ public class SignInForm extends FormActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		initialize();
 		draw();
 	}
@@ -77,12 +72,8 @@ public class SignInForm extends FormActivity {
 	}
 
 	public void draw() {
-		if (mMessage != null) {
-			mTextMessage.setText(mMessage);
-			mTextMessage.setVisibility(View.VISIBLE);
-		}
-		else {
-			mTextMessage.setVisibility(View.GONE);
+		if (mCommon.mMessage != null) {
+			mTextMessage.setText(mCommon.mMessage);
 		}
 	}
 
@@ -90,11 +81,18 @@ public class SignInForm extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 	public void onSendPasswordButtonClick(View view) {
-
 		AircandiCommon.showAlertDialog(R.drawable.icon_app
 				, getResources().getString(R.string.alert_send_password_title)
 				, getResources().getString(R.string.alert_send_password_message)
 				, SignInForm.this, android.R.string.ok, null, null);
+	}
+
+	public void onSignupButtonClick(View view) {
+		IntentBuilder intentBuilder = new IntentBuilder(this, SignUpForm.class);
+		intentBuilder.setCommandType(CommandType.New);
+		Intent intent = intentBuilder.create();
+		startActivity(intent);
+		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 	}
 
 	public void onSignInButtonClick(View view) {
@@ -207,31 +205,6 @@ public class SignInForm extends FormActivity {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
 					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null);
 			return false;
-		}
-		return true;
-	}
-
-	// 	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
-	// --------------------------------------------------------------------------------------------
-
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getSupportMenuInflater().inflate(mCommon.mThemeTone.equals("light") ? R.menu.menu_signin_light : R.menu.menu_signin_dark, menu);
-		return true;
-	}
-
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		if (menuItem.getItemId() == R.id.signup) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, SignUpForm.class);
-			intentBuilder.setCommandType(CommandType.New);
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 		}
 		return true;
 	}

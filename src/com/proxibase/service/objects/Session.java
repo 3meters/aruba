@@ -31,12 +31,12 @@ public class Session {
 	public Number	modifiedDate;
 	
 	@Expose(serialize = false, deserialize = true)
-	public Number	expires;
+	public Number	expirationDate;
 	
 	public Session() {}
 	
 	public Boolean renewSession(long currentTime) {
-		if (expires.longValue() < (currentTime + CandiConstants.SIXTY_MINUTES)) {
+		if (expirationDate.longValue() < (currentTime + CandiConstants.SIXTY_MINUTES)) {
 			return true;
 		}
 		return false;

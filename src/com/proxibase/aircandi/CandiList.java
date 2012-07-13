@@ -2,6 +2,7 @@ package com.proxibase.aircandi;
 
 import java.util.Collection;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.widget.ListView;
 
 import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.proxibase.aircandi.components.CommandType;
+import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EndlessCandiListAdapter;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.IntentBuilder;
@@ -40,7 +42,33 @@ public class CandiList extends CandiActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (!isFinishing()) {
+		/*
+		 * Two sign in cases:
+		 * 
+		 * - Currently anonymous.
+		 * - Session expired.
+		 */
+		User user = Aircandi.getInstance().getUser();
+		Boolean expired = false;
+		Integer messageResId = R.string.signin_message_mycandi;
+		if (user != null) {
+			Boolean userAnonymous = user.anonymous;
+			if (user.session != null) {
+				expired = user.session.renewSession(DateUtils.nowDate().getTime());
+			}
+			if (userAnonymous || expired) {
+				if (expired) {
+					messageResId = R.string.signin_message_session_expired;
+				}
+				IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
+				intentBuilder.setCommandType(CommandType.Edit);
+				intentBuilder.setMessage(getString(messageResId));
+				Intent intent = intentBuilder.create();
+				startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
+				overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+			}
+		}
+		else if (!isFinishing()) {
 			initialize();
 			bind();
 		}
@@ -211,6 +239,24 @@ public class CandiList extends CandiActivity {
 		}
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
+			if (resultCode == Activity.RESULT_CANCELED) {
+				setResult(resultCode);
+				finish();
+			}
+			else {
+				initialize();
+				bind();
+			}
+		}
+		else {
+			super.onActivityResult(requestCode, resultCode, intent);
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
@@ -238,6 +284,7 @@ public class CandiList extends CandiActivity {
 			}
 		}
 	}
+
 	@Override
 	protected void onRestart() {
 		/*
@@ -247,10 +294,10 @@ public class CandiList extends CandiActivity {
 		 */
 		super.onRestart();
 
-		/* 
+		/*
 		 * Make sure the right tab is active. Restart could be happening because
 		 * of the back stack so we can't assume that the tab was selected to get
-		 * here. 
+		 * here.
 		 */
 		if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByRadar) {
 			mCommon.setActiveTab(0);

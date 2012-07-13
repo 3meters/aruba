@@ -62,17 +62,24 @@ public class ProfileForm extends FormActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		/*
+		 * You can't display the profile form unless you are signed in so the only sign in case
+		 * is if the session expired. That could change if we start letting users view profiles 
+		 * for other Aircandi users.
+		 */
 		User user = Aircandi.getInstance().getUser();
-		if (user != null && (user.anonymous || user.session.renewSession(DateUtils.nowDate().getTime()))) {
-
-			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
-			intentBuilder.setCommandType(CommandType.Edit);
-			intentBuilder.setMessage(getString(R.string.signin_message_new_candi));
-			Intent intent = intentBuilder.create();
-
-			startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		if (user != null) {
+			if (user.session != null) {
+				Boolean expired = user.session.renewSession(DateUtils.nowDate().getTime());
+				if (expired) {
+					IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
+					intentBuilder.setCommandType(CommandType.Edit);
+					intentBuilder.setMessage(getString(R.string.signin_message_session_expired));
+					Intent intent = intentBuilder.create();
+					startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
+					overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				}
+			}
 		}
 		else {
 			initialize();
@@ -160,11 +167,11 @@ public class ProfileForm extends FormActivity {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) serviceResponse.data;
 					mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService).data;
-					
-					/* We got fresh user data but we want to hook up the old session.*/
+
+					/* We got fresh user data but we want to hook up the old session. */
 					mUser.session = Aircandi.getInstance().getUser().session;
 					mImageUriOriginal = mUser.imageUri;
-					
+
 					mCommon.showProgressDialog(false, null);
 					mCommon.stopTitlebarProgress();
 				}
@@ -336,24 +343,24 @@ public class ProfileForm extends FormActivity {
 						 * UI to update itself and pickup the changes like a new profile name, picture, etc.
 						 */
 						ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
-						
+
 						/* Update the global user */
 						Aircandi.getInstance().setUser(mUser);
-						
+
 						/*
 						 * entity.creator is what we show for entity authors. To make the entity model consistent
 						 * with this update to the profile we walk all the entities and update where creator.id
 						 * equals the signed in user.
 						 */
 						ProxiExplorer.getInstance().getEntityModel().updateUser(mUser);
-						
+
 						/*
 						 * We also need to update the user that has been persisted for auto sign in.
 						 */
 						String jsonUser = ProxibaseService.convertObjectToJson((Object) mUser, GsonType.Internal);
 						Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonUser);
 						Aircandi.settingsEditor.commit();
-						
+
 						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_PROFILE_UPDATED);
 						finish();

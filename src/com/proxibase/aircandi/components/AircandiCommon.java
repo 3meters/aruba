@@ -150,7 +150,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		/*
-		 * Base activity class handles restoring view state as long as they have 
+		 * Base activity class handles restoring view state as long as they have
 		 * an id property. We handle ourselves any other state that needs to
 		 * survive activity death.
 		 */
@@ -665,30 +665,31 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void signinAuto() {
-		String jsonUser = Aircandi.settings.getString(Preferences.PREF_USER, null);
 		Logger.i(this, "Auto sign in...");
 
-		User user = null;
-		if (jsonUser != null) {
+		/* Use anonymous user as initial default */
+		User user = ProxibaseService.getGson(GsonType.Internal).fromJson(CandiConstants.USER_ANONYMOUS, User.class);
+
+		String jsonUser = Aircandi.settings.getString(Preferences.PREF_USER, null);
+		String jsonSession = Aircandi.settings.getString(Preferences.PREF_USER_SESSION, null);
+
+		if (jsonUser != null && jsonSession != null) {
+
 			user = ProxibaseService.getGson(GsonType.Internal).fromJson(jsonUser, User.class);
-			String jsonSession = Aircandi.settings.getString(Preferences.PREF_USER_SESSION, null);
 			user.session = ProxibaseService.getGson(GsonType.Internal).fromJson(jsonSession, Session.class);
 			/*
-			 * If user is about to expire, we trigger the sign in process. We set the anonymous user
+			 * If user is about to expire, we trigger the sign in process. We go back to the anonymous user
 			 * as the default in case the user cancels out of the sign in form.
 			 */
-			if (user.session.renewSession(DateUtils.nowDate().getTime())) {
+			if (user.session != null && user.session.expirationDate != null && user.session.renewSession(DateUtils.nowDate().getTime())) {
 				user = ProxibaseService.getGson(GsonType.Internal).fromJson(CandiConstants.USER_ANONYMOUS, User.class);
-				user.anonymous = true;
 				Aircandi.getInstance().setUser(user);
-				signin();
+				signin(R.string.signin_message_session_expired);
 				return;
 			}
 		}
-		else {
-			user = ProxibaseService.getGson(GsonType.Internal).fromJson(CandiConstants.USER_ANONYMOUS, User.class);
-			user.anonymous = true;
-		}
+
+		/* We fall to here if we didn't find a good user or session */
 		Aircandi.getInstance().setUser(user);
 		ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_in) + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
@@ -760,8 +761,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	public void signin() {
-		mActivity.startActivityForResult(new Intent(mActivity, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
+	public void signin(Integer messageResId) {
+		IntentBuilder intentBuilder = new IntentBuilder(mActivity, SignInForm.class);
+		if (messageResId != null) {
+			intentBuilder.setMessage(mActivity.getString(messageResId));
+		}
+		Intent intent = intentBuilder.create();
+		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
 		mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 	}
 
@@ -914,7 +920,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				signout();
 				return;
 			case R.id.signin:
-				signin();
+				signin(null);
 				return;
 			case R.id.about:
 				doInfoClick();
@@ -1202,9 +1208,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (tab.getTag().equals(R.string.radar_tab_radar)) {
 			if (Aircandi.getInstance().getCandiTask() != CandiTask.RadarCandi) {
 				Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
-				
+
 				Intent intent = new Intent(mActivity, CandiRadar.class);
-				/* 
+				/*
 				 * Radar is the root task so the back button will always end here. From radar the back
 				 * button kills the application and returns to the launcher (home).
 				 * 
@@ -1219,14 +1225,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 		else if (tab.getTag().equals(R.string.radar_tab_mycandi)) {
 			if (Aircandi.getInstance().getCandiTask() != CandiTask.MyCandi) {
 				Aircandi.getInstance().setCandiTask(CandiTask.MyCandi);
-				
+
 				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiList.class);
 				intentBuilder.setCollectionType(ProxiExplorer.CollectionType.CandiByUser);
 				intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
 				Intent intent = intentBuilder.create();
-				/* 
+				/*
 				 * These flags put this on the stack as a new task and hitting back will
-				 * take the user back the top of the previous task. 
+				 * take the user back the top of the previous task.
 				 */
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -1237,12 +1243,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 		else if (tab.getTag().equals(R.string.radar_tab_map)) {
 			if (Aircandi.getInstance().getCandiTask() != CandiTask.Map) {
 				Aircandi.getInstance().setCandiTask(CandiTask.Map);
-				
+
 				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiMap.class);
 				Intent intent = intentBuilder.create();
-				/* 
+				/*
 				 * These flags put this on the stack as a new task and hitting back will
-				 * take the user back the top of the previous task. 
+				 * take the user back the top of the previous task.
 				 */
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

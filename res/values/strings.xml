@@ -196,7 +196,8 @@
     <string name="profile_tab_account">ACCOUNT</string>
     <string name="form_button_change_picture">Select</string>
     <string name="form_button_change_password">Change password</string>
-    <string name="form_button_signup">Sign Up</string>
+    <string name="form_button_signin_signup">Create account</string>
+    <string name="form_button_signup">Sign up</string>
     <string name="form_button_save">Save</string>
     <string name="form_button_delete">Delete</string>
     <string name="form_button_cancel">Cancel</string>
@@ -221,8 +222,14 @@
     <string name="form_comment_hint">Comment</string>
     <string name="form_uri_hint">Web address</string>
     <string name="post_label_image">Post Badge</string>
-    <string name="signin_message">Please sign in to create and edit candi.</string>
-    <string name="signin_message_new_candi">Please sign in to create a new</string>
+    
+    <string name="signin_message_general">Sign in to create and share candi with other Aircandi users!</string>
+    <string name="signin_message_session_expired">Your session has expired. Please sign in again.</string>
+    <string name="signin_message_mycandi">Please sign in to view candi you have shared with other Aircandi users.</string>
+    <string name="signin_message_candi_edit">Please sign in to edit your candi.</string>
+    <string name="signin_message_candi_new">Please sign in to create and share candi with other Aircandi users.</string>
+    <string name="signin_message_comment_new">Please sign in to create a candi comment.</string>
+    
     <string name="signin_button_signin">Sign In</string>
     <string name="web_dialog_link_message">Build link…</string>
     <string name="web_dialog_link_bookmark">Select a bookmark</string>

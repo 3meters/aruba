@@ -39,18 +39,31 @@ public class CommentForm extends FormActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		/*
+		 * Two sign in cases:
+		 * 
+		 * - Currently anonymous.
+		 * - Session expired.
+		 */
 		User user = Aircandi.getInstance().getUser();
-		if (user != null && (user.anonymous || user.session.renewSession(DateUtils.nowDate().getTime()))) {
-
-			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
-			intentBuilder.setCommandType(CommandType.Edit);
-			intentBuilder.setMessage(getString(R.string.signin_message_new_candi));
-			Intent intent = intentBuilder.create();
-
-			startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-
+		Boolean expired = false;
+		Integer messageResId = R.string.signin_message_comment_new;
+		if (user != null) {
+			Boolean userAnonymous = user.anonymous;
+			if (user.session != null) {
+				expired = user.session.renewSession(DateUtils.nowDate().getTime());
+			}
+			if (userAnonymous || expired) {
+				if (expired) {
+					messageResId = R.string.signin_message_session_expired;
+				}
+				IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
+				intentBuilder.setCommandType(CommandType.Edit);
+				intentBuilder.setMessage(getString(messageResId));
+				Intent intent = intentBuilder.create();
+				startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
+				overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+			}
 		}
 		else {
 			initialize();
