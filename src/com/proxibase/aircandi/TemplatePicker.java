@@ -38,9 +38,9 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		/* Shown as a dialog so doesn't have an action bar */
 		
 		List<Object> listData = new ArrayList<Object>();
-		listData.add(new Template(R.drawable.icon_post, "Post", null, CandiConstants.TYPE_CANDI_POST));
-		listData.add(new Template(R.drawable.icon_picture, "Picture", null, CandiConstants.TYPE_CANDI_PICTURE));
-		listData.add(new Template(R.drawable.icon_link, "Link", null, CandiConstants.TYPE_CANDI_LINK));
+		listData.add(new Template(R.drawable.icon_post, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
+		listData.add(new Template(R.drawable.icon_picture, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
+		listData.add(new Template(R.drawable.icon_link, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
 
 		mListAdapter = new ListAdapter(this, listData);
 		mListView = (ListView) findViewById(R.id.form_list);

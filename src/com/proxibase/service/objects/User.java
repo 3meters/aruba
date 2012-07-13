@@ -1,7 +1,5 @@
 package com.proxibase.service.objects;
 
-import android.graphics.Bitmap;
-
 import com.google.gson.annotations.Expose;
 
 /**
@@ -56,7 +54,6 @@ public class User extends ServiceEntry {
 	/* For client use only */
 	public boolean	anonymous		= false;
 	public boolean	keepSignedIn	= false;
-	public Bitmap	imageBitmap;
 	public Session	session;
 
 	public User() {}

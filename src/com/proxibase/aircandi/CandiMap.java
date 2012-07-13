@@ -66,7 +66,7 @@ public class CandiMap extends SherlockMapActivity {
 			finish();
 		}
 		else {
-			mCommon = new AircandiCommon(this);
+			mCommon = new AircandiCommon(this, savedInstanceState);
 			mCommon.setTheme(null);
 			mCommon.unpackIntent();
 
@@ -229,15 +229,21 @@ public class CandiMap extends SherlockMapActivity {
 		bind();
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Event routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+	}
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		Logger.i(this, "Configuration changed");
 		super.onConfigurationChanged(newConfig);
 	}
-
-	// --------------------------------------------------------------------------------------------
-	// Event routines
-	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
 	// Application menu routines (settings)
@@ -291,7 +297,6 @@ public class CandiMap extends SherlockMapActivity {
 	public void showCandi() {
 		mMapOverlays = mMapView.getOverlays();
 		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi);
-		// drawable.setBounds(0, 0, 40, 40);
 		mItemizedOverlay = new CandiItemizedOverlay(drawable, mMapView, false);
 
 		for (Object entityPointObject : ProxiExplorer.getInstance().getEntityModel().getMapEntities()) {
@@ -322,7 +327,6 @@ public class CandiMap extends SherlockMapActivity {
 			}
 		}
 		mMapOverlays.add(mItemizedOverlay);
-		// mMapController.zoomToSpan(mItemizedOverlay.getLatSpanE6() + 1500, mItemizedOverlay.getLonSpanE6() + 1500);
 		mMapView.invalidate();
 	}
 
@@ -331,12 +335,10 @@ public class CandiMap extends SherlockMapActivity {
 		mMapOverlays = mMapView.getOverlays();
 		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi_ii);
 		mItemizedOverlay = new CandiItemizedOverlay(drawable, mMapView, true);
-
 		/*
 		 * First check to see if radar is seeing a beacon that didn't come back
 		 * in the service call.
 		 */
-
 		for (Beacon beaconByRadar : ProxiExplorer.getInstance().getEntityModel().getBeacons()) {
 			if (beaconByRadar.entities != null && beaconByRadar.entities.size() > 0) {
 				beaconByRadar.entityCount = beaconByRadar.entities.size();
@@ -401,6 +403,9 @@ public class CandiMap extends SherlockMapActivity {
 			mCommon.reload();
 		}
 		else {
+
+			/* Make sure the right tab is active */
+			mCommon.setActiveTab(2);
 
 			/* User could have changed */
 			invalidateOptionsMenu();

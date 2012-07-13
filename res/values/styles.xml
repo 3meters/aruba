@@ -209,7 +209,7 @@
     </style>
 
     <style name="candi_info_subtitle">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textStyle">italic</item>
     </style>
 
@@ -350,11 +350,11 @@
     <!-- Misc -->
 
     <style name="app_debug_label" parent="android:Widget.TextView">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
     </style>
 
     <style name="app_debug_value" parent="android:Widget.TextView">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
     </style>
 
 </resources>

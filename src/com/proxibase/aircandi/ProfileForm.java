@@ -1,8 +1,6 @@
 package com.proxibase.aircandi;
 
-import org.apache.http.HttpStatus;
-
-import android.app.AlertDialog;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -19,19 +17,20 @@ import android.widget.ViewFlipper;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
-import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageRequest;
-import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
+import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.Utilities;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
@@ -43,9 +42,9 @@ import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.ProxibaseServiceException;
 import com.proxibase.service.Query;
 import com.proxibase.service.ServiceRequest;
+import com.proxibase.service.objects.ServiceData;
 import com.proxibase.service.objects.User;
 
-@SuppressWarnings("unused")
 public class ProfileForm extends FormActivity {
 
 	private ViewFlipper		mViewFlipper;
@@ -58,20 +57,31 @@ public class ProfileForm extends FormActivity {
 	private Button			mButtonSave;
 	private User			mUser;
 	private Integer			mUserId;
+	private Bitmap			mUserBitmap;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		initialize();
-		bind();
+		User user = Aircandi.getInstance().getUser();
+		if (user != null && (user.anonymous || user.session.renewSession(DateUtils.nowDate().getTime()))) {
 
-		if (savedInstanceState != null) {
-			doRestoreInstanceState(savedInstanceState);
+			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
+			intentBuilder.setCommandType(CommandType.Edit);
+			intentBuilder.setMessage(getString(R.string.signin_message_new_candi));
+			Intent intent = intentBuilder.create();
+
+			startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
+			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		}
+		else {
+			initialize();
+			bind();
+			draw();
 		}
 	}
 
-	protected void initialize() {
+	private void initialize() {
 
 		mCommon.track();
 		mCommon.mActionBar.setTitle(R.string.form_title_profile);
@@ -101,7 +111,7 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(isValid());
+				mButtonSave.setEnabled(enableSave());
 			}
 		});
 
@@ -109,13 +119,13 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(isValid());
+				mButtonSave.setEnabled(enableSave());
 			}
 		});
 
 	}
 
-	protected void bind() {
+	private void bind() {
 		/*
 		 * This form is always for editing. We always reload the user to make sure
 		 * we have the freshest data.
@@ -150,10 +160,13 @@ public class ProfileForm extends FormActivity {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) serviceResponse.data;
 					mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService).data;
+					
+					/* We got fresh user data but we want to hook up the old session.*/
+					mUser.session = Aircandi.getInstance().getUser().session;
 					mImageUriOriginal = mUser.imageUri;
+					
 					mCommon.showProgressDialog(false, null);
 					mCommon.stopTitlebarProgress();
-					draw();
 				}
 				else {
 					mCommon.handleServiceError(serviceResponse);
@@ -162,7 +175,7 @@ public class ProfileForm extends FormActivity {
 		}.execute();
 	}
 
-	protected void draw() {
+	private void draw() {
 
 		mTextFullname.setText(mUser.name);
 		mTextBio.setText(mUser.bio);
@@ -171,8 +184,8 @@ public class ProfileForm extends FormActivity {
 		mTextEmail.setText(mUser.email);
 
 		if (mUser.imageUri != null && mUser.imageUri.length() > 0) {
-			if (mUser.imageBitmap != null) {
-				ImageUtils.showImageInImageView(mUser.imageBitmap, mImageUser.getImageView(), true, R.anim.fade_in_medium);
+			if (mUserBitmap != null) {
+				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, R.anim.fade_in_medium);
 			}
 			else {
 				ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
@@ -184,7 +197,7 @@ public class ProfileForm extends FormActivity {
 						ServiceResponse serviceResponse = (ServiceResponse) response;
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-							mUser.imageBitmap = imageResponse.bitmap;
+							mUserBitmap = imageResponse.bitmap;
 						}
 					}
 				});
@@ -202,7 +215,7 @@ public class ProfileForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onSaveButtonClick(View view) {
-		doSave();
+		updateProfile();
 	}
 
 	public void onChangePictureButtonClick(View view) {
@@ -214,7 +227,7 @@ public class ProfileForm extends FormActivity {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mUser.imageUri = imageUri;
-					mUser.imageBitmap = imageBitmap;
+					mUserBitmap = imageBitmap;
 				}
 			}
 		});
@@ -228,11 +241,30 @@ public class ProfileForm extends FormActivity {
 		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
+			if (resultCode == Activity.RESULT_CANCELED) {
+				setResult(resultCode);
+				finish();
+			}
+			else {
+				initialize();
+				bind();
+				draw();
+			}
+		}
+		else {
+			super.onActivityResult(requestCode, resultCode, intent);
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
 
-	protected void doSave() {
+	private void updateProfile() {
 
 		if (validate()) {
 
@@ -255,12 +287,12 @@ public class ProfileForm extends FormActivity {
 					ServiceResponse serviceResponse = new ServiceResponse();
 
 					/* Put image to S3 if we have a new one. */
-					if (mUser.imageBitmap != null && !mUser.imageBitmap.isRecycled()) {
+					if (mUserBitmap != null && !mUserBitmap.isRecycled()) {
 						try {
 							String imageKey = String.valueOf(((User) mUser).id) + "_"
 									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
 									+ ".jpg";
-							S3.putImage(imageKey, mUser.imageBitmap);
+							S3.putImage(imageKey, mUserBitmap);
 							mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
 						}
 						catch (ProxibaseServiceException exception) {
@@ -299,21 +331,49 @@ public class ProfileForm extends FormActivity {
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.trackEvent("User", "Update", null, 0);
 						mCommon.showProgressDialog(false, null);
+						/*
+						 * We treat updating the profile like a change to an entity in the entity model. This forces
+						 * UI to update itself and pickup the changes like a new profile name, picture, etc.
+						 */
+						ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
+						
+						/* Update the global user */
 						Aircandi.getInstance().setUser(mUser);
+						
+						/*
+						 * entity.creator is what we show for entity authors. To make the entity model consistent
+						 * with this update to the profile we walk all the entities and update where creator.id
+						 * equals the signed in user.
+						 */
+						ProxiExplorer.getInstance().getEntityModel().updateUser(mUser);
+						
+						/*
+						 * We also need to update the user that has been persisted for auto sign in.
+						 */
+						String jsonUser = ProxibaseService.convertObjectToJson((Object) mUser, GsonType.Internal);
+						Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonUser);
+						Aircandi.settingsEditor.commit();
+						
 						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_PROFILE_UPDATED);
 						finish();
 					}
 					else {
 						/*
-						 * This could have been caused any problem while updating the user and the user image. We look
-						 * first for ones that are known responses from the service.
+						 * This could have been caused any problem while inserting/updating the user and the user image.
+						 * We look first for ones that are known responses from the service.
 						 * 
-						 * - 400: email not valid
-						 * - 400: email not unique
+						 * - 403.x: email not unique
+						 * - 401.2: expired session
 						 */
-						if (serviceResponse.exception.getHttpStatusCode() == HttpStatus.SC_BAD_REQUEST) {
-							String message = serviceResponse.exception.getResponseMessage();
+						String jsonResponse = serviceResponse.exception.getResponseMessage();
+						ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.ProxibaseService);
+						if (serviceData.error != null) {
+							String message = null;
+							float errorCode = serviceData.error.code.floatValue();
+							if (errorCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
+								message = getString(R.string.alert_signup_email_taken);
+							}
 							AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
 									ProfileForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
 										public void onClick(DialogInterface dialog, int which) {}
@@ -329,15 +389,22 @@ public class ProfileForm extends FormActivity {
 	}
 
 	private boolean validate() {
-		/*
-		 * Might want to do extra validation:
-		 * - valid web link
-		 * - valid email address
-		 */
+		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
+					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null);
+			return false;
+		}
+		if (mTextLink.getText().toString() != null && !mTextLink.getText().toString().equals("")) {
+			if (!Utilities.validWebUri(mTextLink.getText().toString())) {
+				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
+						getResources().getString(R.string.alert_invalid_weburi), this, android.R.string.ok, null, null);
+			}
+			return false;
+		}
 		return true;
 	}
 
-	private boolean isValid() {
+	private boolean enableSave() {
 		if (mTextFullname.getText().length() == 0) {
 			return false;
 		}
@@ -354,48 +421,12 @@ public class ProfileForm extends FormActivity {
 	protected void onDestroy() {
 
 		/* This activity gets destroyed everytime we leave using back or finish(). */
-		try {
-			if (mUser != null && mUser.imageBitmap != null) {
-				mUser.imageBitmap.recycle();
-				mUser.imageBitmap = null;
-			}
+		super.onDestroy();
+		if (mUserBitmap != null && !mUserBitmap.isRecycled()) {
+			mUserBitmap.recycle();
+			mUserBitmap = null;
 		}
-		catch (Exception exception) {
-			Exceptions.Handle(exception);
-		}
-		finally {
-			super.onDestroy();
-		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Persistence routines
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		super.onSaveInstanceState(savedInstanceState);
-		Logger.d(this, "onSaveInstanceState called");
-
-		mCommon.doSaveInstanceState(savedInstanceState);
-		if (mTextFullname != null) {
-			savedInstanceState.putString("fullname", mTextFullname.getText().toString());
-		}
-		if (mTextEmail != null) {
-			savedInstanceState.putString("email", mTextEmail.getText().toString());
-		}
-	}
-
-	private void doRestoreInstanceState(Bundle savedInstanceState) {
-		Logger.d(this, "Restoring previous state");
-
-		mCommon.doRestoreInstanceState(savedInstanceState);
-		if (mTextFullname != null) {
-			mTextFullname.setText(savedInstanceState.getString("fullname"));
-		}
-		if (mTextEmail != null) {
-			mTextEmail.setText(savedInstanceState.getString("email"));
-		}
+		System.gc();
 	}
 
 	// --------------------------------------------------------------------------------------------

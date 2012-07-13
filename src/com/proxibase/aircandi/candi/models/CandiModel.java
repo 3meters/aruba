@@ -6,7 +6,6 @@ import org.anddev.andengine.entity.modifier.IEntityModifier;
 
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
-import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Entity;
 
 /**
@@ -33,22 +32,6 @@ public class CandiModel extends BaseModel {
 		super();
 		setModelId(modelId);
 		mCandiPatchModel = candiPatchModel;
-	}
-
-	public String getEntityType() {
-		if (mEntity != null && mEntity.type != null) {
-			String entityType = mEntity.type;
-			if (entityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
-				return "Link";
-			}
-			else if (entityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-				return "Picture";
-			}
-			else if (entityType.equals(CandiConstants.TYPE_CANDI_POST)) {
-				return "Post";
-			}
-		}
-		return null;
 	}
 
 	public Transition getTransition() {
@@ -130,7 +113,7 @@ public class CandiModel extends BaseModel {
 	public String getTitleText() {
 		String title = super.getTitleText();
 		String displayExtra = null;
-		
+
 		if (mEntity.beacon != null) {
 			if (mDisplayExtra == DisplayExtra.Level) {
 				displayExtra = String.valueOf(mEntity.beacon.getAvgBeaconLevel());

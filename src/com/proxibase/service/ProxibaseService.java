@@ -63,11 +63,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
 import com.proxibase.service.objects.ServiceData;
+import com.proxibase.service.objects.ServiceError;
 import com.proxibase.service.objects.Session;
 import com.proxibase.service.objects.User;
 
@@ -300,7 +302,7 @@ public class ProxibaseService {
 				}
 				else {
 					ProxibaseServiceException exception = handleErrorResponse(response);
-					String errorResponse = "Service Response: " + convertStreamToString(response.getEntity().getContent());
+					String errorResponse = convertStreamToString(response.getEntity().getContent());
 					Logger.d(this, errorResponse);
 					exception.setResponseMessage(errorResponse);
 					if (!shouldRetry(httpRequest, exception, retryCount)) {
@@ -413,18 +415,6 @@ public class ProxibaseService {
 			exception = new ProxibaseServiceException("Request entity too large");
 			exception.setErrorType(ErrorType.Client);
 			exception.setErrorCode(ErrorCode.AircandiServiceException);
-			exception.setHttpStatusCode(statusCode);
-		}
-		else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_CUSTOM_SESSION_EXPIRED) {
-			exception = new ProxibaseServiceException("Session expired");
-			exception.setErrorType(ErrorType.Service);
-			exception.setErrorCode(ErrorCode.SessionException);
-			exception.setHttpStatusCode(statusCode);
-		}
-		else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_CUSTOM_PASSWORD_STRENGTH) {
-			exception = new ProxibaseServiceException("Weak password");
-			exception.setErrorType(ErrorType.Client);
-			exception.setErrorCode(ErrorCode.PasswordException);
 			exception.setHttpStatusCode(statusCode);
 		}
 		else {
@@ -645,7 +635,7 @@ public class ProxibaseService {
 	public String sessionInfo(ServiceRequest serviceRequest) {
 		String sessionInfo = "";
 		if (serviceRequest.getSession() != null) {
-			sessionInfo = "user=" + serviceRequest.getSession().id + "&";
+			sessionInfo = "user=" + serviceRequest.getSession().ownerId + "&";
 			sessionInfo += "session=" + serviceRequest.getSession().key;
 		}
 		return sessionInfo;
@@ -727,6 +717,10 @@ public class ProxibaseService {
 				if (jsonObject.has("date")) {
 					serviceData.date = jsonObject.get("date").getAsJsonPrimitive().getAsNumber();
 				}
+				if (jsonObject.has("error")) {
+					ServiceError error = gson.fromJson(jsonObject.get("error").toString(), ServiceError.class);
+					serviceData.error = error;
+				}
 				if (jsonObject.has("user")) {
 					User user = gson.fromJson(jsonObject.get("user").toString(), User.class);
 					serviceData.user = user;
@@ -734,6 +728,14 @@ public class ProxibaseService {
 				if (jsonObject.has("session")) {
 					Session session = gson.fromJson(jsonObject.get("session").toString(), Session.class);
 					serviceData.session = session;
+					/*
+					 * This is the best place to handle updating the session object for the currently logged
+					 * in user. The primary reason to update is that the service moves the expiration date based
+					 * on activity.
+					 */
+					if (!Aircandi.getInstance().getUser().anonymous) {
+						Aircandi.getInstance().getUser().session = session;
+					}
 				}
 				if (jsonObject.has("count")) {
 					serviceData.count = jsonObject.get("count").getAsJsonPrimitive().getAsNumber();

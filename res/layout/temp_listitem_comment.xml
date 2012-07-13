@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:text="Jay Massena" />
+            android:text="@string/dummy_name" />
 
         <View
             android:id="@+id/item_author_location_separator"
@@ -55,7 +55,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:layout_toRightOf="@+id/item_author_name"
-            android:text="Seattle"
+            android:text="@string/dummy_location"
             android:textColor="?attr/textColorUnfocused" />
     </RelativeLayout>
 
@@ -67,7 +67,7 @@
         android:layout_alignLeft="@+id/group_author"
         android:layout_below="@+id/group_author"
         android:layout_marginBottom="5dp"
-        android:text="The computers in the cars can now figure out the true oil change interval (based on idle time, distance driven, etc), but no one would ever bealive it because then have been brain washed already and would still change the oil every 3k miles." />
+        android:text="@string/dummy_description" />
 
     <LinearLayout
         android:id="@+id/group_actions"
@@ -82,7 +82,7 @@
             style="@style/candi_list_description"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="December 23 at 10:12am"
+            android:text="@string/dummy_datetime"
             android:textColor="?attr/textColorUnfocused" />
     </LinearLayout>
 

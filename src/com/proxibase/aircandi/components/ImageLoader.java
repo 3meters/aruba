@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
@@ -221,6 +222,7 @@ public class ImageLoader {
 
 		Aircandi.applicationHandler.post(new Runnable(){
 
+			@SuppressLint("SetJavaScriptEnabled")
 			@Override
 			public void run() {
 				mWebView.getSettings().setUseWideViewPort(true);
@@ -229,6 +231,9 @@ public class ImageLoader {
 				}
 
 				mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT_MOBILE);
+				/*
+				 * Using setJavaScriptEnabled can introduce XSS vulnerabilities.
+				 */
 				mWebView.getSettings().setJavaScriptEnabled(imageRequest.getLinkJavascriptEnabled());
 				mWebView.getSettings().setLoadWithOverviewMode(true);
 				mWebView.getSettings().setDomStorageEnabled(true);

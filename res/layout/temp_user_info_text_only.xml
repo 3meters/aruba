@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:text="Jay Massena" />
+        android:text="@string/dummy_name" />
 
     <TextView
         style="@style/app_bullet"
@@ -20,7 +20,7 @@
         android:gravity="center_vertical"
         android:paddingLeft="3dp"
         android:paddingRight="3dp"
-        android:text="•" />
+        android:text="@string/symbol_bullet" />
 
     <TextView
         android:id="@+id/text_user_timesince"
@@ -28,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:text="10 hours ago" />
+        android:text="@string/dummy_timesince" />
 
     <ImageView
         android:id="@+id/image_locked"

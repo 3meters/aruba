@@ -32,6 +32,7 @@ import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.Entity.EntityState;
 import com.proxibase.service.objects.Observation;
 import com.proxibase.service.objects.ServiceData;
+import com.proxibase.service.objects.User;
 
 public class ProxiExplorer {
 
@@ -231,8 +232,10 @@ public class ProxiExplorer {
 				synchronized (beacon.entities) {
 					for (Entity entity : beacon.entities) {
 						entity.state = EntityState.Normal;
-						for (Entity childEntity : entity.children) {
-							childEntity.state = EntityState.Normal;
+						if (entity.childrenMore != null) {
+							for (Entity childEntity : entity.children) {
+								childEntity.state = EntityState.Normal;
+							}
 						}
 					}
 				}
@@ -672,6 +675,26 @@ public class ProxiExplorer {
 			entityModel.mMyEntities = mMyEntities.clone();
 			entityModel.mMapEntities = new ArrayList(mMapEntities);
 			entityModel.mLastRefreshDate = mLastRefreshDate;
+			entityModel.mLastActivityDate = mLastActivityDate;
+			entityModel.mRookieHit = mRookieHit;
+
+			return entityModel;
+		}
+
+		public EntityModel copy() {
+
+			/*
+			 * Shallow copy so entities are by value but any entity object properties like beacon are by ref from the
+			 * original.
+			 */
+			EntityModel entityModel = new EntityModel();
+
+			entityModel.mBeacons = new ArrayList(mBeacons); 		// refs to same beacons
+			entityModel.mEntities = mEntities.copy();				// new entities
+			entityModel.mMyEntities = mMyEntities.copy(); 			// new entities
+			entityModel.mMapEntities = new ArrayList(mMapEntities);	// refs to map entities
+			entityModel.mLastRefreshDate = mLastRefreshDate;
+			entityModel.mLastActivityDate = mLastActivityDate;
 			entityModel.mRookieHit = mRookieHit;
 
 			return entityModel;
@@ -728,7 +751,7 @@ public class ProxiExplorer {
 				/* Push the cursor index */
 				entities.setCursorIndex(endIndex);
 
-				/* 
+				/*
 				 * More housekeeping! We only do this for radar candi because user candi should be filtered out
 				 * based on signal and they aren't part of the collection managed by rebuildEntityList.
 				 */
@@ -757,11 +780,13 @@ public class ProxiExplorer {
 								beacon.entities.set(i, entityNew);
 								return true;
 							}
-							for (int j = 0; j < entityOld.children.size(); j++) {
-								Entity childEntityOld = entityOld.children.get(j);
-								if (childEntityOld.id.equals(entityNew.id)) {
-									entityOld.children.set(j, entityNew);
-									return true;
+							if (entityOld.children != null) {
+								for (int j = 0; j < entityOld.children.size(); j++) {
+									Entity childEntityOld = entityOld.children.get(j);
+									if (childEntityOld.id.equals(entityNew.id)) {
+										entityOld.children.set(j, entityNew);
+										return true;
+									}
 								}
 							}
 						}
@@ -784,19 +809,23 @@ public class ProxiExplorer {
 					synchronized (beacon.entities) {
 						beacon.entities.add(entity);
 					}
-					for (Entity childEntity : entity.children) {
-						childEntity.beacon = beacon;
-						childEntity.beaconId = beacon.id;
-						childEntity.parent = entity;
-						childEntity.state = EntityState.New;
+					if (entity.children != null) {
+						for (Entity childEntity : entity.children) {
+							childEntity.beacon = beacon;
+							childEntity.beaconId = beacon.id;
+							childEntity.parent = entity;
+							childEntity.state = EntityState.New;
+						}
 					}
 				}
 				else {
 					entity.beacon = parentEntity.beacon;
 					entity.beaconId = parentEntity.beacon.id;
 					entity.parent = parentEntity;
-					synchronized (parentEntity.children) {
-						parentEntity.children.add(entity);
+					if (parentEntity.children != null) {
+						synchronized (parentEntity.children) {
+							parentEntity.children.add(entity);
+						}
 					}
 				}
 			}
@@ -814,15 +843,21 @@ public class ProxiExplorer {
 					synchronized (myEntities) {
 						myEntities.add(entity);
 					}
-					for (Entity childEntity : entity.children) {
-						childEntity.state = EntityState.New;
-						childEntity.parent = entity;
+					if (entity.children != null) {
+						if (entity.children != null) {
+							for (Entity childEntity : entity.children) {
+								childEntity.state = EntityState.New;
+								childEntity.parent = entity;
+							}
+						}
 					}
 				}
 				else {
 					entity.parent = parentEntity;
-					synchronized (parentEntity.children) {
-						parentEntity.children.add(entity);
+					if (parentEntity.children != null) {
+						synchronized (parentEntity.children) {
+							parentEntity.children.add(entity);
+						}
 					}
 				}
 			}
@@ -838,11 +873,13 @@ public class ProxiExplorer {
 						 * Replace existing entity and do fixups.
 						 */
 						beacon.entities.set(beacon.entities.indexOf(entityTemp), entity);
-						for (Entity childEntity : entity.children) {
-							childEntity.beacon = beacon;
-							childEntity.beaconId = beacon.id;
-							childEntity.parent = entity;
-							childEntity.state = EntityState.Refreshed;
+						if (entity.children != null) {
+							for (Entity childEntity : entity.children) {
+								childEntity.beacon = beacon;
+								childEntity.beaconId = beacon.id;
+								childEntity.parent = entity;
+								childEntity.state = EntityState.Refreshed;
+							}
 						}
 					}
 					else {
@@ -851,12 +888,14 @@ public class ProxiExplorer {
 						 */
 						entityTemp.childrenMore = entity.childrenMore;
 						entityTemp.childCount = entity.childCount;
-						for (Entity childEntity : entity.children) {
-							childEntity.beacon = beacon;
-							childEntity.beaconId = beacon.id;
-							childEntity.parent = entityTemp;
-							childEntity.state = EntityState.New;
-							entityTemp.children.add(childEntity);
+						if (entity.children != null) {
+							for (Entity childEntity : entity.children) {
+								childEntity.beacon = beacon;
+								childEntity.beaconId = beacon.id;
+								childEntity.parent = entityTemp;
+								childEntity.state = EntityState.New;
+								entityTemp.children.add(childEntity);
+							}
 						}
 					}
 				}
@@ -876,12 +915,14 @@ public class ProxiExplorer {
 								beacon.entities.remove(i);
 								return;
 							}
-							for (int j = 0; j < entity.children.size(); j++) {
-								Entity childEntity = entity.children.get(j);
-								if (childEntity.id.equals(deleteEntity.id)) {
-									entity.children.remove(j);
-									entity.childCount = entity.children.size();
-									return;
+							if (entity.children != null) {
+								for (int j = 0; j < entity.children.size(); j++) {
+									Entity childEntity = entity.children.get(j);
+									if (childEntity.id.equals(deleteEntity.id)) {
+										entity.children.remove(j);
+										entity.childCount = entity.children.size();
+										return;
+									}
 								}
 							}
 						}
@@ -896,12 +937,14 @@ public class ProxiExplorer {
 							mMyEntities.remove(i);
 							return;
 						}
-						for (int j = 0; j < entity.children.size(); j++) {
-							Entity childEntity = entity.children.get(j);
-							if (childEntity.id.equals(deleteEntity.id)) {
-								entity.children.remove(j);
-								entity.childCount = entity.children.size();
-								return;
+						if (entity.children != null) {
+							for (int j = 0; j < entity.children.size(); j++) {
+								Entity childEntity = entity.children.get(j);
+								if (childEntity.id.equals(deleteEntity.id)) {
+									entity.children.remove(j);
+									entity.childCount = entity.children.size();
+									return;
+								}
 							}
 						}
 					}
@@ -1004,9 +1047,56 @@ public class ProxiExplorer {
 				synchronized (beacon.entities) {
 					for (Entity entityTemp : beacon.entities) {
 						mEntities.add(entityTemp);
-						for (int i = entityTemp.children.size() - 1; i >= 0; i--) {
-							if (entityTemp.children.get(i).beacon == null) {
-								entityTemp.children.remove(i);
+						if (entityTemp.children != null) {
+							for (int i = entityTemp.children.size() - 1; i >= 0; i--) {
+								if (entityTemp.children.get(i).beacon == null) {
+									entityTemp.children.remove(i);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		public void updateUser(User user) {
+
+			/* Radar entities */
+			for (Beacon beacon : mBeacons) {
+				synchronized (beacon.entities) {
+					for (Entity entity : beacon.entities) {
+						if (entity.creatorId.equals(user.id)) {
+							entity.creator.imageUri = user.imageUri;
+							entity.creator.location = user.location;
+							entity.creator.name = user.name;
+						}
+						if (entity.children != null) {
+							for (Entity childEntity : entity.children) {
+								if (childEntity.creatorId.equals(user.id)) {
+									childEntity.creator.imageUri = user.imageUri;
+									childEntity.creator.location = user.location;
+									childEntity.creator.name = user.name;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			/* My candi entities */
+			synchronized (mMyEntities) {
+				for (Entity entity : mMyEntities) {
+					if (entity.creatorId.equals(user.id)) {
+						entity.creator.imageUri = user.imageUri;
+						entity.creator.location = user.location;
+						entity.creator.name = user.name;
+					}
+					if (entity.children != null) {
+						for (Entity childEntity : entity.children) {
+							if (childEntity.creatorId.equals(user.id)) {
+								childEntity.creator.imageUri = user.imageUri;
+								childEntity.creator.location = user.location;
+								childEntity.creator.name = user.name;
 							}
 						}
 					}
@@ -1052,9 +1142,11 @@ public class ProxiExplorer {
 									if (entity.id.equals(entityId)) {
 										return entity;
 									}
-									for (Entity childEntity : entity.children) {
-										if (childEntity.id.equals(entityId)) {
-											return childEntity;
+									if (entity.children != null) {
+										for (Entity childEntity : entity.children) {
+											if (childEntity.id.equals(entityId)) {
+												return childEntity;
+											}
 										}
 									}
 								}
@@ -1067,9 +1159,11 @@ public class ProxiExplorer {
 								if (entity.id.equals(entityId)) {
 									return entity;
 								}
-								for (Entity childEntity : entity.children) {
-									if (childEntity.id.equals(entityId)) {
-										return childEntity;
+								if (entity.children != null) {
+									for (Entity childEntity : entity.children) {
+										if (childEntity.id.equals(entityId)) {
+											return childEntity;
+										}
 									}
 								}
 							}
@@ -1091,9 +1185,11 @@ public class ProxiExplorer {
 						if (entity.id.equals(entityId)) {
 							return entities;
 						}
-						for (Entity childEntity : entity.children) {
-							if (childEntity.id.equals(entityId)) {
-								return entity.children;
+						if (entity.children != null) {
+							for (Entity childEntity : entity.children) {
+								if (childEntity.id.equals(entityId)) {
+									return entity.children;
+								}
 							}
 						}
 					}
@@ -1179,8 +1275,10 @@ public class ProxiExplorer {
 				synchronized (beacon.entities) {
 					for (Entity entity : beacon.entities) {
 						entitiesFlat.add(entity);
-						for (Entity childEntity : entity.children) {
-							entitiesFlat.add(childEntity);
+						if (entity.children != null) {
+							for (Entity childEntity : entity.children) {
+								entitiesFlat.add(childEntity);
+							}
 						}
 					}
 				}

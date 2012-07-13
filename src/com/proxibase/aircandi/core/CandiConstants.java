@@ -79,6 +79,9 @@ public interface CandiConstants {
 
 	public static final int				TWO_MINUTES								= 1000 * 60 * 2;
 	public static final int				FIVE_MINUTES							= 1000 * 60 * 5;
+	public static final int				FIFTEEN_MINUTES							= 1000 * 60 * 15;
+	public static final int				THIRTY_MINUTES							= 1000 * 60 * 30;
+	public static final int				SIXTY_MINUTES							= 1000 * 60 * 60;
 
 	public static final int				IMAGE_MEMORY_BYTES_MAX					= 2048000;
 	public static final Config			IMAGE_CONFIG_DEFAULT					= Config.ARGB_8888;
@@ -105,6 +108,7 @@ public interface CandiConstants {
 	public static final String			TYPE_CANDI_PICTURE						= "com.proxibase.aircandi.candi.picture";
 	public static final String			TYPE_CANDI_LINK							= "com.proxibase.aircandi.candi.link";
 	public static final String			TYPE_CANDI_COMMAND						= "com.proxibase.aircandi.candi.command";
+	public static final String			TYPE_CANDI_COLLECTION					= "com.proxibase.aircandi.candi.collection";
 
 	public static final String			USER_ANONYMOUS							= "{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\",\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\",\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\",\"imageUri\": \"resource:placeholder_user\", \"isDeveloper\": false, \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}";
 	public static final String			USER_ANONYMOUS_OLD						= "{\"data\": [{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\",\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\",\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\",\"imageUri\": \"resource:placeholder_user\", \"isDeveloper\": false, \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}], \"count\": 1, \"more\": false}";

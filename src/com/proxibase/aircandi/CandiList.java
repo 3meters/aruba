@@ -31,11 +31,11 @@ import com.proxibase.service.objects.User;
 
 public class CandiList extends CandiActivity {
 
-	private ListView		mListView;
-	private Number			mEntityModelRefreshDate;
-	private Number			mEntityModelActivityDate;
-	private User			mEntityModelUser;
-	private Entity			mCollectionEntity;
+	private ListView	mListView;
+	private Number		mEntityModelRefreshDate;
+	private Number		mEntityModelActivityDate;
+	private User		mEntityModelUser;
+	private Entity		mCollectionEntity;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -77,7 +77,7 @@ public class CandiList extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				/*
-				 * Load up the data. We are usually displaying data where the initial chunk has 
+				 * Load up the data. We are usually displaying data where the initial chunk has
 				 * already been fetched from the service. The exception is candi by user. If the
 				 * first fetch hasn't happened yet, we handle it here.
 				 */
@@ -121,7 +121,7 @@ public class CandiList extends CandiActivity {
 						proxiEntities.addAll((Collection<? extends Entity>) serviceData.data);
 						proxiEntities.setCollectionType(CollectionType.CandiByUser);
 						proxiEntities.setCursorIds(serviceData.cursor);
-						
+
 						/* Do some fixup migrating settings to the children collection */
 						for (Entity entity : proxiEntities) {
 							if (entity.children != null) {
@@ -130,7 +130,7 @@ public class CandiList extends CandiActivity {
 								entity.children.setCursorIds(entity.childCursor); // resets cursorIndex
 							}
 						}
-						
+
 						/* Assign again since the object was replaced and we use it to pass down the results */
 						serviceResponse.data = proxiEntities;
 					}
@@ -214,7 +214,7 @@ public class CandiList extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -236,6 +236,27 @@ public class CandiList extends CandiActivity {
 				invalidateOptionsMenu();
 				bind();
 			}
+		}
+	}
+	@Override
+	protected void onRestart() {
+		/*
+		 * This only gets called when the activity was stopped and is now coming back. All the logic
+		 * that would normally be here is in onResume() because restart wasn't getting called
+		 * reliably when returning from another activity.
+		 */
+		super.onRestart();
+
+		/* 
+		 * Make sure the right tab is active. Restart could be happening because
+		 * of the back stack so we can't assume that the tab was selected to get
+		 * here. 
+		 */
+		if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByRadar) {
+			mCommon.setActiveTab(0);
+		}
+		else if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByUser) {
+			mCommon.setActiveTab(1);
 		}
 	}
 

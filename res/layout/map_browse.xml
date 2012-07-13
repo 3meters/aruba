@@ -10,7 +10,6 @@
         android:layout_height="fill_parent"
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
-        android:visibility="invisible"
-        android:layout_below="@+id/activity_header" />
+        android:visibility="invisible" />
 
 </RelativeLayout>

@@ -32,7 +32,7 @@ public class Preferences extends SherlockPreferenceActivity {
 		/*
 		 * We need to set the theme so ActionBarSherlock behaves correctly on API < V14
 		 */
-		mCommon = new AircandiCommon(this);
+		mCommon = new AircandiCommon(this, savedInstanceState);
 		mCommon.setTheme(null);
 
 		super.onCreate(savedInstanceState);

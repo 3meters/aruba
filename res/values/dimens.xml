@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<!-- Item sizing -->
-	<dimen name="application_button_separator_width">1px</dimen>
-    <dimen name="quickcontact_shadow_horiz">30dp</dimen>
-    <dimen name="quickcontact_shadow_vert">37dp</dimen>
-
 </resources>

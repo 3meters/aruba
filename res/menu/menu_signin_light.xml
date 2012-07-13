@@ -7,7 +7,7 @@
         android:orderInCategory="1"
         android:showAsAction="always"/>
     <item
-        android:id="@+id/signup"
+        android:id="@+id/signup_text"
         android:orderInCategory="1"
         android:showAsAction="always"
         android:title="@string/menu_signup_item"/>

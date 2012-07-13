@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.components.CommandType;
+import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
@@ -33,13 +34,14 @@ public class CommentForm extends FormActivity {
 
 	private EditText	mContent;
 	private Button		mButtonSave;
+	private Comment		mComment;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		User user = Aircandi.getInstance().getUser();
-		if (user != null && user.anonymous) {
+		if (user != null && (user.anonymous || user.session.renewSession(DateUtils.nowDate().getTime()))) {
 
 			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
 			intentBuilder.setCommandType(CommandType.Edit);
@@ -50,18 +52,14 @@ public class CommentForm extends FormActivity {
 			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 
 		}
-
-		initialize();
-		bind();
-		draw();
-
-		/* Can overwrite any values from the original intent */
-		if (savedInstanceState != null) {
-			doRestoreInstanceState(savedInstanceState);
+		else {
+			initialize();
+			bind();
+			draw();
 		}
 	}
 
-	protected void initialize() {
+	private void initialize() {
 		mCommon.track();
 		mCommon.mActionBar.setTitle(R.string.form_title_comment);
 		mContent = (EditText) findViewById(R.id.text_content);
@@ -72,20 +70,23 @@ public class CommentForm extends FormActivity {
 
 			@Override
 			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(isValid());
+				mButtonSave.setEnabled(enableSave());
 			}
 		});
 	}
 
-	protected void bind() {
-		mCommon.mComment = new Comment();
-		mCommon.mComment.creatorId = Aircandi.getInstance().getUser().id;
-		mCommon.mComment.location = Aircandi.getInstance().getUser().location;
-		mCommon.mComment.imageUri = Aircandi.getInstance().getUser().imageUri;
-		mCommon.mComment.name = Aircandi.getInstance().getUser().name;
+	private void bind() {
+		/*
+		 * We are always creating a new comment.
+		 */
+		mComment = new Comment();
+		mComment.creatorId = Aircandi.getInstance().getUser().id;
+		mComment.location = Aircandi.getInstance().getUser().location;
+		mComment.imageUri = Aircandi.getInstance().getUser().imageUri;
+		mComment.name = Aircandi.getInstance().getUser().name;
 	}
 
-	protected void draw() {
+	private void draw() {
 		/* Author */
 		((AuthorBlock) findViewById(R.id.block_author)).bindToUser(Aircandi.getInstance().getUser(), null);
 	}
@@ -100,7 +101,7 @@ public class CommentForm extends FormActivity {
 	}
 
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
 		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
 			if (resultCode == Activity.RESULT_CANCELED) {
@@ -113,106 +114,85 @@ public class CommentForm extends FormActivity {
 				draw();
 			}
 		}
+		else {
+			super.onActivityResult(requestCode, resultCode, intent);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
 
-	protected void doSave() {
-		if (!validate()) {
-			return;
-		}
-		insert();
+	private void doSave() {
+		insertComment();
 	}
 
 	private boolean validate() {
-		if (mContent.getText().toString().length() > 0) {
-			return true;
-		}
+		/*
+		 * This is where we would do any heavier validation before saving.
+		 */
 		return true;
 	}
 
-	protected void insert() {
+	private void insertComment() {
 
-		/* TODO: Add title */
-		mCommon.mComment.description = mContent.getText().toString().trim();
+		if (validate()) {
 
-		Logger.i(this, "Insert comment for: " + String.valueOf(mCommon.mParentId));
+			/* TODO: Add title */
+			mComment.description = mContent.getText().toString().trim();
 
-		new AsyncTask() {
+			Logger.i(this, "Insert comment for: " + String.valueOf(mCommon.mParentId));
 
-			@Override
-			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, getString(R.string.progress_saving));
-			}
+			new AsyncTask() {
 
-			@Override
-			protected Object doInBackground(Object... params) {
-				
-				// Construct entity, link, and observation
-				Bundle parameters = new Bundle();
-				parameters.putString("entityId", mCommon.mParentId);
-				parameters.putString("comment", "object:" + ProxibaseService.convertObjectToJson(mCommon.mComment, GsonType.ProxibaseService));
-
-				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertComment")
-						.setRequestType(RequestType.Method)
-						.setParameters(parameters)
-						.setSession(Aircandi.getInstance().getUser().session)
-						.setResponseFormat(ResponseFormat.Json);
-
-				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-				return serviceResponse;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-
-				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					Tracker.trackEvent("Comment", "Insert", null, 0);
-					mCommon.showProgressDialog(false, null);
-					ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
-					setResult(CandiConstants.RESULT_COMMENT_INSERTED);
-					finish();
+				@Override
+				protected void onPreExecute() {
+					mCommon.showProgressDialog(true, getString(R.string.progress_saving));
 				}
-				else {
-					mCommon.handleServiceError(serviceResponse);
+
+				@Override
+				protected Object doInBackground(Object... params) {
+
+					// Construct entity, link, and observation
+					Bundle parameters = new Bundle();
+					parameters.putString("entityId", mCommon.mParentId);
+					parameters.putString("comment", "object:" + ProxibaseService.convertObjectToJson(mComment, GsonType.ProxibaseService));
+
+					ServiceRequest serviceRequest = new ServiceRequest();
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertComment")
+							.setRequestType(RequestType.Method)
+							.setParameters(parameters)
+							.setSession(Aircandi.getInstance().getUser().session)
+							.setResponseFormat(ResponseFormat.Json);
+
+					ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+					return serviceResponse;
 				}
-			}
-		}.execute();
+
+				@Override
+				protected void onPostExecute(Object response) {
+
+					ServiceResponse serviceResponse = (ServiceResponse) response;
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						Tracker.trackEvent("Comment", "Insert", null, 0);
+						mCommon.showProgressDialog(false, null);
+						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
+						setResult(CandiConstants.RESULT_COMMENT_INSERTED);
+						finish();
+					}
+					else {
+						mCommon.handleServiceError(serviceResponse);
+					}
+				}
+			}.execute();
+		}
 	}
 
-	private boolean isValid() {
+	private boolean enableSave() {
 		if (mContent.getText().toString().length() > 0) {
 			return true;
 		}
 		return false;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Persistence routines
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		super.onSaveInstanceState(savedInstanceState);
-		Logger.d(this, "onSaveInstanceState called");
-
-		mCommon.doSaveInstanceState(savedInstanceState);
-		if (mContent != null) {
-			savedInstanceState.putString("content", mContent.getText().toString());
-		}
-	}
-
-	private void doRestoreInstanceState(Bundle savedInstanceState) {
-		Logger.d(this, "Restoring previous state");
-
-		mCommon.doRestoreInstanceState(savedInstanceState);
-		if (mContent != null) {
-			mContent.setText(savedInstanceState.getString("content"));
-		}
 	}
 
 	// --------------------------------------------------------------------------------------------

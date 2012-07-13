@@ -2,6 +2,7 @@ package com.proxibase.service.objects;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.proxibase.aircandi.core.CandiConstants;
 
 /**
  * @author Jayma
@@ -30,7 +31,14 @@ public class Session {
 	public Number	modifiedDate;
 	
 	@Expose(serialize = false, deserialize = true)
-	public Number	expirationDate;
+	public Number	expires;
 	
 	public Session() {}
+	
+	public Boolean renewSession(long currentTime) {
+		if (expires.longValue() < (currentTime + CandiConstants.SIXTY_MINUTES)) {
+			return true;
+		}
+		return false;
+	}
 }

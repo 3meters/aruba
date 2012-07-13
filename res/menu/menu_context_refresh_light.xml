@@ -7,7 +7,7 @@
         android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>
     <item
-        android:id="@+id/refresh"
+        android:id="@+id/refresh_text"
         android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>
     <item

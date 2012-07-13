@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/refresh_frame"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:addStatesFromChildren="true"
     android:background="@drawable/abs__item_background_holo_dark"
     android:clickable="true"
-    android:gravity="center" >
+    android:gravity="center"
+    tools:ignore="Overdraw" >
 
     <ImageView
         android:id="@+id/refresh"

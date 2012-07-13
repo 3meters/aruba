@@ -68,20 +68,4 @@
 		<item>600000</item>
 	</string-array>
 	
-	<string-array
-		name="gallery_categories">
-		<item>space</item>
-		<item>cats</item>
-		<item>cats humor</item>
-		<item>cats funny</item>
-		<item>animals</item>
-		<item>sports</item>
-		<item>nature</item>
-		<item>italy</item>
-	</string-array>
-	<string-array
-		name="form_visibility_values_list">
-		<item>Public</item>
-		<item>Private</item>
-	</string-array>
 </resources>

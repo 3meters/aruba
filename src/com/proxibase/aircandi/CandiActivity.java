@@ -23,7 +23,7 @@ public abstract class CandiActivity extends SherlockActivity {
 			finish();
 		}
 		else {
-			mCommon = new AircandiCommon(this);
+			mCommon = new AircandiCommon(this, savedInstanceState);
 			mCommon.setTheme(null);
 			mCommon.unpackIntent();
 			setContentView(getLayoutId());
@@ -45,6 +45,7 @@ public abstract class CandiActivity extends SherlockActivity {
 		mCommon.doAttachedToWindow();
 	}
 
+	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
 		overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);

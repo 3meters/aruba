@@ -17,7 +17,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
-		mCommon = new AircandiCommon(this);
+		mCommon = new AircandiCommon(this, savedInstanceState);
 		mCommon.setTheme(null);
 		super.onCreate(savedInstanceState);
 		mCommon.initialize();
@@ -36,7 +36,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	}
 
 	public void onProfileClick(View view) {
-		mCommon.doProfileClick(view);
+		mCommon.doProfileClick();
 	}
 
 	public void onRefresh() {}

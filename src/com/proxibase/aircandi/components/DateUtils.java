@@ -37,7 +37,7 @@ public class DateUtils {
 		Pattern pattern = Pattern.compile(JSONDateToMilliseconds);
 		Matcher matcher = pattern.matcher(wcfDate);
 		String result = matcher.replaceAll("$2");
-		return new Date(new Long(result));
+		return new Date(Long.valueOf(result));
 	}
 
 	public static int intervalInSeconds(Date dateOld, Date dateNew) {
@@ -79,8 +79,8 @@ public class DateUtils {
 		Long dateNewLong = dateNewMillis;
 		Long dateOldLong = dateOldMillis;
 
-		Date dateNew = new Date(new Long(dateNewLong));
-		Date dateOld = new Date(new Long(dateOldLong));
+		Date dateNew = new Date(dateNewLong);
+		Date dateOld = new Date(dateOldLong);
 		
 		Long diff = dateNew.getTime() - dateOld.getTime();
 

@@ -415,8 +415,11 @@ public class CandiPatchModel extends Observable {
 			if (!candiModel.getZoneStateNext().getZone().isInactive()) {
 
 				int maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE;
-				if (candiModel.getZoneStateNext().getZone().getCandiesNext().get(0).getZoneStateNext().getStatus() != ZoneStatus.Normal)
-					maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE_WITH_PRIMARY;
+				if (candiModel.getZoneStateNext().getZone().getCandiesNext().size() > 0) {
+					if (candiModel.getZoneStateNext().getZone().getCandiesNext().get(0).getZoneStateNext().getStatus() != ZoneStatus.Normal) {
+						maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE_WITH_PRIMARY;
+					}
+				}
 
 				if (candiModel.getZoneStateNext().getZone().getCandiIndexNext(candiModel) > (maxVisible - 1)) {
 

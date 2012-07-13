@@ -1,6 +1,5 @@
 package com.proxibase.aircandi;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -29,6 +28,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
@@ -52,7 +52,7 @@ public abstract class FormActivity extends SherlockActivity {
 	protected String			mImageName;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
 			/* Try to detect case where this is being created after a crash and bail out. */
 			super.onCreate(savedInstanceState);
@@ -64,7 +64,7 @@ public abstract class FormActivity extends SherlockActivity {
 			 * Theme has to be set before any UI is constructed. We also have to do it for each activity so they pickup
 			 * our custom style attributes.
 			 */
-			mCommon = new AircandiCommon(this);
+			mCommon = new AircandiCommon(this, savedInstanceState);
 			mCommon.unpackIntent();
 			mCommon.setTheme(getCustomTheme());
 			super.onCreate(savedInstanceState);
@@ -102,6 +102,12 @@ public abstract class FormActivity extends SherlockActivity {
 	}
 
 	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		mCommon.doSaveInstanceState(savedInstanceState);
+	}
+
+	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		/*
 		 * Called before onResume. If we are returning from the market app, we get a zero result code whether the user
@@ -130,7 +136,8 @@ public abstract class FormActivity extends SherlockActivity {
 									@Override
 									public void run() {
 										if (mImageRequestListener != null) {
-											mImageRequestListener.onComplete(serviceResponse);
+											ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+											mImageRequestListener.onComplete(serviceResponse, imageResponse.imageUri, null, imageResponse.bitmap);
 										}
 									}
 								});
@@ -173,7 +180,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 				try {
 					/* Get bitmap */
-					Bitmap bitmap = Media.getBitmap(getContentResolver(), Uri.fromFile(getTempFile()));
+					Bitmap bitmap = Media.getBitmap(getContentResolver(), Uri.fromFile(mCommon.getTempFile(this, "image_capture.tmp")));
 
 					/* Scale and crop */
 					ImageRequest imageRequest = new ImageRequest();
@@ -182,7 +189,7 @@ public abstract class FormActivity extends SherlockActivity {
 					bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
 
 					/* Adjust rotation using file Exif information */
-					ExifInterface exif = new ExifInterface(getTempFile().getAbsolutePath());
+					ExifInterface exif = new ExifInterface(mCommon.getTempFile(this, "image_capture.tmp").getAbsolutePath());
 					int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 					int rotate = 0;
 					switch (orientation) {
@@ -239,38 +246,38 @@ public abstract class FormActivity extends SherlockActivity {
 	// Picker routines
 	// --------------------------------------------------------------------------------------------
 
-	public void pickPicture() {
+	protected void pickPicture() {
 		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK);
 		picturePickerIntent.setType("image/*");
 		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
 
 	}
 
-	public void pickVideo() {
+	protected void pickVideo() {
 		Intent videoPickerIntent = new Intent(Intent.ACTION_PICK);
 		videoPickerIntent.setType("video/*");
 		startActivityForResult(videoPickerIntent, CandiConstants.ACTIVITY_VIDEO_PICK);
 	}
 
-	public void takeVideo() {
+	protected void takeVideo() {
 		Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 		startActivityForResult(takeVideoIntent, CandiConstants.ACTIVITY_VIDEO_MAKE);
 	}
 
-	public void takePicture() {
+	protected void takePicture() {
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile()));
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mCommon.getTempFile(this, "image_capture.tmp")));
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
 	}
 
-	public void pickAircandiPicture() {
+	protected void pickAircandiPicture() {
 		Intent candigramPickerIntent = new Intent(this, PictureSearch.class);
 		startActivityForResult(candigramPickerIntent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
 		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 
 	}
 
-	public void useFacebook() {
+	protected void useFacebook() {
 		/*
 		 * Only used for user pictures
 		 */
@@ -295,13 +302,7 @@ public abstract class FormActivity extends SherlockActivity {
 		mImageRequestWebImageView.setImageRequest(imageRequest);
 	}
 
-	private File getTempFile() {
-		File path = new File(Environment.getExternalStorageDirectory(), this.getPackageName());
-		if (!path.exists()) {
-			path.mkdir();
-		}
-		return new File(path, "image_capture.tmp");
-	}
+	
 
 	// --------------------------------------------------------------------------------------------
 	// UI routines
@@ -414,7 +415,7 @@ public abstract class FormActivity extends SherlockActivity {
 		try {
 			if (mCommon != null) {
 				mCommon.recycleImageViewDrawable(R.id.image_picture);
-				mCommon.recycleImageViewDrawable(R.id.image_user);
+				mCommon.recycleImageViewDrawable(R.id.image_user_picture);
 				mCommon.doDestroy();
 			}
 		}

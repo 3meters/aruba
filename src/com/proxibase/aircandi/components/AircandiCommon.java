@@ -1,5 +1,6 @@
 package com.proxibase.aircandi.components;
 
+import java.io.File;
 import java.net.UnknownHostException;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
@@ -53,6 +55,7 @@ import com.proxibase.aircandi.CandiMap;
 import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.CandiRadar.RefreshType;
 import com.proxibase.aircandi.CommentList;
+import com.proxibase.aircandi.FormActivity;
 import com.proxibase.aircandi.Preferences;
 import com.proxibase.aircandi.ProfileForm;
 import com.proxibase.aircandi.R;
@@ -78,7 +81,6 @@ import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
 import com.proxibase.service.ServiceRequest;
-import com.proxibase.service.objects.Comment;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.GeoLocation;
 import com.proxibase.service.objects.Session;
@@ -103,7 +105,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public String						mEntityType;
 	public GeoLocation					mEntityLocation;
 	public List<Entity>					mEntities;
-	public Comment						mComment;
 	public String						mMessage;
 	public String						mBeaconId;
 	public String						mCollectionId;
@@ -137,7 +138,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private CandiPatchModel				mCandiPatchModel;
 	private CandiPatchPresenter			mCandiPatchPresenter;
 
-	public AircandiCommon(Context context) {
+	public AircandiCommon(Context context, Bundle savedInstanceState) {
 		mContext = context;
 		mActivity = (Activity) context;
 		mPageName = mActivity.getClass().getSimpleName();
@@ -146,6 +147,15 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 */
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			mActivity.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		}
+
+		/*
+		 * Base activity class handles restoring view state as long as they have 
+		 * an id property. We handle ourselves any other state that needs to
+		 * survive activity death.
+		 */
+		if (savedInstanceState != null) {
+			doRestoreInstanceState(savedInstanceState);
 		}
 	}
 
@@ -165,7 +175,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (mActivity.findViewById(android.R.id.home) == null) {
 			mActionBarHomeImageView = R.id.abs__home;
 		}
-		
+
 		/* Theme info */
 		TypedValue resourceName = new TypedValue();
 		if (mActivity.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
@@ -280,11 +290,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			if (json != null && !json.equals("")) {
 				mEntityLocation = ProxibaseService.getGson(GsonType.Internal).fromJson(json, GeoLocation.class);
 			}
-
-			json = extras.getString(mContext.getString(R.string.EXTRA_COMMENT));
-			if (json != null && json.length() > 0) {
-				mComment = ProxibaseService.getGson(GsonType.Internal).fromJson(json, Comment.class);
-			}
 		}
 	}
 
@@ -296,19 +301,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 		startRadarActivity();
 	}
 
-	public void doProfileClick(View view) {
-		if (Aircandi.getInstance().getUser() != null) {
-			if (Aircandi.getInstance().getUser().anonymous) {
-				mActivity.startActivityForResult(new Intent(mContext, SignInForm.class), CandiConstants.ACTIVITY_SIGNIN);
-			}
-			else {
-				IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
-				intentBuilder.setCommandType(CommandType.Edit);
-				Intent intent = intentBuilder.create();
-				mActivity.startActivity(intent);
-			}
-			mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-		}
+	public void doProfileClick() {
+		IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
+		intentBuilder.setCommandType(CommandType.View);
+		Intent intent = intentBuilder.create();
+		mActivity.startActivity(intent);
+		mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 	}
 
 	public void doInfoClick() {
@@ -316,7 +314,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		String message = mActivity.getString(R.string.alert_about_message) + " "
 				+ Aircandi.getVersionName(mContext, CandiRadar.class) + "\n"
 				+ mActivity.getString(R.string.dialog_info);
-		AircandiCommon.showAlertDialog(R.drawable.icon_app,  title, message,
+		AircandiCommon.showAlertDialog(R.drawable.icon_app, title, message,
 				mActivity, android.R.string.ok, null, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {}
 				});
@@ -352,7 +350,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 					}
 				}
 			}
-			AircandiCommon.showAlertDialog(R.drawable.icon_app, mActivity.getString(R.string.alert_beacons_title), beaconMessage, mActivity, android.R.string.ok, null, new
+			AircandiCommon.showAlertDialog(R.drawable.icon_app, mActivity.getString(R.string.alert_beacons_title), beaconMessage, mActivity,
+					android.R.string.ok, null, new
 					DialogInterface.OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {}
@@ -426,17 +425,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public void updateBeaconIndicator(final List<WifiScanResult> scanList) {
 
 		synchronized (scanList) {
-			/* 
+			/*
 			 * In case we get called from a background thread.
 			 */
-			mActivity.runOnUiThread(new Runnable(){
+			mActivity.runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
 					Drawable drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_stop);
-					
+
 					mBeaconIndicator.setText(String.valueOf(scanList.size()));
-					
+
 					WifiScanResult wifiStrongest = null;
 
 					int wifiCount = 0;
@@ -463,8 +462,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_go);
 					}
 					mBeaconIndicator.setBackgroundDrawable(drawable);
-					
-				}});
+
+				}
+			});
 
 		}
 	}
@@ -545,14 +545,15 @@ public class AircandiCommon implements ActionBar.TabListener {
 				friendlyMessage = responseMessage;
 			}
 
-			Notification note = new Notification(R.drawable.icon_app, mActivity.getString(R.string.notification_error_network_message), System.currentTimeMillis());
+			Notification note = new Notification(R.drawable.icon_app, mActivity.getString(R.string.notification_error_network_message),
+					System.currentTimeMillis());
 
 			RemoteViews contentView = new RemoteViews(mActivity.getPackageName(), R.layout.custom_notification);
 			contentView.setImageViewResource(R.id.image, R.drawable.icon_app);
 			if (isDeveloper) {
 				contentView.setViewVisibility(R.id.title, View.GONE);
 			}
-			contentView.setTextViewText(R.id.title, mActivity.getString(R.string.app_name));
+			contentView.setTextViewText(R.id.title, mActivity.getString(R.string.name_app));
 			contentView.setTextViewText(R.id.text, friendlyMessage);
 			note.contentView = contentView;
 
@@ -672,6 +673,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 			user = ProxibaseService.getGson(GsonType.Internal).fromJson(jsonUser, User.class);
 			String jsonSession = Aircandi.settings.getString(Preferences.PREF_USER_SESSION, null);
 			user.session = ProxibaseService.getGson(GsonType.Internal).fromJson(jsonSession, Session.class);
+			/*
+			 * If user is about to expire, we trigger the sign in process. We set the anonymous user
+			 * as the default in case the user cancels out of the sign in form.
+			 */
+			if (user.session.renewSession(DateUtils.nowDate().getTime())) {
+				user = ProxibaseService.getGson(GsonType.Internal).fromJson(CandiConstants.USER_ANONYMOUS, User.class);
+				user.anonymous = true;
+				Aircandi.getInstance().setUser(user);
+				signin();
+				return;
+			}
 		}
 		else {
 			user = ProxibaseService.getGson(GsonType.Internal).fromJson(CandiConstants.USER_ANONYMOUS, User.class);
@@ -702,7 +714,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					 */
 					User user = Aircandi.getInstance().getUser();
 					ServiceResponse serviceResponse = new ServiceResponse();
-					
+
 					if (user.session != null) {
 						Bundle parameters = new Bundle();
 						ServiceRequest serviceRequest = new ServiceRequest();
@@ -732,8 +744,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 					user.anonymous = true;
 					Aircandi.getInstance().setUser(user);
 
-					/* Clear the user that is tied into auto-signin */
+					/* Clear the user and session that is tied into auto-signin */
 					Aircandi.settingsEditor.putString(Preferences.PREF_USER, null);
+					Aircandi.settingsEditor.putString(Preferences.PREF_USER_SESSION, null);
 					Aircandi.settingsEditor.commit();
 
 					/* Make sure onPrepareOptionsMenu gets called */
@@ -895,7 +908,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
 				return;
 			case R.id.profile:
-				doProfileClick(null);
+				doProfileClick();
 				return;
 			case R.id.signout:
 				signout();
@@ -1189,32 +1202,52 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (tab.getTag().equals(R.string.radar_tab_radar)) {
 			if (Aircandi.getInstance().getCandiTask() != CandiTask.RadarCandi) {
 				Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
+				
 				Intent intent = new Intent(mActivity, CandiRadar.class);
-				/* Flags let us use existing instance of radar if its already around */
+				/* 
+				 * Radar is the root task so the back button will always end here. From radar the back
+				 * button kills the application and returns to the launcher (home).
+				 * 
+				 * The flags let us use existing instance of radar if its already around.
+				 */
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				mActivity.startActivity(intent);
-				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
 			}
 		}
 		else if (tab.getTag().equals(R.string.radar_tab_mycandi)) {
 			if (Aircandi.getInstance().getCandiTask() != CandiTask.MyCandi) {
 				Aircandi.getInstance().setCandiTask(CandiTask.MyCandi);
+				
 				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiList.class);
 				intentBuilder.setCollectionType(ProxiExplorer.CollectionType.CandiByUser);
 				intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
 				Intent intent = intentBuilder.create();
+				/* 
+				 * These flags put this on the stack as a new task and hitting back will
+				 * take the user back the top of the previous task. 
+				 */
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				mActivity.startActivity(intent);
-				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_long);
 			}
 		}
 		else if (tab.getTag().equals(R.string.radar_tab_map)) {
 			if (Aircandi.getInstance().getCandiTask() != CandiTask.Map) {
 				Aircandi.getInstance().setCandiTask(CandiTask.Map);
+				
 				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiMap.class);
 				Intent intent = intentBuilder.create();
+				/* 
+				 * These flags put this on the stack as a new task and hitting back will
+				 * take the user back the top of the previous task. 
+				 */
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				mActivity.startActivity(intent);
-				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_long);
 			}
 		}
 		else {
@@ -1368,6 +1401,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void setViewFlipper(ViewFlipper viewFlipper) {
 		mViewFlipper = viewFlipper;
+	}
+
+	public File getTempFile(FormActivity formActivity, String tempFileName) {
+		File path = new File(Environment.getExternalStorageDirectory(), formActivity.getPackageName());
+		if (!path.exists()) {
+			path.mkdir();
+		}
+		return new File(path, tempFileName);
 	}
 
 	public enum ServiceOperation {

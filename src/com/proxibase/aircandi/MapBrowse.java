@@ -39,7 +39,7 @@ public class MapBrowse extends SherlockMapActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
-		mCommon = new AircandiCommon(this);
+		mCommon = new AircandiCommon(this, savedInstanceState);
 		mCommon.setTheme(null);
 		mCommon.unpackIntent();
 
@@ -115,7 +115,7 @@ public class MapBrowse extends SherlockMapActivity {
 	public void onRefreshClick(View view) {}
 
 	public void onProfileClick(View view) {
-		mCommon.doProfileClick(view);
+		mCommon.doProfileClick();
 	}
 
 	// --------------------------------------------------------------------------------------------

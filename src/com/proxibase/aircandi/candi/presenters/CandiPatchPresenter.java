@@ -354,7 +354,7 @@ public class CandiPatchPresenter implements Observer {
 		 * 
 		 * TODO: Clone is not creating copies of the child entities.
 		 */
-		mEntityModelSnapshot = entityModel.clone();
+		mEntityModelSnapshot = entityModel.copy();
 
 		if (chunking) {
 			/*
@@ -1146,6 +1146,9 @@ public class CandiPatchPresenter implements Observer {
 					});
 		}
 		else {
+			/*
+			 * Fan out child candi in Radar
+			 */
 			if (candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Secondary) {
 				CandiModel candiParent = (CandiModel) candiModel.getParent();
 				Entity entityParent = candiParent.getEntity();

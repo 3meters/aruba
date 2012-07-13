@@ -25,6 +25,8 @@ public class ServiceData {
 	@Expose
 	public User			user;
 	@Expose
+	public ServiceError	error;
+	@Expose
 	public Session		session;
 	@Expose
 	public Number		time;

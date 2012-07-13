@@ -18,6 +18,7 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
+import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Beacon;
@@ -62,13 +63,13 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 			
 			message = "";
 			if (mapBeacon.pictureCount > 0) {
-				message += "Pictures: " + String.valueOf(mapBeacon.pictureCount) + "\n";
+				message += Aircandi.applicationContext.getString(R.string.candi_map_label_pictures) + " " + String.valueOf(mapBeacon.pictureCount) + "\n";
 			}
 			if (mapBeacon.postCount > 0) {
-				message += "Posts: " + String.valueOf(mapBeacon.postCount) + "\n";
+				message += Aircandi.applicationContext.getString(R.string.candi_map_label_posts) + " " + String.valueOf(mapBeacon.postCount) + "\n";
 			}
 			if (mapBeacon.linkCount > 0) {
-				message += "Links: " + String.valueOf(mapBeacon.linkCount) + "\n";
+				message += Aircandi.applicationContext.getString(R.string.candi_map_label_links) + " " + String.valueOf(mapBeacon.linkCount) + "\n";
 			}
 		}
 

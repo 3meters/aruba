@@ -62,6 +62,15 @@ public class EntityList<T> extends ArrayList<T> {
 		return entityList;
 	}
 
+	public EntityList<Entity> copy() {
+		EntityList<Entity> entityList = new EntityList(this.size());
+		for (int i = 0; i < this.size(); i++) {
+			Entity entity = (Entity) this.get(i);
+			entityList.add(entity.clone());
+		}
+		return entityList;
+	}
+
 	public Boolean isMore() {
 		/*
 		 * CursorIndex should be advanced whenever another set
@@ -86,9 +95,9 @@ public class EntityList<T> extends ArrayList<T> {
 	}
 
 	public int getEndIndex() {
-		int endIndex = this.size() + CandiConstants.RADAR_ENTITY_LIMIT ;
+		int endIndex = this.size() + CandiConstants.RADAR_ENTITY_LIMIT;
 		if (mCursorIndex != null) {
-			endIndex = mCursorIndex + CandiConstants.RADAR_ENTITY_LIMIT ;
+			endIndex = mCursorIndex + CandiConstants.RADAR_ENTITY_LIMIT;
 		}
 		if (endIndex > mCursorIds.size()) {
 			endIndex = mCursorIds.size();

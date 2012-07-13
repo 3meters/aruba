@@ -1,7 +1,5 @@
 package com.proxibase.aircandi;
 
-import org.apache.http.HttpStatus;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -24,6 +22,7 @@ import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.Utilities;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
@@ -54,7 +53,7 @@ public class SignInForm extends FormActivity {
 	private void initialize() {
 
 		mCommon.track();
-		
+
 		mCommon.mActionBar.setTitle(R.string.form_title_signin);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
@@ -97,93 +96,97 @@ public class SignInForm extends FormActivity {
 				, getResources().getString(R.string.alert_send_password_message)
 				, SignInForm.this, android.R.string.ok, null, null);
 	}
-	
 
 	public void onSignInButtonClick(View view) {
-		final String email = mTextEmail.getText().toString().toLowerCase();
-		final String password = mTextPassword.getText().toString();
 
-		new AsyncTask() {
+		if (validate()) {
 
-			@Override
-			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, getString(R.string.progress_signing_in));
-			}
+			final String email = mTextEmail.getText().toString().toLowerCase();
+			final String password = mTextPassword.getText().toString();
 
-			@Override
-			protected Object doInBackground(Object... params) {
+			new AsyncTask() {
 
-				Bundle parameters = new Bundle();
-				ServiceRequest serviceRequest = new ServiceRequest();
-
-				parameters.putString("user", "object:{"
-						+ "\"name\":\"" + email + "\","
-						+ "\"password\":\"" + password + "\""
-						+ "}");
-
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
-						.setRequestType(RequestType.Method)
-						.setParameters(parameters)
-						.setResponseFormat(ResponseFormat.Json);
-
-				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-				return serviceResponse;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-
-				ServiceResponse serviceResponse = (ServiceResponse) response;
-				mCommon.showProgressDialog(false, null);
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-
-					Tracker.trackEvent("User", "Signin", null, 0);
-					String jsonResponse = (String) serviceResponse.data;
-					ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.ProxibaseService);
-					User user = serviceData.user;
-					user.session = serviceData.session;
-
-					Aircandi.getInstance().setUser(user);
-					ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
-							+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
-
-					String jsonUser = ProxibaseService.convertObjectToJson((Object) user, GsonType.ProxibaseService);
-					String jsonSession = ProxibaseService.convertObjectToJson((Object) user.session, GsonType.ProxibaseService);
-					Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonUser);
-					Aircandi.settingsEditor.putString(Preferences.PREF_USER_SESSION, jsonSession);
-					Aircandi.settingsEditor.commit();
-					
-					/* Different user means different user candi */
-					ProxiExplorer.getInstance().getEntityModel().getMyEntities().clear();
-
-					setResult(CandiConstants.RESULT_USER_SIGNED_IN);
-					finish();
+				@Override
+				protected void onPreExecute() {
+					mCommon.showProgressDialog(true, getString(R.string.progress_signing_in));
 				}
-				else {
-					/*
-					 * There are a number of different codes for unsuccessful authentication:
-					 * 
-					 * - 404: email not found
-					 * - 401: incorrect password
-					 */
-					if (serviceResponse.exception.getHttpStatusCode() == HttpStatus.SC_UNAUTHORIZED
-							|| serviceResponse.exception.getHttpStatusCode() == HttpStatus.SC_NOT_FOUND) {
-						String message = getString(R.string.signin_alert_invalid_signin);
-						AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
-								SignInForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog, int which) {}
-								});
-						mTextPassword.setText("");
+
+				@Override
+				protected Object doInBackground(Object... params) {
+
+					Bundle parameters = new Bundle();
+					ServiceRequest serviceRequest = new ServiceRequest();
+
+					parameters.putString("user", "object:{"
+							+ "\"email\":\"" + email + "\","
+							+ "\"password\":\"" + password + "\""
+							+ "}");
+
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
+							.setRequestType(RequestType.Method)
+							.setParameters(parameters)
+							.setResponseFormat(ResponseFormat.Json);
+
+					ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
+					return serviceResponse;
+				}
+
+				@Override
+				protected void onPostExecute(Object response) {
+
+					ServiceResponse serviceResponse = (ServiceResponse) response;
+					mCommon.showProgressDialog(false, null);
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+
+						Tracker.trackEvent("User", "Signin", null, 0);
+
+						String jsonResponse = (String) serviceResponse.data;
+						ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.ProxibaseService);
+						User user = serviceData.user;
+						user.session = serviceData.session;
+
+						Aircandi.getInstance().setUser(user);
+						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
+								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+
+						String jsonUser = ProxibaseService.convertObjectToJson((Object) user, GsonType.Internal);
+						String jsonSession = ProxibaseService.convertObjectToJson((Object) user.session, GsonType.Internal);
+						Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonUser);
+						Aircandi.settingsEditor.putString(Preferences.PREF_USER_SESSION, jsonSession);
+						Aircandi.settingsEditor.commit();
+
+						/* Different user means different user candi */
+						ProxiExplorer.getInstance().getEntityModel().getMyEntities().clear();
+
+						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
+						finish();
 					}
 					else {
-						mCommon.handleServiceError(serviceResponse);
+						/*
+						 * Code for unsuccessful authentication:
+						 * 
+						 * - 401.1: email or password is wrong
+						 */
+						String jsonResponse = serviceResponse.exception.getResponseMessage();
+						ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.Internal);
+						if (serviceData.error != null && serviceData.error.code.floatValue() == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
+							String message = getString(R.string.alert_signin_invalid_signin);
+							AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
+									SignInForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
+										public void onClick(DialogInterface dialog, int which) {}
+									});
+							mTextPassword.setText("");
+						}
+						else {
+							mCommon.handleServiceError(serviceResponse);
+						}
 					}
 				}
-			}
-		}.execute();
+			}.execute();
+		}
 	}
-	
+
 	private boolean isValid() {
 		/*
 		 * Client validation logic is handle here. The service may still reject based on
@@ -195,7 +198,16 @@ public class SignInForm extends FormActivity {
 		if (mTextPassword.getText().length() < 6) {
 			return false;
 		}
-		
+
+		return true;
+	}
+
+	private boolean validate() {
+		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
+					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null);
+			return false;
+		}
 		return true;
 	}
 

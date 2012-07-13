@@ -847,7 +847,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	public void navigateUp() {
 		mCandiPatchPresenter.renderingActivate();
 		mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, Navigation.Up, false);
-		getCommon().setActionBarTitleAndIcon(R.drawable.icon_app, R.string.app_name, false);
+		getCommon().setActionBarTitleAndIcon(R.drawable.icon_app, R.string.name_app, false);
 		getCommon().mActionBar.setHomeButtonEnabled(false);
 	}
 
@@ -1494,26 +1494,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				getCommon().reload();
 			}
 			else {
-				//				/*
-				//				 * We control window focus messages that trigger the engine from here.
-				//				 */
-				//				super.onWindowFocusChanged(true);
-				//
-				//				/* We run a fake modifier so we can trigger texture loading */
-				//				mEngine.getScene().registerEntityModifier(
-				//						new AlphaModifier(CandiConstants.DURATION_INSTANT, 0.0f, 1.0f, new IEntityModifierListener() {
-				//
-				//							@Override
-				//							public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-				//								onTexturesReady();
-				//							}
-				//
-				//							@Override
-				//							public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-				//								mCandiPatchPresenter.renderingActivate();
-				//							}
-				//						}, EaseLinear.getInstance()));
-
 				/*
 				 * We have to be pretty aggressive about refreshing the UI because
 				 * there are lots of actions that could have happened while this activity
@@ -1528,6 +1508,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				if (!Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
 						|| ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
 						|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+					Logger.i(this, "CandiRadarActivity detected entity model change");
 					invalidateOptionsMenu();
 					scanForBeacons(new ScanOptions(false, false));
 				}

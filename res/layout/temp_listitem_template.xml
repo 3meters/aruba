@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:id="@+id/item_row"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" >
@@ -25,7 +24,7 @@
         android:layout_centerVertical="true"
         android:layout_marginTop="3dp"
         android:layout_toRightOf="@+id/item_image"
-        android:text="Place" />
+        android:text="@string/dummy_title" />
 
     <!--
     <com.proxibase.aircandi.widgets.TextViewEllipsizing
