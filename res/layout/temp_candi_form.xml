@@ -3,16 +3,17 @@
     xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:id="@+id/candi_form"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent" xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Body -->
-
+
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:background="?attr/backgroundCandiInfo"
-        android:fillViewport="true" >
+        android:fillViewport="true"
+        tools:ignore="UselessParent" >
 
         <RelativeLayout
             android:id="@+id/group_candi_content"

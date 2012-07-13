@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent" xmlns:tools="http://schemas.android.com/tools">
 
     <FrameLayout
         android:layout_width="fill_parent"
@@ -102,13 +102,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:visibility="gone" >
-
+
         <SlidingDrawer
             android:id="@+id/debug_drawer_radar"
             android:layout_width="fill_parent"
             android:layout_height="160dp"
             android:content="@+id/debug_slider_content"
-            android:handle="@+id/debug_slider_handle" >
+            android:handle="@+id/debug_slider_handle"
+            tools:ignore="UselessParent" >
 
             <LinearLayout
                 android:id="@+id/debug_slider_handle"

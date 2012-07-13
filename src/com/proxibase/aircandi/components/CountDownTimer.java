@@ -46,76 +46,13 @@ import android.os.SystemClock;
  */
 public abstract class CountDownTimer {
 
-	/**
-	 * Millis since epoch when alarm should stop.
-	 */
-	private  long	mMillisInFuture;
-
-	/**
-	 * The interval in millis that the user receives callbacks
-	 */
-	private final long	mCountdownInterval;
-
-	private long		mStopTimeInFuture;
-
-	private boolean		mCancelled	= false;
-
-	/**
-	 * @param millisInFuture The number of millis in the future from the call
-	 *            to {@link #start()} until the countdown is done and {@link #onFinish()} is called.
-	 * @param countDownInterval The interval along the way to receive {@link #onTick(long)} callbacks.
-	 */
-	public CountDownTimer(long millisInFuture, long countDownInterval) {
-		mMillisInFuture = millisInFuture;
-		mCountdownInterval = countDownInterval;
-	}
-
-	/**
-	 * Cancel the countdown.
-	 * Do not call it from inside CountDownTimer threads
-	 */
-	public final void cancel() {
-		mHandler.removeMessages(MSG);
-		mCancelled = true;
-	}
-
-	/**
-	 * Start the countdown.
-	 */
-	public synchronized final CountDownTimer start() {
-		if (mMillisInFuture <= 0) {
-			onFinish();
-			return this;
-		}
-		mStopTimeInFuture = SystemClock.elapsedRealtime() + mMillisInFuture;
-		mHandler.sendMessage(mHandler.obtainMessage(MSG));
-		mCancelled = false;
-		return this;
-	}
-
-	/**
-	 * Callback fired on regular interval.
-	 * 
-	 * @param millisUntilFinished The amount of time until finished.
-	 */
-	public abstract void onTick(long millisUntilFinished);
-
-	/**
-	 * Callback fired when the time is up.
-	 */
-	public abstract void onFinish();
-
-	public long getMillisInFuture() {
-		return mMillisInFuture;
-	}
-
-	public void setMillisInFuture(long millisInFuture) {
-		mMillisInFuture = millisInFuture;
-	}
-
+	private long				mMillisInFuture;		// Millis since epoch when alarm should stop. 
+	private final long			mCountdownInterval;	// The interval in millis that the user receives callbacks 
+	private long				mStopTimeInFuture;
+	private boolean				mCancelled	= false;
 	private static final int	MSG			= 1;
 
-	// handles counting down
+	/* handles counting down */
 	private Handler				mHandler	= new Handler() {
 
 												@Override
@@ -150,4 +87,61 @@ public abstract class CountDownTimer {
 													}
 												}
 											};
+
+	/**
+	 * @param millisInFuture
+	 *            The number of millis in the future from the call
+	 *            to {@link #start()} until the countdown is done and {@link #onFinish()} is called.
+	 * @param countDownInterval
+	 *            The interval along the way to receive {@link #onTick(long)} callbacks.
+	 */
+	public CountDownTimer(long millisInFuture, long countDownInterval) {
+		mMillisInFuture = millisInFuture;
+		mCountdownInterval = countDownInterval;
+	}
+
+	/**
+	 * Cancel the countdown.
+	 * Do not call it from inside CountDownTimer threads
+	 */
+	public final void cancel() {
+		mHandler.removeMessages(MSG);
+		mCancelled = true;
+	}
+
+	/**
+	 * Start the countdown.
+	 */
+	public synchronized final CountDownTimer start() {
+		if (mMillisInFuture <= 0) {
+			onFinish();
+			return this;
+		}
+		mStopTimeInFuture = SystemClock.elapsedRealtime() + mMillisInFuture;
+		mHandler.sendMessage(mHandler.obtainMessage(MSG));
+		mCancelled = false;
+		return this;
+	}
+
+	/**
+	 * Callback fired on regular interval.
+	 * 
+	 * @param millisUntilFinished
+	 *            The amount of time until finished.
+	 */
+	public abstract void onTick(long millisUntilFinished);
+
+	/**
+	 * Callback fired when the time is up.
+	 */
+	public abstract void onFinish();
+
+	public long getMillisInFuture() {
+		return mMillisInFuture;
+	}
+
+	public void setMillisInFuture(long millisInFuture) {
+		mMillisInFuture = millisInFuture;
+	}
+
 }
