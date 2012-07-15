@@ -1,8 +1,10 @@
 package com.proxibase.aircandi.components;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
+import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Entity;
@@ -170,5 +172,48 @@ public class EntityList<T> extends ArrayList<T> {
 
 	public void setCursorIndex(Integer cursorIndex) {
 		mCursorIndex = cursorIndex;
+	}
+
+	public static class SortEntitiesByModifiedDate implements Comparator<Entity> {
+	
+		@Override
+		public int compare(Entity object1, Entity object2) {
+			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
+				return 1;
+			}
+			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
+				return 0;
+			}
+			return -1;
+		}
+	}
+
+	public static class SortCandiModelsByDiscoveryTimeModifiedDate implements Comparator<CandiModel> {
+	
+		@Override
+		public int compare(CandiModel object1, CandiModel object2) {
+	
+			Entity entity1 = object1.getEntity();
+			Entity entity2 = object2.getEntity();
+	
+			/* Rounded to produce a 5 second bucket that will get further sorted by recent activity */
+			if ((entity1.discoveryTime.getTime() / 5000) > (entity2.discoveryTime.getTime() / 5000)) {
+				return -1;
+			}
+			if ((entity1.discoveryTime.getTime() / 5000) < (entity2.discoveryTime.getTime() / 5000)) {
+				return 1;
+			}
+			else {
+				if (entity1.modifiedDate.longValue() > entity2.modifiedDate.longValue()) {
+					return -1;
+				}
+				else if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+			}
+		}
 	}
 }

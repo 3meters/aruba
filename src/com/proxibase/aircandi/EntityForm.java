@@ -1,5 +1,7 @@
 package com.proxibase.aircandi;
 
+import java.util.Collections;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,6 +28,7 @@ import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AircandiCommon.ServiceOperation;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
+import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.GeoLocationManager;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
@@ -443,10 +446,6 @@ public class EntityForm extends FormActivity {
 									 * normally get set by the service.
 									 */
 									Entity entity = mEntityForForm;
-									Entity parentEntity = null;
-									if (entity.parentId != null) {
-										parentEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entity.parentId, CollectionType.CandiByRadar);
-									}
 									Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeaconById(entity.beaconId);
 									String jsonResponse = (String) serviceResponse.data;
 									ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, Result.class, GsonType.ProxibaseService);
@@ -459,8 +458,41 @@ public class EntityForm extends FormActivity {
 									entity.creatorId = entity.ownerId;
 									entity.modifierId = entity.ownerId;
 
+									/*
+									 * Push to radar entities.
+									 */
+									Entity parentEntity = null;
+									if (entity.parentId != null) {
+										parentEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entity.parentId, CollectionType.CandiByRadar);
+									}
 									ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, CollectionType.CandiByRadar);
-									ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, CollectionType.CandiByUser);
+									if (parentEntity != null) {
+										parentEntity.childCount++;
+										/* Sort child into the right spot */
+										if (parentEntity.children.size() > 1) {
+											Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
+										}
+									}
+
+									/*
+									 * Push to user entities if we have already loaded them.
+									 */
+									if (ProxiExplorer.getInstance().getEntityModel().getMyEntities().getCursorIds() != null
+											&& ProxiExplorer.getInstance().getEntityModel().getMyEntities().size() > 0) {
+										if (entity.parentId != null) {
+											parentEntity = ProxiExplorer.getInstance().getEntityModel()
+													.getEntityById(entity.parentId, CollectionType.CandiByUser);
+										}
+										ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, CollectionType.CandiByUser);
+										if (parentEntity != null) {
+											parentEntity.childCount++;
+											/* Sort child into the right spot */
+											if (parentEntity.children.size() > 1) {
+												Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
+											}
+										}
+									}
+
 									ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 
 									ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
@@ -476,7 +508,7 @@ public class EntityForm extends FormActivity {
 								gather(mEntityForForm);
 								mEntityForForm.modifierId = Aircandi.getInstance().getUser().id;
 								mEntityForForm.modifiedDate = DateUtils.nowDate().getTime();
-								
+
 								serviceResponse = updateEntity(mEntityForForm);
 
 								if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -509,7 +541,7 @@ public class EntityForm extends FormActivity {
 										entityByUser.imageUri = mEntityForForm.imageUri;
 										entityByUser.linkUri = mEntityForForm.linkUri;
 									}
-									
+
 									ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 									ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 									setResult(CandiConstants.RESULT_ENTITY_UPDATED);

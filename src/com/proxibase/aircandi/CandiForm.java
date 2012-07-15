@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.components.CandiPagerAdapter;
 import com.proxibase.aircandi.components.CommandType;
+import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.IntentBuilder;
@@ -118,7 +119,7 @@ public class CandiForm extends CandiActivity {
 
 						/* Sort the children if there are any */
 						if (mEntity.children != null && mEntity.children.size() > 1) {
-							Collections.sort(mEntity.children, new Entity.SortEntitiesByModifiedDate());
+							Collections.sort(mEntity.children, new EntityList.SortEntitiesByModifiedDate());
 						}
 
 						/* Get the view pager configured */

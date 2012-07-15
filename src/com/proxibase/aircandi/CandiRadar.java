@@ -166,7 +166,13 @@ import com.proxibase.service.objects.User;
  * 
  * - EntityForm: onDestroy.
  * - PictureSearch: onDestroy.
- * - AndEngine: at the end of an updateTextures pass.
+ * - ProfileForm: onDestroy.
+ * - SignUpForm: onDestroy.
+ * - AndEngine: at the end of an updateTextures pass. TextureManager.updateTextures is called everytime
+ *   the engine is asked to draw a frame by the opengl renderer. System.gc is called if textures were
+ *   loaded or unloaded during the call.
+ *   ** Update: I have turned off the gc call in updateTextures to see if it is really needed **
+ * - AndEngine: Font.update (don't believe we are using any).
  * 
  * Explicit bitmap recycling
  * 

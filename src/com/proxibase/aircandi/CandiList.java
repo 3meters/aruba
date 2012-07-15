@@ -118,7 +118,7 @@ public class CandiList extends CandiActivity {
 				/*
 				 * If its the user collection and it hasn't been populated yet, chunk in the first set of entities.
 				 */
-				if (proxiEntities.size() == 0 && proxiEntities.getCollectionType() == CollectionType.CandiByUser) {
+				if (proxiEntities.getCollectionType() == CollectionType.CandiByUser && (proxiEntities.getCursorIds() == null || proxiEntities.size() == 0)) {
 
 					Bundle parameters = new Bundle();
 					ServiceRequest serviceRequest = new ServiceRequest();

@@ -3,14 +3,12 @@ package com.proxibase.service.objects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.proxibase.aircandi.Aircandi;
-import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
@@ -184,7 +182,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		Entity entityCopy = (Entity) Utilities.deepCopy(this);
 		return entityCopy;
 	}
-
+	
 	public String getCollection() {
 		return "entities";
 	}
@@ -309,58 +307,6 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			entity.imageUri = entity.imagePreviewUri;
 		}
 		return entity;
-	}
-
-	public static class SortEntitiesByModifiedDate implements Comparator<Entity> {
-
-		@Override
-		public int compare(Entity object1, Entity object2) {
-			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
-				return 1;
-			}
-			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
-				return 0;
-			}
-			return -1;
-		}
-	}
-
-	public static class SortEntitiesByDiscoveryTimeModifiedDate implements Comparator<CandiModel> {
-
-		@Override
-		public int compare(CandiModel object1, CandiModel object2) {
-
-			Entity entity1 = object1.getEntity();
-			Entity entity2 = object2.getEntity();
-
-			/* Rounded to produce a bucket that will get further sorted by recent activity */
-			if ((entity1.discoveryTime.getTime() / 1000) > (entity2.discoveryTime.getTime() / 1000)) {
-				return -1;
-			}
-			if ((entity1.discoveryTime.getTime() / 1000) < (entity2.discoveryTime.getTime() / 1000)) {
-				return 1;
-			}
-			else {
-				if (entity1.modifiedDate.longValue() > entity2.modifiedDate.longValue()) {
-					return -1;
-				}
-				else if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
-					return 1;
-				}
-				else {
-					return 0;
-				}
-			}
-		}
-	}
-
-	public static class SortEntitiesByType implements Comparator<CandiModel> {
-
-		@Override
-		public int compare(CandiModel object1, CandiModel object2) {
-
-			return object1.getEntity().type.compareToIgnoreCase(object2.getEntity().type);
-		}
 	}
 
 	public static enum ImageFormat {

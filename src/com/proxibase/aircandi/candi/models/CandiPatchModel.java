@@ -13,6 +13,7 @@ import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.components.CandiList;
 import com.proxibase.aircandi.components.DateUtils;
+import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Entity;
@@ -487,7 +488,7 @@ public class CandiPatchModel extends Observable {
 	}
 
 	public void sortCandiModels(List list) {
-		Collections.sort(list, new Entity.SortEntitiesByDiscoveryTimeModifiedDate());
+		Collections.sort(list, new EntityList.SortCandiModelsByDiscoveryTimeModifiedDate());
 	}
 
 	public ZoneModel getZoneNeighbor(ZoneModel targetZoneModel, boolean forward) {
