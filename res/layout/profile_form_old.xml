@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/form_footer"
+        android:layout_alignParentTop="true"
+        android:background="?attr/backgroundCandiInfo"
+        android:fillViewport="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true" >
+
+        <ViewFlipper
+            android:id="@+id/flipper_form"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:gravity="center_vertical"
+            android:visibility="visible" >
+
+            <!-- Profile -->
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|top"
+                android:orientation="vertical"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="15dp" >
+
+                <!-- User picture -->
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/form_label_picture" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginLeft="2dp"
+                    android:gravity="left"
+                    android:orientation="horizontal" >
+
+                    <com.proxibase.aircandi.widgets.WebImageView
+                        android:id="@+id/image_picture"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_weight="0"
+                        aircandi:layout="@layout/temp_webimageview_framed_fill"
+                        aircandi:maxHeight="100dp"
+                        aircandi:maxWidth="100dp"
+                        android:scaleType="centerCrop"
+                        android:tag="resource:placeholder_user" />
+
+                    <Button
+                        android:id="@+id/btn_change_public_image"
+                        style="@style/app_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="-3dp"
+                        android:layout_weight="0"
+                        android:maxWidth="150dp"
+                        android:onClick="onChangePictureButtonClick"
+                        android:text="@string/form_button_change_picture" />
+
+                    <View
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+                </LinearLayout>
+
+                <!-- Full name -->
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/form_label_fullname" />
+
+                <EditText
+                    android:id="@+id/text_fullname"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName" />
+
+                <!-- Bio -->
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/form_label_bio" />
+
+                <EditText
+                    android:id="@+id/text_bio"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textLongMessage" />
+
+                <!-- Web link -->
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/form_label_link" />
+
+                <EditText
+                    android:id="@+id/text_link"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri" />
+
+                <!-- Location -->
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/form_label_location" />
+
+                <EditText
+                    android:id="@+id/text_location"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPostalAddress" />
+            </LinearLayout>
+
+            <!-- Account -->
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical|top"
+                android:orientation="vertical"
+                android:padding="5dp" >
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/form_label_email" />
+
+                <EditText
+                    android:id="@+id/text_email"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:inputType="textEmailAddress" />
+
+                <Button
+                    android:id="@+id/btn_change_password"
+                    style="@style/app_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onChangePasswordButtonClick"
+                    android:text="@string/form_button_change_password" />
+            </LinearLayout>
+        </ViewFlipper>
+    </ScrollView>
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/form_footer"
+        style="@style/form_footer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal" >
+
+        <Button
+            android:id="@+id/btn_save"
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onSaveButtonClick"
+            android:text="@string/form_button_save" />
+
+        <Button
+            style="@style/app_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
+    </LinearLayout>
+
+</RelativeLayout>

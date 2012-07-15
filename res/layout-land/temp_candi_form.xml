@@ -106,10 +106,9 @@
                     android:layout_marginBottom="7dp"
                     android:layout_marginLeft="3dp"
                     android:text="@string/dummy_description" />
-
                 <LinearLayout
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="35dp"
                     android:layout_marginBottom="10dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal" >
@@ -118,11 +117,10 @@
                         android:id="@+id/button_comments"
                         style="@style/comments_button"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="fill_parent"
                         android:layout_marginLeft="3dp"
-                        android:layout_marginRight="15dp"
+                        android:layout_marginRight="10dp"
                         android:clickable="true"
-                        android:gravity="left"
                         android:onClick="onBrowseCommentsButtonClick"
                         android:paddingBottom="0dp"
                         android:paddingTop="0dp"
@@ -130,16 +128,15 @@
 
                     <ImageView
                         android:id="@+id/button_map"
-                        style="@style/comments_button"
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:background="@drawable/app_image_selector"
                         android:clickable="true"
-                        android:gravity="left"
                         android:onClick="onMapButtonClick"
-                        android:padding="3dp"
-                        android:src="@drawable/icon_map_32" />
+                        android:scaleType="center"
+                        android:src="?attr/iconLocation" />
                 </LinearLayout>
+                
             </LinearLayout>
         </RelativeLayout>
 

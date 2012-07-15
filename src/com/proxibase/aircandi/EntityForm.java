@@ -102,13 +102,12 @@ public class EntityForm extends FormActivity {
 				Intent intent = intentBuilder.create();
 				startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
 				overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				return;
 			}
 		}
-		else {
-			initialize();
-			bind();
-			draw();
-		}
+		initialize();
+		bind();
+		draw();
 	}
 
 	private void initialize() {
@@ -477,6 +476,7 @@ public class EntityForm extends FormActivity {
 								gather(mEntityForForm);
 								mEntityForForm.modifierId = Aircandi.getInstance().getUser().id;
 								mEntityForForm.modifiedDate = DateUtils.nowDate().getTime();
+								
 								serviceResponse = updateEntity(mEntityForForm);
 
 								if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -493,6 +493,7 @@ public class EntityForm extends FormActivity {
 										entityByRadar.modifiedDate = mEntityForForm.modifiedDate;
 										entityByRadar.imagePreviewUri = mEntityForForm.imagePreviewUri;
 										entityByRadar.imageUri = mEntityForForm.imageUri;
+										entityByRadar.linkUri = mEntityForForm.linkUri;
 									}
 									/*
 									 * The entity could also be in the mycandi collection.
@@ -506,8 +507,9 @@ public class EntityForm extends FormActivity {
 										entityByUser.modifiedDate = mEntityForForm.modifiedDate;
 										entityByUser.imagePreviewUri = mEntityForForm.imagePreviewUri;
 										entityByUser.imageUri = mEntityForForm.imageUri;
+										entityByUser.linkUri = mEntityForForm.linkUri;
 									}
-
+									
 									ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 									ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 									setResult(CandiConstants.RESULT_ENTITY_UPDATED);

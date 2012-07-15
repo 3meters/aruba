@@ -22,6 +22,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.objects.Observation;
 
+@SuppressWarnings("unused")
 public class GeoLocationManager {
 
 	/*
@@ -54,10 +55,8 @@ public class GeoLocationManager {
 	private Location					mCurrentLocation;
 	private LocationManager				mLocationManager;
 	private LocationListener			mLocationListener;
-	@SuppressWarnings("unused")
 	private Runnable					mLocationScanRunnable;
 	protected PendingIntent				mPendingIntentSingleUpdate;
-	@SuppressWarnings("unused")
 	private EventHandler				mEventLocationChanged;
 	private AtomicBoolean				mLocationScanActive	= new AtomicBoolean(false);
 

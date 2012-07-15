@@ -16,6 +16,9 @@
 
 package com.proxibase.aircandi.components;
 
+import java.lang.ref.WeakReference;
+
+import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -46,47 +49,14 @@ import android.os.SystemClock;
  */
 public abstract class CountDownTimer {
 
-	private long				mMillisInFuture;		// Millis since epoch when alarm should stop. 
-	private final long			mCountdownInterval;	// The interval in millis that the user receives callbacks 
+	private long				mMillisInFuture;							// Millis since epoch when alarm should stop. 
+	private final long			mCountdownInterval;						// The interval in millis that the user receives callbacks 
 	private long				mStopTimeInFuture;
 	private boolean				mCancelled	= false;
 	private static final int	MSG			= 1;
 
 	/* handles counting down */
-	private Handler				mHandler	= new Handler() {
-
-												@Override
-												public void handleMessage(Message msg) {
-
-													synchronized (CountDownTimer.this) {
-														final long millisLeft = mStopTimeInFuture - SystemClock.elapsedRealtime();
-
-														if (millisLeft <= 0) {
-															onFinish();
-														}
-														else if (millisLeft < mCountdownInterval) {
-															// no tick, just delay until done
-															sendMessageDelayed(obtainMessage(MSG), millisLeft);
-														}
-														else {
-															long lastTickStart = SystemClock.elapsedRealtime();
-															onTick(millisLeft);
-
-															// take into account user's onTick taking time to execute
-															long delay = lastTickStart + mCountdownInterval - SystemClock.elapsedRealtime();
-
-															// special case: user's onTick took more than interval to
-															// complete, skip to next interval
-															while (delay < 0)
-																delay += mCountdownInterval;
-
-															if (!mCancelled) {
-																sendMessageDelayed(obtainMessage(MSG), delay);
-															}
-														}
-													}
-												}
-											};
+	private Handler				mHandler	= new CountDownHandler(this);
 
 	/**
 	 * @param millisInFuture
@@ -144,4 +114,53 @@ public abstract class CountDownTimer {
 		mMillisInFuture = millisInFuture;
 	}
 
+	/*
+	 * Our custom handler holds a weak reference to the containing class so
+	 * we don't leak the outer containing class.
+	 */
+	@SuppressLint("HandlerLeak")
+	class CountDownHandler extends Handler {
+		
+		private final WeakReference<CountDownTimer>	mCountDownTimer;
+
+		CountDownHandler(CountDownTimer countDownTimer) {
+			mCountDownTimer = new WeakReference<CountDownTimer>(countDownTimer);
+		}
+
+		@Override
+		public void handleMessage(Message msg) {
+
+			CountDownTimer countDownTimer = mCountDownTimer.get();
+			if (countDownTimer != null) {
+
+				synchronized (CountDownTimer.this) {
+					final long millisLeft = mStopTimeInFuture - SystemClock.elapsedRealtime();
+
+					if (millisLeft <= 0) {
+						onFinish();
+					}
+					else if (millisLeft < mCountdownInterval) {
+						// no tick, just delay until done
+						sendMessageDelayed(obtainMessage(MSG), millisLeft);
+					}
+					else {
+						long lastTickStart = SystemClock.elapsedRealtime();
+						onTick(millisLeft);
+
+						// take into account user's onTick taking time to execute
+						long delay = lastTickStart + mCountdownInterval - SystemClock.elapsedRealtime();
+
+						// special case: user's onTick took more than interval to
+						// complete, skip to next interval
+						while (delay < 0)
+							delay += mCountdownInterval;
+
+						if (!mCancelled) {
+							sendMessageDelayed(obtainMessage(MSG), delay);
+						}
+					}
+				}
+			}
+		}
+	}
 }

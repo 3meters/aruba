@@ -1,5 +1,7 @@
 package com.proxibase.service.objects;
 
+import java.io.Serializable;
+
 import android.graphics.Bitmap;
 
 import com.google.gson.annotations.Expose;
@@ -8,8 +10,10 @@ import com.google.gson.annotations.SerializedName;
 /**
  * @author Jayma
  */
-public class Comment {
+public class Comment implements Cloneable, Serializable{
 
+	private static final long	serialVersionUID	= 4362288672244719448L;
+	
 	@Expose
 	public String	title;
 	@Expose

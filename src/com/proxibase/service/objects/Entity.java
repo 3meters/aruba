@@ -1,5 +1,6 @@
 package com.proxibase.service.objects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -13,6 +14,7 @@ import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
+import com.proxibase.aircandi.components.Utilities;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxiConstants;
 
@@ -21,9 +23,10 @@ import com.proxibase.service.ProxiConstants;
  * 
  * @author Jayma
  */
-public class Entity extends ServiceEntry implements Cloneable {
+public class Entity extends ServiceEntry implements Cloneable, Serializable {
 
-	protected String			mServiceUri	= ProxiConstants.URL_PROXIBASE_SERVICE;
+	private static final long	serialVersionUID	= -3902834532692561618L;
+	protected String			mServiceUri			= ProxiConstants.URL_PROXIBASE_SERVICE;
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 
@@ -54,13 +57,13 @@ public class Entity extends ServiceEntry implements Cloneable {
 	@Expose
 	public Boolean				linkJavascriptEnabled;
 	@Expose
-	public Number				signalFence	= -200f;
+	public Number				signalFence			= -200f;
 	@Expose
 	public Boolean				locked;
 	@Expose
 	public Boolean				enabled;
 	@Expose
-	public String				visibility = "public";
+	public String				visibility			= "public";
 	@Expose
 	public List<Comment>		comments;
 	@Expose(serialize = false, deserialize = true)
@@ -70,7 +73,7 @@ public class Entity extends ServiceEntry implements Cloneable {
 
 	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_beacon")
-	public String				beaconId;											// Used to connect beacon object
+	public String				beaconId;													// Used to connect beacon object
 
 	@Expose(serialize = false, deserialize = true)
 	public GeoLocation			location;
@@ -111,16 +114,16 @@ public class Entity extends ServiceEntry implements Cloneable {
 
 	public Beacon				beacon;
 	public Entity				parent;
-	public String				parentId;											// Instead of serializing parent
-	public Boolean				superRoot	= false;
+	public String				parentId;													// Instead of serializing parent
+	public Boolean				superRoot			= false;
 
-	public Boolean				hidden		= false;
-	public Boolean				dirty		= false;
-	public Boolean				rookie		= true;
+	public Boolean				hidden				= false;
+	public Boolean				dirty				= false;
+	public Boolean				rookie				= true;
 
-	public CommandType			commandType;										// For command entities
+	public CommandType			commandType;												// For command entities
 	public String				data;
-	public EntityState			state		= EntityState.Normal;
+	public EntityState			state				= EntityState.Normal;
 	public Date					discoveryTime;
 
 	public Entity() {}
@@ -143,6 +146,43 @@ public class Entity extends ServiceEntry implements Cloneable {
 		catch (final CloneNotSupportedException ex) {
 			throw new AssertionError();
 		}
+	}
+
+	/*
+	 * We make sure that all entities in the children and parents
+	 * collections are new entity objects. Any other object properties on
+	 * the entity object are still references to the same instance including:
+	 * 
+	 * - Beacon object
+	 * - Comments in the comment list
+	 * - GeoLocation
+	 */
+	public Entity copy() {
+		try {
+			final Entity entity = (Entity) super.clone();
+			if (this.children != null) {
+				entity.children = this.children.copy();
+			}
+			if (this.parents != null) {
+				entity.parents = this.parents.copy();
+			}
+			if (this.comments != null) {
+				entity.comments = (List<Comment>) ((ArrayList) this.comments).clone();
+			}
+			return entity;
+		}
+		catch (final CloneNotSupportedException ex) {
+			throw new AssertionError();
+		}
+	}
+	/*
+	 * A deep copy is created of the entire entity object using
+	 * serialization/deserialization. All object properties are
+	 * recreated as new instances
+	 */
+	public Entity deepCopy() {
+		Entity entityCopy = (Entity) Utilities.deepCopy(this);
+		return entityCopy;
 	}
 
 	public String getCollection() {

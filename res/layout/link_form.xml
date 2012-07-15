@@ -39,23 +39,24 @@
                     <EditText
                         android:id="@+id/text_uri"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="40dp"
                         android:layout_weight="1"
                         android:gravity="center|left"
                         android:hint="@string/form_uri_hint"
                         android:inputType="textUri"
                         android:singleLine="true" />
 
-                    <ImageButton
+                    <ImageView
                         android:id="@+id/btn_link_builder"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:layout_weight="0"
                         android:clickable="true"
-                        android:maxWidth="50dp"
-                        android:minWidth="50dp"
+                        android:maxWidth="40dp"
+                        android:minWidth="40dp"
                         android:onClick="onLinkBuilderClick"
-                        android:src="@drawable/icon_bookmarks" />
+                        android:scaleType="center"
+                        android:src="?attr/iconBookmarks" />
                 </LinearLayout>
 
                 <EditText
@@ -76,7 +77,7 @@
                 <com.proxibase.aircandi.widgets.AuthorBlock
                     android:id="@+id/block_author"
                     android:layout_width="fill_parent"
-                    android:layout_height="40dp"
+                    android:layout_height="30dp"
                     android:layout_marginTop="10dp"
                     aircandi:layout="@layout/temp_user_info" />
             </LinearLayout>

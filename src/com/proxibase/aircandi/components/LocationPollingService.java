@@ -1,5 +1,6 @@
 package com.proxibase.aircandi.components;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import com.proxibase.aircandi.core.CandiConstants;
  * ensure the CPU stays on while the location lookup is going on. Handles both
  * successful and timeout conditions.
  */
+@SuppressLint("Registered")
 public class LocationPollingService extends Service {
 
 	private static final String						LOCK_NAME_STATIC	= "com.proxibase.aircandi.LocationPoller";

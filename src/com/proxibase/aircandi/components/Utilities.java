@@ -1,10 +1,14 @@
 package com.proxibase.aircandi.components;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 
-import android.graphics.Bitmap;
 import android.os.CountDownTimer;
 import android.os.Debug;
 
@@ -121,14 +125,44 @@ public class Utilities {
 		}
 	}
 
+	/**
+	 * Returns a copy of the object, or null if the object cannot be serialized.
+	 */
+	public static Object deepCopy(Object objectOriginal) {
+		Object objectCopy = null;
+		try {
+			/*
+			 * Write the object out to a byte array
+			 */
+			FastByteArrayOutputStream fbos = new Utilities.FastByteArrayOutputStream();
+			ObjectOutputStream out = new ObjectOutputStream(fbos);
+			out.writeObject(objectOriginal);
+			out.flush();
+			out.close();
+
+			/*
+			 * Make an input stream from the byte array and read a copy of the object back in.'
+			 */
+			ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
+			objectCopy = in.readObject();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		catch (ClassNotFoundException cnfe) {
+			cnfe.printStackTrace();
+		}
+		return objectCopy;
+	}
+
 	public static final String md5(final String s) {
 		try {
-			// Create MD5 Hash
+			/* Create MD5 Hash */
 			MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
 			digest.update(s.getBytes());
 			byte messageDigest[] = digest.digest();
 
-			// Create Hex String
+			/* Create Hex String */
 			StringBuffer hexString = new StringBuffer();
 			for (int i = 0; i < messageDigest.length; i++) {
 				String h = Integer.toHexString(0xFF & messageDigest[i]);
@@ -146,38 +180,151 @@ public class Utilities {
 		return "";
 	}
 
-	public static final String md5HashForBitmap(Bitmap bitmap) {
-		try {
-			// Create MD5 Hash
-			MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
-			byte[] bytes = ImageManager.byteArrayForBitmap(bitmap);
-			digest.update(bytes);
-			byte messageDigest[] = digest.digest();
-			return messageDigest.toString();
-
-			//			// Create Hex String
-			//			StringBuffer hexString = new StringBuffer();
-			//			for (int i = 0; i < messageDigest.length; i++) {
-			//				String h = Integer.toHexString(0xFF & messageDigest[i]);
-			//				while (h.length() < 2) {
-			//					h = "0" + h;
-			//				}
-			//				hexString.append(h);
-			//			}
-			//			return hexString.toString();
-
-		}
-		catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		return "";
-	}
-
 	public static Boolean validEmail(String email) {
 		return EMAIL_ADDRESS.matcher(email).matches();
 	}
-	
+
 	public static Boolean validWebUri(String webUri) {
 		return WEB_URL.matcher(webUri).matches();
 	}
+
+	/**
+	 * ByteArrayOutputStream implementation that doesn't synchronize methods
+	 * and doesn't copy the data on toByteArray().
+	 */
+
+	static public class FastByteArrayOutputStream extends OutputStream {
+		/**
+		 * Buffer and size
+		 */
+		protected byte[]	buf		= null;
+		protected int		size	= 0;
+
+		/**
+		 * Constructs a stream with buffer capacity size 5K
+		 */
+		public FastByteArrayOutputStream() {
+			this(5 * 1024);
+		}
+
+		/**
+		 * Constructs a stream with the given initial size
+		 */
+		public FastByteArrayOutputStream(int initSize) {
+			this.size = 0;
+			this.buf = new byte[initSize];
+		}
+
+		/**
+		 * Ensures that we have a large enough buffer for the given size.
+		 */
+		private void verifyBufferSize(int sz) {
+			if (sz > buf.length) {
+				byte[] old = buf;
+				buf = new byte[Math.max(sz, 2 * buf.length)];
+				System.arraycopy(old, 0, buf, 0, old.length);
+				old = null;
+			}
+		}
+
+		public int getSize() {
+			return size;
+		}
+
+		/**
+		 * Returns the byte array containing the written data. Note that this
+		 * array will almost always be larger than the amount of data actually
+		 * written.
+		 */
+
+		public byte[] getByteArray() {
+			return buf;
+		}
+
+		public final void write(byte b[]) {
+			verifyBufferSize(size + b.length);
+			System.arraycopy(b, 0, buf, size, b.length);
+			size += b.length;
+		}
+
+		public final void write(byte b[], int off, int len) {
+			verifyBufferSize(size + len);
+			System.arraycopy(b, off, buf, size, len);
+			size += len;
+		}
+
+		public final void write(int b) {
+			verifyBufferSize(size + 1);
+			buf[size++] = (byte) b;
+		}
+
+		public void reset() {
+			size = 0;
+		}
+
+		/**
+		 * Returns a ByteArrayInputStream for reading back the written data
+		 */
+		public InputStream getInputStream() {
+			return new FastByteArrayInputStream(buf, size);
+		}
+
+	}
+
+	/**
+	 * ByteArrayInputStream implementation that does not synchronize methods.
+	 */
+
+	static public class FastByteArrayInputStream extends InputStream {
+		/**
+		 * Our byte buffer
+		 */
+		protected byte[]	buf		= null;
+
+		/**
+		 * Number of bytes that we can read from the buffer
+		 */
+		protected int		count	= 0;
+
+		/**
+		 * Number of bytes that have been read from the buffer
+		 */
+		protected int		pos		= 0;
+
+		public FastByteArrayInputStream(byte[] buf, int count) {
+			this.buf = buf;
+			this.count = count;
+		}
+
+		public final int available() {
+			return count - pos;
+		}
+
+		public final int read() {
+			return (pos < count) ? (buf[pos++] & 0xff) : -1;
+		}
+
+		public final int read(byte[] b, int off, int len) {
+			if (pos >= count)
+				return -1;
+
+			if ((pos + len) > count)
+				len = (count - pos);
+
+			System.arraycopy(buf, pos, b, off, len);
+			pos += len;
+			return len;
+		}
+
+		public final long skip(long n) {
+			if ((pos + n) > count)
+				n = count - pos;
+			if (n < 0)
+				return 0;
+			pos += n;
+			return n;
+		}
+
+	}
+
 }

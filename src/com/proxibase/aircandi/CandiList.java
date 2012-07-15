@@ -48,10 +48,10 @@ public class CandiList extends CandiActivity {
 		 * - Currently anonymous.
 		 * - Session expired.
 		 */
-		User user = Aircandi.getInstance().getUser();
-		Boolean expired = false;
-		Integer messageResId = R.string.signin_message_mycandi;
-		if (user != null) {
+		if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByUser) {
+			User user = Aircandi.getInstance().getUser();
+			Boolean expired = false;
+			Integer messageResId = R.string.signin_message_mycandi;
 			Boolean userAnonymous = user.anonymous;
 			if (user.session != null) {
 				expired = user.session.renewSession(DateUtils.nowDate().getTime());
@@ -66,9 +66,11 @@ public class CandiList extends CandiActivity {
 				Intent intent = intentBuilder.create();
 				startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
 				overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				return;
 			}
 		}
-		else if (!isFinishing()) {
+		
+		if (!isFinishing()) {
 			initialize();
 			bind();
 		}

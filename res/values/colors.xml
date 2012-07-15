@@ -32,15 +32,24 @@
     <color name="pager_indicator_text_focused_light">@color/text_light</color>
     
     <!-- 
+    	We also used the pressed color in radar and that color is hardcoded
+    	in CandiPatchPresenter.initializeScene 
+    -->
+    	
+    <color name="pressed">@color/holo_blue_light</color>
+    
+    <!-- 
     Theme Colors
     	- light suffix means a theme where backgrounds are generally light in tone. 
     	- dark suffix means a theme where backgrounds are generally dark in tone. 
     <color name="edit_hint">#ffffa01c</color>
     -->
+    
     <color name="stop">#99990000</color>
     <color name="caution">#99999900</color>
     <color name="go">#99009900</color>
     
+    <color name="holo_blue_light">#8833b5e5</color>
     <color name="accent">#ffffaa00</color>
     <color name="accent_darker">#ffbb7700</color>
     <color name="accent_lighter">#ffffcc00</color>

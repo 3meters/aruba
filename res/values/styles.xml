@@ -19,6 +19,15 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="app_text_appearance_small_outlined" parent="@android:style/TextAppearance">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
     <style name="app_text_appearance_micro" parent="@android:style/TextAppearance">
         <item name="android:textSize">12sp</item>
     </style>
@@ -76,7 +85,8 @@
         <item name="android:textAppearance">@style/app_text_appearance_micro</item>
     </style>
 
-    <!-- Actionbar (not currently used or being deprecated) 
+    <!--
+    Actionbar (not currently used or being deprecated) 
 
     <style name="widget_actionbar_dark" parent="Widget.Sherlock.ActionBar">
         <item name="actionModeBackground">@color/transparent</item>
@@ -96,10 +106,9 @@
 
     <style name="actionbar_rule_vertical">
         <item name="android:background">@drawable/app_header_separator</item>
-    </style>
-    
-	-->
-	
+    </style>
+    -->
+
     <style name="actionbar">
         <item name="android:background">?attr/backgroundHeader</item>
     </style>
@@ -121,7 +130,7 @@
         <item name="android:background">@drawable/button_nooutline_selector</item>
         <item name="android:textColor">?attr/textColorButtonHeader</item>
     </style>
-    	
+
     <!-- Notifications -->
 
     <style name="notification_text">
@@ -135,7 +144,9 @@
 
     <!--
          If you want a slightly different color for some text,
-         consider using ?android:attr/textColorSecondary    -->
+         consider using ?android:attr/textColorSecondary
+    -->
+
 
     <!-- Progress -->
 
@@ -316,12 +327,12 @@
         <item name="android:textAppearance">@style/app_text_appearance_micro</item>
         <item name="android:paddingLeft">2dp</item>
     </style>
-    
+
     <style name="form_text">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:paddingLeft">2dp</item>
     </style>
-    
+
     <style name="form_error" parent="android:Widget.TextView">
         <item name="android:textColor">#ffff8844</item>
         <item name="android:background">?attr/backgroundHeader</item>

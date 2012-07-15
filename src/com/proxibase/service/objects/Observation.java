@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Observation extends ServiceEntry {
 
+	private static final long	serialVersionUID	= 5247954279209162831L;
+
 	@Expose
 	@SerializedName("_beacon")
 	public String	beaconId;

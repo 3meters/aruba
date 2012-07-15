@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Link extends ServiceEntry {
 
+	private static final long	serialVersionUID	= 8839291281700760437L;
+
 	@Expose
 	@SerializedName("_from")
 	public String	fromId;

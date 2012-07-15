@@ -80,59 +80,41 @@
 
                 <!-- Full name -->
 
-                <TextView
-                    style="@style/form_label"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/form_label_fullname" />
-
                 <EditText
                     android:id="@+id/text_fullname"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:hint="@string/form_label_fullname"
                     android:inputType="textPersonName" />
 
-                <!-- Bio -->
-
-                <TextView
-                    style="@style/form_label"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/form_label_bio" />
-
-                <EditText
-                    android:id="@+id/text_bio"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textLongMessage" />
-
-                <!-- Web link -->
-
-                <TextView
-                    style="@style/form_label"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/form_label_link" />
-
-                <EditText
-                    android:id="@+id/text_link"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textUri" />
-
                 <!-- Location -->
-
-                <TextView
-                    style="@style/form_label"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/form_label_location" />
 
                 <EditText
                     android:id="@+id/text_location"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:hint="@string/form_label_location"
                     android:inputType="textPostalAddress" />
+
+                <!-- Web link -->
+
+                <EditText
+                    android:id="@+id/text_link"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/form_label_link"
+                    android:inputType="textUri" />
+
+                <!-- Bio -->
+
+                <EditText
+                    android:id="@+id/text_bio"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/form_label_bio"
+                    android:gravity="top"
+                    android:minLines="5"
+                    android:inputType="textMultiLine" />
             </LinearLayout>
 
             <!-- Account -->
@@ -144,16 +126,11 @@
                 android:orientation="vertical"
                 android:padding="5dp" >
 
-                <TextView
-                    style="@style/form_label"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/form_label_email" />
-
                 <EditText
                     android:id="@+id/text_email"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:hint="@string/form_label_email"
                     android:layout_marginBottom="15dp"
                     android:inputType="textEmailAddress" />
 

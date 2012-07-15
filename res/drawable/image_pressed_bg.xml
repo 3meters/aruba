@@ -9,7 +9,7 @@
     
     <stroke
         android:width="3dp"
-        android:color="#ffffaa00" />
+        android:color="@color/pressed" />
     <padding
         android:bottom="3dp"
         android:left="3dp"

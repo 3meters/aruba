@@ -27,24 +27,24 @@
         <EditText
             android:id="@+id/text_uri"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:gravity="center|left"
             android:hint="@string/picture_search_query_hint"
             android:inputType="text"
             android:singleLine="true" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/btn_link_builder"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_weight="0"
             android:clickable="true"
-            android:maxWidth="48dp"
-            android:minWidth="48dp"
+            android:maxWidth="40dp"
+            android:minWidth="40dp"
             android:onClick="onSearchClick"
             android:scaleType="center"
-            android:src="@android:drawable/ic_search_category_default" />
+            android:src="?attr/iconSearch" />
     </LinearLayout>
 
     <GridView

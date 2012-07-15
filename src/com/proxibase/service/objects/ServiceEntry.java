@@ -1,5 +1,7 @@
 package com.proxibase.service.objects;
 
+import java.io.Serializable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.proxibase.service.ProxiConstants;
@@ -9,7 +11,9 @@ import com.proxibase.service.ProxiConstants;
  * 
  * @author Jayma
  */
-public abstract class ServiceEntry {
+public abstract class ServiceEntry  implements Cloneable, Serializable {
+
+	private static final long	serialVersionUID	= 5341986472204947191L;
 
 	protected String	mServiceUri	= ProxiConstants.URL_PROXIBASE_SERVICE;
 

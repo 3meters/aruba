@@ -31,7 +31,10 @@
         <item name="iconPicture">@drawable/icon_picture</item>
         <item name="iconLink">@drawable/icon_link</item>
         <item name="iconMap">@drawable/icon_map_32</item>
-        <item name="iconProfile">@drawable/placeholder_user_dark</item>
+        <item name="iconLocation">@drawable/ic_location_dark</item>
+		<item name="iconBookmarks">@drawable/ic_search_dark</item>
+		<item name="iconSearch">@drawable/ic_search_dark</item>
+		<item name="iconProfile">@drawable/placeholder_user_dark</item>
         <item name="iconLocked">@drawable/icon_lock_dark</item>
         <item name="pagerNotch">@drawable/indicator_current_dark</item>
         <item name="pagerBorder">#33ffffff</item>
@@ -45,9 +48,6 @@
         <item name="imageForwardInfo">@drawable/icon_forward_dark</item>
         <item name="backgroundForwardInfo">@color/transparent</item>
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_dark</item>
-        <item name="actionStripBackground">@drawable/actionstrip_background_dark</item>
-        <item name="actionStripUpArrow">@drawable/actionstrip_arrow_up_dark</item>
-        <item name="actionStripDownArrow">@drawable/actionstrip_arrow_down_dark</item>
         <item name="activityFooterFormBackground">@drawable/app_header_bg_dark</item>
         <item name="ruleColor">@color/rule_30_dark</item>
         <item name="logo">@drawable/icon_app</item>
@@ -73,16 +73,17 @@
         <item name="android:textAppearance">@style/app_text_appearance</item>
         <item name="android:editTextStyle">@style/app_edittext</item>
         
+        <!-- API level 11 begin -->
         <item name="actionModeBackground">@drawable/app_header_bg_dark</item>
         <item name="android:actionModeBackground">@drawable/app_header_bg_dark</item>
-    </style>
+        <!-- API level 11 end -->
+        </style>
 
     <style name="aircandi_theme_snow" parent="Theme.Sherlock.Light">
         <item name="themeTone">light</item>
         <item name="actionBarTone">light</item>
         <item name="android:windowNoTitle">false</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowActionBarOverlay">false</item>
         <item name="busy">@drawable/busy_anim_light</item>
         <item name="android:textColorHint">@color/edit_hint</item>
         <item name="textColorFocused">@color/pager_indicator_text_focused_light</item>
@@ -107,6 +108,9 @@
         <item name="iconMap">@drawable/icon_map_32</item>
         <item name="iconLocked">@drawable/icon_lock_light</item>
         <item name="iconProfile">@drawable/placeholder_user_light</item>
+        <item name="iconLocation">@drawable/ic_location_light</item>
+		<item name="iconBookmarks">@drawable/ic_search_light</item>
+		<item name="iconSearch">@drawable/ic_search_light</item>
         <item name="pagerNotch">@drawable/indicator_current_light</item>
         <item name="pagerBorder">@color/rule_30_light</item>
         <item name="backgroundCandiInfo">@android:color/transparent</item>
@@ -119,9 +123,6 @@
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_light</item>
         <item name="imageForwardInfo">@drawable/icon_forward_light</item>
         <item name="backgroundForwardInfo">@color/transparent</item>
-        <item name="actionStripBackground">@drawable/actionstrip_background_light</item>
-        <item name="actionStripUpArrow">@drawable/actionstrip_arrow_up_light</item>
-        <item name="actionStripDownArrow">@drawable/actionstrip_arrow_down_light</item>
         <item name="activityFooterFormBackground">@drawable/app_header_bg_light</item>
         <item name="ruleColor">@color/rule_30_light</item>
         <item name="logo">@drawable/icon_app</item>
@@ -147,18 +148,22 @@
         <item name="android:textAppearance">@style/app_text_appearance</item>
         <item name="android:editTextStyle">@style/app_edittext</item>
         
+        <!-- API level 11 begin -->
+        <item name="android:windowActionBarOverlay">false</item>
+        <item name="windowActionBarOverlay">false</item>
+        
         <!-- Following two are to override the default solid background -->
         <item name="actionBarStyle">@style/Widget.Sherlock.Light.ActionBar</item>
         <item name="android:actionBarStyle">@style/Widget.Sherlock.Light.ActionBar</item>
         <item name="actionModeBackground">@drawable/app_header_bg_light</item>
         <item name="android:actionModeBackground">@drawable/app_header_bg_light</item>
+        <!-- API level 11 end -->
         
     </style>
 
     <style name="aircandi_theme_blueray" parent="aircandi_theme_midnight">
         <item name="logo">@drawable/icon_app</item>
         <item name="android:windowBackground">@drawable/wallpaper_blueray</item>
-        <item name="actionStripBackground">@drawable/actionstrip_background_blueray</item>
         <item name="backgroundForm">@color/transparent</item>
         <item name="backgroundSliderHandleInfo">@drawable/slider_handle_info_bg_blueray</item>
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_blueray</item>
@@ -184,10 +189,10 @@
         <item name="iconBack">@drawable/icon_back_dark</item>
         <item name="iconLocked">@drawable/icon_lock_dark</item>
         <item name="iconProfile">@drawable/placeholder_user_dark</item>
+        <item name="iconLocation">@drawable/ic_location_dark</item>
+		<item name="iconBookmarks">@drawable/ic_search_dark</item>
+		<item name="iconSearch">@drawable/ic_search_dark</item>
         <item name="backgroundCandiInfo">#99ffffff</item>
-        <item name="actionStripBackground">@drawable/actionstrip_background_serene</item>
-        <item name="actionStripUpArrow">@drawable/actionstrip_arrow_up_dark</item>
-        <item name="actionStripDownArrow">@drawable/actionstrip_arrow_down_dark</item>
         <item name="logo">@drawable/icon_app</item>
         <item name="placeholder_user">placeholder_user_dark</item>
         <item name="imageSliderHandleSearch">@drawable/gripper_dark</item>
@@ -196,9 +201,11 @@
         <item name="backgroundSliderHandleInfo">@drawable/slider_handle_info_bg_serene</item>
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_serene</item>
         
+        <!-- API level 11 begin -->
         <item name="actionModeBackground">@drawable/app_header_bg_dark</item>
         <item name="android:actionModeBackground">@drawable/app_header_bg_dark</item>
-    </style>
+        <!-- API level 11 end -->
+        </style>
 
     <style name="aircandi_theme_dialog" parent="Theme.Sherlock.Dialog">
         <item name="android:windowIsTranslucent">true</item>

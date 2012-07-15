@@ -53,6 +53,15 @@ public class EntityList<T> extends ArrayList<T> {
 		return null;
 	}
 
+	/*
+	 * The list created is a new object but the objects in the list
+	 * are the same ones from the cloned list by reference. Make a change
+	 * and it will effect the object in both lists. 
+	 *
+	 * (non-Javadoc)
+	 * @see java.util.ArrayList#clone()
+	 */
+	@Override
 	public EntityList<T> clone() {
 		EntityList<T> entityList = (EntityList<T>) super.clone();
 		entityList.setCollectionType(mCollectionType);
@@ -61,13 +70,38 @@ public class EntityList<T> extends ArrayList<T> {
 		entityList.setCollectionEntity(mCollectionEntity);
 		return entityList;
 	}
-
+	/*
+	 * The list created is a new object and the entity objects in the list
+	 * are new objects. Make a change to an object in the new list and 
+	 * it will not effect the object in the old list.
+	 */
 	public EntityList<Entity> copy() {
 		EntityList<Entity> entityList = new EntityList(this.size());
 		for (int i = 0; i < this.size(); i++) {
 			Entity entity = (Entity) this.get(i);
 			entityList.add(entity.clone());
 		}
+		entityList.setCollectionType(mCollectionType);
+		entityList.setCursorIds(mCursorIds);
+		entityList.setCursorIndex(mCursorIndex);
+		entityList.setCollectionEntity(mCollectionEntity);
+		return entityList;
+	}
+	/*
+	 * The list created is a new object and the entity objects in the list
+	 * are completely new objects including all their object properties.
+	 * Note: serialization is sloooooow.
+	 */
+	public EntityList<Entity> deepCopy() {
+		EntityList<Entity> entityList = new EntityList(this.size());
+		for (int i = 0; i < this.size(); i++) {
+			Entity entity = (Entity) this.get(i);
+			entityList.add(entity.deepCopy());
+		}
+		entityList.setCollectionType(mCollectionType);
+		entityList.setCursorIds(mCursorIds);
+		entityList.setCursorIndex(mCursorIndex);
+		entityList.setCollectionEntity(mCollectionEntity);
 		return entityList;
 	}
 

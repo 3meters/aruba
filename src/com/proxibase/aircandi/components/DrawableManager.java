@@ -1,6 +1,7 @@
 package com.proxibase.aircandi.components;
 
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 import android.graphics.Bitmap;
@@ -13,9 +14,9 @@ import android.os.Message;
 import com.proxibase.aircandi.PictureSearch;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ServiceRequest;
 
 public class DrawableManager {
 	/*
@@ -41,12 +42,15 @@ public class DrawableManager {
 			}
 		}
 
-		final Handler handler = new Handler() {
+		final DrawableHandler handler = new DrawableHandler(this) {
 
 			@Override
 			public void handleMessage(Message message) {
-				if (((String) holder.itemImage.getTag()).equals(uri)) {
-					ImageUtils.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true);
+				DrawableManager drawableManager = getDrawableManager().get();
+				if (drawableManager != null) {
+					if (((String) holder.itemImage.getTag()).equals(uri)) {
+						ImageUtils.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true);
+					}
 				}
 			}
 		};
@@ -86,6 +90,23 @@ public class DrawableManager {
 			return drawable;
 		}
 		return null;
+	}
+
+	/*
+	 * We add a weak reference to the containing class which can
+	 * be checked when handling messages to ensure we don't leak memory.
+	 */
+	class DrawableHandler extends Handler {
+
+		private final WeakReference<DrawableManager>	mDrawableManager;
+
+		DrawableHandler(DrawableManager drawableManager) {
+			mDrawableManager = new WeakReference<DrawableManager>(drawableManager);
+		}
+
+		public WeakReference<DrawableManager> getDrawableManager() {
+			return mDrawableManager;
+		}
 	}
 
 }

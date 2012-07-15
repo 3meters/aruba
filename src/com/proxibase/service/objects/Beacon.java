@@ -1,5 +1,6 @@
 package com.proxibase.service.objects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,8 +11,10 @@ import com.google.gson.annotations.Expose;
  * @author Jayma
  */
 
-public class Beacon extends ServiceEntry {
+public class Beacon extends ServiceEntry implements Cloneable, Serializable{
 
+	private static final long	serialVersionUID	= 694133954499515095L;
+	
 	@Expose
 	public String			ssid;
 	@Expose

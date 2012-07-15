@@ -64,7 +64,7 @@ public class ProfileForm extends FormActivity {
 		super.onCreate(savedInstanceState);
 		/*
 		 * You can't display the profile form unless you are signed in so the only sign in case
-		 * is if the session expired. That could change if we start letting users view profiles 
+		 * is if the session expired. That could change if we start letting users view profiles
 		 * for other Aircandi users.
 		 */
 		User user = Aircandi.getInstance().getUser();
@@ -78,14 +78,13 @@ public class ProfileForm extends FormActivity {
 					Intent intent = intentBuilder.create();
 					startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
 					overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+					return;
 				}
 			}
 		}
-		else {
-			initialize();
-			bind();
-			draw();
-		}
+		initialize();
+		bind();
+		draw();
 	}
 
 	private void initialize() {

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    name="Aircandi_custom"
+    default="revision" >
+
+    <!-- Build info -->
+
+    <property file="build_info.properties" />
+
+    <property
+        name="build.number"
+        value="${build.major.number}.${build.minor.number}.${build.revision.number}" />
+
+    <!-- extra output directory -->
+
+    <property
+        name="web.dir"
+        value="\\DATASERVER\Files\Websites\Development\Aircandi\Android" />
+
+    <property
+        name="web.local.dir"
+        value="D:\Files\Proxibase\Code\Aircandi\Service\Android" />
+    
+	<!-- Handles incrementing build numbers -->
+	
+	<target name="-revision">
+	    <propertyfile  file="build_info.properties">
+	            <entry key="build.revision.number" type="int" operation="+" value="1" pattern="00"/>
+	    </propertyfile>
+	</target>
+
+	<target name="-minor">
+	    <propertyfile  file="build_info.properties">
+	            <entry key="build.minor.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.revision.number" type="int" value="0" pattern="00"/>
+	    </propertyfile>
+	</target>
+
+	<target name="-major">
+	    <propertyfile  file="build_info.properties">
+	            <entry key="build.major.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.minor.number" type="int" value="0" pattern="00"/>
+	            <entry key="build.revision.number" type="int" value="0" pattern="00"/>
+	    </propertyfile>
+	</target>
+
+	<target name="-all">
+	    <propertyfile  file="build_info.properties">
+	            <entry key="build.major.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.minor.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.revision.number" type="int" operation="+" value="1" pattern="00"/>
+	    </propertyfile>
+	</target>	
+	
+	<target name="current_build_number" description="Shows current build number.">
+	 	<echo>Current build number:${build.number}</echo>
+	</target>
+	
+    <!-- Customized release target: Adds steps to update versionName in the manifest
+         and output the signed release apk file to the web server. -->
+         
+    <target name="-release-sign" if="has.keystore" >
+        <!-- only create apk if *not* a library project -->
+        <do-only-if-not-library elseText="Library project: do not create apk..." >
+            <sequential>
+                
+				<antcall target="-revision" />				
+				<xpath input="AndroidManifest.xml" expression="/manifest/@android:versionCode" output="build.version.code" default="false" />
+				<xpath input="AndroidManifest.xml" expression="/manifest/@android:versionName" output="build.version.name" default="false" />
+				<antcall target="current_build_number" />				
+                
+                <property name="out.unaligned.file" location="${out.absolute.dir}/${ant.project.name}-release-unaligned.apk" />
+
+                <!-- Signs the APK -->
+                <echo level="info">Signing final apk...</echo>
+                <signapk
+                        input="${out.packaged.file}"
+                        output="${out.unaligned.file}"
+                        keystore="${key.store}"
+                        storepass="${key.store.password}"
+                        alias="${key.alias}"
+                        keypass="${key.alias.password}"/>
+
+                <!-- Zip aligns the APK -->
+                <zipalign-helper
+                        in.package="${out.unaligned.file}"
+                        out.package="${out.final.file}" />
+                
+                <!-- Extra copy to website 
+				<copy file="${out.final.file}" toDir="${web.dir}" overwrite="true" />				
+				<copy file="${out.final.file}" toDir="${web.local.dir}" overwrite="true" />
+				-->
+				
+                <echo level="info">Release Package: ${out.final.file}</echo>
+            </sequential>
+        </do-only-if-not-library>
+        <record-build-info />
+    </target>
+	
+</project>

@@ -510,7 +510,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						getCommon().startTitlebarProgress();
 					}
 				}
-
 				/*
 				 * We track the progress of a full scan because it effects lots of async processes like candi view
 				 * management.
@@ -590,11 +589,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 									|| mCandiPatchModel.getCandiRootCurrent().isSuperRoot());
 
 							if (!mPrefAutoscan || atParentLevel) {
-								EntityModel entityModel = ProxiExplorer.getInstance().getEntityModel();
-								mCandiPatchPresenter.updateCandiData(entityModel, mScanOptions.fullBuild, false, false);
+								/*
+								 * We pass a copy to presenter to provide more stability and steady state.
+								 */
+								EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
+								mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false, false);
 
 								/* Check for rookies and play a sound */
-								if (mPrefSoundEffects && mCandiPatchPresenter.getEntityModelSnapshot().getRookieHit()) {
+								if (mPrefSoundEffects && mCandiPatchPresenter.getRookieHit()) {
 									mCandiAlertSound.play();
 								}
 							}
@@ -819,7 +821,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						ServiceResponse serviceResponse = entityModel.chunkEntities(entities);
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 							Logger.d(CandiRadar.this, "More entities chunked from service");
-							mCandiPatchPresenter.updateCandiData(entityModel, false, true, false);
+							/*
+							 * We pass a copy to presenter to provide more stability and steady state.
+							 */
+							EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
+							mCandiPatchPresenter.updateCandiData(entitiesCopy, false, true, false);
 						}
 						return serviceResponse;
 					}
@@ -847,7 +853,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	public void navigateUp() {
 		mCandiPatchPresenter.renderingActivate();
 		mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, Navigation.Up, false);
-		getCommon().setActionBarTitleAndIcon(R.drawable.icon_app, R.string.name_app, false);
+		getCommon().setActionBarTitleAndIcon(null, R.string.name_app, false);
 		getCommon().mActionBar.setHomeButtonEnabled(false);
 	}
 

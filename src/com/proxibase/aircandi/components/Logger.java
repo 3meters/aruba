@@ -4,6 +4,16 @@ import android.util.Log;
 
 import com.proxibase.aircandi.core.CandiConstants;
 
+/*
+ * We are currently get complaints from dalvikvm when it create dex about
+ * ambiguous hit on apache.common.logging.
+ * 
+ * Who is pulling this in?
+ * 
+ * - aws-android-sdk-1.2.1-core.jar
+ * 
+ */
+
 public class Logger {
 
 	/*
@@ -32,7 +42,7 @@ public class Logger {
 	}
 
 	static private void Log(LogLevel logLevel, Object taskContext, String msgFormat, Throwable t) {
-		
+
 		String task = "";
 		if (INCLUDE_MODULE && taskContext != null) {
 			task = taskContext.getClass().getSimpleName() + ": ";

@@ -16,6 +16,7 @@ import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.Tracker;
@@ -63,13 +64,12 @@ public class CommentForm extends FormActivity {
 				Intent intent = intentBuilder.create();
 				startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
 				overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				return;
 			}
 		}
-		else {
-			initialize();
-			bind();
-			draw();
-		}
+		initialize();
+		bind();
+		draw();
 	}
 
 	private void initialize() {
@@ -189,6 +189,7 @@ public class CommentForm extends FormActivity {
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.trackEvent("Comment", "Insert", null, 0);
 						mCommon.showProgressDialog(false, null);
+						ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_COMMENT_INSERTED);
 						finish();

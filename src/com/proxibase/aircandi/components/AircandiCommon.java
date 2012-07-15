@@ -929,6 +929,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void setActionBarTitleAndIcon(final Integer resIdIcon, final Integer resIdTitle, final boolean showUpIndicator) {
+		String title = null;
+		if (resIdTitle != null) {
+			title = mActivity.getString(resIdTitle);
+		}
+		setActionBarTitleAndIcon(resIdIcon, title, showUpIndicator);
+	}
+
+	public void setActionBarTitleAndIcon(final Integer resIdIcon, final String title, final boolean showUpIndicator) {
 		if (resIdIcon != null) {
 			final ImageView imageView = (ImageView) mActivity.findViewById(mActionBarHomeImageView);
 
@@ -959,8 +967,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 					});
 
 					imageView.startAnimation(mAnimFadeIn);
-					if (resIdTitle != null) {
-						mActionBar.setTitle(resIdTitle);
+					if (title != null) {
+						mActionBar.setTitle(title);
 					}
 					mActionBar.setDisplayHomeAsUpEnabled(showUpIndicator);
 				}
@@ -972,8 +980,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 			imageView.startAnimation(mAnimFadeOut);
 		}
 		else {
-			if (resIdTitle != null) {
-				mActionBar.setTitle(resIdTitle);
+			if (title != null) {
+				mActionBar.setTitle(title);
 				mActionBar.setDisplayHomeAsUpEnabled(showUpIndicator);
 			}
 		}

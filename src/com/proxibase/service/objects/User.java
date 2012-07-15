@@ -9,6 +9,8 @@ public class User extends ServiceEntry {
 
 	/* syntax: @Expose (serialize = false, deserialize = false) */
 
+	private static final long	serialVersionUID	= 127428776257201065L;
+	
 	@Expose
 	public String	name;
 	@Expose

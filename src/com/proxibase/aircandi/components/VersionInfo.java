@@ -8,6 +8,7 @@ import com.proxibase.service.objects.ServiceEntry;
  */
 public class VersionInfo extends ServiceEntry {
 
+	private static final long	serialVersionUID	= 6537038067017071976L;
 	@Expose
 	public String	type;
 	@Expose
