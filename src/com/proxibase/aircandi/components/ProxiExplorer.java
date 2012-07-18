@@ -17,7 +17,6 @@ import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.Preferences;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
 import com.proxibase.service.ProxibaseService.GsonType;
@@ -305,11 +304,11 @@ public class ProxiExplorer {
 		parameters.putString("userId", Aircandi.getInstance().getUser().id);
 		parameters.putString("eagerLoad", "object:{\"children\":true,\"comments\":false}");
 		parameters.putString("options", "object:{\"limit\":"
-				+ String.valueOf(CandiConstants.RADAR_ENTITY_LIMIT)
+				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
 				+ ",\"skip\":0"
 				+ ",\"sort\":{\"modifiedDate\":-1} "
 				+ ",\"children\":{\"limit\":"
-				+ String.valueOf(CandiConstants.RADAR_CHILDENTITY_LIMIT)
+				+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
 				+ ",\"skip\":0"
 				+ ",\"sort\":{\"modifiedDate\":-1}}"
 				+ "}");
@@ -381,11 +380,11 @@ public class ProxiExplorer {
 
 		if (jsonOptions == null) {
 			jsonOptions = "{\"limit\":"
-					+ String.valueOf(CandiConstants.RADAR_ENTITY_LIMIT)
+					+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
 					+ ",\"skip\":0"
 					+ ",\"sort\":{\"modifiedDate\":-1} "
 					+ ",\"children\":{\"limit\":"
-					+ String.valueOf(CandiConstants.RADAR_CHILDENTITY_LIMIT)
+					+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
 					+ ",\"skip\":0"
 					+ ",\"sort\":{\"modifiedDate\":-1}}"
 					+ "}";
@@ -870,12 +869,12 @@ public class ProxiExplorer {
 			}
 		}
 
-		/*
-		 * We want to update the entity wherever it might be in the entity model while
-		 * keeping the same instance.
-		 */
 		@SuppressWarnings("unused")
-		public void updateEntity(Entity entityUpdated, boolean chunked) {
+		public void updateEntityEverywhere(Entity entityUpdated, boolean chunked) {
+			/*
+			 * We want to update the entity wherever it might be in the entity model while
+			 * keeping the same instance.
+			 */
 
 			/* Radar entities */
 			for (Beacon beacon : mBeacons) {

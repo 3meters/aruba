@@ -24,10 +24,16 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
+	private Boolean		mIsRoot;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			mIsRoot = extras.getBoolean(getString(R.string.EXTRA_ENTITY_IS_ROOT));
+		}
 
 		initialize();
 	}
@@ -36,11 +42,15 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		mCommon.track();
 
 		/* Shown as a dialog so doesn't have an action bar */
-		
+
 		List<Object> listData = new ArrayList<Object>();
-		listData.add(new Template(R.drawable.icon_post, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
-		listData.add(new Template(R.drawable.icon_picture, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
-		listData.add(new Template(R.drawable.icon_link, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
+		listData.add(new Template(R.drawable.ic_post_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
+		listData.add(new Template(R.drawable.ic_picture_dark, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
+		listData.add(new Template(R.drawable.ic_link_dark, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
+		if (mIsRoot != null && mIsRoot) {
+			listData.add(new Template(R.drawable.ic_collection_dark, getString(R.string.name_entity_type_collection), null,
+					CandiConstants.TYPE_CANDI_COLLECTION));
+		}
 
 		mListAdapter = new ListAdapter(this, listData);
 		mListView = (ListView) findViewById(R.id.form_list);
@@ -103,7 +113,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 			if (view == null)
 			{
 				LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				view = inflater.inflate(R.layout.temp_listitem_template, null);
+				view = inflater.inflate(R.layout.temp_listitem_templates, null);
 			}
 
 			if (itemData != null)

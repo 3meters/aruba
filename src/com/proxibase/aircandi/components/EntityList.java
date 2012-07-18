@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
-import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.objects.Entity;
 
 public class EntityList<T> extends ArrayList<T> {
@@ -131,9 +131,9 @@ public class EntityList<T> extends ArrayList<T> {
 	}
 
 	public int getEndIndex() {
-		int endIndex = this.size() + CandiConstants.RADAR_ENTITY_LIMIT;
+		int endIndex = this.size() + ProxiConstants.RADAR_ENTITY_LIMIT;
 		if (mCursorIndex != null) {
-			endIndex = mCursorIndex + CandiConstants.RADAR_ENTITY_LIMIT;
+			endIndex = mCursorIndex + ProxiConstants.RADAR_ENTITY_LIMIT;
 		}
 		if (endIndex > mCursorIds.size()) {
 			endIndex = mCursorIds.size();

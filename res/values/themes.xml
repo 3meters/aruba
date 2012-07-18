@@ -34,8 +34,9 @@
         <item name="iconLocation">@drawable/ic_location_dark</item>
 		<item name="iconBookmarks">@drawable/ic_search_dark</item>
 		<item name="iconSearch">@drawable/ic_search_dark</item>
+		<item name="iconGo">@drawable/ic_go_dark</item>
 		<item name="iconProfile">@drawable/placeholder_user_dark</item>
-        <item name="iconLocked">@drawable/icon_lock_dark</item>
+        <item name="iconLocked">@drawable/ic_locked_dark</item>
         <item name="pagerNotch">@drawable/indicator_current_dark</item>
         <item name="pagerBorder">#33ffffff</item>
         <item name="backgroundCandiInfo">@android:color/transparent</item>
@@ -106,12 +107,13 @@
         <item name="iconPicture">@drawable/icon_picture</item>
         <item name="iconLink">@drawable/icon_link</item>
         <item name="iconMap">@drawable/icon_map_32</item>
-        <item name="iconLocked">@drawable/icon_lock_light</item>
+        <item name="iconLocked">@drawable/ic_locked_light</item>
         <item name="iconProfile">@drawable/placeholder_user_light</item>
         <item name="iconLocation">@drawable/ic_location_light</item>
 		<item name="iconBookmarks">@drawable/ic_search_light</item>
 		<item name="iconSearch">@drawable/ic_search_light</item>
-        <item name="pagerNotch">@drawable/indicator_current_light</item>
+		<item name="iconGo">@drawable/ic_go_light</item>
+		<item name="pagerNotch">@drawable/indicator_current_light</item>
         <item name="pagerBorder">@color/rule_30_light</item>
         <item name="backgroundCandiInfo">@android:color/transparent</item>
         <item name="backgroundForm">@color/transparent</item>

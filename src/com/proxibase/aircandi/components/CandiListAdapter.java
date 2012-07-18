@@ -1,5 +1,6 @@
 package com.proxibase.aircandi.components;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
@@ -9,19 +10,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
-
 import com.proxibase.aircandi.R;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.objects.Entity;
 
-public class CandiListAdapter extends ArrayAdapter<Entity> {
+public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable {
 
+	private final Object	mLock			= new Object();
 	private LayoutInflater	mInflater;
 	private Integer			mItemLayoutId	= R.layout.temp_listitem_candi;
 	private List<Entity>	mEntities;
+	private CandiFilter		mCandiFilter;
 
 	public CandiListAdapter(Context context, List<Entity> entities, Integer itemLayoutId) {
 		super(context, 0, entities);
@@ -141,12 +146,25 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 		return mEntities.get(position);
 	}
 
+	@Override
+	public int getCount() {
+		return mEntities.size();
+	}
+
 	public boolean areAllItemsEnabled() {
 		return false;
 	}
 
 	public boolean isEnabled(int position) {
 		return false;
+	}
+
+	@Override
+	public Filter getFilter() {
+		if (mCandiFilter == null) {
+			mCandiFilter = new CandiFilter();
+		}
+		return mCandiFilter;
 	}
 
 	public static class CandiListViewHolder {
@@ -160,4 +178,55 @@ public class CandiListAdapter extends ArrayAdapter<Entity> {
 		public View					itemActionButton;
 		public Object				data;
 	}
+
+	private class CandiFilter extends Filter {
+
+		protected FilterResults performFiltering(CharSequence filterType) {
+
+			/* Initiate our results object */
+			FilterResults results = new FilterResults();
+
+			/* If the adapter array is empty, check the actual items array and use it */
+			if (mEntities == null) {
+				synchronized (mLock) { // Notice the declaration above
+					mEntities = new ArrayList<Entity>();
+				}
+			}
+
+			/* No prefix is sent to filter by so we're going to send back the original array */
+			if (filterType == null || filterType.length() == 0) {
+				synchronized (mLock) {
+					results.values = mEntities;
+					results.count = mEntities.size();
+				}
+			}
+			else {
+				if (filterType.toString().toLowerCase().equals("candipatches")) {
+					final ArrayList<Entity> filteredEntities = new ArrayList<Entity>(mEntities.size());
+					for (int i = 0; i < mEntities.size(); i++) {
+						Entity entity = mEntities.get(i);
+						if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION) && !entity.locked) {
+							filteredEntities.add(entity);
+						}
+					}
+					results.values = filteredEntities;
+					results.count = filteredEntities.size();
+				}
+			}
+			return results;
+		}
+
+		protected void publishResults(CharSequence prefix, FilterResults results) {
+
+			mEntities = (ArrayList<Entity>) results.values;
+			/* Let the adapter know about the updated list */
+			if (results.count > 0) {
+				notifyDataSetChanged();
+			}
+			else {
+				notifyDataSetInvalidated();
+			}
+		}
+	}
+
 }

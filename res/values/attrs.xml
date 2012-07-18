@@ -57,6 +57,7 @@
         <attr name="iconLocked" format="string" />
         <attr name="iconLocation" format="string" />
         <attr name="iconBookmarks" format="string" />
+        <attr name="iconGo" format="string" />
         <attr name="xlogo" format="string" />
         <attr name="imageSliderHandleSearch" format="string" />
         <attr name="backgroundSliderHandleSearch" format="string" />

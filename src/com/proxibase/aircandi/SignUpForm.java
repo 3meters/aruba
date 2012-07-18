@@ -162,11 +162,12 @@ public class SignUpForm extends FormActivity {
 		showChangePictureDialog(true, mImageUser, new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap) {
+			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mUser.imageUri = imageUri;
+					mUser.linkUri = linkUri;
 					mUserBitmap = imageBitmap;
 				}
 			}

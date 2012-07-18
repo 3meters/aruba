@@ -107,26 +107,30 @@ public class ImageUtils {
 	}
 
 	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, ImageRequest imageRequest) {
+		return scaleAndCropBitmap(bitmap, imageRequest.getScaleToWidth(), imageRequest.getImageShape());
+	}
+		
+	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, int scaleToWidth, ImageShape imageShape) {
 
 		/* Scale if needed */
 		Bitmap bitmapScaled = bitmap;
-		if (imageRequest.getScaleToWidth() > 0) {
+		if (scaleToWidth > 0) {
 			boolean portrait = bitmap.getHeight() > bitmap.getWidth();
 			if (portrait) {
-				if (bitmap.getWidth() != imageRequest.getScaleToWidth()) {
-					float scalingRatio = (float) imageRequest.getScaleToWidth() / (float) bitmap.getWidth();
+				if (bitmap.getWidth() != scaleToWidth) {
+					float scalingRatio = (float) scaleToWidth / (float) bitmap.getWidth();
 					float newHeight = (float) bitmap.getHeight() * scalingRatio;
-					bitmapScaled = Bitmap.createScaledBitmap(bitmap, imageRequest.getScaleToWidth(), (int) (newHeight), true);
+					bitmapScaled = Bitmap.createScaledBitmap(bitmap, scaleToWidth, (int) (newHeight), true);
 					if (!bitmapScaled.equals(bitmap)) {
 						bitmap.recycle();
 					}
 				}
 			}
 			else {
-				if (bitmap.getHeight() != imageRequest.getScaleToWidth()) {
-					float scalingRatio = (float) imageRequest.getScaleToWidth() / (float) bitmap.getHeight();
+				if (bitmap.getHeight() != scaleToWidth) {
+					float scalingRatio = (float) scaleToWidth / (float) bitmap.getHeight();
 					float newWidth = (float) bitmap.getWidth() * scalingRatio;
-					bitmapScaled = Bitmap.createScaledBitmap(bitmap, (int) (newWidth), imageRequest.getScaleToWidth(), true);
+					bitmapScaled = Bitmap.createScaledBitmap(bitmap, (int) (newWidth), scaleToWidth, true);
 					if (!bitmapScaled.equals(bitmap)) {
 						bitmap.recycle();
 					}
@@ -136,7 +140,7 @@ public class ImageUtils {
 
 		/* Crop if requested */
 		Bitmap bitmapScaledAndCropped = bitmapScaled;
-		if (imageRequest.getImageShape() == ImageShape.Square) {
+		if (imageShape == ImageShape.Square) {
 			bitmapScaledAndCropped = ImageUtils.cropToSquare(bitmapScaled);
 			if (!bitmapScaledAndCropped.equals(bitmapScaled)) {
 				bitmapScaled.recycle();

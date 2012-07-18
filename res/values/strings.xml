@@ -7,12 +7,14 @@
     <string name="name_entity_type_picture">Picture</string>
     <string name="name_entity_type_post">Post</string>
     <string name="name_entity_type_link">Link</string>
-
+    <string name="name_entity_type_collection">Candipatch</string>
+    
     <!-- Application -->
 
     <string name="EXTRA_PARENT_ENTITY_ID">com.proxibase.aircandi.EXTRA_PARENT_ENTITY_ID</string>
     <string name="EXTRA_BEACON_ID">com.proxibase.aircandi.EXTRA_BEACON_ID</string>
     <string name="EXTRA_ENTITY_ID">com.proxibase.aircandi.EXTRA_ENTITY_ID</string>
+    <string name="EXTRA_ENTITY_IS_ROOT">com.proxibase.aircandi.EXTRA_ENTITY_IS_ROOT</string>
     <string name="EXTRA_ENTITY_TYPE">com.proxibase.aircandi.EXTRA_ENTITY_TYPE</string>
     <string name="EXTRA_ENTITY_LOCATION">com.proxibase.aircandi.EXTRA_ENTITY_LOCATION</string>
     <string name="EXTRA_USER_ID">com.proxibase.aircandi.EXTRA_USER_ID</string>
@@ -48,14 +50,17 @@
     <string name="dummy_datetime">December 23 at 10:12am</string>
     <string name="dummy_subtitle">Be there, do more</string>
     <string name="dummy_description">Ever wonder why Aircandi fans refuse to use anything else? For more than four days, Aircandi has attracted a growing family of loyal, almost zealous customers, known as “Candiniks”. By remaining true to the quality tenets of our founder – emphasizing knowledge, taste, and using the senses to evaluate quality at every step – Aircandi defines the gold standard by which all other proximity applications are judged.</string>
-
+    <string name="dummy_description_ellipsized">Ever wonder why Aircandi fans refuse to use anything else? For more than...</string>
+    
     <!-- Alerts -->
 
     <string name="alert_signin_invalid_signin">Wrong email and password combination.</string>
     <string name="alert_invalid_email">Email address is invalid.</string>
-    <string name="alert_invalid_weburi">Web address is invalid.</string>
+    <string name="alert_weburi_invalid">Web address isn\'t in a valid format.</string>
+    <string name="alert_weburi_unreachable">Web site isn\'t available or can\'t be reached.</string>
     <string name="alert_beacons_zero">The beacon detecter shows green when there are beacons nearby you can add new candi to.</string>
     <string name="alert_beacons_available">There are beacons nearby you can add new candi to.</string>
+    <string name="alert_entity_locked">This candi has been locked by the owner.</string>
     <string name="alert_upgrade_title">New Aircandi version</string>
     <string name="alert_upgrade_body">A newer version of Aircandi is available. Please download and install as soon possible.</string>
     <string name="alert_upgrade_ok">Info</string>
@@ -123,12 +128,20 @@
     <string name="dialog_network_message_connection_notready">Check network connection and retry</string>
     <string name="dialog_network_message_service_notready">Service is unavailable, retry later</string>
     
+    <!-- Entities -->
+
+    <string name="entity_post_title">Post</string>
+    <string name="entity_picture_title">Picture</string>
+	<string name="entity_link_title">Link</string>
+	<string name="entity_collection_title">Candipatch</string>
+        
     <!-- Radar -->
 
     <string name="radar_tab_radar">RADAR</string>
     <string name="radar_tab_mycandi">MY CANDI</string>
     <string name="radar_tab_map">MAP</string>
     <string name="radar_button_new">Drop\nCandi</string>
+    
     <string name="dialog_map_title">Aircandi beacon</string>
     <string name="dialog_map_message">This beacon has:\n\n</string>
     <string name="dialog_network_message_wifi_ready">Wifi enabled, ready for retry</string>
@@ -144,14 +157,16 @@
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_change_picture_title">Select picture…</string>
     <string name="dialog_template_picker_title">Select template</string>
-
+    <string name="dialog_template_picker_message">Create and share candi with Aircandi users!</string>
+    
     <!-- CandiForm -->
 
     <string name="candi_button_comment">Comment</string>
     <string name="candi_button_new">Add\nCandi</string>
     <string name="candi_button_edit">Edit</string>
     <string name="candi_button_move">Move</string>
-
+    <string name="candi_label_comments_none">No comments yet</string>
+    
     <!-- CandiMap -->
 
     <string name="candi_map_label_pictures">Pictures:</string>
@@ -163,7 +178,7 @@
     <string name="toast_wifi_enabling">Wifi state enabling&#8230;</string>
     <string name="toast_wifi_disabling">Wifi state disabling&#8230;</string>
     <string name="toast_wifi_disabled">Wifi state disabled.</string>
-    <string name="toast_signed_in">Signed in as </string>
+    <string name="toast_signed_in">Signed in as</string>
     <string name="toast_signed_out">Signed out.</string>
 
     <!-- Notifications -->
@@ -180,20 +195,41 @@
     <string name="form_title_picture">Picture</string>
     <string name="form_title_post">Post</string>
     <string name="form_title_link">Link</string>
+    <string name="form_title_collection">Collection</string>
     <string name="form_title_profile">Profile settings</string>
     <string name="form_title_password">Change password</string>
     <string name="form_title_signin">Sign in</string>
     <string name="form_title_signup">Sign up</string>
     <string name="form_title_picture_search">Picture search</string>
     <string name="form_title_bookmarks">Bookmarks</string>
-    <string name="form_title_candi">Move this candi to a different parent.</string>
+    <string name="form_title_candi_picker">Candipatches</string>
     <string name="form_title_comment">Comment</string>
     <string name="form_title_picture_browse">Picture viewer</string>
     <string name="form_title_templates">Templates</string>
+    
+    <string name="form_message_candi_picker">Move this candi to a new Candipatch</string>
+    
+    <TextView
+                android:id="@+id/form_message"
+                style="@style/form_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="15dp"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:text="@string/signin_message_general" />
+
+    
+    
     <string name="form_tab_content">CONTENT</string>
     <string name="form_tab_settings">SETTINGS</string>
+    
     <string name="profile_tab_profile">PROFILE</string>
     <string name="profile_tab_account">ACCOUNT</string>
+    
+    <string name="candi_picker_tab_radar">RADAR</string>
+    <string name="candi_picker_tab_mycandi">MY CANDI</string>
+    
     <string name="form_button_change_picture">Select</string>
     <string name="form_button_change_password">Change password</string>
     <string name="form_button_signin_signup">Create account</string>
@@ -203,7 +239,12 @@
     <string name="form_button_cancel">Cancel</string>
     <string name="form_button_terms">Terms of service</string>
     <string name="form_button_send_password">Forgot password?</string>
+    
     <string name="form_label_picture">Picture</string>
+    <string name="form_label_picture_collection">Collection badge</string>
+    <string name="post_label_picture_post">Post Badge</string>
+    <string name="post_label_picture_profile">Picture</string>
+    
     <string name="form_label_fullname">Full name</string>
     <string name="form_label_bio">Bio</string>
     <string name="form_label_link">Web</string>
@@ -216,12 +257,13 @@
     <string name="form_label_email_hint">(We will email you a confirmation.)</string>
     <string name="form_label_locked">Locked</string>
     <string name="form_label_password_hint">(Minimum of 6 characters.)</string>
+    
     <string name="form_title_hint">Subject</string>
     <string name="form_subtitle_hint">Subtitle</string>
     <string name="form_description_hint">Description</string>
     <string name="form_comment_hint">Comment</string>
     <string name="form_uri_hint">Web address</string>
-    <string name="post_label_image">Post Badge</string>
+    
     
     <string name="signin_message_general">Sign in to create and share candi with other Aircandi users!</string>
     <string name="signin_message_session_expired">Your session has expired. Please sign in again.</string>

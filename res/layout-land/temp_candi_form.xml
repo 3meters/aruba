@@ -82,14 +82,49 @@
                     android:layout_marginBottom="7dp"
                     android:layout_marginLeft="3dp"
                     android:text="@string/dummy_subtitle" />
-
-                <com.proxibase.aircandi.widgets.AuthorBlock
-                    android:id="@+id/block_author"
+                
+                <RelativeLayout
                     android:layout_width="fill_parent"
-                    android:layout_height="30dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="3dp"
-                    aircandi:layout="@layout/temp_user_info" />
+                    android:gravity="center_vertical" >
+
+                    <com.proxibase.aircandi.widgets.AuthorBlock
+                        android:id="@+id/block_author"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="3dp"
+                        aircandi:layout="@layout/temp_user_info" />
+
+                    <Button
+                        android:id="@+id/button_comments"
+                        style="@style/candi_comments_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_below="@+id/block_author"
+                        android:layout_marginLeft="3dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginTop="5dp"
+                        android:padding="5dp"
+                        android:clickable="true"
+                        android:onClick="onBrowseCommentsButtonClick"
+                        android:text="@string/candi_label_comments_none" />
+
+                    <ImageView
+                        android:id="@+id/button_map"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="@drawable/app_image_selector"
+                        android:layout_toRightOf="@+id/button_comments"
+                        android:layout_alignTop="@+id/button_comments"
+                        android:clickable="true"
+                        android:onClick="onMapButtonClick"
+                        android:scaleType="center"
+                        android:src="?attr/iconLocation" />
+                </RelativeLayout>
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -103,39 +138,9 @@
                     style="@style/candi_info_description"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_marginLeft="3dp"
                     android:text="@string/dummy_description" />
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginBottom="10dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal" >
-
-                    <Button
-                        android:id="@+id/button_comments"
-                        style="@style/comments_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="fill_parent"
-                        android:layout_marginLeft="3dp"
-                        android:layout_marginRight="10dp"
-                        android:clickable="true"
-                        android:onClick="onBrowseCommentsButtonClick"
-                        android:paddingBottom="0dp"
-                        android:paddingTop="0dp"
-                        android:text="@string/dummy_comments" />
-
-                    <ImageView
-                        android:id="@+id/button_map"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:background="@drawable/app_image_selector"
-                        android:clickable="true"
-                        android:onClick="onMapButtonClick"
-                        android:scaleType="center"
-                        android:src="?attr/iconLocation" />
-                </LinearLayout>
                 
             </LinearLayout>
         </RelativeLayout>

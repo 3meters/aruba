@@ -22,6 +22,7 @@ import org.anddev.andengine.util.modifier.IModifier.IModifierListener;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
@@ -333,6 +334,35 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		return bitmapCopy;
 	}
 
+	protected Bitmap overlayBitmapOnBitmap(Bitmap bitmap, Bitmap overlay, int fillColor, float offsetY, float offsetX,
+			boolean mirror,
+			boolean applyReflectionGradient) {
+
+		/* Make sure we have a mutable bitmap */
+		Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+		Canvas canvas = new Canvas(bitmapCopy);
+		
+		/*
+		 * Draw background for overlay
+		 */
+		ShapeDrawable mDrawable = new ShapeDrawable(new RectShape());
+		mDrawable.getPaint().setColor(fillColor);
+		mDrawable.setBounds(0, ((int) offsetY - 10), bitmapCopy.getWidth(), bitmapCopy.getHeight());
+		mDrawable.draw(canvas);
+		
+		/* Move the canvas and draw the overlay */
+		canvas.translate(offsetX, offsetY);
+		canvas.drawBitmap(overlay, new Matrix(), null);
+
+		if (applyReflectionGradient) {
+			ImageUtils.applyReflectionGradient(bitmapCopy, Mode.DST_IN);
+		}
+
+		canvas = null;
+
+		return bitmapCopy;
+	}
+	
 	public void unloadResources() {
 
 		/* Completely remove all resources associated with this sprite. */

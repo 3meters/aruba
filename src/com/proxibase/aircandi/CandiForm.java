@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
+import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.CandiPagerAdapter;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.EntityList;
@@ -167,7 +168,7 @@ public class CandiForm extends CandiActivity {
 
 	public void onBrowseCommentsButtonClick(View view) {
 		Entity entity = (Entity) view.getTag();
-		if (entity.commentCount > 0) {
+		if (entity.commentCount != null && entity.commentCount > 0) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 			intentBuilder.setCommandType(CommandType.View);
 			intentBuilder.setEntityId(entity.id);
@@ -176,9 +177,12 @@ public class CandiForm extends CandiActivity {
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
 		}
+		else {
+			onNewCommentButtonClick(view);
+		}
 	}
 
-	public void onMoveButtonClick(View view) {
+	public void onMoveCandiButtonClick(View view) {
 		showCandiPicker();
 	}
 
@@ -211,7 +215,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onAddCandiButtonClick(View view) {
-		mCommon.showTemplatePicker();
+		mCommon.showTemplatePicker(false);
 	}
 
 	public void onEditCandiButtonClick(View view) {
@@ -226,11 +230,18 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onNewCommentButtonClick(View view) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
-		intentBuilder.setParentEntityId(mEntity.id);
-		Intent intent = intentBuilder.create();
-		startActivity(intent);
-		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		Entity entity = (Entity) view.getTag();
+		if (!entity.locked) {
+			IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
+			intentBuilder.setParentEntityId(mEntity.id);
+			Intent intent = intentBuilder.create();
+			startActivity(intent);
+			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		}
+		else {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
+					getResources().getString(R.string.alert_entity_locked), this, android.R.string.ok, null, null);
+		}
 	}
 
 	@Override
@@ -301,6 +312,7 @@ public class CandiForm extends CandiActivity {
 		final ImageView map = (ImageView) candiInfoView.findViewById(R.id.button_map);
 		final Button newComment = (Button) candiInfoView.findViewById(R.id.button_comment);
 		final Button newCandi = (Button) candiInfoView.findViewById(R.id.button_new);
+		final Button moveCandi = (Button) candiInfoView.findViewById(R.id.button_move);
 		final Button editCandi = (Button) candiInfoView.findViewById(R.id.button_edit);
 
 		final View holderChildren = (View) candiInfoView.findViewById(R.id.holder_button_children);
@@ -336,18 +348,29 @@ public class CandiForm extends CandiActivity {
 		/* Adjust buttons */
 
 		newCandi.setVisibility(View.GONE);
-		newComment.setVisibility(View.GONE);
+		newComment.setVisibility(View.VISIBLE);
+		newComment.setTag(entity);
 		editCandi.setVisibility(View.GONE);
 		holderChildren.setVisibility(View.GONE);
 		if (!entity.locked) {
 			if (entity.root) {
-				newCandi.setVisibility(View.VISIBLE);
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+					newCandi.setVisibility(View.VISIBLE);
+				}
 			}
 			newComment.setVisibility(View.VISIBLE);
 		}
 
 		if (entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
 			editCandi.setVisibility(View.VISIBLE);
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+				newCandi.setVisibility(View.VISIBLE);
+			}
+			else {
+				if (moveCandi != null) {
+					moveCandi.setVisibility(View.VISIBLE);
+				}
+			}
 		}
 
 		boolean visibleChildren = (entity.children != null && (entity.hasVisibleChildren()) || (entity.childCount != null && entity.childCount > 0));
@@ -377,7 +400,8 @@ public class CandiForm extends CandiActivity {
 			comments.setVisibility(View.VISIBLE);
 		}
 		else {
-			comments.setVisibility(View.GONE);
+			comments.setTag(entity);
+			comments.setVisibility(View.VISIBLE);
 		}
 
 		/* Map */
@@ -520,6 +544,9 @@ public class CandiForm extends CandiActivity {
 			return R.layout.candi_form;
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
+			return R.layout.candi_form;
+		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 			return R.layout.candi_form;
 		}
 		else {

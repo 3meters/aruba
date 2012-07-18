@@ -228,11 +228,12 @@ public class ProfileForm extends FormActivity {
 		showChangePictureDialog(true, mImageUser, new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap) {
+			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mUser.imageUri = imageUri;
+					mUser.linkUri = linkUri;
 					mUserBitmap = imageBitmap;
 				}
 			}
@@ -403,7 +404,7 @@ public class ProfileForm extends FormActivity {
 		if (mTextLink.getText().toString() != null && !mTextLink.getText().toString().equals("")) {
 			if (!Utilities.validWebUri(mTextLink.getText().toString())) {
 				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-						getResources().getString(R.string.alert_invalid_weburi), this, android.R.string.ok, null, null);
+						getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null);
 			}
 			return false;
 		}

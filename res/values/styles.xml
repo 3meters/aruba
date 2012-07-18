@@ -215,6 +215,12 @@
         <item name="android:layout_width">65dp</item>
     </style>
 
+    <style name="candi_comments_button" parent="android:Widget.Button">
+        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textColor">#ffffaa00</item>
+        <item name="android:background">?attr/backgroundButton</item>
+    </style>
+    
     <style name="candi_info_title">
         <item name="android:textAppearance">@style/app_text_appearance_title1</item>
     </style>

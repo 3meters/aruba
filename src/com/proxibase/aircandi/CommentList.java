@@ -23,7 +23,6 @@ import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
@@ -124,15 +123,15 @@ public class CommentList extends CandiActivity {
 		parameters.putString("eagerLoad", "object:{\"children\":false,\"comments\":true}");
 		parameters.putString("fields", "object:{\"entities\":{},\"comments\":{},\"children\":{}}");
 		parameters.putString("options", "object:{\"limit\":"
-				+ String.valueOf(CandiConstants.RADAR_ENTITY_LIMIT)
+				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
 				+ ",\"skip\":0"
 				+ ",\"sort\":{\"modifiedDate\":-1} "
 				+ ",\"children\":{\"limit\":"
-				+ String.valueOf(CandiConstants.RADAR_CHILDENTITY_LIMIT)
+				+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
 				+ ",\"skip\":0"
 				+ ",\"sort\":{\"modifiedDate\":-1}}"
 				+ ",\"comments\":{\"limit\":"
-				+ String.valueOf(CandiConstants.RADAR_COMMENT_LIMIT)
+				+ String.valueOf(ProxiConstants.RADAR_COMMENT_LIMIT)
 				+ ",\"skip\":" + String.valueOf(mComments.size())
 				+ "}}");
 

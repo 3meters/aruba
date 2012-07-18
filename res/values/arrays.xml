@@ -19,6 +19,7 @@
 		<item>Search for pictures</item>
 		<item>Select a gallery picture</item>
 		<item>Take a new picture</item>
+		<item>Use a web page</item>
 		<item>None</item>
 	</string-array>
 	<string-array
@@ -26,6 +27,7 @@
 		<item>Search for pictures</item>
 		<item>Select a gallery picture</item>
 		<item>Take a new picture</item>
+		<item>Use a web page</item>
 		<item>Use Facebook picture</item>
 		<item>None</item>
 	</string-array>

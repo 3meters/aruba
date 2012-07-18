@@ -12,7 +12,7 @@ import android.widget.ArrayAdapter;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.objects.Entity;
 
 public class EndlessCandiListAdapter extends EndlessAdapter {
@@ -32,7 +32,8 @@ public class EndlessCandiListAdapter extends EndlessAdapter {
 
 	@Override
 	protected View getPendingView(ViewGroup parent) {
-		View view = mInflater.inflate(mProxiEntities.isMore() ? R.layout.temp_candi_list_item_placeholder : R.layout.temp_candi_list_item_placeholder_empty, null);
+		View view = mInflater.inflate(mProxiEntities.isMore() ? R.layout.temp_candi_list_item_placeholder : R.layout.temp_candi_list_item_placeholder_empty,
+				null);
 		return view;
 	}
 
@@ -44,7 +45,7 @@ public class EndlessCandiListAdapter extends EndlessAdapter {
 			if (serviceResponse.responseCode == ResponseCode.Success) {
 				mMoreEntities = (List<Entity>) serviceResponse.data;
 				if (mProxiEntities.isMore()) {
-					return ((getWrappedAdapter().getCount() + mMoreEntities.size()) < CandiConstants.RADAR_ENTITY_MAX_LIMIT);
+					return ((getWrappedAdapter().getCount() + mMoreEntities.size()) < ProxiConstants.RADAR_ENTITY_MAX_LIMIT);
 				}
 			}
 		}
@@ -57,5 +58,10 @@ public class EndlessCandiListAdapter extends EndlessAdapter {
 		for (Entity entity : mMoreEntities) {
 			adapterEntities.add(entity);
 		}
+	}
+
+	public ArrayAdapter<Entity> getWrappedAdapterX() {
+		ArrayAdapter<Entity> wrappedAdapter = (ArrayAdapter<Entity>) super.getWrappedAdapter();
+		return wrappedAdapter;
 	}
 }

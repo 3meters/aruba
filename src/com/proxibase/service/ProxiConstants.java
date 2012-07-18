@@ -25,9 +25,13 @@ public interface ProxiConstants {
 	public static final String	USER_AGENT_DESKTOP									= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16";
 	public static final String	USER_AGENT_NEXUS_S									= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 
+	public static final int		RADAR_ENTITY_LIMIT									= 50;
+	public static final int		RADAR_CHILDENTITY_LIMIT								= 20;
+	public static final int		RADAR_COMMENT_LIMIT									= 50;
+	public static final int		RADAR_ENTITY_MAX_LIMIT								= 300;
+	
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS			= 401.1f;
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED		= 401.2f;
 	public static final float	HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE	= 403.1f;
 	public static final float	HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK		= 403.21f;
-
 }

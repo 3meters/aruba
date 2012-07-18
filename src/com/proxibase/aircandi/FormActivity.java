@@ -137,7 +137,8 @@ public abstract class FormActivity extends SherlockActivity {
 									public void run() {
 										if (mImageRequestListener != null) {
 											ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-											mImageRequestListener.onComplete(serviceResponse, imageResponse.imageUri, null, imageResponse.bitmap);
+											mImageRequestListener.onComplete(serviceResponse, imageResponse.imageUri, null, imageResponse.bitmap, imageTitle,
+													imageDescription);
 										}
 									}
 								});
@@ -172,7 +173,7 @@ public abstract class FormActivity extends SherlockActivity {
 				if (bitmap != null && mImageRequestListener != null) {
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);
 					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, R.anim.fade_in_medium);
-					mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap);
+					mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap, null, null);
 					Tracker.trackEvent("Entity", "PickPicture", "None", 0);
 				}
 			}
@@ -214,7 +215,7 @@ public abstract class FormActivity extends SherlockActivity {
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);
 					if (mImageRequestListener != null) {
 						ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, R.anim.fade_in_medium);
-						mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap);
+						mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap, null, null);
 						Tracker.trackEvent("Entity", "TakePicture", "None", 0);
 					}
 				}
@@ -230,11 +231,43 @@ public abstract class FormActivity extends SherlockActivity {
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
 					final String linkUri = extras.getString(getString(R.string.EXTRA_URI));
-					@SuppressWarnings("unused")
 					final String linkTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
-					if (linkUri != null && !linkUri.equals("")) {
+					final String linkDescription = extras.getString(getString(R.string.EXTRA_URI_DESCRIPTION));
+
+					if (mImageRequestWebImageView != null) {
+						if (linkUri != null && !linkUri.equals("")) {
+
+							ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
+							builder.setFromUris(null, linkUri);
+							builder.setRequestListener(new RequestListener() {
+
+								@Override
+								public void onComplete(Object response) {
+
+									final ServiceResponse serviceResponse = (ServiceResponse) response;
+									if (serviceResponse.responseCode == ResponseCode.Success) {
+										runOnUiThread(new Runnable() {
+
+											@Override
+											public void run() {
+												if (mImageRequestListener != null) {
+													ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+													mImageRequestListener.onComplete(serviceResponse, null, linkUri, imageResponse.bitmap, linkTitle,
+															linkDescription);
+												}
+											}
+										});
+									}
+								}
+							});
+
+							ImageRequest imageRequest = builder.create();
+							mImageRequestWebImageView.setImageRequest(imageRequest, false);
+						}
+					}
+					else {
 						if (mImageRequestListener != null) {
-							mImageRequestListener.onComplete(new ServiceResponse(), null, linkUri, null);
+							mImageRequestListener.onComplete(new ServiceResponse(), null, linkUri, null, linkTitle, linkDescription);
 						}
 					}
 				}
@@ -270,6 +303,12 @@ public abstract class FormActivity extends SherlockActivity {
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
 	}
 
+	private void pickWebPage() {
+		Intent intent = new Intent(this, BookmarkPicker.class);
+		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
+		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+	}
+
 	protected void pickAircandiPicture() {
 		Intent candigramPickerIntent = new Intent(this, PictureSearch.class);
 		startActivityForResult(candigramPickerIntent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
@@ -302,8 +341,6 @@ public abstract class FormActivity extends SherlockActivity {
 		mImageRequestWebImageView.setImageRequest(imageRequest);
 	}
 
-	
-
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
@@ -326,6 +363,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 		builder.setCancelable(true);
 		builder.setNegativeButton(getResources().getString(R.string.dialog_button_cancel), null);
+		builder.setIcon(R.drawable.icon_app);
 
 		builder.setItems(listId, new DialogInterface.OnClickListener() {
 
@@ -349,24 +387,34 @@ public abstract class FormActivity extends SherlockActivity {
 					overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 				}
 
+				/* Use a web page */
+				else if (item == 3) {
+					pickWebPage();
+					overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
+				}
+
 				/* Facebook */
-				else if (item == 3 && showFacebookOption) {
+				else if (item == 4 && showFacebookOption) {
 					useFacebook();
 				}
 
 				/* None */
-				else if ((item == 3 && !showFacebookOption) || (item == 4 && showFacebookOption)) {
+				else if ((item == 4 && !showFacebookOption) || (item == 5 && showFacebookOption)) {
 
 					/* Tag has the uri to use for the placeholder */
 					String imageUri = "resource:placeholder_picture";
+					if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+						imageUri = "resource:placeholder_collection";
+					}
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
 					builder.setFromUris(imageUri, null);
+
 					ImageRequest imageRequest = builder.create();
 
 					mImageRequestWebImageView.setImageRequest(imageRequest);
 
 					if (mImageRequestListener != null) {
-						mImageRequestListener.onComplete(new ServiceResponse(), null, null, null);
+						mImageRequestListener.onComplete(new ServiceResponse(), imageUri, null, null, null, null);
 					}
 
 					Tracker.trackEvent("Entity", "DefaultPicture", "None", 0);

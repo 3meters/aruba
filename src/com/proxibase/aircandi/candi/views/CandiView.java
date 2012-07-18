@@ -13,13 +13,13 @@ import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.GestureDetector.OnGestureListener;
+import android.view.MotionEvent;
 
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.candi.models.BaseModel;
-import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
+import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.candi.models.CandiModel.ReasonInactive;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
@@ -27,13 +27,14 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.sprites.CandiSprite;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.components.BitmapTextureSource;
+import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
+import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
-import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
-import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
@@ -774,6 +775,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	public Bitmap decorateTexture(Bitmap bitmap, boolean isReflection) {
 		final CandiModel candiModel = (CandiModel) this.mModel;
+		/*
+		 * Handle text overlay for posts
+		 */
 		if (candiModel != null && candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_POST) &&
 				candiModel.getEntity().description != null &&
 				candiModel.getEntity().description.length() > 0) {
@@ -782,6 +786,30 @@ public class CandiView extends BaseView implements OnGestureListener {
 			}
 			else {
 				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0xcc000000, -45, 5, candiModel.getEntity().description, true, true);
+			}
+		}
+		/*
+		 * Handle bitmap overlay for collections that have a badge set
+		 */
+		else if (candiModel != null && candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+
+			if (candiModel.getEntity().getMasterImageUri() == null
+					|| !candiModel.getEntity().getMasterImageUri().toLowerCase().startsWith("resource:")) {
+
+				String resolvedResourceName = ImageManager.getInstance().resolveResourceName("placeholder_collection");
+				int resourceId = ImageManager.getInstance().getActivity().getResources()
+						.getIdentifier(resolvedResourceName, "drawable", "com.proxibase.aircandi");
+				Bitmap overlay = ImageManager.getInstance().loadBitmapFromResources(resourceId);
+				int overlayWidth = 65;
+				overlay = ImageUtils.scaleAndCropBitmap(overlay, overlayWidth, ImageShape.Square);
+
+				if (!isReflection) {
+					bitmap = overlayBitmapOnBitmap(bitmap, overlay, 0x77000000, CandiConstants.CANDI_VIEW_WIDTH - (overlayWidth + 7),
+							CandiConstants.CANDI_VIEW_WIDTH - (overlayWidth + 7), false, false);
+				}
+				//			else {
+				//				bitmap = overlayBitmapOnBitmap(bitmap, overlay, 0, 0, true, true);
+				//			}
 			}
 		}
 		return bitmap;

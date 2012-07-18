@@ -363,7 +363,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	public void showTemplatePicker() {
+	public void showTemplatePicker(Boolean isRoot) {
 		/*
 		 * Dialogs
 		 * 
@@ -372,6 +372,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * theme id to the dialog activity.
 		 */
 		Intent intent = new Intent(mActivity, TemplatePicker.class);
+		intent.putExtra(mActivity.getString(R.string.EXTRA_ENTITY_IS_ROOT), isRoot);
 		intent.putExtra(mActivity.getString(R.string.EXTRA_THEME_ID), mThemeTone.equals("dark") ? R.style.Theme_Sherlock_Dialog
 				: R.style.Theme_Sherlock_Light_Dialog);
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_TEMPLATE_PICK);
@@ -691,7 +692,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* We fall to here if we didn't find a good user or session */
 		Aircandi.getInstance().setUser(user);
-		ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_in) + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+		ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_in) + " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
 		/* Make sure onPrepareOptionsMenu gets called (since api 11) */
 		((SherlockActivity) mActivity).invalidateOptionsMenu();
@@ -1151,6 +1152,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 		else if (mPageName.equals("EntityForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
 		}
+		else if (mPageName.equals("CandiPicker")) {
+			addTabsToActionBar(this, CandiConstants.TABS_CANDI_PICKER_ID);
+		}
 	}
 
 	public void addTabsToActionBar(ActionBar.TabListener tabListener, int tabsId)
@@ -1202,6 +1206,20 @@ public class AircandiCommon implements ActionBar.TabListener {
 			tab = mActionBar.newTab();
 			tab.setText(R.string.profile_tab_account);
 			tab.setTag(R.string.profile_tab_account);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+		}
+		else if (tabsId == CandiConstants.TABS_CANDI_PICKER_ID) {
+
+			ActionBar.Tab tab = mActionBar.newTab();
+			tab.setText(R.string.candi_picker_tab_radar);
+			tab.setTag(R.string.candi_picker_tab_radar);
+			tab.setTabListener(tabListener);
+			mActionBar.addTab(tab, false);
+
+			tab = mActionBar.newTab();
+			tab.setText(R.string.candi_picker_tab_mycandi);
+			tab.setTag(R.string.candi_picker_tab_mycandi);
 			tab.setTabListener(tabListener);
 			mActionBar.addTab(tab, false);
 		}

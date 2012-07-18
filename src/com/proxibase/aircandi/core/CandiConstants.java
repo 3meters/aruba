@@ -67,6 +67,7 @@ public interface CandiConstants {
 	public static final int				TABS_PRIMARY_ID							= 1;
 	public static final int				TABS_PROFILE_FORM_ID					= 2;
 	public static final int				TABS_ENTITY_FORM_ID						= 3;
+	public static final int				TABS_CANDI_PICKER_ID					= 4;
 
 	public static final int				VERTEX_INDEX_X							= 0;
 	public static final int				VERTEX_INDEX_Y							= 1;
@@ -98,11 +99,6 @@ public interface CandiConstants {
 	public static final String			URL_AIRCANDI_BLOG						= "http://devblog.proxibase.com/";
 	public static final String			URL_AIRCANDI_MEDIA						= "https://s3.amazonaws.com/";
 	public static final String			S3_BUCKET_IMAGES						= "3meters_images";
-
-	public static final int				RADAR_ENTITY_LIMIT						= 10;
-	public static final int				RADAR_CHILDENTITY_LIMIT					= 5;
-	public static final int				RADAR_COMMENT_LIMIT						= 50;
-	public static final int				RADAR_ENTITY_MAX_LIMIT					= 300;
 
 	public static final String			TYPE_CANDI_POST							= "com.proxibase.aircandi.candi.post";
 	public static final String			TYPE_CANDI_PICTURE						= "com.proxibase.aircandi.candi.picture";

@@ -162,16 +162,22 @@ import com.proxibase.service.objects.User;
 /*
  * Bitmap Management
  * 
+ * gc calls are evil but necessary sometimes. It forces code exection to stop while
+ * the gc makes an explicit garbage pass. Behavior may be a bit different with 
+ * the introduction of concurrent gc in Gingerbread (v2.3)
+ * 
  * Explicit gc calls to free bitmap memory:
  * 
  * - EntityForm: onDestroy.
  * - PictureSearch: onDestroy.
  * - ProfileForm: onDestroy.
  * - SignUpForm: onDestroy.
+ * 
  * - AndEngine: at the end of an updateTextures pass. TextureManager.updateTextures is called everytime
- *   the engine is asked to draw a frame by the opengl renderer. System.gc is called if textures were
- *   loaded or unloaded during the call.
- *   ** Update: I have turned off the gc call in updateTextures to see if it is really needed **
+ * the engine is asked to draw a frame by the opengl renderer. System.gc is called if textures were
+ * loaded or unloaded during the call.
+ * ** Update **: 7/15/12: I have turned off the gc call in updateTextures to see if it is really needed **
+ * 
  * - AndEngine: Font.update (don't believe we are using any).
  * 
  * Explicit bitmap recycling
@@ -426,7 +432,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	public void onNewCandiButtonClick(View view) {
 		if (Aircandi.getInstance().getUser() != null) {
-			getCommon().showTemplatePicker();
+			getCommon().showTemplatePicker(true);
 		}
 	}
 

@@ -127,11 +127,11 @@ public class CandiList extends CandiActivity {
 					parameters.putString("userId", Aircandi.getInstance().getUser().id);
 					parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
 					parameters.putString("options", "object:{\"limit\":"
-							+ String.valueOf(CandiConstants.RADAR_ENTITY_LIMIT)
+							+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
 							+ ",\"skip\":0"
 							+ ",\"sort\":{\"modifiedDate\":-1} "
 							+ ",\"children\":{\"limit\":"
-							+ String.valueOf(CandiConstants.RADAR_CHILDENTITY_LIMIT)
+							+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
 							+ ",\"skip\":0"
 							+ ",\"sort\":{\"modifiedDate\":-1}}"
 							+ "}");

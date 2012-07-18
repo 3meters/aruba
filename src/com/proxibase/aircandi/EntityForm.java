@@ -137,6 +137,9 @@ public class EntityForm extends FormActivity {
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_post);
 		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+			mCommon.mActionBar.setTitle(R.string.form_title_collection);
+		}
 
 		mImagePicture = (WebImageView) findViewById(R.id.image_picture);
 		mTextUri = (EditText) findViewById(R.id.text_uri);
@@ -175,6 +178,12 @@ public class EntityForm extends FormActivity {
 
 			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
 				entity.imagePreviewUri = "resource:placeholder_picture";
+				entity.imageUri = entity.imagePreviewUri;
+			}
+			else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+				entity.title = getString(R.string.entity_collection_title);
+				entity.label = entity.title;
+				entity.imagePreviewUri = "resource:placeholder_collection";
 				entity.imageUri = entity.imagePreviewUri;
 			}
 			mEntityForForm = entity;
@@ -287,12 +296,13 @@ public class EntityForm extends FormActivity {
 		showChangePictureDialog(false, mImagePicture, new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap) {
+			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mEntityBitmap = imageBitmap;
 					mEntityForForm.imageUri = imageUri;
+					mEntityForForm.imagePreviewUri = imageUri;
 					mEntityForForm.linkUri = linkUri;
 				}
 			}
@@ -337,15 +347,23 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private boolean validate() {
+		/*
+		 * We only validate the web address if the form had an input for it and
+		 * the user set it to something.
+		 */
 		if (mTextUri != null) {
 			String linkUri = mTextUri.getText().toString();
-			if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
-				linkUri = "http://" + linkUri;
-			}
+			if (linkUri != null && !linkUri.equals("")) {
 
-			if (!Utilities.validWebUri(linkUri)) {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-						getResources().getString(R.string.alert_invalid_weburi), this, android.R.string.ok, null, null);
+				if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
+					linkUri = "http://" + linkUri;
+				}
+
+				if (!Utilities.validWebUri(linkUri)) {
+					AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
+							getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null);
+					return false;
+				}
 			}
 		}
 		return true;
@@ -391,31 +409,34 @@ public class EntityForm extends FormActivity {
 				protected Object doInBackground(Object... params) {
 					ServiceResponse serviceResponse = new ServiceResponse();
 					/*
-					 * If using uri then we have already validated by now
+					 * If using uri then we have already checked to see if it is a well formed
+					 * web address by now
 					 */
 					if (mTextUri != null) {
 
 						String linkUri = mTextUri.getText().toString();
-						if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
-							linkUri = "http://" + linkUri;
-						}
+						if (linkUri != null && !linkUri.equals("")) {
+							if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
+								linkUri = "http://" + linkUri;
+							}
 
-						ServiceRequest serviceRequest = new ServiceRequest();
-						serviceRequest.setUri(linkUri)
-								.setRequestType(RequestType.Get)
-								.setResponseFormat(ResponseFormat.Html)
-								.setSuppressUI(true);
+							ServiceRequest serviceRequest = new ServiceRequest();
+							serviceRequest.setUri(linkUri)
+									.setRequestType(RequestType.Get)
+									.setResponseFormat(ResponseFormat.Html)
+									.setSuppressUI(true);
 
-						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+							serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-						/*
-						 * Success means the uri was verified.
-						 */
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							mEntityForForm.linkUri = linkUri;
-							mEntityForForm.imageUri = null;
-							mEntityBitmap = null;
-							mUriVerified = true;
+							/*
+							 * Success means the uri was verified.
+							 */
+							if (serviceResponse.responseCode == ResponseCode.Success) {
+								mEntityForForm.linkUri = linkUri;
+								mEntityForForm.imageUri = null;
+								mEntityBitmap = null;
+								mUriVerified = true;
+							}
 						}
 					}
 
@@ -856,7 +877,7 @@ public class EntityForm extends FormActivity {
 		super.mImageRequestListener = new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap) {
+			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -869,7 +890,7 @@ public class EntityForm extends FormActivity {
 
 					if (!Utilities.validWebUri(linkUri)) {
 						AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-								getResources().getString(R.string.alert_invalid_weburi), EntityForm.this, android.R.string.ok, null, null);
+								getResources().getString(R.string.alert_weburi_invalid), EntityForm.this, android.R.string.ok, null, null);
 						return;
 					}
 					else {
@@ -1012,6 +1033,9 @@ public class EntityForm extends FormActivity {
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
 			return R.layout.link_form;
+		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+			return R.layout.collection_form;
 		}
 		else {
 			return 0;

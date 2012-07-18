@@ -826,7 +826,7 @@ public class ProxibaseService {
 
 		public void onComplete(Object response, Object extra) {}
 
-		public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap) {}
+		public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {}
 
 		public void onProgressChanged(int progress) {}
 	}

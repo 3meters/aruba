@@ -6,20 +6,30 @@
     android:layout_height="fill_parent"
     tools:ignore="UnusedNamespace" >
 
-    <!-- Child candi -->
+    <!-- Candi being moved -->
+
+    <TextView
+        android:id="@+id/form_message"
+        style="@style/form_text"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="@string/form_message_candi_picker" />
+
+    <!-- Tabs -->
 
     <View
         android:layout_width="fill_parent"
         android:layout_height="1px"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/form_message"
         android:background="?attr/ruleColor" />
 
-    <!--
     <RelativeLayout
-        android:id="@+id/candi_child"
+        android:id="@+id/candi_to_move"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/activity_header"
+        android:layout_below="@+id/form_message"
+        android:padding="10dp"
         android:background="@drawable/button_nooutline_selector" >
 
         <com.proxibase.aircandi.widgets.WebImageView
@@ -40,7 +50,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignWithParentIfMissing="true"
-            android:layout_toRightOf="@id/item_image" />
+            android:layout_toRightOf="@id/item_image"
+            android:text="@string/dummy_title" />
 
         <com.proxibase.aircandi.widgets.TextViewEllipsizing
             android:id="@+id/item_description"
@@ -50,25 +61,22 @@
             android:layout_alignWithParentIfMissing="true"
             android:layout_below="@+id/item_title"
             android:layout_toLeftOf="@+id/image_forward"
-            android:layout_toRightOf="@id/item_image" />
+            android:layout_toRightOf="@id/item_image"
+            android:text="@string/dummy_description_ellipsized" />
     </RelativeLayout>
-
-    -->
-
-
-    <!-- Tabs -->
 
     <View
         android:layout_width="fill_parent"
         android:layout_height="1px"
+        android:layout_below="@+id/candi_to_move"
         android:background="?attr/ruleColor" />
-
-
+    
     <ViewFlipper
         android:id="@+id/flipper_form"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
+        android:layout_below="@+id/candi_to_move"
         android:clipChildren="false"
         android:gravity="center_vertical"
         android:visibility="visible" >
