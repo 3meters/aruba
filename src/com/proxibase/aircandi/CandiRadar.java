@@ -81,6 +81,7 @@ import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AircandiCommon.ServiceOperation;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.EntityList;
@@ -481,7 +482,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						intentBuilder.setEntityType(entityType);
 						Intent redirectIntent = intentBuilder.create();
 						startActivity(redirectIntent);
-						overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+						AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 					}
 				}
 			}
@@ -605,7 +606,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 								 * We pass a copy to presenter to provide more stability and steady state.
 								 */
 								EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
-								mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false, false);
+								mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false);
 
 								/* Check for rookies and play a sound */
 								if (mPrefSoundEffects && mCandiPatchPresenter.getRookieHit()) {
@@ -799,64 +800,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	// --------------------------------------------------------------------------------------------
 
 	private void doCandiAction(final CandiModel candiModel) {
-		/*
-		 * When starting from a candi in search view we always target the first CandiInfo view in the flipper.
-		 */
-		if (candiModel.getEntity().type == CandiConstants.TYPE_CANDI_COMMAND) {
-			if (mCandiPatchPresenter != null) {
-				mCandiPatchPresenter.mIgnoreInput = false;
-			}
-
-			if (candiModel.getEntity().commandType == CommandType.ChunkEntities
-					|| candiModel.getEntity().commandType == CommandType.ChunkChildEntities) {
-
-				final EntityModel entityModel = ProxiExplorer.getInstance().getEntityModel();
-
-				new AsyncTask() {
-
-					@Override
-					protected void onPreExecute() {
-						getCommon().showProgressDialog(false, null);
-						getCommon().showProgressDialog(true, getString(R.string.progress_more), CandiRadar.this);
-						getCommon().startTitlebarProgress();
-					}
-
-					@Override
-					protected Object doInBackground(Object... params) {
-
-						EntityList<Entity> entities = entityModel.getEntities();
-						if (candiModel.getEntity().commandType == CommandType.ChunkChildEntities) {
-							Entity entityParent = entityModel.getEntityById(candiModel.getEntity().parentId, CollectionType.CandiByRadar);
-							entities = entityParent.children;
-						}
-
-						ServiceResponse serviceResponse = entityModel.chunkEntities(entities);
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							Logger.d(CandiRadar.this, "More entities chunked from service");
-							/*
-							 * We pass a copy to presenter to provide more stability and steady state.
-							 */
-							EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
-							mCandiPatchPresenter.updateCandiData(entitiesCopy, false, true, false);
-						}
-						return serviceResponse;
-					}
-
-					@Override
-					protected void onPostExecute(Object response) {
-						ServiceResponse serviceResponse = (ServiceResponse) response;
-						updateDebugInfo();
-						getCommon().stopTitlebarProgress();
-						getCommon().showProgressDialog(false, null);
-						if (serviceResponse.responseCode != ResponseCode.Success) {
-							getCommon().handleServiceError(serviceResponse, ServiceOperation.Chunking, CandiRadar.this);
-						}
-					}
-
-				}.execute();
-			}
-		}
-		else if (!candiModel.isDeleted()) {
+		if (!candiModel.isDeleted()) {
 			mCandiPatchModel.setCandiModelSelected(candiModel);
 			showCandiForm(candiModel);
 		}
@@ -864,8 +808,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	public void navigateUp() {
 		mCandiPatchPresenter.renderingActivate();
-		mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, Navigation.Up, false);
-		getCommon().setActionBarTitleAndIcon(null, R.string.name_app, false);
+		mCandiPatchPresenter.navigateModel(mCandiPatchModel.getCandiRootCurrent().getParent(), false, false, Navigation.Up);
+		getCommon().mActionBar.setDisplayHomeAsUpEnabled(false);
 		getCommon().mActionBar.setHomeButtonEnabled(false);
 	}
 
@@ -878,7 +822,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		intentBuilder.setEntityType(entity.type);
 		intentBuilder.setCollectionType(ProxiExplorer.CollectionType.CandiByRadar);
 
-		if (entity.root) {
+		if (entity.parent == null) {
 			intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
 		}
 		else {
@@ -888,7 +832,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Intent intent = intentBuilder.create();
 
 		startActivity(intent);
-		overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiRadarToCandiForm);
 	}
 
 	class PackageReceiver extends BroadcastReceiver {
@@ -1766,7 +1710,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 											String updateUri = versionInfo.updateUri != null ? versionInfo.updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
 											intent.setData(Uri.parse(updateUri));
 											startActivity(intent);
-											overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+											AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
 										}
 									}
 								});

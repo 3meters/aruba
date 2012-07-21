@@ -26,8 +26,10 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
@@ -81,12 +83,12 @@ public abstract class FormActivity extends SherlockActivity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		overridePendingTransition(R.anim.browse_in, R.anim.form_out);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
 	}
 
 	public void onCancelButtonClick(View view) {
 		finish();
-		overridePendingTransition(R.anim.browse_in, R.anim.form_out);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
 	}
 
 	@Override
@@ -283,37 +285,39 @@ public abstract class FormActivity extends SherlockActivity {
 		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK);
 		picturePickerIntent.setType("image/*");
 		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
-
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	protected void pickVideo() {
 		Intent videoPickerIntent = new Intent(Intent.ACTION_PICK);
 		videoPickerIntent.setType("video/*");
 		startActivityForResult(videoPickerIntent, CandiConstants.ACTIVITY_VIDEO_PICK);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	protected void takeVideo() {
 		Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 		startActivityForResult(takeVideoIntent, CandiConstants.ACTIVITY_VIDEO_MAKE);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	protected void takePicture() {
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mCommon.getTempFile(this, "image_capture.tmp")));
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	private void pickWebPage() {
 		Intent intent = new Intent(this, BookmarkPicker.class);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
-		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	protected void pickAircandiPicture() {
 		Intent candigramPickerIntent = new Intent(this, PictureSearch.class);
 		startActivityForResult(candigramPickerIntent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
-		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
-
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	protected void useFacebook() {
@@ -372,25 +376,21 @@ public abstract class FormActivity extends SherlockActivity {
 				/* Aircandi picture */
 				if (item == 0) {
 					pickAircandiPicture();
-					overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 				}
 
 				/* Gallery picture */
 				else if (item == 1) {
 					pickPicture();
-					overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 				}
 
 				/* Take picture */
 				else if (item == 2) {
 					takePicture();
-					overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 				}
 
 				/* Use a web page */
 				else if (item == 3) {
 					pickWebPage();
-					overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
 				}
 
 				/* Facebook */

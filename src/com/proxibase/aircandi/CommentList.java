@@ -66,15 +66,15 @@ public class CommentList extends CandiActivity {
 		 */
 		if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
 			if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByRadar) {
-				mCommon.setActionBarTitleAndIcon(null, R.string.navigation_radar, true);
+				mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			}
 			else if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByUser) {
+				mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
 				mCommon.mActionBar.setHomeButtonEnabled(false);
 			}
 		}
 		else {
-			Entity collectionEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, mCommon.mCollectionType);
-			mCommon.setActionBarTitleAndIcon(collectionEntity, true);
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		}
 		
 		new AsyncTask() {

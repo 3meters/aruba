@@ -26,6 +26,8 @@ import android.widget.ViewFlipper;
 
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AircandiCommon.ServiceOperation;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
@@ -104,7 +106,7 @@ public class EntityForm extends FormActivity {
 				intentBuilder.setMessage(getString(messageResId));
 				Intent intent = intentBuilder.create();
 				startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-				overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 				return;
 			}
 		}
@@ -488,7 +490,6 @@ public class EntityForm extends FormActivity {
 									}
 									ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, CollectionType.CandiByRadar);
 									if (parentEntity != null) {
-										parentEntity.childCount++;
 										/* Sort child into the right spot */
 										if (parentEntity.children.size() > 1) {
 											Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
@@ -498,15 +499,13 @@ public class EntityForm extends FormActivity {
 									/*
 									 * Push to user entities if we have already loaded them.
 									 */
-									if (ProxiExplorer.getInstance().getEntityModel().getMyEntities().getCursorIds() != null
-											&& ProxiExplorer.getInstance().getEntityModel().getMyEntities().size() > 0) {
+									if (ProxiExplorer.getInstance().getEntityModel().getMyEntities().size() > 0) {
 										if (entity.parentId != null) {
 											parentEntity = ProxiExplorer.getInstance().getEntityModel()
 													.getEntityById(entity.parentId, CollectionType.CandiByUser);
 										}
 										ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, CollectionType.CandiByUser);
 										if (parentEntity != null) {
-											parentEntity.childCount++;
 											/* Sort child into the right spot */
 											if (parentEntity.children.size() > 1) {
 												Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
@@ -872,7 +871,7 @@ public class EntityForm extends FormActivity {
 
 		Intent intent = new Intent(this, BookmarkPicker.class);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
-		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 
 		super.mImageRequestListener = new RequestListener() {
 

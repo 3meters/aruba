@@ -2,18 +2,14 @@ package com.proxibase.service.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.components.CommandType;
-import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.Utilities;
-import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxiConstants;
 
 /**
@@ -86,22 +82,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public EntityList<Entity>	children;
 
 	@Expose(serialize = false, deserialize = true)
-	public List<String>			childCursor;
-
-	@Expose(serialize = false, deserialize = true)
-	public Integer				childCount;
-
-	@Expose(serialize = false, deserialize = true)
-	public Boolean				childrenMore;
-
-	@Expose(serialize = false, deserialize = true)
 	public EntityList<Entity>	parents;
-
-	@Expose(serialize = false, deserialize = true)
-	public Integer				parentCount;
-
-	@Expose(serialize = false, deserialize = true)
-	public Boolean				parentsMore;
 
 	/*
 	 * For client use only
@@ -146,16 +127,16 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		}
 	}
 
-	/*
-	 * We make sure that all entities in the children and parents
-	 * collections are new entity objects. Any other object properties on
-	 * the entity object are still references to the same instance including:
-	 * 
-	 * - Beacon object
-	 * - Comments in the comment list
-	 * - GeoLocation
-	 */
 	public Entity copy() {
+		/*
+		 * We make sure that all entities in the children and parents
+		 * collections are new entity objects. Any other object properties on
+		 * the entity object are still references to the same instance including:
+		 * 
+		 * - Beacon object
+		 * - Comments in the comment list
+		 * - GeoLocation
+		 */
 		try {
 			final Entity entity = (Entity) super.clone();
 			if (this.children != null) {
@@ -173,16 +154,17 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			throw new AssertionError();
 		}
 	}
-	/*
-	 * A deep copy is created of the entire entity object using
-	 * serialization/deserialization. All object properties are
-	 * recreated as new instances
-	 */
+
 	public Entity deepCopy() {
+		/*
+		 * A deep copy is created of the entire entity object using
+		 * serialization/deserialization. All object properties are
+		 * recreated as new instances
+		 */
 		Entity entityCopy = (Entity) Utilities.deepCopy(this);
 		return entityCopy;
 	}
-	
+
 	public String getCollection() {
 		return "entities";
 	}
@@ -232,81 +214,6 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			}
 		}
 		return imageFormat;
-	}
-
-	public static Entity getCommandEntity(CommandType commandType) {
-
-		Entity entity = new Entity();
-		entity.id = String.valueOf(DateUtils.nowDate().getTime());
-		entity.signalFence = -100.0f;
-		entity.creatorId = Aircandi.getInstance().getUser().id;
-		entity.modifierId = Aircandi.getInstance().getUser().id;
-
-		/*
-		 * We use old dates to force entities that are acting as commands
-		 * to sort to the end of the collection.
-		 */
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		cal.set(Calendar.YEAR, 2000);
-
-		entity.modifiedDate = cal.getTime().getTime();
-		entity.discoveryTime = cal.getTime();
-
-		entity.enabled = true;
-		entity.label = "Tap for more candi";
-		entity.title = "Tap for more candi";
-		entity.locked = false;
-		entity.linkJavascriptEnabled = false;
-		entity.linkZoom = false;
-		entity.rookie = false;
-		entity.commandType = commandType;
-		entity.visibility = Visibility.Public.toString().toLowerCase();
-		entity.children = new EntityList<Entity>();
-		entity.type = CandiConstants.TYPE_CANDI_COMMAND;
-		if (entity.type.equals(CandiConstants.TYPE_CANDI_COMMAND)) {
-			entity.imagePreviewUri = "resource:placeholder_logo";
-			entity.imageUri = entity.imagePreviewUri;
-		}
-		return entity;
-	}
-
-	public static Entity getRootEntity() {
-
-		Entity entity = new Entity();
-		entity.id = ProxiConstants.ROOT_COLLECTION_ID;
-		entity.signalFence = -100.0f;
-		entity.creatorId = Aircandi.getInstance().getUser().id;
-		entity.modifierId = Aircandi.getInstance().getUser().id;
-
-		/*
-		 * We use old dates to force entities that are acting as commands
-		 * to sort to the end of the collection.
-		 */
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		cal.set(Calendar.YEAR, 2000);
-
-		entity.modifiedDate = cal.getTime().getTime();
-		entity.discoveryTime = cal.getTime();
-
-		entity.enabled = true;
-		entity.label = "Tap for more candi";
-		entity.title = "Tap for more candi";
-		entity.locked = false;
-		entity.linkJavascriptEnabled = false;
-		entity.linkZoom = false;
-		entity.rookie = false;
-		entity.visibility = Visibility.Public.toString().toLowerCase();
-		entity.children = new EntityList<Entity>();
-		entity.type = CandiConstants.TYPE_CANDI_COMMAND;
-		if (entity.type.equals(CandiConstants.TYPE_CANDI_COMMAND)) {
-			entity.imagePreviewUri = "resource:placeholder_logo";
-			entity.imageUri = entity.imagePreviewUri;
-		}
-		return entity;
 	}
 
 	public static enum ImageFormat {

@@ -18,7 +18,9 @@ import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageRequest;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
@@ -77,7 +79,7 @@ public class ProfileForm extends FormActivity {
 					intentBuilder.setMessage(getString(R.string.signin_message_session_expired));
 					Intent intent = intentBuilder.create();
 					startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-					overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+					AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 					return;
 				}
 			}
@@ -245,7 +247,7 @@ public class ProfileForm extends FormActivity {
 		intentBuilder.setCommandType(CommandType.Edit);
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
-		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	@Override

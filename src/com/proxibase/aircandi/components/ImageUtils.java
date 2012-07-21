@@ -25,7 +25,7 @@ import com.proxibase.aircandi.core.CandiConstants;
 public class ImageUtils {
 
 	private static Paint			mPaint	= new Paint();
-	private static LinearGradient	mShader	= new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x88ffffff, 0x00ffffff,
+	private static LinearGradient	mShader	= new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x80ffffff, 0x00ffffff,
 													TileMode.CLAMP);
 
 	public static void showToastNotification(final String message, final int duration) {

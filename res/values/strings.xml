@@ -7,7 +7,7 @@
     <string name="name_entity_type_picture">Picture</string>
     <string name="name_entity_type_post">Post</string>
     <string name="name_entity_type_link">Link</string>
-    <string name="name_entity_type_collection">Candipatch</string>
+    <string name="name_entity_type_collection">Collection</string>
     
     <!-- Application -->
 
@@ -50,7 +50,7 @@
     <string name="dummy_datetime">December 23 at 10:12am</string>
     <string name="dummy_subtitle">Be there, do more</string>
     <string name="dummy_description">Ever wonder why Aircandi fans refuse to use anything else? For more than four days, Aircandi has attracted a growing family of loyal, almost zealous customers, known as “Candiniks”. By remaining true to the quality tenets of our founder – emphasizing knowledge, taste, and using the senses to evaluate quality at every step – Aircandi defines the gold standard by which all other proximity applications are judged.</string>
-    <string name="dummy_description_ellipsized">Ever wonder why Aircandi fans refuse to use anything else? For more than...</string>
+    <string name="dummy_description_ellipsized">Ever wonder why Aircandi fans refuse to use anything else? For more than&#8230;</string>
     
     <!-- Alerts -->
 
@@ -68,6 +68,7 @@
     <string name="alert_deleted">Deleted</string>
     <string name="alert_updated">Saved</string>
     <string name="alert_inserted">Saved</string>
+    <string name="alert_moved">Candi moved</string>
     <string name="alert_signed_in">Signed in as</string>
     <string name="alert_password_changed">Password changed for</string>
     <string name="alert_error_title">Aircandi service</string>
@@ -103,6 +104,7 @@
     <string name="progress_saving">Saving&#8230;</string>
     <string name="progress_verifying">Verifying&#8230;</string>
     <string name="progress_deleting">Deleting&#8230;</string>
+    <string name="progress_moving">Moving&#8230;</string>
     <string name="progress_changing_password">Changing&#8230;</string>
     <string name="progress_searching">Searching&#8230;</string>
     <string name="progress_signing_in">Signing in&#8230;</string>
@@ -133,7 +135,7 @@
     <string name="entity_post_title">Post</string>
     <string name="entity_picture_title">Picture</string>
 	<string name="entity_link_title">Link</string>
-	<string name="entity_collection_title">Candipatch</string>
+	<string name="entity_collection_title">Collection</string>
         
     <!-- Radar -->
 
@@ -202,25 +204,16 @@
     <string name="form_title_signup">Sign up</string>
     <string name="form_title_picture_search">Picture search</string>
     <string name="form_title_bookmarks">Bookmarks</string>
-    <string name="form_title_candi_picker">Candipatches</string>
+    <string name="form_title_preferences">Aircandi settings</string>
+    <string name="form_title_candi_picker">Pick a new collection</string>
     <string name="form_title_comment">Comment</string>
+    <string name="form_title_comment_list">Comments</string>
     <string name="form_title_picture_browse">Picture viewer</string>
+    <string name="form_title_map_browse">Location</string>
     <string name="form_title_templates">Templates</string>
     
-    <string name="form_message_candi_picker">Move this candi to a new Candipatch</string>
-    
-    <TextView
-                android:id="@+id/form_message"
-                style="@style/form_text"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="15dp"
-                android:paddingLeft="2dp"
-                android:paddingRight="2dp"
-                android:text="@string/signin_message_general" />
-
-    
-    
+    <string name="form_message_candi_picker">Move this candi to a new collection</string>
+        
     <string name="form_tab_content">CONTENT</string>
     <string name="form_tab_settings">SETTINGS</string>
     
@@ -236,9 +229,11 @@
     <string name="form_button_signup">Sign up</string>
     <string name="form_button_save">Save</string>
     <string name="form_button_delete">Delete</string>
+    <string name="form_button_ok">OK</string>
     <string name="form_button_cancel">Cancel</string>
     <string name="form_button_terms">Terms of service</string>
     <string name="form_button_send_password">Forgot password?</string>
+    <string name="form_button_move_solo">No collection</string>
     
     <string name="form_label_picture">Picture</string>
     <string name="form_label_picture_collection">Collection badge</string>

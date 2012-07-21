@@ -699,7 +699,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}
 
 		/* Process any decorations like text overlays */
-		bodyBitmap = decorateTexture(bodyBitmap, false);
+		bodyBitmap = decorateTexture(bodyBitmap, false, true);
 
 		mBodyTextureRegion = TextureRegionFactory.createFromSource(mBodyTexture, new BitmapTextureSource(bodyBitmap, cacheName, new IBitmapAdapter() {
 
@@ -718,7 +718,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 					if (bodyBitmap != null) {
 						Logger.v(this, "Engine request: texture refreshed from cache: "
 								+ (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
-						bodyBitmap = decorateTexture(bodyBitmap, false);
+						bodyBitmap = decorateTexture(bodyBitmap, false, true);
 						return bodyBitmap;
 					}
 
@@ -734,7 +734,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}), 0, 0);
 
 		if (reflectionBitmap != null) {
-			reflectionBitmap = decorateTexture(reflectionBitmap, true);
+			reflectionBitmap = decorateTexture(reflectionBitmap, true, true);
 			mReflectionTexture.clearTextureSources();
 			mReflectionTextureRegion = TextureRegionFactory.createFromSource(mReflectionTexture, new BitmapTextureSource(reflectionBitmap, cacheName
 					+ ".reflection",
@@ -745,7 +745,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 							if (mModel != null && !mRecycled) {
 								Bitmap bitmap = ImageManager.getInstance().getImage(cacheName + ".reflection");
 								if (bitmap != null) {
-									bitmap = decorateTexture(bitmap, true);
+									bitmap = decorateTexture(bitmap, true, true);
 									return bitmap;
 								}
 								else {
@@ -773,7 +773,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}
 	}
 
-	public Bitmap decorateTexture(Bitmap bitmap, boolean isReflection) {
+	public Bitmap decorateTexture(Bitmap bitmap, boolean isReflection, boolean insetCollectionImage) {
 		final CandiModel candiModel = (CandiModel) this.mModel;
 		/*
 		 * Handle text overlay for posts
@@ -795,7 +795,6 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 			if (candiModel.getEntity().getMasterImageUri() == null
 					|| !candiModel.getEntity().getMasterImageUri().toLowerCase().startsWith("resource:")) {
-
 				String resolvedResourceName = ImageManager.getInstance().resolveResourceName("placeholder_collection");
 				int resourceId = ImageManager.getInstance().getActivity().getResources()
 						.getIdentifier(resolvedResourceName, "drawable", "com.proxibase.aircandi");
@@ -804,12 +803,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 				overlay = ImageUtils.scaleAndCropBitmap(overlay, overlayWidth, ImageShape.Square);
 
 				if (!isReflection) {
-					bitmap = overlayBitmapOnBitmap(bitmap, overlay, 0x77000000, CandiConstants.CANDI_VIEW_WIDTH - (overlayWidth + 7),
+					bitmap = overlayBitmapOnBitmap(bitmap, overlay, 0x55000000, CandiConstants.CANDI_VIEW_WIDTH - (overlayWidth + 7),
 							CandiConstants.CANDI_VIEW_WIDTH - (overlayWidth + 7), false, false);
 				}
-				//			else {
-				//				bitmap = overlayBitmapOnBitmap(bitmap, overlay, 0, 0, true, true);
-				//			}
 			}
 		}
 		return bitmap;

@@ -9,10 +9,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
+import com.proxibase.aircandi.components.CandiListAdapter;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
-import com.proxibase.aircandi.components.EndlessCandiListAdapter;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
@@ -37,7 +39,7 @@ public class CandiList extends CandiActivity {
 	private Number		mEntityModelRefreshDate;
 	private Number		mEntityModelActivityDate;
 	private User		mEntityModelUser;
-	private Entity		mCollectionEntity;
+	private String		mFilter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -65,11 +67,11 @@ public class CandiList extends CandiActivity {
 				intentBuilder.setMessage(getString(messageResId));
 				Intent intent = intentBuilder.create();
 				startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-				overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 				return;
 			}
 		}
-		
+
 		if (!isFinishing()) {
 			initialize();
 			bind();
@@ -86,15 +88,15 @@ public class CandiList extends CandiActivity {
 		 */
 		if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
 			if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByRadar) {
-				mCommon.setActionBarTitleAndIcon(null, R.string.navigation_radar, true);
+				mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			}
 			else if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByUser) {
+				mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
 				mCommon.mActionBar.setHomeButtonEnabled(false);
 			}
 		}
 		else {
-			mCollectionEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, mCommon.mCollectionType);
-			mCommon.setActionBarTitleAndIcon(mCollectionEntity, true);
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		}
 
 		new AsyncTask() {
@@ -118,13 +120,16 @@ public class CandiList extends CandiActivity {
 				/*
 				 * If its the user collection and it hasn't been populated yet, chunk in the first set of entities.
 				 */
-				if (proxiEntities.getCollectionType() == CollectionType.CandiByUser && (proxiEntities.getCursorIds() == null || proxiEntities.size() == 0)) {
+				if (proxiEntities.getCollectionType() == CollectionType.CandiByUser && proxiEntities.size() == 0) {
 
 					Bundle parameters = new Bundle();
 					ServiceRequest serviceRequest = new ServiceRequest();
 
 					/* Set method parameters */
 					parameters.putString("userId", Aircandi.getInstance().getUser().id);
+					if (mFilter != null) {
+						parameters.putString("filter", mFilter);
+					}
 					parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
 					parameters.putString("options", "object:{\"limit\":"
 							+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
@@ -150,14 +155,15 @@ public class CandiList extends CandiActivity {
 
 						proxiEntities.addAll((Collection<? extends Entity>) serviceData.data);
 						proxiEntities.setCollectionType(CollectionType.CandiByUser);
-						proxiEntities.setCursorIds(serviceData.cursor);
 
 						/* Do some fixup migrating settings to the children collection */
 						for (Entity entity : proxiEntities) {
 							if (entity.children != null) {
-								entity.children.setCollectionEntity(entity);
 								entity.children.setCollectionType(CollectionType.CandiByUser);
-								entity.children.setCursorIds(entity.childCursor); // resets cursorIndex
+								for (Entity childEntity : entity.children) {
+									childEntity.parent = entity;
+									childEntity.parentId = entity.id;
+								}
 							}
 						}
 
@@ -179,8 +185,8 @@ public class CandiList extends CandiActivity {
 					mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 					mEntityModelUser = Aircandi.getInstance().getUser();
 					if (serviceResponse.data != null) {
-						mListView.setAdapter(new EndlessCandiListAdapter(CandiList.this, (EntityList<Entity>) serviceResponse.data,
-								R.layout.temp_listitem_candi));
+						CandiListAdapter adapter = new CandiListAdapter(CandiList.this, (EntityList<Entity>) serviceResponse.data, R.layout.temp_listitem_candi);
+						mListView.setAdapter(adapter);
 					}
 				}
 				mCommon.showProgressDialog(false, null);
@@ -202,29 +208,23 @@ public class CandiList extends CandiActivity {
 
 	public void onListItemClick(View view) {
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
-		if (entity.type == CandiConstants.TYPE_CANDI_COMMAND) {
+		IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class);
+		intentBuilder.setCommandType(CommandType.View);
+		intentBuilder.setEntityId(entity.id);
+		intentBuilder.setEntityType(entity.type);
+		intentBuilder.setCollectionId(mCommon.mCollectionId);
+		intentBuilder.setCollectionType(mCommon.mCollectionType);
 
+		if (entity.parent != null) {
+			intentBuilder.setEntityLocation(entity.parent.location);
 		}
 		else {
-			IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class);
-			intentBuilder.setCommandType(CommandType.View);
-			intentBuilder.setEntityId(entity.id);
-			intentBuilder.setEntityType(entity.type);
-			intentBuilder.setCollectionId(mCommon.mCollectionId);
-			intentBuilder.setCollectionType(mCommon.mCollectionType);
-
-			if (!entity.root) {
-				//intentBuilder.setEntityLocation(entity.parent.location);
-			}
-			else {
-				intentBuilder.setBeaconId(entity.beaconId);
-			}
-			Intent intent = intentBuilder.create();
-
-			startActivity(intent);
-			overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+			intentBuilder.setBeaconId(entity.beaconId);
 		}
+		Intent intent = intentBuilder.create();
 
+		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
 	}
 
 	public void onCommentsClick(View view) {
@@ -238,6 +238,7 @@ public class CandiList extends CandiActivity {
 			intentBuilder.setCollectionType(mCommon.mCollectionType);
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);			
 		}
 	}
 

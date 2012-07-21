@@ -6,7 +6,9 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import com.proxibase.aircandi.Aircandi;
+import com.proxibase.aircandi.R;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.content.res.Resources.NotFoundException;
@@ -20,16 +22,77 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
 public class AnimUtils {
+	
+	public static enum TransitionType {
+		CandiPageToForm,
+		FormToCandiPage,
+		CandiPageToCandiPage,
+		CandiMapToCandiPage,
+		CandiFormToCandiList,
+		CandiRadarToCandiForm,
+		CandiListToCandiForm,
+		CandiPageToMyCandi,
+		CandiPageToCandiMap,
+		CandiPageToCandiRadar,
+		CandiPageBack
+	}
+	
+	public static void doOverridePendingTransition(Activity activity, TransitionType transitionType) {
+		/*
+		 * Generic candi to candi
+		 */
+		if (transitionType == TransitionType.CandiRadarToCandiForm) {
+			//activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+			// activity.overridePendingTransition(R.anim.fade_zoom_in, R.anim.hold);
+			activity.overridePendingTransition(R.anim.activity_open_enter, R.anim.hold);
+		}
+		else if (transitionType == TransitionType.CandiPageBack) {
+			//activity.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+			//activity.overridePendingTransition(R.anim.hold, R.anim.fade_zoom_out);
+			activity.overridePendingTransition(R.anim.hold, R.anim.activity_close_exit);
+		}
+		else if (transitionType == TransitionType.CandiFormToCandiList) {
+			//activity.overridePendingTransition(R.anim.slide_in_right_long, R.anim.slide_out_left_long);
+			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		}
+		else if (transitionType == TransitionType.CandiListToCandiForm) {
+			//activity.overridePendingTransition(R.anim.slide_in_right_long, R.anim.slide_out_left_long);
+			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		}
+		/*
+		 * Moving between primary tabs
+		 */
+		else if (transitionType == TransitionType.CandiMapToCandiPage) {
+			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		}
+		else if (transitionType == TransitionType.CandiPageToCandiRadar) {
+			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		}
+		else if (transitionType == TransitionType.CandiPageToMyCandi) {
+			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_long);
+		}
+		else if (transitionType == TransitionType.CandiPageToCandiMap) {
+			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_long);
+		}
+		/*
+		 * Jumping to and from forms
+		 */
+		else if (transitionType == TransitionType.CandiPageToForm) {
+			activity.overridePendingTransition(R.anim.fade_zoom_in, R.anim.hold);
+		}
+		else if (transitionType == TransitionType.FormToCandiPage) {
+			activity.overridePendingTransition(R.anim.hold, R.anim.fade_zoom_out);
+		}
+	}
 
-	/**
-	 * Loads an {@link Animation} object from a resource
-	 * 
-	 * @param context Application context used to access resources
-	 * @param id The resource id of the animation to load
-	 * @return The animation object reference by the specified id
-	 * @throws NotFoundException when the animation cannot be loaded
-	 */
 	public static Animation loadAnimation(int id) throws NotFoundException {
+		/*
+		 * Loads an animation object from a resource
+		 * 
+		 * @param id The resource id of the animation to load
+		 * @return The animation object reference by the specified id
+		 * @throws NotFoundException when the animation cannot be loaded
+		 */
 
 		XmlResourceParser parser = null;
 		try {

@@ -26,11 +26,13 @@ import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.CandiItemizedOverlay;
 import com.proxibase.aircandi.components.GeoLocationManager;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
@@ -236,7 +238,7 @@ public class CandiMap extends SherlockMapActivity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiMapToCandiPage);
 	}
 
 	@Override

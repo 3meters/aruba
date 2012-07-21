@@ -8,7 +8,9 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 
 public abstract class CandiActivity extends SherlockActivity {
 
@@ -48,7 +50,7 @@ public abstract class CandiActivity extends SherlockActivity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageBack);
 	}
 
 	@Override

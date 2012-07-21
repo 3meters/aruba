@@ -347,7 +347,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		 */
 		ShapeDrawable mDrawable = new ShapeDrawable(new RectShape());
 		mDrawable.getPaint().setColor(fillColor);
-		mDrawable.setBounds(0, ((int) offsetY - 10), bitmapCopy.getWidth(), bitmapCopy.getHeight());
+		mDrawable.setBounds(0, ((int) offsetY - 5), bitmapCopy.getWidth(), bitmapCopy.getHeight());
 		mDrawable.draw(canvas);
 		
 		/* Move the canvas and draw the overlay */

@@ -15,7 +15,6 @@ import com.proxibase.aircandi.components.CandiList;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.Logger;
-import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Entity;
 
 /**
@@ -202,7 +201,7 @@ public class CandiPatchModel extends Observable {
 		return candiModelManaged;
 	}
 
-	public void updateVisibilityNext(boolean chunking) {
+	public void updateVisibilityNext() {
 
 		/* Reset inactive zone */
 		mZoneInactive.getCandiesNext().clear();
@@ -260,7 +259,7 @@ public class CandiPatchModel extends Observable {
 		}
 	}
 
-	public void updateZonesNext(Navigation navigation, boolean chunking) {
+	public void updateZonesNext(Navigation navigation) {
 
 		/* Clear candies from zones that already exist (new ones might be created later). */
 		for (ZoneModel zoneModel : mZoneModels) {
@@ -279,23 +278,6 @@ public class CandiPatchModel extends Observable {
 		if (visibleCandiNextCount < (focusedZoneIndex + 1)) {
 			zoneIndex = (focusedZoneIndex + 1) - visibleCandiNextCount;
 			zoneIndex++;
-		}
-
-		if (navigation == Navigation.Down && mCandiModelFocused != null) {
-			CandiModel candiRootNext = (CandiModel) mCandiRootNext;
-			synchronized (candiRootNext.getChildren()) {
-				if (candiRootNext.getChildren().size() > focusedZoneIndex) {
-					CandiModel childModel = (CandiModel) ((CandiModel) mCandiRootNext).getChildren().get(focusedZoneIndex);
-					if (childModel.getEntity().type == CandiConstants.TYPE_CANDI_COMMAND) {
-						zoneIndex++;
-					}
-				}
-			}
-		}
-		else if (chunking) {
-			/* We want the starting zone index to remain unchanged. */
-			CandiModel candiModelFirst = (CandiModel) ((CandiModel) mCandiRootNext).getChildren().get(0);
-			zoneIndex = candiModelFirst.getZoneStateCurrent().getZone().getZoneIndex();
 		}
 
 		for (IModel model : mCandiRootNext.getChildren()) {
@@ -355,7 +337,7 @@ public class CandiPatchModel extends Observable {
 		 * slot the user is currently looking at.
 		 */
 		boolean swappingEnabled = false;
-		if (chunking == false && (mCandiModelFocused == null || (focusedZoneIndex == 0 && navigation != Navigation.None) || focusedZoneIndex != 0)) {
+		if (mCandiModelFocused == null || (focusedZoneIndex == 0 && navigation != Navigation.None) || focusedZoneIndex != 0) {
 			swappingEnabled = true;
 		}
 

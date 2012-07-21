@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageUtils;
@@ -17,6 +18,7 @@ import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.ProxiExplorer;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.Tracker;
@@ -63,7 +65,7 @@ public class CommentForm extends FormActivity {
 				intentBuilder.setMessage(getString(messageResId));
 				Intent intent = intentBuilder.create();
 				startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-				overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 				return;
 			}
 		}

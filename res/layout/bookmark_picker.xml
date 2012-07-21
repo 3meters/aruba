@@ -14,7 +14,7 @@
 
         <EditText
             android:id="@+id/text_uri"
-            android:layout_width="wrap_content"
+            android:layout_width="0dip"
             android:layout_height="40dp"
             android:layout_weight="1"
             android:gravity="center|left"
@@ -22,17 +22,6 @@
             android:inputType="textUri"
             android:singleLine="true" />
 
-        <ImageView
-            android:id="@+id/btn_link_go"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_weight="0"
-            android:clickable="true"
-            android:maxWidth="40dp"
-            android:minWidth="40dp"
-            android:onClick="onLinkGoClick"
-            android:scaleType="center"
-            android:src="?attr/iconGo" />
     </LinearLayout>
 
     <ListView
@@ -59,10 +48,22 @@
         android:gravity="center_horizontal" >
 
         <Button
+            android:id="@+id/btn_ok"
             style="@style/app_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
-            android:minWidth="150dp"
+            android:layout_weight="1"
+            android:maxWidth="150dp"
+            android:enabled="false"
+            android:onClick="onOkButtonClick"
+            android:text="@string/form_button_ok" />
+        
+        <Button
+            style="@style/app_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxWidth="150dp"
             android:onClick="onCancelButtonClick"
             android:text="@string/form_button_cancel" />
     </LinearLayout>

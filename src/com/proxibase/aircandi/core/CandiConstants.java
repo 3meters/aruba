@@ -103,7 +103,6 @@ public interface CandiConstants {
 	public static final String			TYPE_CANDI_POST							= "com.proxibase.aircandi.candi.post";
 	public static final String			TYPE_CANDI_PICTURE						= "com.proxibase.aircandi.candi.picture";
 	public static final String			TYPE_CANDI_LINK							= "com.proxibase.aircandi.candi.link";
-	public static final String			TYPE_CANDI_COMMAND						= "com.proxibase.aircandi.candi.command";
 	public static final String			TYPE_CANDI_COLLECTION					= "com.proxibase.aircandi.candi.collection";
 
 	public static final String			USER_ANONYMOUS							= "{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\",\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\",\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\",\"imageUri\": \"resource:placeholder_user\", \"isDeveloper\": false, \"anonymous\": true, \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}";

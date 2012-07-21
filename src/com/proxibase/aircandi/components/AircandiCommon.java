@@ -19,7 +19,6 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -33,7 +32,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -52,6 +50,7 @@ import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.CandiForm;
 import com.proxibase.aircandi.CandiList;
 import com.proxibase.aircandi.CandiMap;
+import com.proxibase.aircandi.CandiPicker;
 import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.CandiRadar.RefreshType;
 import com.proxibase.aircandi.CommentList;
@@ -64,9 +63,8 @@ import com.proxibase.aircandi.SignInForm;
 import com.proxibase.aircandi.TemplatePicker;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.Events.EventHandler;
-import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
-import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
 import com.proxibase.aircandi.components.ProxiExplorer.WifiScanResult;
@@ -75,7 +73,6 @@ import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
 import com.proxibase.service.ProxibaseService.GsonType;
-import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.ProxibaseService.RequestType;
 import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
@@ -125,6 +122,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public Integer						mTabIndex;
 	public ActionBar					mActionBar;
 	private ViewFlipper					mViewFlipper;
+	@SuppressWarnings("unused")
 	private Integer						mActionBarHomeImageView;
 
 	/* Animations */
@@ -306,7 +304,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		intentBuilder.setCommandType(CommandType.View);
 		Intent intent = intentBuilder.create();
 		mActivity.startActivity(intent);
-		mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
 
 	public void doInfoClick() {
@@ -376,6 +374,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		intent.putExtra(mActivity.getString(R.string.EXTRA_THEME_ID), mThemeTone.equals("dark") ? R.style.Theme_Sherlock_Dialog
 				: R.style.Theme_Sherlock_Light_Dialog);
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_TEMPLATE_PICK);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
 
 	@SuppressWarnings("unused")
@@ -769,7 +768,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		Intent intent = intentBuilder.create();
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-		mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
 
 	public void startScanService() {
@@ -802,6 +801,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Intent intent = new Intent(mContext, CandiRadar.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		mContext.startActivity(intent);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageBack);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -912,7 +912,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				return;
 			case R.id.settings:
 				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
-				mActivity.overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 				return;
 			case R.id.profile:
 				doProfileClick();
@@ -927,136 +927,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 				doInfoClick();
 				return;
 		}
-	}
-
-	public void setActionBarTitleAndIcon(final Integer resIdIcon, final Integer resIdTitle, final boolean showUpIndicator) {
-		String title = null;
-		if (resIdTitle != null) {
-			title = mActivity.getString(resIdTitle);
-		}
-		setActionBarTitleAndIcon(resIdIcon, title, showUpIndicator);
-	}
-
-	public void setActionBarTitleAndIcon(final Integer resIdIcon, final String title, final boolean showUpIndicator) {
-		if (resIdIcon != null) {
-			final ImageView imageView = (ImageView) mActivity.findViewById(mActionBarHomeImageView);
-
-			/* Fade out the current icon */
-			imageView.setAnimation(null);
-			mAnimFadeOut.setAnimationListener(new AnimationListener() {
-
-				@Override
-				public void onAnimationStart(Animation animation) {}
-
-				@Override
-				public void onAnimationEnd(Animation animation) {
-
-					imageView.setImageResource(resIdIcon);
-
-					/* Fade in the new icon */
-					imageView.setAnimation(null);
-					mAnimFadeIn.setAnimationListener(new AnimationListener() {
-
-						@Override
-						public void onAnimationStart(Animation animation) {}
-
-						@Override
-						public void onAnimationEnd(Animation animation) {}
-
-						@Override
-						public void onAnimationRepeat(Animation animation) {}
-					});
-
-					imageView.startAnimation(mAnimFadeIn);
-					if (title != null) {
-						mActionBar.setTitle(title);
-					}
-					mActionBar.setDisplayHomeAsUpEnabled(showUpIndicator);
-				}
-
-				@Override
-				public void onAnimationRepeat(Animation animation) {}
-			});
-
-			imageView.startAnimation(mAnimFadeOut);
-		}
-		else {
-			if (title != null) {
-				mActionBar.setTitle(title);
-				mActionBar.setDisplayHomeAsUpEnabled(showUpIndicator);
-			}
-		}
-	}
-
-	public void setActionBarTitleAndIcon(final Entity entity, final boolean showUpIndicator) {
-
-		final ImageView imageView = (ImageView) mActivity.findViewById(mActionBarHomeImageView);
-		final ImageRequestBuilder builder = new ImageRequestBuilder(imageView);
-
-		/* Fade out the current icon */
-		imageView.setAnimation(null);
-		Animation animation = AnimUtils.loadAnimation(R.anim.fade_out_medium);
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		animation.setAnimationListener(new AnimationListener() {
-
-			@Override
-			public void onAnimationStart(Animation animation) {}
-
-			@Override
-			public void onAnimationEnd(Animation animation) {
-
-				builder.setImageUri(entity.getMasterImageUri());
-				builder.setImageFormat(entity.getMasterImageFormat());
-				builder.setLinkZoom(entity.linkZoom);
-				builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
-				builder.setSearchCache(true);
-				builder.setRequestListener(new RequestListener() {
-
-					@Override
-					public void onComplete(Object response) {
-						ServiceResponse serviceResponse = (ServiceResponse) response;
-
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-							if (imageResponse.bitmap != null) {
-								Drawable drawable = new BitmapDrawable(mActivity.getResources(), imageResponse.bitmap);
-								imageView.setImageDrawable(drawable);
-
-								/* Fade in the new icon */
-								imageView.setAnimation(null);
-								Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
-								animation.setFillEnabled(true);
-								animation.setFillAfter(true);
-								animation.setAnimationListener(new AnimationListener() {
-
-									@Override
-									public void onAnimationStart(Animation animation) {}
-
-									@Override
-									public void onAnimationEnd(Animation animation) {}
-
-									@Override
-									public void onAnimationRepeat(Animation animation) {}
-								});
-
-								imageView.startAnimation(animation);
-								mActionBar.setTitle(entity.title);
-								mActionBar.setDisplayHomeAsUpEnabled(showUpIndicator);
-							}
-						}
-					}
-				});
-
-				ImageRequest imageRequest = builder.create();
-				ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation) {}
-		});
-
-		imageView.startAnimation(animation);
 	}
 
 	public final class ActionModeRefresh implements ActionMode.Callback {
@@ -1147,13 +1017,16 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		else if (mPageName.equals("ProfileForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PROFILE_FORM_ID);
-			setActionBarTitleAndIcon(null, R.string.form_title_profile, false);
 		}
 		else if (mPageName.equals("EntityForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
 		}
 		else if (mPageName.equals("CandiPicker")) {
-			addTabsToActionBar(this, CandiConstants.TABS_CANDI_PICKER_ID);
+			/*
+			 * We let candi picker handle tab changes because there
+			 * is extra work to do.
+			 */
+			addTabsToActionBar((CandiPicker) mActivity, CandiConstants.TABS_CANDI_PICKER_ID);
 		}
 	}
 
@@ -1245,7 +1118,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				mActivity.startActivity(intent);
-				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToCandiRadar);
 			}
 		}
 		else if (tab.getTag().equals(R.string.radar_tab_mycandi)) {
@@ -1263,7 +1136,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				mActivity.startActivity(intent);
-				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_long);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToMyCandi);
 			}
 		}
 		else if (tab.getTag().equals(R.string.radar_tab_map)) {
@@ -1279,7 +1152,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				mActivity.startActivity(intent);
-				mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_long);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToCandiMap);
 			}
 		}
 		else {
@@ -1454,6 +1327,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		CandiList,
 		CandiBrowse,
 		CandiSave,
+		CandiMove,
 		CandiDelete,
 		ImageLoad,
 		CommentBrowse,

@@ -4,7 +4,9 @@
     android:id="@+id/item_row"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/button_nooutline_selector" >
+    android:background="@drawable/button_nooutline_selector"
+    android:clickable="true"
+    android:onClick="onListItemClick" >
 
     <View
         android:layout_width="fill_parent"
@@ -23,6 +25,19 @@
         aircandi:maxHeight="60dp"
         aircandi:maxWidth="60dp" />
 
+    <ImageView
+        android:id="@+id/item_image_collection"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignBottom="@+id/item_image"
+        android:layout_alignRight="@+id/item_image"
+        android:layout_marginBottom="3dp"
+        android:layout_marginRight="3dp"
+        aircandi:maxHeight="60dp"
+        aircandi:maxWidth="60dp"      
+        android:visibility="visible"   
+        android:src="@drawable/placeholder_collection" />
+    
     <com.proxibase.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_title"
         style="@style/bookmark_list_title"

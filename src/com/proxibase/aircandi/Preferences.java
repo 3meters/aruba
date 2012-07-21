@@ -5,7 +5,9 @@ import android.os.Bundle;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.Tracker;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 
 public class Preferences extends SherlockPreferenceActivity {
 
@@ -51,7 +53,7 @@ public class Preferences extends SherlockPreferenceActivity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		overridePendingTransition(R.anim.browse_in, R.anim.form_out);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
 	}
 
 	public static enum PrefResponse {

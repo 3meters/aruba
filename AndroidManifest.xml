@@ -54,7 +54,7 @@
         <activity
             android:name=".SignInForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_signin"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
@@ -77,39 +77,39 @@
         <activity
             android:name=".MapBrowse"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_map_browse"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".CommentForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_comment"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".CommentList"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".PictureSearch"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_picture_search"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".BookmarkPicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_bookmarks"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".TemplatePicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_templates"
             android:theme="@style/Theme.Sherlock.Dialog"
-            android:icon="@drawable/icon_app"
+            android:icon="@drawable/placeholder_collection"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
@@ -121,19 +121,19 @@
         <activity
             android:name=".SignUpForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_signup"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".ProfileForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_profile"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".PasswordForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_password"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
@@ -145,14 +145,14 @@
         <activity
             android:name=".PictureBrowse"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
+            android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".Preferences"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
-            android:label="@string/name_app"
+            android:label="@string/form_title_preferences"
             android:theme="@android:style/Theme" >
             <intent-filter>
                 <action android:name="com.proxibase.aircandi.Preferences" />

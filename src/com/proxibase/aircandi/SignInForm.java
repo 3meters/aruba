@@ -12,10 +12,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
@@ -92,7 +94,7 @@ public class SignInForm extends FormActivity {
 		intentBuilder.setCommandType(CommandType.New);
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
-		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	public void onSignInButtonClick(View view) {

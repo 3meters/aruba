@@ -12,7 +12,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
@@ -47,6 +49,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new CandiListViewHolder();
 			holder.itemImage = (WebImageView) view.findViewById(R.id.item_image);
+			holder.itemImageCollection = (ImageView) view.findViewById(R.id.item_image_collection);
 			holder.itemTitle = (TextView) view.findViewById(R.id.item_title);
 			holder.itemSubtitle = (TextView) view.findViewById(R.id.item_subtitle);
 			holder.itemDescription = (TextViewEllipsizing) view.findViewById(R.id.item_description);
@@ -61,6 +64,16 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 		if (itemData != null) {
 			Entity entity = itemData;
 			holder.data = itemData;
+			if (holder.itemImageCollection != null) {
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+					if (entity.getMasterImageUri() != null && !entity.getMasterImageUri().toLowerCase().startsWith("resource:")) {
+						holder.itemImageCollection.setVisibility(View.VISIBLE);
+					}
+				}
+				else {
+					holder.itemImageCollection.setVisibility(View.GONE);
+				}
+			}
 			if (holder.itemTitle != null) {
 				if (entity.title != null && entity.title.length() > 0) {
 					holder.itemTitle.setText(entity.title);
@@ -170,6 +183,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 	public static class CandiListViewHolder {
 
 		public WebImageView			itemImage;
+		public ImageView			itemImageCollection;
 		public TextView				itemTitle;
 		public TextView				itemSubtitle;
 		public TextViewEllipsizing	itemDescription;

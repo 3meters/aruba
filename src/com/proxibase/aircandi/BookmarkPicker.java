@@ -8,9 +8,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -31,6 +33,7 @@ public class BookmarkPicker extends FormActivity implements OnItemClickListener 
 	private String			mUri;
 	private String			mUriTitle;
 	private String			mUriDescription;
+	private Button			mOkButton;
 	private BookmarkAdapter	mBookmarkAdapter;
 
 	@Override
@@ -52,18 +55,26 @@ public class BookmarkPicker extends FormActivity implements OnItemClickListener 
 		mListView.setOnItemClickListener(this);
 		mListView.setDivider(null);
 
+		mOkButton = (Button) findViewById(R.id.btn_ok);
 		mTextUri = (EditText) findViewById(R.id.text_uri);
+		mTextUri.addTextChangedListener(new SimpleTextWatcher() {
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				mOkButton.setEnabled(mOkButton.getText().length() > 0);
+			}
+		});
+		
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 		mUri = mBookmarkAdapter.getUrl(position);
 		mUriTitle = mBookmarkAdapter.getTitle(position);
-
-		doVerify();
+		mTextUri.setText(mUri);
 	}
 
-	public void onLinkGoClick(View view) {
+	public void onOkButtonClick(View view) {
 		mUri = mTextUri.getText().toString();
 		doVerify();
 	}

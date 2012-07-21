@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -16,24 +18,39 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.components.AircandiCommon;
+import com.proxibase.aircandi.components.AircandiCommon.ServiceOperation;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.CandiPagerAdapter;
 import com.proxibase.aircandi.components.CommandType;
+import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
+import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
+import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
+import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
 import com.proxibase.service.ProxiConstants;
+import com.proxibase.service.ProxibaseService;
+import com.proxibase.service.ProxibaseService.GsonType;
+import com.proxibase.service.ProxibaseService.RequestType;
+import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ProxibaseServiceException.ErrorCode;
+import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.GeoLocation;
+import com.proxibase.service.objects.Link;
 import com.proxibase.service.objects.ServiceData;
 import com.proxibase.service.objects.User;
 
@@ -61,18 +78,7 @@ public class CandiForm extends CandiActivity {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
-			if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByRadar) {
-				mCommon.setActionBarTitleAndIcon(null, R.string.navigation_radar, true);
-			}
-			else if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByUser) {
-				mCommon.setActionBarTitleAndIcon(null, R.string.navigation_mycandi, true);
-			}
-		}
-		else {
-			Entity collectionEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, mCommon.mCollectionType);
-			mCommon.setActionBarTitleAndIcon(collectionEntity, true);
-		}
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 
 		if (useProxiExplorer) {
 			/*
@@ -163,7 +169,7 @@ public class CandiForm extends CandiActivity {
 
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
-		overridePendingTransition(R.anim.slide_in_right_long, R.anim.slide_out_left_long);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiFormToCandiList);
 	}
 
 	public void onBrowseCommentsButtonClick(View view) {
@@ -176,6 +182,8 @@ public class CandiForm extends CandiActivity {
 			intentBuilder.setCollectionType(mCommon.mCollectionType);
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+
 		}
 		else {
 			onNewCommentButtonClick(view);
@@ -194,6 +202,7 @@ public class CandiForm extends CandiActivity {
 		intentBuilder.setEntityLocation(mCommon.mEntityLocation);
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	public void onImageClick(View view) {
@@ -211,7 +220,7 @@ public class CandiForm extends CandiActivity {
 			intent.setData(Uri.parse(mEntity.linkUri));
 		}
 		startActivity(intent);
-		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	public void onAddCandiButtonClick(View view) {
@@ -226,7 +235,7 @@ public class CandiForm extends CandiActivity {
 		intentBuilder.setCollectionType(mCommon.mCollectionType);
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
-		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	public void onNewCommentButtonClick(View view) {
@@ -236,7 +245,7 @@ public class CandiForm extends CandiActivity {
 			intentBuilder.setParentEntityId(mEntity.id);
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
-			overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 		}
 		else {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
@@ -278,19 +287,27 @@ public class CandiForm extends CandiActivity {
 						intentBuilder.setEntityType(entityType);
 						Intent redirectIntent = intentBuilder.create();
 						startActivity(redirectIntent);
-						overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+						AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 					}
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_CANDI_PICK) {
-				if (intent != null && intent.getExtras() != null) {
+				if (intent != null) {
+					String parentEntityIdNew = null;
 					Bundle extras = intent.getExtras();
-					final String parentEntityId = extras.getString(getString(R.string.EXTRA_ENTITY_ID));
-					if (parentEntityId != null && !parentEntityId.equals("")) {
-						/*
-						 * Update entity link and refresh parent entity info
-						 */
+					if (extras != null) {
+						parentEntityIdNew = extras.getString(getString(R.string.EXTRA_ENTITY_ID));
 					}
+					/*
+					 * If parent entity is null then the candi is being moved to the top on its own.
+					 * 
+					 * Special case: user could have a top level candi and choose to move it to
+					 * top so it's a no-op.
+					 */
+					if (parentEntityIdNew == null && mEntity.parent == null) {
+						return;
+					}
+					moveCandi(mEntity, parentEntityIdNew);
 				}
 			}
 		}
@@ -305,6 +322,7 @@ public class CandiForm extends CandiActivity {
 		final TextView title = (TextView) candiInfoView.findViewById(R.id.candi_info_title);
 		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_info_subtitle);
 		final WebImageView imageCandi = (WebImageView) candiInfoView.findViewById(R.id.candi_info_image);
+		final ImageView imageCollection = (ImageView) candiInfoView.findViewById(R.id.candi_info_image_collection);
 		final ViewGroup imageCandiHolder = (ViewGroup) candiInfoView.findViewById(R.id.candi_info_image_holder);
 		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_info_description);
 		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
@@ -314,6 +332,8 @@ public class CandiForm extends CandiActivity {
 		final Button newCandi = (Button) candiInfoView.findViewById(R.id.button_new);
 		final Button moveCandi = (Button) candiInfoView.findViewById(R.id.button_move);
 		final Button editCandi = (Button) candiInfoView.findViewById(R.id.button_edit);
+		final ViewGroup parentGroup = (ViewGroup) candiInfoView.findViewById(R.id.candi_info_parent_group);
+		final TextView parentText = (TextView) candiInfoView.findViewById(R.id.candi_info_parent_text);
 
 		final View holderChildren = (View) candiInfoView.findViewById(R.id.holder_button_children);
 		final WebImageView imageChildren = (WebImageView) candiInfoView.findViewById(R.id.button_children_image);
@@ -330,6 +350,14 @@ public class CandiForm extends CandiActivity {
 			ImageRequest imageRequest = builder.create();
 			imageCandi.setImageRequest(imageRequest);
 			imageCandiHolder.setVisibility(View.VISIBLE);
+			if (imageCollection != null) {
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+					imageCollection.setVisibility(View.VISIBLE);
+				}
+				else {
+					imageCollection.setVisibility(View.INVISIBLE);
+				}
+			}
 		}
 		else {
 			imageCandiHolder.setVisibility(View.GONE);
@@ -345,6 +373,15 @@ public class CandiForm extends CandiActivity {
 			authorBlock.setVisibility(View.GONE);
 		}
 
+		/* Parent info */
+		if (parentGroup != null && entity.parent == null && entity.parentId == null) {
+			parentGroup.setVisibility(View.GONE);
+		}
+		else {
+			parentGroup.setVisibility(View.VISIBLE);
+			parentText.setText("Candipatch: " + entity.parent.label);
+		}
+
 		/* Adjust buttons */
 
 		newCandi.setVisibility(View.GONE);
@@ -353,7 +390,7 @@ public class CandiForm extends CandiActivity {
 		editCandi.setVisibility(View.GONE);
 		holderChildren.setVisibility(View.GONE);
 		if (!entity.locked) {
-			if (entity.root) {
+			if (entity.parent == null) {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 					newCandi.setVisibility(View.VISIBLE);
 				}
@@ -373,7 +410,7 @@ public class CandiForm extends CandiActivity {
 			}
 		}
 
-		boolean visibleChildren = (entity.children != null && (entity.hasVisibleChildren()) || (entity.childCount != null && entity.childCount > 0));
+		boolean visibleChildren = (entity.children != null && entity.hasVisibleChildren());
 		if (visibleChildren) {
 			Entity childEntity = entity.children.get(0);
 
@@ -387,7 +424,7 @@ public class CandiForm extends CandiActivity {
 			imageChildren.setImageRequest(imageRequest);
 
 			/* child count */
-			textChildren.setText(String.valueOf(entity.childCount));
+			textChildren.setText(String.valueOf(entity.children.size()));
 
 			holderChildren.setVisibility(View.VISIBLE);
 		}
@@ -500,7 +537,151 @@ public class CandiForm extends CandiActivity {
 	private void showCandiPicker() {
 		Intent intent = new Intent(this, CandiPicker.class);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_PICK);
-		overridePendingTransition(R.anim.form_in, R.anim.browse_out);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	}
+
+	private void moveCandi(final Entity entityToMove, final String parentEntityIdNew) {
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				//mCommon.showProgressDialog(true, getString(R.string.progress_moving));
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				ServiceResponse serviceResponse = new ServiceResponse();
+				Bundle parameters = new Bundle();
+
+				/* We could be relinking to either another entity or a beacon */
+				Link link = new Link();
+				if (parentEntityIdNew == null) {
+					link.toId = entityToMove.beacon.id;
+					link.fromId = entityToMove.id;
+				}
+				else {
+					link.toId = parentEntityIdNew;
+					link.fromId = entityToMove.id;
+				}
+				parameters.putString("link",
+						"object:" + ProxibaseService.convertObjectToJson(link, GsonType.ProxibaseService));
+
+				/* Entity */
+				parameters.putString("originalToId", entityToMove.parent != null ? entityToMove.parent.id : entityToMove.beacon.id);
+
+				ServiceRequest serviceRequest = new ServiceRequest();
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateLink")
+						.setRequestType(RequestType.Method)
+						.setParameters(parameters)
+						.setSession(Aircandi.getInstance().getUser().session)
+						.setResponseFormat(ResponseFormat.Json);
+
+				serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
+				return serviceResponse;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				//mCommon.showProgressDialog(false, null);
+				if (serviceResponse.responseCode != ResponseCode.Success) {
+					if (serviceResponse.exception.getErrorCode() == ErrorCode.SessionException) {
+						AircandiCommon.showAlertDialog(R.drawable.icon_app
+								, getResources().getString(R.string.alert_session_expired_title)
+								, getResources().getString(R.string.alert_session_expired_message)
+								, CandiForm.this, android.R.string.ok, null, new OnClickListener() {
+
+									public void onClick(DialogInterface dialog, int which) {}
+								});
+					}
+					else {
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiMove, CandiForm.this);
+					}
+				}
+				else {
+					/*
+					 * Fixup the entity model.
+					 * 
+					 * - Could have moved to a different parent
+					 * - Could have moved from parent to top
+					 * - Could have moved from top to a parent
+					 * 
+					 * The entity we have been passed could have come from radar or user collections so we
+					 * need to look it up for each.
+					 */
+					Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entityToMove.id, CollectionType.CandiByRadar);
+					if (parentEntityIdNew == null) {
+						/*
+						 * Moving to top. We assume beacon has been set to the beacon used by the original parent.
+						 */
+						Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel().getEntityById(entity.parent.id, CollectionType.CandiByRadar);
+						parentEntityOriginal.children.remove(entity);
+						entity.beacon.entities.add(entity);
+						entity.parent = null;
+						entity.parentId = null;
+					}
+					else {
+						/*
+						 * Moving to parent
+						 */
+						Entity parentEntityNew = ProxiExplorer.getInstance().getEntityModel().getEntityById(parentEntityIdNew, CollectionType.CandiByRadar);
+						if (entity.parent != null) {
+							Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
+									.getEntityById(entity.parent.id, CollectionType.CandiByRadar);
+							parentEntityOriginal.children.remove(entity);
+						}
+						parentEntityNew.children.add(entity);
+						entity.parent = parentEntityNew;
+						entity.parentId = parentEntityNew.id;
+						if (parentEntityNew.children.size() > 1) {
+							Collections.sort(parentEntityNew.children, new EntityList.SortEntitiesByModifiedDate());
+						}
+					}
+
+					/* The user candi collection might not be populated yet */
+					entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entityToMove.id, CollectionType.CandiByUser);
+					if (entity != null) {
+						if (parentEntityIdNew == null) {
+							/*
+							 * Moving to top. User candi are not associated with beacons.
+							 */
+							Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
+									.getEntityById(entity.parent.id, CollectionType.CandiByUser);
+							parentEntityOriginal.children.remove(entity);
+							entity.parent = null;
+							entity.parentId = null;
+						}
+						else {
+							/*
+							 * Moving to parent.
+							 */
+							if (entity.parent != null) {
+								Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
+										.getEntityById(entity.parent.id, CollectionType.CandiByUser);
+								parentEntityOriginal.children.remove(entity);
+							}
+							Entity parentEntityNew = ProxiExplorer.getInstance().getEntityModel().getEntityById(parentEntityIdNew, CollectionType.CandiByUser);
+							/* For user candi, we might be moving to a parent that isn't in the user candi. */
+							if (parentEntityNew != null) {
+								parentEntityNew.children.add(entity);
+								entity.parent = parentEntityNew;
+								entity.parentId = parentEntityNew.id;
+								if (parentEntityNew.children.size() > 1) {
+									Collections.sort(parentEntityNew.children, new EntityList.SortEntitiesByModifiedDate());
+								}
+							}
+						}
+					}
+
+					ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
+					ImageUtils.showToastNotification(getString(R.string.alert_moved), Toast.LENGTH_SHORT);
+					bind(true);
+				}
+			}
+		}.execute();
+
 	}
 
 	// --------------------------------------------------------------------------------------------
