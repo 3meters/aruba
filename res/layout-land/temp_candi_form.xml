@@ -57,19 +57,16 @@
                     aircandi:maxHeight="60dp"
                     aircandi:maxWidth="60dp"
                     android:gravity="bottom|right"
-                    android:src="@drawable/placeholder_collection"
+                    android:src="@drawable/ic_collection_250"
                     android:visibility="visible" />
 
-                <LinearLayout
-                    android:layout_width="250px"
-                    android:layout_height="250px"
-                    android:gravity="bottom|right" >
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/zoom_light" />
-                </LinearLayout>
+                <ImageView
+                    android:id="@+id/candi_info_image_zoom"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignBottom="@+id/candi_info_image"
+                    android:layout_alignRight="@+id/candi_info_image"
+                    android:src="@drawable/ic_zoom_light" />
             </RelativeLayout>
 
             <LinearLayout
@@ -153,7 +150,7 @@
                             android:layout_alignParentLeft="true"
                             android:background="@drawable/app_image_selector"
                             android:scaleType="centerInside"
-                            android:src="@drawable/placeholder_collection" />
+                            android:src="@drawable/ic_collection_250" />
 
                         <TextView
                             android:id="@+id/candi_info_parent_text"

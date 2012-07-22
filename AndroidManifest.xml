@@ -109,7 +109,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_templates"
             android:theme="@style/Theme.Sherlock.Dialog"
-            android:icon="@drawable/placeholder_collection"
+            android:icon="@drawable/ic_collection_250"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity

@@ -185,7 +185,7 @@ public class EntityForm extends FormActivity {
 			else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 				entity.title = getString(R.string.entity_collection_title);
 				entity.label = entity.title;
-				entity.imagePreviewUri = "resource:placeholder_collection";
+				entity.imagePreviewUri = "resource:ic_collection_250";
 				entity.imageUri = entity.imagePreviewUri;
 			}
 			mEntityForForm = entity;

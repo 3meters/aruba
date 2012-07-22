@@ -782,10 +782,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 				candiModel.getEntity().description != null &&
 				candiModel.getEntity().description.length() > 0) {
 			if (!isReflection) {
-				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0xcc000000, 175, 5, candiModel.getEntity().description, false, false);
+				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x99000000, 175, 5, candiModel.getEntity().description, false, false);
 			}
 			else {
-				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0xcc000000, -45, 5, candiModel.getEntity().description, true, true);
+				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x00000000, -45, 5, candiModel.getEntity().description, true, true);
 			}
 		}
 		/*
@@ -795,7 +795,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 			if (candiModel.getEntity().getMasterImageUri() == null
 					|| !candiModel.getEntity().getMasterImageUri().toLowerCase().startsWith("resource:")) {
-				String resolvedResourceName = ImageManager.getInstance().resolveResourceName("placeholder_collection");
+				String resolvedResourceName = ImageManager.getInstance().resolveResourceName("ic_collection_250");
 				int resourceId = ImageManager.getInstance().getActivity().getResources()
 						.getIdentifier(resolvedResourceName, "drawable", "com.proxibase.aircandi");
 				Bitmap overlay = ImageManager.getInstance().loadBitmapFromResources(resourceId);

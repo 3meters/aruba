@@ -171,6 +171,7 @@
     
     <!-- CandiMap -->
 
+    <string name="candi_map_label_collections">Collections:</string>
     <string name="candi_map_label_pictures">Pictures:</string>
     <string name="candi_map_label_posts">Posts:</string>
     <string name="candi_map_label_links">Links:</string>

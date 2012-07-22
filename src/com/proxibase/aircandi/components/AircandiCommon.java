@@ -589,7 +589,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 				@Override
 				public void run() {
-					image.setBackgroundResource(R.drawable.busy_anim_dark);
+					if (mThemeTone.equals("dark")) {
+						image.setBackgroundResource(R.drawable.busy_anim_dark);
+					}
+					else if (mThemeTone.equals("light")) {
+						image.setBackgroundResource(R.drawable.busy_anim_light);
+					}
 					final AnimationDrawable animation = (AnimationDrawable) image.getBackground();
 					animation.start();
 				}

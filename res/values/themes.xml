@@ -13,8 +13,7 @@
         <item name="busy">@drawable/busy_anim_dark</item>
         <item name="textColorFocused">@color/pager_indicator_text_focused_dark</item>
         <item name="textColorUnfocused">@color/pager_indicator_text_unfocused_dark</item>
-        <item name="textureBodyZone">gfx/trans_30_dark.png</item>
-        <item name="textureBusyIndicator">gfx/busyspritesIV_dark.png</item>
+        <item name="textureBodyZone">@raw/trans_30_dark</item>
         <item name="textColorTitle">@color/text_dark</item>
         <item name="textColorFormTitle">@color/text_dark</item>
         <item name="textColorButton">@color/text_dark</item>
@@ -27,10 +26,6 @@
         <item name="iconRefresh">@drawable/icon_refresh_dark</item>
         <item name="iconNew">@drawable/icon_new_dark</item>
         <item name="iconBack">@drawable/icon_back_dark</item>
-        <item name="iconPost">@drawable/icon_post</item>
-        <item name="iconPicture">@drawable/icon_picture</item>
-        <item name="iconLink">@drawable/icon_link</item>
-        <item name="iconMap">@drawable/icon_map_32</item>
         <item name="iconLocation">@drawable/ic_location_dark</item>
 		<item name="iconBookmarks">@drawable/ic_search_dark</item>
 		<item name="iconSearch">@drawable/ic_search_dark</item>
@@ -89,8 +84,7 @@
         <item name="android:textColorHint">@color/edit_hint</item>
         <item name="textColorFocused">@color/pager_indicator_text_focused_light</item>
         <item name="textColorUnfocused">@color/pager_indicator_text_unfocused_light</item>
-        <item name="textureBodyZone">gfx/trans_30_light.png</item>
-        <item name="textureBusyIndicator">gfx/busyspritesIV_light.png</item>
+        <item name="textureBodyZone">@raw/trans_30_light</item>
         <item name="textColorTitle">@color/text_light</item>
         <item name="textColorFormTitle">@color/text_light</item>
         <item name="textColorButton">@color/text_light</item>
@@ -103,10 +97,6 @@
         <item name="iconRefresh">@drawable/icon_refresh_light</item>
         <item name="iconNew">@drawable/icon_new_light</item>
         <item name="iconBack">@drawable/icon_back_light</item>
-        <item name="iconPost">@drawable/icon_post</item>
-        <item name="iconPicture">@drawable/icon_picture</item>
-        <item name="iconLink">@drawable/icon_link</item>
-        <item name="iconMap">@drawable/icon_map_32</item>
         <item name="iconLocked">@drawable/ic_locked_light</item>
         <item name="iconProfile">@drawable/placeholder_user_light</item>
         <item name="iconLocation">@drawable/ic_location_light</item>
@@ -189,7 +179,6 @@
         <item name="iconRefresh">@drawable/icon_refresh_dark</item>
         <item name="iconNew">@drawable/icon_new_dark</item>
         <item name="iconBack">@drawable/icon_back_dark</item>
-        <item name="iconLocked">@drawable/icon_lock_dark</item>
         <item name="iconProfile">@drawable/placeholder_user_dark</item>
         <item name="iconLocation">@drawable/ic_location_dark</item>
 		<item name="iconBookmarks">@drawable/ic_search_dark</item>

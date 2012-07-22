@@ -79,6 +79,7 @@ import com.proxibase.aircandi.components.CountDownTimer;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.ImageManager;
+import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
@@ -129,8 +130,7 @@ public class CandiPatchPresenter implements Observer {
 	private boolean					mRenderingActive		= true;
 	private RenderCountDownTimer	mRenderingTimer;
 
-	private String					mStyleTextureBodyZone;
-	private String					mStyleTextureBusyIndicator;
+	private Integer					mStyleTextureBodyZoneResId;
 	private String					mStyleTextColorTitle;
 
 	// --------------------------------------------------------------------------------------------
@@ -321,17 +321,10 @@ public class CandiPatchPresenter implements Observer {
 	private void loadStyles() {
 		TypedValue resourceName = new TypedValue();
 		if (mContext.getTheme().resolveAttribute(R.attr.textureBodyZone, resourceName, true)) {
-			mStyleTextureBodyZone = (String) resourceName.coerceToString();
+			mStyleTextureBodyZoneResId = (Integer) resourceName.resourceId;
 		}
 		else {
 			throw new IllegalStateException("Placeholder texture was not found in the current theme");
-		}
-
-		if (mContext.getTheme().resolveAttribute(R.attr.textureBusyIndicator, resourceName, true)) {
-			mStyleTextureBusyIndicator = (String) resourceName.coerceToString();
-		}
-		else {
-			throw new IllegalStateException("Busy indicator texture was not found in the current theme");
 		}
 
 		if (mContext.getTheme().resolveAttribute(R.attr.textColorTitle, resourceName, true)) {
@@ -710,7 +703,7 @@ public class CandiPatchPresenter implements Observer {
 		if (zoneModel.getViewStateNext().isVisible() && zoneModel.countObservers() == 0) {
 
 			final ZoneView zoneView = new ZoneView(zoneModel, CandiPatchPresenter.this);
-			zoneView.setTitleTextColor(Color.parseColor(getStyleTextColorTitle()));
+			zoneView.setTitleTextColor(Color.parseColor(mStyleTextColorTitle));
 			zoneView.setTitleTextFillColor(Color.TRANSPARENT);
 
 			/* Link view to the model */
@@ -1635,28 +1628,33 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Textures that are shared by zone views */
 		Bitmap zoneBodyBitmap = null;
-		zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
+		zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromResources(Integer.valueOf(mStyleTextureBodyZoneResId));
+		
 		if (zoneBodyBitmap != null) {
+			zoneBodyBitmap = ImageUtils.scaleAndCropBitmap(zoneBodyBitmap, CandiConstants.CANDI_VIEW_WIDTH, ImageShape.Square);
+			
 			Bitmap zoneReflectionBitmap = ImageUtils.makeReflection(zoneBodyBitmap, true);
 
-			mZoneBodyTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(zoneBodyBitmap, mStyleTextureBodyZone,
+			mZoneBodyTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(zoneBodyBitmap, "zone_body",
 					new IBitmapAdapter() {
 
 						@Override
 						public Bitmap reloadBitmap() {
 							Bitmap zoneBodyBitmap = null;
-							zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
+							zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromResources(Integer.valueOf(mStyleTextureBodyZoneResId));
+							zoneBodyBitmap = ImageUtils.scaleAndCropBitmap(zoneBodyBitmap, CandiConstants.CANDI_VIEW_WIDTH, ImageShape.Square);
 							return zoneBodyBitmap;
 						}
 					}), 0, 0);
 
-			mZoneReflectionTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(zoneReflectionBitmap, mStyleTextureBodyZone,
+			mZoneReflectionTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(zoneReflectionBitmap, "zone_body",
 					new IBitmapAdapter() {
 
 						@Override
 						public Bitmap reloadBitmap() {
 							Bitmap zoneBodyBitmap = null;
-							zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromAssets(mStyleTextureBodyZone);
+							zoneBodyBitmap = ImageManager.getInstance().loadBitmapFromResources(Integer.valueOf(mStyleTextureBodyZoneResId));
+							zoneBodyBitmap = ImageUtils.scaleAndCropBitmap(zoneBodyBitmap, CandiConstants.CANDI_VIEW_WIDTH, ImageShape.Square);
 							if (zoneBodyBitmap != null) {
 								Bitmap zoneReflectionBitmap = ImageUtils.makeReflection(zoneBodyBitmap, true);
 								return zoneReflectionBitmap;
@@ -1667,7 +1665,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Scene progress sprite */
-		mPlaceholderTextureRegion = TextureRegionFactory.createFromAsset(mTexture, mContext, mStyleTextureBodyZone, 256, 0);
+		mPlaceholderTextureRegion = TextureRegionFactory.createFromResource(mTexture, mContext, Integer.valueOf(mStyleTextureBodyZoneResId), 256, 0);
 	}
 
 	public void resetTextures(TextureReset textureReset) {
@@ -1792,14 +1790,6 @@ public class CandiPatchPresenter implements Observer {
 
 	public ChaseCamera getCamera() {
 		return mCamera;
-	}
-
-	public String getStyleTextureBodyZone() {
-		return this.mStyleTextureBodyZone;
-	}
-
-	public String getStyleTextureBusyIndicator() {
-		return this.mStyleTextureBusyIndicator;
 	}
 
 	public String getStyleTextColorTitle() {

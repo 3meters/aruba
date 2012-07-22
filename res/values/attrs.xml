@@ -31,8 +31,7 @@
         <attr name="itemLayout" />
     </declare-styleable>
     <declare-styleable name="CandiRadar">
-        <attr name="textureBodyZone" format="string" />
-        <attr name="textureBusyIndicator" format="string" />
+        <attr name="textureBodyZone" format="reference" />
         <attr name="textColorTitle" format="string" />
         <attr name="textColorButton" format="color" />
         <attr name="textColorButtonHeader" format="color" />

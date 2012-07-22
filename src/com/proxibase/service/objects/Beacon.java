@@ -50,6 +50,8 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable{
 	public Integer			postCount;									
 	@Expose(serialize = false, deserialize = true)
 	public Integer			linkCount;									
+	@Expose(serialize = false, deserialize = true)
+	public Integer			collectionCount;									
 
 	// For client use only
 	public int				scanLevelDb;

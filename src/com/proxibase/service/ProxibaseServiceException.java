@@ -73,8 +73,8 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 	 */
 	@Override
 	public String toString() {
-		return "Http Status Code: " + getHttpStatusCode() + ", "
-				+ "Proxi Error Code: " + getErrorCode() + ", "
+		return "Http Status Code: " + mHttpStatusCode + ", "
+				+ "Proxi Error Code: " + mErrorCode + ", "
 				+ "Proxi Error Message: " + getMessage();
 	}
 

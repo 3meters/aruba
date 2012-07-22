@@ -44,8 +44,8 @@ public class CandiSprite extends Sprite {
 
 	@Override
 	public boolean onAreaTouched(final TouchEvent sceneTouchEvent, final float touchAreaLocalX, final float touchAreaLocalY) {
-		if (getGestureDetector() != null)
-			return getGestureDetector().onTouchEvent(sceneTouchEvent.getMotionEvent());
+		if (mGestureDetector != null)
+			return mGestureDetector.onTouchEvent(sceneTouchEvent.getMotionEvent());
 		else
 			return false;
 	}

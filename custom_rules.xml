@@ -86,10 +86,10 @@
                         in.package="${out.unaligned.file}"
                         out.package="${out.final.file}" />
                 
-                <!-- Extra copy to website 
+                <!-- Extra copy to website 				-->
+                 
 				<copy file="${out.final.file}" toDir="${web.dir}" overwrite="true" />				
 				<copy file="${out.final.file}" toDir="${web.local.dir}" overwrite="true" />
-				-->
 				
                 <echo level="info">Release Package: ${out.final.file}</echo>
             </sequential>

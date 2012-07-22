@@ -164,7 +164,7 @@ public class ImageLoader {
 		}
 
 		/* Start thread if it's not started yet */
-		if (mImageLoaderThread.getState() == Thread.State.NEW) {
+		if (mImageLoaderThread.getState() == Thread.State.NEW && !mImageLoaderThread.isAlive()) {
 			mImageLoaderThread.start();
 		}
 	}

@@ -36,7 +36,7 @@
         aircandi:maxHeight="60dp"
         aircandi:maxWidth="60dp"      
         android:visibility="visible"   
-        android:src="@drawable/placeholder_collection" />
+        android:src="@drawable/ic_collection_250" />
     
     <com.proxibase.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_title"

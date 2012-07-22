@@ -62,14 +62,17 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		if (mapBeacon != null) {
 			
 			message = "";
+			if (mapBeacon.collectionCount > 0) {
+				message += Aircandi.applicationContext.getString(R.string.candi_map_label_collections) + " " + String.valueOf(mapBeacon.collectionCount) + "\n";
+			}
+			if (mapBeacon.linkCount > 0) {
+				message += Aircandi.applicationContext.getString(R.string.candi_map_label_links) + " " + String.valueOf(mapBeacon.linkCount) + "\n";
+			}
 			if (mapBeacon.pictureCount > 0) {
 				message += Aircandi.applicationContext.getString(R.string.candi_map_label_pictures) + " " + String.valueOf(mapBeacon.pictureCount) + "\n";
 			}
 			if (mapBeacon.postCount > 0) {
 				message += Aircandi.applicationContext.getString(R.string.candi_map_label_posts) + " " + String.valueOf(mapBeacon.postCount) + "\n";
-			}
-			if (mapBeacon.linkCount > 0) {
-				message += Aircandi.applicationContext.getString(R.string.candi_map_label_links) + " " + String.valueOf(mapBeacon.linkCount) + "\n";
 			}
 		}
 

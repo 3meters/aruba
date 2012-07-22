@@ -2,6 +2,7 @@ package com.proxibase.aircandi;
 
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
@@ -27,12 +28,12 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AnimUtils;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.CandiItemizedOverlay;
 import com.proxibase.aircandi.components.GeoLocationManager;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
-import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
@@ -251,10 +252,10 @@ public class CandiMap extends SherlockMapActivity {
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
 
-	/*
-	 * These are here because CandiMap does not extend CandiActivity
-	 */
 	public boolean onCreateOptionsMenu(Menu menu) {
+		/*
+		 * These are here instead of common because CandiMap does not extend CandiActivity
+		 */
 		mCommon.doCreateOptionsMenu(menu);
 		return true;
 	}
@@ -394,6 +395,7 @@ public class CandiMap extends SherlockMapActivity {
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressLint("NewApi")
 	@Override
 	protected void onRestart() {
 		Logger.d(this, "CandiActivity restarting");
@@ -410,7 +412,8 @@ public class CandiMap extends SherlockMapActivity {
 			mCommon.setActiveTab(2);
 
 			/* User could have changed */
-			invalidateOptionsMenu();
+			/* Make sure onPrepareOptionsMenu gets called (since api 11) */
+			((SherlockMapActivity) this).invalidateOptionsMenu();
 		}
 	}
 

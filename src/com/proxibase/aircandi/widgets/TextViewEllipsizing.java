@@ -26,7 +26,7 @@ public class TextViewEllipsizing extends TextView {
 	private boolean							isStale;
 	private boolean							programmaticChange;
 	private String							fullText;
-	private int								maxLines						= -1;
+	private int								mMaxLines						= -1;
 	private float							lineSpacingMultiplier			= 1.0f;
 	private float							lineAdditionalVerticalPadding	= 0.0f;
 	private boolean							mMirrorText						= false;
@@ -61,12 +61,12 @@ public class TextViewEllipsizing extends TextView {
 	@Override
 	public void setMaxLines(int maxLines) {
 		super.setMaxLines(maxLines);
-		this.maxLines = maxLines;
+		this.mMaxLines = maxLines;
 		isStale = true;
 	}
 
 	public int getMaxLines() {
-		return maxLines;
+		return mMaxLines;
 	}
 
 	@Override
@@ -110,7 +110,7 @@ public class TextViewEllipsizing extends TextView {
 	}
 
 	private void resetText() {
-		int maxLines = getMaxLines();
+		int maxLines = mMaxLines;
 		String workingText = fullText;
 		boolean ellipsized = false;
 		try {

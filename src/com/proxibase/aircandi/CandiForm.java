@@ -49,6 +49,7 @@ import com.proxibase.service.ProxibaseService.ResponseFormat;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ServiceRequest;
 import com.proxibase.service.objects.Entity;
+import com.proxibase.service.objects.Entity.ImageFormat;
 import com.proxibase.service.objects.GeoLocation;
 import com.proxibase.service.objects.Link;
 import com.proxibase.service.objects.ServiceData;
@@ -323,6 +324,7 @@ public class CandiForm extends CandiActivity {
 		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_info_subtitle);
 		final WebImageView imageCandi = (WebImageView) candiInfoView.findViewById(R.id.candi_info_image);
 		final ImageView imageCollection = (ImageView) candiInfoView.findViewById(R.id.candi_info_image_collection);
+		final ImageView imageZoom = (ImageView) candiInfoView.findViewById(R.id.candi_info_image_zoom);
 		final ViewGroup imageCandiHolder = (ViewGroup) candiInfoView.findViewById(R.id.candi_info_image_holder);
 		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_info_description);
 		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
@@ -341,26 +343,42 @@ public class CandiForm extends CandiActivity {
 
 		/* Candi image */
 
-		if (entity.imageUri != null || entity.linkUri != null) {
+		if (imageCollection != null) {
+			imageCollection.setVisibility(View.INVISIBLE);
+		}
+
+		if (entity.imageUri != null
+				|| entity.linkUri != null
+				|| entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+			String imageUri = entity.getMasterImageUri();
+			ImageFormat imageFormat = entity.getMasterImageFormat();
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+				imageUri = "resource:ic_post_v2_250";
+				imageFormat = ImageFormat.Binary;
+			}
 			ImageRequestBuilder builder = new ImageRequestBuilder(imageCandi);
-			builder.setImageUri(entity.getMasterImageUri());
-			builder.setImageFormat(entity.getMasterImageFormat());
+			builder.setImageUri(imageUri);
+			builder.setImageFormat(imageFormat);
 			builder.setLinkZoom(entity.linkZoom);
 			builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
 			ImageRequest imageRequest = builder.create();
 			imageCandi.setImageRequest(imageRequest);
 			imageCandiHolder.setVisibility(View.VISIBLE);
-			if (imageCollection != null) {
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
-					imageCollection.setVisibility(View.VISIBLE);
-				}
-				else {
-					imageCollection.setVisibility(View.INVISIBLE);
-				}
+		}
+
+		if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+			if (entity.getMasterImageUri() == null
+					|| !entity.getMasterImageUri().toLowerCase().startsWith("resource:")) {
+				imageCollection.setVisibility(View.VISIBLE);
+			}
+			else {
+				imageCandi.setClickable(false);
+				imageZoom.setVisibility(View.GONE);
 			}
 		}
-		else {
-			imageCandiHolder.setVisibility(View.GONE);
+		else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+			imageCandi.setClickable(false);
+			imageZoom.setVisibility(View.GONE);
 		}
 
 		/* Author block */

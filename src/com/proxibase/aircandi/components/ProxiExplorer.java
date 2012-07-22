@@ -339,7 +339,7 @@ public class ProxiExplorer {
 
 			/* Merge entities into data model */
 			mEntityModel.mergeEntities(entities, beaconIdsNew, beaconIdsRefresh, false);
-			ProxiExplorer.getInstance().getEntityModel().getEntities().setCollectionType(CollectionType.CandiByRadar);
+			mEntityModel.getEntities().setCollectionType(CollectionType.CandiByRadar);
 		}
 		return serviceResponse;
 	}

@@ -38,7 +38,7 @@
         aircandi:maxHeight="60dp"
         aircandi:maxWidth="60dp"      
         android:visibility="gone"   
-        android:src="@drawable/placeholder_collection" />
+        android:src="@drawable/ic_collection_250" />
     
     <TextView
         android:id="@+id/item_title"

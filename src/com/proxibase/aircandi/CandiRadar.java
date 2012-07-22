@@ -164,7 +164,7 @@ import com.proxibase.service.objects.User;
  * Bitmap Management
  * 
  * gc calls are evil but necessary sometimes. It forces code exection to stop while
- * the gc makes an explicit garbage pass. Behavior may be a bit different with 
+ * the gc makes an explicit garbage pass. Behavior may be a bit different with
  * the introduction of concurrent gc in Gingerbread (v2.3)
  * 
  * Explicit gc calls to free bitmap memory:
@@ -1261,12 +1261,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	@Override
 	public void onLoadResources() {
 		SoundFactory.setAssetBasePath("sfx/");
-		try {
-			mCandiAlertSound = SoundFactory.createSoundFromAsset(mEngine.getSoundManager(), this, "notification2.mp3");
-		}
-		catch (final IOException e) {
-			e.printStackTrace();
-		}
+		//			mCandiAlertSound = SoundFactory.createSoundFromAsset(mEngine.getSoundManager(), this, "notification2.mp3");
+		mCandiAlertSound = SoundFactory.createSoundFromResource(mEngine.getSoundManager(), this, R.raw.notification_candi_discovered);
 		mEngine.getTextureManager().setTextureListener(this);
 	}
 
@@ -1467,7 +1463,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				 * - Change in user which effects which candi and UI should be visible.
 				 * - User profile could have been updated and we don't catch that.
 				 */
-				if (!Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
+				if (Aircandi.getInstance().getUser() == null
+						|| !Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
 						|| ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
 						|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 					Logger.i(this, "CandiRadarActivity detected entity model change");

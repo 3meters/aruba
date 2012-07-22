@@ -404,7 +404,7 @@ public abstract class FormActivity extends SherlockActivity {
 					/* Tag has the uri to use for the placeholder */
 					String imageUri = "resource:placeholder_picture";
 					if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
-						imageUri = "resource:placeholder_collection";
+						imageUri = "resource:ic_collection_250";
 					}
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
 					builder.setFromUris(imageUri, null);
