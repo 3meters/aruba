@@ -64,8 +64,8 @@
         </activity>
         <activity
             android:name=".CandiList"
-            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity

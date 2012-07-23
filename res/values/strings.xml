@@ -26,7 +26,8 @@
     <string name="EXTRA_COLLECTION_ID">com.proxibase.aircandi.EXTRA_COLLECTION_ID</string>
     <string name="EXTRA_THEME_ID">com.proxibase.aircandi.EXTRA_THEME_ID</string>
     <string name="EXTRA_COMMAND_TYPE">com.proxibase.aircandi.EXTRA_COMMAND_TYPE</string>
-
+    <string name="EXTRA_NAVIGATION_TOP">com.proxibase.aircandi.EXTRA_NAVIGATION_TOP</string>
+    
     <!-- Menus -->
 
     <string name="menu_beacons_item">Beacons</string>

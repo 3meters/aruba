@@ -133,6 +133,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public EventHandler					mEventScanReceived;
 	private EventHandler				mEventLocationChanged;
 	public String						mPageName;
+	public Boolean						mNavigationTop				= false;
+	public Boolean						mConfigChange = false;
 	private CandiPatchModel				mCandiPatchModel;
 	private CandiPatchPresenter			mCandiPatchPresenter;
 
@@ -273,6 +275,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			mMessage = extras.getString(mContext.getString(R.string.EXTRA_MESSAGE));
 			mThemeId = extras.getInt(mContext.getString(R.string.EXTRA_THEME_ID));
 			mCollectionId = extras.getString(mContext.getString(R.string.EXTRA_COLLECTION_ID));
+			mNavigationTop = extras.getBoolean(mContext.getString(R.string.EXTRA_NAVIGATION_TOP));
 
 			String collectionType = extras.getString(mContext.getString(R.string.EXTRA_COLLECTION_TYPE));
 			if (collectionType != null) {
@@ -985,6 +988,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 
 	public void manageTabs() {
+		Logger.i(this, "Building tabs: " + mPageName);		
 		if (mPageName.equals("CandiRadar")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
 			setActiveTab(0);
@@ -1104,16 +1108,20 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void setActiveTab(int position) {
+		Logger.i(this, "Setting active tab: " + String.valueOf(position));
 		mActionBar.getTabAt(position).select();
 	}
 
 	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		Logger.i(this, "onTabSelected: " + tab.getTag());
 		if (tab.getTag().equals(R.string.radar_tab_radar)) {
 			if (Aircandi.getInstance().getCandiTask() != CandiTask.RadarCandi) {
 				Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
 
-				Intent intent = new Intent(mActivity, CandiRadar.class);
+				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiRadar.class);
+				intentBuilder.setNavigationTop(true);
+				Intent intent = intentBuilder.create();
 				/*
 				 * Radar is the root task so the back button will always end here. From radar the back
 				 * button kills the application and returns to the launcher (home).
@@ -1131,8 +1139,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 				Aircandi.getInstance().setCandiTask(CandiTask.MyCandi);
 
 				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiList.class);
-				intentBuilder.setCollectionType(ProxiExplorer.CollectionType.CandiByUser);
-				intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
+				intentBuilder.setNavigationTop(true)
+						.setCollectionType(ProxiExplorer.CollectionType.CandiByUser)
+						.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
 				Intent intent = intentBuilder.create();
 				/*
 				 * These flags put this on the stack as a new task and hitting back will
@@ -1149,6 +1158,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				Aircandi.getInstance().setCandiTask(CandiTask.Map);
 
 				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiMap.class);
+				intentBuilder.setNavigationTop(true);
 				Intent intent = intentBuilder.create();
 				/*
 				 * These flags put this on the stack as a new task and hitting back will
@@ -1175,43 +1185,55 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	@Override
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {
-		/*
-		 * Reselecting a tab should take the user to the top of the
-		 * hierarchy but not refresh data.
-		 * 
-		 * This seems to get fired without user interaction when first
-		 * displayed in landscape mode.
-		 */
-		// if (tab.getTag().equals(R.string.radar_tab_radar)) {
-		// if (mPageName.equals("CandiRadar")) {
-		// if (mCandiPatchModel != null && mCandiPatchModel.getCandiRootCurrent() != null
-		// && mCandiPatchModel.getCandiRootCurrent().getParent() != null) {
-		// ((CandiRadar) mActivity).navigateUp();
-		// }
-		// }
-		// else {
-		// Intent intent = new Intent(mActivity, CandiRadar.class);
-		// /* Flags let us use existing instance of radar if its already around */
-		// intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		// intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		// mActivity.startActivity(intent);
-		// mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-		// }
-		// }
-		// else if (tab.getTag().equals(R.string.radar_tab_mycandi)) {
-		// IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiList.class);
-		// intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
-		// intentBuilder.setCollectionType(mCollectionType);
-		// Intent intent = intentBuilder.create();
-		// mActivity.startActivity(intent);
-		// mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-		// }
-		// else if (tab.getTag().equals(R.string.radar_tab_map)) {
-		// IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiMap.class);
-		// Intent intent = intentBuilder.create();
-		// mActivity.startActivity(intent);
-		// mActivity.overridePendingTransition(R.anim.fade_in_medium, R.anim.hold);
-		// }
+		Logger.i(this, "onTabReselected: " + tab.getText() + ", Top: " + String.valueOf(mNavigationTop));
+
+//		/*
+//		 * Reselecting a tab should take the user to the top of the
+//		 * hierarchy but not refresh data.
+//		 * 
+//		 * This seems to get fired without user interaction when first
+//		 * displayed in landscape mode.
+//		 */
+//		if (tab.getTag().equals(R.string.radar_tab_radar)) {
+//			if (!mNavigationTop) {
+//				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiRadar.class);
+//				intentBuilder.setNavigationTop(true);
+//				Intent intent = intentBuilder.create();
+//				/* Flags let us use existing instance of radar if its already around */
+//				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//				intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//				mActivity.startActivity(intent);
+//				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageBack);
+//			}
+//		}
+//		else if (tab.getTag().equals(R.string.radar_tab_mycandi)) {
+//			/*
+//			 * This seems to get fired without user interaction when first
+//			 * displayed in landscape mode so we check to see if we are already at the top.
+//			 */
+//			
+//			/*
+//			 * Problem: this gets fired when we are on candi form on change to landscape.
+//			 * We then navigate back to candi list. When in candiform, how can we tell the 
+//			 * different between tabReselected by the user vs tabReselected by system because
+//			 * of change to landscape?
+//			 * 
+//			 * - onTabReselected fires on first orientation change but not subsequent ones.
+//			 * 
+//			 */
+//			if (!mNavigationTop) {
+//				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiList.class);
+//				intentBuilder.setNavigationTop(true);
+//				intentBuilder.setCollectionType(ProxiExplorer.CollectionType.CandiByUser);
+//				intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
+//				Intent intent = intentBuilder.create();
+//
+//				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//				mActivity.startActivity(intent);
+//				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageBack);
+//			}
+//		}
 	}
 
 	// --------------------------------------------------------------------------------------------

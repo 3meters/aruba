@@ -56,6 +56,7 @@ public abstract class CandiActivity extends SherlockActivity {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		Logger.i(this, "Configuration changed");
+		mCommon.mConfigChange = true;
 		super.onConfigurationChanged(newConfig);
 	}
 

@@ -25,6 +25,7 @@ public class IntentBuilder {
 	private CommandType		mCommandType;
 	private String			mBeaconId;
 	private Boolean			mStripChildEntities	= true;
+	private Boolean			mNavigationTop = false;
 	private Class<?>		mClass;
 	private String			mCollectionId;
 	private CollectionType	mCollectionType;
@@ -101,6 +102,10 @@ public class IntentBuilder {
 			intent.putExtra(mContext.getString(R.string.EXTRA_COMMAND_TYPE), mCommandType.name());
 		}
 
+		if (mNavigationTop != null) {
+			intent.putExtra(mContext.getString(R.string.EXTRA_NAVIGATION_TOP), mNavigationTop);
+		}
+		
 		return intent;
 	}
 
@@ -156,6 +161,11 @@ public class IntentBuilder {
 
 	public IntentBuilder setCommandType(CommandType commandType) {
 		mCommandType = commandType;
+		return this;
+	}
+
+	public IntentBuilder setNavigationTop(Boolean navigationTop) {
+		mNavigationTop = navigationTop;
 		return this;
 	}
 }
