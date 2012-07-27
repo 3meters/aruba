@@ -22,7 +22,6 @@
         android:layout_alignParentTop="true"
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
-        aircandi:animation="@anim/fade_in_medium"
         aircandi:layout="@layout/temp_webimageview"
         aircandi:maxHeight="60dp"
         aircandi:maxWidth="60dp" />
@@ -89,7 +88,7 @@
             android:id="@+id/item_comments"
             style="@style/comments_button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:clickable="true"
             android:gravity="left"
             android:onClick="onCommentsClick"

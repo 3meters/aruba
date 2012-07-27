@@ -44,10 +44,6 @@ public class BookmarkPicker extends FormActivity implements OnItemClickListener 
 	}
 
 	private void initialize() {
-		mCommon.track();
-
-		/* Action bar */
-		mCommon.mActionBar.setTitle(R.string.form_title_bookmarks);
 
 		mBookmarkAdapter = new BookmarkAdapter(this, "");
 		mListView = (ListView) findViewById(R.id.list_bookmarks);

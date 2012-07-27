@@ -7,9 +7,9 @@ import org.anddev.andengine.util.AsyncCallable;
 import org.anddev.andengine.util.Callback;
 import org.anddev.andengine.util.progress.ProgressCallable;
 
-import com.actionbarsherlock.app.SherlockActivity;
-
 import android.app.ProgressDialog;
+
+import com.actionbarsherlock.app.SherlockActivity;
 
 /**
  * @author Nicolas Gramlich

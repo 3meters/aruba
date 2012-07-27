@@ -2,17 +2,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:layout_width="fill_parent"
-    android:layout_height="30dp" >
+    android:layout_height="wrap_content" >
 
     <com.proxibase.aircandi.widgets.WebImageView
         android:id="@+id/image_user_picture"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
         android:layout_marginRight="5dp"
-        aircandi:maxHeight="30dp"
-        aircandi:maxWidth="30dp"
+        aircandi:maxHeight="35dp"
+        aircandi:maxWidth="35dp"
         android:scaleType="centerCrop" />
 
     <com.proxibase.aircandi.widgets.TextViewEllipsizing
@@ -47,6 +47,6 @@
         android:maxHeight="20dp"
         android:scaleType="fitCenter"
         android:src="?attr/iconLocked"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
 </RelativeLayout>

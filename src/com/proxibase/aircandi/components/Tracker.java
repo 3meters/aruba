@@ -1,67 +1,81 @@
 package com.proxibase.aircandi.components;
 
-import android.content.Context;
+import android.app.Activity;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.google.analytics.tracking.android.EasyTracker;
 
 /*
  * Tracker strategy
  * 
  * - Every activity is a page view when initialized.
- * - Page views and events info is dispatched to google service when a page view is created.
- * 	
- * - Select events are tracked
- * 		- Insert, update, delete entity
- * 		- User clicks refresh
- * 		- Insert, update user
- * 		- Comment created
- * 		- User signin, signout
+ * - Page views and events info is dispatched to google service automatically
+ * by EasyTracker.
  * 
- * 		More candidates
- * 		- Preferences modified
+ * - Select events are tracked
+ * - Insert, update, delete entity
+ * - User clicks refresh
+ * - Insert, update user
+ * - Comment created
+ * - User signin, signout
+ * 
+ * More candidates
+ * - Preferences modified
  */
 
 public class Tracker {
 
-	public static void trackEvent(String arg0, String arg1, String arg2, int arg3) {
+	public static void trackEvent(String arg0, String arg1, String arg2, long arg3) {
 		/*
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			//GoogleAnalyticsTracker.getInstance().trackEvent(arg0, arg1, arg2, arg3);
+			EasyTracker.getTracker().trackEvent(arg0, arg1, arg2, arg3);
 		}
-		catch (Exception exception) {
-		}
+		catch (Exception exception) {}
 	}
 
-	public static void trackPageView(String arg0) {
+	public static void trackView(String viewName) {
+		/*
+		 * Arguments should be free of whitespace.
+		 */
 		try {
-			//GoogleAnalyticsTracker.getInstance().trackPageView(arg0);
+			EasyTracker.getTracker().trackView(viewName);
 		}
-		catch (Exception exception) {
-		}
+		catch (Exception exception) {}
 	}
 
 	public static void dispatch() {
 		try {
-			//GoogleAnalyticsTracker.getInstance().dispatch();
+			EasyTracker.getInstance().dispatch();
 		}
-		catch (Exception exception) {
-		}
+		catch (Exception exception) {}
 	}
 
 	public static void stopSession() {
 		try {
-			GoogleAnalyticsTracker.getInstance().stopSession();
+			EasyTracker.getTracker().setStartSession(false);
 		}
-		catch (Exception exception) {
-		}
+		catch (Exception exception) {}
 	}
-	public static void startNewSession(String arg0, Context context) {
+
+	public static void startNewSession() {
 		try {
-			GoogleAnalyticsTracker.getInstance().startNewSession(arg0, context);
+			EasyTracker.getTracker().setStartSession(true);
 		}
-		catch (Exception exception) {
+		catch (Exception exception) {}
+	}
+
+	public static void activityStart(Activity activity) {
+		try {
+			EasyTracker.getInstance().activityStart(activity);
 		}
+		catch (Exception exception) {}
+	}
+
+	public static void activityStop(Activity activity) {
+		try {
+			EasyTracker.getInstance().activityStop(activity);
+		}
+		catch (Exception exception) {}
 	}
 }

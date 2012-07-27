@@ -43,7 +43,7 @@ import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
-import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
+import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.aircandi.components.S3;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.Utilities;
@@ -127,9 +127,6 @@ public class EntityForm extends FormActivity {
 			GeoLocationManager.getInstance().getSingleLocationUpdate(null, criteria);
 		}
 
-		/* Tracking */
-		mCommon.track();
-
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_link);
 		}
@@ -198,7 +195,7 @@ public class EntityForm extends FormActivity {
 				 * that any changes only show up in the entity model if the changes make it
 				 * to the service.
 				 */
-				Entity entityForModel = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mCollectionType);
+				Entity entityForModel = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mParentId, mCommon.mEntityTree);
 				if (entityForModel != null) {
 					mEntityForForm = entityForModel.clone();
 					mImageUriOriginal = mEntityForForm.imageUri;
@@ -223,7 +220,7 @@ public class EntityForm extends FormActivity {
 			if (mImagePicture != null) {
 				if (entity.imageUri != null && !entity.imageUri.equals("")) {
 					if (mEntityBitmap != null) {
-						ImageUtils.showImageInImageView(mEntityBitmap, mImagePicture.getImageView(), true, R.anim.fade_in_medium);
+						ImageUtils.showImageInImageView(mEntityBitmap, mImagePicture.getImageView(), true, AnimUtils.fadeInMedium());
 						mImagePicture.setVisibility(View.VISIBLE);
 					}
 					else {
@@ -478,6 +475,9 @@ public class EntityForm extends FormActivity {
 									entity.createdDate = DateUtils.nowDate().getTime();
 									entity.modifiedDate = entity.createdDate;
 									entity.ownerId = Aircandi.getInstance().getUser().id;
+									entity.owner = Aircandi.getInstance().getUser();
+									entity.creator = Aircandi.getInstance().getUser();
+									entity.modifier = Aircandi.getInstance().getUser();
 									entity.creatorId = entity.ownerId;
 									entity.modifierId = entity.ownerId;
 
@@ -486,9 +486,9 @@ public class EntityForm extends FormActivity {
 									 */
 									Entity parentEntity = null;
 									if (entity.parentId != null) {
-										parentEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entity.parentId, CollectionType.CandiByRadar);
+										parentEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entity.parentId, null, EntityTree.Radar);
 									}
-									ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, CollectionType.CandiByRadar);
+									ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, EntityTree.Radar);
 									if (parentEntity != null) {
 										/* Sort child into the right spot */
 										if (parentEntity.children.size() > 1) {
@@ -497,18 +497,33 @@ public class EntityForm extends FormActivity {
 									}
 
 									/*
-									 * Push to user entities if we have already loaded them.
+									 * Push to user entities if we have already loaded them. The entity should be
+									 * inserted at the top level and also added as a child if it has a parent. Beacon
+									 * parameter will be ignored.
+									 * 
+									 * We assume that if the user tree is empty then it will get loaded later and
+									 * all the correct data will come from the service.
 									 */
-									if (ProxiExplorer.getInstance().getEntityModel().getMyEntities().size() > 0) {
+									if (!ProxiExplorer.getInstance().getEntityModel().getUserEntities().isEmpty()) {
+
+										/*
+										 * Insert at top level. The routine pushes the new entity in at the top of the
+										 * list
+										 * so we shouldn't have to sort since it will produce the same result.
+										 */
+										ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, null, null, EntityTree.User);
+
+										/* Insert at child level */
 										if (entity.parentId != null) {
 											parentEntity = ProxiExplorer.getInstance().getEntityModel()
-													.getEntityById(entity.parentId, CollectionType.CandiByUser);
-										}
-										ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, CollectionType.CandiByUser);
-										if (parentEntity != null) {
-											/* Sort child into the right spot */
-											if (parentEntity.children.size() > 1) {
-												Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
+													.getEntityById(entity.parentId, null, EntityTree.User);
+											if (parentEntity != null) {
+												ProxiExplorer.getInstance().getEntityModel()
+														.insertEntity(entity, beacon, parentEntity, EntityTree.User);
+												/* Sort child into the right spot */
+												if (parentEntity.children.size() > 1) {
+													Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
+												}
 											}
 										}
 									}
@@ -537,7 +552,7 @@ public class EntityForm extends FormActivity {
 									 * and update the appropriate entities in the entity model to match.
 									 */
 									Entity entityByRadar = ProxiExplorer.getInstance().getEntityModel()
-											.getEntityById(mCommon.mEntityId, CollectionType.CandiByRadar);
+											.getEntityById(mCommon.mEntityId, mCommon.mParentId, EntityTree.Radar);
 
 									if (entityByRadar != null) {
 										gather(entityByRadar);
@@ -551,7 +566,7 @@ public class EntityForm extends FormActivity {
 									 * The entity could also be in the mycandi collection.
 									 */
 									Entity entityByUser = ProxiExplorer.getInstance().getEntityModel()
-											.getEntityById(mCommon.mEntityId, CollectionType.CandiByUser);
+											.getEntityById(mCommon.mEntityId, mCommon.mParentId, EntityTree.User);
 
 									if (entityByUser != null) {
 										gather(entityByUser);
@@ -597,6 +612,7 @@ public class EntityForm extends FormActivity {
 						}
 					}
 				}
+
 			}.execute();
 		}
 	}
@@ -604,7 +620,6 @@ public class EntityForm extends FormActivity {
 	private ServiceResponse insertEntity() {
 
 		Logger.i(this, "Inserting entity: " + mEntityForForm.title);
-		Tracker.trackEvent("Entity", "Insert", mEntityForForm.type, 0);
 		ServiceResponse serviceResponse = new ServiceResponse();
 
 		/* Get strongest nearby beacon and alert if none */
@@ -708,7 +723,7 @@ public class EntityForm extends FormActivity {
 		}
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
-			Tracker.trackEvent("Entity", "New", mCommon.mEntityType, 0);
+			Tracker.trackEvent("Entity", "New", mEntityForForm.type, 0);
 		}
 
 		return serviceResponse;
@@ -725,7 +740,6 @@ public class EntityForm extends FormActivity {
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			Logger.i(this, "Updating entity: " + entity.title);
-			Tracker.trackEvent("Entity", "Update", entity.type, 0);
 
 			// Construct entity, link, and observation
 			Bundle parameters = new Bundle();
@@ -818,8 +832,8 @@ public class EntityForm extends FormActivity {
 					Tracker.trackEvent("Entity", "Delete", mEntityForForm.type, 0);
 					Logger.i(this, "Deleted entity: " + mEntityForForm.title);
 
-					ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm, CollectionType.CandiByRadar);
-					ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm, CollectionType.CandiByUser);
+					ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm, EntityTree.Radar);
+					ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm, EntityTree.User);
 					ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 
 					mCommon.showProgressDialog(false, null);
@@ -831,6 +845,7 @@ public class EntityForm extends FormActivity {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiDelete, EntityForm.this);
 				}
 			}
+
 		}.execute();
 	}
 

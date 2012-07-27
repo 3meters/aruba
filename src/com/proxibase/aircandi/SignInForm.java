@@ -48,10 +48,6 @@ public class SignInForm extends FormActivity {
 	}
 
 	private void initialize() {
-
-		mCommon.track();
-
-		mCommon.mActionBar.setTitle(R.string.form_title_signin);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextMessage = (TextView) findViewById(R.id.form_message);
@@ -87,6 +83,7 @@ public class SignInForm extends FormActivity {
 				, getResources().getString(R.string.alert_send_password_title)
 				, getResources().getString(R.string.alert_send_password_message)
 				, SignInForm.this, android.R.string.ok, null, null);
+		Tracker.trackEvent("DialogSendPassword", "Open", null, 0);
 	}
 
 	public void onSignupButtonClick(View view) {
@@ -139,6 +136,7 @@ public class SignInForm extends FormActivity {
 					mCommon.showProgressDialog(false, null);
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 
+						Tracker.startNewSession();
 						Tracker.trackEvent("User", "Signin", null, 0);
 
 						String jsonResponse = (String) serviceResponse.data;
@@ -157,7 +155,7 @@ public class SignInForm extends FormActivity {
 						Aircandi.settingsEditor.commit();
 
 						/* Different user means different user candi */
-						ProxiExplorer.getInstance().getEntityModel().getMyEntities().clear();
+						ProxiExplorer.getInstance().getEntityModel().getUserEntities().clear();
 
 						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
 						finish();

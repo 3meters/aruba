@@ -91,8 +91,6 @@ public class ProfileForm extends FormActivity {
 
 	private void initialize() {
 
-		mCommon.track();
-		mCommon.mActionBar.setTitle(R.string.form_title_profile);
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mUserId = extras.getInt(getString(R.string.EXTRA_USER_ID));
@@ -193,7 +191,7 @@ public class ProfileForm extends FormActivity {
 
 		if (mUser.imageUri != null && mUser.imageUri.length() > 0) {
 			if (mUserBitmap != null) {
-				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, R.anim.fade_in_medium);
+				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 			else {
 				ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);

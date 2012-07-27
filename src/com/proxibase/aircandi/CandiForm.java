@@ -36,7 +36,7 @@ import com.proxibase.aircandi.components.IntentBuilder;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
+import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
@@ -57,23 +57,20 @@ import com.proxibase.service.objects.User;
 
 public class CandiForm extends CandiActivity {
 
-	private List<Entity>	mEntitiesForPaging	= new ArrayList<Entity>();
-	private ViewPager		mViewPager;
-	private Entity			mEntity;
-	private Number			mEntityModelRefreshDate;
-	private Number			mEntityModelActivityDate;
-	private User			mEntityModelUser;
+	protected List<Entity>	mEntitiesForPaging	= new ArrayList<Entity>();
+	protected ViewPager		mViewPager;
+	protected Entity		mEntity;
+	protected Number		mEntityModelRefreshDate;
+	protected Number		mEntityModelActivityDate;
+	protected User			mEntityModelUser;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!isFinishing()) {
-			initialize();
 			bind(true);
 		}
 	}
-
-	public void initialize() {}
 
 	public void bind(Boolean useProxiExplorer) {
 		/*
@@ -85,7 +82,7 @@ public class CandiForm extends CandiActivity {
 			/*
 			 * Entity is coming from entity model.
 			 */
-			mEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mCollectionType);
+			mEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mParentId, EntityTree.Radar);
 			mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 			mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 			mEntityModelUser = Aircandi.getInstance().getUser();
@@ -140,6 +137,7 @@ public class CandiForm extends CandiActivity {
 						mCommon.handleServiceError(serviceResponse);
 					}
 				}
+
 			}.execute();
 		}
 	}
@@ -165,8 +163,10 @@ public class CandiForm extends CandiActivity {
 		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
 
 		intentBuilder.setCommandType(CommandType.View);
+		intentBuilder.setEntityId(mEntity.id);
+		intentBuilder.setParentEntityId(mEntity.parentId);
 		intentBuilder.setCollectionId(mCommon.mEntityId);
-		intentBuilder.setCollectionType(mCommon.mCollectionType);
+		intentBuilder.setEntityTree(mCommon.mEntityTree);
 
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
@@ -179,8 +179,9 @@ public class CandiForm extends CandiActivity {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 			intentBuilder.setCommandType(CommandType.View);
 			intentBuilder.setEntityId(entity.id);
+			intentBuilder.setParentEntityId(entity.parentId);
 			intentBuilder.setCollectionId(entity.id);
-			intentBuilder.setCollectionType(mCommon.mCollectionType);
+			intentBuilder.setEntityTree(mCommon.mEntityTree);
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
 			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
@@ -196,10 +197,11 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onMapButtonClick(View view) {
-		String entityId = (String) view.getTag();
+		Entity entity = (Entity) view.getTag();
 		IntentBuilder intentBuilder = new IntentBuilder(this, MapBrowse.class);
 		intentBuilder.setCommandType(CommandType.View);
-		intentBuilder.setEntityId(entityId);
+		intentBuilder.setEntityId(entity.id);
+		intentBuilder.setParentEntityId(entity.parentId);
 		intentBuilder.setEntityLocation(mCommon.mEntityLocation);
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
@@ -213,7 +215,8 @@ public class CandiForm extends CandiActivity {
 			IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
 			intentBuilder.setCommandType(CommandType.View);
 			intentBuilder.setEntityId(mEntity.id);
-			intentBuilder.setCollectionType(mCommon.mCollectionType);
+			intentBuilder.setParentEntityId(mEntity.parentId);
+			intentBuilder.setEntityTree(mCommon.mEntityTree);
 			intent = intentBuilder.create();
 		}
 		else {
@@ -232,8 +235,9 @@ public class CandiForm extends CandiActivity {
 		IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class);
 		intentBuilder.setCommandType(CommandType.Edit);
 		intentBuilder.setEntityId(mEntity.id);
+		intentBuilder.setParentEntityId(mEntity.parentId);
 		intentBuilder.setEntityType(mEntity.type);
-		intentBuilder.setCollectionType(mCommon.mCollectionType);
+		intentBuilder.setEntityTree(mCommon.mEntityTree);
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
@@ -243,6 +247,7 @@ public class CandiForm extends CandiActivity {
 		Entity entity = (Entity) view.getTag();
 		if (!entity.locked) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
+			intentBuilder.setEntityId(null);
 			intentBuilder.setParentEntityId(mEntity.id);
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
@@ -284,6 +289,7 @@ public class CandiForm extends CandiActivity {
 
 						IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class);
 						intentBuilder.setCommandType(CommandType.New);
+						intentBuilder.setEntityId(null); 	// Because this is a new entity
 						intentBuilder.setParentEntityId(parentId);
 						intentBuilder.setEntityType(entityType);
 						Intent redirectIntent = intentBuilder.create();
@@ -466,7 +472,7 @@ public class CandiForm extends CandiActivity {
 		}
 		else {
 			map.setVisibility(View.VISIBLE);
-			map.setTag(entity.id);
+			map.setTag(entity);
 		}
 
 		/* Candi text */
@@ -500,13 +506,13 @@ public class CandiForm extends CandiActivity {
 		return candiInfoView;
 	}
 
-	private void updateViewPager()
+	protected void updateViewPager()
 	{
 		if (mViewPager == null) {
 
-			mViewPager = (ViewPager) CandiForm.this.findViewById(R.id.view_pager);
+			mViewPager = (ViewPager) findViewById(R.id.view_pager);
 
-			List<Entity> entitiesForPaging = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, mCommon.mCollectionType);
+			List<Entity> entitiesForPaging = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, mCommon.mEntityTree);
 
 			/*
 			 * We clone the collection so our updates don't impact the entity model that
@@ -525,7 +531,7 @@ public class CandiForm extends CandiActivity {
 				}
 			});
 
-			mViewPager.setAdapter(new CandiPagerAdapter(CandiForm.this, mViewPager, mEntitiesForPaging));
+			mViewPager.setAdapter(new CandiPagerAdapter(this, mViewPager, mEntitiesForPaging));
 
 			synchronized (mEntitiesForPaging) {
 				for (int i = 0; i < mEntitiesForPaging.size(); i++) {
@@ -629,12 +635,14 @@ public class CandiForm extends CandiActivity {
 					 * The entity we have been passed could have come from radar or user collections so we
 					 * need to look it up for each.
 					 */
-					Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entityToMove.id, CollectionType.CandiByRadar);
+					Entity entity = ProxiExplorer.getInstance().getEntityModel()
+							.getEntityById(entityToMove.id, entityToMove.parentId, EntityTree.Radar);
 					if (parentEntityIdNew == null) {
 						/*
 						 * Moving to top. We assume beacon has been set to the beacon used by the original parent.
 						 */
-						Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel().getEntityById(entity.parent.id, CollectionType.CandiByRadar);
+						Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
+								.getEntityById(entity.parentId, null, EntityTree.Radar);
 						parentEntityOriginal.children.remove(entity);
 						entity.beacon.entities.add(entity);
 						entity.parent = null;
@@ -644,10 +652,11 @@ public class CandiForm extends CandiActivity {
 						/*
 						 * Moving to parent
 						 */
-						Entity parentEntityNew = ProxiExplorer.getInstance().getEntityModel().getEntityById(parentEntityIdNew, CollectionType.CandiByRadar);
+						Entity parentEntityNew = ProxiExplorer.getInstance().getEntityModel()
+								.getEntityById(parentEntityIdNew, null, EntityTree.Radar);
 						if (entity.parent != null) {
 							Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
-									.getEntityById(entity.parent.id, CollectionType.CandiByRadar);
+									.getEntityById(entity.parentId, null, EntityTree.Radar);
 							parentEntityOriginal.children.remove(entity);
 						}
 						parentEntityNew.children.add(entity);
@@ -659,14 +668,14 @@ public class CandiForm extends CandiActivity {
 					}
 
 					/* The user candi collection might not be populated yet */
-					entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entityToMove.id, CollectionType.CandiByUser);
+					entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entityToMove.id, entityToMove.parentId, EntityTree.User);
 					if (entity != null) {
 						if (parentEntityIdNew == null) {
 							/*
 							 * Moving to top. User candi are not associated with beacons.
 							 */
 							Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
-									.getEntityById(entity.parent.id, CollectionType.CandiByUser);
+									.getEntityById(entity.parentId, null, EntityTree.User);
 							parentEntityOriginal.children.remove(entity);
 							entity.parent = null;
 							entity.parentId = null;
@@ -677,10 +686,11 @@ public class CandiForm extends CandiActivity {
 							 */
 							if (entity.parent != null) {
 								Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
-										.getEntityById(entity.parent.id, CollectionType.CandiByUser);
+										.getEntityById(entity.parentId, null, EntityTree.User);
 								parentEntityOriginal.children.remove(entity);
 							}
-							Entity parentEntityNew = ProxiExplorer.getInstance().getEntityModel().getEntityById(parentEntityIdNew, CollectionType.CandiByUser);
+							Entity parentEntityNew = ProxiExplorer.getInstance().getEntityModel()
+									.getEntityById(parentEntityIdNew, null, EntityTree.User);
 							/* For user candi, we might be moving to a parent that isn't in the user candi. */
 							if (parentEntityNew != null) {
 								parentEntityNew.children.add(entity);

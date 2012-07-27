@@ -9,8 +9,8 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AnimUtils;
-import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.AnimUtils.TransitionType;
+import com.proxibase.aircandi.components.Logger;
 
 public abstract class CandiActivity extends SherlockActivity {
 
@@ -26,7 +26,7 @@ public abstract class CandiActivity extends SherlockActivity {
 		}
 		else {
 			mCommon = new AircandiCommon(this, savedInstanceState);
-			mCommon.setTheme(null);
+			mCommon.setTheme(false);
 			mCommon.unpackIntent();
 			setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
@@ -100,6 +100,18 @@ public abstract class CandiActivity extends SherlockActivity {
 	protected void onResume() {
 		mCommon.doResume();
 		super.onResume();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		mCommon.doStop();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		mCommon.doStart();
 	}
 
 	@Override

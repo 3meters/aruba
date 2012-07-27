@@ -25,18 +25,18 @@ public class DrawableManager {
 	 * needs to be freed. If collected, we download the bitmap again.
 	 */
 
-	private final HashMap<String, SoftReference<Bitmap>>	bitmapCache;
+	private final HashMap<String, SoftReference<Bitmap>>	mBitmapCache;
 
 	public DrawableManager() {
-		bitmapCache = new HashMap<String, SoftReference<Bitmap>>();
+		mBitmapCache = new HashMap<String, SoftReference<Bitmap>>();
 	}
 
 	@SuppressWarnings("deprecation")
 	public void fetchDrawableOnThread(final String uri, final PictureSearch.ViewHolder holder) {
 
-		synchronized (bitmapCache) {
-			if (bitmapCache.containsKey(uri) && bitmapCache.get(uri).get() != null) {
-				BitmapDrawable bitmapDrawable = new BitmapDrawable(bitmapCache.get(uri).get());
+		synchronized (mBitmapCache) {
+			if (mBitmapCache.containsKey(uri) && mBitmapCache.get(uri).get() != null) {
+				BitmapDrawable bitmapDrawable = new BitmapDrawable(mBitmapCache.get(uri).get());
 				ImageUtils.showDrawableInImageView(bitmapDrawable, holder.itemImage, false);
 				return;
 			}
@@ -86,7 +86,7 @@ public class DrawableManager {
 				throw new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);
 			}
 			BitmapDrawable drawable = new BitmapDrawable(bitmap);
-			bitmapCache.put(uri, new SoftReference(bitmap));
+			mBitmapCache.put(uri, new SoftReference(bitmap));
 			return drawable;
 		}
 		return null;

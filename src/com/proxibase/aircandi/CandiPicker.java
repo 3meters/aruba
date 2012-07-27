@@ -19,7 +19,7 @@ import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
-import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
+import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService;
@@ -34,7 +34,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 
 	private ListView			mListViewCandi;
 	private EntityList<Entity>	mEntities	= new EntityList<Entity>();
-	private CollectionType		mMethodType	= CollectionType.CandiByRadar;
+	private EntityTree		mMethodType	= EntityTree.Radar;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -44,22 +44,15 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 	}
 
 	private void initialize() {
-		mCommon.track();
-
-		/* Action bar */
-		mCommon.mActionBar.setTitle(R.string.form_title_candi_picker);
-
 		mListViewCandi = (ListView) findViewById(R.id.list_candi);
 		mListViewCandi.setDivider(null);
-
-		mCommon.setActiveTab(0);
 		bind();
 	}
 
 	public void bind() {
-		if (mMethodType == CollectionType.CandiByRadar) {
+		if (mMethodType == EntityTree.Radar) {
 			EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel()
-					.getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, CollectionType.CandiByRadar);
+					.getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, EntityTree.Radar);
 			if (entities != null) {
 				mEntities.clear();
 				for (Entity entity : entities) {
@@ -71,10 +64,10 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 				mListViewCandi.setAdapter(adapter);
 			}
 		}
-		else if (mMethodType == CollectionType.CandiByUser) {
+		else if (mMethodType == EntityTree.User) {
 
 			EntityList<Entity> entitiesUserCandi = ProxiExplorer.getInstance().getEntityModel()
-					.getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, CollectionType.CandiByUser);
+					.getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, EntityTree.User);
 
 			if (entitiesUserCandi != null && entitiesUserCandi.size() > 0) {
 				mEntities.clear();
@@ -105,7 +98,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 						Bundle parameters = new Bundle();
 						ServiceRequest serviceRequest = new ServiceRequest();
 						EntityList<Entity> entitiesUserCandi = ProxiExplorer.getInstance().getEntityModel()
-								.getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, CollectionType.CandiByUser);
+								.getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, EntityTree.User);
 
 						/* Set method parameters */
 						parameters.putString("userId", Aircandi.getInstance().getUser().id);
@@ -132,13 +125,13 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 							String jsonResponse = (String) serviceResponse.data;
 							ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
 
-							entitiesUserCandi.setCollectionType(CollectionType.CandiByUser);
+							entitiesUserCandi.setCollectionType(EntityTree.User);
 							entitiesUserCandi.addAll((Collection<? extends Entity>) serviceData.data);
 							
 							/* Do some fixup migrating settings to the children collection */
 							for (Entity entity : entitiesUserCandi) {
 								if (entity.children != null) {
-									entity.children.setCollectionType(CollectionType.CandiByUser);
+									entity.children.setCollectionType(EntityTree.User);
 									for (Entity childEntity : entity.children) {
 										childEntity.parent = entity;
 										childEntity.parentId = entity.id;
@@ -219,11 +212,11 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		if (((Integer) tab.getTag()) == R.string.candi_picker_tab_radar) {
-			mMethodType = ProxiExplorer.CollectionType.CandiByRadar;
+			mMethodType = ProxiExplorer.EntityTree.Radar;
 			bind();
 		}
 		else if (((Integer) tab.getTag()) == R.string.candi_picker_tab_mycandi) {
-			mMethodType = ProxiExplorer.CollectionType.CandiByUser;
+			mMethodType = ProxiExplorer.EntityTree.User;
 			bind();
 		}
 

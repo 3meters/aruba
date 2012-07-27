@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
-        android:background="?attr/backgroundCandiInfo"
+        android:background="?attr/backgroundForm"
         android:fillViewport="true" >
 
         <LinearLayout
@@ -35,8 +35,8 @@
 
             <com.proxibase.aircandi.widgets.AuthorBlock
                 android:id="@+id/block_author"
-                android:layout_width="fill_parent"
-                android:layout_height="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 aircandi:layout="@layout/temp_user_info" />
         </LinearLayout>

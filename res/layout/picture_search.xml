@@ -53,7 +53,7 @@
         android:layout_height="fill_parent"
         android:layout_above="@+id/form_footer"
         android:layout_below="@+id/cbo_category"
-        android:background="?attr/backgroundCandiInfo"
+        android:background="?attr/backgroundForm"
         android:columnWidth="100dp"
         android:gravity="center"
         android:horizontalSpacing="5dp"

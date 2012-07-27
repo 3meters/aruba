@@ -2,11 +2,10 @@
 <resources>
     <attr name="layout" format="integer" />
     <attr name="itemLayout" format="integer" />
-    <attr name="animation" format="integer" />
     <declare-styleable name="Global">
         <attr name="themeTone" format="string" />
         <attr name="actionBarTone" format="string" />
-        <attr name="busy" format="string" />
+        <attr name="busy" format="reference" />
     </declare-styleable>
     <declare-styleable name="ViewPagerIndicator">
         <attr name="textColorFocused" format="color" />
@@ -19,7 +18,6 @@
     </declare-styleable>
     <declare-styleable name="WebImageView">
         <attr name="layout" />
-        <attr name="animation" />
         <attr name="showBusy" format="boolean" />
         <attr name="busyWidth" format="dimension" />
         <attr name="minWidth" format="dimension" />

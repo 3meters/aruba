@@ -100,7 +100,7 @@ import com.proxibase.aircandi.components.NetworkManager.IWifiReadyListener;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
-import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
+import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.aircandi.components.ProxiExplorer.EntityModel;
 import com.proxibase.aircandi.components.ProxiExplorer.ScanOptions;
 import com.proxibase.aircandi.components.ProxiHandlerManager;
@@ -322,10 +322,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			updateDebugInfo();
 		}
 
-		/* Analytics tracker */
-		Tracker.startNewSession(getAnalyticsId(), Aircandi.applicationContext);
-		getCommon().track();
-
 		/* Check for emulator */
 		if (Build.PRODUCT.equals("google_sdk") || Build.PRODUCT.equals("sdk")) {
 			mUsingEmulator = true;
@@ -478,6 +474,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 						IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class);
 						intentBuilder.setCommandType(CommandType.New);
+						intentBuilder.setEntityId(null); // Because we are making a new entity
 						intentBuilder.setParentEntityId(parentId);
 						intentBuilder.setEntityType(entityType);
 						Intent redirectIntent = intentBuilder.create();
@@ -655,6 +652,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 									updateDebugInfo();
 
 									mCandiPatchPresenter.setFullUpdateInProgress(false);
+									mCandiPatchPresenter.setIgnoreInput(false);
+
 									getCommon().stopTitlebarProgress();
 									getCommon().showProgressDialog(false, null);
 
@@ -697,6 +696,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						if (mScanOptions.fullBuild && mCandiPatchPresenter != null) {
 							mCandiPatchPresenter.renderingActivate(60000);
 							mCandiPatchPresenter.setFullUpdateInProgress(true);
+							mCandiPatchPresenter.setIgnoreInput(true);
+
 							/*
 							 * Quick check for a new version. We continue even if the network call fails.
 							 */
@@ -716,6 +717,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 							}
 						});
 						mCandiPatchPresenter.setFullUpdateInProgress(false);
+						mCandiPatchPresenter.setIgnoreInput(false);
 						mBeaconScanActive = false;
 						getCommon().handleServiceError(serviceResponse, ServiceOperation.LinkLookup, CandiRadar.this);
 					}
@@ -764,7 +766,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			 * Scan could have caused the current candi to go away or be hidden
 			 */
 			if (idOfEntityToRefresh != null) {
-				Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(idOfEntityToRefresh, ProxiExplorer.CollectionType.CandiByRadar);
+				Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(idOfEntityToRefresh, null, ProxiExplorer.EntityTree.Radar);
 
 				/* We refresh the image if it's using a linkUri */
 				if (entity != null && !entity.hidden && entity.linkUri != null && !entity.linkUri.equals("")) {
@@ -779,17 +781,17 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					candiModelFocused.setChanged();
 					candiModelFocused.update();
 
-					for (IModel childModel : candiModelFocused.getChildren()) {
-						CandiModel childCandiModel = (CandiModel) childModel;
-						Entity childEntity = childCandiModel.getEntity();
-						if (childEntity != null && !childEntity.hidden && childEntity.linkUri != null && !childEntity.linkUri.equals("")) {
-							synchronized (childCandiModel.getViewActions()) {
-								childCandiModel.getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
-							}
-							childCandiModel.setChanged();
-							childCandiModel.update();
-						}
-					}
+//					for (IModel childModel : candiModelFocused.getChildren()) {
+//						CandiModel childCandiModel = (CandiModel) childModel;
+//						Entity childEntity = childCandiModel.getEntity();
+//						if (childEntity != null && !childEntity.hidden && childEntity.linkUri != null && !childEntity.linkUri.equals("")) {
+//							synchronized (childCandiModel.getViewActions()) {
+//								childCandiModel.getViewActions().addFirst(new ViewAction(ViewActionType.UpdateTexturesForce));
+//							}
+//							childCandiModel.setChanged();
+//							childCandiModel.update();
+//						}
+//					}
 				}
 			}
 		}
@@ -819,8 +821,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class);
 		intentBuilder.setCommandType(CommandType.View);
 		intentBuilder.setEntityId(entity.id);
+		intentBuilder.setParentEntityId(entity.parentId);
 		intentBuilder.setEntityType(entity.type);
-		intentBuilder.setCollectionType(ProxiExplorer.CollectionType.CandiByRadar);
+		intentBuilder.setEntityTree(ProxiExplorer.EntityTree.Radar);
 
 		if (entity.parent == null) {
 			intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
@@ -1015,17 +1018,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		View buttonFrame = (View) findViewById(R.id.button_layer);
 		if (show) {
 			buttonFrame.setAnimation(null);
-			Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
-			animation.setFillEnabled(true);
-			animation.setFillAfter(true);
-			buttonFrame.startAnimation(animation);
+			buttonFrame.startAnimation(AnimUtils.fadeInMedium());
 		}
 		else {
 			buttonFrame.setAnimation(null);
-			Animation animation = AnimUtils.loadAnimation(R.anim.fade_out_medium);
-			animation.setFillEnabled(true);
-			animation.setFillAfter(true);
-			buttonFrame.startAnimation(animation);
+			buttonFrame.startAnimation(AnimUtils.fadeOutMedium());
 		}
 	}
 
@@ -1408,6 +1405,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * Only called first time activity is started.
 		 */
 		Logger.i(this, "CandiRadarActivity starting");
+		getCommon().doStart();
 		super.onStart();
 	}
 
@@ -1464,6 +1462,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				 * - User profile could have been updated and we don't catch that.
 				 */
 				if (Aircandi.getInstance().getUser() == null
+						|| mEntityModelUser == null
 						|| !Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
 						|| ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
 						|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
@@ -1536,6 +1535,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * Fired when starting another activity and we lose our window.
 		 */
 		Logger.i(this, "CandiRadarActivity stopped");
+		getCommon().doStop();
 		super.onStop(); /* Goes to Sherlock */
 
 		/* Make sure autoscan is stopped if we are not in the foreground */

@@ -66,9 +66,7 @@ public class PictureSearch extends FormActivity {
 	}
 
 	private void initialize() {
-		mCommon.track();
 		
-		mCommon.mActionBar.setTitle(R.string.form_title_picture_search);
 		mDrawableManager = new DrawableManager();
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mGridView = (GridView) findViewById(R.id.grid_gallery);

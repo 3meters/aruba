@@ -2,34 +2,40 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="350dp"
     android:padding="15dp" >
 
     <!-- Header -->
 
     <LinearLayout
-        android:id="@+id/form_header"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="10dp" >
+        android:gravity="center_vertical|top"
+        android:orientation="vertical"
+        android:paddingBottom="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="15dp" >
 
         <TextView
             android:id="@+id/header_text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/dialog_template_picker_message"/>
+            android:paddingBottom="15dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:text="@string/dialog_template_picker_message" />
+
+        <ListView
+            android:id="@+id/form_list"
+            android:layout_width="fill_parent"
+            android:layout_height="180dp" >
+
+            <!-- Preview: listitem=@layout/temp_listitem_template -->
+        </ListView>
     </LinearLayout>
-
-    <ListView
-        android:id="@+id/form_list"
-        android:layout_width="fill_parent"
-        android:layout_height="180dp"
-        android:layout_below="@+id/form_header"
-        android:layout_marginBottom="10dp" >
-
-        <!-- Preview: listitem=@layout/temp_listitem_template -->
-    </ListView>
 
     <!-- Footer -->
 
@@ -37,7 +43,7 @@
         android:id="@+id/form_footer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/form_list"
+        android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
 
         <Button
@@ -45,7 +51,7 @@
             android:layout_height="wrap_content"
             android:minWidth="150dp"
             android:onClick="onCancelButtonClick"
-            android:text="@string/dialog_button_cancel" />
+            android:text="@string/form_button_cancel" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -22,7 +22,7 @@
     <string name="EXTRA_URI_TITLE">com.proxibase.aircandi.EXTRA_URI_TITLE</string>
     <string name="EXTRA_URI_DESCRIPTION">com.proxibase.aircandi.EXTRA_URI_DESCRIPTION</string>
     <string name="EXTRA_MESSAGE">com.proxibase.aircandi.EXTRA_MESSAGE</string>
-    <string name="EXTRA_COLLECTION_TYPE">com.proxibase.aircandi.EXTRA_COLLECTION_TYPE</string>
+    <string name="EXTRA_ENTITY_TREE">com.proxibase.aircandi.EXTRA_ENTITY_TREE</string>
     <string name="EXTRA_COLLECTION_ID">com.proxibase.aircandi.EXTRA_COLLECTION_ID</string>
     <string name="EXTRA_THEME_ID">com.proxibase.aircandi.EXTRA_THEME_ID</string>
     <string name="EXTRA_COMMAND_TYPE">com.proxibase.aircandi.EXTRA_COMMAND_TYPE</string>
@@ -226,14 +226,14 @@
     <string name="candi_picker_tab_mycandi">MY CANDI</string>
     
     <string name="form_button_change_picture">Select</string>
-    <string name="form_button_change_password">Change password</string>
-    <string name="form_button_signin_signup">Create account</string>
+    <string name="form_button_change_password">Change password&#8230;</string>
+    <string name="form_button_signin_signup">Create account&#8230;</string>
     <string name="form_button_signup">Sign up</string>
     <string name="form_button_save">Save</string>
     <string name="form_button_delete">Delete</string>
     <string name="form_button_ok">OK</string>
     <string name="form_button_cancel">Cancel</string>
-    <string name="form_button_terms">Terms of service</string>
+    <string name="form_button_terms">Terms of service&#8230;</string>
     <string name="form_button_send_password">Forgot password?</string>
     <string name="form_button_move_solo">No collection</string>
     

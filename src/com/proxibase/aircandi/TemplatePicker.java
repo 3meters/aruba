@@ -39,17 +39,26 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	}
 
 	private void initialize() {
-		mCommon.track();
-
+		
 		/* Shown as a dialog so doesn't have an action bar */
-
 		List<Object> listData = new ArrayList<Object>();
-		listData.add(new Template(R.drawable.ic_post_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
-		listData.add(new Template(R.drawable.ic_picture_dark, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
-		listData.add(new Template(R.drawable.ic_link_dark, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
-		if (mIsRoot != null && mIsRoot) {
-			listData.add(new Template(R.drawable.ic_collection_dark, getString(R.string.name_entity_type_collection), null,
-					CandiConstants.TYPE_CANDI_COLLECTION));
+		if (mCommon.mThemeTone.equals("dark")) {
+			listData.add(new Template(R.drawable.ic_post_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
+			listData.add(new Template(R.drawable.ic_picture_dark, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
+			listData.add(new Template(R.drawable.ic_link_dark, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
+			if (mIsRoot != null && mIsRoot) {
+				listData.add(new Template(R.drawable.ic_collection_dark, getString(R.string.name_entity_type_collection), null,
+						CandiConstants.TYPE_CANDI_COLLECTION));
+			}
+		}
+		else {
+			listData.add(new Template(R.drawable.ic_post_light, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
+			listData.add(new Template(R.drawable.ic_picture_light, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
+			listData.add(new Template(R.drawable.ic_link_light, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
+			if (mIsRoot != null && mIsRoot) {
+				listData.add(new Template(R.drawable.ic_collection_light, getString(R.string.name_entity_type_collection), null,
+						CandiConstants.TYPE_CANDI_COLLECTION));
+			}
 		}
 
 		mListAdapter = new ListAdapter(this, listData);
@@ -77,8 +86,8 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	}
 
 	@Override
-	protected Integer getCustomTheme() {
-		return mCommon.mThemeId;
+	protected Boolean isDialog() {
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------

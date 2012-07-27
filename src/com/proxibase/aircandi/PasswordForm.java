@@ -63,10 +63,6 @@ public class PasswordForm extends FormActivity {
 	}
 
 	protected void initialize() {
-
-		mCommon.track();
-		mCommon.mActionBar.setTitle(R.string.form_title_password);
-
 		mUser = Aircandi.getInstance().getUser();
 		mTextPasswordOld = (EditText) findViewById(R.id.text_password_old);
 		mTextPassword = (EditText) findViewById(R.id.text_password);

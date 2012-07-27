@@ -70,7 +70,7 @@ public class CandiMap extends SherlockMapActivity {
 		}
 		else {
 			mCommon = new AircandiCommon(this, savedInstanceState);
-			mCommon.setTheme(null);
+			mCommon.setTheme(false);
 			mCommon.unpackIntent();
 
 			setContentView(getLayoutId());
@@ -440,6 +440,17 @@ public class CandiMap extends SherlockMapActivity {
 		if (mMyLocationOverlay != null) {
 			mMyLocationOverlay.disableMyLocation();
 		}
+	}
+	@Override
+	protected void onStop() {
+		super.onStop();
+		mCommon.doStop();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		mCommon.doStart();
 	}
 
 	// --------------------------------------------------------------------------------------------

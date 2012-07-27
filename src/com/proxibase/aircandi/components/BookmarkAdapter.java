@@ -95,6 +95,7 @@ public class BookmarkAdapter extends BaseAdapter {
 		c.close();
 	}
 
+	@SuppressWarnings("deprecation")
 	private void doSearch() {
 		if (mCursor != null) {
 			mCursor.unregisterContentObserver(mChangeObserver);

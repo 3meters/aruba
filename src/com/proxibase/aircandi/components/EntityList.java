@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import com.proxibase.aircandi.candi.models.CandiModel;
-import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
+import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.service.objects.Entity;
 
 public class EntityList<T> extends ArrayList<T> {
 
 	private static final long	serialVersionUID	= -2567383399125318332L;
-	private CollectionType		mCollectionType;
+	private EntityTree		mCollectionType;
 
 	/*
 	 * CollectionEntity is the entity that owns this collection. If CollectionEntity
@@ -19,7 +19,7 @@ public class EntityList<T> extends ArrayList<T> {
 
 	public EntityList() {}
 
-	public EntityList(CollectionType collectionType) {
+	public EntityList(EntityTree collectionType) {
 		super();
 		mCollectionType = collectionType;
 	}
@@ -96,11 +96,11 @@ public class EntityList<T> extends ArrayList<T> {
 		return entityList;
 	}
 
-	public CollectionType getCollectionType() {
+	public EntityTree getCollectionType() {
 		return mCollectionType;
 	}
 
-	public void setCollectionType(CollectionType collectionType) {
+	public void setCollectionType(EntityTree collectionType) {
 		mCollectionType = collectionType;
 	}
 

@@ -439,17 +439,6 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private void showBodyAndReflection() {
-		mPlaceholderSprite.setVisible(false);
-		mPlaceholderReflectionSprite.setVisible(false);
-		mBodySprite.setVisible(true);
-
-		if (mModel != null && ((BaseModel) mModel).getViewStateCurrent().reflectionActive() && mReflectionSprite != null) {
-			mReflectionSprite.setVisible(true);
-		}
-	}
-
 	@Override
 	public void clearSpriteModifiers() {
 		// super.clearSpriteModifiers();
@@ -606,7 +595,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 									Logger.v(CandiView.this, "Texture request complete: "
 											+ (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 									mHasBitmap = true;
-									updateTextureRegions(imageResponse.bitmap);
+									updateTextureRegions(imageResponse.bitmap, skipCache);
 									if (candiModel.getViewStateCurrent().isVisible()) {
 										showBodyAndReflectionAnimated();
 									}
@@ -626,7 +615,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 								Bitmap bitmap = ImageManager.getInstance().loadBitmapFromAssets(CandiConstants.IMAGE_BROKEN);
 								if (bitmap != null) {
 									mHasBitmap = false;
-									updateTextureRegions(bitmap);
+									updateTextureRegions(bitmap, skipCache);
 									if (candiModel.getViewStateCurrent().isVisible()) {
 										showBodyAndReflectionAnimated();
 									}
@@ -674,7 +663,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}
 	}
 
-	private void updateTextureRegions(Bitmap bodyBitmap) {
+	private void updateTextureRegions(Bitmap bodyBitmap, Boolean skipCache) {
 
 		final CandiModel candiModel = (CandiModel) this.mModel;
 		if (candiModel == null) {
@@ -691,7 +680,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		String imageUri = ImageRequestBuilder.getImageUriFromEntity(entity);
 		final String cacheName = ImageManager.getInstance().resolveCacheName(imageUri);
 		Bitmap reflectionBitmap = ImageManager.getInstance().getImage(cacheName + ".reflection");
-		if (reflectionBitmap == null) {
+		if (reflectionBitmap == null || skipCache) {
 			if (bodyBitmap != null && !bodyBitmap.isRecycled()) {
 				reflectionBitmap = ImageUtils.makeReflection(bodyBitmap, true);
 				ImageManager.getInstance().putImage(cacheName + ".reflection", reflectionBitmap, CompressFormat.PNG);
@@ -903,6 +892,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	@Override
 	public boolean onDown(MotionEvent e) {
+		if (mCandiPatchPresenter.isIgnoreInput()) {
+			return true;
+		}
 		float top = this.getY();
 		if (!getModel().getViewStateCurrent().isCollapsed()) {
 			top = top + CandiConstants.CANDI_VIEW_TITLE_HEIGHT;
@@ -918,11 +910,17 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+		if (mCandiPatchPresenter.isIgnoreInput()) {
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public void onLongPress(MotionEvent e) {
+		if (mCandiPatchPresenter.isIgnoreInput()) {
+			return;
+		}
 		if (mCandiPatchPresenter.mHighlight.isVisible()) {
 			mCandiPatchPresenter.mHighlight.setVisible(false);
 		}
@@ -933,6 +931,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	@Override
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+		if (mCandiPatchPresenter.isIgnoreInput()) {
+			return true;
+		}
 		if (mCandiPatchPresenter.mHighlight.isVisible()) {
 			mCandiPatchPresenter.mHighlight.setVisible(false);
 		}
@@ -945,6 +946,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
 
+		if (mCandiPatchPresenter.isIgnoreInput()) {
+			return true;
+		}
 		mCandiPatchPresenter.mHighlight.setVisible(false);
 		if (mTouchListener != null) {
 			long startTime = System.nanoTime();

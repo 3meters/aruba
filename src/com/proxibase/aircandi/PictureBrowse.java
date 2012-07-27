@@ -26,8 +26,6 @@ public class PictureBrowse extends FormActivity {
 	}
 
 	private void initialize() {
-		mCommon.mActionBar.setTitle(R.string.form_title_picture_browse);
-
 		mProgress = (ProgressBar) findViewById(R.id.progressBar);
 		mWebView = (WebView) findViewById(R.id.webview);
 		mWebView.setBackgroundColor(0x00000000);
@@ -48,7 +46,7 @@ public class PictureBrowse extends FormActivity {
 
 	protected void draw() {
 		
-		final Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mCollectionType);
+		final Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mParentId, mCommon.mEntityTree);
 
 		/* Title */
 		if (findViewById(R.id.text_title) != null) {

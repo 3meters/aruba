@@ -22,7 +22,30 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
 public class AnimUtils {
-	
+
+	private static Animation	mFadeInMedium;
+	private static Animation	mFadeOutMedium;
+
+	public static Animation fadeInMedium() {
+		/*
+		 * We make a new animation object each time because when I 
+		 * tried sharing one, there was lots of flashing and weird behavior.
+		 * 
+		 * If there is a better way to do this later then this will serve
+		 * as a choke point for the implementation.
+		 */
+		mFadeInMedium = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+		return mFadeInMedium;
+	}
+
+	public static Animation fadeOutMedium() {
+		/*
+		 * Same comment as above
+		 */
+		mFadeOutMedium = AnimUtils.loadAnimation(R.anim.fade_out_medium);
+		return mFadeOutMedium;
+	}
+
 	public static enum TransitionType {
 		CandiPageToForm,
 		FormToCandiPage,
@@ -36,7 +59,7 @@ public class AnimUtils {
 		CandiPageToCandiRadar,
 		CandiPageBack
 	}
-	
+
 	public static void doOverridePendingTransition(Activity activity, TransitionType transitionType) {
 		/*
 		 * Generic candi to candi
@@ -90,7 +113,9 @@ public class AnimUtils {
 		 * Loads an animation object from a resource
 		 * 
 		 * @param id The resource id of the animation to load
+		 * 
 		 * @return The animation object reference by the specified id
+		 * 
 		 * @throws NotFoundException when the animation cannot be loaded
 		 */
 
@@ -115,11 +140,11 @@ public class AnimUtils {
 		}
 	}
 
-	static Animation createAnimationFromXml(Context c, XmlPullParser parser) throws XmlPullParserException, IOException {
+	private static Animation createAnimationFromXml(Context c, XmlPullParser parser) throws XmlPullParserException, IOException {
 		return AnimUtils.createAnimationFromXml(c, parser, null, Xml.asAttributeSet(parser));
 	}
 
-	static Animation createAnimationFromXml(Context c, XmlPullParser parser, AnimationSet parent, AttributeSet attrs) throws XmlPullParserException,
+	private static Animation createAnimationFromXml(Context c, XmlPullParser parser, AnimationSet parent, AttributeSet attrs) throws XmlPullParserException,
 			IOException {
 
 		Animation anim = null;

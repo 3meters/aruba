@@ -28,8 +28,8 @@ public interface CandiConstants {
 	public static final int				INTERVAL_NETWORK_PHONEY					= 3000;
 	public static final int				INTERVAL_SCAN							= 60000;
 
-	public static final int				LOCATION_POLLING_INTERVAL				= 300000;																																																																																																														// 5
-																																																																																																																																				// minutes
+	public static final int				LOCATION_POLLING_INTERVAL				= 300000;																// 5
+																																						// minutes
 	public static final int				LOCATION_POLLING_TIMEOUT				= 60000;
 
 	public static final float			CANDI_VIEW_HALO							= 2.0f;
@@ -85,6 +85,7 @@ public interface CandiConstants {
 	public static final int				SIXTY_MINUTES							= 1000 * 60 * 60;
 
 	public static final int				IMAGE_MEMORY_BYTES_MAX					= 2048000;
+	public static final int				IMAGE_MEMORY_CACHE_WIDTH_MAX			= 100;																// (100x100x4) + 10000 extra
 	public static final Config			IMAGE_CONFIG_DEFAULT					= Config.ARGB_8888;
 	public static final int				IMAGE_WIDTH_SMALL						= 60;
 	public static final int				IMAGE_WIDTH_DEFAULT						= 250;
@@ -105,8 +106,11 @@ public interface CandiConstants {
 	public static final String			TYPE_CANDI_LINK							= "com.proxibase.aircandi.candi.link";
 	public static final String			TYPE_CANDI_COLLECTION					= "com.proxibase.aircandi.candi.collection";
 
-	public static final String			USER_ANONYMOUS							= "{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\",\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\",\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\",\"imageUri\": \"resource:placeholder_user\", \"isDeveloper\": false, \"anonymous\": true, \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}";
-	public static final String			USER_ANONYMOUS_OLD						= "{\"data\": [{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\",\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\",\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\",\"imageUri\": \"resource:placeholder_user\", \"isDeveloper\": false, \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}], \"count\": 1, \"more\": false}";
+	public static final String			USER_ANONYMOUS							= "{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\","
+																						+ "\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\","
+																						+ "\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\","
+																						+ "\"imageUri\": \"resource:placeholder_user\", \"isDeveloper\": false, \"anonymous\": true,"
+																						+ " \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}";
 
 	public static final int				ACTIVITY_ENTITY_HANDLER					= 100;
 	public static final int				ACTIVITY_MARKET							= 200;
@@ -173,10 +177,18 @@ public interface CandiConstants {
 	public static final int				GL_BLEND_FUNCTION_SOURCE				= GL10.GL_ONE;
 	public static final int				GL_BLEND_FUNCTION_DESTINATION			= GL10.GL_ONE_MINUS_SRC_ALPHA;
 	public static final TextureOptions	GL_TEXTURE_OPTION						= TextureOptions.BILINEAR_PREMULTIPLYALPHA;
-	public static final String			USER_AGENT_MOBILE						= "Mozilla/5.0 (Linux; U; Android 2.1.3; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
-	public static final String			USER_AGENT_DESKTOP						= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16";
-	public static final String			USER_AGENT_BACK							= "Mozilla/5.0 (Linux; U; Android 2.2.1; fr-ch; A43 Build/FROYO) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
-	public static final String			USER_AGENT_NEXUS_S						= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
+	public static final String			USER_AGENT_MOBILE						= "Mozilla/5.0 (Linux; U; Android 2.1.3; en-us; "
+																						+ "Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) "
+																						+ "Version/4.0 Mobile Safari/533.1";
+	public static final String			USER_AGENT_DESKTOP						= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) "
+																						+ "AppleWebKit/533.16 (KHTML, like Gecko) "
+																						+ "Version/5.0 Safari/533.16";
+	public static final String			USER_AGENT_BACK							= "Mozilla/5.0 (Linux; U; Android 2.2.1; fr-ch; A43 Build/FROYO) "
+																						+ "AppleWebKit/533.1 (KHTML, like Gecko) "
+																						+ "Version/4.0 Mobile Safari/533.1";
+	public static final String			USER_AGENT_NEXUS_S						= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) "
+																						+ "AppleWebKit/533.1 (KHTML, like Gecko) "
+																						+ "Version/4.0 Mobile Safari/533.1";
 
 	// The default search radius in meters when searching for nearby beacons.
 	public static int					LOCATION_DEFAULT_RADIUS					= 150;

@@ -14,6 +14,7 @@ import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
@@ -58,8 +59,6 @@ public class SignUpForm extends FormActivity {
 	}
 
 	protected void initialize() {
-		mCommon.track();
-		mCommon.mActionBar.setTitle(R.string.form_title_signup);
 		mImageUser = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
@@ -116,7 +115,7 @@ public class SignUpForm extends FormActivity {
 		 */
 		if (mUser.imageUri != null && !mUser.imageUri.equals("")) {
 			if (mUserBitmap != null) {
-				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, R.anim.fade_in_medium);
+				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 			else {
 
@@ -155,6 +154,7 @@ public class SignUpForm extends FormActivity {
 				, getResources().getString(R.string.alert_terms_title)
 				, getResources().getString(R.string.alert_terms_message)
 				, SignUpForm.this, android.R.string.ok, null, null);
+		Tracker.trackEvent("DialogTerms", "Open", null, 0);
 	}
 
 	public void onChangePictureButtonClick(View view) {

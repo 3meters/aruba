@@ -65,10 +65,10 @@ public class CommentList extends CandiActivity {
 		 * Navigation setup for action bar icon and title
 		 */
 		if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
-			if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByRadar) {
+			if (mCommon.mEntityTree == ProxiExplorer.EntityTree.Radar) {
 				mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			}
-			else if (mCommon.mCollectionType == ProxiExplorer.CollectionType.CandiByUser) {
+			else if (mCommon.mEntityTree == ProxiExplorer.EntityTree.User) {
 				mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
 				mCommon.mActionBar.setHomeButtonEnabled(false);
 			}

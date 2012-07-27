@@ -1,16 +1,16 @@
 package com.proxibase.aircandi.components;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Bitmap.Config;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Animation;
@@ -18,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.proxibase.aircandi.Aircandi;
-import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.core.CandiConstants;
 
@@ -109,7 +108,7 @@ public class ImageUtils {
 	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, ImageRequest imageRequest) {
 		return scaleAndCropBitmap(bitmap, imageRequest.getScaleToWidth(), imageRequest.getImageShape());
 	}
-		
+
 	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, int scaleToWidth, ImageShape imageShape) {
 
 		/* Scale if needed */
@@ -227,19 +226,17 @@ public class ImageUtils {
 		return hexColor;
 	}
 
-	public static void showImageInImageView(Bitmap bitmap, ImageView imageView, boolean animate, int animationId) {
+	public static void showImageInImageView(Bitmap bitmap, ImageView imageView, boolean animate, Animation animation) {
 		imageView.setImageBitmap(bitmap);
 		if (animate) {
-			Animation animation = AnimUtils.loadAnimation(animationId);
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			imageView.startAnimation(animation);
 		}
 	}
 
-	public static void clearImageInImageView(ImageView imageView, boolean animate, int animationId) {
+	public static void clearImageInImageView(ImageView imageView, boolean animate, Animation animation) {
 		if (animate) {
-			Animation animation = AnimUtils.loadAnimation(animationId);
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			imageView.startAnimation(animation);
@@ -249,11 +246,11 @@ public class ImageUtils {
 			imageView.setImageBitmap(null);
 		}
 	}
-	
+
 	public static void showDrawableInImageView(Drawable drawable, ImageView imageView, boolean animate) {
 		imageView.setImageDrawable(drawable);
 		if (animate) {
-			Animation animation = AnimUtils.loadAnimation(R.anim.fade_in_medium);
+			Animation animation = AnimUtils.fadeInMedium;
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			imageView.startAnimation(animation);

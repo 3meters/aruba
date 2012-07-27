@@ -16,6 +16,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 
 import com.proxibase.aircandi.R;
+import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
@@ -38,7 +39,6 @@ public class WebImageView extends RelativeLayout {
 	private Integer						mMaxHeight;
 	private boolean						mShowBusy;
 	private Integer						mLayoutId;
-	private Integer						mAnimationId;
 	private ScaleType					mScaleType		= ScaleType.CENTER_CROP;
 	private String						mThemeTone;
 
@@ -73,7 +73,6 @@ public class WebImageView extends RelativeLayout {
 		mMaxHeight = ta.getDimensionPixelSize(R.styleable.WebImageView_maxHeight, Integer.MAX_VALUE);
 		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.temp_webimageview);
-		mAnimationId = ta.getResourceId(R.styleable.WebImageView_animation, R.anim.fade_in_medium);
 
 		TypedValue resourceName = new TypedValue();
 		if (context.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
@@ -183,13 +182,13 @@ public class WebImageView extends RelativeLayout {
 										? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true)
 										: bitmap;
 								if (scaleBitmap) {
-									bitmap.recycle();
+									//bitmap.recycle();
 								}
 								mThreadHandler.post(new Runnable() {
 
 									@Override
 									public void run() {
-										ImageUtils.showImageInImageView(bitmapScaled, mImageView, true, mAnimationId);
+										ImageUtils.showImageInImageView(bitmapScaled, mImageView, true, AnimUtils.fadeInMedium());
 									}
 								});
 							}
@@ -205,7 +204,7 @@ public class WebImageView extends RelativeLayout {
 
 									@Override
 									public void run() {
-										ImageUtils.showImageInImageView(bitmapScaled, mImageView, true, mAnimationId);
+										ImageUtils.showImageInImageView(bitmapScaled, mImageView, true, AnimUtils.fadeInMedium());
 									}
 								});
 							}
@@ -231,7 +230,7 @@ public class WebImageView extends RelativeLayout {
 
 			@Override
 			public void run() {
-				ImageUtils.clearImageInImageView(mImageView, animate, animationId);
+				ImageUtils.clearImageInImageView(mImageView, animate, AnimUtils.fadeOutMedium());
 			}
 		});
 	}
@@ -258,6 +257,7 @@ public class WebImageView extends RelativeLayout {
 		else {
 			mImageViewLoading.post(new Runnable() {
 
+				@SuppressWarnings("deprecation")
 				@Override
 				public void run() {
 					mImageViewLoading.setBackgroundDrawable(null);

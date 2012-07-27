@@ -75,8 +75,6 @@ public class CommentForm extends FormActivity {
 	}
 
 	private void initialize() {
-		mCommon.track();
-		mCommon.mActionBar.setTitle(R.string.form_title_comment);
 		mContent = (EditText) findViewById(R.id.text_content);
 		mButtonSave = (Button) findViewById(R.id.button_save);
 		mButtonSave.setEnabled(false);
@@ -190,8 +188,12 @@ public class CommentForm extends FormActivity {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.trackEvent("Comment", "Insert", null, 0);
-						mCommon.showProgressDialog(false, null);
+						
+						/* We need to push the comment into the entity model. */
+						ProxiExplorer.getInstance().getEntityModel().insertCommentEverywhere(mComment, mCommon.mParentId);
 						ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
+						
+						mCommon.showProgressDialog(false, null);
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_COMMENT_INSERTED);
 						finish();

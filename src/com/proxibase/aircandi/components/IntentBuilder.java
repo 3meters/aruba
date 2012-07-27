@@ -9,26 +9,26 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.CommandType;
-import com.proxibase.aircandi.components.ProxiExplorer.CollectionType;
+import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.service.objects.Beacon;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.GeoLocation;
 
 public class IntentBuilder {
 
-	private Context			mContext;
-	private String			mEntityId;
-	private String			mParentEntityId;
-	private GeoLocation		mEntityLocation;
-	private String			mEntityType;
-	private String			mMessage;
-	private CommandType		mCommandType;
-	private String			mBeaconId;
-	private Boolean			mStripChildEntities	= true;
-	private Boolean			mNavigationTop = false;
-	private Class<?>		mClass;
-	private String			mCollectionId;
-	private CollectionType	mCollectionType;
+	private Context		mContext;
+	private String		mEntityId;
+	private String		mParentEntityId;
+	private GeoLocation	mEntityLocation;
+	private String		mEntityType;
+	private String		mMessage;
+	private CommandType	mCommandType;
+	private String		mBeaconId;
+	private Boolean		mStripChildEntities	= true;
+	private Boolean		mNavigationTop		= false;
+	private Class<?>	mClass;
+	private String		mCollectionId;
+	private EntityTree	mEntityTree;
 
 	public IntentBuilder() {}
 
@@ -94,8 +94,8 @@ public class IntentBuilder {
 			intent.putExtra(mContext.getString(R.string.EXTRA_COLLECTION_ID), mCollectionId);
 		}
 
-		if (mCollectionType != null) {
-			intent.putExtra(mContext.getString(R.string.EXTRA_COLLECTION_TYPE), mCollectionType.name());
+		if (mEntityTree != null) {
+			intent.putExtra(mContext.getString(R.string.EXTRA_ENTITY_TREE), mEntityTree.name());
 		}
 
 		if (mCommandType != null) {
@@ -105,7 +105,7 @@ public class IntentBuilder {
 		if (mNavigationTop != null) {
 			intent.putExtra(mContext.getString(R.string.EXTRA_NAVIGATION_TOP), mNavigationTop);
 		}
-		
+
 		return intent;
 	}
 
@@ -154,8 +154,8 @@ public class IntentBuilder {
 		return this;
 	}
 
-	public IntentBuilder setCollectionType(CollectionType collectionType) {
-		mCollectionType = collectionType;
+	public IntentBuilder setEntityTree(EntityTree entityTree) {
+		mEntityTree = entityTree;
 		return this;
 	}
 

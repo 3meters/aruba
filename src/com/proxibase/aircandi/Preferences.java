@@ -6,7 +6,6 @@ import android.os.Bundle;
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AnimUtils;
-import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 
 public class Preferences extends SherlockPreferenceActivity {
@@ -35,18 +34,16 @@ public class Preferences extends SherlockPreferenceActivity {
 		 * We need to set the theme so ActionBarSherlock behaves correctly on API < V14
 		 */
 		mCommon = new AircandiCommon(this, savedInstanceState);
-		mCommon.setTheme(null);
+		mCommon.setTheme(false);
 
 		super.onCreate(savedInstanceState);
 		if (Aircandi.getInstance().getUser() != null
 				&& Aircandi.getInstance().getUser().isDeveloper != null
 				&& Aircandi.getInstance().getUser().isDeveloper) {
 			addPreferencesFromResource(R.xml.preferences_dev);
-			Tracker.trackPageView("/Preferences");
 		}
 		else {
 			addPreferencesFromResource(R.xml.preferences);
-			Tracker.trackPageView("/PreferencesDev");
 		}
 	}
 
@@ -54,6 +51,18 @@ public class Preferences extends SherlockPreferenceActivity {
 	public void onBackPressed() {
 		super.onBackPressed();
 		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		mCommon.doStop();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		mCommon.doStart();
 	}
 
 	public static enum PrefResponse {

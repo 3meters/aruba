@@ -29,6 +29,8 @@ import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
+import org.anddev.andengine.opengl.texture.source.ITextureSource;
+import org.anddev.andengine.opengl.texture.source.ResourceTextureSource;
 import org.anddev.andengine.opengl.util.GLHelper;
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 import org.anddev.andengine.util.modifier.IModifier;
@@ -214,7 +216,8 @@ public class CandiPatchPresenter implements Observer {
 		{
 			/* Highlight */
 			mHighlight = new Rectangle(0, 0, 260, 260);
-			mHighlight.setColor(0.2f, 0.7f, 0.9f, 0.6f);
+			mHighlight.setColor(1.0f, 0.7f, 0f, 1.0f);
+			//mHighlight.setColor(0.2f, 0.7f, 0.9f, 0.6f);
 			mHighlight.setVisible(false);
 			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mHighlight);
 
@@ -323,15 +326,9 @@ public class CandiPatchPresenter implements Observer {
 		if (mContext.getTheme().resolveAttribute(R.attr.textureBodyZone, resourceName, true)) {
 			mStyleTextureBodyZoneResId = (Integer) resourceName.resourceId;
 		}
-		else {
-			throw new IllegalStateException("Placeholder texture was not found in the current theme");
-		}
 
 		if (mContext.getTheme().resolveAttribute(R.attr.textColorTitle, resourceName, true)) {
 			mStyleTextColorTitle = (String) resourceName.coerceToString();
-		}
-		else {
-			throw new IllegalStateException("Text color title was not found in the current theme");
 		}
 	}
 
@@ -1665,7 +1662,11 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Scene progress sprite */
-		mPlaceholderTextureRegion = TextureRegionFactory.createFromResource(mTexture, mContext, Integer.valueOf(mStyleTextureBodyZoneResId), 256, 0);
+		
+		final ITextureSource textureSource = new ResourceTextureSource(Aircandi.applicationContext, mStyleTextureBodyZoneResId);
+		mPlaceholderTextureRegion =  TextureRegionFactory.createFromSource(mTexture, textureSource, 256, 0);
+		
+		//mPlaceholderTextureRegion = TextureRegionFactory.createFromResource(mTexture, mContext, Integer.valueOf(mStyleTextureBodyZoneResId), 256, 0);
 	}
 
 	public void resetTextures(TextureReset textureReset) {

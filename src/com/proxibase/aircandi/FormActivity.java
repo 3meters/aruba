@@ -68,7 +68,7 @@ public abstract class FormActivity extends SherlockActivity {
 			 */
 			mCommon = new AircandiCommon(this, savedInstanceState);
 			mCommon.unpackIntent();
-			mCommon.setTheme(getCustomTheme());
+			mCommon.setTheme(isDialog());
 			super.onCreate(savedInstanceState);
 			super.setContentView(this.getLayoutID());
 			mCommon.initialize();
@@ -117,6 +117,8 @@ public abstract class FormActivity extends SherlockActivity {
 		 */
 		if (resultCode == Activity.RESULT_OK) {
 			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
+
+				Tracker.trackEvent("Entity", "PictureSearch", "None", 0);
 
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
@@ -168,19 +170,20 @@ public abstract class FormActivity extends SherlockActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
 
+				Tracker.trackEvent("Entity", "PickPicture", "None", 0);
 				Uri imageUri = intent.getData();
 				Bitmap bitmap = null;
 
 				bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_DEFAULT));
 				if (bitmap != null && mImageRequestListener != null) {
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);
-					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, R.anim.fade_in_medium);
+					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, AnimUtils.fadeInMedium());
 					mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap, null, null);
-					Tracker.trackEvent("Entity", "PickPicture", "None", 0);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
 
+				Tracker.trackEvent("Entity", "TakePicture", "None", 0);
 				try {
 					/* Get bitmap */
 					Bitmap bitmap = Media.getBitmap(getContentResolver(), Uri.fromFile(mCommon.getTempFile(this, "image_capture.tmp")));
@@ -216,9 +219,8 @@ public abstract class FormActivity extends SherlockActivity {
 
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);
 					if (mImageRequestListener != null) {
-						ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, R.anim.fade_in_medium);
+						ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, AnimUtils.fadeInMedium());
 						mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap, null, null);
-						Tracker.trackEvent("Entity", "TakePicture", "None", 0);
 					}
 				}
 				catch (FileNotFoundException e) {
@@ -230,6 +232,7 @@ public abstract class FormActivity extends SherlockActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_LINK_PICK) {
 
+				Tracker.trackEvent("Entity", "PickBookmark", "None", 0);
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
 					final String linkUri = extras.getString(getString(R.string.EXTRA_URI));
@@ -363,7 +366,9 @@ public abstract class FormActivity extends SherlockActivity {
 
 		View titleView = getLayoutInflater().inflate(R.layout.temp_dialog_title, null);
 		((TextView) titleView.findViewById(R.id.dialog_title_text)).setText(getResources().getString(R.string.dialog_change_picture_title));
-		builder.setCustomTitle(titleView);
+		//builder.setCustomTitle(titleView);
+		builder.setTitle(R.string.dialog_change_picture_title);
+		builder.setIcon(R.drawable.icon_app);
 
 		builder.setCancelable(true);
 		builder.setNegativeButton(getResources().getString(R.string.dialog_button_cancel), null);
@@ -431,8 +436,8 @@ public abstract class FormActivity extends SherlockActivity {
 		alert.show();
 	}
 
-	protected Integer getCustomTheme() {
-		return null;
+	protected Boolean isDialog() {
+		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -443,11 +448,9 @@ public abstract class FormActivity extends SherlockActivity {
 	protected void onResume() {
 		super.onResume();
 		mCommon.doResume();
-		if (!mCommon.mUsingCustomTheme) {
-			if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
-				mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
-				mCommon.reload();
-			}
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+			mCommon.reload();
 		}
 	}
 
@@ -473,6 +476,18 @@ public abstract class FormActivity extends SherlockActivity {
 		finally {
 			super.onDestroy();
 		}
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		mCommon.doStop();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		mCommon.doStart();
 	}
 
 	protected int getLayoutID() {

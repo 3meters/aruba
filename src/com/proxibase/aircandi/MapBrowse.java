@@ -40,7 +40,7 @@ public class MapBrowse extends SherlockMapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 
 		mCommon = new AircandiCommon(this, savedInstanceState);
-		mCommon.setTheme(null);
+		mCommon.setTheme(false);
 		mCommon.unpackIntent();
 
 		setContentView(getLayoutId());
@@ -55,16 +55,15 @@ public class MapBrowse extends SherlockMapActivity {
 	@SuppressWarnings("deprecation")
 	private void initialize() {
 
-		mCommon.track();
 		mMapView = new MapView(this, Aircandi.isDebugBuild(this) ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
 		mMapView.setBuiltInZoomControls(true);
 		mMapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
 		mMapView.setSatellite(false);
 		mMapView.setStreetView(false);
 		mMapView.setClickable(true);
-		
+
 		mMapController = mMapView.getController();
-		
+
 		ViewGroup mapHolder = (ViewGroup) findViewById(R.id.map_holder);
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		mapHolder.addView(mMapView, params);
@@ -156,13 +155,27 @@ public class MapBrowse extends SherlockMapActivity {
 		GeoLocation entityLocation = mEntity.location != null ? mEntity.location : mCommon.mEntityLocation;
 		GeoPoint geoPoint = new GeoPoint((int) (entityLocation.latitude.doubleValue() * 1E6), (int) (entityLocation.longitude.doubleValue() * 1E6));
 
-		
 		OverlayItem overlayItem = new OverlayItem(geoPoint, mEntity.title, mEntity.description);
 		overlayItem.setMarker(drawable);
 		mItemizedOverlay.addOverlay(overlayItem);
 		zoomToGeoPoint(geoPoint);
 		mMapOverlays.add(mItemizedOverlay);
 		mMapView.invalidate();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle routines
+	// --------------------------------------------------------------------------------------------
+	@Override
+	protected void onStop() {
+		super.onStop();
+		mCommon.doStop();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		mCommon.doStart();
 	}
 
 	// --------------------------------------------------------------------------------------------

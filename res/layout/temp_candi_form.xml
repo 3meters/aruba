@@ -99,14 +99,14 @@
                 <RelativeLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:gravity="center_vertical" >
+                    android:layout_marginBottom="10dp">
 
                     <com.proxibase.aircandi.widgets.AuthorBlock
                         android:id="@+id/block_author"
-                        android:layout_width="250px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="3dp"
+                        android:minWidth="175dp"
                         aircandi:layout="@layout/temp_user_info" />
 
                     <Button
@@ -129,8 +129,8 @@
                         android:id="@+id/button_map"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:layout_alignTop="@+id/block_author"
-                        android:layout_toRightOf="@+id/block_author"
+                        android:layout_alignTop="@+id/button_comments"
+                        android:layout_toRightOf="@+id/button_comments"
                         android:background="@drawable/app_image_selector"
                         android:clickable="true"
                         android:onClick="onMapButtonClick"
