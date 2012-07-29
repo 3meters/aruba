@@ -122,14 +122,14 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	private void makeSprites() {
 
 		/* Placeholder and reflection */
-		mPlaceholderTextureRegion = mCandiPatchPresenter.mPlaceholderTextureRegion.clone();
+		mPlaceholderTextureRegion = mCandiPatchPresenter.mCandiBodyTextureRegion.clone();
 		mPlaceholderSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, mPlaceholderTextureRegion);
 		mPlaceholderSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mPlaceholderSprite.setVisible(false);
 		mPlaceholderSprite.setZIndex(10);
 		attachChild(mPlaceholderSprite);
 
-		mPlaceholderReflectionTextureRegion = mCandiPatchPresenter.mZoneReflectionTextureRegion.clone();
+		mPlaceholderReflectionTextureRegion = mCandiPatchPresenter.mCandiReflectionTextureRegion.clone();
 		mPlaceholderReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT,
 				mPlaceholderReflectionTextureRegion);
 		mPlaceholderReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);

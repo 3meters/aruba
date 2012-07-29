@@ -13,6 +13,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.Drawable;
+import android.view.View;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -27,6 +28,14 @@ public class ImageUtils {
 	private static LinearGradient	mShader	= new LinearGradient(0, 0, 0, CandiConstants.CANDI_VIEW_REFLECTION_HEIGHT, 0x80ffffff, 0x00ffffff,
 													TileMode.CLAMP);
 
+	public static Bitmap bitmapFromView(View view, int width, int height) {
+		Bitmap bitmap = Bitmap.createBitmap(width, height, CandiConstants.IMAGE_CONFIG_DEFAULT);
+		Canvas canvas = new Canvas(bitmap);
+		view.draw(canvas);
+		canvas = null;
+		return bitmap;
+	}
+	
 	public static void showToastNotification(final String message, final int duration) {
 		Aircandi.applicationHandler.post(new Runnable() {
 
@@ -250,7 +259,7 @@ public class ImageUtils {
 	public static void showDrawableInImageView(Drawable drawable, ImageView imageView, boolean animate) {
 		imageView.setImageDrawable(drawable);
 		if (animate) {
-			Animation animation = AnimUtils.fadeInMedium;
+			Animation animation = AnimUtils.fadeInMedium();
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			imageView.startAnimation(animation);

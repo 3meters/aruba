@@ -648,6 +648,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 			if (mPlaceholderSprite != null) {
 				if (imageRequest.getImageUri() != null && !ImageManager.isLocalImage(imageRequest.getImageUri())) {
 					mPlaceholderSprite.setVisible(!ImageManager.getInstance().hasImage(imageRequest.getImageUri()));
+					mPlaceholderReflectionSprite.setVisible(mPlaceholderSprite.isVisible());
 				}
 			}
 
@@ -806,7 +807,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 		mBodyTexture.clearTextureSources();
 		mReflectionTexture.clearTextureSources();
-		mPlaceholderTextureRegion = mCandiPatchPresenter.mPlaceholderTextureRegion.clone();
+		mPlaceholderTextureRegion = mCandiPatchPresenter.mCandiBodyTextureRegion.clone();
 		requestTextureSources(false, true);
 	}
 

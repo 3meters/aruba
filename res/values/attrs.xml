@@ -30,6 +30,7 @@
     </declare-styleable>
     <declare-styleable name="CandiRadar">
         <attr name="textureBodyZone" format="reference" />
+        <attr name="textureBodyCandi" format="reference" />
         <attr name="textColorTitle" format="string" />
         <attr name="textColorButton" format="color" />
         <attr name="textColorButtonHeader" format="color" />

@@ -10,7 +10,6 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Picture;
-import android.os.Message;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebView.PictureListener;
@@ -34,7 +33,6 @@ import com.proxibase.service.objects.Entity.ImageFormat;
 @SuppressWarnings("deprecation")
 public class ImageLoader {
 
-	// private ImageCache mImageCache;
 	private ImagesQueue		mImagesQueue		= new ImagesQueue();
 	private ImagesLoader	mImageLoaderThread	= new ImagesLoader();
 	private WebView			mWebView;
@@ -204,12 +202,11 @@ public class ImageLoader {
 		return serviceResponse;
 	}
 
-	private void getWebPageAsBitmap(final String uri, final ImageRequest imageRequest, final RequestListener listener) {
+	private void getWebPageAsBitmap(final String originalUri, final ImageRequest imageRequest, final RequestListener listener) {
 
-		// String webViewContent = "";
-		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Success, ResponseCodeDetail.Success, null, null);
-		final AtomicBoolean ready = new AtomicBoolean(false);
+		final ServiceResponse serviceResponse = new ServiceResponse();
 		final AtomicInteger pictureCount = new AtomicInteger(0);
+		final AtomicBoolean ready = new AtomicBoolean(false);
 
 		/*
 		 * Setting WideViewPort to false will cause html text to layout to try and fit the sizing of the webview though
@@ -220,11 +217,12 @@ public class ImageLoader {
 		 * constrained to it's own dimensions (so if the webview is 50px*50px the viewport will be the same size)
 		 */
 
-		Aircandi.applicationHandler.post(new Runnable(){
+		Aircandi.applicationHandler.post(new Runnable() {
 
 			@SuppressLint("SetJavaScriptEnabled")
 			@Override
 			public void run() {
+
 				mWebView.getSettings().setUseWideViewPort(true);
 				if (imageRequest.getLinkZoom()) {
 					mWebView.getSettings().setUseWideViewPort(false);
@@ -242,76 +240,106 @@ public class ImageLoader {
 				mWebView.setWebViewClient(new WebViewClient() {
 
 					@Override
-					public void onTooManyRedirects(WebView view, Message cancelMsg, Message continueMsg) {
-						super.onTooManyRedirects(view, cancelMsg, continueMsg);
-						Logger.v(this, "Too many redirects: " + uri);
+					public void onLoadResource(WebView view, String url) {
+						super.onLoadResource(view, url);
 					}
 
 					@Override
 					public void onPageStarted(WebView view, String url, Bitmap favicon) {
 						super.onPageStarted(view, url, favicon);
-						Logger.v(this, "Page started: " + url);
+						Logger.v(ImageLoader.this, "Page started: " + url);
 					}
 
 					@Override
 					public void onPageFinished(WebView view, String url) {
 						super.onPageFinished(view, url);
-						Logger.v(this, "Page finished: " + url);
+						Logger.v(ImageLoader.this, "Page finished: " + url);
 						ready.set(true);
 					}
 
 					public boolean shouldOverrideUrlLoading(WebView view, String url) {
 						view.loadUrl(url);
-						Logger.v(this, "Url intercepted and loaded: " + url);
+						Logger.v(ImageLoader.this, "Url intercepted and loaded: " + url);
 						return false;
 					}
+
 				});
+
 				mWebView.setWebChromeClient(new WebChromeClient() {
 
 					@Override
 					public void onProgressChanged(WebView view, int progress) {
 						listener.onProgressChanged(progress);
-					}
-				});
-				mWebView.setPictureListener(new PictureListener() {
 
-					@Override
-					public void onNewPicture(WebView view, Picture picture) {
-						/*
-						 * Sometimes the first call isn't finished with layout but the second one is correct. How can we tell
-						 * the difference?
-						 */
+						Logger.v(ImageLoader.this, "Progress: " + String.valueOf(progress) + " :" + view.getUrl());
+						if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+							if (view.getUrl() != null && progress >= 100) {
+								Logger.v(ImageLoader.this, "Capturing screenshot: " + view.getUrl());
 
-						if (ready.get()) {
-							pictureCount.getAndIncrement();
+								Aircandi.applicationHandler.postDelayed(new Runnable() {
 
-							final Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
-									CandiConstants.IMAGE_CONFIG_DEFAULT);
-							Canvas canvas = new Canvas(bitmap);
+									@Override
+									public void run() {
+										Bitmap bitmap = captureWebView(mWebView.capturePicture());
+										serviceResponse.data = bitmap;
+										listener.onComplete(serviceResponse);
+									}
 
-							Matrix matrix = new Matrix();
-							float scale = (float) CandiConstants.CANDI_VIEW_WIDTH / (float) picture.getWidth();
-							matrix.postScale(scale, scale);
+								}, 1000);
 
-							canvas.setMatrix(matrix);
-							canvas.drawPicture(picture);
-
-							/* Release */
-							canvas = null;
-							serviceResponse.data = bitmap;
-							listener.onComplete(serviceResponse);
-
-							/* We only allow a maximum of two picture calls */
-							if (pictureCount.get() >= 2) {
-								mWebView.setPictureListener(null);
 							}
 						}
 					}
 				});
 
-				mWebView.loadUrl(uri);
-			}});
-		
+				/*
+				 * Using picture listener works best on older versions.
+				 */
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+					mWebView.setPictureListener(new PictureListener() {
+
+						@Override
+						public void onNewPicture(WebView view, Picture picture) {
+							Logger.v(this, "WebView onNewPicture called");
+							/*
+							 * Sometimes the first call isn't finished with layout but the second one is correct.
+							 * How can we tell the difference?
+							 */
+							if (ready.get()) {
+								pictureCount.getAndIncrement();
+								Bitmap bitmap = captureWebView(picture);
+								serviceResponse.data = bitmap;
+								listener.onComplete(serviceResponse);
+
+								/* We only allow a maximum of two picture calls */
+								if (pictureCount.get() >= 2) {
+									mWebView.setPictureListener(null);
+								}
+							}
+						}
+					});
+				}
+				mWebView.loadUrl(originalUri);
+			}
+		});
+	}
+
+	private Bitmap captureWebView(Picture picture) {
+
+		final Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
+				CandiConstants.IMAGE_CONFIG_DEFAULT);
+		Canvas canvas = new Canvas(bitmap);
+
+		Matrix matrix = new Matrix();
+		float scale = (float) CandiConstants.CANDI_VIEW_WIDTH / (float) picture.getWidth();
+		matrix.postScale(scale, scale);
+
+		canvas.setMatrix(matrix);
+		canvas.drawPicture(picture);
+
+		/* Release */
+		canvas = null;
+		return bitmap;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -383,7 +411,7 @@ public class ImageLoader {
 						if (imageRequest.getImageFormat() == ImageFormat.Html) {
 
 							processingWebPage = true;
-							Logger.v(this, "Starting html image processing: " + imageRequest.getImageUri());
+							Logger.v(ImageLoader.this, "Starting html image processing: " + imageRequest.getImageUri());
 							getWebPageAsBitmap(imageRequest.getImageUri(), imageRequest, new RequestListener() {
 
 								@Override
@@ -405,7 +433,7 @@ public class ImageLoader {
 										/* Stuff it into the cache. Overwrites if it already exists. */
 										ImageManager.getInstance().putImage(imageRequest.getImageUri(), bitmap, CompressFormat.JPEG);
 
-										Logger.v(this, "Html image processed: " + imageRequest.getImageUri());
+										Logger.v(ImageLoader.this, "Html image processed: " + imageRequest.getImageUri());
 										serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
 									}
 									imageRequest.getRequestListener().onComplete(serviceResponse);
@@ -424,7 +452,7 @@ public class ImageLoader {
 
 							long startTime = System.nanoTime();
 							float estimatedTime = System.nanoTime();
-							Logger.v(this, imageRequest.getImageUri() + ": Download started...");
+							Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Download started...");
 
 							/*
 							 * Gets bitmap at native size and downsamples if necessary to stay within the max size in
@@ -445,7 +473,8 @@ public class ImageLoader {
 							if (serviceResponse.responseCode == ResponseCode.Success) {
 
 								bitmap = (Bitmap) serviceResponse.data;
-								Logger.v(this, imageRequest.getImageUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000) + "ms");
+								Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000)
+										+ "ms");
 
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
@@ -457,24 +486,24 @@ public class ImageLoader {
 
 								estimatedTime = System.nanoTime() - startTime;
 								startTime = System.nanoTime();
-								Logger.v(this, imageRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000) + "ms");
+								Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000) + "ms");
 
 								/*
 								 * Stuff it into the cache. Overwrites if it already exists. This is a perf hit in the
 								 * process because writing files is slow.
 								 */
 								if (imageRequest.doUpdateCache()) {
-									Logger.v(this, imageRequest.getImageUri() + ": Pushing into cache...");
+									Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Pushing into cache...");
 									ImageManager.getInstance().putImage(imageRequest.getImageUri(), bitmap);
 								}
 								imageRequest.getRequestListener().onProgressChanged(80);
 
-								Logger.v(this, imageRequest.getImageUri() + ": Progress complete");
+								Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Progress complete");
 								serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
 								imageRequest.getRequestListener().onProgressChanged(100);
 							}
 							else if (serviceResponse.responseCodeDetail == ResponseCodeDetail.IllegalStateException) {
-								/* 
+								/*
 								 * Data couldn't be successfully decoded into a bitmap so substitute
 								 * the broken image placeholder
 								 */
