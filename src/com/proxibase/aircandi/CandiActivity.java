@@ -32,7 +32,6 @@ public abstract class CandiActivity extends SherlockActivity {
 			super.onCreate(savedInstanceState);
 			mCommon.initialize();
 
-			Logger.i(this, "CandiActivity created");
 			Logger.d(this, "Started from radar flag: " + String.valueOf(Aircandi.getInstance().getLaunchedFromRadar()));
 		}
 	}
@@ -55,7 +54,7 @@ public abstract class CandiActivity extends SherlockActivity {
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
-		Logger.i(this, "Configuration changed");
+		Logger.d(this, "Configuration changed");
 		mCommon.mConfigChange = true;
 		super.onConfigurationChanged(newConfig);
 	}

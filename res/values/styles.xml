@@ -32,6 +32,10 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+    <style name="app_text_appearance_tiny" parent="@android:style/TextAppearance">
+        <item name="android:textSize">10sp</item>
+    </style>
+
     <style name="app_text_appearance_title1" parent="@android:style/TextAppearance">
         <item name="android:textSize">22sp</item>
         <item name="android:textStyle">bold</item>
@@ -46,6 +50,12 @@
         <item name="android:minWidth">80dp</item>
         <item name="android:maxWidth">200dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    </style>
+
+    <style name="app_button_borderless" parent="Widget.Sherlock.ActionButton"></style>
+
+    <style name="app_bar" parent="Widget.Sherlock.ActionBar.TabBar">
+        <item name="android:background">?attr/activityFooterFormBackground</item>
     </style>
 
     <style name="app_picture">
@@ -106,7 +116,7 @@
 
     <style name="actionbar_rule_vertical">
         <item name="android:background">@drawable/app_header_separator</item>
-    </style>
+    </style>
     -->
 
     <style name="actionbar">
@@ -144,7 +154,7 @@
 
     <!--
          If you want a slightly different color for some text,
-         consider using ?android:attr/textColorSecondary
+         consider using ?android:attr/textColorSecondary
     -->
 
 
@@ -221,7 +231,7 @@
         <item name="android:textColor">#ffffaa00</item>
         <item name="android:background">?attr/backgroundButton</item>
     </style>
-    
+
     <style name="candi_info_title">
         <item name="android:textAppearance">@style/app_text_appearance_title1</item>
     </style>

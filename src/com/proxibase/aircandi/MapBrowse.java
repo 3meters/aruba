@@ -55,7 +55,7 @@ public class MapBrowse extends SherlockMapActivity {
 	@SuppressWarnings("deprecation")
 	private void initialize() {
 
-		mMapView = new MapView(this, Aircandi.isDebugBuild(this) ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
+		mMapView = new MapView(this, BuildConfig.DEBUG ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
 		mMapView.setBuiltInZoomControls(true);
 		mMapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
 		mMapView.setSatellite(false);

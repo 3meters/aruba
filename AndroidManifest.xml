@@ -117,9 +117,9 @@
         <activity
             android:name=".TemplatePicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:icon="@drawable/ic_collection_250"
             android:label="@string/form_title_templates"
             android:theme="@style/Theme.Sherlock.Dialog"
-            android:icon="@drawable/ic_collection_250"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
@@ -162,8 +162,7 @@
             android:name=".Preferences"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
-            android:label="@string/form_title_preferences"
-            android:theme="@android:style/Theme" >
+            android:label="@string/form_title_preferences" >
             <intent-filter>
                 <action android:name="com.proxibase.aircandi.Preferences" />
 
@@ -182,7 +181,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
-    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
     -->
 
 </manifest>

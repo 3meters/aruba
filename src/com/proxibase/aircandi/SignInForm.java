@@ -16,6 +16,7 @@ import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.IntentBuilder;
+import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
@@ -143,6 +144,8 @@ public class SignInForm extends FormActivity {
 						ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.ProxibaseService);
 						User user = serviceData.user;
 						user.session = serviceData.session;
+						Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
+
 
 						Aircandi.getInstance().setUser(user);
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)

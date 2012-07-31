@@ -66,6 +66,7 @@ import com.proxibase.aircandi.candi.models.CandiPatchModel;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.Events.EventHandler;
+import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.aircandi.components.ProxiExplorer.WifiScanResult;
@@ -111,7 +112,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	/* Theme */
 	public String						mThemeTone;
 	public Integer						mThemeId;
-	private Integer						mThemeBusyIndicatorResId;
+	public Integer						mThemeBusyIndicatorResId;
 	public Integer						mThemeDialogResId;
 
 	/* UI */
@@ -119,7 +120,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public TextView						mBeaconIndicator;
 	protected TextView					mTitle;
 	protected ImageView					mButtonRefresh;
-	public Dialog						mProgressDialog;
+	private Dialog						mProgressDialog;
 	public String						mPrefTheme;
 	public Boolean						mUsingCustomTheme			= false;
 	public Integer						mTabIndex;
@@ -163,6 +164,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
 
+		Logger.i(this, "Activity created: " + mPageName);
+		Logger.d(this, "Started from radar flag: " + String.valueOf(Aircandi.getInstance().getLaunchedFromRadar()));
+
 		/* Stash the action bar */
 		if (mPageName.equals("CandiMap") || mPageName.equals("MapBrowse")) {
 			mActionBar = ((SherlockMapActivity) mActivity).getSupportActionBar();
@@ -196,7 +200,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		/* Tabs: setup tabs if appropriate */
 		manageTabs();
 
-
 		/* Beacon indicator */
 		mBeaconIndicator = (TextView) mActivity.findViewById(R.id.beacon_indicator);
 		if (mBeaconIndicator != null) {
@@ -223,24 +226,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (mButtonRefresh != null) {
 			mButtonRefresh.setVisibility(View.VISIBLE);
 		}
-
-		/* Dialogs */
-		mProgressDialog = new Dialog(mContext, R.style.progress_body);
-		mProgressDialog.setTitle(null);
-		mProgressDialog.setCancelable(true);
-		mProgressDialog.setCanceledOnTouchOutside(false);
-		mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-		mProgressDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-				WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-		mProgressDialog.setOnDismissListener(new OnDismissListener() {
-
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				final ImageView image = (ImageView) mProgressDialog.findViewById(R.id.image_body_progress_indicator);
-				image.setBackgroundResource(0);
-			}
-		});
-
 	}
 
 	public void unpackIntent() {
@@ -562,19 +547,20 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void showProgressDialog(boolean visible, String message, Activity ownerActivity) {
 
+		Dialog progressDialog = getProgressDialog();
 		if (visible) {
 			if (ownerActivity != null) {
-				mProgressDialog.setOwnerActivity(ownerActivity);
+				progressDialog.setOwnerActivity(ownerActivity);
 			}
-			mProgressDialog.setContentView(R.layout.dialog_progress);
-			final ImageView image = (ImageView) mProgressDialog.findViewById(R.id.image_body_progress_indicator);
-			TextView text = (TextView) mProgressDialog.findViewById(R.id.text_progress_message);
+			progressDialog.setContentView(R.layout.dialog_progress);
+			final ImageView image = (ImageView) progressDialog.findViewById(R.id.image_body_progress_indicator);
+			TextView text = (TextView) progressDialog.findViewById(R.id.text_progress_message);
 			text.setText(message == null ? mActivity.getString(R.string.progress_loading) : message);
 
 			/* Prevent dismissing the indicator with the back key */
-			mProgressDialog.setCancelable(false);
+			progressDialog.setCancelable(false);
 
-			mProgressDialog.show();
+			progressDialog.show();
 			image.post(new Runnable() {
 
 				@Override
@@ -587,8 +573,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		}
 		else {
-			if (mProgressDialog.isShowing() && mProgressDialog.getWindow().getWindowManager() != null) {
-				mProgressDialog.dismiss();
+			if (progressDialog.isShowing() && progressDialog.getWindow().getWindowManager() != null) {
+				progressDialog.dismiss();
 			}
 		}
 	}
@@ -736,6 +722,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 					/*
 					 * We continue on even if the service call failed.
 					 */
+					ServiceResponse serviceResponse = (ServiceResponse) response;
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						Logger.i(this, "User signed out: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
+					}
+					else {
+						Logger.w(this, "User signed out, service call failed: " + Aircandi.getInstance().getUser().id);
+					}
+
 					User user = ProxibaseService.getGson(GsonType.Internal).fromJson(CandiConstants.USER_ANONYMOUS, User.class);
 					user.anonymous = true;
 					Aircandi.getInstance().setUser(user);
@@ -982,7 +976,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 
 	public void manageTabs() {
-		Logger.i(this, "Building tabs: " + mPageName);
+		Logger.v(this, "Building tabs: " + mPageName);
 		if (mPageName.equals("CandiRadar")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
 			setActiveTab(0);
@@ -1100,7 +1094,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void setActiveTab(int position) {
-		Logger.i(this, "Setting active tab: " + String.valueOf(position));
+		Logger.v(this, "Setting active tab: " + String.valueOf(position));
 		if (mActionBar.getSelectedTab() == null || mActionBar.getSelectedTab().getPosition() != position) {
 			mActionBar.getTabAt(position).select();
 		}
@@ -1108,7 +1102,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
-		Logger.i(this, "onTabSelected: " + tab.getTag());
+		Logger.v(this, "onTabSelected: " + tab.getTag());
 		if (tab.getTag().equals(R.string.radar_tab_radar)) {
 			if (Aircandi.getInstance().getCandiTask() != CandiTask.RadarCandi) {
 				Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
@@ -1179,7 +1173,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	@Override
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {
-		Logger.i(this, "onTabReselected: " + tab.getText() + ", Top: " + String.valueOf(mNavigationTop));
+		Logger.v(this, "onTabReselected: " + tab.getText() + ", Top: " + String.valueOf(mNavigationTop));
 
 		//		/*
 		//		 * Reselecting a tab should take the user to the top of the
@@ -1346,6 +1340,29 @@ public class AircandiCommon implements ActionBar.TabListener {
 			path.mkdir();
 		}
 		return new File(path, tempFileName);
+	}
+
+	public Dialog getProgressDialog() {
+
+		if (mProgressDialog == null) {
+			/* Dialogs */
+			mProgressDialog = new Dialog(mContext, R.style.progress_body);
+			mProgressDialog.setTitle(null);
+			mProgressDialog.setCancelable(true);
+			mProgressDialog.setCanceledOnTouchOutside(false);
+			mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+			mProgressDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+					WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+			mProgressDialog.setOnDismissListener(new OnDismissListener() {
+
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					final ImageView image = (ImageView) mProgressDialog.findViewById(R.id.image_body_progress_indicator);
+					image.setBackgroundResource(0);
+				}
+			});
+		}
+		return mProgressDialog;
 	}
 
 	public enum ServiceOperation {

@@ -560,10 +560,10 @@ public class CandiPatchModel extends Observable {
 	public void setCandiModelFocused(CandiModel candiFocused) {
 		if (mCandiModelFocused != candiFocused) {
 			if (candiFocused != null) {
-				Logger.d(null, "Changing candi model focus: " + candiFocused.getTitleText());
+				Logger.d(this, "Changing candi model focus: " + candiFocused.getTitleText());
 			}
 			else {
-				Logger.d(null, "Changing candi model focus: null");
+				Logger.d(this, "Changing candi model focus: null");
 			}
 		}
 		mCandiModelFocused = candiFocused;

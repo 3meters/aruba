@@ -317,8 +317,6 @@ public class ProfileForm extends FormActivity {
 						mUser.modifiedDate = DateUtils.nowDate().getTime();
 						mUser.modifierId = Aircandi.getInstance().getUser().id;
 
-						Logger.i(this, "Updating user profile: " + mUser.name);
-
 						ServiceRequest serviceRequest = new ServiceRequest();
 						serviceRequest.setUri(mUser.getEntryUri())
 								.setRequestType(RequestType.Update)
@@ -336,6 +334,7 @@ public class ProfileForm extends FormActivity {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
+						Logger.i(this, "Updated user profile: " + mUser.name + " (" + mUser.id + ")");
 						Tracker.trackEvent("User", "Update", null, 0);
 						mCommon.showProgressDialog(false, null);
 						/*

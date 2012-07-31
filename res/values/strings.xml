@@ -105,6 +105,7 @@
     <string name="progress_saving">Saving&#8230;</string>
     <string name="progress_verifying">Verifying&#8230;</string>
     <string name="progress_deleting">Deleting&#8230;</string>
+    <string name="progress_updating">Updating&#8230;</string>
     <string name="progress_moving">Moving&#8230;</string>
     <string name="progress_changing_password">Changing&#8230;</string>
     <string name="progress_searching">Searching&#8230;</string>
@@ -165,7 +166,7 @@
     <!-- CandiForm -->
 
     <string name="candi_button_comment">Comment</string>
-    <string name="candi_button_new">Add\nCandi</string>
+    <string name="candi_button_new">Add Candi</string>
     <string name="candi_button_edit">Edit</string>
     <string name="candi_button_move">Move</string>
     <string name="candi_label_comments_none">No comments yet</string>

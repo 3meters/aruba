@@ -650,7 +650,7 @@ public class ProxiExplorer {
 	public static class EntityModel {
 
 		private EntityList<Entity>	mEntities			= new EntityList<Entity>(EntityTree.Radar);
-		private EntityList<Entity>	mUserEntities			= new EntityList<Entity>(EntityTree.User);
+		private EntityList<Entity>	mUserEntities		= new EntityList<Entity>(EntityTree.User);
 		private List<Object>		mMapEntities		= new ArrayList<Object>();
 
 		private List<Beacon>		mBeacons			= new ArrayList<Beacon>();
@@ -734,7 +734,7 @@ public class ProxiExplorer {
 			return false;
 		}
 
-		public void insertEntity(Entity entity, Beacon beacon, Entity parentEntity, EntityTree collectionType) {
+		public void insertEntity(Entity entity, Beacon beacon, Entity parentEntity, Boolean atTop, EntityTree collectionType) {
 			if (collectionType == EntityTree.Radar) {
 				/*
 				 * Radar candi are associated with beacons currently in radar proximity.
@@ -745,7 +745,12 @@ public class ProxiExplorer {
 				if (parentEntity == null) {
 					entity.beacon = beacon;
 					synchronized (beacon.entities) {
-						beacon.entities.add(0, entity);
+						if (atTop) {
+							beacon.entities.add(0, entity);
+						}
+						else {
+							beacon.entities.add(entity);
+						}
 					}
 					if (entity.children != null) {
 						for (Entity childEntity : entity.children) {
@@ -766,7 +771,12 @@ public class ProxiExplorer {
 						parentEntity.children = new EntityList<Entity>();
 					}
 					synchronized (parentEntity.children) {
-						parentEntity.children.add(0, entity);
+						if (atTop) {
+							parentEntity.children.add(0, entity);
+						}
+						else {
+							parentEntity.children.add(entity);
+						}
 					}
 				}
 			}
@@ -778,14 +788,19 @@ public class ProxiExplorer {
 				 * 
 				 * Linkages: parent
 				 */
-				List<Entity> myEntities = mUserEntities;
+				List<Entity> userEntities = mUserEntities;
 				entity.state = EntityState.New;
 				if (parentEntity == null) {
 					/*
 					 * This is a root entity
 					 */
-					synchronized (myEntities) {
-						myEntities.add(0, entity);
+					synchronized (userEntities) {
+						if (atTop) {
+							userEntities.add(0, entity);
+						}
+						else {
+							userEntities.add(entity);
+						}
 					}
 					if (entity.children != null) {
 						for (Entity childEntity : entity.children) {
@@ -805,14 +820,18 @@ public class ProxiExplorer {
 						parentEntity.children = new EntityList<Entity>();
 					}
 					synchronized (parentEntity.children) {
-						parentEntity.children.add(0, entity);
+						if (atTop) {
+							parentEntity.children.add(0, entity);
+						}
+						else {
+							parentEntity.children.add(entity);
+						}
 					}
 				}
 			}
 		}
 
-		@SuppressWarnings("unused")
-		public void updateEntityEverywhere(Entity entityUpdated, boolean chunked) {
+		public void updateEntityEverywhere(Entity entityWithUpdates) {
 			/*
 			 * We want to update the entity wherever it might be in the entity model while
 			 * keeping the same instance.
@@ -822,18 +841,36 @@ public class ProxiExplorer {
 			for (Beacon beacon : mBeacons) {
 				synchronized (beacon.entities) {
 					for (Entity entity : beacon.entities) {
-						if (entity.children != null) {
-							for (Entity childEntity : entity.children) {}
+						if (entity.id.equals(entityWithUpdates.id)) {
+							Entity.copyEntityProperties(entityWithUpdates, entity);
+						}
+						else {
+							if (entity.children != null) {
+								for (Entity childEntity : entity.children) {
+									if (childEntity.id.equals(entityWithUpdates.id)) {
+										Entity.copyEntityProperties(entityWithUpdates, childEntity);
+									}
+								}
+							}
 						}
 					}
 				}
 			}
 
-			/* My candi entities */
+			/* User entities */
 			synchronized (mUserEntities) {
 				for (Entity entity : mUserEntities) {
-					if (entity.children != null) {
-						for (Entity childEntity : entity.children) {}
+					if (entity.id.equals(entityWithUpdates.id)) {
+						Entity.copyEntityProperties(entityWithUpdates, entity);
+					}
+					else {
+						if (entity.children != null) {
+							for (Entity childEntity : entity.children) {
+								if (childEntity.id.equals(entityWithUpdates.id)) {
+									Entity.copyEntityProperties(entityWithUpdates, childEntity);
+								}
+							}
+						}
 					}
 				}
 			}
@@ -901,12 +938,15 @@ public class ProxiExplorer {
 		}
 
 		public void updateEntityByBeacon(Entity entityUpdated, Beacon beacon) {
+			/*
+			 * This only gets call as part of processing the results of getEntitiesForBeacons.
+			 */
 			entityUpdated.beacon = beacon;
 			entityUpdated.state = EntityState.Refreshed;
 			for (Entity entity : beacon.entities) {
 				if (entity.id.equals(entityUpdated.id)) {
 					/*
-					 * Replace existing entity and do fixups.
+					 * Replace existing entity and do fixups on the children
 					 */
 					beacon.entities.set(beacon.entities.indexOf(entity), entityUpdated);
 					if (entityUpdated.children != null) {
@@ -918,21 +958,7 @@ public class ProxiExplorer {
 							childEntity.state = EntityState.Refreshed;
 						}
 					}
-				}
-				else {
-					/*
-					 * Append new children to existing entity and do fixups.
-					 */
-					if (entityUpdated.children != null) {
-						for (Entity childEntity : entityUpdated.children) {
-							childEntity.beacon = beacon;
-							childEntity.beaconId = beacon.id;
-							childEntity.parent = entity;
-							childEntity.parentId = entity.id;
-							childEntity.state = EntityState.New;
-							entity.children.add(childEntity);
-						}
-					}
+					break;
 				}
 			}
 		}
@@ -990,6 +1016,9 @@ public class ProxiExplorer {
 		}
 
 		private void mergeEntities(List<Object> entities, ArrayList<String> beaconIds, ArrayList<String> refreshIds, Boolean chunking) {
+			/*
+			 * The passed entities collection is a top level collection and not a child collection.
+			 */
 
 			/* Match returned entities back to beacons */
 			List<Beacon> refreshedBeacons = new ArrayList<Beacon>();
@@ -1005,7 +1034,7 @@ public class ProxiExplorer {
 						 */
 						for (Beacon beacon : mBeacons) {
 							if (beacon.id.equals(rawEntity.beaconId)) {
-								insertEntity(rawEntity, beacon, null, EntityTree.Radar);
+								insertEntity(rawEntity, beacon, null, false, EntityTree.Radar);
 							}
 						}
 					}
@@ -1037,7 +1066,7 @@ public class ProxiExplorer {
 									/*
 									 * This is new entity
 									 */
-									insertEntity(rawEntity, beacon, null, EntityTree.Radar);
+									insertEntity(rawEntity, beacon, null, false, EntityTree.Radar);
 								}
 								break;
 							}
@@ -1375,11 +1404,13 @@ public class ProxiExplorer {
 	public static class ScanOptions {
 
 		public boolean	showProgress	= true;
+		public Integer	progressMessageResId;
 		public boolean	fullBuild		= false;
 
-		public ScanOptions(boolean fullBuild, boolean showProgress) {
+		public ScanOptions(boolean fullBuild, boolean showProgress, Integer progressMessageResId) {
 			this.fullBuild = fullBuild;
 			this.showProgress = showProgress;
+			this.progressMessageResId = progressMessageResId;
 		}
 	}
 

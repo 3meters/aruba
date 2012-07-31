@@ -92,7 +92,6 @@ public class CandiForm extends CandiActivity {
 				onBackPressed();
 			}
 			else {
-				/* Get the view pager configured */
 				updateViewPager();
 			}
 		}
@@ -162,10 +161,15 @@ public class CandiForm extends CandiActivity {
 	public void onChildrenButtonClick(View v) {
 		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
 
+		/*
+		 * mCommon.mEntityId is the original entity the user navigated to but
+		 * they could have swiped using the viewpager to a different entity so
+		 * we need to use mEntity to get the right entity context.
+		 */
 		intentBuilder.setCommandType(CommandType.View);
 		intentBuilder.setEntityId(mEntity.id);
 		intentBuilder.setParentEntityId(mEntity.parentId);
-		intentBuilder.setCollectionId(mCommon.mEntityId);
+		intentBuilder.setCollectionId(mEntity.id);
 		intentBuilder.setEntityTree(mCommon.mEntityTree);
 
 		Intent intent = intentBuilder.create();
@@ -174,18 +178,16 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onBrowseCommentsButtonClick(View view) {
-		Entity entity = (Entity) view.getTag();
-		if (entity.commentCount != null && entity.commentCount > 0) {
+		if (mEntity.commentCount != null && mEntity.commentCount > 0) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 			intentBuilder.setCommandType(CommandType.View);
-			intentBuilder.setEntityId(entity.id);
-			intentBuilder.setParentEntityId(entity.parentId);
-			intentBuilder.setCollectionId(entity.id);
+			intentBuilder.setEntityId(mEntity.id);
+			intentBuilder.setParentEntityId(mEntity.parentId);
+			intentBuilder.setCollectionId(mEntity.id);
 			intentBuilder.setEntityTree(mCommon.mEntityTree);
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
 			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-
 		}
 		else {
 			onNewCommentButtonClick(view);
@@ -197,11 +199,10 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onMapButtonClick(View view) {
-		Entity entity = (Entity) view.getTag();
 		IntentBuilder intentBuilder = new IntentBuilder(this, MapBrowse.class);
 		intentBuilder.setCommandType(CommandType.View);
-		intentBuilder.setEntityId(entity.id);
-		intentBuilder.setParentEntityId(entity.parentId);
+		intentBuilder.setEntityId(mEntity.id);
+		intentBuilder.setParentEntityId(mEntity.parentId);
 		intentBuilder.setEntityLocation(mCommon.mEntityLocation);
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
@@ -209,7 +210,6 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onImageClick(View view) {
-
 		Intent intent = null;
 		if (mEntity.imageUri != null && !mEntity.imageUri.equals("")) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
@@ -244,8 +244,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onNewCommentButtonClick(View view) {
-		Entity entity = (Entity) view.getTag();
-		if (!entity.locked) {
+		if (!mEntity.locked) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
 			intentBuilder.setEntityId(null);
 			intentBuilder.setParentEntityId(mEntity.id);
@@ -410,8 +409,10 @@ public class CandiForm extends CandiActivity {
 
 		newCandi.setVisibility(View.GONE);
 		newComment.setVisibility(View.VISIBLE);
-		newComment.setTag(entity);
 		editCandi.setVisibility(View.GONE);
+		if (moveCandi != null) {
+			moveCandi.setVisibility(View.GONE);
+		}
 		holderChildren.setVisibility(View.GONE);
 		if (!entity.locked) {
 			if (entity.parent == null) {
@@ -457,11 +458,9 @@ public class CandiForm extends CandiActivity {
 
 		if (entity.commentCount != null && entity.commentCount > 0) {
 			comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
-			comments.setTag(entity);
 			comments.setVisibility(View.VISIBLE);
 		}
 		else {
-			comments.setTag(entity);
 			comments.setVisibility(View.VISIBLE);
 		}
 
@@ -472,7 +471,6 @@ public class CandiForm extends CandiActivity {
 		}
 		else {
 			map.setVisibility(View.VISIBLE);
-			map.setTag(entity);
 		}
 
 		/* Candi text */

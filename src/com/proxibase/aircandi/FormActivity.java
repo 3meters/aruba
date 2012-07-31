@@ -99,7 +99,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
-		Logger.i(this, "Configuration changed");
+		Logger.d(this, "Configuration changed");
 		super.onConfigurationChanged(newConfig);
 	}
 

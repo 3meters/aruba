@@ -155,6 +155,23 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		}
 	}
 
+	public static void copyEntityProperties(Entity fromEntity, Entity toEntity) {
+		/*
+		 * Properties involved with editing are copied from one entity to another.
+		 */
+		toEntity.title = fromEntity.title;
+		toEntity.label = fromEntity.label;
+		toEntity.description = fromEntity.description;
+		toEntity.linkJavascriptEnabled = fromEntity.linkJavascriptEnabled;
+		toEntity.linkZoom = fromEntity.linkZoom;
+		toEntity.locked = fromEntity.locked;
+		toEntity.modifierId = fromEntity.modifierId;
+		toEntity.modifiedDate = fromEntity.modifiedDate;
+		toEntity.imagePreviewUri = fromEntity.imagePreviewUri;
+		toEntity.imageUri = fromEntity.imageUri;
+		toEntity.linkUri = fromEntity.linkUri;
+	}
+
 	public Entity deepCopy() {
 		/*
 		 * A deep copy is created of the entire entity object using

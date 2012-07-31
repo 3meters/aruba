@@ -10,14 +10,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.Signature;
 import android.location.Location;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
-import com.proxibase.aircandi.components.Logger;
 import com.proxibase.service.objects.User;
 
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ", customReportContent = {
@@ -75,7 +71,6 @@ import com.proxibase.service.objects.User;
 				"Proxibase:D",
 				"*:S" } // Filter format : tag : priority
 )
-
 public class Aircandi extends Application {
 
 	private static Aircandi					singletonObject;
@@ -90,7 +85,6 @@ public class Aircandi extends Application {
 	private Boolean							mToolstripOpen			= false;
 	private Boolean							mFirstTimeCandiForm		= true;
 	private CandiTask						mCandiTask				= CandiTask.RadarCandi;
-	private static Boolean					mIsDebugBuild;
 	private Boolean							mLaunchedFromRadar		= false;
 
 	public static Aircandi getInstance() {
@@ -115,29 +109,6 @@ public class Aircandi extends Application {
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
-	}
-
-	public static Boolean isDebugBuild(Context context) {
-		/*
-		 * Checks if this apk was built using the debug certificate
-		 */
-		if (mIsDebugBuild == null) {
-			try {
-				mIsDebugBuild = false;
-				Signature[] sigs = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_SIGNATURES).signatures;
-				for (int i = 0; i < sigs.length; i++) {
-					if (sigs[i].hashCode() == DEBUG_SIGNATURE_HASH) {
-						Logger.d(applicationContext, "This is a debug build!");
-						mIsDebugBuild = true;
-						break;
-					}
-				}
-			}
-			catch (NameNotFoundException exception) {
-				exception.printStackTrace();
-			}
-		}
-		return mIsDebugBuild;
 	}
 
 	public static int timeSinceLocationInMillis(Location location) {

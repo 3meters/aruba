@@ -413,6 +413,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 	}
 
 	private void showBodyAndReflectionAnimated() {
+		if (mCandiPatchPresenter != null) {
+			mCandiPatchPresenter.renderingActivate();
+		}
+
 		if (mPlaceholderSprite.isVisible()) {
 			mPlaceholderSprite.registerEntityModifier(
 					new CandiAlphaModifier(mPlaceholderSprite,
@@ -775,7 +779,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x99000000, 175, 5, candiModel.getEntity().description, false, false);
 			}
 			else {
-				bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x00000000, -45, 5, candiModel.getEntity().description, true, true);
+				//bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x00000000, -45, 5, candiModel.getEntity().description, true, true);
 			}
 		}
 		/*
@@ -891,11 +895,20 @@ public class CandiView extends BaseView implements OnGestureListener {
 		mTouchListener = listener;
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Gesture listener implementation
+	// --------------------------------------------------------------------------------------------
+	
 	@Override
 	public boolean onDown(MotionEvent e) {
 		if (mCandiPatchPresenter.isIgnoreInput()) {
 			return true;
 		}
+		Logger.v(this, "onDown called...");
+
+		/*
+		 * Set the position of the highlight sprite
+		 */
 		float top = this.getY();
 		if (!getModel().getViewStateCurrent().isCollapsed()) {
 			top = top + CandiConstants.CANDI_VIEW_TITLE_HEIGHT;
@@ -919,11 +932,11 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	@Override
 	public void onLongPress(MotionEvent e) {
+		/*
+		 * This happens while the finger is still down.
+		 */
 		if (mCandiPatchPresenter.isIgnoreInput()) {
 			return;
-		}
-		if (mCandiPatchPresenter.mHighlight.isVisible()) {
-			mCandiPatchPresenter.mHighlight.setVisible(false);
 		}
 		if (mTouchListener != null) {
 			mTouchListener.onViewLongPress(this);
@@ -934,9 +947,6 @@ public class CandiView extends BaseView implements OnGestureListener {
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
 		if (mCandiPatchPresenter.isIgnoreInput()) {
 			return true;
-		}
-		if (mCandiPatchPresenter.mHighlight.isVisible()) {
-			mCandiPatchPresenter.mHighlight.setVisible(false);
 		}
 		return false;
 	}

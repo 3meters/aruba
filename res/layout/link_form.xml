@@ -100,14 +100,14 @@
 
     <LinearLayout
         android:id="@+id/form_footer"
-        style="@style/form_footer"
+        style="@style/app_bar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
 
         <Button
-            style="@style/app_button"
+            style="@style/app_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -116,7 +116,7 @@
 
         <Button
             android:id="@+id/btn_delete_post"
-            style="@style/app_button"
+            style="@style/app_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -124,7 +124,7 @@
             android:text="@string/form_button_delete" />
 
         <Button
-            style="@style/app_button"
+            style="@style/app_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

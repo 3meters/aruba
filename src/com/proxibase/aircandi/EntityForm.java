@@ -176,7 +176,7 @@ public class EntityForm extends FormActivity {
 			entity.type = mCommon.mEntityType;
 
 			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-				entity.imagePreviewUri = "resource:placeholder_picture";
+				entity.imagePreviewUri = "resource:placeholder_logo";
 				entity.imageUri = entity.imagePreviewUri;
 			}
 			else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
@@ -220,6 +220,7 @@ public class EntityForm extends FormActivity {
 			if (mImagePicture != null) {
 				if (entity.imageUri != null && !entity.imageUri.equals("")) {
 					if (mEntityBitmap != null) {
+						mImagePicture.showLoading(false);
 						ImageUtils.showImageInImageView(mEntityBitmap, mImagePicture.getImageView(), true, AnimUtils.fadeInMedium());
 						mImagePicture.setVisibility(View.VISIBLE);
 					}
@@ -315,7 +316,7 @@ public class EntityForm extends FormActivity {
 
 	public void onDeleteButtonClick(View view) {
 		mCommon.startTitlebarProgress();
-		deleteEntity();
+		deleteEntityAtService();
 	}
 
 	public void onLinkBuilderClick(View view) {
@@ -456,8 +457,8 @@ public class EntityForm extends FormActivity {
 								 * Pull all the control values back into the entity object
 								 */
 								gather(mEntityForForm);
-
-								serviceResponse = insertEntity();
+								serviceResponse = insertEntityAtService();
+								
 								if (serviceResponse.responseCode == ResponseCode.Success) {
 									/*
 									 * Insert new entity into the entity model.
@@ -472,6 +473,7 @@ public class EntityForm extends FormActivity {
 									Result result = (Result) serviceData.data;
 
 									entity.id = result._id;
+									entity.rookie = true;
 									entity.createdDate = DateUtils.nowDate().getTime();
 									entity.modifiedDate = entity.createdDate;
 									entity.ownerId = Aircandi.getInstance().getUser().id;
@@ -488,13 +490,19 @@ public class EntityForm extends FormActivity {
 									if (entity.parentId != null) {
 										parentEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entity.parentId, null, EntityTree.Radar);
 									}
-									ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, EntityTree.Radar);
+									ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, true, EntityTree.Radar);
 									if (parentEntity != null) {
 										/* Sort child into the right spot */
 										if (parentEntity.children.size() > 1) {
 											Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
 										}
 									}
+									
+									/*
+									 * Entity was added to the beacon but we still need to rebuild the
+									 * blended list of entities across all beacons.
+									 */
+									ProxiExplorer.getInstance().getEntityModel().rebuildEntityList();
 
 									/*
 									 * Push to user entities if we have already loaded them. The entity should be
@@ -511,7 +519,7 @@ public class EntityForm extends FormActivity {
 										 * list
 										 * so we shouldn't have to sort since it will produce the same result.
 										 */
-										ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, null, null, EntityTree.User);
+										ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, null, null, true, EntityTree.User);
 
 										/* Insert at child level */
 										if (entity.parentId != null) {
@@ -519,7 +527,7 @@ public class EntityForm extends FormActivity {
 													.getEntityById(entity.parentId, null, EntityTree.User);
 											if (parentEntity != null) {
 												ProxiExplorer.getInstance().getEntityModel()
-														.insertEntity(entity, beacon, parentEntity, EntityTree.User);
+														.insertEntity(entity, beacon, parentEntity, true, EntityTree.User);
 												/* Sort child into the right spot */
 												if (parentEntity.children.size() > 1) {
 													Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
@@ -544,40 +552,16 @@ public class EntityForm extends FormActivity {
 								mEntityForForm.modifierId = Aircandi.getInstance().getUser().id;
 								mEntityForForm.modifiedDate = DateUtils.nowDate().getTime();
 
-								serviceResponse = updateEntity(mEntityForForm);
+								serviceResponse = updateEntityAtService(mEntityForForm);
 
 								if (serviceResponse.responseCode == ResponseCode.Success) {
 									/*
 									 * Now that we know the entity has been updated with the service, go ahead
 									 * and update the appropriate entities in the entity model to match.
 									 */
-									Entity entityByRadar = ProxiExplorer.getInstance().getEntityModel()
-											.getEntityById(mCommon.mEntityId, mCommon.mParentId, EntityTree.Radar);
-
-									if (entityByRadar != null) {
-										gather(entityByRadar);
-										entityByRadar.modifierId = mEntityForForm.modifierId;
-										entityByRadar.modifiedDate = mEntityForForm.modifiedDate;
-										entityByRadar.imagePreviewUri = mEntityForForm.imagePreviewUri;
-										entityByRadar.imageUri = mEntityForForm.imageUri;
-										entityByRadar.linkUri = mEntityForForm.linkUri;
-									}
-									/*
-									 * The entity could also be in the mycandi collection.
-									 */
-									Entity entityByUser = ProxiExplorer.getInstance().getEntityModel()
-											.getEntityById(mCommon.mEntityId, mCommon.mParentId, EntityTree.User);
-
-									if (entityByUser != null) {
-										gather(entityByUser);
-										entityByUser.modifierId = mEntityForForm.modifierId;
-										entityByUser.modifiedDate = mEntityForForm.modifiedDate;
-										entityByUser.imagePreviewUri = mEntityForForm.imagePreviewUri;
-										entityByUser.imageUri = mEntityForForm.imageUri;
-										entityByUser.linkUri = mEntityForForm.linkUri;
-									}
-
+									ProxiExplorer.getInstance().getEntityModel().updateEntityEverywhere(mEntityForForm);
 									ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
+									
 									ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 									setResult(CandiConstants.RESULT_ENTITY_UPDATED);
 								}
@@ -617,7 +601,7 @@ public class EntityForm extends FormActivity {
 		}
 	}
 
-	private ServiceResponse insertEntity() {
+	private ServiceResponse insertEntityAtService() {
 
 		Logger.i(this, "Inserting entity: " + mEntityForForm.title);
 		ServiceResponse serviceResponse = new ServiceResponse();
@@ -647,7 +631,7 @@ public class EntityForm extends FormActivity {
 		}
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
-			serviceResponse = updateImages(); /* Upload images to S3 as needed. */
+			serviceResponse = storeImageAtS3(); /* Upload images to S3 as needed. */
 		}
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -729,13 +713,13 @@ public class EntityForm extends FormActivity {
 		return serviceResponse;
 	}
 
-	private ServiceResponse updateEntity(Entity entity) {
+	private ServiceResponse updateEntityAtService(Entity entity) {
 
 		ServiceResponse serviceResponse = new ServiceResponse();
 
 		/* Upload new images to S3 as needed. */
 		if (serviceResponse.responseCode == ResponseCode.Success) {
-			serviceResponse = updateImages();
+			serviceResponse = storeImageAtS3();
 		}
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -763,7 +747,7 @@ public class EntityForm extends FormActivity {
 		return serviceResponse;
 	}
 
-	private void deleteEntity() {
+	private void deleteEntityAtService() {
 		/*
 		 * TODO: We need to update the service so the recursive entity delete also deletes any associated resources
 		 * stored with S3. As currently coded, we will be orphaning any images associated with child entities.
@@ -834,6 +818,13 @@ public class EntityForm extends FormActivity {
 
 					ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm, EntityTree.Radar);
 					ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm, EntityTree.User);
+					
+					/*
+					 * Entity was added to the beacon but we still need to rebuild the
+					 * blended list of entities across all beacons.
+					 */
+					ProxiExplorer.getInstance().getEntityModel().rebuildEntityList();
+
 					ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 
 					mCommon.showProgressDialog(false, null);
@@ -849,7 +840,7 @@ public class EntityForm extends FormActivity {
 		}.execute();
 	}
 
-	private ServiceResponse updateImages() {
+	private ServiceResponse storeImageAtS3() {
 
 		/*
 		 * Delete image from S3 if it has been orphaned TODO: We are going with a garbage collection scheme for orphaned
@@ -935,7 +926,7 @@ public class EntityForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				mCommon.getProgressDialog().setOnCancelListener(new DialogInterface.OnCancelListener() {
 
 					public void onCancel(DialogInterface dialog) {
 						mAsyncTask.cancel(true);

@@ -16,6 +16,7 @@ import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.IntentBuilder;
+import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
@@ -192,6 +193,8 @@ public class UserCandiList extends CandiList {
 	// --------------------------------------------------------------------------------------------
 
 	public void onListItemClick(View view) {
+		Logger.v(this, "List item clicked");
+				
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
 		IntentBuilder intentBuilder = new IntentBuilder(this, UserCandiForm.class);
 		intentBuilder.setCommandType(CommandType.View);

@@ -4,26 +4,25 @@ import android.util.Log;
 
 import com.proxibase.aircandi.core.CandiConstants;
 
-/*
- * We are currently get complaints from dalvikvm when it create dex about
- * ambiguous hit on apache.common.logging.
- * 
- * Who is pulling this in?
- * 
- * - aws-android-sdk-1.2.1-core.jar
- * 
- */
-
 public class Logger {
 
 	/*
-	 * Logging levels
+	 * Logging levels and guidance
 	 * 
 	 * ERROR = 6
+	 * A problem that has crashed the applicaion.
+	 * 
 	 * WARN = 5
+	 * When a condition exists that could be a concern but we keep running.
+	 * 
 	 * INFO = 4
+	 * Reporting that is part of normal operation.
+	 * 
 	 * DEBUG = 3
+	 * Information that is needed to track down bugs either locally or via remote crash reports.
+	 * 
 	 * VERBOSE = 2
+	 * Chatty stuff that is helpful in the logs while developing but will never used in release.
 	 */
 
 	private static int		LOG_LEVEL		= Log.VERBOSE;
@@ -45,7 +44,7 @@ public class Logger {
 
 		String task = "";
 		if (INCLUDE_MODULE && taskContext != null) {
-			task = taskContext.getClass().getSimpleName() + ": ";
+			task = "[" + Thread.currentThread().getName() + "]: " + taskContext.getClass().getSimpleName() + ": ";
 		}
 		if (logLevel == LogLevel.Error) {
 			Log.e(CandiConstants.APP_NAME, task + msgFormat, t);

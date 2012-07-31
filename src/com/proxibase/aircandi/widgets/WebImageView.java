@@ -11,6 +11,8 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
@@ -39,7 +41,9 @@ public class WebImageView extends RelativeLayout {
 	private Integer						mMaxHeight;
 	private boolean						mShowBusy;
 	private Integer						mLayoutId;
+	private Integer						mThemeBusyIndicatorResId;
 	private ScaleType					mScaleType		= ScaleType.CENTER_CROP;
+	@SuppressWarnings("unused")
 	private String						mThemeTone;
 
 	private static final ScaleType[]	sScaleTypeArray	= {
@@ -77,6 +81,9 @@ public class WebImageView extends RelativeLayout {
 		TypedValue resourceName = new TypedValue();
 		if (context.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
 			mThemeTone = (String) resourceName.coerceToString();
+		}
+		if (context.getTheme().resolveAttribute(R.attr.busy, resourceName, true)) {
+			mThemeBusyIndicatorResId = (Integer) resourceName.resourceId;
 		}
 
 		if (!isInEditMode()) {
@@ -211,6 +218,7 @@ public class WebImageView extends RelativeLayout {
 
 						}
 					}
+
 					if (mShowBusy) {
 						showLoading(false);
 					}
@@ -241,13 +249,7 @@ public class WebImageView extends RelativeLayout {
 
 				@Override
 				public void run() {
-					if (mThemeTone.equals("dark")) {
-						mImageViewLoading.setBackgroundResource(R.drawable.busy_anim_dark);
-					}
-					else if (mThemeTone.equals("light")) {
-						mImageViewLoading.setBackgroundResource(R.drawable.busy_anim_light);
-					}
-
+					mImageViewLoading.setBackgroundResource(mThemeBusyIndicatorResId);
 					final AnimationDrawable animation = (AnimationDrawable) mImageViewLoading.getBackground();
 					animation.start();
 					mImageViewLoading.setVisibility(View.VISIBLE);
@@ -257,11 +259,24 @@ public class WebImageView extends RelativeLayout {
 		else {
 			mImageViewLoading.post(new Runnable() {
 
-				@SuppressWarnings("deprecation")
 				@Override
 				public void run() {
-					mImageViewLoading.setBackgroundDrawable(null);
-					mImageViewLoading.setVisibility(View.GONE);
+					Animation animation = AnimUtils.fadeOutMedium();
+					animation.setAnimationListener(new AnimationListener() {
+
+						@Override
+						public void onAnimationStart(Animation animation) {}
+
+						@SuppressWarnings("deprecation")
+						@Override
+						public void onAnimationEnd(Animation animation) {
+							mImageViewLoading.setBackgroundDrawable(null);
+						}
+
+						@Override
+						public void onAnimationRepeat(Animation animation) {}
+					});
+					mImageViewLoading.startAnimation(animation);
 				}
 			});
 		}

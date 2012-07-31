@@ -14,6 +14,7 @@ import com.proxibase.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.IntentBuilder;
+import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
@@ -115,21 +116,27 @@ public class CandiList extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onListItemClick(View view) {
+		
+		Logger.v(this, "List item clicked");
+		
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
+		
 		IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class);
 		intentBuilder.setCommandType(CommandType.View);
 		intentBuilder.setEntityId(entity.id);
 		intentBuilder.setParentEntityId(entity.parentId);
 		intentBuilder.setEntityType(entity.type);
-		intentBuilder.setCollectionId(mCommon.mCollectionId);
 		intentBuilder.setEntityTree(EntityTree.Radar);
 
+		intentBuilder.setCollectionId(mCommon.mCollectionId);
+		
 		if (entity.parent != null) {
 			intentBuilder.setEntityLocation(entity.parent.location);
 		}
 		else {
 			intentBuilder.setBeaconId(entity.beaconId);
 		}
+		
 		Intent intent = intentBuilder.create();
 
 		startActivity(intent);

@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundForm" >
 
     <LinearLayout
         android:id="@+id/group_uri"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal" >
 
         <EditText
@@ -21,16 +22,15 @@
             android:hint="@string/form_uri_hint"
             android:inputType="textUri"
             android:singleLine="true" />
-
     </LinearLayout>
 
     <ListView
         android:id="@+id/list_bookmarks"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/group_uri"
         android:layout_above="@+id/form_footer"
-        android:background="?attr/backgroundCandiInfo"
+        android:layout_below="@+id/group_uri"
+        android:background="?attr/backgroundForm"
         android:cacheColorHint="#00000000"
         android:listSelector="#00000000" >
 
@@ -41,7 +41,7 @@
 
     <LinearLayout
         android:id="@+id/form_footer"
-        style="@style/form_footer"
+        style="@style/app_bar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -53,11 +53,11 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:maxWidth="150dp"
             android:enabled="false"
+            android:maxWidth="150dp"
             android:onClick="onOkButtonClick"
             android:text="@string/form_button_ok" />
-        
+
         <Button
             style="@style/app_button"
             android:layout_width="0dp"

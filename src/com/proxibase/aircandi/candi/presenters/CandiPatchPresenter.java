@@ -361,7 +361,7 @@ public class CandiPatchPresenter implements Observer {
 			 * Clears all game engine sprites. Clears all touch areas. Clears zone and candi model collections. Reloads
 			 * shared textures. Creates new root candi model
 			 */
-			Logger.d(null, "Starting full build.");
+			Logger.d(this, "Starting full build.");
 			mFullUpdateInProgress = true;
 			mCandiViewsActiveHash.clear();
 			mZoneViews.clear();
@@ -373,7 +373,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		else {
-			Logger.d(null, "Starting standard update.");
+			Logger.d(this, "Starting standard update.");
 
 			/*
 			 * Clear out models that have previously marked for deletion. For models and any children: - Recycles the
@@ -513,7 +513,7 @@ public class CandiPatchPresenter implements Observer {
 		 * 
 		 * updateCandiData gets called from radar chunking and beacon scans.
 		 */
-		Logger.d(null, "Starting model navigation.");
+		Logger.d(this, "Starting model navigation.");
 
 		mCandiPatchModel.setCandiRootNext(candiRootNext);
 
@@ -593,7 +593,7 @@ public class CandiPatchPresenter implements Observer {
 				attempts++;
 
 				if (attempts >= 3) {
-					Logger.d(null, "Cleared all modifiers/actions after two attempts to let them finish.");
+					Logger.d(this, "Cleared all modifiers/actions after two attempts to let them finish.");
 					/*
 					 * Last ditch effort to continue: clear actions/modifiers from candi models no matter what.
 					 */
@@ -772,7 +772,19 @@ public class CandiPatchPresenter implements Observer {
 
 				@Override
 				public void run() {
-					candiView.setGestureDetector(new GestureDetector(mCandiRadarActivity, candiView));
+					candiView.setGestureDetector(new GestureDetector(mCandiRadarActivity, candiView) {
+
+						@Override
+						public boolean onTouchEvent(MotionEvent motionEvent) {
+							boolean detectedUp = motionEvent.getAction() == MotionEvent.ACTION_UP;
+							if (detectedUp) {
+								if (mHighlight.isVisible()) {
+									mHighlight.setVisible(false);
+								}
+							}
+							return super.onTouchEvent(motionEvent);
+						}
+					});
 				}
 			});
 
@@ -971,7 +983,6 @@ public class CandiPatchPresenter implements Observer {
 				recycleCount++;
 			}
 		}
-		// Logger.d(this, "Recycled views: " + String.valueOf(recycleCount));
 
 		/* First, allocate any views needed for the candi with the current focus */
 		CandiModel candiModelFocused = mCandiPatchModel.getCandiModelFocused();
@@ -1008,7 +1019,6 @@ public class CandiPatchPresenter implements Observer {
 				}
 			}
 		}
-		// Logger.d(this, "Loaned views: " + String.valueOf(loanedCount));
 
 		/* update debug info */
 		mCandiRadarActivity.runOnUiThread(new Runnable() {

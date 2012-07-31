@@ -12,7 +12,7 @@ import com.proxibase.aircandi.components.Logger;
 
 public abstract class AircandiGameActivity extends LayoutGameActivity {
 
-	private AircandiCommon	mCommon;
+	protected AircandiCommon	mCommon;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -43,7 +43,7 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
-		Logger.i(this, "Configuration changed");
+		Logger.d(this, "Configuration changed");
 		super.onConfigurationChanged(newConfig);
 	}
 
@@ -74,13 +74,5 @@ public abstract class AircandiGameActivity extends LayoutGameActivity {
 	@Override
 	public Scene onLoadScene() {
 		return null;
-	}
-
-	public AircandiCommon getCommon() {
-		return mCommon;
-	}
-
-	public void setCommon(AircandiCommon common) {
-		mCommon = common;
 	}
 }

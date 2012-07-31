@@ -35,6 +35,8 @@
     <string name="com.proxibase.aircandi.Preferences">Preferences</string>
     <string name="com.proxibase.aircandi.CandiList">CandiList</string>
     <string name="com.proxibase.aircandi.CandiForm">CandiForm</string>
+    <string name="com.proxibase.aircandi.UserCandiList">UserCandiList</string>
+    <string name="com.proxibase.aircandi.UserCandiForm">UserCandiForm</string>
     <string name="com.proxibase.aircandi.CandiMap">CandiMap</string>
     <string name="com.proxibase.aircandi.CandiPicker">CandiPicker</string>
     <string name="com.proxibase.aircandi.BookmarkPicker">BookmarkPicker</string>

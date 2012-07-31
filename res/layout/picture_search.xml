@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
+        android:background="?attr/backgroundForm"
     android:layout_height="fill_parent" >
 
     <!--
@@ -53,7 +54,6 @@
         android:layout_height="fill_parent"
         android:layout_above="@+id/form_footer"
         android:layout_below="@+id/cbo_category"
-        android:background="?attr/backgroundForm"
         android:columnWidth="100dp"
         android:gravity="center"
         android:horizontalSpacing="5dp"
@@ -68,14 +68,14 @@
 
     <LinearLayout
         android:id="@+id/form_footer"
-        style="@style/form_footer"
+        style="@style/app_bar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
 
         <Button
-            style="@style/app_button"
+            style="@style/app_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="150dp"

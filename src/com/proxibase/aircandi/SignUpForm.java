@@ -208,7 +208,7 @@ public class SignUpForm extends FormActivity {
 			mUser.createdDate = DateUtils.nowDate().getTime();
 			mUser.modifiedDate = mUser.createdDate;
 
-			Logger.i(this, "Insert user: " + mUser.name);
+			Logger.d(this, "Inserting user: " + mUser.name);
 
 			new AsyncTask() {
 
