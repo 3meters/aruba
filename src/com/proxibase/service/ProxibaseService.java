@@ -55,6 +55,7 @@ import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -68,6 +69,7 @@ import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.service.ProxibaseServiceException.ErrorCode;
 import com.proxibase.service.ProxibaseServiceException.ErrorType;
+import com.proxibase.service.ServiceRequest.AuthType;
 import com.proxibase.service.objects.ServiceData;
 import com.proxibase.service.objects.ServiceError;
 import com.proxibase.service.objects.Session;
@@ -246,19 +248,19 @@ public class ProxibaseService {
 					addEntity((HttpEntityEnclosingRequestBase) httpRequest, jsonBody);
 				}
 			}
-			
+
 			/* Add headers and set the Uri */
-			addHeaders(httpRequest, serviceRequest.getResponseFormat());
+			addHeaders(httpRequest, serviceRequest);
 			if (redirectedUri != null) {
 				httpRequest.setURI(redirectedUri);
 			}
 			else {
 				Query query = serviceRequest.getQuery();
 				String uriString = query == null ? serviceRequest.getUri() : serviceRequest.getUri() + query.queryString();
-				
+
 				/* Add session info to uri if supplied */
 				String sessionInfo = sessionInfo(serviceRequest);
-				if (!sessionInfo.equals("")){
+				if (!sessionInfo.equals("")) {
 					if (uriString.contains("?")) {
 						uriString += "&" + sessionInfo;
 					}
@@ -266,7 +268,7 @@ public class ProxibaseService {
 						uriString += "?" + sessionInfo;
 					}
 				}
-				
+
 				httpRequest.setURI(uriFromString(uriString));
 			}
 
@@ -553,10 +555,13 @@ public class ProxibaseService {
 		return buf;
 	}
 
-	private void addHeaders(HttpRequestBase httpAction, ResponseFormat responseFormat) {
+	private void addHeaders(HttpRequestBase httpAction, ServiceRequest serviceRequest) {
 		httpAction.addHeader("Content-Type", "application/json");
-		if (responseFormat == ResponseFormat.Json) {
+		if (serviceRequest.getResponseFormat() == ResponseFormat.Json) {
 			httpAction.addHeader("Accept", "application/json");
+		}
+		if (serviceRequest.getAuthType() == AuthType.Basic) {
+			httpAction.addHeader("Authorization", "Basic " + serviceRequest.getPasswordBase64());
 		}
 	}
 
@@ -580,7 +585,7 @@ public class ProxibaseService {
 		return uri;
 	}
 
-	private static String convertStreamToString(InputStream inputStream) throws IOException {
+	public static String convertStreamToString(InputStream inputStream) throws IOException {
 
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 		StringBuilder stringBuilder = new StringBuilder();
@@ -640,6 +645,7 @@ public class ProxibaseService {
 		}
 		return sessionInfo;
 	}
+
 	// ----------------------------------------------------------------------------------------
 	// Json methods
 	// ----------------------------------------------------------------------------------------
@@ -679,6 +685,37 @@ public class ProxibaseService {
 
 				if (jsonObject.has("data")) {
 					jsonElement = jsonObject.get("data");
+					List<Object> array = new ArrayList<Object>();
+					if (jsonElement.isJsonPrimitive()) {
+						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+						if (primitive.isString()) {
+							array.add(primitive.getAsString());
+						}
+						else if (primitive.isNumber()) {
+							array.add(primitive.getAsNumber());
+						}
+						else if (primitive.isBoolean()) {
+							array.add(primitive.getAsBoolean());
+						}
+					}
+					else if (jsonElement.isJsonArray()) {
+						JsonArray jsonArray = jsonElement.getAsJsonArray();
+						for (int i = 0; i < jsonArray.size(); i++) {
+							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
+							array.add(gson.fromJson(jsonObjectNew.toString(), type));
+						}
+					}
+					else if (jsonElement.isJsonObject()) {
+						Object obj = gson.fromJson(jsonElement.toString(), type);
+						array.add(obj);
+					}
+					serviceData.data = array;
+				}
+
+				/* Targeting bing results from azure */
+				if (jsonObject.has("d")) {
+					jsonObject = jsonObject.getAsJsonObject("d");
+					jsonElement = jsonObject.getAsJsonArray("results");
 					List<Object> array = new ArrayList<Object>();
 					if (jsonElement.isJsonPrimitive()) {
 						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
@@ -775,6 +812,10 @@ public class ProxibaseService {
 			gsonb.excludeFieldsWithoutExposeAnnotation();
 			gsonb.setPrettyPrinting(); /* TODO: remove this later */
 		}
+		else if (gsonType == GsonType.BingService) {
+			gsonb.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE);
+			gsonb.setPrettyPrinting(); /* TODO: remove this later */
+		}
 		Gson gson = gsonb.create();
 		return gson;
 	}
@@ -838,7 +879,8 @@ public class ProxibaseService {
 	public static enum GsonType {
 		Internal,
 		ProxibaseService,
-		ProxibaseServiceNew
+		ProxibaseServiceNew,
+		BingService
 	}
 
 	public static enum ResponseFormat {

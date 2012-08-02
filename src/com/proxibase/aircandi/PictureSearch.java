@@ -1,6 +1,8 @@
 package com.proxibase.aircandi;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -21,22 +23,21 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
-import com.google.code.bing.search.client.BingSearchClient;
-import com.google.code.bing.search.client.BingSearchClient.SearchRequestBuilder;
-import com.google.code.bing.search.client.BingSearchServiceClientFactory;
-import com.google.code.bing.search.schema.AdultOption;
-import com.google.code.bing.search.schema.SearchResponse;
-import com.google.code.bing.search.schema.SourceType;
-import com.google.code.bing.search.schema.multimedia.ImageResult;
 import com.proxibase.aircandi.components.DrawableManager;
 import com.proxibase.aircandi.components.EndlessAdapter;
+import com.proxibase.aircandi.components.ImageResult;
 import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
-import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.service.ProxibaseServiceException;
-import com.proxibase.service.ProxibaseServiceException.ErrorCode;
-import com.proxibase.service.ProxibaseServiceException.ErrorType;
+import com.proxibase.service.ProxiConstants;
+import com.proxibase.service.ProxibaseService;
+import com.proxibase.service.ProxibaseService.GsonType;
+import com.proxibase.service.ProxibaseService.RequestType;
+import com.proxibase.service.ProxibaseService.ResponseFormat;
+import com.proxibase.service.ServiceRequest;
+import com.proxibase.service.ServiceRequest.AuthType;
+import com.proxibase.service.objects.ServiceData;
 
 /*
  * We often will get duplicates because the ordering of images isn't
@@ -66,7 +67,7 @@ public class PictureSearch extends FormActivity {
 	}
 
 	private void initialize() {
-		
+
 		mDrawableManager = new DrawableManager();
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mGridView = (GridView) findViewById(R.id.grid_gallery);
@@ -141,32 +142,31 @@ public class PictureSearch extends FormActivity {
 	private ServiceResponse loadImages(String query, long count, long offset) {
 
 		ServiceResponse serviceResponse = new ServiceResponse();
-		BingSearchServiceClientFactory factory = BingSearchServiceClientFactory.newInstance();
-
-		BingSearchClient client = factory.createBingSearchClient();
-		SearchRequestBuilder builder = client.newSearchRequestBuilder();
-
-		builder.withAppId(getBingId());
-		builder.withQuery(query);
-		builder.withSourceType(SourceType.IMAGE);
-		builder.withVersion("2.2");
-		builder.withAdultOption(AdultOption.MODERATE);
-		builder.withImageRequestFilter("Size:Large");
-		builder.withImageRequestCount(count);
-		builder.withImageRequestOffset(offset);
-
-		SearchResponse searchResponse = null;
 		try {
-			searchResponse = client.search(builder.getResult());
-			ArrayList<ImageResult> images = (ArrayList<ImageResult>) searchResponse.getImage().getResults();
-			serviceResponse.data = images;
-			return serviceResponse;
+			query = "%27" + URLEncoder.encode(query, "UTF-8") + "%27";
 		}
-		catch (Exception exception) {
-			serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.UnknownException, null,
-					new ProxibaseServiceException(query, ErrorType.Client, ErrorCode.UnknownException, exception));
-			return serviceResponse;
+		catch (UnsupportedEncodingException exception) {
+			exception.printStackTrace();
 		}
+		
+		String bingUrl = ProxiConstants.URL_PROXIBASE_SEARCH_IMAGES
+				+ "?Query=" + query 
+				+ "&Market=%27en-US%27&Adult=%27Moderate%27&ImageFilters=%27size%3alarge%27"
+				+ "&$top=" + String.valueOf(count) 
+				+ "&$skip=" + String.valueOf(offset) 
+				+ "&$format=Json";
+
+		ServiceRequest serviceRequest = new ServiceRequest(bingUrl, RequestType.Get, ResponseFormat.Json);
+		serviceRequest.setAuthType(AuthType.Basic)
+				.setUserName(null)
+				.setPassword(getBingKey());
+
+		serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		ServiceData serviceData = ProxibaseService.convertJsonToObjects((String)serviceResponse.data, ImageResult.class, GsonType.BingService);
+		ArrayList<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
+		serviceResponse.data = images;
+
+		return serviceResponse;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -196,15 +196,15 @@ public class PictureSearch extends FormActivity {
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
 
-	private String getBingId() {
+	private String getBingKey() {
 		Properties properties = new Properties();
 		try {
 			properties.load(getClass().getResourceAsStream("bing_api.properties"));
-			String appId = properties.getProperty("appId");
+			String appId = properties.getProperty("appKey");
 			return appId;
 		}
 		catch (IOException exception) {
-			throw new IllegalStateException("Unable to retrieve bing appId");
+			throw new IllegalStateException("Unable to retrieve bing appKey");
 		}
 	}
 

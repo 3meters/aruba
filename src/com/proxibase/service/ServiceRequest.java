@@ -1,5 +1,7 @@
 package com.proxibase.service;
 
+import org.apache.commons.codec.binary.Base64;
+
 import android.os.Bundle;
 
 import com.proxibase.service.ProxibaseService.RequestListener;
@@ -37,8 +39,17 @@ public class ServiceRequest {
 	private RequestType		mRequestType;
 	private ResponseFormat	mResponseFormat;
 	private RequestListener	mRequestListener;
-	private Session 		mSession;
-	private boolean			mSuppressUI = false;
+	private Session			mSession;
+	private String			mUserName;
+	private String			mPassword;
+	private AuthType		mAuthType	= AuthType.None;
+	private boolean			mSuppressUI	= false;
+
+	public enum AuthType {
+		None,
+		Basic,
+		OAuth
+	}
 
 	public ServiceRequest() {}
 
@@ -150,6 +161,39 @@ public class ServiceRequest {
 
 	public ServiceRequest setSession(Session session) {
 		mSession = session;
+		return this;
+	}
+
+	public String getUserName() {
+		return mUserName;
+	}
+
+	public ServiceRequest setUserName(String userName) {
+		mUserName = userName;
+		return this;
+	}
+
+	public String getPassword() {
+		return mPassword;
+	}
+
+	public String getPasswordBase64() {
+		byte[] accountKeyBytes = Base64.encodeBase64((mPassword + ":" + mPassword).getBytes());
+		String accountKeyEnc = new String(accountKeyBytes);
+		return accountKeyEnc;
+	}
+	
+	public ServiceRequest setPassword(String password) {
+		mPassword = password;
+		return this;
+	}
+
+	public AuthType getAuthType() {
+		return mAuthType;
+	}
+
+	public ServiceRequest setAuthType(AuthType authType) {
+		mAuthType = authType;
 		return this;
 	}
 }

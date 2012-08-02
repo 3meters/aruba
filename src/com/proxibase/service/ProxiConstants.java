@@ -20,6 +20,8 @@ public interface ProxiConstants {
 	public static final String	_URL_PROXIBASE_SERVICE_METHOD						= "https://api.proxibase.com/do/";
 	public static final String	_URL_PROXIBASE_SERVICE_AUTH							= "https://api.proxibase.com/auth/";
 	public static final String	URL_PROXIBASE_MEDIA									= "https://s3.amazonaws.com/";
+	public static final String	URL_PROXIBASE_SEARCH_IMAGES							= "https://api.datamarket.azure.com/Data.ashx/Bing/Search/v1/Image";
+
 	public static final String	APP_NAME											= "Proxibase";
 	public static final String	USER_AGENT_MOBILE									= "Mozilla/5.0 (Linux; U; Android 2.1.3; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 	public static final String	USER_AGENT_DESKTOP									= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16";
@@ -29,7 +31,7 @@ public interface ProxiConstants {
 	public static final int		RADAR_CHILDENTITY_LIMIT								= 20;
 	public static final int		RADAR_COMMENT_LIMIT									= 50;
 	public static final int		RADAR_ENTITY_MAX_LIMIT								= 300;
-	
+
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS			= 401.1f;
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED		= 401.2f;
 	public static final float	HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE	= 403.1f;
