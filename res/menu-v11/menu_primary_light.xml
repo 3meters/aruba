@@ -21,25 +21,25 @@
         android:title="@string/menu_profile_item"/>
     <item
         android:id="@+id/settings"
-        android:icon="@drawable/ic_settings_dark"
+        android:icon="@drawable/ic_settings_light"
         android:orderInCategory="2"
         android:showAsAction="never"
         android:title="@string/menu_settings_item"/>
     <item
         android:id="@+id/signin"
-        android:icon="@drawable/ic_accounts_dark"
+        android:icon="@drawable/ic_accounts_light"
         android:orderInCategory="2"
         android:showAsAction="never"
         android:title="@string/menu_signin_item"/>
     <item
         android:id="@+id/signout"
-        android:icon="@drawable/ic_accounts_dark"
+        android:icon="@drawable/ic_accounts_light"
         android:orderInCategory="2"
         android:showAsAction="never"
         android:title="@string/menu_signout_item"/>
     <item
         android:id="@+id/about"
-        android:icon="@drawable/ic_about_dark"
+        android:icon="@drawable/ic_about_light"
         android:orderInCategory="2"
         android:showAsAction="never"
         android:title="@string/menu_about_item"/>
