@@ -551,8 +551,6 @@ public class CandiView extends BaseView implements OnGestureListener {
 		final CandiModel candiModel = (CandiModel) this.mModel;
 		if (candiModel == null) return;
 
-		Logger.v(this, "Requesting texture source: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
-
 		if (!mActiveImageRequest) {
 			/*
 			 * TODO: We'd like to prioritize highest the candi views that are currently visible but position hasn't been
@@ -663,8 +661,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 			}
 
 			progressVisible(true);
-			Logger.v(this, "Requesting image: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
-			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
+			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
 		}
 	}
 

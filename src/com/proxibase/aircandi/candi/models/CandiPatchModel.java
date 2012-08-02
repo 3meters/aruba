@@ -305,25 +305,25 @@ public class CandiPatchModel extends Observable {
 					mCandiModelFocused = candiModel;
 				}
 
-				/* Hookup any children */
-				if (!candiModel.hasVisibleChildrenNext()) {
-					candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
-				}
-				else {
-					candiModel.getZoneStateNext().setStatus(ZoneStatus.Primary);
-
-					/* We might have children that are hidden even though the parent isn't. */
-					for (IModel childModel : candiModel.getChildren()) {
-						CandiModel childCandiModel = (CandiModel) childModel;
-						childCandiModel.setChanged();
-
-						if (childCandiModel.getViewStateNext().isVisible()) {
-							zone.getCandiesNext().add(childCandiModel);
-							childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Secondary);
-							childCandiModel.getZoneStateNext().setZone(zone);
-						}
-					}
-				}
+//				/* Hookup any children */
+//				if (!candiModel.hasVisibleChildrenNext()) {
+//					candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
+//				}
+//				else {
+//					candiModel.getZoneStateNext().setStatus(ZoneStatus.Primary);
+//
+//					/* We might have children that are hidden even though the parent isn't. */
+//					for (IModel childModel : candiModel.getChildren()) {
+//						CandiModel childCandiModel = (CandiModel) childModel;
+//						childCandiModel.setChanged();
+//
+//						if (childCandiModel.getViewStateNext().isVisible()) {
+//							zone.getCandiesNext().add(childCandiModel);
+//							childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Secondary);
+//							childCandiModel.getZoneStateNext().setZone(zone);
+//						}
+//					}
+//				}
 				zoneIndex++;
 			}
 		}

@@ -85,7 +85,7 @@ public interface CandiConstants {
 	public static final int				SIXTY_MINUTES							= 1000 * 60 * 60;
 
 	public static final int				IMAGE_MEMORY_BYTES_MAX					= 2048000;
-	public static final int				IMAGE_MEMORY_CACHE_WIDTH_MAX			= 100;																// (100x100x4) + 10000 extra
+	public static final int				IMAGE_MEMORY_CACHE_WIDTH_MAX			= 100;																	// (100x100x4) + 10000 extra
 	public static final Config			IMAGE_CONFIG_DEFAULT					= Config.ARGB_8888;
 	public static final int				IMAGE_WIDTH_SMALL						= 60;
 	public static final int				IMAGE_WIDTH_DEFAULT						= 250;
@@ -156,6 +156,7 @@ public interface CandiConstants {
 	public static final float			DURATION_CANDIBODY_EXPAND				= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_REFLECTION_HIDESHOW			= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_PLACEHOLDER_HIDESHOW			= 0.5f * DURATION_MULTIPLIER;
+	public static final float			DURATION_ZONE_HIDESHOW					= 1.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_OVERFLOW_FADE		= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_FADE				= 0.8f * DURATION_MULTIPLIER;
 	public static final float			DURATION_TRANSITIONS_FADE_TEST			= 3.0f * DURATION_MULTIPLIER;

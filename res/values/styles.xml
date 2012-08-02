@@ -52,7 +52,10 @@
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
-    <style name="app_button_borderless" parent="Widget.Sherlock.ActionButton"></style>
+    <!-- We use sherlock as parent for v14+ -->
+    <style name="app_button_borderless" parent="Widget.Sherlock.ActionButton">
+        <item name="android:textColor">?attr/textColorButton</item>
+    </style>
 
     <style name="app_bar" parent="Widget.Sherlock.ActionBar.TabBar">
         <item name="android:background">?attr/activityFooterFormBackground</item>

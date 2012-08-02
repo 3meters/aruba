@@ -4,6 +4,7 @@ import static org.anddev.andengine.util.constants.Constants.VERTEX_INDEX_X;
 import static org.anddev.andengine.util.constants.Constants.VERTEX_INDEX_Y;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -354,6 +355,9 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Check to see if there is a brand new entity in the collection */
 		mRookieHit = rookieHit(entitiesCopy);
+		
+		/* We want all new discoveries on this pass to get the same date */
+		Date discoveryTime = DateUtils.nowDate();
 
 		renderingActivate();
 		if (fullBuild) {
@@ -435,7 +439,7 @@ public class CandiPatchPresenter implements Observer {
 				 * We keep bumping the date up until the entity is finally visible.
 				 */
 				if (entity.rookie) {
-					entity.discoveryTime = DateUtils.nowDate();
+					entity.discoveryTime = discoveryTime;
 					if (!entity.hidden) {
 						entity.rookie = false;
 					}
@@ -624,18 +628,18 @@ public class CandiPatchPresenter implements Observer {
 							break;
 						}
 					}
-					for (IModel childModel : candiModel.getChildren()) {
-						CandiModel childCandiModel = (CandiModel) childModel;
-						synchronized (childCandiModel.getViewModifiers()) {
-							if (childCandiModel.getViewModifiers().size() > 0) {
-								modifierHit = true;
-								break;
-							}
-						}
-					}
-					if (modifierHit) {
-						break;
-					}
+//					for (IModel childModel : candiModel.getChildren()) {
+//						CandiModel childCandiModel = (CandiModel) childModel;
+//						synchronized (childCandiModel.getViewModifiers()) {
+//							if (childCandiModel.getViewModifiers().size() > 0) {
+//								modifierHit = true;
+//								break;
+//							}
+//						}
+//					}
+//					if (modifierHit) {
+//						break;
+//					}
 				}
 
 				if (!modifierHit) {
@@ -653,7 +657,11 @@ public class CandiPatchPresenter implements Observer {
 			}
 
 			manageViews(false, true);
-			doZoneAnimations(navigation);
+			/*
+			 * Jayma: disabled because we aren't using radar navigation.
+			 * 
+			 * doZoneAnimations(navigation);
+			 */
 			doTransitionAnimations(navigation);
 		}
 
@@ -865,7 +873,10 @@ public class CandiPatchPresenter implements Observer {
 			synchronized (zoneModel.getViewModifiers()) {
 				zoneModel.getViewModifiers().clear();
 				zoneModel.getViewModifiers().addLast(
+						new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
+				zoneModel.getViewModifiers().addLast(
 						new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f, CandiConstants.EASE_FADE_OUT));
+
 			}
 			zoneModel.getViewStateCurrent().setVisible(false);
 			zoneModel.setChanged();
@@ -1190,6 +1201,7 @@ public class CandiPatchPresenter implements Observer {
 	// Animation
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("unused")
 	private void doZoneAnimations(Navigation navigation) {
 		/*
 		 * This always gets called as part of a navigation operation either drilling in or out.

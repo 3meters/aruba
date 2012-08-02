@@ -51,15 +51,16 @@ public class ImageLoader {
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressLint("NewApi")
-	public void fetchImage(final ImageRequest imageRequest) {
+	public void fetchImage(final ImageRequest imageRequest, boolean asyncOk) {
 
-		final ServiceResponse serviceResponse = new ServiceResponse();
 		if (imageRequest.getRequestListener() == null) {
 			throw new IllegalArgumentException("imageRequest.imageReadyListener is required");
 		}
 
 		if (imageRequest.getImageUri().toLowerCase().startsWith("resource:")) {
 
+			ServiceResponse serviceResponse = new ServiceResponse();
+			
 			String rawResourceName = imageRequest.getImageUri().substring(imageRequest.getImageUri().indexOf("resource:") + 9);
 			String resolvedResourceName = ImageManager.getInstance().resolveResourceName(rawResourceName);
 
@@ -108,51 +109,78 @@ public class ImageLoader {
 		else {
 
 			if (imageRequest.doSearchCache()) {
-				AsyncTask task = new AsyncTask() {
+				/*
+				 * We use async for WebImageView for faster performance in lists. We don't use
+				 * it for CandiViews because of state conflicts and dependencies plus the rendering
+				 * process is already async.
+				 */
+				if (asyncOk) {
 
-					@Override
-					protected Object doInBackground(Object... params) {
-						Bitmap bitmap = ImageManager.getInstance().getImage(imageRequest.getImageUri());
-						if (bitmap != null) {
-							Logger.v(this, "Image request satisfied from cache: " + imageRequest.getImageUri());
-							if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL && imageRequest.getScaleToWidth() != bitmap.getWidth()) {
-								/*
-								 * We might have cached a large version of an image so we need to make sure we honor the
-								 * image request specifications.
-								 */
-								bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
+					AsyncTask task = new AsyncTask() {
+
+						@Override
+						protected Object doInBackground(Object... params) {
+							ServiceResponse serviceResponse = getCachedImage(imageRequest);
+							return serviceResponse;
+						}
+
+						@Override
+						protected void onPostExecute(Object result) {
+							ServiceResponse serviceResponse = (ServiceResponse) result;
+							if (serviceResponse.responseCode == ResponseCode.Success) {
+								imageRequest.getRequestListener().onComplete(serviceResponse);
 							}
-							serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
+							else {
+								queueImage(imageRequest);
+							}
 						}
-						else {
-							serviceResponse.responseCode = ResponseCode.Failed;
-						}
-						return serviceResponse;
-					}
 
-					@Override
-					protected void onPostExecute(Object result) {
-						ServiceResponse serviceResponse = (ServiceResponse) result;
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							imageRequest.getRequestListener().onComplete(serviceResponse);
-						}
-						else {
-							queueImage(imageRequest);
-						}
-					}
+					};
 
-				};
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-					task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+						task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					}
+					else {
+						task.execute();
+					}
 				}
 				else {
-					task.execute();
+					ServiceResponse serviceResponse = getCachedImage(imageRequest);
+
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						imageRequest.getRequestListener().onComplete(serviceResponse);
+					}
+					else {
+						queueImage(imageRequest);
+					}
 				}
 			}
 			else {
 				queueImage(imageRequest);
 			}
 		}
+	}
+	
+	private ServiceResponse getCachedImage(ImageRequest imageRequest) {
+		
+		ServiceResponse serviceResponse = new ServiceResponse();
+		Bitmap bitmap = ImageManager.getInstance().getImage(imageRequest.getImageUri());
+		if (bitmap != null) {
+			Logger.v(this, "Image request satisfied from cache: " + imageRequest.getImageUri());
+			if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL
+					&& imageRequest.getScaleToWidth() != bitmap.getWidth()) {
+				/*
+				 * We might have cached a large version of an image so we need to make sure we honor
+				 * the image request specifications.
+				 */
+				bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
+			}
+			serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
+		}
+		else {
+			serviceResponse.responseCode = ResponseCode.Failed;
+		}
+		return serviceResponse;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -518,7 +546,7 @@ public class ImageLoader {
 								 * the broken image placeholder
 								 */
 								imageRequest.setImageUri("resource:placeholder_picture");
-								fetchImage(imageRequest);
+								fetchImage(imageRequest, false);
 							}
 							imageRequest.getRequestListener().onComplete(serviceResponse);
 						}

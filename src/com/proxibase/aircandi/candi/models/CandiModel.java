@@ -1,9 +1,5 @@
 package com.proxibase.aircandi.candi.models;
 
-import java.util.LinkedList;
-
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
 import com.proxibase.service.objects.Entity;
@@ -139,10 +135,6 @@ public class CandiModel extends BaseModel {
 
 	public void setDisplayExtra(DisplayExtra displayExtra) {
 		mDisplayExtra = displayExtra;
-	}
-
-	public void setModifiers(LinkedList<IEntityModifier> modifiers) {
-		mViewModifiers = modifiers;
 	}
 
 	public void setEntity(Entity entity) {

@@ -230,7 +230,7 @@ public class WebImageView extends RelativeLayout {
 			}
 		});
 
-		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest);
+		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, true);
 	}
 
 	public void clearImage(final boolean animate, final Integer animationId) {

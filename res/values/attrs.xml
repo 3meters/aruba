@@ -5,6 +5,7 @@
     <declare-styleable name="Global">
         <attr name="themeTone" format="string" />
         <attr name="preferenceStyle" format="reference" />
+        <attr name="buttonStyle" format="reference" />
         <attr name="actionBarTone" format="string" />
         <attr name="busy" format="reference" />
     </declare-styleable>
