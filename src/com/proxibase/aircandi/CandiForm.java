@@ -657,6 +657,9 @@ public class CandiForm extends CandiActivity {
 									.getEntityById(entity.parentId, null, EntityTree.Radar);
 							parentEntityOriginal.children.remove(entity);
 						}
+						if (parentEntityNew.children == null) {
+							parentEntityNew.children = new EntityList<Entity>();
+						}
 						parentEntityNew.children.add(entity);
 						entity.parent = parentEntityNew;
 						entity.parentId = parentEntityNew.id;
@@ -691,6 +694,9 @@ public class CandiForm extends CandiActivity {
 									.getEntityById(parentEntityIdNew, null, EntityTree.User);
 							/* For user candi, we might be moving to a parent that isn't in the user candi. */
 							if (parentEntityNew != null) {
+								if (parentEntityNew.children == null) {
+									parentEntityNew.children = new EntityList<Entity>();
+								}
 								parentEntityNew.children.add(entity);
 								entity.parent = parentEntityNew;
 								entity.parentId = parentEntityNew.id;

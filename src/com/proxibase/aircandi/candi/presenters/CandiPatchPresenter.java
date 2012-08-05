@@ -6,9 +6,7 @@ import static org.anddev.andengine.util.constants.Constants.VERTEX_INDEX_Y;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -48,6 +46,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import com.proxibase.aircandi.Aircandi;
+import com.proxibase.aircandi.BuildConfig;
 import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.Preferences;
 import com.proxibase.aircandi.R;
@@ -154,9 +153,6 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Rendering timer */
 		mRenderingTimer = new RenderCountDownTimer(5000, 500);
-
-		/* Textures */
-		loadHardwareTextures();
 
 		initialize();
 	}
@@ -355,7 +351,7 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Check to see if there is a brand new entity in the collection */
 		mRookieHit = rookieHit(entitiesCopy);
-		
+
 		/* We want all new discoveries on this pass to get the same date */
 		Date discoveryTime = DateUtils.nowDate();
 
@@ -501,9 +497,9 @@ public class CandiPatchPresenter implements Observer {
 		/* Navigate to make sure we are completely configured */
 		navigateModel(mCandiPatchModel.getCandiRootNext(), delayObserverUpdate, fullBuild, Navigation.None);
 
-		if (fullBuild) {
-			manageViewsAsync();
-		}
+		//		if (fullBuild) {
+		//			manageViewsAsync();
+		//		}
 		renderingActivate(5000);
 		Logger.d(this, "Model updated with entities");
 		mEntities = entitiesCopy;
@@ -524,9 +520,9 @@ public class CandiPatchPresenter implements Observer {
 		/* Need to sort the candi before assigning to zones */
 		/* Sort the candi by discovery time then modified time */
 		mCandiPatchModel.sortCandiModels(mCandiPatchModel.getCandiRootNext().getChildren());
-		for (IModel candiModel : mCandiPatchModel.getCandiRootNext().getChildren()) {
-			mCandiPatchModel.sortCandiModels(candiModel.getChildren());
-		}
+//		for (IModel candiModel : mCandiPatchModel.getCandiRootNext().getChildren()) {
+//			mCandiPatchModel.sortCandiModels(candiModel.getChildren());
+//		}
 
 		/*
 		 * Set candi visible state, move candi to inactive zone if appropriate. Set candiModelFocused to null if candi
@@ -577,17 +573,17 @@ public class CandiPatchPresenter implements Observer {
 						candiModel.getViewActions().clear();
 					}
 				}
-				for (IModel childModel : candiModel.getChildren()) {
-					CandiModel childCandiModel = (CandiModel) childModel;
-					if (mCandiViewsActiveHash.get(childCandiModel.getModelIdAsString()) == null) {
-						synchronized (childCandiModel.getViewModifiers()) {
-							childCandiModel.getViewModifiers().clear();
-						}
-						synchronized (childCandiModel.getViewActions()) {
-							childCandiModel.getViewActions().clear();
-						}
-					}
-				}
+//				for (IModel childModel : candiModel.getChildren()) {
+//					CandiModel childCandiModel = (CandiModel) childModel;
+//					if (mCandiViewsActiveHash.get(childCandiModel.getModelIdAsString()) == null) {
+//						synchronized (childCandiModel.getViewModifiers()) {
+//							childCandiModel.getViewModifiers().clear();
+//						}
+//						synchronized (childCandiModel.getViewActions()) {
+//							childCandiModel.getViewActions().clear();
+//						}
+//					}
+//				}
 			}
 
 			/* Wait for modifiers of active candi views to finish */
@@ -608,15 +604,15 @@ public class CandiPatchPresenter implements Observer {
 						synchronized (candiModel.getViewActions()) {
 							candiModel.getViewActions().clear();
 						}
-						for (IModel childModel : candiModel.getChildren()) {
-							CandiModel childCandiModel = (CandiModel) childModel;
-							synchronized (childCandiModel.getViewModifiers()) {
-								childCandiModel.getViewModifiers().clear();
-							}
-							synchronized (childCandiModel.getViewActions()) {
-								childCandiModel.getViewActions().clear();
-							}
-						}
+//						for (IModel childModel : candiModel.getChildren()) {
+//							CandiModel childCandiModel = (CandiModel) childModel;
+//							synchronized (childCandiModel.getViewModifiers()) {
+//								childCandiModel.getViewModifiers().clear();
+//							}
+//							synchronized (childCandiModel.getViewActions()) {
+//								childCandiModel.getViewActions().clear();
+//							}
+//						}
 					}
 				}
 
@@ -628,18 +624,18 @@ public class CandiPatchPresenter implements Observer {
 							break;
 						}
 					}
-//					for (IModel childModel : candiModel.getChildren()) {
-//						CandiModel childCandiModel = (CandiModel) childModel;
-//						synchronized (childCandiModel.getViewModifiers()) {
-//							if (childCandiModel.getViewModifiers().size() > 0) {
-//								modifierHit = true;
-//								break;
-//							}
-//						}
-//					}
-//					if (modifierHit) {
-//						break;
-//					}
+					//					for (IModel childModel : candiModel.getChildren()) {
+					//						CandiModel childCandiModel = (CandiModel) childModel;
+					//						synchronized (childCandiModel.getViewModifiers()) {
+					//							if (childCandiModel.getViewModifiers().size() > 0) {
+					//								modifierHit = true;
+					//								break;
+					//							}
+					//						}
+					//					}
+					//					if (modifierHit) {
+					//						break;
+					//					}
 				}
 
 				if (!modifierHit) {
@@ -685,9 +681,9 @@ public class CandiPatchPresenter implements Observer {
 		mEngine.getScene().getChild(CandiConstants.LAYER_CANDI).sortChildren();
 
 		/* Without animations, we can lazy create views. */
-		if (!CandiConstants.TRANSITIONS_ACTIVE) {
-			manageViewsAsync();
-		}
+		//		if (!CandiConstants.TRANSITIONS_ACTIVE) {
+		//			manageViewsAsync();
+		//		}
 
 		/* Make sure we have a current candi and UI is centered on it */
 		if (fullUpdate) {
@@ -838,10 +834,10 @@ public class CandiPatchPresenter implements Observer {
 		final CandiView candiView = mCandiViewPool.obtainPoolItem();
 
 		if (candiView.isRecycled()) {
-			Logger.v(null, "CandiView pulled from pool: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
+			Logger.v(this, "CandiView pulled from pool: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 		}
 		else {
-			Logger.v(null, "CandiView created: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
+			Logger.d(this, "CandiView created: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 		}
 
 		candiView.setRecycled(false);
@@ -854,6 +850,13 @@ public class CandiPatchPresenter implements Observer {
 		 * Both of these calls cause new textures to be loaded based on the current candi model.
 		 */
 		if (candiView.isHardwareTexturesInitialized()) {
+			/*
+			 * How time is spent in this call
+			 * 
+			 * - Image is pulled from file cache and decoded into a bitmap (90 ms)
+			 * - Bitmap is pushed to texture regions 
+			 * - Animation to fade in the images in the ui is kicked off (500 ms duration) 
+			 */
 			candiView.initializeModel();
 		}
 		else {
@@ -943,7 +946,7 @@ public class CandiPatchPresenter implements Observer {
 		mCandiViewsActiveHash.remove(modelId);
 
 		if (candiView != null) {
-			Logger.v(null, "CandiView recycled to the pool: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
+			Logger.v(this, "CandiView recycled to the pool: " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 			mCandiViewPool.recyclePoolItem(candiView);
 		}
 	}
@@ -956,7 +959,6 @@ public class CandiPatchPresenter implements Observer {
 		}
 	};
 
-	@SuppressWarnings("unused")
 	private void manageViews(boolean localUpdate, boolean useNext) {
 		/*
 		 * - Called synchronously from navigate if doing animations else async. - Called async when finished with scroll
@@ -974,8 +976,6 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Recycle views first */
-		int recycleCount = 0;
-
 		for (int i = 0; i < countCandiModels; i++) {
 			final CandiModel candiModel = (CandiModel) candiModels.get(i);
 			ViewState viewStateCurrent = candiModel.getViewStateCurrent();
@@ -991,26 +991,14 @@ public class CandiPatchPresenter implements Observer {
 
 			if (!isWithinHalo && mCandiViewsActiveHash.containsKey(candiModel.getModelIdAsString())) {
 				sendCandiViewToPool(candiModel, useNext);
-				recycleCount++;
 			}
 		}
 
 		/* First, allocate any views needed for the candi with the current focus */
 		CandiModel candiModelFocused = mCandiPatchModel.getCandiModelFocused();
-		int loanedCount = 0;
 		if (localUpdate) {
 			if (candiModelFocused.getViewStateCurrent().isVisible() && !mCandiViewsActiveHash.containsKey(candiModelFocused.getModelIdAsString())) {
 				getCandiViewFromPool(candiModelFocused, localUpdate, useNext);
-				synchronized (candiModelFocused.getChildren()) {
-					for (IModel candiModelChildFocused : candiModelFocused.getChildren()) {
-						if (candiModelChildFocused.getViewStateCurrent().isVisible() && !mCandiViewsActiveHash
-								.containsKey(((CandiModel) candiModelChildFocused)
-										.getModelIdAsString())) {
-							getCandiViewFromPool((CandiModel) candiModelChildFocused, localUpdate, useNext);
-							loanedCount++;
-						}
-					}
-				}
 			}
 		}
 
@@ -1026,21 +1014,22 @@ public class CandiPatchPresenter implements Observer {
 				boolean isWithinHalo = viewState.isWithinHalo(mCamera);
 				if (isWithinHalo && !mCandiViewsActiveHash.containsKey(candiModel.getModelIdAsString())) {
 					getCandiViewFromPool(candiModel, localUpdate, useNext);
-					loanedCount++;
 				}
 			}
 		}
 
 		/* update debug info */
-		mCandiRadarActivity.runOnUiThread(new Runnable() {
+		if (BuildConfig.DEBUG) {
+			mCandiRadarActivity.runOnUiThread(new Runnable() {
 
-			@Override
-			public void run() {
-				if (Aircandi.settings.getBoolean(Preferences.PREF_SHOW_DEBUG, false)) {
-					mCandiRadarActivity.updateDebugInfo();
+				@Override
+				public void run() {
+					if (Aircandi.settings.getBoolean(Preferences.PREF_SHOW_DEBUG, false)) {
+						mCandiRadarActivity.updateDebugInfo();
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	public float getLastVisibleCandiModelX(boolean useNext) {
@@ -1546,47 +1535,47 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Repeat for all children */
-		for (IModel childModel : candiModel.getChildren()) {
-			CandiModel childCandiModel = (CandiModel) childModel;
-			final CandiView childCandiView = (CandiView) mCandiViewsActiveHash.get(childCandiModel.getModelIdAsString());
-			mCandiViewsActiveHash.remove(childCandiModel.getModelIdAsString());
-			if (childCandiView != null) {
-				renderingActivate();
-
-				/*
-				 * Remove associated images from image cache if the parent was deleted for good
-				 */
-				if (candiModel.isDeleted()) {
-					String imageUri = ImageRequestBuilder.getImageUriFromEntity(childCandiModel.getEntity());
-					final String cacheName = ImageManager.getInstance().resolveCacheName(imageUri);
-					ImageManager.getInstance().deleteImage(cacheName);
-					ImageManager.getInstance().deleteImage(cacheName + ".reflection");
-				}
-
-				/* Recycle the candi view */
-				if (mCandiViewsActiveHash.containsKey(childCandiModel.getModelIdAsString())) {
-					sendCandiViewToPool(childCandiModel, false);
-				}
-			}
-		}
+//		for (IModel childModel : candiModel.getChildren()) {
+//			CandiModel childCandiModel = (CandiModel) childModel;
+//			final CandiView childCandiView = (CandiView) mCandiViewsActiveHash.get(childCandiModel.getModelIdAsString());
+//			mCandiViewsActiveHash.remove(childCandiModel.getModelIdAsString());
+//			if (childCandiView != null) {
+//				renderingActivate();
+//
+//				/*
+//				 * Remove associated images from image cache if the parent was deleted for good
+//				 */
+//				if (candiModel.isDeleted()) {
+//					String imageUri = ImageRequestBuilder.getImageUriFromEntity(childCandiModel.getEntity());
+//					final String cacheName = ImageManager.getInstance().resolveCacheName(imageUri);
+//					ImageManager.getInstance().deleteImage(cacheName);
+//					ImageManager.getInstance().deleteImage(cacheName + ".reflection");
+//				}
+//
+//				/* Recycle the candi view */
+//				if (mCandiViewsActiveHash.containsKey(childCandiModel.getModelIdAsString())) {
+//					sendCandiViewToPool(childCandiModel, false);
+//				}
+//			}
+//		}
 
 		/* Remove child models */
-		for (IModel childCandiModel : candiModel.getChildren()) {
-			/*
-			 * This is ok because we are not removing from the same list we are iterating.
-			 */
-			mCandiPatchModel.getCandiModels().remove(childCandiModel); // Search is done using model id
-
-			if (mCandiPatchModel.getCandiModelFocused() == childCandiModel) {
-				mCandiPatchModel.setCandiModelFocused(null);
-			}
-			if (mCandiPatchModel.getCandiModelSelected() == childCandiModel) {
-				mCandiPatchModel.setCandiModelSelected(null);
-			}
-			if (mCandiPatchModel.getCandiRootCurrent() == childCandiModel) {
-				mCandiPatchModel.setCandiRootCurrent(null);
-			}
-		}
+//		for (IModel childCandiModel : candiModel.getChildren()) {
+//			/*
+//			 * This is ok because we are not removing from the same list we are iterating.
+//			 */
+//			mCandiPatchModel.getCandiModels().remove(childCandiModel); // Search is done using model id
+//
+//			if (mCandiPatchModel.getCandiModelFocused() == childCandiModel) {
+//				mCandiPatchModel.setCandiModelFocused(null);
+//			}
+//			if (mCandiPatchModel.getCandiModelSelected() == childCandiModel) {
+//				mCandiPatchModel.setCandiModelSelected(null);
+//			}
+//			if (mCandiPatchModel.getCandiRootCurrent() == childCandiModel) {
+//				mCandiPatchModel.setCandiRootCurrent(null);
+//			}
+//		}
 
 		/* Remove parent model */
 		mCandiPatchModel.getCandiModels().remove(candiModel); // Search is done using model id
@@ -1647,13 +1636,11 @@ public class CandiPatchPresenter implements Observer {
 	// Textures
 	// --------------------------------------------------------------------------------------------
 
-	public void loadHardwareTextures() {
-		mTexture = new Texture(512, 512, CandiConstants.GL_TEXTURE_OPTION);
-		mTexture.setName("Global placeholder");
-		mEngine.getTextureManager().loadTexture(mTexture);
-	}
-
 	public void loadTextureSources() {
+
+		/* Create texture */
+		mTexture = new Texture(512, 512, CandiConstants.GL_TEXTURE_OPTION);
+		mTexture.setName("Global texture for candi and zone generics");
 
 		/* Textures that are shared by zone views */
 		Bitmap candiBodyBitmap = null;
@@ -1663,7 +1650,7 @@ public class CandiPatchPresenter implements Observer {
 			candiBodyBitmap = ImageUtils.scaleAndCropBitmap(candiBodyBitmap, CandiConstants.CANDI_VIEW_WIDTH, ImageShape.Square);
 			Bitmap candiReflectionBitmap = ImageUtils.makeReflection(candiBodyBitmap, true);
 
-			mCandiBodyTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(candiBodyBitmap, "candi_body",
+			mCandiBodyTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(candiBodyBitmap, "candi_body_placeholder",
 					new IBitmapAdapter() {
 
 						@Override
@@ -1675,7 +1662,8 @@ public class CandiPatchPresenter implements Observer {
 						}
 					}), 0, 0);
 
-			mCandiReflectionTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(candiReflectionBitmap, "candi_body",
+			mCandiReflectionTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(candiReflectionBitmap,
+					"candi_body_placeholder_reflection",
 					new IBitmapAdapter() {
 
 						@Override
@@ -1712,7 +1700,8 @@ public class CandiPatchPresenter implements Observer {
 						}
 					}), 256, 0);
 
-			mZoneReflectionTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(zoneReflectionBitmap, "zone_body",
+			mZoneReflectionTextureRegion = TextureRegionFactory.createFromSource(mTexture, new BitmapTextureSource(zoneReflectionBitmap,
+					"zone_body_reflection",
 					new IBitmapAdapter() {
 
 						@Override
@@ -1728,37 +1717,10 @@ public class CandiPatchPresenter implements Observer {
 						}
 					}), 256, 256);
 		}
-	}
 
-	public void resetTextures(TextureReset textureReset) {
+		/* Load the texture */
+		mEngine.getTextureManager().loadTexture(mTexture);
 
-		/* Candi views */
-		Iterator it = mCandiViewsActiveHash.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			CandiView candiView = (CandiView) entry.getValue();
-			if (textureReset == TextureReset.VisibleOnly && !candiView.getModel().getViewStateCurrent().isVisibleToCamera(mCamera)) {
-				continue;
-			}
-			else if (textureReset == TextureReset.NonVisibleOnly && candiView.getModel().getViewStateCurrent().isVisibleToCamera(mCamera)) {
-				continue;
-			}
-			candiView.resetTextureSources();
-		}
-
-		/* Zone views */
-		for (final ZoneView zoneView : mZoneViews) {
-			if (textureReset == TextureReset.VisibleOnly && !zoneView.isVisibleToCamera(mCamera))
-				continue;
-			else if (textureReset == TextureReset.NonVisibleOnly && zoneView.isVisibleToCamera(mCamera))
-				continue;
-			zoneView.resetTextureSources();
-		}
-	}
-
-	public void resetSharedTextures() {
-		mTexture.clearTextureSources();
-		loadTextureSources();
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 package com.proxibase.aircandi;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -315,7 +316,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		/* Debug footer */
 		debugSliderShow(mPrefShowDebug);
-		if (mPrefShowDebug) {
+		if (mPrefShowDebug && BuildConfig.DEBUG) {
 			updateDebugInfo();
 		}
 
@@ -386,7 +387,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			public void run() {
 				try {
 					Properties properties = new Properties();
-					properties.load(getClass().getResourceAsStream("AwsCredentials.properties"));
+					InputStream inputStream = getClass().getResourceAsStream("AwsCredentials.properties");
+					properties.load(inputStream);
 
 					String accessKeyId = properties.getProperty("accessKey");
 					String secretKey = properties.getProperty("secretKey");
@@ -654,7 +656,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 									mEntityModelUser = Aircandi.getInstance().getUser();
 
 									/* Add a call to pass along analytics */
-									updateDebugInfo();
+									if (BuildConfig.DEBUG) {
+										updateDebugInfo();
+									}
 
 									mCandiPatchPresenter.setFullUpdateInProgress(false);
 									mCandiPatchPresenter.setIgnoreInput(false);
@@ -756,8 +760,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			Logger.v(this, "User refresh request ignored because of active scan");
 			return;
 		}
-
-		updateDebugInfo();
+		if (BuildConfig.DEBUG) {
+			updateDebugInfo();
+		}
 		if (!mReadyToRun) {
 			return;
 		}
@@ -1170,59 +1175,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			mCandiSurfaceView.setVisibility(View.VISIBLE);
 			((View) findViewById(R.id.retry_dialog)).setVisibility(View.GONE);
 		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Dialogs
-	// --------------------------------------------------------------------------------------------
-
-	private void showInstallDialog(final CandiModel candi) {
-
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				final Dialog dialog = new Dialog(CandiRadar.this, R.style.aircandi_theme_dialog);
-				final RelativeLayout installDialog = (RelativeLayout) getLayoutInflater().inflate(R.layout.dialog_install, null);
-				dialog.setContentView(installDialog, new FrameLayout.LayoutParams(400, 300, Gravity.CENTER));
-				dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-				dialog.getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.dialog_bg));
-
-				((Button) installDialog.findViewById(R.id.btn_install_ok)).setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						// Intent goToMarket = new
-						// Intent(Intent.ACTION_VIEW).setData(Uri.parse(candi.getEntity().entityHandler.code));
-						// startActivityForResult(goToMarket,
-						// CandiConstants.ACTIVITY_MARKET);
-						// dialog.dismiss();
-					}
-				});
-				((Button) installDialog.findViewById(R.id.btn_install_cancel)).setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						dialog.dismiss();
-						if (!mEngine.isRunning()) {
-							if (mCandiPatchModel.getCandiModels().size() > 0) {
-								mCandiPatchPresenter.resetSharedTextures();
-								mCandiPatchPresenter.resetTextures(TextureReset.VisibleOnly);
-								new Thread(new Runnable() {
-
-									@Override
-									public void run() {
-										mCandiPatchPresenter.resetTextures(TextureReset.NonVisibleOnly);
-									}
-								}).start();
-							}
-						}
-					}
-				});
-				dialog.show();
-
-			}
-		});
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1645,9 +1597,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		if (mPrefShowDebug != Aircandi.settings.getBoolean(Preferences.PREF_SHOW_DEBUG, false)) {
 			prefResponse = PrefResponse.Change;
 			mPrefShowDebug = Aircandi.settings.getBoolean(Preferences.PREF_SHOW_DEBUG, false);
-			debugSliderShow(mPrefShowDebug);
-			if (mPrefShowDebug) {
-				updateDebugInfo();
+			if (BuildConfig.DEBUG) {
+				debugSliderShow(mPrefShowDebug);
+				if (mPrefShowDebug) {
+					updateDebugInfo();
+				}
 			}
 		}
 

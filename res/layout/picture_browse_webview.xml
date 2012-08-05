@@ -3,10 +3,9 @@
     xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="?attr/backgroundForm" >
+    android:background="?attr/backgroundForm"  >
 
     <RelativeLayout
-        android:id="@+id/progress_group"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" >
@@ -27,11 +26,11 @@
             android:progressDrawable="@drawable/progress" />
     </RelativeLayout>
 
-    <it.sephiroth.android.library.imagezoom.ImageViewTouch
-        android:id="@+id/image"
+    <WebView
+        android:id="@+id/webview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:scaleType="fitCenter" />
+        android:background="#00000000" />
 
     <LinearLayout
         style="@style/actionbar"

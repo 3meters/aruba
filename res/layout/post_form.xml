@@ -2,14 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundForm"  >
 
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
-        android:background="?attr/backgroundForm"
         android:fillViewport="true" >
 
         <ViewFlipper
@@ -35,6 +35,7 @@
                     android:id="@+id/text_title"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="textNoSuggestions"
                     android:hint="@string/form_title_hint" />
 
                 <EditText
@@ -43,7 +44,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="top"
                     android:hint="@string/form_description_hint"
-                    android:inputType="textMultiLine"
+                    android:inputType="textMultiLine|textNoSuggestions"
                     android:lines="10" />
 
                 <com.proxibase.aircandi.widgets.AuthorBlock

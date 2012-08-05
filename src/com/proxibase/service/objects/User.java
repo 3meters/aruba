@@ -39,7 +39,7 @@ public class User extends ServiceEntry {
 	@Expose
 	public String	password;
 	@Expose
-	public Number	lastSignedIn;
+	public Number	lastSignedInDate;
 	@Expose
 	public String	authSource;
 	@Expose

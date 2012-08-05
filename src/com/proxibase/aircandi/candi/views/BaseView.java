@@ -86,13 +86,12 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public void initialize() {
-		updateTextureRegions();
+		updateTextureRegions("Title update: ");
 		mBound = true;
 	}
 
 	public void initializeModel() {
-		
-		updateTextureRegions();
+		updateTextureRegions("Title update: ");
 		mBound = true;
 	}
 
@@ -104,9 +103,12 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		 */
 		if (mModel != null) {
 			String titleTextModel = ((BaseModel) mModel).getTitleText();
-			if (mTitleSprite != null && titleTextModel != null && !titleTextModel.equals(mTitleText)) {
+			if (titleTextModel == null) {
+				titleTextModel = "";
+			}
+			if (!titleTextModel.equals(mTitleText)) {
 				mTitleText = titleTextModel;
-				updateTextureRegions();
+				updateTextureRegions("Title update: ");
 			}
 		}
 	}
@@ -164,32 +166,33 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		}
 	}
 
-	protected void updateTextureRegions() {
-		if (((BaseModel) mModel).getTitleText() != null) {
+	protected void updateTextureRegions(String namePrefix) {
+		final BaseModel model = (BaseModel) mModel;
+		if (model.getTitleText() == null) {
+			model.setTitleText("");
+		}
 
-			mTitleTexture.clearTextureSources();
-			BaseModel model = (BaseModel) mModel;
-			Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, model.getTitleText());
+		mTitleTexture.clearTextureSources();
+		Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, model.getTitleText());
 
-			mTitleTextureRegion = TextureRegionFactory.createFromSource(mTitleTexture, new BitmapTextureSource(titleBitmap, model.getTitleText(), new IBitmapAdapter() {
+		mTitleTextureRegion = TextureRegionFactory.createFromSource(mTitleTexture, new BitmapTextureSource(titleBitmap, namePrefix + model.getTitleText(),
+				new IBitmapAdapter() {
 
-				@Override
-				public Bitmap reloadBitmap() {
-					/*
-					 * This gets called if the bitmap being used as the texture source has been recycled
-					 */
-					Bitmap titleBitmap = null;
-					if (mModel != null) {
-						titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, ((BaseModel) mModel)
-								.getTitleText());
+					@Override
+					public Bitmap reloadBitmap() {
+						/*
+						 * This gets called if the bitmap being used as the texture source has been recycled
+						 */
+						Bitmap titleBitmap = null;
+						if (mModel != null) {
+							titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, model.getTitleText());
+						}
+						return titleBitmap;
 					}
-					return titleBitmap;
-				}
-			}), 0, 0);
+				}), 0, 0);
 
-			if (mTitleSprite == null) {
-				makeTitleSprite();
-			}
+		if (mTitleSprite == null) {
+			makeTitleSprite();
 		}
 	}
 
@@ -341,7 +344,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		/* Make sure we have a mutable bitmap */
 		Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 		Canvas canvas = new Canvas(bitmapCopy);
-		
+
 		/*
 		 * Draw background for overlay
 		 */
@@ -349,7 +352,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mDrawable.getPaint().setColor(fillColor);
 		mDrawable.setBounds(0, ((int) offsetY - 5), bitmapCopy.getWidth(), bitmapCopy.getHeight());
 		mDrawable.draw(canvas);
-		
+
 		/* Move the canvas and draw the overlay */
 		canvas.translate(offsetX, offsetY);
 		canvas.drawBitmap(overlay, new Matrix(), null);
@@ -362,7 +365,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 		return bitmapCopy;
 	}
-	
+
 	public void unloadResources() {
 
 		/* Completely remove all resources associated with this sprite. */
@@ -374,10 +377,6 @@ public abstract class BaseView extends Entity implements Observer, IView {
 
 		if (mTitleTexture != null)
 			mCandiPatchPresenter.getEngine().getTextureManager().unloadTexture(mTitleTexture);
-	}
-
-	public void resetTextureSources() {
-		updateTextureRegions();
 	}
 
 	public void loadHardwareTextures() {
@@ -469,7 +468,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public void setHardwareTexturesInitialized(boolean hardwareTexturesInitialized) {
-		this.mHardwareTexturesInitialized = hardwareTexturesInitialized;
+		mHardwareTexturesInitialized = hardwareTexturesInitialized;
 	}
 
 	public boolean isHardwareTexturesInitialized() {
@@ -477,7 +476,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public void setUnbound(boolean unbound) {
-		this.mBound = unbound;
+		mBound = unbound;
 	}
 
 	public boolean isUnbound() {
@@ -485,7 +484,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	}
 
 	public void setRecycled(boolean recycled) {
-		this.mRecycled = recycled;
+		mRecycled = recycled;
 	}
 
 	public boolean isRecycled() {

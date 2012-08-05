@@ -37,6 +37,7 @@
         <item name="pagerBorder">#33ffffff</item>
         <item name="backgroundCandiInfo">@android:color/transparent</item>
         <item name="backgroundForm">@android:color/black</item>
+        <item name="placeholder_user">placeholder_user_dark</item>
         <item name="imageSliderHandleSearch">@drawable/gripper_dark</item>
         <item name="backgroundSliderHandleSearch">@drawable/slider_handle_search_bg_dark</item>
         <item name="backgroundSliderContentSearch">@drawable/slider_content_search_bg_dark</item>
@@ -104,6 +105,7 @@
         <item name="pagerBorder">@color/rule_30_light</item>
         <item name="backgroundCandiInfo">@android:color/transparent</item>
         <item name="backgroundForm">@android:color/white</item>
+        <item name="placeholder_user">placeholder_user_light</item>
         <item name="imageSliderHandleSearch">@drawable/gripper_light</item>
         <item name="backgroundSliderHandleSearch">@drawable/slider_handle_search_bg_light</item>
         <item name="backgroundSliderContentSearch">@drawable/slider_content_search_bg_light</item>
@@ -167,6 +169,7 @@
         <item name="textColorUnfocused">@color/pager_indicator_text_unfocused_light</item>
         <item name="textColorButtonHeader">@color/text_dark</item>
         <item name="textColorFooter">@color/text_dark</item>
+        <item name="textColorButton">@color/text_dark</item>
         <item name="iconSearchActions">@drawable/icon_actions_dark</item>
         <item name="iconInfoActions">@drawable/icon_actions_light</item>
         <item name="iconRefresh">@drawable/icon_refresh_dark</item>

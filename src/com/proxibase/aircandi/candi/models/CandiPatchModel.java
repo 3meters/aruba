@@ -459,12 +459,12 @@ public class CandiPatchModel extends Observable {
 				candiModel.getViewStateNext().setCollapsed(candiModel.getViewStateNext().getScale() != CandiPatchPresenter.SCALE_NORMAL);
 
 				/* Include any children */
-				for (IModel childModel : candiModel.getChildren()) {
-					CandiModel childCandiModel = (CandiModel) childModel;
-					childCandiModel.getViewStateNext().setHasReflection(childCandiModel.getZoneStateNext().getAlignment() == ZoneAlignment.Bottom);
-					childCandiModel.getViewStateNext()
-							.setCollapsed(childCandiModel.getViewStateNext().getScale() != CandiPatchPresenter.SCALE_NORMAL);
-				}
+//				for (IModel childModel : candiModel.getChildren()) {
+//					CandiModel childCandiModel = (CandiModel) childModel;
+//					childCandiModel.getViewStateNext().setHasReflection(childCandiModel.getZoneStateNext().getAlignment() == ZoneAlignment.Bottom);
+//					childCandiModel.getViewStateNext()
+//							.setCollapsed(childCandiModel.getViewStateNext().getScale() != CandiPatchPresenter.SCALE_NORMAL);
+//				}
 			}
 		}
 	}

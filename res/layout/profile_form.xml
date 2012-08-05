@@ -2,14 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundForm" >
 
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
-        android:background="?attr/backgroundForm"
         android:fillViewport="true"
         android:focusable="true"
         android:focusableInTouchMode="true" >
@@ -85,7 +85,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/form_label_fullname"
-                    android:inputType="textPersonName" />
+                    android:inputType="textPersonName|textNoSuggestions" />
 
                 <!-- Location -->
 
@@ -94,7 +94,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/form_label_location"
-                    android:inputType="textPostalAddress" />
+                    android:inputType="textPostalAddress|textNoSuggestions" />
 
                 <!-- Web link -->
 
@@ -103,7 +103,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/form_label_link"
-                    android:inputType="textUri" />
+                    android:inputType="textUri|textNoSuggestions" />
 
                 <!-- Bio -->
 
@@ -113,7 +113,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="top"
                     android:hint="@string/form_label_bio"
-                    android:inputType="textMultiLine"
+                    android:inputType="textMultiLine|textNoSuggestions"
                     android:minLines="5" />
             </LinearLayout>
 

@@ -44,7 +44,7 @@ public class ZoneView extends BaseView {
 	public void initialize() {
 		super.initialize();
 
-		updateTextureRegions();
+		updateTextureRegions(null);
 
 		if (mBodyTextureRegion != null) {
 			makeBodySprite();
@@ -59,7 +59,7 @@ public class ZoneView extends BaseView {
 	public void initializeModel() {
 		super.initializeModel();
 
-		updateTextureRegions();
+		updateTextureRegions(null);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -103,8 +103,9 @@ public class ZoneView extends BaseView {
 			while (true) {
 				ViewAction viewAction = null;
 				synchronized (model.getViewActions()) {
-					if (!model.getViewActions().isEmpty())
+					if (!model.getViewActions().isEmpty()) {
 						viewAction = model.getViewActions().removeFirst();
+					}
 				}
 
 				if (viewAction == null) break;
@@ -155,9 +156,9 @@ public class ZoneView extends BaseView {
 	}
 
 	private void makeReflectionSprite() {
-		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT
-												+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
-				mReflectionTextureRegion);
+		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT
+				+ CandiConstants.CANDI_VIEW_BODY_HEIGHT
+				+ CandiConstants.CANDI_VIEW_REFLECTION_GAP, mReflectionTextureRegion);
 		mReflectionSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mReflectionSprite.setZIndex(0);
 		mReflectionSprite.setVisible(true);
@@ -173,13 +174,6 @@ public class ZoneView extends BaseView {
 	}
 
 	@Override
-	public void resetTextureSources() {
-		super.resetTextureSources();
-
-		updateTextureRegions();
-	}
-
-	@Override
 	public void loadHardwareTextures() {
 		super.loadHardwareTextures();
 
@@ -189,8 +183,8 @@ public class ZoneView extends BaseView {
 	}
 
 	@Override
-	protected void updateTextureRegions() {
-		super.updateTextureRegions();
+	protected void updateTextureRegions(String namePrefix) {
+		super.updateTextureRegions("Zone title: ");
 
 		mBodyTextureRegion = mCandiPatchPresenter.mZoneBodyTextureRegion.clone();
 		mReflectionTextureRegion = mCandiPatchPresenter.mZoneReflectionTextureRegion.clone();

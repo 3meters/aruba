@@ -891,6 +891,9 @@ public class ProxiExplorer {
 								entity.comments = new ArrayList<Comment>();
 							}
 							entity.comments.add(0, comment);
+							if (entity.commentCount == null) {
+								entity.commentCount = 0;
+							}
 							entity.commentCount++;
 						}
 						else {
@@ -901,6 +904,9 @@ public class ProxiExplorer {
 											childEntity.comments = new ArrayList<Comment>();
 										}
 										childEntity.comments.add(0, comment);
+										if (childEntity.commentCount == null) {
+											childEntity.commentCount = 0;
+										}
 										childEntity.commentCount++;
 									}
 								}

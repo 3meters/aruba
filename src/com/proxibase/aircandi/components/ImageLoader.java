@@ -173,6 +173,7 @@ public class ImageLoader {
 				 * We might have cached a large version of an image so we need to make sure we honor
 				 * the image request specifications.
 				 */
+				Logger.v(this, "Image from cache needs to be scaled: " + imageRequest.getImageUri());
 				bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
 			}
 			serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());

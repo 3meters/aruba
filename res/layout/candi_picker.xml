@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    tools:ignore="UnusedNamespace" >
+    tools:ignore="UnusedNamespace"
+    
+    android:background="?attr/backgroundForm"  >
 
     <!-- Candi being moved -->
 
@@ -76,7 +78,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
-        android:background="?attr/backgroundForm"
         android:cacheColorHint="#00000000"
         android:listSelector="#00000000" >
 

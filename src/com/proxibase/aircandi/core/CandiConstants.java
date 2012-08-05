@@ -28,8 +28,7 @@ public interface CandiConstants {
 	public static final int				INTERVAL_NETWORK_PHONEY					= 3000;
 	public static final int				INTERVAL_SCAN							= 60000;
 
-	public static final int				LOCATION_POLLING_INTERVAL				= 300000;																// 5
-																																						// minutes
+	public static final int				LOCATION_POLLING_INTERVAL				= 300000;																// 5 minutes
 	public static final int				LOCATION_POLLING_TIMEOUT				= 60000;
 
 	public static final float			CANDI_VIEW_HALO							= 2.0f;
@@ -90,7 +89,6 @@ public interface CandiConstants {
 	public static final int				IMAGE_WIDTH_SMALL						= 60;
 	public static final int				IMAGE_WIDTH_DEFAULT						= 250;
 	public static final int				IMAGE_WIDTH_ORIGINAL					= -1;
-	public static final String			IMAGE_BROKEN							= "gfx/placeholder3.png";
 
 	public static final String			URL_PROXIBASE							= "https://api.proxibase.com/";
 
