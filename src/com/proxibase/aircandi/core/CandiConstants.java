@@ -45,6 +45,7 @@ public interface CandiConstants {
 																						+ CANDI_VIEW_TITLE_HEIGHT
 																						+ CANDI_VIEW_TITLE_SPACER_HEIGHT;
 	public static final int				CANDI_VIEW_ZOOMED_PADDING				= 10;
+	public static final int				CANDI_VIEW_BADGE_WIDTH					= 65;
 
 	public static final int				MAP_VIEW_FONT_SIZE						= 20;
 	public static final int				MAP_VIEW_TITLE_MARGIN					= 6;

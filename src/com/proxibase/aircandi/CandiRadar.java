@@ -258,7 +258,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		super.onCreate(savedInstanceState);
 		if (CandiConstants.DEBUG_TRACE) {
-			Debug.startMethodTracing("candi_search", 100000000);
+			Debug.startMethodTracing("candi_radar", 100000000);
 		}
 
 		initialize();

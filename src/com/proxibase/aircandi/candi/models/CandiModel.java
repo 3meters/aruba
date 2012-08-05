@@ -21,6 +21,7 @@ public class CandiModel extends BaseModel {
 	private boolean			mTouchAreaActive	= false;
 	private boolean			mRookie				= true;
 	private boolean			mDeleted			= false;
+	private int				mPriority			= 0;
 	private boolean			mMasterImageUpdated	= false;
 	private ReasonInactive	mReasonInactive		= ReasonInactive.None;
 
@@ -216,6 +217,14 @@ public class CandiModel extends BaseModel {
 
 	public boolean isMasterImageUpdated() {
 		return mMasterImageUpdated;
+	}
+
+	public int getPriority() {
+		return mPriority;
+	}
+
+	public void setPriority(int priority) {
+		mPriority = priority;
 	}
 
 	public static class ZoneState {

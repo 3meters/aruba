@@ -4,6 +4,8 @@ import static org.anddev.andengine.util.constants.Constants.VERTEX_INDEX_X;
 import static org.anddev.andengine.util.constants.Constants.VERTEX_INDEX_Y;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.opengl.GLU;
+import android.os.AsyncTask;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -109,12 +112,11 @@ public class CandiPatchPresenter implements Observer {
 	private float					mBoundsMaxX;
 	private ChaseCamera				mCamera;
 	private Scene					mScene;
+	public Bitmap					mBitmapBadgeCollections;
 
 	public Texture					mTexture;
-
 	public TextureRegion			mCandiBodyTextureRegion;
 	public TextureRegion			mCandiReflectionTextureRegion;
-
 	public TextureRegion			mZoneBodyTextureRegion;
 	public TextureRegion			mZoneReflectionTextureRegion;
 
@@ -178,7 +180,11 @@ public class CandiPatchPresenter implements Observer {
 		/* Resource references per theme */
 		loadStyles();
 
+		/* Textures that get shared across candi and zone views */
 		loadTextureSources();
+
+		/* Bitmaps that should be cached for multiple use */
+		loadBitmapBadges();
 	}
 
 	public Scene initializeScene() {
@@ -333,6 +339,16 @@ public class CandiPatchPresenter implements Observer {
 		if (mContext.getTheme().resolveAttribute(R.attr.textColorTitle, resourceName, true)) {
 			mStyleTextColorTitle = (String) resourceName.coerceToString();
 		}
+	}
+
+	private void loadBitmapBadges() {
+		/*
+		 * Much more efficient to do this once and cache it.
+		 */
+		String resolvedResourceName = ImageManager.getInstance().resolveResourceName("ic_collection_250");
+		int resourceId = mCandiRadarActivity.getResources().getIdentifier(resolvedResourceName, "drawable", "com.proxibase.aircandi");
+		mBitmapBadgeCollections = ImageManager.getInstance().loadBitmapFromResources(resourceId);
+		mBitmapBadgeCollections = ImageUtils.scaleAndCropBitmap(mBitmapBadgeCollections, CandiConstants.CANDI_VIEW_BADGE_WIDTH, ImageShape.Square);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -520,9 +536,9 @@ public class CandiPatchPresenter implements Observer {
 		/* Need to sort the candi before assigning to zones */
 		/* Sort the candi by discovery time then modified time */
 		mCandiPatchModel.sortCandiModels(mCandiPatchModel.getCandiRootNext().getChildren());
-//		for (IModel candiModel : mCandiPatchModel.getCandiRootNext().getChildren()) {
-//			mCandiPatchModel.sortCandiModels(candiModel.getChildren());
-//		}
+		//		for (IModel candiModel : mCandiPatchModel.getCandiRootNext().getChildren()) {
+		//			mCandiPatchModel.sortCandiModels(candiModel.getChildren());
+		//		}
 
 		/*
 		 * Set candi visible state, move candi to inactive zone if appropriate. Set candiModelFocused to null if candi
@@ -573,17 +589,17 @@ public class CandiPatchPresenter implements Observer {
 						candiModel.getViewActions().clear();
 					}
 				}
-//				for (IModel childModel : candiModel.getChildren()) {
-//					CandiModel childCandiModel = (CandiModel) childModel;
-//					if (mCandiViewsActiveHash.get(childCandiModel.getModelIdAsString()) == null) {
-//						synchronized (childCandiModel.getViewModifiers()) {
-//							childCandiModel.getViewModifiers().clear();
-//						}
-//						synchronized (childCandiModel.getViewActions()) {
-//							childCandiModel.getViewActions().clear();
-//						}
-//					}
-//				}
+				//				for (IModel childModel : candiModel.getChildren()) {
+				//					CandiModel childCandiModel = (CandiModel) childModel;
+				//					if (mCandiViewsActiveHash.get(childCandiModel.getModelIdAsString()) == null) {
+				//						synchronized (childCandiModel.getViewModifiers()) {
+				//							childCandiModel.getViewModifiers().clear();
+				//						}
+				//						synchronized (childCandiModel.getViewActions()) {
+				//							childCandiModel.getViewActions().clear();
+				//						}
+				//					}
+				//				}
 			}
 
 			/* Wait for modifiers of active candi views to finish */
@@ -604,15 +620,15 @@ public class CandiPatchPresenter implements Observer {
 						synchronized (candiModel.getViewActions()) {
 							candiModel.getViewActions().clear();
 						}
-//						for (IModel childModel : candiModel.getChildren()) {
-//							CandiModel childCandiModel = (CandiModel) childModel;
-//							synchronized (childCandiModel.getViewModifiers()) {
-//								childCandiModel.getViewModifiers().clear();
-//							}
-//							synchronized (childCandiModel.getViewActions()) {
-//								childCandiModel.getViewActions().clear();
-//							}
-//						}
+						//						for (IModel childModel : candiModel.getChildren()) {
+						//							CandiModel childCandiModel = (CandiModel) childModel;
+						//							synchronized (childCandiModel.getViewModifiers()) {
+						//								childCandiModel.getViewModifiers().clear();
+						//							}
+						//							synchronized (childCandiModel.getViewActions()) {
+						//								childCandiModel.getViewActions().clear();
+						//							}
+						//						}
 					}
 				}
 
@@ -854,8 +870,8 @@ public class CandiPatchPresenter implements Observer {
 			 * How time is spent in this call
 			 * 
 			 * - Image is pulled from file cache and decoded into a bitmap (90 ms)
-			 * - Bitmap is pushed to texture regions 
-			 * - Animation to fade in the images in the ui is kicked off (500 ms duration) 
+			 * - Bitmap is pushed to texture regions
+			 * - Animation to fade in the images in the ui is kicked off (500 ms duration)
 			 */
 			candiView.initializeModel();
 		}
@@ -959,12 +975,11 @@ public class CandiPatchPresenter implements Observer {
 		}
 	};
 
-	private void manageViews(boolean localUpdate, boolean useNext) {
+	private void manageViews(final boolean localUpdate, final boolean useNext) {
 		/*
-		 * - Called synchronously from navigate if doing animations else async. - Called async when finished with scroll
-		 * or fling.
+		 * - Called synchronously from navigate if doing animations else async.
+		 * - Called async when finished with scroll or fling.
 		 */
-		// CandiList candiModels = mCandiPatchModel.getCandiModels();
 		ArrayList<CandiModel> candiModels = new ArrayList<CandiModel>(mCandiPatchModel.getCandiModels());
 		int countCandiModels = candiModels.size();
 
@@ -994,26 +1009,66 @@ public class CandiPatchPresenter implements Observer {
 			}
 		}
 
-		/* First, allocate any views needed for the candi with the current focus */
-		CandiModel candiModelFocused = mCandiPatchModel.getCandiModelFocused();
 		if (localUpdate) {
-			if (candiModelFocused.getViewStateCurrent().isVisible() && !mCandiViewsActiveHash.containsKey(candiModelFocused.getModelIdAsString())) {
-				getCandiViewFromPool(candiModelFocused, localUpdate, useNext);
+			/*
+			 * Allocate views based on UI priority
+			 */
+			List<CandiModel> candiModelsByPriority = new ArrayList<CandiModel>();
+
+			CandiModel candiModelFocused = mCandiPatchModel.getCandiModelFocused();
+			ZoneModel zoneModelFocused = useNext ? candiModelFocused.getZoneStateNext().getZone() : candiModelFocused.getZoneStateCurrent().getZone();
+
+			/* Prioritize based on UI distance from the candi with focus */
+			for (CandiModel candiModel : candiModels) {
+				ZoneModel zoneModel = useNext ? candiModel.getZoneStateNext().getZone() : candiModel.getZoneStateCurrent().getZone();
+				candiModel.setPriority(Math.abs(zoneModelFocused.getZoneIndex() - zoneModel.getZoneIndex()));
+				candiModelsByPriority.add(candiModel);
+			}
+
+			/* Sort */
+			Collections.sort(candiModelsByPriority, new SortCandiModelsByPriority());
+
+			/* Work */
+
+			for (final CandiModel candiModel : candiModelsByPriority) {
+				ViewState viewState = useNext ? candiModel.getViewStateNext() : candiModel.getViewStateCurrent();
+				if (viewState.isVisible()) {
+					boolean isWithinHalo = viewState.isWithinHalo(mCamera);
+					if (isWithinHalo && !mCandiViewsActiveHash.containsKey(candiModel.getModelIdAsString())) {
+
+						AsyncTask task = new AsyncTask() {
+
+							@Override
+							protected Object doInBackground(Object... params) {
+								getCandiViewFromPool(candiModel, localUpdate, useNext);
+								return null;
+							}
+						};
+
+						/*
+						 * We don't want parallel tasks because it slows down the display
+						 * of the highest priority candi.
+						 */
+						task.execute();
+					}
+				}
 			}
 		}
-
-		/*
-		 * Now do the rest. Any we already did above won't be done again because they are now in the view tracking hash
-		 * map.
-		 */
-		for (int i = 0; i < countCandiModels; i++) {
-			final CandiModel candiModel = (CandiModel) candiModels.get(i);
-			ViewState viewState = useNext ? candiModel.getViewStateNext() : candiModel.getViewStateCurrent();
-
-			if (viewState.isVisible()) {
-				boolean isWithinHalo = viewState.isWithinHalo(mCamera);
-				if (isWithinHalo && !mCandiViewsActiveHash.containsKey(candiModel.getModelIdAsString())) {
-					getCandiViewFromPool(candiModel, localUpdate, useNext);
+		else {
+			/*
+			 * Allocate views without priority
+			 */
+			for (CandiModel candiModel : candiModels) {
+				ViewState viewState = useNext ? candiModel.getViewStateNext() : candiModel.getViewStateCurrent();
+				if (viewState.isVisible()) {
+					boolean isWithinHalo = viewState.isWithinHalo(mCamera);
+					if (isWithinHalo && !mCandiViewsActiveHash.containsKey(candiModel.getModelIdAsString())) {
+						/*
+						 * TODO: Are we getting animations from this and from the standard
+						 * navigation animation logic later?
+						 */
+						getCandiViewFromPool(candiModel, localUpdate, useNext);
+					}
 				}
 			}
 		}
@@ -1535,47 +1590,47 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Repeat for all children */
-//		for (IModel childModel : candiModel.getChildren()) {
-//			CandiModel childCandiModel = (CandiModel) childModel;
-//			final CandiView childCandiView = (CandiView) mCandiViewsActiveHash.get(childCandiModel.getModelIdAsString());
-//			mCandiViewsActiveHash.remove(childCandiModel.getModelIdAsString());
-//			if (childCandiView != null) {
-//				renderingActivate();
-//
-//				/*
-//				 * Remove associated images from image cache if the parent was deleted for good
-//				 */
-//				if (candiModel.isDeleted()) {
-//					String imageUri = ImageRequestBuilder.getImageUriFromEntity(childCandiModel.getEntity());
-//					final String cacheName = ImageManager.getInstance().resolveCacheName(imageUri);
-//					ImageManager.getInstance().deleteImage(cacheName);
-//					ImageManager.getInstance().deleteImage(cacheName + ".reflection");
-//				}
-//
-//				/* Recycle the candi view */
-//				if (mCandiViewsActiveHash.containsKey(childCandiModel.getModelIdAsString())) {
-//					sendCandiViewToPool(childCandiModel, false);
-//				}
-//			}
-//		}
+		//		for (IModel childModel : candiModel.getChildren()) {
+		//			CandiModel childCandiModel = (CandiModel) childModel;
+		//			final CandiView childCandiView = (CandiView) mCandiViewsActiveHash.get(childCandiModel.getModelIdAsString());
+		//			mCandiViewsActiveHash.remove(childCandiModel.getModelIdAsString());
+		//			if (childCandiView != null) {
+		//				renderingActivate();
+		//
+		//				/*
+		//				 * Remove associated images from image cache if the parent was deleted for good
+		//				 */
+		//				if (candiModel.isDeleted()) {
+		//					String imageUri = ImageRequestBuilder.getImageUriFromEntity(childCandiModel.getEntity());
+		//					final String cacheName = ImageManager.getInstance().resolveCacheName(imageUri);
+		//					ImageManager.getInstance().deleteImage(cacheName);
+		//					ImageManager.getInstance().deleteImage(cacheName + ".reflection");
+		//				}
+		//
+		//				/* Recycle the candi view */
+		//				if (mCandiViewsActiveHash.containsKey(childCandiModel.getModelIdAsString())) {
+		//					sendCandiViewToPool(childCandiModel, false);
+		//				}
+		//			}
+		//		}
 
 		/* Remove child models */
-//		for (IModel childCandiModel : candiModel.getChildren()) {
-//			/*
-//			 * This is ok because we are not removing from the same list we are iterating.
-//			 */
-//			mCandiPatchModel.getCandiModels().remove(childCandiModel); // Search is done using model id
-//
-//			if (mCandiPatchModel.getCandiModelFocused() == childCandiModel) {
-//				mCandiPatchModel.setCandiModelFocused(null);
-//			}
-//			if (mCandiPatchModel.getCandiModelSelected() == childCandiModel) {
-//				mCandiPatchModel.setCandiModelSelected(null);
-//			}
-//			if (mCandiPatchModel.getCandiRootCurrent() == childCandiModel) {
-//				mCandiPatchModel.setCandiRootCurrent(null);
-//			}
-//		}
+		//		for (IModel childCandiModel : candiModel.getChildren()) {
+		//			/*
+		//			 * This is ok because we are not removing from the same list we are iterating.
+		//			 */
+		//			mCandiPatchModel.getCandiModels().remove(childCandiModel); // Search is done using model id
+		//
+		//			if (mCandiPatchModel.getCandiModelFocused() == childCandiModel) {
+		//				mCandiPatchModel.setCandiModelFocused(null);
+		//			}
+		//			if (mCandiPatchModel.getCandiModelSelected() == childCandiModel) {
+		//				mCandiPatchModel.setCandiModelSelected(null);
+		//			}
+		//			if (mCandiPatchModel.getCandiRootCurrent() == childCandiModel) {
+		//				mCandiPatchModel.setCandiRootCurrent(null);
+		//			}
+		//		}
 
 		/* Remove parent model */
 		mCandiPatchModel.getCandiModels().remove(candiModel); // Search is done using model id
@@ -2109,4 +2164,19 @@ public class CandiPatchPresenter implements Observer {
 	public static enum TextureReset {
 		All, VisibleOnly, NonVisibleOnly
 	}
+
+	public static class SortCandiModelsByPriority implements Comparator<CandiModel> {
+
+		@Override
+		public int compare(CandiModel object1, CandiModel object2) {
+			if (object1.getPriority() < object2.getPriority()) {
+				return -1;
+			}
+			else if (object1.getPriority() == object2.getPriority()) {
+				return 0;
+			}
+			return 1;
+		}
+	}
+
 }

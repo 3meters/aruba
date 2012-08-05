@@ -32,7 +32,6 @@ import com.proxibase.aircandi.components.BitmapTextureSource.IBitmapAdapter;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
-import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
@@ -794,16 +793,15 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 				if (candiModel.getEntity().getMasterImageUri() == null
 						|| !candiModel.getEntity().getMasterImageUri().toLowerCase().startsWith("resource:")) {
-					String resolvedResourceName = ImageManager.getInstance().resolveResourceName("ic_collection_250");
-					int resourceId = ImageManager.getInstance().getActivity().getResources()
-							.getIdentifier(resolvedResourceName, "drawable", "com.proxibase.aircandi");
-					Bitmap overlay = ImageManager.getInstance().loadBitmapFromResources(resourceId);
-					int overlayWidth = 65;
-					overlay = ImageUtils.scaleAndCropBitmap(overlay, overlayWidth, ImageShape.Square);
 
 					if (!isReflection) {
-						bitmap = overlayBitmapOnBitmap(bitmap, overlay, 0x55000000, CandiConstants.CANDI_VIEW_WIDTH - (overlayWidth + 7),
-								CandiConstants.CANDI_VIEW_WIDTH - (overlayWidth + 7), false, false);
+						bitmap = overlayBitmapOnBitmap(bitmap
+								, mCandiPatchPresenter.mBitmapBadgeCollections
+								, 0x55000000
+								, CandiConstants.CANDI_VIEW_WIDTH - (CandiConstants.CANDI_VIEW_BADGE_WIDTH + 7)
+								, CandiConstants.CANDI_VIEW_WIDTH - (CandiConstants.CANDI_VIEW_BADGE_WIDTH + 7)
+								, false
+								, false);
 					}
 				}
 			}
