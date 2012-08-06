@@ -4,9 +4,9 @@
 
     <gradient
         android:angle="270"
-        android:centerColor="@color/stop"
-        android:endColor="@color/stop"
-        android:startColor="@color/stop"
+        android:centerColor="@color/beacon_stop"
+        android:endColor="@color/beacon_stop"
+        android:startColor="@color/beacon_stop"
         android:type="linear" />
 
     <size

@@ -38,14 +38,9 @@ public class Preferences extends SherlockPreferenceActivity {
 		/*
 		 * TODO: Switch over to using the preferenceStyle attribute for the current theme.
 		 */
+		@SuppressWarnings("unused")
 		String prefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
-
-		if (prefTheme.equals("aircandi_theme_snow") || prefTheme.equals("aircandi_theme_serene")) {
-			setTheme(R.style.aircandi_theme_snow);
-		}
-		else {
-			setTheme(R.style.aircandi_theme_midnight);
-		}
+		setTheme(R.style.aircandi_theme_form_light);
 
 		super.onCreate(savedInstanceState);
 		if (Aircandi.getInstance().getUser() != null

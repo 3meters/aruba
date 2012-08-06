@@ -53,14 +53,6 @@
     </style>
 
     <!-- We use sherlock as parent for v14+ -->
-    <style name="app_button_borderless" parent="Widget.Sherlock.ActionButton">
-        <item name="android:textColor">?attr/textColorButton</item>
-    </style>
-
-    <style name="app_bar" parent="Widget.Sherlock.ActionBar.TabBar">
-        <item name="android:background">?attr/activityFooterFormBackground</item>
-    </style>
-
     <style name="app_picture">
         <item name="android:adjustViewBounds">true</item>
         <item name="android:focusable">true</item>
@@ -98,32 +90,40 @@
         <item name="android:textAppearance">@style/app_text_appearance_micro</item>
     </style>
 
-    <!--
-    Actionbar (not currently used or being deprecated) 
+    <!-- Actionbar -->
 
-    <style name="widget_actionbar_dark" parent="Widget.Sherlock.ActionBar">
-        <item name="actionModeBackground">@color/transparent</item>
-        <item name="android:actionModeBackground">@color/transparent</item>
+    <style name="actionbar" parent="Widget.Sherlock.ActionBar">
+        <item name="android:background">?attr/backgroundActionBar</item>
+        <item name="background">?attr/backgroundActionBar</item>
     </style>
 
-    <style name="widget_actionbar_light" parent="Widget.Sherlock.Light.ActionBar">
-        <item name="actionModeBackground">@color/transparent</item>
-        <item name="android:actionModeBackground">@color/transparent</item>
+    <style name="actionbar_light" parent="Widget.Sherlock.Light.ActionBar">
+        <item name="android:background">?attr/backgroundActionBar</item>
+        <item name="background">?attr/backgroundActionBar</item>
     </style>
 
-    <style name="actionbar_button">
-        <item name="android:gravity">center</item>
-        <item name="android:background">@drawable/app_button_selector</item>
+    <style name="actionbar_tabbar" parent="Widget.Sherlock.ActionBar.TabBar">
+        <item name="android:background">?attr/backgroundTabBar</item>
+        <item name="background">?attr/backgroundTabBar</item>
     </style>
 
+    <style name="actionbar_tabbar_light" parent="Widget.Sherlock.Light.ActionBar.TabBar">
+        <item name="android:background">?attr/backgroundTabBar</item>
+        <item name="background">?attr/backgroundTabBar</item>
+    </style>
 
-    <style name="actionbar_rule_vertical">
-        <item name="android:background">@drawable/app_header_separator</item>
-    </style>
-    -->
+    <style name="actionbar_buttonbar" parent="Widget.Sherlock.ActionBar.TabBar">
+        <item name="android:background">?attr/backgroundButtonBar</item>
+        <item name="background">?attr/backgroundButtonBar</item>
+    </style>
 
-    <style name="actionbar">
-        <item name="android:background">?attr/backgroundHeader</item>
+    <style name="actionbar_buttonbar_light" parent="Widget.Sherlock.Light.ActionBar.TabBar">
+        <item name="android:background">?attr/backgroundButtonBar</item>
+        <item name="background">?attr/backgroundButtonBar</item>
+    </style>
+
+    <style name="app_button_borderless" parent="Widget.Sherlock.ActionButton">
+        <item name="android:textColor">?attr/textColorButton</item>
     </style>
 
     <style name="actionbar_title">
@@ -133,7 +133,7 @@
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?attr/textColorButtonHeader</item>
     </style>
-
+    
     <style name="actionbar_logo">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
@@ -143,7 +143,7 @@
         <item name="android:background">@drawable/button_nooutline_selector</item>
         <item name="android:textColor">?attr/textColorButtonHeader</item>
     </style>
-
+    
     <!-- Notifications -->
 
     <style name="notification_text">
@@ -157,7 +157,7 @@
 
     <!--
          If you want a slightly different color for some text,
-         consider using ?android:attr/textColorSecondary
+         consider using ?android:attr/textColorSecondary
     -->
 
 
@@ -298,35 +298,11 @@
         <item name="android:gravity">center</item>
     </style>
 
-    <!-- Tabs -->
-
-    <style name="form_tab_active">
-        <item name="android:background">?attr/tabColorActive</item>
-    </style>
-
-    <style name="form_tab_inactive">
-        <item name="android:background">?attr/tabColorInactive</item>
-    </style>
-
-    <style name="form_tab_background">
-        <item name="android:background">?attr/tabColorBackground</item>
-    </style>
-
-    <style name="form_tab_label">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:background">@drawable/button_nooutline_selector</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="form_tab_rule_vertical">
-        <item name="android:background">@drawable/tab_separator</item>
-    </style>
-
     <!-- Aircandi Gallery -->
 
     <style name="gallery_image_placeholder">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:background">?attr/backgroundHeader</item>
+        <item name="android:background">?attr/backgroundTabBar</item>
     </style>
 
     <!-- Candi Forms -->
@@ -351,11 +327,6 @@
     <style name="form_text">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:paddingLeft">2dp</item>
-    </style>
-
-    <style name="form_error" parent="android:Widget.TextView">
-        <item name="android:textColor">#ffff8844</item>
-        <item name="android:background">?attr/backgroundHeader</item>
     </style>
 
     <style name="form_picture">

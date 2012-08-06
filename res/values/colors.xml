@@ -1,35 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
  
-    <color name="application_titlebar_separator_start">@color/rule_dark</color>
-    <color name="application_titlebar_separator_center">@color/rule_dark</color>
-    <color name="application_titlebar_separator_end">@color/rule_dark</color>
-    
-    <color name="tab_separator_start">@color/rule_30_dark</color>
-    <color name="tab_separator_center">@color/rule_30_dark</color>
-    <color name="tab_separator_end">@color/rule_30_dark</color>
-    <color name="tab_rule_active">#ff63A9E2</color>
-    <color name="tab_rule_inactive_dark">#44ffffff</color>
-    <color name="tab_rule_inactive_light">#11000000</color>
-    <color name="tab_background_dark">#22ffffff</color>
-    <color name="tab_background_light">#22000000</color>
-    
     <color name="progress_start">#ffffd300</color>
     <color name="progress_end">#ffffd300</color>
-    
-    <color name="actionstrip_background_fill_dark">@color/fill_shadelight_dark</color>
-    <color name="actionstrip_background_stroke_dark">@color/rule_dark</color>
-    <color name="actionstrip_background_fill_light">@color/fill_shadelight_light</color>
-    <color name="actionstrip_background_stroke_light">@color/rule_light</color>
-    <color name="actionstrip_background_fill_blueray">@color/fill_shadelight_blueray</color>
-    <color name="actionstrip_background_stroke_blueray">@color/rule_dark</color>
-    <color name="actionstrip_background_fill_serene">@color/fill_shadelight_serene</color>
-    <color name="actionstrip_background_stroke_serene">@color/rule_dark</color>
-    
-    <color name="pager_indicator_text_unfocused_dark">@color/text_dark</color>
-    <color name="pager_indicator_text_unfocused_light">@color/text_light</color>
-    <color name="pager_indicator_text_focused_dark">@color/text_dark</color>
-    <color name="pager_indicator_text_focused_light">@color/text_light</color>
     
     <!-- 
     	We also used the pressed color in radar and that color is hardcoded
@@ -45,41 +18,33 @@
     <color name="edit_hint">#ffffa01c</color>
     -->
     
-    <color name="stop">#99990000</color>
-    <color name="caution">#99999900</color>
-    <color name="go">#99009900</color>
+    <color name="beacon_stop">#99990000</color>
+    <color name="beacon_caution">#99999900</color>
+    <color name="beacon_go">#99009900</color>
+    <color name="beacon_off">#33ffffff</color>
     
     <color name="holo_blue_light">#8833b5e5</color>
+    
     <color name="accent">#ffffaa00</color>
     <color name="accent_darker">#ffbb7700</color>
     <color name="accent_lighter">#ffffcc00</color>
+    
     <color name="edit_hint">#ff888888</color>
-    <color name="transparent">#00000000</color>
-    <color name="text_pressed">#ff000000</color>
     
     <color name="text_dark">#ffffffff</color>
     <color name="text_light">#ff000000</color>
     <color name="text_unfocused_dark">#ffcccccc</color>
     <color name="text_unfocused_light">#ff666666</color>
+    <color name="text_pressed">#ff000000</color>
     
-    <color name="fill_shadelight_dark">#ff000000</color>
-    <color name="fill_shadedark_dark">#ff000000</color>
-    <color name="fill_shadelight_light">#ffd6d6d6</color>
-    <color name="fill_shadedark_light">#ffd6d6d6</color>
+    <color name="background_bar_dark">#33ffffff</color>
+    <color name="background_bar_light">#11000000</color>
+    <color name="background_bar_dark_solid">#ffcccccc</color>
+    <color name="background_bar_light_solid">#ff111111</color>
     
-    <color name="fill_shadelightest_blueray">#ffc6e0ff</color>
-    <color name="fill_shadelight_blueray">#ff3064A8</color>
-    <color name="fill_shadedark_blueray">#ff183880</color>
-    <color name="fill_shadelight_serene">#ff54add3</color>
-    <color name="fill_shadedark_serene">#ff54add3</color>
-    
-    <color name="fill_30_dark">#33ffffff</color>
-    <color name="fill_30_light">#22000000</color>
-    
-    <color name="rule_dark">#ffffffff</color>
-    <color name="rule_light">#ff000000</color>
     <color name="rule_30_dark">#33ffffff</color>
     <color name="rule_30_light">#33000000</color>    
-    <color name="rule_60_dark">#88ffffff</color>
-    <color name="rule_60_light">#88000000</color>    
+
+    <color name="rule_30_light">#33000000</color>    
+    
 </resources>

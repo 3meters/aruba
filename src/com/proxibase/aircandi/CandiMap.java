@@ -70,7 +70,7 @@ public class CandiMap extends SherlockMapActivity {
 		}
 		else {
 			mCommon = new AircandiCommon(this, savedInstanceState);
-			mCommon.setTheme(false);
+			mCommon.setTheme(false, false);
 			mCommon.unpackIntent();
 
 			setContentView(getLayoutId());

@@ -68,7 +68,7 @@ public abstract class FormActivity extends SherlockActivity {
 			 */
 			mCommon = new AircandiCommon(this, savedInstanceState);
 			mCommon.unpackIntent();
-			mCommon.setTheme(isDialog());
+			mCommon.setTheme(isDialog(), true);
 			super.onCreate(savedInstanceState);
 			super.setContentView(this.getLayoutID());
 			mCommon.initialize();

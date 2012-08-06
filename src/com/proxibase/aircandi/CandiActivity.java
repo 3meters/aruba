@@ -26,7 +26,7 @@ public abstract class CandiActivity extends SherlockActivity {
 		}
 		else {
 			mCommon = new AircandiCommon(this, savedInstanceState);
-			mCommon.setTheme(false);
+			mCommon.setTheme(false, false);
 			mCommon.unpackIntent();
 			setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);

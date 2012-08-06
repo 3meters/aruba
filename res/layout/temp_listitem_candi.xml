@@ -104,6 +104,6 @@
         android:layout_centerVertical="true"
         android:paddingRight="3dp"
         android:scaleType="fitXY"
-        android:src="?attr/imageForwardInfo" />
+        android:src="?attr/iconForward" />
 
 </RelativeLayout>

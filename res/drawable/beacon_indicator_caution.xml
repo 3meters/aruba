@@ -4,9 +4,9 @@
 
     <gradient
         android:angle="270"
-        android:centerColor="@color/caution"
-        android:endColor="@color/caution"
-        android:startColor="@color/caution"
+        android:centerColor="@color/beacon_caution"
+        android:endColor="@color/beacon_caution"
+        android:startColor="@color/beacon_caution"
         android:type="linear" />
 
     <size

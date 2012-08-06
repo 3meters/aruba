@@ -40,7 +40,7 @@ public class MapBrowse extends SherlockMapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 
 		mCommon = new AircandiCommon(this, savedInstanceState);
-		mCommon.setTheme(false);
+		mCommon.setTheme(false, false);
 		mCommon.unpackIntent();
 
 		setContentView(getLayoutId());
