@@ -69,6 +69,9 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 					if (entity.getMasterImageUri() != null && !entity.getMasterImageUri().toLowerCase().startsWith("resource:")) {
 						holder.itemImageCollection.setVisibility(View.VISIBLE);
 					}
+					else {
+						holder.itemImageCollection.setVisibility(View.GONE);
+					}
 				}
 				else {
 					holder.itemImageCollection.setVisibility(View.GONE);

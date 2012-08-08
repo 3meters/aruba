@@ -336,7 +336,7 @@ public class CandiPatchPresenter implements Observer {
 			mStyleTextureBodyCandiResId = (Integer) resourceName.resourceId;
 		}
 
-		if (mContext.getTheme().resolveAttribute(R.attr.textColorTitle, resourceName, true)) {
+		if (mContext.getTheme().resolveAttribute(R.attr.textColor, resourceName, true)) {
 			mStyleTextColorTitle = (String) resourceName.coerceToString();
 		}
 	}

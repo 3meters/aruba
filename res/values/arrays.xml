@@ -35,6 +35,7 @@
 	<string-array
 		name="theme_list_preference">
 		<item>Blueray</item>
+		<item>Lagoon</item>
 		<item>Midnight</item>
 		<item>Serene</item>
 		<item>Smolder</item>
@@ -43,6 +44,7 @@
 	<string-array
 		name="themevalues_list_preference">
 		<item>aircandi_theme_blueray</item>
+		<item>aircandi_theme_lagoon</item>
 		<item>aircandi_theme_midnight</item>
 		<item>aircandi_theme_serene</item>
 		<item>aircandi_theme_smolder</item>

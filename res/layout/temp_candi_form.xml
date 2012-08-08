@@ -13,7 +13,7 @@
         android:layout_height="fill_parent"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
-        android:background="?attr/backgroundCandiInfo"
+        android:background="?attr/backgroundCandi"
         android:fillViewport="true"
         tools:ignore="UselessParent" >
 
@@ -37,14 +37,14 @@
                 android:orientation="vertical" >
 
                 <RelativeLayout
-                    android:id="@+id/candi_info_image_holder"
+                    android:id="@+id/candi_form_image_holder"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left"
                     android:layout_marginBottom="15dp" >
 
                     <com.proxibase.aircandi.widgets.WebImageView
-                        android:id="@+id/candi_info_image"
+                        android:id="@+id/candi_form_image"
                         android:layout_width="250px"
                         android:layout_height="250px"
                         aircandi:layout="@layout/temp_webimageview_framed_fill"
@@ -56,11 +56,11 @@
                         android:scaleType="centerCrop" />
 
                     <ImageView
-                        android:id="@+id/candi_info_image_collection"
+                        android:id="@+id/candi_form_image_collection"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:layout_alignBottom="@+id/candi_info_image"
-                        android:layout_alignRight="@+id/candi_info_image"
+                        android:layout_alignBottom="@+id/candi_form_image"
+                        android:layout_alignRight="@+id/candi_form_image"
                         android:layout_marginBottom="12dp"
                         android:layout_marginRight="12dp"
                         aircandi:maxHeight="60dp"
@@ -70,17 +70,17 @@
                         android:visibility="visible" />
 
                     <ImageView
-                        android:id="@+id/candi_info_image_zoom"
+                        android:id="@+id/candi_form_image_zoom"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:layout_alignBottom="@+id/candi_info_image"
-                        android:layout_alignRight="@+id/candi_info_image"
+                        android:layout_alignBottom="@+id/candi_form_image"
+                        android:layout_alignRight="@+id/candi_form_image"
                         android:src="@drawable/ic_zoom_light" />
                 </RelativeLayout>
 
                 <TextView
-                    android:id="@+id/candi_info_title"
-                    style="@style/candi_info_title"
+                    android:id="@+id/candi_form_title"
+                    style="?attr/candiFormTitleStyle"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="3dp"
@@ -89,8 +89,8 @@
                     android:text="@string/dummy_title" />
 
                 <TextView
-                    android:id="@+id/candi_info_subtitle"
-                    style="@style/candi_info_subtitle"
+                    android:id="@+id/candi_form_subtitle"
+                    style="@style/candi_form_subtitle"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="7dp"
@@ -112,7 +112,7 @@
 
                     <Button
                         android:id="@+id/button_comments"
-                        style="@style/comments_button"
+                        style="@style/button_comments"
                         android:layout_width="wrap_content"
                         android:layout_height="30dp"
                         android:layout_alignParentLeft="true"
@@ -140,7 +140,7 @@
                         android:src="?attr/iconLocation" />
 
                     <RelativeLayout
-                        android:id="@+id/candi_info_parent_group"
+                        android:id="@+id/candi_form_parent_group"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
@@ -149,7 +149,7 @@
                         android:gravity="center_vertical" >
 
                         <ImageView
-                            android:id="@+id/candi_info_parent_image"
+                            android:id="@+id/candi_form_parent_image"
                             android:layout_width="32dp"
                             android:layout_height="32dp"
                             android:layout_alignParentLeft="true"
@@ -158,21 +158,21 @@
                             android:src="@drawable/ic_collection_250" />
 
                         <TextView
-                            android:id="@+id/candi_info_parent_text"
-                            style="@style/candi_info_subtitle"
+                            android:id="@+id/candi_form_parent_text"
+                            style="@style/candi_form_subtitle"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_marginBottom="7dp"
                             android:layout_marginLeft="3dp"
-                            android:layout_toRightOf="@+id/candi_info_parent_image"
+                            android:layout_toRightOf="@+id/candi_form_parent_image"
                             android:text="@string/dummy_subtitle" />
                     </RelativeLayout>
                 </RelativeLayout>
 
                 <TextView
-                    android:id="@+id/candi_info_description"
-                    style="@style/candi_info_description"
+                    android:id="@+id/candi_form_description"
+                    style="@style/candi_form_description"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="7dp"
@@ -185,7 +185,7 @@
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_alignTop="@+id/candi_info_image"
+                android:layout_alignTop="@+id/candi_form_image"
                 android:layout_marginRight="5dp"
                 android:layout_marginTop="2dp"
                 android:background="?attr/backgroundButton"
@@ -209,7 +209,7 @@
 
                     <TextView
                         android:id="@+id/button_children_text"
-                        style="@style/app_text_appearance_small_outlined"
+                        style="@style/app_text_appearance_outlined_small"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginLeft="10dp"
@@ -238,14 +238,14 @@
 
     <LinearLayout
         android:id="@+id/form_footer"
-        style="@style/actionbar_buttonbar"
+        style="?attr/buttonBarStyle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true" >
 
         <Button
             android:id="@+id/button_comment"
-            style="@style/app_button_borderless"
+            style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -254,7 +254,7 @@
 
         <Button
             android:id="@+id/button_new"
-            style="@style/app_button_borderless"
+            style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -263,7 +263,7 @@
 
         <Button
             android:id="@+id/button_edit"
-            style="@style/app_button_borderless"
+            style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -272,7 +272,7 @@
 
         <Button
             android:id="@+id/button_move"
-            style="@style/app_button_borderless"
+            style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

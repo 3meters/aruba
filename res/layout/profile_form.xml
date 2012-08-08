@@ -62,7 +62,7 @@
 
                     <Button
                         android:id="@+id/btn_change_public_image"
-                        style="@style/app_button"
+                        style="@style/actionbar_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
@@ -136,7 +136,7 @@
 
                 <Button
                     android:id="@+id/btn_change_password"
-                    style="@style/app_button"
+                    style="@style/actionbar_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="onChangePasswordButtonClick"
@@ -149,7 +149,7 @@
 
     <LinearLayout
         android:id="@+id/form_footer"
-        style="@style/actionbar_buttonbar"
+        style="?attr/buttonBarStyle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -157,7 +157,7 @@
 
         <Button
             android:id="@+id/btn_save"
-            style="@style/app_button_borderless"
+            style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -165,7 +165,7 @@
             android:text="@string/form_button_save" />
 
         <Button
-            style="@style/app_button_borderless"
+            style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

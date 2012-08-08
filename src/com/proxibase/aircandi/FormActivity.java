@@ -364,9 +364,6 @@ public abstract class FormActivity extends SherlockActivity {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(FormActivity.this);
 
-		View titleView = getLayoutInflater().inflate(R.layout.temp_dialog_title, null);
-		((TextView) titleView.findViewById(R.id.dialog_title_text)).setText(getResources().getString(R.string.dialog_change_picture_title));
-		//builder.setCustomTitle(titleView);
 		builder.setTitle(R.string.dialog_change_picture_title);
 		builder.setIcon(R.drawable.icon_app);
 

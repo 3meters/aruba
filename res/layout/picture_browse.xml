@@ -34,7 +34,7 @@
         android:scaleType="fitCenter" />
 
     <LinearLayout
-        style="@style/actionbar"
+        style="?attr/buttonBarStyle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

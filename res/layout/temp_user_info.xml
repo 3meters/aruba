@@ -16,8 +16,8 @@
         android:scaleType="centerCrop" />
 
     <com.proxibase.aircandi.widgets.TextViewEllipsizing
-        android:id="@+id/text_user_fullname"
-        style="@style/app_user_fullname"
+        android:id="@+id/candi_user_fullname"
+        style="@style/candi_user"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/image_user_picture"
@@ -27,8 +27,8 @@
         android:text="@string/dummy_name" />
     
     <TextView
-        android:id="@+id/text_user_timesince"
-        style="@style/app_user_timesince"
+        android:id="@+id/candi_user_timesince"
+        style="@style/candi_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:lines="1"
@@ -42,7 +42,7 @@
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_alignBottom="@+id/image_user_picture"
-        android:layout_toRightOf="@+id/text_user_timesince"
+        android:layout_toRightOf="@+id/candi_user_timesince"
         android:maxWidth="20dp"
         android:maxHeight="20dp"
         android:scaleType="fitCenter"

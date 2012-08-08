@@ -1,58 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Application wide styles -->
+    <!-- Application text styles -->
 
     <style name="app_text_appearance" parent="@android:style/TextAppearance">
         <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?attr/textColor</item>
     </style>
 
-    <style name="app_text_appearance_large" parent="@android:style/TextAppearance">
-        <item name="android:textSize">22sp</item>
-    </style>
-
-    <style name="app_text_appearance_medium" parent="@android:style/TextAppearance">
-        <item name="android:textSize">18sp</item>
-    </style>
-
-    <style name="app_text_appearance_small" parent="@android:style/TextAppearance">
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <style name="app_text_appearance_small_outlined" parent="@android:style/TextAppearance">
-        <item name="android:textSize">14sp</item>
+    <style name="app_text_appearance_outlined" parent="app_text_appearance">
         <item name="android:textColor">#ffffffff</item>
         <item name="android:shadowColor">#000000</item>
         <item name="android:shadowDx">1</item>
         <item name="android:shadowDy">1</item>
         <item name="android:shadowRadius">1</item>
     </style>
+    
+    <style name="app_text_appearance_large" parent="app_text_appearance">
+        <item name="android:textSize">22sp</item>
+    </style>
 
-    <style name="app_text_appearance_micro" parent="@android:style/TextAppearance">
+    <style name="app_text_appearance_medium" parent="app_text_appearance">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="app_text_appearance_small" parent="app_text_appearance">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="app_text_appearance_outlined_small" parent="app_text_appearance_outlined">
+        <item name="android:textSize">14sp</item>
+    </style>
+    
+    <style name="app_text_appearance_micro" parent="app_text_appearance">
         <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="app_text_appearance_tiny" parent="@android:style/TextAppearance">
+    <style name="app_text_appearance_tiny" parent="app_text_appearance">
         <item name="android:textSize">10sp</item>
     </style>
 
-    <style name="app_text_appearance_title1" parent="@android:style/TextAppearance">
-        <item name="android:textSize">22sp</item>
+    <style name="app_text_appearance_title1" parent="app_text_appearance_large">
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="app_text_appearance_title2" parent="@android:style/TextAppearance">
-        <item name="android:textSize">18sp</item>
+    <style name="app_text_appearance_title2" parent="app_text_appearance_medium">
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="app_button">
-        <item name="android:minWidth">80dp</item>
-        <item name="android:maxWidth">200dp</item>
+    <!-- Application widgets -->
+    
+    <style name="candi_user" parent="android:Widget.TextView">
+        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
+    </style>
+    
+    <style name="candi_form_title">
+        <item name="android:textAppearance">@style/app_text_appearance_title1</item>
+    </style>
+
+    <style name="candi_form_title_outlined">
+        <item name="android:textAppearance">@style/app_text_appearance_title1</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+    
+    <style name="candi_form_subtitle">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <style name="candi_form_description">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
-    <!-- We use sherlock as parent for v14+ -->
+    <style name="candi_list_title">
+        <item name="android:textAppearance">@style/app_text_appearance_title2</item>
+    </style>
+
+    <style name="candi_list_title_outlined">
+        <item name="android:textAppearance">@style/app_text_appearance_title2</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+	</style>
+    
+    <style name="candi_list_subtitle">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <style name="candi_list_description">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    </style>
+
+    <style name="bookmark_list_title">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="bookmark_list_uri">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    </style>
+
     <style name="app_picture">
         <item name="android:adjustViewBounds">true</item>
         <item name="android:focusable">true</item>
@@ -62,11 +116,6 @@
     <style name="app_picture_framed" parent="app_picture">
         <item name="android:background">?attr/backgroundPicture</item>
         <item name="android:padding">3dp</item>
-    </style>
-
-    <style name="app_picture_outlined" parent="app_picture">
-        <item name="android:background">?attr/backgroundPicture</item>
-        <item name="android:padding">0dp</item>
     </style>
 
     <style name="app_checkbox" parent="android:Widget.CompoundButton.CheckBox">
@@ -79,20 +128,30 @@
 
     <style name="app_bullet">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:textColor">@color/accent</item>
+        <item name="android:textColor">?attr/textColorBullet</item>
     </style>
 
-    <style name="app_user_fullname" parent="android:Widget.TextView">
+    <style name="app_button_square" parent="android:Widget.Button">
         <item name="android:textAppearance">@style/app_text_appearance_micro</item>
+        <item name="android:textColor">?attr/textColor</item>
+        <item name="android:background">?attr/backgroundButton</item>
+        <item name="android:layout_height">65dp</item>
+        <item name="android:layout_width">65dp</item>
     </style>
 
-    <style name="app_user_timesince" parent="android:Widget.TextView">
-        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
+    <style name="button_comments" parent="android:Widget.Button">
+        <item name="android:textColor">?attr/textColorComment</item>
+        <item name="android:background">@drawable/button_nooutline_selector</item>
+    </style>
+    
+    <style name="list_loading_placeholder">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:background">?attr/backgroundTabBar</item>
     </style>
 
     <!-- Actionbar -->
 
-    <style name="actionbar" parent="Widget.Sherlock.ActionBar">
+    <style name="actionbar_dark" parent="Widget.Sherlock.ActionBar">
         <item name="android:background">?attr/backgroundActionBar</item>
         <item name="background">?attr/backgroundActionBar</item>
     </style>
@@ -101,8 +160,8 @@
         <item name="android:background">?attr/backgroundActionBar</item>
         <item name="background">?attr/backgroundActionBar</item>
     </style>
-
-    <style name="actionbar_tabbar" parent="Widget.Sherlock.ActionBar.TabBar">
+    
+    <style name="actionbar_tabbar_dark" parent="Widget.Sherlock.ActionBar.TabBar">
         <item name="android:background">?attr/backgroundTabBar</item>
         <item name="background">?attr/backgroundTabBar</item>
     </style>
@@ -111,8 +170,8 @@
         <item name="android:background">?attr/backgroundTabBar</item>
         <item name="background">?attr/backgroundTabBar</item>
     </style>
-
-    <style name="actionbar_buttonbar" parent="Widget.Sherlock.ActionBar.TabBar">
+    
+    <style name="actionbar_buttonbar_dark" parent="Widget.Sherlock.ActionBar.TabBar">
         <item name="android:background">?attr/backgroundButtonBar</item>
         <item name="background">?attr/backgroundButtonBar</item>
     </style>
@@ -121,17 +180,26 @@
         <item name="android:background">?attr/backgroundButtonBar</item>
         <item name="background">?attr/backgroundButtonBar</item>
     </style>
-
-    <style name="app_button_borderless" parent="Widget.Sherlock.ActionButton">
-        <item name="android:textColor">?attr/textColorButton</item>
-    </style>
+    
+    <style name="actionbar_button_borderless" parent="Widget.Sherlock.ActionButton">
+        <item name="android:textColor">?attr/textColorBars</item>
+        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+	</style>
 
     <style name="actionbar_title">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical|left</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textColor">?attr/textColorButtonHeader</item>
+        <item name="android:textColor">?attr/textColor</item>
+    </style>
+
+    <style name="actionbar_beacons">
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
     
     <style name="actionbar_logo">
@@ -141,168 +209,13 @@
         <item name="android:drawableLeft">?attr/logo</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:background">@drawable/button_nooutline_selector</item>
-        <item name="android:textColor">?attr/textColorButtonHeader</item>
-    </style>
-    
-    <!-- Notifications -->
-
-    <style name="notification_text">
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColor">?attr/textColor</item>
     </style>
 
-    <style name="notification_title">
-        <item name="android:textColor">@android:color/black</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <!--
-         If you want a slightly different color for some text,
-         consider using ?android:attr/textColorSecondary
-    -->
-
-
-    <!-- Progress -->
-
-    <style name="progress_body" parent="android:Theme.Dialog">
-        <item name="android:windowBackground">?attr/backgroundProgress</item>
-        <item name="android:windowNoTitle">true</item>
-    </style>
-
-    <style name="progress_text">
+    <style name="actionbar_button">
+        <item name="android:minWidth">80dp</item>
+        <item name="android:maxWidth">200dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textColor">?attr/textColorTitle</item>
-    </style>
-
-    <!-- Candi Search -->
-
-    <style name="debug_slider_handle">
-        <item name="android:src">?attr/imageSliderHandleSearch</item>
-        <item name="android:background">?attr/backgroundSliderHandleSearch</item>
-    </style>
-
-    <style name="debug_slider_content">
-        <item name="android:background">?attr/backgroundSliderContentSearch</item>
-    </style>
-
-    <!-- Dialogs -->
-
-    <style name="search_dialog_connect" parent="android:Theme.Dialog">
-        <item name="android:windowBackground">@null</item>
-    </style>
-
-    <style name="search_dialog_text">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-    </style>
-
-    <style name="dialog_title_text">
-        <item name="android:ellipsize">end</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:gravity">center_vertical|left</item>
-        <item name="android:textColor">?attr/textColorButtonHeader</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-    </style>
-
-    <style name="dialog_body_layout">
-        <item name="android:background">#ffffffff</item>
-    </style>
-
-    <style name="dialog_body_text">
-        <item name="android:textColor">#ff000000</item>
-        <item name="android:background">#00000000</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-    </style>
-
-    <!-- Comments -->
-
-    <style name="comments_button" parent="android:Widget.Button">
-        <item name="android:textColor">#ffffaa00</item>
-        <item name="android:background">@drawable/button_nooutline_selector</item>
-    </style>
-
-    <!-- Candi Info -->
-
-    <style name="candi_info_button" parent="android:Widget.Button">
-        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
-        <item name="android:textColor">?attr/textColorButton</item>
-        <item name="android:background">?attr/backgroundButton</item>
-        <item name="android:layout_height">65dp</item>
-        <item name="android:layout_width">65dp</item>
-    </style>
-
-    <style name="candi_comments_button" parent="android:Widget.Button">
-        <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textColor">#ffffaa00</item>
-        <item name="android:background">?attr/backgroundButton</item>
-    </style>
-
-    <style name="candi_info_title">
-        <item name="android:textAppearance">@style/app_text_appearance_title1</item>
-    </style>
-
-    <style name="candi_info_subtitle">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textStyle">italic</item>
-    </style>
-
-    <style name="candi_info_description">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-    </style>
-
-    <style name="candi_info_slider_handle">
-        <item name="android:src">?attr/imageSliderHandleInfo</item>
-        <item name="android:background">?attr/backgroundSliderHandleInfo</item>
-    </style>
-
-    <style name="candi_info_slider_content">
-        <item name="android:background">?attr/backgroundSliderContentInfo</item>
-    </style>
-
-    <!-- Candi List -->
-
-    <style name="candi_list_title">
-        <item name="android:textAppearance">@style/app_text_appearance_title2</item>
-    </style>
-
-    <style name="candi_list_subtitle">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textStyle">italic</item>
-    </style>
-
-    <style name="candi_list_description">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-    </style>
-
-    <style name="candi_list_button">
-        <item name="android:gravity">center</item>
-        <item name="android:background">@drawable/app_button_selector</item>
-    </style>
-
-    <!-- Bookmark List -->
-
-    <style name="bookmark_list_title">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="bookmark_list_uri">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-    </style>
-
-    <!-- CandiInfo: Pager Indicator -->
-
-    <style name="candi_info_pager_text">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:maxWidth">100dp</item>
-        <item name="android:gravity">center</item>
-    </style>
-
-    <!-- Aircandi Gallery -->
-
-    <style name="gallery_image_placeholder">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:background">?attr/backgroundTabBar</item>
     </style>
 
     <!-- Candi Forms -->
@@ -311,7 +224,7 @@
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:textColor">?attr/textColorFormTitle</item>
+        <item name="android:textColor">?attr/textColor</item>
     </style>
 
     <style name="form_label">
@@ -343,9 +256,42 @@
         <item name="android:padding">3dp</item>
     </style>
 
-    <style name="form_footer" parent="android:Widget.TextView">
+    <!--
+         If you want a slightly different color for some text,
+         consider using ?android:attr/textColorSecondary
+    -->
+
+    <!-- Progress -->
+
+    <style name="progress_body" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">?attr/backgroundProgress</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="progress_text">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:background">?attr/backgroundForm</item>
+        <item name="android:textColor">?attr/textColorProgress</item>
+    </style>
+
+    <!-- Dialogs -->
+
+    <style name="dialog_radar_connect" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">@null</item>
+    </style>
+
+    <style name="dialog_radar_text">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    </style>
+
+    <!-- Notifications: used in status bar -->
+
+    <style name="notification_text">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="notification_title">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <!-- Misc -->
@@ -356,6 +302,15 @@
 
     <style name="app_debug_value" parent="android:Widget.TextView">
         <item name="android:textAppearance">@style/app_text_appearance_micro</item>
+    </style>
+
+    <style name="debug_slider_handle">
+        <item name="android:src">?attr/imageSliderHandleSearch</item>
+        <item name="android:background">?attr/backgroundSliderHandleSearch</item>
+    </style>
+
+    <style name="debug_slider_content">
+        <item name="android:background">?attr/backgroundSliderContentSearch</item>
     </style>
 
 </resources>

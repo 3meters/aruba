@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
- 
+    
+    <!-- 
+	   	Theme Colors
+	   	- light suffix means a theme where backgrounds are generally light in tone. 
+	   	- dark suffix means a theme where backgrounds are generally dark in tone. 
+    -->
+    
     <color name="progress_start">#ffffd300</color>
     <color name="progress_end">#ffffd300</color>
     
@@ -8,15 +14,8 @@
     	We also used the pressed color in radar and that color is hardcoded
     	in CandiPatchPresenter.initializeScene 
     -->
-    	
-    <color name="pressed">@color/holo_blue_light</color>
     
-    <!-- 
-    Theme Colors
-    	- light suffix means a theme where backgrounds are generally light in tone. 
-    	- dark suffix means a theme where backgrounds are generally dark in tone. 
-    <color name="edit_hint">#ffffa01c</color>
-    -->
+    <color name="pressed">@color/holo_blue_light</color>
     
     <color name="beacon_stop">#99990000</color>
     <color name="beacon_caution">#99999900</color>
@@ -37,14 +36,37 @@
     <color name="text_unfocused_light">#ff666666</color>
     <color name="text_pressed">#ff000000</color>
     
-    <color name="background_bar_dark">#33ffffff</color>
-    <color name="background_bar_light">#11000000</color>
-    <color name="background_bar_dark_solid">#ffcccccc</color>
-    <color name="background_bar_light_solid">#ff111111</color>
+    <color name="background_dark">@android:color/black</color>
+    <color name="background_light">@android:color/white</color>
     
-    <color name="rule_30_dark">#33ffffff</color>
-    <color name="rule_30_light">#33000000</color>    
-
-    <color name="rule_30_light">#33000000</color>    
+    <color name="background_form_dark_semi">#90000000</color>
+    <color name="background_form_light_semi">#90ffffff</color>
+    
+    <!-- Dark bars: mostly transparent -->
+    
+    <color name="background_actionbar_light">#10000000</color>
+    <color name="background_tabbar_light">#14000000</color>
+    <color name="background_buttonbar_light">@color/background_actionbar_light</color>
+    
+    <!-- Dark bars: mostly opaque -->
+    
+    <color name="background_actionbar_dark_semi">#a0000000</color>
+    <color name="background_tabbar_dark_semi">#80000000</color>
+    <color name="background_buttonbar_dark_semi">@color/background_tabbar_dark_semi</color>
+    
+    <!-- Light bars: mostly transparent -->
+    
+    <color name="background_actionbar_dark">#10ffffff</color>
+    <color name="background_tabbar_dark">#10ffffff</color>
+    <color name="background_buttonbar_dark">@color/background_actionbar_dark</color>
+    
+    <!-- Light bars: mostly opaque -->
+    
+    <color name="background_actionbar_light_semi">#a0ffffff</color>
+    <color name="background_tabbar_light_semi">#80ffffff</color>
+    <color name="background_buttonbar_light_semi">@color/background_actionbar_light_semi</color>
+    
+    <color name="rule_30_dark">#4dffffff</color>
+    <color name="rule_30_light">#4d000000</color>    
     
 </resources>

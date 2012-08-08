@@ -2,21 +2,37 @@
 <resources>
 
     <attr name="layout" format="integer" />
-    <attr name="itemLayout" format="integer" />
 
     <declare-styleable name="Global">
         <attr name="themeTone" format="string" />
-        <attr name="preferenceStyle" format="reference" />
-        <attr name="buttonStyle" format="reference" />
-        <attr name="actionBarTone" format="string" />
         <attr name="busy" format="reference" />
-        <attr name="styleActionBar" format="reference" />
-        <attr name="styleTabBar" format="reference" />
-        <attr name="styleButtonBar" format="reference" />
-    </declare-styleable>
-    <declare-styleable name="ViewPagerIndicator">
-        <attr name="textColorFocused" format="color" />
-        <attr name="textColorUnfocused" format="color" />
+        <attr name="buttonBarStyle" format="reference" />
+        <attr name="candiFormTitleStyle" format="reference" />
+        <attr name="candiListTitleStyle" format="reference" />
+        <attr name="ruleColor" format="color|reference" />
+        <attr name="textColor" format="color|reference" />
+        <attr name="textColorUnfocused" format="color|reference" />
+        <attr name="textColorComment" format="color|reference" />
+        <attr name="textColorBullet" format="color|reference" />
+        <attr name="textColorBars" format="color|reference" />
+        <attr name="textColorProgress" format="color|reference" />
+        <attr name="textureBodyZone" format="reference" />
+        <attr name="textureBodyCandi" format="reference" />
+        <attr name="backgroundButton" format="string" />
+        <attr name="backgroundCandi" format="color|reference" />
+        <attr name="backgroundForm" format="color|reference" />
+        <attr name="backgroundProgress" format="string" />
+        <attr name="backgroundPicture" format="string" />
+        <attr name="backgroundActionBar" format="string" />
+        <attr name="backgroundButtonBar" format="string" />
+        <attr name="backgroundTabBar" format="string" />
+        <attr name="iconSearch" format="string" />
+        <attr name="iconRefresh" format="string" />
+        <attr name="iconLocked" format="string" />
+        <attr name="iconLocation" format="string" />
+        <attr name="iconBookmarks" format="string" />
+        <attr name="iconForward" format="string" />
+        <attr name="placeholder_user" format="string" />
     </declare-styleable>
     <declare-styleable name="AuthorLayout">
         <attr name="layout" />
@@ -30,65 +46,13 @@
         <attr name="minHeight" format="dimension" />
         <attr name="maxHeight" format="dimension" />
     </declare-styleable>
-    <declare-styleable name="CandiListView">
-        <attr name="itemLayout" />
-    </declare-styleable>
-    <declare-styleable name="CandiRadar">
-        <attr name="textureBodyZone" format="reference" />
-        <attr name="textureBodyCandi" format="reference" />
-        <attr name="textColorTitle" format="string" />
-        <attr name="textColorButton" format="color" />
-        <attr name="textColorButtonHeader" format="color" />
-        <attr name="textColorFooter" format="color" />
-        <attr name="actionStripUpArrow" format="string" />
-        <attr name="actionStripDownArrow" format="string" />
-        <attr name="backgroundButton" format="string" />
-        <attr name="backgroundCandiInfo" format="color" />
-        <attr name="backgroundForm" format="color" />
-        <attr name="iconSearch" format="string" />
-        <attr name="iconSearchActions" format="string" />
-        <attr name="iconRefresh" format="string" />
-        <attr name="iconNew" format="string" />
-        <attr name="iconBack" format="string" />
-        <attr name="iconPost" format="string" />
-        <attr name="iconPicture" format="string" />
-        <attr name="iconLink" format="string" />
-        <attr name="iconProfile" format="string" />
-        <attr name="iconMap" format="string" />
-        <attr name="iconLocked" format="string" />
-        <attr name="iconLocation" format="string" />
-        <attr name="iconBookmarks" format="string" />
-        <attr name="iconGo" format="string" />
-        <attr name="xlogo" format="string" />
-        <attr name="imageSliderHandleSearch" format="string" />
-        <attr name="backgroundSliderHandleSearch" format="string" />
-        <attr name="backgroundSliderContentSearch" format="string" />
-        <attr name="backgroundProgress" format="string" />
-        <attr name="placeholder_forum" format="string" />
-        <attr name="placeholder_post" format="string" />
-        <attr name="placeholder_gallery" format="string" />
-        <attr name="placeholder_picture" format="string" />
-        <attr name="placeholder_user" format="string" />
-    </declare-styleable>
-    <declare-styleable name="CandiForm">
-        <attr name="backgroundActionBar" format="string" />
-        <attr name="backgroundButtonBar" format="string" />
-        <attr name="backgroundTabBar" format="string" />
-        <attr name="textColorFormTitle" format="color" />
-        <attr name="tabColorActive" format="color" />
-        <attr name="tabColorInactive" format="color" />
-        <attr name="tabColorBackground" format="color" />
-        <attr name="backgroundPicture" format="string" />
-    </declare-styleable>
-    <declare-styleable name="CandiInfo">
-        <attr name="ruleColor" format="color" />
-        <attr name="textColor" format="color" />
-        <attr name="iconInfoActions" format="string" />
+    <declare-styleable name="Debug">
         <attr name="imageSliderHandleInfo" format="string" />
-        <attr name="iconForward" format="string" />
-        <attr name="backgroundForwardInfo" format="string" />
+        <attr name="imageSliderHandleSearch" format="string" />
         <attr name="backgroundSliderHandleInfo" format="string" />
         <attr name="backgroundSliderContentInfo" format="string" />
+        <attr name="backgroundSliderHandleSearch" format="string" />
+        <attr name="backgroundSliderContentSearch" format="string" />
     </declare-styleable>
 
 </resources>

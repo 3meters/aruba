@@ -325,13 +325,13 @@ public class CandiForm extends CandiActivity {
 
 	static public ViewGroup buildCandiInfo(final Entity entity, final ViewGroup candiInfoView, GeoLocation mLocation, boolean refresh) {
 
-		final TextView title = (TextView) candiInfoView.findViewById(R.id.candi_info_title);
-		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_info_subtitle);
-		final WebImageView imageCandi = (WebImageView) candiInfoView.findViewById(R.id.candi_info_image);
-		final ImageView imageCollection = (ImageView) candiInfoView.findViewById(R.id.candi_info_image_collection);
-		final ImageView imageZoom = (ImageView) candiInfoView.findViewById(R.id.candi_info_image_zoom);
-		final ViewGroup imageCandiHolder = (ViewGroup) candiInfoView.findViewById(R.id.candi_info_image_holder);
-		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_info_description);
+		final TextView title = (TextView) candiInfoView.findViewById(R.id.candi_form_title);
+		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_form_subtitle);
+		final WebImageView imageCandi = (WebImageView) candiInfoView.findViewById(R.id.candi_form_image);
+		final ImageView imageCollection = (ImageView) candiInfoView.findViewById(R.id.candi_form_image_collection);
+		final ImageView imageZoom = (ImageView) candiInfoView.findViewById(R.id.candi_form_image_zoom);
+		final ViewGroup imageCandiHolder = (ViewGroup) candiInfoView.findViewById(R.id.candi_form_image_holder);
+		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_form_description);
 		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
 		final Button comments = (Button) candiInfoView.findViewById(R.id.button_comments);
 		final ImageView map = (ImageView) candiInfoView.findViewById(R.id.button_map);
@@ -339,8 +339,8 @@ public class CandiForm extends CandiActivity {
 		final Button newCandi = (Button) candiInfoView.findViewById(R.id.button_new);
 		final Button moveCandi = (Button) candiInfoView.findViewById(R.id.button_move);
 		final Button editCandi = (Button) candiInfoView.findViewById(R.id.button_edit);
-		final ViewGroup parentGroup = (ViewGroup) candiInfoView.findViewById(R.id.candi_info_parent_group);
-		final TextView parentText = (TextView) candiInfoView.findViewById(R.id.candi_info_parent_text);
+		final ViewGroup parentGroup = (ViewGroup) candiInfoView.findViewById(R.id.candi_form_parent_group);
+		final TextView parentText = (TextView) candiInfoView.findViewById(R.id.candi_form_parent_text);
 
 		final View holderChildren = (View) candiInfoView.findViewById(R.id.holder_button_children);
 		final WebImageView imageChildren = (WebImageView) candiInfoView.findViewById(R.id.button_children_image);
@@ -402,7 +402,7 @@ public class CandiForm extends CandiActivity {
 		}
 		else {
 			parentGroup.setVisibility(View.VISIBLE);
-			parentText.setText("Candipatch: " + entity.parent.label);
+			parentText.setText(Aircandi.getInstance().getString(R.string.name_entity_type_collection) + ": " + entity.parent.label);
 		}
 
 		/* Adjust buttons */

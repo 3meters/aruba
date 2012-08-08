@@ -633,17 +633,19 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
 		Integer themeResId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
 		if (isDialog) {
-			themeResId = R.style.aircandi_theme_dialog;
+			themeResId = R.style.aircandi_theme_dialog_dark;
 			if (mPrefTheme.equals("aircandi_theme_snow")
 					|| mPrefTheme.equals("aircandi_theme_serene")
+					|| mPrefTheme.equals("aircandi_theme_lagoon")
 					|| mPrefTheme.equals("aircandi_theme_blueray")) {
-				themeResId = R.style.aircandi_theme_light_dialog;
+				themeResId = R.style.aircandi_theme_dialog_light;
 			}
 		}
 		else if (isForm) {
 			themeResId = R.style.aircandi_theme_form_light;
 			if (mPrefTheme.equals("aircandi_theme_snow")
 					|| mPrefTheme.equals("aircandi_theme_serene")
+					|| mPrefTheme.equals("aircandi_theme_lagoon")
 					|| mPrefTheme.equals("aircandi_theme_blueray")) {
 				themeResId = R.style.aircandi_theme_form_light;
 			}

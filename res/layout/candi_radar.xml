@@ -10,7 +10,7 @@
 
         <RelativeLayout
             android:id="@+id/retry_dialog"
-            style="@style/search_dialog_connect"
+            style="@style/dialog_radar_connect"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:gravity="center"
@@ -19,7 +19,7 @@
 
             <TextView
                 android:id="@+id/retry_message"
-                style="@style/search_dialog_text"
+                style="@style/dialog_radar_text"
                 android:layout_width="175dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
@@ -36,7 +36,7 @@
 
                 <Button
                     android:id="@+id/button_retry"
-                    style="@style/app_button"
+                    style="@style/actionbar_button"
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:clickable="true"
@@ -44,7 +44,7 @@
 
                 <Button
                     android:id="@+id/button_cancel"
-                    style="@style/app_button"
+                    style="@style/actionbar_button"
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:clickable="true"
@@ -82,7 +82,7 @@
 
             <Button
                 android:id="@+id/button_new"
-                style="@style/candi_info_button"
+                style="@style/app_button_square"
                 android:layout_width="65dp"
                 android:layout_height="65dp"
                 android:layout_alignParentRight="true"
