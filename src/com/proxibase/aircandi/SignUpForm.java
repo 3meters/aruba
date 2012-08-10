@@ -238,7 +238,7 @@ public class SignUpForm extends FormActivity {
 						ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.ProxibaseService);
 						mUser = serviceData.user;
 						mUser.session = serviceData.session;
-						
+
 						/*
 						 * Upload images to S3 as needed.
 						 */
@@ -257,15 +257,9 @@ public class SignUpForm extends FormActivity {
 								/*
 								 * Update user.
 								 * 
-								 * Need to update the user to capture the uri for the image we saved. Must strip out the
-								 * password
-								 * because service only allows password updates through a different service call.
+								 * Need to update the user to capture the uri for the image we saved. 
 								 */
 								mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
-//								mUser.creatorId = mUser.id;
-//								mUser.ownerId = mUser.id;
-//								mUser.modifierId = mUser.id;
-//								mUser.password = null;
 								serviceRequest = new ServiceRequest();
 								serviceRequest.setUri(mUser.getEntryUri())
 										.setRequestType(RequestType.Update)
