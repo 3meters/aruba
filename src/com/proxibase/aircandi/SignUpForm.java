@@ -221,7 +221,8 @@ public class SignUpForm extends FormActivity {
 				protected Object doInBackground(Object... params) {
 
 					ServiceRequest serviceRequest = new ServiceRequest();
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + mUser.getCollection())
+
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "user/create")
 							.setRequestType(RequestType.Insert)
 							.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService))
 							.setResponseFormat(ResponseFormat.Json);
@@ -234,8 +235,10 @@ public class SignUpForm extends FormActivity {
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 
 						String jsonResponse = (String) serviceResponse.data;
-						User userStub = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService).data;
-						mUser.id = userStub.id;
+						ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.ProxibaseService);
+						mUser = serviceData.user;
+						mUser.session = serviceData.session;
+						
 						/*
 						 * Upload images to S3 as needed.
 						 */
@@ -259,17 +262,18 @@ public class SignUpForm extends FormActivity {
 								 * because service only allows password updates through a different service call.
 								 */
 								mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
-								mUser.creatorId = mUser.id;
-								mUser.ownerId = mUser.id;
-								mUser.modifierId = mUser.id;
-								mUser.password = null;
+//								mUser.creatorId = mUser.id;
+//								mUser.ownerId = mUser.id;
+//								mUser.modifierId = mUser.id;
+//								mUser.password = null;
 								serviceRequest = new ServiceRequest();
 								serviceRequest.setUri(mUser.getEntryUri())
 										.setRequestType(RequestType.Update)
 										.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService))
+										.setSession(mUser.session)
 										.setResponseFormat(ResponseFormat.Json);
 
-								/* Doing an insert so we don't need anything back */
+								/* Doing an update so we don't need anything back */
 								serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 							}
 						}

@@ -84,7 +84,7 @@
                     android:gravity="top"
                     android:hint="@string/form_description_hint"
                     android:inputType="textMultiLine|textNoSuggestions"
-                    android:lines="10" />
+                    android:minLines="5" />
 
                 <com.proxibase.aircandi.widgets.AuthorBlock
                     android:id="@+id/block_author"

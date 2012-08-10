@@ -61,6 +61,18 @@ public class User extends ServiceEntry {
 	public User() {}
 
 	@Override
+	public User clone() {
+		try {
+			final User user = (User) super.clone();
+			return user;
+		}
+		catch (final CloneNotSupportedException ex) {
+			throw new AssertionError();
+		}
+	}
+
+	
+	@Override
 	public String getCollection() {
 		return "users";
 	}

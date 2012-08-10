@@ -28,15 +28,17 @@
 		<item>Select a gallery picture</item>
 		<item>Take a new picture</item>
 		<item>Use a web page</item>
-		<item>Use Facebook picture</item>
+		<item>Use facebook picture</item>
 		<item>None</item>
 	</string-array>
 	
 	<string-array
 		name="theme_list_preference">
 		<item>Blueray</item>
+		<item>Canyon</item>
 		<item>Lagoon</item>
 		<item>Midnight</item>
+		<item>Misty</item>
 		<item>Serene</item>
 		<item>Smolder</item>
 		<item>Snow</item>
@@ -44,8 +46,10 @@
 	<string-array
 		name="themevalues_list_preference">
 		<item>aircandi_theme_blueray</item>
+		<item>aircandi_theme_canyon</item>
 		<item>aircandi_theme_lagoon</item>
 		<item>aircandi_theme_midnight</item>
+		<item>aircandi_theme_misty</item>
 		<item>aircandi_theme_serene</item>
 		<item>aircandi_theme_smolder</item>
 		<item>aircandi_theme_snow</item>

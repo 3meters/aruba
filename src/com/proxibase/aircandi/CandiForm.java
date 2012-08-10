@@ -228,7 +228,13 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onAddCandiButtonClick(View view) {
-		mCommon.showTemplatePicker(false);
+		if (!mEntity.locked) {
+			mCommon.showTemplatePicker(false);
+		}
+		else {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
+					getResources().getString(R.string.alert_entity_locked), this, android.R.string.ok, null, null);
+		}
 	}
 
 	public void onEditCandiButtonClick(View view) {

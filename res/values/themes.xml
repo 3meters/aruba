@@ -43,11 +43,13 @@
         
         <item name="ruleColor">@color/rule_30_dark</item>
         <item name="textColor">@color/text_dark</item>
+        <item name="textColorRadar">@color/text_dark</item>
         <item name="textColorUnfocused">@color/text_dark</item>
         <item name="textColorComment">@color/accent</item>
         <item name="textColorBullet">@color/accent</item>
         <item name="textColorBars">@color/text_dark</item>
         <item name="textColorProgress">@color/text_dark</item>
+        <item name="textOutlineRadar">true</item>
         
         <!-- Drawables and backgrounds -->
         
@@ -120,11 +122,13 @@
         
         <item name="ruleColor">@color/rule_30_light</item>
         <item name="textColor">@color/text_light</item>
+        <item name="textColorRadar">@color/text_light</item>
         <item name="textColorUnfocused">@color/text_light</item>
         <item name="textColorComment">@color/accent</item>
         <item name="textColorBullet">@color/accent</item>
         <item name="textColorBars">@color/text_light</item>
         <item name="textColorProgress">@color/text_light</item>
+        <item name="textOutlineRadar">false</item>
         
         <!-- Drawables and backgrounds -->
         
@@ -173,72 +177,74 @@
         
     </style>
     
-	<!-- Midnight Theme -->
-	
-    <style name="aircandi_theme_midnight" parent="aircandi_theme_dark"/>
-    
-	<!-- 
-		Snow theme 
-		Example using dark bars and light body
-	-->
-	
-    <style name="aircandi_theme_snow" parent="aircandi_theme_light">
-        <item name="android:windowBackground">@drawable/wallpaper_snow_vii</item>
+    <style name="aircandi_theme_light_semi" parent="aircandi_theme_light">
         <item name="backgroundActionBar">@color/background_actionbar_light_semi</item>
         <item name="backgroundTabBar">@color/background_tabbar_light_semi</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_light_semi</item>
     </style>
-        
-	<!--  
-		Lagoon theme
-		Example using light bars and dark body
-	-->
-    <style name="aircandi_theme_lagoon" parent="aircandi_theme_light">
-        <item name="android:windowBackground">@drawable/wallpaper_lagoon</item>
+    
+    <style name="aircandi_theme_dark_semi" parent="aircandi_theme_dark">
+        <item name="backgroundActionBar">@color/background_actionbar_dark_semi</item>
+        <item name="backgroundTabBar">@color/background_tabbar_dark_semi</item>
+        <item name="backgroundButtonBar">@color/background_buttonbar_dark_semi</item>
+    </style>
+    
+    <style name="aircandi_theme_light_semi_invert" parent="aircandi_theme_light_semi">
         <item name="textColor">@color/text_dark</item>
+        <item name="textColorRadar">@color/text_dark</item>
+        <item name="textOutlineRadar">true</item>
         <item name="textColorBars">@color/text_light</item>
         <item name="candiFormTitleStyle">@style/candi_form_title_outlined</item>
         <item name="candiListTitleStyle">@style/candi_list_title_outlined</item>
         <item name="iconLocation">@drawable/ic_location_dark</item>
         <item name="backgroundButton">@drawable/button_selector_dark</item>
-        <item name="backgroundActionBar">@color/background_actionbar_light_semi</item>
-        <item name="backgroundTabBar">@color/background_tabbar_light_semi</item>
-        <item name="backgroundButtonBar">@color/background_buttonbar_light_semi</item>
-    </style>
-     
-    <!-- Blue Ray Theme -->
+        </style>
     
-    <style name="aircandi_theme_blueray" parent="aircandi_theme_dark">
-        <item name="android:windowBackground">@drawable/wallpaper_blueray</item>
-        <item name="backgroundForm">@android:color/white</item>
-    </style>
-
+    <!-- Midnight Theme -->
+	
+    <style name="aircandi_theme_midnight" parent="aircandi_theme_dark"/>
+    
 	<!-- Smolder Theme -->
 	
     <style name="aircandi_theme_smolder" parent="aircandi_theme_dark">
         <item name="android:windowBackground">@drawable/wallpaper_smolder</item>
     </style>
 
-	<!-- Serene Theme -->
+    <!-- Blue Ray Theme -->
+    
+    <style name="aircandi_theme_blueray" parent="aircandi_theme_dark">
+        <item name="android:windowBackground">@drawable/wallpaper_blueray</item>
+    </style>
+
+    <!-- Snow theme	-->
 	
-    <style name="aircandi_theme_serene" parent="aircandi_theme_light">
+    <style name="aircandi_theme_snow" parent="aircandi_theme_light_semi">
+        <item name="android:windowBackground">@drawable/wallpaper_snow_vii</item>
+    </style>
+    
+    <!-- Lagoon theme	-->
+    
+    <style name="aircandi_theme_lagoon" parent="aircandi_theme_light_semi_invert">
+        <item name="android:windowBackground">@drawable/wallpaper_lagoon</item>
+    </style>
+     
+    <!-- Canyon theme	-->
+    
+    <style name="aircandi_theme_canyon" parent="aircandi_theme_dark">
+        <item name="android:windowBackground">@drawable/wallpaper_canyon</item>
+    </style>
+    
+    <!-- Misty theme	-->
+    
+    <style name="aircandi_theme_misty" parent="aircandi_theme_light_semi_invert">
+        <item name="android:windowBackground">@drawable/wallpaper_misty</item>
+    </style>
+    
+    <!-- Serene Theme -->
+	
+    <style name="aircandi_theme_serene" parent="aircandi_theme_light_semi">
         <item name="android:windowBackground">@drawable/wallpaper_serene</item>
-        <item name="themeTone">dark</item>
-        <item name="busy">@drawable/busy_anim_light</item>
-        <item name="logo">@drawable/icon_app</item>
-        
-        <item name="textColorUnfocused">@color/text_dark</item>
-        
         <item name="backgroundCandi">@color/background_form_light_semi</item>
-        <item name="backgroundForm">@color/background_light</item>
-        <item name="backgroundButtonBar">@color/background_buttonbar_light_semi</item>
-        
-        <item name="iconRefresh">@drawable/icon_refresh_dark</item>
-        <item name="iconLocation">@drawable/ic_location_light</item>
-        <item name="iconBookmarks">@drawable/ic_search_light</item>
-        <item name="iconSearch">@drawable/ic_search_light</item>
-        
-        <item name="placeholder_user">placeholder_user_dark</item>
     </style>
     
 	<!-- Dark Form Theme -->

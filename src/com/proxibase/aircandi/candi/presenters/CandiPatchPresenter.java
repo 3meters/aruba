@@ -138,6 +138,7 @@ public class CandiPatchPresenter implements Observer {
 	private Integer					mStyleTextureBodyCandiResId;
 
 	private String					mStyleTextColorTitle;
+	private Boolean					mStyleTextOutlineTitle;
 
 	// --------------------------------------------------------------------------------------------
 	// Initialization
@@ -336,8 +337,12 @@ public class CandiPatchPresenter implements Observer {
 			mStyleTextureBodyCandiResId = (Integer) resourceName.resourceId;
 		}
 
-		if (mContext.getTheme().resolveAttribute(R.attr.textColor, resourceName, true)) {
+		if (mContext.getTheme().resolveAttribute(R.attr.textColorRadar, resourceName, true)) {
 			mStyleTextColorTitle = (String) resourceName.coerceToString();
+		}
+		
+		if (mContext.getTheme().resolveAttribute(R.attr.textOutlineRadar, resourceName, true)) {
+			mStyleTextOutlineTitle = Boolean.parseBoolean((String) resourceName.coerceToString());
 		}
 	}
 
@@ -1945,6 +1950,14 @@ public class CandiPatchPresenter implements Observer {
 
 	public void setRookieHit(Boolean rookieHit) {
 		mRookieHit = rookieHit;
+	}
+
+	public Boolean getStyleTextOutlineTitle() {
+		return mStyleTextOutlineTitle;
+	}
+
+	public void setStyleTextOutlineTitle(Boolean styleTextOutlineTitle) {
+		mStyleTextOutlineTitle = styleTextOutlineTitle;
 	}
 
 	private class RenderCountDownTimer extends CountDownTimer {

@@ -16,13 +16,13 @@
         android:padding="15dp" >
 
         <TextView
-            android:id="@+id/header_text"
+            android:id="@+id/text_message"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="15dp"
             android:paddingLeft="2dp"
             android:paddingRight="2dp"
-            android:text="@string/dialog_template_picker_message" />
+            android:text="@string/dialog_template_picker_message_top" />
 
         <ListView
             android:id="@+id/form_list"

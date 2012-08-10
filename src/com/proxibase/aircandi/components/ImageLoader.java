@@ -546,7 +546,7 @@ public class ImageLoader {
 								 * Data couldn't be successfully decoded into a bitmap so substitute
 								 * the broken image placeholder
 								 */
-								imageRequest.setImageUri("resource:placeholder_picture");
+								imageRequest.setImageUri("resource:placeholder_logo");
 								fetchImage(imageRequest, false);
 							}
 							imageRequest.getRequestListener().onComplete(serviceResponse);

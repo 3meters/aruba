@@ -10,6 +10,7 @@ import com.google.gson.annotations.SerializedName;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.Utilities;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.ProxiConstants;
 
 /**
@@ -20,7 +21,7 @@ import com.proxibase.service.ProxiConstants;
 public class Entity extends ServiceEntry implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= -3902834532692561618L;
-	protected String			mServiceUri			= ProxiConstants.URL_PROXIBASE_SERVICE;
+	protected String			mServiceUri			= ProxiConstants.URL_PROXIBASE_SERVICE_REST;
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 
@@ -120,6 +121,15 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			if (this.comments != null) {
 				entity.comments = (List<Comment>) ((ArrayList) this.comments).clone();
 			}
+			if (this.owner != null) {
+				entity.owner = this.owner.clone();
+			}
+			if (this.creator != null) {
+				entity.creator = this.creator.clone();
+			}
+			if (this.modifier != null) {
+				entity.modifier = this.modifier.clone();
+			}
 			return entity;
 		}
 		catch (final CloneNotSupportedException ex) {
@@ -196,38 +206,57 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	}
 
 	public String getMasterImageUri() {
+		/*
+		 * Special case where type==post
+		 */
 		String masterImageUri = null;
-		if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
-			masterImageUri = imagePreviewUri;
+		if (this.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+			masterImageUri = this.creator.imageUri;
 		}
-		else if (linkUri != null && !linkUri.equals("")) {
-			masterImageUri = linkUri;
-		}
-		else if (creator != null) {
-			if (creator.imageUri != null && !creator.imageUri.equals("")) {
-				masterImageUri = creator.imageUri;
+		else {
+
+			if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
+				masterImageUri = imagePreviewUri;
 			}
-			else if (creator.linkUri != null && !creator.linkUri.equals("")) {
-				masterImageUri = creator.linkUri;
+			else if (linkUri != null && !linkUri.equals("")) {
+				masterImageUri = linkUri;
+			}
+			else if (creator != null) {
+				if (creator.imageUri != null && !creator.imageUri.equals("")) {
+					masterImageUri = creator.imageUri;
+				}
+				else if (creator.linkUri != null && !creator.linkUri.equals("")) {
+					masterImageUri = creator.linkUri;
+				}
 			}
 		}
 		return masterImageUri;
 	}
 
 	public ImageFormat getMasterImageFormat() {
+
+		/*
+		 * Special case where type==post
+		 */
 		ImageFormat imageFormat = ImageFormat.Binary;
-		if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
+		if (this.type.equals(CandiConstants.TYPE_CANDI_POST)) {
 			imageFormat = ImageFormat.Binary;
 		}
-		else if (linkUri != null && !linkUri.equals("")) {
-			imageFormat = ImageFormat.Html;
-		}
-		else if (creator != null) {
-			if (creator.imageUri != null && !creator.imageUri.equals("")) {
+		else {
+
+			if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
 				imageFormat = ImageFormat.Binary;
 			}
-			else if (creator.linkUri != null && !creator.linkUri.equals("")) {
+			else if (linkUri != null && !linkUri.equals("")) {
 				imageFormat = ImageFormat.Html;
+			}
+			else if (creator != null) {
+				if (creator.imageUri != null && !creator.imageUri.equals("")) {
+					imageFormat = ImageFormat.Binary;
+				}
+				else if (creator.linkUri != null && !creator.linkUri.equals("")) {
+					imageFormat = ImageFormat.Html;
+				}
 			}
 		}
 		return imageFormat;

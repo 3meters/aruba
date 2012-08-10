@@ -643,12 +643,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		else if (isForm) {
 			themeResId = R.style.aircandi_theme_form_light;
-			if (mPrefTheme.equals("aircandi_theme_snow")
-					|| mPrefTheme.equals("aircandi_theme_serene")
-					|| mPrefTheme.equals("aircandi_theme_lagoon")
-					|| mPrefTheme.equals("aircandi_theme_blueray")) {
-				themeResId = R.style.aircandi_theme_form_light;
-			}
 		}
 		((Activity) mContext).setTheme(themeResId);
 	}
@@ -708,17 +702,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 					ServiceResponse serviceResponse = new ServiceResponse();
 
 					if (user.session != null) {
-						Bundle parameters = new Bundle();
 						ServiceRequest serviceRequest = new ServiceRequest();
 
-						parameters.putString("user", "object:{"
-								+ "\"_id\":\"" + user.id + "\","
-								+ "\"session\":\"" + user.session.key + "\""
-								+ "}");
-
 						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
-								.setRequestType(RequestType.Method)
-								.setParameters(parameters)
+								.setRequestType(RequestType.Get)
+								.setSession(user.session)
 								.setResponseFormat(ResponseFormat.Json);
 
 						serviceResponse = NetworkManager.getInstance().request(serviceRequest);

@@ -11,11 +11,13 @@
         <attr name="candiListTitleStyle" format="reference" />
         <attr name="ruleColor" format="color|reference" />
         <attr name="textColor" format="color|reference" />
+        <attr name="textColorRadar" format="color|reference" />
         <attr name="textColorUnfocused" format="color|reference" />
         <attr name="textColorComment" format="color|reference" />
         <attr name="textColorBullet" format="color|reference" />
         <attr name="textColorBars" format="color|reference" />
         <attr name="textColorProgress" format="color|reference" />
+        <attr name="textOutlineRadar" format="boolean" />
         <attr name="textureBodyZone" format="reference" />
         <attr name="textureBodyCandi" format="reference" />
         <attr name="backgroundButton" format="string" />

@@ -173,7 +173,8 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		}
 
 		mTitleTexture.clearTextureSources();
-		Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, model.getTitleText());
+		Bitmap titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0,
+				mCandiPatchPresenter.getStyleTextOutlineTitle(), model.getTitleText());
 
 		mTitleTextureRegion = TextureRegionFactory.createFromSource(mTitleTexture, new BitmapTextureSource(titleBitmap, namePrefix + model.getTitleText(),
 				new IBitmapAdapter() {
@@ -185,7 +186,8 @@ public abstract class BaseView extends Entity implements Observer, IView {
 						 */
 						Bitmap titleBitmap = null;
 						if (mModel != null) {
-							titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, model.getTitleText());
+							titleBitmap = makeTextBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0,
+									mCandiPatchPresenter.getStyleTextOutlineTitle(), model.getTitleText());
 						}
 						return titleBitmap;
 					}
@@ -255,7 +257,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		}
 	}
 
-	protected Bitmap makeTextBitmap(int width, int height, int padding, CharSequence text) {
+	protected Bitmap makeTextBitmap(int width, int height, int padding, boolean textOutline, CharSequence text) {
 
 		if (mTextView == null) {
 			mTextView = new TextViewEllipsizing(mCandiPatchPresenter.mCandiRadarActivity);
@@ -266,9 +268,14 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTextView.setText(text);
 		mTextView.setTextColor(mTitleTextColor);
 		mTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-		mTextView.setShadowLayer(0, 0, 0, 0xff000000);
+		if (textOutline) {
+			mTextView.setShadowLayer(1, 1, 1, 0xff000000);
+		}
+		else {
+			mTextView.setShadowLayer(0, 0, 0, 0xff000000);
+		}
 		mTextView.setBackgroundColor(mTitleTextFillColor);
-		mTextView.setPadding(padding, padding, padding, padding);
+		mTextView.setPadding(padding, padding, padding, 2);
 		mTextView.setEllipsize(TruncateAt.END);
 
 		Bitmap bitmap = Bitmap.createBitmap(width, height, CandiConstants.IMAGE_CONFIG_DEFAULT);

@@ -161,7 +161,8 @@
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_change_picture_title">Select picture…</string>
     <string name="dialog_template_picker_title">Select template</string>
-    <string name="dialog_template_picker_message">Create and share candi with Aircandi users!</string>
+    <string name="dialog_template_picker_message_top">Create and share candi with Aircandi users!</string>
+    <string name="dialog_template_picker_message_collection">Add and share candi in this collection.</string>
     
     <!-- CandiForm -->
 

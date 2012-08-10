@@ -21,15 +21,14 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AnimUtils;
+import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
-import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
 import com.proxibase.aircandi.components.ImageRequestBuilder;
@@ -339,7 +338,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 				/* Used to pass back the bitmap and imageUri (sometimes) for the entity */
 				if (mImageRequestListener != null) {
-					mImageRequestListener.onComplete(response, user.imageUri);
+					mImageRequestListener.onComplete(new ServiceResponse(), user.imageUri, null, null, null, null);
 				}
 			}
 		});
@@ -404,8 +403,8 @@ public abstract class FormActivity extends SherlockActivity {
 				else if ((item == 4 && !showFacebookOption) || (item == 5 && showFacebookOption)) {
 
 					/* Tag has the uri to use for the placeholder */
-					String imageUri = "resource:placeholder_picture";
-					if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+					String imageUri = "resource:placeholder_logo";
+					if (mCommon.mEntityType != null && mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 						imageUri = "resource:ic_collection_250";
 					}
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);

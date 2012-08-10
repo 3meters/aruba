@@ -94,7 +94,7 @@
             android:name=".CommentForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_comment"
-            android:windowSoftInputMode="stateHidden" >
+            android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
             android:name=".CommentList"

@@ -15,7 +15,7 @@ public abstract class ServiceEntry  implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 5341986472204947191L;
 
-	protected String	mServiceUri	= ProxiConstants.URL_PROXIBASE_SERVICE;
+	protected String	mServiceUri	= ProxiConstants.URL_PROXIBASE_SERVICE_REST;
 
 	/*
 	 * Annotation syntax:

@@ -49,7 +49,7 @@
                     aircandi:maxHeight="100dp"
                     aircandi:maxWidth="100dp"
                     android:scaleType="centerCrop"
-                    android:tag="resource:placeholder_user" />
+                    android:tag="resource:placeholder_logo" />
 
                 <Button
                     android:id="@+id/btn_change_public_image"

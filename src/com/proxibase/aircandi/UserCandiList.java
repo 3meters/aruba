@@ -67,6 +67,7 @@ public class UserCandiList extends CandiList {
 			Intent intent = intentBuilder.create();
 			startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
 			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+			super.onCreate(savedInstanceState);
 			return;
 		}
 		super.onCreate(savedInstanceState);

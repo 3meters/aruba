@@ -25,6 +25,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
 	private Boolean		mIsRoot;
+	private TextView	mTextViewMessage;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -63,6 +64,10 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 
 		mListAdapter = new ListAdapter(this, listData);
 		mListView = (ListView) findViewById(R.id.form_list);
+		mTextViewMessage = (TextView) findViewById(R.id.text_message);
+		if (!mIsRoot) {
+			mTextViewMessage.setText(R.string.dialog_template_picker_message_collection);
+		}
 		mListView.setAdapter(mListAdapter);
 		mListView.setOnItemClickListener(this);
 	}

@@ -151,7 +151,7 @@ public class ProfileForm extends FormActivity {
 				}
 
 				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE)
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
 						.setRequestType(RequestType.Get)
 						.setQuery(query)
 						.setResponseFormat(ResponseFormat.Json);

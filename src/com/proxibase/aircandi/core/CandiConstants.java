@@ -108,7 +108,7 @@ public interface CandiConstants {
 	public static final String			USER_ANONYMOUS							= "{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\","
 																						+ "\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\","
 																						+ "\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\","
-																						+ "\"imageUri\": \"resource:placeholder_user\", \"isDeveloper\": false, \"anonymous\": true,"
+																						+ "\"imageUri\": \"resource:placeholder_logo\", \"isDeveloper\": false, \"anonymous\": true,"
 																						+ " \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}";
 
 	public static final int				ACTIVITY_ENTITY_HANDLER					= 100;

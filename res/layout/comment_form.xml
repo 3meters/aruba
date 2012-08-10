@@ -30,8 +30,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="top"
                 android:hint="@string/form_comment_hint"
-                android:inputType="textMultiLine|textShortMessage|textNoSuggestions"
-                android:lines="10" />
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:minLines="5" />
 
             <com.proxibase.aircandi.widgets.AuthorBlock
                 android:id="@+id/block_author"

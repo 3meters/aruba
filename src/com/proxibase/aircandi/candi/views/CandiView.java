@@ -780,7 +780,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 					candiModel.getEntity().description != null &&
 					candiModel.getEntity().description.length() > 0) {
 				if (!isReflection) {
-					bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x99000000, 175, 5, candiModel.getEntity().description, false, false);
+					bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x55000000, 175, 5, candiModel.getEntity().description, false, false);
 				}
 				else {
 					//bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x00000000, -45, 5, candiModel.getEntity().description, true, true);
