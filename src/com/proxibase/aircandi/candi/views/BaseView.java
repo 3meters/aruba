@@ -143,8 +143,9 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mProgressBarSprite = new CandiRectangle(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, 0, 10);
 		mProgressBarSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mProgressBarSprite.setVisible(false);
-		mProgressBarSprite.setColor(1, 0.827f, 0);
 		mProgressBarSprite.setZIndex(20);
+		mProgressBarSprite.setWidth((float) CandiConstants.CANDI_VIEW_WIDTH);
+		setProgressColor(Color.argb(256, 256, 212, 0));
 
 		attachChild(mProgressBarSprite);
 
@@ -257,6 +258,14 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		}
 	}
 
+	public void setProgressColor(int color) {
+		float red = Color.red(color);
+		float green = Color.green(color);
+		float blue = Color.blue(color);
+		float alpha = Color.alpha(color);
+		mProgressBarSprite.setColor(red / 255f, green / 255f, blue / 255f, alpha / 255f);
+	}
+	
 	protected Bitmap makeTextBitmap(int width, int height, int padding, boolean textOutline, CharSequence text) {
 
 		if (mTextView == null) {

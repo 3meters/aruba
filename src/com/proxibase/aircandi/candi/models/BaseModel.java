@@ -170,7 +170,8 @@ public abstract class BaseModel extends Observable implements IModel {
 		}
 
 		private boolean isCulled(Camera camera) {
-			return mX > camera.getMaxX() || mY > camera.getMaxY()
+			return mX > camera.getMaxX() 
+					|| mY > camera.getMaxY()
 					|| mX + (mWidth * mScale) < camera.getMinX()
 					|| mY + (mHeight * mScale) < camera.getMinY();
 		}
@@ -191,7 +192,9 @@ public abstract class BaseModel extends Observable implements IModel {
 			//				haloMaxX = lastX;
 			//			}
 
-			return mX + (mWidth * mScale) < haloMinX || mX > haloMaxX;
+			boolean outsideHalo = mX + (mWidth * mScale) < haloMinX || mX > haloMaxX;
+			
+			return outsideHalo;
 		}
 
 		public float getX() {

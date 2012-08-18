@@ -147,6 +147,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 				doViewActions();
 				doViewModifiers();
 				updateTouchArea(candiModel.isTouchAreaActive());
+				int avgBeaconLevel = candiModel.getEntity().beacon.getAvgBeaconLevel();
+				int color = ImageUtils.getColorBySignalLevel(avgBeaconLevel, 255);
+				setProgressColor(color);
 			}
 		});
 	}
@@ -605,7 +608,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 								}
 								Logger.v(CandiView.this, "Texture region update complete: " + titleText + ": "
 										+ String.valueOf((System.nanoTime() - startTime) / 1000000) + "ms");
-								progressVisible(false);
+								//progressVisible(false);
 							}
 							else {
 								if (mModel != null) {
@@ -624,7 +627,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 									if (candiModel.getViewStateCurrent().isVisible()) {
 										showBodyAndReflectionAnimated();
 									}
-									progressVisible(false);
+									//progressVisible(false);
 								}
 							}
 						}

@@ -233,6 +233,7 @@ public class CandiPatchPresenter implements Observer {
 			mCameraTargetSprite.setColor(1, 0, 0, 0.2f);
 			mCameraTargetSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 			mCameraTargetSprite.setVisible(false);
+			mCameraTargetSprite.setScale(CandiConstants.CANDI_VIEW_SCALE);
 			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mCameraTargetSprite);
 
 			/* Tie camera position to target position. */

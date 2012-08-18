@@ -33,6 +33,7 @@ public interface CandiConstants {
 
 	public static final float			CANDI_VIEW_HALO							= 2.0f;
 
+	public static final float			CANDI_VIEW_SCALE						= 1.0f;
 	public static final int				CANDI_VIEW_WIDTH						= 250;
 	public static final int				CANDI_VIEW_SPACING						= 20;
 	public static final int				CANDI_VIEW_BODY_HEIGHT					= 250;

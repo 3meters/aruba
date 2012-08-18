@@ -6,11 +6,19 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.proxibase.service.ProxiConstants;
 
-/**
- * Bound by default to the proxibase odata service.
+/*
+ * Initial user settings (owner,creator):
  * 
- * @author Jayma
+ * entities: user, user
+ * links: user, user
+ * sessions: user, user
+ * users: user, admin
+ * 
+ * beacons: admin, user
+ * documents: admin, admin
+ * observations: admin, user
  */
+
 public abstract class ServiceEntry implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 5341986472204947191L;
@@ -26,7 +34,7 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 	@SerializedName("_id")
 	public String				id;
 
-	/* Lookup Ids */
+	/* User ids */
 
 	@Expose
 	@SerializedName("_owner")
@@ -40,7 +48,15 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 	@SerializedName("_modifier")
 	public String				modifierId;
 
-	/* Lookups */
+	/* Dates */
+
+	@Expose(serialize = false, deserialize = true)
+	public Number				createdDate;
+
+	@Expose(serialize = false, deserialize = true)
+	public Number				modifiedDate;
+
+	/* Users (client) */
 
 	@Expose(serialize = false, deserialize = true)
 	public User					owner;
@@ -50,14 +66,6 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 
 	@Expose(serialize = false, deserialize = true)
 	public User					modifier;
-
-	/* Dates */
-
-	@Expose(serialize = false, deserialize = true)
-	public Number				createdDate;
-
-	@Expose(serialize = false, deserialize = true)
-	public Number				modifiedDate;
 
 	/* Client use only */
 	public String				timeSince;

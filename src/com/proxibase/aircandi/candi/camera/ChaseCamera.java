@@ -26,7 +26,6 @@ public class ChaseCamera extends ZoomCamera {
 	@Override
 	public void onUpdate(final float pSecondsElapsed) {
 		this.updateChaseEntity();
-		// super.onUpdate(pSecondsElapsed);
 	}
 
 	@Override

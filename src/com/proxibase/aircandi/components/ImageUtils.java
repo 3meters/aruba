@@ -68,6 +68,26 @@ public class ImageUtils {
 			return (int) (displayPixels * 1.5f + 0.5f);
 		}
 	}
+	
+	public static int getColorBySignalLevel(int signalLevel, int alpha) {
+		/*
+		 * hue: 0 = red, 120 = green
+		 */
+		float levelMax = 100;
+		float levelMin = 50;
+		float signalLevelAbs = (float) Math.abs(signalLevel);
+		if (signalLevelAbs > levelMax) {
+			signalLevelAbs = levelMax;
+		}
+		else if (signalLevelAbs < levelMin) {
+			signalLevelAbs = levelMin;
+		}
+		
+		float signalLevelPcnt = (signalLevelAbs - levelMin) / (levelMax - levelMin);
+		
+		float[] hsv = new float[]{(120 - (120 * signalLevelPcnt)), 0.9f, 1f};
+		return Color.HSVToColor(hsv);
+	}
 
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
 		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
