@@ -140,7 +140,7 @@ public class PasswordForm extends FormActivity {
 						+ "\"newPassword\":\"" + mTextPassword.getText().toString() + "\""
 						+ "}");
 
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "changepw")
+				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "changepw")
 						.setRequestType(RequestType.Method)
 						.setParameters(parameters)
 						.setSession(Aircandi.getInstance().getUser().session)

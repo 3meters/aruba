@@ -220,7 +220,7 @@ public class SignUpForm extends FormActivity {
 
 					ServiceRequest serviceRequest = new ServiceRequest();
 
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE + "user/create")
+					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "create")
 							.setRequestType(RequestType.Insert)
 							.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService))
 							.setResponseFormat(ResponseFormat.Json);
