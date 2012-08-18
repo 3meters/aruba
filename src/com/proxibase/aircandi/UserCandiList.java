@@ -50,6 +50,7 @@ public class UserCandiList extends CandiList {
 		if (user == null) {
 			super.onCreate(savedInstanceState);
 			finish();
+			return;
 		}
 		Boolean expired = false;
 		Integer messageResId = R.string.signin_message_mycandi;

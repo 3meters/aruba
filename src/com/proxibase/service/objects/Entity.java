@@ -11,7 +11,6 @@ import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.Utilities;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxiConstants;
 
 /**
  * Entity as described by the proxi protocol standards.
@@ -21,7 +20,6 @@ import com.proxibase.service.ProxiConstants;
 public class Entity extends ServiceEntry implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= -3902834532692561618L;
-	protected String			mServiceUri			= ProxiConstants.URL_PROXIBASE_SERVICE_REST;
 
 	/* Annotation syntax: @Expose (serialize = false, deserialize = false) */
 

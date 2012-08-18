@@ -11,11 +11,9 @@ import com.proxibase.service.ProxiConstants;
  * 
  * @author Jayma
  */
-public abstract class ServiceEntry  implements Cloneable, Serializable {
+public abstract class ServiceEntry implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 5341986472204947191L;
-
-	protected String	mServiceUri	= ProxiConstants.URL_PROXIBASE_SERVICE_REST;
 
 	/*
 	 * Annotation syntax:
@@ -26,58 +24,50 @@ public abstract class ServiceEntry  implements Cloneable, Serializable {
 	 */
 	@Expose
 	@SerializedName("_id")
-	public String		id;
+	public String				id;
 
 	/* Lookup Ids */
 
 	@Expose
 	@SerializedName("_owner")
-	public String		ownerId;
+	public String				ownerId;
 
 	@Expose
 	@SerializedName("_creator")
-	public String		creatorId;
+	public String				creatorId;
 
 	@Expose
 	@SerializedName("_modifier")
-	public String		modifierId;
+	public String				modifierId;
 
 	/* Lookups */
 
 	@Expose(serialize = false, deserialize = true)
-	public User			owner;
+	public User					owner;
 
 	@Expose(serialize = false, deserialize = true)
-	public User			creator;
+	public User					creator;
 
 	@Expose(serialize = false, deserialize = true)
-	public User			modifier;
+	public User					modifier;
 
 	/* Dates */
 
 	@Expose(serialize = false, deserialize = true)
-	public Number		createdDate;
+	public Number				createdDate;
 
 	@Expose(serialize = false, deserialize = true)
-	public Number		modifiedDate;
+	public Number				modifiedDate;
 
 	/* Client use only */
-	public String		timeSince;
+	public String				timeSince;
 
 	public String getEntryUri() {
-		String root = mServiceUri;
+		String root = ProxiConstants.URL_PROXIBASE_SERVICE_REST;
 		String entity = this.getCollection();
 		String uri = root + entity + "/ids:" + id;
 		return uri;
 	}
 
 	public abstract String getCollection();
-
-	public void setServiceUri(String serviceUri) {
-		this.mServiceUri = serviceUri;
-	}
-
-	public String getServiceUri() {
-		return mServiceUri;
-	}
 }

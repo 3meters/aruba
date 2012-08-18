@@ -145,15 +145,19 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Query query = new Query("users").filter("{\"_id\":\"" + String.valueOf(mUserId) + "\"}");
+				Query query =  new Query("users");
 				if (mUser != null) {
-					query = new Query("users").filter("{\"email\":\"" + ((User) mUser).email + "\"}");
+					query.filter("{\"email\":\"" + ((User) mUser).email + "\"}");
+				}
+				else {
+					query.filter("{\"_id\":\"" + String.valueOf(mUserId) + "\"}");
 				}
 
 				ServiceRequest serviceRequest = new ServiceRequest();
 				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
 						.setRequestType(RequestType.Get)
 						.setQuery(query)
+						.setSession(Aircandi.getInstance().getUser().session)
 						.setResponseFormat(ResponseFormat.Json);
 
 				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
@@ -314,8 +318,10 @@ public class ProfileForm extends FormActivity {
 						mUser.bio = mTextBio.getText().toString().trim();
 						mUser.location = mTextLocation.getText().toString().trim();
 						mUser.webUri = mTextLink.getText().toString().trim();
-						mUser.modifiedDate = DateUtils.nowDate().getTime();
-						mUser.modifierId = Aircandi.getInstance().getUser().id;
+						/*
+						 * Service handles modifiedId and modifiedDate based
+						 * on the session info passed with request.
+						 */
 
 						ServiceRequest serviceRequest = new ServiceRequest();
 						serviceRequest.setUri(mUser.getEntryUri())

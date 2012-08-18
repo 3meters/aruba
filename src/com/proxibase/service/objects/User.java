@@ -10,53 +10,53 @@ public class User extends ServiceEntry {
 	/* syntax: @Expose (serialize = false, deserialize = false) */
 
 	private static final long	serialVersionUID	= 127428776257201065L;
-	
+
 	@Expose
-	public String	name;
+	public String				name;
 	@Expose
-	public String	email;						// Required
+	public String				email;										// Required
 	@Expose
-	public String	role;
+	public String				role;
 	@Expose
-	public String	imageUri;
+	public String				imageUri;
 	@Expose
-	public String	linkUri;
+	public String				linkUri;
 	@Expose
-	public String	location;
+	public String				location;
 	@Expose
-	public String	bio;
+	public String				bio;
 	@Expose
-	public String	webUri;
+	public String				webUri;
 	@Expose
-	public Boolean	isDeveloper;
-	
+	public Boolean				isDeveloper;
+
 	@Expose
-	public String	facebookId;
+	public String				facebookId;
 	@Expose
-	public String	twitterId;
+	public String				twitterId;
 	@Expose
-	public String	googleId;
+	public String				googleId;
 	@Expose
-	public String	password;
+	public String				password;
 	@Expose
-	public Number	lastSignedInDate;
+	public Number				lastSignedInDate;
 	@Expose
-	public String	authSource;
+	public String				authSource;
 	@Expose
-	public String	oauthId;
+	public String				oauthId;
 	@Expose
-	public String	oauthToken;
+	public String				oauthToken;
 	@Expose
-	public String	oauthSecret;
+	public String				oauthSecret;
 	@Expose
-	public String	oauthData;
+	public String				oauthData;
 	@Expose
-	public Number	emailValidated;
+	public Number				emailValidated;
 
 	/* For client use only */
-	public boolean	anonymous		= false;
-	public boolean	keepSignedIn	= false;
-	public Session	session;
+	public boolean				anonymous			= false;
+	public boolean				keepSignedIn		= false;
+	public Session				session;
 
 	public User() {}
 
@@ -71,7 +71,6 @@ public class User extends ServiceEntry {
 		}
 	}
 
-	
 	@Override
 	public String getCollection() {
 		return "users";

@@ -13,14 +13,14 @@ public interface ProxiConstants {
 
 	public static final String	ROOT_COLLECTION_ID									= "0000.000000.00000.000";
 
-	public static final String	URL_PROXIBASE_SERVICE								= "http://api.aircandi.com:8080/";
-	public static final String	URL_PROXIBASE_SERVICE_REST							= "http://api.aircandi.com:8080/data/";
-	public static final String	URL_PROXIBASE_SERVICE_METHOD						= "http://api.aircandi.com:8080/do/";
-	public static final String	URL_PROXIBASE_SERVICE_AUTH							= "http://api.aircandi.com:8080/auth/";
-	public static final String	_URL_PROXIBASE_SERVICE								= "https://api.proxibase.com/";
-	public static final String	_URL_PROXIBASE_SERVICE_REST							= "https://api.proxibase.com/data";
-	public static final String	_URL_PROXIBASE_SERVICE_METHOD						= "https://api.proxibase.com/do/";
-	public static final String	_URL_PROXIBASE_SERVICE_AUTH							= "https://api.proxibase.com/auth/";
+	public static final String	_URL_PROXIBASE_SERVICE								= "http://api.aircandi.com:8080/";
+	public static final String	_URL_PROXIBASE_SERVICE_REST							= "http://api.aircandi.com:8080/data/";
+	public static final String	_URL_PROXIBASE_SERVICE_METHOD						= "http://api.aircandi.com:8080/do/";
+	public static final String	_URL_PROXIBASE_SERVICE_AUTH							= "http://api.aircandi.com:8080/auth/";
+	public static final String	URL_PROXIBASE_SERVICE								= "https://api.proxibase.com/";
+	public static final String	URL_PROXIBASE_SERVICE_REST							= "https://api.proxibase.com/data/";
+	public static final String	URL_PROXIBASE_SERVICE_METHOD						= "https://api.proxibase.com/do/";
+	public static final String	URL_PROXIBASE_SERVICE_AUTH							= "https://api.proxibase.com/auth/";
 	public static final String	URL_PROXIBASE_MEDIA									= "https://s3.amazonaws.com/";
 	public static final String	URL_PROXIBASE_SEARCH_IMAGES							= "https://api.datamarket.azure.com/Data.ashx/Bing/Search/v1/Image";
 

@@ -476,12 +476,14 @@ public class EntityForm extends FormActivity {
 									entity.rookie = true;
 									entity.createdDate = DateUtils.nowDate().getTime();
 									entity.modifiedDate = entity.createdDate;
+									
 									entity.ownerId = Aircandi.getInstance().getUser().id;
+									entity.creatorId = entity.ownerId;
+									entity.modifierId = entity.ownerId;
+									
 									entity.owner = Aircandi.getInstance().getUser();
 									entity.creator = Aircandi.getInstance().getUser();
 									entity.modifier = Aircandi.getInstance().getUser();
-									entity.creatorId = entity.ownerId;
-									entity.modifierId = entity.ownerId;
 
 									/*
 									 * Push to radar entities.
@@ -549,9 +551,10 @@ public class EntityForm extends FormActivity {
 								 * collection, that entity gets updated.
 								 */
 								gather(mEntityForForm);
-								mEntityForForm.modifierId = Aircandi.getInstance().getUser().id;
-								mEntityForForm.modifiedDate = DateUtils.nowDate().getTime();
-
+								/*
+								 * Service handles modifierId and modifiedDate based
+								 * on session info that is passed with the request.
+								 */
 								serviceResponse = updateEntityAtService(mEntityForForm);
 
 								if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -677,9 +680,10 @@ public class EntityForm extends FormActivity {
 				}
 
 				beacon.beaconType = BeaconType.Fixed.name().toLowerCase();
-				beacon.ownerId = Aircandi.getInstance().getUser().id;
-				beacon.creatorId = Aircandi.getInstance().getUser().id;
-				beacon.modifierId = Aircandi.getInstance().getUser().id;
+				/*
+				 * Owner, creator, and modifier are managed by the service using
+				 * the session info sent with the request.
+				 */
 				beacon.locked = false;
 
 				parameters.putString("beacon",

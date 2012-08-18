@@ -4,6 +4,7 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -31,6 +32,7 @@ public class DrawableManager {
 		mBitmapCache = new HashMap<String, SoftReference<Bitmap>>();
 	}
 
+	@SuppressLint("HandlerLeak")
 	@SuppressWarnings("deprecation")
 	public void fetchDrawableOnThread(final String uri, final PictureSearch.ViewHolder holder) {
 
@@ -96,6 +98,7 @@ public class DrawableManager {
 	 * We add a weak reference to the containing class which can
 	 * be checked when handling messages to ensure we don't leak memory.
 	 */
+	@SuppressLint("HandlerLeak")
 	class DrawableHandler extends Handler {
 
 		private final WeakReference<DrawableManager>	mDrawableManager;
@@ -108,5 +111,4 @@ public class DrawableManager {
 			return mDrawableManager;
 		}
 	}
-
 }

@@ -205,8 +205,6 @@ public class SignUpForm extends FormActivity {
 			mUser.email = mTextEmail.getText().toString().trim().toLowerCase();
 			mUser.name = mTextFullname.getText().toString().trim();
 			mUser.password = mTextPassword.getText().toString().trim();
-			mUser.createdDate = DateUtils.nowDate().getTime();
-			mUser.modifiedDate = mUser.createdDate;
 
 			Logger.d(this, "Inserting user: " + mUser.name);
 

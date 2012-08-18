@@ -738,7 +738,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 					Aircandi.settingsEditor.commit();
 
 					/* Make sure onPrepareOptionsMenu gets called */
-					((SherlockActivity) mActivity).invalidateOptionsMenu();
+					if (mPageName.equals("CandiMap")) {
+						((SherlockMapActivity) mActivity).invalidateOptionsMenu();
+					}
+					else {
+						((SherlockActivity) mActivity).invalidateOptionsMenu();
+					}
 
 					ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
 					Tracker.trackEvent("User", "Signout", null, 0);

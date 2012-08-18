@@ -1657,8 +1657,13 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		Query query = new Query("documents").filter("{\"type\":\"version\",\"target\":\"aircandi\"}");
 
-		ServiceRequest serviceRequest = new ServiceRequest(ProxiConstants.URL_PROXIBASE_SERVICE_REST, query, RequestType.Get, ResponseFormat.Json);
-		serviceRequest.setSuppressUI(true);
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
+				.setRequestType(RequestType.Get)
+				.setQuery(query)
+				.setSuppressUI(true)
+				.setResponseFormat(ResponseFormat.Json);
+		
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 		/*
