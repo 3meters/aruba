@@ -82,8 +82,16 @@ public class UserCandiList extends CandiList {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
-		mCommon.mActionBar.setHomeButtonEnabled(false);
+		if (mCommon.mEntityId != null) {
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+			mCommon.mActionBar.setHomeButtonEnabled(true);
+			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.User);
+			mCommon.mActionBar.setTitle(collection.title);
+		}
+		else {
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
+			mCommon.mActionBar.setHomeButtonEnabled(false);
+		}
 
 		new AsyncTask() {
 
@@ -94,7 +102,7 @@ public class UserCandiList extends CandiList {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				
+
 				ServiceResponse serviceResponse = new ServiceResponse();
 				EntityList<Entity> proxiEntities = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, EntityTree.User);
 				Boolean entityTreeEmpty = (ProxiExplorer.getInstance().getEntityModel().getUserEntities().size() == 0);
@@ -196,7 +204,7 @@ public class UserCandiList extends CandiList {
 
 	public void onListItemClick(View view) {
 		Logger.v(this, "List item clicked");
-				
+
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
 		IntentBuilder intentBuilder = new IntentBuilder(this, UserCandiForm.class);
 		intentBuilder.setCommandType(CommandType.View);

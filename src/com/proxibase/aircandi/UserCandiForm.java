@@ -34,6 +34,8 @@ public class UserCandiForm extends CandiForm {
 			mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 			mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 			mEntityModelUser = Aircandi.getInstance().getUser();
+			
+			mCommon.mActionBar.setTitle(mEntity.title);
 
 			/* Was likely deleted from the entity model */
 			if (mEntity == null) {

@@ -69,6 +69,8 @@ public class CandiList extends CandiActivity {
 				 */
 				EntityList<Entity> entitiesRadar = ProxiExplorer.getInstance().getEntityModel()
 						.getCollectionById(mCommon.mCollectionId, EntityTree.Radar);
+				Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
+				mCommon.mActionBar.setTitle(collection.title);
 				ServiceResponse serviceResponse = new ServiceResponse();
 				serviceResponse.data = entitiesRadar;
 				return serviceResponse;
