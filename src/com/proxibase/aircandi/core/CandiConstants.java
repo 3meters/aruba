@@ -31,13 +31,23 @@ public interface CandiConstants {
 	public static final int				LOCATION_POLLING_INTERVAL				= 300000;																// 5 minutes
 	public static final int				LOCATION_POLLING_TIMEOUT				= 60000;
 
-	public static final float			CANDI_VIEW_HALO							= 2.0f;
+	public static final boolean			RADAR_SCROLL_HORIZONTAL					= false;
+	public static final int				RADAR_STACK_COUNT						= 3;
+	public static final float			RADAR_PADDING_TOP						= 15f;
+	public static final float			RADAR_PADDING_BOTTOM					= 100f;
+	public static final float			RADAR_ZOOM								= 0.55f;
 
+	public static final float			CANDI_VIEW_HALO							= 2.0f;
+	public static final boolean			CANDI_VIEW_REFLECTION_SHOW				= false;
+
+	public static final float			CANDI_VIEW_HIGHLIGHT_THICKNESS			= 8.0f;
 	public static final float			CANDI_VIEW_SCALE						= 1.0f;
 	public static final int				CANDI_VIEW_WIDTH						= 250;
-	public static final int				CANDI_VIEW_SPACING						= 20;
+	public static final int				CANDI_VIEW_SPACING_VERTICAL				= 30;
+	public static final int				CANDI_VIEW_SPACING_HORIZONTAL			= 15;
 	public static final int				CANDI_VIEW_BODY_HEIGHT					= 250;
 	public static final int				CANDI_VIEW_TITLE_HEIGHT					= 100;
+	public static final int				CANDI_VIEW_TITLE_LINES					= 2;
 	public static final int				CANDI_VIEW_REFLECTION_HEIGHT			= 125;
 	public static final int				CANDI_VIEW_REFLECTION_GAP				= 1;
 	public static final int				CANDI_VIEW_TITLE_SPACER_HEIGHT			= 2;
@@ -45,6 +55,7 @@ public interface CandiConstants {
 	public static final int				CANDI_VIEW_HEIGHT						= CANDI_VIEW_BODY_HEIGHT
 																						+ CANDI_VIEW_TITLE_HEIGHT
 																						+ CANDI_VIEW_TITLE_SPACER_HEIGHT;
+
 	public static final int				CANDI_VIEW_ZOOMED_PADDING				= 10;
 	public static final int				CANDI_VIEW_BADGE_WIDTH					= 65;
 
@@ -147,7 +158,7 @@ public interface CandiConstants {
 
 	public static final float			DURATION_MULTIPLIER						= 1.0f;
 	public static final float			DURATION_ZOOM							= 0.5f * DURATION_MULTIPLIER;
-	public static final float			DURATION_BOUNCEBACK						= 1.0f * DURATION_MULTIPLIER;
+	public static final float			DURATION_BOUNCEBACK						= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_SLOTTING_MAJOR					= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_SLOTTING_MINOR					= 0.5f * DURATION_MULTIPLIER;
 	public static final float			DURATION_CANDIINFO_SHOW					= 0.4f * DURATION_MULTIPLIER;

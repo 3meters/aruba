@@ -58,7 +58,7 @@ public class CandiMap extends SherlockMapActivity {
 	private LocationManager			mLocationManager;
 	private LocationListener		mLocationListener;
 	private static double			RADIUS_EARTH	= 6378000;	// meters
-	private static double			SEARCH_RANGE	= 100;		// meters
+	private static double			SEARCH_RANGE	= 1000000;		// meters
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -103,7 +103,7 @@ public class CandiMap extends SherlockMapActivity {
 
 			public void run() {
 				mMapController.animateTo(mMyLocationOverlay.getMyLocation());
-				mMapController.setZoom(18);
+				mMapController.setZoom(16);
 			}
 		});
 
@@ -360,6 +360,7 @@ public class CandiMap extends SherlockMapActivity {
 
 		for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getMapBeacons()) {
 			if (beaconByLocation.entityCount.intValue() > 0
+					&& beaconByLocation.bssid != null
 					&& !beaconByLocation.bssid.equals(ProxiExplorer.globalBssid)
 					&& beaconByLocation.latitude != null
 					&& beaconByLocation.longitude != null) {

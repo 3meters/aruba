@@ -10,7 +10,7 @@ import com.proxibase.service.objects.Entity;
 public class EntityList<T> extends ArrayList<T> {
 
 	private static final long	serialVersionUID	= -2567383399125318332L;
-	private EntityTree		mCollectionType;
+	private EntityTree			mCollectionType;
 
 	/*
 	 * CollectionEntity is the entity that owns this collection. If CollectionEntity
@@ -142,6 +142,43 @@ public class EntityList<T> extends ArrayList<T> {
 				}
 				else {
 					return 0;
+				}
+			}
+		}
+	}
+
+	public static class SortCandiModelsBySignalLevelDiscoveryTimeModifiedDate implements Comparator<CandiModel> {
+
+		@Override
+		public int compare(CandiModel object1, CandiModel object2) {
+
+			Entity entity1 = object1.getEntity();
+			Entity entity2 = object2.getEntity();
+			/* Signal level */
+			if (entity1.beacon.getAvgBeaconLevel() > entity2.beacon.getAvgBeaconLevel()) {
+				return -1;
+			}
+			else if (entity1.beacon.getAvgBeaconLevel() < entity2.beacon.getAvgBeaconLevel()) {
+				return 1;
+			}
+			else {
+				/* Rounded to produce a 5 second bucket that will get further sorted by recent activity */
+				if ((entity1.discoveryTime.getTime() / 5000) > (entity2.discoveryTime.getTime() / 5000)) {
+					return -1;
+				}
+				else if ((entity1.discoveryTime.getTime() / 5000) < (entity2.discoveryTime.getTime() / 5000)) {
+					return 1;
+				}
+				else {
+					if (entity1.modifiedDate.longValue() > entity2.modifiedDate.longValue()) {
+						return -1;
+					}
+					else if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
+						return 1;
+					}
+					else {
+						return 0;
+					}
 				}
 			}
 		}

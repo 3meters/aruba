@@ -157,7 +157,7 @@ public class CandiForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
-
+	
 	public void onChildrenButtonClick(View v) {
 		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
 

@@ -78,6 +78,7 @@ import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.ICandiListener;
 import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter.TextureReset;
+import com.proxibase.aircandi.candi.sprites.CameraTargetSprite;
 import com.proxibase.aircandi.candi.views.ViewAction;
 import com.proxibase.aircandi.candi.views.ViewAction.ViewActionType;
 import com.proxibase.aircandi.components.AircandiCommon;
@@ -245,6 +246,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	private CandiPatchModel				mCandiPatchModel;
 	private CandiPatchPresenter			mCandiPatchPresenter;
 	private RenderSurfaceView			mCandiSurfaceView;
+
+	private float						mRadarWidth;
+	private float						mRadarHeight;
 
 	private Sound						mCandiAlertSound;
 	private ScreenOrientation			mScreenOrientation		= ScreenOrientation.PORTRAIT;
@@ -432,6 +436,10 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		}
 	}
 
+	public void onHelpButtonClick(View view) {
+		mCommon.showHelp(R.string.help_radar);
+	}
+	
 	private void onCandiSingleTap(final CandiModel candiModel) {
 		/*
 		 * This event bubbles up from user interaction with CandiViews. This can
@@ -444,7 +452,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * Route to here:
 		 * 
 		 * CandiView.onViewSingleTap (setup when candi view pool allocates)
-		 * CandiPatchPresenter.onCandiViewSingleTap
 		 * CandiRadar.onLoadScene.onSingleTap
 		 * CandiRadar.onCandiSingleTap
 		 */
@@ -1195,15 +1202,17 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		/* Adjusted for density */
 		int statusBarHeight = (int) FloatMath.ceil(CandiConstants.ANDROID_STATUSBAR_HEIGHT * displayMetrics.density);
 		int actionBarStackedHeight = (int) FloatMath.ceil((CandiConstants.ANDROID_ACTIONBAR_HEIGHT * 2) * displayMetrics.density);
+		int buttonBarHeight = (int) FloatMath.ceil(CandiConstants.ANDROID_ACTIONBAR_HEIGHT * displayMetrics.density);
+
 		int widthPixels = displayMetrics.widthPixels;
 		int heightPixels = displayMetrics.heightPixels;
 
 		if (widthPixels > heightPixels) {
 			widthPixels = displayMetrics.heightPixels;
 			heightPixels = displayMetrics.widthPixels;
-		}
+		}		
 
-		Camera camera = new ChaseCamera(0, 0, widthPixels, heightPixels - (actionBarStackedHeight + statusBarHeight)) {
+		Camera camera = new ChaseCamera(0, 0, widthPixels, heightPixels - (actionBarStackedHeight + statusBarHeight + buttonBarHeight)) {
 
 			@Override
 			public void onApplySceneMatrix(GL10 pGL) {
@@ -1221,6 +1230,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				mCandiPatchPresenter.setFrustum(pGL);
 			}
 		};
+		
+		mRadarWidth = camera.getWidth();
+		mRadarHeight = camera.getHeight();
 
 		EngineOptions options = new EngineOptions(false, mScreenOrientation, new FillResolutionPolicy(), camera);
 		options.setNeedsSound(true);
@@ -1246,6 +1258,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Logger.d(this, "Loading scene");
 		mCandiPatchPresenter = new CandiPatchPresenter(this, this, mEngine, mRenderSurfaceView, mCandiPatchModel);
 		mCommon.setCandiPatchPresenter(mCandiPatchPresenter);
+		mCandiPatchPresenter.setRadarHeight(mRadarHeight);
+		mCandiPatchPresenter.setRadarWidth(mRadarWidth);
+
 		Scene scene = mCandiPatchPresenter.initializeScene();
 
 		mCandiPatchModel.addObserver(mCandiPatchPresenter);
@@ -1663,7 +1678,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				.setQuery(query)
 				.setSuppressUI(true)
 				.setResponseFormat(ResponseFormat.Json);
-		
+
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 		/*

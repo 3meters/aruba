@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 import com.proxibase.aircandi.candi.models.CandiModel.Transition;
+import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.core.CandiConstants;
 
@@ -28,12 +29,13 @@ public class ZoneModel extends BaseModel {
 	}
 
 	private void initialize() {
-
-		/* Zones have a locked in position right from the beginning */
-		mViewStateCurrent.setX(mCandiPatchModel.getOriginX() + ((CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING) * mZoneIndex));
-		mViewStateCurrent.setY(mCandiPatchModel.getOriginY());
+		/* 
+		 * Zones have a locked in position right from the beginning 
+		 */
+		mViewStateCurrent.setX(mCandiPatchModel.getX(mZoneIndex) + CandiPatchPresenter.mRadarPaddingLeft);
+		mViewStateCurrent.setY(mCandiPatchModel.getY(mZoneIndex) + CandiPatchPresenter.mRadarPaddingTop);
 		mViewStateCurrent.setWidth(CandiConstants.CANDI_VIEW_WIDTH);
-		mViewStateCurrent.setWidth(CandiConstants.CANDI_VIEW_BODY_HEIGHT);
+		mViewStateCurrent.setHeight(CandiConstants.CANDI_VIEW_BODY_HEIGHT);
 	}
 
 	public void shiftToNext() {
@@ -115,8 +117,9 @@ public class ZoneModel extends BaseModel {
 
 		double index = 0;
 		for (IModel candiModel : candiModels) {
-			if (candiModel == candiModelTarget)
+			if (candiModel == candiModelTarget) {
 				break;
+			}
 			index++;
 		}
 
@@ -130,8 +133,9 @@ public class ZoneModel extends BaseModel {
 		position.colFirst = false;
 		position.colLast = false;
 
-		if (index > ZONE_CHILDREN_MAX_VISIBLE - 1)
+		if (index > ZONE_CHILDREN_MAX_VISIBLE - 1) {
 			index = ZONE_CHILDREN_MAX_VISIBLE - 1;
+		}
 
 		if (candiModelZoneStatus == ZoneStatus.Normal) {
 
@@ -243,8 +247,6 @@ public class ZoneModel extends BaseModel {
 					fixedY = 85;
 				}
 
-				//position.x = (float) (this.getViewStateCurrent().getX() + ((index % columns) * offsetX));
-				//position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY() + ((Math.floor(index / rows)) * offsetY));
 				position.x = (float) (this.getViewStateCurrent().getX() + fixedX);
 				position.y = (float) (CandiConstants.CANDI_VIEW_TITLE_HEIGHT + this.getViewStateCurrent().getY() + fixedY);
 			}
@@ -254,8 +256,9 @@ public class ZoneModel extends BaseModel {
 	}
 
 	public float getChildScaleCurrent(CandiModel candiModelTarget) {
-		if (mInactive)
+		if (mInactive) {
 			return 1.0f;
+		}
 
 		float scale = 1.0f;
 
@@ -279,10 +282,11 @@ public class ZoneModel extends BaseModel {
 	}
 
 	public float getChildScaleNext(CandiModel candiModelTarget) {
-		if (mInactive)
-			return 1.0f;
+		if (mInactive) {
+			return CandiConstants.CANDI_VIEW_SCALE;
+		}
 
-		float scale = 1.0f;
+		float scale = CandiConstants.CANDI_VIEW_SCALE;
 
 		if (candiModelTarget.getZoneStateNext().getStatus() == ZoneStatus.Normal) {
 			if (mCandiesNext.size() > 4) {
@@ -332,7 +336,7 @@ public class ZoneModel extends BaseModel {
 
 	public static class Position {
 
-		public float	scale		= 1.0f;
+		public float	scale		= CandiConstants.CANDI_VIEW_SCALE;
 		public float	x			= 0;
 		public float	y			= 0;
 		public int		row			= 0;

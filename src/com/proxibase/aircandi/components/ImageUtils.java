@@ -85,7 +85,7 @@ public class ImageUtils {
 		
 		float signalLevelPcnt = (signalLevelAbs - levelMin) / (levelMax - levelMin);
 		
-		float[] hsv = new float[]{(120 - (120 * signalLevelPcnt)), 0.9f, 1f};
+		float[] hsv = new float[]{(120 - (120 * signalLevelPcnt)), 1.0f, 0.85f};
 		return Color.HSVToColor(hsv);
 	}
 

@@ -15,6 +15,7 @@ import com.proxibase.aircandi.components.CandiList;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Entity;
 
 /**
@@ -35,9 +36,11 @@ public class CandiPatchModel extends Observable {
 	private CandiModel					mCandiModelSelected	= null;
 	private IModel						mCandiRootCurrent;
 	private IModel						mCandiRootNext;
-	private float						mOriginX;
-	private float						mOriginY;
 	private int							mScreenWidth;
+
+	// --------------------------------------------------------------------------------------------
+	// Initialization
+	// --------------------------------------------------------------------------------------------
 
 	public CandiPatchModel() {
 
@@ -46,13 +49,13 @@ public class CandiPatchModel extends Observable {
 		mZoneInactive.setInactive(true);
 	}
 
-	/**
-	 * Calling update() will notify observers of this and trigger notifications to
-	 * observers of child models. If atomically appropriate, update() can be called on
-	 * child models independent of this parent model. The changed status for child
-	 * models does not bubble up to this parent model.
-	 */
 	public void update() {
+		/*
+		 * Calling update() will notify observers of this and trigger notifications to
+		 * observers of child models. If atomically appropriate, update() can be called on
+		 * child models independent of this parent model. The changed status for child
+		 * models does not bubble up to this parent model.
+		 */
 
 		/*
 		 * The super class only updates observers if hasChanged == true.
@@ -93,12 +96,16 @@ public class CandiPatchModel extends Observable {
 			candiModel.shiftToNext();
 	}
 
-	/**
-	 * When new candi models are added they start out
-	 * in the inactive zone until they get properly assigned
-	 * during the updateZones pass.
-	 */
+	// --------------------------------------------------------------------------------------------
+	// Primary
+	// --------------------------------------------------------------------------------------------
+
 	public void addCandiModel(CandiModel candiModel) {
+		/*
+		 * When new candi models are added they start out
+		 * in the inactive zone until they get properly assigned
+		 * during the updateZones pass.
+		 */
 
 		mCandiModels.add(candiModel);
 
@@ -122,10 +129,11 @@ public class CandiPatchModel extends Observable {
 		super.setChanged();
 	}
 
-	/**
-	 * Updates if the model exists but never fails
-	 */
 	public CandiModel updateCandiModel(Entity entity, DisplayExtra displayExtra) {
+		/*
+		 * Updates if the model exists but never fails
+		 */
+
 		/*
 		 * This only gets called when doing a partial update and a candi model already exists. A partial
 		 * update only pulls in entities for new beacons but does not pick up service side changes for the
@@ -179,11 +187,12 @@ public class CandiPatchModel extends Observable {
 		if (candiModelManaged.getViewStateNext().isVisible() && candiModelManaged.getZoneStateCurrent().getZone().isInactive()) {
 
 			ZoneModel zoneTarget = null;
-			for (ZoneModel zone : mZoneModels)
+			for (ZoneModel zone : mZoneModels) {
 				if (zone.getCandiesCurrent().size() == 0) {
 					zoneTarget = zone;
 					break;
 				}
+			}
 
 			if (zoneTarget == null) {
 				zoneTarget = new ZoneModel(mZoneModels.size(), this);
@@ -305,25 +314,25 @@ public class CandiPatchModel extends Observable {
 					mCandiModelFocused = candiModel;
 				}
 
-//				/* Hookup any children */
-//				if (!candiModel.hasVisibleChildrenNext()) {
-//					candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
-//				}
-//				else {
-//					candiModel.getZoneStateNext().setStatus(ZoneStatus.Primary);
-//
-//					/* We might have children that are hidden even though the parent isn't. */
-//					for (IModel childModel : candiModel.getChildren()) {
-//						CandiModel childCandiModel = (CandiModel) childModel;
-//						childCandiModel.setChanged();
-//
-//						if (childCandiModel.getViewStateNext().isVisible()) {
-//							zone.getCandiesNext().add(childCandiModel);
-//							childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Secondary);
-//							childCandiModel.getZoneStateNext().setZone(zone);
-//						}
-//					}
-//				}
+				//				/* Hookup any children */
+				//				if (!candiModel.hasVisibleChildrenNext()) {
+				//					candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
+				//				}
+				//				else {
+				//					candiModel.getZoneStateNext().setStatus(ZoneStatus.Primary);
+				//
+				//					/* We might have children that are hidden even though the parent isn't. */
+				//					for (IModel childModel : candiModel.getChildren()) {
+				//						CandiModel childCandiModel = (CandiModel) childModel;
+				//						childCandiModel.setChanged();
+				//
+				//						if (childCandiModel.getViewStateNext().isVisible()) {
+				//							zone.getCandiesNext().add(childCandiModel);
+				//							childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Secondary);
+				//							childCandiModel.getZoneStateNext().setZone(zone);
+				//						}
+				//					}
+				//				}
 				zoneIndex++;
 			}
 		}
@@ -459,19 +468,23 @@ public class CandiPatchModel extends Observable {
 				candiModel.getViewStateNext().setCollapsed(candiModel.getViewStateNext().getScale() != CandiPatchPresenter.SCALE_NORMAL);
 
 				/* Include any children */
-//				for (IModel childModel : candiModel.getChildren()) {
-//					CandiModel childCandiModel = (CandiModel) childModel;
-//					childCandiModel.getViewStateNext().setHasReflection(childCandiModel.getZoneStateNext().getAlignment() == ZoneAlignment.Bottom);
-//					childCandiModel.getViewStateNext()
-//							.setCollapsed(childCandiModel.getViewStateNext().getScale() != CandiPatchPresenter.SCALE_NORMAL);
-//				}
+				//				for (IModel childModel : candiModel.getChildren()) {
+				//					CandiModel childCandiModel = (CandiModel) childModel;
+				//					childCandiModel.getViewStateNext().setHasReflection(childCandiModel.getZoneStateNext().getAlignment() == ZoneAlignment.Bottom);
+				//					childCandiModel.getViewStateNext()
+				//							.setCollapsed(childCandiModel.getViewStateNext().getScale() != CandiPatchPresenter.SCALE_NORMAL);
+				//				}
 			}
 		}
 	}
 
 	public void sortCandiModels(List list) {
-		Collections.sort(list, new EntityList.SortCandiModelsByDiscoveryTimeModifiedDate());
+		Collections.sort(list, new EntityList.SortCandiModelsBySignalLevelDiscoveryTimeModifiedDate());
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Setters/Getters
+	// --------------------------------------------------------------------------------------------
 
 	public ZoneModel getZoneNeighbor(ZoneModel targetZoneModel, boolean forward) {
 		int targetIndex = targetZoneModel.getZoneIndex();
@@ -549,12 +562,30 @@ public class CandiPatchModel extends Observable {
 		return mCandiRootNext;
 	}
 
-	public float getOriginX() {
-		return mOriginX;
+	public float getX(int zoneIndex) {
+		if (CandiConstants.RADAR_SCROLL_HORIZONTAL) {
+			int rank = (int) Math.floor(zoneIndex / CandiConstants.RADAR_STACK_COUNT);
+			float x = ((CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING_VERTICAL) * rank);
+			return x;
+		}
+		else {
+			int rank = (zoneIndex % CandiConstants.RADAR_STACK_COUNT);
+			float x = (CandiConstants.CANDI_VIEW_WIDTH * rank) + (CandiConstants.CANDI_VIEW_SPACING_VERTICAL * rank);
+			return x;
+		}
 	}
 
-	public float getOriginY() {
-		return mOriginY;
+	public float getY(int zoneIndex) {
+		if (CandiConstants.RADAR_SCROLL_HORIZONTAL) {
+			int rank = zoneIndex % CandiConstants.RADAR_STACK_COUNT;
+			float y = ((CandiConstants.CANDI_VIEW_HEIGHT + CandiConstants.CANDI_VIEW_SPACING_HORIZONTAL) * rank);
+			return y;
+		}
+		else {
+			int rank = (int) Math.floor(zoneIndex / CandiConstants.RADAR_STACK_COUNT); /* zero based */
+			float y = (CandiConstants.CANDI_VIEW_HEIGHT * rank) + (CandiConstants.CANDI_VIEW_SPACING_HORIZONTAL * rank);
+			return y;
+		}
 	}
 
 	public void setCandiModelFocused(CandiModel candiFocused) {
@@ -573,14 +604,6 @@ public class CandiPatchModel extends Observable {
 		mCandiModelSelected = candiSelected;
 	}
 
-	public void setOriginX(float originX) {
-		mOriginX = originX;
-	}
-
-	public void setOriginY(float originY) {
-		mOriginY = originY;
-	}
-
 	public void setCandiRootCurrent(IModel candiRootCurrent) {
 		mCandiRootCurrent = candiRootCurrent;
 	}
@@ -596,6 +619,10 @@ public class CandiPatchModel extends Observable {
 	public int getScreenWidth() {
 		return mScreenWidth;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Primary
+	// --------------------------------------------------------------------------------------------
 
 	public static enum Navigation {
 		Up,

@@ -74,7 +74,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:hint="@string/form_title_hint"
-                    android:inputType="textNoSuggestions" />
+                    android:inputType="textAutoCorrect" />
 
                 <EditText
                     android:id="@+id/text_content"
@@ -83,7 +83,7 @@
                     android:layout_weight="0"
                     android:gravity="top"
                     android:hint="@string/form_description_hint"
-                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:inputType="textMultiLine|textAutoCorrect"
                     android:minLines="5" />
 
                 <com.proxibase.aircandi.widgets.AuthorBlock

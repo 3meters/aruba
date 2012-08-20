@@ -94,7 +94,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/form_label_location"
-                    android:inputType="textPostalAddress|textNoSuggestions" />
+                    android:inputType="textPostalAddress|textAutoCorrect" />
 
                 <!-- Web link -->
 
@@ -103,7 +103,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/form_label_link"
-                    android:inputType="textUri|textNoSuggestions" />
+                    android:inputType="textUri" />
 
                 <!-- Bio -->
 
@@ -113,7 +113,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="top"
                     android:hint="@string/form_label_bio"
-                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:inputType="textMultiLine|textAutoCorrect"
                     android:minLines="5" />
             </LinearLayout>
 

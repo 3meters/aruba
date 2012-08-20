@@ -149,7 +149,7 @@ public abstract class BaseModel extends Observable implements IModel {
 		private float	mHeight			= CandiConstants.CANDI_VIEW_BODY_HEIGHT;
 		private float	mWidth			= CandiConstants.CANDI_VIEW_WIDTH;
 		private int		mZIndex;
-		private float	mScale			= 1.0f;
+		private float	mScale			= CandiConstants.CANDI_VIEW_SCALE;
 		private boolean	mZoomed			= false;
 		private boolean	mVisible		= false;
 		private boolean	mLastWithinHalo	= false;

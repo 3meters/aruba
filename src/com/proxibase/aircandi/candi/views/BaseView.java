@@ -49,6 +49,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	protected Object				mModel;
 
 	protected CandiRectangle		mProgressBarSprite;
+	protected CandiRectangle		mProximitySprite;
 
 	protected TextureRegion			mPlaceholderTextureRegion;
 	public CandiSprite				mPlaceholderSprite;
@@ -145,10 +146,19 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mProgressBarSprite.setVisible(false);
 		mProgressBarSprite.setZIndex(20);
 		mProgressBarSprite.setWidth((float) CandiConstants.CANDI_VIEW_WIDTH);
-		setProgressColor(Color.argb(256, 256, 212, 0));
-
+		mProgressBarSprite.setColor(1.0f, 0.8f, 0, 1.0f);
 		attachChild(mProgressBarSprite);
 
+		/* Proximity indicator */
+		mProximitySprite = new CandiRectangle(CandiConstants.CANDI_VIEW_WIDTH - 25
+				, CandiConstants.CANDI_VIEW_TITLE_HEIGHT - 40
+				, 25
+				, 25);
+		mProximitySprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
+		mProximitySprite.setVisible(true);
+		mProximitySprite.setZIndex(20);
+		setProximityColor(Color.argb(256, 256, 212, 0));
+		attachChild(mProximitySprite);
 		this.sortChildren();
 	}
 
@@ -258,14 +268,14 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		}
 	}
 
-	public void setProgressColor(int color) {
+	public void setProximityColor(int color) {
 		float red = Color.red(color);
 		float green = Color.green(color);
 		float blue = Color.blue(color);
 		float alpha = Color.alpha(color);
-		mProgressBarSprite.setColor(red / 255f, green / 255f, blue / 255f, alpha / 255f);
+		mProximitySprite.setColor(red / 255f, green / 255f, blue / 255f, alpha / 255f);
 	}
-	
+
 	protected Bitmap makeTextBitmap(int width, int height, int padding, boolean textOutline, CharSequence text) {
 
 		if (mTextView == null) {
@@ -276,7 +286,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTextView.setSingleLine(false);
 		mTextView.setText(text);
 		mTextView.setTextColor(mTitleTextColor);
-		mTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+		mTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, CandiConstants.CANDI_VIEW_FONT_SIZE);
 		if (textOutline) {
 			mTextView.setShadowLayer(1, 1, 1, 0xff000000);
 		}
@@ -284,14 +294,14 @@ public abstract class BaseView extends Entity implements Observer, IView {
 			mTextView.setShadowLayer(0, 0, 0, 0xff000000);
 		}
 		mTextView.setBackgroundColor(mTitleTextFillColor);
-		mTextView.setPadding(padding, padding, padding, 2);
+		mTextView.setPadding(padding, padding, 35, 2);
 		mTextView.setEllipsize(TruncateAt.END);
 
 		Bitmap bitmap = Bitmap.createBitmap(width, height, CandiConstants.IMAGE_CONFIG_DEFAULT);
 		Canvas canvas = new Canvas(bitmap);
 		mTextView.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 		mTextView.layout(0, 0, width, height);
-		mTextView.setMaxLines(4); /* Important to set this after measure/layout */
+		mTextView.setMaxLines(CandiConstants.CANDI_VIEW_TITLE_LINES); /* Important to set this after measure/layout */
 		mTextView.setGravity(Gravity.BOTTOM);
 		mTextView.setMirrorText(false);
 		mTextView.draw(canvas);

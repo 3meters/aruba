@@ -54,6 +54,7 @@ import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.CandiRadar.RefreshType;
 import com.proxibase.aircandi.CommentList;
 import com.proxibase.aircandi.FormActivity;
+import com.proxibase.aircandi.HelpForm;
 import com.proxibase.aircandi.Preferences;
 import com.proxibase.aircandi.ProfileForm;
 import com.proxibase.aircandi.R;
@@ -348,6 +349,22 @@ public class AircandiCommon implements ActionBar.TabListener {
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
 
+	public void showHelp(int helpResId) {
+		/*
+		 * Dialogs
+		 * 
+		 * To get the dialog activity to overlay the calling activity, the theme needs to be set on the activity in the
+		 * manifest in order to get the correct window features. The theme can then be modified by passing the desired
+		 * theme id to the dialog activity.
+		 */
+		Intent intent = new Intent(mActivity, HelpForm.class);
+		intent.putExtra(mActivity.getString(R.string.EXTRA_STRING_ID), R.string.help_radar);
+		intent.putExtra(mActivity.getString(R.string.EXTRA_THEME_ID), mThemeTone.equals("dark") ? R.style.Theme_Sherlock_Dialog
+				: R.style.Theme_Sherlock_Light_Dialog);
+		mActivity.startActivity(intent);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.HelpShow);
+	}
+	
 	@SuppressWarnings("unused")
 	public void showLocationAccuracy() {
 		final Location location = GeoLocationManager.getInstance().getCurrentLocation();

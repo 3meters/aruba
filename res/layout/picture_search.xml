@@ -32,7 +32,7 @@
             android:layout_weight="1"
             android:gravity="center|left"
             android:hint="@string/picture_search_query_hint"
-            android:inputType="text"
+            android:inputType="textAutoCorrect"
             android:singleLine="true" />
 
         <ImageView

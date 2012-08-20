@@ -57,7 +57,9 @@ public class AnimUtils {
 		CandiPageToMyCandi,
 		CandiPageToCandiMap,
 		CandiPageToCandiRadar,
-		CandiPageBack
+		CandiPageBack,
+		HelpShow,
+		HelpHide
 	}
 
 	public static void doOverridePendingTransition(Activity activity, TransitionType transitionType) {
@@ -105,6 +107,15 @@ public class AnimUtils {
 		}
 		else if (transitionType == TransitionType.FormToCandiPage) {
 			activity.overridePendingTransition(R.anim.hold, R.anim.fade_zoom_out);
+		}
+		/*
+		 * Jumping to and from help
+		 */
+		else if (transitionType == TransitionType.HelpShow) {
+			activity.overridePendingTransition(R.anim.help_zoom_in, R.anim.hold);
+		}
+		else if (transitionType == TransitionType.HelpHide) {
+			activity.overridePendingTransition(R.anim.hold, R.anim.help_zoom_out);
 		}
 	}
 

@@ -25,7 +25,7 @@ public class Logger {
 	 * Chatty stuff that is helpful in the logs while developing but will never used in release.
 	 */
 
-	private static int		LOG_LEVEL		= Log.DEBUG;
+	private static int		LOG_LEVEL		= Log.VERBOSE;
 	private static boolean	INCLUDE_MODULE	= true;
 
 	private static enum LogLevel {

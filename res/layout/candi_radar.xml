@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" xmlns:tools="http://schemas.android.com/tools">
+    android:layout_height="fill_parent" >
 
     <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true" >
 
         <RelativeLayout
@@ -13,6 +15,7 @@
             style="@style/dialog_radar_connect"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:layout_above="@+id/form_footer"
             android:gravity="center"
             android:padding="25dp"
             android:visibility="gone" >
@@ -78,7 +81,7 @@
             android:id="@+id/button_layer"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:visibility="visible" >
+            android:visibility="gone" >
 
             <Button
                 android:id="@+id/button_new"
@@ -100,9 +103,9 @@
         android:id="@+id/debug_wrapper_radar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/form_footer"
         android:visibility="gone" >
-
+
         <SlidingDrawer
             android:id="@+id/debug_drawer_radar"
             android:layout_width="fill_parent"
@@ -156,5 +159,42 @@
             </LinearLayout>
         </SlidingDrawer>
     </FrameLayout>
+
+    <!-- Footer -->
+
+    <RelativeLayout
+        android:id="@+id/form_footer"
+        style="?attr/buttonBarStyle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1px"
+            android:layout_alignParentTop="true"
+            android:background="?attr/ruleColor" />
+
+        <Button
+            android:id="@+id/button_new"
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:drawableLeft="?attr/iconNewCandi"
+            android:drawablePadding="5dp"
+            android:onClick="onNewCandiButtonClick"
+            android:text="@string/radar_button_new" />
+
+        <ImageButton
+            android:id="@+id/button_help"
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:onClick="onHelpButtonClick"
+            android:src="?attr/iconHelp"
+            android:text="@string/radar_button_help" />
+    </RelativeLayout>
 
 </RelativeLayout>

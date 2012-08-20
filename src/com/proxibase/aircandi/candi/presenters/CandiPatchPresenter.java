@@ -44,7 +44,6 @@ import android.opengl.GLU;
 import android.os.AsyncTask;
 import android.util.TypedValue;
 import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
@@ -66,7 +65,6 @@ import com.proxibase.aircandi.candi.models.ZoneModel;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
 import com.proxibase.aircandi.candi.modifiers.CandiAlphaModifier;
 import com.proxibase.aircandi.candi.sprites.CameraTargetSprite;
-import com.proxibase.aircandi.candi.sprites.CameraTargetSprite.MoveListener;
 import com.proxibase.aircandi.candi.sprites.CandiAnimatedSprite;
 import com.proxibase.aircandi.candi.sprites.CandiScene;
 import com.proxibase.aircandi.candi.views.CandiView;
@@ -107,9 +105,21 @@ public class CandiPatchPresenter implements Observer {
 	public CandiAnimatedSprite		mProgressSprite;
 	public Rectangle				mHighlight;
 	private float					mLastMotionX;
+	private float					mLastMotionY;
 	private CameraTargetSprite		mCameraTargetSprite;
 	private float					mBoundsMinX;
 	private float					mBoundsMaxX;
+	private float					mBoundsMinY;
+	private float					mBoundsMaxY;
+
+	private float					mRadarWidth;
+	private float					mRadarHeight;
+
+	public static float				mRadarPaddingLeft;
+	public static float				mRadarPaddingRight;
+	public static float				mRadarPaddingTop;
+	public static float				mRadarPaddingBottom;
+
 	private ChaseCamera				mCamera;
 	private Scene					mScene;
 	public Bitmap					mBitmapBadgeCollections;
@@ -174,10 +184,6 @@ public class CandiPatchPresenter implements Observer {
 		/* Pooling */
 		mCandiViewPool = new CandiViewPool(0, 1);
 
-		/* Origin */
-		mCandiPatchModel.setOriginX(0);
-		mCandiPatchModel.setOriginY(0);
-
 		/* Resource references per theme */
 		loadStyles();
 
@@ -219,21 +225,28 @@ public class CandiPatchPresenter implements Observer {
 		scene.setBackground(new ColorBackground(0, 0, 0, 0)); /* Transparent */
 		scene.setTouchAreaBindingEnabled(true);
 
+		float contentWidth = (CandiConstants.CANDI_VIEW_WIDTH * CandiConstants.RADAR_STACK_COUNT)
+				+ (CandiConstants.CANDI_VIEW_SPACING_VERTICAL * (CandiConstants.RADAR_STACK_COUNT - 1));
+		float paddingTotal = getRadarZoomedWidth() - contentWidth;
+
+		mRadarPaddingLeft = paddingTotal * 0.5f;
+		mRadarPaddingRight = paddingTotal - mRadarPaddingLeft;
+		mRadarPaddingTop = CandiConstants.RADAR_PADDING_TOP;
+		mRadarPaddingBottom = CandiConstants.RADAR_PADDING_BOTTOM;
+
 		{
 			/* Highlight */
 			mHighlight = new Rectangle(0, 0, 260, 260);
 			mHighlight.setColor(1.0f, 0.7f, 0f, 1.0f);
-			//mHighlight.setColor(0.2f, 0.7f, 0.9f, 0.6f);
 			mHighlight.setVisible(false);
 			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mHighlight);
 
 			/* Invisible entity used to scroll */
-			mCameraTargetSprite = new CameraTargetSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT, CandiConstants.CANDI_VIEW_WIDTH,
-					CandiConstants.CANDI_VIEW_BODY_HEIGHT, this);
+			mCameraTargetSprite = new CameraTargetSprite((getRadarZoomedWidth() * 0.5f), (getRadarZoomedHeight() * 0.5f), 0, 0, this);
 			mCameraTargetSprite.setColor(1, 0, 0, 0.2f);
 			mCameraTargetSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 			mCameraTargetSprite.setVisible(false);
-			mCameraTargetSprite.setScale(CandiConstants.CANDI_VIEW_SCALE);
+			mCameraTargetSprite.setScale(CandiConstants.RADAR_ZOOM);
 			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mCameraTargetSprite);
 
 			/* Tie camera position to target position. */
@@ -246,63 +259,100 @@ public class CandiPatchPresenter implements Observer {
 				public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent pSceneTouchEvent) {
 
 					/*
-					 * TouchEvent is world coordinates MotionEvent is screen coordinates
+					 * This gets called even when the touch is targeting a candiview.
+					 * 
+					 * TouchEvent is world coordinates 
+					 * MotionEvent is screen coordinates
 					 */
 					renderingActivate();
-					if (mFullUpdateInProgress || mIgnoreInput)
-						return true;
-
-					final float screenX = pSceneTouchEvent.getMotionEvent().getX();
-
-					/*
-					 * Check for a fling or double tap using the gesture detector
-					 */
-					if (mGestureDetector.onTouchEvent(pSceneTouchEvent.getMotionEvent())) {
+					if (mFullUpdateInProgress || mIgnoreInput) {
 						return true;
 					}
 
-					if (pSceneTouchEvent.isActionDown()) {
-						mLastMotionX = screenX;
-						mCameraTargetSprite.clearEntityModifiers();
-						return true;
-					}
+					if (CandiConstants.RADAR_SCROLL_HORIZONTAL) {
 
-					if (pSceneTouchEvent.isActionUp()) {
-						ZoneModel nearestZone = getNearestZone(mCameraTargetSprite.getX(), false);
-						if (nearestZone != null) {
-							mCandiPatchModel.setCandiModelFocused(nearestZone.getCandiesCurrent().get(0));
-							mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
-									CandiConstants.EASE_SLOTTING_MINOR, new MoveListener() {
+						final float screenX = pSceneTouchEvent.getMotionEvent().getX();
 
-										@Override
-										public void onMoveFinished() {
-											manageViewsAsync();
-										}
-
-										@Override
-										public void onMoveStarted() {}
-									});
-
-						}
-						return true;
-					}
-
-					if (pSceneTouchEvent.isActionMove()) {
-						if (mHighlight.isVisible()) {
-							mHighlight.setVisible(false);
+						/*
+						 * Check for a fling or double tap using the gesture detector
+						 */
+						if (mGestureDetector.onTouchEvent(pSceneTouchEvent.getMotionEvent())) {
+							return true;
 						}
 
-						float scrollX = mLastMotionX - screenX;
-						scrollX /= mCameraTargetSprite.getScaleX();
-						float cameraTargetX = mCameraTargetSprite.getX();
-
-						if (Math.abs(scrollX) >= 1) {
-							mCameraTargetSprite.setPosition(cameraTargetX + scrollX, mCameraTargetSprite.getY());
+						if (pSceneTouchEvent.isActionDown()) {
+							mLastMotionX = screenX;
+							mCameraTargetSprite.clearEntityModifiers();
+							return true;
 						}
-						mLastMotionX = screenX;
-						return true;
+						else if (pSceneTouchEvent.isActionUp()) {
+							return true;
+						}
+						else if (pSceneTouchEvent.isActionMove()) {
+							if (mHighlight.isVisible()) {
+								mHighlight.setVisible(false);
+							}
+
+							float scrollX = mLastMotionX - screenX;
+							scrollX /= mCameraTargetSprite.getScaleX();
+							float cameraTargetX = mCameraTargetSprite.getX();
+
+							if (Math.abs(scrollX) >= 1) {
+								mCameraTargetSprite.setPosition(cameraTargetX + scrollX, mCameraTargetSprite.getY());
+							}
+							mLastMotionX = screenX;
+							return true;
+						}
+						return false;
 					}
-					return false;
+					else {
+						final float screenY = pSceneTouchEvent.getMotionEvent().getY();
+
+						/*
+						 * Check for a fling or double tap using the gesture detector
+						 */
+						if (mGestureDetector.onTouchEvent(pSceneTouchEvent.getMotionEvent())) {
+							return true;
+						}
+
+						if (pSceneTouchEvent.isActionDown()) {
+							mLastMotionY = screenY;
+							mCameraTargetSprite.clearEntityModifiers();
+							return true;
+						}
+						else if (pSceneTouchEvent.isActionUp()) {
+							/*
+							 * Check to see if we ended up outside a boundary
+							 */
+							renderingActivate();
+							float cameraTargetY = mCameraTargetSprite.getY();
+							if (cameraTargetY <= mBoundsMinY) {
+								mCameraTargetSprite.moveToTop(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
+								return false;
+							}
+							else if (cameraTargetY >= mBoundsMaxY) {
+								mCameraTargetSprite.moveToBottom(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
+								return false;
+							}
+							return true;
+						}
+						else if (pSceneTouchEvent.isActionMove()) {
+							if (mHighlight.isVisible()) {
+								mHighlight.setVisible(false);
+							}
+
+							float scrollY = mLastMotionY - screenY;
+							scrollY /= mCameraTargetSprite.getScaleY();
+							float cameraTargetY = mCameraTargetSprite.getY();
+
+							if (Math.abs(scrollY) >= 1) {
+								mCameraTargetSprite.setPosition(mCameraTargetSprite.getX(), cameraTargetY + scrollY);
+							}
+							mLastMotionY = screenY;
+							return true;
+						}
+						return false;
+					}
 				}
 			});
 		}
@@ -341,7 +391,7 @@ public class CandiPatchPresenter implements Observer {
 		if (mContext.getTheme().resolveAttribute(R.attr.textColorRadar, resourceName, true)) {
 			mStyleTextColorTitle = (String) resourceName.coerceToString();
 		}
-		
+
 		if (mContext.getTheme().resolveAttribute(R.attr.textOutlineRadar, resourceName, true)) {
 			mStyleTextOutlineTitle = Boolean.parseBoolean((String) resourceName.coerceToString());
 		}
@@ -683,9 +733,6 @@ public class CandiPatchPresenter implements Observer {
 			doTransitionAnimations(navigation);
 		}
 
-		/* Candies come and go so make sure our zone positioning is correct */
-		ensureZoneFocus();
-
 		/* Trigger epoch observer updates */
 		if (!delayObserverUpdate) {
 			mCandiPatchModel.update();
@@ -702,29 +749,6 @@ public class CandiPatchPresenter implements Observer {
 		 */
 		mEngine.getScene().getChild(CandiConstants.LAYER_CANDI).sortChildren();
 
-		/* Without animations, we can lazy create views. */
-		//		if (!CandiConstants.TRANSITIONS_ACTIVE) {
-		//			manageViewsAsync();
-		//		}
-
-		/* Make sure we have a current candi and UI is centered on it */
-		if (fullUpdate) {
-			mFullUpdateInProgress = false;
-			if (mCandiPatchModel.getZonesOccupiedNextCount() > 0) {
-				mCandiPatchModel.setCandiModelFocused(mCandiPatchModel.getZones().get(0).getCandiesNext().get(0));
-				mCameraTargetSprite.moveToZone(mCandiPatchModel.getZones().get(0), 0.5f);
-			}
-		}
-		else {
-			if (mCandiPatchModel.getCandiModelFocused() == null) {
-				ZoneModel zoneModel = getNearestZone(mCameraTargetSprite.getX(), false);
-				if (zoneModel != null && zoneModel.getCandiesCurrent().size() > 0) {
-					mCandiPatchModel.setCandiModelFocused(getNearestZone(mCameraTargetSprite.getX(), false).getCandiesCurrent().get(0));
-					mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
-							CandiConstants.EASE_SLOTTING_MINOR);
-				}
-			}
-		}
 	}
 
 	private IView ensureZoneView(ZoneModel zoneModel) {
@@ -814,15 +838,14 @@ public class CandiPatchPresenter implements Observer {
 				}
 			});
 
+			/*
+			 * My touch listener that gets called after the touch
+			 * has been examined by the candiview.
+			 */
 			candiView.setViewTouchListener(new ViewTouchListener() {
 
 				@Override
-				public void onViewDoubleTap(IView view) {
-					if (!mIgnoreInput) {
-						mIgnoreInput = true;
-						doCandiViewDoubleTap(candiView);
-					}
-				}
+				public void onViewDoubleTap(IView view) {}
 
 				@Override
 				public void onViewLongPress(IView view) {}
@@ -831,7 +854,15 @@ public class CandiPatchPresenter implements Observer {
 				public void onViewSingleTap(IView view) {
 					if (!mIgnoreInput) {
 						mIgnoreInput = true;
-						doCandiViewSingleTap(candiView);
+						renderingActivate();
+
+						final CandiModel candiModel = (CandiModel) candiView.getModel();
+						Logger.d(this, "SingleTap triggered: " + candiModel.getEntity().label);
+
+						mCandiPatchModel.setCandiModelFocused(candiModel);
+						if (mCandiListener != null) {
+							mCandiListener.onSingleTap(candiModel);
+						}
 					}
 				}
 			});
@@ -1113,93 +1144,6 @@ public class CandiPatchPresenter implements Observer {
 		mManageViewsThread.setPriority(Thread.MIN_PRIORITY);
 		mManageViewsThread.setName("ViewManagerThread");
 		mManageViewsThread.start();
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Event handlers
-	// --------------------------------------------------------------------------------------------
-
-	private void doCandiViewSingleTap(IView candiView) {
-		renderingActivate();
-
-		final CandiModel candiModel = (CandiModel) candiView.getModel();
-		Logger.d(this, "SingleTap triggered: " + candiModel.getEntity().label);
-
-		mCandiPatchModel.setCandiModelFocused(candiModel);
-		float distanceToMove = Math.abs(mCameraTargetSprite.getX() - candiModel.getZoneStateCurrent().getZone().getViewStateCurrent().getX());
-
-		if (distanceToMove != 0) {
-
-			mCameraTargetSprite.clearEntityModifiers();
-			mCameraTargetSprite.moveToZone(candiModel.getZoneStateCurrent().getZone(), CandiConstants.DURATION_SLOTTING_MAJOR,
-					CandiConstants.EASE_SLOTTING_MAJOR,
-					new MoveListener() {
-
-						@Override
-						public void onMoveFinished() {
-							//							if (candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Secondary) {
-							//								mCandiRadarActivity.runOnUiThread(new Runnable() {
-							//
-							//									@Override
-							//									public void run() {
-							//										CandiModel candiParent = (CandiModel) candiModel.getParent();
-							//										Entity entityParent = candiParent.getEntity();
-							//										navigateModel(candiModel.getParent(), false, false, Navigation.Down, false);
-							//										mCandiRadarActivity.getCommon().setActionBarTitleAndIcon(null, entityParent.title, true);
-							//										mIgnoreInput = false;
-							//									}
-							//								});
-							//							}
-							//							else {
-							if (mCandiListener != null) {
-								mCandiListener.onSingleTap(candiModel);
-							}
-							//							}
-						}
-
-						@Override
-						public void onMoveStarted() {}
-					});
-		}
-		else {
-			/*
-			 * Fan out child candi in Radar
-			 */
-			//			if (candiModel.getZoneStateCurrent().getStatus() == ZoneStatus.Secondary) {
-			//				CandiModel candiParent = (CandiModel) candiModel.getParent();
-			//				Entity entityParent = candiParent.getEntity();
-			//				navigateModel(candiModel.getParent(), false, false, Navigation.Down, false);
-			//				mCandiRadarActivity.getCommon().setActionBarTitleAndIcon(null, entityParent.title, true);
-			//
-			//				mIgnoreInput = false;
-			//			}
-			//			else {
-			if (mCandiListener != null) {
-				mCandiListener.onSingleTap(candiModel);
-			}
-			//			}
-		}
-	}
-
-	private void doCandiViewDoubleTap(IView candiView) {
-		final CandiModel candiModel = (CandiModel) candiView.getModel();
-		Logger.d(this, "DoubleTap triggered: " + candiModel.getEntity().label);
-
-		float fromScale = mCameraTargetSprite.getScaleX();
-		float toScale = 1;
-
-		if (mCameraTargetSprite.getScaleX() == 1) {
-			float fullWidth = mCamera.getSurfaceWidth() - (CandiConstants.CANDI_VIEW_ZOOMED_PADDING * 2);
-			float fullHeight = mCamera.getSurfaceHeight() - (CandiConstants.CANDI_VIEW_ZOOMED_PADDING * 2);
-			float toScaleWidth = fullWidth / CandiConstants.CANDI_VIEW_WIDTH;
-			float toScaleHeight = fullHeight / CandiConstants.CANDI_VIEW_BODY_HEIGHT;
-			toScale = toScaleWidth < toScaleHeight ? toScaleWidth : toScaleHeight;
-		}
-
-		mCameraTargetSprite.registerEntityModifier(new ParallelEntityModifier(new ScaleModifier(CandiConstants.DURATION_ZOOM, fromScale, toScale,
-				EaseQuartInOut.getInstance())));
-
-		mIgnoreInput = false;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1500,25 +1444,6 @@ public class CandiPatchPresenter implements Observer {
 		}
 	}
 
-	private void ensureZoneFocus() {
-		/*
-		 * If candi with current focus is going away, move camera target to another entity before other moves/shows
-		 * happen.
-		 */
-		if (mCandiPatchModel.getCandiModelFocused() != null
-				&& mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone().getZoneIndex() + 1 > mCandiPatchModel
-						.getZonesOccupiedNextCount()) {
-			ZoneModel zoneModel = getZoneContainsCandiNext(mCandiPatchModel.getCandiModelFocused());
-			if (zoneModel != null) {
-				mCameraTargetSprite.moveToZone(zoneModel, CandiConstants.DURATION_SLOTTING_MAJOR, CandiConstants.EASE_SLOTTING_MAJOR);
-			}
-			else {
-				mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), true), CandiConstants.DURATION_SLOTTING_MAJOR,
-						CandiConstants.EASE_SLOTTING_MAJOR);
-			}
-		}
-	}
-
 	private void setCameraBoundaries(Scene scene) {
 
 		/* Find first occupied zone */
@@ -1529,10 +1454,24 @@ public class CandiPatchPresenter implements Observer {
 				break;
 			}
 		}
+		/*
+		 * We have an occupied zone
+		 */
 		if (firstOccupiedZone != null) {
-			mBoundsMinX = firstOccupiedZone.getViewStateCurrent().getX();
-			mBoundsMaxX = (mBoundsMinX + (mCandiPatchModel.getZonesOccupiedCurrentCount() - 1)
-					* (CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING));
+			int ranks = (int) Math.ceil(mCandiPatchModel.getZonesOccupiedCurrentCount() / CandiConstants.RADAR_STACK_COUNT);
+			if (CandiConstants.RADAR_SCROLL_HORIZONTAL) {
+				mBoundsMinX = mRadarWidth * 0.5f;
+				mBoundsMaxX = (mBoundsMinX + ((ranks - 1) * (CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING_VERTICAL)));
+			}
+			else {
+				mBoundsMinY = getRadarZoomedHeight() * 0.5f;
+				mBoundsMaxY = mBoundsMinY;
+
+				float boundsMaxY = ((CandiConstants.CANDI_VIEW_HEIGHT * (ranks + 1)) + (CandiConstants.CANDI_VIEW_SPACING_VERTICAL * ranks) - mBoundsMaxY) + CandiConstants.RADAR_PADDING_BOTTOM;
+				if (boundsMaxY > mBoundsMaxY) {
+					mBoundsMaxY = boundsMaxY;
+				}
+			}
 		}
 	}
 
@@ -1788,18 +1727,51 @@ public class CandiPatchPresenter implements Observer {
 	// Utility routines
 	// --------------------------------------------------------------------------------------------
 
-	private ZoneModel getNearestZone(float nearestToX, boolean requireOccupiedNext) {
-		if (mCandiPatchModel.getZonesOccupiedNextCount() == 0)
+	private ZoneModel getNearestZone(float nearestToAxis, boolean requireOccupiedNext) {
+		if (mCandiPatchModel.getZonesOccupiedNextCount() == 0) {
 			return null;
+		}
 
 		int nearestIndex = 0;
 		float smallestDistance = 999999;
 
 		for (ZoneModel zone : mCandiPatchModel.getZones()) {
-			if (requireOccupiedNext && !zone.isOccupiedNext())
+			if (requireOccupiedNext && !zone.isOccupiedNext()) {
 				continue;
+			}
 			if (zone.getCandiesCurrent().size() > 0) {
-				float distance = Math.abs(zone.getViewStateCurrent().getX() - nearestToX);
+				float distance = 0;
+				if (CandiConstants.RADAR_SCROLL_HORIZONTAL) {
+					distance = Math.abs(zone.getViewStateCurrent().getX() - nearestToAxis);
+				}
+				else {
+					distance = Math.abs(zone.getViewStateCurrent().getY() - nearestToAxis);
+				}
+				if (distance < smallestDistance) {
+					nearestIndex = zone.getZoneIndex();
+					smallestDistance = distance;
+				}
+			}
+		}
+
+		return mCandiPatchModel.getZones().get(nearestIndex);
+	}
+
+	@SuppressWarnings("unused")
+	private ZoneModel getNearestCenterZone(float nearestToAxis, boolean requireOccupiedNext) {
+		if (mCandiPatchModel.getZonesOccupiedNextCount() == 0) {
+			return null;
+		}
+
+		int nearestIndex = 0;
+		float smallestDistance = 999999;
+
+		for (ZoneModel zone : mCandiPatchModel.getZones()) {
+			if (requireOccupiedNext && !zone.isOccupiedNext()) {
+				continue;
+			}
+			if (zone.getCandiesCurrent().size() > 0) {
+				float distance = Math.abs(zone.getViewStateCurrent().getX() - nearestToAxis);
 				if (distance < smallestDistance) {
 					nearestIndex = zone.getZoneIndex();
 					smallestDistance = distance;
@@ -1822,6 +1794,7 @@ public class CandiPatchPresenter implements Observer {
 		return null;
 	}
 
+	@SuppressWarnings("unused")
 	private ZoneModel getZoneContainsCandiNext(CandiModel candiModelTarget) {
 		if (mCandiPatchModel.getZonesOccupiedNextCount() == 0)
 			return null;
@@ -1840,10 +1813,6 @@ public class CandiPatchPresenter implements Observer {
 	// --------------------------------------------------------------------------------------------
 	// Setters/Getters
 	// --------------------------------------------------------------------------------------------
-
-	public void setCameraTarget(CameraTargetSprite mCameraTarget) {
-		mCameraTargetSprite = mCameraTarget;
-	}
 
 	public void setCandiListener(ICandiListener listener) {
 		mCandiListener = listener;
@@ -1961,6 +1930,70 @@ public class CandiPatchPresenter implements Observer {
 		mStyleTextOutlineTitle = styleTextOutlineTitle;
 	}
 
+	public float getRadarWidth() {
+		return mRadarWidth;
+	}
+
+	public void setRadarWidth(float radarWidth) {
+		mRadarWidth = radarWidth;
+	}
+
+	public float getRadarHeight() {
+		return mRadarHeight;
+	}
+
+	public void setRadarHeight(float radarHeight) {
+		mRadarHeight = radarHeight;
+	}
+
+	public float getBoundsMinY() {
+		return mBoundsMinY;
+	}
+
+	public float getBoundsMaxY() {
+		return mBoundsMaxY;
+	}
+
+	public float getRadarPaddingLeft() {
+		return mRadarPaddingLeft;
+	}
+
+	public void setRadarPaddingLeft(float radarPaddingLeft) {
+		mRadarPaddingLeft = radarPaddingLeft;
+	}
+
+	public float getRadarPaddingRight() {
+		return mRadarPaddingRight;
+	}
+
+	public void setRadarPaddingRight(float radarPaddingRight) {
+		mRadarPaddingRight = radarPaddingRight;
+	}
+
+	public float getRadarPaddingTop() {
+		return mRadarPaddingTop;
+	}
+
+	public void setRadarPaddingTop(float radarPaddingTop) {
+		mRadarPaddingTop = radarPaddingTop;
+	}
+
+	public float getRadarPaddingBottom() {
+		return mRadarPaddingBottom;
+	}
+
+	public void setRadarPaddingBottom(float radarPaddingBottom) {
+		mRadarPaddingBottom = radarPaddingBottom;
+	}
+
+	public float getRadarZoomedWidth() {
+		return mRadarWidth * (1 / CandiConstants.RADAR_ZOOM);
+	}
+
+	public float getRadarZoomedHeight() {
+		return mRadarHeight * (1 / CandiConstants.RADAR_ZOOM);
+	}
+
 	private class RenderCountDownTimer extends CountDownTimer {
 
 		/*
@@ -1994,91 +2027,129 @@ public class CandiPatchPresenter implements Observer {
 
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-
 			/*
 			 * This gets called because the gesture detector thinks it has a fling gesture
 			 */
 
-			/* Test for swipe that is too vertical to trigger a fling */
-			if (e1 != null && e2 != null) {
-				if (Math.abs(e1.getY() - e2.getY()) > CandiConstants.SWIPE_MAX_OFF_PATH) {
+			/*
+			 * Horizontal scrolling
+			 */
+			if (CandiConstants.RADAR_SCROLL_HORIZONTAL) {
+
+				/* Test for swipe that is too vertical to trigger a fling */
+				if (e1 != null && e2 != null) {
+					if (Math.abs(e1.getY() - e2.getY()) > CandiConstants.SWIPE_MAX_OFF_PATH) {
+						return false;
+					}
+				}
+
+				/* Check to see if we are at a boundary */
+				renderingActivate();
+				float cameraTargetX = mCameraTargetSprite.getX() + 125;
+				if (cameraTargetX <= mBoundsMinX || cameraTargetX >= mBoundsMaxX) {
 					return false;
 				}
-			}
 
-			/* Check to see if we are at a boundary */
-			renderingActivate();
-			float cameraTargetX = mCameraTargetSprite.getX() + 125;
-			if (cameraTargetX <= mBoundsMinX || cameraTargetX >= mBoundsMaxX) {
-				mCameraTargetSprite
-						.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_BOUNCEBACK,
-								CandiConstants.EASE_BOUNCE_BACK);
-				return false;
-			}
+				/* The velocity units are in pixels per second. */
+				final float distanceTimeFactor = 0.8f;
+				final float totalDx = (distanceTimeFactor * velocityX / 2);
 
-			/* The velocity units are in pixels per second. */
-			final float distanceTimeFactor = 0.8f;
-			final float totalDx = (distanceTimeFactor * velocityX / 2);
+				/* Cap the distance we travel so we don't race past our boundaries */
+				float targetX = mCameraTargetSprite.getX() - totalDx;
 
-			/* Cap the distance we travel so we don't race past our boundaries */
-			float targetX = mCameraTargetSprite.getX() - totalDx;
-
-			// boolean smallFling = (Math.abs(totalDx) <=
-			// CandiConstants.SWIPE_SMALL_FLING);
-			// if (smallFling) {
-			// ZoneModel targetZoneModel =
-			// mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone();
-			// ZoneModel nextZoneModel =
-			// mCandiPatchModel.getZoneNeighbor(targetZoneModel, totalDx < 0 ?
-			// true : false);
-			// if (nextZoneModel != null) {
-			// targetX = mCameraTargetSprite.getX() -
-			// nextZoneModel.getViewStateCurrent().getX();
-			// }
-			// }
-
-			if (targetX > mBoundsMaxX - 50) {
-				targetX = mBoundsMaxX - 50;
-			}
-			else if (targetX < mBoundsMinX) {
-				targetX = mBoundsMinX - 150;
-			}
-
-			// final String info = "targetX = " + String.valueOf(targetX) +
-			// " totalDx = " + String.valueOf(totalDx);
-
-			mCameraTargetSprite.registerEntityModifier(new MoveModifier(distanceTimeFactor, mCameraTargetSprite.getX(), targetX, mCameraTargetSprite
-					.getY(), mCameraTargetSprite.getY(), new IEntityModifierListener() {
-
-				@Override
-				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-
-					ZoneModel zoneModel = getNearestZone(mCameraTargetSprite.getX(), false);
-					if (zoneModel != null) {
-						CandiModel candiModel = zoneModel.getCandiesCurrent().get(0);
-						if (candiModel != null) {
-							mCandiPatchModel.setCandiModelFocused(zoneModel.getCandiesCurrent().get(0));
-
-							mCameraTargetSprite.moveToZone(zoneModel, CandiConstants.DURATION_SLOTTING_MINOR,
-									CandiConstants.EASE_SLOTTING_MINOR, new MoveListener() {
-
-										@Override
-										public void onMoveFinished() {
-											manageViewsAsync();
-										}
-
-										@Override
-										public void onMoveStarted() {}
-									});
-						}
-					}
-
+				if (targetX > mBoundsMaxX - 50) {
+					targetX = mBoundsMaxX - 50;
+				}
+				else if (targetX < mBoundsMinX) {
+					targetX = mBoundsMinX - 150;
 				}
 
-				@Override
-				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+				mCameraTargetSprite.registerEntityModifier(new MoveModifier(distanceTimeFactor
+						, mCameraTargetSprite.getX()
+						, targetX
+						, mCameraTargetSprite.getY()
+						, mCameraTargetSprite.getY()
+						, new IEntityModifierListener() {
 
-			}, CandiConstants.EASE_FLING));
+							@Override
+							public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+
+								ZoneModel zoneModel = getNearestZone(mCameraTargetSprite.getX(), false);
+								if (zoneModel != null) {
+									CandiModel candiModel = zoneModel.getCandiesCurrent().get(0);
+									if (candiModel != null) {
+										mCandiPatchModel.setCandiModelFocused(zoneModel.getCandiesCurrent().get(0));
+									}
+								}
+							}
+
+							@Override
+							public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+
+						}
+						, CandiConstants.EASE_FLING));
+			}
+			else {
+
+				/* Test for swipe that is too vertical to trigger a fling */
+				if (e1 != null && e2 != null) {
+					if (Math.abs(e1.getX() - e2.getX()) > CandiConstants.SWIPE_MAX_OFF_PATH) {
+						return false;
+					}
+				}
+
+				/* Check to see if we are at a boundary */
+				renderingActivate();
+				float cameraTargetY = mCameraTargetSprite.getY();
+				if (cameraTargetY <= mBoundsMinY) {
+					mCameraTargetSprite.moveToTop(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
+					return false;
+				}
+				else if (cameraTargetY >= mBoundsMaxY) {
+					mCameraTargetSprite.moveToBottom(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
+					return false;
+				}
+
+				/* The velocity units are in pixels per second. */
+				final float distanceTimeFactor = 0.8f;
+				final float totalDy = (distanceTimeFactor * velocityY / 2);
+
+				/* Cap the distance we travel so we don't race past our boundaries */
+				float targetY = mCameraTargetSprite.getY() - totalDy;
+
+				if (targetY > getBoundsMaxY() - 50) {
+					targetY = getBoundsMaxY() - 50;
+				}
+				else if (targetY < getBoundsMinY()) {
+					targetY = getBoundsMinY() - 150;
+				}
+
+				mCameraTargetSprite.registerEntityModifier(new MoveModifier(distanceTimeFactor
+						, mCameraTargetSprite.getX()
+						, mCameraTargetSprite.getX()
+						, mCameraTargetSprite.getY()
+						, targetY
+						, new IEntityModifierListener() {
+
+							@Override
+							public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+								/* Check to see if we ended up past a boundary */
+								renderingActivate();
+								float cameraTargetY = mCameraTargetSprite.getY();
+								if (cameraTargetY <= mBoundsMinY) {
+									mCameraTargetSprite.moveToTop(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
+								}
+								else if (cameraTargetY >= mBoundsMaxY) {
+									mCameraTargetSprite.moveToBottom(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
+								}
+							}
+
+							@Override
+							public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+
+						}
+						, CandiConstants.EASE_FLING));
+			}
 
 			return true;
 		}
@@ -2102,76 +2173,6 @@ public class CandiPatchPresenter implements Observer {
 		@Override
 		public boolean onSingleTapUp(MotionEvent e) {
 			return false;
-		}
-	}
-
-	@SuppressWarnings("unused")
-	private class DoubleTapGestureDetector extends SimpleOnGestureListener {
-
-		@Override
-		public boolean onDoubleTap(MotionEvent e) {
-			return false;
-		}
-
-		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-
-			/*
-			 * This gets called because the gesture detector thinks its has a fling gesture
-			 */
-
-			/* Test for swipe that is too vertical to trigger a fling */
-			if (Math.abs(e1.getY() - e2.getY()) > CandiConstants.SWIPE_MAX_OFF_PATH) {
-				return false;
-			}
-
-			/* Check to see if we are at a boundary */
-			float cameraTargetX = mCameraTargetSprite.getX() + 125;
-			if (cameraTargetX <= mBoundsMinX || cameraTargetX >= mBoundsMaxX) {
-				mCameraTargetSprite
-						.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_BOUNCEBACK,
-								CandiConstants.EASE_BOUNCE_BACK);
-				return false;
-			}
-
-			/* The velocity units are in pixels per second. */
-			final float distanceTimeFactor = 0.8f;
-			final float totalDx = (distanceTimeFactor * velocityX / 2);
-			boolean smallFling = (Math.abs(totalDx) <= CandiConstants.SWIPE_SMALL_FLING);
-
-			/* Cap the distance we travel so we don't race past our boundaries */
-			float targetX = mCameraTargetSprite.getX() - totalDx;
-
-			if (smallFling) {
-				ZoneModel targetZoneModel = mCandiPatchModel.getCandiModelFocused().getZoneStateCurrent().getZone();
-				ZoneModel nextZoneModel = mCandiPatchModel.getZoneNeighbor(targetZoneModel, totalDx < 0 ? true : false);
-				if (nextZoneModel != null)
-					targetX = mCameraTargetSprite.getX() - nextZoneModel.getViewStateCurrent().getX();
-			}
-
-			if (targetX > mBoundsMaxX - 50) {
-				targetX = mBoundsMaxX - 50;
-			}
-			else if (targetX < mBoundsMinX) {
-				targetX = mBoundsMinX - 150;
-			}
-
-			mCameraTargetSprite.registerEntityModifier(new MoveModifier(distanceTimeFactor, mCameraTargetSprite.getX(), targetX, mCameraTargetSprite
-					.getY(), mCameraTargetSprite.getY(), new IEntityModifierListener() {
-
-				@Override
-				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-					mCandiPatchModel.setCandiModelFocused(getNearestZone(mCameraTargetSprite.getX(), false).getCandiesCurrent().get(0));
-					mCameraTargetSprite.moveToZone(getNearestZone(mCameraTargetSprite.getX(), false), CandiConstants.DURATION_SLOTTING_MINOR,
-							CandiConstants.EASE_SLOTTING_MINOR);
-				}
-
-				@Override
-				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
-
-			}, CandiConstants.EASE_FLING));
-
-			return true;
 		}
 	}
 

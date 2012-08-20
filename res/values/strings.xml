@@ -8,7 +8,7 @@
     <string name="name_entity_type_post">Post</string>
     <string name="name_entity_type_link">Link</string>
     <string name="name_entity_type_collection">Collection</string>
-    
+
     <!-- Application -->
 
     <string name="EXTRA_PARENT_ENTITY_ID">com.proxibase.aircandi.EXTRA_PARENT_ENTITY_ID</string>
@@ -25,9 +25,10 @@
     <string name="EXTRA_ENTITY_TREE">com.proxibase.aircandi.EXTRA_ENTITY_TREE</string>
     <string name="EXTRA_COLLECTION_ID">com.proxibase.aircandi.EXTRA_COLLECTION_ID</string>
     <string name="EXTRA_THEME_ID">com.proxibase.aircandi.EXTRA_THEME_ID</string>
+    <string name="EXTRA_STRING_ID">com.proxibase.aircandi.EXTRA_STRING_ID</string>
     <string name="EXTRA_COMMAND_TYPE">com.proxibase.aircandi.EXTRA_COMMAND_TYPE</string>
     <string name="EXTRA_NAVIGATION_TOP">com.proxibase.aircandi.EXTRA_NAVIGATION_TOP</string>
-    
+
     <!-- Menus -->
 
     <string name="menu_beacons_item">Beacons</string>
@@ -52,7 +53,7 @@
     <string name="dummy_subtitle">Be there, do more</string>
     <string name="dummy_description">Ever wonder why Aircandi fans refuse to use anything else? For more than four days, Aircandi has attracted a growing family of loyal, almost zealous customers, known as “Candiniks”. By remaining true to the quality tenets of our founder – emphasizing knowledge, taste, and using the senses to evaluate quality at every step – Aircandi defines the gold standard by which all other proximity applications are judged.</string>
     <string name="dummy_description_ellipsized">Ever wonder why Aircandi fans refuse to use anything else? For more than&#8230;</string>
-    
+
     <!-- Alerts -->
 
     <string name="alert_signin_invalid_signin">Wrong email and password combination.</string>
@@ -81,8 +82,7 @@
     <string name="alert_send_password_title">Forgot password</string>
     <string name="alert_send_password_message">A message has been sent to your email address with your current password.</string>
     <string name="alert_terms_title">Terms of service</string>
-    <string name="alert_terms_message">	    
-        These Terms of Service ("Terms") govern your access to and use of the services, including our various websites, 
+    <string name="alert_terms_message">        These Terms of Service ("Terms") govern your access to and use of the services, including our various websites, 
 	    SMS, APIs, email notifications, applications, buttons, and widgets, (the "Services" or “Aircandi”), and any 
 	    information, text, graphics, photos or other materials uploaded, downloaded or appearing on the 
 	    Services (collectively referred to as "Content"). Your access to and use of the Services are conditioned 
@@ -95,7 +95,7 @@
     <string name="alert_signup_email_taken">Email address is already being used.</string>
     <string name="alert_signup_password_weak">Password is too weak. Passwords must be at least 6 characters long, not be part of your user name, and not be certain commmon words.</string>
     <string name="alert_change_password_unauthorized">Old password is invalid.</string>
-    
+
     <!-- UI General -->
 
     <string name="progress_scanning">Scanning&#8230;</string>
@@ -116,11 +116,11 @@
 
     <string name="navigation_radar">Radar</string>
     <string name="navigation_mycandi">My Candi</string>
-    
+
     <!-- Symbols -->
-    
+
     <string name="symbol_bullet">•</string>
-    
+
     <!-- Network -->
 
     <string name="network_message_connection_notready">Check network connection and retry</string>
@@ -131,21 +131,21 @@
     <string name="dialog_network_message_connection_ready">Connection established, ready for retry</string>
     <string name="dialog_network_message_connection_notready">Check network connection and retry</string>
     <string name="dialog_network_message_service_notready">Service is unavailable, retry later</string>
-    
+
     <!-- Entities -->
 
     <string name="entity_post_title">Post</string>
     <string name="entity_picture_title">Picture</string>
-	<string name="entity_link_title">Link</string>
-	<string name="entity_collection_title">Collection</string>
-        
+    <string name="entity_link_title">Link</string>
+    <string name="entity_collection_title">Collection</string>
+
     <!-- Radar -->
 
     <string name="radar_tab_radar">RADAR</string>
     <string name="radar_tab_mycandi">MY CANDI</string>
     <string name="radar_tab_map">MAP</string>
-    <string name="radar_button_new">Drop\nCandi</string>
-    
+    <string name="radar_button_new">Drop candi</string>
+    <string name="radar_button_help">Help</string>
     <string name="dialog_map_title">Aircandi beacon</string>
     <string name="dialog_map_message">This beacon has:\n\n</string>
     <string name="dialog_network_message_wifi_ready">Wifi enabled, ready for retry</string>
@@ -163,6 +163,19 @@
     <string name="dialog_template_picker_title">Select template</string>
     <string name="dialog_template_picker_message_top">Create and share candi with Aircandi users!</string>
     <string name="dialog_template_picker_message_collection">Add and share candi in this collection.</string>
+
+    <!-- Help -->
+
+    <string name="help_radar">
+<![CDATA[
+        <h2>Getting Started</h2>
+		<p>With Aircandi you find, create and share content or “candi” using nearby wi-fi hotspots as virtual dropboxes. Drop a picture, a link or say something in a post. When Aircandi users are in range of the hotspot, your candi is automatically shared with them.</p> 
+
+		<p><b>Radar:</b> Discovery candi attached to nearby wi-fi hotspots.</p>
+		<p><b>My Candi:</b> Browse and edit candi you created.</p>
+		<p><b>Map:</b> Locate candi drops in other areas.</p>
+]]>
+    </string>
     
     <!-- CandiForm -->
 
@@ -171,7 +184,7 @@
     <string name="candi_button_edit">Edit</string>
     <string name="candi_button_move">Move</string>
     <string name="candi_label_comments_none">No comments yet</string>
-    
+
     <!-- CandiMap -->
 
     <string name="candi_map_label_collections">Collections:</string>
@@ -195,7 +208,7 @@
 
     <string name="error_service_general">Network is unavailable or busy.</string>
     <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
-    
+
     <!-- Forms -->
 
     <string name="form_title_picture">Picture</string>
@@ -215,18 +228,15 @@
     <string name="form_title_picture_browse">Picture viewer</string>
     <string name="form_title_map_browse">Location</string>
     <string name="form_title_templates">Templates</string>
+    <string name="form_title_help">Aircandi Tips</string>
     
     <string name="form_message_candi_picker">Move this candi to a new collection</string>
-        
     <string name="form_tab_content">CONTENT</string>
     <string name="form_tab_settings">SETTINGS</string>
-    
     <string name="profile_tab_profile">PROFILE</string>
     <string name="profile_tab_account">ACCOUNT</string>
-    
     <string name="candi_picker_tab_radar">RADAR</string>
     <string name="candi_picker_tab_mycandi">MY CANDI</string>
-    
     <string name="form_button_change_picture">Select</string>
     <string name="form_button_change_password">Change password&#8230;</string>
     <string name="form_button_signin_signup">Create account&#8230;</string>
@@ -235,15 +245,14 @@
     <string name="form_button_delete">Delete</string>
     <string name="form_button_ok">OK</string>
     <string name="form_button_cancel">Cancel</string>
+    <string name="form_button_close">Close</string>
     <string name="form_button_terms">Terms of service&#8230;</string>
     <string name="form_button_send_password">Forgot password?</string>
     <string name="form_button_move_solo">No collection</string>
-    
     <string name="form_label_picture">Picture</string>
     <string name="form_label_picture_collection">Collection badge</string>
     <string name="post_label_picture_post">Post Badge</string>
     <string name="post_label_picture_profile">Picture</string>
-    
     <string name="form_label_fullname">Full name</string>
     <string name="form_label_bio">Bio</string>
     <string name="form_label_link">Web</string>
@@ -256,21 +265,17 @@
     <string name="form_label_email_hint">(We will email you a confirmation.)</string>
     <string name="form_label_locked">Locked</string>
     <string name="form_label_password_hint">(Minimum of 6 characters.)</string>
-    
     <string name="form_title_hint">Subject</string>
     <string name="form_subtitle_hint">Subtitle</string>
     <string name="form_description_hint">Description</string>
     <string name="form_comment_hint">Comment</string>
     <string name="form_uri_hint">Web address</string>
-    
-    
     <string name="signin_message_general">Sign in to create and share candi with other Aircandi users!</string>
     <string name="signin_message_session_expired">Your session has expired. Please sign in again.</string>
     <string name="signin_message_mycandi">Please sign in to view candi you have shared with other Aircandi users.</string>
     <string name="signin_message_candi_edit">Please sign in to edit your candi.</string>
     <string name="signin_message_candi_new">Please sign in to create and share candi with other Aircandi users.</string>
     <string name="signin_message_comment_new">Please sign in to create a candi comment.</string>
-    
     <string name="signin_button_signin">Sign In</string>
     <string name="web_dialog_link_message">Build link…</string>
     <string name="web_dialog_link_bookmark">Select a bookmark</string>

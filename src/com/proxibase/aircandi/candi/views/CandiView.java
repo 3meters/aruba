@@ -58,6 +58,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 	public boolean				mReflectionActive	= true;
 	public boolean				mHasBitmap			= false;
 	private boolean				mActiveImageRequest	= false;
+	private float				mTouchStartY;
 
 	// --------------------------------------------------------------------------------------------
 	// Initialization
@@ -75,6 +76,8 @@ public class CandiView extends BaseView implements OnGestureListener {
 		super(model, candiPatchPresenter);
 
 		setVisible(false);
+		setScale(CandiConstants.CANDI_VIEW_SCALE);
+
 	}
 
 	@Override
@@ -122,7 +125,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 			setScale(viewStateNext.getScale());
 
 			/* Configuration */
-			if (viewStateNext.reflectionActive() != mReflectionActive) {
+			if (viewStateNext.reflectionActive() != mReflectionActive && CandiConstants.CANDI_VIEW_REFLECTION_SHOW) {
 				showReflection(viewStateNext.reflectionActive());
 			}
 			if (viewStateNext.isCollapsed() != this.mCollapsed) {
@@ -149,7 +152,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 				updateTouchArea(candiModel.isTouchAreaActive());
 				int avgBeaconLevel = candiModel.getEntity().beacon.getAvgBeaconLevel();
 				int color = ImageUtils.getColorBySignalLevel(avgBeaconLevel, 255);
-				setProgressColor(color);
+				setProximityColor(color);
 			}
 		});
 	}
@@ -176,7 +179,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		setVisible(false);
 		setRotation(0);
 		setPosition(0, 1000); /* Offscreen */
-		setScale(1);
+		setScale(CandiConstants.CANDI_VIEW_SCALE);
 		configureCollapsed(false);
 		if (mTitleSprite != null) {
 			mTitleSprite.setLocked(false);
@@ -486,7 +489,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 					showReflectionAnimated(model.getViewStateNext().reflectionActive(), CandiConstants.DURATION_REFLECTION_HIDESHOW);
 				}
 				else if (viewAction.getViewActionType() == ViewActionType.ReflectionHideShow) {
-					showReflection(model.getViewStateNext().reflectionActive());
+					if (CandiConstants.CANDI_VIEW_REFLECTION_SHOW) {
+						showReflection(model.getViewStateNext().reflectionActive());
+					}
 				}
 				else if (viewAction.getViewActionType() == ViewActionType.Position) {
 					setPosition(model.getViewStateNext().getX(), model.getViewStateNext().getY());
@@ -518,6 +523,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 	// Sprites
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("unused")
 	private void makeReflectionSprite() {
 		mReflectionSprite = new CandiSprite(0, CandiConstants.CANDI_VIEW_TITLE_HEIGHT + CandiConstants.CANDI_VIEW_BODY_HEIGHT
 				+ CandiConstants.CANDI_VIEW_REFLECTION_GAP,
@@ -608,7 +614,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 								}
 								Logger.v(CandiView.this, "Texture region update complete: " + titleText + ": "
 										+ String.valueOf((System.nanoTime() - startTime) / 1000000) + "ms");
-								//progressVisible(false);
+								progressVisible(false);
 							}
 							else {
 								if (mModel != null) {
@@ -627,7 +633,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 									if (candiModel.getViewStateCurrent().isVisible()) {
 										showBodyAndReflectionAnimated();
 									}
-									//progressVisible(false);
+									progressVisible(false);
 								}
 							}
 						}
@@ -765,7 +771,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		if (mBodySprite == null) {
 			makeBodySprite();
 			if (mReflectionSprite == null) {
-				makeReflectionSprite();
+				//makeReflectionSprite();
 			}
 			configureCollapsed(mCollapsed);
 			updateTouchArea(candiModel.isTouchAreaActive());
@@ -841,6 +847,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 		if (mProgressBarSprite != null) {
 			mProgressBarSprite.removeResources();
 		}
+		if (mProximitySprite != null) {
+			mProximitySprite.removeResources();
+		}
 		if (mPlaceholderSprite != null) {
 			mPlaceholderSprite.removeResources();
 		}
@@ -901,8 +910,6 @@ public class CandiView extends BaseView implements OnGestureListener {
 		if (mCandiPatchPresenter.isIgnoreInput()) {
 			return true;
 		}
-		Logger.v(this, "onDown called...");
-
 		/*
 		 * Set the position of the highlight sprite
 		 */
@@ -911,11 +918,13 @@ public class CandiView extends BaseView implements OnGestureListener {
 			top = top + CandiConstants.CANDI_VIEW_TITLE_HEIGHT;
 		}
 
-		mCandiPatchPresenter.mHighlight.setWidth((250 * this.getScaleX()) + 8);
-		mCandiPatchPresenter.mHighlight.setHeight((250 * this.getScaleY()) + 8);
+		mCandiPatchPresenter.mHighlight.setWidth((CandiConstants.CANDI_VIEW_WIDTH * this.getScaleX()) + (CandiConstants.CANDI_VIEW_HIGHLIGHT_THICKNESS * 2));
+		mCandiPatchPresenter.mHighlight.setHeight((CandiConstants.CANDI_VIEW_WIDTH * this.getScaleY()) + (CandiConstants.CANDI_VIEW_HIGHLIGHT_THICKNESS * 2));
 
-		mCandiPatchPresenter.mHighlight.setPosition(getX() - 4f, top - 4f);
+		mCandiPatchPresenter.mHighlight
+				.setPosition(getX() - CandiConstants.CANDI_VIEW_HIGHLIGHT_THICKNESS, top - CandiConstants.CANDI_VIEW_HIGHLIGHT_THICKNESS);
 		mCandiPatchPresenter.mHighlight.setVisible(true);
+		mTouchStartY = e.getY();
 		return false;
 	}
 
@@ -942,6 +951,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	@Override
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+		/*
+		 * This gets called continuously as a candiview is dragged. Also bubbles up
+		 * to the scene touch event.
+		 */
 		if (mCandiPatchPresenter.isIgnoreInput()) {
 			return true;
 		}
@@ -953,12 +966,15 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
-
 		if (mCandiPatchPresenter.isIgnoreInput()) {
 			return true;
 		}
 		mCandiPatchPresenter.mHighlight.setVisible(false);
-		if (mTouchListener != null) {
+		/*
+		 * We have our own test for whether the touch event
+		 * was enough of a move to not quality as a single tap.
+		 */
+		if (mTouchListener != null && Math.abs(mTouchStartY - e.getY()) <= mCandiPatchPresenter.mTouchSlopSquare) {
 			long startTime = System.nanoTime();
 			Logger.v(this, "SingleTapUp started...");
 			mTouchListener.onViewSingleTap(this);

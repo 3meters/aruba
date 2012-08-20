@@ -17,9 +17,9 @@ public class ChaseCamera extends ZoomCamera {
 	@Override
 	public void updateChaseEntity() {
 		if (mChaseEntity != null) {
-			this.setZoomFactor(mChaseEntity.getScaleX());
-			final float[] centerCoordinates = this.mChaseEntity.getSceneCenterCoordinates();
-			this.setCenter(centerCoordinates[VERTEX_INDEX_X], centerCoordinates[VERTEX_INDEX_Y]);
+			setZoomFactor(mChaseEntity.getScaleX());
+			final float[] centerCoordinates = mChaseEntity.getSceneCenterCoordinates();
+			setCenter(centerCoordinates[VERTEX_INDEX_X], centerCoordinates[VERTEX_INDEX_Y]);
 		}
 	}
 

@@ -28,13 +28,15 @@
         <attr name="backgroundActionBar" format="string" />
         <attr name="backgroundButtonBar" format="string" />
         <attr name="backgroundTabBar" format="string" />
+        <attr name="backgroundHelp" format="color|reference" />
         <attr name="iconSearch" format="string" />
         <attr name="iconRefresh" format="string" />
+        <attr name="iconHelp" format="string" />
+        <attr name="iconNewCandi" format="string" />
         <attr name="iconLocked" format="string" />
         <attr name="iconLocation" format="string" />
         <attr name="iconBookmarks" format="string" />
         <attr name="iconForward" format="string" />
-        <attr name="placeholder_user" format="string" />
     </declare-styleable>
     <declare-styleable name="AuthorLayout">
         <attr name="layout" />

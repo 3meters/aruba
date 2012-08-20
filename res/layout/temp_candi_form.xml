@@ -236,6 +236,12 @@
 
     <!-- Footer -->
 
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:layout_above="@+id/form_footer"
+        android:background="?attr/ruleColor" />
+
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
@@ -258,8 +264,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:drawableLeft="?attr/iconNewCandi"
+            android:drawablePadding="0dp"
             android:onClick="onAddCandiButtonClick"
-            android:text="@string/candi_button_new"/>
+            android:text="@string/candi_button_new" />
 
         <Button
             android:id="@+id/button_edit"
@@ -278,6 +286,7 @@
             android:layout_weight="1"
             android:onClick="onMoveCandiButtonClick"
             android:text="@string/candi_button_move" />
+
     </LinearLayout>
 
 </RelativeLayout>

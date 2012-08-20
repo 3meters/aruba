@@ -123,6 +123,13 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
+            android:name=".HelpForm"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_help"
+            android:theme="@style/Theme.Sherlock.Dialog"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
             android:name=".CandiPicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_candi_picker"
