@@ -86,6 +86,8 @@ public class Aircandi extends Application {
 	private Boolean							mFirstTimeCandiForm		= true;
 	private CandiTask						mCandiTask				= CandiTask.RadarCandi;
 	private Boolean							mLaunchedFromRadar		= false;
+	public static Boolean					firstRun				= true;
+	public static Boolean					lastScanEmpty 			= false;
 
 	public static Aircandi getInstance() {
 		return singletonObject;

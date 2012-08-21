@@ -64,6 +64,25 @@
                 android:text="@string/dialog_network_enable_wifi_checkbox" />
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/empty_dialog"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_above="@+id/form_footer"
+            android:gravity="center"
+            android:padding="25dp"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/text_message"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="15dp"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:text="@string/dummy_description" />
+        </RelativeLayout>
+
         <WebView
             android:id="@+id/webview"
             android:layout_width="250dp"

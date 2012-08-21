@@ -329,6 +329,11 @@ public class ProxiExplorer {
 			ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
 			serviceResponse.data = serviceData;
 			List<Object> entities = (List<Object>) serviceData.data;
+			
+			/*
+			 * Temporary
+			 */
+			entities.clear();
 
 			/* Do some fixup migrating settings to the children collection */
 			for (Object obj : entities) {

@@ -176,6 +176,16 @@
 		<p><b>Map:</b> Locate candi drops in other areas.</p>
 ]]>
     </string>
+    <string name="help_radar_empty">
+<![CDATA[
+        <h2>No Candi Nearby</h2>
+		<p>Radar scanned nearby wi-fi hotspots for candi.</p> 
+
+		<p><b>Share:</b> Be the first to create and share some candi here.</p>
+		<p><b>Discover:</b> Use the refresh command when you want to scan for new candi.</p>
+		<p><b>Map:</b> Locate candi drops in other areas.</p>
+]]>
+    </string>
     
     <!-- CandiForm -->
 

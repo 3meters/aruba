@@ -6,6 +6,13 @@
 
     <!-- Header -->
 
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:adjustViewBounds="true"
+        android:src="@drawable/placeholder_logo_v" />
+
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

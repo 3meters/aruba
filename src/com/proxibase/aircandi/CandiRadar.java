@@ -42,6 +42,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.view.Gravity;
@@ -219,7 +220,6 @@ import com.proxibase.service.objects.User;
 @SuppressWarnings("unused")
 public class CandiRadar extends AircandiGameActivity implements TextureListener {
 
-	private boolean						mFirstRun				= true;
 	private AtomicBoolean				mFirstWindow			= new AtomicBoolean(true);
 	private boolean						mPaused					= false;
 	private Boolean						mReadyToRun				= false;
@@ -296,6 +296,13 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		/* Start normal processing */
 		mReadyToRun = false;
+
+		/* Restore empty message since this could be a restart because of a theme change */
+		if (Aircandi.lastScanEmpty) {
+			String helpHtml = getString(R.string.help_radar_empty);
+			((TextView) findViewById(R.id.text_message)).setText(Html.fromHtml(helpHtml));
+			((View) findViewById(R.id.empty_dialog)).setVisibility(View.VISIBLE);
+		}
 
 		/* Initialize preferences */
 		updatePreferences();
@@ -439,7 +446,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	public void onHelpButtonClick(View view) {
 		mCommon.showHelp(R.string.help_radar);
 	}
-	
+
 	private void onCandiSingleTap(final CandiModel candiModel) {
 		/*
 		 * This event bubbles up from user interaction with CandiViews. This can
@@ -477,7 +484,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 						String parentId = null;
 
-						if (mCandiPatchModel != null && !mCandiPatchModel.getCandiRootCurrent().isSuperRoot()) {
+						if (mCandiPatchModel != null
+								&& mCandiPatchModel.getCandiRootCurrent() != null
+								&& !mCandiPatchModel.getCandiRootCurrent().isSuperRoot()) {
 							CandiModel candiModel = (CandiModel) mCandiPatchModel.getCandiRootCurrent();
 							parentId = candiModel.getEntity().id;
 						}
@@ -487,7 +496,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 						IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class);
 						intentBuilder.setCommandType(CommandType.New);
-						intentBuilder.setEntityId(null); // Because we are making a new entity
+						intentBuilder.setEntityId(null); /* Because we are making a new entity */
 						intentBuilder.setParentEntityId(parentId);
 						intentBuilder.setEntityType(entityType);
 						Intent redirectIntent = intentBuilder.create();
@@ -613,15 +622,16 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 									|| mCandiPatchModel.getCandiRootCurrent().isSuperRoot());
 
 							if (!mPrefAutoscan || atParentLevel) {
-								/*
-								 * We pass a copy to presenter to provide more stability and steady state.
-								 */
-								EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
-								mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false);
+								if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0) {
 
-								/* Check for rookies and play a sound */
-								if (mPrefSoundEffects && mCandiPatchPresenter.getRookieHit()) {
-									mCandiAlertSound.play();
+									/* We pass a copy to presenter to provide more stability and steady state. */
+									EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
+									mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false);
+
+									/* Check for rookies and play a sound */
+									if (mPrefSoundEffects && mCandiPatchPresenter.getRookieHit()) {
+										mCandiAlertSound.play();
+									}
 								}
 							}
 						}
@@ -650,8 +660,22 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 								if (serviceResponse.responseCode == ResponseCode.Success) {
 
 									/* Wrap-up */
-									if (mFirstRun) {
-										mFirstRun = false;
+
+									/* Show something to the user that there aren't any candi nearby. */
+									if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0) {
+										Aircandi.lastScanEmpty = false;
+										((View) findViewById(R.id.empty_dialog)).setVisibility(View.GONE);
+									}
+									else {
+										Aircandi.lastScanEmpty = true;
+										String helpHtml = getString(R.string.help_radar_empty);
+										((TextView) findViewById(R.id.text_message)).setText(Html.fromHtml(helpHtml));
+										((View) findViewById(R.id.empty_dialog)).setVisibility(View.VISIBLE);
+									}
+
+									if (Aircandi.firstRun) {
+										onHelpButtonClick(null);
+										Aircandi.firstRun = false;
 									}
 
 									if (mScanOptions.fullBuild && !mFullUpdateSuccess) {
@@ -717,7 +741,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 							/*
 							 * Quick check for a new version. We continue even if the network call fails.
 							 */
-							if (mFirstRun) {
+							if (Aircandi.firstRun) {
 								checkForUpdate();
 							}
 						}
@@ -1210,7 +1234,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		if (widthPixels > heightPixels) {
 			widthPixels = displayMetrics.heightPixels;
 			heightPixels = displayMetrics.widthPixels;
-		}		
+		}
 
 		Camera camera = new ChaseCamera(0, 0, widthPixels, heightPixels - (actionBarStackedHeight + statusBarHeight + buttonBarHeight)) {
 
@@ -1230,7 +1254,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				mCandiPatchPresenter.setFrustum(pGL);
 			}
 		};
-		
+
 		mRadarWidth = camera.getWidth();
 		mRadarHeight = camera.getHeight();
 
@@ -1290,7 +1314,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Logger.d(this, "Starting animation engine");
 		if (mReadyToRun) {
 
-			if (mFirstRun) {
+			if (Aircandi.firstRun) {
 				Logger.d(this, "onResumeGame: Starting first run full beacon scan");
 				scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
 			}
