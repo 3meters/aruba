@@ -331,9 +331,9 @@ public class ProxiExplorer {
 			List<Object> entities = (List<Object>) serviceData.data;
 			
 			/*
-			 * Temporary
+			 * Temporary to force empty case in the UI
 			 */
-			entities.clear();
+			//entities.clear();
 
 			/* Do some fixup migrating settings to the children collection */
 			for (Object obj : entities) {
