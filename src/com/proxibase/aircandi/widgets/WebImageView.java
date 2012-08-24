@@ -218,10 +218,19 @@ public class WebImageView extends RelativeLayout {
 
 						}
 					}
+				}
+				else {
+					mThreadHandler.post(new Runnable() {
 
-					if (mShowBusy) {
-						showLoading(false);
-					}
+						@Override
+						public void run() {
+							Drawable drawable = WebImageView.this.getContext().getResources().getDrawable(R.drawable.image_broken);
+							ImageUtils.showDrawableInImageView(drawable, mImageView, true, AnimUtils.fadeInMedium());
+						}
+					});
+				}
+				if (mShowBusy) {
+					showLoading(false);
 				}
 
 				if (originalImageReadyListener != null) {
@@ -287,7 +296,7 @@ public class WebImageView extends RelativeLayout {
 	}
 
 	public void setImageDrawable(Drawable drawable) {
-		ImageUtils.showDrawableInImageView(drawable, mImageView, true);
+		ImageUtils.showDrawableInImageView(drawable, mImageView, true, AnimUtils.fadeInMedium());
 	}
 
 	public ImageView getImageView() {

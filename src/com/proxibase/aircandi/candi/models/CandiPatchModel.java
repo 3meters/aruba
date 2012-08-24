@@ -14,7 +14,6 @@ import com.proxibase.aircandi.candi.presenters.CandiPatchPresenter;
 import com.proxibase.aircandi.components.CandiList;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
-import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.service.objects.Entity;
 
@@ -32,7 +31,6 @@ public class CandiPatchModel extends Observable {
 	private final List<ZoneModel>		mZoneModels			= new ArrayList<ZoneModel>();
 
 	private ZoneModel					mZoneInactive		= null;
-	private CandiModel					mCandiModelFocused	= null;
 	private CandiModel					mCandiModelSelected	= null;
 	private IModel						mCandiRootCurrent;
 	private IModel						mCandiRootNext;
@@ -76,7 +74,6 @@ public class CandiPatchModel extends Observable {
 	public void reset() {
 		mZoneModels.clear();
 		mCandiModels.clear();
-		mCandiModelFocused = null;
 		mCandiModelSelected = null;
 		mCandiRootCurrent = null;
 		mCandiRootNext = null;
@@ -258,17 +255,10 @@ public class CandiPatchModel extends Observable {
 					}
 				}
 			}
-			/*
-			 * If the model with the current focus is going to be hidden/gone then we
-			 * will need a new focus.
-			 */
-			if (candiModel == mCandiModelFocused && !candiModel.getViewStateNext().isVisible()) {
-				mCandiModelFocused = null;
-			}
 		}
 	}
 
-	public void updateZonesNext(Navigation navigation) {
+	public void updateZonesNext() {
 
 		/* Clear candies from zones that already exist (new ones might be created later). */
 		for (ZoneModel zoneModel : mZoneModels) {
@@ -276,19 +266,7 @@ public class CandiPatchModel extends Observable {
 		}
 
 		/* Assign to zones */
-		int focusedZoneIndex = 0;
-		if (mCandiModelFocused != null) {
-			focusedZoneIndex = mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex();
-		}
-
-		int visibleCandiNextCount = ((CandiModel) mCandiRootNext).visibleChildrenNextCount();
-
 		int zoneIndex = 0;
-		if (visibleCandiNextCount < (focusedZoneIndex + 1)) {
-			zoneIndex = (focusedZoneIndex + 1) - visibleCandiNextCount;
-			zoneIndex++;
-		}
-
 		for (IModel model : mCandiRootNext.getChildren()) {
 
 			CandiModel candiModel = (CandiModel) model;
@@ -305,79 +283,7 @@ public class CandiPatchModel extends Observable {
 				zone.getCandiesNext().add(candiModel);
 				candiModel.getZoneStateNext().setZone(zone);
 
-				/*
-				 * Special treatment for zone one. If the user is currently focused on a
-				 * candi in zone one we make sure their focus stays on whatever candi
-				 * ends up in zone one next. Does not apply if we are drilling in.
-				 */
-				if (zoneIndex == 0 && focusedZoneIndex == 0 && navigation == Navigation.None) {
-					mCandiModelFocused = candiModel;
-				}
-
-				//				/* Hookup any children */
-				//				if (!candiModel.hasVisibleChildrenNext()) {
-				//					candiModel.getZoneStateNext().setStatus(ZoneStatus.Normal);
-				//				}
-				//				else {
-				//					candiModel.getZoneStateNext().setStatus(ZoneStatus.Primary);
-				//
-				//					/* We might have children that are hidden even though the parent isn't. */
-				//					for (IModel childModel : candiModel.getChildren()) {
-				//						CandiModel childCandiModel = (CandiModel) childModel;
-				//						childCandiModel.setChanged();
-				//
-				//						if (childCandiModel.getViewStateNext().isVisible()) {
-				//							zone.getCandiesNext().add(childCandiModel);
-				//							childCandiModel.getZoneStateNext().setStatus(ZoneStatus.Secondary);
-				//							childCandiModel.getZoneStateNext().setZone(zone);
-				//						}
-				//					}
-				//				}
 				zoneIndex++;
-			}
-		}
-
-		/*
-		 * If navigation is down and focusedZone now has command candi then shift everything one zone to the right
-		 */
-
-		/*
-		 * If needed, move the candi model with the current focus back to the
-		 * slot the user is currently looking at.
-		 */
-		boolean swappingEnabled = false;
-		if (mCandiModelFocused == null || (focusedZoneIndex == 0 && navigation != Navigation.None) || focusedZoneIndex != 0) {
-			swappingEnabled = true;
-		}
-
-		if (swappingEnabled) {
-			if (!mCandiModelFocused.getZoneStateCurrent().getZone().isInactive() && !mCandiModelFocused.getZoneStateNext().getZone().isInactive()) {
-				if (mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex() != mCandiModelFocused.getZoneStateNext().getZone()
-						.getZoneIndex()) {
-
-					ZoneModel zoneNextOld = mCandiModelFocused.getZoneStateNext().getZone();
-					ZoneModel zoneNextNew = mZoneModels.get(mCandiModelFocused.getZoneStateCurrent().getZone().getZoneIndex());
-					ArrayList<CandiModel> candiModelsTemp = new ArrayList<CandiModel>();
-
-					/* Move out the old tenants */
-					for (CandiModel modelTemp : zoneNextNew.getCandiesNext()) {
-						candiModelsTemp.add(modelTemp);
-					}
-					zoneNextNew.getCandiesNext().clear();
-
-					/* Move in the new */
-					for (CandiModel modelTemp : zoneNextOld.getCandiesNext()) {
-						zoneNextNew.getCandiesNext().add(modelTemp);
-						modelTemp.getZoneStateNext().setZone(zoneNextNew);
-					}
-					zoneNextOld.getCandiesNext().clear();
-
-					/* Move old tenents into vacated zone */
-					for (CandiModel modelTemp : candiModelsTemp) {
-						zoneNextOld.getCandiesNext().add(modelTemp);
-						modelTemp.getZoneStateNext().setZone(zoneNextOld);
-					}
-				}
 			}
 		}
 
@@ -401,30 +307,6 @@ public class CandiPatchModel extends Observable {
 			}
 		}
 
-		/* Check to see if any zones have overflow */
-		for (CandiModel candiModel : mCandiModels) {
-			candiModel.getZoneStateNext().setOverflow(false);
-			if (!candiModel.getZoneStateNext().getZone().isInactive()) {
-
-				int maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE;
-				if (candiModel.getZoneStateNext().getZone().getCandiesNext().size() > 0) {
-					if (candiModel.getZoneStateNext().getZone().getCandiesNext().get(0).getZoneStateNext().getStatus() != ZoneStatus.Normal) {
-						maxVisible = ZoneModel.ZONE_CHILDREN_MAX_VISIBLE_WITH_PRIMARY;
-					}
-				}
-
-				if (candiModel.getZoneStateNext().getZone().getCandiIndexNext(candiModel) > (maxVisible - 1)) {
-
-					/* Overflow get assigned to the inactive zone too. */
-					candiModel.getZoneStateNext().setOverflow(true);
-					candiModel.getViewStateNext().setVisible(false);
-					candiModel.setTouchAreaActive(false);
-					candiModel.setReasonInactive(ReasonInactive.Navigation);
-					candiModel.getZoneStateNext().setZone(mZoneInactive);
-					mZoneInactive.getCandiesNext().add(candiModel);
-				}
-			}
-		}
 		setChanged();
 	}
 
@@ -444,21 +326,22 @@ public class CandiPatchModel extends Observable {
 
 		/* Zone titling */
 		for (ZoneModel zoneModel : mZoneModels) {
-			if (zoneModel.getCandiesNext().size() > 1) {
-				for (CandiModel candiModel : zoneModel.getCandiesNext()) {
-					if (candiModel.getZoneStateNext().getStatus() == ZoneStatus.Primary) {
-						zoneModel.setTitleText(candiModel.getTitleText());
-						break;
-					}
-				}
-			}
-			else if (zoneModel.getCandiesNext().size() == 1) {
-				/* We don't need the title if the candi model has a candi view */
-				CandiModel candiModel = zoneModel.getCandiesNext().get(0);
-				if (candiModel.countObservers() == 0) {
-					zoneModel.setTitleText(zoneModel.getCandiesNext().get(0).getTitleText());
-				}
-			}
+			zoneModel.setTitleText("");
+//			if (zoneModel.getCandiesNext().size() > 1) {
+//				for (CandiModel candiModel : zoneModel.getCandiesNext()) {
+//					if (candiModel.getZoneStateNext().getStatus() == ZoneStatus.Primary) {
+//						//zoneModel.setTitleText(candiModel.getTitleText());
+//						break;
+//					}
+//				}
+//			}
+//			else if (zoneModel.getCandiesNext().size() == 1) {
+//				/* We don't need the title if the candi model has a candi view */
+//				CandiModel candiModel = zoneModel.getCandiesNext().get(0);
+//				if (candiModel.countObservers() == 0) {
+//					//zoneModel.setTitleText(zoneModel.getCandiesNext().get(0).getTitleText());
+//				}
+//			}
 		}
 
 		for (IModel model : mCandiRootNext.getChildren()) {
@@ -466,14 +349,6 @@ public class CandiPatchModel extends Observable {
 			if (candiModel.getViewStateNext().isVisible()) {
 				candiModel.getViewStateNext().setHasReflection(candiModel.getZoneStateNext().getAlignment() == ZoneAlignment.Bottom);
 				candiModel.getViewStateNext().setCollapsed(candiModel.getViewStateNext().getScale() != CandiPatchPresenter.SCALE_NORMAL);
-
-				/* Include any children */
-				//				for (IModel childModel : candiModel.getChildren()) {
-				//					CandiModel childCandiModel = (CandiModel) childModel;
-				//					childCandiModel.getViewStateNext().setHasReflection(childCandiModel.getZoneStateNext().getAlignment() == ZoneAlignment.Bottom);
-				//					childCandiModel.getViewStateNext()
-				//							.setCollapsed(childCandiModel.getViewStateNext().getScale() != CandiPatchPresenter.SCALE_NORMAL);
-				//				}
 			}
 		}
 	}
@@ -546,10 +421,6 @@ public class CandiPatchModel extends Observable {
 		return mZoneModels;
 	}
 
-	public CandiModel getCandiModelFocused() {
-		return mCandiModelFocused;
-	}
-
 	public CandiModel getCandiModelSelected() {
 		return mCandiModelSelected;
 	}
@@ -564,13 +435,13 @@ public class CandiPatchModel extends Observable {
 
 	public float getX(int zoneIndex) {
 		if (CandiConstants.RADAR_SCROLL_HORIZONTAL) {
-			int rank = (int) Math.floor(zoneIndex / CandiConstants.RADAR_STACK_COUNT);
-			float x = ((CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING_VERTICAL) * rank);
+			int rank = (int) Math.floor((float) zoneIndex / CandiConstants.RADAR_STACK_COUNT);
+			float x = (((float) CandiConstants.CANDI_VIEW_WIDTH + (float) CandiConstants.CANDI_VIEW_SPACING_VERTICAL) * (float) rank);
 			return x;
 		}
 		else {
 			int rank = (zoneIndex % CandiConstants.RADAR_STACK_COUNT);
-			float x = (CandiConstants.CANDI_VIEW_WIDTH * rank) + (CandiConstants.CANDI_VIEW_SPACING_VERTICAL * rank);
+			float x = ((float) CandiConstants.CANDI_VIEW_WIDTH * (float) rank) + ((float) CandiConstants.CANDI_VIEW_SPACING_VERTICAL * (float) rank);
 			return x;
 		}
 	}
@@ -578,26 +449,14 @@ public class CandiPatchModel extends Observable {
 	public float getY(int zoneIndex) {
 		if (CandiConstants.RADAR_SCROLL_HORIZONTAL) {
 			int rank = zoneIndex % CandiConstants.RADAR_STACK_COUNT;
-			float y = ((CandiConstants.CANDI_VIEW_HEIGHT + CandiConstants.CANDI_VIEW_SPACING_HORIZONTAL) * rank);
+			float y = (((float) CandiConstants.CANDI_VIEW_HEIGHT + (float) CandiConstants.CANDI_VIEW_SPACING_HORIZONTAL) * (float) rank);
 			return y;
 		}
 		else {
-			int rank = (int) Math.floor(zoneIndex / CandiConstants.RADAR_STACK_COUNT); /* zero based */
-			float y = (CandiConstants.CANDI_VIEW_HEIGHT * rank) + (CandiConstants.CANDI_VIEW_SPACING_HORIZONTAL * rank);
+			int rank = (int) Math.floor((float) zoneIndex / (float) CandiConstants.RADAR_STACK_COUNT); /* zero based */
+			float y = ((float) CandiConstants.CANDI_VIEW_HEIGHT * (float) rank) + ((float) CandiConstants.CANDI_VIEW_SPACING_HORIZONTAL * (float) rank);
 			return y;
 		}
-	}
-
-	public void setCandiModelFocused(CandiModel candiFocused) {
-		if (mCandiModelFocused != candiFocused) {
-			if (candiFocused != null) {
-				Logger.d(this, "Changing candi model focus: " + candiFocused.getTitleText());
-			}
-			else {
-				Logger.d(this, "Changing candi model focus: null");
-			}
-		}
-		mCandiModelFocused = candiFocused;
 	}
 
 	public void setCandiModelSelected(CandiModel candiSelected) {
@@ -629,5 +488,4 @@ public class CandiPatchModel extends Observable {
 		Down,
 		None
 	}
-
 }

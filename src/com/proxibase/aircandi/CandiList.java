@@ -85,7 +85,6 @@ public class CandiList extends CandiActivity {
 					 */
 					if (((EntityList<Entity>) serviceResponse.data).size() == 0) {
 						mCommon.showProgressDialog(false, null);
-						mCommon.stopTitlebarProgress();
 						onBackPressed();
 					}
 					else {
@@ -101,7 +100,6 @@ public class CandiList extends CandiActivity {
 					}
 				}
 				mCommon.showProgressDialog(false, null);
-				mCommon.stopTitlebarProgress();
 			}
 
 		}.execute();
@@ -109,7 +107,6 @@ public class CandiList extends CandiActivity {
 
 	public void doRefresh() {
 		/* Called from AircandiCommon */
-		mCommon.startTitlebarProgress();
 		bind();
 	}
 

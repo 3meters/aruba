@@ -86,8 +86,11 @@ public class Aircandi extends Application {
 	private Boolean							mFirstTimeCandiForm		= true;
 	private CandiTask						mCandiTask				= CandiTask.RadarCandi;
 	private Boolean							mLaunchedFromRadar		= false;
-	public static Boolean					firstRun				= true;
-	public static Boolean					lastScanEmpty 			= false;
+	public static Boolean					firstRunApp				= true;
+	public static Boolean					firstRunRadar			= true;
+	public static Boolean					runFullScan				= true;
+	public static Boolean					runUiUpdate				= false;
+	public static Boolean					lastScanEmpty			= false;
 
 	public static Aircandi getInstance() {
 		return singletonObject;
@@ -111,6 +114,7 @@ public class Aircandi extends Application {
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
+		firstRunApp = Aircandi.settings.getBoolean(Preferences.SETTING_FIRST_RUN, true);
 	}
 
 	public static int timeSinceLocationInMillis(Location location) {

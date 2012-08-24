@@ -17,6 +17,7 @@ import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.Entity.ImageFormat;
@@ -40,6 +41,7 @@ public class PictureBrowse extends FormActivity {
 		mProgressGroup = (ViewGroup) findViewById(R.id.progress_group);
 		mImageViewTouch = (ImageViewTouch) findViewById(R.id.image);
 		mImageViewTouch.setFitToScreen(true);
+		mCommon.mActionBar.setSubtitle("double-tap to zoom");
 	}
 
 	protected void draw() {
@@ -61,7 +63,11 @@ public class PictureBrowse extends FormActivity {
 		}
 
 		final ImageRequestBuilder builder = new ImageRequestBuilder(this);
-		builder.setImageUri(entity.imageUri);
+		String imageUri = entity.imageUri;
+		if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
+			imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+		}
+		builder.setImageUri(imageUri);
 		builder.setImageFormat(ImageFormat.Binary);
 		builder.setSearchCache(false);
 		builder.setUpdateCache(false);
@@ -71,7 +77,7 @@ public class PictureBrowse extends FormActivity {
 			@Override
 			public void onComplete(Object response) {
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
-				runOnUiThread(new Runnable(){
+				runOnUiThread(new Runnable() {
 
 					@Override
 					public void run() {
@@ -82,12 +88,13 @@ public class PictureBrowse extends FormActivity {
 						else {
 							mImageViewTouch.setImageResource(R.drawable.placeholder_logo);
 						}
-					}});
+					}
+				});
 			}
 
 			@Override
 			public void onProgressChanged(final int progress) {
-				runOnUiThread(new Runnable(){
+				runOnUiThread(new Runnable() {
 
 					@Override
 					public void run() {
@@ -95,7 +102,8 @@ public class PictureBrowse extends FormActivity {
 						if (progress == 100) {
 							mProgressGroup.setVisibility(View.GONE);
 						}
-					}});
+					}
+				});
 			}
 		});
 

@@ -323,10 +323,12 @@ public class ProxibaseService {
 			}
 			catch (IOException exception) {
 				/*
-				 * This could be any of these: - ConnectTimeoutException: timeout expired trying to connect to service -
-				 * SocketTimeoutException: timeout expired on a socket - SocketException: thrown during socket creation
-				 * or setting options - NoHttpResponseException: target server failed to respond with a valid HTTP
-				 * response - UnknownHostException: hostname didn't exist in the dns system
+				 * This could be any of these:
+				 * - ConnectTimeoutException: timeout expired trying to connect to service
+				 * - SocketTimeoutException: timeout expired on a socket
+				 * - SocketException: thrown during socket creation or setting options
+				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
+				 * - UnknownHostException: hostname didn't exist in the dns system
 				 */
 				if (!shouldRetry(httpRequest, exception, retryCount)) {
 					String message = exception.getClass().getSimpleName() + ": " + exception.getMessage();
@@ -335,6 +337,13 @@ public class ProxibaseService {
 					proxibaseException.setResponseMessage(message);
 					throw proxibaseException;
 				}
+			}
+			catch (Exception exception) {
+				String message = exception.getClass().getSimpleName() + ": " + exception.getMessage();
+				Logger.w(this, message);
+				ProxibaseServiceException proxibaseException = new ProxibaseServiceException(message, ErrorType.Client, ErrorCode.IOException, exception);
+				proxibaseException.setResponseMessage(message);
+				throw proxibaseException;
 			}
 		}
 	}

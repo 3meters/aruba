@@ -123,6 +123,7 @@ public class CandiPatchPresenter implements Observer {
 	private ChaseCamera				mCamera;
 	private Scene					mScene;
 	public Bitmap					mBitmapBadgeCollections;
+	public Bitmap					mBitmapBadgePosts;
 
 	public Texture					mTexture;
 	public TextureRegion			mCandiBodyTextureRegion;
@@ -133,7 +134,7 @@ public class CandiPatchPresenter implements Observer {
 	public CandiRadar				mCandiRadarActivity;
 	public RenderSurfaceView		mRenderSurfaceView;
 	private ManageViewsThread		mManageViewsThread;
-	public boolean					mFullUpdateInProgress	= true;
+	public boolean					mRadarUpdateInProgress	= false;
 
 	private ICandiListener			mCandiListener;
 	public int						mTouchSlopSquare;
@@ -148,7 +149,7 @@ public class CandiPatchPresenter implements Observer {
 	private Integer					mStyleTextureBodyCandiResId;
 
 	private String					mStyleTextColorTitle;
-	private Boolean					mStyleTextOutlineTitle;
+	private Boolean					mStyleTextOutlineTitle = false;
 
 	// --------------------------------------------------------------------------------------------
 	// Initialization
@@ -165,7 +166,7 @@ public class CandiPatchPresenter implements Observer {
 		mGestureDetector = new GestureDetector(mContext, new SingleTapGestureDetector());
 
 		/* Rendering timer */
-		mRenderingTimer = new RenderCountDownTimer(5000, 500);
+		mRenderingTimer = new RenderCountDownTimer(20000, 500);
 
 		initialize();
 	}
@@ -261,11 +262,11 @@ public class CandiPatchPresenter implements Observer {
 					/*
 					 * This gets called even when the touch is targeting a candiview.
 					 * 
-					 * TouchEvent is world coordinates 
+					 * TouchEvent is world coordinates
 					 * MotionEvent is screen coordinates
 					 */
 					renderingActivate();
-					if (mFullUpdateInProgress || mIgnoreInput) {
+					if (mRadarUpdateInProgress || mIgnoreInput) {
 						return true;
 					}
 
@@ -405,6 +406,12 @@ public class CandiPatchPresenter implements Observer {
 		int resourceId = mCandiRadarActivity.getResources().getIdentifier(resolvedResourceName, "drawable", "com.proxibase.aircandi");
 		mBitmapBadgeCollections = ImageManager.getInstance().loadBitmapFromResources(resourceId);
 		mBitmapBadgeCollections = ImageUtils.scaleAndCropBitmap(mBitmapBadgeCollections, CandiConstants.CANDI_VIEW_BADGE_WIDTH, ImageShape.Square);
+
+		resolvedResourceName = ImageManager.getInstance().resolveResourceName("ic_post_v2_250");
+		resourceId = mCandiRadarActivity.getResources().getIdentifier(resolvedResourceName, "drawable", "com.proxibase.aircandi");
+		mBitmapBadgePosts = ImageManager.getInstance().loadBitmapFromResources(resourceId);
+		mBitmapBadgePosts = ImageUtils.scaleAndCropBitmap(mBitmapBadgePosts, CandiConstants.CANDI_VIEW_BADGE_WIDTH, ImageShape.Square);
+
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -420,6 +427,7 @@ public class CandiPatchPresenter implements Observer {
 		 * We also want copies of the entities so we can look for changes when refreshing
 		 * the candi model.
 		 */
+		mRadarUpdateInProgress = true;
 
 		/* Check to see if there is a brand new entity in the collection */
 		mRookieHit = rookieHit(entitiesCopy);
@@ -434,7 +442,6 @@ public class CandiPatchPresenter implements Observer {
 			 * shared textures. Creates new root candi model
 			 */
 			Logger.d(this, "Starting full build.");
-			mFullUpdateInProgress = true;
 			mCandiViewsActiveHash.clear();
 			mZoneViews.clear();
 			clearCandiLayer();
@@ -468,14 +475,6 @@ public class CandiPatchPresenter implements Observer {
 						orphaned = false;
 						break;
 					}
-					//					else {
-					//						for (Entity childEntity : entity.children) {
-					//							if (childEntity.id.equals(candiModel.getEntity().id)) {
-					//								orphaned = false;
-					//								break;
-					//							}
-					//						}
-					//					}
 				}
 				if (orphaned) {
 					candiModel.setReasonInactive(ReasonInactive.Deleting);
@@ -501,6 +500,13 @@ public class CandiPatchPresenter implements Observer {
 				candiModel = mCandiPatchModel.updateCandiModel(entity, mCandiRadarActivity.mPrefDisplayExtras);
 				candiModel.setParent(candiRootNext);
 				candiRootNext.getChildren().add(candiModel);
+				/*
+				 * Jayma: Experimenting with bumping the discovery time everytime a candi
+				 * is discovered or re-discovered.
+				 */
+				if (!candiModel.getViewStateCurrent().isVisible() && candiModel.getViewStateNext().isVisible()) {
+					candiModel.getEntity().discoveryTime = discoveryTime;
+				}
 			}
 			else {
 				/*
@@ -518,29 +524,6 @@ public class CandiPatchPresenter implements Observer {
 				candiModel.setParent(candiRootNext);
 				candiRootNext.getChildren().add(candiModel);
 			}
-
-			//			for (Entity childEntity : entity.children) {
-			//
-			//				CandiModel childCandiModel = null;
-			//				if (mCandiPatchModel.hasCandiModelForEntity(childEntity.id)) {
-			//					childCandiModel = mCandiPatchModel.updateCandiModel(childEntity, mCandiRadarActivity.mPrefDisplayExtras);
-			//					candiModel.getChildren().add(childCandiModel);
-			//					childCandiModel.setParent(candiModel);
-			//				}
-			//				else {
-			//					if (childEntity.rookie) {
-			//						childEntity.discoveryTime = DateUtils.nowDate();
-			//						if (!childEntity.hidden) {
-			//							childEntity.rookie = false;
-			//						}
-			//					}
-			//					childCandiModel = CandiModelFactory.newCandiModel(childEntity.id, childEntity, mCandiPatchModel);
-			//					childCandiModel.setDisplayExtra(mCandiRadarActivity.mPrefDisplayExtras);
-			//					mCandiPatchModel.addCandiModel(childCandiModel);
-			//					candiModel.getChildren().add(childCandiModel);
-			//					childCandiModel.setParent(candiModel);
-			//				}
-			//			}
 		}
 
 		/* Restore the previous root if it still has visible children */
@@ -567,24 +550,15 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Navigate to make sure we are completely configured */
-		navigateModel(mCandiPatchModel.getCandiRootNext(), delayObserverUpdate, fullBuild, Navigation.None);
+		navigateModel(mCandiPatchModel.getCandiRootNext(), delayObserverUpdate, fullBuild);
 
-		//		if (fullBuild) {
-		//			manageViewsAsync();
-		//		}
 		renderingActivate(5000);
 		Logger.d(this, "Model updated with entities");
 		mEntities = entitiesCopy;
 	}
 
-	public void navigateModel(IModel candiRootNext, boolean delayObserverUpdate, boolean fullUpdate, Navigation navigation) {
-		/*
-		 * navigation = None always comes from updateCandiData.
-		 * navigation = Up comes from candi radar navigateUp.
-		 * navigation = Down comes from doCandiViewSingleTap.
-		 * 
-		 * updateCandiData gets called from radar chunking and beacon scans.
-		 */
+	public void navigateModel(IModel candiRootNext, boolean delayObserverUpdate, boolean fullUpdate) {
+		
 		Logger.d(this, "Starting model navigation.");
 
 		mCandiPatchModel.setCandiRootNext(candiRootNext);
@@ -592,8 +566,10 @@ public class CandiPatchPresenter implements Observer {
 		/* Need to sort the candi before assigning to zones */
 		/* Sort the candi by discovery time then modified time */
 		mCandiPatchModel.sortCandiModels(mCandiPatchModel.getCandiRootNext().getChildren());
-		//		for (IModel candiModel : mCandiPatchModel.getCandiRootNext().getChildren()) {
-		//			mCandiPatchModel.sortCandiModels(candiModel.getChildren());
+		//		for (IModel model : mCandiPatchModel.getCandiRootNext().getChildren()) {
+		//			CandiModel candiModel = (CandiModel) model;
+		//			Entity entity = candiModel.getEntity();
+		//			Logger.v(this, entity.title + ": Signal: " + String.valueOf(entity.beacon.getAvgBeaconLevel()) + ", DiscoveryTime: " + String.valueOf(entity.discoveryTime.getTime()) + ", ModifiedDate: " + String.valueOf(entity.modifiedDate));
 		//		}
 
 		/*
@@ -605,7 +581,7 @@ public class CandiPatchPresenter implements Observer {
 		 * Clear zones and re-assign candi to zones. Swap zones if needed to keep candi with focus in the zone the user
 		 * is slotted on. Set visible for zones based on candi count.
 		 */
-		mCandiPatchModel.updateZonesNext(navigation);
+		mCandiPatchModel.updateZonesNext();
 
 		/* Set x, y, scale and alignment for all candi */
 		mCandiPatchModel.updatePositionsNext();
@@ -616,15 +592,6 @@ public class CandiPatchPresenter implements Observer {
 		/* Make sure zones have a view */
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
 			ensureZoneView(zoneModel);
-		}
-
-		/*
-		 * Reset focus to primary if we are navigating up to root and currently focused on a child
-		 */
-		if (navigation == Navigation.Up && mCandiPatchModel.getCandiModelFocused() != null) {
-			if (!mCandiPatchModel.getCandiModelFocused().getParent().isSuperRoot()) {
-				mCandiPatchModel.setCandiModelFocused((CandiModel) mCandiPatchModel.getCandiModelFocused().getParent());
-			}
 		}
 
 		/*
@@ -645,17 +612,6 @@ public class CandiPatchPresenter implements Observer {
 						candiModel.getViewActions().clear();
 					}
 				}
-				//				for (IModel childModel : candiModel.getChildren()) {
-				//					CandiModel childCandiModel = (CandiModel) childModel;
-				//					if (mCandiViewsActiveHash.get(childCandiModel.getModelIdAsString()) == null) {
-				//						synchronized (childCandiModel.getViewModifiers()) {
-				//							childCandiModel.getViewModifiers().clear();
-				//						}
-				//						synchronized (childCandiModel.getViewActions()) {
-				//							childCandiModel.getViewActions().clear();
-				//						}
-				//					}
-				//				}
 			}
 
 			/* Wait for modifiers of active candi views to finish */
@@ -676,15 +632,6 @@ public class CandiPatchPresenter implements Observer {
 						synchronized (candiModel.getViewActions()) {
 							candiModel.getViewActions().clear();
 						}
-						//						for (IModel childModel : candiModel.getChildren()) {
-						//							CandiModel childCandiModel = (CandiModel) childModel;
-						//							synchronized (childCandiModel.getViewModifiers()) {
-						//								childCandiModel.getViewModifiers().clear();
-						//							}
-						//							synchronized (childCandiModel.getViewActions()) {
-						//								childCandiModel.getViewActions().clear();
-						//							}
-						//						}
 					}
 				}
 
@@ -696,18 +643,6 @@ public class CandiPatchPresenter implements Observer {
 							break;
 						}
 					}
-					//					for (IModel childModel : candiModel.getChildren()) {
-					//						CandiModel childCandiModel = (CandiModel) childModel;
-					//						synchronized (childCandiModel.getViewModifiers()) {
-					//							if (childCandiModel.getViewModifiers().size() > 0) {
-					//								modifierHit = true;
-					//								break;
-					//							}
-					//						}
-					//					}
-					//					if (modifierHit) {
-					//						break;
-					//					}
 				}
 
 				if (!modifierHit) {
@@ -716,7 +651,7 @@ public class CandiPatchPresenter implements Observer {
 				else {
 					Logger.v(this, "Still active modifiers: sleeping");
 					try {
-						Thread.sleep(500);
+						Thread.sleep(2000);
 					}
 					catch (InterruptedException exception) {
 						return;
@@ -725,12 +660,7 @@ public class CandiPatchPresenter implements Observer {
 			}
 
 			manageViews(false, true);
-			/*
-			 * Jayma: disabled because we aren't using radar navigation.
-			 * 
-			 * doZoneAnimations(navigation);
-			 */
-			doTransitionAnimations(navigation);
+			doTransitionAnimations();
 		}
 
 		/* Trigger epoch observer updates */
@@ -744,9 +674,7 @@ public class CandiPatchPresenter implements Observer {
 		/* Reset camera boundaries */
 		setCameraBoundaries(mScene);
 
-		/*
-		 * Now that all the view entities have updated we can do global operations like z sorting.
-		 */
+		/* Now that all the view entities have updated we can do global operations like z sorting. */
 		mEngine.getScene().getChild(CandiConstants.LAYER_CANDI).sortChildren();
 
 	}
@@ -859,7 +787,6 @@ public class CandiPatchPresenter implements Observer {
 						final CandiModel candiModel = (CandiModel) candiView.getModel();
 						Logger.d(this, "SingleTap triggered: " + candiModel.getEntity().label);
 
-						mCandiPatchModel.setCandiModelFocused(candiModel);
 						if (mCandiListener != null) {
 							mCandiListener.onSingleTap(candiModel);
 						}
@@ -1052,13 +979,9 @@ public class CandiPatchPresenter implements Observer {
 			 */
 			List<CandiModel> candiModelsByPriority = new ArrayList<CandiModel>();
 
-			CandiModel candiModelFocused = mCandiPatchModel.getCandiModelFocused();
-			ZoneModel zoneModelFocused = useNext ? candiModelFocused.getZoneStateNext().getZone() : candiModelFocused.getZoneStateCurrent().getZone();
-
-			/* Prioritize based on UI distance from the candi with focus */
+			/* Prioritize based on visibility to the user */
 			for (CandiModel candiModel : candiModels) {
-				ZoneModel zoneModel = useNext ? candiModel.getZoneStateNext().getZone() : candiModel.getZoneStateCurrent().getZone();
-				candiModel.setPriority(Math.abs(zoneModelFocused.getZoneIndex() - zoneModel.getZoneIndex()));
+				candiModel.setPriority(candiModel.getViewStateNext().isVisibleToCamera(mCamera) ? 1 : 0);
 				candiModelsByPriority.add(candiModel);
 			}
 
@@ -1177,15 +1100,6 @@ public class CandiPatchPresenter implements Observer {
 					rookieHit = true;
 					break;
 				}
-				//				for (Entity childEntity : entity.children) {
-				//					if (!childEntity.hidden) {
-				//						rookieHit = true;
-				//						break;
-				//					}
-				//				}
-				//				if (rookieHit) {
-				//					break;
-				//				}
 			}
 		}
 		return rookieHit;
@@ -1195,54 +1109,7 @@ public class CandiPatchPresenter implements Observer {
 	// Animation
 	// --------------------------------------------------------------------------------------------
 
-	@SuppressWarnings("unused")
-	private void doZoneAnimations(Navigation navigation) {
-		/*
-		 * This always gets called as part of a navigation operation either drilling in or out.
-		 */
-		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
-			for (ZoneView zoneView : mZoneViews) {
-				if (zoneView.getModel() == zoneModel) {
-					if (navigation != Navigation.None) {
-						if (zoneModel.getCandiesNext().size() == 1 && zoneModel.getCandiesCurrent().size() > 1) {
-							synchronized (zoneModel.getViewModifiers()) {
-								zoneModel.getViewModifiers().addLast(
-										new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f,
-												CandiConstants.EASE_FADE_IN));
-							}
-						}
-						else if (zoneModel.getCandiesNext().size() > 1 && zoneModel.getCandiesCurrent().size() == 1) {
-							synchronized (zoneModel.getViewModifiers()) {
-								zoneModel.getViewModifiers().addLast(
-										new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f,
-												CandiConstants.EASE_FADE_IN));
-							}
-						}
-					}
-					else {
-						if (zoneModel.getViewStateNext().isVisible()) {
-							/*
-							 * If not camera visible, go ahead and make it visible. We don't show it because it causes a
-							 * flash when it pops in and is then replace by a cand fade in.
-							 */
-							if (!zoneModel.getViewStateCurrent().isVisible()) {
-								if (zoneModel.getCandiesNext().size() > 1 || !zoneView.isVisibleToCamera(mCamera)) {
-									synchronized (zoneModel.getViewModifiers()) {
-										zoneModel.getViewModifiers().addLast(
-												new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f,
-														CandiConstants.EASE_FADE_IN));
-									}
-								}
-							}
-						}
-					}
-					break;
-				}
-			}
-		}
-	}
-
-	private void doTransitionAnimations(Navigation navigation) {
+	private void doTransitionAnimations() {
 		/*
 		 * Zone transitions The zone might already have a fade out modifier because manageViews() populated it with a
 		 * full size candi view.
@@ -1250,24 +1117,6 @@ public class CandiPatchPresenter implements Observer {
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
 			synchronized (zoneModel.getViewActions()) {
 				zoneModel.getViewActions().addLast(new ViewAction(ViewActionType.Visibility));
-			}
-		}
-
-		/* Ensure that the candi with focus always draws front-most during animations. */
-		if (mCandiPatchModel.getCandiModelFocused() != null) {
-			CandiModel candiModel = mCandiPatchModel.getCandiModelFocused();
-			int childCount = mCandiPatchModel.getCandiModels().size();
-			for (int i = 0; i < childCount; i++) {
-				CandiModel candiModelTemp = mCandiPatchModel.getCandiModels().get(i);
-				if (candiModelTemp.equals(candiModel)) {
-					candiModelTemp.getViewStateNext().setZIndex(childCount);
-				}
-				else {
-					candiModelTemp.getViewStateNext().setZIndex(i);
-				}
-				synchronized (candiModelTemp.getViewActions()) {
-					candiModelTemp.getViewActions().addLast(new ViewAction(ViewActionType.ZIndex));
-				}
 			}
 		}
 
@@ -1299,23 +1148,6 @@ public class CandiPatchPresenter implements Observer {
 								candiModel.getViewModifiers().addLast(
 										new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 1.0f, 0.0f,
 												CandiConstants.EASE_FADE_OUT_STRONG));
-								needDelay = true;
-							}
-							else if (transition == Transition.OverflowOut) {
-								ViewState viewStateNextFocus = mCandiPatchModel.getCandiModelFocused().getViewStateNext();
-								candiModel.getViewModifiers().addLast(
-										new ParallelEntityModifier(
-												new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_OVERFLOW_FADE, 1.0f, 0.0f,
-														CandiConstants.EASE_FADE_OUT_WEAK),
-												new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrent.getScale(),
-														viewStateNextFocus.getScale(), EaseQuartInOut.getInstance()),
-												new MoveModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrent.getX(),
-														viewStateNextFocus.getX(), viewStateCurrent.getY(), viewStateNextFocus.getY(), EaseQuartInOut
-																.getInstance())));
-
-								synchronized (candiModel.getViewActions()) {
-									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ReflectionHideShowAnim));
-								}
 								needDelay = true;
 							}
 							else if (transition == Transition.Move || transition == Transition.Shift) {
@@ -1366,23 +1198,6 @@ public class CandiPatchPresenter implements Observer {
 
 							if (transition == Transition.FadeOut) {
 								// viewStateNext.setVisible(false);
-							}
-							else if (transition == Transition.OverflowIn) {
-								ViewState viewStateCurrentFocus = mCandiPatchModel.getCandiModelFocused().getViewStateCurrent();
-
-								candiModel.getViewModifiers().addLast(
-										new ParallelEntityModifier(
-												new CandiAlphaModifier(null, CandiConstants.DURATION_TRANSITIONS_FADE, 0.0f, 1.0f,
-														CandiConstants.EASE_FADE_IN),
-												new ScaleModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrentFocus.getScale(),
-														viewStateNext.getScale(), EaseQuartInOut.getInstance()),
-												new MoveModifier(CandiConstants.DURATION_TRANSITIONS_MOVE, viewStateCurrentFocus.getX(),
-														viewStateNext.getX(), viewStateCurrentFocus.getY(), viewStateNext.getY(), EaseQuartInOut
-																.getInstance())));
-								synchronized (candiModel.getViewActions()) {
-									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ExpandCollapseAnim));
-									candiModel.getViewActions().addLast(new ViewAction(ViewActionType.ReflectionHideShowAnim));
-								}
 							}
 							else if (transition == Transition.FadeIn) {
 
@@ -1458,18 +1273,28 @@ public class CandiPatchPresenter implements Observer {
 		 * We have an occupied zone
 		 */
 		if (firstOccupiedZone != null) {
-			int ranks = (int) Math.ceil(mCandiPatchModel.getZonesOccupiedCurrentCount() / CandiConstants.RADAR_STACK_COUNT);
+			int ranks = (int) Math.ceil((float) mCandiPatchModel.getZonesOccupiedCurrentCount() / (float) CandiConstants.RADAR_STACK_COUNT);
 			if (CandiConstants.RADAR_SCROLL_HORIZONTAL) {
 				mBoundsMinX = mRadarWidth * 0.5f;
 				mBoundsMaxX = (mBoundsMinX + ((ranks - 1) * (CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING_VERTICAL)));
 			}
 			else {
+				/*
+				 * Start out with bounds that exactly fit the visible radar
+				 */
 				mBoundsMinY = getRadarZoomedHeight() * 0.5f;
 				mBoundsMaxY = mBoundsMinY;
 
-				float boundsMaxY = ((CandiConstants.CANDI_VIEW_HEIGHT * (ranks + 1)) + (CandiConstants.CANDI_VIEW_SPACING_VERTICAL * ranks) - mBoundsMaxY) + CandiConstants.RADAR_PADDING_BOTTOM;
-				if (boundsMaxY > mBoundsMaxY) {
-					mBoundsMaxY = boundsMaxY;
+				/*
+				 * Measure the content to see if scrolling will be needed
+				 */
+				float contentHeight = CandiConstants.CANDI_VIEW_HEIGHT * ranks;
+				contentHeight += CandiConstants.CANDI_VIEW_SPACING_VERTICAL * (ranks - 1);
+				//contentHeight += CandiConstants.RADAR_PADDING_BOTTOM;
+				//contentHeight = contentHeight * (1 / CandiConstants.RADAR_ZOOM);
+
+				if (contentHeight > getRadarZoomedHeight()) {
+					mBoundsMaxY = contentHeight - (getRadarZoomedHeight() * 0.5f);
 				}
 			}
 		}
@@ -1534,54 +1359,8 @@ public class CandiPatchPresenter implements Observer {
 			}
 		}
 
-		/* Repeat for all children */
-		//		for (IModel childModel : candiModel.getChildren()) {
-		//			CandiModel childCandiModel = (CandiModel) childModel;
-		//			final CandiView childCandiView = (CandiView) mCandiViewsActiveHash.get(childCandiModel.getModelIdAsString());
-		//			mCandiViewsActiveHash.remove(childCandiModel.getModelIdAsString());
-		//			if (childCandiView != null) {
-		//				renderingActivate();
-		//
-		//				/*
-		//				 * Remove associated images from image cache if the parent was deleted for good
-		//				 */
-		//				if (candiModel.isDeleted()) {
-		//					String imageUri = ImageRequestBuilder.getImageUriFromEntity(childCandiModel.getEntity());
-		//					final String cacheName = ImageManager.getInstance().resolveCacheName(imageUri);
-		//					ImageManager.getInstance().deleteImage(cacheName);
-		//					ImageManager.getInstance().deleteImage(cacheName + ".reflection");
-		//				}
-		//
-		//				/* Recycle the candi view */
-		//				if (mCandiViewsActiveHash.containsKey(childCandiModel.getModelIdAsString())) {
-		//					sendCandiViewToPool(childCandiModel, false);
-		//				}
-		//			}
-		//		}
-
-		/* Remove child models */
-		//		for (IModel childCandiModel : candiModel.getChildren()) {
-		//			/*
-		//			 * This is ok because we are not removing from the same list we are iterating.
-		//			 */
-		//			mCandiPatchModel.getCandiModels().remove(childCandiModel); // Search is done using model id
-		//
-		//			if (mCandiPatchModel.getCandiModelFocused() == childCandiModel) {
-		//				mCandiPatchModel.setCandiModelFocused(null);
-		//			}
-		//			if (mCandiPatchModel.getCandiModelSelected() == childCandiModel) {
-		//				mCandiPatchModel.setCandiModelSelected(null);
-		//			}
-		//			if (mCandiPatchModel.getCandiRootCurrent() == childCandiModel) {
-		//				mCandiPatchModel.setCandiRootCurrent(null);
-		//			}
-		//		}
-
 		/* Remove parent model */
 		mCandiPatchModel.getCandiModels().remove(candiModel); // Search is done using model id
-		if (mCandiPatchModel.getCandiModelFocused() == candiModel) {
-			mCandiPatchModel.setCandiModelFocused(null);
-		}
 		if (mCandiPatchModel.getCandiModelSelected() == candiModel) {
 			mCandiPatchModel.setCandiModelSelected(null);
 		}
@@ -1822,8 +1601,12 @@ public class CandiPatchPresenter implements Observer {
 		return mEngine;
 	}
 
-	public void setFullUpdateInProgress(boolean fullUpdateInProgress) {
-		mFullUpdateInProgress = fullUpdateInProgress;
+	public boolean isRadarUpdateInProgress() {
+		return mRadarUpdateInProgress;
+	}
+
+	public void setRadarUpdateInProgress(boolean radarUpdateInProgress) {
+		mRadarUpdateInProgress = radarUpdateInProgress;
 	}
 
 	public void setScene(Scene scene) {
@@ -2077,9 +1860,6 @@ public class CandiPatchPresenter implements Observer {
 								ZoneModel zoneModel = getNearestZone(mCameraTargetSprite.getX(), false);
 								if (zoneModel != null) {
 									CandiModel candiModel = zoneModel.getCandiesCurrent().get(0);
-									if (candiModel != null) {
-										mCandiPatchModel.setCandiModelFocused(zoneModel.getCandiesCurrent().get(0));
-									}
 								}
 							}
 

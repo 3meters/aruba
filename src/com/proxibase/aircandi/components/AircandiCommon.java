@@ -189,12 +189,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			mThemeBusyIndicatorResId = (Integer) resourceName.resourceId;
 		}
 
-		/* Get view references */
-		mProgressIndicator = null;
-		if (mProgressIndicator != null) {
-			mProgressIndicator.setVisibility(View.INVISIBLE);
-		}
-
 		mTitle = (TextView) mActivity.findViewById(R.id.text_title);
 		showLocationAccuracy();
 
@@ -462,7 +456,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		handleServiceError(serviceResponse, ServiceOperation.Unknown, null);
 	}
 
-	@SuppressWarnings("deprecation")
 	public void handleServiceError(ServiceResponse serviceResponse, ServiceOperation serviceOperation, Context context) {
 
 		ErrorType errorType = serviceResponse.exception.getErrorType();
@@ -521,7 +514,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Logger.w(context, logMessage);
 		if (showAlert && context != null) {
 			showProgressDialog(false, null);
-			stopTitlebarProgress();
 			AircandiCommon.showAlertDialog(R.drawable.icon_app, mActivity.getString(R.string.alert_error_title),
 					friendlyMessage, context, android.R.string.ok, null, new
 					DialogInterface.OnClickListener() {
@@ -534,8 +526,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 				friendlyMessage = responseMessage;
 			}
 
-			Notification note = new Notification(R.drawable.icon_app, mActivity.getString(R.string.notification_error_network_message),
-					System.currentTimeMillis());
+			@SuppressWarnings("deprecation")
+			Notification note = new Notification(R.drawable.icon_app_status
+					, mActivity.getString(R.string.notification_error_network_message)
+					, System.currentTimeMillis());
 
 			RemoteViews contentView = new RemoteViews(mActivity.getPackageName(), R.layout.custom_notification);
 			contentView.setImageViewResource(R.id.image, R.drawable.icon_app);
@@ -553,9 +547,28 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 			ImageUtils.showToastNotification(friendlyMessage, Toast.LENGTH_SHORT);
 			showProgressDialog(false, null);
-			stopTitlebarProgress();
 			mNotificationManager.notify(CandiConstants.NOTIFICATION_NETWORK, note);
 		}
+	}
+	
+	public void showNotification(String title, String message, Context context) {
+		@SuppressWarnings("deprecation")
+		Notification note = new Notification(R.drawable.icon_app_status
+				, title
+				, System.currentTimeMillis());
+
+		RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification);
+		contentView.setImageViewResource(R.id.image, R.drawable.icon_app);
+		contentView.setTextViewText(R.id.title, title);
+		contentView.setTextViewText(R.id.text, message);
+		note.contentView = contentView;
+		
+		Intent intent = new Intent(mContext, CandiRadar.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+		note.contentIntent = pendingIntent;
+
+		mNotificationManager.notify(CandiConstants.NOTIFICATION_NETWORK, note);
 	}
 
 	public void showProgressDialog(boolean visible, String message) {
@@ -617,33 +630,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* Prevent dimming the background */
 		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-	}
-
-	public void startTitlebarProgress() {
-		if (mProgressIndicator != null) {
-			mProgressIndicator.setVisibility(View.VISIBLE);
-			mButtonRefresh.setVisibility(View.INVISIBLE);
-			mProgressIndicator.bringToFront();
-
-			mProgressIndicator.post(new Runnable() {
-
-				@Override
-				public void run() {
-					AnimationDrawable animation = (AnimationDrawable) mProgressIndicator.getBackground();
-					animation.setOneShot(false);
-					animation.start();
-				}
-			});
-		}
-	}
-
-	public void stopTitlebarProgress() {
-		if (mProgressIndicator != null) {
-			mProgressIndicator.setAnimation(null);
-			mButtonRefresh.setVisibility(View.VISIBLE);
-			mButtonRefresh.bringToFront();
-			mProgressIndicator.setVisibility(View.INVISIBLE);
-		}
 	}
 
 	public void setTheme(Boolean isDialog, Boolean isForm) {
@@ -1277,7 +1263,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public void doDestroy() {}
 
 	public void doPause() {
-		stopTitlebarProgress();
 		synchronized (Events.EventBus.locationChanged) {
 			Events.EventBus.locationChanged.remove(mEventLocationChanged);
 		}

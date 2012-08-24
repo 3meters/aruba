@@ -213,7 +213,6 @@ public class CandiMap extends SherlockMapActivity {
 						((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
 						showBeacons();
 						mCommon.showProgressDialog(false, null);
-						mCommon.stopTitlebarProgress();
 					}
 					else {
 						mCommon.handleServiceError(serviceResponse);

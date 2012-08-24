@@ -26,6 +26,7 @@ public class Preferences extends SherlockPreferenceActivity {
 	public static final String	PREF_USER_SESSION		= "Pref_User_Session";
 	public static final String	SETTING_VERSION_NAME	= "Setting_Version_Name";
 	public static final String	SETTING_PICTURE_SEARCH	= "Setting_Picture_Search";
+	public static final String	SETTING_FIRST_RUN		= "Setting_First_Run";
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -79,6 +80,6 @@ public class Preferences extends SherlockPreferenceActivity {
 	}
 
 	public static enum PrefResponse {
-		None, Change, Refresh, Restart
+		None, Change, Refresh, Restart, Rebuild
 	}
 }

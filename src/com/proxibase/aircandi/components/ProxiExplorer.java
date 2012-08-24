@@ -291,7 +291,7 @@ public class ProxiExplorer {
 			parameters.putStringArrayList("beaconIdsNew", beaconIdsNew);
 		}
 
-		if (beaconIdsRefresh.size() > 0) {
+		if (beaconIdsRefresh.size() > 0 && lastRefreshDate != null) {
 			parameters.putStringArrayList("beaconIdsRefresh", beaconIdsRefresh);
 			parameters.putLong("refreshDate", lastRefreshDate.longValue());
 		}
@@ -329,7 +329,7 @@ public class ProxiExplorer {
 			ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
 			serviceResponse.data = serviceData;
 			List<Object> entities = (List<Object>) serviceData.data;
-			
+
 			/*
 			 * Temporary to force empty case in the UI
 			 */
@@ -340,6 +340,9 @@ public class ProxiExplorer {
 				Entity rawEntity = (Entity) obj;
 				if (rawEntity.children != null) {
 					rawEntity.children.setCollectionType(EntityTree.Radar);
+				}
+				if (rawEntity.beaconId.equals("0003:" + globalBssid)) {
+					rawEntity.global = true;
 				}
 			}
 
@@ -493,6 +496,20 @@ public class ProxiExplorer {
 		if (Aircandi.settings.getBoolean(Preferences.PREF_ENTITY_FENCING, true) && beacon.getAvgBeaconLevel() < signalThresholdFluid) {
 			entity.hidden = true;
 			return;
+		}
+
+		/* Hide global entities if specified */
+		if (!Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true) && entity.global) {
+			entity.hidden = true;
+			return;
+		}
+
+		/* Hide demo entities if specified */
+		if (!Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false)) {
+			if (entity.beacon.bssid.equals(demoBssid)) {
+				entity.hidden = true;
+				return;
+			}
 		}
 	}
 

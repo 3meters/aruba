@@ -87,13 +87,12 @@ public class CandiForm extends CandiActivity {
 			mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 			mEntityModelUser = Aircandi.getInstance().getUser();
 			
-			mCommon.mActionBar.setTitle(mEntity.title);
-
 			/* Was likely deleted from the entity model */
 			if (mEntity == null) {
 				onBackPressed();
 			}
 			else {
+				mCommon.mActionBar.setTitle(mEntity.title);
 				updateViewPager();
 			}
 		}
@@ -132,7 +131,6 @@ public class CandiForm extends CandiActivity {
 						updateViewPager();
 
 						mCommon.showProgressDialog(false, null);
-						mCommon.stopTitlebarProgress();
 					}
 					else {
 						mCommon.handleServiceError(serviceResponse);
@@ -152,7 +150,6 @@ public class CandiForm extends CandiActivity {
 		 * current entity. Other entities in the same collection are not
 		 * refreshed.
 		 */
-		mCommon.startTitlebarProgress();
 		bind(false);
 	}
 

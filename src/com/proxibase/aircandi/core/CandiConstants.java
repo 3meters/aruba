@@ -36,6 +36,7 @@ public interface CandiConstants {
 	public static final float			RADAR_PADDING_TOP						= 15f;
 	public static final float			RADAR_PADDING_BOTTOM					= 100f;
 	public static final float			RADAR_ZOOM								= 0.55f;
+	public static final int				RADAR_BEACON_SIGNAL_BUCKET_SIZE			= 1;
 
 	public static final float			CANDI_VIEW_HALO							= 2.0f;
 	public static final boolean			CANDI_VIEW_REFLECTION_SHOW				= false;
@@ -57,7 +58,7 @@ public interface CandiConstants {
 																						+ CANDI_VIEW_TITLE_SPACER_HEIGHT;
 
 	public static final int				CANDI_VIEW_ZOOMED_PADDING				= 10;
-	public static final int				CANDI_VIEW_BADGE_WIDTH					= 65;
+	public static final int				CANDI_VIEW_BADGE_WIDTH					= 100;
 
 	public static final int				MAP_VIEW_FONT_SIZE						= 20;
 	public static final int				MAP_VIEW_TITLE_MARGIN					= 6;
@@ -96,7 +97,7 @@ public interface CandiConstants {
 	public static final int				THIRTY_MINUTES							= 1000 * 60 * 30;
 	public static final int				SIXTY_MINUTES							= 1000 * 60 * 60;
 
-	public static final int				IMAGE_MEMORY_BYTES_MAX					= 2048000;
+	public static final int				IMAGE_MEMORY_BYTES_MAX					= 4096000;
 	public static final int				IMAGE_MEMORY_CACHE_WIDTH_MAX			= 100;																	// (100x100x4) + 10000 extra
 	public static final Config			IMAGE_CONFIG_DEFAULT					= Config.ARGB_8888;
 	public static final int				IMAGE_WIDTH_SMALL						= 60;
@@ -105,12 +106,8 @@ public interface CandiConstants {
 
 	public static final String			URL_PROXIBASE							= "https://api.proxibase.com/";
 
-	public static final String			URL_AIRCANDI_SERVICE_ODATA				= "http://dev.aircandi.com/airodata.svc/";
-	public static final String			URL_AIRCANDI_SERVICE					= "http://dev.aircandi.com/airlogic.asmx/";
-	public static final String			URL_AIRCANDI_UPGRADE					= "http://dev.aircandi.com/candiinstall.aspx/";
-	public static final String			URL_AIRCANDI_BLOG						= "http://devblog.proxibase.com/";
-	public static final String			URL_AIRCANDI_MEDIA						= "https://s3.amazonaws.com/";
-	public static final String			S3_BUCKET_IMAGES						= "3meters_images";
+	public static final String			URL_AIRCANDI_UPGRADE					= "http://www.aircandi.com/install.html";
+	public static final String			S3_BUCKET_IMAGES						= "aircandi-images";
 
 	public static final String			TYPE_CANDI_POST							= "com.proxibase.aircandi.candi.post";
 	public static final String			TYPE_CANDI_PICTURE						= "com.proxibase.aircandi.candi.picture";

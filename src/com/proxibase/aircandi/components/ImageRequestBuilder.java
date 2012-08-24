@@ -1,6 +1,7 @@
 package com.proxibase.aircandi.components;
 
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
+import com.proxibase.service.ProxiConstants;
 import com.proxibase.service.ProxibaseService.RequestListener;
 import com.proxibase.service.objects.Entity;
 import com.proxibase.service.objects.Entity.ImageFormat;
@@ -70,7 +71,12 @@ public class ImageRequestBuilder {
 	public static String getImageUriFromEntity(Entity entity) {
 		String imageUri = null;
 		if (entity.imagePreviewUri != null && !entity.imagePreviewUri.equals("")) {
-			imageUri = entity.imagePreviewUri;
+			if (!entity.imagePreviewUri.toLowerCase().startsWith("resource:")) {
+				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + entity.imagePreviewUri;
+			}
+			else {
+				imageUri = entity.imagePreviewUri;
+			}
 		}
 		else if (entity.linkUri != null && !entity.linkUri.equals("")) {
 			imageUri = entity.linkUri;
@@ -88,7 +94,12 @@ public class ImageRequestBuilder {
 
 	public void setFromUris(String imageUri, String linkUri) {
 		if (imageUri != null && !imageUri.equals("")) {
-			this.mImageUri = imageUri;
+			String imageUriFixed = imageUri;
+			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
+				imageUriFixed = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+			}
+
+			this.mImageUri = imageUriFixed;
 			this.mImageFormat = ImageFormat.Binary;
 		}
 		else if (linkUri != null && !linkUri.equals("")) {

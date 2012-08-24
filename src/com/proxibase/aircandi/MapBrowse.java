@@ -97,7 +97,6 @@ public class MapBrowse extends SherlockMapActivity {
 						mapHolder.setVisibility(View.VISIBLE);
 						showCandi();
 						mCommon.showProgressDialog(false, null);
-						mCommon.stopTitlebarProgress();
 					}
 					else {
 						mCommon.handleServiceError(serviceResponse);

@@ -39,7 +39,7 @@ public class DrawableManager {
 		synchronized (mBitmapCache) {
 			if (mBitmapCache.containsKey(uri) && mBitmapCache.get(uri).get() != null) {
 				BitmapDrawable bitmapDrawable = new BitmapDrawable(mBitmapCache.get(uri).get());
-				ImageUtils.showDrawableInImageView(bitmapDrawable, holder.itemImage, false);
+				ImageUtils.showDrawableInImageView(bitmapDrawable, holder.itemImage, false, AnimUtils.fadeInMedium());
 				return;
 			}
 		}
@@ -51,7 +51,7 @@ public class DrawableManager {
 				DrawableManager drawableManager = getDrawableManager().get();
 				if (drawableManager != null) {
 					if (((String) holder.itemImage.getTag()).equals(uri)) {
-						ImageUtils.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true);
+						ImageUtils.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true, AnimUtils.fadeInMedium());
 					}
 				}
 			}

@@ -286,11 +286,11 @@
     <!-- Notifications: used in status bar -->
 
     <style name="notification_text">
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textAppearance">@style/app_text_appearance_micro</item>
     </style>
 
     <style name="notification_title">
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:textStyle">bold</item>
     </style>
 

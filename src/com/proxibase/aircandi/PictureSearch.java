@@ -128,7 +128,6 @@ public class PictureSearch extends FormActivity {
 					mImages = (ArrayList<ImageResult>) serviceResponse.data;
 					mOffset += PAGE_SIZE;
 					mCommon.showProgressDialog(false, null);
-					mCommon.stopTitlebarProgress();
 					mGridView.setAdapter(new EndlessImageAdapter(mImages));
 				}
 				else {

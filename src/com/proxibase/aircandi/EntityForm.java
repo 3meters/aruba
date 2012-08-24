@@ -72,7 +72,7 @@ import com.proxibase.service.objects.User;
 public class EntityForm extends FormActivity {
 
 	private ViewFlipper		mViewFlipper;
-	protected WebImageView	mImagePicture;
+	protected WebImageView	mImageViewPicture;
 	private EditText		mTextUri;
 	private boolean			mUriVerified	= false;
 	private AsyncTask		mAsyncTask		= null;
@@ -140,7 +140,7 @@ public class EntityForm extends FormActivity {
 			mCommon.mActionBar.setTitle(R.string.form_title_collection);
 		}
 
-		mImagePicture = (WebImageView) findViewById(R.id.image_picture);
+		mImageViewPicture = (WebImageView) findViewById(R.id.image_picture);
 		mTextUri = (EditText) findViewById(R.id.text_uri);
 
 		if (mTextUri != null) {
@@ -217,22 +217,22 @@ public class EntityForm extends FormActivity {
 
 			/* Content */
 
-			if (mImagePicture != null) {
+			if (mImageViewPicture != null) {
 				if (entity.imageUri != null && !entity.imageUri.equals("")) {
 					if (mEntityBitmap != null) {
-						mImagePicture.showLoading(false);
-						ImageUtils.showImageInImageView(mEntityBitmap, mImagePicture.getImageView(), true, AnimUtils.fadeInMedium());
-						mImagePicture.setVisibility(View.VISIBLE);
+						mImageViewPicture.showLoading(false);
+						ImageUtils.showImageInImageView(mEntityBitmap, mImageViewPicture.getImageView(), true, AnimUtils.fadeInMedium());
+						mImageViewPicture.setVisibility(View.VISIBLE);
 					}
 					else {
-						ImageRequestBuilder builder = new ImageRequestBuilder(mImagePicture);
+						ImageRequestBuilder builder = new ImageRequestBuilder(mImageViewPicture);
 						builder.setImageUri(entity.getMasterImageUri());
 						builder.setImageFormat(entity.getMasterImageFormat());
 						builder.setLinkZoom(entity.linkZoom);
 						builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
 
 						ImageRequest imageRequest = builder.create();
-						mImagePicture.setImageRequest(imageRequest);
+						mImageViewPicture.setImageRequest(imageRequest);
 					}
 				}
 			}
@@ -293,7 +293,7 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onChangePictureButtonClick(View view) {
-		showChangePictureDialog(false, mImagePicture, new RequestListener() {
+		showChangePictureDialog(false, mImageViewPicture, new RequestListener() {
 
 			@Override
 			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
@@ -310,12 +310,10 @@ public class EntityForm extends FormActivity {
 	}
 
 	public void onSaveButtonClick(View view) {
-		mCommon.startTitlebarProgress();
 		doSave();
 	}
 
 	public void onDeleteButtonClick(View view) {
-		mCommon.startTitlebarProgress();
 		deleteEntityAtService();
 	}
 
@@ -860,8 +858,7 @@ public class EntityForm extends FormActivity {
 						+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
 						+ ".jpg";
 				S3.putImage(imageKey, mEntityBitmap);
-				mEntityForForm.imagePreviewUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES
-						+ "/" + imageKey;
+				mEntityForForm.imagePreviewUri = imageKey;
 				if (mEntityForForm.imageUri == null || mEntityForForm.imageUri.equals("")) {
 					mEntityForForm.imageUri = mEntityForForm.imagePreviewUri;
 				}

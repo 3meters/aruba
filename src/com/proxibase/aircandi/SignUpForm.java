@@ -144,7 +144,6 @@ public class SignUpForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onSignUpButtonClick(View view) {
-		mCommon.startTitlebarProgress();
 		doSave();
 	}
 
@@ -255,9 +254,9 @@ public class SignUpForm extends FormActivity {
 								/*
 								 * Update user.
 								 * 
-								 * Need to update the user to capture the uri for the image we saved. 
+								 * Need to update the user to capture the uri for the image we saved.
 								 */
-								mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
+								mUser.imageUri = imageKey;
 								serviceRequest = new ServiceRequest();
 								serviceRequest.setUri(mUser.getEntryUri())
 										.setRequestType(RequestType.Update)

@@ -15,14 +15,14 @@ public interface ProxiConstants {
 
 	public static final String	_URL_PROXIBASE_SERVICE								= "http://api.aircandi.com:8080/";
 	public static final String	URL_PROXIBASE_SERVICE								= "https://api.proxibase.com/";
-	
+
 	public static final String	URL_PROXIBASE_SERVICE_REST							= URL_PROXIBASE_SERVICE + "data/";
 	public static final String	URL_PROXIBASE_SERVICE_USER							= URL_PROXIBASE_SERVICE + "user/";
 	public static final String	URL_PROXIBASE_SERVICE_ADMIN							= URL_PROXIBASE_SERVICE + "admin/";
 	public static final String	URL_PROXIBASE_SERVICE_METHOD						= URL_PROXIBASE_SERVICE + "do/";
 	public static final String	URL_PROXIBASE_SERVICE_AUTH							= URL_PROXIBASE_SERVICE + "auth/";
-	
-	public static final String	URL_PROXIBASE_MEDIA									= "https://s3.amazonaws.com/";
+
+	public static final String	URL_PROXIBASE_MEDIA_IMAGES							= "https://aircandi-images.s3.amazonaws.com/";
 	public static final String	URL_PROXIBASE_SEARCH_IMAGES							= "https://api.datamarket.azure.com/Data.ashx/Bing/Search/v1/Image";
 
 	public static final String	APP_NAME											= "Proxibase";

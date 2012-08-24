@@ -13,22 +13,24 @@
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:layout_alignParentLeft="true"
-        android:layout_marginRight="10dp" />
-    
+        android:layout_marginRight="10dp"
+        android:scaleType="fitCenter" />
+
     <TextView
         android:id="@+id/title"
-        style="@style/notification_title"
+        style="@android:style/TextAppearance.StatusBar.EventContent.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/image" />
 
     <TextView
         android:id="@+id/text"
-        style="@style/notification_text"
+        style="@android:style/TextAppearance.StatusBar.EventContent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/title"
         android:layout_toRightOf="@id/image"
-        android:singleLine="false" />    
+        android:maxLines="1"
+        android:ellipsize="end" />
 
 </RelativeLayout>

@@ -165,7 +165,6 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 							}
 						}
 						mCommon.showProgressDialog(false, null);
-						mCommon.stopTitlebarProgress();
 					}
 
 				}.execute();

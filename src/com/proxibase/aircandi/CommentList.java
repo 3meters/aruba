@@ -108,7 +108,6 @@ public class CommentList extends CandiActivity {
 					}
 				}
 				mCommon.showProgressDialog(false, null);
-				mCommon.stopTitlebarProgress();
 			}
 
 		}.execute();
@@ -154,7 +153,6 @@ public class CommentList extends CandiActivity {
 
 	public void doRefresh() {
 		/* Called from AircandiCommon */
-		mCommon.startTitlebarProgress();
 		mComments.clear();
 		bind();
 	}

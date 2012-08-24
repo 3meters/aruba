@@ -176,7 +176,6 @@ public class UserCandiList extends CandiList {
 					 */
 					if (((EntityList<Entity>) serviceResponse.data).size() == 0) {
 						mCommon.showProgressDialog(false, null);
-						mCommon.stopTitlebarProgress();
 						onBackPressed();
 					}
 					else {
@@ -192,7 +191,6 @@ public class UserCandiList extends CandiList {
 					}
 				}
 				mCommon.showProgressDialog(false, null);
-				mCommon.stopTitlebarProgress();
 			}
 
 		}.execute();

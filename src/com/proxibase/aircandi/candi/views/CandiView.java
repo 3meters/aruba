@@ -86,6 +86,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 			throw new IllegalStateException("Must set the model before initializing");
 		}
 		super.initialize();
+		final CandiModel candiModel = (CandiModel) this.mModel;
+		if (!candiModel.getEntity().global) {
+			mProximitySprite.setVisible(true);
+		}
 
 		requestTextureSources(false, true);
 	}
@@ -96,6 +100,10 @@ public class CandiView extends BaseView implements OnGestureListener {
 			throw new IllegalStateException("Must set the model before initializing");
 		}
 		super.initializeModel();
+		final CandiModel candiModel = (CandiModel) this.mModel;
+		if (!candiModel.getEntity().global) {
+			mProximitySprite.setVisible(true);
+		}
 
 		requestTextureSources(false, true);
 	}
@@ -555,6 +563,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 	// --------------------------------------------------------------------------------------------
 	// Textures
 	// --------------------------------------------------------------------------------------------
+	
 	private void requestTextureSources(final boolean skipCache, final boolean showBody) {
 
 		if (this.mModel == null) return;
@@ -626,7 +635,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 						else {
 							if (!mHasBitmap && mModel != null && !mRecycled) {
 								Logger.w(CandiView.this, "Broken image: " + entity.imagePreviewUri);
-								Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.placeholder_logo);
+								Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.image_broken);
 								if (bitmap != null) {
 									mHasBitmap = false;
 									updateTextureRegions(bitmap, skipCache);
@@ -708,6 +717,9 @@ public class CandiView extends BaseView implements OnGestureListener {
 		/* Process any decorations like text overlays */
 		bodyBitmap = decorateTexture(bodyBitmap, false, true);
 
+		/*
+		 * TODO: Getting crash: textureSource must not exceed bounds of texture
+		 */
 		mBodyTextureRegion = TextureRegionFactory.createFromSource(mBodyTexture,
 				new BitmapTextureSource(bodyBitmap, "Candi body source: " + candiModel.getTitleText(), new IBitmapAdapter() {
 
@@ -781,32 +793,30 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	public Bitmap decorateTexture(Bitmap bitmap, boolean isReflection, boolean insetCollectionImage) {
 		final CandiModel candiModel = (CandiModel) this.mModel;
-		/*
-		 * Handle text overlay for posts
-		 */
+		
 		if (candiModel != null) {
-			if (candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_POST) &&
-					candiModel.getEntity().description != null &&
-					candiModel.getEntity().description.length() > 0) {
-				if (!isReflection) {
-					bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x55000000, 175, 5, candiModel.getEntity().description, false, false);
-				}
-				else {
-					//bitmap = overlayTextOnBitmap(bitmap, 0xffffffff, 0x00000000, -45, 5, candiModel.getEntity().description, true, true);
-				}
+			
+			/* Handle text overlay for posts */
+			if (candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_POST)) {
+				bitmap = overlayBitmapOnBitmap(bitmap
+						, mCandiPatchPresenter.mBitmapBadgePosts
+						, null
+						, CandiConstants.CANDI_VIEW_WIDTH - (CandiConstants.CANDI_VIEW_BADGE_WIDTH + 7)
+						, CandiConstants.CANDI_VIEW_WIDTH - (CandiConstants.CANDI_VIEW_BADGE_WIDTH + 7)
+						, false
+						, false);
 			}
-			/*
-			 * Handle bitmap overlay for collections that have a badge set
-			 */
+			
 			else if (candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 
+				/* Handle bitmap overlay for collections that have a badge set */
 				if (candiModel.getEntity().getMasterImageUri() == null
 						|| !candiModel.getEntity().getMasterImageUri().toLowerCase().startsWith("resource:")) {
 
 					if (!isReflection) {
 						bitmap = overlayBitmapOnBitmap(bitmap
 								, mCandiPatchPresenter.mBitmapBadgeCollections
-								, 0x55000000
+								, null
 								, CandiConstants.CANDI_VIEW_WIDTH - (CandiConstants.CANDI_VIEW_BADGE_WIDTH + 7)
 								, CandiConstants.CANDI_VIEW_WIDTH - (CandiConstants.CANDI_VIEW_BADGE_WIDTH + 7)
 								, false

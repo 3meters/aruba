@@ -316,7 +316,7 @@ public abstract class FormActivity extends SherlockActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
-	protected void pickAircandiPicture() {
+	protected void pictureSearch() {
 		Intent candigramPickerIntent = new Intent(this, PictureSearch.class);
 		startActivityForResult(candigramPickerIntent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
@@ -374,9 +374,9 @@ public abstract class FormActivity extends SherlockActivity {
 
 			public void onClick(DialogInterface dialog, int item) {
 
-				/* Aircandi picture */
+				/* Picture search */
 				if (item == 0) {
-					pickAircandiPicture();
+					pictureSearch();
 				}
 
 				/* Gallery picture */

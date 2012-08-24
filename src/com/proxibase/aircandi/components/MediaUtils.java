@@ -6,13 +6,12 @@ import android.media.AudioManager;
 import android.net.Uri;
 
 import com.proxibase.aircandi.Aircandi;
-import com.proxibase.aircandi.core.CandiConstants;
 
 public class MediaUtils {
 
 	public static void playVideo(String uri) {
 		if (uri == null) {
-			uri = CandiConstants.URL_AIRCANDI_MEDIA + "video/cezanne.mp3";
+			uri = "video/cezanne.mp3";
 		}
 		Intent tostart = new Intent(Intent.ACTION_VIEW);
 		tostart.setDataAndType(Uri.parse(uri), "video/*");

@@ -19,6 +19,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.Matrix;
 import android.graphics.Bitmap.CompressFormat;
 import android.media.ExifInterface;
@@ -157,7 +158,9 @@ public class ImageManager {
 	}
 
 	public Bitmap loadBitmapFromResources(final int resourceId) {
-		Bitmap bitmap = BitmapFactory.decodeResource(mActivity.getResources(), resourceId);
+		BitmapFactory.Options options = new Options();
+		options.inScaled = false;
+		Bitmap bitmap = BitmapFactory.decodeResource(mActivity.getResources(), resourceId, options);
 		return bitmap;
 	}
 
@@ -277,7 +280,7 @@ public class ImageManager {
 				int sample = 0;
 
 				float fWidth = widthRaw;
-				sample = (int) FloatMath.ceil(fWidth / 1200);
+				sample = (int) FloatMath.ceil(fWidth / 1200f);
 
 				if (sample == 3) {
 					sample = 4;

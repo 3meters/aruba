@@ -11,6 +11,7 @@ import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.components.Utilities;
 import com.proxibase.aircandi.core.CandiConstants;
+import com.proxibase.service.ProxiConstants;
 
 /**
  * Entity as described by the proxi protocol standards.
@@ -66,7 +67,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 
 	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_beacon")
-	public String				beaconId;													// Used to connect beacon object
+	public String				beaconId;										// Used to connect beacon object
 
 	@Expose(serialize = false, deserialize = true)
 	public GeoLocation			location;
@@ -92,14 +93,15 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 
 	public Beacon				beacon;
 	public Entity				parent;
-	public String				parentId;													// Instead of serializing parent
+	public String				parentId;										// Instead of serializing parent
 	public Boolean				superRoot			= false;
 
 	public Boolean				hidden				= false;
 	public Boolean				dirty				= false;
 	public Boolean				rookie				= true;
+	public Boolean				global				= false;
 
-	public CommandType			commandType;												// For command entities
+	public CommandType			commandType;									// For command entities
 	public String				data;
 	public EntityState			state				= EntityState.Normal;
 	public Date					discoveryTime;
@@ -212,9 +214,13 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			masterImageUri = this.creator.imageUri;
 		}
 		else {
-
 			if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
-				masterImageUri = imagePreviewUri;
+				if (!imagePreviewUri.toLowerCase().startsWith("resource:")) {
+					masterImageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imagePreviewUri;
+				}
+				else {
+					masterImageUri = imagePreviewUri;
+				}
 			}
 			else if (linkUri != null && !linkUri.equals("")) {
 				masterImageUri = linkUri;

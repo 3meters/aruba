@@ -109,7 +109,6 @@ public class CommentForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onSaveButtonClick(View view) {
-		mCommon.startTitlebarProgress();
 		doSave();
 	}
 

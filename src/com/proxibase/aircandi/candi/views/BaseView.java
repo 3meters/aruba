@@ -145,7 +145,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mProgressBarSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 		mProgressBarSprite.setVisible(false);
 		mProgressBarSprite.setZIndex(20);
-		mProgressBarSprite.setWidth((float) CandiConstants.CANDI_VIEW_WIDTH);
+		mProgressBarSprite.setWidth(0);
 		mProgressBarSprite.setColor(1.0f, 0.8f, 0, 1.0f);
 		attachChild(mProgressBarSprite);
 
@@ -155,7 +155,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 				, 25
 				, 25);
 		mProximitySprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
-		mProximitySprite.setVisible(true);
+		mProximitySprite.setVisible(false);
 		mProximitySprite.setZIndex(20);
 		setProximityColor(Color.argb(256, 256, 212, 0));
 		attachChild(mProximitySprite);
@@ -363,7 +363,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		return bitmapCopy;
 	}
 
-	protected Bitmap overlayBitmapOnBitmap(Bitmap bitmap, Bitmap overlay, int fillColor, float offsetY, float offsetX,
+	protected Bitmap overlayBitmapOnBitmap(Bitmap bitmap, Bitmap overlay, Integer fillColor, float offsetY, float offsetX,
 			boolean mirror,
 			boolean applyReflectionGradient) {
 
@@ -371,13 +371,13 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 		Canvas canvas = new Canvas(bitmapCopy);
 
-		/*
-		 * Draw background for overlay
-		 */
-		ShapeDrawable mDrawable = new ShapeDrawable(new RectShape());
-		mDrawable.getPaint().setColor(fillColor);
-		mDrawable.setBounds(0, ((int) offsetY - 5), bitmapCopy.getWidth(), bitmapCopy.getHeight());
-		mDrawable.draw(canvas);
+		/* Draw background for overlay */
+		if (fillColor != null) {
+			ShapeDrawable mDrawable = new ShapeDrawable(new RectShape());
+			mDrawable.getPaint().setColor(fillColor);
+			mDrawable.setBounds(0, ((int) offsetY - 5), bitmapCopy.getWidth(), bitmapCopy.getHeight());
+			mDrawable.draw(canvas);
+		}
 
 		/* Move the canvas and draw the overlay */
 		canvas.translate(offsetX, offsetY);

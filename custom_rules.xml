@@ -14,12 +14,8 @@
     <!-- extra output directory -->
 
     <property
-        name="web.dir"
-        value="\\DATASERVER\Files\Websites\Development\Aircandi\Android" />
-
-    <property
         name="web.local.dir"
-        value="D:\Files\Proxibase\Code\Aircandi\Service\Android" />
+        value="D:\Files\Proxibase\Website\android" />
     
 	<!-- Handles incrementing build numbers -->
 	
@@ -87,8 +83,26 @@
                         out.package="${out.final.file}" />
                 
                 <!-- Extra copy to website 				-->
+                
+                <!-- 
+                Ant task to upload to s3
+                
+<taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload">
+        <classpath refid="classpath.compile"/>
+</taskdef>
+
+<target name="upload">
+        <property file="${basedir}/aws.properties"/>
+        <S3Upload verbose="true"
+                        accessId="${aws.accessId}"
+                        secretKey="${aws.secretKey}"
+                        bucket="lifeguard"
+                        publicRead="true">
+                <fileset dir="${lib}" includes="**/*.jar"/>
+        </S3Upload>
+</target>                
+                 -->
                  
-				<copy file="${out.final.file}" toDir="${web.dir}" overwrite="true" />				
 				<copy file="${out.final.file}" toDir="${web.local.dir}" overwrite="true" />
 				
                 <echo level="info">Release Package: ${out.final.file}</echo>

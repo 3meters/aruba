@@ -54,10 +54,12 @@ public class CandiAlphaModifier extends AlphaModifier {
 
 						view.mBodySprite.setAlpha(1);
 						view.mBodySprite.setVisible(false);
+						
 						if (view.mReflectionSprite != null && view.mReflectionActive) {
 							view.mReflectionSprite.setAlpha(1);
 							view.mReflectionSprite.setVisible(false);
 						}
+						
 						if (view.mTitleSprite != null) {
 							view.mTitleSprite.setAlpha(1);
 							view.mTitleSprite.setVisible(false);
@@ -70,10 +72,12 @@ public class CandiAlphaModifier extends AlphaModifier {
 
 						view.mBodySprite.setAlpha(1);
 						view.mBodySprite.setVisible(false);
+						
 						if (view.mReflectionSprite != null) {
 							view.mReflectionSprite.setAlpha(1);
 							view.mReflectionSprite.setVisible(false);
 						}
+						
 						if (view.mTitleSprite != null) {
 							view.mTitleSprite.setAlpha(1);
 							view.mTitleSprite.setVisible(false);
@@ -97,10 +101,12 @@ public class CandiAlphaModifier extends AlphaModifier {
 
 						view.mBodySprite.setAlpha(0);
 						view.mBodySprite.setVisible(true);
+						
 						if (view.mReflectionSprite != null && view.mReflectionActive) {
 							view.mReflectionSprite.setAlpha(0);
 							view.mReflectionSprite.setVisible(true);
 						}
+						
 						if (view.mTitleSprite != null) {
 							view.mTitleSprite.setAlpha(0);
 							view.mTitleSprite.setVisible(true);
@@ -113,10 +119,12 @@ public class CandiAlphaModifier extends AlphaModifier {
 
 						view.mBodySprite.setAlpha(0);
 						view.mBodySprite.setVisible(true);
+						
 						if (view.mReflectionSprite != null) {
 							view.mReflectionSprite.setAlpha(0);
 							view.mReflectionSprite.setVisible(true);
 						}
+						
 						if (view.mTitleSprite != null) {
 							view.mTitleSprite.setAlpha(0);
 							view.mTitleSprite.setVisible(true);

@@ -145,7 +145,7 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Query query =  new Query("users");
+				Query query = new Query("users");
 				if (mUser != null) {
 					query.filter("{\"email\":\"" + ((User) mUser).email + "\"}");
 				}
@@ -176,7 +176,6 @@ public class ProfileForm extends FormActivity {
 					mImageUriOriginal = mUser.imageUri;
 
 					mCommon.showProgressDialog(false, null);
-					mCommon.stopTitlebarProgress();
 				}
 				else {
 					mCommon.handleServiceError(serviceResponse);
@@ -304,7 +303,7 @@ public class ProfileForm extends FormActivity {
 									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
 									+ ".jpg";
 							S3.putImage(imageKey, mUserBitmap);
-							mUser.imageUri = CandiConstants.URL_AIRCANDI_MEDIA + CandiConstants.S3_BUCKET_IMAGES + "/" + imageKey;
+							mUser.imageUri = imageKey;
 						}
 						catch (ProxibaseServiceException exception) {
 							serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);

@@ -276,10 +276,9 @@ public class ImageUtils {
 		}
 	}
 
-	public static void showDrawableInImageView(Drawable drawable, ImageView imageView, boolean animate) {
+	public static void showDrawableInImageView(Drawable drawable, ImageView imageView, boolean animate, Animation animation) {
 		imageView.setImageDrawable(drawable);
 		if (animate) {
-			Animation animation = AnimUtils.fadeInMedium();
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
 			imageView.startAnimation(animation);

@@ -3,7 +3,7 @@
 
     <!-- Names -->
 
-    <string name="name_app">Aircandi</string>
+    <string name="name_app">aircandi</string>
     <string name="name_entity_type_picture">Picture</string>
     <string name="name_entity_type_post">Post</string>
     <string name="name_entity_type_link">Link</string>

@@ -40,6 +40,7 @@
     <color name="background_light">@android:color/white</color>
     <color name="background_help_dark">@android:color/black</color>
     <color name="background_help_light">@android:color/white</color>
+    <color name="background_picture_browse">#ff282828</color>
     
     <color name="background_form_dark_semi">#90000000</color>
     <color name="background_form_light_semi">#90ffffff</color>

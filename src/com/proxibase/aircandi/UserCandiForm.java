@@ -81,7 +81,6 @@ public class UserCandiForm extends CandiForm {
 						updateViewPager();
 
 						mCommon.showProgressDialog(false, null);
-						mCommon.stopTitlebarProgress();
 					}
 					else {
 						mCommon.handleServiceError(serviceResponse);

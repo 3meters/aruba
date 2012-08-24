@@ -52,8 +52,7 @@ public abstract class BaseModel extends Observable implements IModel {
 	}
 
 	public String getTitleText() {
-		String title = mTitleText;
-		return title;
+		return mTitleText;
 	}
 
 	public void setTitleText(String titleText) {
