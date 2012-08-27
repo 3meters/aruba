@@ -83,7 +83,7 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {}
 					}
-				});
+				}, null);
 		Tracker.trackEvent("DialogMapBeacon", "Open", null, 0);
 
 		return true;

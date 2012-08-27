@@ -265,7 +265,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="textColorBars">@color/text_dark</item>
-        <item name="android:backgroundDimAmount">0.5</item>
+        <item name="android:backgroundDimAmount">0.2</item>
         
         <item name="themeTone">dark</item>
         <item name="ruleColor">@color/rule_30_dark</item>
@@ -280,7 +280,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:textColor">@android:color/black</item>
         <item name="textColorBars">@color/text_light</item>
-        <item name="android:backgroundDimAmount">0.5</item>
+        <item name="android:backgroundDimAmount">0.2</item>
         
         <item name="themeTone">light</item>
         <item name="ruleColor">@color/rule_30_light</item>

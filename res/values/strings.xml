@@ -64,7 +64,8 @@
     <string name="alert_beacons_available">There are beacons nearby you can add new candi to.</string>
     <string name="alert_entity_locked">This candi has been locked by the owner.</string>
     <string name="alert_upgrade_title">New Aircandi version</string>
-    <string name="alert_upgrade_body">A newer version of Aircandi is available. Please download and install as soon possible.</string>
+    <string name="alert_upgrade_needed_body">A newer version of Aircandi is available. Please download and install as soon possible.</string>
+    <string name="alert_upgrade_required_body">A newer version of Aircandi is required. Please download and install.</string>
     <string name="alert_upgrade_ok">Info</string>
     <string name="alert_upgrade_cancel">Cancel</string>
     <string name="alert_deleted">Deleted</string>
@@ -111,7 +112,8 @@
     <string name="progress_searching">Searching&#8230;</string>
     <string name="progress_signing_in">Signing in&#8230;</string>
     <string name="progress_signing_up">Creating&#8230;</string>
-
+    <string name="progress_empty"></string>
+    
     <!-- Navigation -->
 
     <string name="navigation_radar">Radar</string>
@@ -219,6 +221,10 @@
     <string name="error_service_general">Network is unavailable or busy.</string>
     <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
 
+    <!-- Misc -->
+
+    <string name="theme_default">aircandi_theme_canyon</string>
+    
     <!-- Forms -->
 
     <string name="form_title_picture">Picture</string>

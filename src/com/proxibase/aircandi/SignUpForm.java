@@ -152,7 +152,7 @@ public class SignUpForm extends FormActivity {
 		AircandiCommon.showAlertDialog(R.drawable.icon_app
 				, getResources().getString(R.string.alert_terms_title)
 				, getResources().getString(R.string.alert_terms_message)
-				, SignUpForm.this, android.R.string.ok, null, null);
+				, SignUpForm.this, android.R.string.ok, null, null, null);
 		Tracker.trackEvent("DialogTerms", "Open", null, 0);
 	}
 
@@ -184,13 +184,13 @@ public class SignUpForm extends FormActivity {
 	private boolean validate() {
 		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null);
+					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null, null);
 			return false;
 		}
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, getResources().getString(
 					R.string.alert_signup_missmatched_passwords_title),
-					getResources().getString(R.string.alert_signup_missmatched_passwords_message), this, android.R.string.ok, null, null);
+					getResources().getString(R.string.alert_signup_missmatched_passwords_message), this, android.R.string.ok, null, null, null);
 			mTextPasswordConfirm.setText("");
 			return false;
 		}
@@ -290,7 +290,7 @@ public class SignUpForm extends FormActivity {
 										setResult(CandiConstants.RESULT_PROFILE_INSERTED);
 										finish();
 									}
-								});
+								}, null);
 					}
 					else {
 						/*
@@ -318,7 +318,7 @@ public class SignUpForm extends FormActivity {
 							AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
 									SignUpForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
 										public void onClick(DialogInterface dialog, int which) {}
-									});
+									}, null);
 							mTextPassword.setText("");
 						}
 						else {

@@ -359,7 +359,7 @@ public class EntityForm extends FormActivity {
 
 				if (!Utilities.validWebUri(linkUri)) {
 					AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-							getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null);
+							getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null, null);
 					return false;
 				}
 			}
@@ -590,7 +590,7 @@ public class EntityForm extends FormActivity {
 											setResult(CandiConstants.RESULT_PROFILE_INSERTED);
 											finish();
 										}
-									});
+									}, null);
 						}
 						else {
 							mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
@@ -616,7 +616,7 @@ public class EntityForm extends FormActivity {
 					DialogInterface.OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {}
-					});
+					}, null);
 			return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.UnknownException, null, null);
 		}
 
@@ -896,7 +896,7 @@ public class EntityForm extends FormActivity {
 
 					if (!Utilities.validWebUri(linkUri)) {
 						AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-								getResources().getString(R.string.alert_weburi_invalid), EntityForm.this, android.R.string.ok, null, null);
+								getResources().getString(R.string.alert_weburi_invalid), EntityForm.this, android.R.string.ok, null, null, null);
 						return;
 					}
 					else {

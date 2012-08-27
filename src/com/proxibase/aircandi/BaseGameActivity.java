@@ -169,7 +169,7 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 
 		this.mPaused = false;
 		this.acquireWakeLock(this.mEngine.getEngineOptions().getWakeLockOptions());
-		Log.i("AndEngine", "Resuming engine and glsurfaceview rendering thread");
+		Log.i("AndEngine", "Starting engine and resuming glsurfaceview rendering thread");
 		this.mEngine.onResume();
 
 		this.mRenderSurfaceView.onResume();

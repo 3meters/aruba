@@ -22,7 +22,7 @@ public class NetworkManager {
 	private static NetworkManager		singletonObject;
 
 	private Context						mContext;
-	private ConnectionReceiver			mConnectionReceiver			= new ConnectionReceiver();
+	private ConnectivityReceiver		mConnectivityReceiver		= new ConnectivityReceiver();
 	private WifiStateChangedReceiver	mWifiStateChangedReceiver	= new WifiStateChangedReceiver();
 	private IConnectivityListener		mConnectivityListener;
 	private WifiManager					mWifiManager;
@@ -50,10 +50,29 @@ public class NetworkManager {
 		return cm.getActiveNetworkInfo().isConnectedOrConnecting();
 	}
 
+	public boolean isConnectedToNetwork(Context context) {
+
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (cm == null) {
+			return false;
+		}
+
+		NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+		if (networkInfo == null) {
+			return false;
+		}
+
+		if (networkInfo.isAvailable() && networkInfo.isConnectedOrConnecting()) {
+			return true;
+		}
+
+		return false;
+	}
+
 	public void reset() {}
 
 	public void initialize() {
-		mContext.registerReceiver(mConnectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+		mContext.registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 		mContext.registerReceiver(mWifiStateChangedReceiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 		mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
 	}
@@ -92,8 +111,8 @@ public class NetworkManager {
 			serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ConnectionException, null,
 					new ProxibaseServiceException(serviceRequest.getUri(), ErrorType.Client, ErrorCode.ConnectionException, null));
 			serviceResponse.exception.setResponseMessage("Device is not connected to a network: "
-															+ String.valueOf(CONNECT_TRIES) + " tries over "
-															+ String.valueOf(CONNECT_WAIT * CONNECT_TRIES / 1000) + " second window");
+					+ String.valueOf(CONNECT_TRIES) + " tries over "
+					+ String.valueOf(CONNECT_WAIT * CONNECT_TRIES / 1000) + " second window");
 		}
 		else {
 			/*
@@ -155,8 +174,8 @@ public class NetworkManager {
 		try {
 			/* Unregister for network connectivity broadcasts */
 			if (mContext != null) {
-				if (mConnectionReceiver != null) {
-					mContext.unregisterReceiver(mConnectionReceiver);
+				if (mConnectivityReceiver != null) {
+					mContext.unregisterReceiver(mConnectivityReceiver);
 				}
 				if (mWifiStateChangedReceiver != null) {
 					mContext.unregisterReceiver(mWifiStateChangedReceiver);
@@ -179,7 +198,7 @@ public class NetworkManager {
 		 * when a parent activity is resumed.
 		 */
 		if (mContext != null) {
-			mContext.registerReceiver(mConnectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+			mContext.registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 			mContext.registerReceiver(mWifiStateChangedReceiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 		}
 	}
@@ -245,7 +264,7 @@ public class NetworkManager {
 		void onRequestFailed();
 	}
 
-	private class ConnectionReceiver extends BroadcastReceiver {
+	private class ConnectivityReceiver extends BroadcastReceiver {
 
 		@SuppressWarnings("deprecation")
 		@Override
@@ -300,13 +319,13 @@ public class NetworkManager {
 			}
 			else {
 				switch (extraWifiState) {
-					case WifiManager.WIFI_STATE_DISABLED :
+					case WifiManager.WIFI_STATE_DISABLED:
 						Logger.d(this, "Wifi state disabled");
 						break;
-					case WifiManager.WIFI_STATE_DISABLING :
+					case WifiManager.WIFI_STATE_DISABLING:
 						Logger.d(this, "Wifi state disabling");
 						break;
-					case WifiManager.WIFI_STATE_UNKNOWN :
+					case WifiManager.WIFI_STATE_UNKNOWN:
 						Logger.d(this, "Wifi state unknown");
 						break;
 				}

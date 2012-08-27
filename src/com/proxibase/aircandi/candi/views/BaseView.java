@@ -256,7 +256,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 				});
 
 				registerEntityModifier(modifier);
-				mCandiPatchPresenter.renderingActivate();
+				mCandiPatchPresenter.renderingActivateBump();
 			}
 		}
 	}

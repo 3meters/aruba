@@ -7,6 +7,7 @@ import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.AnimUtils.TransitionType;
+import com.proxibase.aircandi.core.CandiConstants;
 
 public class Preferences extends SherlockPreferenceActivity {
 
@@ -39,7 +40,7 @@ public class Preferences extends SherlockPreferenceActivity {
 		/*
 		 * TODO: Switch over to using the preferenceStyle attribute for the current theme.
 		 */
-		String prefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+		String prefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
 		if (prefTheme.equals("aircandi_theme_snow") 
 				|| prefTheme.equals("aircandi_theme_serene")
 				|| prefTheme.equals("aircandi_theme_lagoon")

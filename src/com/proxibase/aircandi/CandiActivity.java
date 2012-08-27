@@ -11,6 +11,7 @@ import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.Logger;
+import com.proxibase.aircandi.core.CandiConstants;
 
 public abstract class CandiActivity extends SherlockActivity {
 
@@ -88,9 +89,9 @@ public abstract class CandiActivity extends SherlockActivity {
 		Logger.d(this, "CandiActivity restarting");
 		super.onRestart();
 
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT))) {
 			Logger.d(this, "Restarting because of theme change");
-			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
 			mCommon.reload();
 		}
 	}

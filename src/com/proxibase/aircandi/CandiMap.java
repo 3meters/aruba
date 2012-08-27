@@ -401,9 +401,9 @@ public class CandiMap extends SherlockMapActivity {
 		Logger.d(this, "CandiActivity restarting");
 		super.onRestart();
 
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight"))) {
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT))) {
 			Logger.d(this, "Restarting because of theme change");
-			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
 			mCommon.reload();
 		}
 		else {

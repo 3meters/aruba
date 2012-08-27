@@ -83,7 +83,7 @@ public class SignInForm extends FormActivity {
 		AircandiCommon.showAlertDialog(R.drawable.icon_app
 				, getResources().getString(R.string.alert_send_password_title)
 				, getResources().getString(R.string.alert_send_password_message)
-				, SignInForm.this, android.R.string.ok, null, null);
+				, SignInForm.this, android.R.string.ok, null, null, null);
 		Tracker.trackEvent("DialogSendPassword", "Open", null, 0);
 	}
 
@@ -176,7 +176,7 @@ public class SignInForm extends FormActivity {
 							AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
 									SignInForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
 										public void onClick(DialogInterface dialog, int which) {}
-									});
+									}, null);
 							mTextPassword.setText("");
 						}
 						else {
@@ -206,7 +206,7 @@ public class SignInForm extends FormActivity {
 	private boolean validate() {
 		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null);
+					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null, null);
 			return false;
 		}
 		return true;

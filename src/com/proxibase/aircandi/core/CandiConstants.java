@@ -12,10 +12,14 @@ import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import android.app.AlarmManager;
 import android.graphics.Bitmap.Config;
+import android.util.Log;
 
 public interface CandiConstants {
 
 	public static final boolean			DEBUG_TRACE								= false;
+	public static final int				LOG_LEVEL								= Log.DEBUG;
+	public static final boolean			TRACKING_ENABLED						= true;
+
 	public static final String			APP_NAME								= "Aircandi";
 	public static final String			APP_PACKAGE_NAME						= "com.proxibase.aircandi.";
 	public static final String			GOOGLE_API_KEY_RELEASE					= "0NLNz2BjIntPUuNQrqaiA6J8TTFflv_PHQ2cTdQ";
@@ -27,6 +31,8 @@ public interface CandiConstants {
 
 	public static final int				INTERVAL_NETWORK_PHONEY					= 3000;
 	public static final int				INTERVAL_SCAN							= 60000;
+	public static final int				INTERVAL_RENDERING_DEFAULT				= 20000;
+	public static final int				INTERVAL_RENDERING_BOOST				= 60000;
 
 	public static final int				LOCATION_POLLING_INTERVAL				= 300000;																// 5 minutes
 	public static final int				LOCATION_POLLING_TIMEOUT				= 60000;
@@ -104,6 +110,8 @@ public interface CandiConstants {
 	public static final int				IMAGE_WIDTH_DEFAULT						= 250;
 	public static final int				IMAGE_WIDTH_ORIGINAL					= -1;
 
+	public static final String			THEME_DEFAULT							= "aircandi_theme_canyon";
+	
 	public static final String			URL_PROXIBASE							= "https://api.proxibase.com/";
 
 	public static final String			URL_AIRCANDI_UPGRADE					= "http://www.aircandi.com/install.html";

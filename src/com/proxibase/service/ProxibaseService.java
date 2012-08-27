@@ -50,10 +50,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -604,25 +601,6 @@ public class ProxibaseService {
 			stringBuilder.append(line + "\n");
 		}
 		return stringBuilder.toString();
-	}
-
-	public boolean isConnectedToNetwork(Context context) {
-
-		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		if (cm == null) {
-			return false;
-		}
-
-		NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-		if (networkInfo == null) {
-			return false;
-		}
-
-		if (networkInfo.isAvailable() && networkInfo.isConnectedOrConnecting()) {
-			return true;
-		}
-
-		return false;
 	}
 
 	private void logDownload(long startTime, long elapsedTime, long bytesDownloaded, String subject) {

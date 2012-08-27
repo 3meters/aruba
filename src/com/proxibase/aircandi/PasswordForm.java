@@ -108,7 +108,7 @@ public class PasswordForm extends FormActivity {
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, getResources().getString(
 					R.string.alert_signup_missmatched_passwords_title),
-					getResources().getString(R.string.alert_signup_missmatched_passwords_message), this, android.R.string.ok, null, null);
+					getResources().getString(R.string.alert_signup_missmatched_passwords_message), this, android.R.string.ok, null, null, null);
 			mTextPasswordConfirm.setText("");
 			return false;
 		}
@@ -188,7 +188,7 @@ public class PasswordForm extends FormActivity {
 						AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
 								PasswordForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog, int which) {}
-								});
+								}, null);
 						mTextPassword.setText("");
 					}
 					else {

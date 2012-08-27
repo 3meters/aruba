@@ -14,6 +14,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
@@ -278,7 +279,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		AircandiCommon.showAlertDialog(R.drawable.icon_app, title, message,
 				mActivity, android.R.string.ok, null, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {}
-				});
+				}, null);
 		Tracker.trackEvent("DialogAbout", "Open", null, 0);
 
 	}
@@ -318,7 +319,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					DialogInterface.OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {}
-					});
+					}, null);
 			Tracker.trackEvent("DialogBeacon", "Open", null, 0);
 		}
 	}
@@ -358,7 +359,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mActivity.startActivity(intent);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.HelpShow);
 	}
-	
+
 	@SuppressWarnings("unused")
 	public void showLocationAccuracy() {
 		final Location location = GeoLocationManager.getInstance().getCurrentLocation();
@@ -519,7 +520,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					DialogInterface.OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {}
-					});
+					}, null);
 		}
 		else {
 			if (isDeveloper) {
@@ -550,7 +551,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			mNotificationManager.notify(CandiConstants.NOTIFICATION_NETWORK, note);
 		}
 	}
-	
+
 	public void showNotification(String title, String message, Context context) {
 		@SuppressWarnings("deprecation")
 		Notification note = new Notification(R.drawable.icon_app_status
@@ -562,7 +563,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		contentView.setTextViewText(R.id.title, title);
 		contentView.setTextViewText(R.id.text, message);
 		note.contentView = contentView;
-		
+
 		Intent intent = new Intent(mContext, CandiRadar.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
@@ -585,7 +586,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 			progressDialog.setContentView(R.layout.dialog_progress);
 			final ImageView image = (ImageView) progressDialog.findViewById(R.id.image_body_progress_indicator);
 			TextView text = (TextView) progressDialog.findViewById(R.id.text_progress_message);
-			text.setText(message == null ? mActivity.getString(R.string.progress_loading) : message);
+			if (message == null) {
+				text.setVisibility(View.GONE);
+			}
+			else {
+				text.setText(message == null ? mActivity.getString(R.string.progress_loading) : message);
+			}
 
 			/* Prevent dismissing the indicator with the back key */
 			progressDialog.setCancelable(false);
@@ -609,17 +615,21 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	public static void showAlertDialog(Integer iconResource, String titleText, String message, Context context, Integer okButtonId, Integer cancelButtonId,
-			OnClickListener listener) {
+	public static AlertDialog showAlertDialog(Integer iconResource, String titleText, String message, Context context, Integer okButtonId, Integer cancelButtonId,
+			OnClickListener listenerClick, OnCancelListener listenerCancel) {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(context).setIcon(iconResource).setTitle(titleText).setMessage(message);
 
 		if (okButtonId != null) {
-			builder.setPositiveButton(okButtonId, listener);
+			builder.setPositiveButton(okButtonId, listenerClick);
+		}
+
+		if (listenerCancel != null) {
+			builder.setOnCancelListener(listenerCancel);
 		}
 
 		if (cancelButtonId != null) {
-			builder.setNegativeButton(cancelButtonId, listener);
+			builder.setNegativeButton(cancelButtonId, listenerClick);
 		}
 
 		AlertDialog alert = builder.show();
@@ -630,10 +640,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* Prevent dimming the background */
 		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		
+		return alert;
 	}
 
 	public void setTheme(Boolean isDialog, Boolean isForm) {
-		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, "aircandi_theme_midnight");
+		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
 		Integer themeResId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
 		if (isDialog) {
 			themeResId = R.style.aircandi_theme_dialog_dark;

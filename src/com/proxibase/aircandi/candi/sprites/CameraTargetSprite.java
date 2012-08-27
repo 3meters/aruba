@@ -38,7 +38,7 @@ public class CameraTargetSprite extends CandiRectangle {
 
 					@Override
 					public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-						mCandiPatchPresenter.renderingActivate();
+						mCandiPatchPresenter.renderingActivateBump();
 						if (moveListener != null) {
 							moveListener.onMoveStarted();
 						}
@@ -72,7 +72,7 @@ public class CameraTargetSprite extends CandiRectangle {
 
 					@Override
 					public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-						mCandiPatchPresenter.renderingActivate();
+						mCandiPatchPresenter.renderingActivateBump();
 						if (moveListener != null) {
 							moveListener.onMoveStarted();
 						}

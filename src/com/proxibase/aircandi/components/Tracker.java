@@ -3,6 +3,7 @@ package com.proxibase.aircandi.components;
 import android.app.Activity;
 
 import com.google.analytics.tracking.android.EasyTracker;
+import com.proxibase.aircandi.core.CandiConstants;
 
 /*
  * Tracker strategy
@@ -29,7 +30,9 @@ public class Tracker {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			EasyTracker.getTracker().trackEvent(arg0, arg1, arg2, arg3);
+			if (CandiConstants.TRACKING_ENABLED) {
+				EasyTracker.getTracker().trackEvent(arg0, arg1, arg2, arg3);
+			}
 		}
 		catch (Exception exception) {}
 	}
@@ -39,42 +42,54 @@ public class Tracker {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			EasyTracker.getTracker().trackView(viewName);
+			if (CandiConstants.TRACKING_ENABLED) {
+				EasyTracker.getTracker().trackView(viewName);
+			}
 		}
 		catch (Exception exception) {}
 	}
 
 	public static void dispatch() {
 		try {
-			EasyTracker.getInstance().dispatch();
+			if (CandiConstants.TRACKING_ENABLED) {
+				EasyTracker.getInstance().dispatch();
+			}
 		}
 		catch (Exception exception) {}
 	}
 
 	public static void stopSession() {
 		try {
-			EasyTracker.getTracker().setStartSession(false);
+			if (CandiConstants.TRACKING_ENABLED) {
+				EasyTracker.getTracker().setStartSession(false);
+			}
 		}
 		catch (Exception exception) {}
 	}
 
 	public static void startNewSession() {
 		try {
-			EasyTracker.getTracker().setStartSession(true);
+			if (CandiConstants.TRACKING_ENABLED) {
+				EasyTracker.getTracker().setStartSession(true);
+			}
 		}
 		catch (Exception exception) {}
 	}
 
 	public static void activityStart(Activity activity) {
 		try {
-			EasyTracker.getInstance().activityStart(activity);
+			if (CandiConstants.TRACKING_ENABLED) {
+				EasyTracker.getInstance().activityStart(activity);
+			}
 		}
 		catch (Exception exception) {}
 	}
 
 	public static void activityStop(Activity activity) {
 		try {
-			EasyTracker.getInstance().activityStop(activity);
+			if (CandiConstants.TRACKING_ENABLED) {
+				EasyTracker.getInstance().activityStop(activity);
+			}
 		}
 		catch (Exception exception) {}
 	}

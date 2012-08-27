@@ -16,7 +16,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 
-import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
@@ -149,7 +148,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		/*
 		 * Animation and touch support Update thread isn't running unless rendering is active.
 		 */
-		mCandiPatchPresenter.renderingActivate();
+		mCandiPatchPresenter.renderingActivateBump();
 		mCandiPatchPresenter.getEngine().runOnUpdateThread(new Runnable() {
 
 			@Override
@@ -172,7 +171,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		 */
 
 		/* Engine resources */
-		mCandiPatchPresenter.renderingActivate();
+		mCandiPatchPresenter.renderingActivateBump();
 		mCandiPatchPresenter.getEngine().runOnUpdateThread(new Runnable() {
 
 			@Override
@@ -428,7 +427,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	private void showBodyAndReflectionAnimated() {
 		if (mCandiPatchPresenter != null) {
-			mCandiPatchPresenter.renderingActivate();
+			mCandiPatchPresenter.renderingActivateBump();
 		}
 
 		if (mPlaceholderSprite.isVisible()) {
@@ -514,7 +513,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 					setZIndex(model.getViewStateNext().getZIndex());
 				}
 				if (mCandiPatchPresenter != null) {
-					mCandiPatchPresenter.renderingActivate();
+					mCandiPatchPresenter.renderingActivateBump();
 				}
 			}
 		}
@@ -563,7 +562,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 	// --------------------------------------------------------------------------------------------
 	// Textures
 	// --------------------------------------------------------------------------------------------
-	
+
 	private void requestTextureSources(final boolean skipCache, final boolean showBody) {
 
 		if (this.mModel == null) return;
@@ -599,51 +598,49 @@ public class CandiView extends BaseView implements OnGestureListener {
 					 * We could be coming back while the data model is getting rebuilt which makes the current work
 					 * expendable.
 					 */
-					if (!Aircandi.getInstance().isRebuildingDataModel()) {
-						if (serviceResponse.responseCode == ResponseCode.Success) {
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						/*
+						 * The view could have been recycled while we were busy and won't have a bound model.
+						 */
+						if (mModel != null && !mRecycled) {
 							/*
-							 * The view could have been recycled while we were busy and won't have a bound model.
+							 * The view could have been recycled and put back into service targeting a different
+							 * bitmap.
 							 */
-							if (mModel != null && !mRecycled) {
-								/*
-								 * The view could have been recycled and put back into service targeting a different
-								 * bitmap.
-								 */
-								final CandiModel candiModel = (CandiModel) mModel;
-								ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-								String imageUri = ImageRequestBuilder.getImageUriFromEntity(candiModel.getEntity());
+							final CandiModel candiModel = (CandiModel) mModel;
+							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+							String imageUri = ImageRequestBuilder.getImageUriFromEntity(candiModel.getEntity());
 
-								if (imageResponse.imageUri.equals(imageUri) && imageResponse.bitmap != null) {
-									Logger.v(CandiView.this, "Texture request complete: " + titleText);
-									mHasBitmap = true;
-									updateTextureRegions(imageResponse.bitmap, skipCache);
-									if (candiModel.getViewStateCurrent().isVisible()) {
-										showBodyAndReflectionAnimated();
-									}
-								}
-								Logger.v(CandiView.this, "Texture region update complete: " + titleText + ": "
-										+ String.valueOf((System.nanoTime() - startTime) / 1000000) + "ms");
-								progressVisible(false);
-							}
-							else {
-								if (mModel != null) {
-									String modelTitle = ((CandiModel) mModel).getTitleText();
-									Logger.v(CandiView.this, "Texture request complete but requestor recycled : " + modelTitle);
+							if (imageResponse.imageUri.equals(imageUri) && imageResponse.bitmap != null) {
+								Logger.v(CandiView.this, "Texture request complete: " + titleText);
+								mHasBitmap = true;
+								updateTextureRegions(imageResponse.bitmap, skipCache);
+								if (candiModel.getViewStateCurrent().isVisible()) {
+									showBodyAndReflectionAnimated();
 								}
 							}
+							Logger.v(CandiView.this, "Texture region update complete: " + titleText + ": "
+									+ String.valueOf((System.nanoTime() - startTime) / 1000000) + "ms");
+							progressVisible(false);
 						}
 						else {
-							if (!mHasBitmap && mModel != null && !mRecycled) {
-								Logger.w(CandiView.this, "Broken image: " + entity.imagePreviewUri);
-								Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.image_broken);
-								if (bitmap != null) {
-									mHasBitmap = false;
-									updateTextureRegions(bitmap, skipCache);
-									if (candiModel.getViewStateCurrent().isVisible()) {
-										showBodyAndReflectionAnimated();
-									}
-									progressVisible(false);
+							if (mModel != null) {
+								String modelTitle = ((CandiModel) mModel).getTitleText();
+								Logger.v(CandiView.this, "Texture request complete but requestor recycled : " + modelTitle);
+							}
+						}
+					}
+					else {
+						if (!mHasBitmap && mModel != null && !mRecycled) {
+							Logger.w(CandiView.this, "Broken image: " + entity.imagePreviewUri);
+							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.image_broken);
+							if (bitmap != null) {
+								mHasBitmap = false;
+								updateTextureRegions(bitmap, skipCache);
+								if (candiModel.getViewStateCurrent().isVisible()) {
+									showBodyAndReflectionAnimated();
 								}
+								progressVisible(false);
 							}
 						}
 					}
@@ -657,7 +654,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 					/* We tickle the rendering window if it's getting low */
 					if (mCandiPatchPresenter != null && mCandiPatchPresenter.getRenderingTimeLeft() <= 1000) {
 						Logger.v(this, "Bumping rendering timer");
-						mCandiPatchPresenter.renderingActivate();
+						mCandiPatchPresenter.renderingActivateBump();
 					}
 				}
 			});
@@ -698,7 +695,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 		Entity entity = candiModel.getEntity();
 
-		mCandiPatchPresenter.renderingActivate();
+		mCandiPatchPresenter.renderingActivateBump();
 		mBodyTexture.clearTextureSources();
 
 		/* Create reflection before creating texture regions because the bitmaps get recycled */
@@ -793,11 +790,11 @@ public class CandiView extends BaseView implements OnGestureListener {
 
 	public Bitmap decorateTexture(Bitmap bitmap, boolean isReflection, boolean insetCollectionImage) {
 		final CandiModel candiModel = (CandiModel) this.mModel;
-		
+
 		if (candiModel != null) {
-			
+
 			/* Handle text overlay for posts */
-			if (candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_POST)) {
+			if (candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_POST) && mCandiPatchPresenter != null) {
 				bitmap = overlayBitmapOnBitmap(bitmap
 						, mCandiPatchPresenter.mBitmapBadgePosts
 						, null
@@ -806,14 +803,14 @@ public class CandiView extends BaseView implements OnGestureListener {
 						, false
 						, false);
 			}
-			
+
 			else if (candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 
 				/* Handle bitmap overlay for collections that have a badge set */
 				if (candiModel.getEntity().getMasterImageUri() == null
 						|| !candiModel.getEntity().getMasterImageUri().toLowerCase().startsWith("resource:")) {
 
-					if (!isReflection) {
+					if (!isReflection && mCandiPatchPresenter != null) {
 						bitmap = overlayBitmapOnBitmap(bitmap
 								, mCandiPatchPresenter.mBitmapBadgeCollections
 								, null

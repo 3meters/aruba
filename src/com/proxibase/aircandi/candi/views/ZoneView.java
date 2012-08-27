@@ -79,7 +79,7 @@ public class ZoneView extends BaseView {
 			}
 		}
 
-		mCandiPatchPresenter.renderingActivate();
+		mCandiPatchPresenter.renderingActivateBump();
 		mCandiPatchPresenter.getEngine().runOnUpdateThread(new Runnable() {
 
 			@Override

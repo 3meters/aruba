@@ -78,6 +78,9 @@ public class ImageRequestBuilder {
 				imageUri = entity.imagePreviewUri;
 			}
 		}
+		else if (entity.linkPreviewUri != null && !entity.linkPreviewUri.equals("")) {
+			imageUri = entity.linkPreviewUri;
+		}
 		else if (entity.linkUri != null && !entity.linkUri.equals("")) {
 			imageUri = entity.linkUri;
 		}

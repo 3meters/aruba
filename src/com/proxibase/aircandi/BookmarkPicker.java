@@ -89,7 +89,7 @@ public class BookmarkPicker extends FormActivity implements OnItemClickListener 
 
 			if (!Utilities.validWebUri(linkUri)) {
 				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-						getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null);
+						getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null, null);
 				return false;
 			}
 		}
@@ -176,7 +176,7 @@ public class BookmarkPicker extends FormActivity implements OnItemClickListener 
 					}
 					else {
 						AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-								getResources().getString(R.string.alert_weburi_unreachable), BookmarkPicker.this, android.R.string.ok, null, null);
+								getResources().getString(R.string.alert_weburi_unreachable), BookmarkPicker.this, android.R.string.ok, null, null, null);
 					}
 				}
 			}.execute();

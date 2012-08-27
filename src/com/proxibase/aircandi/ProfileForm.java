@@ -388,7 +388,7 @@ public class ProfileForm extends FormActivity {
 							AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
 									ProfileForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
 										public void onClick(DialogInterface dialog, int which) {}
-									});
+									}, null);
 						}
 						else {
 							mCommon.handleServiceError(serviceResponse);
@@ -402,13 +402,13 @@ public class ProfileForm extends FormActivity {
 	private boolean validate() {
 		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null);
+					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null, null);
 			return false;
 		}
 		if (mTextLink.getText().toString() != null && !mTextLink.getText().toString().equals("")) {
 			if (!Utilities.validWebUri(mTextLink.getText().toString())) {
 				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-						getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null);
+						getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null, null);
 			}
 			return false;
 		}

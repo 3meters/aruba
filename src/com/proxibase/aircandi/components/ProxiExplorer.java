@@ -1,5 +1,9 @@
 package com.proxibase.aircandi.components;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,6 +19,7 @@ import android.os.Bundle;
 
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.Preferences;
+import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.service.ProxiConstants;
@@ -346,6 +351,15 @@ public class ProxiExplorer {
 				}
 			}
 
+			/* Add any local globals */
+			if (Aircandi.updateNeeded) {
+				Entity entity = loadEntityFromResources(R.raw.aircandi_install);
+				entity.global = true;
+				if (entity != null) {
+					entities.add(entity);
+				}
+			}
+
 			/* Merge entities into data model */
 			mEntityModel.mergeEntities(entities, beaconIdsNew, beaconIdsRefresh, false);
 			mEntityModel.getEntities().setCollectionType(EntityTree.Radar);
@@ -634,6 +648,24 @@ public class ProxiExplorer {
 					mEntityModel.getBeacons().remove(i);
 				}
 			}
+		}
+	}
+
+	public Entity loadEntityFromResources(Integer entityResId) {
+		try {
+			InputStream inputStream = mContext.getResources().openRawResource(entityResId);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+			StringBuilder text = new StringBuilder();
+			String line;
+			while (( line = reader.readLine()) != null) {
+				text.append(line);
+			}		
+			String jsonEntity = text.toString();
+			Entity entity = ProxibaseService.getGson(GsonType.Internal).fromJson(jsonEntity, Entity.class);
+			return entity;
+		}
+		catch (IOException exception) {
+			return null;
 		}
 	}
 
@@ -1341,6 +1373,15 @@ public class ProxiExplorer {
 			}
 
 			return beaconStrongest;
+		}
+
+		public Beacon getGlobalBeacon() {
+			for (Beacon beacon : mBeacons) {
+				if (beacon.id.equals("0003:" + globalBssid)) {
+					return beacon;
+				}
+			}
+			return null;
 		}
 
 		// --------------------------------------------------------------------------------------------

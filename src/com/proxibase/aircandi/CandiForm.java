@@ -232,7 +232,7 @@ public class CandiForm extends CandiActivity {
 		}
 		else {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-					getResources().getString(R.string.alert_entity_locked), this, android.R.string.ok, null, null);
+					getResources().getString(R.string.alert_entity_locked), this, android.R.string.ok, null, null, null);
 		}
 	}
 
@@ -259,7 +259,7 @@ public class CandiForm extends CandiActivity {
 		}
 		else {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-					getResources().getString(R.string.alert_entity_locked), this, android.R.string.ok, null, null);
+					getResources().getString(R.string.alert_entity_locked), this, android.R.string.ok, null, null, null);
 		}
 	}
 
@@ -358,6 +358,7 @@ public class CandiForm extends CandiActivity {
 		}
 
 		if (entity.imageUri != null
+				|| entity.linkPreviewUri != null
 				|| entity.linkUri != null
 				|| entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
 			String imageUri = entity.getMasterImageUri();
@@ -621,7 +622,7 @@ public class CandiForm extends CandiActivity {
 								, CandiForm.this, android.R.string.ok, null, new OnClickListener() {
 
 									public void onClick(DialogInterface dialog, int which) {}
-								});
+								}, null);
 					}
 					else {
 						mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiMove, CandiForm.this);

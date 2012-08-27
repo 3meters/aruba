@@ -59,7 +59,6 @@ import com.proxibase.aircandi.candi.models.CandiModel.ReasonInactive;
 import com.proxibase.aircandi.candi.models.CandiModel.Transition;
 import com.proxibase.aircandi.candi.models.CandiModelFactory;
 import com.proxibase.aircandi.candi.models.CandiPatchModel;
-import com.proxibase.aircandi.candi.models.CandiPatchModel.Navigation;
 import com.proxibase.aircandi.candi.models.IModel;
 import com.proxibase.aircandi.candi.models.ZoneModel;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
@@ -95,7 +94,6 @@ public class CandiPatchPresenter implements Observer {
 	private HashMap					mCandiViewsActiveHash	= new HashMap();
 	public List<ZoneView>			mZoneViews				= new ArrayList<ZoneView>();
 	private CandiViewPool			mCandiViewPool;
-	private EntityList<Entity>		mEntities;
 	private Boolean					mRookieHit				= false;
 
 	private GestureDetector			mGestureDetector;
@@ -134,7 +132,6 @@ public class CandiPatchPresenter implements Observer {
 	public CandiRadar				mCandiRadarActivity;
 	public RenderSurfaceView		mRenderSurfaceView;
 	private ManageViewsThread		mManageViewsThread;
-	public boolean					mRadarUpdateInProgress	= false;
 
 	private ICandiListener			mCandiListener;
 	public int						mTouchSlopSquare;
@@ -149,7 +146,7 @@ public class CandiPatchPresenter implements Observer {
 	private Integer					mStyleTextureBodyCandiResId;
 
 	private String					mStyleTextColorTitle;
-	private Boolean					mStyleTextOutlineTitle = false;
+	private Boolean					mStyleTextOutlineTitle	= false;
 
 	// --------------------------------------------------------------------------------------------
 	// Initialization
@@ -166,7 +163,7 @@ public class CandiPatchPresenter implements Observer {
 		mGestureDetector = new GestureDetector(mContext, new SingleTapGestureDetector());
 
 		/* Rendering timer */
-		mRenderingTimer = new RenderCountDownTimer(20000, 500);
+		mRenderingTimer = new RenderCountDownTimer(CandiConstants.INTERVAL_RENDERING_DEFAULT, 500);
 
 		initialize();
 	}
@@ -265,8 +262,8 @@ public class CandiPatchPresenter implements Observer {
 					 * TouchEvent is world coordinates
 					 * MotionEvent is screen coordinates
 					 */
-					renderingActivate();
-					if (mRadarUpdateInProgress || mIgnoreInput) {
+					renderingActivateBump();
+					if (Aircandi.getInstance().isRadarUpdateInProgress() || mIgnoreInput) {
 						return true;
 					}
 
@@ -325,7 +322,7 @@ public class CandiPatchPresenter implements Observer {
 							/*
 							 * Check to see if we ended up outside a boundary
 							 */
-							renderingActivate();
+							renderingActivateBump();
 							float cameraTargetY = mCameraTargetSprite.getY();
 							if (cameraTargetY <= mBoundsMinY) {
 								mCameraTargetSprite.moveToTop(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
@@ -427,7 +424,6 @@ public class CandiPatchPresenter implements Observer {
 		 * We also want copies of the entities so we can look for changes when refreshing
 		 * the candi model.
 		 */
-		mRadarUpdateInProgress = true;
 
 		/* Check to see if there is a brand new entity in the collection */
 		mRookieHit = rookieHit(entitiesCopy);
@@ -435,7 +431,7 @@ public class CandiPatchPresenter implements Observer {
 		/* We want all new discoveries on this pass to get the same date */
 		Date discoveryTime = DateUtils.nowDate();
 
-		renderingActivate();
+		renderingActivateBump();
 		if (fullBuild) {
 			/*
 			 * Clears all game engine sprites. Clears all touch areas. Clears zone and candi model collections. Reloads
@@ -552,13 +548,12 @@ public class CandiPatchPresenter implements Observer {
 		/* Navigate to make sure we are completely configured */
 		navigateModel(mCandiPatchModel.getCandiRootNext(), delayObserverUpdate, fullBuild);
 
-		renderingActivate(5000);
+		/* Return to default rendering window */
 		Logger.d(this, "Model updated with entities");
-		mEntities = entitiesCopy;
 	}
 
 	public void navigateModel(IModel candiRootNext, boolean delayObserverUpdate, boolean fullUpdate) {
-		
+
 		Logger.d(this, "Starting model navigation.");
 
 		mCandiPatchModel.setCandiRootNext(candiRootNext);
@@ -593,11 +588,6 @@ public class CandiPatchPresenter implements Observer {
 		for (ZoneModel zoneModel : mCandiPatchModel.getZones()) {
 			ensureZoneView(zoneModel);
 		}
-
-		/*
-		 * OK to stop blocking async processes that are on hold because the data model is being rebuilt.
-		 */
-		Aircandi.getInstance().setRebuildingDataModel(false);
 
 		/* For animations, we need to create views in advance. */
 		if (CandiConstants.TRANSITIONS_ACTIVE) {
@@ -782,7 +772,7 @@ public class CandiPatchPresenter implements Observer {
 				public void onViewSingleTap(IView view) {
 					if (!mIgnoreInput) {
 						mIgnoreInput = true;
-						renderingActivate();
+						renderingActivateBump();
 
 						final CandiModel candiModel = (CandiModel) candiView.getModel();
 						Logger.d(this, "SingleTap triggered: " + candiModel.getEntity().label);
@@ -1073,18 +1063,6 @@ public class CandiPatchPresenter implements Observer {
 	// Misc
 	// --------------------------------------------------------------------------------------------
 
-	public boolean isVisibleEntity() {
-		if (mEntities == null || mEntities.size() == 0) {
-			return false;
-		}
-		for (Entity entity : mEntities) {
-			if (!entity.hidden) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public boolean rookieHit(EntityList<Entity> entities) {
 		boolean rookieHit = false;
 		for (Entity entity : entities) {
@@ -1103,6 +1081,33 @@ public class CandiPatchPresenter implements Observer {
 			}
 		}
 		return rookieHit;
+	}
+
+	public void renderingActivateBump() {
+		/*
+		 * Extends the rendering window using the current window setting.
+		 */
+		mRenderingActive = true;
+		mRenderSurfaceView.requestRender();
+		synchronized (mRenderingTimer) {
+			mRenderingTimer.cancel();
+			mRenderingTimer.start();
+		}
+	}
+
+	public void renderingActivate(long millisInFuture) {
+		synchronized (mRenderingTimer) {
+			mRenderingTimer.cancel();
+			mRenderingTimer.setMillisInFuture(millisInFuture);
+			mRenderingActive = true;
+			mRenderSurfaceView.requestRender();
+			Logger.v(this, "Rendering activated at " + String.valueOf(millisInFuture));
+			mRenderingTimer.start();
+		}
+	}
+
+	public long getRenderingTimeLeft() {
+		return mRenderingTimer.getMillisUntilFinished();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1341,7 +1346,7 @@ public class CandiPatchPresenter implements Observer {
 		final CandiView candiView = (CandiView) mCandiViewsActiveHash.get(candiModel.getModelIdAsString());
 		mCandiViewsActiveHash.remove(candiModel.getModelIdAsString());
 		if (candiView != null) {
-			renderingActivate();
+			renderingActivateBump();
 
 			/*
 			 * Remove associated images from image cache if this candi model is gone for good
@@ -1601,14 +1606,6 @@ public class CandiPatchPresenter implements Observer {
 		return mEngine;
 	}
 
-	public boolean isRadarUpdateInProgress() {
-		return mRadarUpdateInProgress;
-	}
-
-	public void setRadarUpdateInProgress(boolean radarUpdateInProgress) {
-		mRadarUpdateInProgress = radarUpdateInProgress;
-	}
-
 	public void setScene(Scene scene) {
 		mScene = scene;
 	}
@@ -1633,10 +1630,6 @@ public class CandiPatchPresenter implements Observer {
 		return mStyleTextColorTitle;
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Inner classes/interfaces
-	// --------------------------------------------------------------------------------------------
-
 	public HashMap getCandiViewsHash() {
 		return mCandiViewsActiveHash;
 	}
@@ -1659,42 +1652,6 @@ public class CandiPatchPresenter implements Observer {
 
 	public boolean isRenderingActive() {
 		return mRenderingActive;
-	}
-
-	public interface ICandiListener {
-
-		void onSelected(IModel candi);
-
-		void onSingleTap(CandiModel candi);
-	}
-
-	public interface IMoveListener {
-
-		void onMoveFinished();
-	}
-
-	public void renderingActivate() {
-		mRenderingActive = true;
-		mRenderSurfaceView.requestRender();
-		synchronized (mRenderingTimer) {
-			mRenderingTimer.cancel();
-			mRenderingTimer.start();
-		}
-	}
-
-	public void renderingActivate(long millisInFuture) {
-		synchronized (mRenderingTimer) {
-			mRenderingTimer.cancel();
-			mRenderingTimer.setMillisInFuture(millisInFuture);
-			mRenderingActive = true;
-			mRenderSurfaceView.requestRender();
-			Logger.v(this, "Rendering activated at " + String.valueOf(millisInFuture));
-			mRenderingTimer.start();
-		}
-	}
-
-	public long getRenderingTimeLeft() {
-		return mRenderingTimer.getMillisUntilFinished();
 	}
 
 	public Boolean getRookieHit() {
@@ -1777,6 +1734,22 @@ public class CandiPatchPresenter implements Observer {
 		return mRadarHeight * (1 / CandiConstants.RADAR_ZOOM);
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Inner classes/interfaces
+	// --------------------------------------------------------------------------------------------
+
+	public interface ICandiListener {
+
+		void onSelected(IModel candi);
+
+		void onSingleTap(CandiModel candi);
+	}
+
+	public interface IMoveListener {
+
+		void onMoveFinished();
+	}
+
 	private class RenderCountDownTimer extends CountDownTimer {
 
 		/*
@@ -1827,7 +1800,7 @@ public class CandiPatchPresenter implements Observer {
 				}
 
 				/* Check to see if we are at a boundary */
-				renderingActivate();
+				renderingActivateBump();
 				float cameraTargetX = mCameraTargetSprite.getX() + 125;
 				if (cameraTargetX <= mBoundsMinX || cameraTargetX >= mBoundsMaxX) {
 					return false;
@@ -1879,7 +1852,7 @@ public class CandiPatchPresenter implements Observer {
 				}
 
 				/* Check to see if we are at a boundary */
-				renderingActivate();
+				renderingActivateBump();
 				float cameraTargetY = mCameraTargetSprite.getY();
 				if (cameraTargetY <= mBoundsMinY) {
 					mCameraTargetSprite.moveToTop(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
@@ -1914,7 +1887,7 @@ public class CandiPatchPresenter implements Observer {
 							@Override
 							public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
 								/* Check to see if we ended up past a boundary */
-								renderingActivate();
+								renderingActivateBump();
 								float cameraTargetY = mCameraTargetSprite.getY();
 								if (cameraTargetY <= mBoundsMinY) {
 									mCameraTargetSprite.moveToTop(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);

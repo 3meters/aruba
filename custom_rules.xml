@@ -2,15 +2,29 @@
 <project
     name="Aircandi_custom"
     default="revision" >
-
+    
+    <!-- Custom tasks 
+	<property name="task.dir" value="${sdk.dir}/tools/lib"/> 
+	<path id="S3Upload.lib"> 
+	    <pathelement location="${task.dir}/awstasks-0.3.jar"/> 
+	</path>  
+	  
+	<taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload">
+	       <classpath refid="S3Upload.lib"/>
+	</taskdef>
+	-->
     <!-- Build info -->
 
     <property file="build_info.properties" />
 
     <property
-        name="build.number"
+        name="build.version"
         value="${build.major.number}.${build.minor.number}.${build.revision.number}" />
 
+    <property
+        name="build.code"
+        value="${build.code}" />
+    
     <!-- extra output directory -->
 
     <property
@@ -21,35 +35,57 @@
 	
 	<target name="-revision">
 	    <propertyfile  file="build_info.properties">
-	            <entry key="build.revision.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.revision.number" type="int" operation="+" value="1" pattern="000"/>
 	    </propertyfile>
 	</target>
 
 	<target name="-minor">
 	    <propertyfile  file="build_info.properties">
 	            <entry key="build.minor.number" type="int" operation="+" value="1" pattern="00"/>
-	            <entry key="build.revision.number" type="int" value="0" pattern="00"/>
+	            <entry key="build.revision.number" type="int" value="0" pattern="000"/>
 	    </propertyfile>
 	</target>
 
 	<target name="-major">
 	    <propertyfile  file="build_info.properties">
-	            <entry key="build.major.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.major.number" type="int" operation="+" value="1" pattern="0"/>
 	            <entry key="build.minor.number" type="int" value="0" pattern="00"/>
-	            <entry key="build.revision.number" type="int" value="0" pattern="00"/>
+	            <entry key="build.revision.number" type="int" value="0" pattern="000"/>
 	    </propertyfile>
 	</target>
 
 	<target name="-all">
 	    <propertyfile  file="build_info.properties">
-	            <entry key="build.major.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.major.number" type="int" operation="+" value="1" pattern="0"/>
 	            <entry key="build.minor.number" type="int" operation="+" value="1" pattern="00"/>
-	            <entry key="build.revision.number" type="int" operation="+" value="1" pattern="00"/>
+	            <entry key="build.revision.number" type="int" operation="+" value="1" pattern="000"/>
 	    </propertyfile>
-	</target>	
+	</target>
 	
-	<target name="current_build_number" description="Shows current build number.">
-	 	<echo>Current build number:${build.number}</echo>
+	<target name="set-version" description="Updates version info in the manifest.">
+	    <input addproperty="build.code" message="Version Code:"/>
+	    <input addproperty="build.version" message="Version Name:"/>
+	    <SetVersion code="${build.code}" name="${build.version}"/>
+	</target>	
+			
+	<target name="current_build_version" description="Shows current build version.">
+	 	<echo>Current build version:${build.version}</echo>
+	</target>
+	
+	<target name="current_manifest_version_name" description="Shows current version in the manifest.">
+		<xpath input="AndroidManifest.xml" expression="/manifest/@android:versionName" output="build.version.name" default="unknown" />
+	    <echo>Current manifest version name:${build.version.name}</echo>
+	</target>
+	
+	<target name="upload" description="Upload aircandi apk to website.">
+		<property file="${source.absolute.dir}/com/proxibase/aircandi/aws.properties"/>
+		<S3Upload verbose="true"
+		                accessId="${accessId}"
+		                secretKey="${secretKey}"
+		                bucket="www.aircandi.com/android"
+                        publicRead="true">
+			<fileset dir="${out.absolute.dir}" includes="${out.final.file}"/>
+		</S3Upload>
 	</target>
 	
     <!-- Customized release target: Adds steps to update versionName in the manifest
@@ -59,11 +95,18 @@
         <!-- only create apk if *not* a library project -->
         <do-only-if-not-library elseText="Library project: do not create apk..." >
             <sequential>
-                
+
+                <!-- Increment revision number in the property file -->
 				<antcall target="-revision" />				
-				<xpath input="AndroidManifest.xml" expression="/manifest/@android:versionCode" output="build.version.code" default="false" />
-				<xpath input="AndroidManifest.xml" expression="/manifest/@android:versionName" output="build.version.name" default="false" />
-				<antcall target="current_build_number" />				
+				
+				<!-- Report current build version -->
+				<antcall target="current_build_version" />	
+				
+				<!-- Push version info to the manifest file -->
+    			<property file="build_info.properties" />
+			    <property name="build.version.next" value="${build.major.number}.${build.minor.number}.${build.revision.number}" />
+			    <property name="build.code.next" value="${build.code}" />
+	    		<SetVersion code="${build.code.next}" name="${build.version.next}"/>
                 
                 <property name="out.unaligned.file" location="${out.absolute.dir}/${ant.project.name}-release-unaligned.apk" />
 
@@ -82,30 +125,18 @@
                         in.package="${out.unaligned.file}"
                         out.package="${out.final.file}" />
                 
-                <!-- Extra copy to website 				-->
-                
-                <!-- 
-                Ant task to upload to s3
-                
-<taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload">
-        <classpath refid="classpath.compile"/>
-</taskdef>
-
-<target name="upload">
-        <property file="${basedir}/aws.properties"/>
-        <S3Upload verbose="true"
-                        accessId="${aws.accessId}"
-                        secretKey="${aws.secretKey}"
-                        bucket="lifeguard"
-                        publicRead="true">
-                <fileset dir="${lib}" includes="**/*.jar"/>
-        </S3Upload>
-</target>                
-                 -->
-                 
 				<copy file="${out.final.file}" toDir="${web.local.dir}" overwrite="true" />
 				
-                <echo level="info">Release Package: ${out.final.file}</echo>
+                <!-- Extra copy to website                 
+        		<property file="${source.absolute.dir}/com/proxibase/aircandi/aws.properties"/>
+		        <S3Upload verbose="true"
+		                        accessId="${accessId}"
+		                        secretKey="${secretKey}"
+		                        bucket="www.aircandi.com">
+		        	<fileset dir="${out.absolute.dir}" includes="${out.final.file}"/>
+		        </S3Upload>
+		        -->
+				<echo level="info">Release Package: ${out.final.file}</echo>
             </sequential>
         </do-only-if-not-library>
         <record-build-info />

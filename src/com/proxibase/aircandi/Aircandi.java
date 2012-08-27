@@ -73,24 +73,29 @@ import com.proxibase.service.objects.User;
 )
 public class Aircandi extends Application {
 
-	private static Aircandi					singletonObject;
-
 	public final static int					DEBUG_SIGNATURE_HASH	= -2026043354;
+
+	private static Aircandi					singletonObject;
 	public static SharedPreferences			settings;
 	public static SharedPreferences.Editor	settingsEditor;
+
 	public static Context					applicationContext;
 	public static Handler					applicationHandler;
-	private User							mUser;
-	private Boolean							mRebuildingDataModel	= false;
-	private Boolean							mToolstripOpen			= false;
-	private Boolean							mFirstTimeCandiForm		= true;
-	private CandiTask						mCandiTask				= CandiTask.RadarCandi;
-	private Boolean							mLaunchedFromRadar		= false;
+
 	public static Boolean					firstRunApp				= true;
 	public static Boolean					firstRunRadar			= true;
 	public static Boolean					runFullScan				= true;
 	public static Boolean					runUiUpdate				= false;
 	public static Boolean					lastScanEmpty			= false;
+	public static Boolean					updateNeeded			= false;
+	public static Boolean					updateRequired			= false;
+	public static String					updateUri;
+
+	private User							mUser;
+	private CandiTask						mCandiTask				= CandiTask.RadarCandi;
+	private Boolean							mLaunchedFromRadar		= false;
+	private Boolean							mRadarUpdateInProgress	= false;
+	private Boolean							mRadarScanInProgress	= false;
 
 	public static Aircandi getInstance() {
 		return singletonObject;
@@ -146,22 +151,6 @@ public class Aircandi extends Application {
 		return mUser;
 	}
 
-	public void setToolstripOpen(Boolean toolstripOpen) {
-		this.mToolstripOpen = toolstripOpen;
-	}
-
-	public Boolean getToolstripOpen() {
-		return mToolstripOpen;
-	}
-
-	public void setFirstTimeCandiForm(Boolean firstTimeCandiForm) {
-		this.mFirstTimeCandiForm = firstTimeCandiForm;
-	}
-
-	public Boolean getFirstTimeCandiForm() {
-		return mFirstTimeCandiForm;
-	}
-
 	public void setCandiTask(CandiTask candiTask) {
 		this.mCandiTask = candiTask;
 	}
@@ -170,20 +159,28 @@ public class Aircandi extends Application {
 		return mCandiTask;
 	}
 
-	public void setRebuildingDataModel(Boolean rebuildingDataModel) {
-		this.mRebuildingDataModel = rebuildingDataModel;
-	}
-
-	public Boolean isRebuildingDataModel() {
-		return mRebuildingDataModel;
-	}
-
 	public void setLaunchedFromRadar(Boolean launchedFromRadar) {
 		this.mLaunchedFromRadar = launchedFromRadar;
 	}
 
 	public Boolean getLaunchedFromRadar() {
 		return mLaunchedFromRadar;
+	}
+
+	public Boolean isRadarUpdateInProgress() {
+		return mRadarUpdateInProgress;
+	}
+
+	public void setRadarUpdateInProgress(Boolean radarUpdateInProgress) {
+		mRadarUpdateInProgress = radarUpdateInProgress;
+	}
+
+	public Boolean isRadarScanInProgress() {
+		return mRadarScanInProgress;
+	}
+
+	public void setRadarScanInProgress(Boolean radarScanInProgress) {
+		mRadarScanInProgress = radarScanInProgress;
 	}
 
 	public static enum CandiTask {

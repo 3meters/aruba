@@ -47,6 +47,8 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	@Expose
 	public String				linkUri;
 	@Expose
+	public String				linkPreviewUri;
+	@Expose
 	public Boolean				linkZoom;
 	@Expose
 	public Boolean				linkJavascriptEnabled;
@@ -180,6 +182,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		toEntity.imagePreviewUri = fromEntity.imagePreviewUri;
 		toEntity.imageUri = fromEntity.imageUri;
 		toEntity.linkUri = fromEntity.linkUri;
+		toEntity.linkPreviewUri = fromEntity.linkPreviewUri;
 	}
 
 	public Entity deepCopy() {
@@ -222,6 +225,9 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 					masterImageUri = imagePreviewUri;
 				}
 			}
+			else if (linkPreviewUri != null && !linkPreviewUri.equals("")) {
+				masterImageUri = linkPreviewUri;
+			}
 			else if (linkUri != null && !linkUri.equals("")) {
 				masterImageUri = linkUri;
 			}
@@ -250,6 +256,9 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 
 			if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
 				imageFormat = ImageFormat.Binary;
+			}
+			else if (linkPreviewUri != null && !linkPreviewUri.equals("")) {
+				imageFormat = ImageFormat.Html;
 			}
 			else if (linkUri != null && !linkUri.equals("")) {
 				imageFormat = ImageFormat.Html;
