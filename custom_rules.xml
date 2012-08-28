@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-    name="Aircandi_custom"
+    name="aircandi_custom"
     default="revision" >
     
     
@@ -19,11 +19,11 @@
 	<target name="bump-version" description="Bumps and updates version info in the manifest.">
 	    
 		<!-- Increment revision number in the property file -->
-	    <propertyfile  file="build_info.properties">
+	    <propertyfile  file="version.properties">
 			<entry key="build.revision.number" type="int" operation="+" value="1" pattern="000"/>
 	    </propertyfile>
 	    
-    	<property file="build_info.properties" />
+    	<property file="version.properties" />
     	
 	    <property name="build.version" value="${build.major.number}.${build.minor.number}.${build.revision.number}" />
 	    <property name="build.code" value="${build.code}" />
@@ -64,6 +64,13 @@
         <do-only-if-not-library elseText="Library project: do not create apk..." >
             <sequential>
                 
+                <!-- Add version to final file name -->
+    			<property file="version.properties" />
+	    		<property name="build.version" value="${build.major.number}.${build.minor.number}.${build.revision.number}" />
+	    		<property name="build.code" value="${build.code}" />
+	    		
+                <property name="out.final.file.versioned" location="${out.absolute.dir}/${ant.project.name}-release-${build.version}.apk" />
+                
                 <property name="out.unaligned.file" location="${out.absolute.dir}/${ant.project.name}-release-unaligned.apk" />
 
                 <!-- Signs the APK -->
@@ -79,9 +86,9 @@
                 <!-- Zip aligns the APK -->
                 <zipalign-helper
                         in.package="${out.unaligned.file}"
-                        out.package="${out.final.file}" />
+                        out.package="${out.final.file.versioned}" />
                 
-				<copy file="${out.final.file}" toDir="${web.local.dir}" overwrite="true" />
+				<copy file="${out.final.file.versioned}" toDir="${web.local.dir}" overwrite="true" />
 				
                 <!-- Extra copy to website                 
         		<property file="${source.absolute.dir}/com/proxibase/aircandi/aws.properties"/>
