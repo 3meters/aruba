@@ -111,9 +111,7 @@ public interface CandiConstants {
 	public static final int				IMAGE_WIDTH_ORIGINAL					= -1;
 
 	public static final String			THEME_DEFAULT							= "aircandi_theme_canyon";
-	
 	public static final String			URL_PROXIBASE							= "https://api.proxibase.com/";
-
 	public static final String			URL_AIRCANDI_UPGRADE					= "http://www.aircandi.com/install.html";
 	public static final String			S3_BUCKET_IMAGES						= "aircandi-images";
 

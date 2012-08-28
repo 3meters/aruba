@@ -3,73 +3,41 @@
     name="Aircandi_custom"
     default="revision" >
     
-    <!-- Custom tasks 
-	<property name="task.dir" value="${sdk.dir}/tools/lib"/> 
-	<path id="S3Upload.lib"> 
-	    <pathelement location="${task.dir}/awstasks-0.3.jar"/> 
-	</path>  
-	  
-	<taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload">
-	       <classpath refid="S3Upload.lib"/>
-	</taskdef>
-	-->
-    <!-- Build info -->
-
-    <property file="build_info.properties" />
-
-    <property
-        name="build.version"
-        value="${build.major.number}.${build.minor.number}.${build.revision.number}" />
-
-    <property
-        name="build.code"
-        value="${build.code}" />
     
     <!-- extra output directory -->
 
     <property
         name="web.local.dir"
         value="D:\Files\Proxibase\Website\android" />
+        
+    <!-- Pre-build targets -->
     
-	<!-- Handles incrementing build numbers -->
-	
-	<target name="-revision">
-	    <propertyfile  file="build_info.properties">
-	            <entry key="build.revision.number" type="int" operation="+" value="1" pattern="000"/>
-	    </propertyfile>
-	</target>
-
-	<target name="-minor">
-	    <propertyfile  file="build_info.properties">
-	            <entry key="build.minor.number" type="int" operation="+" value="1" pattern="00"/>
-	            <entry key="build.revision.number" type="int" value="0" pattern="000"/>
-	    </propertyfile>
-	</target>
-
-	<target name="-major">
-	    <propertyfile  file="build_info.properties">
-	            <entry key="build.major.number" type="int" operation="+" value="1" pattern="0"/>
-	            <entry key="build.minor.number" type="int" value="0" pattern="00"/>
-	            <entry key="build.revision.number" type="int" value="0" pattern="000"/>
-	    </propertyfile>
-	</target>
-
-	<target name="-all">
-	    <propertyfile  file="build_info.properties">
-	            <entry key="build.major.number" type="int" operation="+" value="1" pattern="0"/>
-	            <entry key="build.minor.number" type="int" operation="+" value="1" pattern="00"/>
-	            <entry key="build.revision.number" type="int" operation="+" value="1" pattern="000"/>
-	    </propertyfile>
-	</target>
-	
-	<target name="set-version" description="Updates version info in the manifest.">
-	    <input addproperty="build.code" message="Version Code:"/>
-	    <input addproperty="build.version" message="Version Name:"/>
-	    <SetVersion code="${build.code}" name="${build.version}"/>
+	<target name="-pre-build">
+		<antcall target="bump-version" />				
 	</target>	
-			
+    
+	<target name="bump-version" description="Bumps and updates version info in the manifest.">
+	    
+		<!-- Increment revision number in the property file -->
+	    <propertyfile  file="build_info.properties">
+			<entry key="build.revision.number" type="int" operation="+" value="1" pattern="000"/>
+	    </propertyfile>
+	    
+    	<property file="build_info.properties" />
+    	
+	    <property name="build.version" value="${build.major.number}.${build.minor.number}.${build.revision.number}" />
+	    <property name="build.code" value="${build.code}" />
+	    
+    	<echo>Version code: ${build.code}</echo>
+        <echo>Version name: ${build.version}</echo>    			
+    
+        <!-- Push version info to the manifest file -->
+   		<SetVersion code="${build.code}" name="${build.version}"/>
+	    	    
+	</target>	
+						
 	<target name="current_build_version" description="Shows current build version.">
-	 	<echo>Current build version:${build.version}</echo>
+	 	<echo>Target build version:${build.version}</echo>
 	</target>
 	
 	<target name="current_manifest_version_name" description="Shows current version in the manifest.">
@@ -95,18 +63,6 @@
         <!-- only create apk if *not* a library project -->
         <do-only-if-not-library elseText="Library project: do not create apk..." >
             <sequential>
-
-                <!-- Increment revision number in the property file -->
-				<antcall target="-revision" />				
-				
-				<!-- Report current build version -->
-				<antcall target="current_build_version" />	
-				
-				<!-- Push version info to the manifest file -->
-    			<property file="build_info.properties" />
-			    <property name="build.version.next" value="${build.major.number}.${build.minor.number}.${build.revision.number}" />
-			    <property name="build.code.next" value="${build.code}" />
-	    		<SetVersion code="${build.code.next}" name="${build.version.next}"/>
                 
                 <property name="out.unaligned.file" location="${out.absolute.dir}/${ant.project.name}-release-unaligned.apk" />
 
