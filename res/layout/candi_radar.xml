@@ -194,16 +194,30 @@
             android:layout_alignParentTop="true"
             android:background="?attr/ruleColor" />
 
-        <Button
+        <LinearLayout
             android:id="@+id/button_new"
             style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:drawableLeft="?attr/iconNewCandi"
-            android:drawablePadding="5dp"
+            android:clickable="true"
             android:onClick="onNewCandiButtonClick"
-            android:text="@string/radar_button_new" />
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="?attr/iconNewCandi"
+                android:visibility="visible" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingLeft="2dp"
+                android:text="@string/radar_button_new" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/button_help"

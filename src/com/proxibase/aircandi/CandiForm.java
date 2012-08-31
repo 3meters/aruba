@@ -341,7 +341,7 @@ public class CandiForm extends CandiActivity {
 		final Button comments = (Button) candiInfoView.findViewById(R.id.button_comments);
 		final ImageView map = (ImageView) candiInfoView.findViewById(R.id.button_map);
 		final Button newComment = (Button) candiInfoView.findViewById(R.id.button_comment);
-		final Button newCandi = (Button) candiInfoView.findViewById(R.id.button_new);
+		final ViewGroup newCandi = (ViewGroup) candiInfoView.findViewById(R.id.button_new);
 		final Button moveCandi = (Button) candiInfoView.findViewById(R.id.button_move);
 		final Button editCandi = (Button) candiInfoView.findViewById(R.id.button_edit);
 		final ViewGroup parentGroup = (ViewGroup) candiInfoView.findViewById(R.id.candi_form_parent_group);

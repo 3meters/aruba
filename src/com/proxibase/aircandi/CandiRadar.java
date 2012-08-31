@@ -1379,7 +1379,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, null, CandiRadar.this);
+					mCommon.showProgressDialog(true, "Checking for updates...", CandiRadar.this);
 				}
 
 				@Override

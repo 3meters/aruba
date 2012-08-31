@@ -144,12 +144,14 @@ public class Logger {
 	 * Verbose: Should never compiled into release version
 	 * This level of logging should be used for everything else. This level will only be logged on debug builds.
 	 */
+	@SuppressWarnings("unused")
 	static public void v(Object taskContext, String msgFormat) {
 		if (CandiConstants.LOG_LEVEL <= Log.VERBOSE) {
 			Log(LogLevel.Verbose, taskContext, msgFormat);
 		}
 	}
 
+	@SuppressWarnings("unused")
 	static public void v(Object taskContext, String msgFormat, Throwable t) {
 		if (CandiConstants.LOG_LEVEL <= Log.VERBOSE) {
 			Log(LogLevel.Verbose, taskContext, msgFormat, t);

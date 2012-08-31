@@ -689,9 +689,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 			Tracker.trackEvent("User", "AutoSignin", null, 0);
 		}
 
-		/* We fall to here if we didn't find a good user or session */
 		Aircandi.getInstance().setUser(user);
-		ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_in) + " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+		//ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_in) + " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
 		/* Make sure onPrepareOptionsMenu gets called (since api 11) */
 		((SherlockActivity) mActivity).invalidateOptionsMenu();

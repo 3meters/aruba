@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/progress_body"
     android:layout_width="100dp"
-    android:layout_height="100dp"
+    android:layout_height="wrap_content"
     android:layout_centerInParent="true"
-    android:gravity="center" >
+    android:minHeight="100dp"
+    android:minWidth="100dp"
+    android:orientation="vertical" >
 
     <ImageView
         android:id="@+id/image_body_progress_indicator"
+        android:layout_marginTop="25dp"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_centerInParent="true"
+        android:layout_gravity="center"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
-
+
     <TextView
         android:id="@+id/text_progress_message"
         style="@style/progress_text"
-        android:layout_width="175dp"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/image_body_progress_indicator"
-        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
         android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:gravity="center"
         android:text="@string/progress_loading" />
 
-</RelativeLayout>
+</LinearLayout>
