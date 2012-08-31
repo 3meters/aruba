@@ -20,7 +20,7 @@
 	    
 		<!-- Increment revision number in the property file -->
 	    <propertyfile  file="version.properties">
-			<entry key="build.revision.number" type="int" operation="+" value="1" pattern="000"/>
+			<entry key="build.revision.number" type="int" operation="+" value="1" />
 	    </propertyfile>
 	    
     	<property file="version.properties" />

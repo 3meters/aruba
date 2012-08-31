@@ -69,30 +69,7 @@ public class ImageRequestBuilder {
 	}
 
 	public static String getImageUriFromEntity(Entity entity) {
-		String imageUri = null;
-		if (entity.imagePreviewUri != null && !entity.imagePreviewUri.equals("")) {
-			if (!entity.imagePreviewUri.toLowerCase().startsWith("resource:")) {
-				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + entity.imagePreviewUri;
-			}
-			else {
-				imageUri = entity.imagePreviewUri;
-			}
-		}
-		else if (entity.linkPreviewUri != null && !entity.linkPreviewUri.equals("")) {
-			imageUri = entity.linkPreviewUri;
-		}
-		else if (entity.linkUri != null && !entity.linkUri.equals("")) {
-			imageUri = entity.linkUri;
-		}
-		else if (entity.creator != null) {
-			if (entity.creator.imageUri != null && !entity.creator.imageUri.equals("")) {
-				imageUri = entity.creator.imageUri;
-			}
-			else if (entity.creator.linkUri != null && !entity.creator.linkUri.equals("")) {
-				imageUri = entity.creator.linkUri;
-			}
-		}
-		return imageUri;
+		return entity.getMasterImageUri();
 	}
 
 	public void setFromUris(String imageUri, String linkUri) {

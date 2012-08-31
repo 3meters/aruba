@@ -215,6 +215,9 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		String masterImageUri = null;
 		if (this.type.equals(CandiConstants.TYPE_CANDI_POST)) {
 			masterImageUri = this.creator.imageUri;
+			if (!masterImageUri.startsWith("http:") && !masterImageUri.startsWith("https:") && !masterImageUri.startsWith("resource:")) {
+				masterImageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + this.creator.imageUri;
+			}
 		}
 		else {
 			if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
