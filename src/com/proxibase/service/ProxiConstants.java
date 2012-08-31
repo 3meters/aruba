@@ -14,7 +14,7 @@ public interface ProxiConstants {
 	public static final String	ROOT_COLLECTION_ID									= "0000.000000.00000.000";
 
 	public static final String	_URL_PROXIBASE_SERVICE								= "http://api.aircandi.com:8080/";
-	public static final String	URL_PROXIBASE_SERVICE								= "https://api.proxibase.com/";
+	public static final String	URL_PROXIBASE_SERVICE								= "https://api.aircandi.com/";
 
 	public static final String	URL_PROXIBASE_SERVICE_REST							= URL_PROXIBASE_SERVICE + "data/";
 	public static final String	URL_PROXIBASE_SERVICE_USER							= URL_PROXIBASE_SERVICE + "user/";
@@ -25,7 +25,6 @@ public interface ProxiConstants {
 	public static final String	URL_PROXIBASE_MEDIA_IMAGES							= "https://aircandi-images.s3.amazonaws.com/";
 	public static final String	URL_PROXIBASE_SEARCH_IMAGES							= "https://api.datamarket.azure.com/Data.ashx/Bing/Search/v1/Image";
 
-	public static final String	APP_NAME											= "Proxibase";
 	public static final String	USER_AGENT_MOBILE									= "Mozilla/5.0 (Linux; U; Android 2.1.3; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 	public static final String	USER_AGENT_DESKTOP									= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16";
 	public static final String	USER_AGENT_NEXUS_S									= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
