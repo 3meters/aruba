@@ -14,9 +14,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseService.GsonType;
-import com.proxibase.service.objects.Entity;
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.ProxibaseService.GsonType;
+import com.aircandi.service.objects.Entity;
 
 public class ProxiHandlerManager {
 

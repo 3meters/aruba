@@ -23,6 +23,14 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
+import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ProxibaseService.GsonType;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ServiceRequest.AuthType;
+import com.aircandi.service.objects.ServiceData;
 import com.proxibase.aircandi.components.DrawableManager;
 import com.proxibase.aircandi.components.EndlessAdapter;
 import com.proxibase.aircandi.components.ImageResult;
@@ -30,14 +38,6 @@ import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.service.ProxiConstants;
-import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseService.GsonType;
-import com.proxibase.service.ProxibaseService.RequestType;
-import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.ServiceRequest;
-import com.proxibase.service.ServiceRequest.AuthType;
-import com.proxibase.service.objects.ServiceData;
 
 /*
  * We often will get duplicates because the ordering of images isn't

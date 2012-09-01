@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 
+import com.aircandi.service.objects.Entity;
 import com.proxibase.aircandi.candi.models.CandiModel.DisplayExtra;
 import com.proxibase.aircandi.candi.models.CandiModel.ReasonInactive;
 import com.proxibase.aircandi.candi.models.ZoneModel.Position;
@@ -15,7 +16,6 @@ import com.proxibase.aircandi.components.CandiList;
 import com.proxibase.aircandi.components.DateUtils;
 import com.proxibase.aircandi.components.EntityList;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.objects.Entity;
 
 /**
  * @author Jayma

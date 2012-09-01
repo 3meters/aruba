@@ -17,20 +17,20 @@ import android.webkit.WebView;
 import android.webkit.WebView.PictureListener;
 import android.webkit.WebViewClient;
 
+import com.aircandi.service.ProxibaseServiceException;
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseServiceException.ErrorCode;
+import com.aircandi.service.ProxibaseServiceException.ErrorType;
+import com.aircandi.service.objects.Entity.ImageFormat;
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.components.ImageRequest.ImageResponse;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.ProxibaseService.RequestType;
-import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.ProxibaseServiceException;
-import com.proxibase.service.ProxibaseServiceException.ErrorCode;
-import com.proxibase.service.ProxibaseServiceException.ErrorType;
-import com.proxibase.service.ServiceRequest;
-import com.proxibase.service.objects.Entity.ImageFormat;
 
 @SuppressWarnings("deprecation")
 public class ImageLoader {

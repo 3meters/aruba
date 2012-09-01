@@ -16,15 +16,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.BookmarkAdapter;
 import com.proxibase.aircandi.components.NetworkManager;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.Utilities;
-import com.proxibase.service.ProxibaseService.RequestType;
-import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.ServiceRequest;
 
 public class BookmarkPicker extends FormActivity implements OnItemClickListener {
 

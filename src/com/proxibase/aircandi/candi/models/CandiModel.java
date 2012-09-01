@@ -1,8 +1,8 @@
 package com.proxibase.aircandi.candi.models;
 
+import com.aircandi.service.objects.Entity;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.proxibase.aircandi.candi.models.ZoneModel.ZoneStatus;
-import com.proxibase.service.objects.Entity;
 
 /**
  * @author Jayma

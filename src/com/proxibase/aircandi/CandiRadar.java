@@ -68,6 +68,15 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.Query;
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ProxibaseService.GsonType;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.User;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.Preferences.PrefResponse;
@@ -111,15 +120,6 @@ import com.proxibase.aircandi.components.ProxiHandlerManager;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.components.VersionInfo;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxiConstants;
-import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseService.GsonType;
-import com.proxibase.service.ProxibaseService.RequestType;
-import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.Query;
-import com.proxibase.service.ServiceRequest;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.User;
 
 /*
  * Texture Notes - Textures are loaded into hardware using bitmaps (one or more texture sources).

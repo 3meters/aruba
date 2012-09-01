@@ -20,6 +20,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ProxibaseService.GsonType;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseServiceException.ErrorCode;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.GeoLocation;
+import com.aircandi.service.objects.Link;
+import com.aircandi.service.objects.ServiceData;
+import com.aircandi.service.objects.User;
+import com.aircandi.service.objects.Entity.ImageFormat;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AircandiCommon.ServiceOperation;
@@ -41,19 +54,6 @@ import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.service.ProxiConstants;
-import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseService.GsonType;
-import com.proxibase.service.ProxibaseService.RequestType;
-import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.ProxibaseServiceException.ErrorCode;
-import com.proxibase.service.ServiceRequest;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.Entity.ImageFormat;
-import com.proxibase.service.objects.GeoLocation;
-import com.proxibase.service.objects.Link;
-import com.proxibase.service.objects.ServiceData;
-import com.proxibase.service.objects.User;
 
 public class CandiForm extends CandiActivity {
 

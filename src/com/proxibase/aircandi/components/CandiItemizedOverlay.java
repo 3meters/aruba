@@ -14,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.text.TextUtils;
 
+import com.aircandi.service.objects.Beacon;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;
@@ -21,7 +22,6 @@ import com.google.android.maps.OverlayItem;
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.objects.Beacon;
 
 public class CandiItemizedOverlay extends ItemizedOverlay {
 

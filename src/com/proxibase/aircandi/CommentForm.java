@@ -10,6 +10,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ProxibaseService.GsonType;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.objects.Comment;
+import com.aircandi.service.objects.User;
 import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.DateUtils;
@@ -24,14 +32,6 @@ import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
-import com.proxibase.service.ProxiConstants;
-import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseService.GsonType;
-import com.proxibase.service.ProxibaseService.RequestType;
-import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.ServiceRequest;
-import com.proxibase.service.objects.Comment;
-import com.proxibase.service.objects.User;
 
 public class CommentForm extends FormActivity {
 

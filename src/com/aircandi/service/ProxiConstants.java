@@ -1,4 +1,4 @@
-package com.proxibase.service;
+package com.aircandi.service;
 
 public interface ProxiConstants {
 

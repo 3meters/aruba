@@ -45,6 +45,18 @@ import com.actionbarsherlock.app.SherlockMapActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ProxibaseService.GsonType;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseServiceException.ErrorCode;
+import com.aircandi.service.ProxibaseServiceException.ErrorType;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.GeoLocation;
+import com.aircandi.service.objects.Session;
+import com.aircandi.service.objects.User;
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.Aircandi.CandiTask;
 import com.proxibase.aircandi.CandiForm;
@@ -74,18 +86,6 @@ import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.aircandi.components.ProxiExplorer.WifiScanResult;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.service.ProxiConstants;
-import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseService.GsonType;
-import com.proxibase.service.ProxibaseService.RequestType;
-import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.ProxibaseServiceException.ErrorCode;
-import com.proxibase.service.ProxibaseServiceException.ErrorType;
-import com.proxibase.service.ServiceRequest;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.GeoLocation;
-import com.proxibase.service.objects.Session;
-import com.proxibase.service.objects.User;
 
 public class AircandiCommon implements ActionBar.TabListener {
 

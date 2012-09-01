@@ -10,12 +10,12 @@ import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.ProxibaseServiceException;
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ProxibaseServiceException.ErrorCode;
+import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseServiceException;
-import com.proxibase.service.ServiceRequest;
-import com.proxibase.service.ProxibaseServiceException.ErrorCode;
-import com.proxibase.service.ProxibaseServiceException.ErrorType;
 
 public class NetworkManager {
 

@@ -16,11 +16,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 
+import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.objects.Observation;
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.components.Events.EventHandler;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.objects.Observation;
 
 @SuppressWarnings("unused")
 public class GeoLocationManager {

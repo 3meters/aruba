@@ -1,6 +1,6 @@
 package com.proxibase.aircandi.candi.models;
 
-import com.proxibase.service.objects.Entity;
+import com.aircandi.service.objects.Entity;
 
 public class CandiModelFactory {
 

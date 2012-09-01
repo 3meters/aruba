@@ -10,9 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.aircandi.service.objects.Entity;
 import com.proxibase.aircandi.CandiForm;
 import com.proxibase.aircandi.R;
-import com.proxibase.service.objects.Entity;
 
 public class CandiPagerAdapter extends PagerAdapter {
 

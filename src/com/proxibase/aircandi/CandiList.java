@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.User;
 import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.CandiListAdapter;
@@ -20,8 +22,6 @@ import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.User;
 
 public class CandiList extends CandiActivity {
 	/*

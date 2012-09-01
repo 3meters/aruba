@@ -16,6 +16,8 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 
+import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.objects.Entity;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.candi.models.BaseModel;
 import com.proxibase.aircandi.candi.models.BaseModel.ViewState;
@@ -37,8 +39,6 @@ import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.objects.Entity;
 
 // @SuppressWarnings("unused")
 public class CandiView extends BaseView implements OnGestureListener {

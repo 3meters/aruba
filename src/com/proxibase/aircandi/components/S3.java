@@ -25,6 +25,9 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.aircandi.service.ProxibaseServiceException;
+import com.aircandi.service.ProxibaseServiceException.ErrorCode;
+import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -33,9 +36,6 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.proxibase.aircandi.CandiRadar;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxibaseServiceException;
-import com.proxibase.service.ProxibaseServiceException.ErrorCode;
-import com.proxibase.service.ProxibaseServiceException.ErrorType;
 
 /*
  * How much of AWS am I using just to push images?

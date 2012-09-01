@@ -1,13 +1,13 @@
-package com.proxibase.service;
+package com.aircandi.service;
 
 import org.apache.commons.codec.binary.Base64;
 
 import android.os.Bundle;
 
-import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.ProxibaseService.RequestType;
-import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.objects.Session;
+import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.objects.Session;
 
 /**
  * Here is the typical code to construct a service request:

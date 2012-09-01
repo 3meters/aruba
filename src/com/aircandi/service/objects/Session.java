@@ -1,4 +1,4 @@
-package com.proxibase.service.objects;
+package com.aircandi.service.objects;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

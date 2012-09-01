@@ -8,6 +8,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
+import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ProxibaseService.GsonType;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.ServiceData;
+import com.aircandi.service.objects.User;
 import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.AnimUtils.TransitionType;
 import com.proxibase.aircandi.components.CandiListAdapter;
@@ -23,15 +32,6 @@ import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxiConstants;
-import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseService.GsonType;
-import com.proxibase.service.ProxibaseService.RequestType;
-import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.ServiceRequest;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.ServiceData;
-import com.proxibase.service.objects.User;
 
 public class UserCandiList extends CandiList {
 

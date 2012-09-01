@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.view.View;
 
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.ServiceData;
 import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.EntityList;
@@ -15,8 +17,6 @@ import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.ServiceData;
 
 public class UserCandiForm extends CandiForm {
 

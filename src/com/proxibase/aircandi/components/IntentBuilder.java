@@ -3,6 +3,9 @@ package com.proxibase.aircandi.components;
 import android.content.Context;
 import android.content.Intent;
 
+import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.GeoLocation;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
@@ -10,9 +13,6 @@ import com.google.gson.GsonBuilder;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.CommandType;
 import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
-import com.proxibase.service.objects.Beacon;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.GeoLocation;
 
 public class IntentBuilder {
 

@@ -1,4 +1,4 @@
-package com.proxibase.service;
+package com.aircandi.service;
 
 /**
  * Extension of ProxibaseClientException that represents an error response returned

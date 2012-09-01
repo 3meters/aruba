@@ -14,7 +14,7 @@ import android.location.Location;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
-import com.proxibase.service.objects.User;
+import com.aircandi.service.objects.User;
 
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ", customReportContent = {
 		ReportField.REPORT_ID,

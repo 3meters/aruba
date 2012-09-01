@@ -3,10 +3,10 @@ package com.proxibase.aircandi.components;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import com.aircandi.service.objects.Entity;
 import com.proxibase.aircandi.candi.models.CandiModel;
 import com.proxibase.aircandi.components.ProxiExplorer.EntityTree;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.objects.Entity;
 
 public class EntityList<T> extends ArrayList<T> {
 

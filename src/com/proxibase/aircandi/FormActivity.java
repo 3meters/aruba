@@ -24,6 +24,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.objects.User;
 import com.proxibase.aircandi.components.AircandiCommon;
 import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.AnimUtils.TransitionType;
@@ -39,8 +41,6 @@ import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.Tracker;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.objects.User;
 
 public abstract class FormActivity extends SherlockActivity {
 

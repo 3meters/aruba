@@ -15,12 +15,12 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.aircandi.service.objects.Entity;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
 import com.proxibase.aircandi.widgets.TextViewEllipsizing;
 import com.proxibase.aircandi.widgets.WebImageView;
-import com.proxibase.service.objects.Entity;
 
 public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable {
 

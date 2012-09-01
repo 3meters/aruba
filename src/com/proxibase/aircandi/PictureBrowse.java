@@ -7,6 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Entity.ImageFormat;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ImageManager;
 import com.proxibase.aircandi.components.ImageRequest;
@@ -17,10 +21,6 @@ import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
 import com.proxibase.aircandi.widgets.AuthorBlock;
-import com.proxibase.service.ProxiConstants;
-import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.Entity.ImageFormat;
 
 public class PictureBrowse extends FormActivity {
 

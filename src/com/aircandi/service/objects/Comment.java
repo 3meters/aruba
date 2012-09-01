@@ -1,4 +1,4 @@
-package com.proxibase.service.objects;
+package com.aircandi.service.objects;
 
 import java.io.Serializable;
 

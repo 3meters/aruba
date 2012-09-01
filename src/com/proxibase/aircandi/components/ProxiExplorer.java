@@ -17,27 +17,27 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Bundle;
 
+import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.ProxibaseServiceException;
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.ProxibaseService.GsonType;
+import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.Comment;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Observation;
+import com.aircandi.service.objects.ServiceData;
+import com.aircandi.service.objects.User;
+import com.aircandi.service.objects.Beacon.BeaconState;
+import com.aircandi.service.objects.Entity.EntityState;
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.Preferences;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
-import com.proxibase.service.ProxiConstants;
-import com.proxibase.service.ProxibaseService;
-import com.proxibase.service.ProxibaseService.GsonType;
-import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.ProxibaseService.RequestType;
-import com.proxibase.service.ProxibaseService.ResponseFormat;
-import com.proxibase.service.ProxibaseServiceException;
-import com.proxibase.service.ServiceRequest;
-import com.proxibase.service.objects.Beacon;
-import com.proxibase.service.objects.Beacon.BeaconState;
-import com.proxibase.service.objects.Comment;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.Entity.EntityState;
-import com.proxibase.service.objects.Observation;
-import com.proxibase.service.objects.ServiceData;
-import com.proxibase.service.objects.User;
 
 public class ProxiExplorer {
 

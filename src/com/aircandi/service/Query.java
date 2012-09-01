@@ -1,8 +1,8 @@
-package com.proxibase.service;
+package com.aircandi.service;
 
 import java.net.URLEncoder;
 
-import com.proxibase.service.ProxibaseService.UrlEncodingType;
+import com.aircandi.service.ProxibaseService.UrlEncodingType;
 
 public class Query {
 

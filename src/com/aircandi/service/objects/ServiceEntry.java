@@ -1,10 +1,10 @@
-package com.proxibase.service.objects;
+package com.aircandi.service.objects;
 
 import java.io.Serializable;
 
+import com.aircandi.service.ProxiConstants;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.proxibase.service.ProxiConstants;
 
 /*
  * Initial user settings (owner,creator):

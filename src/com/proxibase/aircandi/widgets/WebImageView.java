@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 
+import com.aircandi.service.ProxibaseService.RequestListener;
 import com.proxibase.aircandi.R;
 import com.proxibase.aircandi.components.AnimUtils;
 import com.proxibase.aircandi.components.ImageManager;
@@ -26,7 +27,6 @@ import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxibaseService.RequestListener;
 
 public class WebImageView extends RelativeLayout {
 

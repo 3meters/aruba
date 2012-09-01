@@ -47,6 +47,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import com.aircandi.service.objects.Entity;
 import com.proxibase.aircandi.Aircandi;
 import com.proxibase.aircandi.BuildConfig;
 import com.proxibase.aircandi.CandiRadar;
@@ -84,7 +85,6 @@ import com.proxibase.aircandi.components.ImageRequestBuilder;
 import com.proxibase.aircandi.components.ImageUtils;
 import com.proxibase.aircandi.components.Logger;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.objects.Entity;
 
 public class CandiPatchPresenter implements Observer {
 

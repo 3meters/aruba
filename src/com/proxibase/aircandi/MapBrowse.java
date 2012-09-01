@@ -12,6 +12,9 @@ import android.widget.FrameLayout.LayoutParams;
 
 import com.actionbarsherlock.app.SherlockMapActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.GeoLocation;
+import com.aircandi.service.objects.ServiceData;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
@@ -23,9 +26,6 @@ import com.proxibase.aircandi.components.NetworkManager.ResponseCode;
 import com.proxibase.aircandi.components.NetworkManager.ServiceResponse;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.GeoLocation;
-import com.proxibase.service.objects.ServiceData;
 
 public class MapBrowse extends SherlockMapActivity {
 

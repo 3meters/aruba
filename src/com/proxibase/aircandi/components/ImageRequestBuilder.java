@@ -1,10 +1,10 @@
 package com.proxibase.aircandi.components;
 
+import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Entity.ImageFormat;
 import com.proxibase.aircandi.components.ImageRequest.ImageShape;
-import com.proxibase.service.ProxiConstants;
-import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.objects.Entity;
-import com.proxibase.service.objects.Entity.ImageFormat;
 
 public class ImageRequestBuilder {
 

@@ -7,10 +7,10 @@ import android.webkit.WebView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.aircandi.service.objects.Entity;
 import com.proxibase.aircandi.components.Exceptions;
 import com.proxibase.aircandi.components.ProxiExplorer;
 import com.proxibase.aircandi.widgets.AuthorBlock;
-import com.proxibase.service.objects.Entity;
 
 public class PictureBrowseWebView extends FormActivity {
 

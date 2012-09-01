@@ -2,9 +2,9 @@ package com.proxibase.aircandi.components;
 
 import android.graphics.Bitmap;
 
+import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.objects.Entity.ImageFormat;
 import com.proxibase.aircandi.core.CandiConstants;
-import com.proxibase.service.ProxibaseService.RequestListener;
-import com.proxibase.service.objects.Entity.ImageFormat;
 
 public class ImageRequest {
 

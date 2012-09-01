@@ -1,4 +1,4 @@
-package com.proxibase.service;
+package com.aircandi.service;
 
 /**
  * Base exception class for any errors that occur while attempting to use a
