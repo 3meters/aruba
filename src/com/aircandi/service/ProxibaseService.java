@@ -52,6 +52,9 @@ import org.apache.http.protocol.HTTP;
 
 import android.graphics.Bitmap;
 
+import com.aircandi.Aircandi;
+import com.aircandi.components.DateUtils;
+import com.aircandi.components.Logger;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
@@ -68,9 +71,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.proxibase.aircandi.Aircandi;
-import com.proxibase.aircandi.components.DateUtils;
-import com.proxibase.aircandi.components.Logger;
 
 /*
  * Http 1.1 Status Codes (subset) - 200: OK - 201: Created - 202: Accepted - 203: Non-authoritative information - 204:

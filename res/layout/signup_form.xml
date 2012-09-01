@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" 
     android:background="?attr/backgroundForm" >
@@ -40,7 +40,7 @@
                 android:gravity="left"
                 android:orientation="horizontal" >
 
-                <com.proxibase.aircandi.widgets.WebImageView
+                <com.aircandi.widgets.WebImageView
                     android:id="@+id/image_picture"
                     android:layout_width="100dp"
                     android:layout_height="100dp"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/candi_form"
     android:layout_width="fill_parent"
@@ -43,7 +43,7 @@
                     android:layout_gravity="left"
                     android:layout_marginBottom="15dp" >
 
-                    <com.proxibase.aircandi.widgets.WebImageView
+                    <com.aircandi.widgets.WebImageView
                         android:id="@+id/candi_form_image"
                         android:layout_width="250px"
                         android:layout_height="250px"
@@ -102,7 +102,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp" >
 
-                    <com.proxibase.aircandi.widgets.AuthorBlock
+                    <com.aircandi.widgets.AuthorBlock
                         android:id="@+id/block_author"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -192,7 +192,7 @@
                 android:onClick="onChildrenButtonClick"
                 android:visibility="visible" >
 
-                <com.proxibase.aircandi.widgets.WebImageView
+                <com.aircandi.widgets.WebImageView
                     android:id="@+id/button_children_image"
                     android:layout_width="65dp"
                     android:layout_height="65dp"

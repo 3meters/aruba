@@ -11,23 +11,23 @@
 
     <!-- Application -->
 
-    <string name="EXTRA_PARENT_ENTITY_ID">com.proxibase.aircandi.EXTRA_PARENT_ENTITY_ID</string>
-    <string name="EXTRA_BEACON_ID">com.proxibase.aircandi.EXTRA_BEACON_ID</string>
-    <string name="EXTRA_ENTITY_ID">com.proxibase.aircandi.EXTRA_ENTITY_ID</string>
-    <string name="EXTRA_ENTITY_IS_ROOT">com.proxibase.aircandi.EXTRA_ENTITY_IS_ROOT</string>
-    <string name="EXTRA_ENTITY_TYPE">com.proxibase.aircandi.EXTRA_ENTITY_TYPE</string>
-    <string name="EXTRA_ENTITY_LOCATION">com.proxibase.aircandi.EXTRA_ENTITY_LOCATION</string>
-    <string name="EXTRA_USER_ID">com.proxibase.aircandi.EXTRA_USER_ID</string>
-    <string name="EXTRA_URI">com.proxibase.aircandi.EXTRA_URI</string>
-    <string name="EXTRA_URI_TITLE">com.proxibase.aircandi.EXTRA_URI_TITLE</string>
-    <string name="EXTRA_URI_DESCRIPTION">com.proxibase.aircandi.EXTRA_URI_DESCRIPTION</string>
-    <string name="EXTRA_MESSAGE">com.proxibase.aircandi.EXTRA_MESSAGE</string>
-    <string name="EXTRA_ENTITY_TREE">com.proxibase.aircandi.EXTRA_ENTITY_TREE</string>
-    <string name="EXTRA_COLLECTION_ID">com.proxibase.aircandi.EXTRA_COLLECTION_ID</string>
-    <string name="EXTRA_THEME_ID">com.proxibase.aircandi.EXTRA_THEME_ID</string>
-    <string name="EXTRA_STRING_ID">com.proxibase.aircandi.EXTRA_STRING_ID</string>
-    <string name="EXTRA_COMMAND_TYPE">com.proxibase.aircandi.EXTRA_COMMAND_TYPE</string>
-    <string name="EXTRA_NAVIGATION_TOP">com.proxibase.aircandi.EXTRA_NAVIGATION_TOP</string>
+    <string name="EXTRA_PARENT_ENTITY_ID">com.aircandi.EXTRA_PARENT_ENTITY_ID</string>
+    <string name="EXTRA_BEACON_ID">com.aircandi.EXTRA_BEACON_ID</string>
+    <string name="EXTRA_ENTITY_ID">com.aircandi.EXTRA_ENTITY_ID</string>
+    <string name="EXTRA_ENTITY_IS_ROOT">com.aircandi.EXTRA_ENTITY_IS_ROOT</string>
+    <string name="EXTRA_ENTITY_TYPE">com.aircandi.EXTRA_ENTITY_TYPE</string>
+    <string name="EXTRA_ENTITY_LOCATION">com.aircandi.EXTRA_ENTITY_LOCATION</string>
+    <string name="EXTRA_USER_ID">com.aircandi.EXTRA_USER_ID</string>
+    <string name="EXTRA_URI">com.aircandi.EXTRA_URI</string>
+    <string name="EXTRA_URI_TITLE">com.aircandi.EXTRA_URI_TITLE</string>
+    <string name="EXTRA_URI_DESCRIPTION">com.aircandi.EXTRA_URI_DESCRIPTION</string>
+    <string name="EXTRA_MESSAGE">com.aircandi.EXTRA_MESSAGE</string>
+    <string name="EXTRA_ENTITY_TREE">com.aircandi.EXTRA_ENTITY_TREE</string>
+    <string name="EXTRA_COLLECTION_ID">com.aircandi.EXTRA_COLLECTION_ID</string>
+    <string name="EXTRA_THEME_ID">com.aircandi.EXTRA_THEME_ID</string>
+    <string name="EXTRA_STRING_ID">com.aircandi.EXTRA_STRING_ID</string>
+    <string name="EXTRA_COMMAND_TYPE">com.aircandi.EXTRA_COMMAND_TYPE</string>
+    <string name="EXTRA_NAVIGATION_TOP">com.aircandi.EXTRA_NAVIGATION_TOP</string>
 
     <!-- Menus -->
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.proxibase.aircandi"
+    package="com.aircandi"
     android:versionCode="3"
     android:versionName="0.3.82" >
 
@@ -170,7 +170,7 @@
             android:exported="false"
             android:label="@string/form_title_preferences" >
             <intent-filter>
-                <action android:name="com.proxibase.aircandi.Preferences" />
+                <action android:name="com.aircandi.Preferences" />
 
                 <category android:name="android.intent.category.PREFERENCE" />
             </intent-filter>
@@ -187,7 +187,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
-    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
     -->
 
 </manifest>

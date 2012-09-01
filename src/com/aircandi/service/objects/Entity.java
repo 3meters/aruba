@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.aircandi.components.CommandType;
+import com.aircandi.components.EntityList;
+import com.aircandi.components.Utilities;
+import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.proxibase.aircandi.components.CommandType;
-import com.proxibase.aircandi.components.EntityList;
-import com.proxibase.aircandi.components.Utilities;
-import com.proxibase.aircandi.core.CandiConstants;
 
 /**
  * Entity as described by the proxi protocol standards.

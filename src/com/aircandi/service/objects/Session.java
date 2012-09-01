@@ -1,8 +1,8 @@
 package com.aircandi.service.objects;
 
+import com.aircandi.core.CandiConstants;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.proxibase.aircandi.core.CandiConstants;
 
 /**
  * @author Jayma

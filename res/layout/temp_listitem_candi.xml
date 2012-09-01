@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.proxibase.aircandi"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:id="@+id/item_row"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
@@ -15,7 +15,7 @@
         android:layout_alignParentTop="true"
         android:background="?attr/ruleColor" />
 
-    <com.proxibase.aircandi.widgets.WebImageView
+    <com.aircandi.widgets.WebImageView
         android:id="@+id/item_image"
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -58,7 +58,7 @@
         android:layout_toLeftOf="@+id/image_forward"
         android:layout_toRightOf="@id/item_image" />
 
-    <com.proxibase.aircandi.widgets.TextViewEllipsizing
+    <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_description"
         style="@style/candi_list_description"
         android:layout_width="fill_parent"
@@ -78,7 +78,7 @@
         android:layout_toRightOf="@+id/item_image"
         android:orientation="vertical" >
 
-        <com.proxibase.aircandi.widgets.AuthorBlock
+        <com.aircandi.widgets.AuthorBlock
             android:id="@+id/item_block_author"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
