@@ -25,17 +25,25 @@ public interface CandiConstants {
 	public static final String			GOOGLE_API_KEY_RELEASE					= "0NLNz2BjIntPUuNQrqaiA6J8TTFflv_PHQ2cTdQ";
 	public static final String			GOOGLE_API_KEY_DEBUG					= "0NLNz2BjIntNt_gkO2_iEs5wIIxNGrG_pmHjPbA";
 
+	public static final int				TWENTY_SECONDS							= 1000 * 20;
+	public static final int				ONE_MINUTE								= 1000 * 60;
+	public static final int				TWO_MINUTES								= 1000 * 60 * 2;
+	public static final int				FIVE_MINUTES							= 1000 * 60 * 5;
+	public static final int				FIFTEEN_MINUTES							= 1000 * 60 * 15;
+	public static final int				THIRTY_MINUTES							= 1000 * 60 * 30;
+	public static final int				SIXTY_MINUTES							= 1000 * 60 * 60;
+
 	public static final int				LAYER_GENERAL							= 0;
 	public static final int				LAYER_ZONES								= 1;
 	public static final int				LAYER_CANDI								= 2;
 
-	public static final int				INTERVAL_NETWORK_PHONEY					= 3000;
-	public static final int				INTERVAL_SCAN							= 60000;
-	public static final int				INTERVAL_RENDERING_DEFAULT				= 20000;
-	public static final int				INTERVAL_RENDERING_BOOST				= 60000;
+	public static final int				INTERVAL_SCAN							= ONE_MINUTE;
+	public static final int				INTERVAL_RENDERING_DEFAULT				= TWENTY_SECONDS;
+	public static final int				INTERVAL_RENDERING_BOOST				= ONE_MINUTE;
 
-	public static final int				LOCATION_POLLING_INTERVAL				= 300000;																// 5 minutes
-	public static final int				LOCATION_POLLING_TIMEOUT				= 60000;
+	public static final int				LOCATION_POLLING_INTERVAL				= FIVE_MINUTES;																			// 5 minutes
+	public static final int				LOCATION_POLLING_TIMEOUT				= ONE_MINUTE;
+	public static final int				INTERVAL_UPDATE_CHECK					= SIXTY_MINUTES;
 
 	public static final boolean			RADAR_SCROLL_HORIZONTAL					= false;
 	public static final int				RADAR_STACK_COUNT						= 3;
@@ -97,14 +105,8 @@ public interface CandiConstants {
 	public static final long			CACHE_TARGET_SIZE						= 8000000;
 	public static final long			CACHE_TRIGGER_SIZE						= 10000000;
 
-	public static final int				TWO_MINUTES								= 1000 * 60 * 2;
-	public static final int				FIVE_MINUTES							= 1000 * 60 * 5;
-	public static final int				FIFTEEN_MINUTES							= 1000 * 60 * 15;
-	public static final int				THIRTY_MINUTES							= 1000 * 60 * 30;
-	public static final int				SIXTY_MINUTES							= 1000 * 60 * 60;
-
 	public static final int				IMAGE_MEMORY_BYTES_MAX					= 4096000;
-	public static final int				IMAGE_MEMORY_CACHE_WIDTH_MAX			= 100;																	// (100x100x4) + 10000 extra
+	public static final int				IMAGE_MEMORY_CACHE_WIDTH_MAX			= 100;																						// (100x100x4) + 10000 extra
 	public static final Config			IMAGE_CONFIG_DEFAULT					= Config.ARGB_8888;
 	public static final int				IMAGE_WIDTH_SMALL						= 60;
 	public static final int				IMAGE_WIDTH_DEFAULT						= 250;
@@ -204,58 +206,54 @@ public interface CandiConstants {
 																						+ "AppleWebKit/533.1 (KHTML, like Gecko) "
 																						+ "Version/4.0 Mobile Safari/533.1";
 
-	// The default search radius in meters when searching for nearby beacons.
+	/* The default search radius in meters when searching for nearby beacons. */
 	public static int					LOCATION_DEFAULT_RADIUS					= 150;
 
-	// The maximum distance the user should travel between location updates.
+	/* The maximum distance the user should travel between location updates. */
 	public static int					LOCATION_MAX_DISTANCE					= LOCATION_DEFAULT_RADIUS / 2;
 
-	// The maximum time that should pass before the user gets a location update.
+	/* The maximum time that should pass before the user gets a location update. */
 	public static long					LOCATION_MAX_TIME						= AlarmManager.INTERVAL_FIFTEEN_MINUTES;
 
-	// You will generally want passive location updates to occur less frequently
-	// than active updates. You need to balance location freshness with battery
-	// life.
-	// The location update distance for passive updates.
+	/*
+	 * You will generally want passive location updates to occur less frequently
+	 * than active updates. You need to balance location freshness with battery
+	 * life. The location update distance for passive updates.
+	 */
 	public static int					LOCATION_PASSIVE_MAX_DISTANCE			= LOCATION_MAX_DISTANCE;
 
-	// The location update time for passive updates
+	/* The location update time for passive updates */
 	public static long					LOCATION_PASSIVE_MAX_TIME				= LOCATION_MAX_TIME;
 
-	// Use the GPS (fine location provider) when the Activity is visible?
+	/* Use the GPS (fine location provider) when the Activity is visible? */
 	public static boolean				USE_GPS_WHEN_ACTIVITY_VISIBLE			= true;
 
-	// When the user exits via the back button, do you want to disable
-	// passive background updates.
+	/* When the user exits via the back button, do you want to disable passive background updates. */
 	public static boolean				DISABLE_PASSIVE_LOCATION_WHEN_USER_EXIT	= false;
 
-	// Maximum latency before you force a cached detail page to be updated.
+	/* Maximum latency before you force a cached detail page to be updated. */
 	public static long					MAX_DETAILS_UPDATE_LATENCY				= AlarmManager.INTERVAL_DAY;
 
-	// Prefetching place details is useful but potentially expensive. The
-	// following
-	// values lets you disable prefetching when on mobile data or low battery
-	// conditions.
-	// Only prefetch on WIFI?
+	/*
+	 * Prefetching place details is useful but potentially expensive. The
+	 * following values lets you disable prefetching when on mobile data or low battery
+	 * conditions. Only prefetch on WIFI?
+	 */
 	public static boolean				PREFETCH_ON_WIFI_ONLY					= false;
 
-	// Disable prefetching when battery is low?
+	/* Disable prefetching when battery is low? */
 	public static boolean				DISABLE_PREFETCH_ON_LOW_BATTERY			= true;
 
-	// How long to wait before retrying failed checkins.
+	/* How long to wait before retrying failed checkins. */
 	public static long					CHECKIN_RETRY_INTERVAL					= AlarmManager.INTERVAL_FIFTEEN_MINUTES;
 
-	// The maximum number of locations to prefetch for each update.
+	/* The maximum number of locations to prefetch for each update. */
 	public static int					PREFETCH_LIMIT							= 5;
 
-	// public static boolean SUPPORTS_GINGERBREAD =
-	// android.os.Build.VERSION.SDK_INT >=
-	// android.os.Build.VERSION_CODES.GINGERBREAD;
-	// public static boolean SUPPORTS_HONEYCOMB =
-	// android.os.Build.VERSION.SDK_INT >=
-	// android.os.Build.VERSION_CODES.HONEYCOMB;
-	// public static boolean SUPPORTS_FROYO = android.os.Build.VERSION.SDK_INT
-	// >= android.os.Build.VERSION_CODES.FROYO;
-	// public static boolean SUPPORTS_ECLAIR = android.os.Build.VERSION.SDK_INT
-	// >= android.os.Build.VERSION_CODES.ECLAIR;
+	public static boolean				SUPPORTS_ECLAIR							= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ECLAIR;
+	public static boolean				SUPPORTS_FROYO							= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.FROYO;
+	public static boolean				SUPPORTS_GINGERBREAD					= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD;
+	public static boolean				SUPPORTS_HONEYCOMB						= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB;
+	public static boolean				SUPPORTS_ICE_CREAM_SANDWICH				= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+	public static boolean				SUPPORTS_JELLY_BEAN						= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN;
 }

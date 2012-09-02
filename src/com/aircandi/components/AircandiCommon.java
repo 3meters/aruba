@@ -580,33 +580,45 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		Dialog progressDialog = getProgressDialog();
 		if (visible) {
-			if (ownerActivity != null) {
-				progressDialog.setOwnerActivity(ownerActivity);
-			}
-			progressDialog.setContentView(R.layout.dialog_progress);
-			final ImageView image = (ImageView) progressDialog.findViewById(R.id.image_body_progress_indicator);
-			TextView text = (TextView) progressDialog.findViewById(R.id.text_progress_message);
-			if (message == null) {
-				text.setVisibility(View.GONE);
+			if (progressDialog.isShowing()) {
+				TextView text = (TextView) progressDialog.findViewById(R.id.text_progress_message);
+				if (message == null) {
+					text.setVisibility(View.GONE);
+				}
+				else {
+					text.setVisibility(View.VISIBLE);
+					text.setText(message);
+				}
 			}
 			else {
-				text.setText(message == null ? mActivity.getString(R.string.progress_loading) : message);
-			}
-
-			/* Prevent dismissing the indicator with the back key */
-			progressDialog.setCancelable(false);
-
-			progressDialog.show();
-			image.post(new Runnable() {
-
-				@Override
-				public void run() {
-					image.setBackgroundResource(mThemeBusyIndicatorResId);
-					final AnimationDrawable animation = (AnimationDrawable) image.getBackground();
-					animation.start();
+				if (ownerActivity != null) {
+					progressDialog.setOwnerActivity(ownerActivity);
 				}
-			});
+				progressDialog.setContentView(R.layout.dialog_progress);
+				final ImageView image = (ImageView) progressDialog.findViewById(R.id.image_body_progress_indicator);
+				TextView text = (TextView) progressDialog.findViewById(R.id.text_progress_message);
+				if (message == null) {
+					text.setVisibility(View.GONE);
+				}
+				else {
+					text.setVisibility(View.VISIBLE);
+					text.setText(message);
+				}
 
+				/* Prevent dismissing the indicator with the back key */
+				progressDialog.setCancelable(false);
+
+				progressDialog.show();
+				image.post(new Runnable() {
+
+					@Override
+					public void run() {
+						image.setBackgroundResource(mThemeBusyIndicatorResId);
+						final AnimationDrawable animation = (AnimationDrawable) image.getBackground();
+						animation.start();
+					}
+				});
+			}
 		}
 		else {
 			if (progressDialog.isShowing() && progressDialog.getWindow().getWindowManager() != null) {
@@ -615,7 +627,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	public static AlertDialog showAlertDialog(Integer iconResource, String titleText, String message, Context context, Integer okButtonId, Integer cancelButtonId,
+	public boolean isProgressDialogShowing() {
+		Dialog progressDialog = getProgressDialog();
+		return (progressDialog.isShowing());
+	}
+
+	public static AlertDialog showAlertDialog(Integer iconResource, String titleText, String message, Context context, Integer okButtonId,
+			Integer cancelButtonId,
 			OnClickListener listenerClick, OnCancelListener listenerCancel) {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(context).setIcon(iconResource).setTitle(titleText).setMessage(message);
@@ -640,7 +658,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* Prevent dimming the background */
 		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-		
+
 		return alert;
 	}
 

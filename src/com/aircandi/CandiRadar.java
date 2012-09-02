@@ -85,6 +85,7 @@ import com.aircandi.candi.views.ViewAction.ViewActionType;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.CommandType;
+import com.aircandi.components.DateUtils;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.Events;
 import com.aircandi.components.Exceptions;
@@ -578,8 +579,10 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 				/* Time to turn on the progress indicators */
 				if (scanOptions.showProgress) {
-					mCommon.showProgressDialog(false, null);
 					mCommon.showProgressDialog(true, getString(scanOptions.progressMessageResId), CandiRadar.this);
+				}
+				else {
+					mCommon.showProgressDialog(false, null);
 				}
 
 				Logger.i(this, "Starting beacon scan, fullBuild = " + String.valueOf(scanOptions.fullBuild));
@@ -1319,7 +1322,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	@Override
 	protected void onResume() {
-		super.onResume();
 		/*
 		 * Lifecycle ordering
 		 * onCreate->onStart->onResume
@@ -1335,66 +1337,40 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * refresh the places where they get used. Game engine is started/restarted in BaseGameActivity class if we
 		 * currently have the window focus.
 		 */
-
-		/* Quick check for a new version. */
-		if (Aircandi.updateRequired) {
-			if (mUpdateAlertDialog == null || !mUpdateAlertDialog.isShowing()) {
-				mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.icon_app
-						, getString(R.string.alert_upgrade_title)
-						, getString(R.string.alert_upgrade_required_body)
-						, CandiRadar.this
-						, R.string.alert_upgrade_ok
-						, R.string.alert_upgrade_cancel
-						, new DialogInterface.OnClickListener() {
-
-							public void onClick(DialogInterface dialog, int which) {
-								if (which == Dialog.BUTTON_POSITIVE) {
-									Logger.d(CandiRadar.this, "Update check: navigating to install page");
-									Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-									intent.setData(Uri.parse(Aircandi.updateUri));
-									startActivity(intent);
-									AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
-								}
-								else if (which == Dialog.BUTTON_NEGATIVE) {
-									/* We don't continue running if user doesn't install a required update */
-									Logger.d(CandiRadar.this, "Update check: user declined");
-									finish();
-								}
-							}
-						}
-						, new DialogInterface.OnCancelListener() {
-
-							@Override
-							public void onCancel(DialogInterface dialog) {
-								Logger.d(CandiRadar.this, "Update check: user canceled");
-								if (Aircandi.updateRequired) {
-									finish();
-								}
-							}
-						});
-				mUpdateAlertDialog.setCanceledOnTouchOutside(false);
-			}
-			return;
+		super.onResume();
+		if (!mFirstWindow.get()) {
+			doResume();
 		}
-		else if (Aircandi.firstRunRadar) {
-			new AsyncTask() {
+	}
+	
+	public void doResume() {
+		
+		/* Quick check for a new version. */
+		final Boolean doUpdateCheck = (Aircandi.lastUpdateCheckDate == null
+				|| (DateUtils.nowDate().getTime() - Aircandi.lastUpdateCheckDate.longValue()) > CandiConstants.INTERVAL_UPDATE_CHECK);
 
-				@Override
-				protected void onPreExecute() {
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				if (doUpdateCheck) {
 					mCommon.showProgressDialog(true, "Checking for updates...", CandiRadar.this);
 				}
+			}
 
-				@Override
-				protected Object doInBackground(Object... params) {
+			@Override
+			protected Object doInBackground(Object... params) {
 
+				if (doUpdateCheck) {
 					Boolean updateNeeded = checkForUpdate();
+					Aircandi.lastUpdateCheckDate = DateUtils.nowDate().getTime();
 
 					/* If null, we didn't complete the check so try again next time */
 					if (updateNeeded != null) {
 						Aircandi.updateNeeded = updateNeeded;
 						Aircandi.firstRunRadar = false;
 					}
-					
+
 					if (updateNeeded != null && updateNeeded) {
 
 						runOnUiThread(new Runnable() {
@@ -1452,92 +1428,137 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 							}
 						});
 					}
-					return null;
+				}
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Object result) {
+				/*
+				 * We get here before the user has made a selection but
+				 * we do know if an update is needed and required.
+				 */
+				if (doUpdateCheck) {
+					if (!Aircandi.updateNeeded) {
+						finishResume(true);
+						scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
+						return;
+					}
 				}
 
-				@Override
-				protected void onPostExecute(Object result) {
-					/*
-					 * We get here before the user has made a selection but
-					 * we do know if an update is needed and required.
-					 */
+				if (Aircandi.updateRequired) {
 					mCommon.showProgressDialog(false, null);
-					if (!Aircandi.updateNeeded) {
+					if (mUpdateAlertDialog == null || !mUpdateAlertDialog.isShowing()) {
+						mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.icon_app
+								, getString(R.string.alert_upgrade_title)
+								, getString(R.string.alert_upgrade_required_body)
+								, CandiRadar.this
+								, R.string.alert_upgrade_ok
+								, R.string.alert_upgrade_cancel
+								, new DialogInterface.OnClickListener() {
+
+									public void onClick(DialogInterface dialog, int which) {
+										if (which == Dialog.BUTTON_POSITIVE) {
+											Logger.d(CandiRadar.this, "Update check: navigating to install page");
+											Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+											intent.setData(Uri.parse(Aircandi.updateUri));
+											startActivity(intent);
+											AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
+										}
+										else if (which == Dialog.BUTTON_NEGATIVE) {
+											/* We don't continue running if user doesn't install a required update */
+											Logger.d(CandiRadar.this, "Update check: user declined");
+											finish();
+										}
+									}
+								}
+								, new DialogInterface.OnCancelListener() {
+
+									@Override
+									public void onCancel(DialogInterface dialog) {
+										Logger.d(CandiRadar.this, "Update check: user canceled");
+										if (Aircandi.updateRequired) {
+											finish();
+										}
+									}
+								});
+						mUpdateAlertDialog.setCanceledOnTouchOutside(false);
+					}
+					return;
+				}
+				else {
+					/*
+					 * Logic that should only run if the activity is resuming after having been paused. This used to be
+					 * in
+					 * restart
+					 * but it wasn't getting called reliably when returning from another activity.
+					 */
+					if (mPaused) {
+						Logger.d(this, "CandiRadarActivity resuming after pause");
+
+						/*
+						 * We could be resuming because of a preference change.
+						 * Restart: theme change
+						 * Refresh: display extra, demo mode, global beacons
+						 */
+						PrefResponse prefResponse = updatePreferences();
+						if (prefResponse == PrefResponse.Refresh) {
+							Logger.d(this, "onResumeGame: Starting UI refresh because of preference change");
+							scanForBeacons(new ScanOptions(false, false, R.string.progress_updating));
+						}
+						else if (prefResponse == PrefResponse.Rebuild) {
+							Logger.d(this, "onResumeGame: Starting full beacon scan because of preference change");
+							scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
+						}
+						else if (prefResponse == PrefResponse.Restart) {
+							/* Example: changing the theme requires recreating the activity */
+							Logger.v(this, "Restarting from onResumeGame because of theme change");
+							Aircandi.runFullScan = true;
+							mCommon.reload();
+						}
+						else {
+							/*
+							 * We have to be pretty aggressive about refreshing the UI because
+							 * there are lots of actions that could have happened while this activity
+							 * was stopped that change what the user would expect to see.
+							 * 
+							 * - Entity deleted or modified
+							 * - Entity children modified
+							 * - New comments
+							 * - Change in user which effects which candi and UI should be visible.
+							 * - User profile could have been updated and we don't catch that.
+							 */
+							if (Aircandi.getInstance().getUser() == null || mEntityModelUser == null
+									|| !Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)) {
+								Logger.d(this, "CandiRadarActivity detected entity model change because of user change");
+								invalidateOptionsMenu();
+								scanForBeacons(new ScanOptions(false, true, R.string.progress_updating));
+							}
+							else if (ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
+									|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+								Logger.d(this, "CandiRadarActivity detected entity model change");
+								mCommon.showProgressDialog(false, null);
+								invalidateOptionsMenu();
+								updateRadarOnly();
+							}
+							else {
+								/* We always do a check because the user might have moved */
+								invalidateOptionsMenu();
+								scanForBeacons(new ScanOptions(false, false, null));
+							}
+						}
+						mPaused = false;
+						finishResume(false);
+					}
+					else {
+						Logger.d(this, "CandiRadarActivity resuming for first time");
 						finishResume(true);
 						scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
 					}
 				}
-
-			}.execute();
-		}
-		else {
-			/*
-			 * Logic that should only run if the activity is resuming after having been paused. This used to be in
-			 * restart
-			 * but it wasn't getting called reliably when returning from another activity.
-			 */
-			if (mPaused) {
-				Logger.d(this, "CandiRadarActivity resuming after pause");
-
-				/*
-				 * We could be resuming because of a preference change.
-				 * Restart: theme change
-				 * Refresh: display extra, demo mode, global beacons
-				 */
-				PrefResponse prefResponse = updatePreferences();
-				if (prefResponse == PrefResponse.Refresh) {
-					Logger.d(this, "onResumeGame: Starting UI refresh because of preference change");
-					scanForBeacons(new ScanOptions(false, false, R.string.progress_updating));
-				}
-				else if (prefResponse == PrefResponse.Rebuild) {
-					Logger.d(this, "onResumeGame: Starting full beacon scan because of preference change");
-					scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
-				}
-				else if (prefResponse == PrefResponse.Restart) {
-					/* Example: changing the theme requires recreating the activity */
-					Logger.v(this, "Restarting from onResumeGame because of theme change");
-					Aircandi.runFullScan = true;
-					mCommon.reload();
-				}
-				else {
-					/*
-					 * We have to be pretty aggressive about refreshing the UI because
-					 * there are lots of actions that could have happened while this activity
-					 * was stopped that change what the user would expect to see.
-					 * 
-					 * - Entity deleted or modified
-					 * - Entity children modified
-					 * - New comments
-					 * - Change in user which effects which candi and UI should be visible.
-					 * - User profile could have been updated and we don't catch that.
-					 */
-					if (Aircandi.getInstance().getUser() == null || mEntityModelUser == null
-							|| !Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)) {
-						Logger.d(this, "CandiRadarActivity detected entity model change because of user change");
-						invalidateOptionsMenu();
-						scanForBeacons(new ScanOptions(false, true, R.string.progress_updating));
-					}
-					else if (ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
-							|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
-						Logger.d(this, "CandiRadarActivity detected entity model change");
-						invalidateOptionsMenu();
-						updateRadarOnly();
-					}
-					else {
-						/* We always do a check because the user might have moved */
-						invalidateOptionsMenu();
-						scanForBeacons(new ScanOptions(false, false, null));
-					}
-				}
-				mPaused = false;
-				finishResume(false);
 			}
-			else {
-				Logger.d(this, "CandiRadarActivity resuming for first time");
-				finishResume(true);
-				scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
-			}
-		}
+
+		}.execute();
 	}
 
 	public void finishResume(Boolean startScan) {
@@ -1580,6 +1601,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			 */
 			super.onWindowFocusChanged(hasWindowFocus);
 			mFirstWindow.set(false);
+			doResume();
 		}
 		else {
 			/* Restart autoscan if enabled */
@@ -1600,12 +1622,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	protected void onPause() {
 		/*
 		 * - Fires when we lose focus and have been moved into the background. This will
-		 * be followed by onStop if we are not visible.
+		 * be followed by onStop if we are not visible. Does not fire if the activity window 
+		 * loses focus but the activity is still active.
 		 * 
-		 * - Calling onPause on super (BaseGameActivity) will cause the engine to pause if it hasn't already
-		 * been paused because of losing window focus.
-		 * 
-		 * - onPause does not fire if the activity window loses focus but the activity is still active.
+		 * - Parent class (BaseGameActivity) has been modified so that it doesn't do any
+		 * work in it's onPause handler.
 		 */
 		Logger.d(this, "CandiRadarActivity paused");
 		mCommon.stopScanService();

@@ -91,6 +91,7 @@ public class Aircandi extends Application {
 	public static Boolean					updateNeeded			= false;
 	public static Boolean					updateRequired			= false;
 	public static String					updateUri;
+	public static Number					lastUpdateCheckDate; 
 
 	private User							mUser;
 	private CandiTask						mCandiTask				= CandiTask.RadarCandi;
