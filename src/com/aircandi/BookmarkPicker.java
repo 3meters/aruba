@@ -16,16 +16,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.BookmarkAdapter;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.Utilities;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.service.ServiceRequest;
+import com.aircandi.components.Utilities;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.R;
+import com.aircandi.service.ServiceRequest;
 
 public class BookmarkPicker extends FormActivity implements OnItemClickListener {
 
@@ -89,8 +88,7 @@ public class BookmarkPicker extends FormActivity implements OnItemClickListener 
 			}
 
 			if (!Utilities.validWebUri(linkUri)) {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-						getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null, null);
+				mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
 				return false;
 			}
 		}
@@ -176,8 +174,7 @@ public class BookmarkPicker extends FormActivity implements OnItemClickListener 
 						finish();
 					}
 					else {
-						AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-								getResources().getString(R.string.alert_weburi_unreachable), BookmarkPicker.this, android.R.string.ok, null, null, null);
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.PickBookmark);
 					}
 				}
 			}.execute();

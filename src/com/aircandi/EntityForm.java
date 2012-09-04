@@ -8,7 +8,6 @@ import org.jsoup.nodes.Element;
 
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Criteria;
@@ -25,7 +24,9 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.DateUtils;
 import com.aircandi.components.EntityList;
@@ -37,38 +38,34 @@ import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.S3;
-import com.aircandi.components.Tracker;
-import com.aircandi.components.Utilities;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityTree;
+import com.aircandi.components.S3;
+import com.aircandi.components.Tracker;
+import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseServiceException.ErrorCode;
+import com.aircandi.service.ProxibaseServiceException;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.Beacon.BeaconType;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Result;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
-import com.aircandi.service.objects.Beacon.BeaconType;
-import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.widgets.AuthorBlock;
 import com.aircandi.widgets.WebImageView;
-import com.aircandi.R;
 
 public class EntityForm extends FormActivity {
 
@@ -359,8 +356,7 @@ public class EntityForm extends FormActivity {
 				}
 
 				if (!Utilities.validWebUri(linkUri)) {
-					AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-							getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null, null);
+					mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
 					return false;
 				}
 			}
@@ -457,7 +453,7 @@ public class EntityForm extends FormActivity {
 								 */
 								gather(mEntityForForm);
 								serviceResponse = insertEntityAtService();
-								
+
 								if (serviceResponse.responseCode == ResponseCode.Success) {
 									/*
 									 * Insert new entity into the entity model.
@@ -475,11 +471,11 @@ public class EntityForm extends FormActivity {
 									entity.rookie = true;
 									entity.createdDate = DateUtils.nowDate().getTime();
 									entity.modifiedDate = entity.createdDate;
-									
+
 									entity.ownerId = Aircandi.getInstance().getUser().id;
 									entity.creatorId = entity.ownerId;
 									entity.modifierId = entity.ownerId;
-									
+
 									entity.owner = Aircandi.getInstance().getUser();
 									entity.creator = Aircandi.getInstance().getUser();
 									entity.modifier = Aircandi.getInstance().getUser();
@@ -498,7 +494,7 @@ public class EntityForm extends FormActivity {
 											Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
 										}
 									}
-									
+
 									/*
 									 * Entity was added to the beacon but we still need to rebuild the
 									 * blended list of entities across all beacons.
@@ -563,7 +559,7 @@ public class EntityForm extends FormActivity {
 									 */
 									ProxiExplorer.getInstance().getEntityModel().updateEntityEverywhere(mEntityForForm);
 									ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
-									
+
 									ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
 									setResult(CandiConstants.RESULT_ENTITY_UPDATED);
 								}
@@ -581,21 +577,7 @@ public class EntityForm extends FormActivity {
 						finish();
 					}
 					else {
-						if (serviceResponse.exception.getErrorCode() == ErrorCode.SessionException) {
-							AircandiCommon.showAlertDialog(R.drawable.icon_app
-									, getResources().getString(R.string.alert_session_expired_title)
-									, getResources().getString(R.string.alert_session_expired_message)
-									, EntityForm.this, android.R.string.ok, null, new OnClickListener() {
-
-										public void onClick(DialogInterface dialog, int which) {
-											setResult(CandiConstants.RESULT_PROFILE_INSERTED);
-											finish();
-										}
-									}, null);
-						}
-						else {
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
-						}
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
 					}
 				}
 
@@ -821,7 +803,7 @@ public class EntityForm extends FormActivity {
 
 					ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm, EntityTree.Radar);
 					ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm, EntityTree.User);
-					
+
 					/*
 					 * Entity was added to the beacon but we still need to rebuild the
 					 * blended list of entities across all beacons.
@@ -896,8 +878,7 @@ public class EntityForm extends FormActivity {
 					}
 
 					if (!Utilities.validWebUri(linkUri)) {
-						AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-								getResources().getString(R.string.alert_weburi_invalid), EntityForm.this, android.R.string.ok, null, null, null);
+						mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
 						return;
 					}
 					else {

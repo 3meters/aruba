@@ -17,6 +17,7 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -190,6 +191,9 @@ public class UserCandiList extends CandiList {
 							mListView.setAdapter(adapter);
 						}
 					}
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiList);							
 				}
 				mCommon.showProgressDialog(false, null);
 			}

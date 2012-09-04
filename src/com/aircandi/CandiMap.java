@@ -21,6 +21,7 @@ import com.actionbarsherlock.app.SherlockMapActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.CandiItemizedOverlay;
 import com.aircandi.components.GeoLocationManager;
@@ -217,7 +218,7 @@ public class CandiMap extends SherlockMapActivity {
 						mCommon.showProgressDialog(false, null);
 					}
 					else {
-						mCommon.handleServiceError(serviceResponse);
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.MapBrowse);
 					}
 
 				}

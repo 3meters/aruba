@@ -28,6 +28,7 @@ import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.ImageResult;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.service.ProxiConstants;
@@ -132,7 +133,7 @@ public class PictureSearch extends FormActivity {
 					mGridView.setAdapter(new EndlessImageAdapter(mImages));
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse);
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
 				}
 			}
 		}.execute();
@@ -273,7 +274,7 @@ public class PictureSearch extends FormActivity {
 				return ((getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX);
 			}
 			else {
-				mCommon.handleServiceError(serviceResponse);
+				mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
 				return false;
 			}
 		}

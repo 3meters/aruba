@@ -1,5 +1,7 @@
 package com.aircandi.components;
 
+import java.net.ConnectException;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,14 +10,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
-import com.aircandi.service.ProxibaseServiceException.ErrorType;
+import com.aircandi.service.ServiceRequest;
 
 public class NetworkManager {
 
@@ -26,8 +26,8 @@ public class NetworkManager {
 	private WifiStateChangedReceiver	mWifiStateChangedReceiver	= new WifiStateChangedReceiver();
 	private IConnectivityListener		mConnectivityListener;
 	private WifiManager					mWifiManager;
-	private static int					CONNECT_TRIES				= 10;
-	private static int					CONNECT_WAIT				= 500;
+	public static int					CONNECT_TRIES				= 10;
+	public static int					CONNECT_WAIT				= 500;
 
 	public static synchronized NetworkManager getInstance() {
 		if (singletonObject == null) {
@@ -77,29 +77,15 @@ public class NetworkManager {
 		mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
 	}
 
-	public void requestAsync(final ServiceRequest serviceRequest) {
-
-		new AsyncTask() {
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				ServiceResponse serviceResponse = request(serviceRequest);
-				return serviceResponse;
-			}
-
-			@Override
-			protected void onPostExecute(Object result) {
-				serviceRequest.getRequestListener().onComplete(result);
-			}
-
-		}.execute();
-	}
-
 	public ServiceResponse request(ServiceRequest serviceRequest) {
-		return request(serviceRequest, null);
+		ServiceResponse serviceResponse = request(serviceRequest, null);
+		return serviceResponse;
 	}
-
-	public ServiceResponse request(ServiceRequest serviceRequest, Context context) {
+	
+	public ServiceResponse request(ServiceRequest serviceRequest, ServiceResponse testServiceResponse) {
+		if (testServiceResponse != null) {
+			return testServiceResponse;
+		}
 		/*
 		 * Don't assume this is being called from the UI thread.
 		 */
@@ -108,11 +94,9 @@ public class NetworkManager {
 
 		/* Make sure we have a network connection */
 		if (!verifyIsConnected()) {
-			serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ConnectionException, null,
-					new ProxibaseServiceException(serviceRequest.getUri(), ErrorType.Client, ErrorCode.ConnectionException, null));
-			serviceResponse.exception.setResponseMessage("Device is not connected to a network: "
-					+ String.valueOf(CONNECT_TRIES) + " tries over "
-					+ String.valueOf(CONNECT_WAIT * CONNECT_TRIES / 1000) + " second window");
+			Exception exception = new ConnectException();
+			ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
+			serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ConnectionException, null, proxibaseException);
 		}
 		else {
 			/*

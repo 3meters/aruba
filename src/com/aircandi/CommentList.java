@@ -21,6 +21,7 @@ import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.service.ProxiConstants;
@@ -108,6 +109,9 @@ public class CommentList extends CandiActivity {
 						mListView.setAdapter(new EndlessCommentAdapter(mComments));
 					}
 				}
+				else {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CommentBrowse);
+				}
 				mCommon.showProgressDialog(false, null);
 			}
 
@@ -192,6 +196,9 @@ public class CommentList extends CandiActivity {
 					if (mMore) {
 						return ((getWrappedAdapter().getCount() + moreComments.size()) < LIST_MAX);
 					}
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CommentBrowse);
 				}
 			}
 			return false;

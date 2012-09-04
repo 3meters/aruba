@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.DateUtils;
@@ -199,7 +200,7 @@ public class CommentForm extends FormActivity {
 						finish();
 					}
 					else {
-						mCommon.handleServiceError(serviceResponse);
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.CommentSave);
 					}
 				}
 			}.execute();

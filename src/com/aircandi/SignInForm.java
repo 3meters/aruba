@@ -1,6 +1,5 @@
 package com.aircandi;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,28 +11,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
+import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.Utilities;
-import com.aircandi.components.AnimUtils.TransitionType;
-import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
-import com.aircandi.R;
 
 public class SignInForm extends FormActivity {
 
@@ -147,7 +146,6 @@ public class SignInForm extends FormActivity {
 						user.session = serviceData.session;
 						Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
 
-
 						Aircandi.getInstance().setUser(user);
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
@@ -165,24 +163,8 @@ public class SignInForm extends FormActivity {
 						finish();
 					}
 					else {
-						/*
-						 * Code for unsuccessful authentication:
-						 * 
-						 * - 401.1: email or password is wrong
-						 */
-						String jsonResponse = serviceResponse.exception.getResponseMessage();
-						ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.Internal);
-						if (serviceData.error != null && serviceData.error.code.floatValue() == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
-							String message = getString(R.string.alert_signin_invalid_signin);
-							AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
-									SignInForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
-										public void onClick(DialogInterface dialog, int which) {}
-									}, null);
-							mTextPassword.setText("");
-						}
-						else {
-							mCommon.handleServiceError(serviceResponse);
-						}
+						mTextPassword.setText("");
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.Signin);
 					}
 				}
 			}.execute();
@@ -206,8 +188,7 @@ public class SignInForm extends FormActivity {
 
 	private boolean validate() {
 		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null, null);
+			mCommon.showAlertDialogSimple(null, getString(R.string.error_invalid_email));
 			return false;
 		}
 		return true;

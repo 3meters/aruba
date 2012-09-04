@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.view.View;
 
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityList;
@@ -84,7 +85,7 @@ public class UserCandiForm extends CandiForm {
 						mCommon.showProgressDialog(false, null);
 					}
 					else {
-						mCommon.handleServiceError(serviceResponse);
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiForm);
 					}
 				}
 

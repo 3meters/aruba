@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -22,7 +20,9 @@ import android.widget.Toast;
 
 import com.aircandi.candi.models.CandiModel;
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiPagerAdapter;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.DateUtils;
@@ -32,29 +32,25 @@ import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseServiceException.ErrorCode;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
-import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.widgets.AuthorBlock;
 import com.aircandi.widgets.WebImageView;
-import com.aircandi.R;
 
 public class CandiForm extends CandiActivity {
 
@@ -87,7 +83,7 @@ public class CandiForm extends CandiActivity {
 			mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 			mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 			mEntityModelUser = Aircandi.getInstance().getUser();
-			
+
 			/* Was likely deleted from the entity model */
 			if (mEntity == null) {
 				onBackPressed();
@@ -134,7 +130,7 @@ public class CandiForm extends CandiActivity {
 						mCommon.showProgressDialog(false, null);
 					}
 					else {
-						mCommon.handleServiceError(serviceResponse);
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiForm);
 					}
 				}
 
@@ -157,7 +153,7 @@ public class CandiForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
-	
+
 	public void onChildrenButtonClick(View v) {
 		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
 
@@ -614,20 +610,8 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				//mCommon.showProgressDialog(false, null);
 				if (serviceResponse.responseCode != ResponseCode.Success) {
-					if (serviceResponse.exception.getErrorCode() == ErrorCode.SessionException) {
-						AircandiCommon.showAlertDialog(R.drawable.icon_app
-								, getResources().getString(R.string.alert_session_expired_title)
-								, getResources().getString(R.string.alert_session_expired_message)
-								, CandiForm.this, android.R.string.ok, null, new OnClickListener() {
-
-									public void onClick(DialogInterface dialog, int which) {}
-								}, null);
-					}
-					else {
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiMove, CandiForm.this);
-					}
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiMove, CandiForm.this);
 				}
 				else {
 					/*

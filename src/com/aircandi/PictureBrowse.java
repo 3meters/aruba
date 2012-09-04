@@ -12,6 +12,7 @@ import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -88,6 +89,7 @@ public class PictureBrowse extends FormActivity {
 						}
 						else {
 							mImageViewTouch.setImageResource(R.drawable.placeholder_logo);
+							mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureBrowse);							
 						}
 					}
 				});

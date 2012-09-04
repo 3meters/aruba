@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.net.ConnectException;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -55,6 +56,7 @@ import android.graphics.Bitmap;
 import com.aircandi.Aircandi;
 import com.aircandi.components.DateUtils;
 import com.aircandi.components.Logger;
+import com.aircandi.components.NetworkManager;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
@@ -269,7 +271,7 @@ public class ProxibaseService {
 				httpRequest.setURI(uriFromString(uriString));
 			}
 
-			HttpResponse response = null;
+			HttpResponse httpResponse = null;
 
 			try {
 				if (retryCount > 0) {
@@ -281,41 +283,49 @@ public class ProxibaseService {
 
 				retryCount++;
 				long startTime = System.nanoTime();
-				response = mHttpClient.execute(httpRequest);
-				long bytesDownloaded = response.getEntity() != null ? response.getEntity().getContentLength() : 0;
+				httpResponse = mHttpClient.execute(httpRequest);
+				long bytesDownloaded = httpResponse.getEntity() != null ? httpResponse.getEntity().getContentLength() : 0;
 				logDownload(startTime, System.nanoTime() - startTime, bytesDownloaded, httpRequest.getURI().toString());
 
 				/* Check the response status code and handle anything that isn't a possible valid success code. */
-				if (isRequestSuccessful(response)) {
-					return handleResponse(httpRequest, response, serviceRequest.getResponseFormat(), serviceRequest.getRequestListener());
+				if (isRequestSuccessful(httpResponse)) {
+					return handleResponse(httpRequest, httpResponse, serviceRequest.getResponseFormat(), serviceRequest.getRequestListener());
 				}
-				else if (isTemporaryRedirect(response)) {
+				else if (isTemporaryRedirect(httpResponse)) {
 					/*
 					 * If we get a 307 Temporary Redirect, we'll point the HTTP method to the redirected location, and
 					 * let the next retry deliver the request to the right location.
 					 */
-					Header[] locationHeaders = response.getHeaders("location");
+					Header[] locationHeaders = httpResponse.getHeaders("location");
 					String redirectedLocation = locationHeaders[0].getValue();
 					Logger.d(this, "Redirecting to: " + redirectedLocation);
 					redirectedUri = URI.create(redirectedLocation);
 				}
 				else {
-					ProxibaseServiceException exception = handleErrorResponse(response);
-					String errorResponse = convertStreamToString(response.getEntity().getContent());
-					Logger.d(this, errorResponse);
-					exception.setResponseMessage(errorResponse);
-					if (!shouldRetry(httpRequest, exception, retryCount)) {
-						throw exception;
+					/*
+					 * We got a non-success http status code so break it down and
+					 * decide if makes sense to retry.
+					 */
+					String responseContent = convertStreamToString(httpResponse.getEntity().getContent());
+					ServiceData serviceData = ProxibaseService.convertJsonToObject(responseContent, ServiceData.class, GsonType.ProxibaseService);
+					Float httpStatusCode = (float) httpResponse.getStatusLine().getStatusCode();
+
+					if (serviceData != null && serviceData.error != null) {
+						httpStatusCode = serviceData.error.code.floatValue();
+					}
+					Logger.d(this, responseContent);
+					ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(httpStatusCode, null);
+					proxibaseException.setResponseMessage(responseContent);
+					if (!shouldRetry(httpRequest, proxibaseException, retryCount)) {
+						throw proxibaseException;
 					}
 				}
 			}
 			catch (ClientProtocolException exception) {
-				/* Can't recover from this with a retry. */
-				String message = "Unable to execute Http request: ClientProtocolException: " + exception.getMessage();
-				Logger.w(this, message);
-				ProxibaseServiceException proxibaseException = new ProxibaseServiceException(message, ErrorType.Client, ErrorCode.ClientProtocolException,
-						exception);
-				proxibaseException.setResponseMessage(message);
+				/*
+				 * Can't recover from this with a retry.
+				 */
+				ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, exception);
 				throw proxibaseException;
 			}
 			catch (IOException exception) {
@@ -328,19 +338,9 @@ public class ProxibaseService {
 				 * - UnknownHostException: hostname didn't exist in the dns system
 				 */
 				if (!shouldRetry(httpRequest, exception, retryCount)) {
-					String message = exception.getClass().getSimpleName() + ": " + exception.getMessage();
-					Logger.w(this, message);
-					ProxibaseServiceException proxibaseException = new ProxibaseServiceException(message, ErrorType.Client, ErrorCode.IOException, exception);
-					proxibaseException.setResponseMessage(message);
+					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, exception);
 					throw proxibaseException;
 				}
-			}
-			catch (Exception exception) {
-				String message = exception.getClass().getSimpleName() + ": " + exception.getMessage();
-				Logger.w(this, message);
-				ProxibaseServiceException proxibaseException = new ProxibaseServiceException(message, ErrorType.Client, ErrorCode.IOException, exception);
-				proxibaseException.setResponseMessage(message);
-				throw proxibaseException;
 			}
 		}
 	}
@@ -388,50 +388,91 @@ public class ProxibaseService {
 		return null;
 	}
 
-	private ProxibaseServiceException handleErrorResponse(HttpResponse response) {
+	public static ProxibaseServiceException makeProxibaseServiceException(Float httpStatusCode, Exception exception) {
 
-		ProxibaseServiceException exception = null;
-		int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode == HttpStatus.SC_NOT_FOUND) {
-			exception = new ProxibaseServiceException("Service or target not found");
-			exception.setErrorType(ErrorType.Service);
-			exception.setErrorCode(ErrorCode.NotFoundException);
-			exception.setHttpStatusCode(statusCode);
+		ProxibaseServiceException proxibaseException = null;
+
+		if (exception != null) {
+			if (exception instanceof ClientProtocolException) {
+				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
+						ErrorCode.ClientProtocolException, exception);
+				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			}
+			else if (exception instanceof ConnectException) {
+				proxibaseException = new ProxibaseServiceException("Not connected to network", ErrorType.Client,
+						ErrorCode.ConnectionException, exception);
+				proxibaseException.setResponseMessage("Device is not connected to a network: "
+						+ String.valueOf(NetworkManager.CONNECT_TRIES) + " tries over "
+						+ String.valueOf(NetworkManager.CONNECT_WAIT * NetworkManager.CONNECT_TRIES / 1000) + " second window");
+			}
+			else if (exception instanceof IOException) {
+				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
+						ErrorCode.IOException, exception);
+				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			}
 		}
-		if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-			exception = new ProxibaseServiceException("Service not found");
-			exception.setErrorType(ErrorType.Service);
-			exception.setErrorCode(ErrorCode.UnauthorizedException);
-			exception.setHttpStatusCode(statusCode);
+		else if (httpStatusCode != null) {
+			if (httpStatusCode == HttpStatus.SC_NOT_FOUND) {
+				proxibaseException = new ProxibaseServiceException("Service or target not found");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.NotFoundException);
+			}
+			else if (httpStatusCode == HttpStatus.SC_UNAUTHORIZED) {
+				/* missing, expired or invalid session */
+				proxibaseException = new ProxibaseServiceException("Unauthorized");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.UnauthorizedException);
+			}
+			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
+				proxibaseException = new ProxibaseServiceException("Unauthorized credentials");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.SessionException);
+			}
+			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
+				proxibaseException = new ProxibaseServiceException("Expired session");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.SessionException);
+			}
+			else if (httpStatusCode == HttpStatus.SC_FORBIDDEN) {
+				/* weak password, duplicate email */
+				proxibaseException = new ProxibaseServiceException("Forbidden");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.ForbiddenException);
+			}
+			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
+				proxibaseException = new ProxibaseServiceException("Duplicate email");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.DuplicateException);
+			}
+			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
+				proxibaseException = new ProxibaseServiceException("Weak password");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.PasswordException);
+			}
+			else if (httpStatusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
+				/* This can happen if service crashes during request */
+				proxibaseException = new ProxibaseServiceException("Gateway timeout");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.GatewayTimeoutException);
+			}
+			else if (httpStatusCode == HttpStatus.SC_CONFLICT) {
+				proxibaseException = new ProxibaseServiceException("Duplicate key");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.UpdateException);
+			}
+			else if (httpStatusCode == HttpStatus.SC_REQUEST_TOO_LONG) {
+				proxibaseException = new ProxibaseServiceException("Request entity too large");
+				proxibaseException.setErrorType(ErrorType.Client);
+				proxibaseException.setErrorCode(ErrorCode.AircandiServiceException);
+			}
+			else {
+				proxibaseException = new ProxibaseServiceException("Service error");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.AircandiServiceException);
+			}
+			proxibaseException.setHttpStatusCode(httpStatusCode);
 		}
-		else if (statusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
-			/*
-			 * This can happen if service crashes during request
-			 */
-			exception = new ProxibaseServiceException("Gateway timeout");
-			exception.setErrorType(ErrorType.Service);
-			exception.setErrorCode(ErrorCode.AircandiServiceException);
-			exception.setHttpStatusCode(statusCode);
-		}
-		else if (statusCode == HttpStatus.SC_CONFLICT) {
-			exception = new ProxibaseServiceException("Duplicate key");
-			exception.setErrorType(ErrorType.Service);
-			exception.setErrorCode(ErrorCode.UpdateException);
-			exception.setHttpStatusCode(statusCode);
-		}
-		else if (statusCode == HttpStatus.SC_REQUEST_TOO_LONG) {
-			exception = new ProxibaseServiceException("Request entity too large");
-			exception.setErrorType(ErrorType.Client);
-			exception.setErrorCode(ErrorCode.AircandiServiceException);
-			exception.setHttpStatusCode(statusCode);
-		}
-		else {
-			exception = new ProxibaseServiceException("Service error");
-			exception.setErrorType(ErrorType.Service);
-			exception.setErrorCode(ErrorCode.AircandiServiceException);
-			exception.setHttpStatusCode(statusCode);
-		}
-		return exception;
+		return proxibaseException;
 	}
 
 	private boolean isRequestSuccessful(HttpResponse response) {

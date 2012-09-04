@@ -1,7 +1,6 @@
 package com.aircandi;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -15,38 +14,37 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.DateUtils;
 import com.aircandi.components.ImageRequest;
+import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
+import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.NetworkManager.ResponseCodeDetail;
+import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.S3;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.Utilities;
-import com.aircandi.components.AnimUtils.TransitionType;
-import com.aircandi.components.ImageRequest.ImageResponse;
-import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ResponseCodeDetail;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.Query;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.objects.ServiceData;
+import com.aircandi.service.ProxibaseServiceException;
+import com.aircandi.service.Query;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.User;
 import com.aircandi.widgets.WebImageView;
-import com.aircandi.R;
 
 public class ProfileForm extends FormActivity {
 
@@ -179,7 +177,7 @@ public class ProfileForm extends FormActivity {
 					mCommon.showProgressDialog(false, null);
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse);
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.ProfileBrowse);
 				}
 			}
 		}.execute();
@@ -208,6 +206,10 @@ public class ProfileForm extends FormActivity {
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 							mUserBitmap = imageResponse.bitmap;
+						}
+						else {
+							mImageUser.getImageView().setImageResource(R.drawable.image_broken);
+							mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureBrowse);							
 						}
 					}
 				});
@@ -371,29 +373,7 @@ public class ProfileForm extends FormActivity {
 						finish();
 					}
 					else {
-						/*
-						 * This could have been caused any problem while inserting/updating the user and the user image.
-						 * We look first for ones that are known responses from the service.
-						 * 
-						 * - 403.x: email not unique
-						 * - 401.2: expired session
-						 */
-						String jsonResponse = serviceResponse.exception.getResponseMessage();
-						ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.ProxibaseService);
-						if (serviceData.error != null) {
-							String message = null;
-							float errorCode = serviceData.error.code.floatValue();
-							if (errorCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
-								message = getString(R.string.alert_signup_email_taken);
-							}
-							AircandiCommon.showAlertDialog(R.drawable.icon_app, null, message,
-									ProfileForm.this, android.R.string.ok, null, new DialogInterface.OnClickListener() {
-										public void onClick(DialogInterface dialog, int which) {}
-									}, null);
-						}
-						else {
-							mCommon.handleServiceError(serviceResponse);
-						}
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.ProfileUpdate);
 					}
 				}
 			}.execute();
@@ -402,14 +382,17 @@ public class ProfileForm extends FormActivity {
 
 	private boolean validate() {
 		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-					getResources().getString(R.string.alert_invalid_email), this, android.R.string.ok, null, null, null);
+			mCommon.showAlertDialogSimple(null, getString(R.string.error_invalid_email));
 			return false;
 		}
 		if (mTextLink.getText().toString() != null && !mTextLink.getText().toString().equals("")) {
 			if (!Utilities.validWebUri(mTextLink.getText().toString())) {
-				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-						getResources().getString(R.string.alert_weburi_invalid), this, android.R.string.ok, null, null, null);
+				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+						, null
+						, getResources().getString(R.string.error_weburi_invalid)
+						, this
+						, android.R.string.ok
+						, null, null, null);
 			}
 			return false;
 		}

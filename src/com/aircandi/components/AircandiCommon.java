@@ -453,8 +453,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	public void handleServiceError(ServiceResponse serviceResponse) {
-		handleServiceError(serviceResponse, ServiceOperation.Unknown, null);
+	public void handleServiceError(ServiceResponse serviceResponse, ServiceOperation serviceOperation) {
+		handleServiceError(serviceResponse, serviceOperation, mActivity);
 	}
 
 	public void handleServiceError(ServiceResponse serviceResponse, ServiceOperation serviceOperation, Context context) {
@@ -462,94 +462,116 @@ public class AircandiCommon implements ActionBar.TabListener {
 		ErrorType errorType = serviceResponse.exception.getErrorType();
 		ErrorCode errorCode = serviceResponse.exception.getErrorCode();
 		String errorMessage = serviceResponse.exception.getMessage();
-		String responseMessage = serviceResponse.exception.getResponseMessage();
-		String logMessage = null;
-		String friendlyMessage = mActivity.getString(R.string.error_service_general);
-		Boolean showAlert = false;
-		Boolean isDeveloper = false;
-		if (Aircandi.getInstance().getUser().isDeveloper != null && Aircandi.getInstance().getUser().isDeveloper) {
-			isDeveloper = true;
-		}
 
-		if (errorType == ErrorType.Service) {
-			if (errorCode == ErrorCode.NotFoundException) {
-				logMessage = "Service not found exception: " + errorMessage;
+		/* We always make sure the progress indicator has been stopped */
+		showProgressDialog(false, null);
+
+		/*
+		 * Client errors occur when we are unable to get a response from a service, or when the client is
+		 * unable to understand a response from a service. This includes protocol, network and timeout errors.
+		 */
+		if (errorType == ErrorType.Client && errorCode == ErrorCode.ConnectionException) {
+			/*
+			 * We don't have a network connection.
+			 */
+			showNotification(mActivity.getString(R.string.error_connection_title), mActivity.getString(R.string.error_connection_notification), context);
+			showAlertDialogSimple(null, mActivity.getString(R.string.error_connection));
+		}
+		else if (errorType == ErrorType.Client && errorCode == ErrorCode.IOException) {
+			/*
+			 * We have a bad network connection.
+			 * 
+			 * This could be any of these:
+			 * - ConnectTimeoutException: timeout expired trying to connect to service
+			 * - SocketTimeoutException: timeout expired on a socket
+			 * - SocketException: thrown during socket creation or setting options
+			 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
+			 * - UnknownHostException: hostname didn't exist in the dns system
+			 */
+			if (serviceResponse.exception.getCause() instanceof UnknownHostException) {
+				showAlertDialogSimple(null, mActivity.getString(R.string.error_client_unknown_host));
 			}
 			else {
-				logMessage = "Service exception: " + errorMessage;
+				ImageUtils.showToastNotification(mActivity.getString(R.string.error_connection_poor), Toast.LENGTH_SHORT);
 			}
 		}
-		/*
-		 * Client errors occur when we are unable to get a response from a
-		 * service, or when the client is unable to understand a response from a
-		 * service. This includes protocol, network and timeout errors.
-		 */
 		else if (errorType == ErrorType.Client) {
-			if (errorCode == ErrorCode.IOException) {
-				if (serviceResponse.exception.getCause() instanceof UnknownHostException) {
-					logMessage = "Unknown host exception: " + errorMessage;
-					friendlyMessage = mActivity.getString(R.string.error_client_unknown_host);
-					showAlert = true;
+			/*
+			 * Something wrong with the request. In most cases, this is a bug and
+			 * not something that a user should cause unless they provided a bad uri.
+			 */
+			if (errorCode == ErrorCode.UnknownHostException) {
+				showAlertDialogSimple(null, mActivity.getString(R.string.error_client_unknown_host));
+			}
+			else {
+				if (errorCode == ErrorCode.ClientProtocolException 
+						|| errorCode == ErrorCode.URISyntaxException) {
+					ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_error), Toast.LENGTH_SHORT);
 				}
 				else {
-					logMessage = "Transport exception: " + errorMessage;
+					/* Something unexpected */
+					ImageUtils.showToastNotification(serviceResponse.exception.getMessage(), Toast.LENGTH_SHORT);
 				}
 			}
-			else if (errorCode == ErrorCode.ConnectionException) {
-				logMessage = "Connection not ready: " + errorMessage;
+		}
+		else if (errorType == ErrorType.Service && errorCode == ErrorCode.NotFoundException) {
+			/*
+			 * Reached the service but requested something that doesn't exist. This is a bug and
+			 * not something that a user should cause.
+			 */
+			ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_not_found), Toast.LENGTH_SHORT);
+		}
+		else if (errorType == ErrorType.Service && errorCode == ErrorCode.UnauthorizedException) {
+			/* Reached the service but requested something that the user can't access. */
+			ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_unauthorized), Toast.LENGTH_SHORT);
+		}
+		else if (errorType == ErrorType.Service && errorCode == ErrorCode.ForbiddenException) {
+			/* Reached the service but request was invalid per service policy. */
+			ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_forbidden), Toast.LENGTH_SHORT);
+		}
+		else if (errorType == ErrorType.Service && errorCode == ErrorCode.GatewayTimeoutException) {
+			/* Reached the service but request was invalid per service policy. */
+			ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_gateway_timeout), Toast.LENGTH_SHORT);
+		}
+		else if (errorType == ErrorType.Service) {
+			/*
+			 * Reached the service with a good call but failed for a well known reason.
+			 * 
+			 * This could have been caused by any problem while inserting/updating.
+			 * We look first for ones that are known responses from the service.
+			 * 
+			 * - 403.x: password not strong enough
+			 * - 403.x: email not unique
+			 * - 401.2: expired session
+			 * - 401.1: invalid or missing session
+			 */
+			String title = null;
+			String message = null;
+			if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
+				title = mActivity.getString(R.string.error_session_expired_title);
+				message = mActivity.getString(R.string.error_session_expired);
 			}
-			else if (errorCode == ErrorCode.UnknownHostException) {
-				logMessage = "Unknown host: " + errorMessage;
-				friendlyMessage = mActivity.getString(R.string.error_client_unknown_host);
+			else if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
+				message = mActivity.getString(R.string.error_signin_invalid_signin);
+				if (serviceOperation == ServiceOperation.PasswordChange) {
+					message = mActivity.getString(R.string.error_change_password_unauthorized);
+				}
 			}
-			else if (errorCode == ErrorCode.ClientProtocolException) {
-				logMessage = "Protocol exception: " + errorMessage;
+			else if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
+				message = mActivity.getString(R.string.error_signup_password_weak);
 			}
-			else if (errorCode == ErrorCode.URISyntaxException) {
-				logMessage = "Uri syntax exception: " + errorMessage;
+			else if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
+				message = mActivity.getString(R.string.error_signup_email_taken);
 			}
 			else {
-				logMessage = "Request exception: " + errorMessage;
-			}
-		}
-		Logger.w(context, logMessage);
-		if (showAlert && context != null) {
-			showProgressDialog(false, null);
-			AircandiCommon.showAlertDialog(R.drawable.icon_app, mActivity.getString(R.string.alert_error_title),
-					friendlyMessage, context, android.R.string.ok, null, new
-					DialogInterface.OnClickListener() {
-
-						public void onClick(DialogInterface dialog, int which) {}
-					}, null);
-		}
-		else {
-			if (isDeveloper) {
-				friendlyMessage = responseMessage;
+				ImageUtils.showToastNotification(serviceResponse.exception.getMessage(), Toast.LENGTH_SHORT);
 			}
 
-			@SuppressWarnings("deprecation")
-			Notification note = new Notification(R.drawable.icon_app_status
-					, mActivity.getString(R.string.notification_error_network_message)
-					, System.currentTimeMillis());
-
-			RemoteViews contentView = new RemoteViews(mActivity.getPackageName(), R.layout.custom_notification);
-			contentView.setImageViewResource(R.id.image, R.drawable.icon_app);
-			if (isDeveloper) {
-				contentView.setViewVisibility(R.id.title, View.GONE);
+			if (message != null) {
+				showAlertDialogSimple(title, message);
 			}
-			contentView.setTextViewText(R.id.title, mActivity.getString(R.string.name_app));
-			contentView.setTextViewText(R.id.text, friendlyMessage);
-			note.contentView = contentView;
-
-			Intent intent = new Intent(mContext, CandiRadar.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
-			note.contentIntent = pendingIntent;
-
-			ImageUtils.showToastNotification(friendlyMessage, Toast.LENGTH_SHORT);
-			showProgressDialog(false, null);
-			mNotificationManager.notify(CandiConstants.NOTIFICATION_NETWORK, note);
 		}
+		Logger.w(context, "Service error: " + errorMessage);
 	}
 
 	public void showNotification(String title, String message, Context context) {
@@ -662,6 +684,21 @@ public class AircandiCommon implements ActionBar.TabListener {
 		return alert;
 	}
 
+	public void showAlertDialogSimple(final String titleText, final String message) {
+		mActivity.runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				AircandiCommon.showAlertDialog(R.drawable.icon_app
+						, titleText
+						, message
+						, mContext, android.R.string.ok, null, new OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {}
+						}, null);
+			}
+		});
+	}
+
 	public void setTheme(Boolean isDialog, Boolean isForm) {
 		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
 		Integer themeResId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
@@ -708,7 +745,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		Aircandi.getInstance().setUser(user);
-		//ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_in) + " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
 		/* Make sure onPrepareOptionsMenu gets called (since api 11) */
 		((SherlockActivity) mActivity).invalidateOptionsMenu();
@@ -1400,12 +1436,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public enum ServiceOperation {
-		Login,
-		Logout,
-		BeaconScan,
-		Chunking,
+		Signin,
+		Signout,
+		Signup,
+		PasswordChange,
 		ProfileBrowse,
-		ProfileSave,
+		ProfileUpdate,
+		BeaconScan,
 		CandiForm,
 		CandiList,
 		CandiBrowse,
@@ -1419,7 +1456,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		PictureSearch,
 		MapBrowse,
 		LinkLookup,
-		Unknown
+		Unknown, PickBookmark, PickCandi, CheckUpdate
 	}
 
 	public static enum ActionButtonSet {

@@ -54,12 +54,8 @@
     <string name="dummy_description">Ever wonder why Aircandi fans refuse to use anything else? For more than four days, Aircandi has attracted a growing family of loyal, almost zealous customers, known as “Candiniks”. By remaining true to the quality tenets of our founder – emphasizing knowledge, taste, and using the senses to evaluate quality at every step – Aircandi defines the gold standard by which all other proximity applications are judged.</string>
     <string name="dummy_description_ellipsized">Ever wonder why Aircandi fans refuse to use anything else? For more than&#8230;</string>
 
-    <!-- Alerts -->
+    <!-- Alerts general -->
 
-    <string name="alert_signin_invalid_signin">Wrong email and password combination.</string>
-    <string name="alert_invalid_email">Email address is invalid.</string>
-    <string name="alert_weburi_invalid">Web address isn\'t in a valid format.</string>
-    <string name="alert_weburi_unreachable">Web site isn\'t available or can\'t be reached.</string>
     <string name="alert_beacons_zero">The beacon detecter shows green when there are beacons nearby you can add new candi to.</string>
     <string name="alert_beacons_available">There are beacons nearby you can add new candi to.</string>
     <string name="alert_entity_locked">This candi has been locked by the owner.</string>
@@ -78,8 +74,6 @@
     <string name="alert_about_title">About</string>
     <string name="alert_about_message">Version:</string>
     <string name="alert_beacons_title">Aircandi beacons</string>
-    <string name="alert_session_expired_title">Session expired</string>
-    <string name="alert_session_expired_message">Your login session expired. Please re-sign in.</string>
     <string name="alert_send_password_title">Forgot password</string>
     <string name="alert_send_password_message">A message has been sent to your email address with your current password.</string>
     <string name="alert_terms_title">Terms of service</string>
@@ -91,11 +85,48 @@
 	    be bound by these Terms.	</string>
     <string name="alert_signup_new_user_title">New user created</string>
     <string name="alert_signup_new_user_message">A message has been sent to your email address with instructions on how to activate your account.</string>
-    <string name="alert_signup_missmatched_passwords_title">Password</string>
-    <string name="alert_signup_missmatched_passwords_message">Passwords do not match</string>
-    <string name="alert_signup_email_taken">Email address is already being used.</string>
-    <string name="alert_signup_password_weak">Password is too weak. Passwords must be at least 6 characters long, not be part of your user name, and not be certain commmon words.</string>
-    <string name="alert_change_password_unauthorized">Old password is invalid.</string>
+
+    <!-- Errors -->
+    
+    <string name="error_weburi_invalid">Web address isn\'t in a valid format.</string>
+    <string name="error_weburi_unreachable">Web site isn\'t available or can\'t be reached.</string>
+    <string name="error_signup_missmatched_passwords_title">Password</string>
+    <string name="error_signup_missmatched_passwords_message">Passwords do not match</string>
+    <string name="error_signup_email_taken">Email address is already being used.</string>
+    <string name="error_signup_password_weak">Password is too weak. Passwords must be at least 6 characters long, not be part of your user name, and not be certain commmon words.</string>
+    <string name="error_change_password_unauthorized">Old password is invalid.</string>
+    
+    <string name="error_connection_title">Aircandi disconnected</string>
+    <string name="error_connection">Check network connection and retry</string>
+    <string name="error_connection_notification">Touch to retry network connection</string>
+    <string name="error_connection_poor">Network connection is poor, retry later</string>
+    <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
+    <string name="error_client_request_error">Aircandi request error</string>
+    <string name="error_client_request_not_found">Resource not found</string>
+    <string name="error_service_unauthorized">Unauthorized request</string>
+    <string name="error_service_forbidden">Requested operation is not valid</string>
+    <string name="error_service_gateway_timeout">Did not receive timely response from service</string>
+    <string name="error_service_general">Unspecified service error</string>
+    
+    <string name="error_signin_invalid_signin">Wrong email and password combination.</string>
+    <string name="error_invalid_email">Email address is invalid.</string>
+    <string name="error_session_expired_title">Session expired</string>
+    <string name="error_session_expired">Your login session expired. Please re-sign in.</string>
+    <string name="error_weburi_invalid">Web address isn\'t in a valid format.</string>
+    <string name="error_weburi_unreachable">Web site isn\'t available or can\'t be reached.</string>
+    <string name="error_signup_missmatched_passwords_title">Password</string>
+    <string name="error_signup_missmatched_passwords_message">Passwords do not match</string>
+    <string name="error_signup_email_taken">Email address is already being used.</string>
+    <string name="error_signup_password_weak">Password is too weak. Passwords must be at least 6 characters long, not be part of your user name, and not be certain commmon words.</string>
+    <string name="error_change_password_unauthorized">Old password is invalid.</string>
+
+    <!-- Toast -->
+
+    <string name="toast_wifi_enabling">Wifi state enabling&#8230;</string>
+    <string name="toast_wifi_disabling">Wifi state disabling&#8230;</string>
+    <string name="toast_wifi_disabled">Wifi state disabled.</string>
+    <string name="toast_signed_in">Signed in as</string>
+    <string name="toast_signed_out">Signed out.</string>
 
     <!-- UI General -->
 
@@ -122,17 +153,6 @@
     <!-- Symbols -->
 
     <string name="symbol_bullet">•</string>
-
-    <!-- Network -->
-
-    <string name="network_message_connection_notready">Check network connection and retry</string>
-    <string name="network_message_connection_poor">Network connection is poor, retry later</string>
-    <string name="network_message_service_notready">Aircandi service is not available</string>
-    <string name="network_message_service_error">Aircandi service error</string>
-    <string name="network_message_client_error">Aircandi request error</string>
-    <string name="dialog_network_message_connection_ready">Connection established, ready for retry</string>
-    <string name="dialog_network_message_connection_notready">Check network connection and retry</string>
-    <string name="dialog_network_message_service_notready">Service is unavailable, retry later</string>
 
     <!-- Entities -->
 
@@ -203,23 +223,6 @@
     <string name="candi_map_label_pictures">Pictures:</string>
     <string name="candi_map_label_posts">Posts:</string>
     <string name="candi_map_label_links">Links:</string>
-
-    <!-- Toast -->
-
-    <string name="toast_wifi_enabling">Wifi state enabling&#8230;</string>
-    <string name="toast_wifi_disabling">Wifi state disabling&#8230;</string>
-    <string name="toast_wifi_disabled">Wifi state disabled.</string>
-    <string name="toast_signed_in">Signed in as</string>
-    <string name="toast_signed_out">Signed out.</string>
-
-    <!-- Notifications -->
-
-    <string name="notification_error_network_message">Network problem&#8230;</string>
-
-    <!-- Errors -->
-
-    <string name="error_service_general">Network is unavailable or busy.</string>
-    <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
 
     <!-- Misc -->
 

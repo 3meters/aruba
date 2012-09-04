@@ -19,25 +19,25 @@ import android.os.Bundle;
 
 import com.aircandi.Aircandi;
 import com.aircandi.Preferences;
+import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseServiceException;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.Beacon.BeaconState;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Entity.EntityState;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
-import com.aircandi.service.objects.Beacon.BeaconState;
-import com.aircandi.service.objects.Entity.EntityState;
-import com.aircandi.R;
 
 public class ProxiExplorer {
 
@@ -657,9 +657,9 @@ public class ProxiExplorer {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 			StringBuilder text = new StringBuilder();
 			String line;
-			while (( line = reader.readLine()) != null) {
+			while ((line = reader.readLine()) != null) {
 				text.append(line);
-			}		
+			}
 			String jsonEntity = text.toString();
 			Entity entity = ProxibaseService.getGson(GsonType.Internal).fromJson(jsonEntity, Entity.class);
 			return entity;

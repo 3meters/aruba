@@ -113,7 +113,7 @@ public interface CandiConstants {
 	public static final int				IMAGE_WIDTH_ORIGINAL					= -1;
 
 	public static final String			THEME_DEFAULT							= "aircandi_theme_canyon";
-	public static final String			URL_AIRCANDI_UPGRADE					= "http://www.aircandi.com/install.html";
+	public static final String			URL_AIRCANDI_UPGRADE					= "http://www.aircandi.com.s3.amazonaws.com/install.html";
 	public static final String			S3_BUCKET_IMAGES						= "aircandi-images";
 
 	public static final String			TYPE_CANDI_POST							= "com.aircandi.candi.post";

@@ -1,5 +1,6 @@
 package com.aircandi.service;
 
+
 /**
  * Extension of ProxibaseClientException that represents an error response returned
  * by the Proxibase web service. Receiving an exception of this type indicates that
@@ -16,7 +17,7 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 	private static final long	serialVersionUID	= 1L;
 	private ErrorCode			mErrorCode			= ErrorCode.AircandiServiceException;
 	private ErrorType			mErrorType			= ErrorType.Unknown;
-	private int					mHttpStatusCode;
+	private float				mHttpStatusCode;
 	private String				mResponseMessage;
 
 	public ProxibaseServiceException(String message) {
@@ -49,11 +50,11 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 		return mErrorType;
 	}
 
-	public void setHttpStatusCode(int httpStatusCode) {
+	public void setHttpStatusCode(float httpStatusCode) {
 		this.mHttpStatusCode = httpStatusCode;
 	}
 
-	public int getHttpStatusCode() {
+	public float getHttpStatusCode() {
 		return mHttpStatusCode;
 	}
 
@@ -95,8 +96,10 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 		InterruptedException,
 		UnknownHostException,
 		UnknownException,
+		ForbiddenException,
+		DuplicateException,
 		SessionException,
-		PasswordException
+		PasswordException, GatewayTimeoutException
 	}
 
 	/**

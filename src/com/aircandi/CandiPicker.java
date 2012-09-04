@@ -16,6 +16,7 @@ import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -164,6 +165,9 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 								CandiListAdapter adapter = new CandiListAdapter(CandiPicker.this, mEntities, R.layout.temp_listitem_candi_picker);
 								mListViewCandi.setAdapter(adapter);
 							}
+						}
+						else {
+							mCommon.handleServiceError(serviceResponse, ServiceOperation.PickCandi);
 						}
 						mCommon.showProgressDialog(false, null);
 					}
