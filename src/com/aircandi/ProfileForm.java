@@ -27,7 +27,6 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.S3;
@@ -209,7 +208,7 @@ public class ProfileForm extends FormActivity {
 						}
 						else {
 							mImageUser.getImageView().setImageResource(R.drawable.image_broken);
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureBrowse);							
+							mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureBrowse);
 						}
 					}
 				});
@@ -309,7 +308,7 @@ public class ProfileForm extends FormActivity {
 							mUser.imageUri = imageKey;
 						}
 						catch (ProxibaseServiceException exception) {
-							serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
+							serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
 						}
 					}
 

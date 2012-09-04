@@ -509,7 +509,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_error), Toast.LENGTH_SHORT);
 				}
 				else {
-					/* Something unexpected */
+					/* Something without special handling */
 					ImageUtils.showToastNotification(serviceResponse.exception.getMessage(), Toast.LENGTH_SHORT);
 				}
 			}

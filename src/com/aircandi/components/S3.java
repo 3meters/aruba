@@ -27,9 +27,8 @@ import android.util.Log;
 
 import com.aircandi.CandiRadar;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.ProxibaseServiceException.ErrorCode;
-import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -187,10 +186,10 @@ public class S3 {
 			S3.getInstance().setObjectAcl(CandiConstants.S3_BUCKET_IMAGES, imageKey, CannedAccessControlList.PublicRead);
 		}
 		catch (final AmazonServiceException exception) {
-			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Service, ErrorCode.AmazonServiceException, exception);
+			throw ProxibaseService.makeProxibaseServiceException(null, exception);
 		}
 		catch (final AmazonClientException exception) {
-			throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Client, ErrorCode.AmazonClientException, exception);
+			throw ProxibaseService.makeProxibaseServiceException(null, exception);
 		}
 		finally {
 			try {
@@ -198,7 +197,7 @@ public class S3 {
 				inputStream.close();
 			}
 			catch (IOException exception) {
-				throw new ProxibaseServiceException(exception.getMessage(), ErrorType.Client, ErrorCode.IOException, exception);
+				throw ProxibaseService.makeProxibaseServiceException(null, exception);
 			}
 		}
 	}

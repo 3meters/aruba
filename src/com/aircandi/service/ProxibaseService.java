@@ -17,6 +17,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.net.ConnectException;
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -314,7 +316,7 @@ public class ProxibaseService {
 						httpStatusCode = serviceData.error.code.floatValue();
 					}
 					Logger.d(this, responseContent);
-					ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(httpStatusCode, null);
+					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(httpStatusCode, null);
 					proxibaseException.setResponseMessage(responseContent);
 					if (!shouldRetry(httpRequest, proxibaseException, retryCount)) {
 						throw proxibaseException;
@@ -389,7 +391,9 @@ public class ProxibaseService {
 	}
 
 	public static ProxibaseServiceException makeProxibaseServiceException(Float httpStatusCode, Exception exception) {
-
+		/*
+		 * This is the only code that creates ProxibaseServiceException objects.
+		 */
 		ProxibaseServiceException proxibaseException = null;
 
 		if (exception != null) {
@@ -408,6 +412,21 @@ public class ProxibaseService {
 			else if (exception instanceof IOException) {
 				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
 						ErrorCode.IOException, exception);
+				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			}
+			else if (exception instanceof AmazonClientException) {
+				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
+						ErrorCode.AmazonClientException, exception);
+				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			}
+			else if (exception instanceof AmazonServiceException) {
+				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
+						ErrorCode.AmazonServiceException, exception);
+				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			}
+			else if (exception instanceof InterruptedException) {
+				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
+						ErrorCode.InterruptedException, exception);
 				proxibaseException.setResponseMessage(proxibaseException.getMessage());
 			}
 		}
@@ -511,7 +530,7 @@ public class ProxibaseService {
 		}
 
 		if (exception instanceof ProxibaseServiceException) {
-			ProxibaseServiceException pse = (ProxibaseServiceException) exception;
+			ProxibaseServiceException proxibaseException = (ProxibaseServiceException) exception;
 
 			/*
 			 * For 500 internal server errors and 503 service unavailable errors, we want to retry, but we need to use
@@ -520,9 +539,9 @@ public class ProxibaseService {
 			 * back to the user as an exception. We also retry 504 gateway timeout errors because this could have been
 			 * caused by service crash during the request and the service will be restarted.
 			 */
-			if (pse.getHttpStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR
-					|| pse.getHttpStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE
-					|| pse.getHttpStatusCode() == HttpStatus.SC_GATEWAY_TIMEOUT) {
+			if (proxibaseException.getHttpStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR
+					|| proxibaseException.getHttpStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE
+					|| proxibaseException.getHttpStatusCode() == HttpStatus.SC_GATEWAY_TIMEOUT) {
 				return true;
 			}
 		}
@@ -555,7 +574,7 @@ public class ProxibaseService {
 		}
 		catch (InterruptedException exception) {
 			Logger.d(this, "Retry delay interrupted");
-			throw new ProxibaseServiceException("Retry delay interrupted");
+			throw makeProxibaseServiceException(null, exception);
 		}
 	}
 

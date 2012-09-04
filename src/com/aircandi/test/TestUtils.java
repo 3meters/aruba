@@ -6,7 +6,6 @@ import java.net.ConnectException;
 import org.apache.http.client.ClientProtocolException;
 
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
@@ -52,7 +51,7 @@ public class TestUtils {
 		}
 
 		ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(httpStatusCode, exception);
-		ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, proxibaseException);
+		ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Failed, null, proxibaseException);
 		return serviceResponse;
 	}
 }

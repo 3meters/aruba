@@ -39,7 +39,6 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityTree;
@@ -600,7 +599,7 @@ public class EntityForm extends FormActivity {
 
 						public void onClick(DialogInterface dialog, int which) {}
 					}, null);
-			return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.UnknownException, null, null);
+			return new ServiceResponse(ResponseCode.Failed, null, null);
 		}
 
 		/* If parent id then this is a child */
@@ -768,7 +767,7 @@ public class EntityForm extends FormActivity {
 						 */
 					}
 					catch (ProxibaseServiceException exception) {
-						serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
+						serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
 					}
 				}
 
@@ -847,7 +846,7 @@ public class EntityForm extends FormActivity {
 				}
 			}
 			catch (ProxibaseServiceException exception) {
-				return new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
+				return new ServiceResponse(ResponseCode.Failed, null, exception);
 			}
 		}
 		return serviceResponse;

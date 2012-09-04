@@ -20,9 +20,9 @@ import android.webkit.WebViewClient;
 import com.aircandi.Aircandi;
 import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.RequestListener;
@@ -60,7 +60,7 @@ public class ImageLoader {
 		if (imageRequest.getImageUri().toLowerCase().startsWith("resource:")) {
 
 			ServiceResponse serviceResponse = new ServiceResponse();
-			
+
 			String rawResourceName = imageRequest.getImageUri().substring(imageRequest.getImageUri().indexOf("resource:") + 9);
 			String resolvedResourceName = ImageManager.getInstance().resolveResourceName(rawResourceName);
 
@@ -160,9 +160,9 @@ public class ImageLoader {
 			}
 		}
 	}
-	
+
 	private ServiceResponse getCachedImage(ImageRequest imageRequest) {
-		
+
 		ServiceResponse serviceResponse = new ServiceResponse();
 		Bitmap bitmap = ImageManager.getInstance().getImage(imageRequest.getImageUri());
 		if (bitmap != null) {
@@ -229,10 +229,7 @@ public class ImageLoader {
 			if (bitmap == null) {
 				Logger.w(null, url + ": stream could not be decoded to a bitmap");
 				serviceResponse.responseCode = ResponseCode.Failed;
-				serviceResponse.responseCodeDetail = ResponseCodeDetail.IllegalStateException;
-				String message = "Stream could not be decoded to a bitmap: " + url;
-				serviceResponse.exception = new ProxibaseServiceException(message, ErrorType.Client, ErrorCode.IllegalStateException,
-						new IllegalStateException("Stream could not be decoded to a bitmap: " + url));
+				serviceResponse.exception = ProxibaseService.makeProxibaseServiceException(null, new IllegalStateException("Stream could not be decoded to a bitmap: " + url));
 			}
 			else {
 				serviceResponse.data = bitmap;
@@ -541,7 +538,7 @@ public class ImageLoader {
 								serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
 								imageRequest.getRequestListener().onProgressChanged(100);
 							}
-							else if (serviceResponse.responseCodeDetail == ResponseCodeDetail.IllegalStateException) {
+							else if (serviceResponse.exception.getErrorCode() == ErrorCode.IllegalStateException) {
 								/*
 								 * Data couldn't be successfully decoded into a bitmap so substitute
 								 * the broken image placeholder

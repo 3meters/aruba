@@ -21,7 +21,6 @@ import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.S3;
 import com.aircandi.components.Tracker;
@@ -259,7 +258,7 @@ public class SignUpForm extends FormActivity {
 								S3.putImage(imageKey, mUserBitmap);
 							}
 							catch (ProxibaseServiceException exception) {
-								serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.UnknownException, null, exception);
+								serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
 							}
 
 							if (serviceResponse.responseCode == ResponseCode.Success) {

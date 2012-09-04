@@ -1,54 +1,27 @@
 package com.aircandi;
 
-import org.apache.http.HttpStatus;
-
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 
 import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.CommandType;
-import com.aircandi.components.DateUtils;
-import com.aircandi.components.Exceptions;
-import com.aircandi.components.ImageRequest;
-import com.aircandi.components.ImageRequestBuilder;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.S3;
-import com.aircandi.components.Tracker;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ResponseCodeDetail;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.core.CandiConstants;
+import com.aircandi.components.Tracker;
 import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.Query;
-import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.ProxibaseService.GsonType;
-import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.objects.ServiceData;
-import com.aircandi.service.objects.ServiceError;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.User;
-import com.aircandi.widgets.WebImageView;
-import com.aircandi.R;
 
-@SuppressWarnings("unused")
 public class PasswordForm extends FormActivity {
 
 	private EditText	mTextPasswordOld;

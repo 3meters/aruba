@@ -14,7 +14,6 @@ import android.net.wifi.WifiManager;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ServiceRequest;
 
 public class NetworkManager {
@@ -81,7 +80,7 @@ public class NetworkManager {
 		ServiceResponse serviceResponse = request(serviceRequest, null);
 		return serviceResponse;
 	}
-	
+
 	public ServiceResponse request(ServiceRequest serviceRequest, ServiceResponse testServiceResponse) {
 		if (testServiceResponse != null) {
 			return testServiceResponse;
@@ -96,7 +95,7 @@ public class NetworkManager {
 		if (!verifyIsConnected()) {
 			Exception exception = new ConnectException();
 			ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
-			serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ConnectionException, null, proxibaseException);
+			serviceResponse = new ServiceResponse(ResponseCode.Failed, null, proxibaseException);
 		}
 		else {
 			/*
@@ -106,18 +105,14 @@ public class NetworkManager {
 			try {
 				/* Could be string, input stream, or array of bytes */
 				Object response = ProxibaseService.getInstance().request(serviceRequest);
-				serviceResponse = new ServiceResponse(ResponseCode.Success, ResponseCodeDetail.Success, response, null);
+				serviceResponse = new ServiceResponse(ResponseCode.Success, response, null);
 			}
 			catch (ProxibaseServiceException exception) {
 				/*
 				 * We got a service side error that either stopped us in our tracks or
 				 * we gave up after performing a series of retries.
 				 */
-				serviceResponse = new ServiceResponse(ResponseCode.Failed, ResponseCodeDetail.ServiceException, null, exception);
-				if (exception.getErrorCode() == ErrorCode.UpdateException) {
-					serviceResponse.responseCode = ResponseCode.Success;
-					serviceResponse.responseCodeDetail = ResponseCodeDetail.UpdateException;
-				}
+				serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
 			}
 		}
 		return serviceResponse;
@@ -320,15 +315,13 @@ public class NetworkManager {
 	public static class ServiceResponse {
 
 		public Object						data;
-		public ResponseCode					responseCode		= ResponseCode.Success;
-		public ResponseCodeDetail			responseCodeDetail	= ResponseCodeDetail.Success;
+		public ResponseCode					responseCode	= ResponseCode.Success;
 		public ProxibaseServiceException	exception;
 
 		public ServiceResponse() {}
 
-		public ServiceResponse(ResponseCode resultCode, ResponseCodeDetail responseCodeDetail, Object data, ProxibaseServiceException exception) {
+		public ServiceResponse(ResponseCode resultCode, Object data, ProxibaseServiceException exception) {
 			this.responseCode = resultCode;
-			this.responseCodeDetail = responseCodeDetail;
 			this.data = data;
 			this.exception = exception;
 		}
@@ -337,19 +330,4 @@ public class NetworkManager {
 	public static enum ResponseCode {
 		Success, Failed
 	}
-
-	public static enum ResponseCodeDetail {
-		Success,
-		ServiceException,
-		RequestException,
-		ServiceNotFoundException,
-		UpdateException,
-		ConnectionException,
-		TransportException,
-		UnknownHostException,
-		ProtocolException,
-		UnknownException,
-		IllegalStateException
-	}
-
 }
