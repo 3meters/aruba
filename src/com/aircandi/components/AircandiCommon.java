@@ -1,7 +1,6 @@
 package com.aircandi.components;
 
 import java.io.File;
-import java.net.UnknownHostException;
 import java.util.List;
 
 import android.app.Activity;
@@ -46,23 +45,24 @@ import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
+import com.aircandi.Aircandi.CandiTask;
 import com.aircandi.CandiForm;
 import com.aircandi.CandiList;
 import com.aircandi.CandiMap;
 import com.aircandi.CandiPicker;
 import com.aircandi.CandiRadar;
+import com.aircandi.CandiRadar.RefreshType;
 import com.aircandi.CommentList;
 import com.aircandi.FormActivity;
 import com.aircandi.HelpForm;
 import com.aircandi.Preferences;
 import com.aircandi.ProfileForm;
+import com.aircandi.R;
 import com.aircandi.ScanService;
 import com.aircandi.SignInForm;
 import com.aircandi.TemplatePicker;
 import com.aircandi.UserCandiForm;
 import com.aircandi.UserCandiList;
-import com.aircandi.Aircandi.CandiTask;
-import com.aircandi.CandiRadar.RefreshType;
 import com.aircandi.candi.models.CandiPatchModel;
 import com.aircandi.candi.presenters.CandiPatchPresenter;
 import com.aircandi.components.AnimUtils.TransitionType;
@@ -74,18 +74,17 @@ import com.aircandi.components.ProxiExplorer.WifiScanResult;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
 import com.aircandi.widgets.WebImageView;
-import com.aircandi.R;
 
 public class AircandiCommon implements ActionBar.TabListener {
 
@@ -336,6 +335,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * manifest in order to get the correct window features. The theme can then be modified by passing the desired
 		 * theme id to the dialog activity.
 		 */
+		Aircandi.returningFromDialog = true;
 		Intent intent = new Intent(mActivity, TemplatePicker.class);
 		intent.putExtra(mActivity.getString(R.string.EXTRA_ENTITY_IS_ROOT), isRoot);
 		intent.putExtra(mActivity.getString(R.string.EXTRA_THEME_ID), mThemeTone.equals("dark") ? R.style.Theme_Sherlock_Dialog
@@ -352,6 +352,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * manifest in order to get the correct window features. The theme can then be modified by passing the desired
 		 * theme id to the dialog activity.
 		 */
+		Aircandi.returningFromDialog = true;
 		Intent intent = new Intent(mActivity, HelpForm.class);
 		intent.putExtra(mActivity.getString(R.string.EXTRA_STRING_ID), R.string.help_radar);
 		intent.putExtra(mActivity.getString(R.string.EXTRA_THEME_ID), mThemeTone.equals("dark") ? R.style.Theme_Sherlock_Dialog
@@ -488,12 +489,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 			 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
 			 * - UnknownHostException: hostname didn't exist in the dns system
 			 */
-			if (serviceResponse.exception.getCause() instanceof UnknownHostException) {
-				showAlertDialogSimple(null, mActivity.getString(R.string.error_client_unknown_host));
-			}
-			else {
+//			if (serviceResponse.exception.getCause() instanceof UnknownHostException) {
+//				showAlertDialogSimple(null, mActivity.getString(R.string.error_client_unknown_host));
+//			}
+//			else {
 				ImageUtils.showToastNotification(mActivity.getString(R.string.error_connection_poor), Toast.LENGTH_SHORT);
-			}
+//			}
 		}
 		else if (errorType == ErrorType.Client) {
 			/*

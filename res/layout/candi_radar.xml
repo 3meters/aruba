@@ -216,6 +216,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:paddingLeft="2dp"
+                android:textColor="?attr/textColorBars"
                 android:text="@string/radar_button_new" />
         </LinearLayout>
 

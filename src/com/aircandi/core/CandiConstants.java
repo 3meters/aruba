@@ -17,7 +17,7 @@ import android.util.Log;
 public interface CandiConstants {
 
 	public static final boolean			DEBUG_TRACE								= false;
-	public static final int				LOG_LEVEL								= Log.DEBUG;
+	public static final int				LOG_LEVEL								= Log.VERBOSE;
 	public static final boolean			TRACKING_ENABLED						= true;
 
 	public static final String			APP_NAME								= "Aircandi";
@@ -25,6 +25,7 @@ public interface CandiConstants {
 	public static final String			GOOGLE_API_KEY_RELEASE					= "0NLNz2BjIntPUuNQrqaiA6J8TTFflv_PHQ2cTdQ";
 	public static final String			GOOGLE_API_KEY_DEBUG					= "0NLNz2BjIntNt_gkO2_iEs5wIIxNGrG_pmHjPbA";
 
+	public static final int				TEN_SECONDS								= 1000 * 10;
 	public static final int				TWENTY_SECONDS							= 1000 * 20;
 	public static final int				ONE_MINUTE								= 1000 * 60;
 	public static final int				TWO_MINUTES								= 1000 * 60 * 2;
@@ -38,7 +39,7 @@ public interface CandiConstants {
 	public static final int				LAYER_CANDI								= 2;
 
 	public static final int				INTERVAL_SCAN							= ONE_MINUTE;
-	public static final int				INTERVAL_RENDERING_DEFAULT				= TWENTY_SECONDS;
+	public static final int				INTERVAL_RENDERING_DEFAULT				= TEN_SECONDS;
 	public static final int				INTERVAL_RENDERING_BOOST				= ONE_MINUTE;
 
 	public static final int				LOCATION_POLLING_INTERVAL				= FIVE_MINUTES;																			// 5 minutes

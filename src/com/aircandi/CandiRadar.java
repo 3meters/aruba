@@ -257,7 +257,6 @@ import com.aircandi.R;
 public class CandiRadar extends AircandiGameActivity implements TextureListener {
 
 	private AtomicBoolean				mFirstWindow			= new AtomicBoolean(true);
-	private boolean						mPaused					= false;
 	private Boolean						mReadyToRun				= false;
 	private Handler						mHandler				= new Handler();
 	public static BasicAWSCredentials	mAwsCredentials			= null;
@@ -679,6 +678,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 										updateComplete();
 
 										if (mScanOptions.fullBuild) {
+											Logger.d(CandiRadar.this, "Full entity update complete");
 											Aircandi.fullUpdateComplete = true;
 										}
 									}
@@ -1390,8 +1390,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 															finish();
 														}
 														else {
-															finishResume(true);
-															scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
+//															finishResume(true);
+//															scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
 														}
 													}
 												}
@@ -1484,7 +1484,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						 * be
 						 * in restart but it wasn't getting called reliably when returning from another activity.
 						 */
-						if (Aircandi.fullUpdateComplete && mPaused) {
+						if (Aircandi.fullUpdateComplete) {
 							Logger.d(this, "CandiRadarActivity resuming after pause");
 
 							/*
@@ -1535,11 +1535,12 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 								}
 								else {
 									/* We always do a check because the user might have moved */
-									invalidateOptionsMenu();
-									scanForBeacons(new ScanOptions(false, false, null));
+									if (!Aircandi.returningFromDialog) {
+										invalidateOptionsMenu();
+										scanForBeacons(new ScanOptions(false, false, null));
+									}
 								}
 							}
-							mPaused = false;
 							finishResume(false);
 						}
 						else {
@@ -1560,6 +1561,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		GeoLocationManager.getInstance().onResume();
 		mCommon.doResume();
 		mCommon.startScanService();
+		Aircandi.returningFromDialog = false;
 
 		/*
 		 * CandiPatchPresenter is created in onLoadScene which gets called after the first onResume
@@ -1628,7 +1630,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			GeoLocationManager.getInstance().onPause();
 
 			mCommon.doPause();
-			mPaused = true;
 		}
 		catch (Exception exception) {
 			Exceptions.Handle(exception);
