@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 
+import android.util.FloatMath;
+
 import com.aircandi.candi.models.CandiModel.DisplayExtra;
 import com.aircandi.candi.models.CandiModel.ReasonInactive;
 import com.aircandi.candi.models.ZoneModel.Position;
@@ -327,21 +329,13 @@ public class CandiPatchModel extends Observable {
 		/* Zone titling */
 		for (ZoneModel zoneModel : mZoneModels) {
 			zoneModel.setTitleText("");
-//			if (zoneModel.getCandiesNext().size() > 1) {
-//				for (CandiModel candiModel : zoneModel.getCandiesNext()) {
-//					if (candiModel.getZoneStateNext().getStatus() == ZoneStatus.Primary) {
-//						//zoneModel.setTitleText(candiModel.getTitleText());
-//						break;
-//					}
-//				}
-//			}
-//			else if (zoneModel.getCandiesNext().size() == 1) {
-//				/* We don't need the title if the candi model has a candi view */
-//				CandiModel candiModel = zoneModel.getCandiesNext().get(0);
-//				if (candiModel.countObservers() == 0) {
-//					//zoneModel.setTitleText(zoneModel.getCandiesNext().get(0).getTitleText());
-//				}
-//			}
+			if (zoneModel.getCandiesNext().size() == 1) {
+				/* We don't need the title if the candi model has a candi view */
+				CandiModel candiModel = zoneModel.getCandiesNext().get(0);
+				if (candiModel.countObservers() == 0) {
+					zoneModel.setTitleText(zoneModel.getCandiesNext().get(0).getTitleText());
+				}
+			}
 		}
 
 		for (IModel model : mCandiRootNext.getChildren()) {
@@ -453,7 +447,7 @@ public class CandiPatchModel extends Observable {
 			return y;
 		}
 		else {
-			int rank = (int) Math.floor((float) zoneIndex / (float) CandiConstants.RADAR_STACK_COUNT); /* zero based */
+			int rank = (int) FloatMath.floor((float) zoneIndex / (float) CandiConstants.RADAR_STACK_COUNT); /* zero based */
 			float y = ((float) CandiConstants.CANDI_VIEW_HEIGHT * (float) rank) + ((float) CandiConstants.CANDI_VIEW_SPACING_HORIZONTAL * (float) rank);
 			return y;
 		}

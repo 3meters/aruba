@@ -176,23 +176,9 @@ public abstract class BaseModel extends Observable implements IModel {
 		}
 
 		private boolean isOutsideHalo(Camera camera) {
-			//			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
-			//			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * mCandiPatchModel.getScreenWidth());
-
 			float haloMinX = camera.getMinX() - (CandiConstants.CANDI_VIEW_HALO * camera.getWidth());
 			float haloMaxX = camera.getMaxX() + (CandiConstants.CANDI_VIEW_HALO * camera.getWidth());
-
-			//			if (haloMinX < 0) {
-			//				haloMaxX += Math.abs(haloMinX);
-			//				haloMinX = 0;
-			//			}
-			//			else if (haloMaxX > lastX) {
-			//				haloMinX -= Math.abs(lastX - haloMaxX);
-			//				haloMaxX = lastX;
-			//			}
-
 			boolean outsideHalo = mX + (mWidth * mScale) < haloMinX || mX > haloMaxX;
-			
 			return outsideHalo;
 		}
 

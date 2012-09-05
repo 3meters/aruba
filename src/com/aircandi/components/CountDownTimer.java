@@ -120,7 +120,7 @@ public abstract class CountDownTimer {
 	 */
 	@SuppressLint("HandlerLeak")
 	class CountDownHandler extends Handler {
-		
+
 		private final WeakReference<CountDownTimer>	mCountDownTimer;
 
 		CountDownHandler(CountDownTimer countDownTimer) {
@@ -140,18 +140,17 @@ public abstract class CountDownTimer {
 						onFinish();
 					}
 					else if (millisLeft < mCountdownInterval) {
-						// no tick, just delay until done
+						/* No tick, just delay until done */
 						sendMessageDelayed(obtainMessage(MSG), millisLeft);
 					}
 					else {
 						long lastTickStart = SystemClock.elapsedRealtime();
 						onTick(millisLeft);
 
-						// take into account user's onTick taking time to execute
+						/* Take into account user's onTick taking time to execute */
 						long delay = lastTickStart + mCountdownInterval - SystemClock.elapsedRealtime();
 
-						// special case: user's onTick took more than interval to
-						// complete, skip to next interval
+						/* Special case: user's onTick took more than interval to complete, skip to next interval */
 						while (delay < 0)
 							delay += mCountdownInterval;
 

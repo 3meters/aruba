@@ -46,18 +46,18 @@ public class DateUtils {
 		return seconds;
 	}
 
-	// Change a Date to GMT
+	/* Change a Date to GMT */
 	public static Date toGMT(Date date) {
 		return changeTimeZone(date, TimeZone.getTimeZone("GMT"));
 	}
 
-	// Change a date to GMT from a given timezone
+	/* Change a date to GMT from a given timezone */
 	public static Date toGmtFromZone(Date date, String fromZone) {
 		TimeZone pst = TimeZone.getTimeZone(fromZone);
 		return new Date(date.getTime() - pst.getRawOffset());
 	}
 
-	// Change a date in another timezone
+	/* Change a date in another timezone */
 	public static Date changeTimeZone(Date date, TimeZone zone) {
 		Calendar first = Calendar.getInstance(zone);
 		first.setTimeInMillis(date.getTime());

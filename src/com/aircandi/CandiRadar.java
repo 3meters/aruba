@@ -2,7 +2,6 @@ package com.aircandi;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ConnectException;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -16,26 +15,16 @@ import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.WakeLockOptions;
 import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.TextureManager.TextureListener;
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
-import org.anddev.andengine.util.modifier.IModifier;
-import org.anddev.andengine.util.modifier.ease.EaseLinear;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.location.Criteria;
 import android.net.NetworkInfo.State;
@@ -49,11 +38,9 @@ import android.os.Handler;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
-import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
@@ -62,7 +49,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -75,22 +61,20 @@ import com.aircandi.Aircandi.CandiTask;
 import com.aircandi.Preferences.PrefResponse;
 import com.aircandi.candi.camera.ChaseCamera;
 import com.aircandi.candi.models.CandiModel;
+import com.aircandi.candi.models.CandiModel.DisplayExtra;
 import com.aircandi.candi.models.CandiPatchModel;
 import com.aircandi.candi.models.IModel;
-import com.aircandi.candi.models.CandiModel.DisplayExtra;
-import com.aircandi.candi.models.CandiPatchModel.Navigation;
 import com.aircandi.candi.presenters.CandiPatchPresenter;
 import com.aircandi.candi.presenters.CandiPatchPresenter.ICandiListener;
-import com.aircandi.candi.presenters.CandiPatchPresenter.TextureReset;
-import com.aircandi.candi.sprites.CameraTargetSprite;
-import com.aircandi.candi.views.ViewAction;
-import com.aircandi.candi.views.ViewAction.ViewActionType;
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.DateUtils;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.Events;
+import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.ImageCache;
@@ -99,34 +83,25 @@ import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiHandlerManager;
-import com.aircandi.components.Tracker;
-import com.aircandi.components.VersionInfo;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils.TransitionType;
-import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.NetworkManager.IConnectivityListener;
 import com.aircandi.components.NetworkManager.IWifiReadyListener;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiExplorer.EntityModel;
-import com.aircandi.components.ProxiExplorer.EntityTree;
+import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ScanOptions;
+import com.aircandi.components.Tracker;
+import com.aircandi.components.VersionInfo;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.Query;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.Query;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
-import com.aircandi.test.TestUtils;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.aircandi.BuildConfig;
-import com.aircandi.R;
 
 /*
  * Texture Notes - Textures are loaded into hardware using bitmaps (one or more texture sources).
@@ -270,8 +245,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	public boolean						mPrefShowDebug			= false;
 	public boolean						mPrefSoundEffects		= true;
 
-	private ProxiHandlerManager			mEntityHandlerManager;
-
 	private Number						mEntityModelRefreshDate;
 	private Number						mEntityModelActivityDate;
 	private User						mEntityModelUser;
@@ -408,9 +381,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		mCandiPatchModel = new CandiPatchModel();
 		mCandiPatchModel.setScreenWidth(ImageManager.getInstance().getDisplayMetrics().widthPixels);
 		mCommon.setCandiPatchModel(mCandiPatchModel);
-
-		/* Proxi activities */
-		mEntityHandlerManager = new ProxiHandlerManager(this);
 
 		/* Property settings get overridden once we retrieve preferences */
 		mCandiSurfaceView = (RenderSurfaceView) findViewById(R.id.view_rendersurface);

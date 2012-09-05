@@ -69,7 +69,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 
 	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_beacon")
-	public String				beaconId;										// Used to connect beacon object
+	public String				beaconId;										/* Used to connect beacon object */
 
 	@Expose(serialize = false, deserialize = true)
 	public GeoLocation			location;
@@ -95,7 +95,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 
 	public Beacon				beacon;
 	public Entity				parent;
-	public String				parentId;										// Instead of serializing parent
+	public String				parentId;										/* Instead of serializing parent */
 	public Boolean				superRoot			= false;
 
 	public Boolean				hidden				= false;

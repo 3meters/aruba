@@ -20,7 +20,6 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -190,7 +189,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		mTitle = (TextView) mActivity.findViewById(R.id.text_title);
-		showLocationAccuracy();
 
 		/* Tabs: setup tabs if appropriate */
 		manageTabs();
@@ -212,9 +210,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mEventLocationChanged = new EventHandler() {
 
 			@Override
-			public void onEvent(Object data) {
-				showLocationAccuracy();
-			}
+			public void onEvent(Object data) {}
 		};
 
 		mButtonRefresh = null;
@@ -361,51 +357,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.HelpShow);
 	}
 
-	@SuppressWarnings("unused")
-	public void showLocationAccuracy() {
-		final Location location = GeoLocationManager.getInstance().getCurrentLocation();
-		// if (location != null
-		// && Aircandi.getInstance().getUser() != null
-		// && Aircandi.getInstance().getUser().isDeveloper != null
-		// && Aircandi.getInstance().getUser().isDeveloper) {
-		// if (location.hasAccuracy()) {
-		// TextView textView = (TextView) mActivity.findViewById(R.id.text_header_debug);
-		// if (textView != null) {
-		// textView.setVisibility(View.VISIBLE);
-		// textView.setText(String.valueOf(location.getAccuracy()));
-		// }
-		// else if (mTitle != null) {
-		// final String title = mActivity.getString(R.string.app_name);
-		// mActivity.runOnUiThread(new Runnable() {
-		//
-		// @Override
-		// public void run() {
-		// mTitle.setText(title + "  " + location.getProvider().substring(0, 1).toUpperCase()
-		// + String.valueOf(location.getAccuracy()));
-		// }
-		// });
-		// }
-		// }
-		// }
-		// else {
-		// /* Clear location info */
-		// TextView textView = (TextView) mActivity.findViewById(R.id.text_header_debug);
-		// if (textView != null) {
-		// textView.setVisibility(View.GONE);
-		// }
-		// else if (mTitle != null) {
-		// final String title = mActivity.getString(R.string.app_name);
-		// mActivity.runOnUiThread(new Runnable() {
-		//
-		// @Override
-		// public void run() {
-		// mTitle.setText(title);
-		// }
-		// });
-		// }
-		// }
-	}
-
 	public void updateBeaconIndicator(final List<WifiScanResult> scanList) {
 
 		synchronized (scanList) {
@@ -489,12 +440,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
 			 * - UnknownHostException: hostname didn't exist in the dns system
 			 */
-//			if (serviceResponse.exception.getCause() instanceof UnknownHostException) {
-//				showAlertDialogSimple(null, mActivity.getString(R.string.error_client_unknown_host));
-//			}
-//			else {
-				ImageUtils.showToastNotification(mActivity.getString(R.string.error_connection_poor), Toast.LENGTH_SHORT);
-//			}
+			ImageUtils.showToastNotification(mActivity.getString(R.string.error_connection_poor), Toast.LENGTH_SHORT);
 		}
 		else if (errorType == ErrorType.Client) {
 			/*
@@ -505,7 +451,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				showAlertDialogSimple(null, mActivity.getString(R.string.error_client_unknown_host));
 			}
 			else {
-				if (errorCode == ErrorCode.ClientProtocolException 
+				if (errorCode == ErrorCode.ClientProtocolException
 						|| errorCode == ErrorCode.URISyntaxException) {
 					ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_error), Toast.LENGTH_SHORT);
 				}
@@ -973,10 +919,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 				 * it falls through to here and we want to go to the top of the app.
 				 */
 				mActivity.onBackPressed();
-				// Intent intent = new Intent(mActivity, CandiRadar.class);
-				// intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				// intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				// mActivity.startActivity(intent);
 				return;
 			case R.id.settings:
 				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);

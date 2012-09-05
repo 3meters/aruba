@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/progress_body"
     android:layout_width="100dp"
     android:layout_height="wrap_content"
     android:layout_centerInParent="true"
     android:minHeight="100dp"
     android:minWidth="100dp"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    tools:ignore="UseCompoundDrawables" >
 
     <ImageView
         android:id="@+id/image_body_progress_indicator"

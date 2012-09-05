@@ -23,13 +23,11 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
-import com.aircandi.service.ProxibaseServiceException.ErrorType;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity.ImageFormat;
 
 @SuppressWarnings("deprecation")

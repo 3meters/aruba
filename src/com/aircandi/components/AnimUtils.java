@@ -67,21 +67,15 @@ public class AnimUtils {
 		 * Generic candi to candi
 		 */
 		if (transitionType == TransitionType.CandiRadarToCandiForm) {
-			//activity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-			// activity.overridePendingTransition(R.anim.fade_zoom_in, R.anim.hold);
 			activity.overridePendingTransition(R.anim.activity_open_enter, R.anim.hold);
 		}
 		else if (transitionType == TransitionType.CandiPageBack) {
-			//activity.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-			//activity.overridePendingTransition(R.anim.hold, R.anim.fade_zoom_out);
 			activity.overridePendingTransition(R.anim.hold, R.anim.activity_close_exit);
 		}
 		else if (transitionType == TransitionType.CandiFormToCandiList) {
-			//activity.overridePendingTransition(R.anim.slide_in_right_long, R.anim.slide_out_left_long);
 			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
 		}
 		else if (transitionType == TransitionType.CandiListToCandiForm) {
-			//activity.overridePendingTransition(R.anim.slide_in_right_long, R.anim.slide_out_left_long);
 			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
 		}
 		/*

@@ -42,6 +42,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.opengl.GLU;
 import android.os.AsyncTask;
+import android.util.FloatMath;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -561,11 +562,6 @@ public class CandiPatchPresenter implements Observer {
 		/* Need to sort the candi before assigning to zones */
 		/* Sort the candi by discovery time then modified time */
 		mCandiPatchModel.sortCandiModels(mCandiPatchModel.getCandiRootNext().getChildren());
-		//		for (IModel model : mCandiPatchModel.getCandiRootNext().getChildren()) {
-		//			CandiModel candiModel = (CandiModel) model;
-		//			Entity entity = candiModel.getEntity();
-		//			Logger.v(this, entity.title + ": Signal: " + String.valueOf(entity.beacon.getAvgBeaconLevel()) + ", DiscoveryTime: " + String.valueOf(entity.discoveryTime.getTime()) + ", ModifiedDate: " + String.valueOf(entity.modifiedDate));
-		//		}
 
 		/*
 		 * Set candi visible state, move candi to inactive zone if appropriate. Set candiModelFocused to null if candi
@@ -1201,10 +1197,7 @@ public class CandiPatchPresenter implements Observer {
 										+ ": " + (candiModel.getTitleText() != null ? candiModel.getTitleText() : "[Untitled]"));
 							}
 
-							if (transition == Transition.FadeOut) {
-								// viewStateNext.setVisible(false);
-							}
-							else if (transition == Transition.FadeIn) {
+							if (transition == Transition.FadeIn) {
 
 								if (needDelay) {
 									candiModel.getViewModifiers().addLast(new DelayModifier(CandiConstants.DURATION_TRANSITIONS_DELAY));
@@ -1278,7 +1271,7 @@ public class CandiPatchPresenter implements Observer {
 		 * We have an occupied zone
 		 */
 		if (firstOccupiedZone != null) {
-			int ranks = (int) Math.ceil((float) mCandiPatchModel.getZonesOccupiedCurrentCount() / (float) CandiConstants.RADAR_STACK_COUNT);
+			int ranks = (int) FloatMath.ceil((float) mCandiPatchModel.getZonesOccupiedCurrentCount() / (float) CandiConstants.RADAR_STACK_COUNT);
 			if (CandiConstants.RADAR_SCROLL_HORIZONTAL) {
 				mBoundsMinX = mRadarWidth * 0.5f;
 				mBoundsMaxX = (mBoundsMinX + ((ranks - 1) * (CandiConstants.CANDI_VIEW_WIDTH + CandiConstants.CANDI_VIEW_SPACING_VERTICAL)));
@@ -1295,8 +1288,6 @@ public class CandiPatchPresenter implements Observer {
 				 */
 				float contentHeight = CandiConstants.CANDI_VIEW_HEIGHT * ranks;
 				contentHeight += CandiConstants.CANDI_VIEW_SPACING_VERTICAL * (ranks - 1);
-				//contentHeight += CandiConstants.RADAR_PADDING_BOTTOM;
-				//contentHeight = contentHeight * (1 / CandiConstants.RADAR_ZOOM);
 
 				if (contentHeight > getRadarZoomedHeight()) {
 					mBoundsMaxY = contentHeight - (getRadarZoomedHeight() * 0.5f);
@@ -1365,7 +1356,7 @@ public class CandiPatchPresenter implements Observer {
 		}
 
 		/* Remove parent model */
-		mCandiPatchModel.getCandiModels().remove(candiModel); // Search is done using model id
+		mCandiPatchModel.getCandiModels().remove(candiModel); /* Search is done using model id */
 		if (mCandiPatchModel.getCandiModelSelected() == candiModel) {
 			mCandiPatchModel.setCandiModelSelected(null);
 		}

@@ -253,7 +253,7 @@
             android:layout_weight="1"
             android:onClick="onNewCommentButtonClick"
             android:text="@string/candi_button_comment" />
-
+
         <LinearLayout
             android:id="@+id/button_new"
             style="@style/actionbar_button_borderless"
@@ -262,7 +262,8 @@
             android:layout_weight="1"
             android:clickable="true"
             android:onClick="onAddCandiButtonClick"
-            android:orientation="horizontal" >
+            android:orientation="horizontal"
+            tools:ignore="UseCompoundDrawables" >
 
             <ImageView
                 android:layout_width="wrap_content"

@@ -40,7 +40,6 @@ import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.R;
 
-// @SuppressWarnings("unused")
 public class CandiView extends BaseView implements OnGestureListener {
 
 	private Texture				mBodyTexture;
@@ -302,18 +301,6 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}
 	}
 
-	public void highlight(boolean highlight) {
-		return;
-		// if (mBodySprite != null) {
-		// if (highlight) {
-		// mBodySprite.setColor(1.0f, 0.7f, 0.0f);
-		// }
-		// else {
-		// mBodySprite.setColor(1.0f, 1.0f, 1.0f);
-		// }
-		// }
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Animation
 	// --------------------------------------------------------------------------------------------
@@ -401,14 +388,6 @@ public class CandiView extends BaseView implements OnGestureListener {
 					mReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new DelayModifier(duration * 0.1f), new CandiAlphaModifier(
 							mReflectionSprite, duration * 0.5f, 0.0f, 1.0f)));
 				}
-			}
-			else {
-				// if (!mPlaceholderReflectionSprite.isVisible()) {
-				// mPlaceholderReflectionSprite.registerEntityModifier(new SequenceEntityModifier(new
-				// DelayModifier(duration * 0.1f),
-				// new CandiAlphaModifier(
-				// mPlaceholderReflectionSprite, duration * 0.5f, 0.0f, 1.0f)));
-				// }
 			}
 		}
 		else {

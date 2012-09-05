@@ -469,10 +469,6 @@ public abstract class BaseView extends Entity implements Observer, IView {
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
-
-		//		for (int i = 0; i < getChildCount(); i++) {
-		//			getChild(i).setVisible(visible);
-		//		}
 	}
 
 	@Override

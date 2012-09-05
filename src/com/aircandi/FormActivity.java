@@ -210,11 +210,11 @@ public abstract class FormActivity extends SherlockActivity {
 							break;
 					}
 
-					// create a matrix object
+					/* create a matrix object */
 					Matrix matrix = new Matrix();
-					matrix.postRotate(rotate); // anti-clockwise by 90 degrees
+					matrix.postRotate(rotate); /* anti-clockwise by 90 degrees */
 
-					// create a new bitmap from the original using the matrix to transform the result
+					/* create a new bitmap from the original using the matrix to transform the result */
 					bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);

@@ -157,12 +157,12 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		if(!this.mGameLoaded) {
 			this.onLoadResources();
 			final Scene scene = this.onLoadScene();
-			// Jayma: Added non null requirement for adding the scene here
+			/* Jayma: Added non null requirement for adding the scene here */
 			if (scene != null)
 				this.mEngine.onLoadComplete(scene);
 			
-			// Old:
-			// this.mEngine.onLoadComplete(scene);
+			/* Old:
+			 this.mEngine.onLoadComplete(scene); */
 			this.onLoadComplete();
 			this.mGameLoaded = true;
 		}

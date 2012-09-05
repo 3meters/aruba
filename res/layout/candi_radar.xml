@@ -193,7 +193,7 @@
             android:layout_height="1px"
             android:layout_alignParentTop="true"
             android:background="?attr/ruleColor" />
-
+
         <LinearLayout
             android:id="@+id/button_new"
             style="@style/actionbar_button_borderless"
@@ -202,7 +202,8 @@
             android:layout_alignParentLeft="true"
             android:clickable="true"
             android:onClick="onNewCandiButtonClick"
-            android:orientation="horizontal" >
+            android:orientation="horizontal"
+            tools:ignore="UseCompoundDrawables" >
 
             <ImageView
                 android:layout_width="wrap_content"

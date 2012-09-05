@@ -743,10 +743,10 @@ public class ProxiExplorer {
 			 */
 			EntityModel entityModel = new EntityModel();
 
-			entityModel.mBeacons = new ArrayList(mBeacons); 		// refs to same beacons
-			entityModel.mEntities = mEntities.deepCopy();			// new entities
-			entityModel.mUserEntities = mUserEntities.deepCopy(); 		// new entities
-			entityModel.mMapEntities = new ArrayList(mMapEntities);	// refs to map entities
+			entityModel.mBeacons = new ArrayList(mBeacons); /* refs to same beacons */
+			entityModel.mEntities = mEntities.deepCopy(); /* new entities */
+			entityModel.mUserEntities = mUserEntities.deepCopy(); /* new entities */
+			entityModel.mMapEntities = new ArrayList(mMapEntities); /* refs to map entities */
 			entityModel.mLastRefreshDate = mLastRefreshDate;
 			entityModel.mLastActivityDate = mLastActivityDate;
 			entityModel.mRookieHit = mRookieHit;

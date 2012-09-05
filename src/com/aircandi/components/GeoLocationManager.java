@@ -126,9 +126,11 @@ public class GeoLocationManager {
 		}
 
 		mCriteria = new Criteria();
-		// Coarse accuracy is specified here to get the fastest possible result.
-		// The calling Activity will likely (or have already) request ongoing
-		// updates using the Fine location provider.
+		/*
+		 * Coarse accuracy is specified here to get the fastest possible result.
+		 * The calling Activity will likely (or have already) request ongoing
+		 * updates using the Fine location provider.
+		 */
 		mCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
 	}
 

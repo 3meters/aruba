@@ -76,7 +76,7 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 			}
 		}
 
-		// Do stuff here when you tap, i.e. :
+		/* Do stuff here when you tap, i.e. */
 		AircandiCommon.showAlertDialog(R.drawable.icon_app, title, message, mContext, null, null, new
 				DialogInterface.OnClickListener() {
 

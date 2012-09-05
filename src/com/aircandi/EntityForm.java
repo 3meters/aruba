@@ -619,7 +619,7 @@ public class EntityForm extends FormActivity {
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
-			// Construct entity, link, and observation
+			/* Construct entity, link, and observation */
 			Bundle parameters = new Bundle();
 
 			/* User */
@@ -709,7 +709,7 @@ public class EntityForm extends FormActivity {
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			Logger.i(this, "Updating entity: " + entity.title);
 
-			// Construct entity, link, and observation
+			/* Construct entity, link, and observation */
 			Bundle parameters = new Bundle();
 			parameters.putBoolean("skipActivityDate", false);
 			parameters.putString("entity", "object:" + ProxibaseService.convertObjectToJson(entity, GsonType.ProxibaseService));

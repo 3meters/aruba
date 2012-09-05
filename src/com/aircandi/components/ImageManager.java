@@ -222,7 +222,7 @@ public class ImageManager {
 		BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, bitmapOptions);
 
 		int widthRaw = bitmapOptions.outWidth;
-		int widthFinal = 500; // default to this if there's a problem
+		int widthFinal = 500; /* default to this if there's a problem */
 		int heightRaw = bitmapOptions.outHeight;
 		int heightFinal = 0;
 
@@ -430,7 +430,7 @@ public class ImageManager {
 			sdkInt = Integer.valueOf(Build.VERSION.SDK);
 		}
 		catch (Exception exception) {
-			sdkInt = 3; // assume they are on cupcake
+			sdkInt = 3; /* assume they are on cupcake */
 		}
 		if (sdkInt >= 5) {
 			try {

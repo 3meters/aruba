@@ -48,7 +48,6 @@ public class IntentBuilder {
 			@Override
 			public boolean shouldSkipClass(Class<?> clazz) {
 				return false;
-				// return (clazz == (Class<List<Entity>>) (Class<?>) List.class);
 			}
 
 			@Override
@@ -59,7 +58,6 @@ public class IntentBuilder {
 					skip = skip || (f.getDeclaringClass() == Entity.class && f.getName().equals("children"));
 				}
 				return skip;
-				// return (f.getDeclaredType() == (Class<List<Entity>>) (Class<?>) List.class);
 			}
 		});
 
