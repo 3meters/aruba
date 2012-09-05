@@ -74,7 +74,7 @@ import com.aircandi.R;
 )
 public class Aircandi extends Application {
 
-	public final static int					DEBUG_SIGNATURE_HASH	= -2026043354;
+	public final static int					DEBUG_SIGNATURE_HASH		= -2026043354;
 
 	private static Aircandi					singletonObject;
 	public static SharedPreferences			settings;
@@ -83,21 +83,21 @@ public class Aircandi extends Application {
 	public static Context					applicationContext;
 	public static Handler					applicationHandler;
 
-	public static Boolean					firstRunApp				= true;
-	public static Boolean					firstRunRadar			= true;
-	public static Boolean					runFullScan				= true;
-	public static Boolean					runUiUpdate				= false;
-	public static Boolean					lastScanEmpty			= false;
-	public static Boolean					updateNeeded			= false;
-	public static Boolean					updateRequired			= false;
-	public static String					updateUri;
-	public static Number					lastUpdateCheckDate; 
+	public static Boolean					firstRunApp					= true;
+	public static Boolean					fullUpdateComplete			= false;
+	public static Boolean					runFullScanOnRadarRestart	= true;
+	public static Boolean					lastScanEmpty				= false;
+
+	public static Boolean					applicationUpdateNeeded		= false;
+	public static Boolean					applicationUpdateRequired	= false;
+	public static String					applicationUpdateUri;
+	public static Number					lastApplicationUpdateCheckDate;
 
 	private User							mUser;
-	private CandiTask						mCandiTask				= CandiTask.RadarCandi;
-	private Boolean							mLaunchedFromRadar		= false;
-	private Boolean							mRadarUpdateInProgress	= false;
-	private Boolean							mRadarScanInProgress	= false;
+	private CandiTask						mCandiTask					= CandiTask.RadarCandi;
+	private Boolean							mLaunchedFromRadar			= false;
+	private Boolean							mRadarUpdateInProgress		= false;
+	private Boolean							mRadarScanInProgress		= false;
 
 	public static Aircandi getInstance() {
 		return singletonObject;

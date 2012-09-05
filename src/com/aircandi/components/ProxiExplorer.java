@@ -352,7 +352,7 @@ public class ProxiExplorer {
 			}
 
 			/* Add any local globals */
-			if (Aircandi.updateNeeded) {
+			if (Aircandi.applicationUpdateNeeded) {
 				Entity entity = loadEntityFromResources(R.raw.aircandi_install);
 				entity.global = true;
 				if (entity != null) {

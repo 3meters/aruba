@@ -259,7 +259,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	private AtomicBoolean				mFirstWindow			= new AtomicBoolean(true);
 	private boolean						mPaused					= false;
 	private Boolean						mReadyToRun				= false;
-	private Boolean						mFullUpdateComplete		= false;
 	private Handler						mHandler				= new Handler();
 	public static BasicAWSCredentials	mAwsCredentials			= null;
 
@@ -638,7 +637,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 									@Override
 									protected Object doInBackground(Object... params) {
-										if (!Aircandi.updateRequired) {
+										if (!Aircandi.applicationUpdateRequired) {
 											if (mScanOptions.fullBuild) {
 												ProxiExplorer.getInstance().getEntityModel().getBeacons().clear();
 											}
@@ -680,7 +679,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 										updateComplete();
 
 										if (mScanOptions.fullBuild) {
-											mFullUpdateComplete = true;
+											Aircandi.fullUpdateComplete = true;
 										}
 									}
 								}
@@ -700,7 +699,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				@Override
 				protected Object doInBackground(Object... params) {
 
-					if (!Aircandi.updateRequired) {
+					if (!Aircandi.applicationUpdateRequired) {
 						ProxiExplorer.getInstance().scanForWifi(null);
 					}
 					return null;
@@ -804,7 +803,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		NetworkManager.getInstance().reset();
 
-		if (!mFullUpdateComplete) {
+		if (!Aircandi.fullUpdateComplete) {
 			doResume();
 		}
 		else {
@@ -1338,8 +1337,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	public void doResume() {
 
 		/* Quick check for a new version. */
-		final Boolean doUpdateCheck = (Aircandi.lastUpdateCheckDate == null
-				|| (DateUtils.nowDate().getTime() - Aircandi.lastUpdateCheckDate.longValue()) > CandiConstants.INTERVAL_UPDATE_CHECK);
+		final Boolean doUpdateCheck = (Aircandi.lastApplicationUpdateCheckDate == null
+				|| (DateUtils.nowDate().getTime() - Aircandi.lastApplicationUpdateCheckDate.longValue()) > CandiConstants.INTERVAL_UPDATE_CHECK);
 
 		new AsyncTask() {
 
@@ -1358,7 +1357,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				if (doUpdateCheck) {
 					serviceResponse = checkForUpdate();
 					if (serviceResponse.responseCode == ResponseCode.Success) {
-						if (Aircandi.updateNeeded) {
+						if (Aircandi.applicationUpdateNeeded) {
 
 							runOnUiThread(new Runnable() {
 
@@ -1366,7 +1365,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 								public void run() {
 									mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.icon_app
 											, getString(R.string.alert_upgrade_title)
-											, getString(Aircandi.updateRequired ? R.string.alert_upgrade_required_body : R.string.alert_upgrade_needed_body)
+											, getString(Aircandi.applicationUpdateRequired ? R.string.alert_upgrade_required_body
+													: R.string.alert_upgrade_needed_body)
 											, CandiRadar.this
 											, R.string.alert_upgrade_ok
 											, R.string.alert_upgrade_cancel
@@ -1376,7 +1376,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 													if (which == Dialog.BUTTON_POSITIVE) {
 														Logger.d(CandiRadar.this, "Update check: navigating to install page");
 														Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-														intent.setData(Uri.parse(Aircandi.updateUri));
+														intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
 														startActivity(intent);
 														AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
 													}
@@ -1385,7 +1385,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 														 * We don't continue running if user doesn't install a required
 														 * update
 														 */
-														if (Aircandi.updateRequired) {
+														if (Aircandi.applicationUpdateRequired) {
 															Logger.d(CandiRadar.this, "Update check: user declined");
 															finish();
 														}
@@ -1400,7 +1400,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 												@Override
 												public void onCancel(DialogInterface dialog) {
-													if (Aircandi.updateRequired) {
+													if (Aircandi.applicationUpdateRequired) {
 														Logger.d(CandiRadar.this, "Update check: user canceled");
 														finish();
 													}
@@ -1430,15 +1430,15 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.CheckUpdate);
 				}
 				else {
-					if (doUpdateCheck) {
-						if (!Aircandi.updateNeeded) {
-							finishResume(true);
-							scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
-							return;
-						}
-					}
+					//					if (doUpdateCheck) {
+					//						if (!Aircandi.applicationUpdateNeeded) {
+					//							finishResume(true);
+					//							scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
+					//							return;
+					//						}
+					//					}
 
-					if (Aircandi.updateRequired) {
+					if (Aircandi.applicationUpdateRequired) {
 						mCommon.showProgressDialog(false, null);
 						if (mUpdateAlertDialog == null || !mUpdateAlertDialog.isShowing()) {
 							mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.icon_app
@@ -1453,7 +1453,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 											if (which == Dialog.BUTTON_POSITIVE) {
 												Logger.d(CandiRadar.this, "Update check: navigating to install page");
 												Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-												intent.setData(Uri.parse(Aircandi.updateUri));
+												intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
 												startActivity(intent);
 												AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
 											}
@@ -1469,7 +1469,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 										@Override
 										public void onCancel(DialogInterface dialog) {
 											Logger.d(CandiRadar.this, "Update check: user canceled");
-											if (Aircandi.updateRequired) {
+											if (Aircandi.applicationUpdateRequired) {
 												finish();
 											}
 										}
@@ -1484,7 +1484,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						 * be
 						 * in restart but it wasn't getting called reliably when returning from another activity.
 						 */
-						if (mPaused && mFullUpdateComplete) {
+						if (Aircandi.fullUpdateComplete && mPaused) {
 							Logger.d(this, "CandiRadarActivity resuming after pause");
 
 							/*
@@ -1504,7 +1504,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 							else if (prefResponse == PrefResponse.Restart) {
 								/* Example: changing the theme requires recreating the activity */
 								Logger.v(this, "Restarting from onResumeGame because of theme change");
-								Aircandi.runFullScan = true;
+								Aircandi.runFullScanOnRadarRestart = true;
 								mCommon.reload();
 							}
 							else {
@@ -1765,7 +1765,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	private ServiceResponse checkForUpdate() {
 
-		Aircandi.updateNeeded = false;
+		Aircandi.applicationUpdateNeeded = false;
 		Query query = new Query("documents").filter("{\"type\":\"version\",\"target\":\"aircandi\"}");
 
 		ServiceRequest serviceRequest = new ServiceRequest();
@@ -1785,14 +1785,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 			if (!currentVersionName.equals(versionInfo.versionName)) {
 				Logger.i(CandiRadar.this, "Update check: update needed");
-				Aircandi.updateNeeded = true;
-				Aircandi.updateUri = versionInfo.updateUri != null ? versionInfo.updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
+				Aircandi.applicationUpdateNeeded = true;
+				Aircandi.applicationUpdateUri = versionInfo.updateUri != null ? versionInfo.updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
 				if (versionInfo.updateRequired) {
-					Aircandi.updateRequired = true;
+					Aircandi.applicationUpdateRequired = true;
 					Logger.i(CandiRadar.this, "Update check: update required");
 				}
 			}
-			Aircandi.lastUpdateCheckDate = DateUtils.nowDate().getTime();
+			Aircandi.lastApplicationUpdateCheckDate = DateUtils.nowDate().getTime();
 		}
 		return serviceResponse;
 	}
