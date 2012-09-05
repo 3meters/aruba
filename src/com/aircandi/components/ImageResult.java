@@ -1,52 +1,37 @@
-/*
- * Copyright 2010 Nabeel Mukhtar
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.aircandi.components;
 
 /**
  * The Class ImageResult.
+ * Used for bing image searches.
  */
 public class ImageResult
 {
 	/** The title. */
-	protected String			title;
+	protected String	title;
 
 	/** The media url. */
-	protected String			mediaUrl;
+	protected String	mediaUrl;
 
 	/** The url. */
-	protected String			url;
+	protected String	url;
 
 	/** The display url. */
-	protected String			displayUrl;
+	protected String	displayUrl;
 
 	/** The width. */
-	protected Long				width;
+	protected Long		width;
 
 	/** The height. */
-	protected Long				height;
+	protected Long		height;
 
 	/** The file size. */
-	protected Long				fileSize;
+	protected Long		fileSize;
 
 	/** The content type. */
-	protected String			contentType;
+	protected String	contentType;
 
 	/** The thumbnail. */
-	protected Thumbnail			thumbnail;
+	protected Thumbnail	thumbnail;
 
 	/**
 	 * Gets the title.

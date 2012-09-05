@@ -109,16 +109,17 @@
     <string name="error_service_general">Unspecified service error</string>
     
     <string name="error_signin_invalid_signin">Wrong email and password combination.</string>
+    <string name="error_change_password_unauthorized">Old password is invalid.</string>
     <string name="error_invalid_email">Email address is invalid.</string>
     <string name="error_session_expired_title">Session expired</string>
     <string name="error_session_expired">Your login session expired. Please re-sign in.</string>
+    <string name="error_session_invalid">Your login session is invalid. Please re-sign in.</string>
     <string name="error_weburi_invalid">Web address isn\'t in a valid format.</string>
     <string name="error_weburi_unreachable">Web site isn\'t available or can\'t be reached.</string>
     <string name="error_signup_missmatched_passwords_title">Password</string>
     <string name="error_signup_missmatched_passwords_message">Passwords do not match</string>
     <string name="error_signup_email_taken">Email address is already being used.</string>
     <string name="error_signup_password_weak">Password is too weak. Passwords must be at least 6 characters long, not be part of your user name, and not be certain commmon words.</string>
-    <string name="error_change_password_unauthorized">Old password is invalid.</string>
 
     <!-- Toast -->
 
@@ -205,6 +206,16 @@
 
 		<p><b>Share:</b> Be the first to create and share some candi here.</p>
 		<p><b>Discover:</b> Use the refresh command when you want to scan for new candi.</p>
+		<p><b>Map:</b> Locate candi drops in other areas.</p>
+]]>
+    </string>
+    
+    <string name="help_radar_empty_no_beacons">
+<![CDATA[
+        <h2>No Wi-fi Hotspots Nearby</h2>
+		<p>The Aircandi radar doesn\'t detect any wi-fi hotspots nearby. You can still use these features:</p> 
+
+		<p><b>My Candi:</b> Browse and edit candi you created.</p>
 		<p><b>Map:</b> Locate candi drops in other areas.</p>
 ]]>
     </string>

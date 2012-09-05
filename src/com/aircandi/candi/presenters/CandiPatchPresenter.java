@@ -447,7 +447,6 @@ public class CandiPatchPresenter implements Observer {
 			mCandiPatchModel.reset(); /* Clears zone and candi model collections */
 			initialize(); /* Reloads shared textures */
 		}
-
 		else {
 			Logger.d(this, "Starting standard update.");
 

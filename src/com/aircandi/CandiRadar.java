@@ -2,6 +2,7 @@ package com.aircandi;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -26,6 +27,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.net.NetworkInfo.State;
 import android.net.Uri;
@@ -89,6 +91,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ScanOptions;
+import com.aircandi.components.ProxiExplorer.WifiScanResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.VersionInfo;
 import com.aircandi.core.CandiConstants;
@@ -263,6 +266,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	private Runnable					mScanRunnableWait;
 	private ScanOptions					mScanOptions;
 	private BeaconScanWatcher			mScanWatcher;
+	public EventHandler					mEventScanReceived;
 	private AlertDialog					mUpdateAlertDialog;
 
 	@Override
@@ -307,8 +311,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		/* Restore empty message since this could be a restart because of a theme change */
 		if (Aircandi.lastScanEmpty) {
-			String helpHtml = getString(R.string.help_radar_empty);
-			((TextView) findViewById(R.id.text_message)).setText(Html.fromHtml(helpHtml));
+			String helpHtml = getString(Aircandi.wifiCount > 0 ? R.string.help_radar_empty : R.string.help_radar_empty_no_beacons);
+			((TextView) findViewById(R.id.text_empty_message)).setText(Html.fromHtml(helpHtml));
 			((View) findViewById(R.id.empty_dialog)).setVisibility(View.VISIBLE);
 		}
 
@@ -396,6 +400,16 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Criteria criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
 		GeoLocationManager.getInstance().getSingleLocationUpdate(null, criteria);
+
+		/* Beacon indicator */
+		mEventScanReceived = new EventHandler() {
+
+			@Override
+			public void onEvent(Object data) {
+				List<WifiScanResult> scanList = (List<WifiScanResult>) data;
+				updateRadarHelp(scanList);
+			}
+		};
 
 		/* Used by other activities to determine if they were auto launched after a crash */
 		Aircandi.getInstance().setLaunchedFromRadar(true);
@@ -644,13 +658,13 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 										EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
 										mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false);
+									}
 
-										updateComplete();
+									updateComplete();
 
-										if (mScanOptions.fullBuild) {
-											Logger.d(CandiRadar.this, "Full entity update complete");
-											Aircandi.fullUpdateComplete = true;
-										}
+									if (mScanOptions.fullBuild) {
+										Logger.d(CandiRadar.this, "Full entity update complete");
+										Aircandi.fullUpdateComplete = true;
 									}
 								}
 								else {
@@ -707,16 +721,23 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 */
 
 		/* Show something to the user that there aren't any candi nearby. */
-		if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0) {
-			Aircandi.lastScanEmpty = false;
-			((View) findViewById(R.id.empty_dialog)).setVisibility(View.GONE);
-		}
-		else {
-			Aircandi.lastScanEmpty = true;
-			String helpHtml = getString(R.string.help_radar_empty);
-			((TextView) findViewById(R.id.text_message)).setText(Html.fromHtml(helpHtml));
-			((View) findViewById(R.id.empty_dialog)).setVisibility(View.VISIBLE);
-		}
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				mCommon.showProgressDialog(false, null);
+				if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0) {
+					Aircandi.lastScanEmpty = false;
+					((View) findViewById(R.id.empty_dialog)).setVisibility(View.GONE);
+				}
+				else {
+					Aircandi.lastScanEmpty = true;
+					String helpHtml = getString(Aircandi.wifiCount > 0 ? R.string.help_radar_empty : R.string.help_radar_empty_no_beacons);
+					((TextView) findViewById(R.id.text_empty_message)).setText(Html.fromHtml(helpHtml));
+					((View) findViewById(R.id.empty_dialog)).setVisibility(View.VISIBLE);
+				}
+			}
+		});
 
 		/* Show aircandi tips if this is the first time the application has been run */
 		if (Aircandi.firstRunApp) {
@@ -741,8 +762,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			updateDebugInfo();
 		}
 
-		mCommon.showProgressDialog(false, null);
-
 		/*
 		 * Schedule the next wifi scan run if autoscan is enabled | The autoscan will pick
 		 * up new beacons and changes in visibility of the entities associated with beacons
@@ -755,6 +774,41 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			/* Make sure something isn't already scheduled */
 			mHandler.removeCallbacks(mScanRunnable);
 			mHandler.postDelayed(mScanRunnable, Integer.parseInt(mPrefAutoscanInterval));
+		}
+	}
+
+	public void updateRadarHelp(final List<WifiScanResult> scanList) {
+
+		/*
+		 * If we are showing help then adjust it depending
+		 * on whether there are beacons nearby.
+		 */
+		if (Aircandi.lastScanEmpty) {
+			synchronized (scanList) {
+				/*
+				 * In case we get called from a background thread.
+				 */
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+
+						int wifiCount = 0;
+						for (WifiScanResult wifi : scanList) {
+							if (wifi.global || wifi.demo) {
+								continue;
+							}
+							else {
+								wifiCount++;
+							}
+						}
+						String helpHtml = getString(wifiCount > 0 ? R.string.help_radar_empty : R.string.help_radar_empty_no_beacons);
+						((TextView) findViewById(R.id.text_empty_message)).setText(Html.fromHtml(helpHtml));
+						((View) findViewById(R.id.empty_dialog)).setVisibility(View.VISIBLE);
+						((View) findViewById(R.id.empty_dialog)).invalidate();
+					}
+				});
+			}
 		}
 	}
 
@@ -1360,8 +1414,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 															finish();
 														}
 														else {
-//															finishResume(true);
-//															scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
+															//															finishResume(true);
+															//															scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
 														}
 													}
 												}
@@ -1371,12 +1425,12 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 												@Override
 												public void onCancel(DialogInterface dialog) {
 													if (Aircandi.applicationUpdateRequired) {
-														Logger.d(CandiRadar.this, "Update check: user canceled");
+														Logger.d(CandiRadar.this, "Update check: user cancelled");
 														finish();
 													}
 													else {
-														finishResume(true);
-														scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
+														//														finishResume(true);
+														//														scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
 													}
 												}
 											});
@@ -1450,9 +1504,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					}
 					else {
 						/*
-						 * Logic that should only run if the activity is resuming after having been paused. This used to
-						 * be
-						 * in restart but it wasn't getting called reliably when returning from another activity.
+						 * Logic that should only run if the activity is resuming after having been paused.
+						 * This used to be in restart but it wasn't getting called reliably when returning from another
+						 * activity.
 						 */
 						if (Aircandi.fullUpdateComplete) {
 							Logger.d(this, "CandiRadarActivity resuming after pause");
@@ -1495,9 +1549,10 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 									invalidateOptionsMenu();
 									scanForBeacons(new ScanOptions(false, true, R.string.progress_updating));
 								}
-								else if (ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
+								else if (ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate() != null
+										&& (ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
 										|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate
-												.longValue()) {
+												.longValue())) {
 									Logger.d(this, "CandiRadarActivity detected entity model change");
 									mCommon.showProgressDialog(false, null);
 									invalidateOptionsMenu();
@@ -1530,6 +1585,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		NetworkManager.getInstance().onResume();
 		GeoLocationManager.getInstance().onResume();
 		mCommon.doResume();
+		synchronized (Events.EventBus.wifiScanReceived) {
+			Events.EventBus.wifiScanReceived.add(mEventScanReceived);
+		}
 		mCommon.startScanService();
 		Aircandi.returningFromDialog = false;
 
@@ -1591,6 +1649,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * work in it's onPause handler.
 		 */
 		Logger.d(this, "CandiRadarActivity paused");
+		synchronized (Events.EventBus.wifiScanReceived) {
+			Events.EventBus.wifiScanReceived.remove(mEventScanReceived);
+		}
 		mCommon.stopScanService();
 		super.onPause();
 		try {

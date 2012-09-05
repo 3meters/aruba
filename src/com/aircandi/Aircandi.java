@@ -88,6 +88,7 @@ public class Aircandi extends Application {
 	public static Boolean					runFullScanOnRadarRestart	= true;
 	public static Boolean					lastScanEmpty				= false;
 	public static Boolean					returningFromDialog			= false;
+	public static Integer					wifiCount					= 0;
 
 	public static Boolean					applicationUpdateNeeded		= false;
 	public static Boolean					applicationUpdateRequired	= false;

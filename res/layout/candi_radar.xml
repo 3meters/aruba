@@ -74,7 +74,7 @@
             android:visibility="gone" >
 
             <TextView
-                android:id="@+id/text_message"
+                android:id="@+id/text_empty_message"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="15dp"

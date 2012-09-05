@@ -197,14 +197,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mBeaconIndicator = (TextView) mActivity.findViewById(R.id.beacon_indicator);
 		if (mBeaconIndicator != null) {
 			updateBeaconIndicator(ProxiExplorer.getInstance().mWifiList);
-			mEventScanReceived = new EventHandler() {
-
-				@Override
-				public void onEvent(Object data) {
-					List<WifiScanResult> scanList = (List<WifiScanResult>) data;
-					updateBeaconIndicator(scanList);
-				}
-			};
+//			mEventScanReceived = new EventHandler() {
+//
+//				@Override
+//				public void onEvent(Object data) {
+//					List<WifiScanResult> scanList = (List<WifiScanResult>) data;
+//					updateBeaconIndicator(scanList);
+//				}
+//			};
 		}
 
 		mEventLocationChanged = new EventHandler() {
@@ -291,8 +291,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			int messageId = R.string.alert_beacons_zero;
 			String beaconMessage = mActivity.getString(messageId);
 			synchronized (ProxiExplorer.getInstance().mWifiList) {
-				int beaconCount = ProxiExplorer.getInstance().mWifiList.size();
-				if (beaconCount > 0) {
+				if (Aircandi.wifiCount > 0) {
 					messageId = R.string.alert_beacons_available;
 					if (Aircandi.getInstance().getUser() != null
 							&& Aircandi.getInstance().getUser().isDeveloper != null
@@ -390,8 +389,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 						}
 					}
 
+					Aircandi.wifiCount = wifiCount;
+
+					mBeaconIndicator.setText(String.valueOf(wifiCount));
 					if (wifiCount > 0) {
-						mBeaconIndicator.setText(String.valueOf(wifiCount));
 						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
 					}
 					if (wifiStrongest != null && wifiStrongest.level > -80) {
@@ -499,9 +500,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 				message = mActivity.getString(R.string.error_session_expired);
 			}
 			else if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
-				message = mActivity.getString(R.string.error_signin_invalid_signin);
+				message = mActivity.getString(R.string.error_session_invalid);
 				if (serviceOperation == ServiceOperation.PasswordChange) {
 					message = mActivity.getString(R.string.error_change_password_unauthorized);
+				}
+				else if (serviceOperation == ServiceOperation.Signin) {
+					message = mActivity.getString(R.string.error_signin_invalid_signin);
 				}
 			}
 			else if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
@@ -1399,7 +1403,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 		PictureSearch,
 		MapBrowse,
 		LinkLookup,
-		Unknown, PickBookmark, PickCandi, CheckUpdate
+		Unknown, 
+		PickBookmark, 
+		PickCandi, 
+		CheckUpdate
 	}
 
 	public static enum ActionButtonSet {
