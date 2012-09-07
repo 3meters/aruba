@@ -312,7 +312,7 @@ public class ProxibaseService {
 					ServiceData serviceData = ProxibaseService.convertJsonToObject(responseContent, ServiceData.class, GsonType.ProxibaseService);
 					Float httpStatusCode = (float) httpResponse.getStatusLine().getStatusCode();
 
-					if (serviceData != null && serviceData.error != null) {
+					if (serviceData != null && serviceData.error != null && serviceData.error.code != null) {
 						httpStatusCode = serviceData.error.code.floatValue();
 					}
 					Logger.d(this, responseContent);

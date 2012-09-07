@@ -152,13 +152,14 @@ public class MapBrowse extends SherlockMapActivity {
 	public void showCandi() {
 		mMapOverlays = mMapView.getOverlays();
 		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi_ii);
-		mItemizedOverlay = new CandiItemizedOverlay(drawable, mMapView, true);
 
 		GeoLocation entityLocation = mEntity.location != null ? mEntity.location : mCommon.mEntityLocation;
 		GeoPoint geoPoint = new GeoPoint((int) (entityLocation.latitude.doubleValue() * 1E6), (int) (entityLocation.longitude.doubleValue() * 1E6));
 
 		OverlayItem overlayItem = new OverlayItem(geoPoint, mEntity.title, mEntity.description);
 		overlayItem.setMarker(drawable);
+		
+		mItemizedOverlay = new CandiItemizedOverlay(null, null, drawable, mMapView);
 		mItemizedOverlay.addOverlay(overlayItem);
 		zoomToGeoPoint(geoPoint);
 		mMapOverlays.add(mItemizedOverlay);

@@ -859,6 +859,8 @@ public class EntityForm extends FormActivity {
 	private void showBookmarkActivity() {
 
 		Intent intent = new Intent(this, BookmarkPicker.class);
+		intent.putExtra(getString(R.string.EXTRA_VERIFY_URI), false);
+		
 		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 

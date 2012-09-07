@@ -21,9 +21,8 @@ public interface CandiConstants {
 	public static final boolean			TRACKING_ENABLED						= true;
 
 	public static final String			APP_NAME								= "Aircandi";
-	public static final String			APP_PACKAGE_NAME						= "com.aircandi.";
-	public static final String			GOOGLE_API_KEY_RELEASE					= "0NLNz2BjIntPUuNQrqaiA6J8TTFflv_PHQ2cTdQ";
-	public static final String			GOOGLE_API_KEY_DEBUG					= "0NLNz2BjIntNt_gkO2_iEs5wIIxNGrG_pmHjPbA";
+	public static final String			GOOGLE_API_KEY_RELEASE					= "059_3gpXU_DPYyT-FzFkprl7kk2TvDhm_6mKWLQ";
+	public static final String			GOOGLE_API_KEY_DEBUG					= "059_3gpXU_DM8qW_gRO68TJul5KWUSUzIE3gQlw";
 
 	public static final int				TEN_SECONDS								= 1000 * 10;
 	public static final int				TWENTY_SECONDS							= 1000 * 20;

@@ -1,5 +1,6 @@
 package com.aircandi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.SuppressLint;
@@ -57,11 +58,11 @@ public class CandiMap extends SherlockMapActivity {
 	private MapController			mMapController	= null;
 	private MyLocationOverlay		mMyLocationOverlay;
 	private List<Overlay>			mMapOverlays;
-	private CandiItemizedOverlay	mItemizedOverlay;
+	private CandiItemizedOverlay	mBeaconOverlay;
 	private LocationManager			mLocationManager;
 	private LocationListener		mLocationListener;
 	private static double			RADIUS_EARTH	= 6378000;	// meters
-	private static double			SEARCH_RANGE	= 1000000;		// meters
+	private static double			SEARCH_RANGE	= 1000000;	// meters
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -110,13 +111,15 @@ public class CandiMap extends SherlockMapActivity {
 			}
 		});
 
-		mMapView.getOverlays().clear();
+		//mMapView.getOverlays().clear();
 		mMapView.getOverlays().add(mMyLocationOverlay);
+		
+		/* Add map to layout */
 		ViewGroup mapHolder = (ViewGroup) findViewById(R.id.map_holder);
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		mapHolder.addView(mMapView, params);
+		
 		mMapView.postInvalidate();
-
 	}
 
 	private void initializeLocation() {
@@ -302,7 +305,7 @@ public class CandiMap extends SherlockMapActivity {
 	public void showCandi() {
 		mMapOverlays = mMapView.getOverlays();
 		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi);
-		mItemizedOverlay = new CandiItemizedOverlay(drawable, mMapView, false);
+		mBeaconOverlay = new CandiItemizedOverlay(null, null, drawable, mMapView);
 
 		for (Object entityPointObject : ProxiExplorer.getInstance().getEntityModel().getMapEntities()) {
 			Entity entityPoint = (Entity) entityPointObject;
@@ -328,18 +331,17 @@ public class CandiMap extends SherlockMapActivity {
 						(int) (entityPoint.location.longitude.doubleValue() * 1E6));
 				OverlayItem overlayitem = new OverlayItem(point, entityPoint.label, entityPoint.label);
 				overlayitem.setMarker(drawable);
-				mItemizedOverlay.addOverlay(overlayitem);
+				mBeaconOverlay.addOverlay(overlayitem);
 			}
 		}
-		mMapOverlays.add(mItemizedOverlay);
+		mMapOverlays.add(mBeaconOverlay);
 		mMapView.invalidate();
 	}
 
 	public void showBeacons() {
 
 		mMapOverlays = mMapView.getOverlays();
-		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi_ii);
-		mItemizedOverlay = new CandiItemizedOverlay(drawable, mMapView, true);
+		Drawable marker = getResources().getDrawable(R.drawable.icon_map_candi_ii);
 		/*
 		 * First check to see if radar is seeing a beacon that didn't come back
 		 * in the service call.
@@ -359,6 +361,9 @@ public class CandiMap extends SherlockMapActivity {
 				}
 			}
 		}
+
+		List<MapBeacon> mapBeacons = new ArrayList<MapBeacon>();
+		List<GeoPoint> geoPoints = new ArrayList<GeoPoint>();
 
 		for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getMapBeacons()) {
 			if (beaconByLocation.entityCount.intValue() > 0
@@ -381,16 +386,27 @@ public class CandiMap extends SherlockMapActivity {
 						beaconByLocation.longitude = currentLocation.getLongitude();
 					}
 				}
-				GeoPoint point = new GeoPoint((int) (beaconByLocation.latitude.doubleValue() * 1E6),
-						(int) (beaconByLocation.longitude.doubleValue() * 1E6));
-				String title = String.valueOf(beaconByLocation.entityCount);
-				String message = beaconByLocation.id;
-				OverlayItem overlayItem = new OverlayItem(point, title, message);
-				overlayItem.setMarker(drawable);
-				mItemizedOverlay.addOverlay(overlayItem);
+				MapBeacon mapBeacon = new MapBeacon();
+				mapBeacon.point = new GeoPoint((int) (beaconByLocation.latitude.doubleValue() * 1E6)
+						, (int) (beaconByLocation.longitude.doubleValue() * 1E6));
+				mapBeacon.title = beaconByLocation.label;
+				mapBeacon.message = beaconByLocation.id;
+				mapBeacons.add(mapBeacon);
+				geoPoints.add(mapBeacon.point);
 			}
 		}
-		mMapOverlays.add(mItemizedOverlay);
+		
+		/*
+		 * Create overlays
+		 */
+		mBeaconOverlay = new CandiItemizedOverlay(mapBeacons, geoPoints, marker, mMapView);
+		for (MapBeacon mapBeacon: mapBeacons) {
+			OverlayItem overlayItem = new OverlayItem(mapBeacon.point, mapBeacon.title, mapBeacon.message);
+			overlayItem.setMarker(marker);
+			mBeaconOverlay.addOverlay(overlayItem);
+		}
+		
+		mMapOverlays.add(mBeaconOverlay);
 		mMapView.invalidate();
 	}
 
@@ -444,6 +460,7 @@ public class CandiMap extends SherlockMapActivity {
 			mMyLocationOverlay.disableMyLocation();
 		}
 	}
+
 	@Override
 	protected void onStop() {
 		super.onStop();
@@ -474,4 +491,13 @@ public class CandiMap extends SherlockMapActivity {
 		return false;
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Inner classes
+	// --------------------------------------------------------------------------------------------
+
+	public class MapBeacon {
+		public GeoPoint	point;
+		public String	title;
+		public String	message;
+	}
 }

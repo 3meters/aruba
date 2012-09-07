@@ -26,6 +26,7 @@
     <string name="EXTRA_COLLECTION_ID">com.aircandi.EXTRA_COLLECTION_ID</string>
     <string name="EXTRA_THEME_ID">com.aircandi.EXTRA_THEME_ID</string>
     <string name="EXTRA_STRING_ID">com.aircandi.EXTRA_STRING_ID</string>
+    <string name="EXTRA_VERIFY_URI">com.aircandi.EXTRA_VERIFY_URI</string>
     <string name="EXTRA_COMMAND_TYPE">com.aircandi.EXTRA_COMMAND_TYPE</string>
     <string name="EXTRA_NAVIGATION_TOP">com.aircandi.EXTRA_NAVIGATION_TOP</string>
 
@@ -85,7 +86,9 @@
 	    be bound by these Terms.	</string>
     <string name="alert_signup_new_user_title">New user created</string>
     <string name="alert_signup_new_user_message">A message has been sent to your email address with instructions on how to activate your account.</string>
-
+    <string name="alert_candimap_ok">View</string>
+    <string name="alert_candimap_cancel">Cancel</string>
+    
     <!-- Errors -->
     
     <string name="error_weburi_invalid">Web address isn\'t in a valid format.</string>
@@ -234,7 +237,8 @@
     <string name="candi_map_label_pictures">Pictures:</string>
     <string name="candi_map_label_posts">Posts:</string>
     <string name="candi_map_label_links">Links:</string>
-
+    <string name="candi_map_label_grouped">Multiple</string>
+    
     <!-- Misc -->
 
     <string name="theme_default">aircandi_theme_canyon</string>
