@@ -151,7 +151,7 @@ public class MapBrowse extends SherlockMapActivity {
 
 	public void showCandi() {
 		mMapOverlays = mMapView.getOverlays();
-		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi_ii);
+		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi_iii);
 
 		GeoLocation entityLocation = mEntity.location != null ? mEntity.location : mCommon.mEntityLocation;
 		GeoPoint geoPoint = new GeoPoint((int) (entityLocation.latitude.doubleValue() * 1E6), (int) (entityLocation.longitude.doubleValue() * 1E6));

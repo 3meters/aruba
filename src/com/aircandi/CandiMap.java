@@ -1,6 +1,7 @@
 package com.aircandi;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.annotation.SuppressLint;
@@ -25,6 +26,7 @@ import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.CandiItemizedOverlay;
+import com.aircandi.components.CandiMapView;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
@@ -54,7 +56,7 @@ import com.aircandi.R;
 public class CandiMap extends SherlockMapActivity {
 
 	protected AircandiCommon		mCommon;
-	private MapView					mMapView		= null;
+	private CandiMapView			mMapView		= null;
 	private MapController			mMapController	= null;
 	private MyLocationOverlay		mMyLocationOverlay;
 	private List<Overlay>			mMapOverlays;
@@ -94,7 +96,7 @@ public class CandiMap extends SherlockMapActivity {
 	@SuppressWarnings("deprecation")
 	private void initialize() {
 
-		mMapView = new MapView(this, BuildConfig.DEBUG ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
+		mMapView = new CandiMapView(this, BuildConfig.DEBUG ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
 		mMapView.setBuiltInZoomControls(true);
 		mMapView.setReticleDrawMode(MapView.ReticleDrawMode.DRAW_RETICLE_OVER);
 		mMapView.setSatellite(false);
@@ -111,14 +113,13 @@ public class CandiMap extends SherlockMapActivity {
 			}
 		});
 
-		//mMapView.getOverlays().clear();
 		mMapView.getOverlays().add(mMyLocationOverlay);
-		
+
 		/* Add map to layout */
 		ViewGroup mapHolder = (ViewGroup) findViewById(R.id.map_holder);
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		mapHolder.addView(mMapView, params);
-		
+
 		mMapView.postInvalidate();
 	}
 
@@ -341,7 +342,7 @@ public class CandiMap extends SherlockMapActivity {
 	public void showBeacons() {
 
 		mMapOverlays = mMapView.getOverlays();
-		Drawable marker = getResources().getDrawable(R.drawable.icon_map_candi_ii);
+		Drawable marker = getResources().getDrawable(R.drawable.icon_map_candi_iii);
 		/*
 		 * First check to see if radar is seeing a beacon that didn't come back
 		 * in the service call.
@@ -395,18 +396,20 @@ public class CandiMap extends SherlockMapActivity {
 				geoPoints.add(mapBeacon.point);
 			}
 		}
-		
+
 		/*
 		 * Create overlays
 		 */
 		mBeaconOverlay = new CandiItemizedOverlay(mapBeacons, geoPoints, marker, mMapView);
-		for (MapBeacon mapBeacon: mapBeacons) {
+		Collections.sort(mapBeacons, new CandiItemizedOverlay.SortMapBeaconsByLatitude());
+		for (MapBeacon mapBeacon : mapBeacons) {
 			OverlayItem overlayItem = new OverlayItem(mapBeacon.point, mapBeacon.title, mapBeacon.message);
 			overlayItem.setMarker(marker);
 			mBeaconOverlay.addOverlay(overlayItem);
 		}
-		
+
 		mMapOverlays.add(mBeaconOverlay);
+		
 		mMapView.invalidate();
 	}
 

@@ -1,6 +1,8 @@
 package com.aircandi;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -21,13 +23,13 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.R;
 
-public class UserCandiForm extends CandiFormBase {
-
+public class MapCandiForm extends CandiFormBase {
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!isFinishing()) {
-			bind(true);
+			bind(false);
 		}
 	}
 
@@ -41,7 +43,7 @@ public class UserCandiForm extends CandiFormBase {
 			/*
 			 * Entity is coming from entity model.
 			 */
-			mEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mParentId, EntityTree.User);
+			mEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mParentId, EntityTree.Map);
 			mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 			mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 			mEntityModelUser = Aircandi.getInstance().getUser();
@@ -54,7 +56,9 @@ public class UserCandiForm extends CandiFormBase {
 			}
 			else {
 				/* Get the view pager configured */
-				updateViewPager(null);
+				List<Entity> entities = new ArrayList<Entity>();
+				entities.add(mEntity);
+				updateViewPager(entities);
 			}
 		}
 		else {
@@ -82,6 +86,9 @@ public class UserCandiForm extends CandiFormBase {
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
+						mCommon.mActionBar.setTitle(mEntity.title);
+						List<Entity> entities = new ArrayList<Entity>();
+						entities.add(mEntity);
 
 						/* Sort the children if there are any */
 						if (mEntity.children != null && mEntity.children.size() > 1) {
@@ -89,7 +96,7 @@ public class UserCandiForm extends CandiFormBase {
 						}
 
 						/* Get the view pager configured */
-						updateViewPager(null);
+						updateViewPager(entities);
 
 						mCommon.showProgressDialog(false, null);
 					}
@@ -107,7 +114,7 @@ public class UserCandiForm extends CandiFormBase {
 	// --------------------------------------------------------------------------------------------
 
 	public void onChildrenButtonClick(View v) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, UserCandiList.class);
+		IntentBuilder intentBuilder = new IntentBuilder(this, MapCandiList.class);
 
 		intentBuilder.setCommandType(CommandType.View);
 		intentBuilder.setEntityId(mEntity.id);

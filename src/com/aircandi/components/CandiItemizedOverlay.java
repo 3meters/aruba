@@ -1,8 +1,10 @@
 package com.aircandi.components;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,13 +20,20 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.TextPaint;
 import android.text.TextUtils;
+import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import com.aircandi.Aircandi;
+import com.aircandi.CandiList;
+import com.aircandi.CandiMap;
 import com.aircandi.CandiRadar;
 import com.aircandi.CandiMap.MapBeacon;
+import com.aircandi.MapCandiList;
+import com.aircandi.candi.models.CandiModel;
 import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.Entity;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;
@@ -35,18 +44,23 @@ import com.aircandi.R;
 @SuppressWarnings("unused")
 public class CandiItemizedOverlay extends ItemizedOverlay {
 
-	private ArrayList<OverlayItem>			mOverlays	= new ArrayList<OverlayItem>();
-	private MapView							mMapView;
-	private List<MapBeacon>					mMapBeacons;
-	private List<GeoPoint>					mGeoPoints;
-	private List<List<List<OverlayItem>>>	mMapGrid;
-	private Context							mContext;
-	private Bitmap							mMarker;
-	private Bitmap							mMarkerGrouped;
-	private Integer							mZoomLevel;
+	private ArrayList<OverlayItem>	mOverlays			= new ArrayList<OverlayItem>();
+	private MapView					mMapView;
+	private List<MapBeacon>			mMapBeacons;
+	private List<GeoPoint>			mGeoPoints;
+	private List<List<OverlayItem>>	mOverlaysClustered	= new ArrayList<List<OverlayItem>>();
+	private Context					mContext;
+	private Bitmap					mMarker;
+	private Bitmap					mMarkerGrouped;
+	private Integer					mZoomLevel;
+	private String					mBeaconId;
 
-	private static int						DENSITY_X	= 20;
-	private static int						DENSITY_Y	= 20;
+	private static int				PIXEL_CLUSTER		= 25;
+	//	private static int				DENSITY_X			= 20;
+	//	private static int				DENSITY_Y			= 20;
+	//	private static double			OFFSET				= 268435456;
+	//	private static double			RADIUS				= 85445659.4471;
+	private long					systemTime			= System.currentTimeMillis();
 
 	public CandiItemizedOverlay(List<MapBeacon> mapBeacons, List<GeoPoint> geoPoints, Drawable defaultMarker, MapView mapView) {
 		super(boundCenterBottom(defaultMarker));
@@ -55,18 +69,8 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		mContext = mMapView.getContext();
 		mMapBeacons = mapBeacons;
 
-		mMarker = ((BitmapDrawable) mapView.getResources().getDrawable(R.drawable.icon_map_candi_ii)).getBitmap();
-		mMarkerGrouped = ((BitmapDrawable) mapView.getResources().getDrawable(R.drawable.icon_map_candi)).getBitmap();
-
-		/* 2D array with some configurable, fixed density */
-		mMapGrid = new ArrayList<List<List<OverlayItem>>>(DENSITY_X);
-		for (int i = 0; i < DENSITY_X; i++) {
-			ArrayList<List<OverlayItem>> column = new ArrayList<List<OverlayItem>>(DENSITY_Y);
-			for (int j = 0; j < DENSITY_Y; j++) {
-				column.add(new ArrayList<OverlayItem>());
-			}
-			mMapGrid.add(column);
-		}
+		mMarker = ((BitmapDrawable) mapView.getResources().getDrawable(R.drawable.icon_map_candi_iii)).getBitmap();
+		mMarkerGrouped = ((BitmapDrawable) mapView.getResources().getDrawable(R.drawable.icon_map_candi_cluster)).getBitmap();
 
 		populate();
 	}
@@ -82,11 +86,17 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 	}
 
 	@Override
+	protected int getIndexToDraw(int arg0) {
+		return super.getIndexToDraw(arg0);
+	}
+
+	@Override
 	protected boolean onTap(int index) {
 		OverlayItem overlayItem = getItem(index);
-		List<OverlayItem> cell = getCell(overlayItem);
+		List<OverlayItem> cell = getCluster(overlayItem);
 
 		String title = "";
+		mBeaconId = null;
 		int collectionCount = 0;
 		int linkCount = 0;
 		int pictureCount = 0;
@@ -94,13 +104,14 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 
 		for (OverlayItem item : cell) {
 			title += item.getTitle() + ", ";
-			Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(overlayItem.getSnippet());
+			Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(item.getSnippet());
 			if (mapBeacon != null) {
 
 				collectionCount += mapBeacon.collectionCount;
 				linkCount += mapBeacon.linkCount;
 				pictureCount += mapBeacon.pictureCount;
 				postCount += mapBeacon.postCount;
+				mBeaconId = mapBeacon.id;
 			}
 		}
 		title = title.substring(0, title.length() - 2);
@@ -123,13 +134,26 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 				, title
 				, message
 				, mContext
-				, R.string.alert_candimap_ok
-				, R.string.alert_candimap_cancel
+				, cell.size() == 1 ? R.string.alert_candimap_ok : null
+				, cell.size() == 1 ? R.string.alert_candimap_cancel : null
 				, new DialogInterface.OnClickListener() {
 
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							Logger.d(mContext, "View map candi");
+							IntentBuilder intentBuilder = new IntentBuilder(mMapView.getContext(), MapCandiList.class);
+
+							/*
+							 * mCommon.mEntityId is the original entity the user navigated to but
+							 * they could have swiped using the viewpager to a different entity so
+							 * we need to use mEntity to get the right entity context.
+							 */
+							intentBuilder.setCommandType(CommandType.View);
+							intentBuilder.setBeaconId(mBeaconId);
+
+							Intent intent = intentBuilder.create();
+							mMapView.getContext().startActivity(intent);
+							AnimUtils.doOverridePendingTransition((Activity) mMapView.getContext(), TransitionType.CandiFormToCandiList);
 						}
 					}
 				}
@@ -138,6 +162,22 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		Tracker.trackEvent("DialogMapBeacon", "Open", null, 0);
 
 		return true;
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event, MapView mapView) {
+		//		switch (event.getAction()) {
+		//			case MotionEvent.ACTION_DOWN:
+		//				if ((System.currentTimeMillis() - systemTime) < ViewConfiguration.getDoubleTapTimeout()) {
+		//					mapView.getController().zoomInFixing((int) event.getX(), (int) event.getY());
+		//				}
+		//				break;
+		//			case MotionEvent.ACTION_UP:
+		//				systemTime = System.currentTimeMillis();
+		//				break;
+		//		}
+		//
+		return false;
 	}
 
 	public void addOverlay(OverlayItem overlay) {
@@ -159,13 +199,11 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		return currentMapBoundsRect.contains(currentDevicePosition.x, currentDevicePosition.y);
 	}
 
-	private List<OverlayItem> getCell(OverlayItem overlayItem) {
-		for (List<List<OverlayItem>> column : mMapGrid) {
-			for (List<OverlayItem> cell : column) {
-				for (OverlayItem item : cell) {
-					if (item.equals(overlayItem)) {
-						return cell;
-					}
+	private List<OverlayItem> getCluster(OverlayItem overlayItem) {
+		for (List<OverlayItem> cluster : mOverlaysClustered) {
+			for (OverlayItem item : cluster) {
+				if (item.equals(overlayItem)) {
+					return cluster;
 				}
 			}
 		}
@@ -195,7 +233,7 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 				markerBottomCenterCoords.y - item.getMarker(0).getIntrinsicHeight() - rect.height());
 
 		/* Paint the text background into the rect */
-		paintRect.setARGB(96, 0, 0, 0);
+		paintRect.setARGB(160, 0, 0, 0);
 		canvas.drawRoundRect(new RectF(rect), 4, 4, paintRect);
 
 		/* Paint the text */
@@ -206,8 +244,38 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		canvas.drawText(title, rect.left + rect.width() / 2, rect.bottom - CandiConstants.MAP_VIEW_TITLE_MARGIN, paintText);
 	}
 
-	private void drawMarker(Point point, Canvas canvas) {
-		canvas.drawBitmap(mMarker, point.x - (mMarker.getWidth() / 2), point.y - mMarker.getHeight(), null);
+	private void drawCount(OverlayItem item, int count, Canvas canvas) {
+
+		GeoPoint point = item.getPoint();
+		Point markerBottomCenterCoords = new Point();
+		mMapView.getProjection().toPixels(point, markerBottomCenterCoords);
+
+		TextPaint paintText = new TextPaint();
+		Paint paintRect = new Paint();
+		Rect rect = new Rect();
+
+		/* Create rect that is sized to contain the ellipsized text we want to display */
+		paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);
+		String itemCount = String.valueOf(count);
+		paintText.getTextBounds(itemCount, 0, itemCount.length(), rect);
+
+		/* Expand the rect by adding margins */
+		rect.inset(-CandiConstants.MAP_VIEW_TITLE_MARGIN, -CandiConstants.MAP_VIEW_TITLE_MARGIN);
+
+		/* Move the rect to where we want it to draw */
+		rect.offsetTo(markerBottomCenterCoords.x - rect.width() / 2
+				, markerBottomCenterCoords.y - (int) (item.getMarker(0).getIntrinsicHeight() * .80));
+
+		/* Paint the text */
+		paintText.setTextAlign(Paint.Align.CENTER);
+		paintText.setTextSize(CandiConstants.MAP_VIEW_FONT_SIZE);
+		paintText.setARGB(255, 255, 255, 255); // alpha, r, g, b (white)
+		paintText.setAntiAlias(true);
+		canvas.drawText(itemCount, rect.left + rect.width() / 2, rect.bottom - CandiConstants.MAP_VIEW_TITLE_MARGIN, paintText);
+	}
+
+	private void drawMarker(Point point, Canvas canvas, Bitmap marker) {
+		canvas.drawBitmap(marker, point.x - (marker.getWidth() / 2), point.y - marker.getHeight(), null);
 	}
 
 	@Override
@@ -216,67 +284,97 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		if (!shadow) {
 
 			if (mZoomLevel == null || mZoomLevel != mapView.getZoomLevel()) {
-				
-				/* We only re-bin if zoom level changes */
+
+				/* We only re-cluster if zoom level changes */
 
 				/* Clear because we might have a new projection */
-				for (List<List<OverlayItem>> column : mMapGrid) {
-					for (List<OverlayItem> cell : column) {
-						cell.clear();
-					}
-				}
+				mOverlaysClustered.clear();
 
 				/* Assign to bins */
+				boolean clusterHit = false;
 				for (OverlayItem item : mOverlays) {
-					int binX;
-					int binY;
-
-					if (isCurrentLocationVisible(item.getPoint())) {
-
-						Projection projection = mapView.getProjection();
-						Point point = projection.toPixels(item.getPoint(), null);
-
-						double fractionX = ((double) point.x / (double) mapView.getWidth());
-						binX = (int) (Math.floor(DENSITY_X * fractionX));
-						double fractionY = ((double) point.y / (double) mapView.getHeight());
-						binY = (int) (Math.floor(DENSITY_Y * fractionY));
-						mMapGrid.get(binX).get(binY).add(item);
+					for (List<OverlayItem> cluster : mOverlaysClustered) {
+						for (OverlayItem clusterItem : cluster) {
+							double distancePx = distanceInPixels(item.getPoint(), clusterItem.getPoint());
+							if (distancePx <= PIXEL_CLUSTER) {
+								cluster.add(item);
+								clusterHit = true;
+								break;
+							}
+						}
+						if (clusterHit) {
+							break;
+						}
 					}
+					if (!clusterHit) {
+						List<OverlayItem> cluster = new ArrayList<OverlayItem>();
+						cluster.add(item);
+						mOverlaysClustered.add(cluster);
+					}
+					clusterHit = false;
 				}
 			}
 
 			/* Draw */
 			mZoomLevel = mapView.getZoomLevel();
-			for (int i = 0; i < DENSITY_X; i++) {
-				for (int j = 0; j < DENSITY_Y; j++) {
-					List<OverlayItem> cell = mMapGrid.get(i).get(j);
-					if (cell.size() > 1) {
-						drawGroup(canvas, mapView, cell);
-					}
-					else if (cell.size() == 1) {
-						// draw single marker
-						drawSingle(canvas, mapView, cell);
-					}
+			for (List<OverlayItem> cluster : mOverlaysClustered) {
+				if (cluster.size() > 1) {
+					drawGroup(canvas, mapView, cluster);
+				}
+				else if (cluster.size() == 1) {
+					drawSingle(canvas, mapView, cluster);
 				}
 			}
 		}
 	}
 
-	private void drawGroup(Canvas canvas, MapView mapView, List<OverlayItem> cell) {
-		GeoPoint point = cell.get(0).getPoint();
+	private void drawGroup(Canvas canvas, MapView mapView, List<OverlayItem> cluster) {
+		GeoPoint point = cluster.get(0).getPoint();
 		Point ptScreenCoord = new Point();
 		mapView.getProjection().toPixels(point, ptScreenCoord);
-		drawMarker(ptScreenCoord, canvas);
-		drawTitle(cell.get(0), mapView.getResources().getString(R.string.candi_map_label_grouped) + " (" + String.valueOf(cell.size()) + ")", canvas);
+		drawMarker(ptScreenCoord, canvas, mMarkerGrouped);
+		drawCount(cluster.get(0), cluster.size(), canvas);
 	}
 
-	private void drawSingle(Canvas canvas, MapView mapView, List<OverlayItem> cell) {
-		for (OverlayItem item : cell) {
+	private void drawSingle(Canvas canvas, MapView mapView, List<OverlayItem> cluster) {
+		for (OverlayItem item : cluster) {
 			GeoPoint geoPoint = item.getPoint();
 			Point point = new Point();
 			mapView.getProjection().toPixels(geoPoint, point);
-			drawMarker(point, canvas);
+			drawMarker(point, canvas, mMarker);
 			drawTitle(item, item.getTitle(), canvas);
 		}
 	}
+
+	private double distanceInPixels(GeoPoint g1, GeoPoint g2) {
+		Projection projection = mMapView.getProjection();
+		Point p1 = new Point();
+		Point p2 = new Point();
+		projection.toPixels(g1, p1);
+		projection.toPixels(g2, p2);
+		double distancePx = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+		return distancePx;
+	}
+
+	public static class SortMapBeaconsByLatitude implements Comparator<MapBeacon> {
+
+		@Override
+		public int compare(MapBeacon object1, MapBeacon object2) {
+
+			double latitude1 = object1.point.getLatitudeE6();
+			double latitude2 = object2.point.getLatitudeE6();
+
+			/* Rounded to produce a 5 second bucket that will get further sorted by recent activity */
+			if (latitude1 > latitude2) {
+				return -1;
+			}
+			if (latitude1 < latitude2) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		}
+	}
+
 }
