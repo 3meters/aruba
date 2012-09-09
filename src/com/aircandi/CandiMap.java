@@ -369,7 +369,7 @@ public class CandiMap extends SherlockMapActivity {
 		for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getMapBeacons()) {
 			if (beaconByLocation.entityCount.intValue() > 0
 					&& beaconByLocation.bssid != null
-					&& !beaconByLocation.bssid.equals(ProxiExplorer.globalBssid)
+					&& !beaconByLocation.bssid.equals(ProxiExplorer.mWifiGlobal.BSSID)
 					&& beaconByLocation.latitude != null
 					&& beaconByLocation.longitude != null) {
 				/*

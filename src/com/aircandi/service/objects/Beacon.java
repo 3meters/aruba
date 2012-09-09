@@ -55,12 +55,13 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable{
 
 	// For client use only
 	public int				scanLevelDb;
-	public boolean			serviceVerified		= false;
-	public boolean			hidden				= false;
-	public boolean			dirty				= false;
-	public boolean			radarHit			= false;
+	public Boolean			serviceVerified		= false;
+	public Boolean			hidden				= false;
+	public Boolean			dirty				= false;
+	public Boolean			test				= false;
+	public Boolean			radarHit			= false;
 	public Date				discoveryTime;
-	public boolean			detectedLastPass	= false;
+	public Boolean			detectedLastPass	= false;
 	public BeaconState		state				= BeaconState.Normal;
 	public List<Entity>		entities			= new ArrayList<Entity>();
 	public int				scanMisses			= 0;
@@ -68,7 +69,11 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable{
 
 	public Beacon() {}
 
-	public Beacon(String bssid, String ssid, String label, int levelDb, Date discoveryTime) {
+//	public Beacon(String bssid, String ssid, String label, int levelDb, Date discoveryTime) {
+//		this(bssid, ssid, label, levelDb, discoveryTime, false);
+//	}
+
+	public Beacon(String bssid, String ssid, String label, int levelDb, Date discoveryTime, Boolean test) {
 		this.id = "0003:" + bssid;
 		this.ssid = ssid;
 		this.bssid = bssid;
@@ -76,7 +81,7 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable{
 		this.scanLevelDb = levelDb;
 		this.discoveryTime = discoveryTime;
 	}
-
+	
 	public Integer getAvgBeaconLevel() {
 		int scanHits = scanPasses.size();
 		int scanLevelSum = 0;

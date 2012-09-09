@@ -239,6 +239,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	private Handler						mHandler				= new Handler();
 	public static BasicAWSCredentials	mAwsCredentials			= null;
 
+	/* We use these to track whether a preference gets changed */
 	public Boolean						mPrefAutoscan			= false;
 	public String						mPrefAutoscanInterval	= "5000";
 	public boolean						mPrefDemoMode			= false;
@@ -247,6 +248,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	public boolean						mPrefEntityFencing		= true;
 	public boolean						mPrefShowDebug			= false;
 	public boolean						mPrefSoundEffects		= true;
+	public String						mPrefTestingBeacons		= "natural";
 
 	private Number						mEntityModelRefreshDate;
 	private Number						mEntityModelActivityDate;
@@ -255,6 +257,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	private CandiPatchModel				mCandiPatchModel;
 	private CandiPatchPresenter			mCandiPatchPresenter;
 	private RenderSurfaceView			mCandiSurfaceView;
+	private ViewGroup					mRetryDialog;
 
 	private float						mRadarWidth;
 	private float						mRadarHeight;
@@ -390,6 +393,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		mCandiSurfaceView = (RenderSurfaceView) findViewById(R.id.view_rendersurface);
 		mCandiSurfaceView.requestFocus();
 		mCandiSurfaceView.setFocusableInTouchMode(true);
+
+		/* Other UI references */
+		mRetryDialog = (ViewGroup) findViewById(R.id.retry_dialog);
 
 		/* Get setup for location snapshots */
 		GeoLocationManager.getInstance().setContext(getApplicationContext());
@@ -542,7 +548,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * Everything associated with this call is on the main thread but the UI is still responsive because most of the
 		 * UI is being handled by the 2d engine thread.
 		 */
-		if (Aircandi.getInstance().isRadarScanInProgress() || Aircandi.getInstance().isRadarUpdateInProgress()) {
+		if (Aircandi.getInstance().isRadarScanInProgress()
+				|| Aircandi.getInstance().isRadarUpdateInProgress()) {
 			return;
 		}
 
@@ -650,7 +657,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 								if (serviceResponse.responseCode == ResponseCode.Success) {
 
-									if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0) {
+//									if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0) {
 
 										mCandiPatchPresenter.renderingActivate(CandiConstants.INTERVAL_RENDERING_BOOST);
 										Aircandi.getInstance().setRadarUpdateInProgress(true);
@@ -658,7 +665,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 										EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
 										mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false);
-									}
+//									}
 
 									updateComplete();
 
@@ -726,7 +733,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			@Override
 			public void run() {
 				mCommon.showProgressDialog(false, null);
-				if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0) {
+				if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0
+						|| mRetryDialog.getVisibility() == View.VISIBLE) {
 					Aircandi.lastScanEmpty = false;
 					((View) findViewById(R.id.empty_dialog)).setVisibility(View.GONE);
 				}
@@ -795,7 +803,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 						int wifiCount = 0;
 						for (WifiScanResult wifi : scanList) {
-							if (wifi.global || wifi.demo) {
+							if (wifi.global) {
 								continue;
 							}
 							else {
@@ -1157,11 +1165,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					}
 				}
 			});
-			((View) findViewById(R.id.retry_dialog)).setVisibility(View.VISIBLE);
+			mRetryDialog.setVisibility(View.VISIBLE);
 		}
 		else {
 			mCandiSurfaceView.setVisibility(View.VISIBLE);
-			((View) findViewById(R.id.retry_dialog)).setVisibility(View.GONE);
+			mRetryDialog.setVisibility(View.GONE);
 		}
 	}
 
@@ -1531,6 +1539,10 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 								Aircandi.runFullScanOnRadarRestart = true;
 								mCommon.reload();
 							}
+							else if (prefResponse == PrefResponse.Test) {
+								/* Used for testing */
+								Logger.v(this, "Testing pref changes");
+							}
 							else {
 								/*
 								 * We have to be pretty aggressive about refreshing the UI because
@@ -1734,9 +1746,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			mPrefAutoscanInterval = Aircandi.settings.getString(Preferences.PREF_AUTOSCAN_INTERVAL, "5000");
 		}
 
-		if (mPrefDemoMode != Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false)) {
-			prefResponse = PrefResponse.Refresh;
-			mPrefDemoMode = Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false);
+		if (mPrefTestingBeacons != Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural")) {
+			prefResponse = PrefResponse.Test;
+			mPrefTestingBeacons = Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural");
 		}
 
 		if (mPrefGlobalBeacons != Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true)) {

@@ -1,79 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string-array
-		name="displayextras_list_preference">
-		<item>None</item>
-		<item>Level</item>
-		<item>Tag</item>
-		<item>Time</item>
-	</string-array>
-	<string-array
-		name="displayextrasvalues_list_preference">
-		<item>None</item>
-		<item>Level</item>
-		<item>Tag</item>
-		<item>Time</item>
-	</string-array>
-	<string-array
-		name="dialog_list_picture_sources">
-		<item>Search for pictures</item>
-		<item>Select a gallery picture</item>
-		<item>Take a new picture</item>
-		<item>Use a web page</item>
-		<item>None</item>
-	</string-array>
-	<string-array
-		name="dialog_list_picture_sources_facebook">
-		<item>Search for pictures</item>
-		<item>Select a gallery picture</item>
-		<item>Take a new picture</item>
-		<item>Use a web page</item>
-		<item>Use facebook picture</item>
-		<item>None</item>
-	</string-array>
-	
-	<string-array
-		name="theme_list_preference">
-		<item>Blueray</item>
-		<item>Canyon</item>
-		<item>Lagoon</item>
-		<item>Midnight</item>
-		<item>Misty</item>
-		<item>Serene</item>
-		<item>Smolder</item>
-		<item>Snow</item>
-	</string-array>
-	<string-array
-		name="themevalues_list_preference">
-		<item>aircandi_theme_blueray</item>
-		<item>aircandi_theme_canyon</item>
-		<item>aircandi_theme_lagoon</item>
-		<item>aircandi_theme_midnight</item>
-		<item>aircandi_theme_misty</item>
-		<item>aircandi_theme_serene</item>
-		<item>aircandi_theme_smolder</item>
-		<item>aircandi_theme_snow</item>
-	</string-array>
-	
-	<string-array 
-		name="autoscan_interval_label_list_preference" >
-		<item>2 seconds</item>
-		<item>5 seconds</item>
-		<item>10 seconds</item>
-		<item>30 seconds</item>
-		<item>1 minute</item>
-		<item>5 minutes</item>
-		<item>10 minutes</item>
-	</string-array>
-	<string-array
-		name="autoscan_interval_value_list_preference">
-		<item>2000</item>
-		<item>5000</item>
-		<item>10000</item>
-		<item>30000</item>
-		<item>60000</item>
-		<item>300000</item>
-		<item>600000</item>
-	</string-array>
-	
+
+    <string-array name="displayextras_list_preference">
+        <item>None</item>
+        <item>Level</item>
+        <item>Tag</item>
+        <item>Time</item>
+    </string-array>
+    <string-array name="displayextrasvalues_list_preference">
+        <item>None</item>
+        <item>Level</item>
+        <item>Tag</item>
+        <item>Time</item>
+    </string-array>
+    <string-array name="dialog_list_picture_sources">
+        <item>Search for pictures</item>
+        <item>Select a gallery picture</item>
+        <item>Take a new picture</item>
+        <item>Use a web page</item>
+        <item>None</item>
+    </string-array>
+    <string-array name="dialog_list_picture_sources_facebook">
+        <item>Search for pictures</item>
+        <item>Select a gallery picture</item>
+        <item>Take a new picture</item>
+        <item>Use a web page</item>
+        <item>Use facebook picture</item>
+        <item>None</item>
+    </string-array>
+    <string-array name="theme_list_preference">
+        <item>Blueray</item>
+        <item>Canyon</item>
+        <item>Lagoon</item>
+        <item>Midnight</item>
+        <item>Misty</item>
+        <item>Serene</item>
+        <item>Smolder</item>
+        <item>Snow</item>
+    </string-array>
+    <string-array name="themevalues_list_preference">
+        <item>aircandi_theme_blueray</item>
+        <item>aircandi_theme_canyon</item>
+        <item>aircandi_theme_lagoon</item>
+        <item>aircandi_theme_midnight</item>
+        <item>aircandi_theme_misty</item>
+        <item>aircandi_theme_serene</item>
+        <item>aircandi_theme_smolder</item>
+        <item>aircandi_theme_snow</item>
+    </string-array>
+    <string-array name="autoscan_interval_label_list_preference">
+        <item>2 seconds</item>
+        <item>5 seconds</item>
+        <item>10 seconds</item>
+        <item>30 seconds</item>
+        <item>1 minute</item>
+        <item>5 minutes</item>
+        <item>10 minutes</item>
+    </string-array>
+    <string-array name="autoscan_interval_value_list_preference">
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>300000</item>
+        <item>600000</item>
+    </string-array>
+    <string-array name="testing_beacons_entries">
+        <item>Natural beacons</item>
+        <item>Demo beacon</item>
+        <item>Massena upper</item>
+        <item>Massena lower</item>
+        <item>Massena lower (strong)</item>
+        <item>Massena lower (weak)</item>
+        <item>Global beacon</item>
+        <item>Empty beacon</item>
+    </string-array>
+    <string-array name="testing_beacons_values">
+        <item>natural</item>
+        <item>demo</item>
+        <item>massena_upper</item>
+        <item>massena_lower</item>
+        <item>massena_lower_strong</item>
+        <item>massena_lower_weak</item>
+        <item>global</item>
+        <item>empty</item>
+    </string-array>
+
 </resources>

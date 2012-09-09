@@ -197,14 +197,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mBeaconIndicator = (TextView) mActivity.findViewById(R.id.beacon_indicator);
 		if (mBeaconIndicator != null) {
 			updateBeaconIndicator(ProxiExplorer.getInstance().mWifiList);
-//			mEventScanReceived = new EventHandler() {
-//
-//				@Override
-//				public void onEvent(Object data) {
-//					List<WifiScanResult> scanList = (List<WifiScanResult>) data;
-//					updateBeaconIndicator(scanList);
-//				}
-//			};
+			//			mEventScanReceived = new EventHandler() {
+			//
+			//				@Override
+			//				public void onEvent(Object data) {
+			//					List<WifiScanResult> scanList = (List<WifiScanResult>) data;
+			//					updateBeaconIndicator(scanList);
+			//				}
+			//			};
 		}
 
 		mEventLocationChanged = new EventHandler() {
@@ -375,7 +375,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 					int wifiCount = 0;
 					for (WifiScanResult wifi : scanList) {
-						if (wifi.global || wifi.demo) {
+						if (wifi.global) {
 							continue;
 						}
 						else {
@@ -395,7 +395,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					if (wifiCount > 0) {
 						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
 					}
-					if (wifiStrongest != null && wifiStrongest.level > -80) {
+					if (wifiStrongest != null && wifiStrongest.level > CandiConstants.RADAR_BEACON_INDICATOR_CAUTION) {
 						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_go);
 					}
 					mBeaconIndicator.setBackgroundDrawable(drawable);
@@ -1403,9 +1403,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 		PictureSearch,
 		MapBrowse,
 		LinkLookup,
-		Unknown, 
-		PickBookmark, 
-		PickCandi, 
+		Unknown,
+		PickBookmark,
+		PickCandi,
 		CheckUpdate
 	}
 

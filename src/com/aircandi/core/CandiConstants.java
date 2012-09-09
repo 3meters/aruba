@@ -51,6 +51,8 @@ public interface CandiConstants {
 	public static final float			RADAR_PADDING_BOTTOM					= 100f;
 	public static final float			RADAR_ZOOM								= 0.55f;
 	public static final int				RADAR_BEACON_SIGNAL_BUCKET_SIZE			= 1;
+	public static final int				RADAR_SCAN_MISS_MAX						= 1;
+	public static final int				RADAR_BEACON_INDICATOR_CAUTION			= -80;
 
 	public static final float			CANDI_VIEW_HALO							= 2.0f;
 	public static final boolean			CANDI_VIEW_REFLECTION_SHOW				= false;

@@ -22,6 +22,7 @@ import com.aircandi.Preferences;
 import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.GsonType;
@@ -53,12 +54,13 @@ public class ProxiExplorer {
 	private WifiManager				mWifiManager;
 	private WifiLock				mWifiLock;
 	private boolean					mUsingEmulator			= false;
-	private final static int		demoLevel				= -20;
-	private final static String		demoBssid				= "48:5b:39:e6:d3:55";
-	private final static String		demoSsid				= "demo_dolly";
-	private final static int		globalLevel				= -20;
-	public final static String		globalBssid				= "00:00:00:00:00:00";
-	private final static String		globalSsid				= "candi_feed";
+	public static WifiScanResult	mWifiGlobal				= new WifiScanResult("00:00:00:00:00:00", "candi_feed", -100, false);
+	private static WifiScanResult	mWifiDemo				= new WifiScanResult("48:5b:39:e6:d3:55", "test_demo", -50, false);
+	private static WifiScanResult	mWifiMassenaUpper		= new WifiScanResult("00:1c:b3:ae:bf:f0", "test_massena_upper", -50, true);
+	private static WifiScanResult	mWifiMassenaLower		= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower", -50, true);
+	private static WifiScanResult	mWifiMassenaLowerStrong	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_strong", -20, true);
+	private static WifiScanResult	mWifiMassenaLowerWeak	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_weak", -100, true);
+	private static WifiScanResult	mWifiEmpty				= new WifiScanResult("aa:aa:bb:bb:cc:cc", "test_empty", -50, true);
 
 	public static synchronized ProxiExplorer getInstance() {
 		if (singletonObject == null) {
@@ -101,21 +103,55 @@ public class ProxiExplorer {
 
 							/* Get the latest scan results */
 							mWifiList.clear();
-							boolean demoBeaconFound = false;
 							for (ScanResult scanResult : mWifiManager.getScanResults()) {
 								mWifiList.add(new WifiScanResult(scanResult));
-								if ((scanResult.BSSID).equals(demoBssid)) {
-									demoBeaconFound = true;
-								}
-							}
-
-							/* Insert wifi results if in demo mode */
-							if (Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false) && !demoBeaconFound) {
-								mWifiList.add(new WifiScanResult(demoBssid, demoSsid, demoLevel));
 							}
 
 							if (Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true)) {
-								mWifiList.add(new WifiScanResult(globalBssid, globalSsid, globalLevel));
+								mWifiGlobal.global = true;
+								mWifiList.add(mWifiGlobal);
+							}
+
+							String testingBeacons = Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural");
+							if (!ListPreferenceMultiSelect.contains("natural", testingBeacons, null)) {
+								mWifiList.clear();
+							}
+
+							if (ListPreferenceMultiSelect.contains("demo", testingBeacons, null)) {
+								boolean demoBeaconFound = false;
+								for (ScanResult scanResult : mWifiManager.getScanResults()) {
+									if ((scanResult.BSSID).equals(mWifiDemo.BSSID)) {
+										demoBeaconFound = true;
+										break;
+									}
+								}
+								if (!demoBeaconFound) {
+									mWifiList.add(mWifiDemo);
+								}
+							}
+
+							if (ListPreferenceMultiSelect.contains("massena_upper", testingBeacons, null)) {
+								mWifiList.add(mWifiMassenaUpper);
+							}
+
+							if (ListPreferenceMultiSelect.contains("massena_lower", testingBeacons, null)) {
+								mWifiList.add(mWifiMassenaLower);
+							}
+
+							if (ListPreferenceMultiSelect.contains("massena_lower_strong", testingBeacons, null)) {
+								mWifiList.add(mWifiMassenaLowerStrong);
+							}
+
+							if (ListPreferenceMultiSelect.contains("massena_lower_weak", testingBeacons, null)) {
+								mWifiList.add(mWifiMassenaLowerWeak);
+							}
+
+							if (ListPreferenceMultiSelect.contains("global", testingBeacons, null)) {
+								mWifiList.add(mWifiGlobal);
+							}
+
+							if (ListPreferenceMultiSelect.contains("empty", testingBeacons, null)) {
+								mWifiList.add(mWifiEmpty);
 							}
 
 							Events.EventBus.onWifiScanReceived(mWifiList);
@@ -143,7 +179,7 @@ public class ProxiExplorer {
 				else {
 					mWifiList.clear();
 					Logger.d(ProxiExplorer.this, "Emulator enabled so using dummy scan results");
-					mWifiList.add(new WifiScanResult(demoBssid, demoSsid, demoLevel));
+					mWifiList.add(mWifiDemo);
 					Events.EventBus.onWifiScanReceived(mWifiList);
 					if (requestListener != null) {
 						requestListener.onComplete(new ServiceResponse());
@@ -193,7 +229,8 @@ public class ProxiExplorer {
 
 					/* Add it if we aren't */
 					if (beaconMatch == null) {
-						Beacon beaconNew = new Beacon(scanResult.BSSID, scanResult.SSID, scanResult.SSID, scanResult.level, DateUtils.nowDate());
+						Beacon beaconNew = new Beacon(scanResult.BSSID, scanResult.SSID, scanResult.SSID, scanResult.level, DateUtils.nowDate(),
+								scanResult.test);
 						beaconNew.detectedLastPass = true;
 						beaconNew.radarHit = true;
 						beaconNew.state = BeaconState.New;
@@ -220,7 +257,7 @@ public class ProxiExplorer {
 				Beacon beacon = mEntityModel.getBeacons().get(i);
 				if (!beacon.detectedLastPass) {
 					beacon.scanMisses++;
-					if (beacon.scanMisses >= 3) {
+					if (beacon.scanMisses >= CandiConstants.RADAR_SCAN_MISS_MAX) {
 						mEntityModel.getBeacons().remove(i);
 					}
 				}
@@ -334,11 +371,6 @@ public class ProxiExplorer {
 			ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
 			serviceResponse.data = serviceData;
 
-			/*
-			 * Temporary to force empty case in the UI
-			 * entities.clear();
-			 */
-
 			if (merge) {
 				List<Object> entities = (List<Object>) serviceData.data;
 
@@ -348,7 +380,7 @@ public class ProxiExplorer {
 					if (rawEntity.children != null) {
 						rawEntity.children.setCollectionType(EntityTree.Radar);
 					}
-					if (rawEntity.beaconId.equals("0003:" + globalBssid)) {
+					if (rawEntity.beaconId.equals("0003:" + mWifiGlobal.BSSID)) {
 						rawEntity.global = true;
 					}
 				}
@@ -520,14 +552,6 @@ public class ProxiExplorer {
 			entity.hidden = true;
 			return;
 		}
-
-		/* Hide demo entities if specified */
-		if (!Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false)) {
-			if (entity.beacon.bssid.equals(demoBssid)) {
-				entity.hidden = true;
-				return;
-			}
-		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -598,10 +622,10 @@ public class ProxiExplorer {
 
 		synchronized (mWifiList) {
 			for (WifiScanResult wifi : mWifiList) {
-				if (wifi.global) {
+				if (wifi.global || wifi.test) {
 					continue;
 				}
-				if (wifi.demo) {
+				if (wifi.BSSID.equals(mWifiDemo.BSSID)) {
 					demoWifi = wifi;
 				}
 				else {
@@ -623,35 +647,12 @@ public class ProxiExplorer {
 		if (wifiStrongest != null) {
 			beaconStrongest = mEntityModel.getBeaconById("0003:" + wifiStrongest.BSSID);
 			if (beaconStrongest == null) {
-				beaconStrongest = new Beacon(wifiStrongest.BSSID, wifiStrongest.SSID, wifiStrongest.SSID, wifiStrongest.level, DateUtils.nowDate());
+				beaconStrongest = new Beacon(wifiStrongest.BSSID, wifiStrongest.SSID, wifiStrongest.SSID, wifiStrongest.level, DateUtils.nowDate(),
+						wifiStrongest.test);
 			}
 		}
 
 		return beaconStrongest;
-	}
-
-	public void setPrefDemoMode(boolean prefDemoMode) {
-
-		/* Make sure we clear any demo beacons */
-		if (!Aircandi.settings.getBoolean(Preferences.PREF_DEMO_MODE, false)) {
-			for (int i = mEntityModel.getBeacons().size() - 1; i >= 0; i--) {
-				if (mEntityModel.getBeacons().get(i).label.equals("demo_dolly")) {
-					mEntityModel.getBeacons().remove(i);
-				}
-			}
-		}
-	}
-
-	public void setPrefGlobalBeacons(boolean prefGlobalBeacons) {
-
-		/* Make sure we clear any global beacons */
-		if (!Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true)) {
-			for (int i = mEntityModel.getBeacons().size() - 1; i >= 0; i--) {
-				if (mEntityModel.getBeacons().get(i).label.equals("candi_feed")) {
-					mEntityModel.getBeacons().remove(i);
-				}
-			}
-		}
 	}
 
 	public Entity loadEntityFromResources(Integer entityResId) {
@@ -1368,37 +1369,9 @@ public class ProxiExplorer {
 			return null;
 		}
 
-		public Beacon getStrongestBeacon() {
-
-			Beacon beaconStrongest = null;
-			Beacon beaconDemo = null;
-
-			for (Beacon beacon : mBeacons) {
-				if (beacon.id.equals("0003:" + globalBssid)) {
-					continue;
-				}
-				if (beacon.id.equals("0003:" + demoBssid)) {
-					beaconDemo = beacon;
-				}
-				else {
-					if (beaconStrongest == null) {
-						beaconStrongest = beacon;
-					}
-					else if (beacon.getAvgBeaconLevel() > beaconStrongest.getAvgBeaconLevel()) {
-						beaconStrongest = beacon;
-					}
-				}
-			}
-			if (beaconStrongest == null && beaconDemo != null) {
-				beaconStrongest = beaconDemo;
-			}
-
-			return beaconStrongest;
-		}
-
 		public Beacon getGlobalBeacon() {
 			for (Beacon beacon : mBeacons) {
-				if (beacon.id.equals("0003:" + globalBssid)) {
+				if (beacon.id.equals("0003:" + mWifiGlobal.BSSID)) {
 					return beacon;
 				}
 			}
@@ -1509,20 +1482,14 @@ public class ProxiExplorer {
 		public String	BSSID;
 		public String	SSID;
 		public int		level	= 0;
-		public Boolean	demo	= false;
 		public Boolean	global	= false;
+		public Boolean	test	= false;
 
-		public WifiScanResult(String bssid, String ssid, int level) {
+		public WifiScanResult(String bssid, String ssid, int level, Boolean test) {
 			this.BSSID = bssid;
 			this.SSID = ssid;
 			this.level = level;
-
-			if (bssid.equals(globalBssid)) {
-				this.global = true;
-			}
-			if (bssid.equals(demoBssid)) {
-				this.demo = true;
-			}
+			this.test = test;
 		}
 
 		public WifiScanResult(ScanResult scanResult) {
