@@ -42,7 +42,7 @@
         <!-- Text and line colors -->
         
         <item name="ruleColor">@color/rule_30_dark</item>
-        <item name="textColor">@color/text_dark</item>
+        <item name="textColor">@color/button_color_selector_dark</item>
         <item name="textColorRadar">@color/text_dark</item>
         <item name="textColorUnfocused">@color/text_dark</item>
         <item name="textColorComment">@color/accent</item>
@@ -122,7 +122,7 @@
         <!-- Text and line colors -->
         
         <item name="ruleColor">@color/rule_15_light</item>
-        <item name="textColor">@color/text_light</item>
+        <item name="textColor">@color/button_color_selector_light</item>
         <item name="textColorRadar">@color/text_light</item>
         <item name="textColorUnfocused">@color/text_light</item>
         <item name="textColorComment">@color/accent</item>

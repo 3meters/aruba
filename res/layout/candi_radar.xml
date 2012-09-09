@@ -23,7 +23,7 @@
             <TextView
                 android:id="@+id/retry_message"
                 style="@style/dialog_radar_text"
-                android:layout_width="175dp"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
@@ -35,6 +35,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/retry_message"
+                android:layout_centerHorizontal="true"
                 android:orientation="horizontal" >
 
                 <Button
@@ -54,14 +55,23 @@
                     android:text="@string/dialog_network_cancel_button" />
             </LinearLayout>
 
-            <CheckBox
-                android:id="@+id/wifi_enabled_checkbox"
-                style="@style/app_checkbox"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/group_buttons"
                 android:layout_centerHorizontal="true"
-                android:text="@string/dialog_network_enable_wifi_checkbox" />
+                android:orientation="horizontal" >
+
+                <CheckBox
+                    android:id="@+id/wifi_enabled_checkbox"
+                    style="@style/app_checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingRight="10dp"
+                    android:gravity="center"
+                    android:text="@string/dialog_network_enable_wifi_checkbox" />
+            </LinearLayout>
         </RelativeLayout>
 
         <RelativeLayout
@@ -193,7 +203,7 @@
             android:layout_height="1px"
             android:layout_alignParentTop="true"
             android:background="?attr/ruleColor" />
-
+
         <LinearLayout
             android:id="@+id/button_new"
             style="@style/actionbar_button_borderless"
@@ -217,8 +227,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:paddingLeft="2dp"
-                android:textColor="?attr/textColorBars"
-                android:text="@string/radar_button_new" />
+                android:text="@string/radar_button_new"
+                android:textColor="?attr/textColorBars" />
         </LinearLayout>
 
         <ImageButton

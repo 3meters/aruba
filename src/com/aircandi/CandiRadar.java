@@ -257,7 +257,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	private CandiPatchModel				mCandiPatchModel;
 	private CandiPatchPresenter			mCandiPatchPresenter;
 	private RenderSurfaceView			mCandiSurfaceView;
-	private ViewGroup					mRetryDialog;
+	private ViewGroup					mWifiDialog;
+	private ViewGroup					mEmptyDialog;
 
 	private float						mRadarWidth;
 	private float						mRadarHeight;
@@ -312,11 +313,15 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		/* Start normal processing */
 		mReadyToRun = false;
 
+		/* Other UI references */
+		mWifiDialog = (ViewGroup) findViewById(R.id.retry_dialog);
+		mEmptyDialog = (ViewGroup) findViewById(R.id.empty_dialog);
+
 		/* Restore empty message since this could be a restart because of a theme change */
 		if (Aircandi.lastScanEmpty) {
 			String helpHtml = getString(Aircandi.wifiCount > 0 ? R.string.help_radar_empty : R.string.help_radar_empty_no_beacons);
 			((TextView) findViewById(R.id.text_empty_message)).setText(Html.fromHtml(helpHtml));
-			((View) findViewById(R.id.empty_dialog)).setVisibility(View.VISIBLE);
+			mEmptyDialog.setVisibility(View.VISIBLE);
 		}
 
 		/* Initialize preferences */
@@ -393,9 +398,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		mCandiSurfaceView = (RenderSurfaceView) findViewById(R.id.view_rendersurface);
 		mCandiSurfaceView.requestFocus();
 		mCandiSurfaceView.setFocusableInTouchMode(true);
-
-		/* Other UI references */
-		mRetryDialog = (ViewGroup) findViewById(R.id.retry_dialog);
 
 		/* Get setup for location snapshots */
 		GeoLocationManager.getInstance().setContext(getApplicationContext());
@@ -657,15 +659,15 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 								if (serviceResponse.responseCode == ResponseCode.Success) {
 
-//									if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0) {
+									//									if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0) {
 
-										mCandiPatchPresenter.renderingActivate(CandiConstants.INTERVAL_RENDERING_BOOST);
-										Aircandi.getInstance().setRadarUpdateInProgress(true);
-										mCandiPatchPresenter.setIgnoreInput(true);
+									mCandiPatchPresenter.renderingActivate(CandiConstants.INTERVAL_RENDERING_BOOST);
+									Aircandi.getInstance().setRadarUpdateInProgress(true);
+									mCandiPatchPresenter.setIgnoreInput(true);
 
-										EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
-										mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false);
-//									}
+									EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
+									mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false);
+									//									}
 
 									updateComplete();
 
@@ -733,16 +735,17 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			@Override
 			public void run() {
 				mCommon.showProgressDialog(false, null);
+				mWifiDialog.setVisibility(View.GONE);
 				if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0
-						|| mRetryDialog.getVisibility() == View.VISIBLE) {
+						|| mWifiDialog.getVisibility() == View.VISIBLE) {
 					Aircandi.lastScanEmpty = false;
-					((View) findViewById(R.id.empty_dialog)).setVisibility(View.GONE);
+					mEmptyDialog.setVisibility(View.GONE);
 				}
 				else {
 					Aircandi.lastScanEmpty = true;
 					String helpHtml = getString(Aircandi.wifiCount > 0 ? R.string.help_radar_empty : R.string.help_radar_empty_no_beacons);
 					((TextView) findViewById(R.id.text_empty_message)).setText(Html.fromHtml(helpHtml));
-					((View) findViewById(R.id.empty_dialog)).setVisibility(View.VISIBLE);
+					mEmptyDialog.setVisibility(View.VISIBLE);
 				}
 			}
 		});
@@ -791,7 +794,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * If we are showing help then adjust it depending
 		 * on whether there are beacons nearby.
 		 */
-		if (Aircandi.lastScanEmpty) {
+		if (Aircandi.lastScanEmpty && mWifiDialog.getVisibility() != View.VISIBLE) {
 			synchronized (scanList) {
 				/*
 				 * In case we get called from a background thread.
@@ -812,8 +815,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						}
 						String helpHtml = getString(wifiCount > 0 ? R.string.help_radar_empty : R.string.help_radar_empty_no_beacons);
 						((TextView) findViewById(R.id.text_empty_message)).setText(Html.fromHtml(helpHtml));
-						((View) findViewById(R.id.empty_dialog)).setVisibility(View.VISIBLE);
-						((View) findViewById(R.id.empty_dialog)).invalidate();
+						mEmptyDialog.setVisibility(View.VISIBLE);
+						mEmptyDialog.invalidate();
 					}
 				});
 			}
@@ -1068,6 +1071,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		if (!NetworkManager.getInstance().isWifiEnabled() && !ProxiExplorer.getInstance().isUsingEmulator()) {
 
+			/* Make sure we are displaying any background message */
+			mEmptyDialog.setVisibility(View.GONE);
+			mCommon.showProgressDialog(false, null);
 			showNetworkDialog(true, getString(R.string.dialog_network_message_wifi_notready));
 			final Button retryButton = (Button) findViewById(R.id.button_retry);
 			final Button cancelButton = (Button) findViewById(R.id.button_cancel);
@@ -1094,7 +1100,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					if (wifiState == WifiManager.WIFI_STATE_ENABLED)
 					{
 						ImageUtils.showToastNotification("Wifi state enabled.", Toast.LENGTH_SHORT);
-						if (((View) findViewById(R.id.retry_dialog)).getVisibility() == View.VISIBLE) {
+						if (mWifiDialog.getVisibility() == View.VISIBLE) {
 							((CheckBox) findViewById(R.id.wifi_enabled_checkbox)).setChecked(true);
 							txtMessage.setText(getString(R.string.dialog_network_message_wifi_ready));
 							retryButton.setEnabled(true);
@@ -1165,11 +1171,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					}
 				}
 			});
-			mRetryDialog.setVisibility(View.VISIBLE);
+			mWifiDialog.setVisibility(View.VISIBLE);
 		}
 		else {
 			mCandiSurfaceView.setVisibility(View.VISIBLE);
-			mRetryDialog.setVisibility(View.GONE);
+			mWifiDialog.setVisibility(View.GONE);
 		}
 	}
 
@@ -1462,14 +1468,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.CheckUpdate);
 				}
 				else {
-					//					if (doUpdateCheck) {
-					//						if (!Aircandi.applicationUpdateNeeded) {
-					//							finishResume(true);
-					//							scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
-					//							return;
-					//						}
-					//					}
-
 					if (Aircandi.applicationUpdateRequired) {
 						mCommon.showProgressDialog(false, null);
 						if (mUpdateAlertDialog == null || !mUpdateAlertDialog.isShowing()) {
