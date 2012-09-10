@@ -54,6 +54,8 @@ import com.aircandi.CandiRadar.RefreshType;
 import com.aircandi.CommentList;
 import com.aircandi.FormActivity;
 import com.aircandi.HelpForm;
+import com.aircandi.MapCandiForm;
+import com.aircandi.MapCandiList;
 import com.aircandi.Preferences;
 import com.aircandi.ProfileForm;
 import com.aircandi.R;
@@ -875,6 +877,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 					else if (mPageName.equals("UserCandiForm")) {
 						((UserCandiForm) mActivity).doRefresh();
 					}
+					else if (mPageName.equals("MapCandiList")) {
+						((MapCandiList) mActivity).doRefresh();
+					}
+					else if (mPageName.equals("MapCandiForm")) {
+						((MapCandiForm) mActivity).doRefresh();
+					}
 					else if (mPageName.equals("CandiMap")) {
 						((CandiMap) mActivity).doRefresh();
 					}
@@ -1007,6 +1015,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
 			setActiveTab(1);
 		}
+		else if (mPageName.equals("MapCandiList")) {
+			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
+			setActiveTab(2);
+		}
 		else if (mPageName.equals("CandiMap")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
 			setActiveTab(2);
@@ -1018,6 +1030,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 		else if (mPageName.equals("UserCandiForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
 			setActiveTab(1);
+		}
+		else if (mPageName.equals("MapCandiForm")) {
+			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
+			setActiveTab(2);
 		}
 		else if (mPageName.equals("CommentList")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
@@ -1113,7 +1129,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void setActiveTab(int position) {
 		Logger.v(this, "Setting active tab: " + String.valueOf(position));
-		if (mActionBar.getSelectedTab() == null || mActionBar.getSelectedTab().getPosition() != position) {
+		if ((mActionBar.getSelectedTab() == null || mActionBar.getSelectedTab().getPosition() != position)
+				&& mActionBar.getTabCount() >= (position - 1)) {
 			mActionBar.getTabAt(position).select();
 		}
 	}

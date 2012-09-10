@@ -7,14 +7,14 @@ import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 
 import com.aircandi.candi.views.ViewAction;
-import com.aircandi.components.CandiList;
+import com.aircandi.components.CandiArrayList;
 import com.aircandi.components.Exceptions;
 import com.aircandi.core.CandiConstants;
 
 public abstract class BaseModel extends Observable implements IModel {
 
 	protected CandiPatchModel				mCandiPatchModel	= null;
-	protected CandiList<IModel>				mChildren			= new CandiList<IModel>();
+	protected CandiArrayList<IModel>				mChildren			= new CandiArrayList<IModel>();
 	protected IModel						mParent				= null;
 	protected boolean						mRoot				= false;
 	protected LinkedList<IEntityModifier>	mViewModifiers		= new LinkedList<IEntityModifier>();
@@ -47,7 +47,7 @@ public abstract class BaseModel extends Observable implements IModel {
 		return mViewModifiers;
 	}
 
-	public CandiList<IModel> getChildren() {
+	public CandiArrayList<IModel> getChildren() {
 		return mChildren;
 	}
 

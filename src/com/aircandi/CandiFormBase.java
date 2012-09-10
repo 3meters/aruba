@@ -52,7 +52,7 @@ import com.aircandi.service.objects.User;
 import com.aircandi.widgets.AuthorBlock;
 import com.aircandi.widgets.WebImageView;
 
-public class CandiFormBase extends CandiActivity {
+public abstract class CandiFormBase extends CandiActivity {
 
 	protected List<Entity>	mEntitiesForPaging	= new ArrayList<Entity>();
 	protected ViewPager		mViewPager;
@@ -61,22 +61,19 @@ public class CandiFormBase extends CandiActivity {
 	protected Number		mEntityModelActivityDate;
 	protected User			mEntityModelUser;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-	}
+	public abstract void bind(Boolean useProxiExplorer);
 
-	public void bind(Boolean useProxiExplorer) {
+	public void doBind(final Boolean useEntityModel, final Boolean pagingEnabled, EntityTree entityTree) {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 
-		if (useProxiExplorer) {
+		if (useEntityModel) {
 			/*
 			 * Entity is coming from entity model.
 			 */
-			mEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mParentId, EntityTree.Radar);
+			mEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mParentId, entityTree);
 			mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 			mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 			mEntityModelUser = Aircandi.getInstance().getUser();
@@ -87,7 +84,13 @@ public class CandiFormBase extends CandiActivity {
 			}
 			else {
 				mCommon.mActionBar.setTitle(mEntity.title);
-				updateViewPager(null);
+				/* Get the view pager configured */
+				List<Entity> entities = null;
+				if (!pagingEnabled) {
+					entities = new ArrayList<Entity>();
+					entities.add(mEntity);
+				}
+				updateViewPager(entities);
 			}
 		}
 		else {
@@ -115,6 +118,7 @@ public class CandiFormBase extends CandiActivity {
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
+						mCommon.mActionBar.setTitle(mEntity.title);
 
 						/* Sort the children if there are any */
 						if (mEntity.children != null && mEntity.children.size() > 1) {
@@ -122,7 +126,12 @@ public class CandiFormBase extends CandiActivity {
 						}
 
 						/* Get the view pager configured */
-						updateViewPager(null);
+						List<Entity> entities = null;
+						if (!pagingEnabled) {
+							entities = new ArrayList<Entity>();
+							entities.add(mEntity);
+						}
+						updateViewPager(entities);
 
 						mCommon.showProgressDialog(false, null);
 					}
@@ -151,19 +160,21 @@ public class CandiFormBase extends CandiActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	public void onChildrenButtonClick(View v) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
+	public abstract void onChildrenButtonClick(View v);
+
+	public void showChildrenForEntity(Class<?> clazz) {
+		IntentBuilder intentBuilder = new IntentBuilder(this, clazz);
 
 		/*
 		 * mCommon.mEntityId is the original entity the user navigated to but
 		 * they could have swiped using the viewpager to a different entity so
 		 * we need to use mEntity to get the right entity context.
 		 */
-		intentBuilder.setCommandType(CommandType.View);
-		intentBuilder.setEntityId(mEntity.id);
-		intentBuilder.setParentEntityId(mEntity.parentId);
-		intentBuilder.setCollectionId(mEntity.id);
-		intentBuilder.setEntityTree(mCommon.mEntityTree);
+		intentBuilder.setCommandType(CommandType.View)
+				.setEntityId(mEntity.id)
+				.setParentEntityId(mEntity.parentId)
+				.setCollectionId(mEntity.id)
+				.setEntityTree(mCommon.mEntityTree);
 
 		Intent intent = intentBuilder.create();
 		startActivity(intent);

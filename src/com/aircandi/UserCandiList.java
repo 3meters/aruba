@@ -6,36 +6,34 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ListView;
 
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiListAdapter;
+import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.DateUtils;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils.TransitionType;
-import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
-import com.aircandi.R;
 
-public class UserCandiList extends CandiList {
+public class UserCandiList extends CandiListBase {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -73,14 +71,16 @@ public class UserCandiList extends CandiList {
 			super.onCreate(savedInstanceState);
 			return;
 		}
+		
 		super.onCreate(savedInstanceState);
+		if (!isFinishing()) {
+			initialize();
+			configureActionBar();
+			bind();
+		}
 	}
 
-	protected void initialize() {
-		mListView = (ListView) findViewById(R.id.list_candi);
-	}
-
-	public void bind() {
+	private void configureActionBar() {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -93,7 +93,11 @@ public class UserCandiList extends CandiList {
 		else {
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
 			mCommon.mActionBar.setHomeButtonEnabled(false);
+			mCommon.mActionBar.setTitle(Aircandi.getInstance().getUser().name);
 		}
+	}
+	
+	public void bind() {
 
 		new AsyncTask() {
 
@@ -193,7 +197,7 @@ public class UserCandiList extends CandiList {
 					}
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiList);							
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiList);
 				}
 				mCommon.showProgressDialog(false, null);
 			}
@@ -207,25 +211,14 @@ public class UserCandiList extends CandiList {
 
 	public void onListItemClick(View view) {
 		Logger.v(this, "List item clicked");
-
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
-		IntentBuilder intentBuilder = new IntentBuilder(this, UserCandiForm.class);
-		intentBuilder.setCommandType(CommandType.View);
-		intentBuilder.setEntityId(entity.id);
-		intentBuilder.setParentEntityId(entity.parentId);
-		intentBuilder.setEntityType(entity.type);
-		intentBuilder.setCollectionId(mCommon.mCollectionId);
-		intentBuilder.setEntityTree(EntityTree.User);
-
-		if (entity.parent != null) {
-			intentBuilder.setEntityLocation(entity.parent.location);
-		}
-		else {
-			intentBuilder.setBeaconId(entity.beaconId);
-		}
-		Intent intent = intentBuilder.create();
-
-		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
+		showCandiFormForEntity(entity, UserCandiForm.class);
 	}
+
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		mCommon.setActiveTab(1);
+	}
+
 }

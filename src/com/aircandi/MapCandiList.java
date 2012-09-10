@@ -3,18 +3,13 @@ package com.aircandi;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.view.View;
-import android.widget.ListView;
 
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityList;
-import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -24,13 +19,20 @@ import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.ServiceData;
 
-public class MapCandiList extends CandiList {
+public class MapCandiList extends CandiListBase {
 
-	protected void initialize() {
-		mListView = (ListView) findViewById(R.id.list_candi);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		if (!isFinishing()) {
+			initialize();
+			configureActionBar();
+			bind();
+		}
 	}
-
-	public void bind() {
+	
+	private void configureActionBar() {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -46,6 +48,9 @@ public class MapCandiList extends CandiList {
 			Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(mCommon.mBeaconId);
 			mCommon.mActionBar.setTitle(beacon.label);
 		}
+	}
+
+	public void bind() {
 
 		new AsyncTask() {
 
@@ -94,7 +99,7 @@ public class MapCandiList extends CandiList {
 						Entity entity = (Entity) serviceData.data;
 						entities = entity.children;
 					}
-					
+
 					/*
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */
@@ -136,29 +141,14 @@ public class MapCandiList extends CandiList {
 	// --------------------------------------------------------------------------------------------
 
 	public void onListItemClick(View view) {
-
 		Logger.v(this, "List item clicked");
-
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
+		showCandiFormForEntity(entity, MapCandiForm.class);
+	}
 
-		IntentBuilder intentBuilder = new IntentBuilder(this, MapCandiForm.class);
-		intentBuilder.setCommandType(CommandType.View)
-				.setEntityId(entity.id)
-				.setParentEntityId(entity.parentId)
-				.setEntityType(entity.type)
-				.setEntityTree(EntityTree.Map)
-				.setCollectionId(mCommon.mCollectionId);
-
-		if (entity.parent != null) {
-			intentBuilder.setEntityLocation(entity.parent.location);
-		}
-		else {
-			intentBuilder.setBeaconId(entity.beaconId);
-		}
-
-		Intent intent = intentBuilder.create();
-
-		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		mCommon.setActiveTab(2);
 	}
 }

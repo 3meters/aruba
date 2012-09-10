@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 
 import com.aircandi.candi.models.BaseModel.ViewState;
-import com.aircandi.components.CandiList;
+import com.aircandi.components.CandiArrayList;
 
 public interface IModel {
 
@@ -15,7 +15,7 @@ public interface IModel {
 
 	public LinkedList<IEntityModifier> getViewModifiers();
 
-	public CandiList<IModel> getChildren();
+	public CandiArrayList<IModel> getChildren();
 
 	public String getTitleText();
 

@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 import com.aircandi.candi.models.CandiModel;
 
-public class CandiList<T> extends ArrayList<T> {
+public class CandiArrayList<T> extends ArrayList<T> {
 
 	private static final long	serialVersionUID	= -2567383399125318333L;
 
-	public CandiList() {}
+	public CandiArrayList() {}
 
-	public CandiList(final int capacity) {
+	public CandiArrayList(final int capacity) {
 
 		super(capacity);
 	}

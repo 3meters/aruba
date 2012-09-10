@@ -72,7 +72,7 @@ import com.aircandi.candi.views.ZoneView;
 import com.aircandi.candi.views.IView.ViewTouchListener;
 import com.aircandi.candi.views.ViewAction.ViewActionType;
 import com.aircandi.components.BitmapTextureSource;
-import com.aircandi.components.CandiList;
+import com.aircandi.components.CandiArrayList;
 import com.aircandi.components.CountDownTimer;
 import com.aircandi.components.DateUtils;
 import com.aircandi.components.EntityList;
@@ -1033,7 +1033,7 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	public float getLastVisibleCandiModelX(boolean useNext) {
-		CandiList candiModels = mCandiPatchModel.getCandiModels();
+		CandiArrayList candiModels = mCandiPatchModel.getCandiModels();
 		int countCandiModels = candiModels.size();
 
 		float lastX = 0;
@@ -1103,6 +1103,19 @@ public class CandiPatchPresenter implements Observer {
 
 	public long getRenderingTimeLeft() {
 		return mRenderingTimer.getMillisUntilFinished();
+	}
+
+	public void ensureScrollBoundaries() {
+		/* Check to see if we are at a boundary */
+		float cameraTargetY = mCameraTargetSprite.getY();
+		if (cameraTargetY <= mBoundsMinY) {
+			renderingActivateBump();
+			mCameraTargetSprite.moveToTop(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
+		}
+		else if (cameraTargetY >= mBoundsMaxY) {
+			renderingActivateBump();
+			mCameraTargetSprite.moveToBottom(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

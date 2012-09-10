@@ -141,15 +141,15 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							Logger.d(mContext, "View map candi");
-							IntentBuilder intentBuilder = new IntentBuilder(mMapView.getContext(), MapCandiList.class);
 
 							/*
 							 * mCommon.mEntityId is the original entity the user navigated to but
 							 * they could have swiped using the viewpager to a different entity so
 							 * we need to use mEntity to get the right entity context.
 							 */
-							intentBuilder.setCommandType(CommandType.View);
-							intentBuilder.setBeaconId(mBeaconId);
+							IntentBuilder intentBuilder = new IntentBuilder(mMapView.getContext(), MapCandiList.class);
+							intentBuilder.setCommandType(CommandType.View)
+									.setBeaconId(mBeaconId);
 
 							Intent intent = intentBuilder.create();
 							mMapView.getContext().startActivity(intent);

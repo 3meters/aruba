@@ -750,6 +750,9 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			}
 		});
 
+		/* Make sure we are at a proper scroll location */
+		mCandiPatchPresenter.ensureScrollBoundaries();
+		
 		/* Show aircandi tips if this is the first time the application has been run */
 		if (Aircandi.firstRunApp) {
 			onHelpButtonClick(null);

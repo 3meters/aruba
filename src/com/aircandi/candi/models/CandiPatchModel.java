@@ -13,7 +13,7 @@ import com.aircandi.candi.models.ZoneModel.Position;
 import com.aircandi.candi.models.ZoneModel.ZoneAlignment;
 import com.aircandi.candi.models.ZoneModel.ZoneStatus;
 import com.aircandi.candi.presenters.CandiPatchPresenter;
-import com.aircandi.components.CandiList;
+import com.aircandi.components.CandiArrayList;
 import com.aircandi.components.DateUtils;
 import com.aircandi.components.EntityList;
 import com.aircandi.core.CandiConstants;
@@ -29,7 +29,7 @@ import com.aircandi.service.objects.Entity;
 
 public class CandiPatchModel extends Observable {
 
-	private final CandiList<CandiModel>	mCandiModels		= new CandiList<CandiModel>();
+	private final CandiArrayList<CandiModel>	mCandiModels		= new CandiArrayList<CandiModel>();
 	private final List<ZoneModel>		mZoneModels			= new ArrayList<ZoneModel>();
 
 	private ZoneModel					mZoneInactive		= null;
@@ -407,7 +407,7 @@ public class CandiPatchModel extends Observable {
 		return null;
 	}
 
-	public CandiList<CandiModel> getCandiModels() {
+	public CandiArrayList<CandiModel> getCandiModels() {
 		return mCandiModels;
 	}
 
