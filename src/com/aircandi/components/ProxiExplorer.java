@@ -300,7 +300,7 @@ public class ProxiExplorer {
 			ServiceResponse serviceResponse = new ServiceResponse();
 			if (beaconIdsNew.size() > 0 || beaconIdsRefresh.size() > 0) {
 
-				serviceResponse = getEntitiesForBeacons(beaconIdsNew, beaconIdsRefresh, mEntityModel.getLastRefreshDate(), true);
+				serviceResponse = getEntitiesForBeacons(beaconIdsNew, beaconIdsRefresh, mEntityModel.getLastRefreshDate(), true, true);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					ServiceData serviceData = (ServiceData) serviceResponse.data;
 					mEntityModel.setLastRefreshDate(serviceData.date.longValue());
@@ -317,7 +317,8 @@ public class ProxiExplorer {
 		return;
 	}
 
-	public ServiceResponse getEntitiesForBeacons(ArrayList<String> beaconIdsNew, ArrayList<String> beaconIdsRefresh, Number lastRefreshDate, Boolean merge) {
+	public ServiceResponse getEntitiesForBeacons(ArrayList<String> beaconIdsNew, ArrayList<String> beaconIdsRefresh, Number lastRefreshDate,
+			Boolean includeObservation, Boolean merge) {
 		/*
 		 * For all refresh types, calling this will reset entity collections.
 		 */
@@ -332,26 +333,29 @@ public class ProxiExplorer {
 		/* Set method parameters */
 		if (beaconIdsNew.size() > 0) {
 			parameters.putStringArrayList("beaconIdsNew", beaconIdsNew);
-			ArrayList<Integer> levels = new ArrayList<Integer>();
-			for (String beaconId : beaconIdsNew) {
-				Beacon beacon = mEntityModel.getBeaconById(beaconId);
-				levels.add(beacon.global ? -20 : beacon.scanLevelDb);
+			if (includeObservation) {
+				ArrayList<Integer> levels = new ArrayList<Integer>();
+				for (String beaconId : beaconIdsNew) {
+					Beacon beacon = mEntityModel.getBeaconById(beaconId);
+					levels.add(beacon.global ? -20 : beacon.scanLevelDb);
+				}
+				parameters.putIntegerArrayList("beaconLevels", levels);
 			}
-			parameters.putIntegerArrayList("beaconLevels", levels);
 		}
-		
+
 		if (beaconIdsRefresh != null && beaconIdsRefresh.size() > 0 && lastRefreshDate != null) {
 			parameters.putStringArrayList("beaconIdsRefresh", beaconIdsRefresh);
 			parameters.putLong("refreshDate", lastRefreshDate.longValue());
 		}
 
-		mObservation = GeoLocationManager.getInstance().getObservation();
-		if (mObservation != null) {
-			parameters.putString("observation",
-					"object:" + ProxibaseService.convertObjectToJson(mObservation, GsonType.ProxibaseService));
+		if (includeObservation) {
+			mObservation = GeoLocationManager.getInstance().getObservation();
+			if (mObservation != null) {
+				parameters.putString("observation",
+						"object:" + ProxibaseService.convertObjectToJson(mObservation, GsonType.ProxibaseService));
+			}
 		}
 
-		parameters.putString("userId", Aircandi.getInstance().getUser().id);
 		parameters.putString("eagerLoad", "object:{\"children\":true,\"comments\":false}");
 		parameters.putString("options", "object:{\"limit\":"
 				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
@@ -1091,7 +1095,7 @@ public class ProxiExplorer {
 				}
 			}
 		}
-		
+
 		public void moveEntity(String moveEntityId, String parentEntityId, EntityTree collectionType) {
 			/*
 			 * This presumes the entity can only appear once per collection type.
@@ -1141,7 +1145,6 @@ public class ProxiExplorer {
 				}
 			}
 		}
-		
 
 		private void mergeEntities(List<Object> entities, ArrayList<String> beaconIds, ArrayList<String> refreshIds, Boolean chunking) {
 			/*

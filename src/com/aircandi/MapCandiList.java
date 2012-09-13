@@ -84,7 +84,7 @@ public class MapCandiList extends CandiListBase {
 					else {
 						ArrayList<String> beaconIdsNew = new ArrayList<String>();
 						beaconIdsNew.add(mCommon.mBeaconId);
-						serviceResponse = ProxiExplorer.getInstance().getEntitiesForBeacons(beaconIdsNew, null, null, false);
+						serviceResponse = ProxiExplorer.getInstance().getEntitiesForBeacons(beaconIdsNew, null, null, false, false);
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 							ServiceData serviceData = (ServiceData) serviceResponse.data;
 							List<Entity> entities = (List<Entity>) serviceData.data;
