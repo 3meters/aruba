@@ -511,11 +511,10 @@ public class EntityForm extends FormActivity {
 									if (!ProxiExplorer.getInstance().getEntityModel().getUserEntities().isEmpty()) {
 
 										/*
-										 * Insert at top level. The routine pushes the new entity in at the top of the
-										 * list
-										 * so we shouldn't have to sort since it will produce the same result.
+										 * Insert at top level. The routine pushes the new entity in at the top of
+										 * the list so we shouldn't have to sort since it will produce the same result.
 										 */
-										ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, null, null, true, EntityTree.User);
+										ProxiExplorer.getInstance().getEntityModel().insertEntity(entity.copy(), null, null, true, EntityTree.User);
 
 										/* Insert at child level */
 										if (entity.parentId != null) {
@@ -860,7 +859,7 @@ public class EntityForm extends FormActivity {
 
 		Intent intent = new Intent(this, BookmarkPicker.class);
 		intent.putExtra(getString(R.string.EXTRA_VERIFY_URI), false);
-		
+
 		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 

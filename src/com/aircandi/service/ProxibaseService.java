@@ -222,12 +222,23 @@ public class ProxibaseService {
 						for (String key : serviceRequest.getParameters().keySet()) {
 							if (serviceRequest.getParameters().get(key) != null) {
 								if (serviceRequest.getParameters().get(key) instanceof ArrayList<?>) {
-									ArrayList<String> items = serviceRequest.getParameters().getStringArrayList(key);
-									jsonBody += "\"" + key + "\":[";
-									for (String beaconId : items) {
-										jsonBody += "\"" + beaconId + "\",";
+
+									if (key.equals("beaconLevels")) {
+										ArrayList<Integer> items = serviceRequest.getParameters().getIntegerArrayList(key);
+										jsonBody += "\"" + key + "\":[";
+										for (Integer beaconLevel : items) {
+											jsonBody += String.valueOf(beaconLevel)+ ",";
+										}
+										jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "],";
 									}
-									jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "],";
+									else {
+										ArrayList<String> items = serviceRequest.getParameters().getStringArrayList(key);
+										jsonBody += "\"" + key + "\":[";
+										for (String beaconId : items) {
+											jsonBody += "\"" + beaconId + "\",";
+										}
+										jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "],";
+									}
 								}
 								else if (serviceRequest.getParameters().get(key) instanceof String) {
 									String value = serviceRequest.getParameters().get(key).toString();
@@ -409,6 +420,11 @@ public class ProxibaseService {
 						+ String.valueOf(NetworkManager.CONNECT_TRIES) + " tries over "
 						+ String.valueOf(NetworkManager.CONNECT_WAIT * NetworkManager.CONNECT_TRIES / 1000) + " second window");
 			}
+			else if (exception instanceof SocketException) {
+				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
+						ErrorCode.SocketException, exception);
+				proxibaseException.setResponseMessage(proxibaseException.getMessage());
+			}
 			else if (exception instanceof IOException) {
 				proxibaseException = new ProxibaseServiceException(exception.getClass().getSimpleName() + ": " + exception.getMessage(), ErrorType.Client,
 						ErrorCode.IOException, exception);
@@ -523,8 +539,17 @@ public class ProxibaseService {
 		}
 
 		if (exception instanceof NoHttpResponseException
-				|| exception instanceof SocketException
 				|| exception instanceof SocketTimeoutException) {
+			Logger.d(this, "Retrying on " + exception.getClass().getName() + ": " + exception.getMessage());
+			return true;
+		}
+
+		if (exception instanceof SocketException) {
+			/*
+			 * This can be caused by the server refusing the connection or resetting the connection. I've
+			 * seen this when a server doesn't have the item being requested. I've also seen this in
+			 * cases where a retry succeeds.
+			 */
 			Logger.d(this, "Retrying on " + exception.getClass().getName() + ": " + exception.getMessage());
 			return true;
 		}

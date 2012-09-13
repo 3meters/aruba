@@ -29,7 +29,7 @@ public class EntityList<T> extends ArrayList<T> {
 		super(capacity);
 	}
 
-	public boolean containsKey(Integer key) {
+	public boolean containsKey(String key) {
 
 		for (int i = 0; i < this.size(); i++) {
 			Entity entity = (Entity) this.get(i);
@@ -40,7 +40,7 @@ public class EntityList<T> extends ArrayList<T> {
 		return false;
 	}
 
-	public Entity getByKey(Integer key) {
+	public Entity getByKey(String key) {
 
 		for (int i = 0; i < this.size(); i++) {
 			Entity entity = (Entity) this.get(i);

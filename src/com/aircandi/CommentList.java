@@ -24,6 +24,7 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ServiceRequest;
@@ -52,6 +53,7 @@ public class CommentList extends CandiActivity {
 		super.onCreate(savedInstanceState);
 		if (!isFinishing()) {
 			initialize();
+			configureActionBar();
 			bind();
 		}
 	}
@@ -60,12 +62,12 @@ public class CommentList extends CandiActivity {
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mListView = (ListView) findViewById(R.id.list_comments);
 	}
-
-	protected void bind() {
-
+	
+	private void configureActionBar() {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
+		
 		if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
 			if (mCommon.mEntityTree == ProxiExplorer.EntityTree.Radar) {
 				mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
@@ -76,9 +78,15 @@ public class CommentList extends CandiActivity {
 			}
 		}
 		else {
+			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
+			mCommon.mActionBar.setTitle(collection.title);
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		}
 		
+	}
+
+	protected void bind() {
+
 		new AsyncTask() {
 
 			@Override

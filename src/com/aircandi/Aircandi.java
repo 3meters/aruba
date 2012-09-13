@@ -14,6 +14,7 @@ import android.location.Location;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
+import com.aircandi.components.StopWatch;
 import com.aircandi.service.objects.User;
 import com.aircandi.R;
 
@@ -82,6 +83,7 @@ public class Aircandi extends Application {
 
 	public static Context					applicationContext;
 	public static Handler					applicationHandler;
+	public static StopWatch					stopwatch;
 
 	public static Boolean					firstRunApp					= true;
 	public static Boolean					fullUpdateComplete			= false;
@@ -119,6 +121,7 @@ public class Aircandi extends Application {
 
 		applicationContext = getApplicationContext();
 		applicationHandler = new Handler();
+		stopwatch = new StopWatch();
 
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());

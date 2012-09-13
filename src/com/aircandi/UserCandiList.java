@@ -76,7 +76,7 @@ public class UserCandiList extends CandiListBase {
 		if (!isFinishing()) {
 			initialize();
 			configureActionBar();
-			bind();
+			bind(true);
 		}
 	}
 
@@ -97,7 +97,7 @@ public class UserCandiList extends CandiListBase {
 		}
 	}
 	
-	public void bind() {
+	public void bind(final Boolean useEntityModel) {
 
 		new AsyncTask() {
 
@@ -115,7 +115,7 @@ public class UserCandiList extends CandiListBase {
 				/*
 				 * If its the user collection and it hasn't been populated yet, do the work.
 				 */
-				if (entityTreeEmpty) {
+				if (entityTreeEmpty || !useEntityModel) {
 
 					Bundle parameters = new Bundle();
 					ServiceRequest serviceRequest = new ServiceRequest();
@@ -148,6 +148,7 @@ public class UserCandiList extends CandiListBase {
 						String jsonResponse = (String) serviceResponse.data;
 						ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
 
+						proxiEntities.clear();
 						proxiEntities.addAll((Collection<? extends Entity>) serviceData.data);
 						proxiEntities.setCollectionType(EntityTree.User);
 
@@ -185,7 +186,6 @@ public class UserCandiList extends CandiListBase {
 						onBackPressed();
 					}
 					else {
-
 						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 						mEntityModelUser = Aircandi.getInstance().getUser();

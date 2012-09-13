@@ -28,10 +28,10 @@ public class MapCandiList extends CandiListBase {
 		if (!isFinishing()) {
 			initialize();
 			configureActionBar();
-			bind();
+			bind(true);
 		}
 	}
-	
+
 	private void configureActionBar() {
 		/*
 		 * Navigation setup for action bar icon and title
@@ -50,7 +50,20 @@ public class MapCandiList extends CandiListBase {
 		}
 	}
 
-	public void bind() {
+	public void bind(final Boolean useEntityModel) {
+
+		if (!useEntityModel) {
+			if (mCommon.mEntityId == null) {
+				Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(mCommon.mBeaconId);
+				mapBeacon.entities = null;
+			}
+			else {
+				Entity parent = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.Map);
+				if (parent.children != null) {
+					parent.children = null;
+				}
+			}
+		}
 
 		new AsyncTask() {
 
@@ -61,27 +74,37 @@ public class MapCandiList extends CandiListBase {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				/*
-				 * Load up the data. We are usually displaying data where the initial chunk has
-				 * already been fetched from the service. The exception is candi by user. If the
-				 * first fetch hasn't happened yet, we handle it here.
-				 */
 
 				ServiceResponse serviceResponse = new ServiceResponse();
 				if (mCommon.mEntityId == null) {
-					ArrayList<String> beaconIdsNew = new ArrayList<String>();
-					beaconIdsNew.add(mCommon.mBeaconId);
-					serviceResponse = ProxiExplorer.getInstance().getEntitiesForBeacons(beaconIdsNew, null, null, false);
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						ServiceData serviceData = (ServiceData) serviceResponse.data;
-						List<Entity> entities = (List<Entity>) serviceData.data;
-						serviceResponse.data = entities;
+					Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(mCommon.mBeaconId);
+					if (mapBeacon.entities != null && mapBeacon.entities.size() > 0) {
+						serviceResponse.data = mapBeacon.entities;
+					}
+					else {
+						ArrayList<String> beaconIdsNew = new ArrayList<String>();
+						beaconIdsNew.add(mCommon.mBeaconId);
+						serviceResponse = ProxiExplorer.getInstance().getEntitiesForBeacons(beaconIdsNew, null, null, false);
+						if (serviceResponse.responseCode == ResponseCode.Success) {
+							ServiceData serviceData = (ServiceData) serviceResponse.data;
+							List<Entity> entities = (List<Entity>) serviceData.data;
+							serviceResponse.data = entities;
+						}
 					}
 				}
 				else {
-					String jsonFields = "{\"entities\":{},\"children\":{},\"parents\":{},\"comments\":{}}";
-					String jsonEagerLoad = "{\"children\":true,\"parents\":true,\"comments\":false}";
-					serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, jsonFields, null);
+					Entity parent = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.Map);
+					if (parent.children != null && parent.children.size() > 0) {
+						serviceResponse.data = parent.children;
+					}
+					else {
+						String jsonFields = "{\"entities\":{},\"children\":{},\"parents\":{},\"comments\":{}}";
+						String jsonEagerLoad = "{\"children\":true,\"parents\":true,\"comments\":false}";
+						serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, jsonFields, null);
+						ServiceData serviceData = (ServiceData) serviceResponse.data;
+						serviceResponse.data = (EntityList<Entity>) serviceData.data;
+
+					}
 				}
 				return serviceResponse;
 			}
@@ -90,16 +113,7 @@ public class MapCandiList extends CandiListBase {
 			protected void onPostExecute(Object response) {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					List<Entity> entities = null;
-					if (mCommon.mEntityId == null) {
-						entities = (List<Entity>) serviceResponse.data;
-					}
-					else {
-						ServiceData serviceData = (ServiceData) serviceResponse.data;
-						Entity entity = (Entity) serviceData.data;
-						entities = entity.children;
-					}
-
+					List<Entity> entities = (List<Entity>) serviceResponse.data;
 					/*
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */

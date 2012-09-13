@@ -103,6 +103,7 @@
     <string name="error_connection">Check network connection and retry</string>
     <string name="error_connection_notification">Touch to retry network connection</string>
     <string name="error_connection_poor">Network connection is poor, retry later</string>
+    <string name="error_client_request_socket_error">Resource has moved or been deleted</string>
     <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
     <string name="error_client_request_error">Aircandi request error</string>
     <string name="error_client_request_not_found">Resource not found</string>

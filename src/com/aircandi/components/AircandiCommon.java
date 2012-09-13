@@ -439,11 +439,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 			 * This could be any of these:
 			 * - ConnectTimeoutException: timeout expired trying to connect to service
 			 * - SocketTimeoutException: timeout expired on a socket
-			 * - SocketException: thrown during socket creation or setting options
 			 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
 			 * - UnknownHostException: hostname didn't exist in the dns system
 			 */
 			ImageUtils.showToastNotification(mActivity.getString(R.string.error_connection_poor), Toast.LENGTH_SHORT);
+		}
+		else if (errorType == ErrorType.Client && errorCode == ErrorCode.SocketException) {
+			/* Connection could be good but the remote service has a problem with our request */
+			ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_socket_error), Toast.LENGTH_SHORT);
 		}
 		else if (errorType == ErrorType.Client) {
 			/*
@@ -981,6 +984,18 @@ public class AircandiCommon implements ActionBar.TabListener {
 				}
 				else if (mPageName.equals("CandiForm")) {
 					((CandiForm) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("UserCandiList")) {
+					((UserCandiList) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("UserCandiForm")) {
+					((UserCandiForm) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("MapCandiList")) {
+					((MapCandiList) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("MapCandiForm")) {
+					((MapCandiForm) mActivity).doRefresh();
 				}
 				else if (mPageName.equals("CandiMap")) {
 					((CandiMap) mActivity).doRefresh();

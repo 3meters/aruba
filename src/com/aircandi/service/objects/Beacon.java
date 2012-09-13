@@ -59,6 +59,7 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable{
 	public Boolean			hidden				= false;
 	public Boolean			dirty				= false;
 	public Boolean			test				= false;
+	public Boolean			global				= false;
 	public Boolean			radarHit			= false;
 	public Date				discoveryTime;
 	public Boolean			detectedLastPass	= false;

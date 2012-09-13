@@ -13,6 +13,7 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.ServiceData;
 
 public class CandiList extends CandiListBase {
 
@@ -23,7 +24,7 @@ public class CandiList extends CandiListBase {
 		if (!isFinishing()) {
 			initialize();
 			configureActionBar();
-			bind();
+			bind(true);
 		}
 	}
 
@@ -36,7 +37,12 @@ public class CandiList extends CandiListBase {
 		mCommon.mActionBar.setTitle(collection.title);
 	}
 
-	public void bind() {
+	public void bind(final Boolean useEntityModel) {
+
+		if (!useEntityModel) {
+			Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
+			entity.children = null;
+		}
 
 		new AsyncTask() {
 
@@ -47,14 +53,19 @@ public class CandiList extends CandiListBase {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				/*
-				 * Load up the data. We are usually displaying data where the initial chunk has
-				 * already been fetched from the service. The exception is candi by user. If the
-				 * first fetch hasn't happened yet, we handle it here.
-				 */
+
 				ServiceResponse serviceResponse = new ServiceResponse();
-				EntityList<Entity> entitiesRadar = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, EntityTree.Radar);
-				serviceResponse.data = entitiesRadar;
+				Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
+				if (entity.children != null && entity.children.size() > 0) {
+					serviceResponse.data = entity.children;
+				}
+				else {
+					String jsonFields = "{\"entities\":{},\"children\":{},\"parents\":{},\"comments\":{}}";
+					String jsonEagerLoad = "{\"children\":true,\"parents\":true,\"comments\":false}";
+					serviceResponse = ProxiExplorer.getInstance().getEntity(entity.id, jsonEagerLoad, jsonFields, null);
+					ServiceData serviceData = (ServiceData) serviceResponse.data;
+					serviceResponse.data = ((Entity)serviceData.data).children;
+				}
 				return serviceResponse;
 			}
 
@@ -70,11 +81,15 @@ public class CandiList extends CandiListBase {
 						onBackPressed();
 					}
 					else {
-
 						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 						mEntityModelUser = Aircandi.getInstance().getUser();
+
 						if (serviceResponse.data != null) {
+							if (!useEntityModel) {
+								Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
+								entity.children = (EntityList<Entity>) serviceResponse.data;
+							}
 							CandiListAdapter adapter = new CandiListAdapter(CandiList.this, (EntityList<Entity>) serviceResponse.data,
 									R.layout.temp_listitem_candi);
 							mListView.setAdapter(adapter);

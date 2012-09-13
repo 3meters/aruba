@@ -234,6 +234,7 @@ public class ProxiExplorer {
 						beaconNew.detectedLastPass = true;
 						beaconNew.radarHit = true;
 						beaconNew.state = BeaconState.New;
+						beaconNew.global = scanResult.global;
 						if (observation != null) {
 							beaconNew.latitude = observation.latitude;
 							beaconNew.longitude = observation.longitude;
@@ -331,8 +332,14 @@ public class ProxiExplorer {
 		/* Set method parameters */
 		if (beaconIdsNew.size() > 0) {
 			parameters.putStringArrayList("beaconIdsNew", beaconIdsNew);
+			ArrayList<Integer> levels = new ArrayList<Integer>();
+			for (String beaconId : beaconIdsNew) {
+				Beacon beacon = mEntityModel.getBeaconById(beaconId);
+				levels.add(beacon.global ? -20 : beacon.scanLevelDb);
+			}
+			parameters.putIntegerArrayList("beaconLevels", levels);
 		}
-
+		
 		if (beaconIdsRefresh != null && beaconIdsRefresh.size() > 0 && lastRefreshDate != null) {
 			parameters.putStringArrayList("beaconIdsRefresh", beaconIdsRefresh);
 			parameters.putLong("refreshDate", lastRefreshDate.longValue());
@@ -982,6 +989,9 @@ public class ProxiExplorer {
 							entity.comments = new ArrayList<Comment>();
 						}
 						entity.comments.add(0, comment);
+						if (entity.commentCount == null) {
+							entity.commentCount = 0;
+						}
 						entity.commentCount++;
 					}
 					else {
@@ -992,6 +1002,9 @@ public class ProxiExplorer {
 										childEntity.comments = new ArrayList<Comment>();
 									}
 									childEntity.comments.add(0, comment);
+									if (childEntity.commentCount == null) {
+										childEntity.commentCount = 0;
+									}
 									childEntity.commentCount++;
 								}
 							}
@@ -1078,6 +1091,57 @@ public class ProxiExplorer {
 				}
 			}
 		}
+		
+		public void moveEntity(String moveEntityId, String parentEntityId, EntityTree collectionType) {
+			/*
+			 * This presumes the entity can only appear once per collection type.
+			 * This needs to change when entities can have multiple parents.
+			 */
+			if (collectionType == EntityTree.Radar) {
+				for (Beacon beacon : mBeacons) {
+					synchronized (beacon.entities) {
+						for (int i = beacon.entities.size() - 1; i >= 0; i--) {
+							Entity entity = beacon.entities.get(i);
+							if (entity.id.equals(moveEntityId)) {
+								return;
+							}
+							if (entity.children != null) {
+								for (int j = entity.children.size() - 1; j >= 0; j--) {
+									Entity childEntity = entity.children.get(j);
+									if (childEntity.id.equals(moveEntityId)) {
+										return;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (collectionType == EntityTree.User) {
+				/*
+				 * An entity can appear both at the top level and as a
+				 * child of a collection.
+				 */
+				synchronized (mUserEntities) {
+					for (int i = mUserEntities.size() - 1; i >= 0; i--) {
+						Entity entity = mUserEntities.get(i);
+						if (entity.id.equals(moveEntityId)) {
+							mUserEntities.remove(i);
+							continue;
+						}
+						if (entity.children != null) {
+							for (int j = entity.children.size() - 1; j >= 0; j--) {
+								Entity childEntity = entity.children.get(j);
+								if (childEntity.id.equals(moveEntityId)) {
+									entity.children.remove(j);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
 
 		private void mergeEntities(List<Object> entities, ArrayList<String> beaconIds, ArrayList<String> refreshIds, Boolean chunking) {
 			/*

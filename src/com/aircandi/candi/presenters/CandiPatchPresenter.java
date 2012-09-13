@@ -465,14 +465,7 @@ public class CandiPatchPresenter implements Observer {
 			 */
 			for (int i = mCandiPatchModel.getCandiModels().size() - 1; i >= 0; i--) {
 				CandiModel candiModel = mCandiPatchModel.getCandiModels().get(i);
-				boolean orphaned = true;
-				for (Entity entity : entitiesCopy) {
-					if (entity.id.equals(candiModel.getEntity().id)) {
-						orphaned = false;
-						break;
-					}
-				}
-				if (orphaned) {
+				if (!entitiesCopy.containsKey(candiModel.getEntity().id)) {
 					candiModel.setReasonInactive(ReasonInactive.Deleting);
 				}
 			}

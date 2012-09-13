@@ -88,7 +88,7 @@ public class CandiMap extends SherlockMapActivity {
 			initializeLocation();
 
 			if (GeoLocationManager.getInstance().getCurrentLocation() != null) {
-				bind();
+				bind(false);
 			}
 		}
 	}
@@ -173,12 +173,12 @@ public class CandiMap extends SherlockMapActivity {
 		}
 	}
 
-	private void bind() {
+	private void bind(Boolean useLocalModel) {
 
 		/*
 		 * If user is anonymous we will only get back candi that are flagged as public
 		 */
-		if (ProxiExplorer.getInstance().getEntityModel().getMapBeacons().size() == 0) {
+		if (!useLocalModel || ProxiExplorer.getInstance().getEntityModel().getMapBeacons().size() == 0) {
 
 			new AsyncTask() {
 
@@ -208,6 +208,7 @@ public class CandiMap extends SherlockMapActivity {
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						String jsonResponse = (String) serviceResponse.data;
 						List<Beacon> beacons = (List<Beacon>) ProxibaseService.convertJsonToObjects(jsonResponse, Beacon.class, GsonType.ProxibaseService).data;
+						ProxiExplorer.getInstance().getEntityModel().getMapBeacons().clear();
 						ProxiExplorer.getInstance().getEntityModel().setMapBeacons(beacons);
 					}
 					return serviceResponse;
@@ -235,7 +236,7 @@ public class CandiMap extends SherlockMapActivity {
 	}
 
 	public void doRefresh() {
-		bind();
+		bind(false);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -342,6 +343,47 @@ public class CandiMap extends SherlockMapActivity {
 	public void showBeacons() {
 
 		mMapOverlays = mMapView.getOverlays();
+		mMapOverlays.remove(mBeaconOverlay);
+		Drawable marker = getResources().getDrawable(R.drawable.icon_map_candi_iii);
+
+		List<MapBeacon> mapBeacons = new ArrayList<MapBeacon>();
+		List<GeoPoint> geoPoints = new ArrayList<GeoPoint>();
+
+		for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getMapBeacons()) {
+			if (beaconByLocation.entityCount.intValue() > 0
+					&& beaconByLocation.bssid != null
+					&& !beaconByLocation.bssid.equals(ProxiExplorer.mWifiGlobal.BSSID)
+					&& beaconByLocation.latitude != null
+					&& beaconByLocation.longitude != null) {
+				MapBeacon mapBeacon = new MapBeacon();
+				mapBeacon.point = new GeoPoint((int) (beaconByLocation.latitude.doubleValue() * 1E6)
+						, (int) (beaconByLocation.longitude.doubleValue() * 1E6));
+				mapBeacon.title = beaconByLocation.label;
+				mapBeacon.message = beaconByLocation.id;
+				mapBeacons.add(mapBeacon);
+				geoPoints.add(mapBeacon.point);
+			}
+		}
+
+		/*
+		 * Create overlays
+		 */
+		mBeaconOverlay = new CandiItemizedOverlay(mapBeacons, geoPoints, marker, mMapView);
+		Collections.sort(mapBeacons, new CandiItemizedOverlay.SortMapBeaconsByLatitude());
+		for (MapBeacon mapBeacon : mapBeacons) {
+			OverlayItem overlayItem = new OverlayItem(mapBeacon.point, mapBeacon.title, mapBeacon.message);
+			overlayItem.setMarker(marker);
+			mBeaconOverlay.addOverlay(overlayItem);
+		}
+
+		mMapOverlays.add(mBeaconOverlay);
+		
+		mMapView.invalidate();
+	}
+
+	public void showBeaconsOld() {
+
+		mMapOverlays = mMapView.getOverlays();
 		Drawable marker = getResources().getDrawable(R.drawable.icon_map_candi_iii);
 		/*
 		 * First check to see if radar is seeing a beacon that didn't come back
@@ -412,7 +454,7 @@ public class CandiMap extends SherlockMapActivity {
 		
 		mMapView.invalidate();
 	}
-
+	
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------

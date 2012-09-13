@@ -1,12 +1,16 @@
 package com.aircandi;
 
 import it.sephiroth.android.library.imagezoom.ImageViewTouch;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView.ScaleType;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.actionbarsherlock.view.Window;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
@@ -29,9 +33,12 @@ public class PictureBrowse extends FormActivity {
 	private ImageViewTouch	mImageViewTouch;
 	private ProgressBar		mProgress;
 	private ViewGroup		mProgressGroup;
+	private Bitmap			mBitmap;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		/* This has to be called before setContentView */
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 
 		initialize();
@@ -43,6 +50,7 @@ public class PictureBrowse extends FormActivity {
 		mProgressGroup = (ViewGroup) findViewById(R.id.progress_group);
 		mImageViewTouch = (ImageViewTouch) findViewById(R.id.image);
 		mImageViewTouch.setFitToScreen(true);
+		setSupportProgressBarIndeterminateVisibility(true);
 		mCommon.mActionBar.setSubtitle("double-tap to zoom");
 	}
 
@@ -64,59 +72,76 @@ public class PictureBrowse extends FormActivity {
 			((View) findViewById(R.id.block_author)).setVisibility(View.GONE);
 		}
 
-		final ImageRequestBuilder builder = new ImageRequestBuilder(this);
-		String imageUri = entity.imageUri;
-		if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
-			imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+		if (mBitmap != null) {
+			mImageViewTouch.setImageBitmap(mBitmap);			
 		}
-		builder.setImageUri(imageUri);
-		builder.setImageFormat(ImageFormat.Binary);
-		builder.setSearchCache(false);
-		builder.setUpdateCache(false);
-		builder.setScaleToWidth(CandiConstants.IMAGE_WIDTH_ORIGINAL);
-		builder.setRequestListener(new RequestListener() {
+		else {
 
-			@Override
-			public void onComplete(Object response) {
-				final ServiceResponse serviceResponse = (ServiceResponse) response;
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-							mImageViewTouch.setImageBitmap(imageResponse.bitmap);
-						}
-						else {
-							mImageViewTouch.setImageResource(R.drawable.placeholder_logo);
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureBrowse);							
-						}
-					}
-				});
+			final ImageRequestBuilder builder = new ImageRequestBuilder(this);
+			String imageUri = entity.imageUri;
+			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
+				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 			}
+			builder.setImageUri(imageUri)
+					.setImageFormat(ImageFormat.Binary)
+					.setSearchCache(false)
+					.setUpdateCache(false)
+					.setScaleToWidth(CandiConstants.IMAGE_WIDTH_ORIGINAL)
+					.setRequestListener(new RequestListener() {
 
-			@Override
-			public void onProgressChanged(final int progress) {
-				runOnUiThread(new Runnable() {
+						@Override
+						public void onComplete(Object response) {
+							final ServiceResponse serviceResponse = (ServiceResponse) response;
+							runOnUiThread(new Runnable() {
 
-					@Override
-					public void run() {
-						mProgress.setProgress(progress);
-						if (progress == 100) {
-							mProgressGroup.setVisibility(View.GONE);
+								@Override
+								public void run() {
+									if (serviceResponse.responseCode == ResponseCode.Success) {
+										ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+										mBitmap = imageResponse.bitmap;
+										mImageViewTouch.setImageBitmap(imageResponse.bitmap);
+									}
+									else {
+										//mImageViewTouch.setFitToScreen(false);
+										mImageViewTouch.setScaleType(ScaleType.CENTER);
+										mImageViewTouch.setImageResource(R.drawable.image_broken);
+										mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureBrowse);
+									}
+									setSupportProgressBarIndeterminateVisibility(false);
+
+								}
+							});
 						}
-					}
-				});
-			}
-		});
 
-		ImageRequest imageRequest = builder.create();
-		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
+						@Override
+						public void onProgressChanged(final int progress) {
+							runOnUiThread(new Runnable() {
+
+								@Override
+								public void run() {
+									mProgress.setProgress(progress);
+									if (progress == 100) {
+										mProgressGroup.setVisibility(View.GONE);
+									}
+								}
+							});
+						}
+					});
+
+			ImageRequest imageRequest = builder.create();
+			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		mImageViewTouch.setFitToScreen(true);
+		super.onConfigurationChanged(newConfig);
+	}
+
 
 	protected void onDestroy() {
 		/*

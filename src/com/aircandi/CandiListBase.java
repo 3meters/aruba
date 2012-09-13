@@ -28,11 +28,11 @@ public abstract class CandiListBase extends CandiActivity {
 		mListView = (ListView) findViewById(R.id.list_candi);
 	}
 
-	public abstract void bind();
+	public abstract void bind(Boolean useEntityModel);
 
 	public void doRefresh() {
 		/* Called from AircandiCommon */
-		bind();
+		bind(false);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ public abstract class CandiListBase extends CandiActivity {
 			}
 			else {
 				initialize();
-				bind();
+				bind(true);
 			}
 		}
 		else {
@@ -122,7 +122,7 @@ public abstract class CandiListBase extends CandiActivity {
 					|| ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
 					|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
-				bind();
+				bind(true);
 			}
 		}
 	}

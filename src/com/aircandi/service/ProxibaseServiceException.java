@@ -100,7 +100,8 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 		DuplicateException,
 		SessionException,
 		PasswordException, 
-		GatewayTimeoutException
+		GatewayTimeoutException, 
+		SocketException
 	}
 
 	/**

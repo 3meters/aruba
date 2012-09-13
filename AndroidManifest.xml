@@ -173,6 +173,7 @@
         <activity
             android:name=".PictureBrowse"
             android:label="@string/form_title_picture_browse"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity

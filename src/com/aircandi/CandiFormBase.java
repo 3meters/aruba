@@ -682,6 +682,10 @@ public abstract class CandiFormBase extends CandiActivity {
 						parentEntityNew.children.add(entity);
 						entity.parent = parentEntityNew;
 						entity.parentId = parentEntityNew.id;
+						
+						/* Remove from top level if its there */
+						entity.beacon.entities.remove(entity);
+
 						if (parentEntityNew.children.size() > 1) {
 							Collections.sort(parentEntityNew.children, new EntityList.SortEntitiesByModifiedDate());
 						}
@@ -725,12 +729,14 @@ public abstract class CandiFormBase extends CandiActivity {
 							}
 						}
 					}
-
+					
+					ProxiExplorer.getInstance().getEntityModel().rebuildEntityList();
 					ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 					ImageUtils.showToastNotification(getString(R.string.alert_moved), Toast.LENGTH_SHORT);
 					bind(true);
 				}
 			}
+		
 		}.execute();
 
 	}

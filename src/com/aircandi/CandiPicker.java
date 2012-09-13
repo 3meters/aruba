@@ -36,7 +36,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 
 	private ListView			mListViewCandi;
 	private EntityList<Entity>	mEntities	= new EntityList<Entity>();
-	private EntityTree		mMethodType	= EntityTree.Radar;
+	private EntityTree			mMethodType	= EntityTree.Radar;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -129,7 +129,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 
 							entitiesUserCandi.setCollectionType(EntityTree.User);
 							entitiesUserCandi.addAll((Collection<? extends Entity>) serviceData.data);
-							
+
 							/* Do some fixup migrating settings to the children collection */
 							for (Entity entity : entitiesUserCandi) {
 								if (entity.children != null) {
@@ -194,7 +194,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 		setResult(Activity.RESULT_OK, intent);
 		finish();
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------

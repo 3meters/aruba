@@ -56,11 +56,12 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 	private String					mBeaconId;
 
 	private static int				PIXEL_CLUSTER		= 25;
-	//	private static int				DENSITY_X			= 20;
-	//	private static int				DENSITY_Y			= 20;
-	//	private static double			OFFSET				= 268435456;
-	//	private static double			RADIUS				= 85445659.4471;
 	private long					systemTime			= System.currentTimeMillis();
+	private boolean					tapPrimed			= false;
+	private float					mTouchStartY;
+	private float					mTouchStartX;
+	private int						mTouchSlopSquare;
+	private long					lastTouchTime		= -1;
 
 	public CandiItemizedOverlay(List<MapBeacon> mapBeacons, List<GeoPoint> geoPoints, Drawable defaultMarker, MapView mapView) {
 		super(boundCenterBottom(defaultMarker));
@@ -69,29 +70,25 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		mContext = mMapView.getContext();
 		mMapBeacons = mapBeacons;
 
+		final ViewConfiguration configuration = ViewConfiguration.get(mContext);
+		int touchSlop = configuration.getScaledTouchSlop();
+		int doubleTapSlop = configuration.getScaledDoubleTapSlop();
+		mTouchSlopSquare = (touchSlop * touchSlop) / 4;
+
 		mMarker = ((BitmapDrawable) mapView.getResources().getDrawable(R.drawable.icon_map_candi_iii)).getBitmap();
 		mMarkerGrouped = ((BitmapDrawable) mapView.getResources().getDrawable(R.drawable.icon_map_candi_cluster)).getBitmap();
 
 		populate();
 	}
 
-	@Override
-	protected OverlayItem createItem(int i) {
-		return mOverlays.get(i);
-	}
-
-	@Override
-	public int size() {
-		return mOverlays.size();
-	}
-
-	@Override
-	protected int getIndexToDraw(int arg0) {
-		return super.getIndexToDraw(arg0);
-	}
+	// --------------------------------------------------------------------------------------------
+	// Event routines
+	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected boolean onTap(int index) {
+		if (!tapPrimed) return false;
+
 		OverlayItem overlayItem = getItem(index);
 		List<OverlayItem> cell = getCluster(overlayItem);
 
@@ -166,49 +163,37 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event, MapView mapView) {
-		//		switch (event.getAction()) {
-		//			case MotionEvent.ACTION_DOWN:
-		//				if ((System.currentTimeMillis() - systemTime) < ViewConfiguration.getDoubleTapTimeout()) {
-		//					mapView.getController().zoomInFixing((int) event.getX(), (int) event.getY());
-		//				}
-		//				break;
-		//			case MotionEvent.ACTION_UP:
-		//				systemTime = System.currentTimeMillis();
-		//				break;
-		//		}
-		//
+		long thisTime = System.currentTimeMillis();
+
+		switch (event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				if ((System.currentTimeMillis() - systemTime) < ViewConfiguration.getDoubleTapTimeout()) {
+					mapView.getController().zoomInFixing((int) event.getX(), (int) event.getY());
+					return true;
+				}
+				else {
+					mTouchStartY = event.getY();
+					mTouchStartX = event.getX();
+					tapPrimed = false;
+					lastTouchTime = thisTime;
+				}
+
+				break;
+			case MotionEvent.ACTION_UP:
+				systemTime = System.currentTimeMillis();
+				if (Math.abs(mTouchStartY - event.getY()) <= mTouchSlopSquare
+						&& Math.abs(mTouchStartX - event.getX()) <= mTouchSlopSquare) {
+					tapPrimed = true;
+				}
+				break;
+		}
+
 		return false;
 	}
 
-	public void addOverlay(OverlayItem overlay) {
-		mOverlays.add(overlay);
-		populate();
-	}
-
-	private static boolean isWithin(Point point, MapView mapView) {
-		return (point.x > 0 & point.x < mapView.getWidth() & point.y > 0 & point.y < mapView.getHeight());
-	}
-
-	private boolean isCurrentLocationVisible(GeoPoint point) {
-		Rect currentMapBoundsRect = new Rect();
-		Point currentDevicePosition = new Point();
-
-		mMapView.getProjection().toPixels(point, currentDevicePosition);
-		mMapView.getDrawingRect(currentMapBoundsRect);
-
-		return currentMapBoundsRect.contains(currentDevicePosition.x, currentDevicePosition.y);
-	}
-
-	private List<OverlayItem> getCluster(OverlayItem overlayItem) {
-		for (List<OverlayItem> cluster : mOverlaysClustered) {
-			for (OverlayItem item : cluster) {
-				if (item.equals(overlayItem)) {
-					return cluster;
-				}
-			}
-		}
-		return null;
-	}
+	// --------------------------------------------------------------------------------------------
+	// UI routines
+	// --------------------------------------------------------------------------------------------
 
 	private void drawTitle(OverlayItem item, String title, Canvas canvas) {
 
@@ -346,6 +331,54 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Misc routines
+	// --------------------------------------------------------------------------------------------
+	@Override
+	protected OverlayItem createItem(int i) {
+		return mOverlays.get(i);
+	}
+
+	@Override
+	public int size() {
+		return mOverlays.size();
+	}
+
+	@Override
+	protected int getIndexToDraw(int arg0) {
+		return super.getIndexToDraw(arg0);
+	}
+
+	public void addOverlay(OverlayItem overlay) {
+		mOverlays.add(overlay);
+		populate();
+	}
+
+	private static boolean isWithin(Point point, MapView mapView) {
+		return (point.x > 0 & point.x < mapView.getWidth() & point.y > 0 & point.y < mapView.getHeight());
+	}
+
+	private boolean isCurrentLocationVisible(GeoPoint point) {
+		Rect currentMapBoundsRect = new Rect();
+		Point currentDevicePosition = new Point();
+
+		mMapView.getProjection().toPixels(point, currentDevicePosition);
+		mMapView.getDrawingRect(currentMapBoundsRect);
+
+		return currentMapBoundsRect.contains(currentDevicePosition.x, currentDevicePosition.y);
+	}
+
+	private List<OverlayItem> getCluster(OverlayItem overlayItem) {
+		for (List<OverlayItem> cluster : mOverlaysClustered) {
+			for (OverlayItem item : cluster) {
+				if (item.equals(overlayItem)) {
+					return cluster;
+				}
+			}
+		}
+		return null;
+	}
+
 	private double distanceInPixels(GeoPoint g1, GeoPoint g2) {
 		Projection projection = mMapView.getProjection();
 		Point p1 = new Point();
@@ -355,6 +388,10 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		double distancePx = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
 		return distancePx;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Inner classes
+	// --------------------------------------------------------------------------------------------
 
 	public static class SortMapBeaconsByLatitude implements Comparator<MapBeacon> {
 
