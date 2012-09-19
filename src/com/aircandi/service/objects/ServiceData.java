@@ -1,8 +1,9 @@
 package com.aircandi.service.objects;
 
-import java.util.List;
+import java.util.HashMap;
 
-import com.google.gson.annotations.Expose;
+import com.aircandi.service.Expose;
+
 
 /**
  * @author Jayma
@@ -12,7 +13,7 @@ public class ServiceData {
 	@Expose
 	public Object		data;
 	@Expose
-	public List<String>	cursor;
+	public Object		d;			/* for Bing */
 	@Expose
 	public Number		date;
 	@Expose
@@ -32,4 +33,29 @@ public class ServiceData {
 	public Number		time;
 
 	public ServiceData() {}
+
+	public static ServiceData setFromPropertiesFromMap(ServiceData serviceData, HashMap map) {
+		/*
+		 * Properties involved with editing are copied from one entity to another.
+		 */
+		serviceData.data = (Object) map.get("data");
+		serviceData.d = (Object) map.get("d");
+		serviceData.date = (Number) map.get("date");
+		serviceData.count = (Number) map.get("count");
+		serviceData.more = (Boolean) map.get("more");
+		serviceData.info = (String) map.get("info");
+		if (map.get("user") != null) {
+			serviceData.user = (User) User.setFromPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
+		}
+		if (map.get("error") != null) {
+			serviceData.error = (ServiceError) ServiceError.setFromPropertiesFromMap(new ServiceError(), (HashMap<String, Object>) map.get("error"));
+		}
+		if (map.get("session") != null) {
+			serviceData.session = (Session) Session.setFromPropertiesFromMap(new Session(), (HashMap<String, Object>) map.get("session"));
+		}
+		serviceData.time = (Number) map.get("time");
+
+		return serviceData;
+	}
+
 }

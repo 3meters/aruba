@@ -35,10 +35,10 @@ import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.Query;
 import com.aircandi.service.ServiceRequest;
@@ -151,8 +151,8 @@ public class ProfileForm extends FormActivity {
 					query.filter("{\"_id\":\"" + String.valueOf(mUserId) + "\"}");
 				}
 
-				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
+				ServiceRequest serviceRequest = new ServiceRequest()
+						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
 						.setRequestType(RequestType.Get)
 						.setQuery(query)
 						.setSession(Aircandi.getInstance().getUser().session)
@@ -167,7 +167,7 @@ public class ProfileForm extends FormActivity {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) serviceResponse.data;
-					mUser = (User) ProxibaseService.convertJsonToObject(jsonResponse, User.class, GsonType.ProxibaseService).data;
+					mUser = (User) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User).data;
 
 					/* We got fresh user data but we want to hook up the old session. */
 					mUser.session = Aircandi.getInstance().getUser().session;
@@ -324,10 +324,10 @@ public class ProfileForm extends FormActivity {
 						 * on the session info passed with request.
 						 */
 
-						ServiceRequest serviceRequest = new ServiceRequest();
-						serviceRequest.setUri(mUser.getEntryUri())
+						ServiceRequest serviceRequest = new ServiceRequest()
+								.setUri(mUser.getEntryUri())
 								.setRequestType(RequestType.Update)
-								.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService))
+								.setRequestBody(ProxibaseService.convertObjectToJsonSmart(mUser, true))
 								.setSession(Aircandi.getInstance().getUser().session)
 								.setResponseFormat(ResponseFormat.Json);
 
@@ -363,7 +363,7 @@ public class ProfileForm extends FormActivity {
 						/*
 						 * We also need to update the user that has been persisted for auto sign in.
 						 */
-						String jsonUser = ProxibaseService.convertObjectToJson((Object) mUser, GsonType.Internal);
+						String jsonUser = ProxibaseService.convertObjectToJsonSmart(mUser, true);
 						Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonUser);
 						Aircandi.settingsEditor.commit();
 

@@ -1,7 +1,8 @@
 package com.aircandi.service.objects;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.aircandi.service.Expose;
+import com.aircandi.service.SerializedName;
+
 
 /**
  * @author Jayma

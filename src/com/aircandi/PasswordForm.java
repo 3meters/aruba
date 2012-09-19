@@ -112,15 +112,14 @@ public class PasswordForm extends FormActivity {
 			protected Object doInBackground(Object... params) {
 
 				Bundle parameters = new Bundle();
-				ServiceRequest serviceRequest = new ServiceRequest();
-
 				parameters.putString("user", "object:{"
 						+ "\"_id\":\"" + mUser.id + "\","
 						+ "\"oldPassword\":\"" + mTextPasswordOld.getText().toString() + "\","
 						+ "\"newPassword\":\"" + mTextPassword.getText().toString() + "\""
 						+ "}");
 
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "changepw")
+				ServiceRequest serviceRequest = new ServiceRequest()
+						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "changepw")
 						.setRequestType(RequestType.Method)
 						.setParameters(parameters)
 						.setSession(Aircandi.getInstance().getUser().session)

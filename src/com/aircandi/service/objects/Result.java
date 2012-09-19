@@ -1,6 +1,9 @@
 package com.aircandi.service.objects;
 
-import com.google.gson.annotations.Expose;
+import java.util.HashMap;
+
+import com.aircandi.service.Expose;
+
 
 /**
  * @author Jayma
@@ -8,7 +11,13 @@ import com.google.gson.annotations.Expose;
 public class Result {
 
 	@Expose
-	public String	_id;
+	public String	id;
 
 	public Result() {}
+	
+	public static Result setFromPropertiesFromMap(Result result, HashMap map) {
+		result.id = (String) map.get("_id");
+
+		return result;
+	}
 }

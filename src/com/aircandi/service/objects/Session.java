@@ -1,44 +1,48 @@
 package com.aircandi.service.objects;
 
+import java.util.HashMap;
+
 import com.aircandi.core.CandiConstants;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.aircandi.service.Expose;
 
 /**
  * @author Jayma
  */
-public class Session {
+public class Session extends ServiceEntry {
 
-	/* syntax: @Expose (serialize = false, deserialize = false) */
-
-	@Expose
-	@SerializedName("_id")
-	public String	id;
+	private static final long	serialVersionUID	= 127428776257201066L;
 
 	@Expose
-	@SerializedName("_owner")
-	public String	ownerId;
-
-	@Expose
-	public String	key;
+	public String				key;
 
 	/* Dates */
 
-	@Expose(serialize = false, deserialize = true)
-	public Number	createdDate;
+	@Expose
+	public Number				expirationDate;
 
-	@Expose(serialize = false, deserialize = true)
-	public Number	modifiedDate;
-	
-	@Expose(serialize = false, deserialize = true)
-	public Number	expirationDate;
-	
 	public Session() {}
-	
+
 	public Boolean renewSession(long currentTime) {
 		if (expirationDate.longValue() < (currentTime + CandiConstants.SIXTY_MINUTES)) {
 			return true;
 		}
 		return false;
 	}
+
+	public static Session setFromPropertiesFromMap(Session session, HashMap map) {
+		/*
+		 * Properties involved with editing are copied from one entity to another.
+		 */
+		session = (Session) ServiceEntry.setFromPropertiesFromMap(session, map);
+		session.key = (String) map.get("key");
+		session.expirationDate = (Number) map.get("expirationDate");
+
+		return session;
+	}
+
+	@Override
+	public String getCollection() {
+		return "sessions";
+	}
+
 }

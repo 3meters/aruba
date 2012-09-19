@@ -351,6 +351,9 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 
 	public void addOverlay(OverlayItem overlay) {
 		mOverlays.add(overlay);
+	}
+	
+	public void doPopulate() {
 		populate();
 	}
 

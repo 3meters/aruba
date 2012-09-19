@@ -126,8 +126,8 @@ public class BookmarkPicker extends FormActivity implements OnItemClickListener 
 								linkUri = "http://" + mUri;
 							}
 
-							ServiceRequest serviceRequest = new ServiceRequest();
-							serviceRequest.setUri(linkUri)
+							ServiceRequest serviceRequest = new ServiceRequest()
+									.setUri(linkUri)
 									.setRequestType(RequestType.Get)
 									.setResponseFormat(ResponseFormat.Html)
 									.setSuppressUI(true);

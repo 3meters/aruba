@@ -23,23 +23,22 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.DrawableManager;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.ImageResult;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.R;
 
 /*
  * We often will get duplicates because the ordering of images isn't
@@ -163,7 +162,8 @@ public class PictureSearch extends FormActivity {
 				.setPassword(getBingKey());
 
 		serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-		ServiceData serviceData = ProxibaseService.convertJsonToObjects((String)serviceResponse.data, ImageResult.class, GsonType.BingService);
+		
+		ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart((String)serviceResponse.data, ServiceDataType.ImageResult);
 		ArrayList<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
 		serviceResponse.data = images;
 

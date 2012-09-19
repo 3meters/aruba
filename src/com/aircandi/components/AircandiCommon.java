@@ -48,7 +48,6 @@ import com.aircandi.Aircandi.CandiTask;
 import com.aircandi.CandiForm;
 import com.aircandi.CandiList;
 import com.aircandi.CandiMap;
-import com.aircandi.CandiPicker;
 import com.aircandi.CandiRadar;
 import com.aircandi.CandiRadar.RefreshType;
 import com.aircandi.CommentList;
@@ -75,9 +74,9 @@ import com.aircandi.components.ProxiExplorer.WifiScanResult;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest;
@@ -247,7 +246,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 			String json = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_LOCATION));
 			if (json != null && !json.equals("")) {
-				mEntityLocation = ProxibaseService.getGson(GsonType.Internal).fromJson(json, GeoLocation.class);
+				mEntityLocation = (GeoLocation) ProxibaseService.convertJsonToObjectInternalSmart(json, ServiceDataType.GeoLocation);
 			}
 		}
 	}
@@ -677,21 +676,21 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Logger.i(this, "Auto sign in...");
 
 		/* Use anonymous user as initial default */
-		User user = ProxibaseService.getGson(GsonType.Internal).fromJson(CandiConstants.USER_ANONYMOUS, User.class);
+
+		User user = (User) ProxibaseService.convertJsonToObjectInternalSmart(CandiConstants.USER_ANONYMOUS, ServiceDataType.User);
 
 		String jsonUser = Aircandi.settings.getString(Preferences.PREF_USER, null);
 		String jsonSession = Aircandi.settings.getString(Preferences.PREF_USER_SESSION, null);
 
 		if (jsonUser != null && jsonSession != null) {
-
-			user = ProxibaseService.getGson(GsonType.Internal).fromJson(jsonUser, User.class);
-			user.session = ProxibaseService.getGson(GsonType.Internal).fromJson(jsonSession, Session.class);
+			user = (User) ProxibaseService.convertJsonToObjectInternalSmart(jsonUser, ServiceDataType.User);
+			user.session = (Session) ProxibaseService.convertJsonToObjectInternalSmart(jsonSession, ServiceDataType.Session);
 			/*
 			 * If user is about to expire, we trigger the sign in process. We go back to the anonymous user
 			 * as the default in case the user cancels out of the sign in form.
 			 */
 			if (user.session != null && user.session.expirationDate != null && user.session.renewSession(DateUtils.nowDate().getTime())) {
-				user = ProxibaseService.getGson(GsonType.Internal).fromJson(CandiConstants.USER_ANONYMOUS, User.class);
+				user = (User) ProxibaseService.convertJsonToObjectInternalSmart(CandiConstants.USER_ANONYMOUS, ServiceDataType.User);
 				Aircandi.getInstance().setUser(user);
 				signin(R.string.signin_message_session_expired);
 				return;
@@ -707,7 +706,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void signout() {
-		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
+		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().isAnonymous()) {
 
 			new AsyncTask() {
 
@@ -726,9 +725,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 					ServiceResponse serviceResponse = new ServiceResponse();
 
 					if (user.session != null) {
-						ServiceRequest serviceRequest = new ServiceRequest();
 
-						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
+						ServiceRequest serviceRequest = new ServiceRequest()
+								.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
 								.setRequestType(RequestType.Get)
 								.setSession(user.session)
 								.setResponseFormat(ResponseFormat.Json);
@@ -752,8 +751,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						Logger.w(this, "User signed out, service call failed: " + Aircandi.getInstance().getUser().id);
 					}
 
-					User user = ProxibaseService.getGson(GsonType.Internal).fromJson(CandiConstants.USER_ANONYMOUS, User.class);
-					user.anonymous = true;
+					User user = (User) ProxibaseService.convertJsonToObjectInternalSmart(CandiConstants.USER_ANONYMOUS, ServiceDataType.User);
 					Aircandi.getInstance().setUser(user);
 
 					/* Clear the user and session that is tied into auto-signin */
@@ -913,7 +911,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void doPrepareOptionsMenu(Menu menu) {
 		/* Hide the sign out option if we don't have a current session */
-		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().anonymous) {
+		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().isAnonymous()) {
 			((MenuItem) menu.findItem(R.id.signin)).setVisible(false);
 			((MenuItem) menu.findItem(R.id.signout)).setVisible(true);
 			((MenuItem) menu.findItem(R.id.profile)).setVisible(true);
@@ -1064,13 +1062,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		else if (mPageName.equals("EntityForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
-		}
-		else if (mPageName.equals("CandiPicker")) {
-			/*
-			 * We let candi picker handle tab changes because there
-			 * is extra work to do.
-			 */
-			addTabsToActionBar((CandiPicker) mActivity, CandiConstants.TABS_CANDI_PICKER_ID);
 		}
 	}
 

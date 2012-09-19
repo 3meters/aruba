@@ -25,33 +25,31 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiItemizedOverlay;
 import com.aircandi.components.CandiMapView;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
-import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.ServiceData;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
-import com.aircandi.BuildConfig;
-import com.aircandi.R;
 
 public class CandiMap extends SherlockMapActivity {
 
@@ -190,24 +188,27 @@ public class CandiMap extends SherlockMapActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 
-					Bundle parameters = new Bundle();
 					Location location = GeoLocationManager.getInstance().getCurrentLocation();
+
+					Bundle parameters = new Bundle();
 					parameters.putDouble("latitude", location.getLatitude());
 					parameters.putDouble("longitude", location.getLongitude());
 					parameters.putDouble("radius", SEARCH_RANGE / RADIUS_EARTH); // to radians
 					parameters.putString("userId", Aircandi.getInstance().getUser().id);
 
-					ServiceRequest serviceRequest = new ServiceRequest();
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getBeaconsNearLocation");
-					serviceRequest.setRequestType(RequestType.Method);
-					serviceRequest.setParameters(parameters);
-					serviceRequest.setResponseFormat(ResponseFormat.Json);
+					ServiceRequest serviceRequest = new ServiceRequest()
+							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getBeaconsNearLocation")
+							.setRequestType(RequestType.Method)
+							.setParameters(parameters)
+							.setResponseFormat(ResponseFormat.Json);
 
 					ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						String jsonResponse = (String) serviceResponse.data;
-						List<Beacon> beacons = (List<Beacon>) ProxibaseService.convertJsonToObjects(jsonResponse, Beacon.class, GsonType.ProxibaseService).data;
+						ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Beacon);
+						List<Beacon> beacons = (List<Beacon>) serviceData.data;
+
 						ProxiExplorer.getInstance().getEntityModel().getMapBeacons().clear();
 						ProxiExplorer.getInstance().getEntityModel().setMapBeacons(beacons);
 					}
@@ -304,42 +305,6 @@ public class CandiMap extends SherlockMapActivity {
 		mMapView.invalidate();
 	}
 
-	public void showCandi() {
-		mMapOverlays = mMapView.getOverlays();
-		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi);
-		mBeaconOverlay = new CandiItemizedOverlay(null, null, drawable, mMapView);
-
-		for (Object entityPointObject : ProxiExplorer.getInstance().getEntityModel().getMapEntities()) {
-			Entity entityPoint = (Entity) entityPointObject;
-			if (entityPoint.location != null) {
-				/*
-				 * If there are entities to map that are attached to beacons we have scanned then
-				 * we want to override the location info from the service with our fresher location info.
-				 * Important because a beacon could have moved and this is the only way to show things
-				 * correctly.
-				 * 
-				 * This will cause all the candi from scanned beacons to stack on the same location.
-				 * 
-				 * We might want to show map indicators for beacons with a candi count instead of
-				 * for each candi.
-				 */
-				Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeaconById(entityPoint.beaconId);
-				if (beacon != null) {
-					Location currentLocation = GeoLocationManager.getInstance().getCurrentLocation();
-					entityPoint.location.latitude = currentLocation.getLatitude();
-					entityPoint.location.longitude = currentLocation.getLongitude();
-				}
-				GeoPoint point = new GeoPoint((int) (entityPoint.location.latitude.doubleValue() * 1E6),
-						(int) (entityPoint.location.longitude.doubleValue() * 1E6));
-				OverlayItem overlayitem = new OverlayItem(point, entityPoint.label, entityPoint.label);
-				overlayitem.setMarker(drawable);
-				mBeaconOverlay.addOverlay(overlayitem);
-			}
-		}
-		mMapOverlays.add(mBeaconOverlay);
-		mMapView.invalidate();
-	}
-
 	public void showBeacons() {
 
 		mMapOverlays = mMapView.getOverlays();
@@ -375,9 +340,8 @@ public class CandiMap extends SherlockMapActivity {
 			overlayItem.setMarker(marker);
 			mBeaconOverlay.addOverlay(overlayItem);
 		}
-
+		mBeaconOverlay.doPopulate();
 		mMapOverlays.add(mBeaconOverlay);
-		
 		mMapView.invalidate();
 	}
 
@@ -451,10 +415,10 @@ public class CandiMap extends SherlockMapActivity {
 		}
 
 		mMapOverlays.add(mBeaconOverlay);
-		
+
 		mMapView.invalidate();
 	}
-	
+
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------

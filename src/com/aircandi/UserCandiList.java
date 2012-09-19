@@ -25,9 +25,9 @@ import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.ServiceData;
@@ -54,7 +54,7 @@ public class UserCandiList extends CandiListBase {
 		}
 		Boolean expired = false;
 		Integer messageResId = R.string.signin_message_mycandi;
-		Boolean userAnonymous = user.anonymous;
+		Boolean userAnonymous = user.isAnonymous();
 		if (user.session != null) {
 			expired = user.session.renewSession(DateUtils.nowDate().getTime());
 		}
@@ -71,7 +71,7 @@ public class UserCandiList extends CandiListBase {
 			super.onCreate(savedInstanceState);
 			return;
 		}
-		
+
 		super.onCreate(savedInstanceState);
 		if (!isFinishing()) {
 			initialize();
@@ -96,7 +96,7 @@ public class UserCandiList extends CandiListBase {
 			mCommon.mActionBar.setTitle(Aircandi.getInstance().getUser().name);
 		}
 	}
-	
+
 	public void bind(final Boolean useEntityModel) {
 
 		new AsyncTask() {
@@ -110,22 +110,21 @@ public class UserCandiList extends CandiListBase {
 			protected Object doInBackground(Object... params) {
 
 				ServiceResponse serviceResponse = new ServiceResponse();
-				EntityList<Entity> proxiEntities = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, EntityTree.User);
-				Boolean entityTreeEmpty = (ProxiExplorer.getInstance().getEntityModel().getUserEntities().size() == 0);
+				EntityList<Entity> userEntities = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, EntityTree.User);
+				Boolean userTreeEmpty = (ProxiExplorer.getInstance().getEntityModel().getUserEntities().size() == 0);
 				/*
 				 * If its the user collection and it hasn't been populated yet, do the work.
 				 */
-				if (entityTreeEmpty || !useEntityModel) {
-
-					Bundle parameters = new Bundle();
-					ServiceRequest serviceRequest = new ServiceRequest();
+				if (userTreeEmpty || !useEntityModel) {
 
 					/* Set method parameters */
+					Bundle parameters = new Bundle();
 					parameters.putString("userId", Aircandi.getInstance().getUser().id);
 					if (mFilter != null) {
 						parameters.putString("filter", mFilter);
 					}
-					parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
+					parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":true,\"comments\":false}");
+					parameters.putString("fields", "object:{\"entities\":{},\"comments\":{},\"children\":{},\"parents\":{\"_id\":true}}");
 					parameters.putString("options", "object:{\"limit\":"
 							+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
 							+ ",\"skip\":0"
@@ -136,7 +135,8 @@ public class UserCandiList extends CandiListBase {
 							+ ",\"sort\":{\"modifiedDate\":-1}}"
 							+ "}");
 
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForUser")
+					ServiceRequest serviceRequest = new ServiceRequest()
+							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForUser")
 							.setRequestType(RequestType.Method)
 							.setParameters(parameters)
 							.setResponseFormat(ResponseFormat.Json);
@@ -146,14 +146,32 @@ public class UserCandiList extends CandiListBase {
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 
 						String jsonResponse = (String) serviceResponse.data;
-						ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+						ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+						
+						/*
+						 * All entities owned by the current are returned at the first level including
+						 * entities that are in collections. Collections will also include their child
+						 * entities including repeating ones already shown at the first level.
+						 * 
+						 * To support move, we need to include parent and beacon info for top level
+						 * entities.
+						 * 
+						 * - no collection: candi is now unlinked to anything.
+						 * - to collection: choice of radar or user collections.
+						 */
 
-						proxiEntities.clear();
-						proxiEntities.addAll((Collection<? extends Entity>) serviceData.data);
-						proxiEntities.setCollectionType(EntityTree.User);
+						userEntities.clear();
+						userEntities.addAll((Collection<? extends Entity>) serviceData.data);
+						userEntities.setCollectionType(EntityTree.User);
 
-						/* Do some fixup migrating settings to the children collection */
-						for (Entity entity : proxiEntities) {
+						/* 
+						 * Do some fixup migrating settings to the children collection
+						 * 
+						 * Top level entities that are actually in collections will have
+						 * parentId set and parents collection is . Child entities will have parentId set
+						 * but no parents collection. 
+						 */
+						for (Entity entity : userEntities) {
 							if (entity.children != null) {
 								entity.children.setCollectionType(EntityTree.User);
 								for (Entity childEntity : entity.children) {
@@ -161,15 +179,19 @@ public class UserCandiList extends CandiListBase {
 									childEntity.parentId = entity.id;
 								}
 							}
+							if (entity.parents != null && entity.parents.size() > 0) {
+								entity.parents.setCollectionType(EntityTree.User);
+								entity.parent = entity.parents.get(0);
+							}
 						}
 
 						/* Assign again since the object was replaced and we use it to pass down the results */
-						serviceResponse.data = proxiEntities;
+						serviceResponse.data = userEntities;
 					}
 				}
 				else {
-					proxiEntities = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, EntityTree.User);
-					serviceResponse.data = proxiEntities;
+					userEntities = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, EntityTree.User);
+					serviceResponse.data = userEntities;
 				}
 				return serviceResponse;
 			}

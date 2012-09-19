@@ -15,27 +15,25 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.DateUtils;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiExplorer.EntityTree;
+import com.aircandi.components.ProxiExplorer;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.widgets.WebImageView;
-import com.aircandi.R;
 
 public class CommentList extends CandiActivity {
 
@@ -62,12 +60,12 @@ public class CommentList extends CandiActivity {
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mListView = (ListView) findViewById(R.id.list_comments);
 	}
-	
+
 	private void configureActionBar() {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		
+
 		if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
 			if (mCommon.mEntityTree == ProxiExplorer.EntityTree.Radar) {
 				mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
@@ -78,11 +76,11 @@ public class CommentList extends CandiActivity {
 			}
 		}
 		else {
-			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
+			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, mCommon.mEntityTree);
 			mCommon.mActionBar.setTitle(collection.title);
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		}
-		
+
 	}
 
 	protected void bind() {
@@ -147,8 +145,8 @@ public class CommentList extends CandiActivity {
 				+ ",\"skip\":" + String.valueOf(mComments.size())
 				+ "}}");
 
-		final ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -157,7 +155,7 @@ public class CommentList extends CandiActivity {
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			String jsonResponse = (String) serviceResponse.data;
-			ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+			ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
 		}
 

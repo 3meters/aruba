@@ -1,5 +1,7 @@
 package com.aircandi.components;
 
+import java.util.HashMap;
+
 /**
  * The Class Thumbnail.
  * Used for bing image searches.
@@ -24,6 +26,22 @@ public class Thumbnail
 
 	/** The run time. */
 	protected Long		runTime;
+
+	public static Thumbnail setFromPropertiesFromMap(Thumbnail thumbnail, HashMap map) {
+		/*
+		 * Properties involved with editing are copied from one entity to another.
+		 */
+		thumbnail.mediaUrl = (String) map.get("MediaUrl");
+		thumbnail.width = Long.parseLong((String) map.get("Width"));
+		thumbnail.height = Long.parseLong((String) map.get("Height"));
+		thumbnail.fileSize = Long.parseLong((String) map.get("FileSize"));
+		thumbnail.contentType = (String) map.get("ContentType");
+		if (map.get("RunTime") != null) {
+			thumbnail.runTime = Long.parseLong((String) map.get("RunTime"));
+		}
+
+		return thumbnail;
+	}
 
 	/**
 	 * Gets the url.

@@ -72,10 +72,10 @@ public class DrawableManager {
 	@SuppressWarnings("deprecation")
 	private Drawable fetchDrawable(final String uri) {
 
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(uri);
-		serviceRequest.setRequestType(RequestType.Get);
-		serviceRequest.setResponseFormat(ResponseFormat.Bytes);
+		ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(uri)
+				.setRequestType(RequestType.Get)
+				.setResponseFormat(ResponseFormat.Bytes);
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 

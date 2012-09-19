@@ -25,7 +25,7 @@
 	    
     	<property file="version.properties" />
     	
-	    <property name="build.version" value="${build.major.number}.${build.minor.number}.${build.revision.number}" />
+	    <property name="build.version" value="${build.major.number}.${build.minor.number}.${build.patch.number}" />
 	    <property name="build.code" value="${build.code}" />
 	    
     	<echo>Version code: ${build.code}</echo>
@@ -66,7 +66,7 @@
                 
                 <!-- Add version to final file name -->
     			<property file="version.properties" />
-	    		<property name="build.version" value="${build.major.number}.${build.minor.number}.${build.revision.number}" />
+	    		<property name="build.version" value="${build.major.number}.${build.minor.number}.${build.patch.number}" />
 	    		<property name="build.code" value="${build.code}" />
 	    		
                 <property name="out.final.file.versioned" location="${out.absolute.dir}/${ant.project.name}-release-${build.version}.apk" />

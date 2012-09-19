@@ -48,10 +48,10 @@ import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
@@ -90,7 +90,7 @@ public class EntityForm extends FormActivity {
 		Boolean expired = false;
 		Integer messageResId = (mCommon.mCommandType == CommandType.New ? R.string.signin_message_candi_new : R.string.signin_message_candi_edit);
 		if (user != null) {
-			Boolean userAnonymous = user.anonymous;
+			Boolean userAnonymous = user.isAnonymous();
 			if (user.session != null) {
 				expired = user.session.renewSession(DateUtils.nowDate().getTime());
 			}
@@ -414,8 +414,8 @@ public class EntityForm extends FormActivity {
 								linkUri = "http://" + linkUri;
 							}
 
-							ServiceRequest serviceRequest = new ServiceRequest();
-							serviceRequest.setUri(linkUri)
+							ServiceRequest serviceRequest = new ServiceRequest()
+									.setUri(linkUri)
 									.setRequestType(RequestType.Get)
 									.setResponseFormat(ResponseFormat.Html)
 									.setSuppressUI(true);
@@ -463,10 +463,10 @@ public class EntityForm extends FormActivity {
 									Entity entity = mEntityForForm;
 									Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeaconById(entity.beaconId);
 									String jsonResponse = (String) serviceResponse.data;
-									ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, Result.class, GsonType.ProxibaseService);
+									ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.Result);
 									Result result = (Result) serviceData.data;
 
-									entity.id = result._id;
+									entity.id = result.id;
 									entity.rookie = true;
 									entity.createdDate = DateUtils.nowDate().getTime();
 									entity.modifiedDate = entity.createdDate;
@@ -633,7 +633,7 @@ public class EntityForm extends FormActivity {
 				if (mObservation != null) {
 					mObservation.beaconId = beacon.id;
 					parameters.putString("observation",
-							"object:" + ProxibaseService.convertObjectToJson(mObservation, GsonType.ProxibaseService));
+							"object:" + ProxibaseService.convertObjectToJsonSmart(mObservation, true));
 				}
 			}
 
@@ -666,21 +666,21 @@ public class EntityForm extends FormActivity {
 				beacon.locked = false;
 
 				parameters.putString("beacon",
-						"object:" + ProxibaseService.convertObjectToJson(beacon, GsonType.ProxibaseService));
+						"object:" + ProxibaseService.convertObjectToJsonSmart(beacon, true));
 			}
 
 			/* Link */
 			Link link = new Link();
 			link.toId = mCommon.mParentId == null ? beacon.id : mEntityForForm.parentId;
 			parameters.putString("link",
-					"object:" + ProxibaseService.convertObjectToJson(link, GsonType.ProxibaseService));
+					"object:" + ProxibaseService.convertObjectToJsonSmart(link, true));
 
 			/* Entity */
 			parameters.putString("entity",
-					"object:" + ProxibaseService.convertObjectToJson(mEntityForForm, GsonType.ProxibaseService));
+					"object:" + ProxibaseService.convertObjectToJsonSmart(mEntityForForm, true));
 
-			ServiceRequest serviceRequest = new ServiceRequest();
-			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
+			ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
 					.setRequestType(RequestType.Method)
 					.setParameters(parameters)
 					.setSession(Aircandi.getInstance().getUser().session)
@@ -711,10 +711,10 @@ public class EntityForm extends FormActivity {
 			/* Construct entity, link, and observation */
 			Bundle parameters = new Bundle();
 			parameters.putBoolean("skipActivityDate", false);
-			parameters.putString("entity", "object:" + ProxibaseService.convertObjectToJson(entity, GsonType.ProxibaseService));
+			parameters.putString("entity", "object:" + ProxibaseService.convertObjectToJsonSmart(entity, true));
 
-			ServiceRequest serviceRequest = new ServiceRequest();
-			serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
+			ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
 					.setRequestType(RequestType.Method)
 					.setParameters(parameters)
 					.setSession(Aircandi.getInstance().getUser().session)
@@ -780,8 +780,8 @@ public class EntityForm extends FormActivity {
 				parameters.putString("entityId", mEntityForForm.id);
 				parameters.putBoolean("deleteChildren", true);
 
-				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteEntity")
+				ServiceRequest serviceRequest = new ServiceRequest()
+						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteEntity")
 						.setRequestType(RequestType.Method)
 						.setParameters(parameters)
 						.setSession(Aircandi.getInstance().getUser().session)
@@ -922,8 +922,8 @@ public class EntityForm extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(linkUri)
+				ServiceRequest serviceRequest = new ServiceRequest()
+						.setUri(linkUri)
 						.setRequestType(RequestType.Get)
 						.setResponseFormat(ResponseFormat.Html);
 

@@ -3,16 +3,10 @@ package com.aircandi.components;
 import android.content.Context;
 import android.content.Intent;
 
-import com.aircandi.components.CommandType;
-import com.aircandi.components.ProxiExplorer.EntityTree;
-import com.aircandi.service.objects.Beacon;
-import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.GeoLocation;
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.aircandi.R;
+import com.aircandi.components.ProxiExplorer.EntityTree;
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.objects.GeoLocation;
 
 public class IntentBuilder {
 
@@ -24,7 +18,6 @@ public class IntentBuilder {
 	private String		mMessage;
 	private CommandType	mCommandType;
 	private String		mBeaconId;
-	private Boolean		mStripChildEntities	= true;
 	private Boolean		mNavigationTop		= false;
 	private Class<?>	mClass;
 	private String		mCollectionId;
@@ -40,31 +33,8 @@ public class IntentBuilder {
 	public Intent create() {
 		Intent intent = new Intent(mContext, mClass);
 
-		/* We want to make sure that any child entities don't get serialized */
-		GsonBuilder gsonb = new GsonBuilder();
-
-		gsonb.setExclusionStrategies(new ExclusionStrategy() {
-
-			@Override
-			public boolean shouldSkipClass(Class<?> clazz) {
-				return false;
-			}
-
-			@Override
-			public boolean shouldSkipField(FieldAttributes f) {
-				/* We always skip these fields because they produce circular references */
-				boolean skip = (f.getDeclaringClass() == Beacon.class && f.getName().equals("entities"));
-				if (mStripChildEntities) {
-					skip = skip || (f.getDeclaringClass() == Entity.class && f.getName().equals("children"));
-				}
-				return skip;
-			}
-		});
-
-		Gson gson = gsonb.create();
-
 		if (mEntityLocation != null) {
-			String json = gson.toJson(mEntityLocation);
+			String json = ProxibaseService.convertObjectToJsonSmart(mEntityLocation, true);
 			intent.putExtra(mContext.getString(R.string.EXTRA_ENTITY_LOCATION), json);
 		}
 

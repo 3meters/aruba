@@ -27,9 +27,9 @@ import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
@@ -74,6 +74,11 @@ public class SignInForm extends FormActivity {
 		if (mCommon.mMessage != null) {
 			mTextMessage.setText(mCommon.mMessage);
 		}
+		String email = Aircandi.settings.getString(Preferences.SETTING_LAST_EMAIL, null);
+		if (email != null) {
+			mTextEmail.setText(email);
+			mTextPassword.requestFocus();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -113,14 +118,13 @@ public class SignInForm extends FormActivity {
 				protected Object doInBackground(Object... params) {
 
 					Bundle parameters = new Bundle();
-					ServiceRequest serviceRequest = new ServiceRequest();
-
 					parameters.putString("user", "object:{"
 							+ "\"email\":\"" + email + "\","
 							+ "\"password\":\"" + password + "\""
 							+ "}");
 
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
+					ServiceRequest serviceRequest = new ServiceRequest()
+							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
 							.setRequestType(RequestType.Method)
 							.setParameters(parameters)
 							.setResponseFormat(ResponseFormat.Json);
@@ -141,7 +145,7 @@ public class SignInForm extends FormActivity {
 						Tracker.trackEvent("User", "Signin", null, 0);
 
 						String jsonResponse = (String) serviceResponse.data;
-						ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.ProxibaseService);
+						ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
 						User user = serviceData.user;
 						user.session = serviceData.session;
 						Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
@@ -150,10 +154,12 @@ public class SignInForm extends FormActivity {
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
-						String jsonUser = ProxibaseService.convertObjectToJson((Object) user, GsonType.Internal);
-						String jsonSession = ProxibaseService.convertObjectToJson((Object) user.session, GsonType.Internal);
+						String jsonUser = ProxibaseService.convertObjectToJsonSmart(user, true);
+						String jsonSession = ProxibaseService.convertObjectToJsonSmart(user.session, true);
+
 						Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonUser);
 						Aircandi.settingsEditor.putString(Preferences.PREF_USER_SESSION, jsonSession);
+						Aircandi.settingsEditor.putString(Preferences.SETTING_LAST_EMAIL, user.email);
 						Aircandi.settingsEditor.commit();
 
 						/* Different user means different user candi */

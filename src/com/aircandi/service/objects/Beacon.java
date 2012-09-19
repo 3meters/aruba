@@ -3,9 +3,11 @@ package com.aircandi.service.objects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
-import com.google.gson.annotations.Expose;
+import com.aircandi.service.Expose;
+
 
 /**
  * @author Jayma
@@ -98,6 +100,35 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable{
 			scanPasses.remove(1);
 		}
 	}
+	
+	public static Beacon setFromPropertiesFromMap(Beacon beacon, HashMap map) {
+		/*
+		 * Properties involved with editing are copied from one entity to another.
+		 */
+		beacon = (Beacon) ServiceEntry.setFromPropertiesFromMap(beacon, map);
+		
+		beacon.ssid = (String) map.get("ssid");
+		beacon.bssid = (String) map.get("bssid");
+		beacon.label = (String) map.get("label");
+		beacon.locked = (Boolean) map.get("locked");
+		beacon.visibility = (String) map.get("visibility");
+		beacon.beaconType = (String) map.get("beaconType");
+		beacon.latitude = (Number) map.get("latitude");
+		beacon.longitude = (Number) map.get("longitude");
+		beacon.altitude = (Number) map.get("altitude");
+		beacon.accuracy = (Number) map.get("accuracy");
+		beacon.speed = (Number) map.get("speed");
+		beacon.bearing = (Number) map.get("bearing");
+		
+		beacon.entityCount = (Integer) map.get("entityCount");
+		beacon.pictureCount = (Integer) map.get("pictureCount");
+		beacon.postCount = (Integer) map.get("postCount");
+		beacon.linkCount = (Integer) map.get("linkCount");
+		beacon.collectionCount = (Integer) map.get("collectionCount");
+		
+		return beacon;
+	}
+	
 
 	@Override
 	public String getCollection() {

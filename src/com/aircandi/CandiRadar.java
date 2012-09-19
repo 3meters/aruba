@@ -93,17 +93,17 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ScanOptions;
 import com.aircandi.components.ProxiExplorer.WifiScanResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.components.VersionInfo;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.Query;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
+import com.aircandi.service.objects.VersionInfo;
 import com.amazonaws.auth.BasicAWSCredentials;
 
 /*
@@ -136,8 +136,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
  * - AWS: We are using the minimum libraries: core and S3. We could do the work to call AWS without their
  * libraries which should give us the biggest savings.
  * 
- * - Gson and Guava: We could reduce our size by making the
- * libraries included with Android work instead of pulling in Gson (which in turn has a dependency on Guava).
+ * - Guava: This library provides MapMaker used to create the image cache.
  */
 
 /*
@@ -667,9 +666,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 									EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
 									mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false);
+
 									//									}
 
 									updateComplete();
+									Aircandi.stopwatch.segmentTime("Finished updating radar UI");
 
 									if (mScanOptions.fullBuild) {
 										Logger.d(CandiRadar.this, "Full entity update complete");
@@ -752,7 +753,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		/* Make sure we are at a proper scroll location */
 		mCandiPatchPresenter.ensureScrollBoundaries();
-		
+
 		/* Show aircandi tips if this is the first time the application has been run */
 		if (Aircandi.firstRunApp) {
 			onHelpButtonClick(null);
@@ -1386,7 +1387,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			@Override
 			protected void onPreExecute() {
 				if (doUpdateCheck) {
-					mCommon.showProgressDialog(true, "Scanning...", CandiRadar.this);
+					mCommon.showProgressDialog(true, getString(R.string.progress_scanning), CandiRadar.this);
 				}
 			}
 
@@ -1813,8 +1814,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		Aircandi.applicationUpdateNeeded = false;
 		Query query = new Query("documents").filter("{\"type\":\"version\",\"target\":\"aircandi\"}");
 
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
+		ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
 				.setRequestType(RequestType.Get)
 				.setQuery(query)
 				.setSuppressUI(true)
@@ -1825,7 +1826,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
 			String jsonResponse = (String) serviceResponse.data;
-			final VersionInfo versionInfo = (VersionInfo) ProxibaseService.convertJsonToObject(jsonResponse, VersionInfo.class, GsonType.ProxibaseService).data;
+			final VersionInfo versionInfo = (VersionInfo) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.VersionInfo).data;
 			String currentVersionName = Aircandi.getVersionName(this, CandiRadar.class);
 
 			if (!currentVersionName.equals(versionInfo.versionName)) {

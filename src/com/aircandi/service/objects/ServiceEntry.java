@@ -1,10 +1,13 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
 
+import com.aircandi.service.Expose;
 import com.aircandi.service.ProxiConstants;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.aircandi.service.SerializedName;
 
 /*
  * Initial user settings (owner,creator):
@@ -56,6 +59,12 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public Number				modifiedDate;
 
+	@Expose(serialize = false, deserialize = true)
+	public String				name;
+
+	@Expose(serialize = false, deserialize = true)
+	public String				namelc;
+
 	/* Users (client) */
 
 	@Expose(serialize = false, deserialize = true)
@@ -78,4 +87,105 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 	}
 
 	public abstract String getCollection();
+
+	public static ServiceEntry setFromPropertiesFromMap(ServiceEntry entry, HashMap map) {
+		/*
+		 * Properties involved with editing are copied from one entity to another.
+		 */
+		entry.id = (String) map.get("_id");
+
+		entry.creatorId = (String) map.get("_creator");
+		entry.ownerId = (String) map.get("_owner");
+		entry.modifierId = (String) map.get("modifierId");
+
+		entry.createdDate = (Number) map.get("createdDate");
+		entry.modifiedDate = (Number) map.get("modifiedDate");
+
+		if (map.get("creator") != null) {
+			entry.creator = (User) User.setFromPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));
+		}
+		if (map.get("owner") != null) {
+			entry.owner = (User) User.setFromPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("owner"));
+		}
+		if (map.get("modifier") != null) {
+			entry.modifier = (User) User.setFromPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("modifier"));
+		}
+
+		return entry;
+	}
+
+	public HashMap<String, Object> getHashMap(Boolean useAnnotations) {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+
+		try {
+			Class<?> cls = this.getClass();
+			Field fields[] = cls.getDeclaredFields();
+			for (Field f : fields) {
+				if (!Modifier.isStatic(f.getModifiers())
+						&& Modifier.isPublic(f.getModifiers())) {
+					if (useAnnotations) {
+						if (!f.isAnnotationPresent(Expose.class)) {
+							continue;
+						}
+						else {
+							Expose annotation = f.getAnnotation(Expose.class);
+							if (!annotation.serialize()) {
+								continue;
+							}
+						}
+					}
+					String name = f.getName();
+					if (useAnnotations) {
+						if (f.isAnnotationPresent(SerializedName.class)) {
+							SerializedName annotation = f.getAnnotation(SerializedName.class);
+							name = annotation.value();
+						}
+					}
+					Object value = f.get(this);
+					if (value != null) {
+						map.put(name, value);
+					}
+				}
+			}
+
+			cls = this.getClass().getSuperclass();
+			Field fieldsSuper[] = cls.getDeclaredFields();
+			for (Field f : fieldsSuper) {
+				if (!Modifier.isStatic(f.getModifiers())
+						&& Modifier.isPublic(f.getModifiers())) {
+					if (useAnnotations) {
+						if (!f.isAnnotationPresent(Expose.class)) {
+							continue;
+						}
+						else {
+							Expose annotation = f.getAnnotation(Expose.class);
+							if (!annotation.serialize()) {
+								continue;
+							}
+						}
+					}
+					String name = f.getName();
+					if (useAnnotations) {
+						if (f.isAnnotationPresent(SerializedName.class)) {
+							SerializedName annotation = f.getAnnotation(SerializedName.class);
+							name = annotation.value();
+						}
+					}
+					Object value = f.get(this);
+					if (value != null) {
+						map.put(name, value);
+					}
+				}
+
+			}
+
+		}
+		catch (IllegalArgumentException exception) {
+			exception.printStackTrace();
+		}
+		catch (IllegalAccessException exception) {
+			exception.printStackTrace();
+		}
+		return map;
+	}
 }

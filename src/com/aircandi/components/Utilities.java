@@ -125,6 +125,29 @@ public class Utilities {
 		}
 	}
 
+	public static class Timer {
+
+		long	start;
+
+		public void start() {
+			Logger.v(this, "Timer started");
+			start = System.nanoTime();
+		}
+
+		public void read() {
+			Logger.v(this, "Timer started");
+			start = System.nanoTime();
+		}
+		
+		void stop() {
+			long elapsed = (System.nanoTime() - start) / 1000;
+			Debug.stopAllocCounting();
+			Logger.d(this, "CandiRadarActivity: " + elapsed + "us, "
+					+ Debug.getThreadAllocCount() + " allocations, "
+					+ Debug.getThreadAllocSize() + " bytes");
+		}
+	}
+
 	/**
 	 * Returns a copy of the object, or null if the object cannot be serialized.
 	 */

@@ -20,7 +20,7 @@ import com.aircandi.service.objects.Session;
  * 	ServiceRequest serviceRequest = new ServiceRequest();
  * 	serviceRequest.setUri(mServiceUri + getCollection());
  * 	serviceRequest.setRequestType(RequestType.Insert);
- * 	serviceRequest.setRequestBody(ProxibaseService.convertObjectToJson((Object) this, GsonType.ProxibaseService));
+ * 	serviceRequest.setRequestBody(ProxibaseService.convertObjectToJsonSmart(this, true));
  * 	serviceRequest.setResponseFormat(ResponseFormat.Json);
  * 	serviceRequest.setRequestListener(listener);
  * 	NetworkManager.getInstance().requestAsync(serviceRequest);

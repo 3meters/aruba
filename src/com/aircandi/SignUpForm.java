@@ -28,10 +28,10 @@ import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.ServiceData;
@@ -228,11 +228,11 @@ public class SignUpForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 
-					ServiceRequest serviceRequest = new ServiceRequest();
-
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "create")
+					/* Jayma: Need to add secret */
+					ServiceRequest serviceRequest = new ServiceRequest()
+							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "create")
 							.setRequestType(RequestType.Insert)
-							.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService))
+							.setRequestBody(ProxibaseService.convertObjectToJsonSmart(mUser, true))
 							.setResponseFormat(ResponseFormat.Json);
 
 					/*
@@ -243,7 +243,7 @@ public class SignUpForm extends FormActivity {
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 
 						String jsonResponse = (String) serviceResponse.data;
-						ServiceData serviceData = ProxibaseService.convertJsonToObject(jsonResponse, ServiceData.class, GsonType.ProxibaseService);
+						ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
 						mUser = serviceData.user;
 						mUser.session = serviceData.session;
 
@@ -268,10 +268,10 @@ public class SignUpForm extends FormActivity {
 								 * Need to update the user to capture the uri for the image we saved.
 								 */
 								mUser.imageUri = imageKey;
-								serviceRequest = new ServiceRequest();
-								serviceRequest.setUri(mUser.getEntryUri())
+								serviceRequest = new ServiceRequest()
+										.setUri(mUser.getEntryUri())
 										.setRequestType(RequestType.Update)
-										.setRequestBody(ProxibaseService.convertObjectToJson((Object) mUser, GsonType.ProxibaseService))
+										.setRequestBody(ProxibaseService.convertObjectToJsonSmart(mUser, true))
 										.setSession(mUser.session)
 										.setResponseFormat(ResponseFormat.Json);
 

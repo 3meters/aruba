@@ -12,28 +12,26 @@ import android.widget.Toast;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.DateUtils;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.Tracker;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.Tracker;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.User;
 import com.aircandi.widgets.AuthorBlock;
-import com.aircandi.R;
 
 public class CommentForm extends FormActivity {
 
@@ -54,7 +52,7 @@ public class CommentForm extends FormActivity {
 		Boolean expired = false;
 		Integer messageResId = R.string.signin_message_comment_new;
 		if (user != null) {
-			Boolean userAnonymous = user.anonymous;
+			Boolean userAnonymous = user.isAnonymous();
 			if (user.session != null) {
 				expired = user.session.renewSession(DateUtils.nowDate().getTime());
 			}
@@ -170,10 +168,10 @@ public class CommentForm extends FormActivity {
 					// Construct entity, link, and observation
 					Bundle parameters = new Bundle();
 					parameters.putString("entityId", mCommon.mParentId);
-					parameters.putString("comment", "object:" + ProxibaseService.convertObjectToJson(mComment, GsonType.ProxibaseService));
+					parameters.putString("comment", "object:" + ProxibaseService.convertObjectToJsonSmart(mComment, true));
 
-					ServiceRequest serviceRequest = new ServiceRequest();
-					serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertComment")
+					ServiceRequest serviceRequest = new ServiceRequest()
+							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertComment")
 							.setRequestType(RequestType.Method)
 							.setParameters(parameters)
 							.setSession(Aircandi.getInstance().getUser().session)
@@ -189,11 +187,11 @@ public class CommentForm extends FormActivity {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.trackEvent("Comment", "Insert", null, 0);
-						
+
 						/* We need to push the comment into the entity model. */
 						ProxiExplorer.getInstance().getEntityModel().insertCommentEverywhere(mComment, mCommon.mParentId);
 						ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
-						
+
 						mCommon.showProgressDialog(false, null);
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_COMMENT_INSERTED);

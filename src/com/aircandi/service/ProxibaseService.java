@@ -8,19 +8,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.net.ConnectException;
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import net.minidev.json.JSONValue;
+import net.minidev.json.parser.ContainerFactory;
+import net.minidev.json.parser.ParseException;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -52,29 +57,31 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import android.graphics.Bitmap;
 
 import com.aircandi.Aircandi;
 import com.aircandi.components.DateUtils;
+import com.aircandi.components.ImageResult;
+import com.aircandi.components.JsonHelper;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
+import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.Comment;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.GeoLocation;
+import com.aircandi.service.objects.Result;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.service.objects.ServiceError;
+import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
+import com.aircandi.service.objects.VersionInfo;
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 
 /*
  * Http 1.1 Status Codes (subset) - 200: OK - 201: Created - 202: Accepted - 203: Non-authoritative information - 204:
@@ -111,6 +118,7 @@ public class ProxibaseService {
 	private static final int			MAX_BACKOFF_RETRIES				= 6;
 	public static final int				DEFAULT_MAX_CONNECTIONS			= 50;
 	public static final int				DEFAULT_CONNECTIONS_PER_ROUTE	= 20;
+	public static final ObjectMapper	objectMapper					= new ObjectMapper();
 	private final HttpParams			mHttpParams;
 
 	@SuppressWarnings("unused")
@@ -227,7 +235,7 @@ public class ProxibaseService {
 										ArrayList<Integer> items = serviceRequest.getParameters().getIntegerArrayList(key);
 										jsonBody += "\"" + key + "\":[";
 										for (Integer beaconLevel : items) {
-											jsonBody += String.valueOf(beaconLevel)+ ",";
+											jsonBody += String.valueOf(beaconLevel) + ",";
 										}
 										jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "],";
 									}
@@ -320,7 +328,7 @@ public class ProxibaseService {
 					 * decide if makes sense to retry.
 					 */
 					String responseContent = convertStreamToString(httpResponse.getEntity().getContent());
-					ServiceData serviceData = ProxibaseService.convertJsonToObject(responseContent, ServiceData.class, GsonType.ProxibaseService);
+					ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
 					Float httpStatusCode = (float) httpResponse.getStatusLine().getStatusCode();
 
 					if (serviceData != null && serviceData.error != null && serviceData.error.code != null) {
@@ -722,175 +730,343 @@ public class ProxibaseService {
 	// Json methods
 	// ----------------------------------------------------------------------------------------
 
-	public static String convertObjectToJson(Object object, GsonType gsonType) {
-		Gson gson = ProxibaseService.getGson(gsonType);
-		String json = gson.toJson(object);
+	public static Object convertJsonToObjectInternalSmart(String jsonString, ServiceDataType serviceDataType) {
+		ContainerFactory containerFactory = new ContainerFactory() {
+			public Map createObjectContainer() {
+				return new LinkedHashMap();
+			}
+
+			@Override
+			public List<Object> createArrayContainer() {
+				return new ArrayList<Object>();
+			}
+		};
+
+		try {
+			LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) Aircandi.parser.parse(jsonString, containerFactory);
+			if (serviceDataType == ServiceDataType.User) {
+				return User.setFromPropertiesFromMap(new User(), rootMap);
+			}
+			else if (serviceDataType == ServiceDataType.Session) {
+				return Session.setFromPropertiesFromMap(new Session(), rootMap);
+			}
+			else if (serviceDataType == ServiceDataType.GeoLocation) {
+				return GeoLocation.setFromPropertiesFromMap(new GeoLocation(), rootMap);
+			}
+			else if (serviceDataType == ServiceDataType.Entity) {
+				return Entity.setFromPropertiesFromMap(new Entity(), rootMap);
+			}
+		}
+		catch (ParseException exception) {
+			exception.printStackTrace();
+		}
+		return null;
+	}
+
+	public static ServiceData convertJsonToObjectSmart(String jsonString, ServiceDataType serviceDataType) {
+
+		ServiceData serviceData = convertJsonToObjectsSmart(jsonString, serviceDataType);
+		if (serviceData.data != null) {
+			if (serviceData.data instanceof List) {
+				List<Object> array = (List<Object>) serviceData.data;
+				if (array != null && array.size() > 0) {
+					serviceData.data = array.get(0);
+				}
+			}
+		}
+		return serviceData;
+	}
+
+	public static ServiceData convertJsonToObjectsSmart(String jsonString, ServiceDataType serviceDataType) {
+
+		Boolean methodTimingOnly = false;
+		if (!Aircandi.stopwatch.isStarted()) {
+			methodTimingOnly = true;
+			Aircandi.stopwatch.start();
+		}
+		Aircandi.stopwatch.segmentTime("Simple data binding start");
+		ContainerFactory containerFactory = new ContainerFactory() {
+			public Map createObjectContainer() {
+				return new LinkedHashMap();
+			}
+
+			@Override
+			public List<Object> createArrayContainer() {
+				return new ArrayList<Object>();
+			}
+		};
+
+		try {
+			LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) Aircandi.parser.parse(jsonString, containerFactory);
+			ServiceData serviceData = ServiceData.setFromPropertiesFromMap(new ServiceData(), rootMap);
+
+			/*
+			 * The data property of ServiceData is always an array even
+			 * if the request could only expect to return a single object.
+			 */
+			if (serviceData.d != null) {
+				/* It's a bing query */
+				rootMap = (LinkedHashMap<String, Object>) serviceData.d;
+				if (serviceDataType == ServiceDataType.ImageResult) {
+					List<LinkedHashMap<String, Object>> maps = (List<LinkedHashMap<String, Object>>) rootMap.get("results");
+					List<Object> list = new ArrayList<Object>();
+					for (LinkedHashMap<String, Object> map : maps) {
+						list.add(ImageResult.setFromPropertiesFromMap(new ImageResult(), map));
+					}
+					serviceData.data = list;
+				}
+			}
+			else if (serviceData.data != null) {
+				if (serviceDataType == ServiceDataType.Result) {
+					serviceData.data = Result.setFromPropertiesFromMap(new Result(), (HashMap) serviceData.data);
+				}
+				else {
+
+					List<LinkedHashMap<String, Object>> maps = (List<LinkedHashMap<String, Object>>) serviceData.data;
+					List<Object> list = new ArrayList<Object>();
+					for (LinkedHashMap<String, Object> map : maps) {
+						if (serviceDataType == ServiceDataType.Entity) {
+							list.add(Entity.setFromPropertiesFromMap(new Entity(), map));
+						}
+						else if (serviceDataType == ServiceDataType.Beacon) {
+							list.add(Beacon.setFromPropertiesFromMap(new Beacon(), map));
+						}
+						else if (serviceDataType == ServiceDataType.User) {
+							list.add(User.setFromPropertiesFromMap(new User(), map));
+						}
+						else if (serviceDataType == ServiceDataType.VersionInfo) {
+							list.add(VersionInfo.setFromPropertiesFromMap(new VersionInfo(), map));
+						}
+						else if (serviceDataType == ServiceDataType.ImageResult) {
+							list.add(ImageResult.setFromPropertiesFromMap(new ImageResult(), map));
+						}
+					}
+					serviceData.data = list;
+				}
+			}
+			Aircandi.stopwatch.segmentTime("Simple data binding complete");
+			if (methodTimingOnly) {
+				Aircandi.stopwatch.stop();
+			}
+			return serviceData;
+		}
+		catch (ParseException exception) {
+			exception.printStackTrace();
+		}
+		Aircandi.stopwatch.segmentTime("Simple data binding complete");
+		if (methodTimingOnly) {
+			Aircandi.stopwatch.stop();
+		}
+		return null;
+	}
+
+	public static ServiceData convertJsonToObjectNative(String jsonString, ServiceDataType serviceDataType) {
+		try {
+			ServiceData serviceData = new ServiceData();
+			org.json.JSONObject jsonObject = new org.json.JSONObject(jsonString);
+
+			if (serviceDataType == ServiceDataType.Entity || serviceDataType == ServiceDataType.Beacon) {
+				List<HashMap<String, Object>> maps = (List<HashMap<String, Object>>) JsonHelper.toList(jsonObject.getJSONArray("data"));;
+				if (serviceDataType == ServiceDataType.Entity) {
+					List<Entity> entities = new ArrayList<Entity>();
+					for (HashMap<String, Object> entityMap : maps) {
+						entities.add(Entity.setFromPropertiesFromMap(new Entity(), entityMap));
+					}
+					serviceData.data = entities;
+				}
+				else if (serviceDataType == ServiceDataType.Beacon) {
+					List<Beacon> beacons = new ArrayList<Beacon>();
+					for (HashMap<String, Object> beaconMap : maps) {
+						beacons.add(Beacon.setFromPropertiesFromMap(new Beacon(), beaconMap));
+					}
+					serviceData.data = beacons;
+				}
+			}
+			Aircandi.stopwatch.segmentTime("Simple data binding complete");
+			return serviceData;
+		}
+		catch (org.json.JSONException exception) {
+			exception.printStackTrace();
+		}
+		Aircandi.stopwatch.segmentTime("Simple data binding complete");
+		return null;
+	}
+
+//	public static String convertObjectToJson(Object object, GsonType gsonType) {
+//		Gson gson = ProxibaseService.getGson(gsonType);
+//		String json = gson.toJson(object);
+//		return json;
+//	}
+
+	public static String convertObjectToJsonSmart(Object object, Boolean useAnnotations) {
+		String json = null;
+		if (object instanceof ServiceEntry) {
+			HashMap map = ((ServiceEntry) object).getHashMap(useAnnotations);
+			json = JSONValue.toJSONString(map);
+		}
+		else if (object instanceof Comment) {
+			HashMap map = ((Comment) object).getHashMap(useAnnotations);
+			json = JSONValue.toJSONString(map);
+		}
+		
 		return json;
 	}
 
-	public static ServiceData convertJsonToObject(String jsonString, Class type, GsonType gsonType) {
-		ServiceData serviceData = convertJsonToObjects(jsonString, type, gsonType);
-		if (serviceData.data != null) {
-			List<Object> array = (List<Object>) serviceData.data;
-			if (array != null && array.size() > 0) {
-				serviceData.data = array.get(0);
-			}
-		}
-		return serviceData;
-	}
+//	public static ServiceData convertJsonToObject(String jsonString, Class type, GsonType gsonType) {
+//		ServiceData serviceData = convertJsonToObjects(jsonString, type, gsonType);
+//		if (serviceData.data != null) {
+//			List<Object> array = (List<Object>) serviceData.data;
+//			if (array != null && array.size() > 0) {
+//				serviceData.data = array.get(0);
+//			}
+//		}
+//		return serviceData;
+//	}
 
-	public static ServiceData convertJsonToObjects(String jsonString, Class type, GsonType gsonType) {
+//	public static ServiceData convertJsonToObjects(String jsonString, Class type, GsonType gsonType) {
+//
+//		Gson gson = ProxibaseService.getGson(gsonType);
+//		ServiceData serviceData = new ServiceData();
+//
+//		/*
+//		 * In general, gson deserializer will ignore elements (fields or classes) in the string that do not exist on the
+//		 * object type. Collections should be treated as generic lists on the target object.
+//		 */
+//		try {
+//
+//			JsonParser parser = new JsonParser();
+//			JsonElement jsonElement = parser.parse(jsonString);
+//			if (jsonElement.isJsonObject()) {
+//				JsonObject jsonObject = jsonElement.getAsJsonObject();
+//
+//				if (jsonObject.has("data")) {
+//					jsonElement = jsonObject.get("data");
+//					List<Object> array = new ArrayList<Object>();
+//					if (jsonElement.isJsonPrimitive()) {
+//						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+//						if (primitive.isString()) {
+//							array.add(primitive.getAsString());
+//						}
+//						else if (primitive.isNumber()) {
+//							array.add(primitive.getAsNumber());
+//						}
+//						else if (primitive.isBoolean()) {
+//							array.add(primitive.getAsBoolean());
+//						}
+//					}
+//					else if (jsonElement.isJsonArray()) {
+//						JsonArray jsonArray = jsonElement.getAsJsonArray();
+//						for (int i = 0; i < jsonArray.size(); i++) {
+//							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
+//							array.add(gson.fromJson(jsonObjectNew.toString(), type));
+//						}
+//					}
+//					else if (jsonElement.isJsonObject()) {
+//						Object obj = gson.fromJson(jsonElement.toString(), type);
+//						array.add(obj);
+//					}
+//					serviceData.data = array;
+//				}
+//
+//				/* Targeting bing results from azure */
+//				if (jsonObject.has("d")) {
+//					jsonObject = jsonObject.getAsJsonObject("d");
+//					jsonElement = jsonObject.getAsJsonArray("results");
+//					List<Object> array = new ArrayList<Object>();
+//					if (jsonElement.isJsonPrimitive()) {
+//						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+//						if (primitive.isString()) {
+//							array.add(primitive.getAsString());
+//						}
+//						else if (primitive.isNumber()) {
+//							array.add(primitive.getAsNumber());
+//						}
+//						else if (primitive.isBoolean()) {
+//							array.add(primitive.getAsBoolean());
+//						}
+//					}
+//					else if (jsonElement.isJsonArray()) {
+//						JsonArray jsonArray = jsonElement.getAsJsonArray();
+//						for (int i = 0; i < jsonArray.size(); i++) {
+//							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
+//							array.add(gson.fromJson(jsonObjectNew.toString(), type));
+//						}
+//					}
+//					else if (jsonElement.isJsonObject()) {
+//						Object obj = gson.fromJson(jsonElement.toString(), type);
+//						array.add(obj);
+//					}
+//					serviceData.data = array;
+//				}
+//
+//				if (jsonObject.has("date")) {
+//					serviceData.date = jsonObject.get("date").getAsJsonPrimitive().getAsNumber();
+//				}
+//				if (jsonObject.has("error")) {
+//					ServiceError error = gson.fromJson(jsonObject.get("error").toString(), ServiceError.class);
+//					serviceData.error = error;
+//				}
+//				if (jsonObject.has("user")) {
+//					User user = gson.fromJson(jsonObject.get("user").toString(), User.class);
+//					serviceData.user = user;
+//				}
+//				if (jsonObject.has("session")) {
+//					Session session = gson.fromJson(jsonObject.get("session").toString(), Session.class);
+//					serviceData.session = session;
+//					/*
+//					 * This is the best place to handle updating the session object for the currently logged
+//					 * in user. The primary reason to update is that the service moves the expiration date based
+//					 * on activity.
+//					 */
+//					if (!Aircandi.getInstance().getUser().anonymous) {
+//						Aircandi.getInstance().getUser().session = session;
+//					}
+//				}
+//				if (jsonObject.has("count")) {
+//					serviceData.count = jsonObject.get("count").getAsJsonPrimitive().getAsNumber();
+//				}
+//				if (jsonObject.has("info")) {
+//					serviceData.info = jsonObject.get("info").getAsJsonPrimitive().getAsString();
+//				}
+//				if (jsonObject.has("more")) {
+//					serviceData.more = jsonObject.get("more").getAsJsonPrimitive().getAsBoolean();
+//				}
+//				if (jsonObject.has("time")) {
+//					serviceData.time = jsonObject.get("time").getAsJsonPrimitive().getAsNumber();
+//				}
+//			}
+//
+//		}
+//		catch (JsonParseException exception) {
+//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
+//		}
+//		catch (IllegalStateException exception) {
+//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
+//		}
+//		catch (Exception exception) {
+//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
+//		}
+//		return serviceData;
+//	}
 
-		Gson gson = ProxibaseService.getGson(gsonType);
-		ServiceData serviceData = new ServiceData();
-
-		/*
-		 * In general, gson deserializer will ignore elements (fields or classes) in the string that do not exist on the
-		 * object type. Collections should be treated as generic lists on the target object.
-		 */
-		try {
-
-			JsonParser parser = new JsonParser();
-			JsonElement jsonElement = parser.parse(jsonString);
-			if (jsonElement.isJsonObject()) {
-				JsonObject jsonObject = jsonElement.getAsJsonObject();
-
-				if (jsonObject.has("data")) {
-					jsonElement = jsonObject.get("data");
-					List<Object> array = new ArrayList<Object>();
-					if (jsonElement.isJsonPrimitive()) {
-						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
-						if (primitive.isString()) {
-							array.add(primitive.getAsString());
-						}
-						else if (primitive.isNumber()) {
-							array.add(primitive.getAsNumber());
-						}
-						else if (primitive.isBoolean()) {
-							array.add(primitive.getAsBoolean());
-						}
-					}
-					else if (jsonElement.isJsonArray()) {
-						JsonArray jsonArray = jsonElement.getAsJsonArray();
-						for (int i = 0; i < jsonArray.size(); i++) {
-							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
-							array.add(gson.fromJson(jsonObjectNew.toString(), type));
-						}
-					}
-					else if (jsonElement.isJsonObject()) {
-						Object obj = gson.fromJson(jsonElement.toString(), type);
-						array.add(obj);
-					}
-					serviceData.data = array;
-				}
-
-				/* Targeting bing results from azure */
-				if (jsonObject.has("d")) {
-					jsonObject = jsonObject.getAsJsonObject("d");
-					jsonElement = jsonObject.getAsJsonArray("results");
-					List<Object> array = new ArrayList<Object>();
-					if (jsonElement.isJsonPrimitive()) {
-						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
-						if (primitive.isString()) {
-							array.add(primitive.getAsString());
-						}
-						else if (primitive.isNumber()) {
-							array.add(primitive.getAsNumber());
-						}
-						else if (primitive.isBoolean()) {
-							array.add(primitive.getAsBoolean());
-						}
-					}
-					else if (jsonElement.isJsonArray()) {
-						JsonArray jsonArray = jsonElement.getAsJsonArray();
-						for (int i = 0; i < jsonArray.size(); i++) {
-							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
-							array.add(gson.fromJson(jsonObjectNew.toString(), type));
-						}
-					}
-					else if (jsonElement.isJsonObject()) {
-						Object obj = gson.fromJson(jsonElement.toString(), type);
-						array.add(obj);
-					}
-					serviceData.data = array;
-				}
-
-				if (jsonObject.has("cursor")) {
-					JsonArray jsonArray = jsonObject.get("cursor").getAsJsonArray();
-					List<String> cursorIds = new ArrayList<String>();
-					for (int i = 0; i < jsonArray.size(); i++) {
-						cursorIds.add(jsonArray.get(i).getAsString());
-					}
-					serviceData.cursor = cursorIds;
-				}
-				if (jsonObject.has("date")) {
-					serviceData.date = jsonObject.get("date").getAsJsonPrimitive().getAsNumber();
-				}
-				if (jsonObject.has("error")) {
-					ServiceError error = gson.fromJson(jsonObject.get("error").toString(), ServiceError.class);
-					serviceData.error = error;
-				}
-				if (jsonObject.has("user")) {
-					User user = gson.fromJson(jsonObject.get("user").toString(), User.class);
-					serviceData.user = user;
-				}
-				if (jsonObject.has("session")) {
-					Session session = gson.fromJson(jsonObject.get("session").toString(), Session.class);
-					serviceData.session = session;
-					/*
-					 * This is the best place to handle updating the session object for the currently logged
-					 * in user. The primary reason to update is that the service moves the expiration date based
-					 * on activity.
-					 */
-					if (!Aircandi.getInstance().getUser().anonymous) {
-						Aircandi.getInstance().getUser().session = session;
-					}
-				}
-				if (jsonObject.has("count")) {
-					serviceData.count = jsonObject.get("count").getAsJsonPrimitive().getAsNumber();
-				}
-				if (jsonObject.has("info")) {
-					serviceData.info = jsonObject.get("info").getAsJsonPrimitive().getAsString();
-				}
-				if (jsonObject.has("more")) {
-					serviceData.more = jsonObject.get("more").getAsJsonPrimitive().getAsBoolean();
-				}
-				if (jsonObject.has("time")) {
-					serviceData.time = jsonObject.get("time").getAsJsonPrimitive().getAsNumber();
-				}
-			}
-
-		}
-		catch (JsonParseException exception) {
-			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
-		}
-		catch (IllegalStateException exception) {
-			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
-		}
-		catch (Exception exception) {
-			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
-		}
-		return serviceData;
-	}
-
-	public static Gson getGson(GsonType gsonType) {
-		GsonBuilder gsonb = new GsonBuilder();
-
-		/*
-		 * Converting objects to/from json for passing between the client and the service we need to apply some
-		 * additional behavior on top of the defaults
-		 */
-		if (gsonType == GsonType.ProxibaseService) {
-			gsonb.excludeFieldsWithoutExposeAnnotation();
-			gsonb.setPrettyPrinting(); /* TODO: remove this later */
-		}
-		else if (gsonType == GsonType.BingService) {
-			gsonb.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE);
-			gsonb.setPrettyPrinting(); /* TODO: remove this later */
-		}
-		Gson gson = gsonb.create();
-		return gson;
-	}
+//	public static Gson getGson(GsonType gsonType) {
+//		GsonBuilder gsonb = new GsonBuilder();
+//
+//		/*
+//		 * Converting objects to/from json for passing between the client and the service we need to apply some
+//		 * additional behavior on top of the defaults
+//		 */
+//		if (gsonType == GsonType.ProxibaseService) {
+//			gsonb.excludeFieldsWithoutExposeAnnotation();
+//			gsonb.setPrettyPrinting(); /* TODO: remove this later */
+//		}
+//		else if (gsonType == GsonType.BingService) {
+//			gsonb.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE);
+//			gsonb.setPrettyPrinting(); /* TODO: remove this later */
+//		}
+//		Gson gson = gsonb.create();
+//		return gson;
+//	}
 
 	// ----------------------------------------------------------------------------------------
 	// Inner classes and enums
@@ -942,6 +1118,17 @@ public class ProxibaseService {
 		public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {}
 
 		public void onProgressChanged(int progress) {}
+	}
+
+	public static enum ServiceDataType {
+		Entity,
+		Beacon,
+		User,
+		Session,
+		VersionInfo,
+		Result,
+		ImageResult,
+		None, GeoLocation
 	}
 
 	public static enum RequestType {

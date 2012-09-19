@@ -13,8 +13,8 @@ public interface ProxiConstants {
 
 	public static final String	ROOT_COLLECTION_ID									= "0000.000000.00000.000";
 
-	public static final String	_URL_PROXIBASE_SERVICE								= "http://api.aircandi.com:8080/";
-	public static final String	URL_PROXIBASE_SERVICE								= "https://api.aircandi.com/";
+	public static final String	URL_PROXIBASE_SERVICE								= "http://ariseditions.com:8080/";
+	public static final String	_URL_PROXIBASE_SERVICE								= "https://aircandi.com:643/";
 
 	public static final String	URL_PROXIBASE_SERVICE_REST							= URL_PROXIBASE_SERVICE + "data/";
 	public static final String	URL_PROXIBASE_SERVICE_USER							= URL_PROXIBASE_SERVICE + "user/";

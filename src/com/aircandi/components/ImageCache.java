@@ -15,40 +15,34 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 
 import com.aircandi.core.CandiConstants;
-import com.google.common.collect.MapMaker;
 
 /**
  * <p>
- * A simple 2-level cache for bitmap images consisting of a small and fast
- * in-memory cache (1st level cache) and a slower but bigger disk cache (2nd
- * level cache). For second level caching, the application's cache directory
- * will be used. Please note that Android may at any point decide to wipe that
- * directory.
+ * A simple 2-level cache for bitmap images consisting of a small and fast in-memory cache (1st level cache) and a
+ * slower but bigger disk cache (2nd level cache). For second level caching, the application's cache directory will be
+ * used. Please note that Android may at any point decide to wipe that directory.
  * </p>
  * <p>
- * When pulling from the cache, it will first attempt to load the image from
- * memory. If that fails, it will try to load it from disk. If that succeeds,
- * the image will be put in the 1st level cache and returned. Otherwise it's a
- * cache miss, and the caller is responsible for loading the image from
- * elsewhere (probably the Internet).
+ * When pulling from the cache, it will first attempt to load the image from memory. If that fails, it will try to load
+ * it from disk. If that succeeds, the image will be put in the 1st level cache and returned. Otherwise it's a cache
+ * miss, and the caller is responsible for loading the image from elsewhere (probably the Internet).
  * </p>
  * <p>
- * Pushes to the cache are always write-through (i.e., the image will be stored
- * both on disk and in memory).
+ * Pushes to the cache are always write-through (i.e., the image will be stored both on disk and in memory).
  * </p>
  */
 
 public class ImageCache implements Map<String, Bitmap> {
-
+	int								cacheSize				= 4 * 1024 * 1024;		// 4MiB
 	private int						mCachedImageQuality		= 100;
 	private String					mSecondLevelCacheDir;
-	private Map<String, Bitmap>		mCache;
+	private LruSoftCache			mCache;
 	private CompressFormat			mCompressedImageFormat	= CompressFormat.PNG;
 	private BitmapFactory.Options	mOptions;
 	private boolean					mFileCacheOnly			= false;
 
 	public ImageCache(Context context, String cacheSubDirectory, int initialCapacity, int concurrencyLevel) {
-		this.mCache = new MapMaker().initialCapacity(initialCapacity).concurrencyLevel(concurrencyLevel).weakValues().makeMap();
+		this.mCache = new LruSoftCache(cacheSize);
 		this.mSecondLevelCacheDir = context.getApplicationContext().getCacheDir() + cacheSubDirectory;
 		makeCacheDirectory();
 		mOptions = new BitmapFactory.Options();
@@ -99,11 +93,11 @@ public class ImageCache implements Map<String, Bitmap> {
 		String imageUrl = (String) key;
 
 		if (!mFileCacheOnly) {
-			Bitmap bitmap = mCache.get(imageUrl);
+			Bitmap bitmap = (Bitmap) mCache.get(null, imageUrl);
 
 			/* 1st level cache hit (memory) */
 			if (bitmap != null) {
-				return mCache.get(imageUrl);
+				return (Bitmap) mCache.get(null, imageUrl);
 			}
 		}
 
@@ -281,7 +275,7 @@ public class ImageCache implements Map<String, Bitmap> {
 			return false;
 		}
 		else {
-			if (mCache.containsKey(key))
+			if (mCache.get(null,key) != null)
 				return true;
 			else {
 				File imageFile = getImageFile((String) key);
@@ -294,13 +288,13 @@ public class ImageCache implements Map<String, Bitmap> {
 	}
 
 	public boolean containsValue(Object value) {
-		return mCache.containsValue(value);
+		return true;
 	}
 
 	public Bitmap remove(Object key) {
 
 		/* Memory cache */
-		if (mCache.containsKey(key)) {
+		if (mCache.get(null, key) != null) {
 			mCache.remove(key);
 		}
 
@@ -314,11 +308,11 @@ public class ImageCache implements Map<String, Bitmap> {
 	}
 
 	public Set<String> keySet() {
-		return mCache.keySet();
+		return null;
 	}
 
 	public Set<java.util.Map.Entry<String, Bitmap>> entrySet() {
-		return mCache.entrySet();
+		return null;
 	}
 
 	public int size() {
@@ -326,15 +320,15 @@ public class ImageCache implements Map<String, Bitmap> {
 	}
 
 	public boolean isEmpty() {
-		return mCache.isEmpty();
+		return (mCache.size() == 0);
 	}
 
 	public void clear() {
-		mCache.clear();
+		mCache.evictAll();
 	}
 
 	public Collection<Bitmap> values() {
-		return mCache.values();
+		return null;
 	}
 
 	private File getImageFile(String imageUri) {

@@ -39,7 +39,6 @@ import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
@@ -260,12 +259,12 @@ public abstract class CandiFormBase extends CandiActivity {
 	}
 
 	public void onEditCandiButtonClick(View view) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class);
-		intentBuilder.setCommandType(CommandType.Edit);
-		intentBuilder.setEntityId(mEntity.id);
-		intentBuilder.setParentEntityId(mEntity.parentId);
-		intentBuilder.setEntityType(mEntity.type);
-		intentBuilder.setEntityTree(mCommon.mEntityTree);
+		IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
+				.setCommandType(CommandType.Edit)
+				.setEntityId(mEntity.id)
+				.setParentEntityId(mEntity.parentId)
+				.setEntityType(mEntity.type)
+				.setEntityTree(mCommon.mEntityTree);
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
@@ -327,21 +326,21 @@ public abstract class CandiFormBase extends CandiActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_CANDI_PICK) {
 				if (intent != null) {
-					String parentEntityIdNew = null;
+					String parentEntityId = null;
 					Bundle extras = intent.getExtras();
 					if (extras != null) {
-						parentEntityIdNew = extras.getString(getString(R.string.EXTRA_ENTITY_ID));
+						parentEntityId = extras.getString(getString(R.string.EXTRA_ENTITY_ID));
 					}
 					/*
-					 * If parent entity is null then the candi is being moved to the top on its own.
+					 * If parentEntityId is null then the candi is being moved to the top on its own.
 					 * 
 					 * Special case: user could have a top level candi and choose to move it to
 					 * top so it's a no-op.
 					 */
-					if (parentEntityIdNew == null && mEntity.parent == null) {
+					if (parentEntityId == null && mEntity.parent == null) {
 						return;
 					}
-					moveCandi(mEntity, parentEntityIdNew);
+					moveCandi(mEntity, parentEntityId);
 				}
 			}
 		}
@@ -588,12 +587,18 @@ public abstract class CandiFormBase extends CandiActivity {
 	}
 
 	private void showCandiPicker() {
-		Intent intent = new Intent(this, CandiPicker.class);
+		IntentBuilder intentBuilder = new IntentBuilder(this, CandiPicker.class)
+				.setEntityTree(mCommon.mEntityTree);
+		Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CANDI_PICK);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
-	private void moveCandi(final Entity entityToMove, final String parentEntityIdNew) {
+	private void moveCandi(final Entity entityToMove, final String collectionEntityId) {
+		/*
+		 * We only move within radar tree or within user tree. A candi can still be
+		 * currently shown in both trees so we still need to fixup across both.
+		 */
 
 		new AsyncTask() {
 
@@ -604,33 +609,37 @@ public abstract class CandiFormBase extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				ServiceResponse serviceResponse = new ServiceResponse();
+
+				Link link = new Link();
 				Bundle parameters = new Bundle();
 
-				/* We could be relinking to either another entity or a beacon */
-				Link link = new Link();
-				if (parentEntityIdNew == null) {
-					link.toId = entityToMove.beacon.id;
+				if (collectionEntityId != null) {
+					/*
+					 * Moving from a (beacon or collection) to a collection
+					 */
+					link.toId = collectionEntityId;
 					link.fromId = entityToMove.id;
+					parameters.putString("link", "object:" + ProxibaseService.convertObjectToJsonSmart(link, true));
+					parameters.putString("originalToId", entityToMove.parentId != null ? entityToMove.parentId : entityToMove.beaconId);
 				}
 				else {
-					link.toId = parentEntityIdNew;
+					/*
+					 * Moving from a collection to a beacon
+					 */
+					link.toId = entityToMove.beaconId;
 					link.fromId = entityToMove.id;
+					parameters.putString("link", "object:" + ProxibaseService.convertObjectToJsonSmart(link, true));
+					parameters.putString("originalToId", entityToMove.parentId);
 				}
-				parameters.putString("link",
-						"object:" + ProxibaseService.convertObjectToJson(link, GsonType.ProxibaseService));
 
-				/* Entity */
-				parameters.putString("originalToId", entityToMove.parent != null ? entityToMove.parent.id : entityToMove.beacon.id);
-
-				ServiceRequest serviceRequest = new ServiceRequest();
-				serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateLink")
+				ServiceRequest serviceRequest = new ServiceRequest()
+						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateLink")
 						.setRequestType(RequestType.Method)
+						.setResponseFormat(ResponseFormat.Json)
 						.setParameters(parameters)
-						.setSession(Aircandi.getInstance().getUser().session)
-						.setResponseFormat(ResponseFormat.Json);
+						.setSession(Aircandi.getInstance().getUser().session);
 
-				serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 				return serviceResponse;
 			}
@@ -645,98 +654,138 @@ public abstract class CandiFormBase extends CandiActivity {
 					/*
 					 * Fixup the entity model.
 					 * 
-					 * - Could have moved to a different parent
-					 * - Could have moved from parent to top
-					 * - Could have moved from top to a parent
+					 * - Could have moved collection to collection
+					 * - Could have moved from collection to beacon
+					 * - Could have moved from beacon to collection
 					 * 
 					 * The entity we have been passed could have come from radar or user collections so we
 					 * need to look it up for each.
 					 */
-					Entity entity = ProxiExplorer.getInstance().getEntityModel()
-							.getEntityById(entityToMove.id, entityToMove.parentId, EntityTree.Radar);
-					if (parentEntityIdNew == null) {
-						/*
-						 * Moving to top. We assume beacon has been set to the beacon used by the original parent.
-						 */
-						Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
-								.getEntityById(entity.parentId, null, EntityTree.Radar);
-						parentEntityOriginal.children.remove(entity);
-						entity.beacon.entities.add(entity);
-						entity.parent = null;
-						entity.parentId = null;
-					}
-					else {
-						/*
-						 * Moving to parent
-						 */
-						Entity parentEntityNew = ProxiExplorer.getInstance().getEntityModel()
-								.getEntityById(parentEntityIdNew, null, EntityTree.Radar);
-						if (entity.parent != null) {
-							Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
+					Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entityToMove.id, entityToMove.parentId, EntityTree.Radar);
+					if (entity != null) {
+						if (collectionEntityId == null) {
+							/*
+							 * Moving from collection to beacon. We assume beacon has been set to the beacon used by the
+							 * original
+							 * parent.
+							 */
+							Entity collectionEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
 									.getEntityById(entity.parentId, null, EntityTree.Radar);
-							parentEntityOriginal.children.remove(entity);
-						}
-						if (parentEntityNew.children == null) {
-							parentEntityNew.children = new EntityList<Entity>();
-						}
-						parentEntityNew.children.add(entity);
-						entity.parent = parentEntityNew;
-						entity.parentId = parentEntityNew.id;
-						
-						/* Remove from top level if its there */
-						entity.beacon.entities.remove(entity);
+							collectionEntityOriginal.children.remove(entity);
 
-						if (parentEntityNew.children.size() > 1) {
-							Collections.sort(parentEntityNew.children, new EntityList.SortEntitiesByModifiedDate());
+							entity.beacon.entities.add(entity);
+							entity.parent = null;
+							entity.parentId = null;
+						}
+						else {
+							/*
+							 * Moving to collection. New collection might have a different beaconId.
+							 */
+							Entity collectionEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(collectionEntityId, null, EntityTree.Radar);
+							if (collectionEntity != null) {
+								if (entity.parent == null) {
+									/*
+									 * Moving from beacon to collection
+									 */
+									entity.beacon.entities.remove(entity);
+
+									if (collectionEntity.children == null) {
+										collectionEntity.children = new EntityList<Entity>();
+									}
+									collectionEntity.children.add(entity);
+									entity.parent = collectionEntity;
+									entity.parentId = collectionEntity.id;
+									entity.beaconId = collectionEntity.beaconId;
+								}
+								else {
+									/*
+									 * Moving from collection to collection
+									 */
+									Entity collectionEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
+											.getEntityById(entity.parentId, null, EntityTree.Radar);
+									collectionEntityOriginal.children.remove(entity);
+
+									if (collectionEntity.children == null) {
+										collectionEntity.children = new EntityList<Entity>();
+									}
+									collectionEntity.children.add(entity);
+									entity.parent = collectionEntity;
+									entity.parentId = collectionEntity.id;
+									entity.beaconId = collectionEntity.beaconId;
+								}
+
+								if (collectionEntity.children.size() > 1) {
+									Collections.sort(collectionEntity.children, new EntityList.SortEntitiesByModifiedDate());
+								}
+							}
 						}
 					}
 
 					/* The user candi collection might not be populated yet */
 					entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entityToMove.id, entityToMove.parentId, EntityTree.User);
 					if (entity != null) {
-						if (parentEntityIdNew == null) {
+						if (collectionEntityId == null) {
 							/*
-							 * Moving to top. User candi are not associated with beacons.
+							 * Moving from collection to beacon.
 							 */
-							Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
+							Entity collectionEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
 									.getEntityById(entity.parentId, null, EntityTree.User);
-							parentEntityOriginal.children.remove(entity);
+							collectionEntityOriginal.children.remove(entity);
+
 							entity.parent = null;
 							entity.parentId = null;
 						}
 						else {
 							/*
-							 * Moving to parent.
+							 * Moving to collection.
 							 */
-							if (entity.parent != null) {
-								Entity parentEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
-										.getEntityById(entity.parentId, null, EntityTree.User);
-								parentEntityOriginal.children.remove(entity);
-							}
-							Entity parentEntityNew = ProxiExplorer.getInstance().getEntityModel()
-									.getEntityById(parentEntityIdNew, null, EntityTree.User);
-							/* For user candi, we might be moving to a parent that isn't in the user candi. */
-							if (parentEntityNew != null) {
-								if (parentEntityNew.children == null) {
-									parentEntityNew.children = new EntityList<Entity>();
+							Entity collectionEntity = ProxiExplorer.getInstance()
+									.getEntityModel()
+									.getEntityById(collectionEntityId, null, EntityTree.User);
+							
+							if (collectionEntity != null) {
+								if (entity.parent != null) {
+									/*
+									 * Moving from beacon to collection
+									 */
+									if (collectionEntity.children == null) {
+										collectionEntity.children = new EntityList<Entity>();
+									}
+									collectionEntity.children.add(entity);
+									entity.parentId = collectionEntity.id;
+									entity.beaconId = collectionEntity.beaconId;
 								}
-								parentEntityNew.children.add(entity);
-								entity.parent = parentEntityNew;
-								entity.parentId = parentEntityNew.id;
-								if (parentEntityNew.children.size() > 1) {
-									Collections.sort(parentEntityNew.children, new EntityList.SortEntitiesByModifiedDate());
+								else {
+									/*
+									 * Moving from collection to collection
+									 */
+									Entity collectionEntityOriginal = ProxiExplorer.getInstance()
+											.getEntityModel()
+											.getEntityById(entity.parentId, null, EntityTree.User);
+									
+									collectionEntityOriginal.children.remove(entity);
+
+									if (collectionEntity.children == null) {
+										collectionEntity.children = new EntityList<Entity>();
+									}
+									collectionEntity.children.add(entity);
+									entity.parentId = collectionEntity.id;
+									entity.beaconId = collectionEntity.beaconId;
+								}
+								if (collectionEntity.children.size() > 1) {
+									Collections.sort(collectionEntity.children, new EntityList.SortEntitiesByModifiedDate());
 								}
 							}
 						}
 					}
-					
+
 					ProxiExplorer.getInstance().getEntityModel().rebuildEntityList();
 					ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 					ImageUtils.showToastNotification(getString(R.string.alert_moved), Toast.LENGTH_SHORT);
 					bind(true);
 				}
 			}
-		
+
 		}.execute();
 
 	}

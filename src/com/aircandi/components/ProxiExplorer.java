@@ -25,10 +25,10 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
@@ -198,6 +198,7 @@ public class ProxiExplorer {
 
 		if (!mScanRequestProcessing.get()) {
 			mScanRequestProcessing.set(true);
+			Aircandi.stopwatch.start();
 			/*
 			 * All current beacons ids are sent to the service. Previously discovered beacons are included in separate
 			 * array along with a their freshness date.
@@ -299,8 +300,9 @@ public class ProxiExplorer {
 
 			ServiceResponse serviceResponse = new ServiceResponse();
 			if (beaconIdsNew.size() > 0 || beaconIdsRefresh.size() > 0) {
-
-				serviceResponse = getEntitiesForBeacons(beaconIdsNew, beaconIdsRefresh, mEntityModel.getLastRefreshDate(), true, true);
+				Aircandi.stopwatch.segmentTime("Finished pre-processing beacons");
+				serviceResponse = getEntitiesForBeacons(beaconIdsNew, beaconIdsRefresh, mEntityModel.getLastRefreshDate(), beaconIdsNew.size() > 0 ? true
+						: false, true);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					ServiceData serviceData = (ServiceData) serviceResponse.data;
 					mEntityModel.setLastRefreshDate(serviceData.date.longValue());
@@ -326,11 +328,10 @@ public class ProxiExplorer {
 			wifiLockAcquire(WifiManager.WIFI_MODE_FULL);
 		}
 
-		Bundle parameters = new Bundle();
-		ServiceRequest serviceRequest = new ServiceRequest();
 		ServiceResponse serviceResponse = new ServiceResponse();
 
 		/* Set method parameters */
+		Bundle parameters = new Bundle();
 		if (beaconIdsNew.size() > 0) {
 			parameters.putStringArrayList("beaconIdsNew", beaconIdsNew);
 			if (includeObservation) {
@@ -352,7 +353,7 @@ public class ProxiExplorer {
 			mObservation = GeoLocationManager.getInstance().getObservation();
 			if (mObservation != null) {
 				parameters.putString("observation",
-						"object:" + ProxibaseService.convertObjectToJson(mObservation, GsonType.ProxibaseService));
+						"object:" + ProxibaseService.convertObjectToJsonSmart(mObservation, true));
 			}
 		}
 
@@ -367,20 +368,23 @@ public class ProxiExplorer {
 				+ ",\"sort\":{\"modifiedDate\":-1}}"
 				+ "}");
 
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForBeacons")
+		ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForBeacons")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
 		serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		Aircandi.stopwatch.segmentTime("Finished service query");
 
 		wifiReleaseLock();
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
 			String jsonResponse = (String) serviceResponse.data;
-			ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+			ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
+			Aircandi.stopwatch.segmentTime("Finished parsing json objects");
 
 			if (merge) {
 				List<Object> entities = (List<Object>) serviceData.data;
@@ -408,6 +412,7 @@ public class ProxiExplorer {
 				/* Merge entities into data model */
 				mEntityModel.mergeEntities(entities, beaconIdsNew, beaconIdsRefresh, false);
 				mEntityModel.getEntities().setCollectionType(EntityTree.Radar);
+				Aircandi.stopwatch.segmentTime("Finished merging into entity model");
 			}
 		}
 		return serviceResponse;
@@ -466,11 +471,11 @@ public class ProxiExplorer {
 		parameters.putString("fields", "object:" + jsonFields);
 		parameters.putString("options", "object:" + jsonOptions);
 
-		final ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities");
-		serviceRequest.setRequestType(RequestType.Method);
-		serviceRequest.setParameters(parameters);
-		serviceRequest.setResponseFormat(ResponseFormat.Json);
+		final ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setResponseFormat(ResponseFormat.Json);
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
@@ -478,7 +483,7 @@ public class ProxiExplorer {
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			String jsonResponse = (String) serviceResponse.data;
-			ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+			ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
 			List<Object> entities = (List<Object>) serviceData.data;
 
@@ -676,7 +681,7 @@ public class ProxiExplorer {
 				text.append(line);
 			}
 			String jsonEntity = text.toString();
-			Entity entity = ProxibaseService.getGson(GsonType.Internal).fromJson(jsonEntity, Entity.class);
+			Entity entity = (Entity) ProxibaseService.convertJsonToObjectInternalSmart(jsonEntity, ServiceDataType.Entity);
 			return entity;
 		}
 		catch (IOException exception) {
@@ -720,7 +725,6 @@ public class ProxiExplorer {
 
 		private EntityList<Entity>	mEntities			= new EntityList<Entity>(EntityTree.Radar);
 		private EntityList<Entity>	mUserEntities		= new EntityList<Entity>(EntityTree.User);
-		private EntityList<Entity>	mMapEntities		= new EntityList<Entity>(EntityTree.Map);
 
 		private List<Beacon>		mBeacons			= new ArrayList<Beacon>();
 		private List<Beacon>		mMapBeacons			= new ArrayList<Beacon>();
@@ -742,7 +746,6 @@ public class ProxiExplorer {
 			entityModel.mBeacons = new ArrayList(mBeacons);
 			entityModel.mEntities = mEntities.clone();
 			entityModel.mUserEntities = mUserEntities.clone();
-			entityModel.mMapEntities = mMapEntities.clone();
 			entityModel.mLastRefreshDate = mLastRefreshDate;
 			entityModel.mLastActivityDate = mLastActivityDate;
 			entityModel.mRookieHit = mRookieHit;
@@ -761,7 +764,6 @@ public class ProxiExplorer {
 			entityModel.mBeacons = new ArrayList(mBeacons); /* refs to same beacons */
 			entityModel.mEntities = mEntities.deepCopy(); /* new entities */
 			entityModel.mUserEntities = mUserEntities.deepCopy(); /* new entities */
-			entityModel.mMapEntities = mMapEntities.deepCopy();
 			entityModel.mLastRefreshDate = mLastRefreshDate;
 			entityModel.mLastActivityDate = mLastActivityDate;
 			entityModel.mRookieHit = mRookieHit;
@@ -1503,14 +1505,6 @@ public class ProxiExplorer {
 
 		public void setUserEntities(EntityList<Entity> userEntities) {
 			mUserEntities = userEntities;
-		}
-
-		public EntityList<Entity> getMapEntities() {
-			return mMapEntities;
-		}
-
-		public void setMapEntities(EntityList<Entity> mapEntities) {
-			mMapEntities = mapEntities;
 		}
 
 		public List<Beacon> getMapBeacons() {

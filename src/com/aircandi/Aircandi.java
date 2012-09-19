@@ -1,5 +1,7 @@
 package com.aircandi;
 
+import net.minidev.json.parser.JSONParser;
+
 import org.acra.ACRA;
 import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
@@ -84,6 +86,7 @@ public class Aircandi extends Application {
 	public static Context					applicationContext;
 	public static Handler					applicationHandler;
 	public static StopWatch					stopwatch;
+	public static JSONParser				parser						= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
 
 	public static Boolean					firstRunApp					= true;
 	public static Boolean					fullUpdateComplete			= false;

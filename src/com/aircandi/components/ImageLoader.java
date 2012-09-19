@@ -208,11 +208,11 @@ public class ImageLoader {
 		/*
 		 * We request a byte array for decoding because of a bug in pre 2.3 versions of android.
 		 */
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setUri(url);
-		serviceRequest.setRequestType(RequestType.Get);
-		serviceRequest.setResponseFormat(ResponseFormat.Bytes);
-		serviceRequest.setRequestListener(listener);
+		ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(url)
+				.setRequestType(RequestType.Get)
+				.setResponseFormat(ResponseFormat.Bytes)
+				.setRequestListener(listener);
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
@@ -227,7 +227,8 @@ public class ImageLoader {
 			if (bitmap == null) {
 				Logger.w(null, url + ": stream could not be decoded to a bitmap");
 				serviceResponse.responseCode = ResponseCode.Failed;
-				serviceResponse.exception = ProxibaseService.makeProxibaseServiceException(null, new IllegalStateException("Stream could not be decoded to a bitmap: " + url));
+				serviceResponse.exception = ProxibaseService.makeProxibaseServiceException(null, new IllegalStateException(
+						"Stream could not be decoded to a bitmap: " + url));
 			}
 			else {
 				serviceResponse.data = bitmap;

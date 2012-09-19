@@ -6,37 +6,32 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.Tab;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CandiListAdapter;
+import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.ProxibaseService.GsonType;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.R;
 
-public class CandiPicker extends FormActivity implements ActionBar.TabListener {
+public class CandiPicker extends FormActivity {
 
 	private ListView			mListViewCandi;
 	private EntityList<Entity>	mEntities	= new EntityList<Entity>();
-	private EntityTree			mMethodType	= EntityTree.Radar;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -52,7 +47,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 	}
 
 	public void bind() {
-		if (mMethodType == EntityTree.Radar) {
+		if (mCommon.mEntityTree == EntityTree.Radar) {
 			EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel()
 					.getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, EntityTree.Radar);
 			if (entities != null) {
@@ -66,7 +61,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 				mListViewCandi.setAdapter(adapter);
 			}
 		}
-		else if (mMethodType == EntityTree.User) {
+		else if (mCommon.mEntityTree == EntityTree.User) {
 
 			EntityList<Entity> entitiesUserCandi = ProxiExplorer.getInstance().getEntityModel()
 					.getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, EntityTree.User);
@@ -96,13 +91,9 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 						 * already been fetched from the service. The exception is candi by user. If the
 						 * first fetch hasn't happened yet, we handle it here.
 						 */
-						ServiceResponse serviceResponse = new ServiceResponse();
-						Bundle parameters = new Bundle();
-						ServiceRequest serviceRequest = new ServiceRequest();
-						EntityList<Entity> entitiesUserCandi = ProxiExplorer.getInstance().getEntityModel()
-								.getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, EntityTree.User);
 
 						/* Set method parameters */
+						Bundle parameters = new Bundle();
 						parameters.putString("userId", Aircandi.getInstance().getUser().id);
 						parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
 						parameters.putString("options", "object:{\"limit\":"
@@ -115,17 +106,21 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 								+ ",\"sort\":{\"modifiedDate\":-1}}"
 								+ "}");
 
-						serviceRequest.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForUser")
+						ServiceRequest serviceRequest = new ServiceRequest()
+								.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForUser")
 								.setRequestType(RequestType.Method)
 								.setParameters(parameters)
 								.setResponseFormat(ResponseFormat.Json);
 
-						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+						ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 
 							String jsonResponse = (String) serviceResponse.data;
-							ServiceData serviceData = ProxibaseService.convertJsonToObjects(jsonResponse, Entity.class, GsonType.ProxibaseService);
+							ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+
+							EntityList<Entity> entitiesUserCandi = ProxiExplorer.getInstance().getEntityModel()
+									.getCollectionById(ProxiConstants.ROOT_COLLECTION_ID, EntityTree.User);
 
 							entitiesUserCandi.setCollectionType(EntityTree.User);
 							entitiesUserCandi.addAll((Collection<? extends Entity>) serviceData.data);
@@ -212,23 +207,4 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 	protected int getLayoutID() {
 		return R.layout.candi_picker;
 	}
-
-	@Override
-	public void onTabSelected(Tab tab, FragmentTransaction ft) {
-		if (((Integer) tab.getTag()) == R.string.candi_picker_tab_radar) {
-			mMethodType = ProxiExplorer.EntityTree.Radar;
-			bind();
-		}
-		else if (((Integer) tab.getTag()) == R.string.candi_picker_tab_mycandi) {
-			mMethodType = ProxiExplorer.EntityTree.User;
-			bind();
-		}
-
-	}
-
-	@Override
-	public void onTabUnselected(Tab tab, FragmentTransaction ft) {}
-
-	@Override
-	public void onTabReselected(Tab tab, FragmentTransaction ft) {}
 }

@@ -1,5 +1,7 @@
 package com.aircandi.components;
 
+import java.util.HashMap;
+
 /**
  * The Class ImageResult.
  * Used for bing image searches.
@@ -32,6 +34,25 @@ public class ImageResult
 
 	/** The thumbnail. */
 	protected Thumbnail	thumbnail;
+
+	public static ImageResult setFromPropertiesFromMap(ImageResult imageResult, HashMap map) {
+		/*
+		 * Properties involved with editing are copied from one entity to another.
+		 */
+		imageResult.title = (String) map.get("Title");
+		imageResult.mediaUrl = (String) map.get("MediaUrl");
+		imageResult.url = (String) map.get("Url");
+		imageResult.displayUrl = (String) map.get("DisplayUrl");
+		imageResult.width = Long.parseLong((String) map.get("Width"));
+		imageResult.height = Long.parseLong((String) map.get("Height"));
+		imageResult.fileSize = Long.parseLong((String) map.get("FileSize"));
+		imageResult.contentType = (String) map.get("ContentType");
+		if (map.get("Thumbnail") != null) {
+			imageResult.thumbnail = Thumbnail.setFromPropertiesFromMap(new Thumbnail(), (HashMap<String, Object>) map.get("Thumbnail"));
+		}
+
+		return imageResult;
+	}
 
 	/**
 	 * Gets the title.

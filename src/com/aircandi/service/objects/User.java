@@ -1,6 +1,9 @@
 package com.aircandi.service.objects;
 
-import com.google.gson.annotations.Expose;
+import java.util.HashMap;
+
+import com.aircandi.service.Expose;
+
 
 /**
  * @author Jayma
@@ -30,31 +33,32 @@ public class User extends ServiceEntry {
 	@Expose
 	public Boolean				isDeveloper;
 
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public String				facebookId;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public String				twitterId;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public String				googleId;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public String				password;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public Number				lastSignedInDate;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public String				authSource;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public String				oauthId;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public String				oauthToken;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public String				oauthSecret;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public String				oauthData;
-	@Expose
-	public Number				emailValidated;
+	@Expose(serialize = false, deserialize = true)
+	public Number				validationDate;
+	@Expose(serialize = false, deserialize = true)
+	public Number				validationNotifyDate;
 
 	/* For client use only */
-	public boolean				anonymous			= false;
 	public boolean				keepSignedIn		= false;
 	public Session				session;
 
@@ -69,6 +73,39 @@ public class User extends ServiceEntry {
 		catch (final CloneNotSupportedException ex) {
 			throw new AssertionError();
 		}
+	}
+
+	public Boolean isAnonymous() {
+		return this.id.equals("0000.000000.00000.000.000000");
+	}
+
+	public static User setFromPropertiesFromMap(User user, HashMap map) {
+		/*
+		 * These base properties are done here instead of calling ServiceEntry
+		 * because of a recursion problem.
+		 */
+		user.id = (String) map.get("_id");
+		user.creatorId = (String) map.get("_creator");
+		user.ownerId = (String) map.get("_owner");
+		user.modifierId = (String) map.get("modifierId");
+		user.createdDate = (Number) map.get("createdDate");
+		user.modifiedDate = (Number) map.get("modifiedDate");
+
+		user.name = (String) map.get("name");
+		user.location = (String) map.get("location");
+		user.imageUri = (String) map.get("imageUri");
+		user.email = (String) map.get("email");
+		user.role = (String) map.get("role");
+		user.linkUri = (String) map.get("linkUri");
+		user.bio = (String) map.get("bio");
+		user.webUri = (String) map.get("webUri");
+		user.isDeveloper = (Boolean) map.get("isDeveloper");
+		user.password = (String) map.get("password");
+		user.lastSignedInDate = (Number) map.get("lastSignedInDate");
+		user.validationDate = (Number) map.get("validationDate");
+		user.validationNotifyDate = (Number) map.get("validationNotifyDate");
+		
+		return user;
 	}
 
 	@Override

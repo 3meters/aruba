@@ -3,15 +3,17 @@ package com.aircandi.service.objects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.service.Expose;
 import com.aircandi.service.ProxiConstants;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.aircandi.service.SerializedName;
 
 /**
  * Entity as described by the proxi protocol standards.
@@ -72,6 +74,10 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public String				beaconId;										/* Used to connect beacon object */
 
 	@Expose(serialize = false, deserialize = true)
+	@SerializedName("_parent")
+	public String				parentId;										/* Used to connect beacon object */
+	
+	@Expose(serialize = false, deserialize = true)
 	public GeoLocation			location;
 
 	@Expose(serialize = false, deserialize = true)
@@ -81,10 +87,19 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public Boolean				commentsMore;
 
 	@Expose(serialize = false, deserialize = true)
+	public Integer				childCount;
+
+	@Expose(serialize = false, deserialize = true)
+	public Boolean				childrenMore;
+
+	@Expose(serialize = false, deserialize = true)
 	public EntityList<Entity>	children;
 
 	@Expose(serialize = false, deserialize = true)
 	public EntityList<Entity>	parents;
+
+	@Expose(serialize = false, deserialize = true)
+	public Integer				parentCount;
 
 	/*
 	 * For client use only
@@ -95,7 +110,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 
 	public Beacon				beacon;
 	public Entity				parent;
-	public String				parentId;										/* Instead of serializing parent */
+	
 	public Boolean				superRoot			= false;
 
 	public Boolean				hidden				= false;
@@ -183,6 +198,67 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		toEntity.imageUri = fromEntity.imageUri;
 		toEntity.linkUri = fromEntity.linkUri;
 		toEntity.linkPreviewUri = fromEntity.linkPreviewUri;
+	}
+
+	public static Entity setFromPropertiesFromMap(Entity entity, HashMap map) {
+		/*
+		 * Properties involved with editing are copied from one entity to another.
+		 */
+		entity = (Entity) ServiceEntry.setFromPropertiesFromMap(entity, map);
+		
+		entity.type = (String) map.get("type");
+		entity.root = (Boolean) map.get("root");
+		entity.title = (String) map.get("title");
+		entity.label = (String) map.get("label");
+		entity.subtitle = (String) map.get("subtitle");
+		entity.description = (String) map.get("description");
+		entity.linkUri = (String) map.get("linkUri");
+		entity.linkPreviewUri = (String) map.get("linkPreviewUri");
+		entity.linkJavascriptEnabled = (Boolean) map.get("linkJavascriptEnabled");
+		entity.linkZoom = (Boolean) map.get("linkZoom");
+		entity.locked = (Boolean) map.get("locked");
+		entity.imagePreviewUri = (String) map.get("imagePreviewUri");
+		entity.imageUri = (String) map.get("imageUri");
+		entity.signalFence = (Number) map.get("signalFence");
+		entity.visibility = (String) map.get("visibility");
+		
+		if (map.get("comments") != null) {
+			entity.comments = new ArrayList<Comment>();
+			List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
+			for (LinkedHashMap<String, Object> commentMap : commentMaps) {
+				entity.comments.add(Comment.setFromPropertiesFromMap(new Comment(), commentMap));
+			}
+		}
+		entity.commentCount = (Integer) map.get("commentCount");
+		entity.commentsMore = (Boolean) map.get("commentsMore");
+		
+		entity.children = new EntityList<Entity>();
+		if (map.get("children") != null) {
+			List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
+			for (LinkedHashMap<String, Object> childMap : childMaps) {
+				entity.children.add(Entity.setFromPropertiesFromMap(new Entity(), childMap));
+			}
+		}
+		entity.childCount = (Integer) map.get("childCount");
+		entity.childrenMore = (Boolean) map.get("childrenMore");
+		
+		entity.parents = new EntityList<Entity>();
+		if (map.get("parents") != null) {
+			List<LinkedHashMap<String, Object>> parentMaps = (List<LinkedHashMap<String, Object>>) map.get("parents");
+			for (LinkedHashMap<String, Object> parentMap : parentMaps) {
+				entity.parents.add(Entity.setFromPropertiesFromMap(new Entity(), parentMap));
+			}
+		}
+		entity.parentId = (String) map.get("_parent");
+		entity.parentCount = (Integer) map.get("parentCount");
+		
+		if (map.get("location") != null) {
+			entity.location = (GeoLocation) GeoLocation.setFromPropertiesFromMap(new GeoLocation(), (HashMap<String, Object>) map.get("location"));
+		}
+		entity.beaconId = (String) map.get("_beacon");
+		entity.activityDate = (Number) map.get("activityDate");
+		
+		return entity;
 	}
 
 	public Entity deepCopy() {

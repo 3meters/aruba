@@ -537,9 +537,12 @@ public class CandiPatchPresenter implements Observer {
 		if (!foundRoot) {
 			mCandiPatchModel.setCandiRootNext(candiRootNext);
 		}
+		Aircandi.stopwatch.segmentTime("Prep work before navigate");
+
 
 		/* Navigate to make sure we are completely configured */
 		navigateModel(mCandiPatchModel.getCandiRootNext(), delayObserverUpdate, fullBuild);
+		Aircandi.stopwatch.segmentTime("Navigate complete");
 
 		/* Return to default rendering window */
 		Logger.d(this, "Model updated with entities");
@@ -577,6 +580,7 @@ public class CandiPatchPresenter implements Observer {
 			ensureZoneView(zoneModel);
 		}
 
+		Aircandi.stopwatch.segmentTime("Prep work before transitions");
 		/* For animations, we need to create views in advance. */
 		if (CandiConstants.TRANSITIONS_ACTIVE) {
 
@@ -636,10 +640,13 @@ public class CandiPatchPresenter implements Observer {
 					}
 				}
 			}
+			Aircandi.stopwatch.segmentTime("Modifier management complete");
 
 			manageViews(false, true);
+
 			doTransitionAnimations();
-		}
+			Aircandi.stopwatch.segmentTime("Transition animations processed");
+	}
 
 		/* Trigger epoch observer updates */
 		if (!delayObserverUpdate) {
@@ -654,6 +661,7 @@ public class CandiPatchPresenter implements Observer {
 
 		/* Now that all the view entities have updated we can do global operations like z sorting. */
 		mEngine.getScene().getChild(CandiConstants.LAYER_CANDI).sortChildren();
+		Aircandi.stopwatch.segmentTime("Model update-shift-sort complete");
 
 	}
 
@@ -950,6 +958,8 @@ public class CandiPatchPresenter implements Observer {
 				sendCandiViewToPool(candiModel, useNext);
 			}
 		}
+		Aircandi.stopwatch.segmentTime("Manage views: recycling complete");
+
 
 		if (localUpdate) {
 			/*
@@ -991,6 +1001,7 @@ public class CandiPatchPresenter implements Observer {
 					}
 				}
 			}
+			Aircandi.stopwatch.segmentTime("Manage views: views allocated");
 		}
 		else {
 			/*
@@ -1008,7 +1019,9 @@ public class CandiPatchPresenter implements Observer {
 						getCandiViewFromPool(candiModel, localUpdate, useNext);
 					}
 				}
+				Aircandi.stopwatch.segmentTime("Manage views: view allocated");
 			}
+
 		}
 
 		/* update debug info */
@@ -1022,6 +1035,7 @@ public class CandiPatchPresenter implements Observer {
 					}
 				}
 			});
+			Aircandi.stopwatch.segmentTime("Manage views: debug info updated");
 		}
 	}
 
