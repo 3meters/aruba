@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityList;
+import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.Expose;
@@ -93,7 +94,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public Boolean				childrenMore;
 
 	@Expose(serialize = false, deserialize = true)
-	public EntityList<Entity>	children;
+	private EntityList<Entity>	children;
 
 	@Expose(serialize = false, deserialize = true)
 	public EntityList<Entity>	parents;
@@ -109,8 +110,6 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	 */
 
 	public Beacon				beacon;
-	public Entity				parent;
-	
 	public Boolean				superRoot			= false;
 
 	public Boolean				hidden				= false;
@@ -352,6 +351,16 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			}
 		}
 		return imageFormat;
+	}
+
+	public EntityList<Entity> getChildren() {
+		EntityList<Entity> childEntities = ProxiExplorer.getInstance().getEntityModel().getChildren(this.id);
+		return childEntities;
+	}
+
+	public Entity getParent() {
+		Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntity(this.parentId);
+		return entity;
 	}
 
 	public static enum ImageFormat {

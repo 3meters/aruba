@@ -41,7 +41,6 @@ public class CandiList extends CandiListBase {
 
 		if (!useEntityModel) {
 			Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
-			entity.children = null;
 		}
 
 		new AsyncTask() {
@@ -56,15 +55,15 @@ public class CandiList extends CandiListBase {
 
 				ServiceResponse serviceResponse = new ServiceResponse();
 				Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
-				if (entity.children != null && entity.children.size() > 0) {
-					serviceResponse.data = entity.children;
+				if (entity.getChildren() != null && entity.getChildren().size() > 0) {
+					serviceResponse.data = entity.getChildren();
 				}
 				else {
 					String jsonFields = "{\"entities\":{},\"children\":{},\"parents\":{},\"comments\":{}}";
 					String jsonEagerLoad = "{\"children\":true,\"parents\":true,\"comments\":false}";
 					serviceResponse = ProxiExplorer.getInstance().getEntity(entity.id, jsonEagerLoad, jsonFields, null);
 					ServiceData serviceData = (ServiceData) serviceResponse.data;
-					serviceResponse.data = ((Entity)serviceData.data).children;
+					serviceResponse.data = ((Entity)serviceData.data).getChildren();
 				}
 				return serviceResponse;
 			}
@@ -88,7 +87,6 @@ public class CandiList extends CandiListBase {
 						if (serviceResponse.data != null) {
 							if (!useEntityModel) {
 								Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
-								entity.children = (EntityList<Entity>) serviceResponse.data;
 							}
 							CandiListAdapter adapter = new CandiListAdapter(CandiList.this, (EntityList<Entity>) serviceResponse.data,
 									R.layout.temp_listitem_candi);

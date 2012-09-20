@@ -131,7 +131,6 @@ public class CommentList extends CandiActivity {
 		entityIds.add(mCommon.mEntityId);
 		parameters.putStringArrayList("entityIds", entityIds);
 		parameters.putString("eagerLoad", "object:{\"children\":false,\"comments\":true}");
-		parameters.putString("fields", "object:{\"entities\":{},\"comments\":{},\"children\":{}}");
 		parameters.putString("options", "object:{\"limit\":"
 				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
 				+ ",\"skip\":0"
@@ -156,6 +155,7 @@ public class CommentList extends CandiActivity {
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			String jsonResponse = (String) serviceResponse.data;
 			ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+			ProxiExplorer.getInstance().getEntityModel().pushToCache((List<Entity>) serviceData.data);
 			serviceResponse.data = serviceData;
 		}
 

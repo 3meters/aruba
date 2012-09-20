@@ -120,8 +120,8 @@ public abstract class CandiFormBase extends CandiActivity {
 						mCommon.mActionBar.setTitle(mEntity.title);
 
 						/* Sort the children if there are any */
-						if (mEntity.children != null && mEntity.children.size() > 1) {
-							Collections.sort(mEntity.children, new EntityList.SortEntitiesByModifiedDate());
+						if (mEntity.getChildren() != null && mEntity.getChildren().size() > 1) {
+							Collections.sort(mEntity.getChildren(), new EntityList.SortEntitiesByModifiedDate());
 						}
 
 						/* Get the view pager configured */
@@ -337,7 +337,7 @@ public abstract class CandiFormBase extends CandiActivity {
 					 * Special case: user could have a top level candi and choose to move it to
 					 * top so it's a no-op.
 					 */
-					if (parentEntityId == null && mEntity.parent == null) {
+					if (parentEntityId == null && mEntity.getParent() == null) {
 						return;
 					}
 					moveCandi(mEntity, parentEntityId);
@@ -425,12 +425,12 @@ public abstract class CandiFormBase extends CandiActivity {
 		}
 
 		/* Parent info */
-		if (parentGroup != null && entity.parent == null && entity.parentId == null) {
+		if (parentGroup != null && entity.getParent() == null && entity.parentId == null) {
 			parentGroup.setVisibility(View.GONE);
 		}
 		else {
 			parentGroup.setVisibility(View.VISIBLE);
-			parentText.setText(Aircandi.getInstance().getString(R.string.name_entity_type_collection) + ": " + entity.parent.label);
+			parentText.setText(Aircandi.getInstance().getString(R.string.name_entity_type_collection) + ": " + entity.getParent().label);
 		}
 
 		/* Adjust buttons */
@@ -443,7 +443,7 @@ public abstract class CandiFormBase extends CandiActivity {
 		}
 		holderChildren.setVisibility(View.GONE);
 		if (!entity.locked) {
-			if (entity.parent == null) {
+			if (entity.getParent() == null) {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 					newCandi.setVisibility(View.VISIBLE);
 				}
@@ -463,9 +463,9 @@ public abstract class CandiFormBase extends CandiActivity {
 			}
 		}
 
-		boolean visibleChildren = (entity.children != null && entity.hasVisibleChildren());
+		boolean visibleChildren = (entity.getChildren() != null && entity.hasVisibleChildren());
 		if (visibleChildren) {
-			Entity childEntity = entity.children.get(0);
+			Entity childEntity = entity.getChildren().get(0);
 
 			/* image */
 			ImageRequestBuilder builder = new ImageRequestBuilder(imageChildren);
@@ -477,7 +477,7 @@ public abstract class CandiFormBase extends CandiActivity {
 			imageChildren.setImageRequest(imageRequest);
 
 			/* child count */
-			textChildren.setText(String.valueOf(entity.children.size()));
+			textChildren.setText(String.valueOf(entity.getChildren().size()));
 
 			holderChildren.setVisibility(View.VISIBLE);
 		}
@@ -671,10 +671,9 @@ public abstract class CandiFormBase extends CandiActivity {
 							 */
 							Entity collectionEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
 									.getEntityById(entity.parentId, null, EntityTree.Radar);
-							collectionEntityOriginal.children.remove(entity);
+							collectionEntityOriginal.getChildren().remove(entity);
 
 							entity.beacon.entities.add(entity);
-							entity.parent = null;
 							entity.parentId = null;
 						}
 						else {
@@ -683,17 +682,13 @@ public abstract class CandiFormBase extends CandiActivity {
 							 */
 							Entity collectionEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(collectionEntityId, null, EntityTree.Radar);
 							if (collectionEntity != null) {
-								if (entity.parent == null) {
+								if (entity.getParent() == null) {
 									/*
 									 * Moving from beacon to collection
 									 */
 									entity.beacon.entities.remove(entity);
 
-									if (collectionEntity.children == null) {
-										collectionEntity.children = new EntityList<Entity>();
-									}
-									collectionEntity.children.add(entity);
-									entity.parent = collectionEntity;
+									collectionEntity.getChildren().add(entity);
 									entity.parentId = collectionEntity.id;
 									entity.beaconId = collectionEntity.beaconId;
 								}
@@ -703,19 +698,15 @@ public abstract class CandiFormBase extends CandiActivity {
 									 */
 									Entity collectionEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
 											.getEntityById(entity.parentId, null, EntityTree.Radar);
-									collectionEntityOriginal.children.remove(entity);
+									collectionEntityOriginal.getChildren().remove(entity);
 
-									if (collectionEntity.children == null) {
-										collectionEntity.children = new EntityList<Entity>();
-									}
-									collectionEntity.children.add(entity);
-									entity.parent = collectionEntity;
+									collectionEntity.getChildren().add(entity);
 									entity.parentId = collectionEntity.id;
 									entity.beaconId = collectionEntity.beaconId;
 								}
 
-								if (collectionEntity.children.size() > 1) {
-									Collections.sort(collectionEntity.children, new EntityList.SortEntitiesByModifiedDate());
+								if (collectionEntity.getChildren().size() > 1) {
+									Collections.sort(collectionEntity.getChildren(), new EntityList.SortEntitiesByModifiedDate());
 								}
 							}
 						}
@@ -730,9 +721,8 @@ public abstract class CandiFormBase extends CandiActivity {
 							 */
 							Entity collectionEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
 									.getEntityById(entity.parentId, null, EntityTree.User);
-							collectionEntityOriginal.children.remove(entity);
+							collectionEntityOriginal.getChildren().remove(entity);
 
-							entity.parent = null;
 							entity.parentId = null;
 						}
 						else {
@@ -744,14 +734,11 @@ public abstract class CandiFormBase extends CandiActivity {
 									.getEntityById(collectionEntityId, null, EntityTree.User);
 							
 							if (collectionEntity != null) {
-								if (entity.parent != null) {
+								if (entity.getParent() != null) {
 									/*
 									 * Moving from beacon to collection
 									 */
-									if (collectionEntity.children == null) {
-										collectionEntity.children = new EntityList<Entity>();
-									}
-									collectionEntity.children.add(entity);
+									collectionEntity.getChildren().add(entity);
 									entity.parentId = collectionEntity.id;
 									entity.beaconId = collectionEntity.beaconId;
 								}
@@ -763,17 +750,14 @@ public abstract class CandiFormBase extends CandiActivity {
 											.getEntityModel()
 											.getEntityById(entity.parentId, null, EntityTree.User);
 									
-									collectionEntityOriginal.children.remove(entity);
+									collectionEntityOriginal.getChildren().remove(entity);
 
-									if (collectionEntity.children == null) {
-										collectionEntity.children = new EntityList<Entity>();
-									}
-									collectionEntity.children.add(entity);
+									collectionEntity.getChildren().add(entity);
 									entity.parentId = collectionEntity.id;
 									entity.beaconId = collectionEntity.beaconId;
 								}
-								if (collectionEntity.children.size() > 1) {
-									Collections.sort(collectionEntity.children, new EntityList.SortEntitiesByModifiedDate());
+								if (collectionEntity.getChildren().size() > 1) {
+									Collections.sort(collectionEntity.getChildren(), new EntityList.SortEntitiesByModifiedDate());
 								}
 							}
 						}

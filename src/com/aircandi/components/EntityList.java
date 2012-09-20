@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import com.aircandi.candi.models.CandiModel;
-import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 
 public class EntityList<T> extends ArrayList<T> {
 
 	private static final long	serialVersionUID	= -2567383399125318332L;
-	private EntityTree			mCollectionType;
 
 	/*
 	 * CollectionEntity is the entity that owns this collection. If CollectionEntity
@@ -19,11 +17,6 @@ public class EntityList<T> extends ArrayList<T> {
 	 */
 
 	public EntityList() {}
-
-	public EntityList(EntityTree collectionType) {
-		super();
-		mCollectionType = collectionType;
-	}
 
 	public EntityList(final int capacity) {
 		super(capacity);
@@ -63,7 +56,6 @@ public class EntityList<T> extends ArrayList<T> {
 	@Override
 	public EntityList<T> clone() {
 		EntityList<T> entityList = (EntityList<T>) super.clone();
-		entityList.setCollectionType(mCollectionType);
 		return entityList;
 	}
 
@@ -78,7 +70,6 @@ public class EntityList<T> extends ArrayList<T> {
 			Entity entity = (Entity) this.get(i);
 			entityList.add(entity.clone());
 		}
-		entityList.setCollectionType(mCollectionType);
 		return entityList;
 	}
 
@@ -93,16 +84,7 @@ public class EntityList<T> extends ArrayList<T> {
 			Entity entity = (Entity) this.get(i);
 			entityList.add(entity.deepCopy());
 		}
-		entityList.setCollectionType(mCollectionType);
 		return entityList;
-	}
-
-	public EntityTree getCollectionType() {
-		return mCollectionType;
-	}
-
-	public void setCollectionType(EntityTree collectionType) {
-		mCollectionType = collectionType;
 	}
 
 	public static class SortEntitiesByModifiedDate implements Comparator<Entity> {

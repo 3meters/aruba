@@ -1,7 +1,5 @@
 package com.aircandi;
 
-import java.util.Collection;
-
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,20 +15,12 @@ import com.aircandi.components.DateUtils;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.core.CandiConstants;
-import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
 
 public class UserCandiList extends CandiListBase {
@@ -97,7 +87,7 @@ public class UserCandiList extends CandiListBase {
 		}
 	}
 
-	public void bind(final Boolean useEntityModel) {
+	public void bind(final Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -108,91 +98,7 @@ public class UserCandiList extends CandiListBase {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-
-				ServiceResponse serviceResponse = new ServiceResponse();
-				EntityList<Entity> userEntities = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, EntityTree.User);
-				Boolean userTreeEmpty = (ProxiExplorer.getInstance().getEntityModel().getUserEntities().size() == 0);
-				/*
-				 * If its the user collection and it hasn't been populated yet, do the work.
-				 */
-				if (userTreeEmpty || !useEntityModel) {
-
-					/* Set method parameters */
-					Bundle parameters = new Bundle();
-					parameters.putString("userId", Aircandi.getInstance().getUser().id);
-					if (mFilter != null) {
-						parameters.putString("filter", mFilter);
-					}
-					parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":true,\"comments\":false}");
-					parameters.putString("fields", "object:{\"entities\":{},\"comments\":{},\"children\":{},\"parents\":{\"_id\":true}}");
-					parameters.putString("options", "object:{\"limit\":"
-							+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
-							+ ",\"skip\":0"
-							+ ",\"sort\":{\"modifiedDate\":-1} "
-							+ ",\"children\":{\"limit\":"
-							+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
-							+ ",\"skip\":0"
-							+ ",\"sort\":{\"modifiedDate\":-1}}"
-							+ "}");
-
-					ServiceRequest serviceRequest = new ServiceRequest()
-							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForUser")
-							.setRequestType(RequestType.Method)
-							.setParameters(parameters)
-							.setResponseFormat(ResponseFormat.Json);
-
-					serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-
-						String jsonResponse = (String) serviceResponse.data;
-						ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
-						
-						/*
-						 * All entities owned by the current are returned at the first level including
-						 * entities that are in collections. Collections will also include their child
-						 * entities including repeating ones already shown at the first level.
-						 * 
-						 * To support move, we need to include parent and beacon info for top level
-						 * entities.
-						 * 
-						 * - no collection: candi is now unlinked to anything.
-						 * - to collection: choice of radar or user collections.
-						 */
-
-						userEntities.clear();
-						userEntities.addAll((Collection<? extends Entity>) serviceData.data);
-						userEntities.setCollectionType(EntityTree.User);
-
-						/* 
-						 * Do some fixup migrating settings to the children collection
-						 * 
-						 * Top level entities that are actually in collections will have
-						 * parentId set and parents collection is . Child entities will have parentId set
-						 * but no parents collection. 
-						 */
-						for (Entity entity : userEntities) {
-							if (entity.children != null) {
-								entity.children.setCollectionType(EntityTree.User);
-								for (Entity childEntity : entity.children) {
-									childEntity.parent = entity;
-									childEntity.parentId = entity.id;
-								}
-							}
-							if (entity.parents != null && entity.parents.size() > 0) {
-								entity.parents.setCollectionType(EntityTree.User);
-								entity.parent = entity.parents.get(0);
-							}
-						}
-
-						/* Assign again since the object was replaced and we use it to pass down the results */
-						serviceResponse.data = userEntities;
-					}
-				}
-				else {
-					userEntities = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, EntityTree.User);
-					serviceResponse.data = userEntities;
-				}
+				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityModel().getUserEntities(Aircandi.getInstance().getUser().id, refresh);
 				return serviceResponse;
 			}
 
@@ -203,7 +109,7 @@ public class UserCandiList extends CandiListBase {
 					/*
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */
-					if (((EntityList<Entity>) serviceResponse.data).size() == 0) {
+					if (serviceResponse.data != null || ((EntityList<Entity>) serviceResponse.data).size() == 0) {
 						mCommon.showProgressDialog(false, null);
 						onBackPressed();
 					}

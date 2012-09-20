@@ -59,8 +59,8 @@ public class MapCandiList extends CandiListBase {
 			}
 			else {
 				Entity parent = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.Map);
-				if (parent.children != null) {
-					parent.children = null;
+				if (parent.getChildren() != null) {
+					parent.setChildren(null);
 				}
 			}
 		}
@@ -77,6 +77,9 @@ public class MapCandiList extends CandiListBase {
 
 				ServiceResponse serviceResponse = new ServiceResponse();
 				if (mCommon.mEntityId == null) {
+					/*
+					 * List of entities attached to a beacon
+					 */
 					Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(mCommon.mBeaconId);
 					if (mapBeacon.entities != null && mapBeacon.entities.size() > 0) {
 						serviceResponse.data = mapBeacon.entities;
@@ -88,14 +91,18 @@ public class MapCandiList extends CandiListBase {
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 							ServiceData serviceData = (ServiceData) serviceResponse.data;
 							List<Entity> entities = (List<Entity>) serviceData.data;
+							ProxiExplorer.getInstance().getEntityModel().pushToCache(entities);
 							serviceResponse.data = entities;
 						}
 					}
 				}
 				else {
+					/*
+					 * List of child entities attached to a parent entity
+					 */
 					Entity parent = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.Map);
-					if (parent.children != null && parent.children.size() > 0) {
-						serviceResponse.data = parent.children;
+					if (parent.getChildren() != null && parent.getChildren().size() > 0) {
+						serviceResponse.data = parent.getChildren();
 					}
 					else {
 						String jsonFields = "{\"entities\":{},\"children\":{},\"parents\":{},\"comments\":{}}";
@@ -103,7 +110,7 @@ public class MapCandiList extends CandiListBase {
 						serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, jsonFields, null);
 						ServiceData serviceData = (ServiceData) serviceResponse.data;
 						serviceResponse.data = (EntityList<Entity>) serviceData.data;
-
+						ProxiExplorer.getInstance().getEntityModel().pushToCache((EntityList<Entity>) serviceData.data);
 					}
 				}
 				return serviceResponse;
@@ -134,7 +141,7 @@ public class MapCandiList extends CandiListBase {
 						}
 						else {
 							Entity parent = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.Map);
-							parent.children = (EntityList<Entity>) entities;
+							parent.setChildren((EntityList<Entity>) entities);
 						}
 
 						if (serviceResponse.data != null) {

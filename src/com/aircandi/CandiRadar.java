@@ -658,16 +658,12 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 								if (serviceResponse.responseCode == ResponseCode.Success) {
 
-									//									if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0) {
-
 									mCandiPatchPresenter.renderingActivate(CandiConstants.INTERVAL_RENDERING_BOOST);
 									Aircandi.getInstance().setRadarUpdateInProgress(true);
 									mCandiPatchPresenter.setIgnoreInput(true);
 
-									EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
+									EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
 									mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false);
-
-									//									}
 
 									updateComplete();
 									Aircandi.stopwatch.segmentTime("Finished updating radar UI");
@@ -881,12 +877,12 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		intentBuilder.setEntityType(entity.type);
 		intentBuilder.setEntityTree(ProxiExplorer.EntityTree.Radar);
 
-		if (entity.parent == null) {
+		if (entity.getParent() == null) {
 			intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
 		}
 		else {
-			intentBuilder.setCollectionId(entity.parent.id);
-			intentBuilder.setEntityLocation(entity.parent.location);
+			intentBuilder.setCollectionId(entity.getParent().id);
+			intentBuilder.setEntityLocation(entity.getParent().location);
 		}
 
 		Intent intent = intentBuilder.create();

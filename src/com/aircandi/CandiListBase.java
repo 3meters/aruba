@@ -68,8 +68,8 @@ public abstract class CandiListBase extends CandiActivity {
 				.setCollectionId(mCommon.mCollectionId)
 				.setEntityTree(mCommon.mEntityTree);
 
-		if (entity.parent != null) {
-			intentBuilder.setEntityLocation(entity.parent.location);
+		if (entity.getParent() != null) {
+			intentBuilder.setEntityLocation(entity.getParent().location);
 		}
 		else {
 			intentBuilder.setBeaconId(entity.beaconId);

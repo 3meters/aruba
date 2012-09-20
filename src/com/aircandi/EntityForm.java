@@ -489,8 +489,8 @@ public class EntityForm extends FormActivity {
 									ProxiExplorer.getInstance().getEntityModel().insertEntity(entity, beacon, parentEntity, true, EntityTree.Radar);
 									if (parentEntity != null) {
 										/* Sort child into the right spot */
-										if (parentEntity.children.size() > 1) {
-											Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
+										if (parentEntity.getChildren().size() > 1) {
+											Collections.sort(parentEntity.getChildren(), new EntityList.SortEntitiesByModifiedDate());
 										}
 									}
 
@@ -508,7 +508,8 @@ public class EntityForm extends FormActivity {
 									 * We assume that if the user tree is empty then it will get loaded later and
 									 * all the correct data will come from the service.
 									 */
-									if (!ProxiExplorer.getInstance().getEntityModel().getUserEntities().isEmpty()) {
+									EntityList<Entity> entities = (EntityList<Entity>) ProxiExplorer.getInstance().getEntityModel().getUserEntities(Aircandi.getInstance().getUser().id, false).data;
+									if (!entities.isEmpty()) {
 
 										/*
 										 * Insert at top level. The routine pushes the new entity in at the top of
@@ -524,8 +525,8 @@ public class EntityForm extends FormActivity {
 												ProxiExplorer.getInstance().getEntityModel()
 														.insertEntity(entity, beacon, parentEntity, true, EntityTree.User);
 												/* Sort child into the right spot */
-												if (parentEntity.children.size() > 1) {
-													Collections.sort(parentEntity.children, new EntityList.SortEntitiesByModifiedDate());
+												if (parentEntity.getChildren().size() > 1) {
+													Collections.sort(parentEntity.getChildren(), new EntityList.SortEntitiesByModifiedDate());
 												}
 											}
 										}
