@@ -60,7 +60,7 @@ public class StopWatch {
 	public long stop() {
 		final long lapTime = processSegmentTime(null);
 		lastThreshold = 0;
-		totalTime = 0;
+		//totalTime = 0;
 		Logger.v(this, "Stopwatch stopped");
 		return lapTime;
 	}
