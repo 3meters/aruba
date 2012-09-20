@@ -8,7 +8,7 @@
 
     <property
         name="web.local.dir"
-        value="D:\Files\Proxibase\Code\Aircandi\Web\android" />
+        value="D:\Files\Proxibase\Code\Aircandi\Web\lib\public\android" />
         
     <!-- Pre-build targets -->
     
