@@ -196,7 +196,7 @@ public class ProxibaseService {
 		String jsonBody = null;
 		URI redirectedUri = null;
 		int retryCount = 0;
-		HttpConnectionParams.setSoTimeout(mHttpParams, 3000);
+		HttpConnectionParams.setSoTimeout(mHttpParams, serviceRequest.getSocketTimeout() == null ? 3000 : serviceRequest.getSocketTimeout());
 
 		while (true) {
 
@@ -358,7 +358,7 @@ public class ProxibaseService {
 				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
 				 * - UnknownHostException: hostname didn't exist in the dns system
 				 */
-				if (!shouldRetry(httpRequest, exception, retryCount)) {
+				if (!serviceRequest.getRetry() || !shouldRetry(httpRequest, exception, retryCount)) {
 					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, exception);
 					throw proxibaseException;
 				}

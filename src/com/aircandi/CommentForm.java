@@ -174,6 +174,8 @@ public class CommentForm extends FormActivity {
 							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertComment")
 							.setRequestType(RequestType.Method)
 							.setParameters(parameters)
+							.setSocketTimeout(30000)
+							.setRetry(false)
 							.setSession(Aircandi.getInstance().getUser().session)
 							.setResponseFormat(ResponseFormat.Json);
 

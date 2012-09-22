@@ -328,6 +328,8 @@ public class ProfileForm extends FormActivity {
 								.setUri(mUser.getEntryUri())
 								.setRequestType(RequestType.Update)
 								.setRequestBody(ProxibaseService.convertObjectToJsonSmart(mUser, true))
+								.setSocketTimeout(30000)
+								.setRetry(false)
 								.setSession(Aircandi.getInstance().getUser().session)
 								.setResponseFormat(ResponseFormat.Json);
 

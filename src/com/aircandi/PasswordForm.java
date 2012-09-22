@@ -122,6 +122,8 @@ public class PasswordForm extends FormActivity {
 						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "changepw")
 						.setRequestType(RequestType.Method)
 						.setParameters(parameters)
+						.setSocketTimeout(30000)
+						.setRetry(false)
 						.setSession(Aircandi.getInstance().getUser().session)
 						.setResponseFormat(ResponseFormat.Json);
 

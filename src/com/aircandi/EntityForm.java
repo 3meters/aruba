@@ -683,6 +683,8 @@ public class EntityForm extends FormActivity {
 					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertEntity")
 					.setRequestType(RequestType.Method)
 					.setParameters(parameters)
+					.setSocketTimeout(30000)
+					.setRetry(false)
 					.setSession(Aircandi.getInstance().getUser().session)
 					.setResponseFormat(ResponseFormat.Json);
 
@@ -717,6 +719,8 @@ public class EntityForm extends FormActivity {
 					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateEntity")
 					.setRequestType(RequestType.Method)
 					.setParameters(parameters)
+					.setSocketTimeout(30000)
+					.setRetry(false)
 					.setSession(Aircandi.getInstance().getUser().session)
 					.setResponseFormat(ResponseFormat.Json);
 
@@ -784,6 +788,8 @@ public class EntityForm extends FormActivity {
 						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "deleteEntity")
 						.setRequestType(RequestType.Method)
 						.setParameters(parameters)
+						.setSocketTimeout(30000)
+						.setRetry(false)
 						.setSession(Aircandi.getInstance().getUser().session)
 						.setResponseFormat(ResponseFormat.Json);
 

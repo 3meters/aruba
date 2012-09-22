@@ -43,6 +43,8 @@ public class ServiceRequest {
 	private String			mUserName;
 	private String			mPassword;
 	private AuthType		mAuthType	= AuthType.None;
+	private Integer			mSocketTimeout;
+	private Boolean			mRetry = true;
 	private boolean			mSuppressUI	= false;
 
 	public enum AuthType {
@@ -182,7 +184,7 @@ public class ServiceRequest {
 		String accountKeyEnc = new String(accountKeyBytes);
 		return accountKeyEnc;
 	}
-	
+
 	public ServiceRequest setPassword(String password) {
 		mPassword = password;
 		return this;
@@ -194,6 +196,24 @@ public class ServiceRequest {
 
 	public ServiceRequest setAuthType(AuthType authType) {
 		mAuthType = authType;
+		return this;
+	}
+
+	public Integer getSocketTimeout() {
+		return mSocketTimeout;
+	}
+
+	public ServiceRequest setSocketTimeout(int socketTimeout) {
+		mSocketTimeout = socketTimeout;
+		return this;
+	}
+
+	public Boolean getRetry() {
+		return mRetry;
+	}
+
+	public ServiceRequest setRetry(Boolean retry) {
+		mRetry = retry;
 		return this;
 	}
 }
