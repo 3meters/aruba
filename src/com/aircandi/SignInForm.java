@@ -127,6 +127,8 @@ public class SignInForm extends FormActivity {
 							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
 							.setRequestType(RequestType.Method)
 							.setParameters(parameters)
+							.setSocketTimeout(30000)
+							.setRetry(false)
 							.setResponseFormat(ResponseFormat.Json);
 
 					ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);

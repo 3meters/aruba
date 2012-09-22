@@ -233,6 +233,8 @@ public class SignUpForm extends FormActivity {
 							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "create")
 							.setRequestType(RequestType.Insert)
 							.setRequestBody(ProxibaseService.convertObjectToJsonSmart(mUser, true))
+							.setSocketTimeout(30000)
+							.setRetry(false)
 							.setResponseFormat(ResponseFormat.Json);
 
 					/*
@@ -272,6 +274,8 @@ public class SignUpForm extends FormActivity {
 										.setUri(mUser.getEntryUri())
 										.setRequestType(RequestType.Update)
 										.setRequestBody(ProxibaseService.convertObjectToJsonSmart(mUser, true))
+										.setSocketTimeout(30000)
+										.setRetry(false)
 										.setSession(mUser.session)
 										.setResponseFormat(ResponseFormat.Json);
 
