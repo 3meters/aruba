@@ -47,9 +47,10 @@ public interface CandiConstants {
 
 	public static final boolean			RADAR_SCROLL_HORIZONTAL					= false;
 	public static final int				RADAR_STACK_COUNT						= 3;
+	public static final float			RADAR_PADDING_SIDES						= 15f;
 	public static final float			RADAR_PADDING_TOP						= 15f;
 	public static final float			RADAR_PADDING_BOTTOM					= 100f;
-	public static final float			RADAR_ZOOM								= 0.55f;
+
 	public static final int				RADAR_BEACON_SIGNAL_BUCKET_SIZE			= 1;
 	public static final int				RADAR_SCAN_MISS_MAX						= 1;
 	public static final int				RADAR_BEACON_INDICATOR_CAUTION			= -80;
@@ -115,7 +116,8 @@ public interface CandiConstants {
 	public static final int				IMAGE_WIDTH_ORIGINAL					= -1;
 
 	public static final String			THEME_DEFAULT							= "aircandi_theme_canyon";
-	public static final String			URL_AIRCANDI_UPGRADE					= "http://www.aircandi.com.s3.amazonaws.com/install.html";
+	public static final String			URL_AIRCANDI_UPGRADE					= "https://aircandi.com/install";
+	public static final String			URL_AIRCANDI_TERMS						= "https://aircandi.com/pages/terms.html";
 	public static final String			S3_BUCKET_IMAGES						= "aircandi-images";
 
 	public static final String			TYPE_CANDI_POST							= "com.aircandi.candi.post";

@@ -14,21 +14,14 @@ import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
-import com.aircandi.components.DateUtils;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.core.CandiConstants;
-import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.User;
 import com.aircandi.widgets.AuthorBlock;
@@ -43,23 +36,13 @@ public class CommentForm extends FormActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		/*
-		 * Two sign in cases:
-		 * 
-		 * - Currently anonymous.
-		 * - Session expired.
+		 * Signin required if user is anonymous
 		 */
 		User user = Aircandi.getInstance().getUser();
-		Boolean expired = false;
 		Integer messageResId = R.string.signin_message_comment_new;
 		if (user != null) {
 			Boolean userAnonymous = user.isAnonymous();
-			if (user.session != null) {
-				expired = user.session.renewSession(DateUtils.nowDate().getTime());
-			}
-			if (userAnonymous || expired) {
-				if (expired) {
-					messageResId = R.string.signin_message_session_expired;
-				}
+			if (userAnonymous) {
 				IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
 				intentBuilder.setCommandType(CommandType.Edit);
 				intentBuilder.setMessage(getString(messageResId));
@@ -165,42 +148,23 @@ public class CommentForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 
-					// Construct entity, link, and observation
-					Bundle parameters = new Bundle();
-					parameters.putString("entityId", mCommon.mParentId);
-					parameters.putString("comment", "object:" + ProxibaseService.convertObjectToJsonSmart(mComment, true));
-
-					ServiceRequest serviceRequest = new ServiceRequest()
-							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "insertComment")
-							.setRequestType(RequestType.Method)
-							.setParameters(parameters)
-							.setSocketTimeout(30000)
-							.setRetry(false)
-							.setSession(Aircandi.getInstance().getUser().session)
-							.setResponseFormat(ResponseFormat.Json);
-
-					ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-					return serviceResponse;
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertComment(mCommon.mParentId, mComment, false);
+					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
+					ModelResult result = (ModelResult) response;
 
-					ServiceResponse serviceResponse = (ServiceResponse) response;
-					if (serviceResponse.responseCode == ResponseCode.Success) {
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.trackEvent("Comment", "Insert", null, 0);
-
-						/* We need to push the comment into the entity model. */
-						ProxiExplorer.getInstance().getEntityModel().insertCommentEverywhere(mComment, mCommon.mParentId);
-						ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
-
 						mCommon.showProgressDialog(false, null);
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_COMMENT_INSERTED);
 						finish();
 					}
 					else {
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.CommentSave);
+						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CommentSave);
 					}
 				}
 			}.execute();

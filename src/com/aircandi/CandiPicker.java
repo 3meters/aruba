@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.ListView;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
@@ -18,10 +21,11 @@ import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 
-public class CandiPicker extends FormActivity {
+public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 
 	private ListView			mListViewCandi;
 	private EntityList<Entity>	mEntities	= new EntityList<Entity>();
+	private EntityTree			mMethodType	= EntityTree.Radar;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -37,7 +41,7 @@ public class CandiPicker extends FormActivity {
 	}
 
 	public void bind() {
-		if (mCommon.mEntityTree == EntityTree.Radar) {
+		if (mMethodType == EntityTree.Radar) {
 			EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
 			if (entities != null) {
 				mEntities.clear();
@@ -50,8 +54,8 @@ public class CandiPicker extends FormActivity {
 				mListViewCandi.setAdapter(adapter);
 			}
 		}
-		else if (mCommon.mEntityTree == EntityTree.User) {
-			
+		else if (mMethodType == EntityTree.User) {
+
 			new AsyncTask() {
 
 				@Override
@@ -61,12 +65,13 @@ public class CandiPicker extends FormActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
-					ModelResult result = ProxiExplorer.getInstance().getEntityModel().getUserEntities(Aircandi.getInstance().getUser().id, false);
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().getUserEntities(false);
 					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
+
 					ModelResult result = (ModelResult) response;
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						/*
@@ -129,4 +134,23 @@ public class CandiPicker extends FormActivity {
 	protected int getLayoutID() {
 		return R.layout.candi_picker;
 	}
+
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		if (((Integer) tab.getTag()) == R.string.candi_picker_tab_radar) {
+			mMethodType = ProxiExplorer.EntityTree.Radar;
+			bind();
+		}
+		else if (((Integer) tab.getTag()) == R.string.candi_picker_tab_mycandi) {
+			mMethodType = ProxiExplorer.EntityTree.User;
+			bind();
+		}
+
+	}
+
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {}
+
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {}
 }

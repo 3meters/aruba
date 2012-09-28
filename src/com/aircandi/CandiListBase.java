@@ -7,6 +7,7 @@ import android.widget.ListView;
 
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.AnimUtils.TransitionType;
+import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.ProxiExplorer;
@@ -32,7 +33,21 @@ public abstract class CandiListBase extends CandiActivity {
 
 	public void doRefresh() {
 		/* Called from AircandiCommon */
-		bind(false);
+		bind(true);
+	}
+
+	@SuppressWarnings("unused")
+	private void updateCandiImages() {
+
+		final int count = mListView.getChildCount();
+
+		for (int i = 0; i < count; i++) {
+			final View view = mListView.getChildAt(i);
+			final CandiListViewHolder holder = (CandiListViewHolder) view.getTag();
+			if (holder.itemImage.getImageView().getDrawable() == null) {}
+		}
+
+		mListView.invalidate();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -51,7 +66,7 @@ public abstract class CandiListBase extends CandiActivity {
 					.setParentEntityId(entity.parentId)
 					.setCollectionId(entity.id)
 					.setEntityTree(mCommon.mEntityTree);
-			
+
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
 			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
@@ -64,6 +79,7 @@ public abstract class CandiListBase extends CandiActivity {
 		intentBuilder.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
 				.setParentEntityId(entity.parentId)
+				.setBeaconId(mCommon.mBeaconId)
 				.setEntityType(entity.type)
 				.setCollectionId(mCommon.mCollectionId)
 				.setEntityTree(mCommon.mEntityTree);
@@ -135,4 +151,5 @@ public abstract class CandiListBase extends CandiActivity {
 	protected int getLayoutId() {
 		return R.layout.candi_list;
 	}
+
 }

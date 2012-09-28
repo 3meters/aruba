@@ -38,7 +38,7 @@
     <string name="menu_settings_item">Settings</string>
     <string name="menu_signin_item">Sign in</string>
     <string name="menu_signout_item">Sign out</string>
-    <string name="menu_signup_item">Sign up</string>
+    <string name="menu_signup_item">Create account</string>
     <string name="menu_about_item">About</string>
     <string name="menu_refresh_all">Refresh All</string>
 
@@ -293,7 +293,7 @@
     <string name="form_label_link">Web</string>
     <string name="form_label_location">Location</string>
     <string name="form_label_password">Password</string>
-    <string name="form_label_terms">By clicking the button, you agree to the terms of service:</string>
+    <string name="form_label_terms">By clicking the Sign up button, you agree to the terms of service:</string>
     <string name="form_label_password_confirm">Confirm password</string>
     <string name="form_label_password_old">Old password</string>
     <string name="form_label_email">Email</string>

@@ -31,7 +31,9 @@ import com.aircandi.CandiMap.MapBeacon;
 import com.aircandi.MapCandiList;
 import com.aircandi.candi.models.CandiModel;
 import com.aircandi.components.AnimUtils.TransitionType;
+import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.google.android.maps.GeoPoint;
@@ -101,7 +103,7 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 
 		for (OverlayItem item : cell) {
 			title += item.getTitle() + ", ";
-			Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(item.getSnippet());
+			Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(item.getSnippet());
 			if (mapBeacon != null) {
 
 				collectionCount += mapBeacon.collectionCount;
@@ -130,6 +132,7 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		AircandiCommon.showAlertDialog(R.drawable.icon_app
 				, title
 				, message
+				, null
 				, mContext
 				, cell.size() == 1 ? R.string.alert_candimap_ok : null
 				, cell.size() == 1 ? R.string.alert_candimap_cancel : null
@@ -144,10 +147,12 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 							 * they could have swiped using the viewpager to a different entity so
 							 * we need to use mEntity to get the right entity context.
 							 */
-							IntentBuilder intentBuilder = new IntentBuilder(mMapView.getContext(), MapCandiList.class);
-							intentBuilder.setCommandType(CommandType.View)
-									.setBeaconId(mBeaconId);
-
+							IntentBuilder intentBuilder = new IntentBuilder(mMapView.getContext(), MapCandiList.class)
+									.setCommandType(CommandType.View)
+									.setBeaconId(mBeaconId)
+									.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID)
+									.setEntityTree(EntityTree.Map);
+							
 							Intent intent = intentBuilder.create();
 							mMapView.getContext().startActivity(intent);
 							AnimUtils.doOverridePendingTransition((Activity) mMapView.getContext(), TransitionType.CandiFormToCandiList);
@@ -352,7 +357,7 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 	public void addOverlay(OverlayItem overlay) {
 		mOverlays.add(overlay);
 	}
-	
+
 	public void doPopulate() {
 		populate();
 	}

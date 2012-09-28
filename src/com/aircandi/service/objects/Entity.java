@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.Utilities;
@@ -79,13 +78,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public String				parentId;										/* Used to connect beacon object */
 	
 	@Expose(serialize = false, deserialize = true)
-	public GeoLocation			location;
-
-	@Expose(serialize = false, deserialize = true)
-	public Integer				commentCount;
-
-	@Expose(serialize = false, deserialize = true)
-	public Boolean				commentsMore;
+	public EntityList<Entity>	children;
 
 	@Expose(serialize = false, deserialize = true)
 	public Integer				childCount;
@@ -94,32 +87,24 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public Boolean				childrenMore;
 
 	@Expose(serialize = false, deserialize = true)
-	private EntityList<Entity>	children;
+	public Integer				commentCount;
 
 	@Expose(serialize = false, deserialize = true)
-	public EntityList<Entity>	parents;
+	public Boolean				commentsMore;
 
 	@Expose(serialize = false, deserialize = true)
-	public Integer				parentCount;
+	public GeoLocation			location;
 
 	/*
 	 * For client use only
-	 * 
-	 * The service can return multiple parents but we but we always work in the context
-	 * of a single parent and beacon
 	 */
-
-	public Beacon				beacon;
-	public Boolean				superRoot			= false;
-
+	  
+	/* These are all controlled by the parent in the case of child entities. */
 	public Boolean				hidden				= false;
-	public Boolean				dirty				= false;
-	public Boolean				rookie				= true;
 	public Boolean				global				= false;
-
-	public CommandType			commandType;									// For command entities
-	public String				data;
-	public EntityState			state				= EntityState.Normal;
+	
+	/* These have meaning for child entities */
+	public Boolean				rookie				= true;
 	public Date					discoveryTime;
 
 	public Entity() {}
@@ -128,12 +113,6 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public Entity clone() {
 		try {
 			final Entity entity = (Entity) super.clone();
-			if (this.children != null) {
-				entity.children = this.children.clone();
-			}
-			if (this.parents != null) {
-				entity.parents = this.parents.clone();
-			}
 			if (this.comments != null) {
 				entity.comments = (List<Comment>) ((ArrayList) this.comments).clone();
 			}
@@ -165,12 +144,6 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		 */
 		try {
 			final Entity entity = (Entity) super.clone();
-			if (this.children != null) {
-				entity.children = this.children.copy();
-			}
-			if (this.parents != null) {
-				entity.parents = this.parents.copy();
-			}
 			if (this.comments != null) {
 				entity.comments = (List<Comment>) ((ArrayList) this.comments).clone();
 			}
@@ -181,22 +154,47 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		}
 	}
 
-	public static void copyEntityProperties(Entity fromEntity, Entity toEntity) {
+	public static void copyProperties(Entity from, Entity to) {
 		/*
-		 * Properties involved with editing are copied from one entity to another.
+		 * Properties are copied from one entity to another.
+		 * 
+		 * Local state properties we intentionally don't overwrite:
+		 * 
+		 * - children
+		 * - hidden
+		 * - global
+		 * - rookie
+		 * - discoveryTime
 		 */
-		toEntity.title = fromEntity.title;
-		toEntity.label = fromEntity.label;
-		toEntity.description = fromEntity.description;
-		toEntity.linkJavascriptEnabled = fromEntity.linkJavascriptEnabled;
-		toEntity.linkZoom = fromEntity.linkZoom;
-		toEntity.locked = fromEntity.locked;
-		toEntity.modifierId = fromEntity.modifierId;
-		toEntity.modifiedDate = fromEntity.modifiedDate;
-		toEntity.imagePreviewUri = fromEntity.imagePreviewUri;
-		toEntity.imageUri = fromEntity.imageUri;
-		toEntity.linkUri = fromEntity.linkUri;
-		toEntity.linkPreviewUri = fromEntity.linkPreviewUri;
+		ServiceEntry.copyProperties(from,  to);
+		
+		to.type = from.type;
+		to.title = from.title;
+		to.label = from.label;
+		to.subtitle = from.subtitle;
+		to.description = from.description;
+		
+		to.linkJavascriptEnabled = from.linkJavascriptEnabled;
+		to.linkZoom = from.linkZoom;
+		
+		to.imageUri = from.imageUri;
+		to.imagePreviewUri = from.imagePreviewUri;
+		to.linkUri = from.linkUri;
+		to.linkPreviewUri = from.linkPreviewUri;
+		
+		to.parentId = from.parentId;
+		to.beaconId = from.beaconId;
+		
+		to.location = from.location;
+		to.locked = from.locked;
+		to.signalFence = from.signalFence;
+		to.visibility = from.visibility;
+		
+		to.comments = from.comments;
+		to.commentCount = from.commentCount;
+		to.commentsMore = from.commentsMore;
+		
+		to.activityDate = from.activityDate;
 	}
 
 	public static Entity setFromPropertiesFromMap(Entity entity, HashMap map) {
@@ -241,20 +239,13 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		entity.childCount = (Integer) map.get("childCount");
 		entity.childrenMore = (Boolean) map.get("childrenMore");
 		
-		entity.parents = new EntityList<Entity>();
-		if (map.get("parents") != null) {
-			List<LinkedHashMap<String, Object>> parentMaps = (List<LinkedHashMap<String, Object>>) map.get("parents");
-			for (LinkedHashMap<String, Object> parentMap : parentMaps) {
-				entity.parents.add(Entity.setFromPropertiesFromMap(new Entity(), parentMap));
-			}
-		}
-		entity.parentId = (String) map.get("_parent");
-		entity.parentCount = (Integer) map.get("parentCount");
-		
 		if (map.get("location") != null) {
 			entity.location = (GeoLocation) GeoLocation.setFromPropertiesFromMap(new GeoLocation(), (HashMap<String, Object>) map.get("location"));
 		}
+		
+		entity.parentId = (String) map.get("_parent");
 		entity.beaconId = (String) map.get("_beacon");
+		
 		entity.activityDate = (Number) map.get("activityDate");
 		
 		return entity;
@@ -275,7 +266,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	}
 
 	public boolean hasVisibleChildren() {
-		for (Entity childEntity : this.children) {
+		for (Entity childEntity : getChildren()) {
 			if (!childEntity.hidden) {
 				return true;
 			}
@@ -361,6 +352,11 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public Entity getParent() {
 		Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntity(this.parentId);
 		return entity;
+	}
+	
+	public Beacon getBeacon() {
+		Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(this.beaconId);
+		return beacon;
 	}
 
 	public static enum ImageFormat {

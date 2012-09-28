@@ -25,28 +25,20 @@ import com.aircandi.components.AnimUtils;
 import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiPagerAdapter;
 import com.aircandi.components.CommandType;
-import com.aircandi.components.DateUtils;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityTree;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.GeoLocation;
-import com.aircandi.service.objects.Link;
-import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
 import com.aircandi.widgets.AuthorBlock;
 import com.aircandi.widgets.WebImageView;
@@ -60,99 +52,75 @@ public abstract class CandiFormBase extends CandiActivity {
 	protected Number		mEntityModelActivityDate;
 	protected User			mEntityModelUser;
 
-	public abstract void bind(Boolean useProxiExplorer);
+	public abstract void bind(Boolean refresh);
 
-	public void doBind(final Boolean useEntityModel, final Boolean pagingEnabled, EntityTree entityTree) {
+	public void doBind(final Boolean refresh, final Boolean pagingEnabled, EntityTree entityTree) {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 
-		if (useEntityModel) {
-			/*
-			 * Entity is coming from entity model.
-			 */
-			mEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mParentId, entityTree);
-			mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
-			mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
-			mEntityModelUser = Aircandi.getInstance().getUser();
+		new AsyncTask() {
 
-			/* Was likely deleted from the entity model */
-			if (mEntity == null) {
-				onBackPressed();
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, getString(R.string.progress_loading));
 			}
-			else {
-				mCommon.mActionBar.setTitle(mEntity.title);
-				/* Get the view pager configured */
-				List<Entity> entities = null;
-				if (!pagingEnabled) {
-					entities = new ArrayList<Entity>();
-					entities.add(mEntity);
-				}
-				updateViewPager(entities);
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, true, null, null);
+				return result;
 			}
-		}
-		else {
-			/*
-			 * Entity is coming from service.
-			 */
-			new AsyncTask() {
 
-				@Override
-				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, getString(R.string.progress_loading));
-				}
+			@Override
+			protected void onPostExecute(Object modelResult) {
+				ModelResult result = (ModelResult) modelResult;
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-				@Override
-				protected Object doInBackground(Object... params) {
-					String jsonFields = "{\"entities\":{},\"children\":{},\"parents\":{},\"comments\":{}}";
-					String jsonEagerLoad = "{\"children\":true,\"parents\":true,\"comments\":false}";
-					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, jsonFields, null);
-					return serviceResponse;
-				}
-
-				@Override
-				protected void onPostExecute(Object result) {
-					ServiceResponse serviceResponse = (ServiceResponse) result;
-
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
+					if (result.data == null) {
+						/* Was likely deleted from the entity model */
+						mCommon.showProgressDialog(false, null);
+						onBackPressed();
+					}
+					else {
+						mEntity = (Entity) result.data;
+						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
+						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
+						mEntityModelUser = Aircandi.getInstance().getUser();
 						mCommon.mActionBar.setTitle(mEntity.title);
 
 						/* Sort the children if there are any */
-						if (mEntity.getChildren() != null && mEntity.getChildren().size() > 1) {
+						if (mEntity.getChildren().size() > 1) {
 							Collections.sort(mEntity.getChildren(), new EntityList.SortEntitiesByModifiedDate());
 						}
 
-						/* Get the view pager configured */
+						/*
+						 * The set of entities to page are built up by the pager. We only pass the entities
+						 * if paging is disabled and we only want to show the current entity.
+						 */
 						List<Entity> entities = null;
 						if (!pagingEnabled) {
 							entities = new ArrayList<Entity>();
 							entities.add(mEntity);
 						}
 						updateViewPager(entities);
-
-						mCommon.showProgressDialog(false, null);
-					}
-					else {
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiForm);
 					}
 				}
+				else {
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
+				}
+				mCommon.showProgressDialog(false, null);
+			}
 
-			}.execute();
-		}
+		}.execute();
 	}
 
 	public void doRefresh() {
 		/*
 		 * Called from AircandiCommon
-		 * 
-		 * Refresh causes us to pull the freshest data from the service but
-		 * we do not merge it into the entity model and it is only for the
-		 * current entity. Other entities in the same collection are not
-		 * refreshed.
 		 */
-		bind(false);
+		bind(true);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -253,8 +221,11 @@ public abstract class CandiFormBase extends CandiActivity {
 			mCommon.showTemplatePicker(false);
 		}
 		else {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-					getResources().getString(R.string.alert_entity_locked), this, android.R.string.ok, null, null, null);
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.alert_entity_locked)
+					, null
+					, this, android.R.string.ok, null, null, null);
 		}
 	}
 
@@ -280,8 +251,11 @@ public abstract class CandiFormBase extends CandiActivity {
 			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 		}
 		else {
-			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert, null,
-					getResources().getString(R.string.alert_entity_locked), this, android.R.string.ok, null, null, null);
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.alert_entity_locked)
+					, null
+					, this, android.R.string.ok, null, null, null);
 		}
 	}
 
@@ -379,16 +353,11 @@ public abstract class CandiFormBase extends CandiActivity {
 			imageCollection.setVisibility(View.INVISIBLE);
 		}
 
-		if (entity.imageUri != null
+		if (imageCandi != null && (entity.imageUri != null
 				|| entity.linkPreviewUri != null
-				|| entity.linkUri != null
-				|| entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+				|| entity.linkUri != null)) {
 			String imageUri = entity.getMasterImageUri();
 			ImageFormat imageFormat = entity.getMasterImageFormat();
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-				imageUri = "resource:ic_post_v2_250";
-				imageFormat = ImageFormat.Binary;
-			}
 			ImageRequestBuilder builder = new ImageRequestBuilder(imageCandi);
 			builder.setImageUri(imageUri);
 			builder.setImageFormat(imageFormat);
@@ -410,8 +379,10 @@ public abstract class CandiFormBase extends CandiActivity {
 			}
 		}
 		else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-			imageCandi.setClickable(false);
-			imageZoom.setVisibility(View.GONE);
+			if (imageCandi != null) {
+				imageCandi.setClickable(false);
+				imageZoom.setVisibility(View.GONE);
+			}
 		}
 
 		/* Author block */
@@ -425,7 +396,7 @@ public abstract class CandiFormBase extends CandiActivity {
 		}
 
 		/* Parent info */
-		if (parentGroup != null && entity.getParent() == null && entity.parentId == null) {
+		if (parentGroup != null && entity.parentId == null && entity.getParent() == null) {
 			parentGroup.setVisibility(View.GONE);
 		}
 		else {
@@ -441,7 +412,9 @@ public abstract class CandiFormBase extends CandiActivity {
 		if (moveCandi != null) {
 			moveCandi.setVisibility(View.GONE);
 		}
-		holderChildren.setVisibility(View.GONE);
+		if (holderChildren != null) {
+			holderChildren.setVisibility(View.GONE);
+		}
 		if (!entity.locked) {
 			if (entity.getParent() == null) {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
@@ -463,7 +436,7 @@ public abstract class CandiFormBase extends CandiActivity {
 			}
 		}
 
-		boolean visibleChildren = (entity.getChildren() != null && entity.hasVisibleChildren());
+		boolean visibleChildren = (entity.hasVisibleChildren());
 		if (visibleChildren) {
 			Entity childEntity = entity.getChildren().get(0);
 
@@ -479,7 +452,9 @@ public abstract class CandiFormBase extends CandiActivity {
 			/* child count */
 			textChildren.setText(String.valueOf(entity.getChildren().size()));
 
-			holderChildren.setVisibility(View.VISIBLE);
+			if (holderChildren != null) {
+				holderChildren.setVisibility(View.VISIBLE);
+			}
 		}
 
 		/* Comments */
@@ -539,7 +514,23 @@ public abstract class CandiFormBase extends CandiActivity {
 			mViewPager = (ViewPager) findViewById(R.id.view_pager);
 
 			if (entitiesForPaging == null) {
-				entitiesForPaging = ProxiExplorer.getInstance().getEntityModel().getCollectionById(mCommon.mCollectionId, mCommon.mEntityTree);
+				if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
+					if (mCommon.mEntityTree == EntityTree.User) {
+						entitiesForPaging = (List<Entity>) ((ModelResult) ProxiExplorer.getInstance().getEntityModel().getUserEntities(false)).data;
+					}
+					else if (mCommon.mEntityTree == EntityTree.Radar) {
+						entitiesForPaging = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
+					}
+					else if (mCommon.mEntityTree == EntityTree.Map) {
+						entitiesForPaging = (List<Entity>) ((ModelResult) ProxiExplorer.getInstance().getEntityModel()
+								.getBeaconEntities(mCommon.mBeaconId, false)).data;
+					}
+				}
+				else {
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId, false, false, null, null);
+					Entity entity = (Entity) result.data;
+					entitiesForPaging = entity.getChildren();
+				}
 			}
 
 			/*
@@ -604,169 +595,28 @@ public abstract class CandiFormBase extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				//mCommon.showProgressDialog(true, getString(R.string.progress_moving));
+				mCommon.showProgressDialog(true, getString(R.string.progress_moving));
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				Link link = new Link();
-				Bundle parameters = new Bundle();
-
-				if (collectionEntityId != null) {
-					/*
-					 * Moving from a (beacon or collection) to a collection
-					 */
-					link.toId = collectionEntityId;
-					link.fromId = entityToMove.id;
-					parameters.putString("link", "object:" + ProxibaseService.convertObjectToJsonSmart(link, true));
-					parameters.putString("originalToId", entityToMove.parentId != null ? entityToMove.parentId : entityToMove.beaconId);
-				}
-				else {
-					/*
-					 * Moving from a collection to a beacon
-					 */
-					link.toId = entityToMove.beaconId;
-					link.fromId = entityToMove.id;
-					parameters.putString("link", "object:" + ProxibaseService.convertObjectToJsonSmart(link, true));
-					parameters.putString("originalToId", entityToMove.parentId);
-				}
-
-				ServiceRequest serviceRequest = new ServiceRequest()
-						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "updateLink")
-						.setRequestType(RequestType.Method)
-						.setResponseFormat(ResponseFormat.Json)
-						.setParameters(parameters)
-						.setSession(Aircandi.getInstance().getUser().session);
-
-				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-				return serviceResponse;
+				String newParentId = collectionEntityId != null ? collectionEntityId : entityToMove.getParent().beaconId;
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel()
+						.moveEntity(entityToMove.id, newParentId, collectionEntityId == null ? true : false, false);
+				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
-				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode != ResponseCode.Success) {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiMove, CandiFormBase.this);
+
+				ModelResult result = (ModelResult) response;
+				if (result.serviceResponse.responseCode != ResponseCode.Success) {
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiMove, CandiFormBase.this);
 				}
 				else {
-					/*
-					 * Fixup the entity model.
-					 * 
-					 * - Could have moved collection to collection
-					 * - Could have moved from collection to beacon
-					 * - Could have moved from beacon to collection
-					 * 
-					 * The entity we have been passed could have come from radar or user collections so we
-					 * need to look it up for each.
-					 */
-					Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entityToMove.id, entityToMove.parentId, EntityTree.Radar);
-					if (entity != null) {
-						if (collectionEntityId == null) {
-							/*
-							 * Moving from collection to beacon. We assume beacon has been set to the beacon used by the
-							 * original
-							 * parent.
-							 */
-							Entity collectionEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
-									.getEntityById(entity.parentId, null, EntityTree.Radar);
-							collectionEntityOriginal.getChildren().remove(entity);
-
-							entity.beacon.entities.add(entity);
-							entity.parentId = null;
-						}
-						else {
-							/*
-							 * Moving to collection. New collection might have a different beaconId.
-							 */
-							Entity collectionEntity = ProxiExplorer.getInstance().getEntityModel().getEntityById(collectionEntityId, null, EntityTree.Radar);
-							if (collectionEntity != null) {
-								if (entity.getParent() == null) {
-									/*
-									 * Moving from beacon to collection
-									 */
-									entity.beacon.entities.remove(entity);
-
-									collectionEntity.getChildren().add(entity);
-									entity.parentId = collectionEntity.id;
-									entity.beaconId = collectionEntity.beaconId;
-								}
-								else {
-									/*
-									 * Moving from collection to collection
-									 */
-									Entity collectionEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
-											.getEntityById(entity.parentId, null, EntityTree.Radar);
-									collectionEntityOriginal.getChildren().remove(entity);
-
-									collectionEntity.getChildren().add(entity);
-									entity.parentId = collectionEntity.id;
-									entity.beaconId = collectionEntity.beaconId;
-								}
-
-								if (collectionEntity.getChildren().size() > 1) {
-									Collections.sort(collectionEntity.getChildren(), new EntityList.SortEntitiesByModifiedDate());
-								}
-							}
-						}
-					}
-
-					/* The user candi collection might not be populated yet */
-					entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(entityToMove.id, entityToMove.parentId, EntityTree.User);
-					if (entity != null) {
-						if (collectionEntityId == null) {
-							/*
-							 * Moving from collection to beacon.
-							 */
-							Entity collectionEntityOriginal = ProxiExplorer.getInstance().getEntityModel()
-									.getEntityById(entity.parentId, null, EntityTree.User);
-							collectionEntityOriginal.getChildren().remove(entity);
-
-							entity.parentId = null;
-						}
-						else {
-							/*
-							 * Moving to collection.
-							 */
-							Entity collectionEntity = ProxiExplorer.getInstance()
-									.getEntityModel()
-									.getEntityById(collectionEntityId, null, EntityTree.User);
-							
-							if (collectionEntity != null) {
-								if (entity.getParent() != null) {
-									/*
-									 * Moving from beacon to collection
-									 */
-									collectionEntity.getChildren().add(entity);
-									entity.parentId = collectionEntity.id;
-									entity.beaconId = collectionEntity.beaconId;
-								}
-								else {
-									/*
-									 * Moving from collection to collection
-									 */
-									Entity collectionEntityOriginal = ProxiExplorer.getInstance()
-											.getEntityModel()
-											.getEntityById(entity.parentId, null, EntityTree.User);
-									
-									collectionEntityOriginal.getChildren().remove(entity);
-
-									collectionEntity.getChildren().add(entity);
-									entity.parentId = collectionEntity.id;
-									entity.beaconId = collectionEntity.beaconId;
-								}
-								if (collectionEntity.getChildren().size() > 1) {
-									Collections.sort(collectionEntity.getChildren(), new EntityList.SortEntitiesByModifiedDate());
-								}
-							}
-						}
-					}
-
-					ProxiExplorer.getInstance().getEntityModel().rebuildEntityList();
-					ProxiExplorer.getInstance().getEntityModel().setLastActivityDate(DateUtils.nowDate().getTime());
 					ImageUtils.showToastNotification(getString(R.string.alert_moved), Toast.LENGTH_SHORT);
-					bind(true);
+					bind(false);
 				}
 			}
 

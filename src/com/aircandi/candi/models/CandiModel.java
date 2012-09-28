@@ -111,15 +111,15 @@ public class CandiModel extends BaseModel {
 		String title = super.getTitleText();
 		String displayExtra = null;
 
-		if (mEntity.beacon != null) {
+		if (mEntity.getBeacon() != null) {
 			if (mDisplayExtra == DisplayExtra.Level) {
-				displayExtra = String.valueOf(mEntity.beacon.getAvgBeaconLevel());
+				displayExtra = String.valueOf(mEntity.getBeacon().getAvgBeaconLevel());
 			}
 			else if (mDisplayExtra == DisplayExtra.Tag) {
-				displayExtra = String.valueOf(mEntity.beacon.id);
+				displayExtra = String.valueOf(mEntity.getBeacon().id);
 			}
 			else if (mDisplayExtra == DisplayExtra.Time) {
-				displayExtra = String.valueOf(mEntity.beacon.discoveryTime.getTime() / 100);
+				displayExtra = String.valueOf(mEntity.getBeacon().discoveryTime.getTime() / 100);
 			}
 		}
 

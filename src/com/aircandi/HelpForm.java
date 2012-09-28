@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.ImageManager;
 import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.R;
 
@@ -18,7 +19,7 @@ public class HelpForm extends FormActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+		DisplayMetrics displayMetrics = ImageManager.getInstance().getDisplayMetrics();
 
 		android.view.WindowManager.LayoutParams params = getWindow().getAttributes();
 		params.width = displayMetrics.widthPixels - 50;

@@ -101,6 +101,74 @@ public class EntityList<T> extends ArrayList<T> {
 		}
 	}
 
+	public static class SortEntitiesBySignalLevelDiscoveryTimeModifiedDate implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity entity1, Entity entity2) {
+
+			/* global versus user */
+			if (!entity1.global && entity2.global) {
+				return -1;
+			}
+			if (entity1.global && !entity2.global) {
+				return 1;
+			}
+			else {
+				/*
+				 * Signal level
+				 * 
+				 * Rounded to produce buckets for more sorting stability.
+				 */
+				if ((entity1.getBeacon().getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE) > (entity2.getBeacon().getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)) {
+					return -1;
+				}
+				else if ((entity1.getBeacon().getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE) < (entity2.getBeacon().getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)) {
+					return 1;
+				}
+				else {
+					/*
+					 * Discovery time
+					 * 
+					 * Rounded to produce a 5 second bucket that will get further sorted by recent activity
+					 */
+					if (entity1.discoveryTime != null && entity2.discoveryTime != null) {
+						if ((entity1.discoveryTime.getTime() / 1000) > (entity2.discoveryTime.getTime() / 1000)) {
+							return -1;
+						}
+						else if ((entity1.discoveryTime.getTime() / 1000) < (entity2.discoveryTime.getTime() / 1000)) {
+							return 1;
+						}
+						else {
+							/* Modified date */
+							if (entity1.modifiedDate.longValue() > entity2.modifiedDate.longValue()) {
+								return -1;
+							}
+							else if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
+								return 1;
+							}
+							else {
+								return 0;
+							}
+						}
+					}
+					else {
+						/* Modified date */
+						if (entity1.modifiedDate.longValue() > entity2.modifiedDate.longValue()) {
+							return -1;
+						}
+						else if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
+							return 1;
+						}
+						else {
+							return 0;
+						}
+					}
+				}
+			}
+
+		}
+	}
+
 	public static class SortCandiModelsByDiscoveryTimeModifiedDate implements Comparator<CandiModel> {
 
 		@Override
@@ -151,10 +219,10 @@ public class EntityList<T> extends ArrayList<T> {
 				 * 
 				 * Rounded to produce buckets for more sorting stability.
 				 */
-				if ((entity1.beacon.getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE) > (entity2.beacon.getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)) {
+				if ((entity1.getBeacon().getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE) > (entity2.getBeacon().getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)) {
 					return -1;
 				}
-				else if ((entity1.beacon.getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE) < (entity2.beacon.getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)) {
+				else if ((entity1.getBeacon().getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE) < (entity2.getBeacon().getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)) {
 					return 1;
 				}
 				else {
@@ -204,10 +272,10 @@ public class EntityList<T> extends ArrayList<T> {
 			}
 			else {
 				/* Signal level */
-				if (entity1.beacon.getAvgBeaconLevel() > entity2.beacon.getAvgBeaconLevel()) {
+				if (entity1.getBeacon().getAvgBeaconLevel() > entity2.getBeacon().getAvgBeaconLevel()) {
 					return -1;
 				}
-				else if (entity1.beacon.getAvgBeaconLevel() < entity2.beacon.getAvgBeaconLevel()) {
+				else if (entity1.getBeacon().getAvgBeaconLevel() < entity2.getBeacon().getAvgBeaconLevel()) {
 					return 1;
 				}
 				else {

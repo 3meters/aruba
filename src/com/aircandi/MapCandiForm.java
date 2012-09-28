@@ -15,8 +15,8 @@ public class MapCandiForm extends CandiFormBase {
 		}
 	}
 
-	public void bind(Boolean useEntityModel) {
-		doBind(useEntityModel, false, EntityTree.Map);
+	public void bind(Boolean refresh) {
+		doBind(refresh, true, EntityTree.Map);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -26,5 +26,4 @@ public class MapCandiForm extends CandiFormBase {
 	public void onChildrenButtonClick(View v) {
 		showChildrenForEntity(MapCandiList.class);
 	}
-
 }

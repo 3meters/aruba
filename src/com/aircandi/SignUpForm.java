@@ -2,7 +2,9 @@ package com.aircandi;
 
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,28 +15,20 @@ import android.widget.EditText;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
-import com.aircandi.components.DateUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.S3;
+import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
-import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
 import com.aircandi.widgets.WebImageView;
 
@@ -105,7 +99,7 @@ public class SignUpForm extends FormActivity {
 
 	protected void bind() {
 		mUser = new User();
-		mUser.imageUri = (String) mImageUser.getTag();
+		mUser.imageUri = "resource:placeholder_logo";
 	}
 
 	protected void draw() {
@@ -152,12 +146,7 @@ public class SignUpForm extends FormActivity {
 	}
 
 	public void onViewTermsButtonClick(View view) {
-
-		AircandiCommon.showAlertDialog(R.drawable.icon_app
-				, getResources().getString(R.string.alert_terms_title)
-				, getResources().getString(R.string.alert_terms_message)
-				, SignUpForm.this, android.R.string.ok, null, null, null);
-		Tracker.trackEvent("DialogTerms", "Open", null, 0);
+		doViewTerms();
 	}
 
 	public void onChangePictureButtonClick(View view) {
@@ -181,6 +170,15 @@ public class SignUpForm extends FormActivity {
 	// Service routines
 	// --------------------------------------------------------------------------------------------
 
+	protected void doViewTerms() {
+
+		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(CandiConstants.URL_AIRCANDI_TERMS));
+		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+
+	}
+
 	protected void doSave() {
 		insert();
 	}
@@ -190,6 +188,7 @@ public class SignUpForm extends FormActivity {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_invalid_email)
+					, null
 					, this
 					, android.R.string.ok
 					, null, null, null);
@@ -199,6 +198,7 @@ public class SignUpForm extends FormActivity {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, getResources().getString(R.string.error_signup_missmatched_passwords_title)
 					, getResources().getString(R.string.error_signup_missmatched_passwords_message)
+					, null
 					, this
 					, android.R.string.ok
 					, null, null, null);
@@ -227,79 +227,25 @@ public class SignUpForm extends FormActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
-
-					/* Jayma: Need to add secret */
-					ServiceRequest serviceRequest = new ServiceRequest()
-							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "create")
-							.setRequestType(RequestType.Insert)
-							.setRequestBody(ProxibaseService.convertObjectToJsonSmart(mUser, true))
-							.setSocketTimeout(30000)
-							.setRetry(false)
-							.setResponseFormat(ResponseFormat.Json);
-
-					/*
-					 * Insert user.
-					 */
-					ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-
-						String jsonResponse = (String) serviceResponse.data;
-						ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
-						mUser = serviceData.user;
-						mUser.session = serviceData.session;
-
-						/*
-						 * Upload images to S3 as needed.
-						 */
-						if (mUser.imageUri != null && !mUser.imageUri.contains("resource:") && mUserBitmap != null) {
-							String imageKey = String.valueOf(mUser.id) + "_"
-									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-									+ ".jpg";
-							try {
-								S3.putImage(imageKey, mUserBitmap);
-							}
-							catch (ProxibaseServiceException exception) {
-								serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
-							}
-
-							if (serviceResponse.responseCode == ResponseCode.Success) {
-								/*
-								 * Update user.
-								 * 
-								 * Need to update the user to capture the uri for the image we saved.
-								 */
-								mUser.imageUri = imageKey;
-								serviceRequest = new ServiceRequest()
-										.setUri(mUser.getEntryUri())
-										.setRequestType(RequestType.Update)
-										.setRequestBody(ProxibaseService.convertObjectToJsonSmart(mUser, true))
-										.setSocketTimeout(30000)
-										.setRetry(false)
-										.setSession(mUser.session)
-										.setResponseFormat(ResponseFormat.Json);
-
-								/* Doing an update so we don't need anything back */
-								serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-							}
-						}
-					}
-					return serviceResponse;
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertUser(mUser, mUserBitmap);
+					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
+					ModelResult result = (ModelResult) response;
 
-					ServiceResponse serviceResponse = (ServiceResponse) response;
-					if (serviceResponse.responseCode == ResponseCode.Success) {
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Tracker.trackEvent("User", "Insert", null, 0);
 						mCommon.showProgressDialog(false, null);
 						Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 
-						AircandiCommon.showAlertDialog(R.drawable.icon_app, getResources().getString(R.string.alert_signup_new_user_title),
-								getResources().getString(R.string.alert_signup_new_user_message),
-								SignUpForm.this, android.R.string.ok, null, new OnClickListener() {
+						AircandiCommon.showAlertDialog(R.drawable.icon_app
+								, getResources().getString(R.string.alert_signup_new_user_title)
+								, getResources().getString(R.string.alert_signup_new_user_message)
+								, null
+								, SignUpForm.this, android.R.string.ok, null, new OnClickListener() {
 
 									public void onClick(DialogInterface dialog, int which) {
 										setResult(CandiConstants.RESULT_PROFILE_INSERTED);
@@ -309,7 +255,7 @@ public class SignUpForm extends FormActivity {
 					}
 					else {
 						mTextPassword.setText("");
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.Signup);
+						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Signup);
 					}
 				}
 			}.execute();

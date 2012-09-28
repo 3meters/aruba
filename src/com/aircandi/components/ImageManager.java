@@ -26,6 +26,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore.Images;
+import android.support.v4.util.LruCache;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.util.TypedValue;
@@ -40,8 +41,11 @@ import com.aircandi.core.CandiConstants;
 public class ImageManager {
 
 	private static ImageManager	singletonObject;
+	private static Integer		cache_size	= 100;
 
 	private ImageCache			mImageCache;
+	private LruSoftCache		mThumbnailCacheSoft;
+	private LruCache			mThumbnailCacheHard;
 	private ImageLoader			mImageLoader;
 	private DisplayMetrics		mDisplayMetrics;
 	private Activity			mActivity;
@@ -59,6 +63,8 @@ public class ImageManager {
 	 */
 	private ImageManager() {
 		setImageLoader(new ImageLoader());
+		mThumbnailCacheSoft = new LruSoftCache(cache_size);
+		mThumbnailCacheHard = new LruCache(cache_size);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -595,6 +601,14 @@ public class ImageManager {
 
 	public DisplayMetrics getDisplayMetrics() {
 		return mDisplayMetrics;
+	}
+
+	public LruSoftCache getThumbnailCacheSoft() {
+		return mThumbnailCacheSoft;
+	}
+
+	public LruCache getThumbnailCacheHard() {
+		return mThumbnailCacheHard;
 	}
 
 }

@@ -1,23 +1,19 @@
 package com.aircandi;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.EntityTree;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.ServiceData;
 
 public class MapCandiList extends CandiListBase {
 
@@ -39,31 +35,18 @@ public class MapCandiList extends CandiListBase {
 		if (mCommon.mEntityId != null) {
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			mCommon.mActionBar.setHomeButtonEnabled(true);
-			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.Map);
+			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId);
 			mCommon.mActionBar.setTitle(collection.title);
 		}
-		else {
+		else if (mCommon.mBeaconId != null) {
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			mCommon.mActionBar.setHomeButtonEnabled(true);
-			Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(mCommon.mBeaconId);
+			Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(mCommon.mBeaconId);
 			mCommon.mActionBar.setTitle(beacon.label);
 		}
 	}
 
-	public void bind(final Boolean useEntityModel) {
-
-		if (!useEntityModel) {
-			if (mCommon.mEntityId == null) {
-				Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(mCommon.mBeaconId);
-				mapBeacon.entities = null;
-			}
-			else {
-				Entity parent = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.Map);
-				if (parent.getChildren() != null) {
-					parent.setChildren(null);
-				}
-			}
-		}
+	public void bind(final Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -75,56 +58,28 @@ public class MapCandiList extends CandiListBase {
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				ServiceResponse serviceResponse = new ServiceResponse();
+				ModelResult result = null;
 				if (mCommon.mEntityId == null) {
-					/*
-					 * List of entities attached to a beacon
-					 */
-					Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(mCommon.mBeaconId);
-					if (mapBeacon.entities != null && mapBeacon.entities.size() > 0) {
-						serviceResponse.data = mapBeacon.entities;
-					}
-					else {
-						ArrayList<String> beaconIdsNew = new ArrayList<String>();
-						beaconIdsNew.add(mCommon.mBeaconId);
-						serviceResponse = ProxiExplorer.getInstance().getEntitiesForBeacons(beaconIdsNew, null, null, false, false);
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							ServiceData serviceData = (ServiceData) serviceResponse.data;
-							List<Entity> entities = (List<Entity>) serviceData.data;
-							ProxiExplorer.getInstance().getEntityModel().pushToCache(entities);
-							serviceResponse.data = entities;
-						}
-					}
+					result = ProxiExplorer.getInstance().getEntityModel().getBeaconEntities(mCommon.mBeaconId, refresh);
 				}
 				else {
-					/*
-					 * List of child entities attached to a parent entity
-					 */
-					Entity parent = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.Map);
-					if (parent.getChildren() != null && parent.getChildren().size() > 0) {
-						serviceResponse.data = parent.getChildren();
-					}
-					else {
-						String jsonFields = "{\"entities\":{},\"children\":{},\"parents\":{},\"comments\":{}}";
-						String jsonEagerLoad = "{\"children\":true,\"parents\":true,\"comments\":false}";
-						serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, jsonFields, null);
-						ServiceData serviceData = (ServiceData) serviceResponse.data;
-						serviceResponse.data = (EntityList<Entity>) serviceData.data;
-						ProxiExplorer.getInstance().getEntityModel().pushToCache((EntityList<Entity>) serviceData.data);
+					result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId, refresh, true, null, null);
+					if (result.data != null) {
+						result.data = ((Entity) result.data).getChildren();
 					}
 				}
-				return serviceResponse;
+				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
-				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					List<Entity> entities = (List<Entity>) serviceResponse.data;
+
+				ModelResult result = (ModelResult) response;
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					/*
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */
-					if (entities.size() == 0) {
+					if (result.data == null) {
 						mCommon.showProgressDialog(false, null);
 						onBackPressed();
 					}
@@ -132,24 +87,13 @@ public class MapCandiList extends CandiListBase {
 						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 						mEntityModelUser = Aircandi.getInstance().getUser();
-						/*
-						 * Push to model
-						 */
-						if (mCommon.mEntityId == null) {
-							Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getMapBeaconById(mCommon.mBeaconId);
-							mapBeacon.entities = entities;
-						}
-						else {
-							Entity parent = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.Map);
-							parent.setChildren((EntityList<Entity>) entities);
-						}
 
-						if (serviceResponse.data != null) {
-							CandiListAdapter adapter = new CandiListAdapter(MapCandiList.this, entities,
-									R.layout.temp_listitem_candi);
-							mListView.setAdapter(adapter);
-						}
+						CandiListAdapter adapter = new CandiListAdapter(MapCandiList.this, (EntityList<Entity>) result.data, R.layout.temp_listitem_candi);
+						mListView.setAdapter(adapter);
 					}
+				}
+				else {
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiList);
 				}
 				mCommon.showProgressDialog(false, null);
 			}

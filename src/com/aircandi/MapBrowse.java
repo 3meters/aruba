@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,22 +12,15 @@ import android.widget.FrameLayout.LayoutParams;
 import com.actionbarsherlock.app.SherlockMapActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CandiItemizedOverlay;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
-import com.aircandi.service.objects.ServiceData;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
-import com.aircandi.BuildConfig;
-import com.aircandi.R;
 
 public class MapBrowse extends SherlockMapActivity {
 
@@ -74,39 +66,9 @@ public class MapBrowse extends SherlockMapActivity {
 	}
 
 	private void bind() {
-		if (mEntity == null && mCommon.mEntityId != null) {
-
-			new AsyncTask() {
-
-				@Override
-				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, getString(R.string.progress_loading));
-				}
-
-				@Override
-				protected Object doInBackground(Object... params) {
-					String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":false}";
-					ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntity(mCommon.mEntityId, jsonEagerLoad, null, null);
-					return serviceResponse;
-				}
-
-				@Override
-				protected void onPostExecute(Object response) {
-					ServiceResponse serviceResponse = (ServiceResponse) response;
-
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						mEntity = (Entity) ((ServiceData) serviceResponse.data).data;
-						ViewGroup mapHolder = (ViewGroup) findViewById(R.id.map_holder);
-						mapHolder.setVisibility(View.VISIBLE);
-						showCandi();
-						mCommon.showProgressDialog(false, null);
-					}
-					else {
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.MapBrowse);
-					}
-				}
-			}.execute();
-		}
+		ViewGroup mapHolder = (ViewGroup) findViewById(R.id.map_holder);
+		mapHolder.setVisibility(View.VISIBLE);
+		showCandi();
 	}
 
 	// --------------------------------------------------------------------------------------------

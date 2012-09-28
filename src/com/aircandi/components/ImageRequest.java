@@ -120,10 +120,10 @@ public class ImageRequest {
 
 		public Bitmap	bitmap;
 		public String	imageUri;
-		
+
 		public ImageResponse(Bitmap bitmap, String imageUri) {
 			this.bitmap = bitmap;
-			this.imageUri = imageUri; 
+			this.imageUri = imageUri;
 		}
 	}
 

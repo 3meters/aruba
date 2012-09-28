@@ -25,23 +25,16 @@ import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.S3;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
-import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.ProxibaseServiceException;
-import com.aircandi.service.Query;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.User;
 import com.aircandi.widgets.WebImageView;
 
@@ -56,32 +49,12 @@ public class ProfileForm extends FormActivity {
 	private EditText		mTextEmail;
 	private Button			mButtonSave;
 	private User			mUser;
-	private Integer			mUserId;
 	private Bitmap			mUserBitmap;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * You can't display the profile form unless you are signed in so the only sign in case
-		 * is if the session expired. That could change if we start letting users view profiles
-		 * for other Aircandi users.
-		 */
-		User user = Aircandi.getInstance().getUser();
-		if (user != null) {
-			if (user.session != null) {
-				Boolean expired = user.session.renewSession(DateUtils.nowDate().getTime());
-				if (expired) {
-					IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
-					intentBuilder.setCommandType(CommandType.Edit);
-					intentBuilder.setMessage(getString(R.string.signin_message_session_expired));
-					Intent intent = intentBuilder.create();
-					startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-					AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-					return;
-				}
-			}
-		}
+		
 		initialize();
 		bind();
 		draw();
@@ -89,15 +62,10 @@ public class ProfileForm extends FormActivity {
 
 	private void initialize() {
 
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			mUserId = extras.getInt(getString(R.string.EXTRA_USER_ID));
-		}
-
 		mUser = Aircandi.getInstance().getUser();
 
-		if (mUser == null && mUserId == null) {
-			throw new IllegalStateException("User or userId must be passed to ProfileForm");
+		if (mUser == null) {
+			throw new IllegalStateException("Current user required by ProfileForm");
 		}
 
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
@@ -143,30 +111,15 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Query query = new Query("users");
-				if (mUser != null) {
-					query.filter("{\"email\":\"" + ((User) mUser).email + "\"}");
-				}
-				else {
-					query.filter("{\"_id\":\"" + String.valueOf(mUserId) + "\"}");
-				}
-
-				ServiceRequest serviceRequest = new ServiceRequest()
-						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
-						.setRequestType(RequestType.Get)
-						.setQuery(query)
-						.setSession(Aircandi.getInstance().getUser().session)
-						.setResponseFormat(ResponseFormat.Json);
-
-				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-				return serviceResponse;
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getUser(mUser.id);
+				return result;
 			}
 
 			@Override
-			protected void onPostExecute(Object result) {
-				ServiceResponse serviceResponse = (ServiceResponse) result;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					String jsonResponse = (String) serviceResponse.data;
+			protected void onPostExecute(Object modelResult) {
+				ModelResult result = (ModelResult) modelResult;
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					String jsonResponse = (String) result.serviceResponse.data;
 					mUser = (User) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User).data;
 
 					/* We got fresh user data but we want to hook up the old session. */
@@ -176,7 +129,7 @@ public class ProfileForm extends FormActivity {
 					mCommon.showProgressDialog(false, null);
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.ProfileBrowse);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.ProfileBrowse);
 				}
 			}
 		}.execute();
@@ -279,6 +232,13 @@ public class ProfileForm extends FormActivity {
 	private void updateProfile() {
 
 		if (validate()) {
+			
+			mUser.email = mTextEmail.getText().toString().trim();
+			mUser.name = mTextFullname.getText().toString().trim();
+			mUser.bio = mTextBio.getText().toString().trim();
+			mUser.location = mTextLocation.getText().toString().trim();
+			mUser.webUri = mTextLink.getText().toString().trim();
+
 
 			new AsyncTask() {
 
@@ -289,60 +249,15 @@ public class ProfileForm extends FormActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
-
-					/*
-					 * TODO: We are going with a garbage collection scheme for orphaned images. We
-					 * need to use an extended property on S3 items that is set to a date when
-					 * collection is ok. This allows downloaded entities to keep working even if
-					 * an image for entity has changed.
-					 */
-					ServiceResponse serviceResponse = new ServiceResponse();
-
-					/* Put image to S3 if we have a new one. */
-					if (mUserBitmap != null && !mUserBitmap.isRecycled()) {
-						try {
-							String imageKey = String.valueOf(((User) mUser).id) + "_"
-									+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-									+ ".jpg";
-							S3.putImage(imageKey, mUserBitmap);
-							mUser.imageUri = imageKey;
-						}
-						catch (ProxibaseServiceException exception) {
-							serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
-						}
-					}
-
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-
-						mUser.email = mTextEmail.getText().toString().trim();
-						mUser.name = mTextFullname.getText().toString().trim();
-						mUser.bio = mTextBio.getText().toString().trim();
-						mUser.location = mTextLocation.getText().toString().trim();
-						mUser.webUri = mTextLink.getText().toString().trim();
-						/*
-						 * Service handles modifiedId and modifiedDate based
-						 * on the session info passed with request.
-						 */
-
-						ServiceRequest serviceRequest = new ServiceRequest()
-								.setUri(mUser.getEntryUri())
-								.setRequestType(RequestType.Update)
-								.setRequestBody(ProxibaseService.convertObjectToJsonSmart(mUser, true))
-								.setSocketTimeout(30000)
-								.setRetry(false)
-								.setSession(Aircandi.getInstance().getUser().session)
-								.setResponseFormat(ResponseFormat.Json);
-
-						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-					}
-					return serviceResponse;
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().updateUser(mUser, mUserBitmap, false);
+					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
-					ServiceResponse serviceResponse = (ServiceResponse) response;
+					ModelResult result = (ModelResult) response;
 
-					if (serviceResponse.responseCode == ResponseCode.Success) {
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "Updated user profile: " + mUser.name + " (" + mUser.id + ")");
 						Tracker.trackEvent("User", "Update", null, 0);
 						mCommon.showProgressDialog(false, null);
@@ -354,14 +269,6 @@ public class ProfileForm extends FormActivity {
 
 						/* Update the global user */
 						Aircandi.getInstance().setUser(mUser);
-
-						/*
-						 * entity.creator is what we show for entity authors. To make the entity model consistent
-						 * with this update to the profile we walk all the entities and update where creator.id
-						 * equals the signed in user.
-						 */
-						ProxiExplorer.getInstance().getEntityModel().updateUser(mUser);
-
 						/*
 						 * We also need to update the user that has been persisted for auto sign in.
 						 */
@@ -374,7 +281,7 @@ public class ProfileForm extends FormActivity {
 						finish();
 					}
 					else {
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.ProfileUpdate);
+						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.ProfileUpdate);
 					}
 				}
 			}.execute();
@@ -391,6 +298,7 @@ public class ProfileForm extends FormActivity {
 				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(R.string.error_weburi_invalid)
+						, null
 						, this
 						, android.R.string.ok
 						, null, null, null);

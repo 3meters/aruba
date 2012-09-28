@@ -31,19 +31,11 @@ import com.aircandi.components.CandiMapView;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
-import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
-import com.aircandi.service.objects.ServiceData;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
@@ -61,8 +53,6 @@ public class CandiMap extends SherlockMapActivity {
 	private CandiItemizedOverlay	mBeaconOverlay;
 	private LocationManager			mLocationManager;
 	private LocationListener		mLocationListener;
-	private static double			RADIUS_EARTH	= 6378000;	// meters
-	private static double			SEARCH_RANGE	= 1000000;	// meters
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -86,7 +76,7 @@ public class CandiMap extends SherlockMapActivity {
 			initializeLocation();
 
 			if (GeoLocationManager.getInstance().getCurrentLocation() != null) {
-				bind(false);
+				bind(true);
 			}
 		}
 	}
@@ -171,73 +161,46 @@ public class CandiMap extends SherlockMapActivity {
 		}
 	}
 
-	private void bind(Boolean useLocalModel) {
+	private void bind(final Boolean refresh) {
 
 		/*
 		 * If user is anonymous we will only get back candi that are flagged as public
 		 */
-		if (!useLocalModel || ProxiExplorer.getInstance().getEntityModel().getMapBeacons().size() == 0) {
 
-			new AsyncTask() {
+		new AsyncTask() {
 
-				@Override
-				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, getString(R.string.progress_loading));
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, getString(R.string.progress_loading));
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+
+				Location location = GeoLocationManager.getInstance().getCurrentLocation();
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getMapBeacons(location, refresh);
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object modelResult) {
+				ModelResult result = (ModelResult) modelResult;
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
+					showBeacons();
+					mCommon.showProgressDialog(false, null);
+				}
+				else {
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.MapBrowse);
 				}
 
-				@Override
-				protected Object doInBackground(Object... params) {
-
-					Location location = GeoLocationManager.getInstance().getCurrentLocation();
-
-					Bundle parameters = new Bundle();
-					parameters.putDouble("latitude", location.getLatitude());
-					parameters.putDouble("longitude", location.getLongitude());
-					parameters.putDouble("radius", SEARCH_RANGE / RADIUS_EARTH); // to radians
-					parameters.putString("userId", Aircandi.getInstance().getUser().id);
-
-					ServiceRequest serviceRequest = new ServiceRequest()
-							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getBeaconsNearLocation")
-							.setRequestType(RequestType.Method)
-							.setParameters(parameters)
-							.setResponseFormat(ResponseFormat.Json);
-
-					ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						String jsonResponse = (String) serviceResponse.data;
-						ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Beacon);
-						List<Beacon> beacons = (List<Beacon>) serviceData.data;
-
-						ProxiExplorer.getInstance().getEntityModel().getMapBeacons().clear();
-						ProxiExplorer.getInstance().getEntityModel().setMapBeacons(beacons);
-					}
-					return serviceResponse;
-				}
-
-				@Override
-				protected void onPostExecute(Object result) {
-					ServiceResponse serviceResponse = (ServiceResponse) result;
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
-						showBeacons();
-						mCommon.showProgressDialog(false, null);
-					}
-					else {
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.MapBrowse);
-					}
-
-				}
-			}.execute();
-		}
-		else {
-			((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
-			showBeacons();
-		}
+			}
+		
+		}.execute();
 	}
 
 	public void doRefresh() {
-		bind(false);
+		bind(true);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -314,8 +277,9 @@ public class CandiMap extends SherlockMapActivity {
 		List<MapBeacon> mapBeacons = new ArrayList<MapBeacon>();
 		List<GeoPoint> geoPoints = new ArrayList<GeoPoint>();
 
-		for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getMapBeacons()) {
-			if (beaconByLocation.entityCount.intValue() > 0
+		for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getBeacons()) {
+			if (beaconByLocation.entityCount != null 
+					&& beaconByLocation.entityCount.intValue() > 0
 					&& beaconByLocation.bssid != null
 					&& !beaconByLocation.bssid.equals(ProxiExplorer.mWifiGlobal.BSSID)
 					&& beaconByLocation.latitude != null
@@ -342,80 +306,6 @@ public class CandiMap extends SherlockMapActivity {
 		}
 		mBeaconOverlay.doPopulate();
 		mMapOverlays.add(mBeaconOverlay);
-		mMapView.invalidate();
-	}
-
-	public void showBeaconsOld() {
-
-		mMapOverlays = mMapView.getOverlays();
-		Drawable marker = getResources().getDrawable(R.drawable.icon_map_candi_iii);
-		/*
-		 * First check to see if radar is seeing a beacon that didn't come back
-		 * in the service call.
-		 */
-		for (Beacon beaconByRadar : ProxiExplorer.getInstance().getEntityModel().getBeacons()) {
-			if (beaconByRadar.entities != null && beaconByRadar.entities.size() > 0) {
-				beaconByRadar.entityCount = beaconByRadar.entities.size();
-				boolean beaconHit = false;
-				for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getMapBeacons()) {
-					if (beaconByLocation.id.equals(beaconByRadar.id)) {
-						beaconHit = true;
-						break;
-					}
-				}
-				if (!beaconHit) {
-					ProxiExplorer.getInstance().getEntityModel().getMapBeacons().add(beaconByRadar);
-				}
-			}
-		}
-
-		List<MapBeacon> mapBeacons = new ArrayList<MapBeacon>();
-		List<GeoPoint> geoPoints = new ArrayList<GeoPoint>();
-
-		for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getMapBeacons()) {
-			if (beaconByLocation.entityCount.intValue() > 0
-					&& beaconByLocation.bssid != null
-					&& !beaconByLocation.bssid.equals(ProxiExplorer.mWifiGlobal.BSSID)
-					&& beaconByLocation.latitude != null
-					&& beaconByLocation.longitude != null) {
-				/*
-				 * If a beacon is currently within radar detection range we want to
-				 * override any lat/lon settings using the users current location.
-				 * 
-				 * Multiple beacons in radar range will stack on the same map location unless
-				 * we do something to offset them.
-				 */
-				Beacon beaconByRadar = ProxiExplorer.getInstance().getEntityModel().getBeaconById(beaconByLocation.id);
-				if (beaconByRadar != null) {
-					Location currentLocation = GeoLocationManager.getInstance().getCurrentLocation();
-					if (currentLocation != null) {
-						beaconByLocation.latitude = currentLocation.getLatitude();
-						beaconByLocation.longitude = currentLocation.getLongitude();
-					}
-				}
-				MapBeacon mapBeacon = new MapBeacon();
-				mapBeacon.point = new GeoPoint((int) (beaconByLocation.latitude.doubleValue() * 1E6)
-						, (int) (beaconByLocation.longitude.doubleValue() * 1E6));
-				mapBeacon.title = beaconByLocation.label;
-				mapBeacon.message = beaconByLocation.id;
-				mapBeacons.add(mapBeacon);
-				geoPoints.add(mapBeacon.point);
-			}
-		}
-
-		/*
-		 * Create overlays
-		 */
-		mBeaconOverlay = new CandiItemizedOverlay(mapBeacons, geoPoints, marker, mMapView);
-		Collections.sort(mapBeacons, new CandiItemizedOverlay.SortMapBeaconsByLatitude());
-		for (MapBeacon mapBeacon : mapBeacons) {
-			OverlayItem overlayItem = new OverlayItem(mapBeacon.point, mapBeacon.title, mapBeacon.message);
-			overlayItem.setMarker(marker);
-			mBeaconOverlay.addOverlay(overlayItem);
-		}
-
-		mMapOverlays.add(mBeaconOverlay);
-
 		mMapView.invalidate();
 	}
 

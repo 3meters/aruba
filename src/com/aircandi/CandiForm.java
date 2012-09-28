@@ -11,12 +11,12 @@ public class CandiForm extends CandiFormBase {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!isFinishing()) {
-			bind(true);
+			bind(false);
 		}
 	}
 
-	public void bind(Boolean useEntityModel) {
-		doBind(useEntityModel, true, EntityTree.Radar);
+	public void bind(Boolean refresh) {
+		doBind(refresh, true, EntityTree.Radar);
 	}
 
 	public void onChildrenButtonClick(View v) {

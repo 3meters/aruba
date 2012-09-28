@@ -1,6 +1,5 @@
 package com.aircandi;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -10,27 +9,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.ImageUtils;
-import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
-import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
 
@@ -88,16 +80,13 @@ public class SignInForm extends FormActivity {
 		AircandiCommon.showAlertDialog(R.drawable.icon_app
 				, getResources().getString(R.string.alert_send_password_title)
 				, getResources().getString(R.string.alert_send_password_message)
+				, null
 				, SignInForm.this, android.R.string.ok, null, null, null);
 		Tracker.trackEvent("DialogSendPassword", "Open", null, 0);
 	}
 
 	public void onSignupButtonClick(View view) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, SignUpForm.class);
-		intentBuilder.setCommandType(CommandType.New);
-		Intent intent = intentBuilder.create();
-		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		mCommon.signup();
 	}
 
 	public void onSignInButtonClick(View view) {
@@ -116,37 +105,22 @@ public class SignInForm extends FormActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
-
-					Bundle parameters = new Bundle();
-					parameters.putString("user", "object:{"
-							+ "\"email\":\"" + email + "\","
-							+ "\"password\":\"" + password + "\""
-							+ "}");
-
-					ServiceRequest serviceRequest = new ServiceRequest()
-							.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signin")
-							.setRequestType(RequestType.Method)
-							.setParameters(parameters)
-							.setSocketTimeout(30000)
-							.setRetry(false)
-							.setResponseFormat(ResponseFormat.Json);
-
-					ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-					return serviceResponse;
+					
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().signin(email, password);
+					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
-
-					ServiceResponse serviceResponse = (ServiceResponse) response;
+					
+					ModelResult result = (ModelResult) response;
 					mCommon.showProgressDialog(false, null);
-					if (serviceResponse.responseCode == ResponseCode.Success) {
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Tracker.startNewSession();
 						Tracker.trackEvent("User", "Signin", null, 0);
 
-						String jsonResponse = (String) serviceResponse.data;
+						String jsonResponse = (String) result.serviceResponse.data;
 						ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
 						User user = serviceData.user;
 						user.session = serviceData.session;
@@ -164,15 +138,12 @@ public class SignInForm extends FormActivity {
 						Aircandi.settingsEditor.putString(Preferences.SETTING_LAST_EMAIL, user.email);
 						Aircandi.settingsEditor.commit();
 
-						/* Different user means different user candi */
-						ProxiExplorer.getInstance().getEntityModel().getUserEntities().clear();
-
 						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
 						finish();
 					}
 					else {
 						mTextPassword.setText("");
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.Signin);
+						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Signin);
 					}
 				}
 			}.execute();
@@ -199,6 +170,26 @@ public class SignInForm extends FormActivity {
 			mCommon.showAlertDialogSimple(null, getString(R.string.error_invalid_email));
 			return false;
 		}
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	public boolean onCreateOptionsMenu(Menu menu) {
+		mCommon.doCreateOptionsMenu(menu);
+		return true;
+	}
+
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		mCommon.doPrepareOptionsMenu(menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		mCommon.doOptionsItemSelected(item);
 		return true;
 	}
 

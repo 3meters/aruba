@@ -11,12 +11,12 @@ public class UserCandiForm extends CandiFormBase {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!isFinishing()) {
-			bind(true);
+			bind(false);
 		}
 	}
 
-	public void bind(Boolean useEntityModel) {
-		doBind(useEntityModel, true, EntityTree.User);
+	public void bind(Boolean refresh) {
+		doBind(refresh, true, EntityTree.User);
 	}
 
 	// --------------------------------------------------------------------------------------------

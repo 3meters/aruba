@@ -114,6 +114,20 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 		return entry;
 	}
 
+	public static void copyProperties(ServiceEntry fromEntry, ServiceEntry toEntry) {
+		/*
+		 * Properties are copied from one entity to another.
+		 */
+		toEntry.ownerId = fromEntry.ownerId;
+		toEntry.owner = fromEntry.owner;
+		toEntry.modifierId = fromEntry.modifierId;
+		toEntry.modifier = fromEntry.modifier;
+		toEntry.modifiedDate = fromEntry.modifiedDate;
+		toEntry.creatorId = fromEntry.creatorId;
+		toEntry.creator = fromEntry.creator;
+		toEntry.createdDate = fromEntry.createdDate;
+	}
+
 	public HashMap<String, Object> getHashMap(Boolean useAnnotations) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 

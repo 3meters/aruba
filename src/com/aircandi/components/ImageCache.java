@@ -33,7 +33,7 @@ import com.aircandi.core.CandiConstants;
  */
 
 public class ImageCache implements Map<String, Bitmap> {
-	int								cacheSize				= 4 * 1024 * 1024;		// 4MiB
+	int								cacheSize				= 50;		// 4MiB
 	private int						mCachedImageQuality		= 100;
 	private String					mSecondLevelCacheDir;
 	private LruSoftCache			mCache;

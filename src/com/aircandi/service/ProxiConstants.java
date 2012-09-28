@@ -2,7 +2,8 @@ package com.aircandi.service;
 
 public interface ProxiConstants {
 
-	public static final int		TIMEOUT_SOCKET										= 30000;
+	public static final int		TIMEOUT_SOCKET_QUERIES								= 3000;
+	public static final int		TIMEOUT_SOCKET_UPDATES								= 30000;
 	public static final int		TIMEOUT_CONNECTION									= 5000;
 	public static final int		JSON_NOT_INT_PRIMITIVE								= 999999;
 	public static final int		RESULT_OK											= -1;
@@ -12,6 +13,7 @@ public interface ProxiConstants {
 	public static final boolean	MODE_DEBUG											= true;
 
 	public static final String	ROOT_COLLECTION_ID									= "0000.000000.00000.000";
+	public static final String	INSERT_USER_SECRET									= "larissa";
 
 	public static final String	_URL_PROXIBASE_SERVICE								= "http://ariseditions.com:8080/";
 	public static final String	URL_PROXIBASE_SERVICE								= "https://aircandi.com:643/";

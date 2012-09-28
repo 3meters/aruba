@@ -11,14 +11,12 @@ import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.CommandType;
-import com.aircandi.components.DateUtils;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.EntityTree;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
@@ -27,12 +25,6 @@ public class UserCandiList extends CandiListBase {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		/*
-		 * Two sign in cases:
-		 * 
-		 * - Currently anonymous.
-		 * - Session expired.
-		 */
 		User user = Aircandi.getInstance().getUser();
 		/*
 		 * If user is null then we are getting restarted after a crash
@@ -42,16 +34,12 @@ public class UserCandiList extends CandiListBase {
 			finish();
 			return;
 		}
-		Boolean expired = false;
+		/*
+		 * Signin required if user is anonymous
+		 */
 		Integer messageResId = R.string.signin_message_mycandi;
 		Boolean userAnonymous = user.isAnonymous();
-		if (user.session != null) {
-			expired = user.session.renewSession(DateUtils.nowDate().getTime());
-		}
-		if (userAnonymous || expired) {
-			if (expired) {
-				messageResId = R.string.signin_message_session_expired;
-			}
+		if (userAnonymous) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
 			intentBuilder.setCommandType(CommandType.Edit);
 			intentBuilder.setMessage(getString(messageResId));
@@ -66,7 +54,7 @@ public class UserCandiList extends CandiListBase {
 		if (!isFinishing()) {
 			initialize();
 			configureActionBar();
-			bind(true);
+			bind(false);
 		}
 	}
 
@@ -74,16 +62,16 @@ public class UserCandiList extends CandiListBase {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		if (mCommon.mEntityId != null) {
-			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
-			mCommon.mActionBar.setHomeButtonEnabled(true);
-			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, null, EntityTree.User);
-			mCommon.mActionBar.setTitle(collection.title);
-		}
-		else {
+		if (mCommon.mEntityId == null) {
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
 			mCommon.mActionBar.setHomeButtonEnabled(false);
 			mCommon.mActionBar.setTitle(Aircandi.getInstance().getUser().name);
+		}
+		else {
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+			mCommon.mActionBar.setHomeButtonEnabled(true);
+			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId);
+			mCommon.mActionBar.setTitle(collection.title);
 		}
 	}
 
@@ -98,18 +86,27 @@ public class UserCandiList extends CandiListBase {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				ServiceResponse serviceResponse = ProxiExplorer.getInstance().getEntityModel().getUserEntities(Aircandi.getInstance().getUser().id, refresh);
-				return serviceResponse;
+				ModelResult result = null;
+				if (mCommon.mEntityId == null) {
+					result = ProxiExplorer.getInstance().getEntityModel().getUserEntities(refresh);
+				}
+				else {
+					result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId, refresh, true, null, null);
+					if (result.data != null) {
+						result.data = ((Entity) result.data).getChildren();
+					}
+				}
+				return result;
 			}
 
 			@Override
-			protected void onPostExecute(Object response) {
-				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
+			protected void onPostExecute(Object modelResult) {
+				ModelResult result = (ModelResult) modelResult;
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					/*
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */
-					if (serviceResponse.data != null || ((EntityList<Entity>) serviceResponse.data).size() == 0) {
+					if (result.data == null || ((EntityList<Entity>) result.data).size() == 0) {
 						mCommon.showProgressDialog(false, null);
 						onBackPressed();
 					}
@@ -117,15 +114,14 @@ public class UserCandiList extends CandiListBase {
 						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 						mEntityModelUser = Aircandi.getInstance().getUser();
-						if (serviceResponse.data != null) {
-							CandiListAdapter adapter = new CandiListAdapter(UserCandiList.this, (EntityList<Entity>) serviceResponse.data,
-									R.layout.temp_listitem_candi);
-							mListView.setAdapter(adapter);
-						}
+
+						CandiListAdapter adapter = new CandiListAdapter(UserCandiList.this, (EntityList<Entity>) result.data,
+								R.layout.temp_listitem_candi);
+						mListView.setAdapter(adapter);
 					}
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiList);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiList);
 				}
 				mCommon.showProgressDialog(false, null);
 			}

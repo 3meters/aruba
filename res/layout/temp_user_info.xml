@@ -10,6 +10,8 @@
         android:layout_height="35dp"
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
+        aircandi:layout="@layout/temp_webimageview"
+        
         android:layout_marginRight="5dp"
         aircandi:maxHeight="35dp"
         aircandi:maxWidth="35dp"

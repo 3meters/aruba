@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Filter;
@@ -15,12 +15,12 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.aircandi.R;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.widgets.AuthorBlock;
 import com.aircandi.widgets.TextViewEllipsizing;
 import com.aircandi.widgets.WebImageView;
-import com.aircandi.R;
 
 public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable {
 
@@ -29,11 +29,13 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 	private Integer			mItemLayoutId	= R.layout.temp_listitem_candi;
 	private List<Entity>	mEntities;
 	private CandiFilter		mCandiFilter;
+	protected int			mScrollState	= CandiScrollManager.SCROLL_STATE_IDLE;
 
 	public CandiListAdapter(Context context, List<Entity> entities, Integer itemLayoutId) {
 		super(context, 0, entities);
 		mEntities = entities;
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 		if (itemLayoutId != null) {
 			mItemLayoutId = itemLayoutId;
 		}
@@ -63,7 +65,9 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 		if (itemData != null) {
 			Entity entity = itemData;
+			Logger.d(this, "Adapter getView: " + itemData.title);
 			holder.data = itemData;
+			holder.position = position;
 			if (holder.itemImageCollection != null) {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 					if (entity.getMasterImageUri() != null && !entity.getMasterImageUri().toLowerCase().startsWith("resource:")) {
@@ -136,21 +140,20 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
-				String imageUri = entity.getMasterImageUri();
-				if (holder.itemImage.getImageView().getTag() == null || !imageUri.equals((String) holder.itemImage.getImageView().getTag())) {
+				final String imageUri = entity.getMasterImageUri();
 
-					BitmapDrawable bitmapDrawable = (BitmapDrawable) holder.itemImage.getImageView().getDrawable();
-					if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null && !bitmapDrawable.getBitmap().isRecycled()) {
-						bitmapDrawable.getBitmap().recycle();
-					}
+				/* Don't do anything if the image is already set to the one we want */
+				if (holder.itemImage.getImageUri() == null || !holder.itemImage.getImageUri().equals(imageUri)) {
+
 					ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemImage);
 					builder.setImageUri(imageUri);
 					builder.setImageFormat(entity.getMasterImageFormat());
 					builder.setLinkZoom(entity.linkZoom);
 					builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
-					ImageRequest imageRequest = builder.create();
-					holder.itemImage.setImageRequest(imageRequest);
+					final ImageRequest imageRequest = builder.create();
 
+					holder.itemImageUri = imageUri;
+					holder.itemImage.setImageRequest(imageRequest);
 				}
 			}
 		}
@@ -183,8 +186,28 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 		return mCandiFilter;
 	}
 
+	public int getScrollState() {
+		return mScrollState;
+	}
+
+	public void setScrollState(int scrollState) {
+		mScrollState = scrollState;
+	}
+
+	public class CandiScrollManager implements AbsListView.OnScrollListener {
+
+		public void onScrollStateChanged(AbsListView view, int scrollState) {
+			mScrollState = scrollState;
+			notifyDataSetChanged();
+		}
+
+		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {}
+	}
+
 	public static class CandiListViewHolder {
 
+		public int					position;
+		public String				itemImageUri;
 		public WebImageView			itemImage;
 		public ImageView			itemImageCollection;
 		public TextView				itemTitle;

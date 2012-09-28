@@ -118,6 +118,7 @@ public class CandiPatchPresenter implements Observer {
 	public static float				mRadarPaddingRight;
 	public static float				mRadarPaddingTop;
 	public static float				mRadarPaddingBottom;
+	public static float				mRadarZoom = 0.55f;
 
 	private ChaseCamera				mCamera;
 	private Scene					mScene;
@@ -232,6 +233,8 @@ public class CandiPatchPresenter implements Observer {
 		mRadarPaddingRight = paddingTotal - mRadarPaddingLeft;
 		mRadarPaddingTop = CandiConstants.RADAR_PADDING_TOP;
 		mRadarPaddingBottom = CandiConstants.RADAR_PADDING_BOTTOM;
+		
+		mRadarZoom = mRadarWidth / (contentWidth + (CandiConstants.RADAR_PADDING_SIDES * 4f)) ;
 
 		{
 			/* Highlight */
@@ -245,7 +248,7 @@ public class CandiPatchPresenter implements Observer {
 			mCameraTargetSprite.setColor(1, 0, 0, 0.2f);
 			mCameraTargetSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 			mCameraTargetSprite.setVisible(false);
-			mCameraTargetSprite.setScale(CandiConstants.RADAR_ZOOM);
+			mCameraTargetSprite.setScale(mRadarZoom);
 			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mCameraTargetSprite);
 
 			/* Tie camera position to target position. */
@@ -1737,11 +1740,11 @@ public class CandiPatchPresenter implements Observer {
 	}
 
 	public float getRadarZoomedWidth() {
-		return mRadarWidth * (1 / CandiConstants.RADAR_ZOOM);
+		return mRadarWidth * (1 / mRadarZoom);
 	}
 
 	public float getRadarZoomedHeight() {
-		return mRadarHeight * (1 / CandiConstants.RADAR_ZOOM);
+		return mRadarHeight * (1 / mRadarZoom);
 	}
 
 	// --------------------------------------------------------------------------------------------

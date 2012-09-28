@@ -12,14 +12,10 @@ import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.User;
 
 public class PasswordForm extends FormActivity {
@@ -86,6 +82,7 @@ public class PasswordForm extends FormActivity {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, getResources().getString(R.string.error_signup_missmatched_passwords_title)
 					, getResources().getString(R.string.error_signup_missmatched_passwords_message)
+					, null
 					, this
 					, android.R.string.ok
 					, null, null, null);
@@ -110,34 +107,15 @@ public class PasswordForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-
-				Bundle parameters = new Bundle();
-				parameters.putString("user", "object:{"
-						+ "\"_id\":\"" + mUser.id + "\","
-						+ "\"oldPassword\":\"" + mTextPasswordOld.getText().toString() + "\","
-						+ "\"newPassword\":\"" + mTextPassword.getText().toString() + "\""
-						+ "}");
-
-				ServiceRequest serviceRequest = new ServiceRequest()
-						.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_USER + "changepw")
-						.setRequestType(RequestType.Method)
-						.setParameters(parameters)
-						.setSocketTimeout(30000)
-						.setRetry(false)
-						.setSession(Aircandi.getInstance().getUser().session)
-						.setResponseFormat(ResponseFormat.Json);
-
-				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-				return serviceResponse;
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().updatePassword(mUser.id,  mTextPasswordOld.getText().toString(), mTextPassword.getText().toString());
+				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
-
-				ServiceResponse serviceResponse = (ServiceResponse) response;
+				ModelResult result = (ModelResult) response;
 				mCommon.showProgressDialog(false, null);
-				if (serviceResponse.responseCode == ResponseCode.Success) {
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
 					Tracker.trackEvent("User", "PasswordChange", null, 0);
@@ -147,7 +125,7 @@ public class PasswordForm extends FormActivity {
 				}
 				else {
 					mTextPassword.setText("");
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.PasswordChange);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.PasswordChange);
 				}
 			}
 		}.execute();

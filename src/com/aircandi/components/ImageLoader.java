@@ -136,7 +136,7 @@ public class ImageLoader {
 					};
 
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-						task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						task.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
 					}
 					else {
 						task.execute();
@@ -159,7 +159,7 @@ public class ImageLoader {
 		}
 	}
 
-	private ServiceResponse getCachedImage(ImageRequest imageRequest) {
+	public ServiceResponse getCachedImage(ImageRequest imageRequest) {
 
 		ServiceResponse serviceResponse = new ServiceResponse();
 		Bitmap bitmap = ImageManager.getInstance().getImage(imageRequest.getImageUri());

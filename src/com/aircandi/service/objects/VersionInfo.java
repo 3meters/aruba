@@ -28,6 +28,8 @@ public class VersionInfo extends ServiceEntry {
 	@Expose
 	public Boolean				updateRequired;
 	@Expose
+	public Boolean				enabled;
+	@Expose
 	public String				updateUri;
 
 	public VersionInfo() {}
@@ -49,6 +51,7 @@ public class VersionInfo extends ServiceEntry {
 		versionInfo.versionName = (String) map.get("versionName");
 		versionInfo.versionCode = (Integer) map.get("versionCode");
 		versionInfo.updateRequired = (Boolean) map.get("updateRequired");
+		versionInfo.enabled = (Boolean) map.get("enabled");
 		versionInfo.updateUri = (String) map.get("updateUri");
 
 		return versionInfo;

@@ -20,6 +20,7 @@ import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
@@ -56,7 +57,8 @@ public class PictureBrowse extends FormActivity {
 
 	protected void draw() {
 
-		final Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mEntityId, mCommon.mParentId, mCommon.mEntityTree);
+		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, false, false, null, null);
+		final Entity entity = (Entity) result.data;
 
 		/* Title */
 		if (findViewById(R.id.text_title) != null) {

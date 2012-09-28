@@ -4,16 +4,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
-import com.aircandi.components.EntityList;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.EntityTree;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.ServiceData;
 
 public class CandiList extends CandiListBase {
 
@@ -24,7 +22,7 @@ public class CandiList extends CandiListBase {
 		if (!isFinishing()) {
 			initialize();
 			configureActionBar();
-			bind(true);
+			bind(false);
 		}
 	}
 
@@ -32,16 +30,12 @@ public class CandiList extends CandiListBase {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
+		Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId);
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		mCommon.mActionBar.setTitle(collection.title);
 	}
 
-	public void bind(final Boolean useEntityModel) {
-
-		if (!useEntityModel) {
-			Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
-		}
+	public void bind(final Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -52,30 +46,19 @@ public class CandiList extends CandiListBase {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-
-				ServiceResponse serviceResponse = new ServiceResponse();
-				Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
-				if (entity.getChildren() != null && entity.getChildren().size() > 0) {
-					serviceResponse.data = entity.getChildren();
-				}
-				else {
-					String jsonFields = "{\"entities\":{},\"children\":{},\"parents\":{},\"comments\":{}}";
-					String jsonEagerLoad = "{\"children\":true,\"parents\":true,\"comments\":false}";
-					serviceResponse = ProxiExplorer.getInstance().getEntity(entity.id, jsonEagerLoad, jsonFields, null);
-					ServiceData serviceData = (ServiceData) serviceResponse.data;
-					serviceResponse.data = ((Entity)serviceData.data).getChildren();
-				}
-				return serviceResponse;
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId, refresh, true, null, null);
+				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
-				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
+				
+				ModelResult result = (ModelResult) response;
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					/*
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */
-					if (((EntityList<Entity>) serviceResponse.data).size() == 0) {
+					if (result.data == null) {
 						mCommon.showProgressDialog(false, null);
 						onBackPressed();
 					}
@@ -84,15 +67,14 @@ public class CandiList extends CandiListBase {
 						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 						mEntityModelUser = Aircandi.getInstance().getUser();
 
-						if (serviceResponse.data != null) {
-							if (!useEntityModel) {
-								Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, EntityTree.Radar);
-							}
-							CandiListAdapter adapter = new CandiListAdapter(CandiList.this, (EntityList<Entity>) serviceResponse.data,
-									R.layout.temp_listitem_candi);
-							mListView.setAdapter(adapter);
-						}
+						Entity entity = (Entity) result.data;
+
+						CandiListAdapter adapter = new CandiListAdapter(CandiList.this,  entity.getChildren(), R.layout.temp_listitem_candi);
+						mListView.setAdapter(adapter);
 					}
+				}
+				else {
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiList);
 				}
 				mCommon.showProgressDialog(false, null);
 			}
@@ -115,5 +97,4 @@ public class CandiList extends CandiListBase {
 		super.onRestart();
 		mCommon.setActiveTab(0);
 	}
-
 }

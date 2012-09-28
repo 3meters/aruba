@@ -112,8 +112,6 @@ public class ProxibaseService {
 
 	private static ProxibaseService		singletonObject;
 	private DefaultHttpClient			mHttpClient;
-	private int							mTimeoutSocket					= ProxiConstants.TIMEOUT_SOCKET;
-	private int							mTimeoutConnection				= ProxiConstants.TIMEOUT_CONNECTION;
 	private static final int			MAX_BACKOFF_IN_MILLISECONDS		= 5 * 1000;
 	private static final int			MAX_BACKOFF_RETRIES				= 6;
 	public static final int				DEFAULT_MAX_CONNECTIONS			= 50;
@@ -138,8 +136,6 @@ public class ProxibaseService {
 	private ProxibaseService() {
 
 		/* Connection settings */
-		mTimeoutConnection = 5000;
-		mTimeoutSocket = 3000;
 		mHttpParams = new BasicHttpParams();
 		ConnPerRoute connPerRoute = new ConnPerRoute() {
 
@@ -157,8 +153,8 @@ public class ProxibaseService {
 		ConnManagerParams.setMaxConnectionsPerRoute(mHttpParams, connPerRoute);
 		ConnManagerParams.setTimeout(mHttpParams, 1000);
 		HttpConnectionParams.setStaleCheckingEnabled(mHttpParams, false);
-		HttpConnectionParams.setConnectionTimeout(mHttpParams, mTimeoutConnection);
-		HttpConnectionParams.setSoTimeout(mHttpParams, mTimeoutSocket);
+		HttpConnectionParams.setConnectionTimeout(mHttpParams, ProxiConstants.TIMEOUT_CONNECTION);
+		HttpConnectionParams.setSoTimeout(mHttpParams, ProxiConstants.TIMEOUT_SOCKET_QUERIES);
 		HttpConnectionParams.setTcpNoDelay(mHttpParams, true);
 		HttpConnectionParams.setSocketBufferSize(mHttpParams, 8192);
 		HttpProtocolParams.setVersion(mHttpParams, HttpVersion.HTTP_1_1);
@@ -196,7 +192,8 @@ public class ProxibaseService {
 		String jsonBody = null;
 		URI redirectedUri = null;
 		int retryCount = 0;
-		HttpConnectionParams.setSoTimeout(mHttpParams, serviceRequest.getSocketTimeout() == null ? 3000 : serviceRequest.getSocketTimeout());
+		HttpConnectionParams.setSoTimeout(mHttpParams,
+				serviceRequest.getSocketTimeout() == null ? ProxiConstants.TIMEOUT_SOCKET_QUERIES : serviceRequest.getSocketTimeout());
 
 		while (true) {
 
@@ -207,7 +204,13 @@ public class ProxibaseService {
 			else if (serviceRequest.getRequestType() == RequestType.Insert) {
 				httpRequest = new HttpPost();
 				if (serviceRequest.getRequestBody() != null) {
-					addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + "}");
+					if (serviceRequest.getUseSecret()) {
+						addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + ", \"secret\":\""
+								+ ProxiConstants.INSERT_USER_SECRET + "\"}");
+					}
+					else {
+						addEntity((HttpEntityEnclosingRequestBase) httpRequest, "{\"data\":" + serviceRequest.getRequestBody() + "}");
+					}
 				}
 			}
 			else if (serviceRequest.getRequestType() == RequestType.Update) {
@@ -337,7 +340,7 @@ public class ProxibaseService {
 					Logger.d(this, responseContent);
 					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(httpStatusCode, null);
 					proxibaseException.setResponseMessage(responseContent);
-					if (!shouldRetry(httpRequest, proxibaseException, retryCount)) {
+					if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, proxibaseException, retryCount)) {
 						throw proxibaseException;
 					}
 				}
@@ -358,7 +361,7 @@ public class ProxibaseService {
 				 * - NoHttpResponseException: target server failed to respond with a valid HTTP response
 				 * - UnknownHostException: hostname didn't exist in the dns system
 				 */
-				if (!serviceRequest.getRetry() || !shouldRetry(httpRequest, exception, retryCount)) {
+				if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, exception, retryCount)) {
 					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(null, exception);
 					throw proxibaseException;
 				}
@@ -612,18 +615,6 @@ public class ProxibaseService {
 	}
 
 	// ----------------------------------------------------------------------------------------
-	// Setters/Getters
-	// ----------------------------------------------------------------------------------------
-
-	public void setTimeoutSocket(int timeoutSocket) {
-		this.mTimeoutSocket = timeoutSocket;
-	}
-
-	public void setTimeoutConnection(int timeoutConnection) {
-		this.mTimeoutConnection = timeoutConnection;
-	}
-
-	// ----------------------------------------------------------------------------------------
 	// Inner helper methods
 	// ----------------------------------------------------------------------------------------
 
@@ -655,7 +646,9 @@ public class ProxibaseService {
 	}
 
 	private void addHeaders(HttpRequestBase httpAction, ServiceRequest serviceRequest) {
-		httpAction.addHeader("Content-Type", "application/json");
+		if (serviceRequest.getRequestType() != RequestType.Get) {
+			httpAction.addHeader("Content-Type", "application/json");
+		}
 		if (serviceRequest.getResponseFormat() == ResponseFormat.Json) {
 			httpAction.addHeader("Accept", "application/json");
 		}
@@ -892,11 +885,11 @@ public class ProxibaseService {
 		return null;
 	}
 
-//	public static String convertObjectToJson(Object object, GsonType gsonType) {
-//		Gson gson = ProxibaseService.getGson(gsonType);
-//		String json = gson.toJson(object);
-//		return json;
-//	}
+	//	public static String convertObjectToJson(Object object, GsonType gsonType) {
+	//		Gson gson = ProxibaseService.getGson(gsonType);
+	//		String json = gson.toJson(object);
+	//		return json;
+	//	}
 
 	public static String convertObjectToJsonSmart(Object object, Boolean useAnnotations) {
 		String json = null;
@@ -908,165 +901,165 @@ public class ProxibaseService {
 			HashMap map = ((Comment) object).getHashMap(useAnnotations);
 			json = JSONValue.toJSONString(map);
 		}
-		
+
 		return json;
 	}
 
-//	public static ServiceData convertJsonToObject(String jsonString, Class type, GsonType gsonType) {
-//		ServiceData serviceData = convertJsonToObjects(jsonString, type, gsonType);
-//		if (serviceData.data != null) {
-//			List<Object> array = (List<Object>) serviceData.data;
-//			if (array != null && array.size() > 0) {
-//				serviceData.data = array.get(0);
-//			}
-//		}
-//		return serviceData;
-//	}
+	//	public static ServiceData convertJsonToObject(String jsonString, Class type, GsonType gsonType) {
+	//		ServiceData serviceData = convertJsonToObjects(jsonString, type, gsonType);
+	//		if (serviceData.data != null) {
+	//			List<Object> array = (List<Object>) serviceData.data;
+	//			if (array != null && array.size() > 0) {
+	//				serviceData.data = array.get(0);
+	//			}
+	//		}
+	//		return serviceData;
+	//	}
 
-//	public static ServiceData convertJsonToObjects(String jsonString, Class type, GsonType gsonType) {
-//
-//		Gson gson = ProxibaseService.getGson(gsonType);
-//		ServiceData serviceData = new ServiceData();
-//
-//		/*
-//		 * In general, gson deserializer will ignore elements (fields or classes) in the string that do not exist on the
-//		 * object type. Collections should be treated as generic lists on the target object.
-//		 */
-//		try {
-//
-//			JsonParser parser = new JsonParser();
-//			JsonElement jsonElement = parser.parse(jsonString);
-//			if (jsonElement.isJsonObject()) {
-//				JsonObject jsonObject = jsonElement.getAsJsonObject();
-//
-//				if (jsonObject.has("data")) {
-//					jsonElement = jsonObject.get("data");
-//					List<Object> array = new ArrayList<Object>();
-//					if (jsonElement.isJsonPrimitive()) {
-//						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
-//						if (primitive.isString()) {
-//							array.add(primitive.getAsString());
-//						}
-//						else if (primitive.isNumber()) {
-//							array.add(primitive.getAsNumber());
-//						}
-//						else if (primitive.isBoolean()) {
-//							array.add(primitive.getAsBoolean());
-//						}
-//					}
-//					else if (jsonElement.isJsonArray()) {
-//						JsonArray jsonArray = jsonElement.getAsJsonArray();
-//						for (int i = 0; i < jsonArray.size(); i++) {
-//							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
-//							array.add(gson.fromJson(jsonObjectNew.toString(), type));
-//						}
-//					}
-//					else if (jsonElement.isJsonObject()) {
-//						Object obj = gson.fromJson(jsonElement.toString(), type);
-//						array.add(obj);
-//					}
-//					serviceData.data = array;
-//				}
-//
-//				/* Targeting bing results from azure */
-//				if (jsonObject.has("d")) {
-//					jsonObject = jsonObject.getAsJsonObject("d");
-//					jsonElement = jsonObject.getAsJsonArray("results");
-//					List<Object> array = new ArrayList<Object>();
-//					if (jsonElement.isJsonPrimitive()) {
-//						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
-//						if (primitive.isString()) {
-//							array.add(primitive.getAsString());
-//						}
-//						else if (primitive.isNumber()) {
-//							array.add(primitive.getAsNumber());
-//						}
-//						else if (primitive.isBoolean()) {
-//							array.add(primitive.getAsBoolean());
-//						}
-//					}
-//					else if (jsonElement.isJsonArray()) {
-//						JsonArray jsonArray = jsonElement.getAsJsonArray();
-//						for (int i = 0; i < jsonArray.size(); i++) {
-//							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
-//							array.add(gson.fromJson(jsonObjectNew.toString(), type));
-//						}
-//					}
-//					else if (jsonElement.isJsonObject()) {
-//						Object obj = gson.fromJson(jsonElement.toString(), type);
-//						array.add(obj);
-//					}
-//					serviceData.data = array;
-//				}
-//
-//				if (jsonObject.has("date")) {
-//					serviceData.date = jsonObject.get("date").getAsJsonPrimitive().getAsNumber();
-//				}
-//				if (jsonObject.has("error")) {
-//					ServiceError error = gson.fromJson(jsonObject.get("error").toString(), ServiceError.class);
-//					serviceData.error = error;
-//				}
-//				if (jsonObject.has("user")) {
-//					User user = gson.fromJson(jsonObject.get("user").toString(), User.class);
-//					serviceData.user = user;
-//				}
-//				if (jsonObject.has("session")) {
-//					Session session = gson.fromJson(jsonObject.get("session").toString(), Session.class);
-//					serviceData.session = session;
-//					/*
-//					 * This is the best place to handle updating the session object for the currently logged
-//					 * in user. The primary reason to update is that the service moves the expiration date based
-//					 * on activity.
-//					 */
-//					if (!Aircandi.getInstance().getUser().anonymous) {
-//						Aircandi.getInstance().getUser().session = session;
-//					}
-//				}
-//				if (jsonObject.has("count")) {
-//					serviceData.count = jsonObject.get("count").getAsJsonPrimitive().getAsNumber();
-//				}
-//				if (jsonObject.has("info")) {
-//					serviceData.info = jsonObject.get("info").getAsJsonPrimitive().getAsString();
-//				}
-//				if (jsonObject.has("more")) {
-//					serviceData.more = jsonObject.get("more").getAsJsonPrimitive().getAsBoolean();
-//				}
-//				if (jsonObject.has("time")) {
-//					serviceData.time = jsonObject.get("time").getAsJsonPrimitive().getAsNumber();
-//				}
-//			}
-//
-//		}
-//		catch (JsonParseException exception) {
-//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
-//		}
-//		catch (IllegalStateException exception) {
-//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
-//		}
-//		catch (Exception exception) {
-//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
-//		}
-//		return serviceData;
-//	}
+	//	public static ServiceData convertJsonToObjects(String jsonString, Class type, GsonType gsonType) {
+	//
+	//		Gson gson = ProxibaseService.getGson(gsonType);
+	//		ServiceData serviceData = new ServiceData();
+	//
+	//		/*
+	//		 * In general, gson deserializer will ignore elements (fields or classes) in the string that do not exist on the
+	//		 * object type. Collections should be treated as generic lists on the target object.
+	//		 */
+	//		try {
+	//
+	//			JsonParser parser = new JsonParser();
+	//			JsonElement jsonElement = parser.parse(jsonString);
+	//			if (jsonElement.isJsonObject()) {
+	//				JsonObject jsonObject = jsonElement.getAsJsonObject();
+	//
+	//				if (jsonObject.has("data")) {
+	//					jsonElement = jsonObject.get("data");
+	//					List<Object> array = new ArrayList<Object>();
+	//					if (jsonElement.isJsonPrimitive()) {
+	//						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+	//						if (primitive.isString()) {
+	//							array.add(primitive.getAsString());
+	//						}
+	//						else if (primitive.isNumber()) {
+	//							array.add(primitive.getAsNumber());
+	//						}
+	//						else if (primitive.isBoolean()) {
+	//							array.add(primitive.getAsBoolean());
+	//						}
+	//					}
+	//					else if (jsonElement.isJsonArray()) {
+	//						JsonArray jsonArray = jsonElement.getAsJsonArray();
+	//						for (int i = 0; i < jsonArray.size(); i++) {
+	//							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
+	//							array.add(gson.fromJson(jsonObjectNew.toString(), type));
+	//						}
+	//					}
+	//					else if (jsonElement.isJsonObject()) {
+	//						Object obj = gson.fromJson(jsonElement.toString(), type);
+	//						array.add(obj);
+	//					}
+	//					serviceData.data = array;
+	//				}
+	//
+	//				/* Targeting bing results from azure */
+	//				if (jsonObject.has("d")) {
+	//					jsonObject = jsonObject.getAsJsonObject("d");
+	//					jsonElement = jsonObject.getAsJsonArray("results");
+	//					List<Object> array = new ArrayList<Object>();
+	//					if (jsonElement.isJsonPrimitive()) {
+	//						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+	//						if (primitive.isString()) {
+	//							array.add(primitive.getAsString());
+	//						}
+	//						else if (primitive.isNumber()) {
+	//							array.add(primitive.getAsNumber());
+	//						}
+	//						else if (primitive.isBoolean()) {
+	//							array.add(primitive.getAsBoolean());
+	//						}
+	//					}
+	//					else if (jsonElement.isJsonArray()) {
+	//						JsonArray jsonArray = jsonElement.getAsJsonArray();
+	//						for (int i = 0; i < jsonArray.size(); i++) {
+	//							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
+	//							array.add(gson.fromJson(jsonObjectNew.toString(), type));
+	//						}
+	//					}
+	//					else if (jsonElement.isJsonObject()) {
+	//						Object obj = gson.fromJson(jsonElement.toString(), type);
+	//						array.add(obj);
+	//					}
+	//					serviceData.data = array;
+	//				}
+	//
+	//				if (jsonObject.has("date")) {
+	//					serviceData.date = jsonObject.get("date").getAsJsonPrimitive().getAsNumber();
+	//				}
+	//				if (jsonObject.has("error")) {
+	//					ServiceError error = gson.fromJson(jsonObject.get("error").toString(), ServiceError.class);
+	//					serviceData.error = error;
+	//				}
+	//				if (jsonObject.has("user")) {
+	//					User user = gson.fromJson(jsonObject.get("user").toString(), User.class);
+	//					serviceData.user = user;
+	//				}
+	//				if (jsonObject.has("session")) {
+	//					Session session = gson.fromJson(jsonObject.get("session").toString(), Session.class);
+	//					serviceData.session = session;
+	//					/*
+	//					 * This is the best place to handle updating the session object for the currently logged
+	//					 * in user. The primary reason to update is that the service moves the expiration date based
+	//					 * on activity.
+	//					 */
+	//					if (!Aircandi.getInstance().getUser().anonymous) {
+	//						Aircandi.getInstance().getUser().session = session;
+	//					}
+	//				}
+	//				if (jsonObject.has("count")) {
+	//					serviceData.count = jsonObject.get("count").getAsJsonPrimitive().getAsNumber();
+	//				}
+	//				if (jsonObject.has("info")) {
+	//					serviceData.info = jsonObject.get("info").getAsJsonPrimitive().getAsString();
+	//				}
+	//				if (jsonObject.has("more")) {
+	//					serviceData.more = jsonObject.get("more").getAsJsonPrimitive().getAsBoolean();
+	//				}
+	//				if (jsonObject.has("time")) {
+	//					serviceData.time = jsonObject.get("time").getAsJsonPrimitive().getAsNumber();
+	//				}
+	//			}
+	//
+	//		}
+	//		catch (JsonParseException exception) {
+	//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
+	//		}
+	//		catch (IllegalStateException exception) {
+	//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
+	//		}
+	//		catch (Exception exception) {
+	//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
+	//		}
+	//		return serviceData;
+	//	}
 
-//	public static Gson getGson(GsonType gsonType) {
-//		GsonBuilder gsonb = new GsonBuilder();
-//
-//		/*
-//		 * Converting objects to/from json for passing between the client and the service we need to apply some
-//		 * additional behavior on top of the defaults
-//		 */
-//		if (gsonType == GsonType.ProxibaseService) {
-//			gsonb.excludeFieldsWithoutExposeAnnotation();
-//			gsonb.setPrettyPrinting(); /* TODO: remove this later */
-//		}
-//		else if (gsonType == GsonType.BingService) {
-//			gsonb.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE);
-//			gsonb.setPrettyPrinting(); /* TODO: remove this later */
-//		}
-//		Gson gson = gsonb.create();
-//		return gson;
-//	}
+	//	public static Gson getGson(GsonType gsonType) {
+	//		GsonBuilder gsonb = new GsonBuilder();
+	//
+	//		/*
+	//		 * Converting objects to/from json for passing between the client and the service we need to apply some
+	//		 * additional behavior on top of the defaults
+	//		 */
+	//		if (gsonType == GsonType.ProxibaseService) {
+	//			gsonb.excludeFieldsWithoutExposeAnnotation();
+	//			gsonb.setPrettyPrinting(); /* TODO: remove this later */
+	//		}
+	//		else if (gsonType == GsonType.BingService) {
+	//			gsonb.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE);
+	//			gsonb.setPrettyPrinting(); /* TODO: remove this later */
+	//		}
+	//		Gson gson = gsonb.create();
+	//		return gson;
+	//	}
 
 	// ----------------------------------------------------------------------------------------
 	// Inner classes and enums

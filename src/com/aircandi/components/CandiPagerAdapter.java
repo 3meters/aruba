@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.aircandi.CandiForm;
+import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.R;
 
@@ -38,7 +39,11 @@ public class CandiPagerAdapter extends PagerAdapter {
 	@Override
 	public Object instantiateItem(View collection, int position) {
 		Entity entity = mEntities.get(position);
-		ViewGroup candiInfoView = (ViewGroup) mInflater.inflate(R.layout.temp_candi_form, null);
+		Integer layoutId = R.layout.temp_candi_form;
+		if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+			layoutId = R.layout.temp_candi_form_post;
+		}
+		ViewGroup candiInfoView = (ViewGroup) mInflater.inflate(layoutId, null);
 		candiInfoView = CandiForm.buildCandiInfo(entity, candiInfoView, null, false);
 		((ViewPager) collection).addView(candiInfoView, 0);
 		return candiInfoView;

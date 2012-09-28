@@ -17,16 +17,15 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 
+import com.aircandi.R;
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
-import com.aircandi.components.ImageUtils;
 import com.aircandi.components.ImageRequest.ImageResponse;
+import com.aircandi.components.ImageUtils;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.R;
 
 public class WebImageView extends RelativeLayout {
 
@@ -124,6 +123,19 @@ public class WebImageView extends RelativeLayout {
 		}
 	}
 
+	public void setImage(final Bitmap bitmap, String imageUri) {
+
+		mImageUri = imageUri;
+		mThreadHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mImageView.setImageBitmap(null);
+				ImageUtils.showImageInImageView(bitmap, mImageView, true, AnimUtils.fadeInMedium());
+			}
+		});
+	}
+
 	/**
 	 * Handles the image request to set the internal ImageView. Creates a separate
 	 * scaled bitmap based on maxWidth and maxHeight or defaults if not set. The original
@@ -148,6 +160,7 @@ public class WebImageView extends RelativeLayout {
 	 * @param okToRecycle
 	 */
 	public void setImageRequest(final ImageRequest imageRequest, final boolean okToRecycle) {
+
 		mImageUri = imageRequest.getImageUri();
 
 		final RequestListener originalImageReadyListener = imageRequest.getRequestListener();
@@ -157,6 +170,7 @@ public class WebImageView extends RelativeLayout {
 		if (mShowBusy) {
 			showLoading(true);
 		}
+
 		mImageView.setImageBitmap(null);
 
 		imageRequest.setRequestListener(new RequestListener() {
@@ -175,47 +189,18 @@ public class WebImageView extends RelativeLayout {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 
 					final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-					final Bitmap bitmap = ((ImageResponse) serviceResponse.data).bitmap;
 
 					/* Make sure this is the right target for the image */
 					if (imageResponse.imageUri.equals(mImageUri)) {
-						mImageView.setTag(mImageUri);
 
-						if (bitmap != null) {
+						if (imageResponse.bitmap != null) {
 
-							if (okToRecycle) {
-								boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
-								final Bitmap bitmapScaled = scaleBitmap
-										? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true)
-										: bitmap;
-								if (scaleBitmap) {
-									//bitmap.recycle();
-								}
-								mThreadHandler.post(new Runnable() {
+							boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
+							final Bitmap bitmapScaled = scaleBitmap
+									? Bitmap.createScaledBitmap(imageResponse.bitmap, mMaxWidth, mMaxHeight, true)
+									: imageResponse.bitmap;
 
-									@Override
-									public void run() {
-										ImageUtils.showImageInImageView(bitmapScaled, mImageView, true, AnimUtils.fadeInMedium());
-									}
-								});
-							}
-							else {
-								boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
-								final Bitmap bitmapScaled = scaleBitmap
-										? Bitmap.createScaledBitmap(bitmap, mMaxWidth, mMaxHeight, true)
-										: Bitmap.createScaledBitmap(bitmap,
-												CandiConstants.IMAGE_WIDTH_DEFAULT,
-												CandiConstants.IMAGE_WIDTH_DEFAULT, true);
-
-								mThreadHandler.post(new Runnable() {
-
-									@Override
-									public void run() {
-										ImageUtils.showImageInImageView(bitmapScaled, mImageView, true, AnimUtils.fadeInMedium());
-									}
-								});
-							}
-
+							setImage(bitmapScaled, imageResponse.imageUri);
 						}
 					}
 				}
@@ -295,6 +280,10 @@ public class WebImageView extends RelativeLayout {
 		return mImageUri;
 	}
 
+	public void setImageUri(String imageUri) {
+		mImageUri = imageUri;
+	}
+
 	public void setImageDrawable(Drawable drawable) {
 		ImageUtils.showDrawableInImageView(drawable, mImageView, true, AnimUtils.fadeInMedium());
 	}
@@ -303,12 +292,17 @@ public class WebImageView extends RelativeLayout {
 		return mImageView;
 	}
 
-	public void onDestroy() {
+	public void recycleBitmap() {
 		if (mImageView.getDrawable() != null) {
 			BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
-			if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null) {
+			if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null && !bitmapDrawable.getBitmap().isRecycled()) {
 				bitmapDrawable.getBitmap().recycle();
 			}
 		}
+		mImageView.setImageBitmap(null);
+	}
+
+	public void onDestroy() {
+		recycleBitmap();
 	}
 }

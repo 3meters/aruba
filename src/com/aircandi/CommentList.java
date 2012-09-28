@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,30 +19,22 @@ import com.aircandi.components.DateUtils;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.ServiceData;
 import com.aircandi.widgets.WebImageView;
 
 public class CommentList extends CandiActivity {
 
 	private ListView		mListView;
 	private List<Comment>	mComments		= new ArrayList<Comment>();
-	private Entity			mEntity;
 
 	protected int			mLastResultCode	= Activity.RESULT_OK;
 	private LayoutInflater	mInflater;
-	private Boolean			mMore;
+	private Boolean			mMore = false;
 	private static long		LIST_MAX		= 300L;
 
 	@Override
@@ -52,7 +43,7 @@ public class CommentList extends CandiActivity {
 		if (!isFinishing()) {
 			initialize();
 			configureActionBar();
-			bind();
+			bind(true);
 		}
 	}
 
@@ -76,14 +67,14 @@ public class CommentList extends CandiActivity {
 			}
 		}
 		else {
-			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntityById(mCommon.mCollectionId, null, mCommon.mEntityTree);
+			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId);
 			mCommon.mActionBar.setTitle(collection.title);
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		}
 
 	}
 
-	protected void bind() {
+	protected void bind(final Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -94,29 +85,34 @@ public class CommentList extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				ServiceResponse serviceResponse = loadComments();
-				return serviceResponse;
+				/*
+				 * Just get the comments without updating the entity in the cache
+				 */
+				String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, false, jsonEagerLoad, null);
+				return result;
 			}
 
 			@Override
-			protected void onPostExecute(Object result) {
-				ServiceResponse serviceResponse = (ServiceResponse) result;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
+			protected void onPostExecute(Object modelResult) {
+				ModelResult result = (ModelResult) modelResult;
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-					ServiceData serviceData = (ServiceData) serviceResponse.data;
-					List<Entity> entities = (List<Entity>) serviceData.data;
-					if (entities != null && entities.get(0).comments != null) {
-						mEntity = entities.get(0);
-						mComments = mEntity.comments;
-						mMore = mEntity.commentsMore;
-					}
+					if (result.data != null) {
+						Entity entity = (Entity) result.data;
 
-					if (mComments != null) {
-						mListView.setAdapter(new EndlessCommentAdapter(mComments));
+						if (entity.comments != null) {
+							mComments = entity.comments;
+							mMore = entity.commentsMore;
+						}
+
+						if (mComments != null) {
+							mListView.setAdapter(new EndlessCommentAdapter(mComments));
+						}
 					}
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CommentBrowse);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CommentBrowse);
 				}
 				mCommon.showProgressDialog(false, null);
 			}
@@ -124,14 +120,10 @@ public class CommentList extends CandiActivity {
 		}.execute();
 	}
 
-	public ServiceResponse loadComments() {
-
-		final Bundle parameters = new Bundle();
-		ArrayList<String> entityIds = new ArrayList<String>();
-		entityIds.add(mCommon.mEntityId);
-		parameters.putStringArrayList("entityIds", entityIds);
-		parameters.putString("eagerLoad", "object:{\"children\":false,\"comments\":true}");
-		parameters.putString("options", "object:{\"limit\":"
+	public ModelResult loadComments() {
+		
+		String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
+		String jsonOptions = "{\"limit\":"
 				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
 				+ ",\"skip\":0"
 				+ ",\"sort\":{\"modifiedDate\":-1} "
@@ -142,30 +134,16 @@ public class CommentList extends CandiActivity {
 				+ ",\"comments\":{\"limit\":"
 				+ String.valueOf(ProxiConstants.RADAR_COMMENT_LIMIT)
 				+ ",\"skip\":" + String.valueOf(mComments.size())
-				+ "}}");
+				+ "}}";
 
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntities")
-				.setRequestType(RequestType.Method)
-				.setParameters(parameters)
-				.setResponseFormat(ResponseFormat.Json);
-
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-			String jsonResponse = (String) serviceResponse.data;
-			ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
-			ProxiExplorer.getInstance().getEntityModel().pushToCache((List<Entity>) serviceData.data);
-			serviceResponse.data = serviceData;
-		}
-
-		return serviceResponse;
+		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, true, false, jsonEagerLoad, jsonOptions);
+		return result;
 	}
 
 	public void doRefresh() {
 		/* Called from AircandiCommon */
 		mComments.clear();
-		bind();
+		bind(true);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -190,21 +168,24 @@ public class CommentList extends CandiActivity {
 		protected boolean cacheInBackground() {
 			moreComments.clear();
 			if (mMore) {
-				ServiceResponse serviceResponse = loadComments();
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					ServiceData serviceData = (ServiceData) serviceResponse.data;
-					List<Entity> entities = (List<Entity>) serviceData.data;
+				ModelResult result = loadComments();
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					
+					if (result.data != null) {
+						Entity entity = (Entity) result.data;
 
-					mEntity = entities.get(0);
-					moreComments = mEntity.comments;
-					mMore = mEntity.commentsMore;
+						if (entity.comments != null) {
+							moreComments = entity.comments;
+							mMore = entity.commentsMore;
+						}
 
-					if (mMore) {
-						return ((getWrappedAdapter().getCount() + moreComments.size()) < LIST_MAX);
+						if (mMore) {
+							return ((getWrappedAdapter().getCount() + moreComments.size()) < LIST_MAX);
+						}
 					}
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.CommentBrowse);
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CommentBrowse);
 				}
 			}
 			return false;
@@ -283,14 +264,11 @@ public class CommentList extends CandiActivity {
 				if (holder.itemAuthorImage != null) {
 
 					String imageUri = comment.imageUri;
-					if (holder.itemAuthorImage.getImageView().getTag() == null || !imageUri.equals((String) holder.itemAuthorImage.getImageView().getTag())) {
+					if (holder.itemAuthorImage.getImageUri() == null || !imageUri.equals((String) holder.itemAuthorImage.getImageUri())) {
 						/*
 						 * We are aggresive about recycling bitmaps when we can.
 						 */
-						BitmapDrawable bitmapDrawable = (BitmapDrawable) holder.itemAuthorImage.getImageView().getDrawable();
-						if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null) {
-							bitmapDrawable.getBitmap().recycle();
-						}
+						holder.itemAuthorImage.recycleBitmap();
 						if (comment.imageUri != null && comment.imageUri.length() != 0) {
 							ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemAuthorImage);
 							builder.setFromUris(comment.imageUri, null);

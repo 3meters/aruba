@@ -45,6 +45,7 @@ public class ServiceRequest {
 	private AuthType		mAuthType	= AuthType.None;
 	private Integer			mSocketTimeout;
 	private Boolean			mRetry = true;
+	private Boolean			mUseSecret = false;
 	private boolean			mSuppressUI	= false;
 
 	public enum AuthType {
@@ -208,12 +209,21 @@ public class ServiceRequest {
 		return this;
 	}
 
-	public Boolean getRetry() {
+	public Boolean okToRetry() {
 		return mRetry;
 	}
 
 	public ServiceRequest setRetry(Boolean retry) {
 		mRetry = retry;
+		return this;
+	}
+
+	public Boolean getUseSecret() {
+		return mUseSecret;
+	}
+
+	public ServiceRequest setUseSecret(Boolean useSecret) {
+		mUseSecret = useSecret;
 		return this;
 	}
 }

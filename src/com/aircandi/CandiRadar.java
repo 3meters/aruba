@@ -90,6 +90,7 @@ import com.aircandi.components.NetworkManager.IWifiReadyListener;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.ProxiExplorer.ScanOptions;
 import com.aircandi.components.ProxiExplorer.WifiScanResult;
 import com.aircandi.components.Tracker;
@@ -662,7 +663,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 									Aircandi.getInstance().setRadarUpdateInProgress(true);
 									mCandiPatchPresenter.setIgnoreInput(true);
 
-									EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
+									EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
+									EntityList<Entity> entitiesCopy = (EntityList<Entity>) entities.copy();
 									mCandiPatchPresenter.updateCandiData(entitiesCopy, mScanOptions.fullBuild, false);
 
 									updateComplete();
@@ -709,7 +711,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		mCandiPatchPresenter.setIgnoreInput(true);
 
 		/* We pass a copy to presenter to provide more stability and steady state. */
-		EntityList<Entity> entitiesCopy = ProxiExplorer.getInstance().getEntityModel().getEntities().copy();
+		EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
+		EntityList<Entity> entitiesCopy = entities.copy();
 		mCandiPatchPresenter.updateCandiData(entitiesCopy, false, false);
 
 		/* Handles other wrapup tasks */
@@ -733,8 +736,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			public void run() {
 				mCommon.showProgressDialog(false, null);
 				mWifiDialog.setVisibility(View.GONE);
-				if (ProxiExplorer.getInstance().getEntityModel().getEntities().size() > 0
-						|| mWifiDialog.getVisibility() == View.VISIBLE) {
+				EntityList<Entity> radarEntities = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
+				if (radarEntities.size() > 0 || mWifiDialog.getVisibility() == View.VISIBLE) {
 					Aircandi.lastScanEmpty = false;
 					mEmptyDialog.setVisibility(View.GONE);
 				}
@@ -877,7 +880,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		intentBuilder.setEntityType(entity.type);
 		intentBuilder.setEntityTree(ProxiExplorer.EntityTree.Radar);
 
-		if (entity.getParent() == null) {
+		if (entity.parentId == null) {
 			intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
 		}
 		else {
@@ -1240,6 +1243,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	@Override
 	public void onLoadResources() {
 		mCandiAlertSound = SoundFactory.createSoundFromResource(mEngine.getSoundManager(), this, R.raw.notification_candi_discovered);
+		mCandiAlertSound.setVolume(0.4f);
 		mEngine.getTextureManager().setTextureListener(this);
 	}
 
@@ -1390,11 +1394,11 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				ServiceResponse serviceResponse = new ServiceResponse();
+				ModelResult result = new ModelResult();
 
 				if (doUpdateCheck) {
-					serviceResponse = checkForUpdate();
-					if (serviceResponse.responseCode == ResponseCode.Success) {
+					result = ProxiExplorer.getInstance().getEntityModel().checkForUpdate();
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						if (Aircandi.applicationUpdateNeeded) {
 
 							runOnUiThread(new Runnable() {
@@ -1405,6 +1409,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 											, getString(R.string.alert_upgrade_title)
 											, getString(Aircandi.applicationUpdateRequired ? R.string.alert_upgrade_required_body
 													: R.string.alert_upgrade_needed_body)
+											, null
 											, CandiRadar.this
 											, R.string.alert_upgrade_ok
 											, R.string.alert_upgrade_cancel
@@ -1454,7 +1459,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						}
 					}
 				}
-				return serviceResponse;
+				return result.serviceResponse;
 			}
 
 			@Override
@@ -1474,6 +1479,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 							mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.icon_app
 									, getString(R.string.alert_upgrade_title)
 									, getString(R.string.alert_upgrade_required_body)
+									, null
 									, CandiRadar.this
 									, R.string.alert_upgrade_ok
 									, R.string.alert_upgrade_cancel
@@ -1806,8 +1812,10 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	}
 
 	private ServiceResponse checkForUpdate() {
+		ModelResult result = ProxiExplorer.getInstance().getEntityModel().checkForUpdate();
 
 		Aircandi.applicationUpdateNeeded = false;
+		Aircandi.applicationUpdateRequired = false;
 		Query query = new Query("documents").filter("{\"type\":\"version\",\"target\":\"aircandi\"}");
 
 		ServiceRequest serviceRequest = new ServiceRequest()
@@ -1817,6 +1825,10 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				.setSuppressUI(true)
 				.setResponseFormat(ResponseFormat.Json);
 
+		if (!Aircandi.getInstance().getUser().isAnonymous()) {
+			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		}
+
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -1825,7 +1837,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			final VersionInfo versionInfo = (VersionInfo) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.VersionInfo).data;
 			String currentVersionName = Aircandi.getVersionName(this, CandiRadar.class);
 
-			if (!currentVersionName.equals(versionInfo.versionName)) {
+			if (versionInfo.enabled && !currentVersionName.equals(versionInfo.versionName)) {
 				Logger.i(CandiRadar.this, "Update check: update needed");
 				Aircandi.applicationUpdateNeeded = true;
 				Aircandi.applicationUpdateUri = versionInfo.updateUri != null ? versionInfo.updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;

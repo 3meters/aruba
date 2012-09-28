@@ -6,85 +6,79 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.service.Expose;
-
 
 /**
  * @author Jayma
  */
 
-public class Beacon extends ServiceEntry implements Cloneable, Serializable{
+public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 694133954499515095L;
-	
+
 	@Expose
-	public String			ssid;
+	public String				ssid;
 	@Expose
-	public String			bssid;
+	public String				bssid;
 	@Expose
-	public String			label;
+	public String				label;
 	@Expose
-	public Boolean			locked;
+	public Boolean				locked;
 	@Expose
-	public String			visibility;
+	public String				visibility;
 	@Expose
-	public String			beaconType;
+	public String				beaconType;
 	@Expose
-	public Number			latitude;
+	public Number				latitude;
 	@Expose
-	public Number			longitude;
+	public Number				longitude;
 	@Expose
-	public Number			altitude;
+	public Number				altitude;
 	@Expose
-	public Number			accuracy;
+	public Number				accuracy;
 	@Expose
-	public Number			bearing;
+	public Number				bearing;
 	@Expose
-	public Number			speed;
+	public Number				speed;
+	@Expose
+	public Number				level;
 
 	/* Synthetic service fields */
 
 	@Expose(serialize = false, deserialize = true)
-	public Integer			entityCount;									
+	public Integer				entityCount;
 	@Expose(serialize = false, deserialize = true)
-	public Integer			pictureCount;									
+	public Integer				pictureCount;
 	@Expose(serialize = false, deserialize = true)
-	public Integer			postCount;									
+	public Integer				postCount;
 	@Expose(serialize = false, deserialize = true)
-	public Integer			linkCount;									
+	public Integer				linkCount;
 	@Expose(serialize = false, deserialize = true)
-	public Integer			collectionCount;									
+	public Integer				collectionCount;
 
 	// For client use only
-	public int				scanLevelDb;
-	public Boolean			serviceVerified		= false;
-	public Boolean			hidden				= false;
-	public Boolean			dirty				= false;
-	public Boolean			test				= false;
-	public Boolean			global				= false;
-	public Boolean			radarHit			= false;
-	public Date				discoveryTime;
-	public Boolean			detectedLastPass	= false;
-	public BeaconState		state				= BeaconState.Normal;
-	public List<Entity>		entities			= new ArrayList<Entity>();
-	public int				scanMisses			= 0;
-	public List<Integer>	scanPasses			= new ArrayList<Integer>();
+	public int					signalLevel;
+	public Boolean				global				= false;
+	public Boolean				radarHit			= false;
+	public Date					discoveryTime;
+	public Boolean				detectedLastPass	= false;
+	public BeaconState			state				= BeaconState.Normal;
+	public int					scanMisses			= 0;
+	public List<Integer>		scanPasses			= new ArrayList<Integer>();
 
 	public Beacon() {}
-
-//	public Beacon(String bssid, String ssid, String label, int levelDb, Date discoveryTime) {
-//		this(bssid, ssid, label, levelDb, discoveryTime, false);
-//	}
 
 	public Beacon(String bssid, String ssid, String label, int levelDb, Date discoveryTime, Boolean test) {
 		this.id = "0003:" + bssid;
 		this.ssid = ssid;
 		this.bssid = bssid;
 		this.label = label;
-		this.scanLevelDb = levelDb;
+		this.signalLevel = levelDb;
 		this.discoveryTime = discoveryTime;
 	}
-	
+
 	public Integer getAvgBeaconLevel() {
 		int scanHits = scanPasses.size();
 		int scanLevelSum = 0;
@@ -100,13 +94,53 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable{
 			scanPasses.remove(1);
 		}
 	}
-	
+
+	public static void copyProperties(Beacon from, Beacon to) {
+		/*
+		 * Properties are copied from one beacon to another.
+		 * 
+		 * Local state properties we intentionally don't overwrite:
+		 * 
+		 * - scanLevel;
+		 * - global
+		 * - radarHit
+		 * - discoveryTime
+		 * - detectedLastPass
+		 * - state
+		 * - scanMisses
+		 * - scanPasses
+		 */
+		ServiceEntry.copyProperties(from, to);
+
+		to.ssid = from.ssid;
+		to.bssid = from.bssid;
+		to.label = from.label;
+		to.beaconType = from.beaconType;
+		to.latitude = from.latitude;
+		to.longitude = from.longitude;
+		to.altitude = from.altitude;
+		to.accuracy = from.accuracy;
+		to.speed = from.speed;
+		to.bearing = from.bearing;
+		to.level = from.level;
+
+		to.entityCount = from.entityCount;
+		to.collectionCount = from.collectionCount;
+		to.linkCount = from.linkCount;
+		to.pictureCount = from.pictureCount;
+		to.postCount = from.postCount;
+
+		to.locked = from.locked;
+		to.visibility = from.visibility;
+
+	}
+
 	public static Beacon setFromPropertiesFromMap(Beacon beacon, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
 		beacon = (Beacon) ServiceEntry.setFromPropertiesFromMap(beacon, map);
-		
+
 		beacon.ssid = (String) map.get("ssid");
 		beacon.bssid = (String) map.get("bssid");
 		beacon.label = (String) map.get("label");
@@ -119,16 +153,15 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable{
 		beacon.accuracy = (Number) map.get("accuracy");
 		beacon.speed = (Number) map.get("speed");
 		beacon.bearing = (Number) map.get("bearing");
-		
+
 		beacon.entityCount = (Integer) map.get("entityCount");
 		beacon.pictureCount = (Integer) map.get("pictureCount");
 		beacon.postCount = (Integer) map.get("postCount");
 		beacon.linkCount = (Integer) map.get("linkCount");
 		beacon.collectionCount = (Integer) map.get("collectionCount");
-		
+
 		return beacon;
 	}
-	
 
 	@Override
 	public String getCollection() {
@@ -152,6 +185,11 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable{
 			levelPcnt = .8f;
 
 		return levelPcnt;
+	}
+
+	public List<Entity> getEntities() {
+		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getBeaconEntities(this.id, false);
+		return (List<Entity>) result.data;
 	}
 
 	public static enum BeaconType {

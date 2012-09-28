@@ -48,6 +48,7 @@ import com.aircandi.Aircandi.CandiTask;
 import com.aircandi.CandiForm;
 import com.aircandi.CandiList;
 import com.aircandi.CandiMap;
+import com.aircandi.CandiPicker;
 import com.aircandi.CandiRadar;
 import com.aircandi.CandiRadar.RefreshType;
 import com.aircandi.CommentList;
@@ -60,6 +61,7 @@ import com.aircandi.ProfileForm;
 import com.aircandi.R;
 import com.aircandi.ScanService;
 import com.aircandi.SignInForm;
+import com.aircandi.SignUpForm;
 import com.aircandi.TemplatePicker;
 import com.aircandi.UserCandiForm;
 import com.aircandi.UserCandiList;
@@ -70,16 +72,14 @@ import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer.EntityTree;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.ProxiExplorer.WifiScanResult;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Session;
@@ -272,8 +272,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 		String message = mActivity.getString(R.string.alert_about_message) + " "
 				+ Aircandi.getVersionName(mContext, CandiRadar.class) + "\n"
 				+ mActivity.getString(R.string.dialog_info);
-		AircandiCommon.showAlertDialog(R.drawable.icon_app, title, message,
-				mActivity, android.R.string.ok, null, new DialogInterface.OnClickListener() {
+		AircandiCommon.showAlertDialog(R.drawable.icon_app
+				, title
+				, message
+				, null
+				, mActivity, android.R.string.ok, null, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {}
 				}, null);
 		Tracker.trackEvent("DialogAbout", "Open", null, 0);
@@ -309,8 +312,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 					}
 				}
 			}
-			AircandiCommon.showAlertDialog(R.drawable.icon_app, mActivity.getString(R.string.alert_beacons_title), beaconMessage, mActivity,
-					android.R.string.ok, null, new
+			AircandiCommon.showAlertDialog(R.drawable.icon_app
+					, mActivity.getString(R.string.alert_beacons_title)
+					, beaconMessage
+					, null
+					, mActivity, android.R.string.ok, null, new
 					DialogInterface.OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {}
@@ -502,6 +508,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 			if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
 				title = mActivity.getString(R.string.error_session_expired_title);
 				message = mActivity.getString(R.string.error_session_expired);
+				/*
+				 * Make sure the user is logged out
+				 */
+				signout();
+
 			}
 			else if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
 				message = mActivity.getString(R.string.error_session_invalid);
@@ -510,6 +521,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 				}
 				else if (serviceOperation == ServiceOperation.Signin) {
 					message = mActivity.getString(R.string.error_signin_invalid_signin);
+				}
+				else {
+					signout();
 				}
 			}
 			else if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
@@ -609,11 +623,20 @@ public class AircandiCommon implements ActionBar.TabListener {
 		return (progressDialog.isShowing());
 	}
 
-	public static AlertDialog showAlertDialog(Integer iconResource, String titleText, String message, Context context, Integer okButtonId,
+	public static AlertDialog showAlertDialog(Integer iconResource, String titleText, String message, View customView, Context context, Integer okButtonId,
 			Integer cancelButtonId,
 			OnClickListener listenerClick, OnCancelListener listenerCancel) {
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(context).setIcon(iconResource).setTitle(titleText).setMessage(message);
+		AlertDialog.Builder builder = new AlertDialog.Builder(context)
+				.setIcon(iconResource)
+				.setTitle(titleText);
+
+		if (customView == null) {
+			builder.setMessage(message);
+		}
+		else {
+			builder.setView(customView);
+		}
 
 		if (okButtonId != null) {
 			builder.setPositiveButton(okButtonId, listenerClick);
@@ -631,7 +654,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* Hardcoded size for body text in the alert */
 		TextView textView = (TextView) alert.findViewById(android.R.id.message);
-		textView.setTextSize(14);
+		if (textView != null) {
+			textView.setTextSize(14);
+		}
 
 		/* Prevent dimming the background */
 		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
@@ -647,6 +672,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				AircandiCommon.showAlertDialog(R.drawable.icon_app
 						, titleText
 						, message
+						, null
 						, mContext, android.R.string.ok, null, new OnClickListener() {
 							public void onClick(DialogInterface dialog, int which) {}
 						}, null);
@@ -676,7 +702,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Logger.i(this, "Auto sign in...");
 
 		/* Use anonymous user as initial default */
-
 		User user = (User) ProxibaseService.convertJsonToObjectInternalSmart(CandiConstants.USER_ANONYMOUS, ServiceDataType.User);
 
 		String jsonUser = Aircandi.settings.getString(Preferences.PREF_USER, null);
@@ -685,16 +710,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (jsonUser != null && jsonSession != null) {
 			user = (User) ProxibaseService.convertJsonToObjectInternalSmart(jsonUser, ServiceDataType.User);
 			user.session = (Session) ProxibaseService.convertJsonToObjectInternalSmart(jsonSession, ServiceDataType.Session);
-			/*
-			 * If user is about to expire, we trigger the sign in process. We go back to the anonymous user
-			 * as the default in case the user cancels out of the sign in form.
-			 */
-			if (user.session != null && user.session.expirationDate != null && user.session.renewSession(DateUtils.nowDate().getTime())) {
-				user = (User) ProxibaseService.convertJsonToObjectInternalSmart(CandiConstants.USER_ANONYMOUS, ServiceDataType.User);
-				Aircandi.getInstance().setUser(user);
-				signin(R.string.signin_message_session_expired);
-				return;
-			}
+			ImageUtils.showToastNotification(mActivity.getString(R.string.alert_signed_in)
+					+ " " + user.name, Toast.LENGTH_SHORT);
 			Tracker.startNewSession();
 			Tracker.trackEvent("User", "AutoSignin", null, 0);
 		}
@@ -703,6 +720,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* Make sure onPrepareOptionsMenu gets called (since api 11) */
 		((SherlockActivity) mActivity).invalidateOptionsMenu();
+	}
+
+	public void signup() {
+		IntentBuilder intentBuilder = new IntentBuilder(mActivity, SignUpForm.class);
+		intentBuilder.setCommandType(CommandType.New);
+		Intent intent = intentBuilder.create();
+		mActivity.startActivity(intent);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
 
 	public void signout() {
@@ -718,33 +743,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 				@Override
 				protected Object doInBackground(Object... params) {
 
-					/*
-					 * Sign out with the service so the session can be cleaned up.
-					 */
-					User user = Aircandi.getInstance().getUser();
-					ServiceResponse serviceResponse = new ServiceResponse();
-
-					if (user.session != null) {
-
-						ServiceRequest serviceRequest = new ServiceRequest()
-								.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_AUTH + "signout")
-								.setRequestType(RequestType.Get)
-								.setSession(user.session)
-								.setResponseFormat(ResponseFormat.Json);
-
-						serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-					}
-
-					return serviceResponse;
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().signout();
+					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
+					ModelResult result = (ModelResult) response;
 					/*
 					 * We continue on even if the service call failed.
 					 */
-					ServiceResponse serviceResponse = (ServiceResponse) response;
-					if (serviceResponse.responseCode == ResponseCode.Success) {
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "User signed out: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
 					}
 					else {
@@ -829,6 +838,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 			SherlockMapActivity mapActivity = (SherlockMapActivity) mActivity;
 			mapActivity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
 		}
+		else if (mPageName.equals("SignInForm")) {
+			SherlockActivity mapActivity = (SherlockActivity) mActivity;
+			mapActivity.getSupportMenuInflater().inflate(R.menu.menu_signin, menu);
+		}
 		else {
 			SherlockActivity activity = (SherlockActivity) mActivity;
 			activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
@@ -911,15 +924,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void doPrepareOptionsMenu(Menu menu) {
 		/* Hide the sign out option if we don't have a current session */
-		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().isAnonymous()) {
-			((MenuItem) menu.findItem(R.id.signin)).setVisible(false);
-			((MenuItem) menu.findItem(R.id.signout)).setVisible(true);
-			((MenuItem) menu.findItem(R.id.profile)).setVisible(true);
-		}
-		else {
-			((MenuItem) menu.findItem(R.id.signin)).setVisible(true);
-			((MenuItem) menu.findItem(R.id.signout)).setVisible(false);
-			((MenuItem) menu.findItem(R.id.profile)).setVisible(false);
+		if (!mPageName.equals("SignInForm")) {
+			if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().isAnonymous()) {
+				((MenuItem) menu.findItem(R.id.signin)).setVisible(false);
+				((MenuItem) menu.findItem(R.id.signout)).setVisible(true);
+				((MenuItem) menu.findItem(R.id.profile)).setVisible(true);
+			}
+			else {
+				((MenuItem) menu.findItem(R.id.signin)).setVisible(true);
+				((MenuItem) menu.findItem(R.id.signout)).setVisible(false);
+				((MenuItem) menu.findItem(R.id.profile)).setVisible(false);
+			}
 		}
 	}
 
@@ -945,6 +960,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 				return;
 			case R.id.signin:
 				signin(null);
+				return;
+			case R.id.signup:
+				signup();
 				return;
 			case R.id.about:
 				doInfoClick();
@@ -1063,6 +1081,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 		else if (mPageName.equals("EntityForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
 		}
+		else if (mPageName.equals("CandiPicker")) {
+			/*
+			 * We let candi picker handle tab changes because there
+			 * is extra work to do.
+			 */
+			addTabsToActionBar((CandiPicker) mActivity, CandiConstants.TABS_CANDI_PICKER_ID);
+		}		
 	}
 
 	public void addTabsToActionBar(ActionBar.TabListener tabListener, int tabsId)
