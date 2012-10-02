@@ -137,10 +137,21 @@ public class LinkPicker extends FormActivity {
 	}
 
 	public void onLinkTestButtonClick(View view) {
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-		intent.setData(Uri.parse(mTextUri.getText().toString()));
-		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		String linkUri = mTextUri.getText().toString();
+
+		if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
+			linkUri = "http://" + linkUri;
+		}
+
+		if (!Utilities.validWebUri(linkUri)) {
+			mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
+		}
+		else {
+			Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+			intent.setData(Uri.parse(linkUri));
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		}
 	}
 
 	public void onOkButtonClick(View view) {
