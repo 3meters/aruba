@@ -1,6 +1,7 @@
 package com.aircandi;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,16 +9,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
+import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockMapActivity;
 import com.actionbarsherlock.view.Menu;
@@ -29,12 +27,14 @@ import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiItemizedOverlay;
 import com.aircandi.components.CandiMapView;
 import com.aircandi.components.GeoLocationManager;
-import com.aircandi.components.ImageUtils;
+import com.aircandi.components.GeoLocationManager.BaseLocationListener;
+import com.aircandi.components.GeoLocationManager.LocationSensorOptions;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Beacon;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapController;
@@ -43,6 +43,7 @@ import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
+@SuppressWarnings("unused")
 public class CandiMap extends SherlockMapActivity {
 
 	protected AircandiCommon		mCommon;
@@ -51,8 +52,10 @@ public class CandiMap extends SherlockMapActivity {
 	private MyLocationOverlay		mMyLocationOverlay;
 	private List<Overlay>			mMapOverlays;
 	private CandiItemizedOverlay	mBeaconOverlay;
-	private LocationManager			mLocationManager;
-	private LocationListener		mLocationListener;
+	private Boolean					mBeaconsLoaded	= false;
+
+	private BaseLocationListener	mLocationListener;
+	private LocationSensorOptions	mLocationSensorOptions;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -66,23 +69,32 @@ public class CandiMap extends SherlockMapActivity {
 			mCommon = new AircandiCommon(this, savedInstanceState);
 			mCommon.setTheme(false, false);
 			mCommon.unpackIntent();
-
 			setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
-
 			mCommon.initialize();
 
 			initialize();
-			initializeLocation();
-
-			if (GeoLocationManager.getInstance().getCurrentLocation() != null) {
-				bind(true);
-			}
 		}
 	}
 
 	@SuppressWarnings("deprecation")
 	private void initialize() {
+
+		/* Get location support setup */
+		Criteria criteria = new Criteria();
+		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+		GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
+				, GeoLocationManager.MAXIMUM_AGE
+				, criteria, new RequestListener(){
+
+					@Override
+					public void onComplete(Object response) {
+						Location location = (Location) response;
+						if (location != null) {
+							bind(true, location);
+						}
+						
+					}});
 
 		mMapView = new CandiMapView(this, BuildConfig.DEBUG ? CandiConstants.GOOGLE_API_KEY_DEBUG : CandiConstants.GOOGLE_API_KEY_RELEASE);
 		mMapView.setBuiltInZoomControls(true);
@@ -111,96 +123,49 @@ public class CandiMap extends SherlockMapActivity {
 		mMapView.postInvalidate();
 	}
 
-	private void initializeLocation() {
-		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		mLocationListener = new LocationListener() {
+	private void bind(final Boolean refresh, final Location location) {
 
-			@Override
-			public void onLocationChanged(Location location) {
-				if (GeoLocationManager.isBetterLocation(location, GeoLocationManager.getInstance().getCurrentLocation())) {
-					GeoLocationManager.getInstance().setCurrentLocation(location);
-				}
-			}
-
-			@Override
-			public void onProviderDisabled(String provider) {
-				ImageUtils.showToastNotification(provider + ": disabled", Toast.LENGTH_SHORT);
-			}
-
-			@Override
-			public void onProviderEnabled(String provider) {
-				ImageUtils.showToastNotification(provider + ": enabled", Toast.LENGTH_SHORT);
-			}
-
-			@Override
-			public void onStatusChanged(String provider, int status, Bundle extras) {
-				if (status == LocationProvider.AVAILABLE) {
-					ImageUtils.showToastNotification(provider + ": available", Toast.LENGTH_SHORT);
-				}
-				else if (status == LocationProvider.OUT_OF_SERVICE) {
-					ImageUtils.showToastNotification(provider + ": out of service", Toast.LENGTH_SHORT);
-				}
-				else if (status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
-					ImageUtils.showToastNotification(provider + ": temporarily unavailable", Toast.LENGTH_SHORT);
-				}
-			}
-		};
-
-		Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		if (lastKnownLocationNetwork != null) {
-			if (GeoLocationManager.isBetterLocation(lastKnownLocationNetwork, GeoLocationManager.getInstance().getCurrentLocation())) {
-				GeoLocationManager.getInstance().setCurrentLocation(lastKnownLocationNetwork);
-			}
+		if (location == null) {
+			mCommon.showAlertDialogSimple(null, getString(R.string.alert_location_unavailable));
 		}
+		else {
 
-		Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (lastKnownLocationGPS != null) {
-			if (GeoLocationManager.isBetterLocation(lastKnownLocationGPS, GeoLocationManager.getInstance().getCurrentLocation())) {
-				GeoLocationManager.getInstance().setCurrentLocation(lastKnownLocationGPS);
-			}
+			new AsyncTask() {
+
+				@Override
+				protected void onPreExecute() {
+					mCommon.showProgressDialog(true, getString(R.string.progress_loading));
+				}
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					/*
+					 * The fetched beacons are loaded into the beacon cache by the call.
+					 */
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().getMapBeacons(location, refresh);
+					return result;
+				}
+
+				@Override
+				protected void onPostExecute(Object modelResult) {
+					ModelResult result = (ModelResult) modelResult;
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+						((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
+						mBeaconsLoaded = true;
+						showBeacons((Collection<Beacon>) result.data);
+						mCommon.showProgressDialog(false, null);
+					}
+					else {
+						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.MapBrowse);
+					}
+				}
+
+			}.execute();
 		}
-	}
-
-	private void bind(final Boolean refresh) {
-
-		/*
-		 * If user is anonymous we will only get back candi that are flagged as public
-		 */
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, getString(R.string.progress_loading));
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-
-				Location location = GeoLocationManager.getInstance().getCurrentLocation();
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getMapBeacons(location, refresh);
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object modelResult) {
-				ModelResult result = (ModelResult) modelResult;
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
-					showBeacons();
-					mCommon.showProgressDialog(false, null);
-				}
-				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.MapBrowse);
-				}
-
-			}
-		
-		}.execute();
 	}
 
 	public void doRefresh() {
-		bind(true);
+		bind(true, GeoLocationManager.getInstance().getLocation());
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -268,7 +233,7 @@ public class CandiMap extends SherlockMapActivity {
 		mMapView.invalidate();
 	}
 
-	public void showBeacons() {
+	public void showBeacons(Collection<Beacon> data) {
 
 		mMapOverlays = mMapView.getOverlays();
 		mMapOverlays.remove(mBeaconOverlay);
@@ -277,8 +242,8 @@ public class CandiMap extends SherlockMapActivity {
 		List<MapBeacon> mapBeacons = new ArrayList<MapBeacon>();
 		List<GeoPoint> geoPoints = new ArrayList<GeoPoint>();
 
-		for (Beacon beaconByLocation : ProxiExplorer.getInstance().getEntityModel().getBeacons()) {
-			if (beaconByLocation.entityCount != null 
+		for (Beacon beaconByLocation : data) {
+			if (beaconByLocation.entityCount != null
 					&& beaconByLocation.entityCount.intValue() > 0
 					&& beaconByLocation.bssid != null
 					&& !beaconByLocation.bssid.equals(ProxiExplorer.mWifiGlobal.BSSID)
@@ -339,10 +304,6 @@ public class CandiMap extends SherlockMapActivity {
 	protected void onResume() {
 		super.onResume();
 		mCommon.doResume();
-		if (mLocationManager != null) {
-			mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mLocationListener);
-			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, mLocationListener);
-		}
 		if (mMyLocationOverlay != null) {
 			mMyLocationOverlay.enableMyLocation();
 		}
@@ -352,9 +313,6 @@ public class CandiMap extends SherlockMapActivity {
 	protected void onPause() {
 		super.onPause();
 		mCommon.doPause();
-		if (mLocationManager != null) {
-			mLocationManager.removeUpdates(mLocationListener);
-		}
 		if (mMyLocationOverlay != null) {
 			mMyLocationOverlay.disableMyLocation();
 		}
@@ -378,11 +336,6 @@ public class CandiMap extends SherlockMapActivity {
 
 	protected int getLayoutId() {
 		return R.layout.candi_map;
-	}
-
-	@Override
-	protected boolean isLocationDisplayed() {
-		return mMyLocationOverlay.isMyLocationEnabled();
 	}
 
 	@Override

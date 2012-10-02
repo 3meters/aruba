@@ -34,7 +34,7 @@ public class CommentList extends CandiActivity {
 
 	protected int			mLastResultCode	= Activity.RESULT_OK;
 	private LayoutInflater	mInflater;
-	private Boolean			mMore = false;
+	private Boolean			mMore			= false;
 	private static long		LIST_MAX		= 300L;
 
 	@Override
@@ -121,7 +121,7 @@ public class CommentList extends CandiActivity {
 	}
 
 	public ModelResult loadComments() {
-		
+
 		String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
 		String jsonOptions = "{\"limit\":"
 				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
@@ -170,7 +170,7 @@ public class CommentList extends CandiActivity {
 			if (mMore) {
 				ModelResult result = loadComments();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					
+
 					if (result.data != null) {
 						Entity entity = (Entity) result.data;
 
@@ -270,8 +270,9 @@ public class CommentList extends CandiActivity {
 						 */
 						holder.itemAuthorImage.recycleBitmap();
 						if (comment.imageUri != null && comment.imageUri.length() != 0) {
-							ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemAuthorImage);
-							builder.setFromUris(comment.imageUri, null);
+							ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemAuthorImage)
+									.setFromUris(comment.imageUri, null);
+							
 							ImageRequest imageRequest = builder.create();
 							holder.itemAuthorImage.setImageRequest(imageRequest);
 						}

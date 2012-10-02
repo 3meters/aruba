@@ -39,7 +39,7 @@
     <string name="com.aircandi.UserCandiForm">UserCandiForm</string>
     <string name="com.aircandi.CandiMap">CandiMap</string>
     <string name="com.aircandi.CandiPicker">CandiPicker</string>
-    <string name="com.aircandi.BookmarkPicker">BookmarkPicker</string>
+    <string name="com.aircandi.LinkPicker">LinkPicker</string>
     <string name="com.aircandi.TemplatePicker">TemplatePicker</string>
     <string name="com.aircandi.PictureSearch">PictureSearch</string>
     <string name="com.aircandi.PictureBrowse">PictureBrowse</string>

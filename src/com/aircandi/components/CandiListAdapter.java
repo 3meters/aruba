@@ -27,13 +27,13 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 	private final Object	mLock			= new Object();
 	private LayoutInflater	mInflater;
 	private Integer			mItemLayoutId	= R.layout.temp_listitem_candi;
-	private List<Entity>	mEntities;
+	private List<Entity>	mListItems;
 	private CandiFilter		mCandiFilter;
 	protected int			mScrollState	= CandiScrollManager.SCROLL_STATE_IDLE;
 
 	public CandiListAdapter(Context context, List<Entity> entities, Integer itemLayoutId) {
 		super(context, 0, entities);
-		mEntities = entities;
+		mListItems = entities;
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		if (itemLayoutId != null) {
@@ -45,7 +45,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
 		final CandiListViewHolder holder;
-		Entity itemData = (Entity) mEntities.get(position);
+		Entity itemData = (Entity) mListItems.get(position);
 
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
@@ -68,6 +68,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			Logger.d(this, "Adapter getView: " + itemData.title);
 			holder.data = itemData;
 			holder.position = position;
+			
 			if (holder.itemImageCollection != null) {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 					if (entity.getMasterImageUri() != null && !entity.getMasterImageUri().toLowerCase().startsWith("resource:")) {
@@ -145,11 +146,12 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 				/* Don't do anything if the image is already set to the one we want */
 				if (holder.itemImage.getImageUri() == null || !holder.itemImage.getImageUri().equals(imageUri)) {
 
-					ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemImage);
-					builder.setImageUri(imageUri);
-					builder.setImageFormat(entity.getMasterImageFormat());
-					builder.setLinkZoom(entity.linkZoom);
-					builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
+					ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemImage)
+							.setImageUri(imageUri)
+							.setImageFormat(entity.getMasterImageFormat())
+							.setLinkZoom(entity.linkZoom)
+							.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
+					
 					final ImageRequest imageRequest = builder.create();
 
 					holder.itemImageUri = imageUri;
@@ -162,12 +164,12 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 	@Override
 	public Entity getItem(int position) {
-		return mEntities.get(position);
+		return mListItems.get(position);
 	}
 
 	@Override
 	public int getCount() {
-		return mEntities.size();
+		return mListItems.size();
 	}
 
 	public boolean areAllItemsEnabled() {
@@ -227,24 +229,24 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			FilterResults results = new FilterResults();
 
 			/* If the adapter array is empty, check the actual items array and use it */
-			if (mEntities == null) {
+			if (mListItems == null) {
 				synchronized (mLock) { // Notice the declaration above
-					mEntities = new ArrayList<Entity>();
+					mListItems = new ArrayList<Entity>();
 				}
 			}
 
 			/* No prefix is sent to filter by so we're going to send back the original array */
 			if (filterType == null || filterType.length() == 0) {
 				synchronized (mLock) {
-					results.values = mEntities;
-					results.count = mEntities.size();
+					results.values = mListItems;
+					results.count = mListItems.size();
 				}
 			}
 			else {
 				if (filterType.toString().toLowerCase().equals("candipatches")) {
-					final ArrayList<Entity> filteredEntities = new ArrayList<Entity>(mEntities.size());
-					for (int i = 0; i < mEntities.size(); i++) {
-						Entity entity = mEntities.get(i);
+					final ArrayList<Entity> filteredEntities = new ArrayList<Entity>(mListItems.size());
+					for (int i = 0; i < mListItems.size(); i++) {
+						Entity entity = mListItems.get(i);
 						if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION) && !entity.locked) {
 							filteredEntities.add(entity);
 						}
@@ -258,7 +260,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 		protected void publishResults(CharSequence prefix, FilterResults results) {
 
-			mEntities = (ArrayList<Entity>) results.values;
+			mListItems = (ArrayList<Entity>) results.values;
 			/* Let the adapter know about the updated list */
 			if (results.count > 0) {
 				notifyDataSetChanged();

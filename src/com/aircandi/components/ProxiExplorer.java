@@ -1027,8 +1027,8 @@ public class ProxiExplorer {
 
 					/* Beacon */
 					if (beacon != null) {
-						if (GeoLocationManager.getInstance().getCurrentLocation() != null) {
-							Location currentLocation = GeoLocationManager.getInstance().getCurrentLocation();
+						if (GeoLocationManager.getInstance().getLocation() != null) {
+							Location currentLocation = GeoLocationManager.getInstance().getLocation();
 
 							beacon.latitude = currentLocation.getLatitude();
 							beacon.longitude = currentLocation.getLongitude();

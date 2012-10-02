@@ -1233,9 +1233,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	@Override
-	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-
-	}
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {}
 
 	@Override
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {

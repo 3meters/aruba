@@ -312,7 +312,7 @@ public abstract class FormActivity extends SherlockActivity {
 	}
 
 	private void pickWebPage() {
-		Intent intent = new Intent(this, BookmarkPicker.class);
+		Intent intent = new Intent(this, LinkPicker.class);
 		intent.putExtra(getString(R.string.EXTRA_VERIFY_URI), false);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);

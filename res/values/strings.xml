@@ -45,6 +45,8 @@
     <!-- Testing (used for view previews) -->
 
     <string name="dummy_title">Aircandi For Everyone</string>
+    <string name="dummy_category_name">Restaurant</string>
+    <string name="dummy_uri">http://goodeats.com</string>
     <string name="dummy_name">Jay Massena</string>
     <string name="dummy_location">Seattle, WA</string>
     <string name="dummy_comments">21 Comments</string>
@@ -57,6 +59,7 @@
 
     <!-- Alerts general -->
 
+    <string name="alert_location_unavailable">Please enable a location service in system settings.</string>
     <string name="alert_beacons_zero">The beacon detecter shows green when there are beacons nearby you can add new candi to.</string>
     <string name="alert_beacons_available">There are beacons nearby you can add new candi to.</string>
     <string name="alert_entity_locked">This candi has been locked by the owner.</string>
@@ -175,6 +178,7 @@
     <string name="radar_button_help">Help</string>
     <string name="dialog_map_title">Aircandi beacon</string>
     <string name="dialog_map_message">This beacon has:\n\n</string>
+    <string name="dialog_network_message_wifi_tethered">Aircandi radar can\'t scan for candi because your device is currently tethered and acting as a Wifi hotspot. Please turn off tethering and try again.</string>
     <string name="dialog_network_message_wifi_ready">Wifi enabled, ready for retry</string>
     <string name="dialog_network_message_wifi_notready">Enable wifi and retry</string>
     <string name="dialog_network_retry_button">Retry</string>
@@ -255,7 +259,7 @@
     <string name="form_title_signin">Sign in</string>
     <string name="form_title_signup">Sign up</string>
     <string name="form_title_picture_search">Picture search</string>
-    <string name="form_title_bookmarks">Bookmarks</string>
+    <string name="form_title_link_picker">Link picker</string>
     <string name="form_title_preferences">Aircandi settings</string>
     <string name="form_title_candi_picker">Pick a new collection</string>
     <string name="form_title_comment">Comment</string>
@@ -272,7 +276,12 @@
     <string name="profile_tab_account">ACCOUNT</string>
     <string name="candi_picker_tab_radar">RADAR</string>
     <string name="candi_picker_tab_mycandi">MY CANDI</string>
+    <string name="bookmark_picker_tab_suggestions">SUGGESTIONS</string>
+    <string name="bookmark_picker_tab_bookmarks">BOOKMARKS</string>
+    
     <string name="form_button_change_picture">Select</string>
+    <string name="form_button_pick_link">Pick</string>
+    <string name="form_button_test_link">Test</string>
     <string name="form_button_change_password">Change password&#8230;</string>
     <string name="form_button_signin_signup">Create account&#8230;</string>
     <string name="form_button_signup">Sign up</string>

@@ -399,15 +399,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		mCandiSurfaceView.requestFocus();
 		mCandiSurfaceView.setFocusableInTouchMode(true);
 
-		/* Get setup for location snapshots */
+		/* 
+		 * Get setup for location snapshots. Initialize will populate location
+		 * with the best of any cached location fixes. A single update will
+		 * be launched if the best cached location fix doesn't meet our freshness
+		 * and accuracy requirements.
+		 */
 		GeoLocationManager.getInstance().setContext(getApplicationContext());
 		GeoLocationManager.getInstance().initialize();
-
-		/* Get first coarse fix so we can include an observation with beacon scans */
-		GeoLocationManager.getInstance().setCurrentLocation(null);
-		Criteria criteria = new Criteria();
-		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-		GeoLocationManager.getInstance().getSingleLocationUpdate(null, criteria);
 
 		/* Beacon indicator */
 		mEventScanReceived = new EventHandler() {
@@ -1072,12 +1071,22 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 	private void verifyWifi(final IWifiReadyListener listener) {
 
-		if (!NetworkManager.getInstance().isWifiEnabled() && !ProxiExplorer.getInstance().isUsingEmulator()) {
+		if (NetworkManager.getInstance().isTethered()) {
+			mEmptyDialog.setVisibility(View.GONE);
+			mCommon.showProgressDialog(false, null);
+			showNetworkDialog(true, getString(R.string.dialog_network_message_wifi_tethered), true);
+			if (listener != null) {
+				Logger.i(this, "Wifi failed: tethered");
+				listener.onWifiFailed();
+			}
+
+		}
+		else if (!NetworkManager.getInstance().isWifiEnabled() && !ProxiExplorer.getInstance().isUsingEmulator()) {
 
 			/* Make sure we are displaying any background message */
 			mEmptyDialog.setVisibility(View.GONE);
 			mCommon.showProgressDialog(false, null);
-			showNetworkDialog(true, getString(R.string.dialog_network_message_wifi_notready));
+			showNetworkDialog(true, getString(R.string.dialog_network_message_wifi_notready), false);
 			final Button retryButton = (Button) findViewById(R.id.button_retry);
 			final Button cancelButton = (Button) findViewById(R.id.button_cancel);
 			final TextView txtMessage = (TextView) findViewById(R.id.retry_message);
@@ -1086,7 +1095,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 				@Override
 				public void onClick(View v) {
-					showNetworkDialog(false, "");
+					showNetworkDialog(false, "", false);
 					listener.onWifiFailed();
 					return;
 				}
@@ -1113,7 +1122,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 								public void onClick(View v) {
 									/* Re-enter so we get to the next stage */
 									NetworkManager.getInstance().setConnectivityListener(null);
-									showNetworkDialog(false, "");
+									showNetworkDialog(false, "", false);
 									if (listener != null) {
 										Logger.i(this, "Wifi verified");
 										listener.onWifiReady();
@@ -1141,6 +1150,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		}
 		else {
+			showNetworkDialog(false, "", false);
 			if (listener != null) {
 				Logger.i(this, "Wifi verified");
 				listener.onWifiReady();
@@ -1148,33 +1158,45 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		}
 	}
 
-	private void showNetworkDialog(boolean visible, String message) {
+	private void showNetworkDialog(boolean visible, String message, Boolean hideControls) {
 
 		if (visible) {
 			TextView txtMessage = (TextView) findViewById(R.id.retry_message);
 			CheckBox enableWifiCheckBox = (CheckBox) findViewById(R.id.wifi_enabled_checkbox);
+			ViewGroup controls = (ViewGroup) findViewById(R.id.group_buttons);
 
 			mCandiSurfaceView.setVisibility(View.GONE);
-
 			txtMessage.setText(message);
-			boolean isWifiEnabled = NetworkManager.getInstance().isWifiEnabled();
-			enableWifiCheckBox.setChecked(isWifiEnabled);
 
-			enableWifiCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			if (hideControls) {
+				controls.setVisibility(View.GONE);
+				enableWifiCheckBox.setVisibility(View.GONE);
+				mWifiDialog.setVisibility(View.VISIBLE);
+			}
+			else {
+				controls.setVisibility(View.VISIBLE);
+				enableWifiCheckBox.setVisibility(View.VISIBLE);
 
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					if (isChecked) {
-						Logger.i(CandiRadar.this, "Enable wifi from activity");
-						NetworkManager.getInstance().enableWifi(true);
+				boolean isWifiEnabled = NetworkManager.getInstance().isWifiEnabled();
+				enableWifiCheckBox.setChecked(isWifiEnabled);
+
+				enableWifiCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						if (isChecked) {
+							Logger.i(CandiRadar.this, "Enable wifi from activity");
+							NetworkManager.getInstance().enableWifi(true);
+						}
+						else {
+							Logger.i(CandiRadar.this, "Disable wifi from activity");
+							NetworkManager.getInstance().enableWifi(false);
+						}
 					}
-					else {
-						Logger.i(CandiRadar.this, "Disable wifi from activity");
-						NetworkManager.getInstance().enableWifi(false);
-					}
-				}
-			});
-			mWifiDialog.setVisibility(View.VISIBLE);
+				});
+				mWifiDialog.setVisibility(View.VISIBLE);
+			}
+
 		}
 		else {
 			mCandiSurfaceView.setVisibility(View.VISIBLE);

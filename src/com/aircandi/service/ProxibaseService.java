@@ -330,6 +330,10 @@ public class ProxibaseService {
 					 * We got a non-success http status code so break it down and
 					 * decide if makes sense to retry.
 					 */
+					
+					/*
+					 * This might have been an image request and we didn't get back json
+					 */
 					String responseContent = convertStreamToString(httpResponse.getEntity().getContent());
 					ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
 					Float httpStatusCode = (float) httpResponse.getStatusLine().getStatusCode();
@@ -749,6 +753,9 @@ public class ProxibaseService {
 			else if (serviceDataType == ServiceDataType.Entity) {
 				return Entity.setFromPropertiesFromMap(new Entity(), rootMap);
 			}
+			else {
+				return rootMap;
+			}
 		}
 		catch (ParseException exception) {
 			exception.printStackTrace();
@@ -1121,7 +1128,8 @@ public class ProxibaseService {
 		VersionInfo,
 		Result,
 		ImageResult,
-		None, GeoLocation
+		GeoLocation,
+		None,
 	}
 
 	public static enum RequestType {

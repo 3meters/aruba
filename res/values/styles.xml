@@ -79,7 +79,12 @@
     <style name="candi_list_title">
         <item name="android:textAppearance">@style/app_text_appearance_title2</item>
     </style>
-
+    
+    <style name="candi_list_section">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:background">@color/background_tabbar_light</item>
+        </style>
+    
     <style name="candi_list_title_outlined">
         <item name="android:textAppearance">@style/app_text_appearance_title2</item>
         <item name="android:textColor">#ffffffff</item>

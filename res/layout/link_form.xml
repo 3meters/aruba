@@ -3,7 +3,7 @@
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="?attr/backgroundForm"  >
+    android:background="?attr/backgroundForm" >
 
     <ScrollView
         android:layout_width="fill_parent"
@@ -39,32 +39,28 @@
                     <EditText
                         android:id="@+id/text_uri"
                         android:layout_width="wrap_content"
-                        android:layout_height="40dp"
+                        android:layout_height="fill_parent"
                         android:layout_weight="1"
                         android:gravity="center|left"
                         android:hint="@string/form_uri_hint"
                         android:inputType="textUri"
                         android:singleLine="true" />
 
-                    <ImageView
+                    <Button
                         android:id="@+id/btn_link_builder"
-                        android:layout_width="40dp"
+                        style="@style/actionbar_button"
+                        android:layout_width="wrap_content"
                         android:layout_height="40dp"
-                        android:layout_weight="0"
-                        android:clickable="true"
-                        android:maxWidth="40dp"
-                        android:minWidth="40dp"
                         android:onClick="onLinkBuilderClick"
-                        android:scaleType="center"
-                        android:src="?attr/iconBookmarks" />
+                        android:text="@string/form_button_pick_link" />
                 </LinearLayout>
 
                 <EditText
                     android:id="@+id/text_title"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textAutoCorrect"
-                    android:hint="@string/form_title_hint" />
+                    android:hint="@string/form_title_hint"
+                    android:inputType="textAutoCorrect" />
 
                 <EditText
                     android:id="@+id/text_content"

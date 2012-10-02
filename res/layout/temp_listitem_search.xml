@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    android:id="@+id/item_row"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/button_nooutline_selector"
+    android:clickable="true"
+    android:onClick="onListItemClick" >
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:layout_alignParentTop="true"
+        android:background="?attr/ruleColor" />
+
+    <TextView
+        android:id="@+id/item_section_title"
+        style="@style/candi_list_section"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:gravity="center_vertical"
+        android:padding="5dp"
+        android:text="@string/dummy_title" />
+
+    <com.aircandi.widgets.WebImageView
+        android:id="@+id/item_image"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@+id/item_section_title"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
+        aircandi:layout="@layout/temp_webimageview"
+        aircandi:maxHeight="20dp"
+        aircandi:maxWidth="20dp" />
+
+    <com.aircandi.widgets.TextViewEllipsizing
+        android:id="@+id/item_name"
+        style="@style/candi_list_title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/item_section_title"
+        android:layout_marginTop="3dp"
+        android:layout_toRightOf="@+id/item_image"
+        android:text="@string/dummy_title" />
+
+    <com.aircandi.widgets.TextViewEllipsizing
+        android:id="@+id/item_category_name"
+        style="@style/candi_list_subtitle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/item_name"
+        android:layout_toRightOf="@+id/item_image"
+        android:text="@string/dummy_category_name" />
+
+    <com.aircandi.widgets.TextViewEllipsizing
+        android:id="@+id/item_uri"
+        style="@style/candi_list_description"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/item_category_name"
+        android:layout_toRightOf="@+id/item_image"
+        android:paddingBottom="3dp"
+        android:text="@string/dummy_uri" />
+
+</RelativeLayout>

@@ -91,10 +91,11 @@ public class EntityForm extends FormActivity {
 		 * a single shot coarse location which is usually based on network location method.
 		 */
 		if (mCommon.mCommandType == CommandType.New) {
-			GeoLocationManager.getInstance().setCurrentLocation(null);
 			Criteria criteria = new Criteria();
 			criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-			GeoLocationManager.getInstance().getSingleLocationUpdate(null, criteria);
+			GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
+					, GeoLocationManager.MAXIMUM_AGE
+					, criteria, null);
 		}
 
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
@@ -550,7 +551,7 @@ public class EntityForm extends FormActivity {
 
 	private void showBookmarkActivity() {
 
-		Intent intent = new Intent(this, BookmarkPicker.class);
+		Intent intent = new Intent(this, LinkPicker.class);
 		intent.putExtra(getString(R.string.EXTRA_VERIFY_URI), false);
 
 		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);

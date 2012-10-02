@@ -1,41 +1,54 @@
 package com.aircandi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.aircandi.components.BookmarkAdapter;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
+import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
+import com.aircandi.components.GeoLocationManager;
+import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.SearchAdapter;
+import com.aircandi.components.SearchAdapter.SearchListViewHolder;
+import com.aircandi.components.SearchManager;
+import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.components.Utilities;
+import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
 
-public class BookmarkPicker extends FormActivity implements OnItemClickListener {
+public class LinkPicker extends FormActivity {
 
-	private ListView		mListView;
-	private EditText		mTextUri;
-	private String			mUri;
-	private String			mUriTitle;
-	private String			mUriDescription;
-	private Button			mOkButton;
-	private Boolean			mVerifyUri	= false;
-	private BookmarkAdapter	mBookmarkAdapter;
+	private ListView			mListView;
+	private EditText			mTextUri;
+	private String				mUri;
+	private String				mUriTitle;
+	private String				mUriDescription;
+	private Button				mOkButton;
+	private Button				mTestButton;
+	private Boolean				mVerifyUri		= false;
+	private List<SearchItem>	mSearchItems	= new ArrayList<SearchItem>();
+	private SearchAdapter		mSearchAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -51,29 +64,83 @@ public class BookmarkPicker extends FormActivity implements OnItemClickListener 
 			mVerifyUri = extras.getBoolean(getString(R.string.EXTRA_VERIFY_URI), false);
 		}
 
-		mBookmarkAdapter = new BookmarkAdapter(this, "");
 		mListView = (ListView) findViewById(R.id.list_bookmarks);
-		mListView.setAdapter(mBookmarkAdapter);
-		mListView.setOnItemClickListener(this);
-		mListView.setDivider(null);
-
 		mOkButton = (Button) findViewById(R.id.btn_ok);
+		mTestButton = (Button) findViewById(R.id.btn_link_test);
 		mTextUri = (EditText) findViewById(R.id.text_uri);
 		mTextUri.addTextChangedListener(new SimpleTextWatcher() {
 
 			@Override
 			public void afterTextChanged(Editable s) {
-				mOkButton.setEnabled(mOkButton.getText().length() > 0);
+				mOkButton.setEnabled(mTextUri.getText().length() > 0);
+				mTestButton.setEnabled(mTextUri.getText().length() > 0);
 			}
 		});
 
+		/* Get location support setup */
+		Criteria criteria = new Criteria();
+		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+		GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
+				, GeoLocationManager.MAXIMUM_AGE
+				, criteria, new RequestListener() {
+
+					@Override
+					public void onComplete(Object response) {
+						Location location = (Location) response;
+						if (location != null) {
+							bind();
+						}
+
+					}
+				});
+
 	}
 
-	@Override
-	public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-		mUri = mBookmarkAdapter.getUrl(position);
-		mUriTitle = mBookmarkAdapter.getTitle(position);
+	public void bind() {
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(true, getString(R.string.progress_searching));
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+
+				List<SearchItem> placeSuggestions = SearchManager.getInstance().getPlaceSuggestions();
+				if (placeSuggestions != null) {
+					mSearchItems.addAll(placeSuggestions);
+				}
+				List<SearchItem> bookmarks = SearchManager.getInstance().getBookmarks(getContentResolver());
+				if (bookmarks != null) {
+					mSearchItems.addAll(bookmarks);
+				}
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				mSearchAdapter = new SearchAdapter(LinkPicker.this, mSearchItems, null);
+				mListView.setAdapter(mSearchAdapter);
+				mCommon.showProgressDialog(false, null);
+			}
+
+		}.execute();
+	}
+
+	public void onListItemClick(View view) {
+		SearchItem searchItem = (SearchItem) ((SearchListViewHolder) view.getTag()).data;
+		mUri = searchItem.uri;
+		mUriTitle = searchItem.name;
 		mTextUri.setText(mUri);
+	}
+
+	public void onLinkTestButtonClick(View view) {
+		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(mTextUri.getText().toString()));
+		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	public void onOkButtonClick(View view) {
@@ -216,7 +283,7 @@ public class BookmarkPicker extends FormActivity implements OnItemClickListener 
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.bookmark_picker;
+		return R.layout.link_picker;
 	}
 
 }

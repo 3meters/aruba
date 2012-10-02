@@ -24,14 +24,16 @@ public interface CandiConstants {
 	public static final String			GOOGLE_API_KEY_RELEASE					= "059_3gpXU_DPYyT-FzFkprl7kk2TvDhm_6mKWLQ";
 	public static final String			GOOGLE_API_KEY_DEBUG					= "059_3gpXU_DM8qW_gRO68TJul5KWUSUzIE3gQlw";
 
-	public static final int				TEN_SECONDS								= 1000 * 10;
-	public static final int				TWENTY_SECONDS							= 1000 * 20;
-	public static final int				ONE_MINUTE								= 1000 * 60;
-	public static final int				TWO_MINUTES								= 1000 * 60 * 2;
-	public static final int				FIVE_MINUTES							= 1000 * 60 * 5;
-	public static final int				FIFTEEN_MINUTES							= 1000 * 60 * 15;
-	public static final int				THIRTY_MINUTES							= 1000 * 60 * 30;
-	public static final int				SIXTY_MINUTES							= 1000 * 60 * 60;
+	public static final int				MILLS_PER_SECOND						= 1000;
+	public static final int				ONE_SECOND								= MILLS_PER_SECOND * 1;
+	public static final int				TEN_SECONDS								= MILLS_PER_SECOND * 10;
+	public static final int				TWENTY_SECONDS							= MILLS_PER_SECOND * 20;
+	public static final int				ONE_MINUTE								= MILLS_PER_SECOND * 60;
+	public static final int				TWO_MINUTES								= MILLS_PER_SECOND * 60 * 2;
+	public static final int				FIVE_MINUTES							= MILLS_PER_SECOND * 60 * 5;
+	public static final int				FIFTEEN_MINUTES							= MILLS_PER_SECOND * 60 * 15;
+	public static final int				THIRTY_MINUTES							= MILLS_PER_SECOND * 60 * 30;
+	public static final int				SIXTY_MINUTES							= MILLS_PER_SECOND * 60 * 60;
 
 	public static final int				LAYER_GENERAL							= 0;
 	public static final int				LAYER_ZONES								= 1;
@@ -98,6 +100,7 @@ public interface CandiConstants {
 	public static final int				TABS_PROFILE_FORM_ID					= 2;
 	public static final int				TABS_ENTITY_FORM_ID						= 3;
 	public static final int				TABS_CANDI_PICKER_ID					= 4;
+	public static final int				TABS_LINK_PICKER_ID					= 5;
 
 	public static final int				VERTEX_INDEX_X							= 0;
 	public static final int				VERTEX_INDEX_Y							= 1;

@@ -1,5 +1,7 @@
 package com.aircandi.components;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.ConnectException;
 
 import android.content.BroadcastReceiver;
@@ -47,6 +49,31 @@ public class NetworkManager {
 	public boolean isOnline() {
 		ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		return cm.getActiveNetworkInfo().isConnectedOrConnecting();
+	}
+
+	public boolean isTethered() {
+		/*
+		 * We use reflection because the method is hidden and unpublished.
+		 */
+		Boolean isTethered = false;
+		Method[] wmMethods = mWifiManager.getClass().getDeclaredMethods();
+		for (Method method : wmMethods) {
+			if (method.getName().equals("isWifiApEnabled")) {
+				try {
+					isTethered = (Boolean) method.invoke(mWifiManager);
+				}
+				catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				}
+				catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				catch (InvocationTargetException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return isTethered;
 	}
 
 	public boolean isConnectedToNetwork(Context context) {

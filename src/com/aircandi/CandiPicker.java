@@ -32,12 +32,12 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 		super.onCreate(savedInstanceState);
 
 		initialize();
+		bind();
 	}
 
 	private void initialize() {
 		mListViewCandi = (ListView) findViewById(R.id.list_candi);
 		mListViewCandi.setDivider(null);
-		bind();
 	}
 
 	public void bind() {

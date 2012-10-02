@@ -72,7 +72,7 @@ public class ImageRequestBuilder {
 		return entity.getMasterImageUri();
 	}
 
-	public void setFromUris(String imageUri, String linkUri) {
+	public ImageRequestBuilder setFromUris(String imageUri, String linkUri) {
 		if (imageUri != null && !imageUri.equals("")) {
 			String imageUriFixed = imageUri;
 			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
@@ -86,6 +86,7 @@ public class ImageRequestBuilder {
 			this.mImageUri = linkUri;
 			this.mImageFormat = ImageFormat.Html;
 		}
+		return this;
 	}
 
 	public ImageRequestBuilder setImageUri(String imageUri) {

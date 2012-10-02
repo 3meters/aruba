@@ -10,7 +10,6 @@
 
     <!-- Candi being moved -->
 
-
     <!--
     <TextView
         android:id="@+id/form_message"
@@ -64,13 +63,12 @@
             android:layout_toRightOf="@id/item_image"
             android:text="@string/dummy_description_ellipsized" />
     </RelativeLayout>
-    
 
     <View
         android:layout_width="fill_parent"
         android:layout_height="1px"
         android:layout_below="@+id/candi_to_move"
-        android:background="?attr/ruleColor" />
+        android:background="?attr/ruleColor" />
     -->
 
     <ListView

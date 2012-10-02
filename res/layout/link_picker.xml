@@ -2,26 +2,34 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="?attr/backgroundForm" >
+    android:background="?attr/backgroundForm"
+     >
 
     <LinearLayout
         android:id="@+id/group_uri"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_margin="5dp"
         android:orientation="horizontal" >
 
         <EditText
             android:id="@+id/text_uri"
             android:layout_width="0dip"
-            android:layout_height="40dp"
+            android:layout_height="fill_parent"
             android:layout_weight="1"
             android:gravity="center|left"
             android:hint="@string/form_uri_hint"
             android:inputType="textUri"
             android:singleLine="true" />
+
+        <Button
+            android:id="@+id/btn_link_test"
+            style="@style/actionbar_button"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:onClick="onLinkTestButtonClick"
+            android:text="@string/form_button_test_link" />
     </LinearLayout>
 
     <ListView
@@ -32,7 +40,8 @@
         android:layout_below="@+id/group_uri"
         android:background="?attr/backgroundForm"
         android:cacheColorHint="#00000000"
-        android:listSelector="#00000000" >
+        android:listSelector="#00000000" 
+        android:padding="5dp">
 
         <!-- Preview: listitem=@layout/temp_listitem_bookmark -->
     </ListView>
@@ -49,7 +58,7 @@
 
         <Button
             android:id="@+id/btn_ok"
-            style="@style/actionbar_button"
+            style="@style/actionbar_button_borderless"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -59,7 +68,7 @@
             android:text="@string/form_button_ok" />
 
         <Button
-            style="@style/actionbar_button"
+            style="@style/actionbar_button_borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

@@ -86,7 +86,7 @@ public class LocationPollingService extends Service {
 					mHandler.removeCallbacks(mTimeoutRunnable);
 
 					/* Update the current location */
-					GeoLocationManager.getInstance().setCurrentLocation(location);
+					GeoLocationManager.getInstance().setLocation(location);
 					location.setTime(System.currentTimeMillis());
 
 					/* Notify interested parties */
@@ -118,6 +118,7 @@ public class LocationPollingService extends Service {
 
 				public void onStatusChanged(String provider, int status, Bundle extras) {}
 			};
+			
 			mTimeoutRunnable = new Runnable() {
 
 				public void run() {

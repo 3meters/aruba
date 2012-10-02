@@ -120,9 +120,9 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".BookmarkPicker"
+            android:name=".LinkPicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_bookmarks"
+            android:label="@string/form_title_link_picker"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
@@ -172,8 +172,8 @@
         </activity>
         <activity
             android:name=".PictureBrowse"
-            android:label="@string/form_title_picture_browse"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
@@ -199,7 +199,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
-    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
     -->
 
 </manifest>

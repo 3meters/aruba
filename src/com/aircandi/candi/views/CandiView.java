@@ -156,9 +156,11 @@ public class CandiView extends BaseView implements OnGestureListener {
 				doViewActions();
 				doViewModifiers();
 				updateTouchArea(candiModel.isTouchAreaActive());
-				int avgBeaconLevel = candiModel.getEntity().getBeacon().getAvgBeaconLevel();
-				int color = ImageUtils.getColorBySignalLevel(avgBeaconLevel, 255);
-				setProximityColor(color);
+				if (candiModel.getEntity() != null && candiModel.getEntity().getBeacon() != null) {
+					int avgBeaconLevel = candiModel.getEntity().getBeacon().getAvgBeaconLevel();
+					int color = ImageUtils.getColorBySignalLevel(avgBeaconLevel, 255);
+					setProximityColor(color);
+				}
 			}
 		});
 	}
