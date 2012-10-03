@@ -330,18 +330,17 @@ public class ProxibaseService {
 					 * We got a non-success http status code so break it down and
 					 * decide if makes sense to retry.
 					 */
-					
-					/*
-					 * This might have been an image request and we didn't get back json
-					 */
 					String responseContent = convertStreamToString(httpResponse.getEntity().getContent());
-					ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
 					Float httpStatusCode = (float) httpResponse.getStatusLine().getStatusCode();
-
-					if (serviceData != null && serviceData.error != null && serviceData.error.code != null) {
-						httpStatusCode = serviceData.error.code.floatValue();
-					}
 					Logger.d(this, responseContent);
+					
+					if (serviceRequest.getResponseFormat() == ResponseFormat.Json) {
+						ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
+						if (serviceData != null && serviceData.error != null && serviceData.error.code != null) {
+							httpStatusCode = serviceData.error.code.floatValue();
+						}
+					}
+					
 					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(httpStatusCode, null);
 					proxibaseException.setResponseMessage(responseContent);
 					if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, proxibaseException, retryCount)) {

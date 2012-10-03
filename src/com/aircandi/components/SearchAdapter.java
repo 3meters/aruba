@@ -128,8 +128,8 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 					final ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemImage)
 							.setImageUri(imageUri)
 							.setImageFormat(ImageFormat.Binary)
-							.setSearchCache(false)
-							.setUpdateCache(false)
+							.setSearchCache(true)
+							.setUpdateCache(true)
 							.setScaleToWidth(CandiConstants.IMAGE_WIDTH_ORIGINAL);
 
 					ImageRequest imageRequest = builder.create();

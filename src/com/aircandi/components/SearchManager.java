@@ -97,6 +97,12 @@ public class SearchManager {
 		List<SearchItem> searchItems = null;
 		String uri = ProxiConstants.URL_PROXIBASE_SEARCH_VENUES;
 		Observation observation = GeoLocationManager.getInstance().getObservation();
+		
+//		/* Temp for testing */
+//		Observation observation = new Observation();
+//		observation.latitude = 47.5825666;
+//		observation.longitude = -122.1672287;
+		
 		if (observation != null) {
 			uri += "&ll=" + String.valueOf(observation.latitude) + "," + String.valueOf(observation.longitude);
 			uri += "&limit=20";
@@ -132,11 +138,8 @@ public class SearchManager {
 							LinkedHashMap icon = (LinkedHashMap) categories.get(0).get("icon");
 							if (icon != null) {
 								String prefix = (String) icon.get("prefix");
-								if (prefix.substring(prefix.length() - 1).equals("_")) {
-									prefix = prefix.substring(0, prefix.length() - 1);
-								}
 								String suffix = (String) icon.get("suffix");
-								suggestion.categoryIconUri = prefix + suffix;
+								suggestion.categoryIconUri = prefix + "bg_32" + suffix;
 							}
 						}
 						searchItems.add(suggestion);
