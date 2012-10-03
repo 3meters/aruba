@@ -100,7 +100,7 @@ public interface CandiConstants {
 	public static final int				TABS_PROFILE_FORM_ID					= 2;
 	public static final int				TABS_ENTITY_FORM_ID						= 3;
 	public static final int				TABS_CANDI_PICKER_ID					= 4;
-	public static final int				TABS_LINK_PICKER_ID					= 5;
+	public static final int				TABS_LINK_PICKER_ID						= 5;
 
 	public static final int				VERTEX_INDEX_X							= 0;
 	public static final int				VERTEX_INDEX_Y							= 1;
@@ -167,6 +167,7 @@ public interface CandiConstants {
 	public static final int				VISIBILITY_PRIVATE						= 1;
 
 	public static final int				NOTIFICATION_NETWORK					= 1000;
+	public static final int				NOTIFICATION_UPDATE						= 2000;
 
 	public static final float			DURATION_MULTIPLIER						= 1.0f;
 	public static final float			DURATION_ZOOM							= 0.5f * DURATION_MULTIPLIER;

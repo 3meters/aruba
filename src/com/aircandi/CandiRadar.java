@@ -399,7 +399,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		mCandiSurfaceView.requestFocus();
 		mCandiSurfaceView.setFocusableInTouchMode(true);
 
-		/* 
+		/*
 		 * Get setup for location snapshots. Initialize will populate location
 		 * with the best of any cached location fixes. A single update will
 		 * be launched if the best cached location fix doesn't meet our freshness
@@ -474,7 +474,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 	}
 
 	public void onHelpButtonClick(View view) {
-		//mCommon.showNotification("Aircandi disconnected", "Touch to retry network connection", this);
 		mCommon.showHelp(R.string.help_radar);
 	}
 
@@ -739,12 +738,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				if (radarEntities.size() > 0 || mWifiDialog.getVisibility() == View.VISIBLE) {
 					Aircandi.lastScanEmpty = false;
 					mEmptyDialog.setVisibility(View.GONE);
+					((View) findViewById(R.id.button_new_candi)).setVisibility(View.VISIBLE);
 				}
 				else {
 					Aircandi.lastScanEmpty = true;
 					String helpHtml = getString(Aircandi.wifiCount > 0 ? R.string.help_radar_empty : R.string.help_radar_empty_no_beacons);
 					((TextView) findViewById(R.id.text_empty_message)).setText(Html.fromHtml(helpHtml));
 					mEmptyDialog.setVisibility(View.VISIBLE);
+					((View) findViewById(R.id.button_new_candi)).setVisibility(View.GONE);
 				}
 			}
 		});
@@ -818,6 +819,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						String helpHtml = getString(wifiCount > 0 ? R.string.help_radar_empty : R.string.help_radar_empty_no_beacons);
 						((TextView) findViewById(R.id.text_empty_message)).setText(Html.fromHtml(helpHtml));
 						mEmptyDialog.setVisibility(View.VISIBLE);
+						((View) findViewById(R.id.button_new_candi)).setVisibility(wifiCount > 0 ? View.VISIBLE : View.GONE);
 						mEmptyDialog.invalidate();
 					}
 				});
@@ -1423,6 +1425,14 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						if (Aircandi.applicationUpdateNeeded) {
 
+							Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+							intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
+							mCommon.showNotification(getString(R.string.alert_upgrade_title)
+									, getString(Aircandi.applicationUpdateRequired ? R.string.alert_upgrade_required_body : R.string.alert_upgrade_needed_body)
+									, CandiRadar.this
+									, intent
+									, CandiConstants.NOTIFICATION_UPDATE);
+
 							runOnUiThread(new Runnable() {
 
 								@Override
@@ -1833,46 +1843,46 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		// mCommon.recycleImageViewDrawable(R.id.image_public_reflection);
 	}
 
-	private ServiceResponse checkForUpdate() {
-		ModelResult result = ProxiExplorer.getInstance().getEntityModel().checkForUpdate();
-
-		Aircandi.applicationUpdateNeeded = false;
-		Aircandi.applicationUpdateRequired = false;
-		Query query = new Query("documents").filter("{\"type\":\"version\",\"target\":\"aircandi\"}");
-
-		ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
-				.setRequestType(RequestType.Get)
-				.setQuery(query)
-				.setSuppressUI(true)
-				.setResponseFormat(ResponseFormat.Json);
-
-		if (!Aircandi.getInstance().getUser().isAnonymous()) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
-		}
-
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-
-			String jsonResponse = (String) serviceResponse.data;
-			final VersionInfo versionInfo = (VersionInfo) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.VersionInfo).data;
-			String currentVersionName = Aircandi.getVersionName(this, CandiRadar.class);
-
-			if (versionInfo.enabled && !currentVersionName.equals(versionInfo.versionName)) {
-				Logger.i(CandiRadar.this, "Update check: update needed");
-				Aircandi.applicationUpdateNeeded = true;
-				Aircandi.applicationUpdateUri = versionInfo.updateUri != null ? versionInfo.updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
-				if (versionInfo.updateRequired) {
-					Aircandi.applicationUpdateRequired = true;
-					Logger.i(CandiRadar.this, "Update check: update required");
-				}
-			}
-			Aircandi.lastApplicationUpdateCheckDate = DateUtils.nowDate().getTime();
-		}
-		return serviceResponse;
-	}
-
+//	private ServiceResponse checkForUpdate() {
+//		ModelResult result = ProxiExplorer.getInstance().getEntityModel().checkForUpdate();
+//
+//		Aircandi.applicationUpdateNeeded = false;
+//		Aircandi.applicationUpdateRequired = false;
+//		Query query = new Query("documents").filter("{\"type\":\"version\",\"target\":\"aircandi\"}");
+//
+//		ServiceRequest serviceRequest = new ServiceRequest()
+//				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
+//				.setRequestType(RequestType.Get)
+//				.setQuery(query)
+//				.setSuppressUI(true)
+//				.setResponseFormat(ResponseFormat.Json);
+//
+//		if (!Aircandi.getInstance().getUser().isAnonymous()) {
+//			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+//		}
+//
+//		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+//
+//		if (serviceResponse.responseCode == ResponseCode.Success) {
+//
+//			String jsonResponse = (String) serviceResponse.data;
+//			final VersionInfo versionInfo = (VersionInfo) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.VersionInfo).data;
+//			String currentVersionName = Aircandi.getVersionName(this, CandiRadar.class);
+//
+//			if (versionInfo.enabled && !currentVersionName.equals(versionInfo.versionName)) {
+//				Logger.i(CandiRadar.this, "Update check: update needed");
+//				Aircandi.applicationUpdateNeeded = true;
+//				Aircandi.applicationUpdateUri = versionInfo.updateUri != null ? versionInfo.updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
+//				if (versionInfo.updateRequired) {
+//					Aircandi.applicationUpdateRequired = true;
+//					Logger.i(CandiRadar.this, "Update check: update required");
+//				}
+//			}
+//			Aircandi.lastApplicationUpdateCheckDate = DateUtils.nowDate().getTime();
+//		}
+//		return serviceResponse;
+//	}
+//
 	private String getAnalyticsId() {
 		Properties properties = new Properties();
 

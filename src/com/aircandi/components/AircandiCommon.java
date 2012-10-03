@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -434,7 +435,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 			/*
 			 * We don't have a network connection.
 			 */
-			showNotification(mActivity.getString(R.string.error_connection_title), mActivity.getString(R.string.error_connection_notification), context);
+			Intent intent = new Intent(mContext, CandiRadar.class);
+			showNotification(mActivity.getString(R.string.error_connection_title), mActivity.getString(R.string.error_connection_notification), context, intent, CandiConstants.NOTIFICATION_NETWORK);
 			showAlertDialogSimple(null, mActivity.getString(R.string.error_connection));
 		}
 		else if (errorType == ErrorType.Client && errorCode == ErrorCode.IOException) {
@@ -543,7 +545,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Logger.w(context, "Service error: " + errorMessage);
 	}
 
-	public void showNotification(String title, String message, Context context) {
+	public void showNotification(String title, String message, Context context, Intent intent, int notificationType) {
 		@SuppressWarnings("deprecation")
 		Notification note = new Notification(R.drawable.icon_app_status
 				, title
@@ -555,12 +557,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 		contentView.setTextViewText(R.id.text, message);
 		note.contentView = contentView;
 
-		Intent intent = new Intent(mContext, CandiRadar.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 		note.contentIntent = pendingIntent;
 
-		mNotificationManager.notify(CandiConstants.NOTIFICATION_NETWORK, note);
+		mNotificationManager.notify(notificationType, note);
 	}
 
 	public void showProgressDialog(boolean visible, String message) {
@@ -869,7 +870,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			};
 
 		}
-
+		
 		/* Refresh with action mode support */
 		menuItem = menu.findItem(R.id.refresh);
 		if (menuItem != null) {
@@ -935,6 +936,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 				((MenuItem) menu.findItem(R.id.signout)).setVisible(false);
 				((MenuItem) menu.findItem(R.id.profile)).setVisible(false);
 			}
+			
+			if (!Aircandi.applicationUpdateNeeded) {
+				((MenuItem) menu.findItem(R.id.update)).setVisible(false);
+			}
 		}
 	}
 
@@ -963,6 +968,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 				return;
 			case R.id.signup:
 				signup();
+				return;
+			case R.id.update:				
+				Logger.d(this, "Update menu item: navigating to install page");
+				Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+				intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
+				mActivity.startActivity(intent);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 				return;
 			case R.id.about:
 				doInfoClick();

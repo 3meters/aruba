@@ -36,6 +36,7 @@
     <string name="menu_refresh_item">Refresh</string>
     <string name="menu_profile_item">Profile</string>
     <string name="menu_settings_item">Settings</string>
+    <string name="menu_update_item">Update</string>
     <string name="menu_signin_item">Sign in</string>
     <string name="menu_signout_item">Sign out</string>
     <string name="menu_signup_item">Create account</string>

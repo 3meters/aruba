@@ -205,7 +205,7 @@
             android:background="?attr/ruleColor" />
 
         <LinearLayout
-            android:id="@+id/button_new"
+            android:id="@+id/button_new_candi"
             style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -213,6 +213,7 @@
             android:clickable="true"
             android:onClick="onNewCandiButtonClick"
             android:orientation="horizontal"
+            android:visibility="invisible"
             tools:ignore="UseCompoundDrawables" >
 
             <ImageView
