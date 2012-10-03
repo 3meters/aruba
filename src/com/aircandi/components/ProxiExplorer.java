@@ -28,6 +28,7 @@ import com.aircandi.Aircandi;
 import com.aircandi.CandiRadar;
 import com.aircandi.Preferences;
 import com.aircandi.R;
+import com.aircandi.components.ImageRequest.ImageShape;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.core.CandiConstants;
@@ -597,7 +598,7 @@ public class ProxiExplorer {
 		}
 	}
 
-	private ServiceResponse storeImageAtS3(Entity entity, Bitmap bitmap) {
+	private ServiceResponse storeImageAtS3(Entity entity, User user, Bitmap bitmapOriginal, Boolean previewOnly) {
 
 		/*
 		 * Delete image from S3 if it has been orphaned TODO: We are going with a garbage collection scheme for orphaned
@@ -605,23 +606,50 @@ public class ProxiExplorer {
 		 * allows downloaded entities to keep working even if an image for entity has changed.
 		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
+		String stringDate = DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME);
+		Bitmap bitmapPreview = bitmapOriginal;
 
-		/* Upload image to S3 if we have a new one. */
-		if (bitmap != null) {
+		/* Store the original if requested */
+		if (!previewOnly && bitmapOriginal != null) {
 			try {
-				String imageKey = String.valueOf(Aircandi.getInstance().getUser().id) + "_"
-						+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-						+ ".jpg";
-				S3.putImage(imageKey, bitmap);
-				entity.imagePreviewUri = imageKey;
-				if (entity.imageUri == null || entity.imageUri.equals("")) {
-					entity.imageUri = entity.imagePreviewUri;
+				String imageKey = String.valueOf(Aircandi.getInstance().getUser().id) + "_" + stringDate + "_original.jpg";
+				S3.putImage(imageKey, bitmapOriginal);
+				entity.imageUri = imageKey;
+			}
+			catch (ProxibaseServiceException exception) {
+				return new ServiceResponse(ResponseCode.Failed, null, exception);
+			}
+		}
+
+		/* We always store the preview */
+		if (bitmapPreview != null) {
+			
+			/* Preview image might need scaling. */
+			if (bitmapPreview.getWidth() > CandiConstants.IMAGE_WIDTH_DEFAULT) {
+				ImageRequest imageRequest = new ImageRequest()
+						.setImageShape(ImageShape.Square)
+						.setScaleToWidth(CandiConstants.IMAGE_WIDTH_DEFAULT);
+				bitmapPreview = ImageUtils.scaleAndCropBitmap(bitmapPreview, imageRequest);
+			}
+			
+			try {
+				String imageKey = String.valueOf(Aircandi.getInstance().getUser().id) + "_" + stringDate + ".jpg";
+				S3.putImage(imageKey, bitmapPreview);
+				if (entity != null) {
+					entity.imagePreviewUri = imageKey;
+					if (entity.imageUri == null || entity.imageUri.equals("")) {
+						entity.imageUri = entity.imagePreviewUri;
+					}
+				}
+				else if (user != null) {
+					user.imageUri = imageKey;
 				}
 			}
 			catch (ProxibaseServiceException exception) {
 				return new ServiceResponse(ResponseCode.Failed, null, exception);
 			}
 		}
+
 		return serviceResponse;
 	}
 
@@ -1000,8 +1028,10 @@ public class ProxiExplorer {
 
 			if (!cacheOnly) {
 				Logger.i(this, "Inserting entity: " + entity.title);
-
-				result.serviceResponse = storeImageAtS3(entity, bitmap); /* Upload images to S3 as needed. */
+				/*
+				 * Upload image to S3 as needed
+				 */
+				result.serviceResponse = storeImageAtS3(entity, null, bitmap, (entity.imageUri != null && !entity.imageUri.equals("")));
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
@@ -1109,7 +1139,7 @@ public class ProxiExplorer {
 			if (!cacheOnly) {
 
 				/* Upload new images to S3 as needed. */
-				result.serviceResponse = storeImageAtS3(entity, bitmap);
+				result.serviceResponse = storeImageAtS3(entity, null, bitmap, (entity.imageUri != null && !entity.imageUri.equals("")));
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Logger.i(this, "Updating entity: " + entity.title);
@@ -1270,24 +1300,15 @@ public class ProxiExplorer {
 				/*
 				 * Upload images to S3 as needed.
 				 */
-				if (user.imageUri != null && !user.imageUri.contains("resource:") && bitmap != null) {
-					String imageKey = String.valueOf(user.id) + "_"
-							+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-							+ ".jpg";
-					try {
-						S3.putImage(imageKey, bitmap);
-					}
-					catch (ProxibaseServiceException exception) {
-						serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
-					}
+				/* Upload new images to S3 as needed. */
 
+				if (user.imageUri != null && !user.imageUri.contains("resource:") && bitmap != null) {
+
+					serviceResponse = storeImageAtS3(null, user, bitmap, true);
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						/*
-						 * Update user.
-						 * 
-						 * Need to update the user to capture the uri for the image we saved.
+						 * Update user to capture the uri for the image we saved.
 						 */
-						user.imageUri = imageKey;
 						serviceRequest = new ServiceRequest()
 								.setUri(user.getEntryUri())
 								.setRequestType(RequestType.Update)
@@ -1318,16 +1339,7 @@ public class ProxiExplorer {
 
 				/* Put image to S3 if we have a new one. */
 				if (bitmap != null && !bitmap.isRecycled()) {
-					try {
-						String imageKey = String.valueOf(((User) user).id) + "_"
-								+ String.valueOf(DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME))
-								+ ".jpg";
-						S3.putImage(imageKey, bitmap);
-						user.imageUri = imageKey;
-					}
-					catch (ProxibaseServiceException exception) {
-						result.serviceResponse = new ServiceResponse(ResponseCode.Failed, null, exception);
-					}
+					result.serviceResponse = storeImageAtS3(null, user, bitmap, true);
 				}
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {

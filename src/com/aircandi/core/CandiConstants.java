@@ -116,6 +116,7 @@ public interface CandiConstants {
 	public static final Config			IMAGE_CONFIG_DEFAULT					= Config.ARGB_8888;
 	public static final int				IMAGE_WIDTH_SMALL						= 60;
 	public static final int				IMAGE_WIDTH_DEFAULT						= 250;
+	public static final int				IMAGE_WIDTH_MAXIMUM						= 1024;
 	public static final int				IMAGE_WIDTH_ORIGINAL					= -1;
 
 	public static final String			THEME_DEFAULT							= "aircandi_theme_canyon";

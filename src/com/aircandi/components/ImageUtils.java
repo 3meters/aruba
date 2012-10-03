@@ -89,6 +89,10 @@ public class ImageUtils {
 		return Color.HSVToColor(hsv);
 	}
 
+	public static int getImageMemorySize(int height, int width, boolean hasAlpha) {
+		return height * width * (hasAlpha ? 4 : 3);
+	}
+	
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
 		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
 				.getHeight(), Config.ARGB_8888);
@@ -130,7 +134,7 @@ public class ImageUtils {
 			xEnd = height;
 		}
 
-		Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, xStart, yStart, xEnd, yEnd);
+		Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, xStart, yStart, xEnd, yEnd, null, true);
 		return croppedBitmap;
 	}
 
@@ -139,7 +143,19 @@ public class ImageUtils {
 	}
 
 	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, int scaleToWidth, ImageShape imageShape) {
-
+		
+//		/* Create a matrix for the manipulation */
+//		Matrix matrix = new Matrix();
+//
+//		/* Resize the bitmap */
+//		matrix.postScale(scaleBy, scaleBy);
+//		if (rotation != 0) {
+//			matrix.postRotate(rotation);
+//		}
+//
+//		Bitmap bitmapSampledAndScaled = Bitmap.createBitmap(bitmapSampled, 0, 0, bitmapSampled.getWidth(), bitmapSampled.getHeight(), matrix,
+//				true);
+		
 		/* Scale if needed */
 		Bitmap bitmapScaled = bitmap;
 		if (scaleToWidth > 0) {

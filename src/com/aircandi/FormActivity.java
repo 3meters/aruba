@@ -26,22 +26,20 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
+import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
-import com.aircandi.components.Tracker;
-import com.aircandi.components.AnimUtils.TransitionType;
-import com.aircandi.components.ImageRequest.ImageResponse;
-import com.aircandi.components.ImageRequest.ImageShape;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.Tracker;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
 import com.aircandi.widgets.WebImageView;
-import com.aircandi.R;
 
 public abstract class FormActivity extends SherlockActivity {
 
@@ -126,29 +124,33 @@ public abstract class FormActivity extends SherlockActivity {
 					final String imageTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
 					final String imageDescription = extras.getString(getString(R.string.EXTRA_URI_DESCRIPTION));
 
-					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
-					builder.setFromUris(imageUri, null);
-					builder.setRequestListener(new RequestListener() {
+					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView)
+							.setFromUris(imageUri, null)
+							.setRequestListener(new RequestListener() {
 
-						@Override
-						public void onComplete(Object response) {
+								@Override
+								public void onComplete(Object response) {
 
-							final ServiceResponse serviceResponse = (ServiceResponse) response;
-							if (serviceResponse.responseCode == ResponseCode.Success) {
-								runOnUiThread(new Runnable() {
+									final ServiceResponse serviceResponse = (ServiceResponse) response;
+									if (serviceResponse.responseCode == ResponseCode.Success) {
+										runOnUiThread(new Runnable() {
 
-									@Override
-									public void run() {
-										if (mImageRequestListener != null) {
-											ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-											mImageRequestListener.onComplete(serviceResponse, imageResponse.imageUri, null, imageResponse.bitmap, imageTitle,
-													imageDescription);
-										}
+											@Override
+											public void run() {
+												if (mImageRequestListener != null) {
+													ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+													mImageRequestListener.onComplete(serviceResponse
+															, imageResponse.imageUri
+															, null
+															, imageResponse.bitmap
+															, imageTitle
+															, imageDescription);
+												}
+											}
+										});
 									}
-								});
-							}
-						}
-					});
+								}
+							});
 
 					if (imageTitle != null && !imageTitle.equals("")) {
 						EditText title = (EditText) findViewById(R.id.text_title);
@@ -174,7 +176,9 @@ public abstract class FormActivity extends SherlockActivity {
 				Uri imageUri = intent.getData();
 				Bitmap bitmap = null;
 
-				bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, String.valueOf(CandiConstants.IMAGE_WIDTH_DEFAULT));
+				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
+				bitmap = ImageManager.getInstance().loadBitmapFromDevice(imageUri, "original");
+
 				if (bitmap != null && mImageRequestListener != null) {
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);
 					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, AnimUtils.fadeInMedium());
@@ -188,34 +192,46 @@ public abstract class FormActivity extends SherlockActivity {
 					/* Get bitmap */
 					Bitmap bitmap = Media.getBitmap(getContentResolver(), Uri.fromFile(mCommon.getTempFile(this, "image_capture.tmp")));
 
-					/* Scale and crop */
-					ImageRequest imageRequest = new ImageRequest();
-					imageRequest.setImageShape(ImageShape.Square);
-					imageRequest.setScaleToWidth(CandiConstants.IMAGE_WIDTH_DEFAULT);
-					bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
-
 					/* Adjust rotation using file Exif information */
 					ExifInterface exif = new ExifInterface(mCommon.getTempFile(this, "image_capture.tmp").getAbsolutePath());
 					int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-					int rotate = 0;
+					int rotation = 0;
 					switch (orientation) {
 						case ExifInterface.ORIENTATION_ROTATE_270:
-							rotate = 270;
+							rotation = 270;
 							break;
 						case ExifInterface.ORIENTATION_ROTATE_180:
-							rotate = 180;
+							rotation = 180;
 							break;
 						case ExifInterface.ORIENTATION_ROTATE_90:
-							rotate = 90;
+							rotation = 90;
 							break;
 					}
+					/*
+					 * Camera images can be huge. For example a 2560x1920 image takes up 20MBs of memory.
+					 * To prevent OM errors, we need to make sure the image size is managed.
+					 */
+					Boolean scalingNeeded = (bitmap.getWidth() > CandiConstants.IMAGE_WIDTH_MAXIMUM || bitmap.getHeight() > CandiConstants.IMAGE_WIDTH_MAXIMUM);
+					if (scalingNeeded || rotation != 0) {
 
-					/* create a matrix object */
-					Matrix matrix = new Matrix();
-					matrix.postRotate(rotate); /* anti-clockwise by 90 degrees */
+						Matrix matrix = new Matrix();
 
-					/* create a new bitmap from the original using the matrix to transform the result */
-					bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+						/* Resize the bitmap */
+						if (scalingNeeded) {
+							float scalingRatio = (float) CandiConstants.IMAGE_WIDTH_MAXIMUM / (float) bitmap.getWidth();
+							matrix.postScale(scalingRatio, scalingRatio);
+						}
+						
+						if (rotation != 0) {
+							matrix.postRotate(rotation);
+						}
+						/*
+						 * Create a new bitmap from the original using the matrix to transform the result.
+						 * Potential for OM condition because if the garbage collector is behind, we could
+						 * have several large bitmaps in memory at the same time.
+						 */
+						bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+					}
 
 					mImageRequestWebImageView.getImageView().setImageBitmap(null);
 					if (mImageRequestListener != null) {

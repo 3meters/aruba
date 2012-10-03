@@ -233,7 +233,7 @@ public class ImageManager {
 		int heightFinal = 0;
 
 		if (imageWidthMax.toLowerCase().equals("original")) {
-			if (imageBytes.length > CandiConstants.IMAGE_MEMORY_BYTES_MAX) {
+			if (ImageUtils.getImageMemorySize(heightRaw, widthRaw, true) > CandiConstants.IMAGE_MEMORY_BYTES_MAX) {
 				float finWidth = 1000;
 				int sample = 0;
 
@@ -259,9 +259,16 @@ public class ImageManager {
 
 				Bitmap bitmapSampled = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, bitmapOptions);
 
+				/* Rotate the image if needed */
+				if (rotation != 0) {
+					Matrix matrix = new Matrix();
+					matrix.postRotate(rotation);
+					bitmapSampled = Bitmap.createBitmap(bitmapSampled, 0, 0, bitmapSampled.getWidth(), bitmapSampled.getHeight(), matrix, true);
+				}
+
+				/* Compress the image */
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				bitmapSampled.compress(Bitmap.CompressFormat.JPEG, 90, baos);
-
 				Bitmap bitmapSampledAndCompressed = BitmapFactory.decodeByteArray(baos.toByteArray(), 0, baos.toByteArray().length);
 
 				/* Release */
@@ -272,6 +279,15 @@ public class ImageManager {
 			else {
 				bitmapOptions.inJustDecodeBounds = false;
 				Bitmap bitmapOriginalSize = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, bitmapOptions);
+
+				/* Rotate the image if needed */
+				if (rotation != 0) {
+					Matrix matrix = new Matrix();
+					matrix.postRotate(rotation);
+					bitmapOriginalSize = Bitmap.createBitmap(bitmapOriginalSize, 0, 0, bitmapOriginalSize.getWidth(), bitmapOriginalSize.getHeight(), matrix,
+							true);
+				}
+
 				return bitmapOriginalSize;
 			}
 		}
@@ -280,6 +296,15 @@ public class ImageManager {
 			if (widthFinal > widthRaw) {
 				bitmapOptions.inJustDecodeBounds = false;
 				Bitmap bitmapOriginalSize = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, bitmapOptions);
+
+				/* Rotate the image if needed */
+				if (rotation != 0) {
+					Matrix matrix = new Matrix();
+					matrix.postRotate(rotation);
+					bitmapOriginalSize = Bitmap.createBitmap(bitmapOriginalSize, 0, 0, bitmapOriginalSize.getWidth(), bitmapOriginalSize.getHeight(), matrix,
+							true);
+				}
+
 				return bitmapOriginalSize;
 			}
 			else {

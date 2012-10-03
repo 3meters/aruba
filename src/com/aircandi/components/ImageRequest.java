@@ -32,80 +32,90 @@ public class ImageRequest {
 		return this.mImageUri;
 	}
 
-	public void setImageUri(String imageUri) {
+	public ImageRequest setImageUri(String imageUri) {
 		this.mImageUri = imageUri;
+		return this;
 	}
 
 	public ImageFormat getImageFormat() {
 		return this.mImageFormat;
 	}
 
-	public void setImageFormat(ImageFormat imageFormat) {
+	public ImageRequest setImageFormat(ImageFormat imageFormat) {
 		this.mImageFormat = imageFormat;
+		return this;
 	}
 
 	public ImageShape getImageShape() {
 		return this.mImageShape;
 	}
 
-	public void setImageShape(ImageShape imageShape) {
+	public ImageRequest setImageShape(ImageShape imageShape) {
 		this.mImageShape = imageShape;
+		return this;
 	}
 
 	public Object getImageRequestor() {
 		return this.mImageRequestor;
 	}
 
-	public void setImageRequestor(Object imageRequestor) {
+	public ImageRequest setImageRequestor(Object imageRequestor) {
 		this.mImageRequestor = imageRequestor;
+		return this;
 	}
 
 	public Integer getPriority() {
 		return this.mPriority;
 	}
 
-	public void setPriority(Integer priority) {
+	public ImageRequest setPriority(Integer priority) {
 		this.mPriority = priority;
+		return this;
 	}
 
 	public Integer getScaleToWidth() {
 		return this.mScaleToWidth;
 	}
 
-	public void setScaleToWidth(Integer scaleToWidth) {
+	public ImageRequest setScaleToWidth(Integer scaleToWidth) {
 		this.mScaleToWidth = scaleToWidth;
+		return this;
 	}
 
 	public Boolean getLinkZoom() {
 		return this.mLinkZoom;
 	}
 
-	public void setLinkZoom(Boolean linkZoom) {
+	public ImageRequest setLinkZoom(Boolean linkZoom) {
 		this.mLinkZoom = linkZoom;
+		return this;
 	}
 
 	public Boolean getLinkJavascriptEnabled() {
 		return this.mLinkJavascriptEnabled;
 	}
 
-	public void setLinkJavascriptEnabled(Boolean linkJavascriptEnabled) {
+	public ImageRequest setLinkJavascriptEnabled(Boolean linkJavascriptEnabled) {
 		this.mLinkJavascriptEnabled = linkJavascriptEnabled;
+		return this;
 	}
 
 	public Boolean doUpdateCache() {
 		return this.mUpdateCache;
 	}
 
-	public void setUpdateCache(Boolean updateCache) {
+	public ImageRequest setUpdateCache(Boolean updateCache) {
 		this.mUpdateCache = updateCache;
+		return this;
 	}
 
 	public Boolean doSearchCache() {
 		return this.mSearchCache;
 	}
 
-	public void setSearchCache(Boolean searchCache) {
+	public ImageRequest setSearchCache(Boolean searchCache) {
 		this.mSearchCache = searchCache;
+		return this;
 	}
 
 	public RequestListener getRequestListener() {

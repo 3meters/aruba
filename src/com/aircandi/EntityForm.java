@@ -271,6 +271,11 @@ public class EntityForm extends FormActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					/*
+					 * If we get back a bitmap and an imageUri we want to just store a preview.
+					 * otherwise if the bitmap is wider that our default, we want to store
+					 * both preview and native versions.
+					 */
 					mEntityBitmap = imageBitmap;
 					mEntityForForm.imageUri = imageUri;
 					mEntityForForm.imagePreviewUri = imageUri;
@@ -474,11 +479,12 @@ public class EntityForm extends FormActivity {
 					, "Aircandi beacons"
 					, getString(R.string.alert_beacons_zero)
 					, null
-					, EntityForm.this, android.R.string.ok, null, new
-					DialogInterface.OnClickListener() {
-
+					, EntityForm.this, android.R.string.ok
+					, null
+					, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {}
-					}, null);
+					}
+					, null);
 			result.serviceResponse = new ServiceResponse(ResponseCode.Failed, null, null);
 			return result;
 		}
