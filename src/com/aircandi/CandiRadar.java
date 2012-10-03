@@ -1464,10 +1464,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 															Logger.d(CandiRadar.this, "Update check: user declined");
 															finish();
 														}
-														else {
-															//															finishResume(true);
-															//															scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
-														}
 													}
 												}
 											}
@@ -1476,12 +1472,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 												@Override
 												public void onCancel(DialogInterface dialog) {
 													if (Aircandi.applicationUpdateRequired) {
-														Logger.d(CandiRadar.this, "Update check: user cancelled");
+														Logger.d(CandiRadar.this, "Update check: user canceled");
 														finish();
-													}
-													else {
-														//														finishResume(true);
-														//														scanForBeacons(new ScanOptions(true, true, R.string.progress_scanning));
 													}
 												}
 											});
