@@ -286,7 +286,7 @@ public abstract class BaseView extends Entity implements Observer, IView {
 		mTextView.setSingleLine(false);
 		mTextView.setText(text);
 		mTextView.setTextColor(mTitleTextColor);
-		mTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, CandiConstants.CANDI_VIEW_FONT_SIZE);
+		mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, CandiConstants.CANDI_VIEW_FONT_SIZE);
 		if (textOutline) {
 			mTextView.setShadowLayer(1, 1, 1, 0xff000000);
 		}

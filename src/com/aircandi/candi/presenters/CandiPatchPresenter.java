@@ -228,13 +228,13 @@ public class CandiPatchPresenter implements Observer {
 		float contentWidth = (CandiConstants.CANDI_VIEW_WIDTH * CandiConstants.RADAR_STACK_COUNT)
 				+ (CandiConstants.CANDI_VIEW_SPACING_VERTICAL * (CandiConstants.RADAR_STACK_COUNT - 1));
 		float paddingTotal = getRadarZoomedWidth() - contentWidth;
-
-		mRadarPaddingLeft = paddingTotal * 0.5f;
-		mRadarPaddingRight = paddingTotal - mRadarPaddingLeft;
-		mRadarPaddingTop = CandiConstants.RADAR_PADDING_TOP;
-		mRadarPaddingBottom = CandiConstants.RADAR_PADDING_BOTTOM;
 		
-		mRadarZoom = mRadarWidth / (contentWidth + (CandiConstants.RADAR_PADDING_SIDES * 4f)) ;
+		mRadarPaddingLeft =  0.0f;
+		mRadarPaddingRight = paddingTotal - mRadarPaddingLeft; // Not used
+		mRadarPaddingTop = 0.0f;
+		mRadarPaddingBottom = CandiConstants.RADAR_PADDING_BOTTOM; // Not used
+		
+		mRadarZoom = mRadarWidth / (contentWidth + (CandiConstants.RADAR_PADDING_SIDES * 2f)) ;
 
 		{
 			/* Highlight */
@@ -244,7 +244,9 @@ public class CandiPatchPresenter implements Observer {
 			scene.getChild(CandiConstants.LAYER_GENERAL).attachChild(mHighlight);
 
 			/* Invisible entity used to scroll */
-			mCameraTargetSprite = new CameraTargetSprite((getRadarZoomedWidth() * 0.5f), (getRadarZoomedHeight() * 0.5f), 0, 0, this);
+			float cameraX = contentWidth * 0.5f;
+			float cameraY = (getRadarZoomedHeight() * 0.5f);
+			mCameraTargetSprite = new CameraTargetSprite(cameraX, cameraY, 0, 0, this);
 			mCameraTargetSprite.setColor(1, 0, 0, 0.2f);
 			mCameraTargetSprite.setBlendFunction(CandiConstants.GL_BLEND_FUNCTION_SOURCE, CandiConstants.GL_BLEND_FUNCTION_DESTINATION);
 			mCameraTargetSprite.setVisible(false);
@@ -1715,28 +1717,12 @@ public class CandiPatchPresenter implements Observer {
 		mRadarPaddingLeft = radarPaddingLeft;
 	}
 
-	public float getRadarPaddingRight() {
-		return mRadarPaddingRight;
-	}
-
-	public void setRadarPaddingRight(float radarPaddingRight) {
-		mRadarPaddingRight = radarPaddingRight;
-	}
-
 	public float getRadarPaddingTop() {
 		return mRadarPaddingTop;
 	}
 
 	public void setRadarPaddingTop(float radarPaddingTop) {
 		mRadarPaddingTop = radarPaddingTop;
-	}
-
-	public float getRadarPaddingBottom() {
-		return mRadarPaddingBottom;
-	}
-
-	public void setRadarPaddingBottom(float radarPaddingBottom) {
-		mRadarPaddingBottom = radarPaddingBottom;
 	}
 
 	public float getRadarZoomedWidth() {

@@ -82,7 +82,7 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 	public String getEntryUri() {
 		String root = ProxiConstants.URL_PROXIBASE_SERVICE_REST;
 		String entity = this.getCollection();
-		String uri = root + entity + "/ids:" + id;
+		String uri = root + entity + "/" + id;
 		return uri;
 	}
 

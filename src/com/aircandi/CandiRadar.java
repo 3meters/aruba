@@ -735,17 +735,16 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				mCommon.showProgressDialog(false, null);
 				mWifiDialog.setVisibility(View.GONE);
 				EntityList<Entity> radarEntities = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
+				((View) findViewById(R.id.button_new_candi)).setVisibility(Aircandi.wifiCount > 0 ? View.VISIBLE : View.GONE);
 				if (radarEntities.size() > 0 || mWifiDialog.getVisibility() == View.VISIBLE) {
 					Aircandi.lastScanEmpty = false;
 					mEmptyDialog.setVisibility(View.GONE);
-					((View) findViewById(R.id.button_new_candi)).setVisibility(View.VISIBLE);
 				}
 				else {
 					Aircandi.lastScanEmpty = true;
 					String helpHtml = getString(Aircandi.wifiCount > 0 ? R.string.help_radar_empty : R.string.help_radar_empty_no_beacons);
 					((TextView) findViewById(R.id.text_empty_message)).setText(Html.fromHtml(helpHtml));
 					mEmptyDialog.setVisibility(View.VISIBLE);
-					((View) findViewById(R.id.button_new_candi)).setVisibility(View.GONE);
 				}
 			}
 		});
@@ -1217,6 +1216,8 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		/*
 		 * For now, we only support portait orientation. Supporting orientation changes will likely require some fancy
 		 * scaling transformation since the game engine locks on the supplied orientation.
+		 * 
+		 * Zoom Scaling is handled in CandiPatchPresenter.initializeScene()
 		 */
 		mScreenOrientation = ScreenOrientation.PORTRAIT;
 		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
@@ -1835,46 +1836,46 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		// mCommon.recycleImageViewDrawable(R.id.image_public_reflection);
 	}
 
-//	private ServiceResponse checkForUpdate() {
-//		ModelResult result = ProxiExplorer.getInstance().getEntityModel().checkForUpdate();
-//
-//		Aircandi.applicationUpdateNeeded = false;
-//		Aircandi.applicationUpdateRequired = false;
-//		Query query = new Query("documents").filter("{\"type\":\"version\",\"target\":\"aircandi\"}");
-//
-//		ServiceRequest serviceRequest = new ServiceRequest()
-//				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
-//				.setRequestType(RequestType.Get)
-//				.setQuery(query)
-//				.setSuppressUI(true)
-//				.setResponseFormat(ResponseFormat.Json);
-//
-//		if (!Aircandi.getInstance().getUser().isAnonymous()) {
-//			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
-//		}
-//
-//		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-//
-//		if (serviceResponse.responseCode == ResponseCode.Success) {
-//
-//			String jsonResponse = (String) serviceResponse.data;
-//			final VersionInfo versionInfo = (VersionInfo) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.VersionInfo).data;
-//			String currentVersionName = Aircandi.getVersionName(this, CandiRadar.class);
-//
-//			if (versionInfo.enabled && !currentVersionName.equals(versionInfo.versionName)) {
-//				Logger.i(CandiRadar.this, "Update check: update needed");
-//				Aircandi.applicationUpdateNeeded = true;
-//				Aircandi.applicationUpdateUri = versionInfo.updateUri != null ? versionInfo.updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
-//				if (versionInfo.updateRequired) {
-//					Aircandi.applicationUpdateRequired = true;
-//					Logger.i(CandiRadar.this, "Update check: update required");
-//				}
-//			}
-//			Aircandi.lastApplicationUpdateCheckDate = DateUtils.nowDate().getTime();
-//		}
-//		return serviceResponse;
-//	}
-//
+	//	private ServiceResponse checkForUpdate() {
+	//		ModelResult result = ProxiExplorer.getInstance().getEntityModel().checkForUpdate();
+	//
+	//		Aircandi.applicationUpdateNeeded = false;
+	//		Aircandi.applicationUpdateRequired = false;
+	//		Query query = new Query("documents").filter("{\"type\":\"version\",\"target\":\"aircandi\"}");
+	//
+	//		ServiceRequest serviceRequest = new ServiceRequest()
+	//				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
+	//				.setRequestType(RequestType.Get)
+	//				.setQuery(query)
+	//				.setSuppressUI(true)
+	//				.setResponseFormat(ResponseFormat.Json);
+	//
+	//		if (!Aircandi.getInstance().getUser().isAnonymous()) {
+	//			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+	//		}
+	//
+	//		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+	//
+	//		if (serviceResponse.responseCode == ResponseCode.Success) {
+	//
+	//			String jsonResponse = (String) serviceResponse.data;
+	//			final VersionInfo versionInfo = (VersionInfo) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.VersionInfo).data;
+	//			String currentVersionName = Aircandi.getVersionName(this, CandiRadar.class);
+	//
+	//			if (versionInfo.enabled && !currentVersionName.equals(versionInfo.versionName)) {
+	//				Logger.i(CandiRadar.this, "Update check: update needed");
+	//				Aircandi.applicationUpdateNeeded = true;
+	//				Aircandi.applicationUpdateUri = versionInfo.updateUri != null ? versionInfo.updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
+	//				if (versionInfo.updateRequired) {
+	//					Aircandi.applicationUpdateRequired = true;
+	//					Logger.i(CandiRadar.this, "Update check: update required");
+	//				}
+	//			}
+	//			Aircandi.lastApplicationUpdateCheckDate = DateUtils.nowDate().getTime();
+	//		}
+	//		return serviceResponse;
+	//	}
+	//
 	private String getAnalyticsId() {
 		Properties properties = new Properties();
 

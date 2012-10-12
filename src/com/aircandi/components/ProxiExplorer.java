@@ -1387,13 +1387,13 @@ public class ProxiExplorer {
 					.setSuppressUI(true)
 					.setResponseFormat(ResponseFormat.Json);
 
-			if (!Aircandi.getInstance().getUser().isAnonymous()) {
-				/*
-				 * This causes the user session expiration window to get bumped
-				 * if we are within a week of expiration.
-				 */
-				serviceRequest.setSession(Aircandi.getInstance().getUser().session);
-			}
+//			if (!Aircandi.getInstance().getUser().isAnonymous()) {
+//				/*
+//				 * This causes the user session expiration window to get bumped
+//				 * if we are within a week of expiration.
+//				 */
+//				serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+//			}
 
 			result.serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 

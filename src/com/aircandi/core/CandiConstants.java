@@ -71,7 +71,7 @@ public interface CandiConstants {
 	public static final int				CANDI_VIEW_REFLECTION_HEIGHT			= 125;
 	public static final int				CANDI_VIEW_REFLECTION_GAP				= 1;
 	public static final int				CANDI_VIEW_TITLE_SPACER_HEIGHT			= 2;
-	public static final int				CANDI_VIEW_FONT_SIZE					= 24;
+	public static final int				CANDI_VIEW_FONT_SIZE					= 30;																						// pixels
 	public static final int				CANDI_VIEW_HEIGHT						= CANDI_VIEW_BODY_HEIGHT
 																						+ CANDI_VIEW_TITLE_HEIGHT
 																						+ CANDI_VIEW_TITLE_SPACER_HEIGHT;
