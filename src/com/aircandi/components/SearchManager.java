@@ -12,7 +12,10 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
+import com.aircandi.service.objects.ServiceData;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -21,6 +24,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.provider.Browser;
 import android.webkit.WebIconDatabase.IconListener;
 
@@ -51,7 +55,7 @@ public class SearchManager {
 	public List<SearchItem> getBookmarks(ContentResolver contentResolver) {
 
 		List<SearchItem> searchItems = null;
-		
+
 		/* Need to add the created date column to the query */
 		String[] columns = new String[Browser.HISTORY_PROJECTION.length + 1];
 		System.arraycopy(Browser.HISTORY_PROJECTION, 0, columns, 0, Browser.HISTORY_PROJECTION.length);
@@ -91,60 +95,47 @@ public class SearchManager {
 
 		return searchItems;
 	}
-	
+
 	public List<SearchItem> getPlaceSuggestions() {
-		
+
 		List<SearchItem> searchItems = null;
-		String uri = ProxiConstants.URL_PROXIBASE_SEARCH_VENUES;
 		Observation observation = GeoLocationManager.getInstance().getObservation();
-		
-//		/* Temp for testing */
-//		Observation observation = new Observation();
-//		observation.latitude = 47.5825666;
-//		observation.longitude = -122.1672287;
-		
-		if (observation != null) {
-			uri += "&ll=" + String.valueOf(observation.latitude) + "," + String.valueOf(observation.longitude);
-			uri += "&limit=20";
+
+		//		/* Temp for testing */
+		//		Observation observation = new Observation();
+		//		observation.latitude = 47.5825666;
+		//		observation.longitude = -122.1672287;
+
+		if (observation == null) {
+			return null;
 		}
 
+		Bundle parameters = new Bundle();
+		parameters.putBoolean("placesWithUriOnly", true);
+		parameters.putFloat("latitude", observation.latitude.floatValue());
+		parameters.putFloat("longitude", observation.longitude.floatValue());
+		parameters.putString("source", "foursquare");
+
 		ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(uri)
-				.setRequestType(RequestType.Get)
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getPlacesNearLocation")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 		if (serviceResponse.responseCode == ResponseCode.Success) {
-			Object results = ProxibaseService.convertJsonToObjectInternalSmart((String) serviceResponse.data, null);
-			serviceResponse.data = results;
-		}
-		
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-			
-			if (serviceResponse.data != null) {
-
-				searchItems = new ArrayList<SearchItem>();
-				LinkedHashMap map = (LinkedHashMap) ((LinkedHashMap) serviceResponse.data).get("response");
-				List<LinkedHashMap> venues = (List<LinkedHashMap>) map.get("venues");
-				for (LinkedHashMap venue : venues) {
-					if (venue.get("url") != null) {
-						SearchItem suggestion = new SearchItem();
-						suggestion.type = SearchItemType.Suggestions;
-						suggestion.name = (String) venue.get("name");
-						suggestion.uri = (String) venue.get("url");
-						List<LinkedHashMap> categories = (List<LinkedHashMap>) venue.get("categories");
-						if (categories != null && categories.size() > 0) {
-							suggestion.categoryName = (String) categories.get(0).get("name");
-							LinkedHashMap icon = (LinkedHashMap) categories.get(0).get("icon");
-							if (icon != null) {
-								String prefix = (String) icon.get("prefix");
-								String suffix = (String) icon.get("suffix");
-								suggestion.categoryIconUri = prefix + "bg_32" + suffix;
-							}
-						}
-						searchItems.add(suggestion);
-					}
-				}
+			String jsonResponse = (String) serviceResponse.data;
+			ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+			List<Entity> entities = (List<Entity>) serviceData.data;
+			searchItems = new ArrayList<SearchItem>();
+			for (Entity entity : entities) {
+				SearchItem suggestion = new SearchItem();
+				suggestion.type = SearchItemType.Suggestions;
+				suggestion.name = entity.title;
+				suggestion.uri = entity.uri;
+				suggestion.categoryName = entity.place.categories.get(0).name;
+				suggestion.categoryIconUri = entity.imagePreviewUri;
+				searchItems.add(suggestion);
 			}
 		}
 

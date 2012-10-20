@@ -41,7 +41,7 @@ public class CandiList extends CandiListBase {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, getString(R.string.progress_loading));
+				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
 			}
 
 			@Override
@@ -59,7 +59,7 @@ public class CandiList extends CandiListBase {
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */
 					if (result.data == null) {
-						mCommon.showProgressDialog(false, null);
+						mCommon.hideProgressDialog();
 						onBackPressed();
 					}
 					else {
@@ -76,7 +76,7 @@ public class CandiList extends CandiListBase {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiList);
 				}
-				mCommon.showProgressDialog(false, null);
+				mCommon.hideProgressDialog();
 			}
 
 		}.execute();

@@ -131,6 +131,7 @@ public abstract class CandiListBase extends CandiActivity {
 		 * - Entity children modified
 		 * - New comments
 		 * - Change in user which effects which candi and UI should be visible.
+		 * - User signed out.
 		 * - User profile could have been updated and we don't catch that.
 		 */
 		if (!isFinishing() && mEntityModelUser != null) {

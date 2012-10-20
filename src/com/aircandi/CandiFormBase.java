@@ -64,7 +64,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, getString(R.string.progress_loading));
+				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
 			}
 
 			@Override
@@ -80,7 +80,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 					if (result.data == null) {
 						/* Was likely deleted from the entity model */
-						mCommon.showProgressDialog(false, null);
+						mCommon.hideProgressDialog();
 						onBackPressed();
 					}
 					else {
@@ -110,7 +110,7 @@ public abstract class CandiFormBase extends CandiActivity {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
 				}
-				mCommon.showProgressDialog(false, null);
+				mCommon.hideProgressDialog();
 			}
 
 		}.execute();
@@ -353,19 +353,19 @@ public abstract class CandiFormBase extends CandiActivity {
 			imageCollection.setVisibility(View.INVISIBLE);
 		}
 
-		if (imageCandi != null && (entity.imageUri != null
-				|| entity.linkPreviewUri != null
-				|| entity.linkUri != null)) {
+		if (imageCandi != null) {
 			String imageUri = entity.getMasterImageUri();
-			ImageFormat imageFormat = entity.getMasterImageFormat();
-			ImageRequestBuilder builder = new ImageRequestBuilder(imageCandi);
-			builder.setImageUri(imageUri);
-			builder.setImageFormat(imageFormat);
-			builder.setLinkZoom(entity.linkZoom);
-			builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
-			ImageRequest imageRequest = builder.create();
-			imageCandi.setImageRequest(imageRequest);
-			imageCandiHolder.setVisibility(View.VISIBLE);
+			if (imageUri != null) {
+				ImageFormat imageFormat = entity.getMasterImageFormat();
+				ImageRequestBuilder builder = new ImageRequestBuilder(imageCandi);
+				builder.setImageUri(imageUri);
+				builder.setImageFormat(imageFormat);
+				builder.setLinkZoom(entity.linkZoom);
+				builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
+				ImageRequest imageRequest = builder.create();
+				imageCandi.setImageRequest(imageRequest);
+				imageCandiHolder.setVisibility(View.VISIBLE);
+			}
 		}
 
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
@@ -379,6 +379,12 @@ public abstract class CandiFormBase extends CandiActivity {
 			}
 		}
 		else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+			if (imageCandi != null) {
+				imageCandi.setClickable(false);
+				imageZoom.setVisibility(View.GONE);
+			}
+		}
+		else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			if (imageCandi != null) {
 				imageCandi.setClickable(false);
 				imageZoom.setVisibility(View.GONE);
@@ -407,24 +413,31 @@ public abstract class CandiFormBase extends CandiActivity {
 		/* Adjust buttons */
 
 		newCandi.setVisibility(View.GONE);
-		newComment.setVisibility(View.VISIBLE);
+		newComment.setVisibility(View.GONE);
 		editCandi.setVisibility(View.GONE);
+		comments.setVisibility(View.GONE);
+
 		if (moveCandi != null) {
 			moveCandi.setVisibility(View.GONE);
 		}
+		
 		if (holderChildren != null) {
 			holderChildren.setVisibility(View.GONE);
 		}
-		if (!entity.locked) {
+		
+		if (entity.locked != null && entity.locked) {
 			if (entity.getParent() == null) {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 					newCandi.setVisibility(View.VISIBLE);
 				}
 			}
-			newComment.setVisibility(View.VISIBLE);
 		}
 
-		if (entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
+		if (entity.locked != null && !entity.locked) {
+			newComment.setVisibility(View.VISIBLE);
+		}
+		
+		if (entity.creatorId != null && entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
 			editCandi.setVisibility(View.VISIBLE);
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
 				newCandi.setVisibility(View.VISIBLE);
@@ -464,7 +477,9 @@ public abstract class CandiFormBase extends CandiActivity {
 			comments.setVisibility(View.VISIBLE);
 		}
 		else {
-			comments.setVisibility(View.VISIBLE);
+			if (!entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+				comments.setVisibility(View.VISIBLE);
+			}
 		}
 
 		/* Map */
@@ -595,7 +610,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, getString(R.string.progress_moving));
+				mCommon.showProgressDialog(getString(R.string.progress_moving), true);
 			}
 
 			@Override
@@ -665,6 +680,9 @@ public abstract class CandiFormBase extends CandiActivity {
 			return R.layout.candi_form;
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
+			return R.layout.candi_form;
+		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			return R.layout.candi_form;
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {

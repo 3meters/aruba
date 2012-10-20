@@ -15,7 +15,6 @@
             style="@style/dialog_radar_connect"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_above="@+id/form_footer"
             android:gravity="center"
             android:padding="25dp"
             android:visibility="gone" >
@@ -67,7 +66,6 @@
                     style="@style/app_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:paddingRight="10dp"
                     android:gravity="center"
                     android:text="@string/dialog_network_enable_wifi_checkbox" />
@@ -78,7 +76,6 @@
             android:id="@+id/empty_dialog"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_above="@+id/form_footer"
             android:gravity="center"
             android:padding="25dp"
             android:visibility="gone" >

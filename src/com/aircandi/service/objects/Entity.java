@@ -76,7 +76,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_parent")
 	public String				parentId;										/* Used to connect beacon object */
-	
+
 	@Expose(serialize = false, deserialize = true)
 	public EntityList<Entity>	children;
 
@@ -95,14 +95,17 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public GeoLocation			location;
 
+	@Expose(serialize = false, deserialize = true)
+	public Place				place;
 	/*
 	 * For client use only
 	 */
-	  
+
 	/* These are all controlled by the parent in the case of child entities. */
 	public Boolean				hidden				= false;
 	public Boolean				global				= false;
-	
+	public Boolean				synthetic			= false;
+
 	/* These have meaning for child entities */
 	public Boolean				rookie				= true;
 	public Date					discoveryTime;
@@ -166,34 +169,36 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		 * - rookie
 		 * - discoveryTime
 		 */
-		ServiceEntry.copyProperties(from,  to);
-		
+		ServiceEntry.copyProperties(from, to);
+
 		to.type = from.type;
 		to.title = from.title;
 		to.label = from.label;
 		to.subtitle = from.subtitle;
 		to.description = from.description;
-		
+		to.uri = from.uri;
+
 		to.linkJavascriptEnabled = from.linkJavascriptEnabled;
 		to.linkZoom = from.linkZoom;
-		
+
 		to.imageUri = from.imageUri;
 		to.imagePreviewUri = from.imagePreviewUri;
 		to.linkUri = from.linkUri;
 		to.linkPreviewUri = from.linkPreviewUri;
-		
+
 		to.parentId = from.parentId;
 		to.beaconId = from.beaconId;
-		
+
 		to.location = from.location;
+		to.place = from.place;
 		to.locked = from.locked;
 		to.signalFence = from.signalFence;
 		to.visibility = from.visibility;
-		
+
 		to.comments = from.comments;
 		to.commentCount = from.commentCount;
 		to.commentsMore = from.commentsMore;
-		
+
 		to.activityDate = from.activityDate;
 	}
 
@@ -202,8 +207,9 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		 * Properties involved with editing are copied from one entity to another.
 		 */
 		entity = (Entity) ServiceEntry.setFromPropertiesFromMap(entity, map);
-		
+
 		entity.type = (String) map.get("type");
+		entity.uri = (String) map.get("uri");
 		entity.root = (Boolean) map.get("root");
 		entity.title = (String) map.get("title");
 		entity.label = (String) map.get("label");
@@ -218,7 +224,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		entity.imageUri = (String) map.get("imageUri");
 		entity.signalFence = (Number) map.get("signalFence");
 		entity.visibility = (String) map.get("visibility");
-		
+
 		if (map.get("comments") != null) {
 			entity.comments = new ArrayList<Comment>();
 			List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
@@ -228,7 +234,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		}
 		entity.commentCount = (Integer) map.get("commentCount");
 		entity.commentsMore = (Boolean) map.get("commentsMore");
-		
+
 		entity.children = new EntityList<Entity>();
 		if (map.get("children") != null) {
 			List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
@@ -238,16 +244,20 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		}
 		entity.childCount = (Integer) map.get("childCount");
 		entity.childrenMore = (Boolean) map.get("childrenMore");
-		
+
 		if (map.get("location") != null) {
 			entity.location = (GeoLocation) GeoLocation.setFromPropertiesFromMap(new GeoLocation(), (HashMap<String, Object>) map.get("location"));
+		}
+
+		if (map.get("place") != null) {
+			entity.place = (Place) Place.setFromPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"));
 		}
 		
 		entity.parentId = (String) map.get("_parent");
 		entity.beaconId = (String) map.get("_beacon");
-		
+
 		entity.activityDate = (Number) map.get("activityDate");
-		
+
 		return entity;
 	}
 
@@ -286,7 +296,10 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			}
 		}
 		else {
-			if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
+			if (this.synthetic) {
+				masterImageUri = imagePreviewUri;
+			}
+			else if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
 				if (!imagePreviewUri.toLowerCase().startsWith("resource:")) {
 					masterImageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imagePreviewUri;
 				}
@@ -353,7 +366,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntity(this.parentId);
 		return entity;
 	}
-	
+
 	public Beacon getBeacon() {
 		Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(this.beaconId);
 		return beacon;

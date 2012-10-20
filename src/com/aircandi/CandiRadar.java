@@ -24,6 +24,7 @@ import org.anddev.andengine.opengl.view.RenderSurfaceView;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -40,9 +41,11 @@ import android.os.Handler;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
+import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
@@ -387,11 +390,10 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		ImageManager.getInstance().setFileCacheOnly(true);
 		ImageManager.getInstance().getImageLoader().setWebView((WebView) findViewById(R.id.webview));
 		ImageManager.getInstance().setActivity(this);
-		ImageManager.getInstance().setDisplayMetrics(getResources().getDisplayMetrics());
 
 		/* Candi patch */
 		mCandiPatchModel = new CandiPatchModel();
-		mCandiPatchModel.setScreenWidth(ImageManager.getInstance().getDisplayMetrics().widthPixels);
+		mCandiPatchModel.setScreenWidth(Aircandi.displayMetrics.widthPixels);
 		mCommon.setCandiPatchModel(mCandiPatchModel);
 
 		/* Property settings get overridden once we retrieve preferences */
@@ -575,10 +577,10 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 				/* Time to turn on the progress indicators */
 				if (scanOptions.showProgress) {
-					mCommon.showProgressDialog(true, getString(scanOptions.progressMessageResId), CandiRadar.this);
+					mCommon.showProgressDialog(getString(scanOptions.progressMessageResId), true, CandiRadar.this);
 				}
 				else {
-					mCommon.showProgressDialog(false, null);
+					mCommon.hideProgressDialog();
 				}
 
 				Logger.i(this, "Starting beacon scan, fullBuild = " + String.valueOf(scanOptions.fullBuild));
@@ -732,7 +734,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 			@Override
 			public void run() {
-				mCommon.showProgressDialog(false, null);
+				mCommon.hideProgressDialog();
 				mWifiDialog.setVisibility(View.GONE);
 				EntityList<Entity> radarEntities = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
 				((View) findViewById(R.id.button_new_candi)).setVisibility(Aircandi.wifiCount > 0 ? View.VISIBLE : View.GONE);
@@ -1074,7 +1076,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		if (NetworkManager.getInstance().isTethered()) {
 			mEmptyDialog.setVisibility(View.GONE);
-			mCommon.showProgressDialog(false, null);
+			mCommon.hideProgressDialog();
 			showNetworkDialog(true, getString(R.string.dialog_network_message_wifi_tethered), true);
 			if (listener != null) {
 				Logger.i(this, "Wifi failed: tethered");
@@ -1086,7 +1088,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 			/* Make sure we are displaying any background message */
 			mEmptyDialog.setVisibility(View.GONE);
-			mCommon.showProgressDialog(false, null);
+			mCommon.hideProgressDialog();
 			showNetworkDialog(true, getString(R.string.dialog_network_message_wifi_notready), false);
 			final Button retryButton = (Button) findViewById(R.id.button_retry);
 			final Button cancelButton = (Button) findViewById(R.id.button_cancel);
@@ -1220,19 +1222,25 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		 * Zoom Scaling is handled in CandiPatchPresenter.initializeScene()
 		 */
 		mScreenOrientation = ScreenOrientation.PORTRAIT;
-		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+
+		/* Stash display metrics */
+		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+		Display display = windowManager.getDefaultDisplay();
+		DisplayMetrics metrics = new DisplayMetrics();
+		display.getMetrics(metrics);
+		Aircandi.displayMetrics = metrics;
 
 		/* Adjusted for density */
-		int statusBarHeight = (int) FloatMath.ceil((float) CandiConstants.ANDROID_STATUSBAR_HEIGHT * displayMetrics.density);
-		int actionBarStackedHeight = (int) FloatMath.ceil((float) (CandiConstants.ANDROID_ACTIONBAR_HEIGHT * 2) * displayMetrics.density);
-		int buttonBarHeight = (int) FloatMath.ceil((float) CandiConstants.ANDROID_ACTIONBAR_HEIGHT * displayMetrics.density);
+		int statusBarHeight = (int) FloatMath.ceil((float) CandiConstants.ANDROID_STATUSBAR_HEIGHT * Aircandi.displayMetrics.density);
+		int actionBarStackedHeight = (int) FloatMath.ceil((float) (CandiConstants.ANDROID_ACTIONBAR_HEIGHT * 2) * Aircandi.displayMetrics.density);
+		int buttonBarHeight = (int) FloatMath.ceil((float) CandiConstants.ANDROID_ACTIONBAR_HEIGHT * Aircandi.displayMetrics.density);
 
-		int widthPixels = displayMetrics.widthPixels;
-		int heightPixels = displayMetrics.heightPixels;
+		int widthPixels = Aircandi.displayMetrics.widthPixels;
+		int heightPixels = Aircandi.displayMetrics.heightPixels;
 
 		if (widthPixels > heightPixels) {
-			widthPixels = displayMetrics.heightPixels;
-			heightPixels = displayMetrics.widthPixels;
+			widthPixels = Aircandi.displayMetrics.heightPixels;
+			heightPixels = Aircandi.displayMetrics.widthPixels;
 		}
 
 		Camera camera = new ChaseCamera(0, 0, widthPixels, heightPixels - (actionBarStackedHeight + statusBarHeight + buttonBarHeight)) {
@@ -1412,7 +1420,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			@Override
 			protected void onPreExecute() {
 				if (doUpdateCheck) {
-					mCommon.showProgressDialog(true, getString(R.string.progress_scanning), CandiRadar.this);
+					mCommon.showProgressDialog(getString(R.string.progress_scanning), false, CandiRadar.this);
 				}
 			}
 
@@ -1499,7 +1507,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				}
 				else {
 					if (Aircandi.applicationUpdateRequired) {
-						mCommon.showProgressDialog(false, null);
+						mCommon.hideProgressDialog();
 						if (mUpdateAlertDialog == null || !mUpdateAlertDialog.isShowing()) {
 							mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.icon_app
 									, getString(R.string.alert_upgrade_title)
@@ -1595,7 +1603,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 										|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate
 												.longValue())) {
 									Logger.d(this, "CandiRadarActivity detected entity model change");
-									mCommon.showProgressDialog(false, null);
+									mCommon.hideProgressDialog();
 									invalidateOptionsMenu();
 									updateRadarOnly();
 								}
@@ -1836,46 +1844,6 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		// mCommon.recycleImageViewDrawable(R.id.image_public_reflection);
 	}
 
-	//	private ServiceResponse checkForUpdate() {
-	//		ModelResult result = ProxiExplorer.getInstance().getEntityModel().checkForUpdate();
-	//
-	//		Aircandi.applicationUpdateNeeded = false;
-	//		Aircandi.applicationUpdateRequired = false;
-	//		Query query = new Query("documents").filter("{\"type\":\"version\",\"target\":\"aircandi\"}");
-	//
-	//		ServiceRequest serviceRequest = new ServiceRequest()
-	//				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST)
-	//				.setRequestType(RequestType.Get)
-	//				.setQuery(query)
-	//				.setSuppressUI(true)
-	//				.setResponseFormat(ResponseFormat.Json);
-	//
-	//		if (!Aircandi.getInstance().getUser().isAnonymous()) {
-	//			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
-	//		}
-	//
-	//		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-	//
-	//		if (serviceResponse.responseCode == ResponseCode.Success) {
-	//
-	//			String jsonResponse = (String) serviceResponse.data;
-	//			final VersionInfo versionInfo = (VersionInfo) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.VersionInfo).data;
-	//			String currentVersionName = Aircandi.getVersionName(this, CandiRadar.class);
-	//
-	//			if (versionInfo.enabled && !currentVersionName.equals(versionInfo.versionName)) {
-	//				Logger.i(CandiRadar.this, "Update check: update needed");
-	//				Aircandi.applicationUpdateNeeded = true;
-	//				Aircandi.applicationUpdateUri = versionInfo.updateUri != null ? versionInfo.updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
-	//				if (versionInfo.updateRequired) {
-	//					Aircandi.applicationUpdateRequired = true;
-	//					Logger.i(CandiRadar.this, "Update check: update required");
-	//				}
-	//			}
-	//			Aircandi.lastApplicationUpdateCheckDate = DateUtils.nowDate().getTime();
-	//		}
-	//		return serviceResponse;
-	//	}
-	//
 	private String getAnalyticsId() {
 		Properties properties = new Properties();
 

@@ -9,7 +9,7 @@
         android:title="@string/menu_beacons_item"/>
     <item
         android:id="@+id/refresh"
-        android:actionLayout="@layout/actionbar_refresh_dark"
+        android:icon="@drawable/ic_refresh_dark"
         android:orderInCategory="1"
         android:showAsAction="always|withText"
         android:title="@string/menu_refresh_item"/>

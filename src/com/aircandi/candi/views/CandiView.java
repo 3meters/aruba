@@ -85,7 +85,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		}
 		super.initialize();
 		final CandiModel candiModel = (CandiModel) this.mModel;
-		if (!candiModel.getEntity().global) {
+		if (!candiModel.getEntity().global && !candiModel.getEntity().synthetic) {
 			mProximitySprite.setVisible(true);
 		}
 

@@ -3,6 +3,7 @@ package com.aircandi.components;
 import java.io.File;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -10,15 +11,14 @@ import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -31,7 +31,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,6 +59,7 @@ import com.aircandi.MapCandiList;
 import com.aircandi.Preferences;
 import com.aircandi.ProfileForm;
 import com.aircandi.R;
+import com.aircandi.R.layout;
 import com.aircandi.ScanService;
 import com.aircandi.SignInForm;
 import com.aircandi.SignUpForm;
@@ -118,11 +118,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public Integer						mThemeDialogResId;
 
 	/* UI */
-	protected ImageView					mProgressIndicator;
 	public TextView						mBeaconIndicator;
 	protected TextView					mTitle;
-	protected ImageView					mButtonRefresh;
-	private Dialog						mProgressDialog;
+	protected MenuItem					mMenuItemRefresh;
+	protected Boolean					mStartBusyIndicator				= false;
+	private ProgressDialog				mProgressDialog;
 	public String						mPrefTheme;
 	public Boolean						mUsingCustomTheme			= false;
 	public Integer						mTabIndex;
@@ -214,11 +214,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			@Override
 			public void onEvent(Object data) {}
 		};
-
-		mButtonRefresh = null;
-		if (mButtonRefresh != null) {
-			mButtonRefresh.setVisibility(View.VISIBLE);
-		}
 	}
 
 	public void unpackIntent() {
@@ -425,7 +420,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		String errorMessage = serviceResponse.exception.getMessage();
 
 		/* We always make sure the progress indicator has been stopped */
-		showProgressDialog(false, null);
+		hideProgressDialog();
 
 		/*
 		 * Client errors occur when we are unable to get a response from a service, or when the client is
@@ -436,7 +431,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 			 * We don't have a network connection.
 			 */
 			Intent intent = new Intent(mContext, CandiRadar.class);
-			showNotification(mActivity.getString(R.string.error_connection_title), mActivity.getString(R.string.error_connection_notification), context, intent, CandiConstants.NOTIFICATION_NETWORK);
+			showNotification(mActivity.getString(R.string.error_connection_title), mActivity.getString(R.string.error_connection_notification), context,
+					intent, CandiConstants.NOTIFICATION_NETWORK);
 			showAlertDialogSimple(null, mActivity.getString(R.string.error_connection));
 		}
 		else if (errorType == ErrorType.Client && errorCode == ErrorCode.IOException) {
@@ -564,59 +560,52 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mNotificationManager.notify(notificationType, note);
 	}
 
-	public void showProgressDialog(boolean visible, String message) {
-		showProgressDialog(visible, message, null);
+	public void startBusyIndicator() {
+		if (mMenuItemRefresh != null) {
+			mMenuItemRefresh.setActionView(layout.actionbar_refresh);
+			mStartBusyIndicator = false;
+		}
+		else {
+			mStartBusyIndicator = true;
+		}
 	}
 
-	public void showProgressDialog(boolean visible, String message, Activity ownerActivity) {
+	public void stopBusyIndicator() {
+		if (mMenuItemRefresh != null) {
+			mMenuItemRefresh.setActionView(null);
+		}
+		mStartBusyIndicator = false;
+	}
 
-		Dialog progressDialog = getProgressDialog();
-		if (visible) {
-			if (progressDialog.isShowing()) {
-				TextView text = (TextView) progressDialog.findViewById(R.id.text_progress_message);
-				if (message == null) {
-					text.setVisibility(View.GONE);
-				}
-				else {
-					text.setVisibility(View.VISIBLE);
-					text.setText(message);
-				}
-			}
-			else {
+	public void showProgressDialog(String message, Boolean actionBarOnly) {
+		showProgressDialog(message, actionBarOnly, null);
+	}
+
+	public void showProgressDialog(String message, Boolean actionBarOnly, Activity ownerActivity) {
+
+		startBusyIndicator();
+		if (!actionBarOnly) {
+			ProgressDialog progressDialog = getProgressDialog();
+			progressDialog.setMessage(message);
+			if (!progressDialog.isShowing()) {
 				if (ownerActivity != null) {
 					progressDialog.setOwnerActivity(ownerActivity);
 				}
-				progressDialog.setContentView(R.layout.dialog_progress);
-				final ImageView image = (ImageView) progressDialog.findViewById(R.id.image_body_progress_indicator);
-				TextView text = (TextView) progressDialog.findViewById(R.id.text_progress_message);
-				if (message == null) {
-					text.setVisibility(View.GONE);
-				}
-				else {
-					text.setVisibility(View.VISIBLE);
-					text.setText(message);
-				}
-
-				/* Prevent dismissing the indicator with the back key */
 				progressDialog.setCancelable(false);
-
 				progressDialog.show();
-				image.post(new Runnable() {
+				if (Aircandi.displayMetrics != null) {
+					progressDialog.getWindow().setLayout((int) (Aircandi.displayMetrics.widthPixels * 0.7), WindowManager.LayoutParams.WRAP_CONTENT);
+				}
+			}
+		}
+	}
 
-					@Override
-					public void run() {
-						image.setBackgroundResource(mThemeBusyIndicatorResId);
-						final AnimationDrawable animation = (AnimationDrawable) image.getBackground();
-						animation.start();
-					}
-				});
-			}
+	public void hideProgressDialog() {
+		ProgressDialog progressDialog = getProgressDialog();
+		if (progressDialog.isShowing() && progressDialog.getWindow().getWindowManager() != null) {
+			progressDialog.dismiss();
 		}
-		else {
-			if (progressDialog.isShowing() && progressDialog.getWindow().getWindowManager() != null) {
-				progressDialog.dismiss();
-			}
-		}
+		stopBusyIndicator();
 	}
 
 	public boolean isProgressDialogShowing() {
@@ -738,7 +727,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 				@Override
 				protected void onPreExecute() {
-					showProgressDialog(true, mActivity.getString(R.string.progress_signing_out));
+					showProgressDialog(mActivity.getString(R.string.progress_signing_out), true);
 				}
 
 				@Override
@@ -748,6 +737,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					return result;
 				}
 
+				@SuppressLint("NewApi")
 				@Override
 				protected void onPostExecute(Object response) {
 					ModelResult result = (ModelResult) response;
@@ -777,10 +767,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 						((SherlockActivity) mActivity).invalidateOptionsMenu();
 					}
 
+					/* Notify interested parties */
+					Events.EventBus.onUserChanged(user);
 					ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
 					Tracker.trackEvent("User", "Signout", null, 0);
 
-					showProgressDialog(false, null);
+					hideProgressDialog();
 				}
 			}.execute();
 		}
@@ -870,60 +862,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 			};
 
 		}
-		
-		/* Refresh with action mode support */
-		menuItem = menu.findItem(R.id.refresh);
-		if (menuItem != null) {
-			menuItem.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					if (mPageName.equals("CandiRadar")) {
-						((CandiRadar) mActivity).doRefresh(RefreshType.Standard);
-					}
-					else if (mPageName.equals("CandiList")) {
-						((CandiList) mActivity).doRefresh();
-					}
-					else if (mPageName.equals("CandiForm")) {
-						((CandiForm) mActivity).doRefresh();
-					}
-					else if (mPageName.equals("UserCandiList")) {
-						((UserCandiList) mActivity).doRefresh();
-					}
-					else if (mPageName.equals("UserCandiForm")) {
-						((UserCandiForm) mActivity).doRefresh();
-					}
-					else if (mPageName.equals("MapCandiList")) {
-						((MapCandiList) mActivity).doRefresh();
-					}
-					else if (mPageName.equals("MapCandiForm")) {
-						((MapCandiForm) mActivity).doRefresh();
-					}
-					else if (mPageName.equals("CandiMap")) {
-						((CandiMap) mActivity).doRefresh();
-					}
-					else if (mPageName.equals("CommentList")) {
-						((CommentList) mActivity).doRefresh();
-					}
-				}
-			});
-			menuItem.getActionView().findViewById(R.id.refresh_frame).setOnLongClickListener(new View.OnLongClickListener() {
-				@Override
-				public boolean onLongClick(View view) {
-					if (mPageName.equals("CandiMap")) {
-						SherlockMapActivity mapActivity = (SherlockMapActivity) mActivity;
-						mapActivity.startActionMode(new ActionModeRefresh());
-					}
-					else {
-						SherlockActivity activity = (SherlockActivity) mActivity;
-						activity.startActionMode(new ActionModeRefresh());
-					}
-					return true;
-				}
-			});
-		}
+
+		/* Cache refresh menu item */
+		mMenuItemRefresh = menu.findItem(R.id.refresh);
 	}
 
 	public void doPrepareOptionsMenu(Menu menu) {
+
+		if (mStartBusyIndicator) {
+			startBusyIndicator();
+		}
+
 		/* Hide the sign out option if we don't have a current session */
 		if (!mPageName.equals("SignInForm")) {
 			if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().isAnonymous()) {
@@ -936,11 +885,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 				((MenuItem) menu.findItem(R.id.signout)).setVisible(false);
 				((MenuItem) menu.findItem(R.id.profile)).setVisible(false);
 			}
-			
+
 			if (!Aircandi.applicationUpdateNeeded) {
 				((MenuItem) menu.findItem(R.id.update)).setVisible(false);
 			}
 		}
+
 	}
 
 	public void doOptionsItemSelected(MenuItem menuItem) {
@@ -952,6 +902,39 @@ public class AircandiCommon implements ActionBar.TabListener {
 				 * it falls through to here and we want to go to the top of the app.
 				 */
 				mActivity.onBackPressed();
+				return;
+			case R.id.refresh:
+
+				/* Show busy indicator */
+				startBusyIndicator();
+
+				if (mPageName.equals("CandiRadar")) {
+					((CandiRadar) mActivity).doRefresh(RefreshType.Standard);
+				}
+				else if (mPageName.equals("CandiList")) {
+					((CandiList) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("CandiForm")) {
+					((CandiForm) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("UserCandiList")) {
+					((UserCandiList) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("UserCandiForm")) {
+					((UserCandiForm) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("MapCandiList")) {
+					((MapCandiList) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("MapCandiForm")) {
+					((MapCandiForm) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("CandiMap")) {
+					((CandiMap) mActivity).doRefresh();
+				}
+				else if (mPageName.equals("CommentList")) {
+					((CommentList) mActivity).doRefresh();
+				}
 				return;
 			case R.id.settings:
 				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
@@ -969,7 +952,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			case R.id.signup:
 				signup();
 				return;
-			case R.id.update:				
+			case R.id.update:
 				Logger.d(this, "Update menu item: navigating to install page");
 				Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 				intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
@@ -1099,7 +1082,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			 * is extra work to do.
 			 */
 			addTabsToActionBar((CandiPicker) mActivity, CandiConstants.TABS_CANDI_PICKER_ID);
-		}		
+		}
 	}
 
 	public void addTabsToActionBar(ActionBar.TabListener tabListener, int tabsId)
@@ -1417,26 +1400,19 @@ public class AircandiCommon implements ActionBar.TabListener {
 		return new File(path, tempFileName);
 	}
 
-	public Dialog getProgressDialog() {
+	public ProgressDialog getProgressDialog() {
 
 		if (mProgressDialog == null) {
 			/* Dialogs */
-			mProgressDialog = new Dialog(mContext, R.style.progress_body);
-			mProgressDialog.setTitle(null);
+			mProgressDialog = new ProgressDialog(mContext);
+			mProgressDialog.setIndeterminate(true);
 			mProgressDialog.setCancelable(true);
 			mProgressDialog.setCanceledOnTouchOutside(false);
 			mProgressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 			mProgressDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
 					WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-			mProgressDialog.setOnDismissListener(new OnDismissListener() {
-
-				@Override
-				public void onDismiss(DialogInterface dialog) {
-					final ImageView image = (ImageView) mProgressDialog.findViewById(R.id.image_body_progress_indicator);
-					image.setBackgroundResource(0);
-				}
-			});
 		}
+
 		return mProgressDialog;
 	}
 

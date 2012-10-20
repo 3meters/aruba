@@ -102,7 +102,7 @@ public class PasswordForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, getString(R.string.progress_changing_password));
+				mCommon.showProgressDialog(getString(R.string.progress_changing_password), false);
 			}
 
 			@Override
@@ -114,7 +114,7 @@ public class PasswordForm extends FormActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
-				mCommon.showProgressDialog(false, null);
+				mCommon.hideProgressDialog();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");

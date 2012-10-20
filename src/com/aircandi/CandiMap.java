@@ -134,7 +134,7 @@ public class CandiMap extends SherlockMapActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, getString(R.string.progress_loading));
+					mCommon.showProgressDialog(getString(R.string.progress_loading), true);
 				}
 
 				@Override
@@ -153,7 +153,7 @@ public class CandiMap extends SherlockMapActivity {
 						((ViewGroup) findViewById(R.id.map_holder)).setVisibility(View.VISIBLE);
 						mBeaconsLoaded = true;
 						showBeacons((Collection<Beacon>) result.data);
-						mCommon.showProgressDialog(false, null);
+						mCommon.hideProgressDialog();
 					}
 					else {
 						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.MapBrowse);

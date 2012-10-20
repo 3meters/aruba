@@ -43,6 +43,9 @@ public class CandiPagerAdapter extends PagerAdapter {
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
 			layoutId = R.layout.temp_candi_form_post;
 		}
+		else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			layoutId = R.layout.temp_candi_form_place;
+		}
 		ViewGroup candiInfoView = (ViewGroup) mInflater.inflate(layoutId, null);
 		candiInfoView = CandiForm.buildCandiInfo(entity, candiInfoView, null, false);
 		((ViewPager) collection).addView(candiInfoView, 0);

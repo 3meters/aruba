@@ -51,6 +51,7 @@
                         style="@style/actionbar_button"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
+                        android:layout_weight="0"
                         android:onClick="onLinkBuilderClick"
                         android:text="@string/form_button_pick_link" />
                 </LinearLayout>

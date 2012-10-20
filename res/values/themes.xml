@@ -67,7 +67,6 @@
         <item name="backgroundTabBar">@color/background_tabbar_dark</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_dark</item>
         
-        <item name="busy">@drawable/busy_anim_dark</item>
         <item name="logo">@drawable/icon_app</item>
         <item name="iconBookmarks">@drawable/ic_search_dark</item>
         <item name="iconForward">@drawable/icon_forward_dark</item>
@@ -103,6 +102,7 @@
     <style name="aircandi_theme_light" parent="Theme.Sherlock.Light">
 
         <item name="themeTone">light</item>
+        <item name="android:windowBackground">@android:color/white</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">false</item>
         
@@ -147,7 +147,6 @@
         <item name="backgroundTabBar">@color/background_tabbar_light</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_light</item>
         
-        <item name="busy">@drawable/busy_anim_light</item>
         <item name="logo">@drawable/icon_app</item>
         <item name="iconBookmarks">@drawable/ic_search_light</item>
         <item name="iconForward">@drawable/icon_forward_light</item>

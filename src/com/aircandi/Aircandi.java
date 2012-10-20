@@ -15,6 +15,7 @@ import android.content.pm.PackageInfo;
 import android.location.Location;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 
 import com.aircandi.components.StopWatch;
 import com.aircandi.service.objects.User;
@@ -85,6 +86,7 @@ public class Aircandi extends Application {
 
 	public static Context					applicationContext;
 	public static Handler					applicationHandler;
+	public static DisplayMetrics			displayMetrics;
 	public static StopWatch					stopwatch;
 	public static JSONParser				parser						= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
 

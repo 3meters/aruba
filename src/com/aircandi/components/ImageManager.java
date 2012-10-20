@@ -18,16 +18,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.Matrix;
-import android.graphics.Bitmap.CompressFormat;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore.Images;
 import android.support.v4.util.LruCache;
-import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.util.TypedValue;
 
@@ -47,7 +46,6 @@ public class ImageManager {
 	private LruSoftCache		mThumbnailCacheSoft;
 	private LruCache			mThumbnailCacheHard;
 	private ImageLoader			mImageLoader;
-	private DisplayMetrics		mDisplayMetrics;
 	private Activity			mActivity;
 
 	public static synchronized ImageManager getInstance() {
@@ -619,14 +617,6 @@ public class ImageManager {
 	// --------------------------------------------------------------------------------------------
 	// Inner classes and enums
 	// --------------------------------------------------------------------------------------------
-
-	public void setDisplayMetrics(DisplayMetrics displayMetrics) {
-		this.mDisplayMetrics = displayMetrics;
-	}
-
-	public DisplayMetrics getDisplayMetrics() {
-		return mDisplayMetrics;
-	}
 
 	public LruSoftCache getThumbnailCacheSoft() {
 		return mThumbnailCacheSoft;

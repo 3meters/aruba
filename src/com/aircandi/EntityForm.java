@@ -374,7 +374,7 @@ public class EntityForm extends FormActivity {
 				@Override
 				protected void onPreExecute() {
 					if (mTextUri != null && !mUriVerified) {
-						mCommon.showProgressDialog(true, getString(R.string.progress_verifying));
+						mCommon.showProgressDialog(getString(R.string.progress_verifying), false);
 					}
 				}
 
@@ -419,7 +419,7 @@ public class EntityForm extends FormActivity {
 
 							@Override
 							public void run() {
-								mCommon.showProgressDialog(true, getString(R.string.progress_saving));
+								mCommon.showProgressDialog(getString(R.string.progress_saving), false);
 							}
 						});
 
@@ -456,7 +456,7 @@ public class EntityForm extends FormActivity {
 				@Override
 				protected void onPostExecute(Object response) {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
-					mCommon.showProgressDialog(false, null);
+					mCommon.hideProgressDialog();
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						finish();
 					}
@@ -520,7 +520,7 @@ public class EntityForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, getString(R.string.progress_deleting));
+				mCommon.showProgressDialog(getString(R.string.progress_deleting), false);
 			}
 
 			@Override
@@ -538,7 +538,7 @@ public class EntityForm extends FormActivity {
 					Tracker.trackEvent("Entity", "Delete", mEntityForForm.type, 0);
 					Logger.i(this, "Deleted entity: " + mEntityForForm.title);
 
-					mCommon.showProgressDialog(false, null);
+					mCommon.hideProgressDialog();
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 					setResult(CandiConstants.RESULT_ENTITY_DELETED);
 					finish();
@@ -616,7 +616,7 @@ public class EntityForm extends FormActivity {
 						ImageUtils.showToastNotification("Validation canceled", Toast.LENGTH_SHORT);
 					}
 				});
-				mCommon.showProgressDialog(true, getString(R.string.progress_verifying));
+				mCommon.showProgressDialog(getString(R.string.progress_verifying), false);
 			}
 
 			@Override
@@ -668,7 +668,7 @@ public class EntityForm extends FormActivity {
 					else {
 						((EditText) findViewById(R.id.text_content)).setText("");
 					}
-					mCommon.showProgressDialog(false, null);
+					mCommon.hideProgressDialog();
 				}
 				else {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.LinkLookup, EntityForm.this);

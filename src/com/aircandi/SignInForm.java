@@ -13,6 +13,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
+import com.aircandi.components.Events;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -100,7 +101,7 @@ public class SignInForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, getString(R.string.progress_signing_in));
+					mCommon.showProgressDialog(getString(R.string.progress_signing_in), false);
 				}
 
 				@Override
@@ -114,7 +115,7 @@ public class SignInForm extends FormActivity {
 				protected void onPostExecute(Object response) {
 					
 					ModelResult result = (ModelResult) response;
-					mCommon.showProgressDialog(false, null);
+					mCommon.hideProgressDialog();
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Tracker.startNewSession();
@@ -127,6 +128,7 @@ public class SignInForm extends FormActivity {
 						Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
 
 						Aircandi.getInstance().setUser(user);
+						Events.EventBus.onUserChanged(user);						
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 

@@ -128,6 +128,7 @@ public interface CandiConstants {
 	public static final String			TYPE_CANDI_PICTURE						= "com.aircandi.candi.picture";
 	public static final String			TYPE_CANDI_LINK							= "com.aircandi.candi.link";
 	public static final String			TYPE_CANDI_COLLECTION					= "com.aircandi.candi.collection";
+	public static final String			TYPE_CANDI_PLACE						= "com.aircandi.candi.place";
 
 	public static final String			USER_ANONYMOUS							= "{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\","
 																						+ "\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\","

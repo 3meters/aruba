@@ -12,6 +12,8 @@ import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.EntityList;
+import com.aircandi.components.Events;
+import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -22,6 +24,8 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
 
 public class UserCandiList extends CandiListBase {
+
+	private EventHandler	mEventUserChanged;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -34,6 +38,34 @@ public class UserCandiList extends CandiListBase {
 			finish();
 			return;
 		}
+
+		mEventUserChanged = new EventHandler() {
+
+			@Override
+			public void onEvent(Object data) {
+
+				User user = (User) data;
+				if (user.isAnonymous()) {
+					/*
+					 * If user signed out then we need to navigate to radar
+					 */
+					IntentBuilder intentBuilder = new IntentBuilder(UserCandiList.this, CandiRadar.class);
+					intentBuilder.setNavigationTop(true);
+					Intent intent = intentBuilder.create();
+					/*
+					 * The flags let us use existing instance of radar if its already around.
+					 */
+					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+					startActivity(intent);
+					AnimUtils.doOverridePendingTransition(UserCandiList.this, TransitionType.CandiPageToCandiRadar);
+				}
+				else {
+					bind(true);
+				}
+			}
+		};
+
 		/*
 		 * Signin required if user is anonymous
 		 */
@@ -56,6 +88,7 @@ public class UserCandiList extends CandiListBase {
 			configureActionBar();
 			bind(false);
 		}
+
 	}
 
 	private void configureActionBar() {
@@ -81,7 +114,7 @@ public class UserCandiList extends CandiListBase {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, getString(R.string.progress_loading));
+				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
 			}
 
 			@Override
@@ -107,7 +140,7 @@ public class UserCandiList extends CandiListBase {
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */
 					if (result.data == null || ((EntityList<Entity>) result.data).size() == 0) {
-						mCommon.showProgressDialog(false, null);
+						mCommon.hideProgressDialog();
 						onBackPressed();
 					}
 					else {
@@ -123,7 +156,7 @@ public class UserCandiList extends CandiListBase {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiList);
 				}
-				mCommon.showProgressDialog(false, null);
+				mCommon.hideProgressDialog();
 			}
 
 		}.execute();
@@ -137,6 +170,22 @@ public class UserCandiList extends CandiListBase {
 		Logger.v(this, "List item clicked");
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
 		showCandiFormForEntity(entity, UserCandiForm.class);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		synchronized (Events.EventBus.userChanged) {
+			Events.EventBus.userChanged.add(mEventUserChanged);
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		synchronized (Events.EventBus.userChanged) {
+			Events.EventBus.userChanged.remove(mEventUserChanged);
+		}
 	}
 
 	@Override

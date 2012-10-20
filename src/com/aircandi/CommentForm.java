@@ -142,7 +142,7 @@ public class CommentForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, getString(R.string.progress_saving));
+					mCommon.showProgressDialog(getString(R.string.progress_saving), true);
 				}
 
 				@Override
@@ -158,7 +158,7 @@ public class CommentForm extends FormActivity {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.trackEvent("Comment", "Insert", null, 0);
-						mCommon.showProgressDialog(false, null);
+						mCommon.hideProgressDialog();
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_COMMENT_INSERTED);
 						finish();

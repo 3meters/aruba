@@ -3,7 +3,6 @@ package com.aircandi.widgets;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -12,9 +11,9 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.aircandi.R;
@@ -32,7 +31,7 @@ public class WebImageView extends RelativeLayout {
 	private String						mImageUri;
 	private Handler						mThreadHandler	= new Handler();
 	private ImageView					mImageView;
-	private ImageView					mImageViewLoading;
+	private ProgressBar					mProgressBar;
 	private Integer						mBusyWidth;
 	private Integer						mMinWidth;
 	private Integer						mMaxWidth;
@@ -40,7 +39,6 @@ public class WebImageView extends RelativeLayout {
 	private Integer						mMaxHeight;
 	private boolean						mShowBusy;
 	private Integer						mLayoutId;
-	private Integer						mThemeBusyIndicatorResId;
 	private ScaleType					mScaleType		= ScaleType.CENTER_CROP;
 	@SuppressWarnings("unused")
 	private String						mThemeTone;
@@ -81,9 +79,6 @@ public class WebImageView extends RelativeLayout {
 		if (context.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
 			mThemeTone = (String) resourceName.coerceToString();
 		}
-		if (context.getTheme().resolveAttribute(R.attr.busy, resourceName, true)) {
-			mThemeBusyIndicatorResId = (Integer) resourceName.resourceId;
-		}
 
 		if (!isInEditMode()) {
 			int scaleTypeValue = attributes.getAttributeIntValue("http://schemas.android.com/apk/res/android", "scaleType", 6);
@@ -111,15 +106,15 @@ public class WebImageView extends RelativeLayout {
 				mImageView.setImageResource(R.drawable.jaymassena);
 			}
 		}
-		mImageViewLoading = (ImageView) findViewById(R.id.image_loading);
+		mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
-		if (mImageViewLoading != null) {
+		if (mProgressBar != null) {
 			if (!mShowBusy) {
-				mImageViewLoading.setVisibility(View.GONE);
+				mProgressBar.setVisibility(View.GONE);
 			}
 			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mBusyWidth, mBusyWidth);
 			params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-			mImageViewLoading.setLayoutParams(params);
+			mProgressBar.setLayoutParams(params);
 		}
 	}
 
@@ -239,38 +234,40 @@ public class WebImageView extends RelativeLayout {
 
 	public void showLoading(boolean loading) {
 		if (loading) {
-			mImageViewLoading.post(new Runnable() {
-
-				@Override
-				public void run() {
-					mImageViewLoading.setBackgroundResource(mThemeBusyIndicatorResId);
-					final AnimationDrawable animation = (AnimationDrawable) mImageViewLoading.getBackground();
-					animation.start();
-					mImageViewLoading.setVisibility(View.VISIBLE);
-				}
-			});
+			mProgressBar.setVisibility(View.VISIBLE);
+			
+//			mProgressBar.post(new Runnable() {
+//
+//				@Override
+//				public void run() {
+//					mProgressBar.setBackgroundResource(mThemeBusyIndicatorResId);
+//					final AnimationDrawable animation = (AnimationDrawable) mProgressBar.getBackground();
+//					animation.start();
+//					mProgressBar.setVisibility(View.VISIBLE);
+//				}
+//			});
 		}
 		else {
-			mImageViewLoading.post(new Runnable() {
+			mProgressBar.post(new Runnable() {
 
 				@Override
 				public void run() {
 					Animation animation = AnimUtils.fadeOutMedium();
-					animation.setAnimationListener(new AnimationListener() {
-
-						@Override
-						public void onAnimationStart(Animation animation) {}
-
-						@SuppressWarnings("deprecation")
-						@Override
-						public void onAnimationEnd(Animation animation) {
-							mImageViewLoading.setBackgroundDrawable(null);
-						}
-
-						@Override
-						public void onAnimationRepeat(Animation animation) {}
-					});
-					mImageViewLoading.startAnimation(animation);
+//					animation.setAnimationListener(new AnimationListener() {
+//
+//						@Override
+//						public void onAnimationStart(Animation animation) {}
+//
+//						@SuppressWarnings("deprecation")
+//						@Override
+//						public void onAnimationEnd(Animation animation) {
+//							mProgressBar.setBackgroundDrawable(null);
+//						}
+//
+//						@Override
+//						public void onAnimationRepeat(Animation animation) {}
+//					});
+					mProgressBar.startAnimation(animation);
 				}
 			});
 		}

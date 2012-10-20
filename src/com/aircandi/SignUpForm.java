@@ -222,7 +222,7 @@ public class SignUpForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, getString(R.string.progress_signing_up));
+					mCommon.showProgressDialog(getString(R.string.progress_signing_up), false);
 				}
 
 				@Override
@@ -238,7 +238,7 @@ public class SignUpForm extends FormActivity {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Tracker.trackEvent("User", "Insert", null, 0);
-						mCommon.showProgressDialog(false, null);
+						mCommon.hideProgressDialog();
 						Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 
 						AircandiCommon.showAlertDialog(R.drawable.icon_app

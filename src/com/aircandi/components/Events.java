@@ -11,6 +11,7 @@ public class Events {
 		public static List<EventHandler>	entitiesLoaded		= new ArrayList<EventHandler>();
 		public static List<EventHandler>	beaconScanComplete	= new ArrayList<EventHandler>();
 		public static List<EventHandler>	locationChanged		= new ArrayList<EventHandler>();
+		public static List<EventHandler>	userChanged			= new ArrayList<EventHandler>();
 
 		public static void onWifiScanReceived(Object data) {
 			synchronized (wifiScanReceived) {
@@ -48,6 +49,17 @@ public class Events {
 		public static void onLocationChanged(Object data) {
 			synchronized (locationChanged) {
 				List<EventHandler> eventHandlers = (List<EventHandler>) ((ArrayList<EventHandler>) locationChanged).clone();
+				for (EventHandler eventHandler : eventHandlers) {
+					if (eventHandler != null) {
+						eventHandler.onEvent(data);
+					}
+				}
+			}
+		}
+		
+		public static void onUserChanged(Object data) {
+			synchronized (userChanged) {
+				List<EventHandler> eventHandlers = (List<EventHandler>) ((ArrayList<EventHandler>) userChanged).clone();
 				for (EventHandler eventHandler : eventHandlers) {
 					if (eventHandler != null) {
 						eventHandler.onEvent(data);

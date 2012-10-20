@@ -106,7 +106,7 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(true, getString(R.string.progress_loading));
+				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
 			}
 
 			@Override
@@ -126,7 +126,7 @@ public class ProfileForm extends FormActivity {
 					mUser.session = Aircandi.getInstance().getUser().session;
 					mImageUriOriginal = mUser.imageUri;
 
-					mCommon.showProgressDialog(false, null);
+					mCommon.hideProgressDialog();
 				}
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.ProfileBrowse);
@@ -244,7 +244,7 @@ public class ProfileForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(true, getString(R.string.progress_saving));
+					mCommon.showProgressDialog(getString(R.string.progress_saving), false);
 				}
 
 				@Override
@@ -260,7 +260,7 @@ public class ProfileForm extends FormActivity {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "Updated user profile: " + mUser.name + " (" + mUser.id + ")");
 						Tracker.trackEvent("User", "Update", null, 0);
-						mCommon.showProgressDialog(false, null);
+						mCommon.hideProgressDialog();
 						/*
 						 * We treat updating the profile like a change to an entity in the entity model. This forces
 						 * UI to update itself and pickup the changes like a new profile name, picture, etc.

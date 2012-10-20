@@ -60,8 +60,8 @@ public class ImageUtils {
 	}
 
 	public static int getRawPixelsForDisplayPixels(int displayPixels) {
-		if (ImageManager.getInstance().getDisplayMetrics() != null) {
-			final float scale = ImageManager.getInstance().getDisplayMetrics().density;
+		if (Aircandi.displayMetrics != null) {
+			final float scale = Aircandi.displayMetrics.density;
 			return (int) (displayPixels * scale + 0.5f);
 		}
 		else {
