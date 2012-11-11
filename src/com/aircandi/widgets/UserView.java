@@ -17,7 +17,7 @@ import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.service.objects.User;
 import com.aircandi.R;
 
-public class AuthorBlock extends RelativeLayout {
+public class UserView extends RelativeLayout {
 
 	public static final int	HORIZONTAL	= 0;
 	public static final int	VERTICAL	= 1;
@@ -30,19 +30,19 @@ public class AuthorBlock extends RelativeLayout {
 	private User			mUser;
 	private Activity		mActivity;
 
-	public AuthorBlock(Context context) {
+	public UserView(Context context) {
 		this(context, null);
 	}
 
-	public AuthorBlock(Context context, AttributeSet attrs) {
+	public UserView(Context context, AttributeSet attrs) {
 		this(context, attrs, 0);
 	}
 
-	public AuthorBlock(Context context, AttributeSet attrs, int defStyle) {
+	public UserView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
 		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.AuthorLayout, defStyle, 0);
-		int layoutId = ta.getResourceId(R.styleable.AuthorLayout_layout, R.layout.temp_user_info);
+		int layoutId = ta.getResourceId(R.styleable.AuthorLayout_layout, R.layout.widget_user_view);
 		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mBoundView = (ViewGroup) inflater.inflate(layoutId, null);
 
@@ -66,7 +66,14 @@ public class AuthorBlock extends RelativeLayout {
 		mAuthor = author;
 		if (mAuthor != null) {
 			if (mTextName != null) {
-				mTextName.setText(mAuthor.name);
+				String authorName = mAuthor.name;
+				if (authorName == null) {
+					authorName = mAuthor.firstName != null ? mAuthor.firstName : "";
+					if (mAuthor.lastName != null) {
+						authorName += " " + mAuthor.lastName;
+					}
+				}
+				mTextName.setText(authorName);
 			}
 			if (mTextTimeSince != null) {
 				if (date != null) {

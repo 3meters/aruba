@@ -25,7 +25,7 @@ public class ServiceError {
 
 	public ServiceError() {}
 
-	public static ServiceError setFromPropertiesFromMap(ServiceError serviceError, HashMap map) {
+	public static ServiceError setPropertiesFromMap(ServiceError serviceError, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

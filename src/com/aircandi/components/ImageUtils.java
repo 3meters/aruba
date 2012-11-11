@@ -1,9 +1,20 @@
 package com.aircandi.components;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
+
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -13,6 +24,9 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.Drawable;
+import android.os.Environment;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.ImageView;
@@ -35,7 +49,7 @@ public class ImageUtils {
 		canvas = null;
 		return bitmap;
 	}
-	
+
 	public static void showToastNotification(final String message, final int duration) {
 		Aircandi.applicationHandler.post(new Runnable() {
 
@@ -68,7 +82,121 @@ public class ImageUtils {
 			return (int) (displayPixels * 1.5f + 0.5f);
 		}
 	}
-	
+
+	/**
+	 * Converts a immutable bitmap to a mutable bitmap. This operation doesn't allocates
+	 * more memory that there is already allocated.
+	 * 
+	 * @param bitmap
+	 *            - Source image. It will be released, and should not be used more
+	 * @return a copy of imgIn, but muttable.
+	 */
+	public static Bitmap convertToMutable(Bitmap bitmap) {
+		try {
+			//this is the file going to use temporally to save the bytes. 
+			// This file will not be a image, it will store the raw image data.
+			File file = new File(Environment.getExternalStorageDirectory() + File.separator + "temp.tmp");
+
+			//Open an RandomAccessFile
+			//Make sure you have added uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+			//into AndroidManifest.xml file
+			RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+
+			// get the width and height of the source bitmap.
+			int width = bitmap.getWidth();
+			int height = bitmap.getHeight();
+			Config type = bitmap.getConfig();
+
+			//Copy the byte to the file
+			//Assume source bitmap loaded using options.inPreferredConfig = Config.ARGB_8888;
+			FileChannel channel = randomAccessFile.getChannel();
+			MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0, bitmap.getRowBytes() * height);
+			bitmap.copyPixelsToBuffer(map);
+			//recycle the source bitmap, this will be no longer used.
+			bitmap.recycle();
+			//System.gc();// try to force the bytes from the imgIn to be released
+
+			//Create a new bitmap to load the bitmap again. Probably the memory will be available. 
+			bitmap = Bitmap.createBitmap(width, height, type);
+			map.position(0);
+			//load it back from temporary 
+			bitmap.copyPixelsFromBuffer(map);
+			//close the temporary file and channel , then delete that also
+			channel.close();
+			randomAccessFile.close();
+
+			// delete the temp file
+			file.delete();
+
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return bitmap;
+	}
+
+	public static int getPixels(Context context, String displayPixels) {
+		displayPixels = displayPixels.replaceAll("[^\\d.]", "");
+		float pixels = getPixels(context, (int) Float.parseFloat(displayPixels));
+		return (int) pixels;
+	}
+
+	public static int getPixels(Context context, int displayPixels) {
+		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+		int pixels = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) displayPixels, metrics);
+		return pixels;
+	}
+
+	public static Bitmap replacePixels(Bitmap bitmap, String fromColorHex, String toColorHex) {
+		int fromColor = hexToColor(fromColorHex);
+		int toColor = hexToColor(toColorHex);
+		return replacePixels(bitmap, fromColor, toColor);
+	}
+
+	public static Bitmap replacePixels(Bitmap bitmap, int fromColor, int toColor) {
+		int fromRed = Color.red(fromColor);
+		int fromGreen = Color.green(fromColor);
+		int fromBlue = Color.blue(fromColor);
+		
+		int[] pixels = new int[bitmap.getHeight() * bitmap.getWidth()];
+		bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+		for (int i = 0; i < bitmap.getHeight() * bitmap.getWidth(); i++) {
+			int toRed = Color.red(pixels[i]);
+			int toGreen = Color.green(pixels[i]);
+			int toBlue = Color.blue(pixels[i]);
+			
+			if (fromRed == toRed && fromGreen == toGreen && fromBlue == toBlue) {
+				pixels[i] = toColor;
+			}
+		}
+
+		bitmap.setPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+		return bitmap;
+	}
+
+	public Bitmap toGrayscale(Bitmap bitmapOriginal)
+	{
+		int height = bitmapOriginal.getHeight();
+		int width = bitmapOriginal.getWidth();
+
+		Bitmap bitmapGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+		Canvas canvas = new Canvas(bitmapGrayscale);
+		Paint paint = new Paint();
+		ColorMatrix colorMatrix = new ColorMatrix();
+
+		colorMatrix.setSaturation(0);
+		ColorMatrixColorFilter filter = new ColorMatrixColorFilter(colorMatrix);
+		paint.setColorFilter(filter);
+
+		canvas.drawBitmap(bitmapOriginal, 0, 0, paint);
+		return bitmapGrayscale;
+	}
+
 	public static int getColorBySignalLevel(int signalLevel, int alpha) {
 		/*
 		 * hue: 0 = red, 120 = green
@@ -82,17 +210,17 @@ public class ImageUtils {
 		else if (signalLevelAbs < levelMin) {
 			signalLevelAbs = levelMin;
 		}
-		
+
 		float signalLevelPcnt = (signalLevelAbs - levelMin) / (levelMax - levelMin);
-		
-		float[] hsv = new float[]{(120 - (120 * signalLevelPcnt)), 1.0f, 0.85f};
+
+		float[] hsv = new float[] { (120 - (120 * signalLevelPcnt)), 1.0f, 0.85f };
 		return Color.HSVToColor(hsv);
 	}
 
 	public static int getImageMemorySize(int height, int width, boolean hasAlpha) {
 		return height * width * (hasAlpha ? 4 : 3);
 	}
-	
+
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, int pixels) {
 		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap
 				.getHeight(), Config.ARGB_8888);
@@ -143,19 +271,19 @@ public class ImageUtils {
 	}
 
 	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, int scaleToWidth, ImageShape imageShape) {
-		
-//		/* Create a matrix for the manipulation */
-//		Matrix matrix = new Matrix();
-//
-//		/* Resize the bitmap */
-//		matrix.postScale(scaleBy, scaleBy);
-//		if (rotation != 0) {
-//			matrix.postRotate(rotation);
-//		}
-//
-//		Bitmap bitmapSampledAndScaled = Bitmap.createBitmap(bitmapSampled, 0, 0, bitmapSampled.getWidth(), bitmapSampled.getHeight(), matrix,
-//				true);
-		
+
+		//		/* Create a matrix for the manipulation */
+		//		Matrix matrix = new Matrix();
+		//
+		//		/* Resize the bitmap */
+		//		matrix.postScale(scaleBy, scaleBy);
+		//		if (rotation != 0) {
+		//			matrix.postRotate(rotation);
+		//		}
+		//
+		//		Bitmap bitmapSampledAndScaled = Bitmap.createBitmap(bitmapSampled, 0, 0, bitmapSampled.getWidth(), bitmapSampled.getHeight(), matrix,
+		//				true);
+
 		/* Scale if needed */
 		Bitmap bitmapScaled = bitmap;
 		if (scaleToWidth > 0) {

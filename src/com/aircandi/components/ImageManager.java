@@ -42,6 +42,7 @@ public class ImageManager {
 	private static ImageManager	singletonObject;
 	private static Integer		cache_size	= 100;
 
+	private DrawableManager		mDrawableManager;
 	private ImageCache			mImageCache;
 	private LruSoftCache		mThumbnailCacheSoft;
 	private LruCache			mThumbnailCacheHard;
@@ -63,6 +64,8 @@ public class ImageManager {
 		setImageLoader(new ImageLoader());
 		mThumbnailCacheSoft = new LruSoftCache(cache_size);
 		mThumbnailCacheHard = new LruCache(cache_size);
+		mDrawableManager = new DrawableManager();
+
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -626,4 +629,7 @@ public class ImageManager {
 		return mThumbnailCacheHard;
 	}
 
+	public DrawableManager getDrawableManager() {
+		return mDrawableManager;
+	}
 }

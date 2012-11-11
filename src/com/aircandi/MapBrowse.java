@@ -35,7 +35,7 @@ public class MapBrowse extends SherlockMapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 
 		mCommon = new AircandiCommon(this, savedInstanceState);
-		mCommon.setTheme(false, false);
+		mCommon.setTheme(null, false);
 		mCommon.unpackIntent();
 
 		setContentView(getLayoutId());
@@ -113,14 +113,14 @@ public class MapBrowse extends SherlockMapActivity {
 
 	public void showCandi() {
 		mMapOverlays = mMapView.getOverlays();
-		Drawable drawable = getResources().getDrawable(R.drawable.icon_map_candi_iii);
+		Drawable drawable = getResources().getDrawable(R.drawable.ic_map_candi_iii);
 
-		GeoLocation entityLocation = mEntity.location != null ? mEntity.location : mCommon.mEntityLocation;
+		GeoLocation entityLocation = new GeoLocation(mEntity.place.location.lat, mEntity.place.location.lng);
 		GeoPoint geoPoint = new GeoPoint((int) (entityLocation.latitude.doubleValue() * 1E6), (int) (entityLocation.longitude.doubleValue() * 1E6));
 
-		OverlayItem overlayItem = new OverlayItem(geoPoint, mEntity.title, mEntity.description);
+		OverlayItem overlayItem = new OverlayItem(geoPoint, mEntity.name, mEntity.description);
 		overlayItem.setMarker(drawable);
-		
+
 		mItemizedOverlay = new CandiItemizedOverlay(null, null, drawable, mMapView);
 		mItemizedOverlay.addOverlay(overlayItem);
 		zoomToGeoPoint(geoPoint);

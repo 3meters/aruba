@@ -138,7 +138,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 					holder.itemImage.setImageRequest(imageRequest);
 				}
 				else {
-					holder.itemImage.getImageView().setImageResource(R.drawable.app_web_browser_sm);
+					holder.itemImage.getImageView().setImageResource(R.drawable.ic_action_globe_light);
 				}
 			}
 		}
@@ -168,7 +168,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 	}
 
 	public boolean isEnabled(int position) {
-		return false;
+		return true;
 	}
 
 	public static class SearchListViewHolder {

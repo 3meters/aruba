@@ -104,7 +104,7 @@ public class UserCandiList extends CandiListBase {
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			mCommon.mActionBar.setHomeButtonEnabled(true);
 			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId);
-			mCommon.mActionBar.setTitle(collection.title);
+			mCommon.mActionBar.setTitle(collection.name);
 		}
 	}
 
@@ -169,7 +169,7 @@ public class UserCandiList extends CandiListBase {
 	public void onListItemClick(View view) {
 		Logger.v(this, "List item clicked");
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
-		showCandiFormForEntity(entity, UserCandiForm.class);
+		mCommon.showCandiFormForEntity(entity, UserCandiForm.class);
 	}
 
 	@Override

@@ -9,10 +9,10 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
-public class Contact implements Cloneable, Serializable {
+public class Contact extends ServiceObject implements Cloneable, Serializable {
 
-	private static final long	serialVersionUID	= 455904759787968585L;
-
+	private static final long	serialVersionUID	= -4242495727786003116L;
+	
 	@Expose
 	public String				phone;
 	@Expose
@@ -21,8 +21,19 @@ public class Contact implements Cloneable, Serializable {
 	public String				twitter;
 
 	public Contact() {}
+	
+	@Override
+	public Contact clone() {
+		try {
+			final Contact contact = (Contact) super.clone();
+			return contact;
+		}
+		catch (final CloneNotSupportedException ex) {
+			throw new AssertionError();
+		}
+	}	
 
-	public static Contact setFromPropertiesFromMap(Contact contact, HashMap map) {
+	public static Contact setPropertiesFromMap(Contact contact, HashMap map) {
 		
 		contact.phone = (String) map.get("phone");
 		contact.formattedPhone = (String) map.get("formattedPhone");

@@ -41,6 +41,11 @@ public class Observation extends ServiceEntry {
 	public Entity	entity;
 
 	public Observation() {}
+	
+	public Observation(Number pLatitude, Number pLongitude) {
+		this.latitude = pLatitude;
+		this.longitude = pLongitude;
+	}
 
 	public String getCollection() {
 		return "observations";

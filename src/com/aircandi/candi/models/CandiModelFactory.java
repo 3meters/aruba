@@ -12,7 +12,7 @@ public class CandiModelFactory {
 		final CandiModel candiModel = new CandiModel(modelId, candiPatchModel);
 		if (entity != null) {
 			candiModel.setEntity(entity);
-			candiModel.setTitleText(entity.label);
+			candiModel.setTitleText(entity.name);
 		}
 
 		return candiModel;

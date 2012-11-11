@@ -9,83 +9,64 @@
     android:onClick="onListItemClick"
     android:paddingBottom="10dp" >
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1px"
-        android:layout_alignParentTop="true"
-        android:background="?attr/ruleColor" />
-
     <com.aircandi.widgets.WebImageView
-        android:id="@+id/item_image"
+        android:id="@+id/image"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_alignParentTop="true"
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
-        aircandi:layout="@layout/temp_webimageview"
+        aircandi:layout="@layout/widget_webimageview"
         aircandi:maxHeight="60dp"
         aircandi:maxWidth="60dp" />
-
-    <ImageView
-        android:id="@+id/item_image_collection"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignBottom="@+id/item_image"
-        android:layout_alignRight="@+id/item_image"
-        android:layout_marginBottom="3dp"
-        android:layout_marginRight="3dp"
-        aircandi:maxHeight="60dp"
-        aircandi:maxWidth="60dp"      
-        android:visibility="gone"   
-        android:src="@drawable/ic_collection_250" />
     
     <TextView
-        android:id="@+id/item_title"
+        android:id="@+id/title"
         style="?attr/candiListTitleStyle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_toRightOf="@id/item_image" />
+        android:layout_toRightOf="@id/image" />
 
     <TextView
-        android:id="@+id/item_subtitle"
+        android:id="@+id/subtitle"
         style="@style/candi_list_subtitle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_below="@+id/item_title"
+        android:layout_below="@+id/title"
         android:layout_toLeftOf="@+id/image_forward"
-        android:layout_toRightOf="@id/item_image" />
+        android:layout_toRightOf="@id/image" />
 
     <com.aircandi.widgets.TextViewEllipsizing
-        android:id="@+id/item_description"
+        android:id="@+id/description"
         style="@style/candi_list_description"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_below="@+id/item_subtitle"
+        android:layout_below="@+id/subtitle"
         android:layout_toLeftOf="@+id/image_forward"
-        android:layout_toRightOf="@id/item_image" />
+        android:layout_toRightOf="@id/image" />
 
     <LinearLayout
-        android:id="@+id/item_info_group"
+        android:id="@+id/info_group"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/item_description"
+        android:layout_below="@+id/description"
         android:layout_toLeftOf="@+id/image_forward"
-        android:layout_toRightOf="@+id/item_image"
+        android:layout_toRightOf="@+id/image"
         android:orientation="vertical" >
 
-        <com.aircandi.widgets.AuthorBlock
-            android:id="@+id/item_block_author"
+        <com.aircandi.widgets.UserView
+            android:id="@+id/user"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            aircandi:layout="@layout/temp_user_info_text_only" />
+            aircandi:layout="@layout/widget_user_view_text_only" />
 
         <Button
-            android:id="@+id/item_comments"
+            android:id="@+id/button_comments"
             style="@style/button_comments"
             android:layout_width="wrap_content"
             android:layout_height="30dp"

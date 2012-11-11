@@ -16,7 +16,7 @@ public class UserCandiForm extends CandiFormBase {
 	}
 
 	public void bind(Boolean refresh) {
-		doBind(refresh, true, EntityTree.User);
+		doBind(refresh, false, EntityTree.User);
 	}
 
 	// --------------------------------------------------------------------------------------------

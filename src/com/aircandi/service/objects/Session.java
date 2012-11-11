@@ -29,11 +29,11 @@ public class Session extends ServiceEntry {
 		return false;
 	}
 
-	public static Session setFromPropertiesFromMap(Session session, HashMap map) {
+	public static Session setPropertiesFromMap(Session session, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		session = (Session) ServiceEntry.setFromPropertiesFromMap(session, map);
+		session = (Session) ServiceEntry.setPropertiesFromMap(session, map);
 		session.key = (String) map.get("key");
 		session.expirationDate = (Number) map.get("expirationDate");
 

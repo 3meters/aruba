@@ -77,8 +77,8 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		int doubleTapSlop = configuration.getScaledDoubleTapSlop();
 		mTouchSlopSquare = (touchSlop * touchSlop) / 4;
 
-		mMarker = ((BitmapDrawable) mapView.getResources().getDrawable(R.drawable.icon_map_candi_iii)).getBitmap();
-		mMarkerGrouped = ((BitmapDrawable) mapView.getResources().getDrawable(R.drawable.icon_map_candi_cluster)).getBitmap();
+		mMarker = ((BitmapDrawable) mapView.getResources().getDrawable(R.drawable.ic_map_candi_iii)).getBitmap();
+		mMarkerGrouped = ((BitmapDrawable) mapView.getResources().getDrawable(R.drawable.ic_map_candi_cluster)).getBitmap();
 
 		populate();
 	}
@@ -96,7 +96,7 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 
 		String title = "";
 		mBeaconId = null;
-		int collectionCount = 0;
+		int folderCount = 0;
 		int linkCount = 0;
 		int pictureCount = 0;
 		int postCount = 0;
@@ -106,7 +106,7 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 			Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(item.getSnippet());
 			if (mapBeacon != null) {
 
-				collectionCount += mapBeacon.collectionCount;
+				folderCount += mapBeacon.folderCount;
 				linkCount += mapBeacon.linkCount;
 				pictureCount += mapBeacon.pictureCount;
 				postCount += mapBeacon.postCount;
@@ -115,8 +115,8 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		}
 		title = title.substring(0, title.length() - 2);
 		String message = "";
-		if (collectionCount > 0) {
-			message += Aircandi.applicationContext.getString(R.string.candi_map_label_collections) + " " + String.valueOf(collectionCount) + "\n";
+		if (folderCount > 0) {
+			message += Aircandi.applicationContext.getString(R.string.candi_map_label_folders) + " " + String.valueOf(folderCount) + "\n";
 		}
 		if (linkCount > 0) {
 			message += Aircandi.applicationContext.getString(R.string.candi_map_label_links) + " " + String.valueOf(linkCount) + "\n";
@@ -129,7 +129,7 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 		}
 
 		/* Do stuff here when you tap, i.e. */
-		AircandiCommon.showAlertDialog(R.drawable.icon_app
+		AircandiCommon.showAlertDialog(R.drawable.ic_app
 				, title
 				, message
 				, null

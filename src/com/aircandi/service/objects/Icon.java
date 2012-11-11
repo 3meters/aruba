@@ -8,7 +8,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
-public class Icon implements Cloneable, Serializable {
+public class Icon extends ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 455904759787968585L;
 
@@ -18,8 +18,20 @@ public class Icon implements Cloneable, Serializable {
 	public String				suffix;
 
 	public Icon() {}
+	
+	@Override
+	public Icon clone() {
+		try {
+			final Icon icon = (Icon) super.clone();
+			return icon;
+		}
+		catch (final CloneNotSupportedException ex) {
+			throw new AssertionError();
+		}
+	}	
+	
 
-	public static Icon setFromPropertiesFromMap(Icon icon, HashMap map) {
+	public static Icon setPropertiesFromMap(Icon icon, HashMap map) {
 		icon.prefix = (String) map.get("prefix");
 		icon.suffix = (String) map.get("suffix");
 		return icon;

@@ -68,7 +68,7 @@ public class CommentList extends CandiActivity {
 		}
 		else {
 			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId);
-			mCommon.mActionBar.setTitle(collection.title);
+			mCommon.mActionBar.setTitle(collection.name);
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		}
 
@@ -296,7 +296,7 @@ public class CommentList extends CandiActivity {
 		}
 
 		public boolean isEnabled(int position) {
-			return false;
+			return true;
 		}
 
 	}

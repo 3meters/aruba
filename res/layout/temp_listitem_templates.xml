@@ -15,7 +15,7 @@
         android:layout_marginTop="3dp"
         android:focusable="false"
         android:padding="0dp"
-        android:src="@drawable/ic_picture_dark" />
+        android:src="@drawable/ic_action_picture_dark" />
 
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_title"

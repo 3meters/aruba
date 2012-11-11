@@ -33,7 +33,7 @@
         android:layout_marginLeft="5dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
-        aircandi:layout="@layout/temp_webimageview"
+        aircandi:layout="@layout/widget_webimageview"
         aircandi:maxHeight="20dp"
         aircandi:maxWidth="20dp" />
 

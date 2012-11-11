@@ -62,12 +62,16 @@ public class LinkPicker extends FormActivity {
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mVerifyUri = extras.getBoolean(getString(R.string.EXTRA_VERIFY_URI), false);
+			mUri = extras.getString(getString(R.string.EXTRA_URI));
 		}
 
 		mListView = (ListView) findViewById(R.id.list_bookmarks);
 		mOkButton = (Button) findViewById(R.id.btn_ok);
 		mTestButton = (Button) findViewById(R.id.btn_link_test);
 		mTextUri = (EditText) findViewById(R.id.text_uri);
+		if (mUri != null) {
+			mTextUri.setText(mUri);
+		}
 		mTextUri.addTextChangedListener(new SimpleTextWatcher() {
 
 			@Override

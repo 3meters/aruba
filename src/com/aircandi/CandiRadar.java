@@ -73,6 +73,7 @@ import com.aircandi.candi.presenters.CandiPatchPresenter;
 import com.aircandi.candi.presenters.CandiPatchPresenter.ICandiListener;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
+import com.aircandi.components.AndroidManager;
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
@@ -105,7 +106,9 @@ import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.Query;
 import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.User;
 import com.aircandi.service.objects.VersionInfo;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -475,6 +478,27 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		}
 	}
 
+	public void onTuneButtonClick(View view) {
+		Beacon beacon = ProxiExplorer.getInstance().getStrongestWifiAsBeacon();
+		if (beacon == null && mCommon.mParentId == null) {
+			AircandiCommon.showAlertDialog(R.drawable.ic_app
+					, "Aircandi beacons"
+					, getString(R.string.alert_tuning_radar_beacons_zero)
+					, null
+					, CandiRadar.this, android.R.string.ok
+					, null
+					, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {}
+					}
+					, null);
+			return;
+		}
+		
+		Intent intent = new Intent(this, CandiTuner.class);
+		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	}
+
 	public void onHelpButtonClick(View view) {
 		mCommon.showHelp(R.string.help_radar);
 	}
@@ -737,7 +761,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 				mCommon.hideProgressDialog();
 				mWifiDialog.setVisibility(View.GONE);
 				EntityList<Entity> radarEntities = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
-				((View) findViewById(R.id.button_new_candi)).setVisibility(Aircandi.wifiCount > 0 ? View.VISIBLE : View.GONE);
+				((View) findViewById(R.id.button_tune)).setVisibility(Aircandi.wifiCount > 0 ? View.VISIBLE : View.GONE);
 				if (radarEntities.size() > 0 || mWifiDialog.getVisibility() == View.VISIBLE) {
 					Aircandi.lastScanEmpty = false;
 					mEmptyDialog.setVisibility(View.GONE);
@@ -764,6 +788,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 		/* Check for rookies and play a sound */
 		if (mPrefSoundEffects && mCandiPatchPresenter.getRookieHit()) {
+			mCandiPatchPresenter.scrollToTop();
 			mCandiAlertSound.play();
 		}
 
@@ -820,7 +845,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 						String helpHtml = getString(wifiCount > 0 ? R.string.help_radar_empty : R.string.help_radar_empty_no_beacons);
 						((TextView) findViewById(R.id.text_empty_message)).setText(Html.fromHtml(helpHtml));
 						mEmptyDialog.setVisibility(View.VISIBLE);
-						((View) findViewById(R.id.button_new_candi)).setVisibility(wifiCount > 0 ? View.VISIBLE : View.GONE);
+						((View) findViewById(R.id.button_tune)).setVisibility(wifiCount > 0 ? View.VISIBLE : View.GONE);
 						mEmptyDialog.invalidate();
 					}
 				});
@@ -887,7 +912,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 		}
 		else {
 			intentBuilder.setCollectionId(entity.getParent().id);
-			intentBuilder.setEntityLocation(entity.getParent().location);
+			intentBuilder.setEntityLocation(new GeoLocation(entity.getParent().place.location.lat, entity.getParent().place.location.lng));
 		}
 
 		Intent intent = intentBuilder.create();
@@ -1420,7 +1445,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 			@Override
 			protected void onPreExecute() {
 				if (doUpdateCheck) {
-					mCommon.showProgressDialog(getString(R.string.progress_scanning), false, CandiRadar.this);
+					mCommon.showProgressDialog(getString(R.string.progress_scanning), true, CandiRadar.this);
 				}
 			}
 
@@ -1446,7 +1471,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 
 								@Override
 								public void run() {
-									mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.icon_app
+									mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.ic_app
 											, getString(R.string.alert_upgrade_title)
 											, getString(Aircandi.applicationUpdateRequired ? R.string.alert_upgrade_required_body
 													: R.string.alert_upgrade_needed_body)
@@ -1509,7 +1534,7 @@ public class CandiRadar extends AircandiGameActivity implements TextureListener 
 					if (Aircandi.applicationUpdateRequired) {
 						mCommon.hideProgressDialog();
 						if (mUpdateAlertDialog == null || !mUpdateAlertDialog.isShowing()) {
-							mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.icon_app
+							mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.ic_app
 									, getString(R.string.alert_upgrade_title)
 									, getString(R.string.alert_upgrade_required_body)
 									, null

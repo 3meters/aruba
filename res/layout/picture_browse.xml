@@ -1,58 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/background_picture_browse" >
+    android:background="?attr/backgroundForm" >
 
-    <RelativeLayout
-        android:id="@+id/progress_group"
+    <GridView
+        android:id="@+id/grid_gallery"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" >
+        android:layout_height="fill_parent"
+        android:columnWidth="100dp"
+        android:gravity="center"
+        android:horizontalSpacing="5dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="5dp" >
 
-        <ImageView
-            android:id="@+id/form_picture_placeholder"
-            style="@style/form_picture_placeholder"
-            android:layout_width="fill_parent"
-            android:layout_height="10dp" />
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="10dp"
-            android:layout_alignParentTop="true"
-            android:progress="0"
-            android:progressDrawable="@drawable/progress" />
-    </RelativeLayout>
-
-    <it.sephiroth.android.library.imagezoom.ImageViewTouch
-        android:id="@+id/image"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
-
-    <LinearLayout
-        style="?attr/buttonBarStyle"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="#66000000"
-        android:orientation="vertical"
-        android:padding="10dp" >
-
-        <TextView
-            android:id="@+id/text_title"
-            style="@style/form_title"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffffff" />
-
-        <com.aircandi.widgets.AuthorBlock
-            android:id="@+id/block_author"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            aircandi:layout="@layout/temp_user_info_text_only_dark" />
-    </LinearLayout>
+        <!-- Preview: listitem=@layout/temp_galleryitem -->
+    </GridView>
 
 </RelativeLayout>

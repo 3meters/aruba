@@ -44,7 +44,7 @@ public abstract class CandiListBase extends CandiActivity {
 		for (int i = 0; i < count; i++) {
 			final View view = mListView.getChildAt(i);
 			final CandiListViewHolder holder = (CandiListViewHolder) view.getTag();
-			if (holder.itemImage.getImageView().getDrawable() == null) {}
+			if (holder.image.getImageView().getDrawable() == null) {}
 		}
 
 		mListView.invalidate();
@@ -73,29 +73,6 @@ public abstract class CandiListBase extends CandiActivity {
 		}
 	}
 
-	public void showCandiFormForEntity(Entity entity, Class<?> clazz) {
-
-		IntentBuilder intentBuilder = new IntentBuilder(this, clazz);
-		intentBuilder.setCommandType(CommandType.View)
-				.setEntityId(entity.id)
-				.setParentEntityId(entity.parentId)
-				.setBeaconId(mCommon.mBeaconId)
-				.setEntityType(entity.type)
-				.setCollectionId(mCommon.mCollectionId)
-				.setEntityTree(mCommon.mEntityTree);
-
-		if (entity.getParent() != null) {
-			intentBuilder.setEntityLocation(entity.getParent().location);
-		}
-		else {
-			intentBuilder.setBeaconId(entity.beaconId);
-		}
-
-		Intent intent = intentBuilder.create();
-
-		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
-	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {

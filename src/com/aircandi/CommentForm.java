@@ -24,7 +24,7 @@ import com.aircandi.components.Tracker;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.User;
-import com.aircandi.widgets.AuthorBlock;
+import com.aircandi.widgets.UserView;
 
 public class CommentForm extends FormActivity {
 
@@ -58,7 +58,7 @@ public class CommentForm extends FormActivity {
 	}
 
 	private void initialize() {
-		mContent = (EditText) findViewById(R.id.text_content);
+		mContent = (EditText) findViewById(R.id.description);
 		mButtonSave = (Button) findViewById(R.id.button_save);
 		mButtonSave.setEnabled(false);
 
@@ -84,7 +84,7 @@ public class CommentForm extends FormActivity {
 
 	private void draw() {
 		/* Author */
-		((AuthorBlock) findViewById(R.id.block_author)).bindToUser(Aircandi.getInstance().getUser(), null);
+		((UserView) findViewById(R.id.author)).bindToUser(Aircandi.getInstance().getUser(), null);
 	}
 
 	// --------------------------------------------------------------------------------------------

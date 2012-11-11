@@ -9,11 +9,12 @@ import java.util.regex.Pattern;
 
 public class DateUtils {
 
-	public static final String	DATE_NOW_FORMAT				= "yyyy-MM-dd HH:mm:ss";
-	public static final String	DATE_NOW_FORMAT_FILENAME	= "yyyyMMdd_HHmmss";
-	public static final String	DATE_FORMAT_TIME_SINCE		= "MMM d";
-	public static final String	TIME_FORMAT_TIME_SINCE		= "h:mm";
-	public static final String	AMPM_FORMAT_TIME_SINCE		= "a";
+	public static final String	DATE_NOW_FORMAT						= "yyyy-MM-dd HH:mm:ss";
+	public static final String	DATE_NOW_FORMAT_FILENAME			= "yyyyMMdd_HHmmss";
+	public static final String	DATE_FORMAT_TIME_SINCE				= "MMM d";
+	public static final String	DATE_FORMAT_TIME_SINCE_WITH_YEAR	= "MMM d, yyyy";
+	public static final String	TIME_FORMAT_TIME_SINCE				= "h:mm";
+	public static final String	AMPM_FORMAT_TIME_SINCE				= "a";
 
 	public static String nowString() {
 		Calendar cal = Calendar.getInstance();
@@ -74,6 +75,7 @@ public class DateUtils {
 		return output.getTime();
 	}
 
+	@SuppressWarnings("deprecation")
 	public static String timeSince(Long dateOldMillis, Long dateNewMillis) {
 
 		Long dateNewLong = dateNewMillis;
@@ -81,7 +83,7 @@ public class DateUtils {
 
 		Date dateNew = new Date(dateNewLong);
 		Date dateOld = new Date(dateOldLong);
-		
+
 		Long diff = dateNew.getTime() - dateOld.getTime();
 
 		if (diff <= 0) {
@@ -99,11 +101,17 @@ public class DateUtils {
 		String interval = "";
 		if (days >= 1) {
 			SimpleDateFormat datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE);
-			SimpleDateFormat timePart = new SimpleDateFormat(TIME_FORMAT_TIME_SINCE);
-			SimpleDateFormat ampmPart = new SimpleDateFormat(AMPM_FORMAT_TIME_SINCE);
-			return datePart.format(dateOld.getTime()) + " at "
-					+ timePart.format(dateOld.getTime())
-					+ ampmPart.format(dateOld.getTime()).toLowerCase();
+			if (dateOld.getYear() != DateUtils.nowDate().getYear()) {
+				datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE_WITH_YEAR);
+				return datePart.format(dateOld.getTime());
+			}
+			else {
+				SimpleDateFormat timePart = new SimpleDateFormat(TIME_FORMAT_TIME_SINCE);
+				SimpleDateFormat ampmPart = new SimpleDateFormat(AMPM_FORMAT_TIME_SINCE);
+				return datePart.format(dateOld.getTime()) + " at "
+						+ timePart.format(dateOld.getTime())
+						+ ampmPart.format(dateOld.getTime()).toLowerCase();
+			}
 		}
 		else if (hours == 1) /* x hours x minutes ago */
 		{

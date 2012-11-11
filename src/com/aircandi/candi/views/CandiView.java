@@ -558,87 +558,94 @@ public class CandiView extends BaseView implements OnGestureListener {
 			 */
 			mActiveImageRequest = true;
 			final Entity entity = candiModel.getEntity();
+			String imageUri = entity.getImageUri();
 
-			final ImageRequestBuilder builder = new ImageRequestBuilder(this);
-			builder.setImageUri(entity.getMasterImageUri());
-			builder.setImageFormat(entity.getMasterImageFormat());
-			builder.setLinkZoom(entity.linkZoom);
-			builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
-			builder.setSearchCache(!skipCache);
-			builder.setRequestListener(new RequestListener() {
+			final ImageRequestBuilder builder = new ImageRequestBuilder(this)
+					.setImageUri(imageUri)
+					.setImageFormat(entity.getImageFormat())
+					.setLinkZoom(CandiConstants.LINK_ZOOM)
+					.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED)
+					.setSearchCache(!skipCache)
+					.setRequestListener(new RequestListener() {
 
-				@Override
-				public void onComplete(Object response) {
-					/*
-					 * Executes on the ViewManager thread (which has the lowest possible priority). First time for a
-					 * candiview is more expensive because the body and reflection sprites are created.
-					 */
-					ServiceResponse serviceResponse = (ServiceResponse) response;
-
-					/*
-					 * We could be coming back while the data model is getting rebuilt which makes the current work
-					 * expendable.
-					 */
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						/*
-						 * The view could have been recycled while we were busy and won't have a bound model.
-						 */
-						if (mModel != null && !mRecycled) {
+						@Override
+						public void onComplete(Object response) {
 							/*
-							 * The view could have been recycled and put back into service targeting a different
-							 * bitmap.
+							 * Executes on the ViewManager thread (which has the lowest possible priority). First
+							 * time
+							 * for a
+							 * candiview is more expensive because the body and reflection sprites are created.
 							 */
-							final CandiModel candiModel = (CandiModel) mModel;
-							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-							String imageUri = ImageRequestBuilder.getImageUriFromEntity(candiModel.getEntity());
+							ServiceResponse serviceResponse = (ServiceResponse) response;
 
-							if (imageResponse.imageUri.equals(imageUri) && imageResponse.bitmap != null) {
-								Logger.v(CandiView.this, "Texture request complete: " + titleText);
-								mHasBitmap = true;
-								updateTextureRegions(imageResponse.bitmap, skipCache);
-								if (candiModel.getViewStateCurrent().isVisible()) {
-									showBodyAndReflectionAnimated();
+							/*
+							 * We could be coming back while the data model is getting rebuilt which makes the
+							 * current
+							 * work
+							 * expendable.
+							 */
+							if (serviceResponse.responseCode == ResponseCode.Success) {
+								/*
+								 * The view could have been recycled while we were busy and won't have a bound
+								 * model.
+								 */
+								if (mModel != null && !mRecycled) {
+									/*
+									 * The view could have been recycled and put back into service targeting a
+									 * different
+									 * bitmap.
+									 */
+									final CandiModel candiModel = (CandiModel) mModel;
+									ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+									String imageUri = ImageRequestBuilder.getImageUriFromEntity(candiModel.getEntity());
+
+									if (imageResponse.imageUri.equals(imageUri) && imageResponse.bitmap != null) {
+										Logger.v(CandiView.this, "Texture request complete: " + titleText);
+										mHasBitmap = true;
+										updateTextureRegions(imageResponse.bitmap, skipCache);
+										if (candiModel.getViewStateCurrent().isVisible()) {
+											showBodyAndReflectionAnimated();
+										}
+									}
+									Logger.v(CandiView.this, "Texture region update complete: " + titleText + ": "
+											+ String.valueOf((System.nanoTime() - startTime) / 1000000) + "ms");
+									progressVisible(false);
+								}
+								else {
+									if (mModel != null) {
+										String modelTitle = ((CandiModel) mModel).getTitleText();
+										Logger.v(CandiView.this, "Texture request complete but requestor recycled : " + modelTitle);
+									}
 								}
 							}
-							Logger.v(CandiView.this, "Texture region update complete: " + titleText + ": "
-									+ String.valueOf((System.nanoTime() - startTime) / 1000000) + "ms");
-							progressVisible(false);
-						}
-						else {
-							if (mModel != null) {
-								String modelTitle = ((CandiModel) mModel).getTitleText();
-								Logger.v(CandiView.this, "Texture request complete but requestor recycled : " + modelTitle);
-							}
-						}
-					}
-					else {
-						if (!mHasBitmap && mModel != null && !mRecycled) {
-							Logger.w(CandiView.this, "Broken image: " + entity.imagePreviewUri);
-							Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.image_broken);
-							if (bitmap != null) {
-								mHasBitmap = false;
-								updateTextureRegions(bitmap, skipCache);
-								if (candiModel.getViewStateCurrent().isVisible()) {
-									showBodyAndReflectionAnimated();
+							else {
+								if (!mHasBitmap && mModel != null && !mRecycled) {
+									Logger.w(CandiView.this, "Broken image: " + entity.photo.getImageUri());
+									Bitmap bitmap = ImageManager.getInstance().loadBitmapFromResources(R.drawable.image_broken);
+									if (bitmap != null) {
+										mHasBitmap = false;
+										updateTextureRegions(bitmap, skipCache);
+										if (candiModel.getViewStateCurrent().isVisible()) {
+											showBodyAndReflectionAnimated();
+										}
+										progressVisible(false);
+									}
 								}
-								progressVisible(false);
+							}
+							mActiveImageRequest = false;
+						}
+
+						@Override
+						public void onProgressChanged(int progress) {
+							mProgressBarSprite.setWidth(progress * ((float) CandiConstants.CANDI_VIEW_WIDTH / 100f));
+
+							/* We tickle the rendering window if it's getting low */
+							if (mCandiPatchPresenter != null && mCandiPatchPresenter.getRenderingTimeLeft() <= 1000) {
+								Logger.v(this, "Bumping rendering timer");
+								mCandiPatchPresenter.renderingActivateBump();
 							}
 						}
-					}
-					mActiveImageRequest = false;
-				}
-
-				@Override
-				public void onProgressChanged(int progress) {
-					mProgressBarSprite.setWidth(progress * ((float) CandiConstants.CANDI_VIEW_WIDTH / 100f));
-
-					/* We tickle the rendering window if it's getting low */
-					if (mCandiPatchPresenter != null && mCandiPatchPresenter.getRenderingTimeLeft() <= 1000) {
-						Logger.v(this, "Bumping rendering timer");
-						mCandiPatchPresenter.renderingActivateBump();
-					}
-				}
-			});
+					});
 
 			ImageRequest imageRequest = builder.create();
 
@@ -785,11 +792,11 @@ public class CandiView extends BaseView implements OnGestureListener {
 						, false);
 			}
 
-			else if (candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+			else if (candiModel.getEntity().type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
 
 				/* Handle bitmap overlay for collections that have a badge set */
-				if (candiModel.getEntity().getMasterImageUri() == null
-						|| !candiModel.getEntity().getMasterImageUri().toLowerCase().startsWith("resource:")) {
+				if (candiModel.getEntity().getImageUri() == null
+						|| !candiModel.getEntity().getImageUri().toLowerCase().startsWith("resource:")) {
 
 					if (!isReflection && mCandiPatchPresenter != null) {
 						bitmap = overlayBitmapOnBitmap(bitmap
@@ -829,7 +836,7 @@ public class CandiView extends BaseView implements OnGestureListener {
 		 * Completely remove all resources associated with this sprite. This should only be called from the engine
 		 * update thread.
 		 */
-		String associatedModel = mModel != null ? ((CandiModel) mModel).getEntity().label : "Recycled";
+		String associatedModel = mModel != null ? ((CandiModel) mModel).getEntity().name : "Recycled";
 		Logger.v(this, "Unloading resources: " + associatedModel);
 
 		if (mProgressBarSprite != null) {

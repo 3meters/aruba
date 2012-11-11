@@ -24,8 +24,9 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.DrawableManager;
+import com.aircandi.components.DrawableManager.ViewHolder;
 import com.aircandi.components.EndlessAdapter;
+import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageResult;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -51,9 +52,9 @@ public class PictureSearch extends FormActivity {
 	private Spinner					mCategory;
 	private EditText				mSearch;
 	private ArrayList<ImageResult>	mImages;
-	private DrawableManager			mDrawableManager;
 	private long					mOffset		= 0;
 	private String					mQuery;
+	private String					mDefaultSearch;
 	private LayoutInflater			mInflater;
 	private String					mTitleOptional;
 	private static long				PAGE_SIZE	= 30L;
@@ -68,8 +69,11 @@ public class PictureSearch extends FormActivity {
 	}
 
 	private void initialize() {
+		Bundle extras = this.getIntent().getExtras();
+		if (extras != null) {
+			mDefaultSearch = extras.getString(getString(R.string.EXTRA_SEARCH_PHRASE));
+		}
 
-		mDrawableManager = new DrawableManager();
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mGridView = (GridView) findViewById(R.id.grid_gallery);
 
@@ -88,8 +92,12 @@ public class PictureSearch extends FormActivity {
 		});
 
 		mSearch = (EditText) findViewById(R.id.text_uri);
-		String query = Aircandi.settings.getString(Preferences.SETTING_PICTURE_SEARCH, null);
-		mSearch.setText(query);
+		if (mDefaultSearch != null) {
+			mSearch.setText(mDefaultSearch);
+		}
+		else {
+			mSearch.setText(Aircandi.settings.getString(Preferences.SETTING_PICTURE_SEARCH, null));
+		}
 	}
 
 	protected void bind() {
@@ -148,12 +156,12 @@ public class PictureSearch extends FormActivity {
 		catch (UnsupportedEncodingException exception) {
 			exception.printStackTrace();
 		}
-		
+
 		String bingUrl = ProxiConstants.URL_PROXIBASE_SEARCH_IMAGES
-				+ "?Query=" + query 
+				+ "?Query=" + query
 				+ "&Market=%27en-US%27&Adult=%27Moderate%27&ImageFilters=%27size%3alarge%27"
-				+ "&$top=" + String.valueOf(count) 
-				+ "&$skip=" + String.valueOf(offset) 
+				+ "&$top=" + String.valueOf(count)
+				+ "&$skip=" + String.valueOf(offset)
 				+ "&$format=Json";
 
 		ServiceRequest serviceRequest = new ServiceRequest(bingUrl, RequestType.Get, ResponseFormat.Json);
@@ -162,8 +170,8 @@ public class PictureSearch extends FormActivity {
 				.setPassword(getBingKey());
 
 		serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-		
-		ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart((String)serviceResponse.data, ServiceDataType.ImageResult);
+
+		ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart((String) serviceResponse.data, ServiceDataType.ImageResult);
 		ArrayList<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
 		serviceResponse.data = images;
 
@@ -318,16 +326,9 @@ public class PictureSearch extends FormActivity {
 				holder.data = itemData;
 				holder.itemImage.setTag(itemData.getThumbnail().getUrl());
 				holder.itemImage.setImageBitmap(null);
-				mDrawableManager.fetchDrawableOnThread(itemData.getThumbnail().getUrl(), holder);
+				ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(itemData.getThumbnail().getUrl(), holder, null);
 			}
 			return view;
 		}
 	}
-
-	public static class ViewHolder {
-
-		public ImageView	itemImage;
-		public Object		data;
-	}
-
 }

@@ -113,7 +113,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	/* Theme */
 	public String						mThemeTone;
-	public Integer						mThemeId;
 	public Integer						mThemeBusyIndicatorResId;
 	public Integer						mThemeDialogResId;
 
@@ -121,7 +120,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public TextView						mBeaconIndicator;
 	protected TextView					mTitle;
 	protected MenuItem					mMenuItemRefresh;
-	protected Boolean					mStartBusyIndicator				= false;
+	protected Boolean					mStartBusyIndicator			= false;
 	private ProgressDialog				mProgressDialog;
 	public String						mPrefTheme;
 	public Boolean						mUsingCustomTheme			= false;
@@ -226,7 +225,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			mEntityType = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_TYPE));
 			mEntityId = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_ID));
 			mMessage = extras.getString(mContext.getString(R.string.EXTRA_MESSAGE));
-			mThemeId = extras.getInt(mContext.getString(R.string.EXTRA_THEME_ID));
 			mCollectionId = extras.getString(mContext.getString(R.string.EXTRA_COLLECTION_ID));
 			mNavigationTop = extras.getBoolean(mContext.getString(R.string.EXTRA_NAVIGATION_TOP));
 
@@ -268,7 +266,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		String message = mActivity.getString(R.string.alert_about_message) + " "
 				+ Aircandi.getVersionName(mContext, CandiRadar.class) + "\n"
 				+ mActivity.getString(R.string.dialog_info);
-		AircandiCommon.showAlertDialog(R.drawable.icon_app
+		AircandiCommon.showAlertDialog(R.drawable.ic_app
 				, title
 				, message
 				, null
@@ -308,7 +306,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					}
 				}
 			}
-			AircandiCommon.showAlertDialog(R.drawable.icon_app
+			AircandiCommon.showAlertDialog(R.drawable.ic_app
 					, mActivity.getString(R.string.alert_beacons_title)
 					, beaconMessage
 					, null
@@ -336,8 +334,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Aircandi.returningFromDialog = true;
 		Intent intent = new Intent(mActivity, TemplatePicker.class);
 		intent.putExtra(mActivity.getString(R.string.EXTRA_ENTITY_IS_ROOT), isRoot);
-		intent.putExtra(mActivity.getString(R.string.EXTRA_THEME_ID), mThemeTone.equals("dark") ? R.style.Theme_Sherlock_Dialog
-				: R.style.Theme_Sherlock_Light_Dialog);
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_TEMPLATE_PICK);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
@@ -353,10 +349,25 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Aircandi.returningFromDialog = true;
 		Intent intent = new Intent(mActivity, HelpForm.class);
 		intent.putExtra(mActivity.getString(R.string.EXTRA_STRING_ID), R.string.help_radar);
-		intent.putExtra(mActivity.getString(R.string.EXTRA_THEME_ID), mThemeTone.equals("dark") ? R.style.Theme_Sherlock_Dialog
-				: R.style.Theme_Sherlock_Light_Dialog);
 		mActivity.startActivity(intent);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.HelpShow);
+	}
+
+	public void showCandiFormForEntity(Entity entity, Class<?> clazz) {
+
+		IntentBuilder intentBuilder = new IntentBuilder(mActivity, clazz);
+		intentBuilder.setCommandType(CommandType.View)
+				.setEntityId(entity.id)
+				.setParentEntityId(entity.parentId)
+				.setBeaconId(mBeaconId)
+				.setEntityType(entity.type)
+				.setCollectionId(mCollectionId)
+				.setEntityTree(mEntityTree);
+
+		Intent intent = intentBuilder.create();
+
+		mActivity.startActivity(intent);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiListToCandiForm);
 	}
 
 	public void updateBeaconIndicator(final List<WifiScanResult> scanList) {
@@ -420,7 +431,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 		String errorMessage = serviceResponse.exception.getMessage();
 
 		/* We always make sure the progress indicator has been stopped */
-		hideProgressDialog();
+		mActivity.runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				hideProgressDialog();
+			}
+		});
 
 		/*
 		 * Client errors occur when we are unable to get a response from a service, or when the client is
@@ -543,12 +560,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void showNotification(String title, String message, Context context, Intent intent, int notificationType) {
 		@SuppressWarnings("deprecation")
-		Notification note = new Notification(R.drawable.icon_app_status
+		Notification note = new Notification(R.drawable.ic_app_status
 				, title
 				, System.currentTimeMillis());
 
 		RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification);
-		contentView.setImageViewResource(R.id.image, R.drawable.icon_app);
+		contentView.setImageViewResource(R.id.image, R.drawable.ic_app);
 		contentView.setTextViewText(R.id.title, title);
 		contentView.setTextViewText(R.id.text, message);
 		note.contentView = contentView;
@@ -613,9 +630,15 @@ public class AircandiCommon implements ActionBar.TabListener {
 		return (progressDialog.isShowing());
 	}
 
-	public static AlertDialog showAlertDialog(Integer iconResource, String titleText, String message, View customView, Context context, Integer okButtonId,
-			Integer cancelButtonId,
-			OnClickListener listenerClick, OnCancelListener listenerCancel) {
+	public static AlertDialog showAlertDialog(Integer iconResource
+			, String titleText
+			, String message
+			, View customView
+			, Context context
+			, Integer okButtonId
+			, Integer cancelButtonId
+			, OnClickListener listenerClick
+			, OnCancelListener listenerCancel) {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(context)
 				.setIcon(iconResource)
@@ -659,7 +682,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 			@Override
 			public void run() {
-				AircandiCommon.showAlertDialog(R.drawable.icon_app
+				AircandiCommon.showAlertDialog(R.drawable.ic_app
 						, titleText
 						, message
 						, null
@@ -670,21 +693,24 @@ public class AircandiCommon implements ActionBar.TabListener {
 		});
 	}
 
-	public void setTheme(Boolean isDialog, Boolean isForm) {
+	public void setTheme(Integer themeResId, Boolean isDialog) {
 		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
-		Integer themeResId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
-		if (isDialog) {
-			themeResId = R.style.aircandi_theme_dialog_dark;
-			if (mPrefTheme.equals("aircandi_theme_snow")
-					|| mPrefTheme.equals("aircandi_theme_serene")
-					|| mPrefTheme.equals("aircandi_theme_lagoon")
-					|| mPrefTheme.equals("aircandi_theme_blueray")) {
-				themeResId = R.style.aircandi_theme_dialog_light;
+		/*
+		 * Need to use application context so our app level themes and attributes are available to actionbarsherlock
+		 */
+		if (themeResId == null) {
+			themeResId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
+			if (isDialog) {
+				themeResId = R.style.aircandi_theme_dialog_dark;
+				if (mPrefTheme.equals("aircandi_theme_snow")
+						|| mPrefTheme.equals("aircandi_theme_serene")
+						|| mPrefTheme.equals("aircandi_theme_lagoon")
+						|| mPrefTheme.equals("aircandi_theme_blueray")) {
+					themeResId = R.style.aircandi_theme_dialog_light;
+				}
 			}
 		}
-		else if (isForm) {
-			themeResId = R.style.aircandi_theme_form_light;
-		}
+
 		((Activity) mContext).setTheme(themeResId);
 	}
 
@@ -1434,13 +1460,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 		CommentBrowse,
 		CommentSave,
 		PictureBrowse,
+		PictureForm,
 		PictureSearch,
 		MapBrowse,
 		LinkLookup,
 		Unknown,
 		PickBookmark,
 		PickCandi,
-		CheckUpdate
+		CheckUpdate, TipBrowse, Tuning
 	}
 
 	public static enum ActionButtonSet {

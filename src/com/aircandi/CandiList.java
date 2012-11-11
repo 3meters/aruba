@@ -32,7 +32,7 @@ public class CandiList extends CandiListBase {
 		 */
 		Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId);
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
-		mCommon.mActionBar.setTitle(collection.title);
+		mCommon.mActionBar.setTitle(collection.name);
 	}
 
 	public void bind(final Boolean refresh) {
@@ -89,7 +89,7 @@ public class CandiList extends CandiListBase {
 	public void onListItemClick(View view) {
 		Logger.v(this, "List item clicked");
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
-		showCandiFormForEntity(entity, CandiForm.class);
+		mCommon.showCandiFormForEntity(entity, CandiForm.class);
 	}
 
 	@Override

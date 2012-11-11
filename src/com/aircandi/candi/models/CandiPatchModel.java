@@ -155,7 +155,7 @@ public class CandiPatchModel extends Observable {
 		 */
 		CandiModel candiModelManaged = mCandiModels.getByKey(String.valueOf(entity.id));
 		Entity originalEntity = candiModelManaged.getEntity();
-		if (!entity.getMasterImageUri().equals(originalEntity.getMasterImageUri())) {
+		if (!entity.getImageUri().equals(originalEntity.getImageUri())) {
 			candiModelManaged.setMasterImageUpdated(true);
 		}
 
@@ -169,7 +169,7 @@ public class CandiPatchModel extends Observable {
 		}
 
 		candiModelManaged.setEntity(entity);
-		candiModelManaged.setTitleText(entity.label);
+		candiModelManaged.setTitleText(entity.name);
 
 		if (candiModelManaged.getReasonInactive() != ReasonInactive.Navigation) {
 			if (entity.hidden) {

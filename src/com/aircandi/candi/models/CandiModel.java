@@ -116,7 +116,7 @@ public class CandiModel extends BaseModel {
 				displayExtra = String.valueOf(mEntity.getBeacon().getAvgBeaconLevel());
 			}
 			else if (mDisplayExtra == DisplayExtra.Tag) {
-				displayExtra = String.valueOf(mEntity.getBeacon().id);
+				displayExtra = String.valueOf(mEntity.getBeaconId());
 			}
 			else if (mDisplayExtra == DisplayExtra.Time) {
 				displayExtra = String.valueOf(mEntity.getBeacon().discoveryTime.getTime() / 100);

@@ -34,7 +34,7 @@ public class ServiceData {
 
 	public ServiceData() {}
 
-	public static ServiceData setFromPropertiesFromMap(ServiceData serviceData, HashMap map) {
+	public static ServiceData setPropertiesFromMap(ServiceData serviceData, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
@@ -45,13 +45,13 @@ public class ServiceData {
 		serviceData.more = (Boolean) map.get("more");
 		serviceData.info = (String) map.get("info");
 		if (map.get("user") != null) {
-			serviceData.user = (User) User.setFromPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
+			serviceData.user = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
 		}
 		if (map.get("error") != null) {
-			serviceData.error = (ServiceError) ServiceError.setFromPropertiesFromMap(new ServiceError(), (HashMap<String, Object>) map.get("error"));
+			serviceData.error = (ServiceError) ServiceError.setPropertiesFromMap(new ServiceError(), (HashMap<String, Object>) map.get("error"));
 		}
 		if (map.get("session") != null) {
-			serviceData.session = (Session) Session.setFromPropertiesFromMap(new Session(), (HashMap<String, Object>) map.get("session"));
+			serviceData.session = (Session) Session.setPropertiesFromMap(new Session(), (HashMap<String, Object>) map.get("session"));
 		}
 		serviceData.time = (Number) map.get("time");
 

@@ -16,7 +16,7 @@ public class MapCandiForm extends CandiFormBase {
 	}
 
 	public void bind(Boolean refresh) {
-		doBind(refresh, true, EntityTree.Map);
+		doBind(refresh, false, EntityTree.Map);
 	}
 
 	// --------------------------------------------------------------------------------------------

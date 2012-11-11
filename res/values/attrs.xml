@@ -10,6 +10,7 @@
         <attr name="candiFormTitleStyle" format="reference" />
         <attr name="candiListTitleStyle" format="reference" />
         <attr name="ruleColor" format="color|reference" />
+        <attr name="ruleColorStrong" format="color|reference" />
         <attr name="textColor" format="color|reference" />
         <attr name="textColorRadar" format="color|reference" />
         <attr name="textColorUnfocused" format="color|reference" />
@@ -41,6 +42,19 @@
     <declare-styleable name="AuthorLayout">
         <attr name="layout" />
     </declare-styleable>
+    <declare-styleable name="HorizontalScrollLayout">
+        <attr name="layout" />
+    </declare-styleable>
+    <declare-styleable name="SectionLayout">
+        <attr name="layoutHeader" format="integer" />
+        <attr name="layoutFooter" format="integer" />
+        <attr name="headerTitle" format="string" />
+    </declare-styleable>
+    <declare-styleable name="ListViewExpanded">
+        <attr name="layoutItems" format="integer" />
+        <attr name="itemMaxCount" format="integer" />
+        <attr name="showDivider" format="boolean" />
+        </declare-styleable>
     <declare-styleable name="WebImageView">
         <attr name="layout" />
         <attr name="showBusy" format="boolean" />
@@ -49,6 +63,12 @@
         <attr name="maxWidth" format="dimension" />
         <attr name="minHeight" format="dimension" />
         <attr name="maxHeight" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="BuilderButton">
+        <attr name="hint" format="string" />
+    </declare-styleable>
+    <declare-styleable name="ComboButton">
+        <attr name="drawableScale" format="float" />
     </declare-styleable>
     <declare-styleable name="Debug">
         <attr name="imageSliderHandleInfo" format="string" />

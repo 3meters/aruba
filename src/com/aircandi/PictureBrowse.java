@@ -1,168 +1,270 @@
 package com.aircandi;
 
-import it.sephiroth.android.library.imagezoom.ImageViewTouch;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
+import java.util.ArrayList;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView.ScaleType;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
 
-import com.actionbarsherlock.view.Window;
-import com.aircandi.components.Exceptions;
-import com.aircandi.components.ImageManager;
-import com.aircandi.components.ImageRequest;
-import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.ImageRequest.ImageResponse;
+import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
+import com.aircandi.components.DrawableManager.ViewHolder;
+import com.aircandi.components.EndlessAdapter;
+import com.aircandi.components.ImageManager;
+import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.core.CandiConstants;
-import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Entity.ImageFormat;
-import com.aircandi.widgets.AuthorBlock;
-import com.aircandi.R;
+import com.aircandi.service.objects.Photo;
 
+/*
+ * We often will get duplicates because the ordering of images isn't
+ * guaranteed while paging.
+ */
 public class PictureBrowse extends FormActivity {
 
-	private ImageViewTouch	mImageViewTouch;
-	private ProgressBar		mProgress;
-	private ViewGroup		mProgressGroup;
-	private Bitmap			mBitmap;
+	private GridView			mGridView;
+	private ArrayList<Photo>	mImages;
+	private String				mSource;
+	private String				mSourceId;
+	private long				mOffset		= 0;
+	private LayoutInflater		mInflater;
+	private Boolean				mAsPicker;
+	private static long			PAGE_SIZE	= 30L;
+	private static long			LIST_MAX	= 300L;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		/* This has to be called before setContentView */
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 
 		initialize();
-		draw();
+		bind();
 	}
 
 	private void initialize() {
-		mProgress = (ProgressBar) findViewById(R.id.progressBar);
-		mProgressGroup = (ViewGroup) findViewById(R.id.progress_group);
-		mImageViewTouch = (ImageViewTouch) findViewById(R.id.image);
-		mImageViewTouch.setFitToScreen(true);
-		setSupportProgressBarIndeterminateVisibility(true);
-		mCommon.mActionBar.setSubtitle("double-tap to zoom");
+
+		Bundle extras = this.getIntent().getExtras();
+		if (extras != null) {
+			mAsPicker = extras.getBoolean(getString(R.string.EXTRA_AS_PICKER));
+		}
+
+		Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId);
+		mSource = entity.place.source;
+		mSourceId = entity.place.sourceId;
+		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mGridView = (GridView) findViewById(R.id.grid_gallery);
+
+		mGridView.setOnItemClickListener(new OnItemClickListener() {
+
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+
+				String imageUri = mImages.get(position).getImageUri();
+				if (imageUri != null && !imageUri.equals("")) {
+					if (mAsPicker) {
+						Intent intent = new Intent();
+						intent.putExtra(getString(R.string.EXTRA_URI), imageUri);
+						setResult(Activity.RESULT_OK, intent);
+						finish();
+					}
+					else {
+						ProxiExplorer.getInstance().getEntityModel().setPhotos(mImages);
+						Intent intent = new Intent(PictureBrowse.this, PictureDetail.class);
+						intent.putExtra(getString(R.string.EXTRA_URI), imageUri);
+						startActivity(intent);
+						AnimUtils.doOverridePendingTransition(PictureBrowse.this, TransitionType.CandiPageToForm);
+					}
+				}
+			}
+		});
 	}
 
-	protected void draw() {
+	protected void bind() {
 
-		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, false, false, null, null);
-		final Entity entity = (Entity) result.data;
+		new AsyncTask<Object, Object, Object>() {
 
-		/* Title */
-		if (findViewById(R.id.text_title) != null) {
-			((TextView) findViewById(R.id.text_title)).setText(entity.title);
-		}
-
-		/* Author block */
-		if (entity.creator != null) {
-			((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.creator,
-					entity.modifiedDate.longValue(), entity.locked);
-		}
-		else {
-			((View) findViewById(R.id.block_author)).setVisibility(View.GONE);
-		}
-
-		if (mBitmap != null) {
-			mImageViewTouch.setImageBitmap(mBitmap);			
-		}
-		else {
-
-			final ImageRequestBuilder builder = new ImageRequestBuilder(this);
-			String imageUri = entity.imageUri;
-			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
-				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
 			}
-			builder.setImageUri(imageUri)
-					.setImageFormat(ImageFormat.Binary)
-					.setSearchCache(false)
-					.setUpdateCache(false)
-					.setScaleToWidth(CandiConstants.IMAGE_WIDTH_ORIGINAL)
-					.setRequestListener(new RequestListener() {
 
-						@Override
-						public void onComplete(Object response) {
-							final ServiceResponse serviceResponse = (ServiceResponse) response;
-							runOnUiThread(new Runnable() {
+			@Override
+			protected Object doInBackground(Object... params) {
+				ServiceResponse serviceResponse = loadImages(PAGE_SIZE, 0);
+				return serviceResponse;
+			}
 
-								@Override
-								public void run() {
-									if (serviceResponse.responseCode == ResponseCode.Success) {
-										ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-										mBitmap = imageResponse.bitmap;
-										mImageViewTouch.setImageBitmap(imageResponse.bitmap);
-									}
-									else {
-										//mImageViewTouch.setFitToScreen(false);
-										mImageViewTouch.setScaleType(ScaleType.CENTER);
-										mImageViewTouch.setImageResource(R.drawable.image_broken);
-										mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureBrowse);
-									}
-									setSupportProgressBarIndeterminateVisibility(false);
+			@Override
+			protected void onPostExecute(Object result) {
+				ServiceResponse serviceResponse = (ServiceResponse) result;
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					mImages = (ArrayList<Photo>) serviceResponse.data;
+					mOffset += PAGE_SIZE;
+					mGridView.setAdapter(new EndlessImageAdapter(mImages));
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
+				}
+				mCommon.hideProgressDialog();
+			}
+		}.execute();
 
-								}
-							});
-						}
+	}
 
-						@Override
-						public void onProgressChanged(final int progress) {
-							runOnUiThread(new Runnable() {
+	private ServiceResponse loadImages(long count, long offset) {
+		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getPlacePhotos(mSource, mSourceId, count, offset);
+		return result.serviceResponse;
+	}
 
-								@Override
-								public void run() {
-									mProgress.setProgress(progress);
-									if (progress == 100) {
-										mProgressGroup.setVisibility(View.GONE);
-									}
-								}
-							});
-						}
-					});
+	// --------------------------------------------------------------------------------------------
+	// Event routines
+	// --------------------------------------------------------------------------------------------
 
-			ImageRequest imageRequest = builder.create();
-			ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, false);
-		}
+	public void onSearchClick(View view) {
+		bind();
+	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle routines
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		System.gc();
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		mImageViewTouch.setFitToScreen(true);
-		super.onConfigurationChanged(newConfig);
+
+	protected void unbindDrawables(View view) {
+		if (view.getBackground() != null) {
+			view.getBackground().setCallback(null);
+		}
+		if (view instanceof ViewGroup) {
+			for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+				unbindDrawables(((ViewGroup) view).getChildAt(i));
+			}
+			try {
+				((ViewGroup) view).removeAllViews();
+			}
+			catch (Throwable e) {
+				// NOP
+			}
+		}
 	}
 
-
-	protected void onDestroy() {
-		/*
-		 * This activity gets destroyed everytime we leave using back or
-		 * finish().
-		 */
-		try {
-			mCommon.doDestroy();
+	protected void unbindImageViewDrawables(ImageView imageView) {
+		if (imageView.getBackground() != null) {
+			imageView.getBackground().setCallback(null);
 		}
-		catch (Exception exception) {
-			Exceptions.Handle(exception);
-		}
-		finally {
-			super.onDestroy();
+		if (imageView.getDrawable() != null) {
+			imageView.getDrawable().setCallback(null);
+			((BitmapDrawable) imageView.getDrawable()).getBitmap().recycle();
 		}
 	}
 
 	@Override
 	protected int getLayoutID() {
 		return R.layout.picture_browse;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Inner classes
+	// --------------------------------------------------------------------------------------------
+
+	class EndlessImageAdapter extends EndlessAdapter {
+
+		ArrayList<Photo>	moreImages	= new ArrayList<Photo>();
+
+		EndlessImageAdapter(ArrayList<Photo> list) {
+			super(new ListAdapter(list));
+		}
+
+		@Override
+		protected View getPendingView(ViewGroup parent) {
+			View view = mInflater.inflate(R.layout.temp_picture_search_item_placeholder, null);
+			return (view);
+		}
+
+		@Override
+		protected boolean cacheInBackground() {
+			/* What happens if there is a connectivity error? */
+			moreImages.clear();
+
+			ServiceResponse serviceResponse = loadImages(PAGE_SIZE, mOffset);
+			if (serviceResponse.responseCode == ResponseCode.Success) {
+				moreImages = (ArrayList<Photo>) serviceResponse.data;
+				Logger.d(this, "Request more photos: start = " + String.valueOf(mOffset)
+						+ " new total = "
+						+ String.valueOf(getWrappedAdapter().getCount() + moreImages.size()));
+				mOffset += PAGE_SIZE;
+				return ((getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX);
+			}
+			else {
+				mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureBrowse);
+				return false;
+			}
+		}
+
+		@Override
+		protected void appendCachedData() {
+			ArrayAdapter<Photo> list = (ArrayAdapter<Photo>) getWrappedAdapter();
+			for (Photo photo : moreImages) {
+				list.add(photo);
+			}
+		}
+	}
+
+	private class ListAdapter extends ArrayAdapter<Photo> {
+
+		public ListAdapter(ArrayList<Photo> list) {
+			super(PictureBrowse.this, 0, list);
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+
+			View view = convertView;
+			final ViewHolder holder;
+			Photo itemData = (Photo) mImages.get(position);
+
+			if (view == null) {
+				view = mInflater.inflate(R.layout.temp_picture_search_item, null);
+				holder = new ViewHolder();
+				holder.itemImage = (ImageView) view.findViewById(R.id.item_image);
+				view.setTag(holder);
+			}
+			else {
+				holder = (ViewHolder) view.getTag();
+			}
+
+			if (itemData != null) {
+				holder.data = itemData;
+				holder.itemImage.setTag(itemData.getImageSizedUri(100, 100));
+				holder.itemImage.setImageBitmap(null);
+				ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(itemData.getImageSizedUri(100, 100), holder, null);
+			}
+			return view;
+		}
 	}
 }

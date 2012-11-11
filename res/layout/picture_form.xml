@@ -38,8 +38,7 @@
 
                 <RelativeLayout
                     android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
                     android:paddingBottom="10dp"
                     android:paddingLeft="0dp"
                     android:paddingRight="3dp"
@@ -49,7 +48,7 @@
                         android:id="@+id/image_picture"
                         android:layout_width="250px"
                         android:layout_height="250px"
-                        aircandi:layout="@layout/temp_webimageview"
+                        aircandi:layout="@layout/widget_webimageview"
                         android:minWidth="250px"
                         android:scaleType="centerCrop" />
 
@@ -58,7 +57,7 @@
                         style="@style/actionbar_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignTop="@+id/image_picture"
+                        android:layout_centerVertical="true"
                         android:layout_marginLeft="10dp"
                         android:layout_marginTop="-4dp"
                         android:layout_toRightOf="@+id/image_picture"
@@ -71,13 +70,13 @@
                 <EditText
                     android:id="@+id/text_title"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/form_field_height"
                     android:layout_weight="0"
                     android:hint="@string/form_title_hint"
                     android:inputType="textAutoCorrect" />
 
                 <EditText
-                    android:id="@+id/text_content"
+                    android:id="@+id/description"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
@@ -86,12 +85,11 @@
                     android:inputType="textMultiLine|textAutoCorrect"
                     android:minLines="5" />
 
-                <com.aircandi.widgets.AuthorBlock
-                    android:id="@+id/block_author"
+                <com.aircandi.widgets.UserView
+                    android:id="@+id/author"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    aircandi:layout="@layout/temp_user_info" />
+                    android:layout_marginTop="10dp" />
             </LinearLayout>
 
             <!-- Settings -->

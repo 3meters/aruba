@@ -9,7 +9,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
-public class GeoLocation implements Cloneable, Serializable {
+public class GeoLocation extends ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 455904759787968585L;
 
@@ -25,7 +25,7 @@ public class GeoLocation implements Cloneable, Serializable {
 		this.longitude = longitude;
 	}
 
-	public static GeoLocation setFromPropertiesFromMap(GeoLocation geoLocation, HashMap map) {
+	public static GeoLocation setPropertiesFromMap(GeoLocation geoLocation, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

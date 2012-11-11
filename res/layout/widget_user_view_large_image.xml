@@ -6,37 +6,17 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <RelativeLayout
-        android:id="@+id/candi_form_image_holder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left" >
-
-        <com.aircandi.widgets.WebImageView
-            android:id="@+id/image_user_picture"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            aircandi:layout="@layout/temp_webimageview_framed_fill"
-            aircandi:maxHeight="100dp"
-            aircandi:maxWidth="100dp"
-            android:background="@drawable/app_image_selector"
-            android:clickable="true"
-            android:scaleType="centerCrop" />
-
-        <ImageView
-            android:id="@+id/image_badge"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_alignBottom="@+id/image_user_picture"
-            android:layout_alignRight="@+id/image_user_picture"
-            android:layout_marginBottom="8dp"
-            android:layout_marginRight="8dp"
-            aircandi:maxHeight="60dp"
-            aircandi:maxWidth="60dp"
-            android:gravity="bottom|right"
-            android:src="@drawable/ic_post_v2_250"
-            android:visibility="visible" />
-    </RelativeLayout>
+    <com.aircandi.widgets.WebImageView
+        android:id="@+id/image_user_picture"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="left"
+        aircandi:layout="@layout/widget_webimageview_framed"
+        aircandi:maxHeight="100dp"
+        aircandi:maxWidth="100dp"
+        android:background="@drawable/app_image_selector"
+        android:clickable="true"
+        android:scaleType="centerCrop" />
 
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/candi_user_fullname"

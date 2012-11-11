@@ -119,6 +119,9 @@ public interface CandiConstants {
 	public static final int				IMAGE_WIDTH_MAXIMUM						= 1024;
 	public static final int				IMAGE_WIDTH_ORIGINAL					= -1;
 
+	public static final boolean			LINK_JAVASCRIPT_ENABLED					= false;
+	public static final boolean			LINK_ZOOM								= false;
+
 	public static final String			THEME_DEFAULT							= "aircandi_theme_canyon";
 	public static final String			URL_AIRCANDI_UPGRADE					= "https://aircandi.com/install";
 	public static final String			URL_AIRCANDI_TERMS						= "https://aircandi.com/pages/terms.html";
@@ -127,7 +130,7 @@ public interface CandiConstants {
 	public static final String			TYPE_CANDI_POST							= "com.aircandi.candi.post";
 	public static final String			TYPE_CANDI_PICTURE						= "com.aircandi.candi.picture";
 	public static final String			TYPE_CANDI_LINK							= "com.aircandi.candi.link";
-	public static final String			TYPE_CANDI_COLLECTION					= "com.aircandi.candi.collection";
+	public static final String			TYPE_CANDI_FOLDER						= "com.aircandi.candi.folder";
 	public static final String			TYPE_CANDI_PLACE						= "com.aircandi.candi.place";
 
 	public static final String			USER_ANONYMOUS							= "{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\","
@@ -141,6 +144,7 @@ public interface CandiConstants {
 	public static final int				ACTIVITY_PICTURE_PICK_DEVICE			= 300;
 	public static final int				ACTIVITY_PICTURE_SEARCH					= 305;
 	public static final int				ACTIVITY_PICTURE_MAKE					= 310;
+	public static final int				ACTIVITY_PICTURE_PICK_PLACE				= 315;
 	public static final int				ACTIVITY_VIDEO_PICK						= 320;
 	public static final int				ACTIVITY_VIDEO_MAKE						= 330;
 	public static final int				ACTIVITY_SIGNIN							= 400;
@@ -151,9 +155,13 @@ public interface CandiConstants {
 	public static final int				ACTIVITY_CANDI_INFO						= 440;
 	public static final int				ACTIVITY_CANDI_LIST						= 450;
 	public static final int				ACTIVITY_LINK_PICK						= 500;
+	public static final int				ACTIVITY_WEBSITE_PICK					= 525;
 	public static final int				ACTIVITY_CANDI_PICK						= 550;
 	public static final int				ACTIVITY_TEMPLATE_PICK					= 560;
 	public static final int				ACTIVITY_PREFERENCES					= 600;
+	public static final int				ACTIVITY_CUSTOM_PLACE					= 700;
+	public static final int				ACTIVITY_ADDRESS_EDIT					= 800;
+	public static final int				ACTIVITY_CATEGORY_EDIT					= 810;
 
 	public static final int				RESULT_ENTITY_INSERTED					= 100;
 	public static final int				RESULT_ENTITY_UPDATED					= 110;

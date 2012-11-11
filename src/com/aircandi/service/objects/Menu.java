@@ -8,7 +8,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
-public class Menu implements Cloneable, Serializable {
+public class Menu extends ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 455904759787968585L;
 
@@ -21,7 +21,18 @@ public class Menu implements Cloneable, Serializable {
 
 	public Menu() {}
 
-	public static Menu setFromPropertiesFromMap(Menu menu, HashMap map) {
+	@Override
+	public Menu clone() {
+		try {
+			final Menu menu = (Menu) super.clone();
+			return menu;
+		}
+		catch (final CloneNotSupportedException ex) {
+			throw new AssertionError();
+		}
+	}	
+
+	public static Menu setPropertiesFromMap(Menu menu, HashMap map) {
 
 		menu.type = (String) map.get("type");
 		menu.uri = (String) map.get("url");

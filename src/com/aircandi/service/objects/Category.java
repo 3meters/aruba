@@ -11,7 +11,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
-public class Category implements Cloneable, Serializable {
+public class Category extends ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 455904759787968585L;
 
@@ -19,6 +19,8 @@ public class Category implements Cloneable, Serializable {
 	public String				name;
 	@Expose
 	public String				pluralName;
+	@Expose
+	public String				shortName;
 	@Expose
 	public Boolean				primary;
 	@Expose
@@ -28,14 +30,31 @@ public class Category implements Cloneable, Serializable {
 
 	public Category() {}
 
-	public static Category setFromPropertiesFromMap(Category category, HashMap map) {
+	@Override
+	public Category clone() {
+		try {
+			final Category category = (Category) super.clone();
+			if (this.icon != null) {
+				category.icon = this.icon.clone();
+			}
+			if (this.categories != null) {
+				category.categories = (List<Category>) ((ArrayList) this.categories).clone();
+			}
+			return category;
+		}
+		catch (final CloneNotSupportedException ex) {
+			throw new AssertionError();
+		}
+	}
+
+	public static Category setPropertiesFromMap(Category category, HashMap map) {
 
 		category.name = (String) map.get("name");
 		category.pluralName = (String) map.get("pluralName");
 		category.primary = (Boolean) map.get("primary");
 
 		if (map.get("icon") != null) {
-			category.icon = (Icon) Icon.setFromPropertiesFromMap(new Icon(), (HashMap<String, Object>) map.get("icon"));
+			category.icon = (Icon) Icon.setPropertiesFromMap(new Icon(), (HashMap<String, Object>) map.get("icon"));
 		}
 
 		if (map.get("categories") != null) {
@@ -43,11 +62,18 @@ public class Category implements Cloneable, Serializable {
 
 			category.categories = new ArrayList<Category>();
 			for (LinkedHashMap<String, Object> categoryMap : categoryMaps) {
-				category.categories.add(Category.setFromPropertiesFromMap(new Category(), categoryMap));
+				category.categories.add(Category.setPropertiesFromMap(new Category(), categoryMap));
 			}
 		}
 
 		return category;
 	}
 
+	public String iconUri() {
+		if (icon != null && icon.prefix != null) {
+			String iconUri = icon.prefix + "bg_88" + icon.suffix;
+			return iconUri;
+		}
+		return null;
+	}
 }

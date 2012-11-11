@@ -54,7 +54,7 @@
                         android:layout_width="100dp"
                         android:layout_height="100dp"
                         android:layout_weight="0"
-                        aircandi:layout="@layout/temp_webimageview_framed_fill"
+                        aircandi:layout="@layout/widget_webimageview_framed"
                         aircandi:maxHeight="100dp"
                         aircandi:maxWidth="100dp"
                         android:scaleType="centerCrop"
@@ -65,6 +65,7 @@
                         style="@style/actionbar_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:layout_marginLeft="10dp"
                         android:layout_marginTop="-4dp"
                         android:layout_weight="0"
@@ -83,7 +84,7 @@
                 <EditText
                     android:id="@+id/text_fullname"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/form_field_height"
                     android:hint="@string/form_label_fullname"
                     android:inputType="textPersonName|textNoSuggestions" />
 
@@ -92,7 +93,7 @@
                 <EditText
                     android:id="@+id/text_location"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/form_field_height"
                     android:hint="@string/form_label_location"
                     android:inputType="textPostalAddress|textAutoCorrect" />
 
@@ -101,7 +102,7 @@
                 <EditText
                     android:id="@+id/text_link"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/form_field_height"
                     android:hint="@string/form_label_link"
                     android:inputType="textUri" />
 

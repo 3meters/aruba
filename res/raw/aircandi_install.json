@@ -6,16 +6,12 @@
 	"createdDate": 1320710520000,
 	"description": "Use this page to install new versions of Aircandi.",
 	"enabled": true,
-	"label": "Aircandi Update",
-	"linkJavascriptEnabled": false,
-	"linkUri": "https://aircandi.com/install",
-	"linkPreviewUri": "https://aircandi.com/install_preview",
-	"linkZoom": true,
-	"locked": false,
-	"modifiedDate": 1320710520000,
 	"name": "Aircandi Update",
 	"namelc": "aircandi update",
-	"root": true,
+	"photo": {imageUri:"https://aircandi.com/install","format":"html"},
+	"photoPreview": {imageUri:"https://aircandi.com/install_preview","format":"html"},
+	"locked": false,
+	"modifiedDate": 1320710520000,
 	"signalFence": -53,
 	"title": "Aircandi Update",
 	"type": "com.aircandi.candi.link",
@@ -25,15 +21,11 @@
 	"childrenMore": false,
 	"children": [],
 	"childCount": 0,
-	"parentCount": 0,
 	"creator": {
 		"imageUri": "https://graph.facebook.com/696942623/picture?type=large",
 		"location": "",
 		"name": "Jay Gecko the Greatest"
 	},
-	"_beacon": "0003:00:00:00:00:00:00",
-	"location": {
-		"latitude": 47.5935513,
-		"longitude": -122.1598659
+	"beaconLinks":[{"beaconId":"0003:00:00:00:00:00:00"}]
 	}
 }

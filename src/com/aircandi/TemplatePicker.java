@@ -45,21 +45,21 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		/* Shown as a dialog so doesn't have an action bar */
 		List<Object> listData = new ArrayList<Object>();
 		if (mCommon.mThemeTone.equals("dark")) {
-			listData.add(new Template(R.drawable.ic_post_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
-			listData.add(new Template(R.drawable.ic_picture_dark, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
-			listData.add(new Template(R.drawable.ic_link_dark, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
+			listData.add(new Template(R.drawable.ic_action_edit_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
+			listData.add(new Template(R.drawable.ic_action_picture_dark, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
+			listData.add(new Template(R.drawable.ic_action_globe_dark, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
 			if (mIsRoot != null && mIsRoot) {
-				listData.add(new Template(R.drawable.ic_collection_dark, getString(R.string.name_entity_type_collection), null,
-						CandiConstants.TYPE_CANDI_COLLECTION));
+				listData.add(new Template(R.drawable.ic_action_folder_dark, getString(R.string.name_entity_type_folder), null,
+						CandiConstants.TYPE_CANDI_FOLDER));
 			}
 		}
 		else {
-			listData.add(new Template(R.drawable.ic_post_light, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
-			listData.add(new Template(R.drawable.ic_picture_light, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
-			listData.add(new Template(R.drawable.ic_link_light, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
+			listData.add(new Template(R.drawable.ic_action_edit_light, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
+			listData.add(new Template(R.drawable.ic_action_picture_light, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
+			listData.add(new Template(R.drawable.ic_action_globe_light, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
 			if (mIsRoot != null && mIsRoot) {
-				listData.add(new Template(R.drawable.ic_collection_light, getString(R.string.name_entity_type_collection), null,
-						CandiConstants.TYPE_CANDI_COLLECTION));
+				listData.add(new Template(R.drawable.ic_action_folder_light, getString(R.string.name_entity_type_folder), null,
+						CandiConstants.TYPE_CANDI_FOLDER));
 			}
 		}
 
@@ -67,7 +67,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		mListView = (ListView) findViewById(R.id.form_list);
 		mTextViewMessage = (TextView) findViewById(R.id.text_message);
 		if (!mIsRoot) {
-			mTextViewMessage.setText(R.string.dialog_template_picker_message_collection);
+			mTextViewMessage.setText(R.string.dialog_template_picker_message_folder);
 		}
 		mListView.setAdapter(mListAdapter);
 		mListView.setOnItemClickListener(this);
@@ -94,6 +94,11 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	@Override
 	protected Boolean isDialog() {
 		return true;
+	}
+	
+	@Override
+	protected Integer getThemeResId() {
+		return null;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -135,7 +140,6 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 			{
 				((ImageView) view.findViewById(R.id.item_image)).setImageResource(itemData.iconResId);
 				((TextView) view.findViewById(R.id.item_title)).setText(itemData.title);
-				// ((TextView) view.findViewById(R.id.item_description)).setText(itemData.description);
 				view.setTag(itemData);
 			}
 			return view;

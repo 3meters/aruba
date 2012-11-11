@@ -15,7 +15,7 @@
         android:background="?attr/ruleColor" />
 
     <com.aircandi.widgets.WebImageView
-        android:id="@+id/item_image"
+        android:id="@+id/image"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_alignParentTop="true"
@@ -23,35 +23,22 @@
         android:layout_marginTop="5dp"
         aircandi:maxHeight="60dp"
         aircandi:maxWidth="60dp" />
-
-    <ImageView
-        android:id="@+id/item_image_collection"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignBottom="@+id/item_image"
-        android:layout_alignRight="@+id/item_image"
-        android:layout_marginBottom="3dp"
-        android:layout_marginRight="3dp"
-        aircandi:maxHeight="60dp"
-        aircandi:maxWidth="60dp"      
-        android:visibility="gone"   
-        android:src="@drawable/ic_collection_250" />
     
     <com.aircandi.widgets.TextViewEllipsizing
-        android:id="@+id/item_title"
+        android:id="@+id/title"
         style="@style/bookmark_list_title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
-        android:layout_toRightOf="@+id/item_image" />
+        android:layout_toRightOf="@+id/image" />
 
     <com.aircandi.widgets.TextViewEllipsizing
-        android:id="@+id/item_description"
+        android:id="@+id/description"
         style="@style/bookmark_list_uri"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/item_title"
-        android:layout_toRightOf="@+id/item_image"
+        android:layout_below="@+id/title"
+        android:layout_toRightOf="@+id/image"
         android:paddingBottom="3dp" />
 
 </RelativeLayout>

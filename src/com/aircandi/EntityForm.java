@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.location.Criteria;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
@@ -39,15 +40,21 @@ import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Location;
+import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.User;
-import com.aircandi.widgets.AuthorBlock;
+import com.aircandi.widgets.BuilderButton;
+import com.aircandi.widgets.UserView;
 import com.aircandi.widgets.WebImageView;
 
 public class EntityForm extends FormActivity {
@@ -107,8 +114,8 @@ public class EntityForm extends FormActivity {
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_post);
 		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
-			mCommon.mActionBar.setTitle(R.string.form_title_collection);
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
+			mCommon.mActionBar.setTitle(R.string.form_title_folder);
 		}
 
 		mImageViewPicture = (WebImageView) findViewById(R.id.image_picture);
@@ -141,20 +148,16 @@ public class EntityForm extends FormActivity {
 			entity.modifierId = Aircandi.getInstance().getUser().id;
 			entity.enabled = true;
 			entity.locked = false;
-			entity.linkJavascriptEnabled = false;
-			entity.linkZoom = false;
 			entity.visibility = Visibility.Public.toString().toLowerCase();
 			entity.type = mCommon.mEntityType;
 
-			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
-				entity.imagePreviewUri = "resource:placeholder_logo";
-				entity.imageUri = entity.imagePreviewUri;
+			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)
+					|| mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+				entity.getPhoto().setImageUri("resource:placeholder_logo");
 			}
-			else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
-				entity.title = getString(R.string.entity_collection_title);
-				entity.label = entity.title;
-				entity.imagePreviewUri = "resource:ic_collection_250";
-				entity.imageUri = entity.imagePreviewUri;
+			else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
+				entity.name = getString(R.string.entity_folder_title);
+				entity.getPhoto().setImageUri("resource:ic_collection_250");
 			}
 			mEntityForForm = entity;
 		}
@@ -169,12 +172,12 @@ public class EntityForm extends FormActivity {
 				Entity entityForModel = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId);
 				if (entityForModel != null) {
 					mEntityForForm = entityForModel.clone();
-					mImageUriOriginal = mEntityForForm.imageUri;
+					mImageUriOriginal = mEntityForForm.getPhoto().getImageUri();
 				}
 			}
 			else {
 				if (mEntityForForm != null) {
-					mImageUriOriginal = mEntityForForm.imageUri;
+					mImageUriOriginal = mEntityForForm.getPhoto().getImageUri();
 				}
 			}
 		}
@@ -189,18 +192,18 @@ public class EntityForm extends FormActivity {
 			/* Content */
 
 			if (mImageViewPicture != null) {
-				if (entity.imageUri != null && !entity.imageUri.equals("")) {
+				if (entity.getPhoto().getImageUri() != null) {
 					if (mEntityBitmap != null) {
-						mImageViewPicture.showLoading(false);
+						mImageViewPicture.hideLoading();
 						ImageUtils.showImageInImageView(mEntityBitmap, mImageViewPicture.getImageView(), true, AnimUtils.fadeInMedium());
 						mImageViewPicture.setVisibility(View.VISIBLE);
 					}
 					else {
 						ImageRequestBuilder builder = new ImageRequestBuilder(mImageViewPicture);
-						builder.setImageUri(entity.getMasterImageUri());
-						builder.setImageFormat(entity.getMasterImageFormat());
-						builder.setLinkZoom(entity.linkZoom);
-						builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
+						builder.setImageUri(entity.getImageUri());
+						builder.setImageFormat(entity.getImageFormat());
+						builder.setLinkZoom(CandiConstants.LINK_ZOOM);
+						builder.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
 
 						ImageRequest imageRequest = builder.create();
 						mImageViewPicture.setImageRequest(imageRequest);
@@ -209,29 +212,11 @@ public class EntityForm extends FormActivity {
 			}
 
 			if (findViewById(R.id.text_title) != null) {
-				((TextView) findViewById(R.id.text_title)).setText(entity.title);
+				((TextView) findViewById(R.id.text_title)).setText(entity.name);
 			}
 
-			if (findViewById(R.id.text_content) != null) {
-				((TextView) findViewById(R.id.text_content)).setText(entity.description);
-			}
-
-			if (findViewById(R.id.text_uri) != null) {
-				((TextView) findViewById(R.id.text_uri)).setText(entity.linkUri);
-			}
-
-			if (findViewById(R.id.chk_html_zoom) != null) {
-				if (entity.linkUri != null) {
-					((CheckBox) findViewById(R.id.chk_html_zoom)).setVisibility(View.VISIBLE);
-					((CheckBox) findViewById(R.id.chk_html_zoom)).setChecked(entity.linkZoom);
-				}
-			}
-
-			if (findViewById(R.id.chk_html_javascript) != null) {
-				if (entity.linkUri != null) {
-					((CheckBox) findViewById(R.id.chk_html_javascript)).setVisibility(View.VISIBLE);
-					((CheckBox) findViewById(R.id.chk_html_javascript)).setChecked(entity.linkJavascriptEnabled);
-				}
+			if (findViewById(R.id.description) != null) {
+				((TextView) findViewById(R.id.description)).setText(entity.description);
 			}
 
 			if (findViewById(R.id.chk_locked) != null) {
@@ -239,14 +224,51 @@ public class EntityForm extends FormActivity {
 				((CheckBox) findViewById(R.id.chk_locked)).setChecked(entity.locked);
 			}
 
+			/* Place content */
+			if (entity.place != null) {
+				if (entity.place.location != null) {
+					if (findViewById(R.id.address) != null) {
+						String addressBlock = entity.place.location.getAddressBlock();
+						if (!addressBlock.equals("")) {
+							((BuilderButton) findViewById(R.id.address)).setText(entity.place.location.address);
+						}
+					}
+				}
+				if (entity.place.website != null && !entity.place.website.equals("")) {
+					if (findViewById(R.id.website) != null) {
+						((BuilderButton) findViewById(R.id.website)).setText(entity.place.website);
+					}
+				}
+				if (entity.place.categories != null && entity.place.categories.size() > 0) {
+					Category category = entity.place.getCategoryPrimary();
+					if (findViewById(R.id.category) != null) {
+						((BuilderButton) findViewById(R.id.category)).setText(category.name);
+					}
+				}
+				if (entity.place.contact != null) {
+					if (entity.place.contact.twitter != null && !entity.place.contact.twitter.equals("")) {
+						if (findViewById(R.id.twitter) != null) {
+							((TextView) findViewById(R.id.twitter)).setText("@" + entity.place.contact.twitter);
+						}
+					}
+				}
+			}
+			else {
+				if (findViewById(R.id.text_uri) != null) {
+					if (!entity.getPhoto().getDetail().isEmpty() && entity.getPhoto().getDetail().getImageFormat() == ImageFormat.Html) {
+						((TextView) findViewById(R.id.text_uri)).setText(entity.getPhoto().getImageUri());
+					}
+				}
+			}
+
 			/* Author */
 
 			if (entity != null && entity.creator != null) {
-				((AuthorBlock) findViewById(R.id.block_author)).bindToAuthor(entity.creator,
+				((UserView) findViewById(R.id.author)).bindToAuthor(entity.creator,
 						entity.modifiedDate.longValue(), entity.locked);
 			}
 			else {
-				((AuthorBlock) findViewById(R.id.block_author)).setVisibility(View.GONE);
+				((UserView) findViewById(R.id.author)).setVisibility(View.GONE);
 			}
 
 			/* Configure UI */
@@ -264,7 +286,7 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onChangePictureButtonClick(View view) {
-		showChangePictureDialog(false, mImageViewPicture, new RequestListener() {
+		showChangePictureDialog(false, false, null, null, null, mImageViewPicture, new RequestListener() {
 
 			@Override
 			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
@@ -277,9 +299,13 @@ public class EntityForm extends FormActivity {
 					 * both preview and native versions.
 					 */
 					mEntityBitmap = imageBitmap;
-					mEntityForForm.imageUri = imageUri;
-					mEntityForForm.imagePreviewUri = imageUri;
-					mEntityForForm.linkUri = linkUri;
+					if (linkUri != null) {
+						mEntityForForm.getPhoto().setImageUri(linkUri);
+						mEntityForForm.getPhoto().setImageFormat(ImageFormat.Html);
+					}
+					else {
+						mEntityForForm.getPhoto().setImageUri(imageUri);
+					}
 				}
 			}
 		});
@@ -293,8 +319,35 @@ public class EntityForm extends FormActivity {
 		deleteEntityAtService();
 	}
 
+	public void onWebsiteBuilderClick(View view) {
+		showBookmarkActivity(CandiConstants.ACTIVITY_WEBSITE_PICK, mEntityForForm.place.website);
+	}
+
 	public void onLinkBuilderClick(View view) {
-		showBookmarkActivity();
+		showBookmarkActivity(CandiConstants.ACTIVITY_LINK_PICK, mTextUri.getEditableText().toString());
+	}
+
+	public void onAddressBuilderClick(View view) {
+		Intent intent = new Intent(this, AddressBuilder.class);
+		if (mEntityForForm.getPlace().location != null) {
+			String jsonAddress = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.place.location, false, true);
+			intent.putExtra(getString(R.string.EXTRA_ADDRESS), jsonAddress);
+		}
+		if (mEntityForForm.getPlace().contact != null && mEntityForForm.getPlace().contact.phone != null) {
+			intent.putExtra(getString(R.string.EXTRA_PHONE), mEntityForForm.getPlace().contact.phone);
+		}
+		startActivityForResult(intent, CandiConstants.ACTIVITY_ADDRESS_EDIT);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	}
+
+	public void onCategoryBuilderClick(View view) {
+		Intent intent = new Intent(this, CategoryBuilder.class);
+		if (mEntityForForm.getPlace().categories != null && mEntityForForm.getPlace().categories.size() > 0) {
+			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.getPlace().getCategoryPrimary(), false, true);
+			intent.putExtra(getString(R.string.EXTRA_CATEGORY), jsonCategory);
+		}
+		startActivityForResult(intent, CandiConstants.ACTIVITY_CATEGORY_EDIT);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	@Override
@@ -312,7 +365,40 @@ public class EntityForm extends FormActivity {
 			}
 		}
 		else {
-			super.onActivityResult(requestCode, resultCode, intent);
+			if (resultCode == Activity.RESULT_OK && requestCode == CandiConstants.ACTIVITY_ADDRESS_EDIT) {
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+
+					String phone = extras.getString(getString(R.string.EXTRA_PHONE));
+					phone = phone.replaceAll("[^\\d.]", "");
+					mEntityForForm.getPlace().getContact().phone = phone;
+					mEntityForForm.getPlace().getContact().formattedPhone = PhoneNumberUtils.formatNumber(phone);
+
+					String jsonAddress = extras.getString(getString(R.string.EXTRA_ADDRESS));
+					if (jsonAddress != null) {
+						Location locationUpdated = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
+						mEntityForForm.getPlace().location = locationUpdated;
+					}
+					draw();
+				}
+			}
+			else if (resultCode == Activity.RESULT_OK && requestCode == CandiConstants.ACTIVITY_CATEGORY_EDIT) {
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					String jsonCategory = extras.getString(getString(R.string.EXTRA_CATEGORY));
+					if (jsonCategory != null) {
+						Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
+						if (categoryUpdated != null) {
+							mEntityForForm.getPlace().categories.clear();
+							mEntityForForm.getPlace().categories.add(categoryUpdated);
+						}
+					}
+					draw();
+				}
+			}
+			else {
+				super.onActivityResult(requestCode, resultCode, intent);
+			}
 		}
 	}
 
@@ -344,20 +430,22 @@ public class EntityForm extends FormActivity {
 
 	private void gather(Entity entity) {
 		if (findViewById(R.id.text_title) != null) {
-			entity.title = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
-			entity.label = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
+			entity.name = ((TextView) findViewById(R.id.text_title)).getText().toString().trim();
 		}
-		if (findViewById(R.id.text_content) != null) {
-			entity.description = ((TextView) findViewById(R.id.text_content)).getText().toString().trim();
-		}
-		if (findViewById(R.id.chk_html_javascript) != null) {
-			entity.linkJavascriptEnabled = ((CheckBox) findViewById(R.id.chk_html_javascript)).isChecked();
-		}
-		if (findViewById(R.id.chk_html_zoom) != null) {
-			entity.linkZoom = ((CheckBox) findViewById(R.id.chk_html_zoom)).isChecked();
+		if (findViewById(R.id.description) != null) {
+			entity.description = ((TextView) findViewById(R.id.description)).getText().toString().trim();
 		}
 		if (findViewById(R.id.chk_locked) != null) {
 			entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
+		}
+		if (findViewById(R.id.website) != null) {
+			entity.getPlace().website = ((BuilderButton) findViewById(R.id.website)).getText();
+		}
+		if (findViewById(R.id.twitter) != null) {
+			String twitter = ((TextView) findViewById(R.id.twitter)).getText().toString();
+			/* We don't store the at sign */
+			twitter = twitter.replace("@", "");
+			entity.getPlace().getContact().twitter = twitter;
 		}
 	}
 
@@ -405,8 +493,8 @@ public class EntityForm extends FormActivity {
 							 * Success means the uri was verified.
 							 */
 							if (result.serviceResponse.responseCode == ResponseCode.Success) {
-								mEntityForForm.linkUri = linkUri;
-								mEntityForForm.imageUri = null;
+								mEntityForForm.getPhoto().setImageUri(linkUri);
+								mEntityForForm.getPhoto().setImageFormat(ImageFormat.Html);
 								mEntityBitmap = null;
 								mUriVerified = true;
 							}
@@ -475,7 +563,7 @@ public class EntityForm extends FormActivity {
 		/* Get strongest nearby beacon and alert if none */
 		Beacon beacon = ProxiExplorer.getInstance().getStrongestWifiAsBeacon();
 		if (beacon == null && mCommon.mParentId == null) {
-			AircandiCommon.showAlertDialog(R.drawable.icon_app
+			AircandiCommon.showAlertDialog(R.drawable.ic_app
 					, "Aircandi beacons"
 					, getString(R.string.alert_beacons_zero)
 					, null
@@ -490,15 +578,14 @@ public class EntityForm extends FormActivity {
 		}
 
 		/* If parent id then this is a child */
+		if (mEntityForForm.beaconLinks != null) {
+			mEntityForForm.beaconLinks.clear();
+		}
 		if (mCommon.mParentId != null) {
-			mEntityForForm.root = false;
 			mEntityForForm.parentId = mCommon.mParentId;
-			mEntityForForm.beaconId = null;
 		}
 		else {
-			mEntityForForm.root = true;
 			mEntityForForm.parentId = null;
-			mEntityForForm.beaconId = beacon.id;
 		}
 
 		result = ProxiExplorer.getInstance().getEntityModel().insertEntity(mEntityForForm, beacon, mEntityBitmap, false);
@@ -536,7 +623,7 @@ public class EntityForm extends FormActivity {
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Tracker.trackEvent("Entity", "Delete", mEntityForForm.type, 0);
-					Logger.i(this, "Deleted entity: " + mEntityForForm.title);
+					Logger.i(this, "Deleted entity: " + mEntityForForm.name);
 
 					mCommon.hideProgressDialog();
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
@@ -555,12 +642,15 @@ public class EntityForm extends FormActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	private void showBookmarkActivity() {
+	private void showBookmarkActivity(int requestCode, String uri) {
 
 		Intent intent = new Intent(this, LinkPicker.class);
 		intent.putExtra(getString(R.string.EXTRA_VERIFY_URI), false);
+		if (uri != null) {
+			intent.putExtra(getString(R.string.EXTRA_URI), uri);
+		}
 
-		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
+		startActivityForResult(intent, requestCode);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 
 		super.mImageRequestListener = new RequestListener() {
@@ -582,8 +672,12 @@ public class EntityForm extends FormActivity {
 						return;
 					}
 					else {
-						mEntityForForm.linkUri = linkUri;
-						mEntityForForm.imageUri = null;
+						mEntityForForm.getPhoto().setImageUri(linkUri);
+						mEntityForForm.getPhoto().setImageFormat(ImageFormat.Html);
+						mEntityForForm.getPhoto().setSourceName("external");
+						mEntityForForm.getPhoto().getDetail().setImageUri(linkUri);
+						mEntityForForm.getPhoto().getDetail().setImageFormat(ImageFormat.Html);
+						mEntityForForm.getPhoto().getDetail().setSourceName("external");
 						mEntityBitmap = null;
 						updateLinkFields(linkUri);
 					}
@@ -600,7 +694,7 @@ public class EntityForm extends FormActivity {
 		@SuppressWarnings("unused")
 		final EditText textTitle = (EditText) findViewById(R.id.text_title);
 		@SuppressWarnings("unused")
-		final EditText textDescription = (EditText) findViewById(R.id.text_content);
+		final EditText textDescription = (EditText) findViewById(R.id.description);
 
 		textUri.setText(linkUri);
 		mUriVerified = false;
@@ -663,10 +757,10 @@ public class EntityForm extends FormActivity {
 					}
 
 					if (description != null) {
-						((EditText) findViewById(R.id.text_content)).setText(description);
+						((EditText) findViewById(R.id.description)).setText(description);
 					}
 					else {
-						((EditText) findViewById(R.id.text_content)).setText("");
+						((EditText) findViewById(R.id.description)).setText("");
 					}
 					mCommon.hideProgressDialog();
 				}
@@ -722,8 +816,11 @@ public class EntityForm extends FormActivity {
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
 			return R.layout.link_form;
 		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
-			return R.layout.collection_form;
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
+			return R.layout.folder_form;
+		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			return R.layout.place_form;
 		}
 		else {
 			return 0;

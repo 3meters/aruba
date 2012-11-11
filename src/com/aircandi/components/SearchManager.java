@@ -131,10 +131,10 @@ public class SearchManager {
 			for (Entity entity : entities) {
 				SearchItem suggestion = new SearchItem();
 				suggestion.type = SearchItemType.Suggestions;
-				suggestion.name = entity.title;
-				suggestion.uri = entity.uri;
+				suggestion.name = entity.name;
+				suggestion.uri = entity.place.website;
 				suggestion.categoryName = entity.place.categories.get(0).name;
-				suggestion.categoryIconUri = entity.imagePreviewUri;
+				suggestion.categoryIconUri = entity.photo.getImageUri();
 				searchItems.add(suggestion);
 			}
 		}

@@ -35,7 +35,7 @@ public class ImageResult
 	/** The thumbnail. */
 	protected Thumbnail	thumbnail;
 
-	public static ImageResult setFromPropertiesFromMap(ImageResult imageResult, HashMap map) {
+	public static ImageResult setPropertiesFromMap(ImageResult imageResult, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
@@ -48,7 +48,7 @@ public class ImageResult
 		imageResult.fileSize = Long.parseLong((String) map.get("FileSize"));
 		imageResult.contentType = (String) map.get("ContentType");
 		if (map.get("Thumbnail") != null) {
-			imageResult.thumbnail = Thumbnail.setFromPropertiesFromMap(new Thumbnail(), (HashMap<String, Object>) map.get("Thumbnail"));
+			imageResult.thumbnail = Thumbnail.setPropertiesFromMap(new Thumbnail(), (HashMap<String, Object>) map.get("Thumbnail"));
 		}
 
 		return imageResult;

@@ -34,7 +34,7 @@
                     style="@style/form_label"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/form_label_picture_collection" />
+                    android:text="@string/form_label_picture_folder" />
 
                 <RelativeLayout
                     android:layout_width="fill_parent"
@@ -49,7 +49,7 @@
                         android:id="@+id/image_picture"
                         android:layout_width="100dp"
                         android:layout_height="100dp"
-                        aircandi:layout="@layout/temp_webimageview"
+                        aircandi:layout="@layout/widget_webimageview"
                         android:minWidth="100dp"
                         android:scaleType="centerCrop" />
 
@@ -71,27 +71,26 @@
                 <EditText
                     android:id="@+id/text_title"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/form_field_height"
                     android:layout_weight="0"
                     android:hint="@string/form_title_hint"
                     android:inputType="textAutoCorrect" />
 
                 <EditText
-                    android:id="@+id/text_content"
+                    android:id="@+id/description"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/form_field_height"
                     android:layout_weight="0"
                     android:gravity="top"
                     android:hint="@string/form_description_hint"
                     android:inputType="textMultiLine|textAutoCorrect"
                     android:minLines="5" />
 
-                <com.aircandi.widgets.AuthorBlock
-                    android:id="@+id/block_author"
+                <com.aircandi.widgets.UserView
+                    android:id="@+id/author"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    aircandi:layout="@layout/temp_user_info" />
+                    android:layout_marginTop="10dp" />
             </LinearLayout>
 
             <!-- Settings -->

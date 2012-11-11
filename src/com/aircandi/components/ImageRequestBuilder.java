@@ -69,7 +69,7 @@ public class ImageRequestBuilder {
 	}
 
 	public static String getImageUriFromEntity(Entity entity) {
-		return entity.getMasterImageUri();
+		return entity.getImageUri();
 	}
 
 	public ImageRequestBuilder setFromUris(String imageUri, String linkUri) {

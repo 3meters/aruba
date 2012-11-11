@@ -202,13 +202,13 @@
             android:background="?attr/ruleColor" />
 
         <LinearLayout
-            android:id="@+id/button_new_candi"
+            android:id="@+id/button_tune"
             style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
+            android:layout_centerHorizontal="true"
             android:clickable="true"
-            android:onClick="onNewCandiButtonClick"
+            android:onClick="onTuneButtonClick"
             android:orientation="horizontal"
             android:visibility="invisible"
             tools:ignore="UseCompoundDrawables" >
@@ -225,7 +225,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:paddingLeft="2dp"
-                android:text="@string/radar_button_new"
+                android:text="@string/radar_button_tune"
                 android:textColor="?attr/textColorBars" />
         </LinearLayout>
 

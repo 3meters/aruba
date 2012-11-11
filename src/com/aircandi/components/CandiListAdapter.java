@@ -4,22 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aircandi.R;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.widgets.AuthorBlock;
 import com.aircandi.widgets.TextViewEllipsizing;
+import com.aircandi.widgets.UserView;
 import com.aircandi.widgets.WebImageView;
 
 public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable {
@@ -50,13 +53,24 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new CandiListViewHolder();
-			holder.itemImage = (WebImageView) view.findViewById(R.id.item_image);
-			holder.itemImageCollection = (ImageView) view.findViewById(R.id.item_image_collection);
-			holder.itemTitle = (TextView) view.findViewById(R.id.item_title);
-			holder.itemSubtitle = (TextView) view.findViewById(R.id.item_subtitle);
-			holder.itemDescription = (TextViewEllipsizing) view.findViewById(R.id.item_description);
-			holder.itemAuthor = (AuthorBlock) view.findViewById(R.id.item_block_author);
-			holder.itemComments = (Button) view.findViewById(R.id.item_comments);
+			holder.image = (WebImageView) view.findViewById(R.id.image);
+			holder.title = (TextView) view.findViewById(R.id.title);
+			holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
+			holder.description = (TextViewEllipsizing) view.findViewById(R.id.description);
+			holder.user = (UserView) view.findViewById(R.id.user);
+			holder.comments = (Button) view.findViewById(R.id.button_comments);
+			holder.check = (CheckBox) view.findViewById(R.id.check);
+			if (holder.check != null) {
+				holder.check.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View view) {
+						CheckBox checkBox = (CheckBox) view;
+						Entity entity = (Entity) checkBox.getTag();
+						entity.checked = checkBox.isChecked();
+					}
+				});
+			}
 			view.setTag(holder);
 		}
 		else {
@@ -65,97 +79,105 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 		if (itemData != null) {
 			Entity entity = itemData;
-			Logger.d(this, "Adapter getView: " + itemData.title);
+			Logger.d(this, "Adapter getView: " + itemData.name);
 			holder.data = itemData;
 			holder.position = position;
-			
-			if (holder.itemImageCollection != null) {
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
-					if (entity.getMasterImageUri() != null && !entity.getMasterImageUri().toLowerCase().startsWith("resource:")) {
-						holder.itemImageCollection.setVisibility(View.VISIBLE);
+
+			setVisibility(holder.check, View.GONE);
+			if (holder.check != null && entity.checked != null) {
+				holder.check.setChecked(entity.checked);
+				holder.check.setTag(entity);
+				setVisibility(holder.check, View.VISIBLE);
+			}
+
+			setVisibility(holder.title, View.GONE);
+			if (holder.title != null && entity.name != null && entity.name.length() > 0) {
+				holder.title.setText(entity.name);
+				setVisibility(holder.title, View.VISIBLE);
+			}
+
+			setVisibility(holder.subtitle, View.GONE);
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+				if (holder.subtitle != null) {
+					if (entity.subtitle != null) {
+						holder.subtitle.setText(entity.subtitle);
+						setVisibility(holder.subtitle, View.VISIBLE);
 					}
 					else {
-						holder.itemImageCollection.setVisibility(View.GONE);
+						if (entity.place.categories != null && entity.place.categories.size() > 0) {
+							String categories = "";
+							for (Category category : entity.place.categories) {
+								categories += category.name + ", ";
+							}
+							categories = categories.substring(0, categories.length() - 2);
+							holder.subtitle.setText(Html.fromHtml(categories));
+							setVisibility(holder.subtitle, View.VISIBLE);
+						}
 					}
 				}
-				else {
-					holder.itemImageCollection.setVisibility(View.GONE);
-				}
 			}
-			if (holder.itemTitle != null) {
-				if (entity.title != null && entity.title.length() > 0) {
-					holder.itemTitle.setText(entity.title);
-					holder.itemTitle.setVisibility(View.VISIBLE);
-				}
-				else {
-					holder.itemTitle.setVisibility(View.GONE);
+			else {
+				if (holder.subtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
+					holder.subtitle.setText(entity.subtitle);
+					setVisibility(holder.subtitle, View.VISIBLE);
 				}
 			}
 
-			if (holder.itemSubtitle != null) {
-				if (entity.subtitle != null && entity.subtitle.length() > 0) {
-					holder.itemSubtitle.setText(entity.subtitle);
-					holder.itemSubtitle.setVisibility(View.VISIBLE);
-				}
-				else {
-					holder.itemSubtitle.setVisibility(View.GONE);
-				}
-			}
-
-			if (holder.itemDescription != null) {
-				holder.itemDescription.setMaxLines(5);
-				if (entity.description != null && entity.description.length() > 0) {
-					holder.itemDescription.setText(entity.description);
-					holder.itemDescription.setVisibility(View.VISIBLE);
-				}
-				else {
-					holder.itemDescription.setVisibility(View.GONE);
-				}
+			setVisibility(holder.description, View.GONE);
+			if (holder.description != null && entity.description != null && entity.description.length() > 0) {
+				holder.description.setMaxLines(5);
+				holder.description.setText(entity.description);
+				setVisibility(holder.description, View.VISIBLE);
 			}
 
 			/* Comments */
-			if (holder.itemComments != null) {
-				if (entity.commentCount != null && entity.commentCount > 0) {
-					holder.itemComments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
-					holder.itemComments.setTag(entity);
-					holder.itemComments.setVisibility(View.VISIBLE);
-				}
-				else {
-					holder.itemComments.setVisibility(View.GONE);
-				}
+			setVisibility(holder.comments, View.GONE);
+			if (holder.comments != null && entity.commentCount != null && entity.commentCount > 0) {
+				holder.comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
+				holder.comments.setTag(entity);
+				setVisibility(holder.comments, View.VISIBLE);
 			}
 
-			if (holder.itemAuthor != null) {
-				if (entity.creator != null) {
-					holder.itemAuthor.bindToAuthor(entity.creator, entity.modifiedDate.longValue(), entity.locked);
-					holder.itemAuthor.setVisibility(View.VISIBLE);
-				}
-				else {
-					holder.itemAuthor.setVisibility(View.GONE);
-				}
+			setVisibility(holder.user, View.GONE);
+			if (holder.user != null && entity.creator != null) {
+				holder.user.bindToAuthor(entity.creator, entity.modifiedDate.longValue(), entity.locked);
+				setVisibility(holder.user, View.VISIBLE);
 			}
 
-			if (holder.itemImage != null) {
+			if (holder.image != null) {
+
+				holder.image.getImageBadge().setVisibility(View.GONE);
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
+					if (entity.getImageUri() != null && !entity.getImageUri().toLowerCase().startsWith("resource:")) {
+						holder.image.getImageBadge().setImageResource(R.drawable.ic_collection_250);
+						holder.image.getImageBadge().setVisibility(View.VISIBLE);
+					}
+				}
 				/*
 				 * The WebImageView sets the current bitmap ref being held
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
-				final String imageUri = entity.getMasterImageUri();
+				if (entity.photo != null && entity.photo.getBitmap() != null) {
+					ImageUtils.showImageInImageView(entity.photo.getBitmap(), holder.image.getImageView(), true, AnimUtils.fadeInMedium());
+				}
+				else {
+					final String imageUri = entity.getImageUri();
 
-				/* Don't do anything if the image is already set to the one we want */
-				if (holder.itemImage.getImageUri() == null || !holder.itemImage.getImageUri().equals(imageUri)) {
+					/* Don't do anything if the image is already set to the one we want */
+					if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {
 
-					ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemImage)
-							.setImageUri(imageUri)
-							.setImageFormat(entity.getMasterImageFormat())
-							.setLinkZoom(entity.linkZoom)
-							.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
-					
-					final ImageRequest imageRequest = builder.create();
+						ImageRequestBuilder builder = new ImageRequestBuilder(holder.image)
+								.setImageUri(imageUri)
+								.setImageFormat(entity.getImageFormat())
+								.setLinkZoom(CandiConstants.LINK_ZOOM)
+								.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
 
-					holder.itemImageUri = imageUri;
-					holder.itemImage.setImageRequest(imageRequest);
+						final ImageRequest imageRequest = builder.create();
+
+						holder.imageUri = imageUri;
+						holder.image.setImageRequest(imageRequest);
+					}
 				}
 			}
 		}
@@ -177,7 +199,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 	}
 
 	public boolean isEnabled(int position) {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -196,6 +218,12 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 		mScrollState = scrollState;
 	}
 
+	protected static void setVisibility(View view, Integer visibility) {
+		if (view != null) {
+			view.setVisibility(visibility);
+		}
+	}
+
 	public class CandiScrollManager implements AbsListView.OnScrollListener {
 
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -209,15 +237,14 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 	public static class CandiListViewHolder {
 
 		public int					position;
-		public String				itemImageUri;
-		public WebImageView			itemImage;
-		public ImageView			itemImageCollection;
-		public TextView				itemTitle;
-		public TextView				itemSubtitle;
-		public TextViewEllipsizing	itemDescription;
-		public AuthorBlock			itemAuthor;
-		public Button				itemComments;
-		public View					itemActionButton;
+		public String				imageUri;
+		public WebImageView			image;
+		public TextView				title;
+		public TextView				subtitle;
+		public TextViewEllipsizing	description;
+		public UserView				user;
+		public Button				comments;
+		public CheckBox				check;
 		public Object				data;
 	}
 
@@ -247,7 +274,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 					final ArrayList<Entity> filteredEntities = new ArrayList<Entity>(mListItems.size());
 					for (int i = 0; i < mListItems.size(); i++) {
 						Entity entity = mListItems.get(i);
-						if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION) && !entity.locked) {
+						if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER) && !entity.locked) {
 							filteredEntities.add(entity);
 						}
 					}

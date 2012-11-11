@@ -61,7 +61,10 @@ public class User extends ServiceEntry {
 	/* For client use only */
 	public boolean				keepSignedIn		= false;
 	public Session				session;
-
+	public String				firstName;
+	public String 				lastName;
+	public Photo				photo;
+	
 	public User() {}
 
 	@Override
@@ -79,7 +82,7 @@ public class User extends ServiceEntry {
 		return this.id.equals("0000.000000.00000.000.000000");
 	}
 
-	public static User setFromPropertiesFromMap(User user, HashMap map) {
+	public static User setPropertiesFromMap(User user, HashMap map) {
 		/*
 		 * These base properties are done here instead of calling ServiceEntry
 		 * because of a recursion problem.
@@ -92,6 +95,8 @@ public class User extends ServiceEntry {
 		user.modifiedDate = (Number) map.get("modifiedDate");
 
 		user.name = (String) map.get("name");
+		user.firstName = (String) map.get("firstName");
+		user.lastName = (String) map.get("lastName");
 		user.location = (String) map.get("location");
 		user.imageUri = (String) map.get("imageUri");
 		user.email = (String) map.get("email");
@@ -104,6 +109,9 @@ public class User extends ServiceEntry {
 		user.lastSignedInDate = (Number) map.get("lastSignedInDate");
 		user.validationDate = (Number) map.get("validationDate");
 		user.validationNotifyDate = (Number) map.get("validationNotifyDate");
+		if (map.get("photo") != null) {
+			user.photo = (Photo) Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
+		}
 		
 		return user;
 	}

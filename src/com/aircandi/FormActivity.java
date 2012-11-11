@@ -21,17 +21,18 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.AnimUtils.TransitionType;
+import com.aircandi.components.CommandType;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.ImageUtils;
+import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -39,6 +40,7 @@ import com.aircandi.components.Tracker;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
+import com.aircandi.widgets.BuilderButton;
 import com.aircandi.widgets.WebImageView;
 
 public abstract class FormActivity extends SherlockActivity {
@@ -66,7 +68,7 @@ public abstract class FormActivity extends SherlockActivity {
 			 */
 			mCommon = new AircandiCommon(this, savedInstanceState);
 			mCommon.unpackIntent();
-			mCommon.setTheme(isDialog(), true);
+			mCommon.setTheme(getThemeResId(), isDialog());
 			super.onCreate(savedInstanceState);
 			super.setContentView(this.getLayoutID());
 			mCommon.initialize();
@@ -160,7 +162,7 @@ public abstract class FormActivity extends SherlockActivity {
 					}
 
 					if (imageDescription != null && !imageDescription.equals("")) {
-						EditText description = (EditText) findViewById(R.id.text_content);
+						EditText description = (EditText) findViewById(R.id.description);
 						if (description != null && description.getText().toString().equals("")) {
 							description.setText(imageDescription);
 						}
@@ -221,7 +223,7 @@ public abstract class FormActivity extends SherlockActivity {
 							float scalingRatio = (float) CandiConstants.IMAGE_WIDTH_MAXIMUM / (float) bitmap.getWidth();
 							matrix.postScale(scalingRatio, scalingRatio);
 						}
-						
+
 						if (rotation != 0) {
 							matrix.postRotate(rotation);
 						}
@@ -246,12 +248,30 @@ public abstract class FormActivity extends SherlockActivity {
 					e.printStackTrace();
 				}
 			}
+			else if (requestCode == CandiConstants.ACTIVITY_WEBSITE_PICK) {
+				Tracker.trackEvent("Entity", "PickWebsite", "None", 0);
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					String linkUri = extras.getString(getString(R.string.EXTRA_URI));
+					if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
+						linkUri = "http://" + linkUri;
+					}
+
+					((BuilderButton) findViewById(R.id.website)).setText(linkUri);
+				}
+			}
 			else if (requestCode == CandiConstants.ACTIVITY_LINK_PICK) {
 
 				Tracker.trackEvent("Entity", "PickBookmark", "None", 0);
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
-					final String linkUri = extras.getString(getString(R.string.EXTRA_URI));
+
+					String linkUriPre = extras.getString(getString(R.string.EXTRA_URI));
+					if (!linkUriPre.startsWith("http://") && !linkUriPre.startsWith("https://")) {
+						linkUriPre = "http://" + linkUriPre;
+					}
+
+					final String linkUri = linkUriPre;
 					final String linkTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
 					final String linkDescription = extras.getString(getString(R.string.EXTRA_URI_DESCRIPTION));
 
@@ -334,9 +354,22 @@ public abstract class FormActivity extends SherlockActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
-	protected void pictureSearch() {
-		Intent candigramPickerIntent = new Intent(this, PictureSearch.class);
-		startActivityForResult(candigramPickerIntent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
+	protected void pictureSearch(String defaultSearch) {
+		Intent intent = new Intent(this, PictureSearch.class);
+		intent.putExtra(getString(R.string.EXTRA_SEARCH_PHRASE), defaultSearch);
+		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	}
+
+	protected void pickPicturePlace(String entityId) {
+		IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
+		intentBuilder.setCommandType(CommandType.View)
+				.setEntityId(entityId)
+				.setEntityTree(mCommon.mEntityTree);
+
+		Intent intent = intentBuilder.create();
+		intent.putExtra(getString(R.string.EXTRA_AS_PICKER), true);
+		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_PICK_PLACE);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
@@ -369,78 +402,96 @@ public abstract class FormActivity extends SherlockActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	protected void showChangePictureDialog(final boolean showFacebookOption, WebImageView webImageView, final RequestListener listener) {
+	protected void showChangePictureDialog(final boolean showFacebookOption
+			, final boolean showPlaceOption
+			, final String defaultUri
+			, final String defaultSearch
+			, final String entityId
+			, WebImageView webImageView
+			, final RequestListener listener) {
 
 		mImageRequestListener = listener;
 		mImageRequestWebImageView = webImageView;
 
-		int listId = R.array.dialog_list_picture_sources;
+		Integer listId = R.array.dialog_list_picture_sources;
 		if (showFacebookOption) {
 			listId = R.array.dialog_list_picture_sources_facebook;
+		}
+		else if (showPlaceOption) {
+			listId = R.array.dialog_list_picture_sources_place;
 		}
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(FormActivity.this);
 
 		builder.setTitle(R.string.dialog_change_picture_title);
-		builder.setIcon(R.drawable.icon_app);
+		builder.setIcon(R.drawable.ic_app);
 
 		builder.setCancelable(true);
 		builder.setNegativeButton(getResources().getString(R.string.dialog_button_cancel), null);
-		builder.setIcon(R.drawable.icon_app);
+		builder.setIcon(R.drawable.ic_app);
 
 		builder.setItems(listId, new DialogInterface.OnClickListener() {
 
 			public void onClick(DialogInterface dialog, int item) {
 
-				/* Picture search */
-				if (item == 0) {
-					pictureSearch();
-				}
-
-				/* Gallery picture */
-				else if (item == 1) {
-					pickPicture();
-				}
-
-				/* Take picture */
-				else if (item == 2) {
-					takePicture();
-				}
-
-				/* Use a web page */
-				else if (item == 3) {
-					pickWebPage();
-				}
-
-				/* Facebook */
-				else if (item == 4 && showFacebookOption) {
-					useFacebook();
-				}
-
-				/* None */
-				else if ((item == 4 && !showFacebookOption) || (item == 5 && showFacebookOption)) {
-
-					/* Tag has the uri to use for the placeholder */
-					String imageUri = "resource:placeholder_logo";
-					if (mCommon.mEntityType != null && mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
-						imageUri = "resource:ic_collection_250";
+				if (showFacebookOption) {
+					if (item == 0) {
+						pictureSearch(defaultSearch);
 					}
-					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
-					builder.setFromUris(imageUri, null);
-
-					ImageRequest imageRequest = builder.create();
-
-					mImageRequestWebImageView.setImageRequest(imageRequest);
-
-					if (mImageRequestListener != null) {
-						mImageRequestListener.onComplete(new ServiceResponse(), imageUri, null, null, null, null);
+					else if (item == 1) {
+						pickPicture();
 					}
-
-					Tracker.trackEvent("Entity", "DefaultPicture", "None", 0);
+					else if (item == 2) {
+						takePicture();
+					}
+					else if (item == 3) {
+						pickWebPage();
+					}
+					else if (item == 4) {
+						useFacebook();
+					}
+					else if (item == 5) {
+						usePictureDefault(defaultUri);
+					}
+				}
+				else if (showPlaceOption) {
+					if (item == 0) {
+						pickPicturePlace(entityId);
+					}
+					else if (item == 1) {
+						pictureSearch(defaultSearch);
+					}
+					else if (item == 2) {
+						pickPicture();
+					}
+					else if (item == 3) {
+						takePicture();
+					}
+					else if (item == 4) {
+						pickWebPage();
+					}
+					else if (item == 5) {
+						usePictureDefault(defaultUri);
+					}
 				}
 				else {
-					ImageUtils.showToastNotification("Not implemented yet.", Toast.LENGTH_SHORT);
+					if (item == 0) {
+						pictureSearch(defaultSearch);
+					}
+					else if (item == 1) {
+						pickPicture();
+					}
+					else if (item == 2) {
+						takePicture();
+					}
+					else if (item == 3) {
+						pickWebPage();
+					}
+					else if (item == 4) {
+						usePictureDefault(defaultUri);
+					}
 				}
+
 				dialog.dismiss();
 			}
 		});
@@ -450,8 +501,41 @@ public abstract class FormActivity extends SherlockActivity {
 		alert.show();
 	}
 
+	protected void usePictureDefault(String defaultUri) {
+		/* Tag has the uri to use for the placeholder */
+		String imageUri = "resource:placeholder_logo";
+		if (mCommon.mEntityType != null && mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
+			imageUri = "resource:ic_collection_250";
+		}
+		if (defaultUri != null) {
+			imageUri = defaultUri;
+		}
+		ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
+		builder.setFromUris(imageUri, null);
+
+		ImageRequest imageRequest = builder.create();
+
+		mImageRequestWebImageView.setImageRequest(imageRequest);
+
+		if (mImageRequestListener != null) {
+			mImageRequestListener.onComplete(new ServiceResponse(), imageUri, null, null, null, null);
+		}
+
+		Tracker.trackEvent("Entity", "DefaultPicture", "None", 0);
+	}
+
 	protected Boolean isDialog() {
 		return false;
+	}
+
+	protected Integer getThemeResId() {
+		return R.style.aircandi_theme_form_light;
+	}
+	
+	protected static void setVisibility(View view, Integer visibility) {
+		if (view != null) {
+			view.setVisibility(visibility);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

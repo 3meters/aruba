@@ -20,6 +20,14 @@
         <item>Use a web page</item>
         <item>None</item>
     </string-array>
+    <string-array name="dialog_list_picture_sources_place">
+        <item>Select a place picture</item>
+        <item>Search for pictures</item>
+        <item>Select a gallery picture</item>
+        <item>Take a new picture</item>
+        <item>Use a web page</item>
+        <item>None</item>
+    </string-array>
     <string-array name="dialog_list_picture_sources_facebook">
         <item>Search for pictures</item>
         <item>Select a gallery picture</item>

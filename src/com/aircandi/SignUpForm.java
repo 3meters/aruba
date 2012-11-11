@@ -151,7 +151,7 @@ public class SignUpForm extends FormActivity {
 
 	public void onChangePictureButtonClick(View view) {
 
-		showChangePictureDialog(true, mImageUser, new RequestListener() {
+		showChangePictureDialog(true, false, null, null, null, mImageUser, new RequestListener() {
 
 			@Override
 			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
@@ -241,7 +241,7 @@ public class SignUpForm extends FormActivity {
 						mCommon.hideProgressDialog();
 						Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 
-						AircandiCommon.showAlertDialog(R.drawable.icon_app
+						AircandiCommon.showAlertDialog(R.drawable.ic_app
 								, getResources().getString(R.string.alert_signup_new_user_title)
 								, getResources().getString(R.string.alert_signup_new_user_message)
 								, null

@@ -39,7 +39,7 @@ public class VersionInfo extends ServiceEntry {
 		return "documents";
 	}
 
-	public static VersionInfo setFromPropertiesFromMap(VersionInfo versionInfo, HashMap map) {
+	public static VersionInfo setPropertiesFromMap(VersionInfo versionInfo, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

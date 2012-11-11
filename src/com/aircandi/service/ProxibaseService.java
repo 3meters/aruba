@@ -71,13 +71,17 @@ import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.Beacon;
-import com.aircandi.service.objects.Comment;
+import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
+import com.aircandi.service.objects.Location;
+import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Result;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
+import com.aircandi.service.objects.ServiceObject;
 import com.aircandi.service.objects.Session;
+import com.aircandi.service.objects.Tip;
 import com.aircandi.service.objects.User;
 import com.aircandi.service.objects.VersionInfo;
 import com.amazonaws.AmazonClientException;
@@ -333,14 +337,14 @@ public class ProxibaseService {
 					String responseContent = convertStreamToString(httpResponse.getEntity().getContent());
 					Float httpStatusCode = (float) httpResponse.getStatusLine().getStatusCode();
 					Logger.d(this, responseContent);
-					
+
 					if (serviceRequest.getResponseFormat() == ResponseFormat.Json) {
 						ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(responseContent, ServiceDataType.None);
 						if (serviceData != null && serviceData.error != null && serviceData.error.code != null) {
 							httpStatusCode = serviceData.error.code.floatValue();
 						}
 					}
-					
+
 					ProxibaseServiceException proxibaseException = makeProxibaseServiceException(httpStatusCode, null);
 					proxibaseException.setResponseMessage(responseContent);
 					if (!serviceRequest.okToRetry() || !shouldRetry(httpRequest, proxibaseException, retryCount)) {
@@ -741,16 +745,22 @@ public class ProxibaseService {
 		try {
 			LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) Aircandi.parser.parse(jsonString, containerFactory);
 			if (serviceDataType == ServiceDataType.User) {
-				return User.setFromPropertiesFromMap(new User(), rootMap);
+				return User.setPropertiesFromMap(new User(), rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.Session) {
-				return Session.setFromPropertiesFromMap(new Session(), rootMap);
+				return Session.setPropertiesFromMap(new Session(), rootMap);
+			}
+			else if (serviceDataType == ServiceDataType.Location) {
+				return Location.setPropertiesFromMap(new Location(), rootMap);
+			}
+			else if (serviceDataType == ServiceDataType.Category) {
+				return Category.setPropertiesFromMap(new Category(), rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.GeoLocation) {
-				return GeoLocation.setFromPropertiesFromMap(new GeoLocation(), rootMap);
+				return GeoLocation.setPropertiesFromMap(new GeoLocation(), rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.Entity) {
-				return Entity.setFromPropertiesFromMap(new Entity(), rootMap);
+				return Entity.setPropertiesFromMap(new Entity(), rootMap);
 			}
 			else {
 				return rootMap;
@@ -797,7 +807,7 @@ public class ProxibaseService {
 
 		try {
 			LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) Aircandi.parser.parse(jsonString, containerFactory);
-			ServiceData serviceData = ServiceData.setFromPropertiesFromMap(new ServiceData(), rootMap);
+			ServiceData serviceData = ServiceData.setPropertiesFromMap(new ServiceData(), rootMap);
 
 			/*
 			 * The data property of ServiceData is always an array even
@@ -810,14 +820,14 @@ public class ProxibaseService {
 					List<LinkedHashMap<String, Object>> maps = (List<LinkedHashMap<String, Object>>) rootMap.get("results");
 					List<Object> list = new ArrayList<Object>();
 					for (LinkedHashMap<String, Object> map : maps) {
-						list.add(ImageResult.setFromPropertiesFromMap(new ImageResult(), map));
+						list.add(ImageResult.setPropertiesFromMap(new ImageResult(), map));
 					}
 					serviceData.data = list;
 				}
 			}
 			else if (serviceData.data != null) {
 				if (serviceDataType == ServiceDataType.Result) {
-					serviceData.data = Result.setFromPropertiesFromMap(new Result(), (HashMap) serviceData.data);
+					serviceData.data = Result.setPropertiesFromMap(new Result(), (HashMap) serviceData.data);
 				}
 				else {
 
@@ -825,19 +835,28 @@ public class ProxibaseService {
 					List<Object> list = new ArrayList<Object>();
 					for (LinkedHashMap<String, Object> map : maps) {
 						if (serviceDataType == ServiceDataType.Entity) {
-							list.add(Entity.setFromPropertiesFromMap(new Entity(), map));
+							list.add(Entity.setPropertiesFromMap(new Entity(), map));
 						}
 						else if (serviceDataType == ServiceDataType.Beacon) {
-							list.add(Beacon.setFromPropertiesFromMap(new Beacon(), map));
+							list.add(Beacon.setPropertiesFromMap(new Beacon(), map));
 						}
 						else if (serviceDataType == ServiceDataType.User) {
-							list.add(User.setFromPropertiesFromMap(new User(), map));
+							list.add(User.setPropertiesFromMap(new User(), map));
 						}
 						else if (serviceDataType == ServiceDataType.VersionInfo) {
-							list.add(VersionInfo.setFromPropertiesFromMap(new VersionInfo(), map));
+							list.add(VersionInfo.setPropertiesFromMap(new VersionInfo(), map));
 						}
 						else if (serviceDataType == ServiceDataType.ImageResult) {
-							list.add(ImageResult.setFromPropertiesFromMap(new ImageResult(), map));
+							list.add(ImageResult.setPropertiesFromMap(new ImageResult(), map));
+						}
+						else if (serviceDataType == ServiceDataType.Photo) {
+							list.add(Photo.setPropertiesFromMap(new Photo(), map));
+						}
+						else if (serviceDataType == ServiceDataType.Tip) {
+							list.add(Tip.setPropertiesFromMap(new Tip(), map));
+						}
+						else if (serviceDataType == ServiceDataType.Category) {
+							list.add(Category.setPropertiesFromMap(new Category(), map));
 						}
 					}
 					serviceData.data = list;
@@ -869,14 +888,14 @@ public class ProxibaseService {
 				if (serviceDataType == ServiceDataType.Entity) {
 					List<Entity> entities = new ArrayList<Entity>();
 					for (HashMap<String, Object> entityMap : maps) {
-						entities.add(Entity.setFromPropertiesFromMap(new Entity(), entityMap));
+						entities.add(Entity.setPropertiesFromMap(new Entity(), entityMap));
 					}
 					serviceData.data = entities;
 				}
 				else if (serviceDataType == ServiceDataType.Beacon) {
 					List<Beacon> beacons = new ArrayList<Beacon>();
 					for (HashMap<String, Object> beaconMap : maps) {
-						beacons.add(Beacon.setFromPropertiesFromMap(new Beacon(), beaconMap));
+						beacons.add(Beacon.setPropertiesFromMap(new Beacon(), beaconMap));
 					}
 					serviceData.data = beacons;
 				}
@@ -891,181 +910,19 @@ public class ProxibaseService {
 		return null;
 	}
 
-	//	public static String convertObjectToJson(Object object, GsonType gsonType) {
-	//		Gson gson = ProxibaseService.getGson(gsonType);
-	//		String json = gson.toJson(object);
-	//		return json;
-	//	}
-
-	public static String convertObjectToJsonSmart(Object object, Boolean useAnnotations) {
+	public static String convertObjectToJsonSmart(Object object, Boolean useAnnotations, Boolean excludeNulls) {
 		String json = null;
 		if (object instanceof ServiceEntry) {
-			HashMap map = ((ServiceEntry) object).getHashMap(useAnnotations);
+			HashMap map = ((ServiceEntry) object).getHashMap(useAnnotations, excludeNulls);
 			json = JSONValue.toJSONString(map);
 		}
-		else if (object instanceof Comment) {
-			HashMap map = ((Comment) object).getHashMap(useAnnotations);
+		else if (object instanceof ServiceObject) {
+			HashMap map = ((ServiceObject) object).getHashMap(useAnnotations, excludeNulls);
 			json = JSONValue.toJSONString(map);
 		}
 
 		return json;
 	}
-
-	//	public static ServiceData convertJsonToObject(String jsonString, Class type, GsonType gsonType) {
-	//		ServiceData serviceData = convertJsonToObjects(jsonString, type, gsonType);
-	//		if (serviceData.data != null) {
-	//			List<Object> array = (List<Object>) serviceData.data;
-	//			if (array != null && array.size() > 0) {
-	//				serviceData.data = array.get(0);
-	//			}
-	//		}
-	//		return serviceData;
-	//	}
-
-	//	public static ServiceData convertJsonToObjects(String jsonString, Class type, GsonType gsonType) {
-	//
-	//		Gson gson = ProxibaseService.getGson(gsonType);
-	//		ServiceData serviceData = new ServiceData();
-	//
-	//		/*
-	//		 * In general, gson deserializer will ignore elements (fields or classes) in the string that do not exist on the
-	//		 * object type. Collections should be treated as generic lists on the target object.
-	//		 */
-	//		try {
-	//
-	//			JsonParser parser = new JsonParser();
-	//			JsonElement jsonElement = parser.parse(jsonString);
-	//			if (jsonElement.isJsonObject()) {
-	//				JsonObject jsonObject = jsonElement.getAsJsonObject();
-	//
-	//				if (jsonObject.has("data")) {
-	//					jsonElement = jsonObject.get("data");
-	//					List<Object> array = new ArrayList<Object>();
-	//					if (jsonElement.isJsonPrimitive()) {
-	//						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
-	//						if (primitive.isString()) {
-	//							array.add(primitive.getAsString());
-	//						}
-	//						else if (primitive.isNumber()) {
-	//							array.add(primitive.getAsNumber());
-	//						}
-	//						else if (primitive.isBoolean()) {
-	//							array.add(primitive.getAsBoolean());
-	//						}
-	//					}
-	//					else if (jsonElement.isJsonArray()) {
-	//						JsonArray jsonArray = jsonElement.getAsJsonArray();
-	//						for (int i = 0; i < jsonArray.size(); i++) {
-	//							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
-	//							array.add(gson.fromJson(jsonObjectNew.toString(), type));
-	//						}
-	//					}
-	//					else if (jsonElement.isJsonObject()) {
-	//						Object obj = gson.fromJson(jsonElement.toString(), type);
-	//						array.add(obj);
-	//					}
-	//					serviceData.data = array;
-	//				}
-	//
-	//				/* Targeting bing results from azure */
-	//				if (jsonObject.has("d")) {
-	//					jsonObject = jsonObject.getAsJsonObject("d");
-	//					jsonElement = jsonObject.getAsJsonArray("results");
-	//					List<Object> array = new ArrayList<Object>();
-	//					if (jsonElement.isJsonPrimitive()) {
-	//						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
-	//						if (primitive.isString()) {
-	//							array.add(primitive.getAsString());
-	//						}
-	//						else if (primitive.isNumber()) {
-	//							array.add(primitive.getAsNumber());
-	//						}
-	//						else if (primitive.isBoolean()) {
-	//							array.add(primitive.getAsBoolean());
-	//						}
-	//					}
-	//					else if (jsonElement.isJsonArray()) {
-	//						JsonArray jsonArray = jsonElement.getAsJsonArray();
-	//						for (int i = 0; i < jsonArray.size(); i++) {
-	//							JsonObject jsonObjectNew = (JsonObject) jsonArray.get(i);
-	//							array.add(gson.fromJson(jsonObjectNew.toString(), type));
-	//						}
-	//					}
-	//					else if (jsonElement.isJsonObject()) {
-	//						Object obj = gson.fromJson(jsonElement.toString(), type);
-	//						array.add(obj);
-	//					}
-	//					serviceData.data = array;
-	//				}
-	//
-	//				if (jsonObject.has("date")) {
-	//					serviceData.date = jsonObject.get("date").getAsJsonPrimitive().getAsNumber();
-	//				}
-	//				if (jsonObject.has("error")) {
-	//					ServiceError error = gson.fromJson(jsonObject.get("error").toString(), ServiceError.class);
-	//					serviceData.error = error;
-	//				}
-	//				if (jsonObject.has("user")) {
-	//					User user = gson.fromJson(jsonObject.get("user").toString(), User.class);
-	//					serviceData.user = user;
-	//				}
-	//				if (jsonObject.has("session")) {
-	//					Session session = gson.fromJson(jsonObject.get("session").toString(), Session.class);
-	//					serviceData.session = session;
-	//					/*
-	//					 * This is the best place to handle updating the session object for the currently logged
-	//					 * in user. The primary reason to update is that the service moves the expiration date based
-	//					 * on activity.
-	//					 */
-	//					if (!Aircandi.getInstance().getUser().anonymous) {
-	//						Aircandi.getInstance().getUser().session = session;
-	//					}
-	//				}
-	//				if (jsonObject.has("count")) {
-	//					serviceData.count = jsonObject.get("count").getAsJsonPrimitive().getAsNumber();
-	//				}
-	//				if (jsonObject.has("info")) {
-	//					serviceData.info = jsonObject.get("info").getAsJsonPrimitive().getAsString();
-	//				}
-	//				if (jsonObject.has("more")) {
-	//					serviceData.more = jsonObject.get("more").getAsJsonPrimitive().getAsBoolean();
-	//				}
-	//				if (jsonObject.has("time")) {
-	//					serviceData.time = jsonObject.get("time").getAsJsonPrimitive().getAsNumber();
-	//				}
-	//			}
-	//
-	//		}
-	//		catch (JsonParseException exception) {
-	//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
-	//		}
-	//		catch (IllegalStateException exception) {
-	//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
-	//		}
-	//		catch (Exception exception) {
-	//			Logger.e(singletonObject, "convertJsonToObjects: " + exception.getMessage());
-	//		}
-	//		return serviceData;
-	//	}
-
-	//	public static Gson getGson(GsonType gsonType) {
-	//		GsonBuilder gsonb = new GsonBuilder();
-	//
-	//		/*
-	//		 * Converting objects to/from json for passing between the client and the service we need to apply some
-	//		 * additional behavior on top of the defaults
-	//		 */
-	//		if (gsonType == GsonType.ProxibaseService) {
-	//			gsonb.excludeFieldsWithoutExposeAnnotation();
-	//			gsonb.setPrettyPrinting(); /* TODO: remove this later */
-	//		}
-	//		else if (gsonType == GsonType.BingService) {
-	//			gsonb.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE);
-	//			gsonb.setPrettyPrinting(); /* TODO: remove this later */
-	//		}
-	//		Gson gson = gsonb.create();
-	//		return gson;
-	//	}
 
 	// ----------------------------------------------------------------------------------------
 	// Inner classes and enums
@@ -1116,6 +973,10 @@ public class ProxibaseService {
 
 		public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {}
 
+		public Bitmap onFilter(Bitmap bitmap) {
+			return bitmap;
+		}
+
 		public void onProgressChanged(int progress) {}
 	}
 
@@ -1124,11 +985,14 @@ public class ProxibaseService {
 		Beacon,
 		User,
 		Session,
+		Photo,
+		Tip,
 		VersionInfo,
 		Result,
 		ImageResult,
 		GeoLocation,
-		None,
+		Category,
+		None, Location,
 	}
 
 	public static enum RequestType {

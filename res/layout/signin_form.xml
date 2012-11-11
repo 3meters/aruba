@@ -44,7 +44,7 @@
             <EditText
                 android:id="@+id/text_email"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                  android:layout_height="@dimen/form_field_height"
                 android:inputType="textEmailAddress" />
 
             <TextView
@@ -56,7 +56,7 @@
             <EditText
                 android:id="@+id/text_password"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                  android:layout_height="@dimen/form_field_height"
                 android:inputType="textPassword" />
 
             <LinearLayout

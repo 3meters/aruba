@@ -16,6 +16,7 @@ import android.location.Location;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 
 import com.aircandi.components.StopWatch;
 import com.aircandi.service.objects.User;
@@ -85,6 +86,7 @@ public class Aircandi extends Application {
 	public static SharedPreferences.Editor	settingsEditor;
 
 	public static Context					applicationContext;
+	public static LayoutInflater			applicationInflater;
 	public static Handler					applicationHandler;
 	public static DisplayMetrics			displayMetrics;
 	public static StopWatch					stopwatch;
@@ -125,6 +127,7 @@ public class Aircandi extends Application {
 		ACRA.init(this);
 
 		applicationContext = getApplicationContext();
+		applicationInflater = (LayoutInflater) applicationContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		applicationHandler = new Handler();
 		stopwatch = new StopWatch();
 

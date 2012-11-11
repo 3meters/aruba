@@ -7,7 +7,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
@@ -26,33 +25,40 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.service.ProxibaseService.RequestListener;
 
+@SuppressWarnings("unused")
 public class WebImageView extends RelativeLayout {
 
-	private String						mImageUri;
-	private Handler						mThreadHandler	= new Handler();
-	private ImageView					mImageView;
+	private ImageView					mImageMain;
+	private ImageView					mImageBadge;
+	private ImageView					mImageZoom;
 	private ProgressBar					mProgressBar;
-	private Integer						mBusyWidth;
+
+	private String						mImageUri;
+	private Handler						mThreadHandler			= new Handler();
+
 	private Integer						mMinWidth;
 	private Integer						mMaxWidth;
 	private Integer						mMinHeight;
 	private Integer						mMaxHeight;
+
+	private String						mLayoutWidth;
+	private String						mLayoutHeight;
+	private Boolean						mLayoutWidthMatchParent	= false;
 	private boolean						mShowBusy;
 	private Integer						mLayoutId;
-	private ScaleType					mScaleType		= ScaleType.CENTER_CROP;
-	@SuppressWarnings("unused")
-	private String						mThemeTone;
+	private ScaleType					mScaleType				= ScaleType.CENTER_CROP;
 
-	private static final ScaleType[]	sScaleTypeArray	= {
-														ScaleType.MATRIX,
-														ScaleType.FIT_XY,
-														ScaleType.FIT_START,
-														ScaleType.FIT_CENTER,
-														ScaleType.FIT_END,
-														ScaleType.CENTER,
-														ScaleType.CENTER_CROP,
-														ScaleType.CENTER_INSIDE
-														};
+	private static final String			androidNamespace		= "http://schemas.android.com/apk/res/android";
+	private static final ScaleType[]	sScaleTypeArray			= {
+																ScaleType.MATRIX,
+																ScaleType.FIT_XY,
+																ScaleType.FIT_START,
+																ScaleType.FIT_CENTER,
+																ScaleType.FIT_END,
+																ScaleType.CENTER,
+																ScaleType.CENTER_CROP,
+																ScaleType.CENTER_INSIDE
+																};
 
 	public WebImageView(Context context) {
 		this(context, null);
@@ -67,21 +73,21 @@ public class WebImageView extends RelativeLayout {
 
 		TypedArray ta = context.obtainStyledAttributes(attributes, R.styleable.WebImageView, defStyle, 0);
 
-		mBusyWidth = ta.getDimensionPixelSize(R.styleable.WebImageView_busyWidth, 30);
-		mMinWidth = ta.getDimensionPixelSize(R.styleable.WebImageView_minWidth, 0);
 		mMaxWidth = ta.getDimensionPixelSize(R.styleable.WebImageView_maxWidth, Integer.MAX_VALUE);
-		mMinHeight = ta.getDimensionPixelSize(R.styleable.WebImageView_minHeight, 0);
 		mMaxHeight = ta.getDimensionPixelSize(R.styleable.WebImageView_maxHeight, Integer.MAX_VALUE);
-		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
-		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.temp_webimageview);
 
-		TypedValue resourceName = new TypedValue();
-		if (context.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
-			mThemeTone = (String) resourceName.coerceToString();
-		}
+		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
+		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.widget_webimageview);
+
+//		mLayoutWidth = attributes.getAttributeValue(androidNamespace, "layout_width");
+//		mLayoutHeight = attributes.getAttributeValue(androidNamespace, "layout_height");
+//		String displayPixels = mLayoutWidth.replaceAll("[^\\d.]", "");
+//		if ((int) Float.parseFloat(displayPixels) != LayoutParams.FILL_PARENT) {
+//			mLayoutWidthMatchParent = true;
+//		}
 
 		if (!isInEditMode()) {
-			int scaleTypeValue = attributes.getAttributeIntValue("http://schemas.android.com/apk/res/android", "scaleType", 6);
+			int scaleTypeValue = attributes.getAttributeIntValue(androidNamespace, "scaleType", 6);
 			if (scaleTypeValue >= 0) {
 				mScaleType = sScaleTypeArray[scaleTypeValue];
 			}
@@ -89,73 +95,50 @@ public class WebImageView extends RelativeLayout {
 
 		ta.recycle();
 
-		initialize();
+		initialize(context);
 	}
 
-	private void initialize() {
+	private void initialize(Context context) {
 		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		inflater.inflate(mLayoutId, this, true);
-		mImageView = (ImageView) findViewById(R.id.image);
-		if (mImageView != null) {
-			mImageView.setScaleType((ScaleType) mScaleType);
-			mImageView.setMinimumWidth(mMinWidth);
-			mImageView.setMaxWidth(mMaxWidth);
-			mImageView.setMinimumHeight(mMinHeight);
-			mImageView.setMaxHeight(mMaxHeight);
+		View view = inflater.inflate(mLayoutId, this, true);
+
+		mImageBadge = (ImageView) view.findViewById(R.id.image_badge);
+		mImageZoom = (ImageView) view.findViewById(R.id.image_zoom);
+		mImageMain = (ImageView) view.findViewById(R.id.image_main);
+		mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+
+		if (mImageMain != null) {
+			mImageMain.setScaleType((ScaleType) mScaleType);
+			mImageMain.invalidate();
+
 			if (isInEditMode()) {
-				mImageView.setImageResource(R.drawable.jaymassena);
+				mImageMain.setImageResource(R.drawable.placeholder_logo);
 			}
 		}
-		mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
 		if (mProgressBar != null) {
 			if (!mShowBusy) {
 				mProgressBar.setVisibility(View.GONE);
 			}
-			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mBusyWidth, mBusyWidth);
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(30, 30);
 			params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
 			mProgressBar.setLayoutParams(params);
 		}
 	}
 
-	public void setImage(final Bitmap bitmap, String imageUri) {
-
-		mImageUri = imageUri;
-		mThreadHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				mImageView.setImageBitmap(null);
-				ImageUtils.showImageInImageView(bitmap, mImageView, true, AnimUtils.fadeInMedium());
-			}
-		});
+	@Override
+	protected void onLayout(boolean changed, int l, int t, int r, int b) {
+		mImageMain.layout(l, t, r, b);
+		super.onLayout(changed, l, t, r, b);
 	}
 
-	/**
-	 * Handles the image request to set the internal ImageView. Creates a separate
-	 * scaled bitmap based on maxWidth and maxHeight or defaults if not set. The original
-	 * bitmap supplied to satisfy the image request may be recycled. If an image
-	 * is not supplied by the image request, the standard broken image is used.
-	 * 
-	 * @param imageRequest
-	 * @param imageReflection
-	 */
-	public void setImageRequest(final ImageRequest imageRequest) {
-		setImageRequest(imageRequest, true);
-	}
-
-	/**
-	 * Handles the image request to set the internal ImageView. Creates a separate
-	 * scaled bitmap based on maxWidth and maxHeight or defaults if not set. The original
-	 * bitmap supplied to satisfy the image request may be recycled unless !okToRecycle. If an image
-	 * is not supplied by the image request, the standard broken image is used.
-	 * 
-	 * @param imageRequest
-	 * @param imageReflection
-	 * @param okToRecycle
-	 */
-	public void setImageRequest(final ImageRequest imageRequest, final boolean okToRecycle) {
-
+	public void doImageRequest(final ImageRequest imageRequest, final boolean okToRecycle) {
+		/*
+		 * Handles the image request to set the internal ImageView. Creates a separate
+		 * scaled bitmap based on maxWidth and maxHeight or defaults if not set. The original
+		 * bitmap supplied to satisfy the image request may be recycled unless !okToRecycle. If an image
+		 * is not supplied by the image request, the standard broken image is used.
+		 */
 		mImageUri = imageRequest.getImageUri();
 
 		final RequestListener originalImageReadyListener = imageRequest.getRequestListener();
@@ -163,10 +146,10 @@ public class WebImageView extends RelativeLayout {
 		/* Start the busy indicator */
 
 		if (mShowBusy) {
-			showLoading(true);
+			showLoading();
 		}
 
-		mImageView.setImageBitmap(null);
+		mImageMain.setImageBitmap(null);
 
 		imageRequest.setRequestListener(new RequestListener() {
 
@@ -190,12 +173,14 @@ public class WebImageView extends RelativeLayout {
 
 						if (imageResponse.bitmap != null) {
 
-							boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
-							final Bitmap bitmapScaled = scaleBitmap
-									? Bitmap.createScaledBitmap(imageResponse.bitmap, mMaxWidth, mMaxHeight, true)
-									: imageResponse.bitmap;
+							setImage(imageResponse.bitmap, imageResponse.imageUri);
 
-							setImage(bitmapScaled, imageResponse.imageUri);
+//							boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
+//							final Bitmap bitmapScaled = scaleBitmap
+//									? Bitmap.createScaledBitmap(imageResponse.bitmap, mMaxWidth, mMaxHeight, true)
+//									: imageResponse.bitmap;
+//
+//							setImage(bitmapScaled, imageResponse.imageUri);
 						}
 					}
 				}
@@ -205,12 +190,12 @@ public class WebImageView extends RelativeLayout {
 						@Override
 						public void run() {
 							Drawable drawable = WebImageView.this.getContext().getResources().getDrawable(R.drawable.image_broken);
-							ImageUtils.showDrawableInImageView(drawable, mImageView, true, AnimUtils.fadeInMedium());
+							ImageUtils.showDrawableInImageView(drawable, mImageMain, true, AnimUtils.fadeInMedium());
 						}
 					});
 				}
 				if (mShowBusy) {
-					showLoading(false);
+					hideLoading();
 				}
 
 				if (originalImageReadyListener != null) {
@@ -220,57 +205,61 @@ public class WebImageView extends RelativeLayout {
 		});
 
 		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, true);
+
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Misc routines
+	// --------------------------------------------------------------------------------------------
 
 	public void clearImage(final boolean animate, final Integer animationId) {
 		mThreadHandler.post(new Runnable() {
 
 			@Override
 			public void run() {
-				ImageUtils.clearImageInImageView(mImageView, animate, AnimUtils.fadeOutMedium());
+				ImageUtils.clearImageInImageView(mImageMain, animate, AnimUtils.fadeOutMedium());
 			}
 		});
 	}
 
-	public void showLoading(boolean loading) {
-		if (loading) {
-			mProgressBar.setVisibility(View.VISIBLE);
-			
-//			mProgressBar.post(new Runnable() {
-//
-//				@Override
-//				public void run() {
-//					mProgressBar.setBackgroundResource(mThemeBusyIndicatorResId);
-//					final AnimationDrawable animation = (AnimationDrawable) mProgressBar.getBackground();
-//					animation.start();
-//					mProgressBar.setVisibility(View.VISIBLE);
-//				}
-//			});
-		}
-		else {
-			mProgressBar.post(new Runnable() {
+	public void showLoading() {
+		mProgressBar.setVisibility(View.VISIBLE);
+	}
 
-				@Override
-				public void run() {
-					Animation animation = AnimUtils.fadeOutMedium();
-//					animation.setAnimationListener(new AnimationListener() {
-//
-//						@Override
-//						public void onAnimationStart(Animation animation) {}
-//
-//						@SuppressWarnings("deprecation")
-//						@Override
-//						public void onAnimationEnd(Animation animation) {
-//							mProgressBar.setBackgroundDrawable(null);
-//						}
-//
-//						@Override
-//						public void onAnimationRepeat(Animation animation) {}
-//					});
-					mProgressBar.startAnimation(animation);
-				}
-			});
-		}
+	public void hideLoading() {
+		mProgressBar.post(new Runnable() {
+
+			@Override
+			public void run() {
+				Animation animation = AnimUtils.fadeOutMedium();
+				mProgressBar.startAnimation(animation);
+			}
+		});
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Setters/Getters routines
+	// --------------------------------------------------------------------------------------------
+
+	public void setImage(final Bitmap bitmap, String imageUri) {
+
+		mImageUri = imageUri;
+		mThreadHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				mImageMain.setImageBitmap(null);
+				ImageUtils.showImageInImageView(bitmap, mImageMain, true, AnimUtils.fadeInMedium());
+			}
+		});
+	}
+
+	public void setImageRequest(final ImageRequest imageRequest) {
+		setImageRequest(imageRequest, true);
+	}
+
+	public void setImageRequest(final ImageRequest imageRequest, final boolean okToRecycle) {
+		doImageRequest(imageRequest, okToRecycle);
 	}
 
 	public String getImageUri() {
@@ -282,22 +271,34 @@ public class WebImageView extends RelativeLayout {
 	}
 
 	public void setImageDrawable(Drawable drawable) {
-		ImageUtils.showDrawableInImageView(drawable, mImageView, true, AnimUtils.fadeInMedium());
+		ImageUtils.showDrawableInImageView(drawable, mImageMain, true, AnimUtils.fadeInMedium());
 	}
 
 	public ImageView getImageView() {
-		return mImageView;
+		return mImageMain;
+	}
+
+	public ImageView getImageBadge() {
+		return mImageBadge;
+	}
+
+	public ImageView getImageZoom() {
+		return mImageZoom;
 	}
 
 	public void recycleBitmap() {
-		if (mImageView.getDrawable() != null) {
-			BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageView.getDrawable();
+		if (mImageMain.getDrawable() != null) {
+			BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageMain.getDrawable();
 			if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null && !bitmapDrawable.getBitmap().isRecycled()) {
 				bitmapDrawable.getBitmap().recycle();
 			}
 		}
-		mImageView.setImageBitmap(null);
+		mImageMain.setImageBitmap(null);
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Lifecycle routines
+	// --------------------------------------------------------------------------------------------
 
 	public void onDestroy() {
 		recycleBitmap();

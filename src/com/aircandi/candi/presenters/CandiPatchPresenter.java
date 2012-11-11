@@ -776,7 +776,7 @@ public class CandiPatchPresenter implements Observer {
 						renderingActivateBump();
 
 						final CandiModel candiModel = (CandiModel) candiView.getModel();
-						Logger.d(this, "SingleTap triggered: " + candiModel.getEntity().label);
+						Logger.d(this, "SingleTap triggered: " + candiModel.getEntity().name);
 
 						if (mCandiListener != null) {
 							mCandiListener.onSingleTap(candiModel);
@@ -1127,6 +1127,14 @@ public class CandiPatchPresenter implements Observer {
 		else if (cameraTargetY >= mBoundsMaxY) {
 			renderingActivateBump();
 			mCameraTargetSprite.moveToBottom(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
+		}
+	}
+	
+	public void scrollToTop() {
+		float cameraTargetY = mCameraTargetSprite.getY();
+		if (cameraTargetY > mBoundsMinY) {
+			renderingActivateBump();
+			mCameraTargetSprite.moveToTop(CandiConstants.DURATION_BOUNCEBACK, CandiConstants.EASE_BOUNCE_BACK, null);
 		}
 	}
 

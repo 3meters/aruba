@@ -67,7 +67,7 @@ public class CandiMap extends SherlockMapActivity {
 		}
 		else {
 			mCommon = new AircandiCommon(this, savedInstanceState);
-			mCommon.setTheme(false, false);
+			mCommon.setTheme(null, false);
 			mCommon.unpackIntent();
 			setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
@@ -237,7 +237,7 @@ public class CandiMap extends SherlockMapActivity {
 
 		mMapOverlays = mMapView.getOverlays();
 		mMapOverlays.remove(mBeaconOverlay);
-		Drawable marker = getResources().getDrawable(R.drawable.icon_map_candi_iii);
+		Drawable marker = getResources().getDrawable(R.drawable.ic_map_candi_iii);
 
 		List<MapBeacon> mapBeacons = new ArrayList<MapBeacon>();
 		List<GeoPoint> geoPoints = new ArrayList<GeoPoint>();

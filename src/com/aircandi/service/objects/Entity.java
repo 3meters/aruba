@@ -31,31 +31,17 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	@Expose
 	public String				type;
 	@Expose
-	public Boolean				root;
-	@Expose
-	public String				uri;
-	@Expose
-	public String				label;
-	@Expose
-	public String				title;
-	@Expose
 	public String				subtitle;
 	@Expose
 	public String				description;
 	@Expose
-	public String				imageUri;
+	public Photo				photo;
 	@Expose
-	public String				imagePreviewUri;
+	public Place				place;
 	@Expose
-	public String				linkUri;
+	public Number				signalFence			= -100.0f;
 	@Expose
-	public String				linkPreviewUri;
-	@Expose
-	public Boolean				linkZoom;
-	@Expose
-	public Boolean				linkJavascriptEnabled;
-	@Expose
-	public Number				signalFence			= -200f;
+	public Boolean				isCollection;
 	@Expose
 	public Boolean				locked;
 	@Expose
@@ -64,14 +50,14 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public String				visibility			= "public";
 	@Expose
 	public List<Comment>		comments;
+
+	@Expose(serialize = false, deserialize = true)
+	public List<BeaconLink>		beaconLinks;
+
 	@Expose(serialize = false, deserialize = true)
 	public Number				activityDate;
 
 	/* Synthetic service fields */
-
-	@Expose(serialize = false, deserialize = true)
-	@SerializedName("_beacon")
-	public String				beaconId;										/* Used to connect beacon object */
 
 	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_parent")
@@ -92,11 +78,6 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public Boolean				commentsMore;
 
-	@Expose(serialize = false, deserialize = true)
-	public GeoLocation			location;
-
-	@Expose(serialize = false, deserialize = true)
-	public Place				place;
 	/*
 	 * For client use only
 	 */
@@ -105,6 +86,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public Boolean				hidden				= false;
 	public Boolean				global				= false;
 	public Boolean				synthetic			= false;
+	public Boolean				checked				= false;
 
 	/* These have meaning for child entities */
 	public Boolean				rookie				= true;
@@ -119,6 +101,9 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			if (this.comments != null) {
 				entity.comments = (List<Comment>) ((ArrayList) this.comments).clone();
 			}
+			if (this.beaconLinks != null) {
+				entity.beaconLinks = (List<BeaconLink>) ((ArrayList) this.beaconLinks).clone();
+			}
 			if (this.owner != null) {
 				entity.owner = this.owner.clone();
 			}
@@ -128,6 +113,12 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			if (this.modifier != null) {
 				entity.modifier = this.modifier.clone();
 			}
+			if (this.photo != null) {
+				entity.photo = this.photo.clone();
+			}
+			if (this.place != null) {
+				entity.place = this.place.clone();
+			}
 			return entity;
 		}
 		catch (final CloneNotSupportedException ex) {
@@ -135,26 +126,62 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		}
 	}
 
-	public Entity copy() {
+	public static Entity setPropertiesFromMap(Entity entity, HashMap map) {
 		/*
-		 * We make sure that all entities in the children and parents
-		 * collections are new entity objects. Any other object properties on
-		 * the entity object are still references to the same instance including:
-		 * 
-		 * - Beacon object
-		 * - Comments in the comment list
-		 * - GeoLocation
+		 * Properties involved with editing are copied from one entity to another.
 		 */
-		try {
-			final Entity entity = (Entity) super.clone();
-			if (this.comments != null) {
-				entity.comments = (List<Comment>) ((ArrayList) this.comments).clone();
+		entity = (Entity) ServiceEntry.setPropertiesFromMap(entity, map);
+
+		entity.type = (String) map.get("type");
+		entity.name = (String) map.get("name");
+		entity.subtitle = (String) map.get("subtitle");
+		entity.description = (String) map.get("description");
+		entity.isCollection = (Boolean) map.get("isCollection");
+		entity.locked = (Boolean) map.get("locked");
+		entity.signalFence = (Number) map.get("signalFence");
+		entity.visibility = (String) map.get("visibility");
+
+		if (map.get("beaconLinks") != null) {
+			entity.beaconLinks = new ArrayList<BeaconLink>();
+			List<LinkedHashMap<String, Object>> beaconLinkMaps = (List<LinkedHashMap<String, Object>>) map.get("beaconLinks");
+			for (LinkedHashMap<String, Object> beaconLinkMap : beaconLinkMaps) {
+				entity.beaconLinks.add(BeaconLink.setPropertiesFromMap(new BeaconLink(), beaconLinkMap));
 			}
-			return entity;
 		}
-		catch (final CloneNotSupportedException ex) {
-			throw new AssertionError();
+
+		if (map.get("comments") != null) {
+			entity.comments = new ArrayList<Comment>();
+			List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
+			for (LinkedHashMap<String, Object> commentMap : commentMaps) {
+				entity.comments.add(Comment.setPropertiesFromMap(new Comment(), commentMap));
+			}
 		}
+		entity.commentCount = (Integer) map.get("commentCount");
+		entity.commentsMore = (Boolean) map.get("commentsMore");
+
+		entity.children = new EntityList<Entity>();
+		if (map.get("children") != null) {
+			List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
+			for (LinkedHashMap<String, Object> childMap : childMaps) {
+				entity.children.add(Entity.setPropertiesFromMap(new Entity(), childMap));
+			}
+		}
+		entity.childCount = (Integer) map.get("childCount");
+		entity.childrenMore = (Boolean) map.get("childrenMore");
+
+		if (map.get("place") != null) {
+			entity.place = (Place) Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"));
+		}
+
+		if (map.get("photo") != null) {
+			entity.photo = (Photo) Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
+		}
+
+		entity.parentId = (String) map.get("_parent");
+
+		entity.activityDate = (Number) map.get("activityDate");
+
+		return entity;
 	}
 
 	public static void copyProperties(Entity from, Entity to) {
@@ -172,93 +199,27 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		ServiceEntry.copyProperties(from, to);
 
 		to.type = from.type;
-		to.title = from.title;
-		to.label = from.label;
+		to.name = from.name;
 		to.subtitle = from.subtitle;
 		to.description = from.description;
-		to.uri = from.uri;
-
-		to.linkJavascriptEnabled = from.linkJavascriptEnabled;
-		to.linkZoom = from.linkZoom;
-
-		to.imageUri = from.imageUri;
-		to.imagePreviewUri = from.imagePreviewUri;
-		to.linkUri = from.linkUri;
-		to.linkPreviewUri = from.linkPreviewUri;
 
 		to.parentId = from.parentId;
-		to.beaconId = from.beaconId;
 
-		to.location = from.location;
 		to.place = from.place;
+		to.photo = from.photo;
 		to.locked = from.locked;
+		to.isCollection = from.isCollection;
 		to.signalFence = from.signalFence;
 		to.visibility = from.visibility;
 
+		to.beaconLinks = from.beaconLinks;
+
+		to.childCount = from.childCount;
 		to.comments = from.comments;
 		to.commentCount = from.commentCount;
 		to.commentsMore = from.commentsMore;
 
 		to.activityDate = from.activityDate;
-	}
-
-	public static Entity setFromPropertiesFromMap(Entity entity, HashMap map) {
-		/*
-		 * Properties involved with editing are copied from one entity to another.
-		 */
-		entity = (Entity) ServiceEntry.setFromPropertiesFromMap(entity, map);
-
-		entity.type = (String) map.get("type");
-		entity.uri = (String) map.get("uri");
-		entity.root = (Boolean) map.get("root");
-		entity.title = (String) map.get("title");
-		entity.label = (String) map.get("label");
-		entity.subtitle = (String) map.get("subtitle");
-		entity.description = (String) map.get("description");
-		entity.linkUri = (String) map.get("linkUri");
-		entity.linkPreviewUri = (String) map.get("linkPreviewUri");
-		entity.linkJavascriptEnabled = (Boolean) map.get("linkJavascriptEnabled");
-		entity.linkZoom = (Boolean) map.get("linkZoom");
-		entity.locked = (Boolean) map.get("locked");
-		entity.imagePreviewUri = (String) map.get("imagePreviewUri");
-		entity.imageUri = (String) map.get("imageUri");
-		entity.signalFence = (Number) map.get("signalFence");
-		entity.visibility = (String) map.get("visibility");
-
-		if (map.get("comments") != null) {
-			entity.comments = new ArrayList<Comment>();
-			List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
-			for (LinkedHashMap<String, Object> commentMap : commentMaps) {
-				entity.comments.add(Comment.setFromPropertiesFromMap(new Comment(), commentMap));
-			}
-		}
-		entity.commentCount = (Integer) map.get("commentCount");
-		entity.commentsMore = (Boolean) map.get("commentsMore");
-
-		entity.children = new EntityList<Entity>();
-		if (map.get("children") != null) {
-			List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
-			for (LinkedHashMap<String, Object> childMap : childMaps) {
-				entity.children.add(Entity.setFromPropertiesFromMap(new Entity(), childMap));
-			}
-		}
-		entity.childCount = (Integer) map.get("childCount");
-		entity.childrenMore = (Boolean) map.get("childrenMore");
-
-		if (map.get("location") != null) {
-			entity.location = (GeoLocation) GeoLocation.setFromPropertiesFromMap(new GeoLocation(), (HashMap<String, Object>) map.get("location"));
-		}
-
-		if (map.get("place") != null) {
-			entity.place = (Place) Place.setFromPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"));
-		}
-		
-		entity.parentId = (String) map.get("_parent");
-		entity.beaconId = (String) map.get("_beacon");
-
-		entity.activityDate = (Number) map.get("activityDate");
-
-		return entity;
 	}
 
 	public Entity deepCopy() {
@@ -275,91 +236,134 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		return "entities";
 	}
 
-	public boolean hasVisibleChildren() {
+	public Integer visibleChildrenCount() {
+		int count = 0;
 		for (Entity childEntity : getChildren()) {
 			if (!childEntity.hidden) {
-				return true;
+				count++;
 			}
 		}
-		return false;
+		return count;
 	}
 
-	public String getMasterImageUri() {
+	public GeoLocation getLocation() {
+		GeoLocation location = null;
+		Entity parent = getParent();
+		if (parent != null) {
+			location = parent.getLocation();
+		}
+		else {
+			Beacon beacon = getBeacon();
+			if (beacon != null) {
+				location = beacon.getLocation();
+			}
+		}
+		if (location == null && place != null && place.location != null) {
+			location = new GeoLocation(place.location.lat, place.location.lng);
+		}
+		return location;
+	}
+
+	public String getImageUri() {
+
 		/*
-		 * Special case where type==post
+		 * If a special preview photo is available, we use it otherwise
+		 * we use the standard photo.
+		 * 
+		 * Only posts and collections do not have photo objects
 		 */
-		String masterImageUri = null;
+		String imageUri = "resource:placeholder_logo";
 		if (this.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-			masterImageUri = this.creator.imageUri;
-			if (!masterImageUri.startsWith("http:") && !masterImageUri.startsWith("https:") && !masterImageUri.startsWith("resource:")) {
-				masterImageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + this.creator.imageUri;
+			imageUri = this.creator.imageUri;
+			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
+				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + this.creator.imageUri;
 			}
 		}
 		else {
-			if (this.synthetic) {
-				masterImageUri = imagePreviewUri;
-			}
-			else if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
-				if (!imagePreviewUri.toLowerCase().startsWith("resource:")) {
-					masterImageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imagePreviewUri;
+			if (this.photo != null) {
+				imageUri = photo.getImageSizedUri(250, 250);
+				if (imageUri == null) {
+					imageUri = photo.getImageUri();
 				}
-				else {
-					masterImageUri = imagePreviewUri;
-				}
-			}
-			else if (linkPreviewUri != null && !linkPreviewUri.equals("")) {
-				masterImageUri = linkPreviewUri;
-			}
-			else if (linkUri != null && !linkUri.equals("")) {
-				masterImageUri = linkUri;
 			}
 			else if (creator != null) {
 				if (creator.imageUri != null && !creator.imageUri.equals("")) {
-					masterImageUri = creator.imageUri;
+					imageUri = creator.imageUri;
 				}
 				else if (creator.linkUri != null && !creator.linkUri.equals("")) {
-					masterImageUri = creator.linkUri;
+					imageUri = creator.linkUri;
 				}
 			}
 		}
-		return masterImageUri;
+
+		return imageUri;
 	}
 
-	public ImageFormat getMasterImageFormat() {
+	public ImageFormat getImageFormat() {
 
-		/*
-		 * Special case where type==post
-		 */
 		ImageFormat imageFormat = ImageFormat.Binary;
-		if (this.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-			imageFormat = ImageFormat.Binary;
-		}
-		else {
 
-			if (imagePreviewUri != null && !imagePreviewUri.equals("")) {
+		if (this.photo != null) {
+			imageFormat = photo.getImageFormat();
+		}
+		else if (creator != null) {
+			if (creator.imageUri != null && !creator.imageUri.equals("")) {
 				imageFormat = ImageFormat.Binary;
 			}
-			else if (linkPreviewUri != null && !linkPreviewUri.equals("")) {
+			else if (creator.linkUri != null && !creator.linkUri.equals("")) {
 				imageFormat = ImageFormat.Html;
-			}
-			else if (linkUri != null && !linkUri.equals("")) {
-				imageFormat = ImageFormat.Html;
-			}
-			else if (creator != null) {
-				if (creator.imageUri != null && !creator.imageUri.equals("")) {
-					imageFormat = ImageFormat.Binary;
-				}
-				else if (creator.linkUri != null && !creator.linkUri.equals("")) {
-					imageFormat = ImageFormat.Html;
-				}
 			}
 		}
+
 		return imageFormat;
+	}
+
+	public BeaconLink getActiveBeaconLink() {
+		/*
+		 * If an entity has more than one viable beaconLink, we choose the one
+		 * that currently has the strongest beacon.
+		 */
+		if (beaconLinks != null) {
+			BeaconLink strongestBeaconLink = null;
+			Integer strongestLevel = null;
+			for (BeaconLink beaconLink : beaconLinks) {
+				if (strongestBeaconLink == null) {
+					strongestBeaconLink = beaconLink;
+					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(beaconLink.beaconId);
+					if (beacon != null) {
+						strongestLevel = beacon.getAvgBeaconLevel();
+					}
+				}
+				else {
+					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(beaconLink.beaconId);
+					if (beacon != null && beacon.getAvgBeaconLevel() > strongestLevel) {
+						strongestBeaconLink = beaconLink;
+						strongestLevel = beacon.getAvgBeaconLevel();
+					}
+				}
+			}
+			return strongestBeaconLink;
+		}
+		return null;
 	}
 
 	public EntityList<Entity> getChildren() {
 		EntityList<Entity> childEntities = ProxiExplorer.getInstance().getEntityModel().getChildren(this.id);
 		return childEntities;
+	}
+
+	public Photo getPhoto() {
+		if (photo == null) {
+			photo = new Photo();
+		}
+		return photo;
+	}
+
+	public Place getPlace() {
+		if (place == null) {
+			place = new Place();
+		}
+		return place;
 	}
 
 	public Entity getParent() {
@@ -368,8 +372,41 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	}
 
 	public Beacon getBeacon() {
-		Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(this.beaconId);
-		return beacon;
+		BeaconLink beaconLink = getActiveBeaconLink();
+		if (beaconLink != null) {
+			Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(beaconLink.beaconId);
+			if (beaconLink.latitude != null) {
+				beacon.latitude = beaconLink.latitude;
+				beacon.longitude = beaconLink.longitude;
+			}
+			return beacon;
+		}
+		return null;
+	}
+
+	public String getBeaconId() {
+		BeaconLink beaconLink = getActiveBeaconLink();
+		if (beaconLink != null) {
+			return beaconLink.beaconId;
+		}
+		return null;
+	}
+
+	public String getLinkId() {
+		String linkId = getActiveBeaconLink().linkId;
+		return linkId;
+	}
+
+	public String getCategories() {
+		if (place != null && place.categories != null && place.categories.size() > 0) {
+			String categories = "";
+			for (Category category : place.categories) {
+				categories += category.name + ", ";
+			}
+			categories = categories.substring(0, categories.length() - 2);
+			return categories;
+		}
+		return null;
 	}
 
 	public static enum ImageFormat {
@@ -386,5 +423,11 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public static enum Visibility {
 		Public,
 		Private
+	}
+
+	public static enum Source {
+		Aircandi,
+		Foursquare,
+		User
 	}
 }

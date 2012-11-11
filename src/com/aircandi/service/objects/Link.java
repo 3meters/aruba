@@ -17,7 +17,13 @@ public class Link extends ServiceEntry {
 	@Expose
 	@SerializedName("_to")
 	public String	toId;
+	
+	@Expose
+	public Number plus;
 
+	@Expose
+	public Number minus;
+	
 	public Link() {}
 
 	public String getCollection() {

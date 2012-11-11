@@ -34,7 +34,7 @@ public class IntentBuilder {
 		Intent intent = new Intent(mContext, mClass);
 
 		if (mEntityLocation != null) {
-			String json = ProxibaseService.convertObjectToJsonSmart(mEntityLocation, true);
+			String json = ProxibaseService.convertObjectToJsonSmart(mEntityLocation, true, true);
 			intent.putExtra(mContext.getString(R.string.EXTRA_ENTITY_LOCATION), json);
 		}
 

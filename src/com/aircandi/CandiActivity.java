@@ -3,6 +3,7 @@ package com.aircandi;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.View;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
@@ -27,7 +28,7 @@ public abstract class CandiActivity extends SherlockActivity {
 		}
 		else {
 			mCommon = new AircandiCommon(this, savedInstanceState);
-			mCommon.setTheme(false, false);
+			mCommon.setTheme(null, false);
 			mCommon.unpackIntent();
 			setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
@@ -58,6 +59,12 @@ public abstract class CandiActivity extends SherlockActivity {
 		Logger.d(this, "Configuration changed");
 		mCommon.mConfigChange = true;
 		super.onConfigurationChanged(newConfig);
+	}
+
+	protected static void setVisibility(View view, Integer visibility) {
+		if (view != null) {
+			view.setVisibility(visibility);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

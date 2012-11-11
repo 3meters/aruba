@@ -56,7 +56,7 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public Integer				linkCount;
 	@Expose(serialize = false, deserialize = true)
-	public Integer				collectionCount;
+	public Integer				folderCount;
 
 	// For client use only
 	public int					signalLevel;
@@ -81,11 +81,16 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 
 	public Integer getAvgBeaconLevel() {
 		int scanHits = scanPasses.size();
-		int scanLevelSum = 0;
-		for (int scanLevel : this.scanPasses) {
-			scanLevelSum += scanLevel;
+		if (scanHits == 0) {
+			return -80;
 		}
-		return Math.round(scanLevelSum / scanHits);
+		else {
+			int scanLevelSum = 0;
+			for (int scanLevel : this.scanPasses) {
+				scanLevelSum += scanLevel;
+			}
+			return Math.round(scanLevelSum / scanHits);
+		}
 	}
 
 	public void addScanPass(int level) {
@@ -125,7 +130,7 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 		to.level = from.level;
 
 		to.entityCount = from.entityCount;
-		to.collectionCount = from.collectionCount;
+		to.folderCount = from.folderCount;
 		to.linkCount = from.linkCount;
 		to.pictureCount = from.pictureCount;
 		to.postCount = from.postCount;
@@ -135,11 +140,11 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 
 	}
 
-	public static Beacon setFromPropertiesFromMap(Beacon beacon, HashMap map) {
+	public static Beacon setPropertiesFromMap(Beacon beacon, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		beacon = (Beacon) ServiceEntry.setFromPropertiesFromMap(beacon, map);
+		beacon = (Beacon) ServiceEntry.setPropertiesFromMap(beacon, map);
 
 		beacon.ssid = (String) map.get("ssid");
 		beacon.bssid = (String) map.get("bssid");
@@ -158,9 +163,17 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 		beacon.pictureCount = (Integer) map.get("pictureCount");
 		beacon.postCount = (Integer) map.get("postCount");
 		beacon.linkCount = (Integer) map.get("linkCount");
-		beacon.collectionCount = (Integer) map.get("collectionCount");
+		beacon.folderCount = (Integer) map.get("collectionCount");
 
 		return beacon;
+	}
+
+	public GeoLocation getLocation() {
+		GeoLocation location = null;
+		if (latitude != null && longitude != null) {
+			location = new GeoLocation(latitude, longitude);
+		}
+		return location;
 	}
 
 	@Override

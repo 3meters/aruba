@@ -183,7 +183,7 @@ public class ProfileForm extends FormActivity {
 	}
 
 	public void onChangePictureButtonClick(View view) {
-		showChangePictureDialog(true, mImageUser, new RequestListener() {
+		showChangePictureDialog(true, false, null, null, null, mImageUser, new RequestListener() {
 
 			@Override
 			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
@@ -272,7 +272,7 @@ public class ProfileForm extends FormActivity {
 						/*
 						 * We also need to update the user that has been persisted for auto sign in.
 						 */
-						String jsonUser = ProxibaseService.convertObjectToJsonSmart(mUser, true);
+						String jsonUser = ProxibaseService.convertObjectToJsonSmart(mUser, true, false);
 						Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonUser);
 						Aircandi.settingsEditor.commit();
 

@@ -78,7 +78,7 @@ public class SignInForm extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 	public void onSendPasswordButtonClick(View view) {
-		AircandiCommon.showAlertDialog(R.drawable.icon_app
+		AircandiCommon.showAlertDialog(R.drawable.ic_app
 				, getResources().getString(R.string.alert_send_password_title)
 				, getResources().getString(R.string.alert_send_password_message)
 				, null
@@ -132,8 +132,8 @@ public class SignInForm extends FormActivity {
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
-						String jsonUser = ProxibaseService.convertObjectToJsonSmart(user, true);
-						String jsonSession = ProxibaseService.convertObjectToJsonSmart(user.session, true);
+						String jsonUser = ProxibaseService.convertObjectToJsonSmart(user, true, true);
+						String jsonSession = ProxibaseService.convertObjectToJsonSmart(user.session, true, true);
 
 						Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonUser);
 						Aircandi.settingsEditor.putString(Preferences.PREF_USER_SESSION, jsonSession);

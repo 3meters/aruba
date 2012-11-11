@@ -8,7 +8,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
-public class Location implements Cloneable, Serializable {
+public class Location extends ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 455904759787968585L;
 
@@ -42,7 +42,18 @@ public class Location implements Cloneable, Serializable {
 
 	public Location() {}
 
-	public static Location setFromPropertiesFromMap(Location location, HashMap map) {
+	@Override
+	public Location clone() {
+		try {
+			final Location location = (Location) super.clone();
+			return location;
+		}
+		catch (final CloneNotSupportedException ex) {
+			throw new AssertionError();
+		}
+	}
+
+	public static Location setPropertiesFromMap(Location location, HashMap map) {
 
 		location.address = (String) map.get("address");
 		location.crossStreet = (String) map.get("crossStreet");
@@ -57,6 +68,32 @@ public class Location implements Cloneable, Serializable {
 		location.isFuzzed = (Boolean) map.get("isFuzzed");
 
 		return location;
+	}
+
+	public String getAddressBlock() {
+		String addressBlock = "";
+		if (address != null && !address.equals("")) {
+			addressBlock = address + "<br/>";
+		}
+
+		if (crossStreet != null && !crossStreet.equals("")) {
+			addressBlock += "(" + crossStreet + ")" + "<br/>";
+		}
+
+		if (city != null && state != null && !city.equals("") && !state.equals("")) {
+			addressBlock += city + ", " + state;
+		}
+		else if (city != null && !city.equals("")) {
+			addressBlock += city;
+		}
+		else if (state != null && !state.equals("")) {
+			addressBlock += state;
+		}
+
+		if (postalCode != null && !postalCode.equals("")) {
+			addressBlock += " " + postalCode;
+		}
+		return addressBlock;
 	}
 
 }

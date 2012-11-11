@@ -39,15 +39,15 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 
 	/* User ids */
 
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_owner")
 	public String				ownerId;
 
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_creator")
 	public String				creatorId;
 
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	@SerializedName("_modifier")
 	public String				modifierId;
 
@@ -59,7 +59,7 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public Number				modifiedDate;
 
-	@Expose(serialize = false, deserialize = true)
+	@Expose
 	public String				name;
 
 	@Expose(serialize = false, deserialize = true)
@@ -88,7 +88,7 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 
 	public abstract String getCollection();
 
-	public static ServiceEntry setFromPropertiesFromMap(ServiceEntry entry, HashMap map) {
+	public static ServiceEntry setPropertiesFromMap(ServiceEntry entry, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
@@ -102,13 +102,13 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 		entry.modifiedDate = (Number) map.get("modifiedDate");
 
 		if (map.get("creator") != null) {
-			entry.creator = (User) User.setFromPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));
+			entry.creator = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));
 		}
 		if (map.get("owner") != null) {
-			entry.owner = (User) User.setFromPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("owner"));
+			entry.owner = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("owner"));
 		}
 		if (map.get("modifier") != null) {
-			entry.modifier = (User) User.setFromPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("modifier"));
+			entry.modifier = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("modifier"));
 		}
 
 		return entry;
@@ -128,7 +128,7 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 		toEntry.createdDate = fromEntry.createdDate;
 	}
 
-	public HashMap<String, Object> getHashMap(Boolean useAnnotations) {
+	public HashMap<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 
 		try {
@@ -136,7 +136,8 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 			Field fields[] = cls.getDeclaredFields();
 			for (Field f : fields) {
 				if (!Modifier.isStatic(f.getModifiers())
-						&& Modifier.isPublic(f.getModifiers())) {
+						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
+					
 					if (useAnnotations) {
 						if (!f.isAnnotationPresent(Expose.class)) {
 							continue;
@@ -156,8 +157,15 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 						}
 					}
 					Object value = f.get(this);
-					if (value != null) {
-						map.put(name, value);
+
+					if (value instanceof ServiceObject) {
+						HashMap childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
+						map.put(name, childMap);
+					}
+					else {
+						if (value != null || (!excludeNulls)) {
+							map.put(name, value);
+						}
 					}
 				}
 			}
@@ -166,7 +174,7 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 			Field fieldsSuper[] = cls.getDeclaredFields();
 			for (Field f : fieldsSuper) {
 				if (!Modifier.isStatic(f.getModifiers())
-						&& Modifier.isPublic(f.getModifiers())) {
+						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
 					if (useAnnotations) {
 						if (!f.isAnnotationPresent(Expose.class)) {
 							continue;
@@ -186,13 +194,11 @@ public abstract class ServiceEntry implements Cloneable, Serializable {
 						}
 					}
 					Object value = f.get(this);
-					if (value != null) {
+					if (value != null || (!excludeNulls)) {
 						map.put(name, value);
 					}
 				}
-
 			}
-
 		}
 		catch (IllegalArgumentException exception) {
 			exception.printStackTrace();

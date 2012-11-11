@@ -27,7 +27,7 @@ public class Thumbnail
 	/** The run time. */
 	protected Long		runTime;
 
-	public static Thumbnail setFromPropertiesFromMap(Thumbnail thumbnail, HashMap map) {
+	public static Thumbnail setPropertiesFromMap(Thumbnail thumbnail, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

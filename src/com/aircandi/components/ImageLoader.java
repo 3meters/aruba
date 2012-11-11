@@ -1,5 +1,7 @@
 package com.aircandi.components;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -219,10 +221,30 @@ public class ImageLoader {
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
 			byte[] imageBytes = (byte[]) serviceResponse.data;
+			
+			
+			String extension = "";
+			int i = url.lastIndexOf('.');
+			if (i > 0) {
+				extension = url.substring(i + 1);
+			}
 
-			/* Turn byte array into bitmap that fits in our desired max size */
-			Logger.v(null, url + ": " + String.valueOf(imageBytes.length) + " bytes received");
-			Bitmap bitmap = ImageManager.getInstance().bitmapForByteArraySampled(imageBytes, imageRequest, CandiConstants.IMAGE_MEMORY_BYTES_MAX);
+			Bitmap bitmap = null;
+			if (extension.equals("gif")) {
+				/*
+				 * Potential memory issue: We don't have the same sampling protection as 
+				 * we get when decoding a jpeg or png.
+				 */
+				InputStream inputStream = new ByteArrayInputStream(imageBytes);
+				GifDecoder decoder = new GifDecoder();
+				decoder.read(inputStream);
+				bitmap = decoder.getBitmap();
+			}
+			else {
+				/* Turn byte array into bitmap that fits in our desired max size */
+				Logger.v(null, url + ": " + String.valueOf(imageBytes.length) + " bytes received");
+				bitmap = ImageManager.getInstance().bitmapForByteArraySampled(imageBytes, imageRequest, CandiConstants.IMAGE_MEMORY_BYTES_MAX);
+			}
 
 			if (bitmap == null) {
 				Logger.w(null, url + ": stream could not be decoded to a bitmap");

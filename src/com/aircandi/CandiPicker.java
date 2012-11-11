@@ -46,7 +46,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 			if (entities != null) {
 				mEntities.clear();
 				for (Entity entity : entities) {
-					if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION) && !entity.locked) {
+					if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER) && !entity.locked) {
 						mEntities.add(entity);
 					}
 				}
@@ -81,7 +81,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 							EntityList<Entity> entitiesUserCandi = (EntityList<Entity>) result.data;
 							mEntities.clear();
 							for (Entity entity : entitiesUserCandi) {
-								if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION) && !entity.locked) {
+								if (entity.isCollection && !entity.locked) {
 									mEntities.add(entity);
 								}
 							}

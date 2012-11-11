@@ -5,14 +5,17 @@ import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,11 +24,14 @@ import android.widget.Toast;
 import com.aircandi.candi.models.CandiModel;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
+import com.aircandi.components.AndroidManager;
 import com.aircandi.components.AnimUtils;
 import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiPagerAdapter;
 import com.aircandi.components.CommandType;
+import com.aircandi.components.DrawableManager.ViewHolder;
 import com.aircandi.components.EntityList;
+import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.ImageUtils;
@@ -36,11 +42,21 @@ import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.GeoLocation;
+import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Phrase;
+import com.aircandi.service.objects.Place;
+import com.aircandi.service.objects.Tip;
 import com.aircandi.service.objects.User;
-import com.aircandi.widgets.AuthorBlock;
+import com.aircandi.widgets.HorizontalScrollLayout;
+import com.aircandi.widgets.ListViewExpanded;
+import com.aircandi.widgets.SectionLayout;
+import com.aircandi.widgets.TextViewEllipsizing;
+import com.aircandi.widgets.UserView;
 import com.aircandi.widgets.WebImageView;
 
 public abstract class CandiFormBase extends CandiActivity {
@@ -88,7 +104,7 @@ public abstract class CandiFormBase extends CandiActivity {
 						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 						mEntityModelUser = Aircandi.getInstance().getUser();
-						mCommon.mActionBar.setTitle(mEntity.title);
+						mCommon.mActionBar.setTitle(mEntity.name);
 
 						/* Sort the children if there are any */
 						if (mEntity.getChildren().size() > 1) {
@@ -170,50 +186,103 @@ public abstract class CandiFormBase extends CandiActivity {
 	}
 
 	public void onMapButtonClick(View view) {
-		launchMapApp();
+		GeoLocation location = mEntity.getLocation();
+		AndroidManager.getInstance().callMapActivity(this, String.valueOf(location.latitude.doubleValue())
+				, String.valueOf(location.longitude.doubleValue())
+				, mEntity.name);
 	}
 
-	private void launchMapApp() {
-		GeoLocation entityLocation = mEntity.location != null ? mEntity.location : mCommon.mEntityLocation;
-		String latitude = String.valueOf(entityLocation.latitude.doubleValue());
-		String longitude = String.valueOf(entityLocation.longitude.doubleValue());
-		String uri = "geo:" + latitude + "," + longitude + "?q="
-				+ latitude
-				+ "," + longitude
-				+ "(" + mEntity.label + ")";
-		Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
-		startActivity(searchAddress);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	public void onCallButtonClick(View view) {
+		AndroidManager.getInstance().callDialerActivity(this, mEntity.place.contact.phone);
 	}
 
-	@SuppressWarnings("unused")
-	private void launchMapView() {
-		IntentBuilder intentBuilder = new IntentBuilder(this, MapBrowse.class);
-		intentBuilder.setCommandType(CommandType.View);
-		intentBuilder.setEntityId(mEntity.id);
-		intentBuilder.setParentEntityId(mEntity.parentId);
-		intentBuilder.setEntityLocation(mCommon.mEntityLocation);
-		Intent intent = intentBuilder.create();
+	public void onMoreButtonClick(View view) {
+		String target = (String) view.getTag();
+		if (target.equals("photos")) {
+			IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
+			intentBuilder.setCommandType(CommandType.View)
+					.setEntityId(mEntity.id)
+					.setEntityTree(mCommon.mEntityTree);
+
+			Intent intent = intentBuilder.create();
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
+		}
+		else if (target.equals("tips")) {
+			IntentBuilder intentBuilder = new IntentBuilder(this, TipList.class);
+			intentBuilder.setCommandType(CommandType.View)
+					.setEntityId(mEntity.id)
+					.setEntityTree(mCommon.mEntityTree)
+					.setCollectionId(mEntity.id);
+
+			Intent intent = intentBuilder.create();
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
+		}
+		else if (target.equals("candi")) {
+			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
+			intentBuilder.setCommandType(CommandType.View)
+					.setEntityId(mEntity.id)
+					.setEntityTree(mCommon.mEntityTree)
+					.setCollectionId(mEntity.id);
+
+			Intent intent = intentBuilder.create();
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
+		}
+	}
+
+	public void onListItemClick(View view) {}
+
+	public void onWebsiteButtonClick(View view) {
+		AndroidManager.getInstance().callBrowserActivity(this, mEntity.place.website);
+	}
+
+	public void onShareButtonClick(View view) {
+		AndroidManager.getInstance().callSendActivity(this, null, mEntity.place.sourceUriShort);
+	}
+
+	public void onTwitterButtonClick(View view) {
+		AndroidManager.getInstance().callTwitterActivity(this, mEntity.place.contact.twitter);
+	}
+
+	public void onMenuButtonClick(View view) {
+		AndroidManager.getInstance().callBrowserActivity(this, mEntity.place.menu.mobileUri != null ? mEntity.place.menu.mobileUri : mEntity.place.menu.uri);
+	}
+
+	public void onPhotoClick(View view) {
+		List<Photo> photos = mEntity.place.photos;
+		ProxiExplorer.getInstance().getEntityModel().setPhotos(photos);
+		Photo photo = (Photo) view.getTag();
+		Intent intent = new Intent(this, PictureDetail.class);
+		intent.putExtra(getString(R.string.EXTRA_URI), photo.getImageUri());
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	}
+
+	public void onCandiClick(View view) {
+		Entity entity = (Entity) view.getTag();
+		mCommon.showCandiFormForEntity(entity, CandiForm.class);
 	}
 
 	public void onImageClick(View view) {
 		Intent intent = null;
-		if (mEntity.imageUri != null && !mEntity.imageUri.equals("")) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
-			intentBuilder.setCommandType(CommandType.View);
-			intentBuilder.setEntityId(mEntity.id);
-			intentBuilder.setParentEntityId(mEntity.parentId);
-			intentBuilder.setEntityTree(mCommon.mEntityTree);
-			intent = intentBuilder.create();
+		Photo photo = mEntity.photo.hasDetail() ? mEntity.photo.getDetail() : mEntity.photo;
+		if (photo.getImageFormat() == ImageFormat.Binary) {
+			photo.setCreatedAt(mEntity.modifiedDate);
+			photo.setTitle(mEntity.name);
+			photo.setUser(mEntity.creator);
+			ProxiExplorer.getInstance().getEntityModel().getPhotos().clear();
+			ProxiExplorer.getInstance().getEntityModel().getPhotos().add(photo);
+			intent = new Intent(this, PictureDetail.class);
+			intent.putExtra(getString(R.string.EXTRA_URI), mEntity.photo.getImageUri());
+
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 		}
 		else {
-			intent = new Intent(android.content.Intent.ACTION_VIEW);
-			intent.setData(Uri.parse(mEntity.linkUri));
+			AndroidManager.getInstance().callBrowserActivity(this, photo.getImageUri());
 		}
-		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	public void onAddCandiButtonClick(View view) {
@@ -324,202 +393,444 @@ public abstract class CandiFormBase extends CandiActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	static public ViewGroup buildCandiInfo(final Entity entity, final ViewGroup candiInfoView, GeoLocation mLocation, boolean refresh) {
+	static public ViewGroup buildCandiForm(Context context, final Entity entity, final ViewGroup layout, GeoLocation mLocation, boolean refresh) {
+		/*
+		 * For now, we assume that the candi form isn't recycled.
+		 * 
+		 * We leave most of the views visible by default so they are visible in the layout editor.
+		 * 
+		 * - WebImageView primary image is visible by default
+		 * - WebImageView child views are gone by default
+		 * - Header views are visible by default
+		 */
+		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		final TextView title = (TextView) candiInfoView.findViewById(R.id.candi_form_title);
-		final TextView subtitle = (TextView) candiInfoView.findViewById(R.id.candi_form_subtitle);
-		final WebImageView imageCandi = (WebImageView) candiInfoView.findViewById(R.id.candi_form_image);
-		final ImageView imageCollection = (ImageView) candiInfoView.findViewById(R.id.candi_form_image_collection);
-		final ImageView imageZoom = (ImageView) candiInfoView.findViewById(R.id.candi_form_image_zoom);
-		final ViewGroup imageCandiHolder = (ViewGroup) candiInfoView.findViewById(R.id.candi_form_image_holder);
-		final TextView description = (TextView) candiInfoView.findViewById(R.id.candi_form_description);
-		final AuthorBlock authorBlock = (AuthorBlock) candiInfoView.findViewById(R.id.block_author);
-		final Button comments = (Button) candiInfoView.findViewById(R.id.button_comments);
-		final ImageView map = (ImageView) candiInfoView.findViewById(R.id.button_map);
-		final Button newComment = (Button) candiInfoView.findViewById(R.id.button_comment);
-		final ViewGroup newCandi = (ViewGroup) candiInfoView.findViewById(R.id.button_new);
-		final Button moveCandi = (Button) candiInfoView.findViewById(R.id.button_move);
-		final Button editCandi = (Button) candiInfoView.findViewById(R.id.button_edit);
-		final ViewGroup parentGroup = (ViewGroup) candiInfoView.findViewById(R.id.candi_form_parent_group);
-		final TextView parentText = (TextView) candiInfoView.findViewById(R.id.candi_form_parent_text);
+		final WebImageView image = (WebImageView) layout.findViewById(R.id.candi_form_image);
+		final TextView title = (TextView) layout.findViewById(R.id.candi_form_title);
+		final TextView subtitle = (TextView) layout.findViewById(R.id.candi_form_subtitle);
+		final ImageView subtitle_badge = (ImageView) layout.findViewById(R.id.subtitle_badge);
+		final TextView description = (TextView) layout.findViewById(R.id.candi_form_description);
+		final TextView address = (TextView) layout.findViewById(R.id.candi_form_address);
+		final UserView author = (UserView) layout.findViewById(R.id.author);
 
-		final View holderChildren = (View) candiInfoView.findViewById(R.id.holder_button_children);
-		final WebImageView imageChildren = (WebImageView) candiInfoView.findViewById(R.id.button_children_image);
-		final TextView textChildren = (TextView) candiInfoView.findViewById(R.id.button_children_text);
+		/* Primary candi image */
 
-		/* Candi image */
-
-		if (imageCollection != null) {
-			imageCollection.setVisibility(View.INVISIBLE);
-		}
-
-		if (imageCandi != null) {
-			String imageUri = entity.getMasterImageUri();
+		if (image != null) {
+			String imageUri = entity.getImageUri();
 			if (imageUri != null) {
-				ImageFormat imageFormat = entity.getMasterImageFormat();
-				ImageRequestBuilder builder = new ImageRequestBuilder(imageCandi);
-				builder.setImageUri(imageUri);
-				builder.setImageFormat(imageFormat);
-				builder.setLinkZoom(entity.linkZoom);
-				builder.setLinkJavascriptEnabled(entity.linkJavascriptEnabled);
+
+				ImageFormat imageFormat = entity.getImageFormat();
+				ImageRequestBuilder builder = new ImageRequestBuilder(image)
+						.setImageUri(imageUri)
+						.setImageFormat(imageFormat)
+						.setLinkZoom(CandiConstants.LINK_ZOOM)
+						.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
+
 				ImageRequest imageRequest = builder.create();
-				imageCandi.setImageRequest(imageRequest);
-				imageCandiHolder.setVisibility(View.VISIBLE);
-			}
-		}
+				image.setImageRequest(imageRequest);
 
-		if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
-			if (entity.getMasterImageUri() == null
-					|| !entity.getMasterImageUri().toLowerCase().startsWith("resource:")) {
-				imageCollection.setVisibility(View.VISIBLE);
-			}
-			else {
-				imageCandi.setClickable(false);
-				imageZoom.setVisibility(View.GONE);
-			}
-		}
-		else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-			if (imageCandi != null) {
-				imageCandi.setClickable(false);
-				imageZoom.setVisibility(View.GONE);
-			}
-		}
-		else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			if (imageCandi != null) {
-				imageCandi.setClickable(false);
-				imageZoom.setVisibility(View.GONE);
-			}
-		}
-
-		/* Author block */
-
-		if (entity.creator != null) {
-			authorBlock.bindToAuthor(entity.creator, entity.modifiedDate.longValue(), entity.locked);
-			authorBlock.setVisibility(View.VISIBLE);
-		}
-		else {
-			authorBlock.setVisibility(View.GONE);
-		}
-
-		/* Parent info */
-		if (parentGroup != null && entity.parentId == null && entity.getParent() == null) {
-			parentGroup.setVisibility(View.GONE);
-		}
-		else {
-			parentGroup.setVisibility(View.VISIBLE);
-			parentText.setText(Aircandi.getInstance().getString(R.string.name_entity_type_collection) + ": " + entity.getParent().label);
-		}
-
-		/* Adjust buttons */
-
-		newCandi.setVisibility(View.GONE);
-		newComment.setVisibility(View.GONE);
-		editCandi.setVisibility(View.GONE);
-		comments.setVisibility(View.GONE);
-
-		if (moveCandi != null) {
-			moveCandi.setVisibility(View.GONE);
-		}
-		
-		if (holderChildren != null) {
-			holderChildren.setVisibility(View.GONE);
-		}
-		
-		if (entity.locked != null && entity.locked) {
-			if (entity.getParent() == null) {
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
-					newCandi.setVisibility(View.VISIBLE);
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
+					if (entity.getImageUri() == null
+							|| !entity.getImageUri().toLowerCase().startsWith("resource:")) {
+						image.getImageBadge().setImageResource(R.drawable.ic_collection_250);
+						image.getImageBadge().setVisibility(View.VISIBLE);
+						image.getImageZoom().setVisibility(View.VISIBLE);
+						image.setClickable(true);
+					}
+					else {
+						image.getImageBadge().setVisibility(View.GONE);
+						image.getImageZoom().setVisibility(View.GONE);
+						image.setClickable(false);
+					}
+				}
+				else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+					//					if (entity.place.categories != null && entity.place.categories.size() > 0) {
+					//						ViewHolder holder = new ViewHolder();
+					//						holder.itemImage = image.getImageBadge();
+					//						holder.itemImage.setTag(entity.place.categories.get(0).iconUri());
+					//						ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(entity.place.categories.get(0).iconUri(), holder, null);
+					//						image.getImageBadge().setVisibility(View.VISIBLE);
+					//						image.getImageZoom().setVisibility(View.GONE);
+					//						image.setClickable(false);
+					//					}
+					//					else {
+					image.getImageBadge().setVisibility(View.GONE);
+					image.getImageZoom().setVisibility(View.GONE);
+					image.setClickable(false);
+					//					}
+				}
+				else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+					image.getImageBadge().setVisibility(View.GONE);
+					image.getImageZoom().setVisibility(View.GONE);
+					image.setClickable(false);
+				}
+				else {
+					image.getImageBadge().setVisibility(View.GONE);
+					image.getImageZoom().setVisibility(View.VISIBLE);
+					image.setClickable(true);
 				}
 			}
 		}
 
-		if (entity.locked != null && !entity.locked) {
-			newComment.setVisibility(View.VISIBLE);
-		}
-		
-		if (entity.creatorId != null && entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
-			editCandi.setVisibility(View.VISIBLE);
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
-				newCandi.setVisibility(View.VISIBLE);
-			}
-			else {
-				if (moveCandi != null) {
-					moveCandi.setVisibility(View.VISIBLE);
-				}
-			}
-		}
-
-		boolean visibleChildren = (entity.hasVisibleChildren());
-		if (visibleChildren) {
-			Entity childEntity = entity.getChildren().get(0);
-
-			/* image */
-			ImageRequestBuilder builder = new ImageRequestBuilder(imageChildren);
-			builder.setImageUri(childEntity.getMasterImageUri());
-			builder.setImageFormat(childEntity.getMasterImageFormat());
-			builder.setLinkZoom(childEntity.linkZoom);
-			builder.setLinkJavascriptEnabled(childEntity.linkJavascriptEnabled);
-			ImageRequest imageRequest = builder.create();
-			imageChildren.setImageRequest(imageRequest);
-
-			/* child count */
-			textChildren.setText(String.valueOf(entity.getChildren().size()));
-
-			if (holderChildren != null) {
-				holderChildren.setVisibility(View.VISIBLE);
-			}
-		}
-
-		/* Comments */
-
-		if (entity.commentCount != null && entity.commentCount > 0) {
-			comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
-			comments.setVisibility(View.VISIBLE);
-		}
-		else {
-			if (!entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				comments.setVisibility(View.VISIBLE);
-			}
-		}
-
-		/* Map */
-		GeoLocation entityLocation = entity.location != null ? entity.location : mLocation;
-		if (entityLocation == null || entityLocation.latitude == null || entityLocation.longitude == null) {
-			map.setVisibility(View.GONE);
-		}
-		else {
-			map.setVisibility(View.VISIBLE);
-		}
-
-		/* Candi text */
+		/* Header */
 
 		title.setText(null);
 		subtitle.setText(null);
 		description.setText(null);
 
-		if (entity.title != null && !entity.title.equals("")) {
-			title.setText(Html.fromHtml(entity.title));
-			title.setVisibility(View.VISIBLE);
-		}
-		else {
-			title.setVisibility(View.GONE);
-		}
-		if (entity.subtitle != null && !entity.subtitle.equals("")) {
-			subtitle.setText(Html.fromHtml(entity.subtitle));
-			subtitle.setVisibility(View.VISIBLE);
-		}
-		else {
-			subtitle.setVisibility(View.GONE);
-		}
-		if (entity.description != null && !entity.description.equals("")) {
-			description.setText(Html.fromHtml(entity.description));
-			description.setVisibility(View.VISIBLE);
-		}
-		else {
-			description.setVisibility(View.GONE);
+		setVisibility(title, View.GONE);
+		if (title != null && entity.name != null && !entity.name.equals("")) {
+			title.setText(Html.fromHtml(entity.name));
+			setVisibility(title, View.VISIBLE);
 		}
 
-		return candiInfoView;
+		setVisibility(subtitle, View.GONE);
+		if (subtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
+			subtitle.setText(Html.fromHtml(entity.subtitle));
+			setVisibility(subtitle, View.VISIBLE);
+		}
+
+		setVisibility(layout.findViewById(R.id.section_description), View.GONE);
+		if (description != null && entity.description != null && !entity.description.equals("")) {
+			description.setText(Html.fromHtml(entity.description));
+			setVisibility(layout.findViewById(R.id.section_description), View.VISIBLE);
+		}
+
+		/* Candi */
+
+		setVisibility(layout.findViewById(R.id.section_candi), View.GONE);
+		int visibleChildrenCount = entity.getChildren().size();
+		if (visibleChildrenCount > 0) {
+
+			SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_candi);
+			section.getTextViewHeader().setText(String.valueOf(visibleChildrenCount) + " " + context.getString(R.string.candi_section_candi));
+			HorizontalScrollLayout list = (HorizontalScrollLayout) layout.findViewById(R.id.list_candi);
+
+			for (Entity childEntity : entity.getChildren()) {
+				View view = inflater.inflate(R.layout.temp_place_candi_item, null);
+				WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+
+				String imageUri = childEntity.getImageUri();
+				ImageRequestBuilder builder = new ImageRequestBuilder(webImageView)
+						.setImageUri(imageUri)
+						.setImageFormat(childEntity.getImageFormat())
+						.setLinkZoom(CandiConstants.LINK_ZOOM)
+						.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
+
+				ImageRequest imageRequest = builder.create();
+				webImageView.setImageRequest(imageRequest);
+				webImageView.setTag(childEntity);
+
+				list.addView(view);
+			}
+
+			if (visibleChildrenCount > 3) {
+				View footer = inflater.inflate(R.layout.temp_section_footer, null);
+				Button button = (Button) footer.findViewById(R.id.button_more);
+				button.setText(R.string.candi_section_candi_more);
+				button.setTag("candi");
+				section.addView(footer);
+			}
+
+			setVisibility(layout.findViewById(R.id.section_candi), View.VISIBLE);
+		}
+
+		/* Place specific info */
+		if (entity.place != null) {
+			final Place place = entity.place;
+
+			/* We take over the subtitle field and use it for categories */
+			setVisibility(subtitle, View.GONE);
+			if (place.categories != null && place.categories.size() > 0) {
+				String categories = "";
+				for (Category category : place.categories) {
+					if (category.primary != null && category.primary) {
+						categories += "<b>" + category.name + "</b>, ";
+					}
+					else {
+						categories += category.name + ", ";
+					}
+				}
+				categories = categories.substring(0, categories.length() - 2);
+				subtitle.setText(Html.fromHtml(categories));
+				setVisibility(subtitle, View.VISIBLE);
+			}
+
+			setVisibility(subtitle_badge, View.GONE);
+			if (subtitle_badge != null && entity.place.categories != null && entity.place.categories.size() > 0) {
+				ViewHolder holder = new ViewHolder();
+				holder.itemImage = subtitle_badge;
+				holder.itemImage.setTag(entity.place.categories.get(0).iconUri());
+				ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(entity.place.categories.get(0).iconUri(), holder, new RequestListener() {
+
+					@Override
+					public Bitmap onFilter(Bitmap bitmap) {
+						/*
+						 * Turn gray pixels to transparent. Making the bitmap mutable will
+						 * put pressure on memory so this should only be done when working with
+						 * small images. There is an ImageUtils routine that will make make a
+						 * bitmap mutable without using extra memory.
+						 */
+						if (!bitmap.isMutable()) {
+							Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+							bitmap.recycle();
+							mutableBitmap = ImageUtils.replacePixels(mutableBitmap, "#ffc4c3bc", "#00000000");
+							return mutableBitmap;
+						}
+						else {
+							bitmap = ImageUtils.replacePixels(bitmap, "#ffc4c3bc", "#00000000");
+							return bitmap;
+						}
+					}
+
+				});
+				subtitle_badge.setVisibility(View.VISIBLE);
+			}
+
+			if (subtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
+				subtitle.setText(Html.fromHtml(entity.subtitle));
+				setVisibility(subtitle, View.VISIBLE);
+			}
+
+			setVisibility(address, View.GONE);
+			if (address != null && place.location != null) {
+				String addressBlock = place.location.getAddressBlock();
+
+				if (place.contact != null && place.contact.formattedPhone != null) {
+					addressBlock += "<br/>" + place.contact.formattedPhone;
+				}
+
+				address.setText(Html.fromHtml(addressBlock));
+				setVisibility(address, View.VISIBLE);
+			}
+
+			/* Photos */
+			setVisibility(layout.findViewById(R.id.section_photos), View.GONE);
+			if (place.photos != null && place.photos.size() > 0) {
+				SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_photos);
+				section.getTextViewHeader().setText(String.valueOf(place.photoCount) + " " + context.getString(R.string.candi_section_photos));
+				HorizontalScrollLayout list = (HorizontalScrollLayout) layout.findViewById(R.id.list_photos);
+
+				for (Photo photo : place.photos) {
+					ViewHolder holder = new ViewHolder();
+					View view = inflater.inflate(R.layout.temp_place_photo_item, null);
+					WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+					webImageView.setTag(photo);
+					holder.itemImage = webImageView.getImageView();
+					holder.itemImage.setTag(photo.getImageSizedUri(100, 100));
+					holder.itemImage.setImageBitmap(null);
+					ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(photo.getImageSizedUri(100, 100), holder, null);
+					list.addView(view);
+				}
+				if (place.photoCount > place.photos.size()) {
+					View footer = inflater.inflate(R.layout.temp_section_footer, null);
+					Button button = (Button) footer.findViewById(R.id.button_more);
+					button.setText(R.string.candi_section_photos_more);
+					button.setTag("photos");
+					section.addView(footer);
+				}
+
+				setVisibility(layout.findViewById(R.id.section_photos), View.VISIBLE);
+			}
+
+			/* Phrases */
+			setVisibility(layout.findViewById(R.id.section_phrases), View.GONE);
+			if (place.phrases != null && place.phrases.size() > 0) {
+				ListViewExpanded list = (ListViewExpanded) layout.findViewById(R.id.list_phrases);
+				list.setAdapter(new BaseAdapter() {
+
+					@Override
+					public int getCount() {
+						return place.phrases.size();
+					}
+
+					@Override
+					public Object getItem(int position) {
+						return null;
+					}
+
+					@Override
+					public long getItemId(int position) {
+						return 0;
+					}
+
+					@Override
+					public View getView(int position, View convertView, ViewGroup parent) {
+						Phrase phrase = place.phrases.get(position);
+						View view = inflater.inflate(R.layout.temp_listitem_phrase, null);
+
+						TextViewEllipsizing phraseText = (TextViewEllipsizing) view.findViewById(R.id.phrase);
+						String sampleText = new String(phrase.sampleText);
+						sampleText = sampleText.replace(phrase.phrase, "<font color='#ffaa00'>" + phrase.phrase + "</font>");
+						sampleText += " <font color='#aaaaaa'>(" + String.valueOf(phrase.sampleCount) + " tips)</font>";
+						phraseText.setText(Html.fromHtml(sampleText));
+
+						return view;
+					}
+				});
+				setVisibility(layout.findViewById(R.id.section_phrases), View.VISIBLE);
+			}
+
+			/* Tips */
+			setVisibility(layout.findViewById(R.id.section_tips), View.GONE);
+			if (place.tips != null && place.tips.size() > 0) {
+				SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_tips);
+				section.getTextViewHeader().setText(String.valueOf(place.tipCount) + " " + context.getString(R.string.candi_section_tips));
+				ListViewExpanded list = (ListViewExpanded) layout.findViewById(R.id.list_tips);
+				list.setAdapter(new BaseAdapter() {
+
+					@Override
+					public int getCount() {
+						return place.tips.size();
+					}
+
+					@Override
+					public Object getItem(int position) {
+						return null;
+					}
+
+					@Override
+					public long getItemId(int position) {
+						return 0;
+					}
+
+					@Override
+					public View getView(int position, View convertView, ViewGroup parent) {
+						Tip tip = place.tips.get(position);
+						View view = inflater.inflate(R.layout.temp_listitem_tip, null);
+
+						WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+						TextViewEllipsizing description = (TextViewEllipsizing) view.findViewById(R.id.description);
+						UserView user = (UserView) view.findViewById(R.id.author);
+
+						/* Tip text */
+						description.setText(tip.text);
+
+						/* Author block */
+						if (user != null) {
+							setVisibility(user, View.GONE);
+							if (tip.user != null) {
+								user.bindToAuthor(tip.user, tip.createdAt.longValue(), false);
+								setVisibility(user, View.VISIBLE);
+							}
+						}
+
+						ViewHolder holder = new ViewHolder();
+						holder.itemImage = webImageView.getImageView();
+						holder.itemImage.setTag(tip.user.photo.getImageSizedUri(100, 100));
+						holder.itemImage.setImageBitmap(null);
+						ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(tip.user.photo.getImageSizedUri(100, 100), holder, null);
+
+						return view;
+					}
+				});
+
+				if (place.tipCount > list.getItemMaxCount()) {
+					View footer = inflater.inflate(R.layout.temp_section_footer, null);
+					Button button = (Button) footer.findViewById(R.id.button_more);
+					button.setText(R.string.candi_section_tips_more);
+					button.setTag("tips");
+					section.addView(footer);
+				}
+				setVisibility(layout.findViewById(R.id.section_tips), View.VISIBLE);
+			}
+		}
+
+		/* Author block */
+
+		setVisibility(author, View.GONE);
+		if (author != null && entity.creator != null) {
+			author.bindToAuthor(entity.creator, entity.modifiedDate.longValue(), entity.locked);
+			setVisibility(author, View.VISIBLE);
+		}
+
+		/* Buttons */
+		buildCandiButtons(context, entity, layout, mLocation);
+
+		return layout;
+	}
+
+	static private void buildCandiButtons(Context context, final Entity entity, final ViewGroup layout, GeoLocation mLocation) {
+
+		setVisibility(layout.findViewById(R.id.button_map), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_call), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_comments), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_comment), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_new), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_edit), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_move), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_menu), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_twitter), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_website), View.GONE);
+
+		if (entity.locked != null && !entity.locked) {
+			if (entity.isCollection) {
+				setVisibility(layout.findViewById(R.id.button_new), View.VISIBLE);
+			}
+		}
+
+		if (entity.locked != null && !entity.locked) {
+			setVisibility(layout.findViewById(R.id.button_comment), View.VISIBLE);
+		}
+
+		if (entity.creatorId != null && entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
+			setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
+			if (!entity.isCollection) {
+				setVisibility(layout.findViewById(R.id.button_move), View.VISIBLE);
+			}
+		}
+
+		if (!entity.synthetic) {
+			setVisibility(layout.findViewById(R.id.button_comments), View.VISIBLE);
+			if (entity.commentCount != null && entity.commentCount > 0) {
+				Button button = (Button) layout.findViewById(R.id.button_comments);
+				button.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
+			}
+		}
+
+		/* Map */
+
+		GeoLocation location = entity.getLocation();
+		if (location != null) {
+			setVisibility(layout.findViewById(R.id.button_map), View.VISIBLE);
+		}
+
+		/* Dial, twitter, website, menu */
+
+		if (entity.place != null) {
+			Place place = entity.place;
+
+			if (!entity.place.source.equals("user")) {
+				setVisibility(layout.findViewById(R.id.button_edit), View.GONE);
+			}
+
+			if (!entity.synthetic && Aircandi.getInstance().getUser().isDeveloper) {
+				setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
+			}
+
+			if (place.contact != null) {
+				if (place.contact.phone != null) {
+					setVisibility(layout.findViewById(R.id.button_call), View.VISIBLE);
+				}
+
+				if (place.contact.twitter != null) {
+					Button button = (Button) layout.findViewById(R.id.button_twitter);
+					button.setText("@" + place.contact.twitter);
+					setVisibility(button, View.VISIBLE);
+				}
+			}
+
+			if (place.website != null) {
+				setVisibility(layout.findViewById(R.id.button_website), View.VISIBLE);
+			}
+
+			if (place.menu != null) {
+				if (place.menu.mobileUri != null || place.menu.uri != null) {
+					setVisibility(layout.findViewById(R.id.button_menu), View.VISIBLE);
+				}
+			}
+		}
+
 	}
 
 	protected void updateViewPager(List<Entity> entitiesForPaging)
@@ -616,7 +927,7 @@ public abstract class CandiFormBase extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				String newParentId = collectionEntityId != null ? collectionEntityId : entityToMove.getParent().beaconId;
+				String newParentId = collectionEntityId != null ? collectionEntityId : entityToMove.getParent().getBeaconId();
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel()
 						.moveEntity(entityToMove.id, newParentId, collectionEntityId == null ? true : false, false);
 				return result;
@@ -685,7 +996,7 @@ public abstract class CandiFormBase extends CandiActivity {
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			return R.layout.candi_form;
 		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_COLLECTION)) {
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
 			return R.layout.candi_form;
 		}
 		else {

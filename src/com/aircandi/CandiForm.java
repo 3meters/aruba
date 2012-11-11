@@ -16,7 +16,7 @@ public class CandiForm extends CandiFormBase {
 	}
 
 	public void bind(Boolean refresh) {
-		doBind(refresh, true, EntityTree.Radar);
+		doBind(refresh, false, EntityTree.Radar);
 	}
 
 	public void onChildrenButtonClick(View v) {
