@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="120dp"
+        android:layout_marginBottom="10dp" >
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="120dp"
+            android:background="@drawable/picture_bg_dark_place" />
+
+        <com.aircandi.widgets.WebImageView
+            android:id="@+id/candi_form_image"
+            android:layout_width="fill_parent"
+            android:layout_height="120dp"
+            aircandi:layout="@layout/widget_webimageview"
+            aircandi:maxHeight="700dp"
+            aircandi:maxWidth="700dp"
+            android:clickable="true"
+            android:onClick="onImageClick"
+            android:scaleType="centerCrop" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="120dp"
+            android:background="@drawable/picture_overlay_dark" />
+        
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:paddingTop="25dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:paddingBottom="10dp">
+
+            <ImageView
+                android:id="@+id/subtitle_badge"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="10dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/candi_form_title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/dummy_title_short"
+                    android:textColor="#ffffffff"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/candi_form_subtitle"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/dummy_tags"
+                    android:textAllCaps="true"
+                    android:textColor="#ffffffff"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!--
+    <TextView
+        android:id="@+id/candi_form_title"
+        style="?attr/candiFormTitleStyle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dummy_title" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="7dp"
+        android:orientation="horizontal"
+        tools:ignore="UseCompoundDrawables" >
+
+        <ImageView
+            android:id="@+id/subtitle_badge"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="5dp"
+            android:adjustViewBounds="true"
+            android:gravity="bottom|right"
+            android:scaleType="fitCenter"
+            android:src="@drawable/placeholder_logo" />
+
+        <TextView
+            android:id="@+id/candi_form_subtitle"
+            style="@style/candi_form_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/dummy_tags" />
+    </LinearLayout>
+    -->
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp" >
+
+        <TextView
+            android:id="@+id/candi_form_address"
+            style="@style/candi_form_subtitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
+            android:layout_marginLeft="3dp"
+            android:text="@string/dummy_address" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <com.aircandi.widgets.ComboButton
+                android:id="@+id/button_call"
+                style="@style/candi_form_button_combo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                aircandi:drawableScale="0.6"
+                android:drawableLeft="@drawable/ic_action_dialer_dark"
+                android:maxWidth="96dp"
+                android:minWidth="96dp"
+                android:onClick="onCallButtonClick"
+                android:text="@string/candi_button_call" />
+
+            <com.aircandi.widgets.ComboButton
+                android:id="@+id/button_map"
+                style="@style/candi_form_button_combo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                aircandi:drawableScale="0.6"
+                android:drawableLeft="@drawable/ic_action_location_dark"
+                android:maxWidth="96dp"
+                android:minWidth="96dp"
+                android:onClick="onMapButtonClick"
+                android:text="@string/candi_button_map" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button_comments"
+            style="@style/button_comments"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginLeft="5dp"
+            android:onClick="onBrowseCommentsButtonClick"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:text="@string/candi_label_comments_none" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/button_nooutline_selector"
+    android:clickable="true"
+    android:onClick="onListItemClick" >
+
+    <CheckBox
+        android:id="@+id/check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true" />
+
+    <com.aircandi.widgets.WebImageView
+        android:id="@+id/image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/check"
+        aircandi:maxHeight="50dp"
+        aircandi:maxWidth="50dp" />
+
+    <com.aircandi.widgets.TextViewEllipsizing
+        android:id="@+id/title"
+        style="@style/candi_list_title_small"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:layout_toRightOf="@+id/image"
+        android:text="@string/dummy_title" />
+
+    <com.aircandi.widgets.TextViewEllipsizing
+        android:id="@+id/subtitle"
+        style="@style/candi_list_subtitle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title"
+        android:layout_toRightOf="@+id/image"
+        android:maxLines="3"
+        android:paddingBottom="3dp"
+        android:text="@string/dummy_tags" />
+
+</RelativeLayout>

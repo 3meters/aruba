@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="10dp" >
+
+    <TextView
+        android:id="@+id/candi_form_title"
+        style="?attr/candiFormTitleStyle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dummy_title" />
+
+    <TextView
+        android:id="@+id/candi_form_subtitle"
+        style="@style/candi_form_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="7dp"
+        android:layout_marginLeft="3dp"
+        android:text="@string/dummy_tags" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <com.aircandi.widgets.ComboButton
+            android:id="@+id/button_map"
+            style="@style/candi_form_button_combo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            aircandi:drawableScale="0.6"
+            android:drawableLeft="@drawable/ic_action_location_dark"
+            android:maxWidth="96dp"
+            android:minWidth="96dp"
+            android:onClick="onMapButtonClick"
+            android:text="@string/candi_button_map" />
+
+        <Button
+            android:id="@+id/button_comments"
+            style="@style/button_comments"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginLeft="5dp"
+            android:onClick="onBrowseCommentsButtonClick"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:text="@string/candi_label_comments_none" />
+    </LinearLayout>
+
+</LinearLayout>

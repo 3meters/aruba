@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundForm" >
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/form_footer"
+        android:layout_alignParentTop="true"
+        android:fillViewport="true" >
+
+        <ViewFlipper
+            android:id="@+id/flipper_form"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:gravity="center_vertical"
+            android:visibility="visible" >
+
+            <!-- Content -->
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical"
+                android:padding="5dp" >
+
+                <!-- Public Image -->
+
+                <TextView
+                    style="@style/form_label"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:text="@string/form_label_picture_place" />
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="0dp"
+                    android:paddingRight="3dp"
+                    android:paddingTop="5dp" >
+
+                    <com.aircandi.widgets.WebImageView
+                        android:id="@+id/image_picture"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginLeft="4dp"
+                        aircandi:layout="@layout/widget_webimageview"
+                        android:minWidth="100dp"
+                        android:scaleType="centerCrop" />
+
+                    <Button
+                        android:id="@+id/btn_change_public_image"
+                        style="@style/actionbar_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="-4dp"
+                        android:layout_toRightOf="@+id/image_picture"
+                        android:onClick="onChangePictureButtonClick"
+                        android:text="@string/form_button_change_picture" />
+                </RelativeLayout>
+
+                <!-- Title and Content -->
+
+                <EditText
+                    android:id="@+id/text_title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_marginBottom="1dp"
+                    android:layout_weight="0"
+                    android:hint="@string/form_place_title_hint"
+                    android:inputType="textNoSuggestions"
+                    android:textColorHint="@color/edit_hint" />
+
+                <com.aircandi.widgets.BuilderButton
+                    android:id="@+id/address"
+                    android:layout_width="fill_parent"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    aircandi:hint="@string/form_address_hint"
+                    android:background="@drawable/button_selector_light"
+                    android:clickable="true"
+                    android:onClick="onAddressBuilderClick"
+                    android:paddingLeft="7dp" />
+
+                <com.aircandi.widgets.BuilderButton
+                    android:id="@+id/website"
+                    android:layout_width="fill_parent"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    aircandi:hint="@string/form_place_website_hint"
+                    android:addStatesFromChildren="true"
+                    android:background="@drawable/button_selector_light"
+                    android:clickable="true"
+                    android:onClick="onWebsiteBuilderClick"
+                    android:paddingLeft="7dp" />
+
+                <EditText
+                    android:id="@+id/twitter"
+                    android:layout_width="fill_parent"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_marginBottom="1dp"
+                    android:layout_weight="0"
+                    android:hint="@string/form_twitter_hint"
+                    android:inputType="textNoSuggestions"
+                    android:textColorHint="@color/edit_hint" />
+
+                <com.aircandi.widgets.BuilderButton
+                    android:id="@+id/category"
+                    android:layout_width="fill_parent"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    aircandi:hint="@string/form_place_category_hint"
+                    android:background="@drawable/button_selector_light"
+                    android:clickable="true"
+                    android:onClick="onCategoryBuilderClick"
+                    android:paddingLeft="7dp" />
+
+                <EditText
+                    android:id="@+id/description"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:layout_weight="0"
+                    android:gravity="top"
+                    android:hint="@string/form_description_hint"
+                    android:inputType="textMultiLine|textAutoCorrect"
+                    android:minLines="5"
+                    android:textColorHint="@color/edit_hint" />
+
+                <com.aircandi.widgets.UserView
+                    android:id="@+id/author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp" />
+
+                <!--
+                twitter
+                menu
+                candi
+                -->
+            </LinearLayout>
+
+            <!-- Settings -->
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical|top"
+                android:orientation="vertical"
+                android:padding="5dp" >
+
+                <include layout="@layout/temp_form_settings" />
+            </LinearLayout>
+        </ViewFlipper>
+    </ScrollView>
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/form_footer"
+        style="?attr/buttonBarStyle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal" >
+
+        <Button
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onSaveButtonClick"
+            android:text="@string/form_button_save" />
+
+        <Button
+            android:id="@+id/btn_delete_post"
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onDeleteButtonClick"
+            android:text="@string/form_button_delete" />
+
+        <Button
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="350dp" >
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/form_footer"
+        android:layout_alignParentTop="true"
+        android:fillViewport="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|top"
+            android:orientation="vertical"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingTop="15dp" >
+
+            <EditText
+                android:id="@+id/address"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/form_field_height"
+                android:hint="@string/form_address_hint"
+                android:inputType="textPostalAddress" />
+
+            <EditText
+                android:id="@+id/cross_street"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/form_field_height"
+                android:hint="@string/form_cross_street_hint"
+                android:inputType="textPostalAddress"
+                android:nextFocusDown="@+id/city" />
+
+            <EditText
+                android:id="@+id/city"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/form_field_height"
+                android:hint="@string/form_city_hint"
+                android:inputType="textCapWords"
+                android:nextFocusDown="@+id/state" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <EditText
+                    android:id="@+id/state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_weight="1"
+                    android:hint="@string/form_state_hint"
+                    android:inputType="textCapCharacters"
+                    android:nextFocusDown="@+id/zip_code" />
+
+                <EditText
+                    android:id="@+id/zip_code"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_weight="1"
+                    android:hint="@string/form_zipcode_hint"
+                    android:inputType="number"
+                    android:nextFocusDown="@+id/phone" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/phone"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/form_field_height"
+                android:hint="@string/form_phone_hint"
+                android:inputType="phone" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/form_footer"
+        style="?attr/buttonBarStyle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal" >
+
+        <Button
+            android:id="@+id/btn_save"
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onSaveButtonClick"
+            android:text="@string/form_button_save" />
+
+        <Button
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
+    </LinearLayout>
+
+</RelativeLayout>

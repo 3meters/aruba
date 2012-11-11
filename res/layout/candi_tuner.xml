@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="?attr/backgroundForm"
+    tools:context=".CandiTuner"
+    tools:ignore="UnusedNamespace" >
+
+    <TextView
+        android:id="@+id/message"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:padding="10dp"
+        android:text="@string/help_tuning"
+        android:visibility="visible" />
+    
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/message"
+        android:background="@color/abs__holo_blue_light" />
+    
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/form_footer"
+        android:layout_below="@+id/message"
+        android:cacheColorHint="#00000000"
+        android:divider="?attr/ruleColor"
+        android:dividerHeight="1px"
+        android:listSelector="#00000000" >
+
+        <!-- Preview: listitem=@layout/temp_listitem_candi_tuner -->
+    </ListView>
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/form_footer"
+        style="?attr/buttonBarStyle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal" >
+
+        <Button
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onTuneButtonClick"
+            android:text="@string/form_button_tune" />
+
+        <Button
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCustomButtonClick"
+            android:text="@string/form_button_custom" />
+
+        <Button
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
+    </LinearLayout>
+
+    <!-- Custom place form -->
+
+    <FrameLayout
+        android:id="@+id/custom_form"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/drop_shadow_light"
+        android:visibility="gone" >
+
+        <include
+            android:layout_width="300dp"
+            android:layout_height="350dp"
+            layout="@layout/place_custom_form" />
+    </FrameLayout>
+
+</RelativeLayout>
