@@ -15,7 +15,7 @@
     	in CandiPatchPresenter.initializeScene 
     -->
     
-    <color name="pressed">@color/holo_blue_light</color>
+    <color name="pressed">@color/accent</color>
     
     <color name="beacon_stop">#99990000</color>
     <color name="beacon_caution">#99999900</color>

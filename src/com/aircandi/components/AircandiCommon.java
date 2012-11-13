@@ -66,8 +66,6 @@ import com.aircandi.SignUpForm;
 import com.aircandi.TemplatePicker;
 import com.aircandi.UserCandiForm;
 import com.aircandi.UserCandiList;
-import com.aircandi.candi.models.CandiPatchModel;
-import com.aircandi.candi.presenters.CandiPatchPresenter;
 import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -136,8 +134,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public String						mPageName;
 	public Boolean						mNavigationTop				= false;
 	public Boolean						mConfigChange				= false;
-	private CandiPatchModel				mCandiPatchModel;
-	private CandiPatchPresenter			mCandiPatchPresenter;
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
 		mContext = context;
@@ -1393,22 +1389,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
-
-	public CandiPatchModel getCandiPatchModel() {
-		return mCandiPatchModel;
-	}
-
-	public void setCandiPatchModel(CandiPatchModel candiPatchModel) {
-		mCandiPatchModel = candiPatchModel;
-	}
-
-	public CandiPatchPresenter getCandiPatchPresenter() {
-		return mCandiPatchPresenter;
-	}
-
-	public void setCandiPatchPresenter(CandiPatchPresenter candiPatchPresenter) {
-		mCandiPatchPresenter = candiPatchPresenter;
-	}
 
 	public ViewFlipper getViewFlipper() {
 		return mViewFlipper;

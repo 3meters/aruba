@@ -4,7 +4,7 @@
     android:layout_height="fill_parent"
     android:background="?attr/backgroundForm"  >
 
-    <ScrollView
+    <com.aircandi.widgets.BounceScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
@@ -84,7 +84,7 @@
                     android:text="@string/form_button_signin_signup" />
             </LinearLayout>
         </LinearLayout>
-    </ScrollView>
+    </com.aircandi.widgets.BounceScrollView>
 
     <!-- Footer -->
 

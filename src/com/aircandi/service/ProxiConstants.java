@@ -2,9 +2,9 @@ package com.aircandi.service;
 
 public interface ProxiConstants {
 
-	public static final int		TIMEOUT_SOCKET_QUERIES								= 3000;
+	public static final int		TIMEOUT_SOCKET_QUERIES								= 50000;
 	public static final int		TIMEOUT_SOCKET_UPDATES								= 30000;
-	public static final int		TIMEOUT_CONNECTION									= 5000;
+	public static final int		TIMEOUT_CONNECTION									= 10000;
 	public static final int		JSON_NOT_INT_PRIMITIVE								= 999999;
 	public static final int		RESULT_OK											= -1;
 	public static final int		RESULT_FAIL											= 0;

@@ -4,188 +4,130 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <FrameLayout
+    <com.aircandi.widgets.BounceScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@+id/form_footer"
-        android:layout_alignParentTop="true" >
+        android:layout_alignParentTop="true"
+        android:background="?attr/backgroundCandi"
+        android:fillViewport="true"
+        tools:ignore="UselessParent" >
 
-        <RelativeLayout
-            android:id="@+id/retry_dialog"
-            style="@style/dialog_radar_connect"
+        <FrameLayout
+            android:id="@+id/scroll_content"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:gravity="center"
-            android:padding="25dp"
-            android:visibility="gone" >
+            android:layout_height="fill_parent" >
 
-            <TextView
-                android:id="@+id/retry_message"
-                style="@style/dialog_radar_text"
+            <RelativeLayout
+                android:id="@+id/retry_dialog"
+                style="@style/dialog_radar_connect"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
+                android:layout_height="fill_parent"
                 android:gravity="center"
-                android:paddingBottom="15dp" />
+                android:padding="25dp"
+                android:visibility="gone" >
 
-            <LinearLayout
-                android:id="@+id/group_buttons"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/retry_message"
-                android:layout_centerHorizontal="true"
-                android:orientation="horizontal" >
-
-                <Button
-                    android:id="@+id/button_retry"
-                    style="@style/actionbar_button"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:text="@string/dialog_network_retry_button" />
-
-                <Button
-                    android:id="@+id/button_cancel"
-                    style="@style/actionbar_button"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:text="@string/dialog_network_cancel_button" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/group_buttons"
-                android:layout_centerHorizontal="true"
-                android:orientation="horizontal" >
-
-                <CheckBox
-                    android:id="@+id/wifi_enabled_checkbox"
-                    style="@style/app_checkbox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="10dp"
-                    android:gravity="center"
-                    android:text="@string/dialog_network_enable_wifi_checkbox" />
-            </LinearLayout>
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/empty_dialog"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:gravity="center"
-            android:padding="25dp"
-            android:visibility="gone" >
-
-            <TextView
-                android:id="@+id/text_empty_message"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="15dp"
-                android:paddingLeft="2dp"
-                android:paddingRight="2dp"
-                android:text="@string/dummy_description" />
-        </RelativeLayout>
-
-        <WebView
-            android:id="@+id/webview"
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:scrollbars="none"
-            android:visibility="invisible" />
-
-        <org.anddev.andengine.opengl.view.RenderSurfaceView
-            android:id="@+id/view_rendersurface"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:fitsSystemWindows="true" />
-
-        <RelativeLayout
-            android:id="@+id/button_layer"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:visibility="gone" >
-
-            <Button
-                android:id="@+id/button_new"
-                style="@style/app_button_square"
-                android:layout_width="65dp"
-                android:layout_height="65dp"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:layout_margin="15dp"
-                android:height="65dp"
-                android:onClick="onNewCandiButtonClick"
-                android:padding="3dp"
-                android:text="@string/radar_button_new"
-                android:width="65dp" />
-        </RelativeLayout>
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/debug_wrapper_radar"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/form_footer"
-        android:visibility="gone" >
-
-        <SlidingDrawer
-            android:id="@+id/debug_drawer_radar"
-            android:layout_width="fill_parent"
-            android:layout_height="160dp"
-            android:content="@+id/debug_slider_content"
-            android:handle="@+id/debug_slider_handle"
-            tools:ignore="UselessParent" >
-
-            <LinearLayout
-                android:id="@+id/debug_slider_handle"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:orientation="vertical"
-                android:paddingBottom="0dp"
-                android:paddingTop="30dp" >
-
-                <ImageButton
-                    style="@style/debug_slider_handle"
+                <TextView
+                    android:id="@+id/retry_message"
+                    style="@style/dialog_radar_text"
                     android:layout_width="fill_parent"
-                    android:layout_height="20dp"
-                    android:duplicateParentState="true" />
-            </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:paddingBottom="15dp" />
 
-            <LinearLayout
-                android:id="@+id/debug_slider_content"
-                style="@style/debug_slider_content"
+                <LinearLayout
+                    android:id="@+id/group_buttons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/retry_message"
+                    android:layout_centerHorizontal="true"
+                    android:orientation="horizontal" >
+
+                    <Button
+                        android:id="@+id/button_retry"
+                        style="@style/actionbar_button"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:text="@string/dialog_network_retry_button" />
+
+                    <Button
+                        android:id="@+id/button_cancel"
+                        style="@style/actionbar_button"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:text="@string/dialog_network_cancel_button" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/group_buttons"
+                    android:layout_centerHorizontal="true"
+                    android:orientation="horizontal" >
+
+                    <CheckBox
+                        android:id="@+id/wifi_enabled_checkbox"
+                        style="@style/app_checkbox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingRight="10dp"
+                        android:text="@string/dialog_network_enable_wifi_checkbox" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/empty_dialog"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:baselineAligned="false"
-                android:orientation="horizontal"
-                android:padding="0dp" >
+                android:layout_height="fill_parent"
+                android:gravity="center"
+                android:padding="25dp"
+                android:visibility="gone" >
 
-                <RelativeLayout
-                    android:id="@+id/debug_section_one"
-                    style="@style/debug_slider_content"
+                <TextView
+                    android:id="@+id/text_empty_message"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="15dp"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="2dp"
+                    android:text="@string/dummy_description" />
+            </RelativeLayout>
+
+            <WebView
+                android:id="@+id/webview"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:scrollbars="none"
+                android:visibility="invisible" />
+
+            <com.aircandi.widgets.FlowLayout
+                android:id="@+id/radar"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_margin="7dp" />
+
+            <RelativeLayout
+                android:id="@+id/progress"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center" >
+
+                <ProgressBar
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:padding="5dp" >
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/debug_section_two"
-                    style="@style/debug_slider_content"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:padding="5dp" >
-                </RelativeLayout>
-            </LinearLayout>
-        </SlidingDrawer>
-    </FrameLayout>
-
+                    android:layout_centerInParent="true"
+                    android:maxHeight="40dp"
+                    android:minHeight="40dp" />
+            </RelativeLayout>
+        </FrameLayout>
+    </com.aircandi.widgets.BounceScrollView>
+    
     <!-- Footer -->
 
     <RelativeLayout

@@ -196,7 +196,7 @@ public class ProxiExplorer {
 				else {
 					mWifiList.clear();
 					Logger.d(ProxiExplorer.this, "Emulator enabled so using dummy scan results");
-					mWifiList.add(mWifiDemo);
+					mWifiList.add(mWifiMassenaUpper);
 					Events.EventBus.onWifiScanReceived(mWifiList);
 					if (requestListener != null) {
 						requestListener.onComplete(new ServiceResponse());
@@ -325,17 +325,24 @@ public class ProxiExplorer {
 
 			/* Get some virtual place candi */
 			if (serviceResponse.responseCode == ResponseCode.Success) {
-
 				/*
 				 * Make a list of places we already have
 				 */
 				ArrayList<String> excludePlaceIds = new ArrayList<String>();
 				for (Entity entity : mEntityModel.getRadarEntities()) {
-					if (!entity.synthetic && entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+					if (!entity.synthetic && entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && !entity.place.source.equals("user")) {
 						excludePlaceIds.add(entity.place.sourceId);
 					}
 				}
+				
 				observation = GeoLocationManager.getInstance().getObservation();
+				
+				//observation = new Observation(47.6686489, -122.3320842); // zoka
+				observation = new Observation(47.616245, -122.201645); // earls
+				
+				if (mUsingEmulator) {
+					observation = new Observation(47.616245, -122.201645); // earls
+				}
 				if (observation != null) {
 					serviceResponse = getPlacesNearLocation(observation, excludePlaceIds, true);
 				}
@@ -446,10 +453,6 @@ public class ProxiExplorer {
 	public ServiceResponse getPlacesNearLocation(Observation observation, ArrayList<String> excludePlaceIds, Boolean merge) {
 		ServiceResponse serviceResponse = new ServiceResponse();
 
-		/* Temp for testings */
-		//observation = new Observation(47.6686489, -122.3320842); // zoka
-		//observation = new Observation(47.616245, -122.201645); // earls
-
 		Bundle parameters = new Bundle();
 		parameters.putBoolean("placesWithUriOnly", false);
 		if (excludePlaceIds.size() > 0) {
@@ -542,6 +545,11 @@ public class ProxiExplorer {
 			entity.hidden = true;
 			return;
 		}
+
+		/* Entity will be visible so is eligible for the rookie check */
+		if (entity.rookie) {
+			mEntityModel.setRookieHit(true);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -563,42 +571,6 @@ public class ProxiExplorer {
 		if (mWifiLock != null && mWifiLock.isHeld()) {
 			mWifiLock.release();
 		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
-	// --------------------------------------------------------------------------------------------
-
-	public void onPause() {
-		/*
-		 * Call this method when an activity holding a reference to ProxiExplorer is being paused by the system. This
-		 * ensures that any ongoing tag scan is cleaned up properly.
-		 */
-		try {
-			/*
-			 * TODO: Do we need to do anything to clean up processes that might be ongoing? What happens to flags for
-			 * scanning and processing?
-			 */
-		}
-		catch (Exception exception) {
-			/*
-			 * Jayma: For some insane reason, unregisterReceiver always throws an exception so we catch it and move on.
-			 */
-		}
-	}
-
-	public void onDestroy() {
-		/*
-		 * Call this method when an activity holding a reference to ProxiExplorer is being destroyed by the system. This
-		 * ensures that any ongoing tag scan is cleaned up properly and locks are released.
-		 */
-		try {
-			/*
-			 * We are aggressive about hold our wifi lock so we need to be sure it gets released when we are destroyed.
-			 */
-			wifiReleaseLock();
-		}
-		catch (Exception exception) {}
 	}
 
 	// --------------------------------------------------------------------------------------------

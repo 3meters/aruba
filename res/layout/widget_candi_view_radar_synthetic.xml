@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    xmlns:tools="http://schemas.android.com/tools" >
+
+    <com.aircandi.widgets.WebImageView
+        android:id="@+id/image"
+        android:layout_width="fill_parent"
+        android:layout_height="120dp"
+        aircandi:layout="@layout/widget_webimageview"
+        android:background="#ffc4c3bc"
+        aircandi:maxHeight="700dp"
+        aircandi:maxWidth="700dp"
+        android:scaleType="centerCrop" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/picture_overlay_dark_synthetic"
+        android:visibility="visible" />
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_vertical|center_horizontal"
+        android:paddingBottom="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="10dp"
+        android:text="@string/dummy_title_short"
+        android:textColor="#ffffffff"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+</merge>

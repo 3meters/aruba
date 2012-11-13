@@ -12,8 +12,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-import org.anddev.andengine.util.StreamUtils;
-
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
@@ -153,14 +151,12 @@ public class ImageManager {
 			decodeOptions.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
 
 			in = mActivity.getAssets().open(assetPath);
+			in.close();
 			return BitmapFactory.decodeStream(in, null, decodeOptions);
 		}
 		catch (final IOException exception) {
 			Exceptions.Handle(exception);
 			return null;
-		}
-		finally {
-			StreamUtils.close(in);
 		}
 	}
 

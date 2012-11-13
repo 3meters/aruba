@@ -5,7 +5,7 @@
     android:layout_height="fill_parent"
     android:background="?attr/backgroundForm" >
 
-    <ScrollView
+    <com.aircandi.widgets.BounceScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
@@ -167,7 +167,7 @@
                 <include layout="@layout/temp_form_settings" />
             </LinearLayout>
         </ViewFlipper>
-    </ScrollView>
+    </com.aircandi.widgets.BounceScrollView>
 
     <!-- Footer -->
 

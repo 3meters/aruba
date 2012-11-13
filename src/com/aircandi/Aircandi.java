@@ -93,10 +93,12 @@ public class Aircandi extends Application {
 	public static JSONParser				parser						= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
 
 	public static Boolean					firstRunApp					= true;
+	public static Boolean					firstStartApp				= true;
 	public static Boolean					fullUpdateComplete			= false;
 	public static Boolean					runFullScanOnRadarRestart	= true;
 	public static Boolean					lastScanEmpty				= false;
 	public static Boolean					returningFromDialog			= false;
+	public static Boolean					usingEmulator				= false;
 	public static Integer					wifiCount					= 0;
 
 	public static Boolean					applicationUpdateNeeded		= false;

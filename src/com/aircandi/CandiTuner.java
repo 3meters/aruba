@@ -456,10 +456,16 @@ public class CandiTuner extends FormActivity {
 								placeEntity.beaconLinks = new ArrayList<BeaconLink>();
 								placeEntity.beaconLinks.add(new BeaconLink(beacon.id, null));
 								placeEntity.subtitle = entity.getCategories();
+								
 								/* We only want to persist what's needed to link to foursquare */
 								placeEntity.place = new Place();
 								placeEntity.place.source = entity.place.source;
 								placeEntity.place.sourceId = entity.place.sourceId;
+								/* 
+								 * We persist categories for use in radar but it gets overwritten when
+								 * we show place detail via linking.
+								 */
+								placeEntity.place.categories = entity.place.categories;
 
 								if (placeEntity.getPhoto().getBitmap() == null && placeEntity.place.source != null && placeEntity.place.sourceId != null) {
 									/*

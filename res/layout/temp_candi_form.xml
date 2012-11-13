@@ -8,7 +8,7 @@
 
     <!-- Body -->
 
-    <ScrollView
+    <com.aircandi.widgets.BounceScrollView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@+id/form_footer"
@@ -92,7 +92,7 @@
                 android:minWidth="175dp" />
 
         </LinearLayout>
-    </ScrollView>
+    </com.aircandi.widgets.BounceScrollView>
 
     <!-- Footer -->
 

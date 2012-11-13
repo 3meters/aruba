@@ -172,6 +172,13 @@ public class WebImageView extends RelativeLayout {
 					if (imageResponse.imageUri.equals(mImageUri)) {
 
 						if (imageResponse.bitmap != null) {
+							/* 
+							 * Give the original listener a chance to modify the 
+							 * bitmap before we display it.
+							 */
+							if (originalImageReadyListener != null) {
+								imageResponse.bitmap = originalImageReadyListener.onFilter(imageResponse.bitmap);
+							}
 
 							setImage(imageResponse.bitmap, imageResponse.imageUri);
 

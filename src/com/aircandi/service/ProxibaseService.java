@@ -150,8 +150,14 @@ public class ProxibaseService {
 		};
 
 		/*
-		 * Turn off stale checking. Our connections break all the time anyway, and it's not worth it to pay the penalty
-		 * of checking every time.
+		 * Turn off stale checking. Our connections break all the time anyway, and
+		 * it's not worth it to pay the penalty of checking every time.
+		 * 
+		 * Timeouts:
+		 * 
+		 * - setTimeout: Used when retrieving a ManagedClientConnection from the ClientConnectionManager.
+		 * - setConnectionTimeout: Used trying to establish a connection to the server.
+		 * - setSoTimeout: How long a socket will wait for data before throwing up.
 		 */
 		ConnManagerParams.setMaxTotalConnections(mHttpParams, DEFAULT_MAX_CONNECTIONS);
 		ConnManagerParams.setMaxConnectionsPerRoute(mHttpParams, connPerRoute);

@@ -21,12 +21,12 @@ public abstract class CandiActivity extends SherlockActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
-			/* Try to detect case where this is being created after a crash and bail out. */
-			super.onCreate(savedInstanceState);
-			finish();
-		}
-		else {
+//		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
+//			/* Try to detect case where this is being created after a crash and bail out. */
+//			super.onCreate(savedInstanceState);
+//			finish();
+//		}
+//		else {
 			mCommon = new AircandiCommon(this, savedInstanceState);
 			mCommon.setTheme(null, false);
 			mCommon.unpackIntent();
@@ -35,7 +35,7 @@ public abstract class CandiActivity extends SherlockActivity {
 			mCommon.initialize();
 
 			Logger.d(this, "Started from radar flag: " + String.valueOf(Aircandi.getInstance().getLaunchedFromRadar()));
-		}
+//		}
 	}
 
 	// --------------------------------------------------------------------------------------------

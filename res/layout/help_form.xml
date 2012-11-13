@@ -13,7 +13,7 @@
         android:adjustViewBounds="true"
         android:src="@drawable/placeholder_logo_v" />
 
-    <ScrollView
+    <com.aircandi.widgets.BounceScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
@@ -30,7 +30,7 @@
             android:paddingRight="2dp"
             android:scrollbars="vertical"
             android:text="@string/dummy_description" />
-    </ScrollView>
+    </com.aircandi.widgets.BounceScrollView>
 
     <!-- Footer -->
 

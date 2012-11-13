@@ -1,12 +1,6 @@
 package com.aircandi.components;
 
-import java.util.Calendar;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.anddev.andengine.sensor.location.ILocationListener;
-import org.anddev.andengine.sensor.location.LocationProviderStatus;
-import org.anddev.andengine.util.constants.TimeConstants;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -26,7 +20,6 @@ import com.aircandi.components.Events.EventHandler;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Observation;
-import com.google.android.maps.GeoPoint;
 
 @SuppressWarnings("unused")
 public class GeoLocationManager implements LocationListener {
@@ -523,7 +516,7 @@ public class GeoLocationManager implements LocationListener {
 
 	public static class LocationSensorOptions extends Criteria {
 
-		private static final long	MINIMUMTRIGGERTIME_DEFAULT		= 1 * TimeConstants.MILLISECONDSPERSECOND;
+		private static final long	MINIMUMTRIGGERTIME_DEFAULT		= 1 * CandiConstants.MILLS_PER_SECOND;
 		private static final long	MINIMUMTRIGGERDISTANCE_DEFAULT	= 10;
 		private boolean				mEnabledOnly					= true;
 		private long				mMinimumTriggerTime				= MINIMUMTRIGGERTIME_DEFAULT;

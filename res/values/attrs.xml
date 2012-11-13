@@ -39,6 +39,9 @@
         <attr name="iconBookmarks" format="string" />
         <attr name="iconForward" format="string" />
     </declare-styleable>
+    <declare-styleable name="CandiView">
+        <attr name="layout" />
+    </declare-styleable>
     <declare-styleable name="AuthorLayout">
         <attr name="layout" />
     </declare-styleable>

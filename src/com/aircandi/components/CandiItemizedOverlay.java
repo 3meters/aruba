@@ -17,31 +17,25 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiList;
-import com.aircandi.CandiMap;
-import com.aircandi.CandiRadar;
 import com.aircandi.CandiMap.MapBeacon;
 import com.aircandi.MapCandiList;
-import com.aircandi.candi.models.CandiModel;
+import com.aircandi.R;
 import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Beacon;
-import com.aircandi.service.objects.Entity;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
-import com.aircandi.R;
 
 @SuppressWarnings("unused")
 public class CandiItemizedOverlay extends ItemizedOverlay {

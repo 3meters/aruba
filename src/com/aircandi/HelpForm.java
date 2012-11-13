@@ -16,10 +16,12 @@ public class HelpForm extends FormActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		android.view.WindowManager.LayoutParams params = getWindow().getAttributes();
-		params.width = Aircandi.displayMetrics.widthPixels - 50;
-		params.height = Aircandi.displayMetrics.heightPixels - 140;
-		getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+		if (Aircandi.displayMetrics != null) {
+			android.view.WindowManager.LayoutParams params = getWindow().getAttributes();
+			params.width = Aircandi.displayMetrics.widthPixels - 50;
+			params.height = Aircandi.displayMetrics.heightPixels - 140;
+			getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+		}
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {

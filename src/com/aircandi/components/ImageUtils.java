@@ -427,5 +427,6 @@ public class ImageUtils {
 			animation.setFillAfter(true);
 			imageView.startAnimation(animation);
 		}
+		imageView.postInvalidate();
 	}
 }
