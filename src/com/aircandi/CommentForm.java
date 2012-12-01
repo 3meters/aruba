@@ -78,7 +78,7 @@ public class CommentForm extends FormActivity {
 		mComment = new Comment();
 		mComment.creatorId = Aircandi.getInstance().getUser().id;
 		mComment.location = Aircandi.getInstance().getUser().location;
-		mComment.imageUri = Aircandi.getInstance().getUser().imageUri;
+		mComment.imageUri = Aircandi.getInstance().getUser().getPhoto().getImageUri();
 		mComment.name = Aircandi.getInstance().getUser().name;
 	}
 

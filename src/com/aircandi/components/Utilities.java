@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import android.os.CountDownTimer;
@@ -138,7 +139,7 @@ public class Utilities {
 			Logger.v(this, "Timer started");
 			start = System.nanoTime();
 		}
-		
+
 		void stop() {
 			long elapsed = (System.nanoTime() - start) / 1000;
 			Debug.stopAllocCounting();
@@ -201,6 +202,12 @@ public class Utilities {
 			e.printStackTrace();
 		}
 		return "";
+	}
+
+	public static final int random(int min, int max) {
+		Random r = new Random();
+		int i1 = r.nextInt(max - min + 1) + min;
+		return i1;
 	}
 
 	public static Boolean validEmail(String email) {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/item_row"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content" >
 
     <ImageView
@@ -19,7 +19,7 @@
 
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_title"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="40dp"
         android:gravity="center_vertical"
         android:layout_centerVertical="true"
@@ -30,7 +30,7 @@
     <!--
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_description"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/item_title"
         android:paddingBottom="3dp"

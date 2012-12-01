@@ -39,8 +39,7 @@ public class HorizontalScrollLayout extends HorizontalScrollView {
 
 		mLayout = new LinearLayout(mContext);
 		mLayout.setOrientation(LinearLayout.HORIZONTAL);
-		@SuppressWarnings("deprecation")
-		FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		this.addView(mLayout, layoutParams);
 
 		/* Show something in design mode */

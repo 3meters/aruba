@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="?attr/backgroundForm" >
 
     <com.aircandi.widgets.BounceScrollView
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
@@ -14,7 +14,7 @@
 
         <ViewFlipper
             android:id="@+id/flipper_form"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:gravity="center_vertical"
@@ -23,8 +23,8 @@
             <!-- Content -->
 
             <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:padding="5dp" >
 
@@ -32,7 +32,7 @@
 
                 <TextView
                     style="@style/form_label"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="4dp"
                     android:text="@string/form_label_picture_place" />
@@ -72,7 +72,7 @@
 
                 <EditText
                     android:id="@+id/text_title"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="1dp"
                     android:layout_weight="0"
@@ -82,7 +82,7 @@
 
                 <com.aircandi.widgets.BuilderButton
                     android:id="@+id/address"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="5dp"
                     android:layout_marginLeft="4dp"
@@ -95,7 +95,7 @@
 
                 <com.aircandi.widgets.BuilderButton
                     android:id="@+id/website"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="5dp"
                     android:layout_marginLeft="4dp"
@@ -107,9 +107,35 @@
                     android:onClick="onWebsiteBuilderClick"
                     android:paddingLeft="7dp" />
 
+                <!--
+                <com.aircandi.widgets.BuilderButton
+                    android:id="@+id/facebook"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    aircandi:hint="@string/form_place_facebook_hint"
+                    android:addStatesFromChildren="true"
+                    android:background="@drawable/button_selector_light"
+                    android:clickable="true"
+                    android:onClick="onFacebookBuilderClick"
+                    android:paddingLeft="7dp" />
+                -->
+
+                <EditText
+                    android:id="@+id/facebook"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/form_field_height"
+                    android:layout_marginBottom="1dp"
+                    android:layout_weight="0"
+                    android:hint="@string/form_place_facebook_hint"
+                    android:inputType="textNoSuggestions"
+                    android:textColorHint="@color/edit_hint" />
+
                 <EditText
                     android:id="@+id/twitter"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="1dp"
                     android:layout_weight="0"
@@ -119,7 +145,7 @@
 
                 <com.aircandi.widgets.BuilderButton
                     android:id="@+id/category"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="5dp"
                     android:layout_marginLeft="4dp"
@@ -132,7 +158,7 @@
 
                 <EditText
                     android:id="@+id/description"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
                     android:layout_weight="0"
@@ -151,15 +177,15 @@
                 <!--
                 twitter
                 menu
-                candi
+                candi
                 -->
             </LinearLayout>
 
             <!-- Settings -->
 
             <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:gravity="center_vertical|top"
                 android:orientation="vertical"
                 android:padding="5dp" >
@@ -174,7 +200,7 @@
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
@@ -184,8 +210,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:onClick="onSaveButtonClick"
-            android:text="@string/form_button_save" />
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
 
         <Button
             android:id="@+id/btn_delete_post"
@@ -201,8 +227,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:onClick="onCancelButtonClick"
-            android:text="@string/form_button_cancel" />
+            android:onClick="onSaveButtonClick"
+            android:text="@string/form_button_save" />
     </LinearLayout>
 
 </RelativeLayout>

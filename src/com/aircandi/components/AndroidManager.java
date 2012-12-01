@@ -2,6 +2,9 @@ package com.aircandi.components;
 
 import java.util.List;
 
+import com.aircandi.components.AnimUtils.TransitionType;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -31,18 +34,21 @@ public class AndroidManager {
 				+ "(" + label + ")";
 		Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 		context.startActivity(searchAddress);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
 	public void callDialerActivity(Context context, String phoneNumber) {
 		String number = "tel:" + phoneNumber.trim();
 		Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse(number));
 		context.startActivity(callIntent);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
 	public void callBrowserActivity(Context context, String uri) {
 		Intent intent = findBrowserApp(context, uri);
 		intent.setData(Uri.parse(uri));
 		context.startActivity(intent);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
 	public void callSendActivity(Context context, String placeName, String uri) {
@@ -56,8 +62,25 @@ public class AndroidManager {
 
 	public void callTwitterActivity(Context context, String twitterHandle) {
 		Intent intent = findTwitterApp(context);
-		intent.setData(Uri.parse("https://www.twitter.com/" + twitterHandle));
+		if (intent != null) {
+			intent.setData(Uri.parse("https://www.twitter.com/" + twitterHandle));
+			context.startActivity(intent);
+		}
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+	}
+
+	public void callFacebookActivity(Context context, String facebookId) {
+		Intent intent = findFacebookApp(context);
+		if (intent != null) {
+			intent.setData(Uri.parse("fb://profile/" + facebookId + "/wall"));
+			//intent.setData(Uri.parse("fb://page/" + facebookId));
+		}
+		else {
+			intent = findBrowserApp(context, "http://www.facebook.com/" + facebookId);
+			intent.setData(Uri.parse("http://www.facebook.com/" + facebookId));
+		}
 		context.startActivity(intent);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
 	public Intent findTwitterApp(Context context) {
@@ -84,10 +107,31 @@ public class AndroidManager {
 		return null;
 	}
 
+	public Intent findFacebookApp(Context context) {
+		final String[] facebookApps = {
+				"com.facebook.katana" };		// Official android app
+
+		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		intent.setType("text/plain");
+		final PackageManager packageManager = context.getPackageManager();
+		List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+
+		for (int i = 0; i < facebookApps.length; i++) {
+			for (ResolveInfo resolveInfo : list) {
+				String p = resolveInfo.activityInfo.packageName;
+				if (p != null && p.startsWith(facebookApps[i])) {
+					intent.setPackage(p);
+					return intent;
+				}
+			}
+		}
+		return null;
+	}
+
 	public Intent findBrowserApp(Context context, String uri) {
 		final String[] browserApps = {
-				"com.android.browser", 			
-				"com.google.android.browser"};		
+				"com.android.browser",
+				"com.google.android.browser" };
 
 		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 		final PackageManager packageManager = context.getPackageManager();

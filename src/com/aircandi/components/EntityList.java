@@ -1,9 +1,7 @@
 package com.aircandi.components;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 
 public class EntityList<T> extends ArrayList<T> {
@@ -84,110 +82,5 @@ public class EntityList<T> extends ArrayList<T> {
 			entityList.add(entity.deepCopy());
 		}
 		return entityList;
-	}
-
-	public static class SortEntitiesByModifiedDate implements Comparator<Entity> {
-
-		@Override
-		public int compare(Entity object1, Entity object2) {
-			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
-				return 1;
-			}
-			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
-				return 0;
-			}
-			return -1;
-		}
-	}
-
-	public static class SortEntitiesBySignalLevelDiscoveryTimeModifiedDate implements Comparator<Entity> {
-
-		@Override
-		public int compare(Entity entity1, Entity entity2) {
-
-			/* global versus user */
-			if (!entity1.global && entity2.global) {
-				return -1;
-			}
-			if (entity1.global && !entity2.global) {
-				return 1;
-			}
-			else {
-				/* synthetics */
-				if (!entity1.synthetic && entity2.synthetic) {
-					return -1;
-				}
-				if (entity1.synthetic && !entity2.synthetic) {
-					return 1;
-				}
-				else {
-					/*
-					 * Signal level
-					 * 
-					 * Rounded to produce buckets for more sorting stability.
-					 */
-					if (entity1.synthetic) {
-						if (entity1.place.location.distance.intValue() > entity2.place.location.distance.intValue()) {
-							return -1;
-						}
-						else if (entity1.place.location.distance.intValue() < entity2.place.location.distance.intValue()) {
-							return 1;
-						}
-						else {
-							return 0;
-						}
-					}
-					else {
-						if ((entity1.getBeacon().getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE) > (entity2.getBeacon()
-								.getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)) {
-							return -1;
-						}
-						else if ((entity1.getBeacon().getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE) < (entity2.getBeacon()
-								.getAvgBeaconLevel() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)) {
-							return 1;
-						}
-						else {
-							/*
-							 * Discovery time
-							 * 
-							 * Rounded to produce a 5 second bucket that will get further sorted by recent activity
-							 */
-							if (entity1.discoveryTime != null && entity2.discoveryTime != null) {
-								if ((entity1.discoveryTime.getTime() / 1000) > (entity2.discoveryTime.getTime() / 1000)) {
-									return -1;
-								}
-								else if ((entity1.discoveryTime.getTime() / 1000) < (entity2.discoveryTime.getTime() / 1000)) {
-									return 1;
-								}
-								else {
-									/* Modified date */
-									if (entity1.modifiedDate.longValue() > entity2.modifiedDate.longValue()) {
-										return -1;
-									}
-									else if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
-										return 1;
-									}
-									else {
-										return 0;
-									}
-								}
-							}
-							else {
-								/* Modified date */
-								if (entity1.modifiedDate.longValue() > entity2.modifiedDate.longValue()) {
-									return -1;
-								}
-								else if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
-									return 1;
-								}
-								else {
-									return 0;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
 	}
 }

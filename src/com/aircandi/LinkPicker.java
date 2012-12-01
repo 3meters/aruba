@@ -81,7 +81,10 @@ public class LinkPicker extends FormActivity {
 			}
 		});
 
-		/* Get location support setup */
+		/* 
+		 * Get location support setup. We use location to provide
+		 * place suggestions that have websites. 
+		 */
 		Criteria criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
 		GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY

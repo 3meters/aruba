@@ -343,6 +343,7 @@ public class NetworkManager {
 
 		public Object						data;
 		public ResponseCode					responseCode	= ResponseCode.Success;
+		public ResponseDetail				responseDetail	= ResponseDetail.None;
 		public ProxibaseServiceException	exception;
 
 		public ServiceResponse() {}
@@ -356,5 +357,10 @@ public class NetworkManager {
 
 	public static enum ResponseCode {
 		Success, Failed
+	}
+
+	public static enum ResponseDetail {
+		None,
+		UpdateRequired
 	}
 }

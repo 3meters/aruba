@@ -59,7 +59,7 @@ public class TipList extends CandiActivity {
 	}
 
 	protected void initialize() {
-		Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId);
+		Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 		mSource = entity.place.source;
 		mSourceId = entity.place.sourceId;
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -70,7 +70,7 @@ public class TipList extends CandiActivity {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId);
+		Entity collection = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mCollectionId);
 		mCommon.mActionBar.setTitle(collection.name);
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 

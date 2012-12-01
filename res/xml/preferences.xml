@@ -3,24 +3,6 @@
 	xmlns:android="http://schemas.android.com/apk/res/android">
 	<PreferenceCategory
 		android:title="Search preferences">
-		<CheckBoxPreference
-			android:key="Pref_Autoscan"
-			android:defaultValue="false"
-			android:title="Autoscan"
-			android:summary="Scan for candi at regular intervals"
-			android:id="@+id/Pref_Autoscan" />
-        <ListPreference
-            android:id="@+id/Pref_Autoscan_Interval"
-            android:defaultValue="5000"
-            android:dependency="Pref_Autoscan"
-            android:dialogTitle="Select autoscan interval"
-            android:entries="@array/autoscan_interval_label_list_preference"
-            android:entryValues="@array/autoscan_interval_value_list_preference"
-            android:key="Pref_Autoscan_Interval"
-            android:negativeButtonText="Cancel"
-            android:positiveButtonText="OK"
-            android:summary="Interval between autoscans"
-            android:title="Autoscan interval" />
 		<ListPreference
 			android:defaultValue="@string/theme_default"
 			android:summary="Choose a theme"

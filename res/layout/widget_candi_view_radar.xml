@@ -1,39 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <com.aircandi.widgets.WebImageView
-        android:id="@+id/image"
-        android:layout_width="fill_parent"
-        android:layout_height="120dp"
+        android:id="@+id/candi_view_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         aircandi:layout="@layout/widget_webimageview"
         aircandi:maxHeight="700dp"
         aircandi:maxWidth="700dp"
         android:scaleType="centerCrop" />
 
     <View
-        android:layout_width="fill_parent"
-        android:layout_height="120dp"
-        android:background="@drawable/picture_overlay_dark" />
+        android:id="@+id/candi_view_group"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/image_nooutline_selector"
+        android:clickable="true"
+        android:onClick="onCandiClick" />
 
     <LinearLayout
         android:id="@+id/text_group"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:background="@drawable/picture_overlay_dark"
         android:orientation="horizontal"
-        android:paddingBottom="5dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:paddingTop="10dp" >
 
         <ImageView
-            android:id="@+id/subtitle_badge"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:id="@+id/candi_view_subtitle_badge"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_gravity="center_vertical"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="10dp"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter" />
 
@@ -44,27 +50,26 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/title"
-                android:layout_width="fill_parent"
+                android:id="@+id/candi_view_title"
+                style="@style/candi_view_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|center_horizontal"
-                android:layout_weight="1"
-                android:text="@string/dummy_title_short"
-                android:textColor="#ffffffff"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:text="@string/dummy_title_short" />
 
             <TextView
-                android:id="@+id/subtitle"
-                android:layout_width="fill_parent"
+                android:id="@+id/candi_view_subtitle"
+                style="@style/candi_view_subtitle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:text="@string/dummy_tags"
-                android:textAllCaps="true"
-                android:textColor="#ffffffff"
-                android:textSize="10sp" />
+                android:text="@string/dummy_tags" />
+
+            <TextView
+                android:id="@+id/candi_view_distance"
+                style="@style/candi_view_distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dummy_distance" />
         </LinearLayout>
     </LinearLayout>
 
-</merge>
+</RelativeLayout>

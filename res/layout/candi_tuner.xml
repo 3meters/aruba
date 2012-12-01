@@ -2,33 +2,51 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="?attr/backgroundForm"
     tools:context=".CandiTuner"
     tools:ignore="UnusedNamespace" >
 
-    <TextView
-        android:id="@+id/message"
-        android:layout_width="fill_parent"
+    <LinearLayout
+        android:id="@+id/header_group"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:padding="10dp"
-        android:text="@string/help_tuning"
-        android:visibility="visible" />
-    
+        android:orientation="horizontal"
+        android:padding="15dp" >
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/help_tuning"
+            android:textAppearance="@style/app_text_appearance_medium"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/button_custom"
+            style="@style/actionbar_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:onClick="onCustomButtonClick"
+            android:text="@string/form_button_custom" />
+    </LinearLayout>
+
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/message"
+        android:layout_below="@+id/header_group"
         android:background="@color/abs__holo_blue_light" />
-    
+
     <com.aircandi.widgets.BounceListView
         android:id="@+id/list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_above="@+id/form_footer"
-        android:layout_below="@+id/message"
+        android:layout_below="@+id/header_group"
         android:cacheColorHint="#00000000"
         android:divider="?attr/ruleColor"
         android:dividerHeight="1px"
@@ -42,34 +60,26 @@
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal" >
+        android:gravity="center_horizontal|center_vertical" >
 
         <Button
             style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onTuneButtonClick"
-            android:text="@string/form_button_tune" />
-
-        <Button
-            style="@style/actionbar_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onCustomButtonClick"
-            android:text="@string/form_button_custom" />
-
-        <Button
-            style="@style/actionbar_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".5"
             android:onClick="onCancelButtonClick"
             android:text="@string/form_button_cancel" />
+
+        <Button
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight=".5"
+            android:onClick="onTuneButtonClick"
+            android:text="@string/form_button_tune" />
     </LinearLayout>
 
     <!-- Custom place form -->

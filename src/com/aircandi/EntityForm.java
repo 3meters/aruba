@@ -1,5 +1,7 @@
 package com.aircandi;
 
+import java.util.List;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -169,7 +171,7 @@ public class EntityForm extends FormActivity {
 				 * that any changes only show up in the entity model if the changes make it
 				 * to the service.
 				 */
-				Entity entityForModel = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId);
+				Entity entityForModel = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 				if (entityForModel != null) {
 					mEntityForForm = entityForModel.clone();
 					mImageUriOriginal = mEntityForForm.getPhoto().getImageUri();
@@ -248,8 +250,13 @@ public class EntityForm extends FormActivity {
 				if (entity.place.contact != null) {
 					if (entity.place.contact.twitter != null && !entity.place.contact.twitter.equals("")) {
 						if (findViewById(R.id.twitter) != null) {
-							((TextView) findViewById(R.id.twitter)).setText("@" + entity.place.contact.twitter);
+							((TextView) findViewById(R.id.twitter)).setText(entity.place.facebook);
 						}
+					}
+				}
+				if (entity.place.facebook != null && !entity.place.facebook.equals("")) {
+					if (findViewById(R.id.facebook) != null) {
+						((TextView) findViewById(R.id.facebook)).setText("@" + entity.place.contact.twitter);
 					}
 				}
 			}
@@ -304,7 +311,9 @@ public class EntityForm extends FormActivity {
 						mEntityForForm.getPhoto().setImageFormat(ImageFormat.Html);
 					}
 					else {
-						mEntityForForm.getPhoto().setImageUri(imageUri);
+						if (imageUri != null) {
+							mEntityForForm.getPhoto().setImageUri(imageUri);
+						}
 					}
 				}
 			}
@@ -321,6 +330,10 @@ public class EntityForm extends FormActivity {
 
 	public void onWebsiteBuilderClick(View view) {
 		showBookmarkActivity(CandiConstants.ACTIVITY_WEBSITE_PICK, mEntityForForm.place.website);
+	}
+
+	public void onFacebookBuilderClick(View view) {
+		showBookmarkActivity(CandiConstants.ACTIVITY_FACEBOOK_PICK, mEntityForForm.place.website);
 	}
 
 	public void onLinkBuilderClick(View view) {
@@ -447,6 +460,11 @@ public class EntityForm extends FormActivity {
 			twitter = twitter.replace("@", "");
 			entity.getPlace().getContact().twitter = twitter;
 		}
+		if (findViewById(R.id.facebook) != null) {
+			String facebook = ((TextView) findViewById(R.id.facebook)).getText().toString();
+			/* We don't store the at sign */
+			entity.getPlace().facebook = facebook;
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -559,28 +577,14 @@ public class EntityForm extends FormActivity {
 
 	private ModelResult insertEntityAtService() {
 		ModelResult result = new ModelResult();
-
-		/* Get strongest nearby beacon and alert if none */
-		Beacon beacon = ProxiExplorer.getInstance().getStrongestWifiAsBeacon();
-		if (beacon == null && mCommon.mParentId == null) {
-			AircandiCommon.showAlertDialog(R.drawable.ic_app
-					, "Aircandi beacons"
-					, getString(R.string.alert_beacons_zero)
-					, null
-					, EntityForm.this, android.R.string.ok
-					, null
-					, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {}
-					}
-					, null);
-			result.serviceResponse = new ServiceResponse(ResponseCode.Failed, null, null);
-			return result;
-		}
+		List<Beacon> beacons = null;
+		Beacon primaryBeacon = null;
 
 		/* If parent id then this is a child */
-		if (mEntityForForm.beaconLinks != null) {
-			mEntityForForm.beaconLinks.clear();
+		if (mEntityForForm.links != null) {
+			mEntityForForm.links.clear();
 		}
+
 		if (mCommon.mParentId != null) {
 			mEntityForForm.parentId = mCommon.mParentId;
 		}
@@ -588,7 +592,30 @@ public class EntityForm extends FormActivity {
 			mEntityForForm.parentId = null;
 		}
 
-		result = ProxiExplorer.getInstance().getEntityModel().insertEntity(mEntityForForm, beacon, mEntityBitmap, false);
+		if (mEntityForForm.parentId == null) {
+			/*
+			 * We are linking to a beacon so get the best and alert if none
+			 */
+			beacons = ProxiExplorer.getInstance().getStrongestWifiAsBeacons(5);
+			primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
+
+			if (primaryBeacon == null && mCommon.mParentId == null) {
+				AircandiCommon.showAlertDialog(R.drawable.ic_app
+						, "Aircandi beacons"
+						, getString(R.string.alert_beacons_zero)
+						, null
+						, EntityForm.this, android.R.string.ok
+						, null
+						, new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {}
+						}
+						, null);
+				result.serviceResponse = new ServiceResponse(ResponseCode.Failed, null, null);
+				return result;
+			}
+		}
+
+		result = ProxiExplorer.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, mEntityBitmap, false);
 		return result;
 	}
 
@@ -628,7 +655,11 @@ public class EntityForm extends FormActivity {
 					mCommon.hideProgressDialog();
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 					setResult(CandiConstants.RESULT_ENTITY_DELETED);
+					/*
+					 * We either go back to a list or to radar.
+					 */
 					finish();
+					AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToCandiPageAfterDelete);
 				}
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiDelete, EntityForm.this);

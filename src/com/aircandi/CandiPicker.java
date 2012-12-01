@@ -19,6 +19,7 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Entity;
 
 public class CandiPicker extends FormActivity implements ActionBar.TabListener {
@@ -42,7 +43,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 
 	public void bind() {
 		if (mMethodType == EntityTree.Radar) {
-			EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
+			EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarPlaces();
 			if (entities != null) {
 				mEntities.clear();
 				for (Entity entity : entities) {
@@ -65,7 +66,8 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 
 				@Override
 				protected Object doInBackground(Object... params) {
-					ModelResult result = ProxiExplorer.getInstance().getEntityModel().getUserEntities(false);
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel()
+							.getUserEntities(Aircandi.getInstance().getUser().id, false, ProxiConstants.RADAR_ENTITY_LIMIT);
 					return result;
 				}
 

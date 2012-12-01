@@ -75,10 +75,9 @@ public class FlowLayout extends ViewGroup
 						: (totalRowHeight + getVerticalPadding()));
 	}
 
-	@SuppressWarnings("deprecation")
 	private int createChildMeasureSpec(int childLayoutParam, int max, int parentMode) {
 		int spec;
-		if (childLayoutParam == ViewGroup.LayoutParams.FILL_PARENT) {
+		if (childLayoutParam == ViewGroup.LayoutParams.MATCH_PARENT) {
 			spec = MeasureSpec.makeMeasureSpec(max, MeasureSpec.EXACTLY);
 		}
 		else if (childLayoutParam == ViewGroup.LayoutParams.WRAP_CONTENT) {

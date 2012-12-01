@@ -260,6 +260,18 @@ public abstract class FormActivity extends SherlockActivity {
 					((BuilderButton) findViewById(R.id.website)).setText(linkUri);
 				}
 			}
+			else if (requestCode == CandiConstants.ACTIVITY_FACEBOOK_PICK) {
+				Tracker.trackEvent("Entity", "PickFacebook", "None", 0);
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					String linkUri = extras.getString(getString(R.string.EXTRA_URI));
+					if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
+						linkUri = "http://" + linkUri;
+					}
+
+					((BuilderButton) findViewById(R.id.facebook)).setText(linkUri);
+				}
+			}
 			else if (requestCode == CandiConstants.ACTIVITY_LINK_PICK) {
 
 				Tracker.trackEvent("Entity", "PickBookmark", "None", 0);
@@ -378,10 +390,11 @@ public abstract class FormActivity extends SherlockActivity {
 		 * Only used for user pictures
 		 */
 		final User user = Aircandi.getInstance().getUser();
-		user.imageUri = "https://graph.facebook.com/" + user.facebookId + "/picture?type=large";
+		user.getPhoto().setImageUri("https://graph.facebook.com/" + user.facebookId + "/picture?type=large");
+		user.getPhoto().setSourceName("external");
 
 		ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView);
-		builder.setFromUris(user.imageUri, user.linkUri);
+		builder.setFromUris(user.getPhoto().getImageUri(), null);
 		builder.setRequestListener(new RequestListener() {
 
 			@Override
@@ -389,7 +402,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 				/* Used to pass back the bitmap and imageUri (sometimes) for the entity */
 				if (mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse(), user.imageUri, null, null, null, null);
+					mImageRequestListener.onComplete(new ServiceResponse(), user.getImageUri(), null, null, null, null);
 				}
 			}
 		});

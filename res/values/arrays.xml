@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="displayextras_list_preference">
-        <item>None</item>
-        <item>Level</item>
-        <item>Tag</item>
-        <item>Time</item>
-    </string-array>
-    <string-array name="displayextrasvalues_list_preference">
-        <item>None</item>
-        <item>Level</item>
-        <item>Tag</item>
-        <item>Time</item>
-    </string-array>
     <string-array name="dialog_list_picture_sources">
         <item>Search for pictures</item>
         <item>Select a gallery picture</item>
@@ -56,24 +44,6 @@
         <item>aircandi_theme_smolder</item>
         <item>aircandi_theme_snow</item>
     </string-array>
-    <string-array name="autoscan_interval_label_list_preference">
-        <item>2 seconds</item>
-        <item>5 seconds</item>
-        <item>10 seconds</item>
-        <item>30 seconds</item>
-        <item>1 minute</item>
-        <item>5 minutes</item>
-        <item>10 minutes</item>
-    </string-array>
-    <string-array name="autoscan_interval_value_list_preference">
-        <item>2000</item>
-        <item>5000</item>
-        <item>10000</item>
-        <item>30000</item>
-        <item>60000</item>
-        <item>300000</item>
-        <item>600000</item>
-    </string-array>
     <string-array name="testing_beacons_entries">
         <item>Natural beacons</item>
         <item>Demo beacon</item>
@@ -94,5 +64,15 @@
         <item>global</item>
         <item>empty</item>
     </string-array>
-
+    <string-array name="testing_location_entries">
+        <item>Natural location</item>
+        <item>Zoka Coffee</item>
+        <item>Lucky Strike Bowling</item>
+    </string-array>
+    <string-array name="testing_location_values">
+        <item>natural</item>
+        <item>zoka</item>
+        <item>lucky</item>
+    </string-array>
+    
 </resources>

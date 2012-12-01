@@ -30,7 +30,7 @@ public class CandiList extends CandiListBase {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId);
+		Entity collection = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mCollectionId);
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		mCommon.mActionBar.setTitle(collection.name);
 	}
@@ -46,7 +46,7 @@ public class CandiList extends CandiListBase {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId, refresh, true, null, null);
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId, refresh, null, null);
 				return result;
 			}
 

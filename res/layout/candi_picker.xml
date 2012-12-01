@@ -2,79 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    tools:ignore="UnusedNamespace"
-    
-    android:background="?attr/backgroundForm"  >
-
-    <!-- Candi being moved -->
-
-    <!--
-    <TextView
-        android:id="@+id/form_message"
-        style="@style/form_text"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:text="@string/form_message_candi_picker" />
-        
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1px"
-        android:layout_below="@+id/form_message"
-        android:background="?attr/ruleColor" />
-
-    <RelativeLayout
-        android:id="@+id/candi_to_move"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/form_message"
-        android:padding="10dp"
-        android:background="@drawable/button_nooutline_selector" >
-
-        <com.aircandi.widgets.WebImageView
-            android:id="@+id/item_image"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="5dp"
-            aircandi:maxHeight="60dp"
-            aircandi:maxWidth="60dp" />
-
-        <TextView
-            android:id="@+id/item_title"
-            style="@style/candi_list_title"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignWithParentIfMissing="true"
-            android:layout_toRightOf="@id/item_image"
-            android:text="@string/dummy_title" />
-
-        <com.aircandi.widgets.TextViewEllipsizing
-            android:id="@+id/item_description"
-            style="@style/candi_list_description"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignWithParentIfMissing="true"
-            android:layout_below="@+id/item_title"
-            android:layout_toRightOf="@id/item_image"
-            android:text="@string/dummy_description_ellipsized" />
-    </RelativeLayout>
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1px"
-        android:layout_below="@+id/candi_to_move"
-        android:background="?attr/ruleColor" />
-    -->
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/backgroundForm"
+    tools:ignore="UnusedNamespace" >
 
     <com.aircandi.widgets.BounceListView
         android:id="@+id/list_candi"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_above="@+id/form_footer"
         android:cacheColorHint="#00000000"
         android:listSelector="#00000000" >
@@ -87,10 +23,18 @@
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
+
+        <Button
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
 
         <Button
             android:id="@+id/btn_move_solo"
@@ -100,14 +44,6 @@
             android:layout_weight="1"
             android:onClick="onMoveSoloButtonClick"
             android:text="@string/form_button_move_solo" />
-
-        <Button
-            style="@style/actionbar_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onCancelButtonClick"
-            android:text="@string/form_button_cancel" />
     </LinearLayout>
 
 </RelativeLayout>

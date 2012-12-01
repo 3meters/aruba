@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
-    xmlns:tools="http://schemas.android.com/tools" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/candi_view_group"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:background="@drawable/button_nooutline_selector"
+    android:clickable="true"
+    android:onClick="onCandiClick" >
 
-    <com.aircandi.widgets.WebImageView
-        android:id="@+id/image"
-        android:layout_width="fill_parent"
-        android:layout_height="120dp"
-        aircandi:layout="@layout/widget_webimageview"
-        android:background="#ffc4c3bc"
-        aircandi:maxHeight="700dp"
-        aircandi:maxWidth="700dp"
-        android:scaleType="centerCrop" />
+    <TextView
+        android:id="@+id/candi_view_distance"
+        style="@style/candi_view_distance_synthetic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:paddingRight="4dp"
+        android:paddingTop="4dp"
+        android:text="@string/dummy_distance" />
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="120dp"
-        android:background="@drawable/picture_overlay_dark_synthetic"
-        android:visibility="visible" />
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="fill_parent"
+    <ImageView
+        android:id="@+id/candi_view_subtitle_badge"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter" />
+
+    <TextView
+        android:id="@+id/candi_view_title"
+        style="@style/candi_view_name_synthetic"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_vertical|center_horizontal"
@@ -28,9 +38,6 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:paddingTop="10dp"
-        android:text="@string/dummy_title_short"
-        android:textColor="#ffffffff"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+        android:text="@string/dummy_title_short" />
 
-</merge>
+</RelativeLayout>

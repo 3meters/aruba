@@ -3,6 +3,7 @@ package com.aircandi.widgets;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -46,6 +47,7 @@ public class WebImageView extends RelativeLayout {
 	private Boolean						mLayoutWidthMatchParent	= false;
 	private boolean						mShowBusy;
 	private Integer						mLayoutId;
+	private Integer						mColorFilter;
 	private ScaleType					mScaleType				= ScaleType.CENTER_CROP;
 
 	private static final String			androidNamespace		= "http://schemas.android.com/apk/res/android";
@@ -78,13 +80,6 @@ public class WebImageView extends RelativeLayout {
 
 		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.widget_webimageview);
-
-//		mLayoutWidth = attributes.getAttributeValue(androidNamespace, "layout_width");
-//		mLayoutHeight = attributes.getAttributeValue(androidNamespace, "layout_height");
-//		String displayPixels = mLayoutWidth.replaceAll("[^\\d.]", "");
-//		if ((int) Float.parseFloat(displayPixels) != LayoutParams.FILL_PARENT) {
-//			mLayoutWidthMatchParent = true;
-//		}
 
 		if (!isInEditMode()) {
 			int scaleTypeValue = attributes.getAttributeIntValue(androidNamespace, "scaleType", 6);
@@ -165,33 +160,26 @@ public class WebImageView extends RelativeLayout {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-
 					final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 
 					/* Make sure this is the right target for the image */
 					if (imageResponse.imageUri.equals(mImageUri)) {
-
 						if (imageResponse.bitmap != null) {
-							/* 
-							 * Give the original listener a chance to modify the 
+							/*
+							 * Give the original listener a chance to modify the
 							 * bitmap before we display it.
 							 */
 							if (originalImageReadyListener != null) {
 								imageResponse.bitmap = originalImageReadyListener.onFilter(imageResponse.bitmap);
 							}
-
 							setImage(imageResponse.bitmap, imageResponse.imageUri);
-
-//							boolean scaleBitmap = (mMaxWidth != Integer.MAX_VALUE && mMaxHeight != Integer.MAX_VALUE);
-//							final Bitmap bitmapScaled = scaleBitmap
-//									? Bitmap.createScaledBitmap(imageResponse.bitmap, mMaxWidth, mMaxHeight, true)
-//									: imageResponse.bitmap;
-//
-//							setImage(bitmapScaled, imageResponse.imageUri);
 						}
 					}
 				}
 				else {
+					/*
+					 * Show broken image
+					 */
 					mThreadHandler.post(new Runnable() {
 
 						@Override
@@ -201,9 +189,13 @@ public class WebImageView extends RelativeLayout {
 						}
 					});
 				}
-				if (mShowBusy) {
-					hideLoading();
-				}
+				mThreadHandler.post(new Runnable() {
+
+					@Override
+					public void run() {
+						mProgressBar.setVisibility(View.GONE);
+					}
+				});
 
 				if (originalImageReadyListener != null) {
 					originalImageReadyListener.onComplete(serviceResponse);
@@ -256,6 +248,12 @@ public class WebImageView extends RelativeLayout {
 			@Override
 			public void run() {
 				mImageMain.setImageBitmap(null);
+				if (mColorFilter != null) {
+					mImageMain.setColorFilter(mColorFilter, PorterDuff.Mode.MULTIPLY);
+				}
+				else {
+					mImageMain.clearColorFilter();
+				}
 				ImageUtils.showImageInImageView(bitmap, mImageMain, true, AnimUtils.fadeInMedium());
 			}
 		});
@@ -309,5 +307,13 @@ public class WebImageView extends RelativeLayout {
 
 	public void onDestroy() {
 		recycleBitmap();
+	}
+
+	public Integer getColorFilter() {
+		return mColorFilter;
+	}
+
+	public void setColorFilter(Integer colorFilter) {
+		mColorFilter = colorFilter;
 	}
 }

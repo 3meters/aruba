@@ -3,14 +3,14 @@
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/candi_form"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <!-- Body -->
 
     <com.aircandi.widgets.BounceScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
         android:background="?attr/backgroundCandi"
@@ -18,7 +18,7 @@
         tools:ignore="UselessParent" >
 
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingBottom="15dp"
@@ -27,7 +27,7 @@
             android:paddingTop="7dp" >
 
             <LinearLayout
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal" >
 
@@ -39,7 +39,7 @@
                     android:minWidth="80dp" />
 
                 <LinearLayout
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:duplicateParentState="false"
@@ -47,7 +47,7 @@
 
                     <include
                         android:id="@+id/candi_form_header"
-                        android:layout_width="fill_parent"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="3dp"
                         android:layout_marginLeft="3dp"
@@ -56,7 +56,7 @@
                     <com.aircandi.widgets.SectionLayout
                         android:id="@+id/section_description"
                         style="@style/candi_form_section"
-                        android:layout_width="fill_parent"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
                         aircandi:layoutHeader="@layout/temp_section_header"
@@ -65,7 +65,7 @@
                         <TextView
                             android:id="@+id/candi_form_description"
                             style="@style/candi_form_description"
-                            android:layout_width="fill_parent"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/dummy_description"
                             android:visibility="visible" />
@@ -78,7 +78,7 @@
     <!-- Footer -->
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="1px"
         android:layout_above="@+id/form_footer"
         android:background="?attr/ruleColor" />
@@ -86,7 +86,7 @@
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal" >

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi"
     android:versionCode="1"
-    android:versionName="0.4.6" >
+    android:versionName="0.5.0" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -31,7 +31,7 @@
         android:name=".Aircandi"
         android:icon="@drawable/ic_app"
         android:label="@string/name_app"
-        android:theme="@style/aircandi_theme_snow" >
+        android:theme="@style/aircandi_theme_midnight" >
         
         <uses-library
             android:name="com.google.android.maps"
@@ -83,7 +83,7 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".CandiMap"
+            android:name=".CandiUser"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
@@ -91,17 +91,6 @@
         <activity
             android:name=".CandiTuner"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
-        <activity
-            android:name=".MapCandiList"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
-        <activity
-            android:name=".MapCandiForm"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>

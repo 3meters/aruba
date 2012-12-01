@@ -12,6 +12,7 @@ public class IntentBuilder {
 
 	private Context		mContext;
 	private String		mEntityId;
+	private String		mUserId;
 	private String		mParentEntityId;
 	private GeoLocation	mEntityLocation;
 	private String		mEntityType;
@@ -56,6 +57,10 @@ public class IntentBuilder {
 
 		if (mEntityId != null) {
 			intent.putExtra(mContext.getString(R.string.EXTRA_ENTITY_ID), mEntityId);
+		}
+		
+		if (mUserId != null) {
+			intent.putExtra(mContext.getString(R.string.EXTRA_USER_ID), mUserId);
 		}
 
 		if (mCollectionId != null) {
@@ -134,6 +139,15 @@ public class IntentBuilder {
 
 	public IntentBuilder setNavigationTop(Boolean navigationTop) {
 		mNavigationTop = navigationTop;
+		return this;
+	}
+
+	public String getUserId() {
+		return mUserId;
+	}
+
+	public IntentBuilder setUserId(String userId) {
+		mUserId = userId;
 		return this;
 	}
 }

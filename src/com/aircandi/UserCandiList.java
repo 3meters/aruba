@@ -20,6 +20,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
 
@@ -103,7 +104,7 @@ public class UserCandiList extends CandiListBase {
 		else {
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			mCommon.mActionBar.setHomeButtonEnabled(true);
-			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId);
+			Entity collection = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 			mCommon.mActionBar.setTitle(collection.name);
 		}
 	}
@@ -121,10 +122,11 @@ public class UserCandiList extends CandiListBase {
 			protected Object doInBackground(Object... params) {
 				ModelResult result = null;
 				if (mCommon.mEntityId == null) {
-					result = ProxiExplorer.getInstance().getEntityModel().getUserEntities(refresh);
+					result = ProxiExplorer.getInstance().getEntityModel()
+							.getUserEntities(Aircandi.getInstance().getUser().id, refresh, ProxiConstants.RADAR_ENTITY_LIMIT);
 				}
 				else {
-					result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId, refresh, true, null, null);
+					result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId, refresh, null, null);
 					if (result.data != null) {
 						result.data = ((Entity) result.data).getChildren();
 					}

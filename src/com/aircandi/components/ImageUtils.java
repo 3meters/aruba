@@ -29,6 +29,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -139,13 +140,13 @@ public class ImageUtils {
 		return bitmap;
 	}
 
-	public static int getPixels(Context context, String displayPixels) {
+	public static int getRawPixels(Context context, String displayPixels) {
 		displayPixels = displayPixels.replaceAll("[^\\d.]", "");
-		float pixels = getPixels(context, (int) Float.parseFloat(displayPixels));
+		float pixels = getRawPixels(context, (int) Float.parseFloat(displayPixels));
 		return (int) pixels;
 	}
 
-	public static int getPixels(Context context, int displayPixels) {
+	public static int getRawPixels(Context context, int displayPixels) {
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		int pixels = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) displayPixels, metrics);
 		return pixels;
@@ -161,7 +162,7 @@ public class ImageUtils {
 		int fromRed = Color.red(fromColor);
 		int fromGreen = Color.green(fromColor);
 		int fromBlue = Color.blue(fromColor);
-		
+
 		int[] pixels = new int[bitmap.getHeight() * bitmap.getWidth()];
 		bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
 
@@ -169,9 +170,36 @@ public class ImageUtils {
 			int toRed = Color.red(pixels[i]);
 			int toGreen = Color.green(pixels[i]);
 			int toBlue = Color.blue(pixels[i]);
-			
+
 			if (fromRed == toRed && fromGreen == toGreen && fromBlue == toBlue) {
 				pixels[i] = toColor;
+			}
+		}
+
+		bitmap.setPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+		return bitmap;
+	}
+
+	public static Bitmap keepPixels(Bitmap bitmap, String keepColorHex) {
+		int keepColor = hexToColor(keepColorHex);
+		return keepPixels(bitmap, keepColor);
+	}
+
+	public static Bitmap keepPixels(Bitmap bitmap, int keepColor) {
+		int keepRed = Color.red(keepColor);
+		int keepGreen = Color.green(keepColor);
+		int keepBlue = Color.blue(keepColor);
+
+		int[] pixels = new int[bitmap.getHeight() * bitmap.getWidth()];
+		bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+		for (int i = 0; i < bitmap.getHeight() * bitmap.getWidth(); i++) {
+			int toRed = Color.red(pixels[i]);
+			int toGreen = Color.green(pixels[i]);
+			int toBlue = Color.blue(pixels[i]);
+
+			if (toRed != keepRed || toGreen != keepGreen || toBlue != keepBlue) {
+				pixels[i] = 0;
 			}
 		}
 
@@ -391,19 +419,33 @@ public class ImageUtils {
 	}
 
 	public static String colorToHex(int color) {
-		String r = Integer.toHexString(Color.red(color));
-		String g = Integer.toHexString(Color.green(color));
-		String b = Integer.toHexString(Color.blue(color));
-
-		String hexColor = "#" + r + g + b;
+		String hexColor = String.format("#%06X", (0xFFFFFF & color));
+		//		String r = Integer.toHexString(Color.red(color));
+		//		String g = Integer.toHexString(Color.green(color));
+		//		String b = Integer.toHexString(Color.blue(color));
+		//
+		//		String hexColor = "#" + r + g + b;
 		return hexColor;
 	}
 
-	public static void showImageInImageView(Bitmap bitmap, ImageView imageView, boolean animate, Animation animation) {
+	public static void showImageInImageView(Bitmap bitmap, final ImageView imageView, boolean animate, Animation animation) {
 		imageView.setImageBitmap(bitmap);
 		if (animate) {
 			animation.setFillEnabled(true);
 			animation.setFillAfter(true);
+			animation.setAnimationListener(new AnimationListener() {
+
+				@Override
+				public void onAnimationStart(Animation animation) {}
+
+				@Override
+				public void onAnimationEnd(Animation animation) {
+					imageView.clearAnimation();
+				}
+
+				@Override
+				public void onAnimationRepeat(Animation animation) {}
+			});
 			imageView.startAnimation(animation);
 		}
 	}

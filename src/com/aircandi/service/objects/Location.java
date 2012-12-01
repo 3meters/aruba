@@ -36,8 +36,6 @@ public class Location extends ServiceObject implements Cloneable, Serializable {
 	 * parameters will have reduced precision.
 	 */
 	@Expose
-	public Number				distance;
-	@Expose
 	public Boolean				isFuzzed;
 
 	public Location() {}
@@ -64,12 +62,11 @@ public class Location extends ServiceObject implements Cloneable, Serializable {
 		location.cc = (String) map.get("cc");
 		location.lat = (Number) map.get("lat");
 		location.lng = (Number) map.get("lng");
-		location.distance = (Number) map.get("distance");
 		location.isFuzzed = (Boolean) map.get("isFuzzed");
 
 		return location;
 	}
-
+	
 	public String getAddressBlock() {
 		String addressBlock = "";
 		if (address != null && !address.equals("")) {

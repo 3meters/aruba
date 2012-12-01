@@ -1,14 +1,16 @@
 package com.aircandi.service.objects;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.aircandi.service.Expose;
-
 
 /**
  * @author Jayma
  */
-public class User extends ServiceEntry {
+public class User extends ServiceEntryBase {
 
 	/* syntax: @Expose (serialize = false, deserialize = false) */
 
@@ -21,10 +23,6 @@ public class User extends ServiceEntry {
 	@Expose
 	public String				role;
 	@Expose
-	public String				imageUri;
-	@Expose
-	public String				linkUri;
-	@Expose
 	public String				location;
 	@Expose
 	public String				bio;
@@ -32,6 +30,8 @@ public class User extends ServiceEntry {
 	public String				webUri;
 	@Expose
 	public Boolean				isDeveloper;
+	@Expose
+	public Photo				photo;
 
 	@Expose(serialize = false, deserialize = true)
 	public String				facebookId;
@@ -58,19 +58,25 @@ public class User extends ServiceEntry {
 	@Expose(serialize = false, deserialize = true)
 	public Number				validationNotifyDate;
 
+	@Expose(serialize = false, deserialize = true)
+	public List<Stat>			stats;
+
 	/* For client use only */
 	public boolean				keepSignedIn		= false;
 	public Session				session;
 	public String				firstName;
-	public String 				lastName;
-	public Photo				photo;
-	
+	public String				lastName;
+
 	public User() {}
 
 	@Override
 	public User clone() {
 		try {
 			final User user = (User) super.clone();
+			if (this.stats != null) {
+				user.stats = (List<Stat>) ((ArrayList) this.stats).clone();
+			}
+
 			return user;
 		}
 		catch (final CloneNotSupportedException ex) {
@@ -87,10 +93,11 @@ public class User extends ServiceEntry {
 		 * These base properties are done here instead of calling ServiceEntry
 		 * because of a recursion problem.
 		 */
-		user.id = (String) map.get("_id");
-		user.creatorId = (String) map.get("_creator");
-		user.ownerId = (String) map.get("_owner");
-		user.modifierId = (String) map.get("modifierId");
+		user.id = (String) (map.get("_id") != null ? map.get("_id") : map.get("id"));
+		user.ownerId = (String) (map.get("_owner") != null ? map.get("_owner") : map.get("ownerId"));
+		user.creatorId = (String) (map.get("_creator") != null ? map.get("_creator") : map.get("creatorId"));
+		user.modifierId = (String) (map.get("_modifier") != null ? map.get("_modifier") : map.get("modifierId"));
+
 		user.createdDate = (Number) map.get("createdDate");
 		user.modifiedDate = (Number) map.get("modifiedDate");
 
@@ -98,10 +105,8 @@ public class User extends ServiceEntry {
 		user.firstName = (String) map.get("firstName");
 		user.lastName = (String) map.get("lastName");
 		user.location = (String) map.get("location");
-		user.imageUri = (String) map.get("imageUri");
 		user.email = (String) map.get("email");
 		user.role = (String) map.get("role");
-		user.linkUri = (String) map.get("linkUri");
 		user.bio = (String) map.get("bio");
 		user.webUri = (String) map.get("webUri");
 		user.isDeveloper = (Boolean) map.get("isDeveloper");
@@ -112,8 +117,34 @@ public class User extends ServiceEntry {
 		if (map.get("photo") != null) {
 			user.photo = (Photo) Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
 		}
-		
+
+		if (map.get("stats") != null) {
+			user.stats = new ArrayList<Stat>();
+			List<LinkedHashMap<String, Object>> statMaps = (List<LinkedHashMap<String, Object>>) map.get("stats");
+			for (LinkedHashMap<String, Object> statMap : statMaps) {
+				user.stats.add(Stat.setPropertiesFromMap(new Stat(), statMap));
+			}
+		}
+
 		return user;
+	}
+
+	public String getImageUri() {
+		String imageUri = "resource:placeholder_logo";
+		if (this.photo != null) {
+			imageUri = photo.getImageSizedUri(250, 250);
+			if (imageUri == null) {
+				imageUri = photo.getImageUri();
+			}
+		}
+		return imageUri;
+	}
+
+	public Photo getPhoto() {
+		if (photo == null) {
+			photo = new Photo();
+		}
+		return photo;
 	}
 
 	@Override

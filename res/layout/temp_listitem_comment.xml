@@ -2,12 +2,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:id="@+id/item_row"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingBottom="10dp" >
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="1px"
         android:layout_alignParentTop="true"
         android:background="?attr/ruleColor" />
@@ -24,7 +24,7 @@
 
     <RelativeLayout
         android:id="@+id/group_author"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/item_author_image"
         android:layout_toRightOf="@+id/item_author_image"
@@ -62,7 +62,7 @@
     <TextView
         android:id="@+id/item_comment"
         style="@style/candi_list_description"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/group_author"
         android:layout_below="@+id/group_author"
@@ -71,7 +71,7 @@
 
     <LinearLayout
         android:id="@+id/group_actions"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/group_author"
         android:layout_below="@+id/item_comment"
@@ -80,7 +80,7 @@
         <TextView
             android:id="@+id/item_created_date"
             style="@style/candi_list_description"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/dummy_datetime"
             android:textColor="?attr/textColorUnfocused" />

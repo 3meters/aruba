@@ -99,7 +99,7 @@ public class SignUpForm extends FormActivity {
 
 	protected void bind() {
 		mUser = new User();
-		mUser.imageUri = "resource:placeholder_logo";
+		mUser.getPhoto().setImageUri("resource:placeholder_logo");
 	}
 
 	protected void draw() {
@@ -107,14 +107,14 @@ public class SignUpForm extends FormActivity {
 		 * We only want to enable the save button when there is something in all
 		 * the required fields: fullname, email, password
 		 */
-		if (mUser.imageUri != null && !mUser.imageUri.equals("")) {
+		if (mUser.getImageUri() != null && !mUser.getImageUri().equals("")) {
 			if (mUserBitmap != null) {
 				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 			else {
 
 				ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
-				builder.setFromUris(mUser.imageUri, mUser.linkUri);
+				builder.setFromUris(mUser.getImageUri(), null);
 				builder.setRequestListener(new RequestListener() {
 
 					@Override
@@ -158,8 +158,7 @@ public class SignUpForm extends FormActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mUser.imageUri = imageUri;
-					mUser.linkUri = linkUri;
+					mUser.getPhoto().setImageUri(imageUri);
 					mUserBitmap = imageBitmap;
 				}
 			}

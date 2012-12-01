@@ -37,6 +37,8 @@ public interface CandiConstants {
 	public static final int		LOCATION_POLLING_TIMEOUT				= ONE_MINUTE;
 	public static final int		INTERVAL_UPDATE_CHECK					= SIXTY_MINUTES;
 
+	public static final double	SEARCH_RANGE_METERS						= 500;
+
 	public static final int		MAX_Y_OVERSCROLL_DISTANCE				= 50;
 
 	public static final boolean	RADAR_SCROLL_HORIZONTAL					= false;
@@ -114,7 +116,7 @@ public interface CandiConstants {
 	public static final boolean	LINK_JAVASCRIPT_ENABLED					= false;
 	public static final boolean	LINK_ZOOM								= false;
 
-	public static final String	THEME_DEFAULT							= "aircandi_theme_snow";
+	public static final String	THEME_DEFAULT							= "aircandi_theme_midnight";
 	public static final String	URL_AIRCANDI_UPGRADE					= "https://aircandi.com/install";
 	public static final String	URL_AIRCANDI_TERMS						= "https://aircandi.com/pages/terms.html";
 	public static final String	S3_BUCKET_IMAGES						= "aircandi-images";
@@ -148,12 +150,14 @@ public interface CandiConstants {
 	public static final int		ACTIVITY_CANDI_LIST						= 450;
 	public static final int		ACTIVITY_LINK_PICK						= 500;
 	public static final int		ACTIVITY_WEBSITE_PICK					= 525;
+	public static final int		ACTIVITY_FACEBOOK_PICK					= 530;
 	public static final int		ACTIVITY_CANDI_PICK						= 550;
 	public static final int		ACTIVITY_TEMPLATE_PICK					= 560;
 	public static final int		ACTIVITY_PREFERENCES					= 600;
 	public static final int		ACTIVITY_CUSTOM_PLACE					= 700;
 	public static final int		ACTIVITY_ADDRESS_EDIT					= 800;
 	public static final int		ACTIVITY_CATEGORY_EDIT					= 810;
+	public static final int		ACTIVITY_ENTITY_EDIT					= 900;
 
 	public static final int		RESULT_ENTITY_INSERTED					= 100;
 	public static final int		RESULT_ENTITY_UPDATED					= 110;

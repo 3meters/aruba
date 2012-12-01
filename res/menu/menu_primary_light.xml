@@ -11,19 +11,13 @@
         android:id="@+id/refresh"
         android:icon="@drawable/ic_action_reload_light"
         android:orderInCategory="1"
-        android:showAsAction="always|withText"
+        android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>
-    <item
-        android:id="@+id/profile"
-        android:icon="@drawable/ic_action_user_light"
-        android:orderInCategory="1"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_profile_item"/>
     <item
         android:id="@+id/settings"
         android:icon="@drawable/ic_action_settings_light"
-        android:orderInCategory="2"
-        android:showAsAction="never"
+        android:orderInCategory="1"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_settings_item"/>
     <item
         android:id="@+id/signin"

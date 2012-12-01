@@ -15,6 +15,7 @@
     <string name="EXTRA_PARENT_ENTITY_ID">com.aircandi.EXTRA_PARENT_ENTITY_ID</string>
     <string name="EXTRA_BEACON_ID">com.aircandi.EXTRA_BEACON_ID</string>
     <string name="EXTRA_ENTITY_ID">com.aircandi.EXTRA_ENTITY_ID</string>
+    <string name="EXTRA_USER_ID">com.aircandi.EXTRA_USER_ID</string>
     <string name="EXTRA_ENTITY_IS_ROOT">com.aircandi.EXTRA_ENTITY_IS_ROOT</string>
     <string name="EXTRA_ENTITY_TYPE">com.aircandi.EXTRA_ENTITY_TYPE</string>
     <string name="EXTRA_ENTITY_LOCATION">com.aircandi.EXTRA_ENTITY_LOCATION</string>
@@ -63,6 +64,7 @@
     <string name="dummy_location">Seattle, WA</string>
     <string name="dummy_address">"2200 N 56th (at Keystone Pl N)\nSeattle, WA 98103\n(206) 545-4277"</string>
     <string name="dummy_comments">21 Comments</string>
+    <string name="dummy_distance">0.15mi</string>
     <string name="dummy_number">10</string>
     <string name="dummy_timesince">10 minutes ago</string>
     <string name="dummy_datetime">December 23 at 10:12am</string>
@@ -80,11 +82,19 @@
     <string name="alert_beacons_zero">The beacon detecter shows green when there are beacons nearby you can add new candi to.</string>
     <string name="alert_beacons_available">There are beacons nearby you can add new candi to.</string>
     <string name="alert_entity_locked">This candi has been locked by the owner.</string>
+    
     <string name="alert_upgrade_title">New Aircandi version</string>
     <string name="alert_upgrade_needed_body">A newer version of Aircandi is available. Please download and install as soon possible.</string>
     <string name="alert_upgrade_required_body">A newer version of Aircandi is required. Please download and install.</string>
     <string name="alert_upgrade_ok">Info</string>
     <string name="alert_upgrade_cancel">Cancel</string>
+    
+    <string name="alert_wifi_title">Aircandi</string>
+    <string name="alert_wifi_tethered">Turn off hotspot tethering for best results using Aircandi.</string>
+    <string name="alert_wifi_disabled">Enable wifi for best results using Aircandi.</string>
+    <string name="alert_wifi_settings">Settings</string>
+    <string name="alert_wifi_cancel">Cancel</string>
+    
     <string name="alert_deleted">Deleted</string>
     <string name="alert_updated">Saved</string>
     <string name="alert_inserted">Saved</string>
@@ -186,7 +196,7 @@
     <string name="radar_tab_mycandi">MY CANDI</string>
     <string name="radar_tab_map">MAP</string>
     <string name="radar_button_new">Drop candi</string>
-    <string name="radar_button_tune">Earn tuning points</string>
+    <string name="radar_button_tune">Tune it!</string>
     <string name="radar_button_help">Help</string>
     <string name="dialog_map_title">Aircandi beacon</string>
     <string name="dialog_map_message">This beacon has:\n\n</string>
@@ -240,7 +250,7 @@
     </string>
     <string name="help_tuning">
 <![CDATA[
-		Earn tuning points and help us improve Aircandi for everyone! Mark the place that matches where you are and Aircandi will automatically promote it for faster results.
+		Earn tuning points and make Aircandi faster by marking the place that matches where you are.
 ]]>
     </string>
 
@@ -249,6 +259,7 @@
     <string name="candi_button_menu">Menu</string>
     <string name="candi_button_share">Send to a friend</string>
     <string name="candi_button_map">Map</string>
+    <string name="candi_button_tune">Tune it!</string>
     <string name="candi_button_call">Call</string>
     <string name="candi_button_website">View website</string>
     <string name="candi_button_comment">Comment</string>
@@ -264,7 +275,8 @@
     <string name="candi_section_tips_more">View all tips</string>
     <string name="candi_section_phrases">People talk about</string>
     <string name="candi_label_comments_none">No comments yet</string>
-
+    <string name="candi_label_tuning_score">Tunings: </string>
+    
     <!-- CandiMap -->
 
     <string name="candi_map_label_folders">Folders:</string>
@@ -327,7 +339,7 @@
     <string name="form_button_delete">Delete</string>
     <string name="form_button_ok">OK</string>
     <string name="form_button_tune">Tune</string>
-    <string name="form_button_custom">Add custom place</string>
+    <string name="form_button_custom">Add custom\n place</string>
     <string name="form_button_add">Add</string>
     <string name="form_button_cancel">Cancel</string>
     <string name="form_button_close">Close</string>
@@ -360,6 +372,7 @@
     <string name="form_title_hint">Title</string>
     <string name="form_place_title_hint">Name</string>
     <string name="form_place_website_hint">Website</string>
+    <string name="form_place_facebook_hint">Facebook page</string>
     <string name="form_place_category_hint">Category</string>
     <string name="form_place_sub_category_hint">Subcategory</string>
     <string name="form_subtitle_hint">Subtitle</string>

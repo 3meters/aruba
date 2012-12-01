@@ -1,20 +1,20 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.core.CandiConstants;
 import com.aircandi.service.Expose;
 
 /**
  * @author Jayma
  */
 
-public class Beacon extends ServiceEntry implements Cloneable, Serializable {
+public class Beacon extends ServiceEntryBase implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 694133954499515095L;
 
@@ -43,61 +43,22 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 	@Expose
 	public Number				speed;
 	@Expose
-	public Number				level;
-
-	/* Synthetic service fields */
-
-	@Expose(serialize = false, deserialize = true)
-	public Integer				entityCount;
-	@Expose(serialize = false, deserialize = true)
-	public Integer				pictureCount;
-	@Expose(serialize = false, deserialize = true)
-	public Integer				postCount;
-	@Expose(serialize = false, deserialize = true)
-	public Integer				linkCount;
-	@Expose(serialize = false, deserialize = true)
-	public Integer				folderCount;
+	public Number				level;										// Used to evaluate location accuracy 
 
 	// For client use only
-	public int					signalLevel;
 	public Boolean				global				= false;
-	public Boolean				radarHit			= false;
-	public Date					discoveryTime;
-	public Boolean				detectedLastPass	= false;
 	public BeaconState			state				= BeaconState.Normal;
-	public int					scanMisses			= 0;
-	public List<Integer>		scanPasses			= new ArrayList<Integer>();
+	public Boolean				test				= false;
 
 	public Beacon() {}
 
 	public Beacon(String bssid, String ssid, String label, int levelDb, Date discoveryTime, Boolean test) {
-		this.id = "0003:" + bssid;
+		this.id = "0008." + bssid;
 		this.ssid = ssid;
 		this.bssid = bssid;
 		this.label = label;
-		this.signalLevel = levelDb;
-		this.discoveryTime = discoveryTime;
-	}
-
-	public Integer getAvgBeaconLevel() {
-		int scanHits = scanPasses.size();
-		if (scanHits == 0) {
-			return -80;
-		}
-		else {
-			int scanLevelSum = 0;
-			for (int scanLevel : this.scanPasses) {
-				scanLevelSum += scanLevel;
-			}
-			return Math.round(scanLevelSum / scanHits);
-		}
-	}
-
-	public void addScanPass(int level) {
-		scanPasses.add(0, level);
-		while (scanPasses.size() > 1) {
-			scanPasses.remove(1);
-		}
+		this.level = levelDb;
+		this.test = test;
 	}
 
 	public static void copyProperties(Beacon from, Beacon to) {
@@ -106,16 +67,11 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 		 * 
 		 * Local state properties we intentionally don't overwrite:
 		 * 
-		 * - scanLevel;
 		 * - global
-		 * - radarHit
-		 * - discoveryTime
-		 * - detectedLastPass
 		 * - state
-		 * - scanMisses
-		 * - scanPasses
+		 * - test
 		 */
-		ServiceEntry.copyProperties(from, to);
+		ServiceEntryBase.copyProperties(from, to);
 
 		to.ssid = from.ssid;
 		to.bssid = from.bssid;
@@ -129,12 +85,6 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 		to.bearing = from.bearing;
 		to.level = from.level;
 
-		to.entityCount = from.entityCount;
-		to.folderCount = from.folderCount;
-		to.linkCount = from.linkCount;
-		to.pictureCount = from.pictureCount;
-		to.postCount = from.postCount;
-
 		to.locked = from.locked;
 		to.visibility = from.visibility;
 
@@ -144,7 +94,7 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		beacon = (Beacon) ServiceEntry.setPropertiesFromMap(beacon, map);
+		beacon = (Beacon) ServiceEntryBase.setPropertiesFromMap(beacon, map);
 
 		beacon.ssid = (String) map.get("ssid");
 		beacon.bssid = (String) map.get("bssid");
@@ -159,19 +109,13 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 		beacon.speed = (Number) map.get("speed");
 		beacon.bearing = (Number) map.get("bearing");
 
-		beacon.entityCount = (Integer) map.get("entityCount");
-		beacon.pictureCount = (Integer) map.get("pictureCount");
-		beacon.postCount = (Integer) map.get("postCount");
-		beacon.linkCount = (Integer) map.get("linkCount");
-		beacon.folderCount = (Integer) map.get("collectionCount");
-
 		return beacon;
 	}
 
 	public GeoLocation getLocation() {
 		GeoLocation location = null;
 		if (latitude != null && longitude != null) {
-			location = new GeoLocation(latitude, longitude);
+			location = new GeoLocation(latitude.doubleValue(), longitude.doubleValue());
 		}
 		return location;
 	}
@@ -183,26 +127,42 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 
 	public float getLevelPcnt() {
 
-		int avgZoneLevel = Math.abs(this.getAvgBeaconLevel());
 		float levelPcnt = 1f;
 
-		if (avgZoneLevel >= 90)
+		if (this.level.intValue() >= 90)
 			levelPcnt = .1f;
-		else if (avgZoneLevel >= 80)
+		else if (this.level.intValue() >= 80)
 			levelPcnt = .3f;
-		else if (avgZoneLevel >= 70)
+		else if (this.level.intValue() >= 70)
 			levelPcnt = .5f;
-		else if (avgZoneLevel >= 60)
+		else if (this.level.intValue() >= 60)
 			levelPcnt = .7f;
-		else if (avgZoneLevel >= 50)
+		else if (this.level.intValue() >= 50)
 			levelPcnt = .8f;
 
 		return levelPcnt;
 	}
 
 	public List<Entity> getEntities() {
-		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getBeaconEntities(this.id, false);
-		return (List<Entity>) result.data;
+		return (ProxiExplorer.getInstance().getEntityModel().getBeaconEntities(this.id));
+	}
+
+	public static class SortBeaconsBySignalLevel implements Comparator<Beacon> {
+
+		@Override
+		public int compare(Beacon object1, Beacon object2) {
+			if ((object1.level.intValue() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)
+			> (object2.level.intValue() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)) {
+				return -1;
+			}
+			else if ((object1.level.intValue() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)
+			< (object2.level.intValue() / CandiConstants.RADAR_BEACON_SIGNAL_BUCKET_SIZE)) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		}
 	}
 
 	public static enum BeaconType {
@@ -210,6 +170,6 @@ public class Beacon extends ServiceEntry implements Cloneable, Serializable {
 	}
 
 	public static enum BeaconState {
-		New, Normal
+		New, Normal, Gone
 	}
 }

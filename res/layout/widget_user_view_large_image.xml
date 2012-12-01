@@ -21,7 +21,7 @@
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/candi_user_fullname"
         style="@style/candi_user"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="3dp"
         android:gravity="bottom"

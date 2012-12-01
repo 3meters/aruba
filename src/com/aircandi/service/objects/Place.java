@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Random;
 
+import com.aircandi.Aircandi;
+import com.aircandi.R;
 import com.aircandi.service.Expose;
 
 /**
@@ -24,6 +27,8 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 
 	@Expose
 	public String				website;
+	@Expose
+	public String				facebook;
 	@Expose
 	public Contact				contact;
 	@Expose
@@ -103,6 +108,7 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		place.sourceUri = (String) map.get("sourceUri");
 		place.sourceUriShort = (String) map.get("sourceUriShort");
 		place.website = (String) map.get("website");
+		place.facebook = (String) map.get("facebook");
 		place.rating = (Number) map.get("rating");
 
 		if (map.get("location") != null) {
@@ -194,5 +200,73 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 			}
 		}
 		return categoryDefault;
+	}
+
+	public String getCategoryString() {
+		String categories = "";
+		if (this.categories != null && this.categories.size() > 0) {
+			for (Category category : this.categories) {
+				if (category.primary != null && category.primary) {
+					categories += "<b>" + category.name + "</b>, ";
+				}
+				else {
+					categories += category.name + ", ";
+				}
+			}
+			categories = categories.substring(0, categories.length() - 2);
+		}
+		return categories;
+	}
+
+	public Integer getCategoryColorResId() {
+		int colorResId = R.color.accent_gray;
+		Category category = getCategoryPrimary();
+		if (category != null) {
+
+			Random rand = new Random(category.name.hashCode());
+			int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
+			if (colorIndex == 1) {
+				colorResId = R.color.accent_blue_dark_mute;
+			}
+			else if (colorIndex == 2) {
+				colorResId = R.color.accent_orange_dark_mute;
+			}
+			else if (colorIndex == 3) {
+				colorResId = R.color.accent_green_dark_mute;
+			}
+			else if (colorIndex == 4) {
+				colorResId = R.color.accent_purple_dark_mute;
+			}
+			else if (colorIndex == 5) {
+				colorResId = R.color.accent_red_dark_mute;
+			}
+		}
+		return colorResId;
+	}
+	
+	public Integer getCategoryColor() {
+		int colorResId = R.color.accent_gray;
+		Category category = getCategoryPrimary();
+		if (category != null) {
+
+			Random rand = new Random(category.name.hashCode());
+			int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
+			if (colorIndex == 1) {
+				colorResId = R.color.accent_blue_dark_mute;
+			}
+			else if (colorIndex == 2) {
+				colorResId = R.color.accent_orange_dark_mute;
+			}
+			else if (colorIndex == 3) {
+				colorResId = R.color.accent_green_dark_mute;
+			}
+			else if (colorIndex == 4) {
+				colorResId = R.color.accent_purple_dark_mute;
+			}
+			else if (colorIndex == 5) {
+				colorResId = R.color.accent_red_dark_mute;
+			}
+		}
+		return Aircandi.getInstance().getResources().getColor(colorResId);
 	}
 }

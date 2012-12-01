@@ -7,7 +7,7 @@ import com.aircandi.service.SerializedName;
 /**
  * @author Jayma
  */
-public class Observation extends ServiceEntry {
+public class Observation extends ServiceEntryBase {
 
 	private static final long	serialVersionUID	= 5247954279209162831L;
 

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="?attr/backgroundForm" >
 
     <com.aircandi.widgets.BounceScrollView
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
@@ -16,7 +16,7 @@
 
         <ViewFlipper
             android:id="@+id/flipper_form"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:gravity="center_vertical"
@@ -25,7 +25,7 @@
             <!-- Profile -->
 
             <LinearLayout
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical|top"
                 android:orientation="vertical"
@@ -37,12 +37,12 @@
 
                 <TextView
                     style="@style/form_label"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/form_label_picture" />
 
                 <LinearLayout
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
                     android:layout_marginLeft="2dp"
@@ -83,7 +83,7 @@
 
                 <EditText
                     android:id="@+id/text_fullname"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:hint="@string/form_label_fullname"
                     android:inputType="textPersonName|textNoSuggestions" />
@@ -92,7 +92,7 @@
 
                 <EditText
                     android:id="@+id/text_location"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:hint="@string/form_label_location"
                     android:inputType="textPostalAddress|textAutoCorrect" />
@@ -101,7 +101,7 @@
 
                 <EditText
                     android:id="@+id/text_link"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:hint="@string/form_label_link"
                     android:inputType="textUri" />
@@ -110,7 +110,7 @@
 
                 <EditText
                     android:id="@+id/text_bio"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="top"
                     android:hint="@string/form_label_bio"
@@ -121,15 +121,15 @@
             <!-- Account -->
 
             <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:gravity="center_vertical|top"
                 android:orientation="vertical"
                 android:padding="5dp" >
 
                 <EditText
                     android:id="@+id/text_email"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
                     android:hint="@string/form_label_email"
@@ -151,10 +151,18 @@
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
+
+        <Button
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
 
         <Button
             android:id="@+id/btn_save"
@@ -164,14 +172,6 @@
             android:layout_weight="1"
             android:onClick="onSaveButtonClick"
             android:text="@string/form_button_save" />
-
-        <Button
-            style="@style/actionbar_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onCancelButtonClick"
-            android:text="@string/form_button_cancel" />
     </LinearLayout>
 
 </RelativeLayout>

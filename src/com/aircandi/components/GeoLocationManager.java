@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 
 import com.aircandi.Aircandi;
+import com.aircandi.Preferences;
 import com.aircandi.components.Events.EventHandler;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
@@ -54,9 +55,11 @@ public class GeoLocationManager implements LocationListener {
 	 */
 
 	private static GeoLocationManager	singletonObject;
-	public static Integer				MINIMUM_ACCURACY	= 50;
-	public static Long					MAXIMUM_AGE			= (long) CandiConstants.TWO_MINUTES;
-
+	public static Integer				MINIMUM_ACCURACY			= 50;
+	public static Long					MAXIMUM_AGE					= (long) CandiConstants.TWO_MINUTES;
+	public static Double				RADIUS_EARTH_MILES			= 3958.75;
+	public static Double				RADIUS_EARTH_KILOMETERS		= 6371.0;
+	private static double				conversionRatioMetersToFeet	= 3.28083989501;
 	private ILocationListener			mLocationListener;
 
 	private Context						mContext;
@@ -65,7 +68,7 @@ public class GeoLocationManager implements LocationListener {
 	private Runnable					mLocationScanRunnable;
 	protected PendingIntent				mPendingIntentSingleUpdate;
 	private EventHandler				mEventLocationChanged;
-	private AtomicBoolean				mLocationScanActive	= new AtomicBoolean(false);
+	private AtomicBoolean				mLocationScanActive			= new AtomicBoolean(false);
 
 	protected Criteria					mCriteria;
 
@@ -249,7 +252,8 @@ public class GeoLocationManager implements LocationListener {
 			 * If best provider isn't the network provider then check if
 			 * it's enabled and get it going.
 			 */
-			if (!locationProvider.equals(LocationManager.NETWORK_PROVIDER) && mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+			if (!locationProvider.equals(LocationManager.NETWORK_PROVIDER)
+					&& mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
 				mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER
 						, 1000
 						, 0
@@ -321,8 +325,137 @@ public class GeoLocationManager implements LocationListener {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Misc routines
+	// --------------------------------------------------------------------------------------------
+
+	public static int timeSinceLocationInMillis(Location location) {
+		if (location == null) {
+			return Integer.MAX_VALUE;
+		}
+		long locationTime = location.getTime();
+		long currentTime = System.currentTimeMillis();
+		long timeDelta = currentTime - locationTime;
+		return (int) timeDelta;
+	}
+
+	public static float getRadiusForMeters(float meters) {
+		float radius = (float) ((meters / 1000) / RADIUS_EARTH_KILOMETERS);
+		return radius;
+	}
+	// --------------------------------------------------------------------------------------------
 	// Location snapshot routines
 	// --------------------------------------------------------------------------------------------
+
+	/**
+	 * Calculates distance between two point specified by decimal degree lat/lon.
+	 * 
+	 * @param lat1
+	 * @param lng1
+	 * @param lat2
+	 * @param lng2
+	 * @returns distance in meters or yards between the two points
+	 */
+
+	public static double distance(double lat1, double lng1, double lat2, double lng2, MeasurementSystem system) {
+		double R = RADIUS_EARTH_KILOMETERS;
+
+		/* calculate delta in radians for latitudes and longitudes */
+		double dLat = Math.toRadians(lat2 - lat1);
+		double dLng = Math.toRadians(lng2 - lng1);
+
+		double a = Math.sin(dLat / 2)
+				* Math.sin(dLat / 2)
+				+ Math.cos(Math.toRadians(lat1))
+				* Math.cos(Math.toRadians(lat2))
+				* Math.sin(dLng / 2)
+				* Math.sin(dLng / 2);
+
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		double dist = R * c;
+		if (system == MeasurementSystem.Imperial) {
+			dist = (dist * conversionRatioMetersToFeet) / 3;
+		}
+
+		return (new Float(dist).floatValue() * 1000);
+	}
+
+	private static Double toRad(Double value) {
+		return value * Math.PI / 180;
+	}
+
+	/**
+	 * Calculates geodetic distance between two points specified by latitude/longitude using Vincenty inverse formula
+	 * for ellipsoids
+	 * 
+	 * @param lat1
+	 *            first point latitude in decimal degrees
+	 * @param lng1
+	 *            first point longitude in decimal degrees
+	 * @param lat2
+	 *            second point latitude in decimal degrees
+	 * @param lng2
+	 *            second point longitude in decimal degrees
+	 * @returns distance in meters or yards between points with 5.10<sup>-4</sup> precision
+	 * @see <a href="http://www.movable-type.co.uk/scripts/latlong-vincenty.html">Originally posted here</a>
+	 */
+
+	public static double distanceVincenty(double lat1, double lng1, double lat2, double lng2, MeasurementSystem system) {
+
+		double a = 6378137, b = 6356752.314245, f = 1 / 298.257223563; // WGS-84 ellipsoid params
+		double L = Math.toRadians(lng2 - lng1);
+		double U1 = Math.atan((1 - f) * Math.tan(Math.toRadians(lat1)));
+		double U2 = Math.atan((1 - f) * Math.tan(Math.toRadians(lat2)));
+		double sinU1 = Math.sin(U1), cosU1 = Math.cos(U1);
+		double sinU2 = Math.sin(U2), cosU2 = Math.cos(U2);
+
+		double sinLambda, cosLambda, sinSigma, cosSigma, sigma, sinAlpha, cosSqAlpha, cos2SigmaM;
+		double lambda = L, lambdaP, iterLimit = 100;
+		do {
+			sinLambda = Math.sin(lambda);
+			cosLambda = Math.cos(lambda);
+			sinSigma = Math.sqrt((cosU2 * sinLambda) * (cosU2 * sinLambda)
+					+ (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
+			if (sinSigma == 0)
+				return 0; // co-incident points
+			cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
+			sigma = Math.atan2(sinSigma, cosSigma);
+			sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
+			cosSqAlpha = 1 - sinAlpha * sinAlpha;
+			cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha;
+			if (Double.isNaN(cos2SigmaM))
+				cos2SigmaM = 0; // equatorial line: cosSqAlpha=0 (§6)
+			double C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha));
+			lambdaP = lambda;
+			lambda = L + (1 - C) * f * sinAlpha
+					* (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
+		} while (Math.abs(lambda - lambdaP) > 1e-12 && --iterLimit > 0);
+
+		if (iterLimit == 0)
+			return Double.NaN; // formula failed to converge
+
+		double uSq = cosSqAlpha * (a * a - b * b) / (b * b);
+		double A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
+		double B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+		double deltaSigma = B
+				* sinSigma
+				* (cos2SigmaM + B
+						/ 4
+						* (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) - B / 6 * cos2SigmaM
+								* (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
+		double dist = b * A * (sigma - deltaSigma);
+		if (system == MeasurementSystem.Imperial) {
+			dist = (dist * conversionRatioMetersToFeet) / 3;
+		}
+		return dist;
+	}
+
+	public boolean isProviderEnabled(String provider) {
+		return (mLocationManager.isProviderEnabled(provider));
+	}
+
+	public boolean isLocationAccessEnabled() {
+		return (isProviderEnabled(LocationManager.NETWORK_PROVIDER) || isProviderEnabled(LocationManager.GPS_PROVIDER));
+	}
 
 	public Observation getObservation() {
 
@@ -331,24 +464,37 @@ public class GeoLocationManager implements LocationListener {
 		}
 
 		Observation observation = new Observation();
+		if (Aircandi.usingEmulator) {
+			observation = new Observation(47.616245, -122.201645); // earls
+		}
+		else {
+			String testingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
+			if (ListPreferenceMultiSelect.contains("zoka", testingLocation, null)) {
+				observation = new Observation(47.6686489, -122.3320842); // zoka
+			}
+			else if (ListPreferenceMultiSelect.contains("lucky", testingLocation, null)) {
+				observation = new Observation(47.616245, -122.201645); // lucky
+			}
+			else {
+				observation.latitude = mLocation.getLatitude();
+				observation.longitude = mLocation.getLongitude();
 
-		observation.latitude = mLocation.getLatitude();
-		observation.longitude = mLocation.getLongitude();
-
-		if (mLocation.hasAltitude()) {
-			observation.altitude = mLocation.getAltitude();
-		}
-		if (mLocation.hasAccuracy()) {
-			/* In meters. */
-			observation.accuracy = mLocation.getAccuracy();
-		}
-		if (mLocation.hasBearing()) {
-			/* Direction of travel in degrees East of true North. */
-			observation.bearing = mLocation.getBearing();
-		}
-		if (mLocation.hasSpeed()) {
-			/* Speed of the device over ground in meters/second. */
-			observation.speed = mLocation.getSpeed();
+				if (mLocation.hasAltitude()) {
+					observation.altitude = mLocation.getAltitude();
+				}
+				if (mLocation.hasAccuracy()) {
+					/* In meters. */
+					observation.accuracy = mLocation.getAccuracy();
+				}
+				if (mLocation.hasBearing()) {
+					/* Direction of travel in degrees East of true North. */
+					observation.bearing = mLocation.getBearing();
+				}
+				if (mLocation.hasSpeed()) {
+					/* Speed of the device over ground in meters/second. */
+					observation.speed = mLocation.getSpeed();
+				}
+			}
 		}
 
 		return observation;
@@ -418,6 +564,13 @@ public class GeoLocationManager implements LocationListener {
 		return mLocation;
 	}
 
+	/**
+	 * We listen for a single update and then stop.
+	 * 
+	 * @param listener
+	 * @param criteria
+	 */
+
 	public void getSingleLocationUpdate(final RequestListener listener, Criteria criteria) {
 
 		String provider = mLocationManager.getBestProvider(criteria, true);
@@ -462,10 +615,6 @@ public class GeoLocationManager implements LocationListener {
 				listener.onComplete(null);
 			}
 		}
-	}
-
-	public void cancel() {
-		/* call removeUpdates for any registered and active listeners */
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -602,4 +751,7 @@ public class GeoLocationManager implements LocationListener {
 		public void onLocationProviderStatusChanged(final LocationProviderStatus locationProviderStatus, final Bundle bundle);
 	}
 
+	public enum MeasurementSystem {
+		Imperial, Metric
+	}
 }

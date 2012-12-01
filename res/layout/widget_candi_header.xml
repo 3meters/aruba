@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingBottom="10dp" >
@@ -10,12 +10,12 @@
     <TextView
         android:id="@+id/candi_form_title"
         style="?attr/candiFormTitleStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/dummy_title" />
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="7dp"
         android:orientation="horizontal"
@@ -42,14 +42,14 @@
     <TextView
         android:id="@+id/candi_form_address"
         style="@style/candi_form_subtitle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="7dp"
         android:layout_marginLeft="3dp"
         android:text="@string/dummy_address" />
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
         <com.aircandi.widgets.ComboButton
@@ -57,7 +57,7 @@
             style="@style/candi_form_button_combo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            aircandi:drawableScale="0.6"
+            aircandi:drawableScale="@dimen/combo_button_drawable_scale"
             android:drawableLeft="@drawable/ic_action_dialer_dark"
             android:maxWidth="96dp"
             android:minWidth="96dp"
@@ -69,7 +69,7 @@
             style="@style/candi_form_button_combo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            aircandi:drawableScale="0.6"
+            aircandi:drawableScale="@dimen/combo_button_drawable_scale"
             android:drawableLeft="@drawable/ic_action_location_dark"
             android:maxWidth="96dp"
             android:minWidth="96dp"

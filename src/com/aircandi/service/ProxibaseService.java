@@ -74,16 +74,18 @@ import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
+import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Result;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
+import com.aircandi.service.objects.ServiceEntryBase;
 import com.aircandi.service.objects.ServiceObject;
 import com.aircandi.service.objects.Session;
+import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.Tip;
 import com.aircandi.service.objects.User;
-import com.aircandi.service.objects.VersionInfo;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 
@@ -255,8 +257,13 @@ public class ProxibaseService {
 									else {
 										ArrayList<String> items = serviceRequest.getParameters().getStringArrayList(key);
 										jsonBody += "\"" + key + "\":[";
-										for (String beaconId : items) {
-											jsonBody += "\"" + beaconId + "\",";
+										for (String itemString : items) {
+											if (itemString.startsWith("object:")) {
+												jsonBody += itemString.substring(7) + ",";
+											}
+											else {
+												jsonBody += "\"" + itemString + "\",";
+											}
 										}
 										jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "],";
 									}
@@ -840,17 +847,20 @@ public class ProxibaseService {
 					List<LinkedHashMap<String, Object>> maps = (List<LinkedHashMap<String, Object>>) serviceData.data;
 					List<Object> list = new ArrayList<Object>();
 					for (LinkedHashMap<String, Object> map : maps) {
-						if (serviceDataType == ServiceDataType.Entity) {
+						if (serviceDataType == ServiceDataType.ServiceEntry) {
+							list.add(ServiceEntry.setPropertiesFromMap(new ServiceEntry(), map));
+						}
+						else if (serviceDataType == ServiceDataType.Entity) {
 							list.add(Entity.setPropertiesFromMap(new Entity(), map));
 						}
 						else if (serviceDataType == ServiceDataType.Beacon) {
 							list.add(Beacon.setPropertiesFromMap(new Beacon(), map));
 						}
+						else if (serviceDataType == ServiceDataType.Link) {
+							list.add(Link.setPropertiesFromMap(new Link(), map));
+						}
 						else if (serviceDataType == ServiceDataType.User) {
 							list.add(User.setPropertiesFromMap(new User(), map));
-						}
-						else if (serviceDataType == ServiceDataType.VersionInfo) {
-							list.add(VersionInfo.setPropertiesFromMap(new VersionInfo(), map));
 						}
 						else if (serviceDataType == ServiceDataType.ImageResult) {
 							list.add(ImageResult.setPropertiesFromMap(new ImageResult(), map));
@@ -860,6 +870,9 @@ public class ProxibaseService {
 						}
 						else if (serviceDataType == ServiceDataType.Tip) {
 							list.add(Tip.setPropertiesFromMap(new Tip(), map));
+						}
+						else if (serviceDataType == ServiceDataType.Stat) {
+							list.add(Stat.setPropertiesFromMap(new Stat(), map));
 						}
 						else if (serviceDataType == ServiceDataType.Category) {
 							list.add(Category.setPropertiesFromMap(new Category(), map));
@@ -918,8 +931,8 @@ public class ProxibaseService {
 
 	public static String convertObjectToJsonSmart(Object object, Boolean useAnnotations, Boolean excludeNulls) {
 		String json = null;
-		if (object instanceof ServiceEntry) {
-			HashMap map = ((ServiceEntry) object).getHashMap(useAnnotations, excludeNulls);
+		if (object instanceof ServiceEntryBase) {
+			HashMap map = ((ServiceEntryBase) object).getHashMap(useAnnotations, excludeNulls);
 			json = JSONValue.toJSONString(map);
 		}
 		else if (object instanceof ServiceObject) {
@@ -973,6 +986,8 @@ public class ProxibaseService {
 
 	public static class RequestListener {
 
+		public void onComplete() {}
+		
 		public void onComplete(Object response) {}
 
 		public void onComplete(Object response, Object extra) {}
@@ -992,13 +1007,14 @@ public class ProxibaseService {
 		User,
 		Session,
 		Photo,
+		Link,
 		Tip,
 		VersionInfo,
 		Result,
 		ImageResult,
 		GeoLocation,
 		Category,
-		None, Location,
+		None, Location, Stat, ServiceEntry,
 	}
 
 	public static enum RequestType {

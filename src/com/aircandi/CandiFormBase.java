@@ -2,6 +2,7 @@ package com.aircandi;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
@@ -27,18 +28,18 @@ import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiPagerAdapter;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.DrawableManager.ViewHolder;
-import com.aircandi.components.EntityList;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityTree;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
-import com.aircandi.service.ProxiConstants;
+import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.GeoLocation;
@@ -81,7 +82,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, true, null, null);
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, null, null);
 				return result;
 			}
 
@@ -90,12 +91,7 @@ public abstract class CandiFormBase extends CandiActivity {
 				ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-					if (result.data == null) {
-						/* Was likely deleted from the entity model */
-						mCommon.hideProgressDialog();
-						onBackPressed();
-					}
-					else {
+					if (result.data != null) {
 						mEntity = (Entity) result.data;
 						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
@@ -104,7 +100,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 						/* Sort the children if there are any */
 						if (mEntity.getChildren().size() > 1) {
-							Collections.sort(mEntity.getChildren(), new EntityList.SortEntitiesByModifiedDate());
+							Collections.sort(mEntity.getChildren(), new Entity.SortEntitiesByModifiedDate());
 						}
 
 						/*
@@ -118,6 +114,7 @@ public abstract class CandiFormBase extends CandiActivity {
 						}
 						updateViewPager(entities);
 					}
+					mCommon.hideProgressDialog();
 				}
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
@@ -188,6 +185,10 @@ public abstract class CandiFormBase extends CandiActivity {
 				, mEntity.name);
 	}
 
+	public void onTuneButtonClick(View view) {
+		tune();
+	}
+
 	public void onCallButtonClick(View view) {
 		AndroidManager.getInstance().callDialerActivity(this, mEntity.place.contact.phone);
 	}
@@ -240,6 +241,10 @@ public abstract class CandiFormBase extends CandiActivity {
 
 	public void onTwitterButtonClick(View view) {
 		AndroidManager.getInstance().callTwitterActivity(this, mEntity.place.contact.twitter);
+	}
+
+	public void onFacebookButtonClick(View view) {
+		AndroidManager.getInstance().callFacebookActivity(this, mEntity.place.facebook);
 	}
 
 	public void onMenuButtonClick(View view) {
@@ -302,7 +307,7 @@ public abstract class CandiFormBase extends CandiActivity {
 				.setEntityType(mEntity.type)
 				.setEntityTree(mCommon.mEntityTree);
 		Intent intent = intentBuilder.create();
-		startActivity(intent);
+		startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
@@ -335,28 +340,25 @@ public abstract class CandiFormBase extends CandiActivity {
 		 * - Template picker returns type of candi to add as a child
 		 */
 		if (resultCode != Activity.RESULT_CANCELED) {
-			if (requestCode == CandiConstants.ACTIVITY_TEMPLATE_PICK) {
+			if (requestCode == CandiConstants.ACTIVITY_ENTITY_EDIT) {
+				if (resultCode == CandiConstants.RESULT_ENTITY_DELETED) {
+					finish();
+					AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToCandiMap);
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_TEMPLATE_PICK) {
 				if (intent != null && intent.getExtras() != null) {
 
 					Bundle extras = intent.getExtras();
 					final String entityType = extras.getString(getString(R.string.EXTRA_ENTITY_TYPE));
 					if (entityType != null && !entityType.equals("")) {
 
-						String parentId = null;
+						IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
+								.setCommandType(CommandType.New)
+								.setEntityId(null)
+								.setParentEntityId(mCommon.mEntityId)
+								.setEntityType(entityType);
 
-						//						if (mCommon.getCandiPatchModel() != null && !mCommon.getCandiPatchModel().getCandiRootCurrent().isSuperRoot()) {
-						//							CandiModel candiModel = (CandiModel) mCommon.getCandiPatchModel().getCandiRootCurrent();
-						//							parentId = candiModel.getEntity().id;
-						//						}
-						//						else if (mCommon.mEntityId != null) {
-						//							parentId = mCommon.mEntityId;
-						//						}
-
-						IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class);
-						intentBuilder.setCommandType(CommandType.New);
-						intentBuilder.setEntityId(null); 	// Because this is a new entity
-						intentBuilder.setParentEntityId(parentId);
-						intentBuilder.setEntityType(entityType);
 						Intent redirectIntent = intentBuilder.create();
 						startActivity(redirectIntent);
 						AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
@@ -389,6 +391,52 @@ public abstract class CandiFormBase extends CandiActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
+	public void tune() {
+
+		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestWifiAsBeacons(5);
+		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
+
+		new AsyncTask<Object, Object, Object>() {
+
+			@Override
+			protected void onPreExecute() {
+				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				List<Entity> entities = new ArrayList<Entity>();
+				entities.add(mEntity);
+				ServiceResponse serviceResponse = ProxiExplorer.getInstance().tune(beacons, primaryBeacon, entities);
+				return serviceResponse;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				setSupportProgressBarIndeterminateVisibility(false);
+				mCommon.hideProgressDialog();
+				if (serviceResponse.responseCode != ResponseCode.Success) {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.Tuning);
+				}
+				else {
+					if (mEntity.synthetic) {
+						if (serviceResponse.data != null) {
+							/*
+							 * Has map to go from original id to new id
+							 */
+							HashMap map = (HashMap) serviceResponse.data;
+							String newId = (String) map.get(mCommon.mEntityId);
+							mCommon.mEntityId = newId;
+						}
+						bind(true);
+					}
+				}
+			}
+
+		}.execute();
+	}
+
 	static public ViewGroup buildCandiForm(Context context, final Entity entity, final ViewGroup layout, GeoLocation mLocation, boolean refresh) {
 		/*
 		 * For now, we assume that the candi form isn't recycled.
@@ -411,10 +459,11 @@ public abstract class CandiFormBase extends CandiActivity {
 		final UserView author = (UserView) layout.findViewById(R.id.author);
 
 		if (candiView != null) {
+			candiView.setBadgeColorFilter(null, null, null, "#ffffff");
 			candiView.bindToEntity(entity);
 		}
 		else {
-			
+
 			if (image != null) {
 				String imageUri = entity.getImageUri();
 				if (imageUri != null) {
@@ -427,6 +476,7 @@ public abstract class CandiFormBase extends CandiActivity {
 							.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
 
 					ImageRequest imageRequest = builder.create();
+					
 					image.setImageRequest(imageRequest);
 
 					if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
@@ -537,6 +587,10 @@ public abstract class CandiFormBase extends CandiActivity {
 			setVisibility(layout.findViewById(R.id.section_candi), View.VISIBLE);
 		}
 
+		/* Hidden unless it's a place */
+		setVisibility(layout.findViewById(R.id.label_tuning_score), View.GONE);
+		setVisibility(layout.findViewById(R.id.tuning_score), View.GONE);
+
 		/* Place specific info */
 		if (entity.place != null) {
 			final Place place = entity.place;
@@ -552,6 +606,12 @@ public abstract class CandiFormBase extends CandiActivity {
 				address.setText(Html.fromHtml(addressBlock));
 				setVisibility(address, View.VISIBLE);
 			}
+
+			/* Tuning score */
+			setVisibility(layout.findViewById(R.id.label_tuning_score), View.VISIBLE);
+			setVisibility(layout.findViewById(R.id.tuning_score), View.VISIBLE);
+			TextView text = (TextView) layout.findViewById(R.id.tuning_score);
+			text.setText(String.valueOf(entity.getTuningScore()));
 
 			/* Photos */
 			setVisibility(layout.findViewById(R.id.section_photos), View.GONE);
@@ -703,6 +763,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 		setVisibility(layout.findViewById(R.id.button_map), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_call), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_tune), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_comments), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_comment), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_new), View.GONE);
@@ -711,9 +772,10 @@ public abstract class CandiFormBase extends CandiActivity {
 		setVisibility(layout.findViewById(R.id.button_menu), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_twitter), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_website), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_facebook), View.GONE);
 
 		if (entity.locked != null && !entity.locked) {
-			if (entity.isCollection) {
+			if (entity.isCollection != null && entity.isCollection) {
 				setVisibility(layout.findViewById(R.id.button_new), View.VISIBLE);
 			}
 		}
@@ -724,7 +786,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 		if (entity.creatorId != null && entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
 			setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
-			if (!entity.isCollection) {
+			if (entity.isCollection == null || !entity.isCollection) {
 				setVisibility(layout.findViewById(R.id.button_move), View.VISIBLE);
 			}
 		}
@@ -749,6 +811,8 @@ public abstract class CandiFormBase extends CandiActivity {
 		if (entity.place != null) {
 			Place place = entity.place;
 
+			setVisibility(layout.findViewById(R.id.button_tune), View.VISIBLE);
+
 			if (!entity.place.source.equals("user")) {
 				setVisibility(layout.findViewById(R.id.button_edit), View.GONE);
 			}
@@ -762,15 +826,21 @@ public abstract class CandiFormBase extends CandiActivity {
 					setVisibility(layout.findViewById(R.id.button_call), View.VISIBLE);
 				}
 
-				if (place.contact.twitter != null) {
+				if (place.contact.twitter != null && !place.contact.twitter.equals("")) {
 					Button button = (Button) layout.findViewById(R.id.button_twitter);
 					button.setText("@" + place.contact.twitter);
 					setVisibility(button, View.VISIBLE);
 				}
 			}
 
-			if (place.website != null) {
+			if (place.website != null && !place.website.equals("")) {
 				setVisibility(layout.findViewById(R.id.button_website), View.VISIBLE);
+			}
+
+			if (place.facebook != null && !place.facebook.equals("")) {
+				Button button = (Button) layout.findViewById(R.id.button_facebook);
+				button.setText(place.facebook);
+				setVisibility(layout.findViewById(R.id.button_facebook), View.VISIBLE);
 			}
 
 			if (place.menu != null) {
@@ -787,26 +857,6 @@ public abstract class CandiFormBase extends CandiActivity {
 		if (mViewPager == null) {
 
 			mViewPager = (ViewPager) findViewById(R.id.view_pager);
-
-			if (entitiesForPaging == null) {
-				if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
-					if (mCommon.mEntityTree == EntityTree.User) {
-						entitiesForPaging = (List<Entity>) ((ModelResult) ProxiExplorer.getInstance().getEntityModel().getUserEntities(false)).data;
-					}
-					else if (mCommon.mEntityTree == EntityTree.Radar) {
-						entitiesForPaging = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
-					}
-					else if (mCommon.mEntityTree == EntityTree.Map) {
-						entitiesForPaging = (List<Entity>) ((ModelResult) ProxiExplorer.getInstance().getEntityModel()
-								.getBeaconEntities(mCommon.mBeaconId, false)).data;
-					}
-				}
-				else {
-					ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId, false, false, null, null);
-					Entity entity = (Entity) result.data;
-					entitiesForPaging = entity.getChildren();
-				}
-			}
 
 			/*
 			 * We clone the collection so our updates don't impact the entity model that
@@ -842,7 +892,7 @@ public abstract class CandiFormBase extends CandiActivity {
 			/* Replace the entity in our local collection */
 			for (int i = 0; i < mEntitiesForPaging.size(); i++) {
 				Entity entityOld = mEntitiesForPaging.get(i);
-				if (entityOld.id.equals(mEntity.id)) {
+				if (entityOld.id.equals(mEntity.id) || entityOld.id.equals(mEntity.place.sourceId)) {
 					mEntitiesForPaging.set(i, mEntity);
 					break;
 				}

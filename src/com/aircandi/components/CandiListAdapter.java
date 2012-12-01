@@ -21,6 +21,7 @@ import com.aircandi.R;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.widgets.CandiView;
 import com.aircandi.widgets.TextViewEllipsizing;
 import com.aircandi.widgets.UserView;
 import com.aircandi.widgets.WebImageView;
@@ -54,6 +55,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new CandiListViewHolder();
 			holder.image = (WebImageView) view.findViewById(R.id.image);
+			holder.candiView = (CandiView) view.findViewById(R.id.candi_view);
 			holder.title = (TextView) view.findViewById(R.id.title);
 			holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
 			holder.description = (TextViewEllipsizing) view.findViewById(R.id.description);
@@ -83,6 +85,20 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			holder.data = itemData;
 			holder.position = position;
 
+			if (holder.candiView != null) {
+				holder.candiView.setBadgeColorFilter("#ffffff", null, null, "#ffffff");
+				if (entity.synthetic) {
+					int colorResId = entity.place.getCategoryColorResId();
+					holder.candiView.setBackgroundResource(colorResId);
+					holder.candiView.setLayoutId(R.layout.widget_candi_view_tuner_synthetic);
+				}
+				else {
+					holder.candiView.setLayoutId(R.layout.widget_candi_view_tuner);
+				}
+				holder.candiView.initialize();
+				holder.candiView.bindToEntity(entity);
+			}
+			
 			setVisibility(holder.check, View.GONE);
 			if (holder.check != null && entity.checked != null) {
 				holder.check.setChecked(entity.checked);
@@ -144,6 +160,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 				setVisibility(holder.user, View.VISIBLE);
 			}
 
+
 			if (holder.image != null) {
 
 				holder.image.getImageBadge().setVisibility(View.GONE);
@@ -176,6 +193,14 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 						final ImageRequest imageRequest = builder.create();
 
 						holder.imageUri = imageUri;
+						if (entity.synthetic) {
+							int color = entity.place.getCategoryColor();
+							holder.image.setColorFilter(color);
+						}
+						else {
+							holder.image.setColorFilter(null);
+						}
+
 						holder.image.setImageRequest(imageRequest);
 					}
 				}
@@ -239,6 +264,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 		public int					position;
 		public String				imageUri;
 		public WebImageView			image;
+		public CandiView			candiView;
 		public TextView				title;
 		public TextView				subtitle;
 		public TextViewEllipsizing	description;

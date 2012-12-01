@@ -57,7 +57,6 @@ public class ProfileForm extends FormActivity {
 		
 		initialize();
 		bind();
-		draw();
 	}
 
 	private void initialize() {
@@ -124,9 +123,10 @@ public class ProfileForm extends FormActivity {
 
 					/* We got fresh user data but we want to hook up the old session. */
 					mUser.session = Aircandi.getInstance().getUser().session;
-					mImageUriOriginal = mUser.imageUri;
+					mImageUriOriginal = mUser.getImageUri();
 
 					mCommon.hideProgressDialog();
+					draw();
 				}
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.ProfileBrowse);
@@ -143,13 +143,13 @@ public class ProfileForm extends FormActivity {
 		mTextLocation.setText(mUser.location);
 		mTextEmail.setText(mUser.email);
 
-		if (mUser.imageUri != null && mUser.imageUri.length() > 0) {
+		if (mUser.getImageUri() != null && mUser.getImageUri().length() > 0) {
 			if (mUserBitmap != null) {
 				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 			else {
 				ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
-				builder.setFromUris(mUser.imageUri, null);
+				builder.setFromUris(mUser.getImageUri(), null);
 				builder.setRequestListener(new RequestListener() {
 
 					@Override
@@ -190,8 +190,7 @@ public class ProfileForm extends FormActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mUser.imageUri = imageUri;
-					mUser.linkUri = linkUri;
+					mUser.getPhoto().setImageUri(imageUri);
 					mUserBitmap = imageBitmap;
 				}
 			}

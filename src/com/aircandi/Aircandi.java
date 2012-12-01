@@ -12,7 +12,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
-import android.location.Location;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
@@ -20,7 +19,6 @@ import android.view.LayoutInflater;
 
 import com.aircandi.components.StopWatch;
 import com.aircandi.service.objects.User;
-import com.aircandi.R;
 
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ", customReportContent = {
 		ReportField.REPORT_ID,
@@ -97,7 +95,6 @@ public class Aircandi extends Application {
 	public static Boolean					fullUpdateComplete			= false;
 	public static Boolean					runFullScanOnRadarRestart	= true;
 	public static Boolean					lastScanEmpty				= false;
-	public static Boolean					returningFromDialog			= false;
 	public static Boolean					usingEmulator				= false;
 	public static Integer					wifiCount					= 0;
 
@@ -109,7 +106,6 @@ public class Aircandi extends Application {
 	private User							mUser;
 	private CandiTask						mCandiTask					= CandiTask.RadarCandi;
 	private Boolean							mLaunchedFromRadar			= false;
-	private Boolean							mRadarUpdateInProgress		= false;
 	private Boolean							mRadarScanInProgress		= false;
 
 	public static Aircandi getInstance() {
@@ -137,16 +133,6 @@ public class Aircandi extends Application {
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
 		firstRunApp = Aircandi.settings.getBoolean(Preferences.SETTING_FIRST_RUN, true);
-	}
-
-	public static int timeSinceLocationInMillis(Location location) {
-		if (location == null) {
-			return Integer.MAX_VALUE;
-		}
-		long locationTime = location.getTime();
-		long currentTime = System.currentTimeMillis();
-		long timeDelta = currentTime - locationTime;
-		return (int) timeDelta;
 	}
 
 	public static String getVersionName(Context context, Class cls) {
@@ -182,14 +168,6 @@ public class Aircandi extends Application {
 
 	public Boolean getLaunchedFromRadar() {
 		return mLaunchedFromRadar;
-	}
-
-	public Boolean isRadarUpdateInProgress() {
-		return mRadarUpdateInProgress;
-	}
-
-	public void setRadarUpdateInProgress(Boolean radarUpdateInProgress) {
-		mRadarUpdateInProgress = radarUpdateInProgress;
 	}
 
 	public Boolean isRadarScanInProgress() {

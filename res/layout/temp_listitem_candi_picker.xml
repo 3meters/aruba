@@ -2,14 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:id="@+id/item_row"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/button_nooutline_selector"
     android:clickable="true"
     android:onClick="onListItemClick" >
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="1px"
         android:layout_alignParentTop="true"
         android:background="?attr/ruleColor" />
@@ -27,7 +27,7 @@
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/title"
         style="@style/bookmark_list_title"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
         android:layout_toRightOf="@+id/image" />
@@ -35,7 +35,7 @@
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/description"
         style="@style/bookmark_list_uri"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title"
         android:layout_toRightOf="@+id/image"

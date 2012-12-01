@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
-    android:layout_width="fill_parent"
-    android:layout_height="300dp">
+    android:layout_width="match_parent"
+    android:layout_height="300dp" >
 
     <!-- Content -->
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/form_header"
         android:orientation="vertical"
         android:padding="10dp" >
@@ -28,13 +28,13 @@
 
         <Spinner
             android:id="@+id/category"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="@dimen/form_field_height"
             android:spinnerMode="dropdown" />
 
         <Spinner
             android:id="@+id/sub_category"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="@dimen/form_field_height"
             android:spinnerMode="dropdown"
             android:visibility="visible" />
@@ -45,10 +45,18 @@
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
+
+        <Button
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
 
         <Button
             android:id="@+id/btn_save"
@@ -58,14 +66,6 @@
             android:layout_weight="1"
             android:onClick="onSaveButtonClick"
             android:text="@string/form_button_save" />
-
-        <Button
-            style="@style/actionbar_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onCancelButtonClick"
-            android:text="@string/form_button_cancel" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -56,22 +56,9 @@ public class CommentList extends CandiActivity {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-
-		if (mCommon.mCollectionId.equals(ProxiConstants.ROOT_COLLECTION_ID)) {
-			if (mCommon.mEntityTree == ProxiExplorer.EntityTree.Radar) {
-				mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
-			}
-			else if (mCommon.mEntityTree == ProxiExplorer.EntityTree.User) {
-				mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
-				mCommon.mActionBar.setHomeButtonEnabled(false);
-			}
-		}
-		else {
-			Entity collection = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId);
-			mCommon.mActionBar.setTitle(collection.name);
-			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
-		}
-
+		Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+		mCommon.mActionBar.setTitle(entity.name);
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
 	protected void bind(final Boolean refresh) {
@@ -89,7 +76,7 @@ public class CommentList extends CandiActivity {
 				 * Just get the comments without updating the entity in the cache
 				 */
 				String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, false, jsonEagerLoad, null);
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, jsonEagerLoad, null);
 				return result;
 			}
 
@@ -136,7 +123,7 @@ public class CommentList extends CandiActivity {
 				+ ",\"skip\":" + String.valueOf(mComments.size())
 				+ "}}";
 
-		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, true, false, jsonEagerLoad, jsonOptions);
+		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, true, jsonEagerLoad, jsonOptions);
 		return result;
 	}
 
@@ -272,7 +259,7 @@ public class CommentList extends CandiActivity {
 						if (comment.imageUri != null && comment.imageUri.length() != 0) {
 							ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemAuthorImage)
 									.setFromUris(comment.imageUri, null);
-							
+
 							ImageRequest imageRequest = builder.create();
 							holder.itemAuthorImage.setImageRequest(imageRequest);
 						}

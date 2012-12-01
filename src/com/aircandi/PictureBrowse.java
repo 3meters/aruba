@@ -62,7 +62,7 @@ public class PictureBrowse extends FormActivity {
 			mAsPicker = extras.getBoolean(getString(R.string.EXTRA_AS_PICKER));
 		}
 
-		Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId);
+		Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 		mSource = entity.place.source;
 		mSourceId = entity.place.sourceId;
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);

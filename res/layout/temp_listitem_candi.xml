@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:id="@+id/item_row"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/button_nooutline_selector"
     android:clickable="true"
@@ -23,7 +23,7 @@
     <TextView
         android:id="@+id/title"
         style="?attr/candiListTitleStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
@@ -32,7 +32,7 @@
     <TextView
         android:id="@+id/subtitle"
         style="@style/candi_list_subtitle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
         android:layout_below="@+id/title"
@@ -42,7 +42,7 @@
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/description"
         style="@style/candi_list_description"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
         android:layout_below="@+id/subtitle"
@@ -51,7 +51,7 @@
 
     <LinearLayout
         android:id="@+id/info_group"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_below="@+id/description"
@@ -61,7 +61,7 @@
 
         <com.aircandi.widgets.UserView
             android:id="@+id/user"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             aircandi:layout="@layout/widget_user_view_text_only" />
 

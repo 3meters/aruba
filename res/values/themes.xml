@@ -43,13 +43,14 @@
         
         <item name="ruleColor">@color/rule_30_dark</item>
         <item name="ruleColorStrong">@color/rule_60_dark</item>
-        <item name="textColor">@color/button_color_selector_dark</item>
-        <item name="textColorRadar">@color/text_dark</item>
+        <item name="textColor">@color/text_dark</item>
         <item name="textColorUnfocused">@color/text_dark</item>
         <item name="textColorComment">@color/accent</item>
         <item name="textColorBullet">@color/accent</item>
         <item name="textColorBars">@color/text_dark</item>
         <item name="textColorProgress">@color/text_dark</item>
+        <item name="textColorCandiView">@color/text_dark</item>
+        <item name="textColorCandiViewSynthetic">@color/text_dark</item>
         <item name="textOutlineRadar">true</item>
         
         <!-- Drawables and backgrounds -->
@@ -59,6 +60,7 @@
         
         <item name="backgroundButton">@drawable/button_selector_dark</item>
         <item name="backgroundCandi">@android:color/transparent</item>
+        <item name="backgroundRadarCandi">@drawable/candi_bg_dark</item>
         <item name="backgroundForm">@android:color/black</item>
         <item name="backgroundHelp">@color/background_help_dark</item>
         <item name="backgroundPicture">@drawable/picture_bg_dark</item>
@@ -77,6 +79,10 @@
         <item name="iconSearch">@drawable/ic_action_search_dark</item>
         <item name="iconHelp">@drawable/ic_action_help_dark</item>
         <item name="iconNewCandi">@drawable/ic_new_candi_dark</item>
+        <item name="iconTune">@drawable/ic_app</item>
+        
+        <item name="badgeColor">@color/text_dark</item>
+        <item name="badgeColorSynthetic">@color/text_dark</item>
         
 		<!-- Actionbar Sherlock -->
 		
@@ -124,14 +130,18 @@
         
         <item name="ruleColor">@color/rule_15_light</item>
         <item name="ruleColorStrong">@color/rule_60_light</item>
-        <item name="textColor">@color/button_color_selector_light</item>
-        <item name="textColorRadar">@color/text_light</item>
+        <item name="textColor">@color/text_light</item>
         <item name="textColorUnfocused">@color/text_light</item>
         <item name="textColorComment">@color/accent</item>
         <item name="textColorBullet">@color/accent</item>
         <item name="textColorBars">@color/text_light</item>
         <item name="textColorProgress">@color/text_light</item>
+        <item name="textColorCandiView">@color/text_dark</item>
+        <item name="textColorCandiViewSynthetic">@color/text_light</item>
         <item name="textOutlineRadar">false</item>
+        
+        <item name="badgeColor">@color/text_dark</item>
+        <item name="badgeColorSynthetic">@color/text_dark</item>
         
         <!-- Drawables and backgrounds -->
         
@@ -140,6 +150,7 @@
         
         <item name="backgroundButton">@drawable/button_selector_light</item>
         <item name="backgroundCandi">@android:color/transparent</item>
+        <item name="backgroundRadarCandi">@drawable/candi_bg_light</item>
         <item name="backgroundForm">@android:color/black</item>
         <item name="backgroundHelp">@color/background_help_light</item>
         <item name="backgroundPicture">@drawable/picture_bg_light</item>
@@ -158,6 +169,7 @@
         <item name="iconSearch">@drawable/ic_action_search_light</item>
         <item name="iconHelp">@drawable/ic_action_help_light</item>
         <item name="iconNewCandi">@drawable/ic_new_candi_light</item>
+        <item name="iconTune">@drawable/ic_app</item>
         
 		<!-- Actionbar Sherlock -->
 		
@@ -194,7 +206,6 @@
     
     <style name="aircandi_theme_light_semi_invert" parent="aircandi_theme_light_semi">
         <item name="textColor">@color/text_dark</item>
-        <item name="textColorRadar">@color/text_dark</item>
         <item name="textOutlineRadar">true</item>
         <item name="textColorBars">@color/text_light</item>
         <item name="candiFormTitleStyle">@style/candi_form_title_outlined</item>

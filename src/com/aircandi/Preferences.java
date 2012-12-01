@@ -15,17 +15,17 @@ public class Preferences extends SherlockPreferenceActivity {
 	SharedPreferences			prefs;
 	protected AircandiCommon	mCommon;
 
-	public static final String	PREF_AUTOSCAN			= "Pref_Autoscan";
-	public static final String	PREF_AUTOSCAN_INTERVAL	= "Pref_Autoscan_Interval";
 	public static final String	PREF_GLOBAL_BEACONS		= "Pref_Global_Beacons";
 	public static final String	PREF_DISPLAY_EXTRAS		= "Pref_Display_Extras";
 	public static final String	PREF_ENTITY_FENCING		= "Pref_Entity_Fencing";
+	public static final String	PREF_SHOW_DISTANCE		= "Pref_Show_Distance";
 	public static final String	PREF_SHOW_DEBUG			= "Pref_Show_Debug";
 	public static final String	PREF_SOUND_EFFECTS		= "Pref_Sound_Effects";
 	public static final String	PREF_THEME				= "Pref_Theme";
 	public static final String	PREF_USER				= "Pref_User";
 	public static final String	PREF_USER_SESSION		= "Pref_User_Session";
 	public static final String	PREF_TESTING_BEACONS	= "Pref_Testing_Beacons";
+	public static final String	PREF_TESTING_LOCATION	= "Pref_Testing_Location";
 
 	public static final String	SETTING_VERSION_NAME	= "Setting_Version_Name";
 	public static final String	SETTING_PICTURE_SEARCH	= "Setting_Picture_Search";

@@ -16,8 +16,7 @@
         android:id="@+id/image_main"
         style="@style/app_picture_framed"
         android:layout_width="125dp"
-        android:layout_height="125dp"
-        android:src="@drawable/placeholder_logo_bw" />
+        android:layout_height="125dp" />
 
     <ImageView
         android:id="@+id/image_badge"

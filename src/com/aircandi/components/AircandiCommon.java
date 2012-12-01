@@ -47,15 +47,12 @@ import com.aircandi.Aircandi;
 import com.aircandi.Aircandi.CandiTask;
 import com.aircandi.CandiForm;
 import com.aircandi.CandiList;
-import com.aircandi.CandiMap;
 import com.aircandi.CandiPicker;
 import com.aircandi.CandiRadar;
-import com.aircandi.CandiRadar.RefreshType;
+import com.aircandi.CandiUser;
 import com.aircandi.CommentList;
 import com.aircandi.FormActivity;
 import com.aircandi.HelpForm;
-import com.aircandi.MapCandiForm;
-import com.aircandi.MapCandiList;
 import com.aircandi.Preferences;
 import com.aircandi.ProfileForm;
 import com.aircandi.R;
@@ -106,6 +103,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public List<Entity>					mEntities;
 	public String						mMessage;
 	public String						mBeaconId;
+	public String						mUserId;
 	public String						mCollectionId;
 	public EntityTree					mEntityTree;
 
@@ -220,6 +218,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			mBeaconId = extras.getString(mContext.getString(R.string.EXTRA_BEACON_ID));
 			mEntityType = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_TYPE));
 			mEntityId = extras.getString(mContext.getString(R.string.EXTRA_ENTITY_ID));
+			mUserId = extras.getString(mContext.getString(R.string.EXTRA_USER_ID));
 			mMessage = extras.getString(mContext.getString(R.string.EXTRA_MESSAGE));
 			mCollectionId = extras.getString(mContext.getString(R.string.EXTRA_COLLECTION_ID));
 			mNavigationTop = extras.getBoolean(mContext.getString(R.string.EXTRA_NAVIGATION_TOP));
@@ -327,7 +326,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * manifest in order to get the correct window features. The theme can then be modified by passing the desired
 		 * theme id to the dialog activity.
 		 */
-		Aircandi.returningFromDialog = true;
 		Intent intent = new Intent(mActivity, TemplatePicker.class);
 		intent.putExtra(mActivity.getString(R.string.EXTRA_ENTITY_IS_ROOT), isRoot);
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_TEMPLATE_PICK);
@@ -342,7 +340,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * manifest in order to get the correct window features. The theme can then be modified by passing the desired
 		 * theme id to the dialog activity.
 		 */
-		Aircandi.returningFromDialog = true;
 		Intent intent = new Intent(mActivity, HelpForm.class);
 		intent.putExtra(mActivity.getString(R.string.EXTRA_STRING_ID), R.string.help_radar);
 		mActivity.startActivity(intent);
@@ -378,8 +375,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 				@Override
 				public void run() {
 					Drawable drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_stop);
-
 					mBeaconIndicator.setText(String.valueOf(scanList.size()));
+					mBeaconIndicator.setVisibility(View.GONE);
 
 					WifiScanResult wifiStrongest = null;
 
@@ -403,8 +400,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 					mBeaconIndicator.setText(String.valueOf(wifiCount));
 					if (wifiCount > 0) {
+						mBeaconIndicator.setVisibility(View.VISIBLE);
 						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
 					}
+					
 					if (wifiStrongest != null && wifiStrongest.level > CandiConstants.RADAR_BEACON_INDICATOR_CAUTION) {
 						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_go);
 					}
@@ -849,13 +848,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void doCreateOptionsMenu(Menu menu) {
 
-		if (mPageName.equals("CandiMap")) {
-			SherlockMapActivity mapActivity = (SherlockMapActivity) mActivity;
-			mapActivity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
-		}
-		else if (mPageName.equals("SignInForm")) {
-			SherlockActivity mapActivity = (SherlockActivity) mActivity;
-			mapActivity.getSupportMenuInflater().inflate(R.menu.menu_signin, menu);
+		if (mPageName.equals("SignInForm")) {
+			SherlockActivity activity = (SherlockActivity) mActivity;
+			activity.getSupportMenuInflater().inflate(R.menu.menu_signin, menu);
 		}
 		else {
 			SherlockActivity activity = (SherlockActivity) mActivity;
@@ -900,12 +895,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 			if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().isAnonymous()) {
 				((MenuItem) menu.findItem(R.id.signin)).setVisible(false);
 				((MenuItem) menu.findItem(R.id.signout)).setVisible(true);
-				((MenuItem) menu.findItem(R.id.profile)).setVisible(true);
 			}
 			else {
 				((MenuItem) menu.findItem(R.id.signin)).setVisible(true);
 				((MenuItem) menu.findItem(R.id.signout)).setVisible(false);
-				((MenuItem) menu.findItem(R.id.profile)).setVisible(false);
 			}
 
 			if (!Aircandi.applicationUpdateNeeded) {
@@ -931,7 +924,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				startBusyIndicator();
 
 				if (mPageName.equals("CandiRadar")) {
-					((CandiRadar) mActivity).doRefresh(RefreshType.Standard);
+					((CandiRadar) mActivity).doRefresh();
 				}
 				else if (mPageName.equals("CandiList")) {
 					((CandiList) mActivity).doRefresh();
@@ -945,15 +938,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 				else if (mPageName.equals("UserCandiForm")) {
 					((UserCandiForm) mActivity).doRefresh();
 				}
-				else if (mPageName.equals("MapCandiList")) {
-					((MapCandiList) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("MapCandiForm")) {
-					((MapCandiForm) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("CandiMap")) {
-					((CandiMap) mActivity).doRefresh();
-				}
 				else if (mPageName.equals("CommentList")) {
 					((CommentList) mActivity).doRefresh();
 				}
@@ -961,9 +945,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			case R.id.settings:
 				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
-				return;
-			case R.id.profile:
-				doProfileClick();
 				return;
 			case R.id.signout:
 				signout();
@@ -1005,10 +986,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			if (mPageName.equals("CandiRadar")) {
 				if (item.getItemId() == R.id.refresh) {
-					((CandiRadar) mActivity).doRefresh(RefreshType.Standard);
+					((CandiRadar) mActivity).doRefresh();
 				}
 				else if (item.getItemId() == R.id.refresh_all) {
-					((CandiRadar) mActivity).doRefresh(RefreshType.FullBuild);
+					((CandiRadar) mActivity).doRefresh();
 				}
 			}
 			else if (item.getItemId() == R.id.refresh || item.getItemId() == R.id.refresh_all) {
@@ -1023,15 +1004,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 				}
 				else if (mPageName.equals("UserCandiForm")) {
 					((UserCandiForm) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("MapCandiList")) {
-					((MapCandiList) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("MapCandiForm")) {
-					((MapCandiForm) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("CandiMap")) {
-					((CandiMap) mActivity).doRefresh();
 				}
 				else if (mPageName.equals("CommentList")) {
 					((CommentList) mActivity).doRefresh();
@@ -1055,6 +1027,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
 			setActiveTab(0);
 		}
+		else if (mPageName.equals("CandiUser")) {
+			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
+			setActiveTab(1);
+		}
 		else if (mPageName.equals("CandiList")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
 			setActiveTab(0);
@@ -1063,14 +1039,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
 			setActiveTab(1);
 		}
-		else if (mPageName.equals("MapCandiList")) {
-			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
-			setActiveTab(2);
-		}
-		else if (mPageName.equals("CandiMap")) {
-			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
-			setActiveTab(2);
-		}
 		else if (mPageName.equals("CandiForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
 			setActiveTab(0);
@@ -1078,10 +1046,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		else if (mPageName.equals("UserCandiForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
 			setActiveTab(1);
-		}
-		else if (mPageName.equals("MapCandiForm")) {
-			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
-			setActiveTab(2);
 		}
 		else if (mPageName.equals("CommentList")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
@@ -1122,12 +1086,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			tab = mActionBar.newTab();
 			tab.setText(R.string.radar_tab_mycandi);
 			tab.setTag(R.string.radar_tab_mycandi);
-			tab.setTabListener(tabListener);
-			mActionBar.addTab(tab, false);
-
-			tab = mActionBar.newTab();
-			tab.setText(R.string.radar_tab_map);
-			tab.setTag(R.string.radar_tab_map);
 			tab.setTabListener(tabListener);
 			mActionBar.addTab(tab, false);
 		}
@@ -1209,10 +1167,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 			if (Aircandi.getInstance().getCandiTask() != CandiTask.MyCandi) {
 				Aircandi.getInstance().setCandiTask(CandiTask.MyCandi);
 
-				IntentBuilder intentBuilder = new IntentBuilder(mActivity, UserCandiList.class);
-				intentBuilder.setNavigationTop(true)
-						.setEntityTree(ProxiExplorer.EntityTree.User)
-						.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
+				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiUser.class)
+						.setNavigationTop(true)
+						.setUserId(Aircandi.getInstance().getUser().id)
+						.setEntityTree(ProxiExplorer.EntityTree.User);
+
 				Intent intent = intentBuilder.create();
 				/*
 				 * These flags put this on the stack as a new task and hitting back will
@@ -1222,23 +1181,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				mActivity.startActivity(intent);
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToMyCandi);
-			}
-		}
-		else if (tab.getTag().equals(R.string.radar_tab_map)) {
-			if (Aircandi.getInstance().getCandiTask() != CandiTask.Map) {
-				Aircandi.getInstance().setCandiTask(CandiTask.Map);
-
-				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiMap.class);
-				intentBuilder.setNavigationTop(true);
-				Intent intent = intentBuilder.create();
-				/*
-				 * These flags put this on the stack as a new task and hitting back will
-				 * take the user back the top of the previous task.
-				 */
-				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				mActivity.startActivity(intent);
-				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToCandiMap);
 			}
 		}
 		else {
@@ -1447,7 +1389,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Unknown,
 		PickBookmark,
 		PickCandi,
-		CheckUpdate, TipBrowse, Tuning
+		CheckUpdate,
+		TipBrowse,
+		Tuning,
+		CandiUser
 	}
 
 	public static enum ActionButtonSet {

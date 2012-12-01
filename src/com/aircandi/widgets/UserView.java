@@ -84,9 +84,9 @@ public class UserView extends RelativeLayout {
 				}
 			}
 			if (mImageUser != null) {
-				if (mAuthor.imageUri != null && mAuthor.imageUri.length() != 0) {
+				if (mAuthor.getImageUri() != null && mAuthor.getImageUri().length() != 0) {
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
-					builder.setFromUris(mAuthor.imageUri, mAuthor.linkUri);
+					builder.setFromUris(mAuthor.getImageUri(), null);
 					ImageRequest imageRequest = builder.create();
 					mImageUser.setImageRequest(imageRequest);
 				}
@@ -117,9 +117,9 @@ public class UserView extends RelativeLayout {
 				}
 			}
 			if (mImageUser != null) {
-				if (mUser.imageUri != null && mUser.imageUri.length() != 0) {
+				if (mUser.getImageUri() != null && mUser.getImageUri().length() != 0) {
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
-					builder.setFromUris(mUser.imageUri, mUser.linkUri);
+					builder.setFromUris(mUser.getImageUri(), null);
 					ImageRequest imageRequest = builder.create();
 					mImageUser.setImageRequest(imageRequest);
 				}

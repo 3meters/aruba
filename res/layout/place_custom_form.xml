@@ -20,14 +20,14 @@
         android:textSize="22sp" />
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_below="@+id/form_header"
         android:background="@color/abs__holo_blue_light" />
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/form_header"
         android:orientation="vertical"
         android:padding="10dp" >
@@ -35,7 +35,7 @@
         <!-- Public Image -->
 
         <RelativeLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:paddingBottom="10dp"
@@ -68,7 +68,7 @@
 
         <EditText
             android:id="@+id/title"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:layout_weight="0"
@@ -79,7 +79,7 @@
 
         <Spinner
             android:id="@+id/category"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:layout_weight="0"
@@ -87,7 +87,7 @@
 
         <Spinner
             android:id="@+id/sub_category"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:spinnerMode="dropdown"
@@ -99,7 +99,7 @@
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
@@ -109,16 +109,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:onClick="onAddCustomButtonClick"
-            android:text="@string/form_button_add" />
-
+            android:onClick="onCancelCustomButtonClick"
+            android:text="@string/form_button_cancel" />
         <Button
             style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:onClick="onCancelCustomButtonClick"
-            android:text="@string/form_button_cancel" />
-    </LinearLayout>
+            android:onClick="onAddCustomButtonClick"
+            android:text="@string/form_button_add" />
+
+        </LinearLayout>
 
 </RelativeLayout>

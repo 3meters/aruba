@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingBottom="10dp" >
@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/candi_form_title"
         style="?attr/candiFormTitleStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/dummy_title" />
 
@@ -31,7 +31,7 @@
             style="@style/candi_form_button_combo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            aircandi:drawableScale="0.6"
+            aircandi:drawableScale="@dimen/combo_button_drawable_scale"
             android:drawableLeft="@drawable/ic_action_location_dark"
             android:maxWidth="96dp"
             android:minWidth="96dp"

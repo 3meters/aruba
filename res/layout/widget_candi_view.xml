@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools" >
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="120dp"
         android:background="@drawable/picture_bg_dark_place" />
 
     <com.aircandi.widgets.WebImageView
-        android:id="@+id/image"
-        android:layout_width="fill_parent"
+        android:id="@+id/candi_view_image"
+        android:layout_width="match_parent"
         android:layout_height="120dp"
         aircandi:layout="@layout/widget_webimageview"
         aircandi:maxHeight="700dp"
@@ -18,13 +18,23 @@
         android:scaleType="centerCrop" />
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="120dp"
-        android:background="@drawable/picture_overlay_dark" />
+        android:background="@drawable/picture_overlay_dark"
+        android:visibility="visible" />
 
+    <TextView
+        android:id="@+id/candi_view_distance"
+        style="@style/candi_view_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:text="@string/dummy_distance" />
+    
     <LinearLayout
         android:id="@+id/text_group"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
@@ -34,7 +44,7 @@
         android:paddingTop="25dp" >
 
         <ImageView
-            android:id="@+id/subtitle_badge"
+            android:id="@+id/candi_view_subtitle_badge"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center_vertical"
@@ -49,25 +59,23 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/title"
-                android:layout_width="fill_parent"
+                android:id="@+id/candi_view_title"
+                style="@style/candi_view_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:text="@string/dummy_title_short"
-                android:textColor="#ffffffff"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="16sp" />
 
             <TextView
-                android:id="@+id/subtitle"
-                android:layout_width="fill_parent"
+                android:id="@+id/candi_view_subtitle"
+                style="@style/candi_view_subtitle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:text="@string/dummy_tags"
-                android:textAllCaps="true"
-                android:textColor="#ffffffff"
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>

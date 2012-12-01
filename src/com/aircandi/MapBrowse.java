@@ -60,7 +60,7 @@ public class MapBrowse extends SherlockMapActivity {
 		mMapController = mMapView.getController();
 
 		ViewGroup mapHolder = (ViewGroup) findViewById(R.id.map_holder);
-		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		mapHolder.addView(mMapView, params);
 		mMapView.postInvalidate();
 	}
@@ -115,7 +115,7 @@ public class MapBrowse extends SherlockMapActivity {
 		mMapOverlays = mMapView.getOverlays();
 		Drawable drawable = getResources().getDrawable(R.drawable.ic_map_candi_iii);
 
-		GeoLocation entityLocation = new GeoLocation(mEntity.place.location.lat, mEntity.place.location.lng);
+		GeoLocation entityLocation = new GeoLocation(mEntity.place.location.lat.doubleValue(), mEntity.place.location.lng.doubleValue());
 		GeoPoint geoPoint = new GeoPoint((int) (entityLocation.latitude.doubleValue() * 1E6), (int) (entityLocation.longitude.doubleValue() * 1E6));
 
 		OverlayItem overlayItem = new OverlayItem(geoPoint, mEntity.name, mEntity.description);
@@ -161,4 +161,9 @@ public class MapBrowse extends SherlockMapActivity {
 		return false;
 	}
 
+	public class MapBeacon {
+		public GeoPoint	point;
+		public String	title;
+		public String	message;
+	}
 }

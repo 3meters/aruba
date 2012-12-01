@@ -2,12 +2,15 @@ package com.aircandi.service.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.aircandi.components.EntityList;
+import com.aircandi.components.GeoLocationManager;
+import com.aircandi.components.GeoLocationManager.MeasurementSystem;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
@@ -20,7 +23,7 @@ import com.aircandi.service.SerializedName;
  * 
  * @author Jayma
  */
-public class Entity extends ServiceEntry implements Cloneable, Serializable {
+public class Entity extends ServiceEntryBase implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= -3902834532692561618L;
 
@@ -52,7 +55,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public List<Comment>		comments;
 
 	@Expose(serialize = false, deserialize = true)
-	public List<BeaconLink>		beaconLinks;
+	public List<Link>			links;
 
 	@Expose(serialize = false, deserialize = true)
 	public Number				activityDate;
@@ -87,9 +90,9 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	public Boolean				global				= false;
 	public Boolean				synthetic			= false;
 	public Boolean				checked				= false;
+	public Float				distance;										// Cached for easier sorting
 
 	/* These have meaning for child entities */
-	public Boolean				rookie				= true;
 	public Date					discoveryTime;
 
 	public Entity() {}
@@ -101,8 +104,8 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			if (this.comments != null) {
 				entity.comments = (List<Comment>) ((ArrayList) this.comments).clone();
 			}
-			if (this.beaconLinks != null) {
-				entity.beaconLinks = (List<BeaconLink>) ((ArrayList) this.beaconLinks).clone();
+			if (this.links != null) {
+				entity.links = (List<Link>) ((ArrayList) this.links).clone();
 			}
 			if (this.owner != null) {
 				entity.owner = this.owner.clone();
@@ -130,7 +133,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		entity = (Entity) ServiceEntry.setPropertiesFromMap(entity, map);
+		entity = (Entity) ServiceEntryBase.setPropertiesFromMap(entity, map);
 
 		entity.type = (String) map.get("type");
 		entity.name = (String) map.get("name");
@@ -141,11 +144,11 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		entity.signalFence = (Number) map.get("signalFence");
 		entity.visibility = (String) map.get("visibility");
 
-		if (map.get("beaconLinks") != null) {
-			entity.beaconLinks = new ArrayList<BeaconLink>();
-			List<LinkedHashMap<String, Object>> beaconLinkMaps = (List<LinkedHashMap<String, Object>>) map.get("beaconLinks");
-			for (LinkedHashMap<String, Object> beaconLinkMap : beaconLinkMaps) {
-				entity.beaconLinks.add(BeaconLink.setPropertiesFromMap(new BeaconLink(), beaconLinkMap));
+		if (map.get("links") != null) {
+			entity.links = new ArrayList<Link>();
+			List<LinkedHashMap<String, Object>> linkMaps = (List<LinkedHashMap<String, Object>>) map.get("links");
+			for (LinkedHashMap<String, Object> linkMap : linkMaps) {
+				entity.links.add(Link.setPropertiesFromMap(new Link(), linkMap));
 			}
 		}
 
@@ -196,7 +199,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		 * - rookie
 		 * - discoveryTime
 		 */
-		ServiceEntry.copyProperties(from, to);
+		ServiceEntryBase.copyProperties(from, to);
 
 		to.type = from.type;
 		to.name = from.name;
@@ -212,7 +215,7 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		to.signalFence = from.signalFence;
 		to.visibility = from.visibility;
 
-		to.beaconLinks = from.beaconLinks;
+		to.links = from.links;
 
 		to.childCount = from.childCount;
 		to.comments = from.comments;
@@ -259,9 +262,24 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 			}
 		}
 		if (location == null && place != null && place.location != null) {
-			location = new GeoLocation(place.location.lat, place.location.lng);
+			location = new GeoLocation(place.location.lat.doubleValue(), place.location.lng.doubleValue());
 		}
 		return location;
+	}
+
+	public Float getDistance(MeasurementSystem system) {
+		GeoLocation location = getLocation();
+		Float distance = null;
+		if (location != null) {
+			Observation observation = GeoLocationManager.getInstance().getObservation();
+			distance = (float) GeoLocationManager.distanceVincenty(observation.latitude.doubleValue()
+					, observation.longitude.doubleValue()
+					, location.latitude.doubleValue()
+					, location.longitude.doubleValue()
+					, system);
+		}
+		this.distance = distance;
+		return distance;
 	}
 
 	public String getImageUri() {
@@ -274,9 +292,11 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		 */
 		String imageUri = "resource:placeholder_logo";
 		if (this.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-			imageUri = this.creator.imageUri;
+			if (this.creator.photo != null) {
+				imageUri = this.creator.photo.getImageUri();
+			}
 			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
-				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + this.creator.imageUri;
+				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 			}
 		}
 		else {
@@ -287,11 +307,8 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 				}
 			}
 			else if (creator != null) {
-				if (creator.imageUri != null && !creator.imageUri.equals("")) {
-					imageUri = creator.imageUri;
-				}
-				else if (creator.linkUri != null && !creator.linkUri.equals("")) {
-					imageUri = creator.linkUri;
+				if (creator.getImageUri() != null && !creator.getImageUri().equals("")) {
+					imageUri = creator.getImageUri();
 				}
 			}
 		}
@@ -306,43 +323,40 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		if (this.photo != null) {
 			imageFormat = photo.getImageFormat();
 		}
-		else if (creator != null) {
-			if (creator.imageUri != null && !creator.imageUri.equals("")) {
-				imageFormat = ImageFormat.Binary;
-			}
-			else if (creator.linkUri != null && !creator.linkUri.equals("")) {
-				imageFormat = ImageFormat.Html;
+		else if (creator != null && creator.photo != null) {
+			if (creator.photo.getImageUri() != null && !creator.getImageUri().equals("")) {
+				imageFormat = creator.photo.getImageFormat();
 			}
 		}
 
 		return imageFormat;
 	}
 
-	public BeaconLink getActiveBeaconLink() {
+	public Link getActiveLink() {
 		/*
 		 * If an entity has more than one viable beaconLink, we choose the one
 		 * that currently has the strongest beacon.
 		 */
-		if (beaconLinks != null) {
-			BeaconLink strongestBeaconLink = null;
+		if (links != null) {
+			Link strongestLink = null;
 			Integer strongestLevel = null;
-			for (BeaconLink beaconLink : beaconLinks) {
-				if (strongestBeaconLink == null) {
-					strongestBeaconLink = beaconLink;
-					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(beaconLink.beaconId);
+			for (Link link : links) {
+				if (strongestLink == null) {
+					strongestLink = link;
+					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
 					if (beacon != null) {
-						strongestLevel = beacon.getAvgBeaconLevel();
+						strongestLevel = beacon.level.intValue();
 					}
 				}
 				else {
-					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(beaconLink.beaconId);
-					if (beacon != null && beacon.getAvgBeaconLevel() > strongestLevel) {
-						strongestBeaconLink = beaconLink;
-						strongestLevel = beacon.getAvgBeaconLevel();
+					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
+					if (beacon != null && beacon.level.intValue() > strongestLevel) {
+						strongestLink = link;
+						strongestLevel = beacon.level.intValue();
 					}
 				}
 			}
-			return strongestBeaconLink;
+			return strongestLink;
 		}
 		return null;
 	}
@@ -367,33 +381,45 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 	}
 
 	public Entity getParent() {
-		Entity entity = ProxiExplorer.getInstance().getEntityModel().getEntity(this.parentId);
+		Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(this.parentId);
 		return entity;
 	}
 
 	public Beacon getBeacon() {
-		BeaconLink beaconLink = getActiveBeaconLink();
-		if (beaconLink != null) {
-			Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(beaconLink.beaconId);
-			if (beaconLink.latitude != null) {
-				beacon.latitude = beaconLink.latitude;
-				beacon.longitude = beaconLink.longitude;
-			}
+		Link link = getActiveLink();
+		if (link != null) {
+			Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
 			return beacon;
 		}
 		return null;
 	}
 
+	public Integer getTuningScore() {
+		Integer tuningScore = 0;
+		if (links != null) {
+			for (Link beaconLink : links) {
+				/* One point for each link */
+				tuningScore++;
+				
+				/* Bonus points for each tuned link */
+				if (beaconLink.tuneCount != null) {
+					tuningScore += beaconLink.tuneCount.intValue();
+				}
+			}
+		}
+		return tuningScore;
+	}
+
 	public String getBeaconId() {
-		BeaconLink beaconLink = getActiveBeaconLink();
-		if (beaconLink != null) {
-			return beaconLink.beaconId;
+		Link link = getActiveLink();
+		if (link != null) {
+			return link.toId;
 		}
 		return null;
 	}
 
 	public String getLinkId() {
-		String linkId = getActiveBeaconLink().linkId;
+		String linkId = getActiveLink().id;
 		return linkId;
 	}
 
@@ -430,4 +456,62 @@ public class Entity extends ServiceEntry implements Cloneable, Serializable {
 		Foursquare,
 		User
 	}
+
+	public static class SortEntitiesByTuningScoreDistance implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity entity1, Entity entity2) {
+
+			/* global versus user */
+			if (!entity1.global && entity2.global) {
+				return -1;
+			}
+			if (entity1.global && !entity2.global) {
+				return 1;
+			}
+			else {
+				/* synthetics */
+				if (!entity1.synthetic && entity2.synthetic) {
+					return -1;
+				}
+				if (entity1.synthetic && !entity2.synthetic) {
+					return 1;
+				}
+				else {
+					if (entity1.getTuningScore() > entity2.getTuningScore()) {
+						return -1;
+					}
+					if (entity1.getTuningScore() < entity2.getTuningScore()) {
+						return 1;
+					}
+					else {
+						if (entity1.distance < entity2.distance.intValue()) {
+							return -1;
+						}
+						else if (entity1.distance.intValue() > entity2.distance.intValue()) {
+							return 1;
+						}
+						else {
+							return 0;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public static class SortEntitiesByModifiedDate implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity object1, Entity object2) {
+			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
+				return 1;
+			}
+			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
+				return 0;
+			}
+			return -1;
+		}
+	}
+
 }

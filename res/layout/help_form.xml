@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <!-- Header -->
 
     <ImageView
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:adjustViewBounds="true"
         android:src="@drawable/placeholder_logo_v" />
 
     <com.aircandi.widgets.BounceScrollView
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
@@ -23,7 +23,7 @@
 
         <TextView
             android:id="@+id/text_message"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="15dp"
             android:paddingLeft="2dp"
@@ -35,7 +35,7 @@
     <!-- Footer -->
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="1px"
         android:layout_above="@+id/form_footer"
         android:background="?attr/ruleColor" />
@@ -43,14 +43,14 @@
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal" >
 
         <Button
             style="@style/actionbar_button_borderless"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="onCancelButtonClick"
             android:text="@string/form_button_close" />

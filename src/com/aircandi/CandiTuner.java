@@ -3,13 +3,10 @@ package com.aircandi;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.DialogInterface;
-import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -21,45 +18,28 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.Window;
-import com.aircandi.PictureBrowse.EndlessImageAdapter;
-import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AnimUtils;
+import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils.TransitionType;
-import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
-import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Beacon;
-import com.aircandi.service.objects.BeaconLink;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Photo;
-import com.aircandi.service.objects.Place;
-import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.Entity.ImageFormat;
+import com.aircandi.service.objects.Place;
 import com.aircandi.widgets.WebImageView;
 
-@SuppressWarnings("unused")
 public class CandiTuner extends FormActivity {
 
 	private ListView			mListViewCandi;
@@ -83,7 +63,6 @@ public class CandiTuner extends FormActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 
 		initialize();
@@ -106,7 +85,11 @@ public class CandiTuner extends FormActivity {
 
 	public void bind() {
 
-		EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarEntities();
+		EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarPlaces();
+		if (entities != null) {
+			entities.addAll(ProxiExplorer.getInstance().getEntityModel().getRadarSynthetics());
+		}
+		
 		if (entities != null) {
 			mEntities.clear();
 			for (Entity entity : entities) {
@@ -193,6 +176,46 @@ public class CandiTuner extends FormActivity {
 	// Core routines
 	// --------------------------------------------------------------------------------------------
 
+	public void tune() {
+
+		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestWifiAsBeacons(5);
+		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
+
+		new AsyncTask<Object, Object, Object>() {
+
+			@Override
+			protected void onPreExecute() {
+				setSupportProgressBarIndeterminateVisibility(true);
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+
+				List<Entity> entities = new ArrayList<Entity>();
+				for (Entity entity : mEntities) {
+					if (entity.checked) {
+						entities.add(entity);
+					}
+				}
+				ServiceResponse serviceResponse = ProxiExplorer.getInstance().tune(beacons, primaryBeacon, entities);
+				return serviceResponse;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				setSupportProgressBarIndeterminateVisibility(false);
+				if (serviceResponse.responseCode != ResponseCode.Success) {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.Tuning);
+				}
+				else {
+					finish();
+					AnimUtils.doOverridePendingTransition(CandiTuner.this, TransitionType.FormToCandiPage);
+				}
+			}
+		}.execute();
+	}
+
 	private Entity createEntityFromCustomForm() {
 
 		Entity entity = new Entity();
@@ -200,6 +223,7 @@ public class CandiTuner extends FormActivity {
 		entity.synthetic = true;
 		entity.checked = true;
 		entity.isCollection = true;
+		entity.locked = false;
 		entity.type = CandiConstants.TYPE_CANDI_PLACE;
 
 		entity.getPhoto().setSourceName("aircandi");
@@ -209,7 +233,9 @@ public class CandiTuner extends FormActivity {
 				entity.getPhoto().setImageFormat(ImageFormat.Html);
 			}
 			else {
-				entity.getPhoto().setImageUri(mImageUri);
+				if (mImageUri != null) {
+					entity.getPhoto().setImageUri(mImageUri);
+				}
 			}
 			entity.getPhoto().setBitmap(mEntityBitmap);
 		}
@@ -408,128 +434,6 @@ public class CandiTuner extends FormActivity {
 		}
 	}
 
-	public void tune() {
-
-		final Beacon beacon = ProxiExplorer.getInstance().getStrongestWifiAsBeacon();
-		if (beacon == null && mCommon.mParentId == null) {
-			AircandiCommon.showAlertDialog(R.drawable.ic_app
-					, "Aircandi beacons"
-					, getString(R.string.alert_beacons_zero)
-					, null
-					, this, android.R.string.ok
-					, null
-					, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {}
-					}
-					, null);
-			return;
-		}
-
-		new AsyncTask<Object, Object, Object>() {
-
-			@Override
-			protected void onPreExecute() {
-				setSupportProgressBarIndeterminateVisibility(true);
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				ModelResult result = new ModelResult();
-				for (Entity entity : mEntities) {
-					if (entity.checked) {
-						String linkId = entity.id;
-						String originalId = entity.id;
-						Entity placeEntity = null;
-						if (entity.synthetic) {
-							if (entity.id != null) {
-								/*
-								 * Sythetic entity created from foursquare data
-								 * 
-								 * We make a copy so these changes don't effect the synthetic entity
-								 * in the entity model in case we keep it because of a failure.
-								 */
-								placeEntity = entity.clone();
-
-								placeEntity.id = null;
-								placeEntity.parentId = null;
-								placeEntity.signalFence = -100.0f;
-								placeEntity.beaconLinks = new ArrayList<BeaconLink>();
-								placeEntity.beaconLinks.add(new BeaconLink(beacon.id, null));
-								placeEntity.subtitle = entity.getCategories();
-								
-								/* We only want to persist what's needed to link to foursquare */
-								placeEntity.place = new Place();
-								placeEntity.place.source = entity.place.source;
-								placeEntity.place.sourceId = entity.place.sourceId;
-								/* 
-								 * We persist categories for use in radar but it gets overwritten when
-								 * we show place detail via linking.
-								 */
-								placeEntity.place.categories = entity.place.categories;
-
-								if (placeEntity.getPhoto().getBitmap() == null && placeEntity.place.source != null && placeEntity.place.sourceId != null) {
-									/*
-									 * Try to get a better photo to use.
-									 */
-									result = ProxiExplorer.getInstance().getEntityModel()
-											.getPlacePhotos(placeEntity.place.source, placeEntity.place.sourceId, 1, 0);
-									if (result.serviceResponse.responseCode != ResponseCode.Success) {
-										return result;
-									}
-									else {
-										List<Photo> photos = (List<Photo>) result.serviceResponse.data;
-										if (photos != null && photos.size() > 0) {
-											placeEntity.photo = photos.get(0);
-											placeEntity.photo.setSourceName("foursquare");
-										}
-									}
-								}
-							}
-							else {
-								/*
-								 * Synthetic entity created locally as custom.
-								 */
-								placeEntity = entity;
-								placeEntity.beaconLinks = new ArrayList<BeaconLink>();
-								placeEntity.beaconLinks.add(new BeaconLink(beacon.id, null));
-							}
-							
-							result = ProxiExplorer.getInstance().getEntityModel().insertEntity(placeEntity, beacon, placeEntity.photo.getBitmap(), false);
-							if (result.serviceResponse.responseCode != ResponseCode.Success) {
-								return result;
-							}
-							else {
-								/*
-								 * Success so remove the synthetic entity.
-								 */
-								ProxiExplorer.getInstance().getEntityModel().removeEntity(originalId);
-								Entity insertedEntity = (Entity) result.data;
-								linkId = insertedEntity.getLinkId();
-							}
-						}
-
-						result = ProxiExplorer.getInstance().getEntityModel().tuneLink(linkId);
-					}
-
-				}
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
-				setSupportProgressBarIndeterminateVisibility(false);
-				if (result.serviceResponse.responseCode != ResponseCode.Success) {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Tuning);
-				}
-				else {
-					finish();
-					AnimUtils.doOverridePendingTransition(CandiTuner.this, TransitionType.FormToCandiPage);
-				}
-			}
-		}.execute();
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
@@ -550,9 +454,5 @@ public class CandiTuner extends FormActivity {
 	protected int getLayoutID() {
 		return R.layout.candi_tuner;
 	}
-
-	// --------------------------------------------------------------------------------------------
-	// Inner classes
-	// --------------------------------------------------------------------------------------------
 
 }

@@ -12,17 +12,19 @@
         <attr name="ruleColor" format="color|reference" />
         <attr name="ruleColorStrong" format="color|reference" />
         <attr name="textColor" format="color|reference" />
-        <attr name="textColorRadar" format="color|reference" />
         <attr name="textColorUnfocused" format="color|reference" />
         <attr name="textColorComment" format="color|reference" />
         <attr name="textColorBullet" format="color|reference" />
         <attr name="textColorBars" format="color|reference" />
         <attr name="textColorProgress" format="color|reference" />
+        <attr name="textColorCandiView" format="color|reference" />
+        <attr name="textColorCandiViewSynthetic" format="color|reference" />
         <attr name="textOutlineRadar" format="boolean" />
         <attr name="textureBodyZone" format="reference" />
         <attr name="textureBodyCandi" format="reference" />
         <attr name="backgroundButton" format="string" />
         <attr name="backgroundCandi" format="color|reference" />
+        <attr name="backgroundRadarCandi" format="color|reference" />
         <attr name="backgroundForm" format="color|reference" />
         <attr name="backgroundProgress" format="string" />
         <attr name="backgroundPicture" format="string" />
@@ -30,6 +32,8 @@
         <attr name="backgroundButtonBar" format="string" />
         <attr name="backgroundTabBar" format="string" />
         <attr name="backgroundHelp" format="color|reference" />
+        <attr name="badgeColor" format="color|reference" />
+        <attr name="badgeColorSynthetic" format="color|reference" />
         <attr name="iconSearch" format="string" />
         <attr name="iconRefresh" format="string" />
         <attr name="iconHelp" format="string" />
@@ -38,7 +42,8 @@
         <attr name="iconLocation" format="string" />
         <attr name="iconBookmarks" format="string" />
         <attr name="iconForward" format="string" />
-    </declare-styleable>
+        <attr name="iconTune" format="string" />
+        </declare-styleable>
     <declare-styleable name="CandiView">
         <attr name="layout" />
     </declare-styleable>

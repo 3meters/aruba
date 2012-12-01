@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <com.aircandi.widgets.BounceScrollView
         android:id="@+id/scroll_view"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
         android:background="?attr/backgroundCandi"
@@ -16,82 +16,20 @@
 
         <FrameLayout
             android:id="@+id/scroll_content"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" >
-
-            <RelativeLayout
-                android:id="@+id/retry_dialog"
-                style="@style/dialog_radar_connect"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:gravity="center"
-                android:padding="25dp"
-                android:visibility="gone" >
-
-                <TextView
-                    android:id="@+id/retry_message"
-                    style="@style/dialog_radar_text"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"
-                    android:gravity="center"
-                    android:paddingBottom="15dp" />
-
-                <LinearLayout
-                    android:id="@+id/group_buttons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/retry_message"
-                    android:layout_centerHorizontal="true"
-                    android:orientation="horizontal" >
-
-                    <Button
-                        android:id="@+id/button_retry"
-                        style="@style/actionbar_button"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:text="@string/dialog_network_retry_button" />
-
-                    <Button
-                        android:id="@+id/button_cancel"
-                        style="@style/actionbar_button"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:text="@string/dialog_network_cancel_button" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/group_buttons"
-                    android:layout_centerHorizontal="true"
-                    android:orientation="horizontal" >
-
-                    <CheckBox
-                        android:id="@+id/wifi_enabled_checkbox"
-                        style="@style/app_checkbox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:paddingRight="10dp"
-                        android:text="@string/dialog_network_enable_wifi_checkbox" />
-                </LinearLayout>
-            </RelativeLayout>
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
 
             <RelativeLayout
                 android:id="@+id/empty_dialog"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:gravity="center"
                 android:padding="25dp"
                 android:visibility="gone" >
 
                 <TextView
                     android:id="@+id/text_empty_message"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingBottom="15dp"
                     android:paddingLeft="2dp"
@@ -106,16 +44,27 @@
                 android:scrollbars="none"
                 android:visibility="invisible" />
 
-            <com.aircandi.widgets.FlowLayout
+            <LinearLayout
                 android:id="@+id/radar"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_margin="7dp" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="2dp" >
+                <com.aircandi.widgets.FlowLayout
+                    android:id="@+id/radar_places"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <com.aircandi.widgets.FlowLayout
+                    android:id="@+id/radar_synthetics"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
 
             <RelativeLayout
                 android:id="@+id/progress"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:gravity="center" >
 
                 <ProgressBar
@@ -127,18 +76,18 @@
             </RelativeLayout>
         </FrameLayout>
     </com.aircandi.widgets.BounceScrollView>
-    
+
     <!-- Footer -->
 
     <RelativeLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true" >
 
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1px"
             android:layout_alignParentTop="true"
             android:background="?attr/ruleColor" />
@@ -152,14 +101,13 @@
             android:clickable="true"
             android:onClick="onTuneButtonClick"
             android:orientation="horizontal"
-            android:visibility="invisible"
             tools:ignore="UseCompoundDrawables" >
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center"
-                android:src="?attr/iconNewCandi"
+                android:src="?attr/iconTune"
                 android:visibility="visible" />
 
             <TextView
@@ -170,16 +118,6 @@
                 android:text="@string/radar_button_tune"
                 android:textColor="?attr/textColorBars" />
         </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/button_help"
-            style="@style/actionbar_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:onClick="onHelpButtonClick"
-            android:src="?attr/iconHelp"
-            android:text="@string/radar_button_help" />
     </RelativeLayout>
 
 </RelativeLayout>

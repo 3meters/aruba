@@ -49,6 +49,7 @@ public class AnimUtils {
 	public static enum TransitionType {
 		CandiPageToForm,
 		FormToCandiPage,
+		FormToCandiPageAfterDelete,
 		CandiPageToCandiPage,
 		CandiMapToCandiPage,
 		CandiFormToCandiList,
@@ -57,9 +58,11 @@ public class AnimUtils {
 		CandiPageToMyCandi,
 		CandiPageToCandiMap,
 		CandiPageToCandiRadar,
+		CandiPageToAndroidApp,
 		CandiPageBack,
 		HelpShow,
-		HelpHide
+		HelpHide,
+		None
 	}
 
 	public static void doOverridePendingTransition(Activity activity, TransitionType transitionType) {
@@ -77,6 +80,9 @@ public class AnimUtils {
 		}
 		else if (transitionType == TransitionType.CandiListToCandiForm) {
 			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		}
+		else if (transitionType == TransitionType.CandiPageToAndroidApp) {
+			activity.overridePendingTransition(R.anim.activity_open_enter, R.anim.hold);
 		}
 		/*
 		 * Moving between primary tabs
@@ -101,6 +107,12 @@ public class AnimUtils {
 		}
 		else if (transitionType == TransitionType.FormToCandiPage) {
 			activity.overridePendingTransition(R.anim.hold, R.anim.fade_zoom_out);
+		}
+		else if (transitionType == TransitionType.FormToCandiPageAfterDelete) {
+			activity.overridePendingTransition(R.anim.hold, R.anim.help_zoom_out);
+		}
+		else if (transitionType == TransitionType.None) {
+			activity.overridePendingTransition(0, 0);
 		}
 		/*
 		 * Jumping to and from help

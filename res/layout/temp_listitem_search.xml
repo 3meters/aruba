@@ -2,14 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:id="@+id/item_row"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/button_nooutline_selector"
     android:clickable="true"
     android:onClick="onListItemClick" >
 
     <View
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="1px"
         android:layout_alignParentTop="true"
         android:background="?attr/ruleColor" />
@@ -17,7 +17,7 @@
     <TextView
         android:id="@+id/item_section_title"
         style="@style/candi_list_section"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:gravity="center_vertical"
@@ -40,7 +40,7 @@
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_name"
         style="@style/candi_list_title"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/item_section_title"
         android:layout_marginTop="3dp"
@@ -50,7 +50,7 @@
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_category_name"
         style="@style/candi_list_subtitle"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/item_name"
         android:layout_toRightOf="@+id/item_image"
@@ -59,7 +59,7 @@
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/item_uri"
         style="@style/candi_list_description"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/item_category_name"
         android:layout_toRightOf="@+id/item_image"

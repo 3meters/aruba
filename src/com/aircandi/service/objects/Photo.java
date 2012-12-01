@@ -94,18 +94,19 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		return photo;
 	}
 
+	public void setImageUri(String imageUri) {
+		setImageUri(imageUri, null, null, null);
+	}
+
 	public void setImageUri(String prefix, String suffix, Number width, Number height) {
 		this.prefix = prefix;
 		this.suffix = suffix;
 		this.width = width;
 		this.height = height;
-	}
-
-	public void setImageUri(String imageUri) {
-		this.prefix = imageUri;
-		this.suffix = null;
-		this.width = null;
-		this.height = null;
+		this.sourceName = "aircandi";
+		if (prefix.startsWith("http:") || prefix.startsWith("https:")) {
+			this.sourceName = "external";
+		}
 	}
 
 	public Boolean isEmpty() {

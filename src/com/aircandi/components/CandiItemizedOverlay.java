@@ -23,8 +23,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import com.aircandi.Aircandi;
-import com.aircandi.CandiMap.MapBeacon;
-import com.aircandi.MapCandiList;
+import com.aircandi.MapBrowse.MapBeacon;
 import com.aircandi.R;
 import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.ProxiExplorer.EntityTree;
@@ -100,10 +99,10 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 			Beacon mapBeacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(item.getSnippet());
 			if (mapBeacon != null) {
 
-				folderCount += mapBeacon.folderCount;
-				linkCount += mapBeacon.linkCount;
-				pictureCount += mapBeacon.pictureCount;
-				postCount += mapBeacon.postCount;
+//				folderCount += mapBeacon.folderCount;
+//				linkCount += mapBeacon.linkCount;
+//				pictureCount += mapBeacon.pictureCount;
+//				postCount += mapBeacon.postCount;
 				mBeaconId = mapBeacon.id;
 			}
 		}
@@ -122,40 +121,40 @@ public class CandiItemizedOverlay extends ItemizedOverlay {
 			message += Aircandi.applicationContext.getString(R.string.candi_map_label_posts) + " " + String.valueOf(postCount) + "\n";
 		}
 
-		/* Do stuff here when you tap, i.e. */
-		AircandiCommon.showAlertDialog(R.drawable.ic_app
-				, title
-				, message
-				, null
-				, mContext
-				, cell.size() == 1 ? R.string.alert_candimap_ok : null
-				, cell.size() == 1 ? R.string.alert_candimap_cancel : null
-				, new DialogInterface.OnClickListener() {
-
-					public void onClick(DialogInterface dialog, int which) {
-						if (which == Dialog.BUTTON_POSITIVE) {
-							Logger.d(mContext, "View map candi");
-
-							/*
-							 * mCommon.mEntityId is the original entity the user navigated to but
-							 * they could have swiped using the viewpager to a different entity so
-							 * we need to use mEntity to get the right entity context.
-							 */
-							IntentBuilder intentBuilder = new IntentBuilder(mMapView.getContext(), MapCandiList.class)
-									.setCommandType(CommandType.View)
-									.setBeaconId(mBeaconId)
-									.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID)
-									.setEntityTree(EntityTree.Map);
-							
-							Intent intent = intentBuilder.create();
-							mMapView.getContext().startActivity(intent);
-							AnimUtils.doOverridePendingTransition((Activity) mMapView.getContext(), TransitionType.CandiFormToCandiList);
-						}
-					}
-				}
-				, null);
-
-		Tracker.trackEvent("DialogMapBeacon", "Open", null, 0);
+//		/* Do stuff here when you tap, i.e. */
+//		AircandiCommon.showAlertDialog(R.drawable.ic_app
+//				, title
+//				, message
+//				, null
+//				, mContext
+//				, cell.size() == 1 ? R.string.alert_candimap_ok : null
+//				, cell.size() == 1 ? R.string.alert_candimap_cancel : null
+//				, new DialogInterface.OnClickListener() {
+//
+//					public void onClick(DialogInterface dialog, int which) {
+//						if (which == Dialog.BUTTON_POSITIVE) {
+//							Logger.d(mContext, "View map candi");
+//
+//							/*
+//							 * mCommon.mEntityId is the original entity the user navigated to but
+//							 * they could have swiped using the viewpager to a different entity so
+//							 * we need to use mEntity to get the right entity context.
+//							 */
+//							IntentBuilder intentBuilder = new IntentBuilder(mMapView.getContext(), MapCandiList.class)
+//									.setCommandType(CommandType.View)
+//									.setBeaconId(mBeaconId)
+//									.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID)
+//									.setEntityTree(EntityTree.Map);
+//							
+//							Intent intent = intentBuilder.create();
+//							mMapView.getContext().startActivity(intent);
+//							AnimUtils.doOverridePendingTransition((Activity) mMapView.getContext(), TransitionType.CandiFormToCandiList);
+//						}
+//					}
+//				}
+//				, null);
+//
+//		Tracker.trackEvent("DialogMapBeacon", "Open", null, 0);
 
 		return true;
 	}
