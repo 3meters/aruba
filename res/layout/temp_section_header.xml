@@ -2,15 +2,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="5dp"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:paddingBottom="5dp" >
 
-    <TextView
-        android:id="@+id/title"
-        style="@style/candi_form_section_title"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dummy_section_title" />
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/app_text_appearance_large_accent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:text="@string/dummy_section_title" />
+
+        <TextView
+            android:id="@+id/button_more"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/button_nooutline_selector"
+            android:gravity="right|bottom"
+            android:paddingBottom="2dp"
+            android:clickable="true"
+            android:onClick="onMoreButtonClick"
+            android:visibility="gone"
+            android:text="@string/candi_button_more" />
+    </RelativeLayout>
 
     <View
         android:layout_width="match_parent"

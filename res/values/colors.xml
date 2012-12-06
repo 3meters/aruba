@@ -4,7 +4,7 @@
     <!--
 	   	Theme Colors
 	   	- light suffix means a theme where backgrounds are generally light in tone. 
-	   	- dark suffix means a theme where backgrounds are generally dark in tone. 
+	   	- dark suffix means a theme where backgrounds are generally dark in tone.
     -->
 
     <color name="progress_start">#ffffd300</color>
@@ -12,7 +12,7 @@
 
     <!--
     	We also used the pressed color in radar and that color is hardcoded
-    	in CandiPatchPresenter.initializeScene 
+    	in CandiPatchPresenter.initializeScene
     -->
 
     <color name="button_pressed">#ff33b5e5</color>
@@ -22,11 +22,9 @@
     <color name="beacon_go">#99009900</color>
     <color name="beacon_off">#33ffffff</color>
     <color name="holo_blue_light">#8833b5e5</color>
-    
     <color name="accent">#ffffaa00</color>
     <color name="accent_darker">#ffbb7700</color>
     <color name="accent_lighter">#ffffcc00</color>
-    
     <color name="edit_hint">#ff888888</color>
     <color name="text_dark">#ffffffff</color>
     <color name="text_light">#ff000000</color>
@@ -47,25 +45,19 @@
 
     <color name="background_actionbar_light">#10000000</color>
     <color name="background_tabbar_light">#14000000</color>
-    <color name="background_buttonbar_light">@color/background_actionbar_light</color>
-
-    <!-- Darken bars: mostly opaque -->
-
-    <color name="background_actionbar_dark_semi">#a0000000</color>
-    <color name="background_tabbar_dark_semi">#80000000</color>
-    <color name="background_buttonbar_dark_semi">@color/background_tabbar_dark_semi</color>
+    <color name="background_buttonbar_light">#e0ffffff</color>
 
     <!-- Lighten bars: mostly transparent -->
 
     <color name="background_actionbar_dark">#10ffffff</color>
     <color name="background_tabbar_dark">#10ffffff</color>
-    <color name="background_buttonbar_dark">@color/background_actionbar_dark</color>
+	<color name="background_buttonbar_dark">#18ffffff</color>    
 
-    <!-- Lighten bars: mostly opaque -->
+    <!-- <color name="background_buttonbar_dark">#cc000000</color> -->
 
-    <color name="background_actionbar_light_semi">#a0ffffff</color>
-    <color name="background_tabbar_light_semi">#80ffffff</color>
-    <color name="background_buttonbar_light_semi">@color/background_actionbar_light_semi</color>
+
+    <!-- Rules -->
+
     <color name="rule_60_dark">#99ffffff</color>
     <color name="rule_60_light">#99000000</color>
     <color name="rule_30_dark">#4dffffff</color>
@@ -78,23 +70,19 @@
     <color name="accent_red">#ffff4444</color>
     <color name="accent_red_dark">#ffcc0000</color>
     <color name="accent_red_dark_mute">#ffbd4852</color>
-    
     <color name="accent_orange">#ffffbb33</color>
     <color name="accent_orange_dark">#ffff8800</color>
     <color name="accent_orange_dark_mute">#ffe0904e</color>
-    
     <color name="accent_green">#ff99cc00</color>
     <color name="accent_green_dark">#ff669900</color>
     <color name="accent_green_dark_mute">#ff839942</color>
-    
     <color name="accent_purple">#ffaa66cc</color>
     <color name="accent_purple_dark">#ff9933cc</color>
     <color name="accent_purple_dark_mute">#ff9e6bc3</color>
-    
     <color name="accent_blue">#ff33b5e5</color>
     <color name="accent_blue_dark">#ff0099cc</color>
     <color name="accent_blue_dark_mute">#ff48a8bd</color>
-    
     <color name="accent_gray">#ffaaaaaa</color>
     <color name="accent_gray_dark">#ff777777</color>
+
 </resources>

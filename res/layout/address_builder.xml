@@ -88,21 +88,21 @@
         android:gravity="center_horizontal" >
 
         <Button
-            android:id="@+id/btn_save"
-            style="@style/actionbar_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onSaveButtonClick"
-            android:text="@string/form_button_save" />
-
-        <Button
             style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onCancelButtonClick"
             android:text="@string/form_button_cancel" />
+
+        <Button
+            android:id="@+id/btn_save"
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onSaveButtonClick"
+            android:text="@string/form_button_ok" />
     </LinearLayout>
 
 </RelativeLayout>

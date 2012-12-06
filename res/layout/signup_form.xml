@@ -52,7 +52,7 @@
                     android:tag="resource:placeholder_logo" />
 
                 <Button
-                    android:id="@+id/btn_change_public_image"
+                    android:id="@+id/button_change_image"
                     style="@style/actionbar_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

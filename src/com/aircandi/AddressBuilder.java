@@ -3,11 +3,10 @@ package com.aircandi;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 
+import com.aircandi.components.FontManager;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
@@ -15,10 +14,8 @@ import com.aircandi.service.objects.Location;
 
 public class AddressBuilder extends FormActivity {
 
-	private Button		mButtonSave;
 	private Location	mLocation;
 	private String		mPhone;
-	private EditText	mAddress;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,18 +37,13 @@ public class AddressBuilder extends FormActivity {
 		if (mLocation == null) {
 			mLocation = new Location();
 		}
-
-		mButtonSave = (Button) findViewById(R.id.btn_save);
-		mButtonSave.setEnabled(false);
-
-		mAddress = (EditText) findViewById(R.id.address);
-		mAddress.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(enableSave());
-			}
-		});
+		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.phone));
+		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.address));
+		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.cross_street));
+		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.city));
+		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.state));
+		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.zip_code));
+		
 	}
 
 	private void draw() {
@@ -127,20 +119,9 @@ public class AddressBuilder extends FormActivity {
 		finish();
 	}
 
-	private boolean enableSave() {
-		if (mAddress.getText().toString().length() > 0) {
-			return true;
-		}
-		return false;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
-	@Override
-	protected Integer getThemeResId() {
-		return R.style.aircandi_theme_dialog_light;
-	}
 
 	@Override
 	protected int getLayoutID() {

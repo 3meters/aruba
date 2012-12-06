@@ -96,11 +96,6 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		return true;
 	}
 	
-	@Override
-	protected Integer getThemeResId() {
-		return null;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------

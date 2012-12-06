@@ -15,8 +15,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.DateUtils;
 import com.aircandi.components.EndlessAdapter;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -25,6 +25,7 @@ import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.utilities.DateUtils;
 import com.aircandi.widgets.WebImageView;
 
 public class CommentList extends CandiActivity {
@@ -67,7 +68,7 @@ public class CommentList extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
+				mCommon.showBusy();
 			}
 
 			@Override
@@ -101,7 +102,7 @@ public class CommentList extends CandiActivity {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CommentBrowse);
 				}
-				mCommon.hideProgressDialog();
+				mCommon.hideBusy();
 			}
 
 		}.execute();
@@ -208,6 +209,12 @@ public class CommentList extends CandiActivity {
 				holder.itemAuthorLocationSeparator = (View) view.findViewById(R.id.item_author_location_separator);
 				holder.itemComment = (TextView) view.findViewById(R.id.item_comment);
 				holder.itemCreatedDate = (TextView) view.findViewById(R.id.item_created_date);
+				
+				FontManager.getInstance().setTypefaceLight(holder.itemAuthorName);
+				FontManager.getInstance().setTypefaceLight(holder.itemAuthorLocation);
+				FontManager.getInstance().setTypefaceLight(holder.itemComment);
+				FontManager.getInstance().setTypefaceLight(holder.itemCreatedDate);
+				
 				view.setTag(holder);
 			}
 			else {

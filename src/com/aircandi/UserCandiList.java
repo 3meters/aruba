@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.CommandType;
@@ -23,6 +21,8 @@ import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class UserCandiList extends CandiListBase {
 
@@ -115,7 +115,7 @@ public class UserCandiList extends CandiListBase {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
+				mCommon.showBusy();
 			}
 
 			@Override
@@ -142,7 +142,7 @@ public class UserCandiList extends CandiListBase {
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */
 					if (result.data == null || ((EntityList<Entity>) result.data).size() == 0) {
-						mCommon.hideProgressDialog();
+						mCommon.hideBusy();
 						onBackPressed();
 					}
 					else {
@@ -158,7 +158,7 @@ public class UserCandiList extends CandiListBase {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiList);
 				}
-				mCommon.hideProgressDialog();
+				mCommon.hideBusy();
 			}
 
 		}.execute();

@@ -21,8 +21,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -31,11 +29,13 @@ import com.aircandi.components.SearchAdapter;
 import com.aircandi.components.SearchAdapter.SearchListViewHolder;
 import com.aircandi.components.SearchManager;
 import com.aircandi.components.SearchManager.SearchItem;
-import com.aircandi.components.Utilities;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class LinkPicker extends FormActivity {
 
@@ -109,7 +109,7 @@ public class LinkPicker extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_searching), true);
+				mCommon.showBusy(R.string.progress_searching);
 			}
 
 			@Override
@@ -130,7 +130,7 @@ public class LinkPicker extends FormActivity {
 			protected void onPostExecute(Object response) {
 				mSearchAdapter = new SearchAdapter(LinkPicker.this, mSearchItems, null);
 				mListView.setAdapter(mSearchAdapter);
-				mCommon.hideProgressDialog();
+				mCommon.hideBusy();
 			}
 
 		}.execute();
@@ -150,7 +150,7 @@ public class LinkPicker extends FormActivity {
 			linkUri = "http://" + linkUri;
 		}
 
-		if (!Utilities.validWebUri(linkUri)) {
+		if (!MiscUtils.validWebUri(linkUri)) {
 			mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
 		}
 		else {
@@ -178,7 +178,7 @@ public class LinkPicker extends FormActivity {
 				linkUri = "http://" + mUri;
 			}
 
-			if (!Utilities.validWebUri(linkUri)) {
+			if (!MiscUtils.validWebUri(linkUri)) {
 				mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
 				return false;
 			}
@@ -194,7 +194,7 @@ public class LinkPicker extends FormActivity {
 
 					@Override
 					protected void onPreExecute() {
-						mCommon.showProgressDialog(getString(R.string.progress_verifying), false);
+						mCommon.showBusy(R.string.progress_verifying);
 					}
 
 					@Override
@@ -255,7 +255,7 @@ public class LinkPicker extends FormActivity {
 							if (description != null) {
 								mUriDescription = description;
 							}
-							mCommon.hideProgressDialog();
+							mCommon.hideBusy();
 
 							Intent intent = new Intent();
 							intent.putExtra(getString(R.string.EXTRA_URI), mUri);

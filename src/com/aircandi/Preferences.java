@@ -5,9 +5,9 @@ import android.os.Bundle;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.R;
 
 public class Preferences extends SherlockPreferenceActivity {
@@ -16,10 +16,8 @@ public class Preferences extends SherlockPreferenceActivity {
 	protected AircandiCommon	mCommon;
 
 	public static final String	PREF_GLOBAL_BEACONS		= "Pref_Global_Beacons";
-	public static final String	PREF_DISPLAY_EXTRAS		= "Pref_Display_Extras";
 	public static final String	PREF_ENTITY_FENCING		= "Pref_Entity_Fencing";
 	public static final String	PREF_SHOW_DISTANCE		= "Pref_Show_Distance";
-	public static final String	PREF_SHOW_DEBUG			= "Pref_Show_Debug";
 	public static final String	PREF_SOUND_EFFECTS		= "Pref_Sound_Effects";
 	public static final String	PREF_THEME				= "Pref_Theme";
 	public static final String	PREF_USER				= "Pref_User";
@@ -44,14 +42,11 @@ public class Preferences extends SherlockPreferenceActivity {
 		 * TODO: Switch over to using the preferenceStyle attribute for the current theme.
 		 */
 		String prefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
-		if (prefTheme.equals("aircandi_theme_snow")
-				|| prefTheme.equals("aircandi_theme_serene")
-				|| prefTheme.equals("aircandi_theme_lagoon")
-				|| prefTheme.equals("aircandi_theme_blueray")) {
-			setTheme(R.style.aircandi_theme_form_light);
+		if (prefTheme.equals("aircandi_theme_snow")) {
+			setTheme(R.style.aircandi_theme_light);
 		}
 		else {
-			setTheme(R.style.aircandi_theme_form_dark);
+			setTheme(R.style.aircandi_theme_dark);
 		}
 
 		super.onCreate(savedInstanceState);

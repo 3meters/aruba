@@ -54,7 +54,7 @@
                         android:scaleType="centerCrop" />
 
                     <Button
-                        android:id="@+id/btn_change_public_image"
+                        android:id="@+id/button_change_image"
                         style="@style/actionbar_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -126,7 +126,7 @@
             android:text="@string/form_button_cancel" />
 
         <Button
-            android:id="@+id/btn_delete_post"
+            android:id="@+id/button_delete"
             style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -8,8 +8,8 @@
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
+        android:layout_above="@+id/form_footer"
         android:background="?attr/backgroundCandi"
         android:fillViewport="true"
         tools:ignore="UselessParent" >
@@ -50,10 +50,31 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="2dp" >
+
+                <TextView
+                    android:id="@+id/radar_places_header"
+                    style="@style/app_text_appearance_large_accent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:padding="5dp"
+                    android:text="@string/radar_section_places"
+                    android:visibility="invisible" />
+
                 <com.aircandi.widgets.FlowLayout
                     android:id="@+id/radar_places"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/radar_synthetics_header"
+                    style="@style/app_text_appearance_large_accent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:padding="5dp"
+                    android:text="@string/radar_section_synthetics"
+                    android:visibility="invisible" />
 
                 <com.aircandi.widgets.FlowLayout
                     android:id="@+id/radar_synthetics"
@@ -79,18 +100,28 @@
 
     <!-- Footer -->
 
-    <RelativeLayout
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_above="@+id/form_footer"
+        android:background="?attr/ruleColor" />
+
+    <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" >
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal" >
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_alignParentTop="true"
-            android:background="?attr/ruleColor" />
+        <Button
+            android:id="@+id/button_custom"
+            style="@style/actionbar_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCustomPlaceButtonClick"
+            android:text="@string/radar_button_custom" />
 
         <LinearLayout
             android:id="@+id/button_tune"
@@ -98,6 +129,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:layout_weight="1"
             android:clickable="true"
             android:onClick="onTuneButtonClick"
             android:orientation="horizontal"
@@ -111,6 +143,7 @@
                 android:visibility="visible" />
 
             <TextView
+                android:id="@+id/button_tune_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -118,6 +151,6 @@
                 android:text="@string/radar_button_tune"
                 android:textColor="?attr/textColorBars" />
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>

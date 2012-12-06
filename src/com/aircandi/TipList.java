@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EndlessAdapter;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.Logger;
@@ -82,7 +83,7 @@ public class TipList extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
+				mCommon.showBusy();
 			}
 
 			@Override
@@ -103,7 +104,7 @@ public class TipList extends CandiActivity {
 				else {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.TipBrowse);
 				}
-				mCommon.hideProgressDialog();
+				mCommon.hideBusy();
 			}
 
 		}.execute();
@@ -208,6 +209,9 @@ public class TipList extends CandiActivity {
 				holder.image = (WebImageView) view.findViewById(R.id.image);
 				holder.user = (UserView) view.findViewById(R.id.author);
 				holder.description = (TextView) view.findViewById(R.id.description);
+				
+				FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.description));
+				
 				view.setTag(holder);
 			}
 			else {

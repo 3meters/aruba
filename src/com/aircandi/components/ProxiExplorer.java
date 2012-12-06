@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +58,8 @@ import com.aircandi.service.objects.Result;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.DateUtils;
+import com.aircandi.utilities.ImageUtils;
 
 public class ProxiExplorer {
 
@@ -69,6 +72,7 @@ public class ProxiExplorer {
 	private AtomicBoolean			mScanRequestProcessing	= new AtomicBoolean(false);
 
 	public List<WifiScanResult>		mWifiList				= new ArrayList<WifiScanResult>();
+	public Date						mLastWifiUpdate;
 	private WifiManager				mWifiManager;
 	private boolean					mUsingEmulator			= false;
 	public static String			mGlobalBeaconId			= "0008.00:00:00:00:00:00";
@@ -165,6 +169,7 @@ public class ProxiExplorer {
 							}
 
 							mEntityModel.updateBeacons();
+							mLastWifiUpdate = DateUtils.nowDate();
 							Events.EventBus.onWifiScanReceived(mWifiList);
 							if (requestListener != null) {
 								requestListener.onComplete(new ServiceResponse());
@@ -275,7 +280,8 @@ public class ProxiExplorer {
 					, "object:" + ProxibaseService.convertObjectToJsonSmart(mObservation, true, true));
 		}
 
-		parameters.putFloat("radius", GeoLocationManager.getRadiusForMeters((float) CandiConstants.SEARCH_RANGE_METERS));
+		parameters.putFloat("radius", GeoLocationManager.getRadiusForMeters(0f));
+		//		parameters.putFloat("radius", GeoLocationManager.getRadiusForMeters((float) CandiConstants.SEARCH_RANGE_PLACES_METERS));
 		parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
 		parameters.putString("options", "object:{\"limit\":"
 				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
@@ -443,89 +449,70 @@ public class ProxiExplorer {
 		ModelResult result = new ModelResult();
 		HashMap entityIdLookup = new HashMap();
 
+		/*
+		 * Tuning turns synthetic entities into service entities
+		 */
 		for (Entity synthetic : synthetics) {
 
 			String originalId = synthetic.id;
 			Entity entity = null;
 
-			if (synthetic.id != null) {
-				/*
-				 * Sythetic entity created from foursquare data
-				 * 
-				 * We make a copy so these changes don't effect the synthetic entity
-				 * in the entity model in case we keep it because of a failure.
-				 */
-				entity = synthetic.clone();
+			/*
+			 * Sythetic entity created from foursquare data
+			 * 
+			 * We make a copy so these changes don't effect the synthetic entity
+			 * in the entity model in case we keep it because of a failure.
+			 */
+			entity = synthetic.clone();
 
-				entity.id = null;
-				entity.parentId = null;
-				entity.signalFence = -100.0f;
-				if (primaryBeacon != null) {
-					entity.links = new ArrayList<Link>();
-					entity.links.add(new Link(primaryBeacon.id, null));
-				}
-				entity.subtitle = synthetic.getCategories();
-
-				/*
-				 * We only want to persist what's needed to link to foursquare and
-				 * search by location. We want to stick with the foursquare location
-				 * on the entity and we will override with any beacons that get
-				 * added to the mix.
-				 */
-				entity.place = new Place();
-				entity.place.source = synthetic.place.source;
-				entity.place.sourceId = synthetic.place.sourceId;
-
-				/*
-				 * We use the foursquare location as the authority. If beacons are
-				 * linked to this entity, their location will have higher priority.
-				 */
-				entity.place.location = new com.aircandi.service.objects.Location();
-				entity.place.location.lat = synthetic.place.location.lat;
-				entity.place.location.lng = synthetic.place.location.lng;
-				/*
-				 * We persist categories for use in radar but it gets overwritten when
-				 * we show place detail via linking.
-				 */
-				entity.place.categories = synthetic.place.categories;
-
-				if (entity.getPhoto().getBitmap() == null && entity.place.source != null && entity.place.sourceId != null) {
-					/*
-					 * Try to get a better photo to use.
-					 */
-					result = ProxiExplorer.getInstance().getEntityModel().getPlacePhotos(entity.place.source
-							, entity.place.sourceId, 1, 0);
-
-					if (result.serviceResponse.responseCode != ResponseCode.Success) {
-						return result.serviceResponse;
-					}
-					else {
-						List<Photo> photos = (List<Photo>) result.serviceResponse.data;
-						if (photos != null && photos.size() > 0) {
-							entity.photo = photos.get(0);
-							entity.photo.setSourceName("foursquare");
-						}
-					}
-				}
+			entity.id = null;
+			entity.parentId = null;
+			entity.signalFence = -100.0f;
+			if (primaryBeacon != null) {
+				entity.links = new ArrayList<Link>();
+				entity.links.add(new Link(primaryBeacon.id, null));
 			}
-			else {
-				/*
-				 * Synthetic entity created locally as custom.
-				 */
-				entity = synthetic;
-				if (primaryBeacon != null) {
-					entity.links = new ArrayList<Link>();
-					entity.links.add(new Link(primaryBeacon.id, null));
-				}
+			entity.subtitle = synthetic.getCategories();
 
+			/*
+			 * We only want to persist what's needed to link to foursquare and
+			 * search by location. We want to stick with the foursquare location
+			 * on the entity and we will override with any beacons that get
+			 * added to the mix.
+			 */
+			entity.place = new Place();
+			entity.place.source = synthetic.place.source;
+			entity.place.sourceId = synthetic.place.sourceId;
+
+			/*
+			 * We use the foursquare location as the authority. If beacons are
+			 * linked to this entity, their location will have higher priority.
+			 */
+			entity.place.location = new com.aircandi.service.objects.Location();
+			entity.place.location.lat = synthetic.place.location.lat;
+			entity.place.location.lng = synthetic.place.location.lng;
+			/*
+			 * We persist categories for use in radar but it gets overwritten when
+			 * we show place detail via linking.
+			 */
+			entity.place.categories = synthetic.place.categories;
+
+			if (entity.getPhoto().getBitmap() == null && entity.place.source != null && entity.place.sourceId != null) {
 				/*
-				 * We add location info as a consistent feature
+				 * Try to get a better photo to use.
 				 */
-				Location currentLocation = GeoLocationManager.getInstance().getLocation();
-				if (currentLocation != null) {
-					entity.place.location = new com.aircandi.service.objects.Location();
-					entity.place.location.lat = currentLocation.getLatitude();
-					entity.place.location.lng = currentLocation.getLongitude();
+				result = ProxiExplorer.getInstance().getEntityModel().getPlacePhotos(entity.place.source
+						, entity.place.sourceId, 1, 0);
+
+				if (result.serviceResponse.responseCode != ResponseCode.Success) {
+					return result.serviceResponse;
+				}
+				else {
+					List<Photo> photos = (List<Photo>) result.serviceResponse.data;
+					if (photos != null && photos.size() > 0) {
+						entity.photo = photos.get(0);
+						entity.photo.setSourceName("foursquare");
+					}
 				}
 			}
 
@@ -1379,7 +1366,7 @@ public class ProxiExplorer {
 
 				parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
 			}
-
+			
 			/* Observation */
 			Observation observation = GeoLocationManager.getInstance().getObservation();
 			if (observation != null) {
@@ -1841,7 +1828,7 @@ public class ProxiExplorer {
 						}
 						else {
 							/* No beacon for this entity so check using location */
-							if (distance != null && distance < CandiConstants.SEARCH_RANGE_METERS) {
+							if (distance != null && distance < CandiConstants.SEARCH_RANGE_PLACES_METERS) {
 								entities.add(entity);
 							}
 						}
@@ -1869,7 +1856,7 @@ public class ProxiExplorer {
 						}
 						else {
 							/* No beacon for this entity so check using location */
-							if (distance != null && distance < CandiConstants.SEARCH_RANGE_METERS) {
+							if (distance != null && distance < CandiConstants.SEARCH_RANGE_SYNTHETICS_METERS) {
 								entities.add(entity);
 							}
 						}

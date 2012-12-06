@@ -11,6 +11,7 @@ public class UserCandiForm extends CandiFormBase {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!isFinishing()) {
+			initialize();
 			bind(false);
 		}
 	}

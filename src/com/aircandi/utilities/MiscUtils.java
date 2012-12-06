@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.utilities;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,10 +10,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.regex.Pattern;
 
+import com.aircandi.components.Logger;
+
 import android.os.CountDownTimer;
 import android.os.Debug;
 
-public class Utilities {
+public class MiscUtils {
 
 	public static final Pattern	EMAIL_ADDRESS						= Pattern.compile(
 																			"[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
@@ -158,7 +160,7 @@ public class Utilities {
 			/*
 			 * Write the object out to a byte array
 			 */
-			FastByteArrayOutputStream fbos = new Utilities.FastByteArrayOutputStream();
+			FastByteArrayOutputStream fbos = new MiscUtils.FastByteArrayOutputStream();
 			ObjectOutputStream out = new ObjectOutputStream(fbos);
 			out.writeObject(objectOriginal);
 			out.flush();

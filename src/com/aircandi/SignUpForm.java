@@ -14,22 +14,23 @@ import android.widget.EditText;
 
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.MiscUtils;
 import com.aircandi.widgets.WebImageView;
 
 public class SignUpForm extends FormActivity {
@@ -60,6 +61,11 @@ public class SignUpForm extends FormActivity {
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
 		mButtonSignUp = (Button) findViewById(R.id.btn_signup);
 		mButtonSignUp.setEnabled(false);
+		
+		FontManager.getInstance().setTypefaceLight(mTextFullname);
+		FontManager.getInstance().setTypefaceLight(mTextEmail);
+		FontManager.getInstance().setTypefaceLight(mTextPassword);
+		FontManager.getInstance().setTypefaceLight(mTextPasswordConfirm);
 
 		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -183,7 +189,7 @@ public class SignUpForm extends FormActivity {
 	}
 
 	private boolean validate() {
-		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
+		if (!MiscUtils.validEmail(mTextEmail.getText().toString())) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_invalid_email)
@@ -221,7 +227,7 @@ public class SignUpForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(getString(R.string.progress_signing_up), false);
+					mCommon.showBusy(R.string.progress_signing_up);
 				}
 
 				@Override
@@ -237,7 +243,7 @@ public class SignUpForm extends FormActivity {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Tracker.trackEvent("User", "Insert", null, 0);
-						mCommon.hideProgressDialog();
+						mCommon.hideBusy();
 						Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 
 						AircandiCommon.showAlertDialog(R.drawable.ic_app

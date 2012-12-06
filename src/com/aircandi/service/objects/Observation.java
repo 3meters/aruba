@@ -3,7 +3,6 @@ package com.aircandi.service.objects;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
 
-
 /**
  * @author Jayma
  */
@@ -13,35 +12,39 @@ public class Observation extends ServiceEntryBase {
 
 	@Expose
 	@SerializedName("_beacon")
-	public String	beaconId;
+	public String				beaconId;
 
 	@Expose
 	@SerializedName("_entity")
-	public String	entityId;
+	public String				entityId;
 
 	@Expose
-	public Number	levelDb;
+	public Number				levelDb;
 	@Expose
-	public Number	latitude;
+	public Number				latitude;
 	@Expose
-	public Number	longitude;
+	public Number				longitude;
 	@Expose
-	public Number	altitude;
+	public Number				altitude;
 	@Expose
-	public Number	accuracy;
+	public Number				accuracy;
 	@Expose
-	public Number	bearing;
+	public Number				bearing;
 	@Expose
-	public Number	speed;
-
-	@Expose(serialize = false, deserialize = true)
-	public Beacon	beacon;
+	public Number				speed;
 
 	@Expose(serialize = false, deserialize = true)
-	public Entity	entity;
+	public Beacon				beacon;
+
+	@Expose(serialize = false, deserialize = true)
+	public Entity				entity;
+
+	/* Client only */
+	public Number				time;
+	public String				provider;
 
 	public Observation() {}
-	
+
 	public Observation(Number pLatitude, Number pLongitude) {
 		this.latitude = pLatitude;
 		this.longitude = pLongitude;

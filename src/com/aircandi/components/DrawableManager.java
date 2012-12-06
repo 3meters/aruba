@@ -22,6 +22,8 @@ import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.ImageUtils;
 
 public class DrawableManager {
 	/*

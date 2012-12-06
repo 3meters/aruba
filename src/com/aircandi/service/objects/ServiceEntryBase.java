@@ -81,9 +81,6 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public User						modifier;
 
-	/* Client use only */
-	public String					timeSince;
-	
 	public ServiceEntryBase() {}
 
 	public String getEntryUri() {

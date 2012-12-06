@@ -2,7 +2,8 @@ package com.aircandi.components;
 
 import java.util.List;
 
-import com.aircandi.components.AnimUtils.TransitionType;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 import android.app.Activity;
 import android.content.Context;

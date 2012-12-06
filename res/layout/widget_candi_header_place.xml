@@ -22,7 +22,6 @@
 
         <TextView
             android:id="@+id/candi_form_address"
-            style="@style/candi_form_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="7dp"
@@ -30,78 +29,67 @@
             android:text="@string/dummy_address" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="-3dp"
+            android:orientation="horizontal" >
+
+            <com.aircandi.widgets.ComboButton
+                android:id="@+id/button_tune"
+                style="@style/candi_form_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                aircandi:drawableScale="@dimen/combo_button_drawable_large_scale"
+                android:drawablePadding="5dp"
+                android:drawableTop="?attr/iconTune"
+                android:onClick="onTuneButtonClick"
+                android:text="@string/candi_button_tune" />
 
             <com.aircandi.widgets.ComboButton
                 android:id="@+id/button_call"
-                style="@style/candi_form_button_combo"
+                style="@style/candi_form_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 aircandi:drawableScale="@dimen/combo_button_drawable_scale"
-                android:drawableLeft="@drawable/ic_action_dialer_dark"
-                android:maxWidth="120dp"
-                android:minWidth="120dp"
+                android:drawablePadding="5dp"
+                android:drawableTop="@drawable/ic_action_dialer_dark"
                 android:onClick="onCallButtonClick"
                 android:text="@string/candi_button_call" />
 
             <com.aircandi.widgets.ComboButton
                 android:id="@+id/button_map"
-                style="@style/candi_form_button_combo"
+                style="@style/candi_form_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 aircandi:drawableScale="@dimen/combo_button_drawable_scale"
-                android:drawableLeft="@drawable/ic_action_location_dark"
-                android:maxWidth="120dp"
-                android:minWidth="120dp"
+                android:drawablePadding="5dp"
+                android:drawableTop="@drawable/ic_action_map_dark"
                 android:onClick="onMapButtonClick"
                 android:text="@string/candi_button_map" />
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <com.aircandi.widgets.ComboButton
-                android:id="@+id/button_tune"
-                style="@style/candi_form_button_combo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                aircandi:drawableScale="@dimen/combo_button_drawable_large_scale"
-                android:drawableLeft="?attr/iconTune"
-                android:maxWidth="120dp"
-                android:minWidth="120dp"
-                android:onClick="onTuneButtonClick"
-                android:text="@string/candi_button_tune" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
 
             <TextView
                 android:id="@+id/label_tuning_score"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:textAllCaps="true"
-                android:textAppearance="@style/app_text_appearance_micro"
-                android:text="@string/candi_label_tuning_score" />
+                android:layout_marginRight="5dp"
+                android:text="@string/candi_label_tuning_score"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView
                 android:id="@+id/tuning_score"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
                 android:text="@string/dummy_number"
-                android:textAppearance="@style/app_text_appearance_medium" />
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/accent_blue" />
         </LinearLayout>
-
-        <Button
-            android:id="@+id/button_comments"
-            style="@style/button_comments"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_marginLeft="5dp"
-            android:onClick="onBrowseCommentsButtonClick"
-            android:paddingBottom="5dp"
-            android:paddingTop="5dp"
-            android:text="@string/candi_label_comments_none" />
     </LinearLayout>
 
 </LinearLayout>

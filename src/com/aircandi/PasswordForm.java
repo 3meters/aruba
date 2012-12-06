@@ -9,14 +9,15 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.ImageUtils;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.ImageUtils;
 
 public class PasswordForm extends FormActivity {
 
@@ -31,7 +32,6 @@ public class PasswordForm extends FormActivity {
 		super.onCreate(savedInstanceState);
 
 		initialize();
-
 	}
 
 	protected void initialize() {
@@ -40,6 +40,11 @@ public class PasswordForm extends FormActivity {
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
 		mButtonSave = (Button) findViewById(R.id.btn_save);
+
+		FontManager.getInstance().setTypefaceLight(mTextPasswordOld);
+		FontManager.getInstance().setTypefaceLight(mTextPassword);
+		FontManager.getInstance().setTypefaceLight(mTextPasswordConfirm);
+		FontManager.getInstance().setTypefaceLight(mButtonSave);
 
 		mTextPasswordOld.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -102,19 +107,20 @@ public class PasswordForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_changing_password), false);
+				mCommon.showBusy(R.string.progress_changing_password);
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().updatePassword(mUser.id,  mTextPasswordOld.getText().toString(), mTextPassword.getText().toString());
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel()
+						.updatePassword(mUser.id, mTextPasswordOld.getText().toString(), mTextPassword.getText().toString());
 				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
-				mCommon.hideProgressDialog();
+				mCommon.hideBusy();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");

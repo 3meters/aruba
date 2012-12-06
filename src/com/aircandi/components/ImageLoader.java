@@ -31,6 +31,7 @@ import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity.ImageFormat;
+import com.aircandi.utilities.ImageUtils;
 
 @SuppressWarnings("deprecation")
 public class ImageLoader {

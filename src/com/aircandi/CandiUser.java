@@ -14,9 +14,8 @@ import android.widget.TextView;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AndroidManager;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.IntentBuilder;
@@ -31,6 +30,8 @@ import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.widgets.HorizontalScrollLayout;
 import com.aircandi.widgets.SectionLayout;
 import com.aircandi.widgets.WebImageView;
@@ -46,8 +47,14 @@ public class CandiUser extends CandiActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!isFinishing()) {
+			initialize();
 			bind(false);
 		}
+	}
+	
+	private void initialize() {
+		/* Custom fonts */
+		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.name));
 	}
 
 	public void bind(Boolean refresh) {
@@ -64,7 +71,7 @@ public class CandiUser extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
+				mCommon.showBusy();
 			}
 
 			@Override
@@ -95,7 +102,7 @@ public class CandiUser extends CandiActivity {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiUser);
 				}
-				mCommon.hideProgressDialog();
+				mCommon.hideBusy();
 			}
 
 		}.execute();
@@ -168,6 +175,12 @@ public class CandiUser extends CandiActivity {
 		final TextView link = (TextView) findViewById(R.id.link);
 		final TextView bio = (TextView) findViewById(R.id.bio);
 		final TextView stats = (TextView) findViewById(R.id.stats);
+
+		FontManager.getInstance().setTypefaceLight(name);
+		FontManager.getInstance().setTypefaceLight(location);
+		FontManager.getInstance().setTypefaceLight(link);
+		FontManager.getInstance().setTypefaceLight(bio);
+		FontManager.getInstance().setTypefaceLight(stats);
 
 		if (image != null) {
 			image.getImageBadge().setVisibility(View.GONE);

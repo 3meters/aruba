@@ -15,14 +15,11 @@ import android.widget.ViewFlipper;
 
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
-import com.aircandi.components.DateUtils;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequest.ImageResponse;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -30,12 +27,16 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.DateUtils;
+import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.widgets.WebImageView;
 
 public class ProfileForm extends FormActivity {
@@ -54,7 +55,7 @@ public class ProfileForm extends FormActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		initialize();
 		bind();
 	}
@@ -77,6 +78,13 @@ public class ProfileForm extends FormActivity {
 		mTextLocation = (EditText) findViewById(R.id.text_location);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mButtonSave = (Button) findViewById(R.id.btn_save);
+
+		FontManager.getInstance().setTypefaceLight(mTextFullname);
+		FontManager.getInstance().setTypefaceLight(mTextBio);
+		FontManager.getInstance().setTypefaceLight(mTextLink);
+		FontManager.getInstance().setTypefaceLight(mTextLocation);
+		FontManager.getInstance().setTypefaceLight(mTextEmail);
+		FontManager.getInstance().setTypefaceLight(mButtonSave);
 
 		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -105,7 +113,7 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
+				mCommon.showBusy();
 			}
 
 			@Override
@@ -125,7 +133,7 @@ public class ProfileForm extends FormActivity {
 					mUser.session = Aircandi.getInstance().getUser().session;
 					mImageUriOriginal = mUser.getImageUri();
 
-					mCommon.hideProgressDialog();
+					mCommon.hideBusy();
 					draw();
 				}
 				else {
@@ -231,19 +239,18 @@ public class ProfileForm extends FormActivity {
 	private void updateProfile() {
 
 		if (validate()) {
-			
+
 			mUser.email = mTextEmail.getText().toString().trim();
 			mUser.name = mTextFullname.getText().toString().trim();
 			mUser.bio = mTextBio.getText().toString().trim();
 			mUser.location = mTextLocation.getText().toString().trim();
 			mUser.webUri = mTextLink.getText().toString().trim();
 
-
 			new AsyncTask() {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(getString(R.string.progress_saving), false);
+					mCommon.showBusy(R.string.progress_saving);
 				}
 
 				@Override
@@ -259,7 +266,7 @@ public class ProfileForm extends FormActivity {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "Updated user profile: " + mUser.name + " (" + mUser.id + ")");
 						Tracker.trackEvent("User", "Update", null, 0);
-						mCommon.hideProgressDialog();
+						mCommon.hideBusy();
 						/*
 						 * We treat updating the profile like a change to an entity in the entity model. This forces
 						 * UI to update itself and pickup the changes like a new profile name, picture, etc.
@@ -288,12 +295,12 @@ public class ProfileForm extends FormActivity {
 	}
 
 	private boolean validate() {
-		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
+		if (!MiscUtils.validEmail(mTextEmail.getText().toString())) {
 			mCommon.showAlertDialogSimple(null, getString(R.string.error_invalid_email));
 			return false;
 		}
 		if (mTextLink.getText().toString() != null && !mTextLink.getText().toString().equals("")) {
-			if (!Utilities.validWebUri(mTextLink.getText().toString())) {
+			if (!MiscUtils.validWebUri(mTextLink.getText().toString())) {
 				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 						, null
 						, getResources().getString(R.string.error_weburi_invalid)

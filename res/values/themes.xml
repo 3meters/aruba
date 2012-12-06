@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Themes 
+    <!--
+         Themes 
 		For a given theme
 		
 		Same for every theme
@@ -16,31 +17,29 @@
 		- Tabbar tone
 		- Set window background
 		- Select right set of drawables based on the theme tone.
-		- Custom line and text colors in pages, forms, buttons.
-	-->
+		- Custom line and text colors in pages, forms, buttons.
+    -->
 
     <style name="aircandi_theme_dark" parent="Theme.Sherlock">
-        
         <item name="themeTone">dark</item>
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">false</item>
-        
+
         <!-- Default overrides -->
-        
+
         <item name="android:editTextStyle">@style/app_edittext</item>
         <item name="android:textColorHint">@color/edit_hint</item>
         <item name="android:textColorPrimary">@color/text_dark</item>
-        
         <item name="android:textAppearance">@style/app_text_appearance</item>
         <item name="android:textAppearanceLarge">@style/app_text_appearance_large</item>
         <item name="android:textAppearanceMedium">@style/app_text_appearance_medium</item>
         <item name="android:textAppearanceSmall">@style/app_text_appearance_small</item>
         <item name="candiFormTitleStyle">@style/candi_form_title</item>
         <item name="candiListTitleStyle">@style/candi_list_title</item>
-        
+
         <!-- Text and line colors -->
-        
+
         <item name="ruleColor">@color/rule_30_dark</item>
         <item name="ruleColorStrong">@color/rule_60_dark</item>
         <item name="textColor">@color/text_dark</item>
@@ -50,14 +49,13 @@
         <item name="textColorBars">@color/text_dark</item>
         <item name="textColorProgress">@color/text_dark</item>
         <item name="textColorCandiView">@color/text_dark</item>
-        <item name="textColorCandiViewSynthetic">@color/text_dark</item>
+        <item name="textColorCandiViewSynthetic">@color/text_light</item>
         <item name="textOutlineRadar">true</item>
-        
+
         <!-- Drawables and backgrounds -->
-        
+
         <item name="textureBodyCandi">@drawable/placeholder_logo</item>
         <item name="textureBodyZone">@raw/trans_30_dark</item>
-        
         <item name="backgroundButton">@drawable/button_selector_dark</item>
         <item name="backgroundCandi">@android:color/transparent</item>
         <item name="backgroundRadarCandi">@drawable/candi_bg_dark</item>
@@ -65,11 +63,9 @@
         <item name="backgroundHelp">@color/background_help_dark</item>
         <item name="backgroundPicture">@drawable/picture_bg_dark</item>
         <item name="backgroundProgress">@drawable/progress_bg_dark</item>
-        
         <item name="backgroundActionBar">@color/background_actionbar_dark</item>
         <item name="backgroundTabBar">@color/background_tabbar_dark</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_dark</item>
-        
         <item name="logo">@drawable/ic_app</item>
         <item name="iconBookmarks">@drawable/ic_action_search_dark</item>
         <item name="iconForward">@drawable/ic_forward_dark</item>
@@ -80,54 +76,49 @@
         <item name="iconHelp">@drawable/ic_action_help_dark</item>
         <item name="iconNewCandi">@drawable/ic_new_candi_dark</item>
         <item name="iconTune">@drawable/ic_app</item>
-        
         <item name="badgeColor">@color/text_dark</item>
         <item name="badgeColorSynthetic">@color/text_dark</item>
-        
-		<!-- Actionbar Sherlock -->
-		
+
+        <!-- Actionbar Sherlock -->
+
         <item name="actionBarStyle">@style/actionbar_dark</item>
         <item name="actionBarTabBarStyle">@style/actionbar_tabbar_dark</item>
         <item name="buttonBarStyle">@style/actionbar_buttonbar_dark</item>
         <item name="actionModeBackground">?attr/backgroundActionBar</item>
-        
         <item name="android:actionBarStyle">@style/actionbar_dark</item>
         <item name="android:actionBarTabBarStyle">@style/actionbar_tabbar_dark</item>
         <item name="android:actionModeBackground">?attr/backgroundActionBar</item>
-        
+
         <!-- Debug UI -->
-        
+
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_dark</item>
         <item name="backgroundSliderContentSearch">@drawable/slider_content_search_bg_dark</item>
         <item name="backgroundSliderHandleInfo">@drawable/slider_handle_info_bg_dark</item>
         <item name="backgroundSliderHandleSearch">@drawable/slider_handle_search_bg_dark</item>
         <item name="imageSliderHandleInfo">@drawable/gripper_dark</item>
         <item name="imageSliderHandleSearch">@drawable/gripper_dark</item>
-        
-	</style>
+    </style>
 
     <style name="aircandi_theme_light" parent="Theme.Sherlock.Light">
-
         <item name="themeTone">light</item>
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">false</item>
-        
+
         <!-- Default overrides -->
-        
+
         <item name="android:editTextStyle">@style/app_edittext</item>
         <item name="android:textColorHint">@color/edit_hint</item>
         <item name="android:textColorPrimary">@color/text_light</item>
-        
         <item name="android:textAppearance">@style/app_text_appearance</item>
         <item name="android:textAppearanceLarge">@style/app_text_appearance_large</item>
         <item name="android:textAppearanceMedium">@style/app_text_appearance_medium</item>
         <item name="android:textAppearanceSmall">@style/app_text_appearance_small</item>
         <item name="candiFormTitleStyle">@style/candi_form_title</item>
         <item name="candiListTitleStyle">@style/candi_list_title</item>
-        
+
         <!-- Text and line colors -->
-        
+
         <item name="ruleColor">@color/rule_15_light</item>
         <item name="ruleColorStrong">@color/rule_60_light</item>
         <item name="textColor">@color/text_light</item>
@@ -139,27 +130,23 @@
         <item name="textColorCandiView">@color/text_dark</item>
         <item name="textColorCandiViewSynthetic">@color/text_light</item>
         <item name="textOutlineRadar">false</item>
-        
         <item name="badgeColor">@color/text_dark</item>
         <item name="badgeColorSynthetic">@color/text_dark</item>
-        
+
         <!-- Drawables and backgrounds -->
-        
+
         <item name="textureBodyCandi">@drawable/placeholder_logo</item>
         <item name="textureBodyZone">@raw/trans_30_light</item>
-        
         <item name="backgroundButton">@drawable/button_selector_light</item>
         <item name="backgroundCandi">@android:color/transparent</item>
         <item name="backgroundRadarCandi">@drawable/candi_bg_light</item>
-        <item name="backgroundForm">@android:color/black</item>
+        <item name="backgroundForm">@android:color/white</item>
         <item name="backgroundHelp">@color/background_help_light</item>
         <item name="backgroundPicture">@drawable/picture_bg_light</item>
         <item name="backgroundProgress">@drawable/progress_bg_light</item>
-        
         <item name="backgroundActionBar">@color/background_actionbar_light</item>
         <item name="backgroundTabBar">@color/background_tabbar_light</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_light</item>
-        
         <item name="logo">@drawable/ic_app</item>
         <item name="iconBookmarks">@drawable/ic_action_search_light</item>
         <item name="iconForward">@drawable/ic_forward_light</item>
@@ -170,18 +157,17 @@
         <item name="iconHelp">@drawable/ic_action_help_light</item>
         <item name="iconNewCandi">@drawable/ic_new_candi_light</item>
         <item name="iconTune">@drawable/ic_app</item>
-        
-		<!-- Actionbar Sherlock -->
-		
+
+        <!-- Actionbar Sherlock -->
+
         <item name="actionBarStyle">@style/actionbar_light</item>
         <item name="actionBarTabBarStyle">@style/actionbar_tabbar_light</item>
         <item name="buttonBarStyle">@style/actionbar_buttonbar_light</item>
         <item name="actionModeBackground">?attr/backgroundActionBar</item>
-        
         <item name="android:actionBarStyle">@style/actionbar_light</item>
         <item name="android:actionBarTabBarStyle">@style/actionbar_tabbar_light</item>
         <item name="android:actionModeBackground">?attr/backgroundActionBar</item>
-        
+
         <!-- Debug UI -->
         <item name="backgroundSliderContentInfo">@drawable/slider_content_info_bg_light</item>
         <item name="backgroundSliderContentSearch">@drawable/slider_content_search_bg_light</item>
@@ -189,103 +175,26 @@
         <item name="backgroundSliderHandleSearch">@drawable/slider_handle_search_bg_light</item>
         <item name="imageSliderHandleInfo">@drawable/gripper_light</item>
         <item name="imageSliderHandleSearch">@drawable/gripper_light</item>
-        
     </style>
-    
-    <style name="aircandi_theme_light_semi" parent="aircandi_theme_light">
-        <item name="backgroundActionBar">@color/background_actionbar_light_semi</item>
-        <item name="backgroundTabBar">@color/background_tabbar_light_semi</item>
-        <item name="backgroundButtonBar">@color/background_buttonbar_light_semi</item>
-    </style>
-    
-    <style name="aircandi_theme_dark_semi" parent="aircandi_theme_dark">
-        <item name="backgroundActionBar">@color/background_actionbar_dark_semi</item>
-        <item name="backgroundTabBar">@color/background_tabbar_dark_semi</item>
-        <item name="backgroundButtonBar">@color/background_buttonbar_dark_semi</item>
-    </style>
-    
-    <style name="aircandi_theme_light_semi_invert" parent="aircandi_theme_light_semi">
-        <item name="textColor">@color/text_dark</item>
-        <item name="textOutlineRadar">true</item>
-        <item name="textColorBars">@color/text_light</item>
-        <item name="candiFormTitleStyle">@style/candi_form_title_outlined</item>
-        <item name="candiListTitleStyle">@style/candi_list_title_outlined</item>
-        <item name="iconLocation">@drawable/ic_action_location_dark</item>
-        <item name="backgroundButton">@drawable/button_selector_dark</item>
-        </style>
-    
+
     <!-- Midnight Theme -->
-	
-    <style name="aircandi_theme_midnight" parent="aircandi_theme_dark"/>
-    
-	<!-- Smolder Theme -->
-	
-    <style name="aircandi_theme_smolder" parent="aircandi_theme_dark">
-        <item name="android:windowBackground">@drawable/wallpaper_smolder</item>
-    </style>
 
-    <!-- Blue Ray Theme -->
-    
-    <style name="aircandi_theme_blueray" parent="aircandi_theme_dark">
-        <item name="android:windowBackground">@drawable/wallpaper_blueray</item>
-    </style>
+    <style name="aircandi_theme_midnight" parent="aircandi_theme_dark" />
 
-    <!-- Snow theme	-->
-	
-    <style name="aircandi_theme_snow" parent="aircandi_theme_light">
-        <!-- 
-        <item name="android:windowBackground">@drawable/wallpaper_snow_vii</item>
-         -->
-    </style>
-    
-    <!-- Lagoon theme	-->
-    
-    <style name="aircandi_theme_lagoon" parent="aircandi_theme_light_semi_invert">
-        <item name="android:windowBackground">@drawable/wallpaper_lagoon</item>
-    </style>
-     
-    <!-- Canyon theme	-->
-    
-    <style name="aircandi_theme_canyon" parent="aircandi_theme_dark">
-        <item name="android:windowBackground">@drawable/wallpaper_canyon</item>
-    </style>
-    
-    <!-- Misty theme	-->
-    
-    <style name="aircandi_theme_misty" parent="aircandi_theme_light_semi_invert">
-        <item name="android:windowBackground">@drawable/wallpaper_misty</item>
-    </style>
-    
-    <!-- Serene Theme -->
-	
-    <style name="aircandi_theme_serene" parent="aircandi_theme_light_semi">
-        <item name="android:windowBackground">@drawable/wallpaper_serene</item>
-        <item name="backgroundCandi">@color/background_form_light_semi</item>
-    </style>
-    
-	<!-- Dark Form Theme -->
-	
-    <style name="aircandi_theme_form_dark" parent="aircandi_theme_dark">
-        <item name="backgroundForm">@android:color/black</item>
-    </style>
-	
-	<!-- Light Form Theme -->
-	
-    <style name="aircandi_theme_form_light" parent="aircandi_theme_light">
-        <item name="backgroundForm">@android:color/transparent</item>
-	</style>	
-    
+    <!-- Snow theme -->
+
+    <style name="aircandi_theme_snow" parent="aircandi_theme_light" />
+
+    <!-- Dialog Themes -->
+
     <style name="aircandi_theme_dialog_dark" parent="Theme.Sherlock.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="textColorBars">@color/text_dark</item>
         <item name="android:backgroundDimAmount">0.2</item>
-        
         <item name="themeTone">dark</item>
         <item name="ruleColor">@color/rule_30_dark</item>
         <item name="ruleColorStrong">@color/rule_60_dark</item>
-        
-        
         <item name="textColor">@color/text_dark</item>
         <item name="buttonBarStyle">@style/actionbar_buttonbar_dark</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_dark</item>
@@ -295,33 +204,32 @@
     </style>
 
     <style name="aircandi_theme_dialog_light" parent="Theme.Sherlock.Light.Dialog">
-        
         <item name="themeTone">light</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:backgroundDimAmount">0.2</item>
-        
+
         <!-- Default overrides -->
-        
+
         <item name="android:textAppearance">@style/app_text_appearance</item>
         <item name="android:textAppearanceLarge">@style/app_text_appearance_large</item>
         <item name="android:textAppearanceMedium">@style/app_text_appearance_medium</item>
         <item name="android:textAppearanceSmall">@style/app_text_appearance_small</item>
-        
+
         <!-- Text and line colors -->
-        
+
         <item name="android:textColor">@android:color/black</item>
         <item name="textColor">@color/text_light</item>
         <item name="textColorBars">@color/text_light</item>
         <item name="ruleColor">@color/rule_30_light</item>
         <item name="ruleColorStrong">@color/rule_60_light</item>
-        
+
         <!-- Drawables and backgrounds -->
-        
+
         <item name="backgroundPicture">@drawable/picture_bg_light</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_light</item>
-        
-		<!-- Actionbar Sherlock -->
-		
+
+        <!-- Actionbar Sherlock -->
+
         <item name="buttonBarStyle">@style/actionbar_buttonbar_light</item>
         <item name="actionBarItemBackground">@drawable/abs__item_background_holo_light</item>
         <item name="actionBarSize">@dimen/abs__action_bar_default_height</item>

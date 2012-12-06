@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.utilities;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -184,6 +184,10 @@ public class DateUtils {
 			interval = "1 second ago";
 		}
 		else if (seconds > 1) /* x hours x minutes ago */
+		{
+			interval = String.valueOf(seconds) + " seconds ago";
+		}
+		else if (seconds < 1) /* x hours x minutes ago */
 		{
 			interval = String.valueOf(seconds) + " seconds ago";
 		}

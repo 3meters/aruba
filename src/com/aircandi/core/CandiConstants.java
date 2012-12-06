@@ -29,15 +29,16 @@ public interface CandiConstants {
 	public static final int		LAYER_ZONES								= 1;
 	public static final int		LAYER_CANDI								= 2;
 
-	public static final int		INTERVAL_SCAN							= ONE_MINUTE;
-	public static final int		INTERVAL_RENDERING_DEFAULT				= TEN_SECONDS;
-	public static final int		INTERVAL_RENDERING_BOOST				= ONE_MINUTE;
+	public static final int		INTERVAL_SCAN_RADAR						= ONE_MINUTE;
+	public static final int		INTERVAL_SCAN_EDITING					= TWENTY_SECONDS;
+	public static final int		INTERVAL_SCAN_TUNING					= TWENTY_SECONDS;
 
 	public static final int		LOCATION_POLLING_INTERVAL				= FIVE_MINUTES;																			// 5 minutes
 	public static final int		LOCATION_POLLING_TIMEOUT				= ONE_MINUTE;
 	public static final int		INTERVAL_UPDATE_CHECK					= SIXTY_MINUTES;
 
-	public static final double	SEARCH_RANGE_METERS						= 500;
+	public static final double	SEARCH_RANGE_SYNTHETICS_METERS			= 500;
+	public static final double	SEARCH_RANGE_PLACES_METERS				= 50;
 
 	public static final int		MAX_Y_OVERSCROLL_DISTANCE				= 50;
 

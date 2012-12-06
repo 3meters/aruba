@@ -1,13 +1,13 @@
 package com.aircandi.components;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -22,6 +22,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -39,7 +40,6 @@ import android.widget.ViewFlipper;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.app.SherlockMapActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -52,7 +52,6 @@ import com.aircandi.CandiRadar;
 import com.aircandi.CandiUser;
 import com.aircandi.CommentList;
 import com.aircandi.FormActivity;
-import com.aircandi.HelpForm;
 import com.aircandi.Preferences;
 import com.aircandi.ProfileForm;
 import com.aircandi.R;
@@ -63,7 +62,6 @@ import com.aircandi.SignUpForm;
 import com.aircandi.TemplatePicker;
 import com.aircandi.UserCandiForm;
 import com.aircandi.UserCandiList;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -78,8 +76,13 @@ import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
+import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.DateUtils;
+import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.widgets.WebImageView;
 
 public class AircandiCommon implements ActionBar.TabListener {
@@ -163,16 +166,15 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Logger.d(this, "Started from radar flag: " + String.valueOf(Aircandi.getInstance().getLaunchedFromRadar()));
 
 		/* Stash the action bar */
-		if (mPageName.equals("CandiMap") || mPageName.equals("MapBrowse")) {
-			mActionBar = ((SherlockMapActivity) mActivity).getSupportActionBar();
-		}
-		else {
-			mActionBar = ((SherlockActivity) mActivity).getSupportActionBar();
-		}
+		mActionBar = ((SherlockActivity) mActivity).getSupportActionBar();
 		mActionBarHomeImageView = android.R.id.home;
 		if (mActivity.findViewById(android.R.id.home) == null) {
 			mActionBarHomeImageView = R.id.abs__home;
 		}
+
+		/* Fonts */
+		Integer titleId = getActionBarTitleId();
+		FontManager.getInstance().setTypefaceLight((TextView) mActivity.findViewById(titleId));
 
 		/* Theme info */
 		TypedValue resourceName = new TypedValue();
@@ -192,14 +194,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mBeaconIndicator = (TextView) mActivity.findViewById(R.id.beacon_indicator);
 		if (mBeaconIndicator != null) {
 			updateBeaconIndicator(ProxiExplorer.getInstance().mWifiList);
-			//			mEventScanReceived = new EventHandler() {
-			//
-			//				@Override
-			//				public void onEvent(Object data) {
-			//					List<WifiScanResult> scanList = (List<WifiScanResult>) data;
-			//					updateBeaconIndicator(scanList);
-			//				}
-			//			};
 		}
 
 		mEventLocationChanged = new EventHandler() {
@@ -207,6 +201,23 @@ public class AircandiCommon implements ActionBar.TabListener {
 			@Override
 			public void onEvent(Object data) {}
 		};
+	}
+
+	public int getActionBarTitleId() {
+		Integer actionBarTitleId = null;
+		try {
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+				actionBarTitleId = Class.forName("com.actionbarsherlock.R$id").getField("abs__action_bar_title").getInt(null);
+			}
+			else {
+				// Use reflection to get the actionbar title TextView and set the custom font. May break in updates.
+				actionBarTitleId = Class.forName("com.android.internal.R$id").getField("action_bar_title").getInt(null);
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return actionBarTitleId;
 	}
 
 	public void unpackIntent() {
@@ -295,6 +306,19 @@ public class AircandiCommon implements ActionBar.TabListener {
 								beaconMessage += wifi.SSID + ": (" + String.valueOf(wifi.level) + ") " + wifi.BSSID + "\n";
 							}
 						}
+						beaconMessage += "\n";
+						beaconMessage += "Wifi fix: " + DateUtils.intervalSince(ProxiExplorer.getInstance().mLastWifiUpdate, DateUtils.nowDate());
+
+						Observation observation = GeoLocationManager.getInstance().getObservation();
+						if (observation != null) {
+							Date fixDate = new Date(observation.time.longValue());
+							beaconMessage += "\nLocation fix: " + DateUtils.intervalSince(fixDate, DateUtils.nowDate());
+							beaconMessage += "\nLocation accuracy: " + String.valueOf(observation.accuracy);
+							beaconMessage += "\nLocation provider: " + observation.provider;
+						}
+						else {
+							beaconMessage += "\nLocation fix: none";
+						}
 					}
 					else {
 						beaconMessage = mActivity.getString(messageId);
@@ -330,20 +354,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		intent.putExtra(mActivity.getString(R.string.EXTRA_ENTITY_IS_ROOT), isRoot);
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_TEMPLATE_PICK);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
-	}
-
-	public void showHelp(int helpResId) {
-		/*
-		 * Dialogs
-		 * 
-		 * To get the dialog activity to overlay the calling activity, the theme needs to be set on the activity in the
-		 * manifest in order to get the correct window features. The theme can then be modified by passing the desired
-		 * theme id to the dialog activity.
-		 */
-		Intent intent = new Intent(mActivity, HelpForm.class);
-		intent.putExtra(mActivity.getString(R.string.EXTRA_STRING_ID), R.string.help_radar);
-		mActivity.startActivity(intent);
-		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.HelpShow);
 	}
 
 	public void showCandiFormForEntity(Entity entity, Class<?> clazz) {
@@ -403,7 +413,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						mBeaconIndicator.setVisibility(View.VISIBLE);
 						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
 					}
-					
+
 					if (wifiStrongest != null && wifiStrongest.level > CandiConstants.RADAR_BEACON_INDICATOR_CAUTION) {
 						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_go);
 					}
@@ -430,7 +440,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 			@Override
 			public void run() {
-				hideProgressDialog();
+				hideBusy();
 			}
 		});
 
@@ -553,78 +563,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Logger.w(context, "Service error: " + errorMessage);
 	}
 
-	public void showNotification(String title, String message, Context context, Intent intent, int notificationType) {
-		@SuppressWarnings("deprecation")
-		Notification note = new Notification(R.drawable.ic_app_status
-				, title
-				, System.currentTimeMillis());
-
-		RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification);
-		contentView.setImageViewResource(R.id.image, R.drawable.ic_app);
-		contentView.setTextViewText(R.id.title, title);
-		contentView.setTextViewText(R.id.text, message);
-		note.contentView = contentView;
-
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
-		note.contentIntent = pendingIntent;
-
-		mNotificationManager.notify(notificationType, note);
-	}
-
-	public void startBusyIndicator() {
-		if (mMenuItemRefresh != null) {
-			mMenuItemRefresh.setActionView(layout.actionbar_refresh);
-			mStartBusyIndicator = false;
-		}
-		else {
-			mStartBusyIndicator = true;
-		}
-	}
-
-	public void stopBusyIndicator() {
-		if (mMenuItemRefresh != null) {
-			mMenuItemRefresh.setActionView(null);
-		}
-		mStartBusyIndicator = false;
-	}
-
-	public void showProgressDialog(String message, Boolean actionBarOnly) {
-		showProgressDialog(message, actionBarOnly, null);
-	}
-
-	public void showProgressDialog(String message, Boolean actionBarOnly, Activity ownerActivity) {
-
-		startBusyIndicator();
-		if (!actionBarOnly) {
-			ProgressDialog progressDialog = getProgressDialog();
-			progressDialog.setMessage(message);
-			if (!progressDialog.isShowing()) {
-				if (ownerActivity != null) {
-					progressDialog.setOwnerActivity(ownerActivity);
-				}
-				progressDialog.setCancelable(false);
-				progressDialog.show();
-				if (Aircandi.displayMetrics != null) {
-					progressDialog.getWindow().setLayout((int) (Aircandi.displayMetrics.widthPixels * 0.7), WindowManager.LayoutParams.WRAP_CONTENT);
-				}
-			}
-		}
-	}
-
-	public void hideProgressDialog() {
-		ProgressDialog progressDialog = getProgressDialog();
-		if (progressDialog.isShowing() && progressDialog.getWindow().getWindowManager() != null) {
-			progressDialog.dismiss();
-		}
-		stopBusyIndicator();
-	}
-
-	public boolean isProgressDialogShowing() {
-		Dialog progressDialog = getProgressDialog();
-		return (progressDialog.isShowing());
-	}
-
 	public static AlertDialog showAlertDialog(Integer iconResource
 			, String titleText
 			, String message
@@ -697,10 +635,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			themeResId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
 			if (isDialog) {
 				themeResId = R.style.aircandi_theme_dialog_dark;
-				if (mPrefTheme.equals("aircandi_theme_snow")
-						|| mPrefTheme.equals("aircandi_theme_serene")
-						|| mPrefTheme.equals("aircandi_theme_lagoon")
-						|| mPrefTheme.equals("aircandi_theme_blueray")) {
+				if (mPrefTheme.equals("aircandi_theme_snow")) {
 					themeResId = R.style.aircandi_theme_dialog_light;
 				}
 			}
@@ -743,59 +678,61 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void signout() {
 		if (Aircandi.getInstance().getUser() != null && !Aircandi.getInstance().getUser().isAnonymous()) {
-
-			new AsyncTask() {
-
-				@Override
-				protected void onPreExecute() {
-					showProgressDialog(mActivity.getString(R.string.progress_signing_out), true);
-				}
+			mActivity.runOnUiThread(new Runnable() {
 
 				@Override
-				protected Object doInBackground(Object... params) {
+				public void run() {
+					new AsyncTask() {
 
-					ModelResult result = ProxiExplorer.getInstance().getEntityModel().signout();
-					return result;
+						@Override
+						protected void onPreExecute() {
+							showBusy(R.string.progress_signing_out);
+						}
+
+						@Override
+						protected Object doInBackground(Object... params) {
+
+							ModelResult result = ProxiExplorer.getInstance().getEntityModel().signout();
+							return result;
+						}
+
+						@SuppressLint("NewApi")
+						@Override
+						protected void onPostExecute(Object response) {
+							ModelResult result = (ModelResult) response;
+							/*
+							 * We continue on even if the service call failed.
+							 */
+							if (result.serviceResponse.responseCode == ResponseCode.Success) {
+								Logger.i(this, "User signed out: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
+							}
+							else {
+								Logger.w(this, "User signed out, service call failed: " + Aircandi.getInstance().getUser().id);
+							}
+
+							User user = (User) ProxibaseService.convertJsonToObjectInternalSmart(CandiConstants.USER_ANONYMOUS, ServiceDataType.User);
+							Aircandi.getInstance().setUser(user);
+
+							/* Clear the user and session that is tied into auto-signin */
+							Aircandi.settingsEditor.putString(Preferences.PREF_USER, null);
+							Aircandi.settingsEditor.putString(Preferences.PREF_USER_SESSION, null);
+							Aircandi.settingsEditor.commit();
+
+							/* Make sure onPrepareOptionsMenu gets called */
+							((SherlockActivity) mActivity).invalidateOptionsMenu();
+
+							/* Notify interested parties */
+							Events.EventBus.onUserChanged(user);
+							ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
+							Tracker.trackEvent("User", "Signout", null, 0);
+
+							hideBusy();
+						}
+					}.execute();
+
 				}
+			});
 
-				@SuppressLint("NewApi")
-				@Override
-				protected void onPostExecute(Object response) {
-					ModelResult result = (ModelResult) response;
-					/*
-					 * We continue on even if the service call failed.
-					 */
-					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-						Logger.i(this, "User signed out: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
-					}
-					else {
-						Logger.w(this, "User signed out, service call failed: " + Aircandi.getInstance().getUser().id);
-					}
-
-					User user = (User) ProxibaseService.convertJsonToObjectInternalSmart(CandiConstants.USER_ANONYMOUS, ServiceDataType.User);
-					Aircandi.getInstance().setUser(user);
-
-					/* Clear the user and session that is tied into auto-signin */
-					Aircandi.settingsEditor.putString(Preferences.PREF_USER, null);
-					Aircandi.settingsEditor.putString(Preferences.PREF_USER_SESSION, null);
-					Aircandi.settingsEditor.commit();
-
-					/* Make sure onPrepareOptionsMenu gets called */
-					if (mPageName.equals("CandiMap")) {
-						((SherlockMapActivity) mActivity).invalidateOptionsMenu();
-					}
-					else {
-						((SherlockActivity) mActivity).invalidateOptionsMenu();
-					}
-
-					/* Notify interested parties */
-					Events.EventBus.onUserChanged(user);
-					ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
-					Tracker.trackEvent("User", "Signout", null, 0);
-
-					hideProgressDialog();
-				}
-			}.execute();
 		}
 	}
 
@@ -809,7 +746,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
 
-	public void startScanService() {
+	public void startScanService(int scanInterval) {
 
 		/* Start first scan right away */
 		Logger.d(this, "Starting wifi scan service");
@@ -817,13 +754,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mActivity.startService(scanIntent);
 
 		/* Setup a scanning schedule */
-		if (CandiConstants.INTERVAL_SCAN > 0) {
+		if (scanInterval > 0) {
 			AlarmManager alarmManager = (AlarmManager) mActivity.getSystemService(Service.ALARM_SERVICE);
 			PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
 			alarmManager.cancel(pendingIntent);
-			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-					SystemClock.elapsedRealtime() + CandiConstants.INTERVAL_SCAN,
-					CandiConstants.INTERVAL_SCAN, pendingIntent);
+			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP
+					, SystemClock.elapsedRealtime() + scanInterval
+					, scanInterval, pendingIntent);
 		}
 	}
 
@@ -840,6 +777,75 @@ public class AircandiCommon implements ActionBar.TabListener {
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		mContext.startActivity(intent);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageBack);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// UI progress and notifications
+	// --------------------------------------------------------------------------------------------
+
+	public void showBusy() {
+
+		showBusy(null);
+	}
+
+	public void showBusy(Integer messageResId) {
+
+		startBusyIndicator();
+		if (messageResId != null) {
+			ProgressDialog progressDialog = getProgressDialog();
+			progressDialog.setMessage(mActivity.getString(messageResId));
+			if (!progressDialog.isShowing()) {
+				progressDialog.setCancelable(false);
+				progressDialog.show();
+				if (Aircandi.displayMetrics != null) {
+					progressDialog.getWindow().setLayout((int) (Aircandi.displayMetrics.widthPixels * 0.7), WindowManager.LayoutParams.WRAP_CONTENT);
+				}
+			}
+		}
+	}
+
+	public void hideBusy() {
+		ProgressDialog progressDialog = getProgressDialog();
+		if (progressDialog.isShowing() && progressDialog.getWindow().getWindowManager() != null) {
+			progressDialog.dismiss();
+		}
+		stopBusyIndicator();
+	}
+
+	private void startBusyIndicator() {
+		if (mMenuItemRefresh != null) {
+			mMenuItemRefresh.setActionView(layout.actionbar_refresh);
+			mStartBusyIndicator = false;
+		}
+		else {
+			mStartBusyIndicator = true;
+		}
+	}
+
+	private void stopBusyIndicator() {
+		if (mMenuItemRefresh != null) {
+			mMenuItemRefresh.setActionView(null);
+		}
+		mStartBusyIndicator = false;
+	}
+
+	public void showNotification(String title, String message, Context context, Intent intent, int notificationType) {
+		@SuppressWarnings("deprecation")
+		Notification note = new Notification(R.drawable.ic_app_status
+				, title
+				, System.currentTimeMillis());
+
+		RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification);
+		contentView.setImageViewResource(R.id.image, R.drawable.ic_app);
+		contentView.setTextViewText(R.id.title, title);
+		contentView.setTextViewText(R.id.text, message);
+		note.contentView = contentView;
+
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+		note.contentIntent = pendingIntent;
+
+		mNotificationManager.notify(notificationType, note);
 	}
 
 	// --------------------------------------------------------------------------------------------

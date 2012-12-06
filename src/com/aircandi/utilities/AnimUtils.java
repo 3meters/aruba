@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.utilities;
 
 import java.io.IOException;
 
@@ -14,12 +14,14 @@ import android.content.res.XmlResourceParser;
 import android.content.res.Resources.NotFoundException;
 import android.util.AttributeSet;
 import android.util.Xml;
+import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
+import android.view.animation.Animation.AnimationListener;
 
 public class AnimUtils {
 
@@ -28,7 +30,7 @@ public class AnimUtils {
 
 	public static Animation fadeInMedium() {
 		/*
-		 * We make a new animation object each time because when I 
+		 * We make a new animation object each time because when I
 		 * tried sharing one, there was lots of flashing and weird behavior.
 		 * 
 		 * If there is a better way to do this later then this will serve
@@ -44,6 +46,52 @@ public class AnimUtils {
 		 */
 		mFadeOutMedium = AnimUtils.loadAnimation(R.anim.fade_out_medium);
 		return mFadeOutMedium;
+	}
+
+	public static void showView(final View view) {
+		Animation animation = AnimUtils.fadeInMedium();
+		if (view.getVisibility() != View.VISIBLE) {
+			view.setVisibility(View.VISIBLE);
+		}
+		else {
+			return;
+		}
+		animation.setFillEnabled(true);
+		animation.setFillAfter(true);
+		animation.setAnimationListener(new AnimationListener() {
+
+			@Override
+			public void onAnimationStart(Animation animation) {}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				view.clearAnimation();
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {}
+		});
+		view.startAnimation(animation);
+	}
+
+	public static void hideView(final View view) {
+		Animation animation = AnimUtils.fadeOutMedium();
+		animation.setFillEnabled(true);
+		animation.setFillAfter(true);
+		animation.setAnimationListener(new AnimationListener() {
+
+			@Override
+			public void onAnimationStart(Animation animation) {}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				view.clearAnimation();
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {}
+		});
+		view.startAnimation(animation);
 	}
 
 	public static enum TransitionType {
@@ -125,7 +173,7 @@ public class AnimUtils {
 		}
 	}
 
-	public static Animation loadAnimation(int id) throws NotFoundException {
+	public static Animation loadAnimation(int animationResId) throws NotFoundException {
 		/*
 		 * Loads an animation object from a resource
 		 * 
@@ -138,16 +186,16 @@ public class AnimUtils {
 
 		XmlResourceParser parser = null;
 		try {
-			parser = Aircandi.applicationContext.getResources().getAnimation(id);
+			parser = Aircandi.applicationContext.getResources().getAnimation(animationResId);
 			return AnimUtils.createAnimationFromXml(Aircandi.applicationContext, parser);
 		}
 		catch (XmlPullParserException ex) {
-			NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(id));
+			NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(animationResId));
 			rnf.initCause(ex);
 			throw rnf;
 		}
 		catch (IOException ex) {
-			NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(id));
+			NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(animationResId));
 			rnf.initCause(ex);
 			throw rnf;
 		}

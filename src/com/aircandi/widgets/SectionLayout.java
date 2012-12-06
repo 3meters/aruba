@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.aircandi.R;
+import com.aircandi.components.FontManager;
 
 public class SectionLayout extends LinearLayout {
 
@@ -16,6 +17,7 @@ public class SectionLayout extends LinearLayout {
 	private Integer	mLayoutFooterId;
 	private String	mHeaderTitle;
 	private TextView mTextViewHeader;
+	private TextView mButtonMore;
 
 	public SectionLayout(Context context) {
 		this(context, null);
@@ -43,7 +45,12 @@ public class SectionLayout extends LinearLayout {
 		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (mLayoutHeaderId != 0) {
 			View view = inflater.inflate(mLayoutHeaderId, null);
+			
 			mTextViewHeader = (TextView) view.findViewById(R.id.title);
+			mButtonMore = (TextView) view.findViewById(R.id.button_more);
+			FontManager.getInstance().setTypefaceLight(mTextViewHeader);
+			FontManager.getInstance().setTypefaceLight(mButtonMore);
+			
 			if (mTextViewHeader != null) {
 				if (mHeaderTitle == null) {
 					mTextViewHeader.setVisibility(View.GONE);
@@ -68,5 +75,13 @@ public class SectionLayout extends LinearLayout {
 
 	public void setTextViewHeader(TextView textViewHeader) {
 		mTextViewHeader = textViewHeader;
+	}
+
+	public TextView getButtonMore() {
+		return mButtonMore;
+	}
+
+	public void setButtonMore(TextView buttonMore) {
+		mButtonMore = buttonMore;
 	}
 }

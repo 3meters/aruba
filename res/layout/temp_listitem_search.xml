@@ -16,7 +16,7 @@
 
     <TextView
         android:id="@+id/item_section_title"
-        style="@style/candi_list_section"
+        style="@style/app_text_appearance_large_accent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"

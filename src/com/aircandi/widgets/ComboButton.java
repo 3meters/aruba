@@ -1,13 +1,14 @@
 package com.aircandi.widgets;
 
-import com.aircandi.R;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ScaleDrawable;
 import android.util.AttributeSet;
 import android.widget.Button;
+
+import com.aircandi.R;
+import com.aircandi.components.FontManager;
 
 public class ComboButton extends Button {
 
@@ -30,6 +31,8 @@ public class ComboButton extends Button {
 	}
 
 	private void setDrawableSize(Context context, AttributeSet attrs, int defStyle) {
+		FontManager.getInstance().setTypefaceLight(this);
+
 		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ComboButton, defStyle, 0);
 		mDrawableScale = ta.getFloat(R.styleable.ComboButton_drawableScale, 0.5f);
 

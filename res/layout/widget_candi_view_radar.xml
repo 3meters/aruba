@@ -4,6 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/picture_bg_dark_place" />
+    
 
     <com.aircandi.widgets.WebImageView
         android:id="@+id/candi_view_image"

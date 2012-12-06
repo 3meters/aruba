@@ -18,8 +18,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.DrawableManager.ViewHolder;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.ImageManager;
@@ -30,6 +28,8 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 /*
  * We often will get duplicates because the ordering of images isn't
@@ -98,7 +98,7 @@ public class PictureBrowse extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
+				mCommon.showBusy();
 			}
 
 			@Override
@@ -118,7 +118,7 @@ public class PictureBrowse extends FormActivity {
 				else {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
 				}
-				mCommon.hideProgressDialog();
+				mCommon.hideBusy();
 			}
 		}.execute();
 

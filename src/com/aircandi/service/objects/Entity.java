@@ -12,11 +12,11 @@ import com.aircandi.components.EntityList;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.GeoLocationManager.MeasurementSystem;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.Expose;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.SerializedName;
+import com.aircandi.utilities.MiscUtils;
 
 /**
  * Entity as described by the proxi protocol standards.
@@ -231,7 +231,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 * serialization/deserialization. All object properties are
 		 * recreated as new instances
 		 */
-		Entity entityCopy = (Entity) Utilities.deepCopy(this);
+		Entity entityCopy = (Entity) MiscUtils.deepCopy(this);
 		return entityCopy;
 	}
 
@@ -268,17 +268,25 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public Float getDistance(MeasurementSystem system) {
-		GeoLocation location = getLocation();
-		Float distance = null;
-		if (location != null) {
-			Observation observation = GeoLocationManager.getInstance().getObservation();
-			distance = (float) GeoLocationManager.distanceVincenty(observation.latitude.doubleValue()
-					, observation.longitude.doubleValue()
-					, location.latitude.doubleValue()
-					, location.longitude.doubleValue()
-					, system);
+		Beacon beacon = getBeacon();
+		if (beacon != null) {
+			this.distance = beacon.getDistance();
 		}
-		this.distance = distance;
+		else {
+			GeoLocation location = getLocation();
+			Float distance = 0f;
+			if (location != null) {
+				Observation observation = GeoLocationManager.getInstance().getObservation();
+				if (observation != null) {
+					distance = (float) GeoLocationManager.distanceVincenty(observation.latitude.doubleValue()
+							, observation.longitude.doubleValue()
+							, location.latitude.doubleValue()
+							, location.longitude.doubleValue()
+							, system);
+				}
+			}
+			this.distance = distance;
+		}
 		return distance;
 	}
 
@@ -334,21 +342,18 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 	public Link getActiveLink() {
 		/*
-		 * If an entity has more than one viable beaconLink, we choose the one
-		 * that currently has the strongest beacon.
+		 * If an entity has more than one viable link, we choose the one
+		 * using the following priority:
+		 * 
+		 * - strongest primary
+		 * - any primary
+		 * - any non-primary
 		 */
 		if (links != null) {
 			Link strongestLink = null;
-			Integer strongestLevel = null;
+			Integer strongestLevel = -200;
 			for (Link link : links) {
-				if (strongestLink == null) {
-					strongestLink = link;
-					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
-					if (beacon != null) {
-						strongestLevel = beacon.level.intValue();
-					}
-				}
-				else {
+				if (link.primary) {
 					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
 					if (beacon != null && beacon.level.intValue() > strongestLevel) {
 						strongestLink = link;
@@ -356,6 +361,17 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 					}
 				}
 			}
+
+			if (strongestLink == null) {
+				for (Link link : links) {
+					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
+					if (beacon != null && beacon.level.intValue() > strongestLevel) {
+						strongestLink = link;
+						strongestLevel = beacon.level.intValue();
+					}
+				}
+			}
+
 			return strongestLink;
 		}
 		return null;
@@ -395,15 +411,46 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public Integer getTuningScore() {
+		/*
+		 * Our primary goal is to make sure that if you are standing
+		 * in the same spot that was previously used to pin a place, that place
+		 * should be first in radar.
+		 * 
+		 * Inputs:
+		 * - How many beacons is the entity is linked to
+		 * - How many beacon links have been tuned to the place entity
+		 * - How many beacons are flagged as primary.
+		 * - How close to a primary is the device. (signal level)
+		 * 
+		 * Only primary links get tuning points.
+		 * A place entity can have multiple primary links as it gets extended.
+		 */
 		Integer tuningScore = 0;
 		if (links != null) {
-			for (Link beaconLink : links) {
+			for (Link link : links) {
 				/* One point for each link */
 				tuningScore++;
-				
+
 				/* Bonus points for each tuned link */
-				if (beaconLink.tuneCount != null) {
-					tuningScore += beaconLink.tuneCount.intValue();
+				if (link.tuneCount != null) {
+					tuningScore += link.tuneCount.intValue();
+				}
+
+				/* Add points for being close to a primary */
+				if (link.primary) {
+					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
+					if (beacon != null) {
+						int level = beacon.level.intValue();
+
+						if (level <= -90)
+							tuningScore += 1;
+						else if (level <= -80)
+							tuningScore += 2;
+						else if (level <= -70)
+							tuningScore += 4;
+						else
+							tuningScore += 8;
+					}
 				}
 			}
 		}

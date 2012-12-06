@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.utilities;
 
 import android.content.Intent;
 import android.media.AsyncPlayer;

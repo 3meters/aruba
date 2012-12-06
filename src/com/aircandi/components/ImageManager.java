@@ -29,6 +29,8 @@ import android.util.FloatMath;
 import android.util.TypedValue;
 
 import com.aircandi.core.CandiConstants;
+import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.MiscUtils;
 
 /*
  * TODO: ImageCache uses weak references by default. Should investigate the possible benefits
@@ -552,28 +554,28 @@ public class ImageManager {
 	// --------------------------------------------------------------------------------------------
 
 	public Bitmap getImage(String key) {
-		String keyHashed = Utilities.md5(key);
+		String keyHashed = MiscUtils.md5(key);
 		return mImageCache.get(keyHashed);
 	}
 
 	public boolean hasImage(String key) {
-		String keyHashed = Utilities.md5(key);
+		String keyHashed = MiscUtils.md5(key);
 		return mImageCache.containsKey(keyHashed);
 	}
 
 	public void deleteImage(String key) {
 		/* Removes the image from the memory and file caches. */
-		String keyHashed = Utilities.md5(key);
+		String keyHashed = MiscUtils.md5(key);
 		mImageCache.remove(keyHashed);
 	}
 
 	public void putImage(String key, Bitmap bitmap) {
-		String keyHashed = Utilities.md5(key);
+		String keyHashed = MiscUtils.md5(key);
 		mImageCache.put(keyHashed, bitmap);
 	}
 
 	public void putImage(String key, Bitmap bitmap, CompressFormat compressFormat) {
-		String keyHashed = Utilities.md5(key);
+		String keyHashed = MiscUtils.md5(key);
 		mImageCache.put(keyHashed, bitmap);
 	}
 

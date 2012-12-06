@@ -106,7 +106,7 @@ public class PictureSearch extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_searching), true);
+				mCommon.showBusy();
 			}
 
 			@Override
@@ -136,7 +136,7 @@ public class PictureSearch extends FormActivity {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mImages = (ArrayList<ImageResult>) serviceResponse.data;
 					mOffset += PAGE_SIZE;
-					mCommon.hideProgressDialog();
+					mCommon.hideBusy();
 					mGridView.setAdapter(new EndlessImageAdapter(mImages));
 				}
 				else {

@@ -62,7 +62,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import android.graphics.Bitmap;
 
 import com.aircandi.Aircandi;
-import com.aircandi.components.DateUtils;
 import com.aircandi.components.ImageResult;
 import com.aircandi.components.JsonHelper;
 import com.aircandi.components.Logger;
@@ -86,6 +85,7 @@ import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.Tip;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.DateUtils;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 

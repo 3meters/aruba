@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.ListView;
 
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.IntentBuilder;
@@ -14,6 +12,8 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public abstract class CandiListBase extends CandiActivity {
 	/*

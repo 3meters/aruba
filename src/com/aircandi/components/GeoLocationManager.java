@@ -1,5 +1,6 @@
 package com.aircandi.components;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.AlarmManager;
@@ -21,6 +22,7 @@ import com.aircandi.components.Events.EventHandler;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Observation;
+import com.aircandi.utilities.DateUtils;
 
 @SuppressWarnings("unused")
 public class GeoLocationManager implements LocationListener {
@@ -28,7 +30,22 @@ public class GeoLocationManager implements LocationListener {
 	/*
 	 * Current location strategy
 	 * 
-	 * We only use location when inserting a beacon or entity.
+	 * Location is used in the following ways:
+	 * 
+	 * - Beacons have location info that is continuously improved/updated as needed.
+	 * - Linked place entities use location info from the link source.
+	 * - Custom place entities use location info from the device.
+	 * - Radar shows synthetics based on the current location.
+	 * - Radar shows custom/linked place entities based on location if no beacons available
+	 * - Tuning without beacons stores location with the tuning action.
+	 * 
+	 * Location info is created/refreshed at the following points
+	 * 
+	 * - Initialization of GeoLocationManager (done in Radar onCreate)
+	 * - Any radar scan.
+	 * - Creation of EntityForm
+	 * - Creation of LinkPicker
+	 * - Creation of CandiTuner
 	 * 
 	 * When the entity form is created for a new candi we refresh the current
 	 * location using a combination of last known and a single coarse update (if
@@ -47,11 +64,6 @@ public class GeoLocationManager implements LocationListener {
 	 * Altitude and accuracy are in meters.
 	 * Bearing is direction of travel in degrees East of true North.
 	 * Speed is movement of the device over ground in meters/second.
-	 * 
-	 * 
-	 * Notes: The engine class has location support but we are not
-	 * using it so our location implementation doesn't have a dependency
-	 * on the engine.
 	 */
 
 	private static GeoLocationManager	singletonObject;
@@ -98,6 +110,91 @@ public class GeoLocationManager implements LocationListener {
 		ensureLocation(MINIMUM_ACCURACY, MAXIMUM_AGE, criteria, null);
 	}
 
+	public void ensureLocation(int minAccuracy, long maxTimeAgo, Criteria criteria, final RequestListener listener) {
+		/*
+		 * Returns the most accurate and timely previously detected location.
+		 * When the last result is beyond the specified maximum distance or
+		 * latency a one-off location update is returned.
+		 */
+		Logger.d(this, "Ensuring location");
+		Location bestLocation = null;
+		float bestAccuracy = Float.MAX_VALUE;
+		long bestTime = Long.MIN_VALUE;
+		Location backupLocation = null;
+		long backupTime = Long.MIN_VALUE;
+		
+		long minTime = System.currentTimeMillis() - maxTimeAgo;
+
+		/*
+		 * Iterate through all the providers on the system, keeping note of the
+		 * most accurate result within the acceptable time limit. If no result
+		 * is found within maxTime, return the newest Location.
+		 */
+		for (String provider : mLocationManager.getAllProviders()) {
+
+			Location location = mLocationManager.getLastKnownLocation(provider);
+			if (location != null) {
+				float accuracy = location.getAccuracy();
+				long time = location.getTime();
+				
+				if (time > backupTime) {
+					backupLocation = location;
+				}
+				
+				if ((time > minTime 
+						&& accuracy < bestAccuracy)) {
+					bestLocation = location;
+					bestAccuracy = accuracy;
+					bestTime = time;
+				}
+				else if (time < minTime
+						&& bestAccuracy == Float.MAX_VALUE
+						&& time > bestTime) {
+					bestLocation = location;
+					bestTime = time;
+				}
+			}
+		}
+		
+		/*
+		 * Use the most recent location fix as a backup while
+		 * we get another fix if necessary.
+		 */
+		if (backupLocation != null) {
+			mLocation = backupLocation;
+		}
+		/*
+		 * If the best result is beyond the allowed time limit, or the accuracy
+		 * of the best result is wider than the acceptable maximum distance,
+		 * request a single update.
+		 */
+		
+		if (bestLocation == null || bestTime < minTime || bestAccuracy > minAccuracy) {
+			getSingleLocationUpdate(listener, criteria);
+		}
+		else {
+			if (isBetterLocation(bestLocation, mLocation)) {
+				Date fixDate = new Date(bestTime);
+				Logger.d(this, "Using last known location: accuracy="
+						+ String.valueOf(bestLocation.getAccuracy())
+						+ " age=" + DateUtils.intervalSince(fixDate, DateUtils.nowDate()));
+				mLocation = bestLocation;
+				if (mLocationListener != null) {
+					mLocationListener.onLocationChanged(mLocation);
+				}
+			}
+			else {
+				Date fixDate = new Date(mLocation.getTime());
+				Logger.d(this, "Current location is best: accuracy="
+						+ String.valueOf(mLocation.getAccuracy())
+						+ " age=" + DateUtils.intervalSince(fixDate, DateUtils.nowDate()));
+			}
+			if (listener != null) {
+				listener.onComplete(mLocation);
+			}
+		}
+	}
+
 	private void initializeLocation() {
 		/*
 		 * Look for the best available location fix in the system and use it. This
@@ -114,65 +211,6 @@ public class GeoLocationManager implements LocationListener {
 		if (lastKnownLocationGPS != null) {
 			if (isBetterLocation(lastKnownLocationGPS, mLocation)) {
 				mLocation = lastKnownLocationGPS;
-			}
-		}
-	}
-
-	public void ensureLocation(int minAccuracy, long maxTimeAgo, Criteria criteria, final RequestListener listener) {
-		/*
-		 * Returns the most accurate and timely previously detected location.
-		 * When the last result is beyond the specified maximum distance or
-		 * latency a one-off location update is returned.
-		 */
-		Location bestLocation = null;
-		float bestAccuracy = Float.MAX_VALUE;
-		long bestTime = Long.MIN_VALUE;
-		long minTime = System.currentTimeMillis() - maxTimeAgo;
-
-		/*
-		 * Iterate through all the providers on the system, keeping note of the
-		 * most accurate result within the acceptable time limit. If no result
-		 * is found within maxTime, return the newest Location.
-		 */
-		for (String provider : mLocationManager.getAllProviders()) {
-
-			Location location = mLocationManager.getLastKnownLocation(provider);
-			if (location != null) {
-				float accuracy = location.getAccuracy();
-				long time = location.getTime();
-				if ((time > minTime && accuracy < bestAccuracy)) {
-					bestLocation = location;
-					bestAccuracy = accuracy;
-					bestTime = time;
-				}
-				else if (time < minTime
-						&& bestAccuracy == Float.MAX_VALUE
-						&& time > bestTime) {
-					bestLocation = location;
-					bestTime = time;
-				}
-			}
-		}
-		/*
-		 * If the best result is beyond the allowed time limit, or the accuracy
-		 * of the best result is wider than the acceptable maximum distance,
-		 * request a single update.
-		 */
-		if (bestTime < minTime || bestAccuracy > minAccuracy) {
-			getSingleLocationUpdate(listener, criteria);
-		}
-		else {
-			if (bestLocation != null) {
-				Logger.d(this, "Using cached location");
-				if (isBetterLocation(bestLocation, mLocation)) {
-					mLocation = bestLocation;
-				}
-				if (mLocationListener != null && bestLocation != null) {
-					mLocationListener.onLocationChanged(bestLocation);
-				}
-			}
-			if (listener != null) {
-				listener.onComplete(bestLocation);
 			}
 		}
 	}
@@ -342,6 +380,7 @@ public class GeoLocationManager implements LocationListener {
 		float radius = (float) ((meters / 1000) / RADIUS_EARTH_KILOMETERS);
 		return radius;
 	}
+
 	// --------------------------------------------------------------------------------------------
 	// Location snapshot routines
 	// --------------------------------------------------------------------------------------------
@@ -466,14 +505,20 @@ public class GeoLocationManager implements LocationListener {
 		Observation observation = new Observation();
 		if (Aircandi.usingEmulator) {
 			observation = new Observation(47.616245, -122.201645); // earls
+			observation.time = DateUtils.nowDate().getTime();
+			observation.provider = "emulator_lucky";
 		}
 		else {
 			String testingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
 			if (ListPreferenceMultiSelect.contains("zoka", testingLocation, null)) {
 				observation = new Observation(47.6686489, -122.3320842); // zoka
+				observation.time = DateUtils.nowDate().getTime();
+				observation.provider = "testing_zoka";
 			}
 			else if (ListPreferenceMultiSelect.contains("lucky", testingLocation, null)) {
 				observation = new Observation(47.616245, -122.201645); // lucky
+				observation.time = DateUtils.nowDate().getTime();
+				observation.provider = "testing_lucky";
 			}
 			else {
 				observation.latitude = mLocation.getLatitude();
@@ -494,6 +539,8 @@ public class GeoLocationManager implements LocationListener {
 					/* Speed of the device over ground in meters/second. */
 					observation.speed = mLocation.getSpeed();
 				}
+				observation.time = mLocation.getTime();
+				observation.provider = mLocation.getProvider();
 			}
 		}
 
@@ -611,6 +658,7 @@ public class GeoLocationManager implements LocationListener {
 			}, mContext.getMainLooper());
 		}
 		else {
+			Logger.d(this, "No location provider available");
 			if (listener != null) {
 				listener.onComplete(null);
 			}

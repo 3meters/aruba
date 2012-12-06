@@ -18,10 +18,10 @@ import com.aircandi.Preferences;
 import com.aircandi.R;
 import com.aircandi.components.DrawableManager.ViewHolder;
 import com.aircandi.components.GeoLocationManager.MeasurementSystem;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.ImageUtils;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Category;
@@ -29,6 +29,8 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Place;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.ImageUtils;
 
 public class CandiView extends RelativeLayout {
 
@@ -86,6 +88,10 @@ public class CandiView extends RelativeLayout {
 		mSubtitle = (TextView) mLayout.findViewById(R.id.candi_view_subtitle);
 		mDistance = (TextView) mLayout.findViewById(R.id.candi_view_distance);
 		mCategoryImage = (ImageView) mLayout.findViewById(R.id.candi_view_subtitle_badge);
+		
+		FontManager.getInstance().setTypefaceRegular(mTitle);
+		FontManager.getInstance().setTypefaceLight(mSubtitle);
+
 	}
 
 	public void bindToEntity(Entity entity) {
@@ -95,12 +101,20 @@ public class CandiView extends RelativeLayout {
 		if (!entity.synthetic) {
 			if (mEntity != null && entity.id.equals(mEntity.id) && entity.activityDate.longValue() == mEntity.activityDate.longValue()) {
 				mEntity = entity;
+				/* We still should update stats */
+				if (entity.place != null) {
+					showStats(entity);
+				}
 				return;
 			}
 		}
 		else {
-			if (mEntity != null && entity.id.equals(mEntity.id)) {
+			if (mEntity != null && entity.id != null && mEntity.id != null && entity.id.equals(mEntity.id)) {
 				mEntity = entity;
+				/* We still should update stats */
+				if (entity.place != null) {
+					showStats(entity);
+				}
 				return;
 			}
 		}
@@ -111,89 +125,97 @@ public class CandiView extends RelativeLayout {
 			/* Primary candi image */
 
 			if (mCandiImage != null) {
-				String imageUri = entity.getImageUri();
-				if (imageUri != null) {
 
-					ImageFormat imageFormat = entity.getImageFormat();
-					ImageRequestBuilder builder = new ImageRequestBuilder(mCandiImage)
-							.setImageUri(imageUri)
-							.setImageFormat(imageFormat)
-							.setLinkZoom(CandiConstants.LINK_ZOOM)
-							.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED)
-							.setRequestListener(new RequestListener() {
+				/* If we are carrying around a bitmap then it should be used */
+				if (mEntity.photo != null && mEntity.photo.getBitmap() != null) {
+					ImageUtils.showImageInImageView(entity.photo.getBitmap(), mCandiImage.getImageView(), true, AnimUtils.fadeInMedium());
+				}
+				else {
 
-								@Override
-								public void onComplete(Object response) {
-									if (mFilterColor != null) {
-										mCandiImage.getImageView().setColorFilter(ImageUtils.hexToColor(mFilterColor), PorterDuff.Mode.MULTIPLY);
-									}
-								}
+					String imageUri = entity.getImageUri();
+					if (imageUri != null) {
 
-								@Override
-								public Bitmap onFilter(Bitmap bitmap) {
-									/*
-									 * Turn gray pixels to transparent. Making the bitmap mutable will
-									 * put pressure on memory so this should only be done when working with
-									 * small images. There is an ImageUtils routine that will make make a
-									 * bitmap mutable without using extra memory.
-									 */
-									Bitmap transformedBitmap = null;
-									if (mKeepColor == null && mFromColor == null && mToColor == null) {
-										return bitmap;
-									}
-									else {
-										transformedBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-										bitmap.recycle();
+						ImageFormat imageFormat = entity.getImageFormat();
+						ImageRequestBuilder builder = new ImageRequestBuilder(mCandiImage)
+								.setImageUri(imageUri)
+								.setImageFormat(imageFormat)
+								.setLinkZoom(CandiConstants.LINK_ZOOM)
+								.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED)
+								.setRequestListener(new RequestListener() {
 
-										if (mKeepColor != null) {
-											transformedBitmap = ImageUtils.keepPixels(transformedBitmap, mKeepColor);
-										}
-
-										if (mFromColor != null && mToColor != null) {
-											transformedBitmap = ImageUtils.replacePixels(transformedBitmap, mFromColor, mToColor);
+									@Override
+									public void onComplete(Object response) {
+										if (mFilterColor != null) {
+											mCandiImage.getImageView().setColorFilter(ImageUtils.hexToColor(mFilterColor), PorterDuff.Mode.MULTIPLY);
 										}
 									}
 
-									return transformedBitmap;
-								}
-							});
+									@Override
+									public Bitmap onFilter(Bitmap bitmap) {
+										/*
+										 * Turn gray pixels to transparent. Making the bitmap mutable will
+										 * put pressure on memory so this should only be done when working with
+										 * small images. There is an ImageUtils routine that will make make a
+										 * bitmap mutable without using extra memory.
+										 */
+										Bitmap transformedBitmap = null;
+										if (mKeepColor == null && mFromColor == null && mToColor == null) {
+											return bitmap;
+										}
+										else {
+											transformedBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+											bitmap.recycle();
 
-					ImageRequest imageRequest = builder.create();
-					if (mEntity.synthetic) {
-						int color = mEntity.place.getCategoryColor();
-						mCandiImage.setColorFilter(color);
-					}
-					mCandiImage.setImageRequest(imageRequest);
+											if (mKeepColor != null) {
+												transformedBitmap = ImageUtils.keepPixels(transformedBitmap, mKeepColor);
+											}
 
-					if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
-						if (entity.getImageUri() == null
-								|| !entity.getImageUri().toLowerCase().startsWith("resource:")) {
-							mCandiImage.getImageBadge().setImageResource(R.drawable.ic_collection_250);
-							mCandiImage.getImageBadge().setVisibility(View.VISIBLE);
-							mCandiImage.getImageZoom().setVisibility(View.VISIBLE);
-							mCandiImage.setClickable(true);
+											if (mFromColor != null && mToColor != null) {
+												transformedBitmap = ImageUtils.replacePixels(transformedBitmap, mFromColor, mToColor);
+											}
+										}
+
+										return transformedBitmap;
+									}
+								});
+
+						ImageRequest imageRequest = builder.create();
+						if (mEntity.synthetic) {
+							int color = mEntity.place.getCategoryColor();
+							mCandiImage.setColorFilter(color);
 						}
-						else {
-							mCandiImage.getImageBadge().setVisibility(View.GONE);
-							mCandiImage.getImageZoom().setVisibility(View.GONE);
-							mCandiImage.setClickable(false);
-						}
+						mCandiImage.setImageRequest(imageRequest);
+
 					}
-					else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-						mCandiImage.getImageBadge().setVisibility(View.GONE);
-						mCandiImage.getImageZoom().setVisibility(View.GONE);
-						mCandiImage.setClickable(false);
-					}
-					else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-						mCandiImage.getImageBadge().setVisibility(View.GONE);
-						mCandiImage.getImageZoom().setVisibility(View.GONE);
-						mCandiImage.setClickable(false);
-					}
-					else {
-						mCandiImage.getImageBadge().setVisibility(View.GONE);
+				}
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
+					if (entity.getImageUri() == null
+							|| !entity.getImageUri().toLowerCase().startsWith("resource:")) {
+						mCandiImage.getImageBadge().setImageResource(R.drawable.ic_collection_250);
+						mCandiImage.getImageBadge().setVisibility(View.VISIBLE);
 						mCandiImage.getImageZoom().setVisibility(View.VISIBLE);
 						mCandiImage.setClickable(true);
 					}
+					else {
+						mCandiImage.getImageBadge().setVisibility(View.GONE);
+						mCandiImage.getImageZoom().setVisibility(View.GONE);
+						mCandiImage.setClickable(false);
+					}
+				}
+				else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+					mCandiImage.getImageBadge().setVisibility(View.GONE);
+					mCandiImage.getImageZoom().setVisibility(View.GONE);
+					mCandiImage.setClickable(false);
+				}
+				else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+					mCandiImage.getImageBadge().setVisibility(View.GONE);
+					mCandiImage.getImageZoom().setVisibility(View.GONE);
+					mCandiImage.setClickable(false);
+				}
+				else {
+					mCandiImage.getImageBadge().setVisibility(View.GONE);
+					mCandiImage.getImageZoom().setVisibility(View.VISIBLE);
+					mCandiImage.setClickable(true);
 				}
 			}
 
@@ -235,6 +257,9 @@ public class CandiView extends RelativeLayout {
 						setVisibility(mSubtitle, View.VISIBLE);
 					}
 				}
+				
+				/* Developer only stats */
+				showStats(entity);
 
 				setVisibility(mDistance, View.GONE);
 				if (Aircandi.settings.getBoolean(Preferences.PREF_SHOW_DISTANCE, false)) {
@@ -242,7 +267,7 @@ public class CandiView extends RelativeLayout {
 						String info = "";
 						if (!entity.synthetic) {
 							int primaryCount = 0;
-							for (Link link: entity.links) {
+							for (Link link : entity.links) {
 								if (link.primary) {
 									primaryCount++;
 								}
@@ -256,7 +281,7 @@ public class CandiView extends RelativeLayout {
 						else {
 							info = String.format("M:%.0f", entity.getDistance(MeasurementSystem.Metric));
 						}
-						
+
 						if (!info.equals("")) {
 							mDistance.setText(Html.fromHtml(info));
 							setVisibility(mDistance, View.VISIBLE);
@@ -316,6 +341,36 @@ public class CandiView extends RelativeLayout {
 				if (mSubtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
 					mSubtitle.setText(Html.fromHtml(entity.subtitle));
 					setVisibility(mSubtitle, View.VISIBLE);
+				}
+			}
+		}
+	}
+
+	public void showStats(Entity entity) {
+		setVisibility(mDistance, View.GONE);
+		if (Aircandi.settings.getBoolean(Preferences.PREF_SHOW_DISTANCE, false)) {
+			if (mDistance != null) {
+				String info = "";
+				if (!entity.synthetic) {
+					int primaryCount = 0;
+					for (Link link : entity.links) {
+						if (link.primary) {
+							primaryCount++;
+						}
+					}
+					info = String.format("T:%d L:%d P:%d M:%.0f"
+							, entity.getTuningScore()
+							, entity.links.size()
+							, primaryCount
+							, entity.getDistance(MeasurementSystem.Metric));
+				}
+				else {
+					info = String.format("M:%.0f", entity.getDistance(MeasurementSystem.Metric));
+				}
+
+				if (!info.equals("")) {
+					mDistance.setText(Html.fromHtml(info));
+					setVisibility(mDistance, View.VISIBLE);
 				}
 			}
 		}

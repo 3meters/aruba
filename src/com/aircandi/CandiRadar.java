@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.location.Criteria;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.AsyncTask;
@@ -22,21 +23,20 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi.CandiTask;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.Events;
 import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.Exceptions;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.ImageCache;
 import com.aircandi.components.ImageManager;
-import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -50,6 +50,9 @@ import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.ImageUtils;
 import com.aircandi.widgets.BounceScrollView;
 import com.aircandi.widgets.CandiView;
 import com.aircandi.widgets.FlowLayout;
@@ -239,6 +242,10 @@ public class CandiRadar extends CandiActivity {
 		/* Other UI references */
 		mProgressRadar = (ViewGroup) findViewById(R.id.progress);
 		mScrollView = (BounceScrollView) findViewById(R.id.scroll_view);
+		
+		/* Fonts */
+		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_custom));
+		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_tune_text));
 
 		/* Store sounds */
 		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
@@ -274,6 +281,20 @@ public class CandiRadar extends CandiActivity {
 		if (entities.size() == 0) {
 			layout.removeAllViews();
 			return;
+		}
+		
+		/* 
+		 * Custom typeface can only be set via code. We are keeping it here
+		 * for simplicity even though it would be more efficient to set it
+		 * once when the activity is created.
+		 */
+		if (mCommon.mThemeTone.equals("dark")) {
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.radar_places_header));
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.radar_synthetics_header));
+		}
+		else {
+			FontManager.getInstance().setTypefaceRegular((TextView) findViewById(R.id.radar_places_header));
+			FontManager.getInstance().setTypefaceRegular((TextView) findViewById(R.id.radar_synthetics_header));
 		}
 
 		String badgeColor = null;
@@ -410,8 +431,15 @@ public class CandiRadar extends CandiActivity {
 			entityIndex++;
 		}
 
+		if (layout.getId() == R.id.radar_places) {
+			AnimUtils.showView(findViewById(R.id.radar_places_header));
+		}
+		else if (layout.getId() == R.id.radar_synthetics) {
+			AnimUtils.showView(findViewById(R.id.radar_synthetics_header));
+		}
+
 		mProgressRadar.setVisibility(View.GONE);
-		mCommon.hideProgressDialog();
+		mCommon.hideBusy();
 
 		/* Check for rookies and play a sound */
 		if (addSparkle && topIsNew) {
@@ -426,9 +454,16 @@ public class CandiRadar extends CandiActivity {
 	// Event handlers
 	// --------------------------------------------------------------------------------------------
 
-	public void onNewCandiButtonClick(View view) {
+	public void onCustomPlaceButtonClick(View view) {
 		if (Aircandi.getInstance().getUser() != null) {
-			mCommon.showTemplatePicker(true);
+			IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
+					.setCommandType(CommandType.New)
+					.setEntityId(null)
+					.setEntityType(CandiConstants.TYPE_CANDI_PLACE);
+
+			Intent intent = intentBuilder.create();
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 		}
 	}
 
@@ -436,10 +471,6 @@ public class CandiRadar extends CandiActivity {
 		Intent intent = new Intent(this, CandiTuner.class);
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-	}
-
-	public void onHelpButtonClick(View view) {
-		mCommon.showHelp(R.string.help_radar);
 	}
 
 	public void onCandiClick(View view) {
@@ -474,7 +505,19 @@ public class CandiRadar extends CandiActivity {
 			AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
 		}
 		else {
-			mCommon.showProgressDialog(null, true);
+			mCommon.showBusy();
+			/*
+			 * Start a location update. It may or may not be finished by the
+			 * time we use the location information. We want to force this to
+			 * be as fresh as possible so we don't accept anything even slightly
+			 * stale.
+			 */
+			Criteria criteria = new Criteria();
+			criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+			GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
+					, 0
+					, criteria, null);
+
 			new SearchProcess().start();
 		}
 	}
@@ -639,12 +682,11 @@ public class CandiRadar extends CandiActivity {
 		 */
 
 		/* Show something to the user that there aren't any candi nearby. */
-		mCommon.hideProgressDialog();
+		mCommon.hideBusy();
 		mProgressRadar.setVisibility(View.GONE);
 
 		/* Show aircandi tips if this is the first time the application has been run */
 		if (Aircandi.firstRunApp) {
-			onHelpButtonClick(null);
 			Aircandi.settingsEditor.putBoolean(Preferences.SETTING_FIRST_RUN, false);
 			Aircandi.settingsEditor.commit();
 			Aircandi.firstRunApp = false;
@@ -765,7 +807,7 @@ public class CandiRadar extends CandiActivity {
 
 		NetworkManager.getInstance().onResume();
 		GeoLocationManager.getInstance().onResume();
-		mCommon.startScanService();
+		mCommon.startScanService(CandiConstants.INTERVAL_SCAN_RADAR);
 	}
 
 	@Override
@@ -797,9 +839,9 @@ public class CandiRadar extends CandiActivity {
 
 					@Override
 					public void run() {
-						mCommon.hideProgressDialog();
+						mCommon.hideBusy();
 						invalidateOptionsMenu();
-						mCommon.showProgressDialog(null, true);
+						mCommon.showBusy();
 						draw(false);
 						searchComplete();
 					}

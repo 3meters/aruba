@@ -61,7 +61,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(getString(R.string.progress_loading), true);
+					mCommon.showBusy();
 				}
 
 				@Override
@@ -94,7 +94,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 					else {
 						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.PickCandi);
 					}
-					mCommon.hideProgressDialog();
+					mCommon.hideBusy();
 				}
 
 			}.execute();

@@ -1,5 +1,6 @@
 package com.aircandi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jsoup.Jsoup;
@@ -23,15 +24,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -40,7 +38,6 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
@@ -51,10 +48,14 @@ import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.Entity.Visibility;
+import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.widgets.BuilderButton;
 import com.aircandi.widgets.UserView;
 import com.aircandi.widgets.WebImageView;
@@ -107,7 +108,10 @@ public class EntityForm extends FormActivity {
 					, criteria, null);
 		}
 
-		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
+		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			mCommon.mActionBar.setTitle(R.string.form_title_place);
+		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_link);
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
@@ -146,25 +150,27 @@ public class EntityForm extends FormActivity {
 
 			Entity entity = new Entity();
 			entity.signalFence = -100.0f;
-			entity.creatorId = Aircandi.getInstance().getUser().id;
-			entity.modifierId = Aircandi.getInstance().getUser().id;
 			entity.enabled = true;
 			entity.locked = false;
+			entity.isCollection = false;
 			entity.visibility = Visibility.Public.toString().toLowerCase();
 			entity.type = mCommon.mEntityType;
 
-			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)
 					|| mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				entity.getPhoto().setImageUri("resource:placeholder_logo");
+				entity.getPhoto().setImageUri("resource:placeholder_logo_bw");
 			}
-			else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
+			else if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
+				entity.isCollection = true;
 				entity.name = getString(R.string.entity_folder_title);
 				entity.getPhoto().setImageUri("resource:ic_collection_250");
+			}
+			else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+				entity.isCollection = true;
 			}
 			mEntityForForm = entity;
 		}
 		else {
-
 			if (mEntityForForm == null && mCommon.mEntityId != null) {
 				/*
 				 * Entity is coming from entity model. We want to create a clone so
@@ -190,6 +196,18 @@ public class EntityForm extends FormActivity {
 		if (mEntityForForm != null) {
 
 			final Entity entity = mEntityForForm;
+			
+			/* Fonts */
+			
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_cancel));
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_delete));
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_save));
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_change_image));
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.twitter));
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.facebook));
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.text_uri));
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.text_title));
+			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.description));
 
 			/* Content */
 
@@ -213,12 +231,16 @@ public class EntityForm extends FormActivity {
 				}
 			}
 
-			if (findViewById(R.id.text_title) != null) {
-				((TextView) findViewById(R.id.text_title)).setText(entity.name);
+			if (entity.name != null && !entity.name.equals("")) {
+				if (findViewById(R.id.text_title) != null) {
+					((TextView) findViewById(R.id.text_title)).setText(entity.name);
+				}
 			}
 
-			if (findViewById(R.id.description) != null) {
-				((TextView) findViewById(R.id.description)).setText(entity.description);
+			if (entity.description != null && !entity.description.equals("")) {
+				if (findViewById(R.id.description) != null) {
+					((TextView) findViewById(R.id.description)).setText(entity.description);
+				}
 			}
 
 			if (findViewById(R.id.chk_locked) != null) {
@@ -281,8 +303,8 @@ public class EntityForm extends FormActivity {
 			/* Configure UI */
 
 			if (mCommon.mCommandType == CommandType.New) {
-				if (findViewById(R.id.btn_delete_post) != null) {
-					((Button) findViewById(R.id.btn_delete_post)).setVisibility(View.GONE);
+				if (findViewById(R.id.button_delete) != null) {
+					((Button) findViewById(R.id.button_delete)).setVisibility(View.GONE);
 				}
 			}
 		}
@@ -391,8 +413,8 @@ public class EntityForm extends FormActivity {
 					if (jsonAddress != null) {
 						Location locationUpdated = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
 						mEntityForForm.getPlace().location = locationUpdated;
+						((BuilderButton) findViewById(R.id.address)).setText(mEntityForForm.place.location.address);
 					}
-					draw();
 				}
 			}
 			else if (resultCode == Activity.RESULT_OK && requestCode == CandiConstants.ACTIVITY_CATEGORY_EDIT) {
@@ -402,11 +424,14 @@ public class EntityForm extends FormActivity {
 					if (jsonCategory != null) {
 						Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 						if (categoryUpdated != null) {
+							if (mEntityForForm.getPlace().categories == null) {
+								mEntityForForm.getPlace().categories = new ArrayList<Category>();
+							}
 							mEntityForForm.getPlace().categories.clear();
 							mEntityForForm.getPlace().categories.add(categoryUpdated);
+							((BuilderButton) findViewById(R.id.category)).setText(categoryUpdated.name);
 						}
 					}
-					draw();
 				}
 			}
 			else {
@@ -432,7 +457,7 @@ public class EntityForm extends FormActivity {
 					linkUri = "http://" + linkUri;
 				}
 
-				if (!Utilities.validWebUri(linkUri)) {
+				if (!MiscUtils.validWebUri(linkUri)) {
 					mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
 					return false;
 				}
@@ -480,7 +505,7 @@ public class EntityForm extends FormActivity {
 				@Override
 				protected void onPreExecute() {
 					if (mTextUri != null && !mUriVerified) {
-						mCommon.showProgressDialog(getString(R.string.progress_verifying), false);
+						mCommon.showBusy(R.string.progress_verifying);
 					}
 				}
 
@@ -525,7 +550,7 @@ public class EntityForm extends FormActivity {
 
 							@Override
 							public void run() {
-								mCommon.showProgressDialog(getString(R.string.progress_saving), false);
+								mCommon.showBusy(R.string.progress_saving);
 							}
 						});
 
@@ -562,7 +587,7 @@ public class EntityForm extends FormActivity {
 				@Override
 				protected void onPostExecute(Object response) {
 					ServiceResponse serviceResponse = (ServiceResponse) response;
-					mCommon.hideProgressDialog();
+					mCommon.hideBusy();
 					if (serviceResponse.responseCode == ResponseCode.Success) {
 						finish();
 					}
@@ -579,6 +604,11 @@ public class EntityForm extends FormActivity {
 		ModelResult result = new ModelResult();
 		List<Beacon> beacons = null;
 		Beacon primaryBeacon = null;
+
+		/* First we want to make sure we have the freshest set of beacons */
+		if (NetworkManager.getInstance().isWifiEnabled()) {
+			ProxiExplorer.getInstance().scanForWifi(new RequestListener() {});
+		}
 
 		/* If parent id then this is a child */
 		if (mEntityForForm.links != null) {
@@ -599,19 +629,21 @@ public class EntityForm extends FormActivity {
 			beacons = ProxiExplorer.getInstance().getStrongestWifiAsBeacons(5);
 			primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
 
-			if (primaryBeacon == null && mCommon.mParentId == null) {
-				AircandiCommon.showAlertDialog(R.drawable.ic_app
-						, "Aircandi beacons"
-						, getString(R.string.alert_beacons_zero)
-						, null
-						, EntityForm.this, android.R.string.ok
-						, null
-						, new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {}
-						}
-						, null);
-				result.serviceResponse = new ServiceResponse(ResponseCode.Failed, null, null);
-				return result;
+			/*
+			 * Set location info if this is a place entity
+			 */
+			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+				mEntityForForm.getPlace().source = "user";
+				mEntityForForm.getPlace().sourceId = Aircandi.getInstance().getUser().id;
+				/*
+				 * We add location info as a consistent feature
+				 */
+				android.location.Location currentLocation = GeoLocationManager.getInstance().getLocation();
+				if (currentLocation != null) {
+					mEntityForForm.place.location = new com.aircandi.service.objects.Location();
+					mEntityForForm.place.location.lat = currentLocation.getLatitude();
+					mEntityForForm.place.location.lng = currentLocation.getLongitude();
+				}
 			}
 		}
 
@@ -634,7 +666,7 @@ public class EntityForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_deleting), false);
+				mCommon.showBusy(R.string.progress_deleting);
 			}
 
 			@Override
@@ -652,7 +684,7 @@ public class EntityForm extends FormActivity {
 					Tracker.trackEvent("Entity", "Delete", mEntityForForm.type, 0);
 					Logger.i(this, "Deleted entity: " + mEntityForForm.name);
 
-					mCommon.hideProgressDialog();
+					mCommon.hideBusy();
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 					setResult(CandiConstants.RESULT_ENTITY_DELETED);
 					/*
@@ -698,7 +730,7 @@ public class EntityForm extends FormActivity {
 						linkUri = "http://" + linkUri;
 					}
 
-					if (!Utilities.validWebUri(linkUri)) {
+					if (!MiscUtils.validWebUri(linkUri)) {
 						mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
 						return;
 					}
@@ -741,7 +773,7 @@ public class EntityForm extends FormActivity {
 						ImageUtils.showToastNotification("Validation canceled", Toast.LENGTH_SHORT);
 					}
 				});
-				mCommon.showProgressDialog(getString(R.string.progress_verifying), false);
+				mCommon.showBusy(R.string.progress_verifying);
 			}
 
 			@Override
@@ -793,7 +825,7 @@ public class EntityForm extends FormActivity {
 					else {
 						((EditText) findViewById(R.id.description)).setText("");
 					}
-					mCommon.hideProgressDialog();
+					mCommon.hideBusy();
 				}
 				else {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.LinkLookup, EntityForm.this);
@@ -814,7 +846,7 @@ public class EntityForm extends FormActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mCommon.startScanService();
+		mCommon.startScanService(CandiConstants.INTERVAL_SCAN_RADAR);
 	}
 
 	@Override

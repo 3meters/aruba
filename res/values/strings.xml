@@ -4,11 +4,11 @@
     <!-- Names -->
 
     <string name="name_app">aircandi</string>
-    <string name="name_entity_type_picture">Picture</string>
-    <string name="name_entity_type_post">Post</string>
-    <string name="name_entity_type_place">Place</string>
-    <string name="name_entity_type_link">Link</string>
-    <string name="name_entity_type_folder">Folder</string>
+    <string name="name_entity_type_picture">picture</string>
+    <string name="name_entity_type_post">post</string>
+    <string name="name_entity_type_place">place</string>
+    <string name="name_entity_type_link">link</string>
+    <string name="name_entity_type_folder">folder</string>
 
     <!-- Application -->
 
@@ -60,10 +60,10 @@
     <string name="dummy_phrase">after your two hour wifi code expires you can ask for more!! for...</string>
     <string name="dummy_pattern">hour wifi</string>
     <string name="dummy_phrase_stats">(2 tips)</string>
-    <string name="dummy_section_title">Section</string>
+    <string name="dummy_section_title">aection</string>
     <string name="dummy_location">Seattle, WA</string>
     <string name="dummy_address">"2200 N 56th (at Keystone Pl N)\nSeattle, WA 98103\n(206) 545-4277"</string>
-    <string name="dummy_comments">21 Comments</string>
+    <string name="dummy_comments">21 comments</string>
     <string name="dummy_distance">0.15mi</string>
     <string name="dummy_number">10</string>
     <string name="dummy_timesince">10 minutes ago</string>
@@ -95,23 +95,23 @@
     <string name="alert_wifi_settings">Settings</string>
     <string name="alert_wifi_cancel">Cancel</string>
     
-    <string name="alert_deleted">Deleted</string>
-    <string name="alert_updated">Saved</string>
-    <string name="alert_inserted">Saved</string>
-    <string name="alert_moved">Candi moved</string>
-    <string name="alert_signed_in">Signed in as</string>
-    <string name="alert_password_changed">Password changed for</string>
-    <string name="alert_error_title">Aircandi service</string>
-    <string name="alert_about_title">About</string>
-    <string name="alert_about_message">Version:</string>
-    <string name="alert_beacons_title">Aircandi beacons</string>
-    <string name="alert_send_password_title">Forgot password</string>
+    <string name="alert_deleted">deleted</string>
+    <string name="alert_updated">saved</string>
+    <string name="alert_inserted">saved</string>
+    <string name="alert_moved">candi moved</string>
+    <string name="alert_signed_in">signed in as</string>
+    <string name="alert_password_changed">password changed for</string>
+    <string name="alert_error_title">aircandi service</string>
+    <string name="alert_about_title">about</string>
+    <string name="alert_about_message">version:</string>
+    <string name="alert_beacons_title">aircandi beacons</string>
+    <string name="alert_send_password_title">forgot password</string>
     <string name="alert_send_password_message">A message has been sent to your email address with your current password.</string>
-    <string name="alert_terms_title">Terms of service</string>
+    <string name="alert_terms_title">terms of service</string>
     <string name="alert_signup_new_user_title">New user created</string>
     <string name="alert_signup_new_user_message">A message has been sent to your email address with instructions on how to activate your account.</string>
-    <string name="alert_candimap_ok">View</string>
-    <string name="alert_candimap_cancel">Cancel</string>
+    <string name="alert_candimap_ok">view</string>
+    <string name="alert_candimap_cancel">cancel</string>
 
     <!-- Errors -->
 
@@ -164,6 +164,7 @@
     <string name="progress_signing_out">Signing out&#8230;</string>
     <string name="progress_saving">Saving&#8230;</string>
     <string name="progress_verifying">Verifying&#8230;</string>
+    <string name="progress_tuning">Tuning&#8230;</string>
     <string name="progress_deleting">Deleting&#8230;</string>
     <string name="progress_updating">Updating&#8230;</string>
     <string name="progress_moving">Moving&#8230;</string>
@@ -192,12 +193,12 @@
 
     <!-- Radar -->
 
-    <string name="radar_tab_radar">RADAR</string>
-    <string name="radar_tab_mycandi">MY CANDI</string>
-    <string name="radar_tab_map">MAP</string>
-    <string name="radar_button_new">Drop candi</string>
-    <string name="radar_button_tune">Tune it!</string>
-    <string name="radar_button_help">Help</string>
+    <string name="radar_tab_radar">radar</string>
+    <string name="radar_tab_mycandi">my candi</string>
+    <string name="radar_button_custom">add custom place</string>
+    <string name="radar_button_tune">tune it!</string>
+    <string name="radar_section_places">tuned</string>
+    <string name="radar_section_synthetics">nearby</string>
     <string name="dialog_map_title">Aircandi beacon</string>
     <string name="dialog_map_message">This beacon has:\n\n</string>
     <string name="dialog_network_message_wifi_tethered">Aircandi radar can\'t scan for candi because your device is currently tethered and acting as a Wifi hotspot. Please turn off tethering and try again.</string>
@@ -211,7 +212,7 @@
     <string name="dialog_install_cancel"> No Thanks</string>
     <string name="dialog_install_toast_package_installed"> has been installed. Tap the candi to launch.</string>
     <string name="dialog_info">Copyright 3meters LLC 2012</string>
-    <string name="dialog_button_cancel">Cancel</string>
+    <string name="dialog_button_cancel">cancel</string>
     <string name="dialog_change_picture_title">Select picture…</string>
     <string name="dialog_template_picker_title">Select template</string>
     <string name="dialog_template_picker_message_top">Create and share candi with Aircandi users!</string>
@@ -250,143 +251,135 @@
     </string>
     <string name="help_tuning">
 <![CDATA[
-		Earn tuning points and make Aircandi faster by marking the place that matches where you are.
+		Make Aircandi faster by marking the places that match where you are.
 ]]>
     </string>
 
     <!-- CandiForm -->
 
-    <string name="candi_button_menu">Menu</string>
-    <string name="candi_button_share">Send to a friend</string>
-    <string name="candi_button_map">Map</string>
-    <string name="candi_button_tune">Tune it!</string>
-    <string name="candi_button_call">Call</string>
-    <string name="candi_button_website">View website</string>
-    <string name="candi_button_comment">Comment</string>
-    <string name="candi_button_new">Add Candi</string>
-    <string name="candi_button_edit">Edit</string>
-    <string name="candi_button_move">Move</string>
-    <string name="candi_button_more">View all</string>
-    <string name="candi_section_photos">Photos</string>
-    <string name="candi_section_candi">Candi</string>
-    <string name="candi_section_tips">Tips</string>
-    <string name="candi_section_photos_more">View all photos</string>
-    <string name="candi_section_candi_more">View all candi</string>
-    <string name="candi_section_tips_more">View all tips</string>
-    <string name="candi_section_phrases">People talk about</string>
-    <string name="candi_label_comments_none">No comments yet</string>
-    <string name="candi_label_tuning_score">Tunings: </string>
+    <string name="candi_button_menu">menu</string>
+    <string name="candi_button_share">send to a friend</string>
+    <string name="candi_button_map">map</string>
+    <string name="candi_button_tune">tune it!</string>
+    <string name="candi_button_call">call</string>
+    <string name="candi_button_website">view website</string>
+    <string name="candi_button_comment">comment</string>
+    <string name="candi_button_new">add candi</string>
+    <string name="candi_button_edit">edit</string>
+    <string name="candi_button_move">move</string>
+    <string name="candi_button_more">view all</string>
+    <string name="candi_section_photos">photos</string>
+    <string name="candi_section_candi">candi</string>
+    <string name="candi_section_tips">tips</string>
+    <string name="candi_section_photos_more">view all photos</string>
+    <string name="candi_section_candi_more">view all candi</string>
+    <string name="candi_section_tips_more">view all tips</string>
+    <string name="candi_section_phrases">people talk about</string>
+    <string name="candi_label_comments_none">no comments yet</string>
+    <string name="candi_label_tuning_score">tuning score</string>
     
-    <!-- CandiMap -->
-
-    <string name="candi_map_label_folders">Folders:</string>
-    <string name="candi_map_label_pictures">Pictures:</string>
-    <string name="candi_map_label_places">Places:</string>
-    <string name="candi_map_label_posts">Posts:</string>
-    <string name="candi_map_label_links">Links:</string>
-    <string name="candi_map_label_grouped">Multiple</string>
-
     <!-- Misc -->
 
-    <string name="theme_default">aircandi_theme_canyon</string>
+    <string name="theme_default">aircandi_theme_midnight</string>
 
     <!-- Forms.titles -->
 
-    <string name="form_title_picture">Picture</string>
-    <string name="form_title_post">Post</string>
-    <string name="form_title_place">Place</string>
-    <string name="form_title_link">Link</string>
-    <string name="form_title_folder">Folder</string>
-    <string name="form_title_profile">Profile settings</string>
-    <string name="form_title_password">Change password</string>
-    <string name="form_title_signin">Sign in</string>
-    <string name="form_title_signup">Sign up</string>
-    <string name="form_title_picture_search">Picture search</string>
-    <string name="form_title_picture_browse">Picture browse</string>
-    <string name="form_title_link_picker">Link picker</string>
-    <string name="form_title_preferences">Aircandi settings</string>
-    <string name="form_title_candi_picker">Pick a new collection</string>
-    <string name="form_title_comment">Comment</string>
-    <string name="form_title_comment_list">Comments</string>
-    <string name="form_title_picture_form">Picture viewer</string>
-    <string name="form_title_map_browse">Location</string>
-    <string name="form_title_templates">Templates</string>
-    <string name="form_title_category_builder">Category</string>
-        <string name="form_title_address_builder">Address</string>
-    <string name="form_title_help">Aircandi Tips</string>
+    <string name="form_title_picture">picture</string>
+    <string name="form_title_post">post</string>
+    <string name="form_title_place">place</string>
+    <string name="form_title_link">link</string>
+    <string name="form_title_folder">folder</string>
+    <string name="form_title_tuning">tuning</string>
+    <string name="form_title_profile">profile settings</string>
+    <string name="form_title_password">change password</string>
+    <string name="form_title_signin">sign in</string>
+    <string name="form_title_signup">sign up</string>
+    <string name="form_title_picture_search">picture search</string>
+    <string name="form_title_picture_browse">picture browse</string>
+    <string name="form_title_link_picker">link picker</string>
+    <string name="form_title_preferences">aircandi settings</string>
+    <string name="form_title_candi_picker">pick a new collection</string>
+    <string name="form_title_comment">comment</string>
+    <string name="form_title_comment_list">comments</string>
+    <string name="form_title_picture_form">picture viewer</string>
+    <string name="form_title_map_browse">location</string>
+    <string name="form_title_templates">templates</string>
+    <string name="form_title_category_builder">category</string>
+        <string name="form_title_address_builder">address</string>
+    <string name="form_title_help">aircandi tips</string>
 
     <!-- Forms.misc -->
 
     <string name="form_message_candi_picker">Move this candi to a new collection</string>
-    <string name="form_tab_content">CONTENT</string>
-    <string name="form_tab_settings">SETTINGS</string>
-    <string name="profile_tab_profile">PROFILE</string>
-    <string name="profile_tab_account">ACCOUNT</string>
-    <string name="candi_picker_tab_radar">RADAR</string>
-    <string name="candi_picker_tab_mycandi">MY CANDI</string>
-    <string name="bookmark_picker_tab_suggestions">SUGGESTIONS</string>
-    <string name="bookmark_picker_tab_bookmarks">BOOKMARKS</string>
+    <string name="form_tab_content">content</string>
+    <string name="form_tab_settings">settings</string>
+    <string name="profile_tab_profile">profile</string>
+    <string name="profile_tab_account">account</string>
+    <string name="candi_picker_tab_radar">radar</string>
+    <string name="candi_picker_tab_mycandi">my candi</string>
+    <string name="bookmark_picker_tab_suggestions">suggestions</string>
+    <string name="bookmark_picker_tab_bookmarks">bookmarks</string>
 
     <!-- Forms.buttons -->
 
-    <string name="form_button_change_picture">Select</string>
-    <string name="form_button_pick_link">Pick</string>
-    <string name="form_button_test_link">Test</string>
-    <string name="form_button_change_password">Change password&#8230;</string>
-    <string name="form_button_signin_signup">Create account&#8230;</string>
-    <string name="form_button_signup">Sign up</string>
-    <string name="form_button_save">Save</string>
-    <string name="form_button_delete">Delete</string>
-    <string name="form_button_ok">OK</string>
-    <string name="form_button_tune">Tune</string>
-    <string name="form_button_custom">Add custom\n place</string>
-    <string name="form_button_add">Add</string>
-    <string name="form_button_cancel">Cancel</string>
-    <string name="form_button_close">Close</string>
-    <string name="form_button_terms">Terms of service&#8230;</string>
-    <string name="form_button_send_password">Forgot password?</string>
-    <string name="form_button_move_solo">No collection</string>
+    <string name="form_button_change_picture">select</string>
+    <string name="form_button_pick_link">pick</string>
+    <string name="form_button_test_link">test</string>
+    <string name="form_button_change_password">change password&#8230;</string>
+    <string name="form_button_signin_signup">create account&#8230;</string>
+    <string name="form_button_signup">sign up</string>
+    <string name="form_button_save">save</string>
+    <string name="form_button_delete">delete</string>
+    <string name="form_button_ok">ok</string>
+    <string name="form_button_tune">tune</string>
+    <string name="form_button_custom">add custom\n place</string>
+    <string name="form_button_add">add</string>
+    <string name="form_button_cancel">cancel</string>
+    <string name="form_button_close">close</string>
+    <string name="form_button_terms">terms of service&#8230;</string>
+    <string name="form_button_send_password">forgot password?</string>
+    <string name="form_button_move_solo">no collection</string>
 
     <!-- Forms.labels -->
 
-    <string name="form_label_picture">Picture</string>
-    <string name="form_label_picture_folder">Folder badge</string>
-    <string name="form_label_picture_place">Photo</string>
-    <string name="post_label_picture_post">Post Badge</string>
-    <string name="post_label_picture_profile">Picture</string>
-    <string name="form_label_fullname">Full name</string>
-    <string name="form_label_bio">Bio</string>
-    <string name="form_label_link">Web</string>
-    <string name="form_label_location">Location</string>
-    <string name="form_label_password">Password</string>
+    <string name="form_label_picture">picture</string>
+    <string name="form_label_picture_folder">folder badge</string>
+    <string name="form_label_picture_place">photo</string>
+    <string name="post_label_picture_post">post badge</string>
+    <string name="post_label_picture_profile">picture</string>
+    <string name="form_label_fullname">full name</string>
+    <string name="form_label_bio">bio</string>
+    <string name="form_label_link">web</string>
+    <string name="form_label_location">location</string>
+    <string name="form_label_password">password</string>
     <string name="form_label_terms">By clicking the Sign up button, you agree to the terms of service:</string>
-    <string name="form_label_password_confirm">Confirm password</string>
-    <string name="form_label_password_old">Old password</string>
-    <string name="form_label_email">Email</string>
+    <string name="form_label_password_confirm">confirm password</string>
+    <string name="form_label_password_old">old password</string>
+    <string name="form_label_email">email</string>
     <string name="form_label_email_hint">(We will email you a confirmation.)</string>
-    <string name="form_label_locked">Locked</string>
+    <string name="form_label_locked">locked</string>
     <string name="form_label_password_hint">(Minimum of 6 characters.)</string>
 
     <!-- Forms.hints -->
 
-    <string name="form_title_hint">Title</string>
-    <string name="form_place_title_hint">Name</string>
-    <string name="form_place_website_hint">Website</string>
-    <string name="form_place_facebook_hint">Facebook page</string>
-    <string name="form_place_category_hint">Category</string>
-    <string name="form_place_sub_category_hint">Subcategory</string>
-    <string name="form_subtitle_hint">Subtitle</string>
-    <string name="form_description_hint">Description</string>
-    <string name="form_phone_hint">Phone</string>
-    <string name="form_address_hint">Address</string>
-    <string name="form_cross_street_hint">Cross street</string>
-    <string name="form_state_hint">State</string>
-    <string name="form_city_hint">City</string>
-    <string name="form_zipcode_hint">Zipcode</string>
-    <string name="form_comment_hint">Comment</string>
-    <string name="form_uri_hint">Web address</string>
-    <string name="form_twitter_hint">Twitter</string>
-    <string name="picture_search_query_hint">Search</string>
+    <string name="form_title_hint">title</string>
+    <string name="form_place_title_hint">name</string>
+    <string name="form_place_website_hint">website</string>
+    <string name="form_place_facebook_hint">facebook page</string>
+    <string name="form_place_category_hint">category</string>
+    <string name="form_place_sub_category_hint">subcategory</string>
+    <string name="form_subtitle_hint">subtitle</string>
+    <string name="form_description_hint">description</string>
+    <string name="form_phone_hint">phone</string>
+    <string name="form_address_hint">address</string>
+    <string name="form_cross_street_hint">cross street</string>
+    <string name="form_state_hint">state</string>
+    <string name="form_city_hint">city</string>
+    <string name="form_zipcode_hint">zipcode</string>
+    <string name="form_comment_hint">comment</string>
+    <string name="form_uri_hint">web address</string>
+    <string name="form_twitter_hint">twitter</string>
+    <string name="picture_search_query_hint">search</string>
     
     <!-- Forms.messages -->
 
@@ -396,16 +389,16 @@
     <string name="signin_message_candi_edit">Please sign in to edit your candi.</string>
     <string name="signin_message_candi_new">Please sign in to create and share candi with other Aircandi users.</string>
     <string name="signin_message_comment_new">Please sign in to create a candi comment.</string>
-    <string name="signin_button_signin">Sign In</string>
-    <string name="web_dialog_link_message">Build link…</string>
-    <string name="web_dialog_link_bookmark">Select a bookmark</string>
-    <string name="web_dialog_link_search">Web search</string>
-    <string name="web_dialog_link_negative">Cancel</string>
-    <string name="web_progress_validating">Validating website…</string>
-    <string name="web_alert_website_unavailable">Website unavailable</string>
-    <string name="web_label_html_zoom">Zoom html</string>
-    <string name="web_label_javascript">Javascript enabled</string>
-    <string name="picture_search_loading">Loading…</string>
+    <string name="signin_button_signin">sign In</string>
+    <string name="web_dialog_link_message">build link…</string>
+    <string name="web_dialog_link_bookmark">select a bookmark</string>
+    <string name="web_dialog_link_search">web search</string>
+    <string name="web_dialog_link_negative">cancel</string>
+    <string name="web_progress_validating">validating website…</string>
+    <string name="web_alert_website_unavailable">website unavailable</string>
+    <string name="web_label_html_zoom">zoom html</string>
+    <string name="web_label_javascript">javascript enabled</string>
+    <string name="picture_search_loading">loading…</string>
 
     <!-- Crash reporting -->
 

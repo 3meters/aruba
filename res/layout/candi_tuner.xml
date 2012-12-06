@@ -13,26 +13,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:orientation="horizontal"
-        android:padding="15dp" >
+        android:orientation="vertical"
+        android:padding="8dp" 
+        android:layout_marginBottom="5dp">
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/app_text_appearance_large_accent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/form_title_tuning" />
 
         <TextView
             android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/help_tuning"
             android:textAppearance="@style/app_text_appearance_medium"
             android:visibility="visible" />
-
-        <Button
-            android:id="@+id/button_custom"
-            style="@style/actionbar_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:onClick="onCustomButtonClick"
-            android:text="@string/form_button_custom" />
     </LinearLayout>
 
     <View
@@ -66,6 +64,7 @@
         android:gravity="center_horizontal|center_vertical" >
 
         <Button
+            android:id="@+id/button_cancel"
             style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -74,6 +73,7 @@
             android:text="@string/form_button_cancel" />
 
         <Button
+            android:id="@+id/button_tune"
             style="@style/actionbar_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -81,21 +81,5 @@
             android:onClick="onTuneButtonClick"
             android:text="@string/form_button_tune" />
     </LinearLayout>
-
-    <!-- Custom place form -->
-
-    <FrameLayout
-        android:id="@+id/custom_form"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:background="@drawable/drop_shadow_light"
-        android:visibility="gone" >
-
-        <include
-            android:layout_width="300dp"
-            android:layout_height="350dp"
-            layout="@layout/place_custom_form" />
-    </FrameLayout>
 
 </RelativeLayout>

@@ -11,10 +11,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
-import com.aircandi.components.ImageUtils;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -24,6 +22,9 @@ import com.aircandi.components.Tracker;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.widgets.UserView;
 
 public class CommentForm extends FormActivity {
@@ -59,9 +60,13 @@ public class CommentForm extends FormActivity {
 
 	private void initialize() {
 		mContent = (EditText) findViewById(R.id.description);
+		
 		mButtonSave = (Button) findViewById(R.id.button_save);
 		mButtonSave.setEnabled(false);
-
+		
+		FontManager.getInstance().setTypefaceLight(mContent);
+		FontManager.getInstance().setTypefaceLight(mButtonSave);
+		
 		mContent.addTextChangedListener(new SimpleTextWatcher() {
 
 			@Override
@@ -142,7 +147,7 @@ public class CommentForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(getString(R.string.progress_saving), true);
+					mCommon.showBusy(R.string.progress_saving);
 				}
 
 				@Override
@@ -158,7 +163,7 @@ public class CommentForm extends FormActivity {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.trackEvent("Comment", "Insert", null, 0);
-						mCommon.hideProgressDialog();
+						mCommon.hideBusy();
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_COMMENT_INSERTED);
 						finish();

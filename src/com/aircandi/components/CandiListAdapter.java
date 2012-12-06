@@ -21,6 +21,8 @@ import com.aircandi.R;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.ImageUtils;
 import com.aircandi.widgets.CandiView;
 import com.aircandi.widgets.TextViewEllipsizing;
 import com.aircandi.widgets.UserView;
@@ -57,6 +59,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			holder.image = (WebImageView) view.findViewById(R.id.image);
 			holder.candiView = (CandiView) view.findViewById(R.id.candi_view);
 			holder.title = (TextView) view.findViewById(R.id.title);
+
 			holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
 			holder.description = (TextViewEllipsizing) view.findViewById(R.id.description);
 			holder.user = (UserView) view.findViewById(R.id.user);
@@ -74,6 +77,11 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 				});
 			}
 			view.setTag(holder);
+			
+			FontManager.getInstance().setTypefaceLight(holder.title);
+			FontManager.getInstance().setTypefaceLight(holder.subtitle);
+			FontManager.getInstance().setTypefaceLight(holder.description);
+			FontManager.getInstance().setTypefaceLight(holder.comments);
 		}
 		else {
 			holder = (CandiListViewHolder) view.getTag();

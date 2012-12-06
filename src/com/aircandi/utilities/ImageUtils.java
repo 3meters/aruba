@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.utilities;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
+import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequest.ImageShape;
 import com.aircandi.core.CandiConstants;
 

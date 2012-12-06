@@ -14,18 +14,19 @@ import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.Events;
-import com.aircandi.components.ImageUtils;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.components.Utilities;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.MiscUtils;
 
 public class SignInForm extends FormActivity {
 
@@ -47,6 +48,12 @@ public class SignInForm extends FormActivity {
 		mTextMessage = (TextView) findViewById(R.id.form_message);
 		mButtonSignIn = (Button) findViewById(R.id.btn_signin);
 		mButtonSignIn.setEnabled(false);
+		
+		FontManager.getInstance().setTypefaceLight(mTextEmail);
+		FontManager.getInstance().setTypefaceLight(mTextPassword);
+		FontManager.getInstance().setTypefaceLight(mTextMessage);
+		FontManager.getInstance().setTypefaceLight(mButtonSignIn);
+		
 		mTextEmail.addTextChangedListener(new SimpleTextWatcher() {
 
 			@Override
@@ -101,7 +108,7 @@ public class SignInForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showProgressDialog(getString(R.string.progress_signing_in), false);
+					mCommon.showBusy(R.string.progress_signing_in);
 				}
 
 				@Override
@@ -115,7 +122,7 @@ public class SignInForm extends FormActivity {
 				protected void onPostExecute(Object response) {
 					
 					ModelResult result = (ModelResult) response;
-					mCommon.hideProgressDialog();
+					mCommon.hideBusy();
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Tracker.startNewSession();
@@ -168,7 +175,7 @@ public class SignInForm extends FormActivity {
 	}
 
 	private boolean validate() {
-		if (!Utilities.validEmail(mTextEmail.getText().toString())) {
+		if (!MiscUtils.validEmail(mTextEmail.getText().toString())) {
 			mCommon.showAlertDialogSimple(null, getString(R.string.error_invalid_email));
 			return false;
 		}

@@ -20,6 +20,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Window;
 import com.aircandi.components.DrawableManager.ViewHolder;
 import com.aircandi.components.Exceptions;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -77,6 +78,8 @@ public class PictureDetail extends FormActivity {
 		final ImageView image = (ImageView) layout.findViewById(R.id.image);
 		((ImageViewTouch) image).setFitToScreen(true);
 		((ImageViewTouch) image).setScrollEnabled(false);
+		
+		FontManager.getInstance().setTypefaceLight(title);
 
 		/* Title */
 		setVisibility(title, View.GONE);

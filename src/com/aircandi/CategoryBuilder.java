@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -114,11 +115,6 @@ public class CategoryBuilder extends FormActivity {
 		return true;
 	}
 
-	@Override
-	protected Integer getThemeResId() {
-		return R.style.aircandi_theme_dialog_light;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
@@ -157,15 +153,17 @@ public class CategoryBuilder extends FormActivity {
 		final List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStrings(mCategories);
 		categories.add(getString(R.string.form_place_category_hint));
 
-		ArrayAdapter adapter = new ArrayAdapter(this, R.layout.sherlock_spinner_item, categories) {
+		ArrayAdapter adapter = new ArrayAdapter(this, R.layout.spinner_item, categories) {
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 
 				View view = super.getView(position, convertView, parent);
 
+				FontManager.getInstance().setTypefaceLight((TextView) view.findViewById(R.id.spinner_name));
+
 				if (position == getCount()) {
-					((TextView) view.findViewById(android.R.id.text1)).setText("");
-					((TextView) view.findViewById(android.R.id.text1)).setHint(categories.get(getCount())); //"Hint to be displayed"
+					((TextView) view.findViewById(R.id.spinner_name)).setText("");
+					((TextView) view.findViewById(R.id.spinner_name)).setHint(categories.get(getCount())); //"Hint to be displayed"
 				}
 
 				return view;
@@ -176,8 +174,10 @@ public class CategoryBuilder extends FormActivity {
 				return super.getCount() - 1; // you dont display last item. It is used as hint.
 			}
 		};
-		adapter.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+		
+		//adapter.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
 		mSpinnerCategory.setAdapter(adapter);
+		
 		if (mOriginalCategory == null) {
 			mSpinnerCategory.setSelection(adapter.getCount());
 		}
@@ -196,15 +196,17 @@ public class CategoryBuilder extends FormActivity {
 					final List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStrings(mCategory.categories);
 					categories.add(getString(R.string.form_place_sub_category_hint));
 
-					ArrayAdapter adapter = new ArrayAdapter(CategoryBuilder.this, R.layout.sherlock_spinner_item, categories) {
+					ArrayAdapter adapter = new ArrayAdapter(CategoryBuilder.this, R.layout.spinner_item, categories) {
 						@Override
 						public View getView(int position, View convertView, ViewGroup parent) {
 
 							View view = super.getView(position, convertView, parent);
 
+							FontManager.getInstance().setTypefaceLight((TextView) view.findViewById(R.id.spinner_name));
+							
 							if (position == getCount()) {
-								((TextView) view.findViewById(android.R.id.text1)).setText("");
-								((TextView) view.findViewById(android.R.id.text1)).setHint(categories.get(getCount())); //"Hint to be displayed"
+								((TextView) view.findViewById(R.id.spinner_name)).setText("");
+								((TextView) view.findViewById(R.id.spinner_name)).setHint(categories.get(getCount())); //"Hint to be displayed"
 							}
 
 							return view;
@@ -216,7 +218,7 @@ public class CategoryBuilder extends FormActivity {
 						}
 					};
 
-					adapter.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+					//adapter.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
 
 					mSpinnerSubcategory.setVisibility(View.VISIBLE);
 					mSpinnerSubcategory.setAdapter(adapter);

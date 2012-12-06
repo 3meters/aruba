@@ -33,8 +33,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
                 android:visibility="visible" >
 
                 <!-- Main body -->
@@ -152,6 +152,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="20dp"
+                        android:layout_marginLeft="-3dp"
                         android:orientation="vertical" >
 
                         <com.aircandi.widgets.ComboButton
@@ -186,7 +187,7 @@
                             android:drawablePadding="5dp"
                             android:onClick="onFacebookButtonClick"
                             android:text="@string/dummy_twitter" />
-                        
+
                         <com.aircandi.widgets.ComboButton
                             android:id="@+id/button_twitter"
                             style="@style/candi_form_button_combo"
@@ -210,6 +211,17 @@
                             android:text="@string/candi_button_menu" />
                     </LinearLayout>
                 </com.aircandi.widgets.SectionLayout>
+
+                <Button
+                    android:id="@+id/button_comments"
+                    style="@style/button_comments"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="5dp"
+                    android:onClick="onBrowseCommentsButtonClick"
+                    android:paddingBottom="5dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/candi_label_comments_none" />
 
                 <com.aircandi.widgets.UserView
                     android:id="@+id/author"
@@ -264,6 +276,7 @@
                 android:visibility="visible" />
 
             <TextView
+            	android:id="@+id/button_new_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

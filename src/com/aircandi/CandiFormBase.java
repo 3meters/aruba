@@ -23,15 +23,13 @@ import android.widget.Toast;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AndroidManager;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CandiPagerAdapter;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.DrawableManager.ViewHolder;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -48,6 +46,9 @@ import com.aircandi.service.objects.Phrase;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Tip;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.widgets.CandiView;
 import com.aircandi.widgets.HorizontalScrollLayout;
 import com.aircandi.widgets.ListViewExpanded;
@@ -67,6 +68,16 @@ public abstract class CandiFormBase extends CandiActivity {
 
 	public abstract void bind(Boolean refresh);
 
+	public void initialize() {
+
+		/* Font for button bar */
+		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_comment));
+		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_edit));
+		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_move));
+		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_new_text));
+
+	}
+
 	public void doBind(final Boolean refresh, final Boolean pagingEnabled, EntityTree entityTree) {
 		/*
 		 * Navigation setup for action bar icon and title
@@ -77,7 +88,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
+				mCommon.showBusy();
 			}
 
 			@Override
@@ -114,12 +125,12 @@ public abstract class CandiFormBase extends CandiActivity {
 						}
 						updateViewPager(entities);
 					}
-					mCommon.hideProgressDialog();
+					mCommon.hideBusy();
 				}
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
 				}
-				mCommon.hideProgressDialog();
+				mCommon.hideBusy();
 			}
 
 		}.execute();
@@ -400,7 +411,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_loading), true);
+				mCommon.showBusy(R.string.progress_tuning);
 			}
 
 			@Override
@@ -415,7 +426,7 @@ public abstract class CandiFormBase extends CandiActivity {
 			protected void onPostExecute(Object response) {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				setSupportProgressBarIndeterminateVisibility(false);
-				mCommon.hideProgressDialog();
+				mCommon.hideBusy();
 				if (serviceResponse.responseCode != ResponseCode.Success) {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.Tuning);
 				}
@@ -476,7 +487,7 @@ public abstract class CandiFormBase extends CandiActivity {
 							.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
 
 					ImageRequest imageRequest = builder.create();
-					
+
 					image.setImageRequest(imageRequest);
 
 					if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
@@ -528,12 +539,14 @@ public abstract class CandiFormBase extends CandiActivity {
 			setVisibility(title, View.GONE);
 			if (title != null && entity.name != null && !entity.name.equals("")) {
 				title.setText(Html.fromHtml(entity.name));
+				FontManager.getInstance().setTypefaceLight(title);
 				setVisibility(title, View.VISIBLE);
 			}
 
 			setVisibility(subtitle, View.GONE);
 			if (subtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
 				subtitle.setText(Html.fromHtml(entity.subtitle));
+				FontManager.getInstance().setTypefaceLight(subtitle);
 				setVisibility(subtitle, View.VISIBLE);
 			}
 		}
@@ -544,6 +557,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 		setVisibility(layout.findViewById(R.id.section_description), View.GONE);
 		if (description != null && entity.description != null && !entity.description.equals("")) {
+			FontManager.getInstance().setTypefaceLight(description);
 			description.setText(Html.fromHtml(entity.description));
 			setVisibility(layout.findViewById(R.id.section_description), View.VISIBLE);
 		}
@@ -579,6 +593,7 @@ public abstract class CandiFormBase extends CandiActivity {
 			if (visibleChildrenCount > 3) {
 				View footer = inflater.inflate(R.layout.temp_section_footer, null);
 				Button button = (Button) footer.findViewById(R.id.button_more);
+				FontManager.getInstance().setTypefaceLight(button);
 				button.setText(R.string.candi_section_candi_more);
 				button.setTag("candi");
 				section.addView(footer);
@@ -604,14 +619,21 @@ public abstract class CandiFormBase extends CandiActivity {
 				}
 
 				address.setText(Html.fromHtml(addressBlock));
+				FontManager.getInstance().setTypefaceLight(address);
 				setVisibility(address, View.VISIBLE);
 			}
 
 			/* Tuning score */
-			setVisibility(layout.findViewById(R.id.label_tuning_score), View.VISIBLE);
-			setVisibility(layout.findViewById(R.id.tuning_score), View.VISIBLE);
-			TextView text = (TextView) layout.findViewById(R.id.tuning_score);
-			text.setText(String.valueOf(entity.getTuningScore()));
+			setVisibility(layout.findViewById(R.id.label_tuning_score), View.GONE);
+			setVisibility(layout.findViewById(R.id.tuning_score), View.GONE);
+			if (!entity.synthetic) {
+				FontManager.getInstance().setTypefaceLight((TextView) layout.findViewById(R.id.label_tuning_score));
+				FontManager.getInstance().setTypefaceLight((TextView) layout.findViewById(R.id.tuning_score));
+				setVisibility(layout.findViewById(R.id.label_tuning_score), View.VISIBLE);
+				setVisibility(layout.findViewById(R.id.tuning_score), View.VISIBLE);
+				TextView text = (TextView) layout.findViewById(R.id.tuning_score);
+				text.setText(String.valueOf(entity.getTuningScore()));
+			}
 
 			/* Photos */
 			setVisibility(layout.findViewById(R.id.section_photos), View.GONE);
@@ -631,12 +653,12 @@ public abstract class CandiFormBase extends CandiActivity {
 					ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(photo.getImageSizedUri(100, 100), holder, null);
 					list.addView(view);
 				}
+				
 				if (place.photoCount > place.photos.size()) {
-					View footer = inflater.inflate(R.layout.temp_section_footer, null);
-					Button button = (Button) footer.findViewById(R.id.button_more);
+					TextView button = section.getButtonMore();
 					button.setText(R.string.candi_section_photos_more);
 					button.setTag("photos");
-					section.addView(footer);
+					setVisibility(button, View.VISIBLE);
 				}
 
 				setVisibility(layout.findViewById(R.id.section_photos), View.VISIBLE);
@@ -669,6 +691,7 @@ public abstract class CandiFormBase extends CandiActivity {
 						View view = inflater.inflate(R.layout.temp_listitem_phrase, null);
 
 						TextViewEllipsizing phraseText = (TextViewEllipsizing) view.findViewById(R.id.phrase);
+						FontManager.getInstance().setTypefaceLight(phraseText);
 						String sampleText = new String(phrase.sampleText);
 						sampleText = sampleText.replace(phrase.phrase, "<font color='#ffaa00'>" + phrase.phrase + "</font>");
 						sampleText += " <font color='#aaaaaa'>(" + String.valueOf(phrase.sampleCount) + " tips)</font>";
@@ -713,6 +736,7 @@ public abstract class CandiFormBase extends CandiActivity {
 						UserView user = (UserView) view.findViewById(R.id.author);
 
 						/* Tip text */
+						FontManager.getInstance().setTypefaceLight(description);
 						description.setText(tip.text);
 
 						/* Author block */
@@ -735,12 +759,12 @@ public abstract class CandiFormBase extends CandiActivity {
 				});
 
 				if (place.tipCount > list.getItemMaxCount()) {
-					View footer = inflater.inflate(R.layout.temp_section_footer, null);
-					Button button = (Button) footer.findViewById(R.id.button_more);
+					TextView button = section.getButtonMore();
 					button.setText(R.string.candi_section_tips_more);
 					button.setTag("tips");
-					section.addView(footer);
+					setVisibility(button, View.VISIBLE);
 				}
+				
 				setVisibility(layout.findViewById(R.id.section_tips), View.VISIBLE);
 			}
 		}
@@ -764,15 +788,25 @@ public abstract class CandiFormBase extends CandiActivity {
 		setVisibility(layout.findViewById(R.id.button_map), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_call), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_tune), View.GONE);
-		setVisibility(layout.findViewById(R.id.button_comments), View.GONE);
+
 		setVisibility(layout.findViewById(R.id.button_comment), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_new), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_edit), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_move), View.GONE);
+
 		setVisibility(layout.findViewById(R.id.button_menu), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_comments), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_twitter), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_website), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_facebook), View.GONE);
+
+		FontManager.getInstance().setTypefaceLight((TextView) layout.findViewById(R.id.button_map));
+		FontManager.getInstance().setTypefaceLight((TextView) layout.findViewById(R.id.button_call));
+		FontManager.getInstance().setTypefaceLight((TextView) layout.findViewById(R.id.button_tune));
+		FontManager.getInstance().setTypefaceLight((TextView) layout.findViewById(R.id.button_comment));
+		FontManager.getInstance().setTypefaceLight((TextView) layout.findViewById(R.id.button_new_text));
+		FontManager.getInstance().setTypefaceLight((TextView) layout.findViewById(R.id.button_edit));
+		FontManager.getInstance().setTypefaceLight((TextView) layout.findViewById(R.id.button_move));
 
 		if (entity.locked != null && !entity.locked) {
 			if (entity.isCollection != null && entity.isCollection) {
@@ -920,7 +954,7 @@ public abstract class CandiFormBase extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showProgressDialog(getString(R.string.progress_moving), true);
+				mCommon.showBusy(R.string.progress_moving);
 			}
 
 			@Override

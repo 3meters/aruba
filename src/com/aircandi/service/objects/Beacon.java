@@ -119,28 +119,42 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 		}
 		return location;
 	}
+	
+	public Float getDistance() {
+		
+		Float distance = 0f;
+		
+		if (this.level.intValue() >= -40)
+			distance = 1f;
+		else if (this.level.intValue() >= -50)
+			distance = 2f;
+		else if (this.level.intValue() >= -55)
+			distance = 3f;
+		else if (this.level.intValue() >= -60)
+			distance = 5f;
+		else if (this.level.intValue() >= -65)
+			distance = 7f;
+		else if (this.level.intValue() >= -70)
+			distance = 10f;
+		else if (this.level.intValue() >= -75)
+			distance = 15f;
+		else if (this.level.intValue() >= -80)
+			distance = 20f;
+		else if (this.level.intValue() >= -85)
+			distance = 30f;
+		else if (this.level.intValue() >= -90)
+			distance = 40f;
+		else if (this.level.intValue() >= -95)
+			distance = 60f;
+		else
+			distance = 80f;
+			
+		return distance;
+	}
 
 	@Override
 	public String getCollection() {
 		return "beacons";
-	}
-
-	public float getLevelPcnt() {
-
-		float levelPcnt = 1f;
-
-		if (this.level.intValue() >= 90)
-			levelPcnt = .1f;
-		else if (this.level.intValue() >= 80)
-			levelPcnt = .3f;
-		else if (this.level.intValue() >= 70)
-			levelPcnt = .5f;
-		else if (this.level.intValue() >= 60)
-			levelPcnt = .7f;
-		else if (this.level.intValue() >= 50)
-			levelPcnt = .8f;
-
-		return levelPcnt;
 	}
 
 	public List<Entity> getEntities() {

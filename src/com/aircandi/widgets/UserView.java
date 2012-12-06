@@ -11,10 +11,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.aircandi.components.DateUtils;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.DateUtils;
 import com.aircandi.R;
 
 public class UserView extends RelativeLayout {

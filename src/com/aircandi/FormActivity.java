@@ -24,14 +24,11 @@ import android.widget.EditText;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.aircandi.components.AircandiCommon;
-import com.aircandi.components.AnimUtils;
-import com.aircandi.components.AnimUtils.TransitionType;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.ImageUtils;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -40,6 +37,9 @@ import com.aircandi.components.Tracker;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.widgets.BuilderButton;
 import com.aircandi.widgets.WebImageView;
 
@@ -68,7 +68,7 @@ public abstract class FormActivity extends SherlockActivity {
 			 */
 			mCommon = new AircandiCommon(this, savedInstanceState);
 			mCommon.unpackIntent();
-			mCommon.setTheme(getThemeResId(), isDialog());
+			mCommon.setTheme(null, isDialog());
 			super.onCreate(savedInstanceState);
 			super.setContentView(this.getLayoutID());
 			mCommon.initialize();
@@ -541,10 +541,6 @@ public abstract class FormActivity extends SherlockActivity {
 		return false;
 	}
 
-	protected Integer getThemeResId() {
-		return R.style.aircandi_theme_form_light;
-	}
-	
 	protected static void setVisibility(View view, Integer visibility) {
 		if (view != null) {
 			view.setVisibility(visibility);

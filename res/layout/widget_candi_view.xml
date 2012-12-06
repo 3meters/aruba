@@ -58,15 +58,16 @@
             android:layout_gravity="center_vertical"
             android:orientation="vertical" >
 
-            <TextView
+            <com.aircandi.widgets.TextViewEllipsizing
                 android:id="@+id/candi_view_title"
                 style="@style/candi_view_name"
                 android:layout_width="match_parent"
+                android:maxLines="2"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:text="@string/dummy_title_short"
-                android:textSize="16sp" />
+                android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/candi_view_subtitle"

@@ -17,6 +17,8 @@ import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.components.SearchManager.SearchItemType;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity.ImageFormat;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.ImageUtils;
 import com.aircandi.widgets.WebImageView;
 
 public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterable {
@@ -75,10 +77,10 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 			else {
 				((TextView) view.findViewById(R.id.item_section_title)).setVisibility(View.VISIBLE);
 				if (suggestion.type == SearchItemType.Suggestions) {
-					((TextView) view.findViewById(R.id.item_section_title)).setText("NEARBY");
+					((TextView) view.findViewById(R.id.item_section_title)).setText(getContext().getString(R.id.radar_synthetics_header));
 				}
 				else {
-					((TextView) view.findViewById(R.id.item_section_title)).setText(suggestion.type.name().toUpperCase());
+					((TextView) view.findViewById(R.id.item_section_title)).setText(suggestion.type.name());
 				}
 			}
 
