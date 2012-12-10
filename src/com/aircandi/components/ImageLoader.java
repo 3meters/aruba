@@ -3,23 +3,12 @@ package com.aircandi.components;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Picture;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
-import android.webkit.WebView.PictureListener;
-import android.webkit.WebViewClient;
 
-import com.aircandi.Aircandi;
 import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -33,12 +22,10 @@ import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.utilities.ImageUtils;
 
-@SuppressWarnings("deprecation")
 public class ImageLoader {
 
 	private ImagesQueue		mImagesQueue		= new ImagesQueue();
 	private ImagesLoader	mImageLoaderThread	= new ImagesLoader();
-	private WebView			mWebView;
 
 	public ImageLoader() {
 
@@ -222,8 +209,7 @@ public class ImageLoader {
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
 			byte[] imageBytes = (byte[]) serviceResponse.data;
-			
-			
+
 			String extension = "";
 			int i = url.lastIndexOf('.');
 			if (i > 0) {
@@ -233,7 +219,7 @@ public class ImageLoader {
 			Bitmap bitmap = null;
 			if (extension.equals("gif")) {
 				/*
-				 * Potential memory issue: We don't have the same sampling protection as 
+				 * Potential memory issue: We don't have the same sampling protection as
 				 * we get when decoding a jpeg or png.
 				 */
 				InputStream inputStream = new ByteArrayInputStream(imageBytes);
@@ -260,154 +246,6 @@ public class ImageLoader {
 		return serviceResponse;
 	}
 
-	private void getWebPageAsBitmap(final String originalUri, final ImageRequest imageRequest, final RequestListener listener) {
-
-		final ServiceResponse serviceResponse = new ServiceResponse();
-		final AtomicInteger pictureCount = new AtomicInteger(0);
-		final AtomicBoolean ready = new AtomicBoolean(false);
-
-		/*
-		 * Setting WideViewPort to false will cause html text to layout to try and fit the sizing of the webview though
-		 * our screen capture will still be cover the full page width. Ju Setting to true will handle text nicely but
-		 * will show the full width of the webview even if the page content only fills a portion of it. We might have to
-		 * have a property to control the desired result when using html for the tile display image. Makes the Webview
-		 * have a normal viewport (such as a normal desktop browser), while when false the webview will have a viewport
-		 * constrained to it's own dimensions (so if the webview is 50px*50px the viewport will be the same size)
-		 */
-
-		Aircandi.applicationHandler.post(new Runnable() {
-
-			@SuppressLint("SetJavaScriptEnabled")
-			@Override
-			public void run() {
-
-				mWebView.getSettings().setUseWideViewPort(true);
-				if (imageRequest.getLinkZoom()) {
-					mWebView.getSettings().setUseWideViewPort(false);
-				}
-
-				mWebView.getSettings().setUserAgentString(CandiConstants.USER_AGENT_MOBILE);
-				/*
-				 * Using setJavaScriptEnabled can introduce XSS vulnerabilities.
-				 */
-				mWebView.getSettings().setJavaScriptEnabled(imageRequest.getLinkJavascriptEnabled());
-				mWebView.getSettings().setLoadWithOverviewMode(true);
-				mWebView.getSettings().setDomStorageEnabled(true);
-				mWebView.refreshDrawableState();
-
-				mWebView.setWebViewClient(new WebViewClient() {
-
-					@Override
-					public void onLoadResource(WebView view, String url) {
-						super.onLoadResource(view, url);
-					}
-
-					@Override
-					public void onPageStarted(WebView view, String url, Bitmap favicon) {
-						super.onPageStarted(view, url, favicon);
-						Logger.v(ImageLoader.this, "Page started: " + url);
-					}
-
-					@Override
-					public void onPageFinished(WebView view, String url) {
-						super.onPageFinished(view, url);
-						Logger.v(ImageLoader.this, "Page finished: " + url);
-						ready.set(true);
-					}
-
-					public boolean shouldOverrideUrlLoading(WebView view, String url) {
-						view.loadUrl(url);
-						Logger.v(ImageLoader.this, "Url intercepted and loaded: " + url);
-						return false;
-					}
-
-				});
-
-				mWebView.setWebChromeClient(new WebChromeClient() {
-
-					@Override
-					public void onProgressChanged(WebView view, int progress) {
-						listener.onProgressChanged(progress);
-
-						Logger.v(ImageLoader.this, "Progress: " + String.valueOf(progress) + " :" + view.getUrl());
-						if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-							if (view.getUrl() != null && progress >= 100) {
-								Logger.v(ImageLoader.this, "Capturing screenshot: " + view.getUrl());
-
-								Aircandi.applicationHandler.postDelayed(new Runnable() {
-
-									@Override
-									public void run() {
-										Bitmap bitmap = captureWebView(mWebView.capturePicture());
-										serviceResponse.data = bitmap;
-										listener.onComplete(serviceResponse);
-									}
-
-								}, 1000);
-
-							}
-						}
-					}
-				});
-
-				/*
-				 * Using picture listener works best on older versions.
-				 */
-				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-					mWebView.setPictureListener(new PictureListener() {
-
-						@Override
-						public void onNewPicture(WebView view, Picture picture) {
-							Logger.v(this, "WebView onNewPicture called");
-							/*
-							 * Sometimes the first call isn't finished with layout but the second one is correct.
-							 * How can we tell the difference?
-							 */
-							if (ready.get()) {
-								pictureCount.getAndIncrement();
-								Bitmap bitmap = captureWebView(picture);
-								serviceResponse.data = bitmap;
-								listener.onComplete(serviceResponse);
-
-								/* We only allow a maximum of two picture calls */
-								if (pictureCount.get() >= 2) {
-									mWebView.setPictureListener(null);
-								}
-							}
-						}
-					});
-				}
-				mWebView.loadUrl(originalUri);
-			}
-		});
-	}
-
-	private Bitmap captureWebView(Picture picture) {
-
-		final Bitmap bitmap = Bitmap.createBitmap(CandiConstants.CANDI_VIEW_WIDTH, CandiConstants.CANDI_VIEW_WIDTH,
-				CandiConstants.IMAGE_CONFIG_DEFAULT);
-		Canvas canvas = new Canvas(bitmap);
-
-		Matrix matrix = new Matrix();
-		float scale = (float) CandiConstants.CANDI_VIEW_WIDTH / (float) picture.getWidth();
-		matrix.postScale(scale, scale);
-
-		canvas.setMatrix(matrix);
-		canvas.drawPicture(picture);
-
-		/* Release */
-		canvas = null;
-		return bitmap;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Setter/Getter routines
-	// --------------------------------------------------------------------------------------------
-
-	public void setWebView(WebView webView) {
-		mWebView = webView;
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Loader routines
 	// --------------------------------------------------------------------------------------------
@@ -431,8 +269,6 @@ public class ImageLoader {
 
 	private class ImagesLoader extends Thread {
 
-		private boolean	processingWebPage	= false;
-
 		public void run() {
 
 			try {
@@ -451,62 +287,12 @@ public class ImageLoader {
 						Logger.v(this, "ImageQueue has " + String.valueOf(mImagesQueue.mImagesToLoad.size()) + " images requests pending");
 						final ImageRequest imageRequest;
 						synchronized (mImagesQueue.mImagesToLoad) {
-							ImageRequest imageRequestCheck = mImagesQueue.mImagesToLoad.peek();
-							if (imageRequestCheck.getImageFormat() == ImageFormat.Html) {
-								if (processingWebPage) {
-									Logger.v(this, "ImageQueue thread is waiting");
-									mImagesQueue.mImagesToLoad.wait();
-								}
-							}
 							imageRequest = mImagesQueue.mImagesToLoad.poll();
 						}
 
 						Bitmap bitmap = null;
 						ServiceResponse serviceResponse = new ServiceResponse();
-						/*
-						 * Html image
-						 */
-						if (imageRequest.getImageFormat() == ImageFormat.Html) {
-
-							processingWebPage = true;
-							Logger.v(ImageLoader.this, "Starting html image processing: " + imageRequest.getImageUri());
-							getWebPageAsBitmap(imageRequest.getImageUri(), imageRequest, new RequestListener() {
-
-								@Override
-								public void onComplete(Object response) {
-
-									ServiceResponse serviceResponse = (ServiceResponse) response;
-									if (serviceResponse.responseCode == ResponseCode.Success) {
-										processingWebPage = false;
-
-										/* It safe to start processing another web page image if we have one */
-										synchronized (mImagesQueue.mImagesToLoad) {
-											mImagesQueue.mImagesToLoad.notifyAll();
-										}
-
-										/* Perform requested post processing */
-										Bitmap bitmap = (Bitmap) serviceResponse.data;
-										bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
-
-										/* Stuff it into the cache. Overwrites if it already exists. */
-										ImageManager.getInstance().putImage(imageRequest.getImageUri(), bitmap, CompressFormat.JPEG);
-
-										Logger.v(ImageLoader.this, "Html image processed: " + imageRequest.getImageUri());
-										serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
-									}
-									imageRequest.getRequestListener().onComplete(serviceResponse);
-								}
-
-								@Override
-								public void onProgressChanged(int progress) {
-									imageRequest.getRequestListener().onProgressChanged(progress);
-								}
-							});
-						}
-						/*
-						 * Binary image
-						 */
-						else if (imageRequest.getImageFormat() == ImageFormat.Binary) {
+						if (imageRequest.getImageFormat() == ImageFormat.Binary) {
 
 							long startTime = System.nanoTime();
 							float estimatedTime = System.nanoTime();

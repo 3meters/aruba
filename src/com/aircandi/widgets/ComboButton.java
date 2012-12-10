@@ -31,7 +31,7 @@ public class ComboButton extends Button {
 	}
 
 	private void setDrawableSize(Context context, AttributeSet attrs, int defStyle) {
-		FontManager.getInstance().setTypefaceLight(this);
+		FontManager.getInstance().setTypefaceDefault(this);
 
 		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ComboButton, defStyle, 0);
 		mDrawableScale = ta.getFloat(R.styleable.ComboButton_drawableScale, 0.5f);

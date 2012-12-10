@@ -14,6 +14,31 @@ public interface CandiConstants {
 	public static final String	GOOGLE_API_KEY_RELEASE					= "059_3gpXU_DPYyT-FzFkprl7kk2TvDhm_6mKWLQ";
 	public static final String	GOOGLE_API_KEY_DEBUG					= "059_3gpXU_DM8qW_gRO68TJul5KWUSUzIE3gQlw";
 
+	/* Activity parameters */
+	public static final String	EXTRA_PARENT_ENTITY_ID					= "com.aircandi.EXTRA_PARENT_ENTITY_ID";
+	public static final String	EXTRA_BEACON_ID							= "com.aircandi.EXTRA_BEACON_ID";
+	public static final String	EXTRA_ENTITY_ID							= "com.aircandi.EXTRA_ENTITY_ID";
+	public static final String	EXTRA_ENTITY_IS_ROOT					= "com.aircandi.EXTRA_ENTITY_IS_ROOT";
+	public static final String	EXTRA_ENTITY_TYPE						= "com.aircandi.EXTRA_ENTITY_TYPE";
+	public static final String	EXTRA_ENTITY_LOCATION					= "com.aircandi.EXTRA_ENTITY_LOCATION";
+	public static final String	EXTRA_USER_ID							= "com.aircandi.EXTRA_USER_ID";
+	public static final String	EXTRA_URI								= "com.aircandi.EXTRA_URI";
+	public static final String	EXTRA_URI_TITLE							= "com.aircandi.EXTRA_URI_TITLE";
+	public static final String	EXTRA_URI_DESCRIPTION					= "com.aircandi.EXTRA_URI_DESCRIPTION";
+	public static final String	EXTRA_MESSAGE							= "com.aircandi.EXTRA_MESSAGE";
+	public static final String	EXTRA_ADDRESS							= "com.aircandi.EXTRA_ADDRESS";
+	public static final String	EXTRA_CATEGORY							= "com.aircandi.EXTRA_CATEGORY";
+	public static final String	EXTRA_PHONE								= "com.aircandi.EXTRA_PHONE";
+	public static final String	EXTRA_ENTITY_TREE						= "com.aircandi.EXTRA_ENTITY_TREE";
+	public static final String	EXTRA_COLLECTION_ID						= "com.aircandi.EXTRA_COLLECTION_ID";
+	public static final String	EXTRA_STRING_ID							= "com.aircandi.EXTRA_STRING_ID";
+	public static final String	EXTRA_VERIFY_URI						= "com.aircandi.EXTRA_VERIFY_URI";
+	public static final String	EXTRA_COMMAND_TYPE						= "com.aircandi.EXTRA_COMMAND_TYPE";
+	public static final String	EXTRA_NAVIGATION_TOP					= "com.aircandi.EXTRA_NAVIGATION_TOP";
+	public static final String	EXTRA_SEARCH_PHRASE						= "com.aircandi.EXTRA_SEARCH_PHRASE";
+	public static final String	EXTRA_AS_PICKER							= "com.aircandi.EXTRA_AS_PICKER";
+	public static final String	EXTRA_LIST_TYPE						= "com.aircandi.EXTRA_LIST_TARGET";
+
 	public static final int		MILLS_PER_SECOND						= 1000;
 	public static final int		ONE_SECOND								= MILLS_PER_SECOND * 1;
 	public static final int		TEN_SECONDS								= MILLS_PER_SECOND * 10;
@@ -124,7 +149,6 @@ public interface CandiConstants {
 
 	public static final String	TYPE_CANDI_POST							= "com.aircandi.candi.post";
 	public static final String	TYPE_CANDI_PICTURE						= "com.aircandi.candi.picture";
-	public static final String	TYPE_CANDI_LINK							= "com.aircandi.candi.link";
 	public static final String	TYPE_CANDI_FOLDER						= "com.aircandi.candi.folder";
 	public static final String	TYPE_CANDI_PLACE						= "com.aircandi.candi.place";
 
@@ -150,7 +174,7 @@ public interface CandiConstants {
 	public static final int		ACTIVITY_CANDI_INFO						= 440;
 	public static final int		ACTIVITY_CANDI_LIST						= 450;
 	public static final int		ACTIVITY_LINK_PICK						= 500;
-	public static final int		ACTIVITY_WEBSITE_PICK					= 525;
+	public static final int		ACTIVITY_WEBSITE_EDIT					= 525;
 	public static final int		ACTIVITY_FACEBOOK_PICK					= 530;
 	public static final int		ACTIVITY_CANDI_PICK						= 550;
 	public static final int		ACTIVITY_TEMPLATE_PICK					= 560;

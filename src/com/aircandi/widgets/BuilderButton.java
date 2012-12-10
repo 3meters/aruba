@@ -44,7 +44,7 @@ public class BuilderButton extends RelativeLayout {
 		View view = inflater.inflate(R.layout.widget_builder_button, this);
 
 		mTextView = (TextView) view.findViewById(R.id.builder_text);
-		FontManager.getInstance().setTypefaceLight(mTextView);
+		FontManager.getInstance().setTypefaceDefault(mTextView);
 
 		if (mHint != null) {
 			mTextView.setTextColor(getResources().getColor(R.color.edit_hint));

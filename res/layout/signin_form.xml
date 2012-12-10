@@ -33,31 +33,27 @@
                 android:paddingBottom="15dp"
                 android:paddingLeft="2dp"
                 android:paddingRight="2dp"
-                android:text="@string/signin_message_general" />
-
-            <TextView
-                style="@style/form_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/form_label_email" />
+                android:text="@string/signin_message_general"
+                android:visibility="gone" />
 
             <EditText
                 android:id="@+id/text_email"
+                style="@style/form_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:inputType="textEmailAddress" />
-
-            <TextView
-                style="@style/form_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/form_label_password" />
+                android:hint="@string/form_label_email"
+                android:inputType="textEmailAddress"
+                android:textSize="16dp" />
 
             <EditText
                 android:id="@+id/text_password"
+                style="@style/form_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:inputType="textPassword" />
+                android:layout_marginBottom="10dp"
+                android:hint="@string/form_label_password"
+                android:inputType="textPassword"
+                android:textSize="16dp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -66,22 +62,13 @@
                 android:orientation="horizontal" >
 
                 <Button
-                    android:id="@+id/btn_send_password"
-                    style="@style/actionbar_button"
+                    android:id="@+id/button_send_password"
+                    style="@style/form_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="15dp"
                     android:onClick="onSendPasswordButtonClick"
                     android:text="@string/form_button_send_password" />
-
-                <Button
-                    android:id="@+id/btn_signup"
-                    style="@style/actionbar_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:onClick="onSignupButtonClick"
-                    android:text="@string/form_button_signin_signup" />
             </LinearLayout>
         </LinearLayout>
     </com.aircandi.widgets.BounceScrollView>
@@ -97,7 +84,8 @@
         android:gravity="center_horizontal" >
 
         <Button
-            style="@style/actionbar_button_borderless"
+            android:id="@+id/button_cancel"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -106,7 +94,7 @@
 
         <Button
             android:id="@+id/btn_signin"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

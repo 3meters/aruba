@@ -11,7 +11,6 @@ import android.location.Criteria;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -21,7 +20,6 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -35,7 +33,6 @@ import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.GeoLocationManager;
-import com.aircandi.components.ImageCache;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
@@ -136,8 +133,8 @@ import com.amazonaws.auth.BasicAWSCredentials;
 
 public class CandiRadar extends CandiActivity {
 
-	private Handler						mHandler		= new Handler();
-	public static BasicAWSCredentials	mAwsCredentials	= null;
+	private Handler						mHandler			= new Handler();
+	public static BasicAWSCredentials	mAwsCredentials		= null;
 
 	private Number						mEntityModelRefreshDate;
 	private Number						mEntityModelActivityDate;
@@ -147,16 +144,15 @@ public class CandiRadar extends CandiActivity {
 
 	private SoundPool					mSoundPool;
 	private int							mNewCandiSoundId;
-	private Boolean						mInitialized	= false;
+	private Boolean						mInitialized		= false;
+	private EventHandler				mEventLocationChanged;
+	private Boolean						mWaitingForLocation	= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Aircandi.getInstance().setLaunchedFromRadar(true);
+		Aircandi.getInstance().setLaunchedNormally(true);
 		super.onCreate(savedInstanceState);
 
-		if (Build.PRODUCT.contains("sdk")) {
-			Aircandi.usingEmulator = true;
-		}
 		/*
 		 * Get setup for location snapshots. Initialize will populate location
 		 * with the best of any cached location fixes. A single update will
@@ -173,10 +169,6 @@ public class CandiRadar extends CandiActivity {
 			finish();
 		}
 
-		/* Connectivity monitoring */
-		NetworkManager.getInstance().setContext(getApplicationContext());
-		NetworkManager.getInstance().initialize();
-
 		/* We alert that wifi isn't enabled */
 		if (NetworkManager.getInstance().isTethered()
 				|| (!NetworkManager.getInstance().isWifiEnabled() && !Aircandi.usingEmulator)) {
@@ -188,43 +180,13 @@ public class CandiRadar extends CandiActivity {
 
 						@Override
 						public void onComplete() {
-							if (Aircandi.firstStartApp) {
-								initializeApp();
-							}
 							initialize();
 						}
 					});
 		}
 		else {
-			if (Aircandi.firstStartApp) {
-				initializeApp();
-			}
 			initialize();
 		}
-	}
-
-	private Boolean initializeApp() {
-		/*
-		 * Here we initialize application level state that will continue
-		 * even if this activity is destroyed.
-		 */
-
-		/* Proxibase sdk components */
-		ProxiExplorer.getInstance().setContext(getApplicationContext());
-		ProxiExplorer.getInstance().setUsingEmulator(Aircandi.usingEmulator);
-		ProxiExplorer.getInstance().initialize();
-
-		/* Image cache */
-		ImageManager.getInstance().setImageCache(new ImageCache(getApplicationContext(), CandiConstants.CACHE_PATH, 100, 16));
-		ImageManager.getInstance().setFileCacheOnly(true);
-		ImageManager.getInstance().getImageLoader().setWebView((WebView) findViewById(R.id.webview));
-		ImageManager.getInstance().setActivity(this);
-
-		/* Auto signin the user */
-		mCommon.signinAuto();
-		Aircandi.firstStartApp = false;
-		return true;
-
 	}
 
 	private void initialize() {
@@ -232,20 +194,46 @@ public class CandiRadar extends CandiActivity {
 		 * Here we initialize activity level state. Only called from
 		 * onCreate.
 		 */
+		
+		/* Always reset the entity cache */
+		ProxiExplorer.getInstance().getEntityModel().removeAllEntities();
 
 		/* Used by other activities to determine if they were auto launched after a crash */
-		Aircandi.getInstance().setLaunchedFromRadar(true);
+		Aircandi.getInstance().setLaunchedNormally(true);
 
 		/* Initialize preferences */
 		updatePreferences(true);
 
+		/* Location support */
+		mEventLocationChanged = new EventHandler() {
+
+			@Override
+			public void onEvent(Object data) {
+				if (mWaitingForLocation) {
+					final Observation observation = GeoLocationManager.getInstance().getObservation();
+					if (observation != null) {
+						mWaitingForLocation = false;
+						new AsyncTask() {
+
+							@Override
+							protected Object doInBackground(Object... params) {
+								ProxiExplorer.getInstance().getPlacesNearLocation(observation);
+								return null;
+							}
+
+						}.execute();
+					}
+				}
+			}
+		};
+
 		/* Other UI references */
 		mProgressRadar = (ViewGroup) findViewById(R.id.progress);
 		mScrollView = (BounceScrollView) findViewById(R.id.scroll_view);
-		
+
 		/* Fonts */
-		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_custom));
-		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_tune_text));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_custom));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_tune_text));
 
 		/* Store sounds */
 		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
@@ -266,31 +254,45 @@ public class CandiRadar extends CandiActivity {
 		if (configChange) {
 			layout.removeAllViews();
 		}
-		drawLayout(layout, entities, configChange ? false : true);
+		drawLayout(PlaceType.Tuned, layout, entities, configChange ? false : true);
 
 		layout = (FlowLayout) findViewById(R.id.radar_synthetics);
 		entities = ProxiExplorer.getInstance().getEntityModel().getRadarSynthetics();
 		if (configChange) {
 			layout.removeAllViews();
 		}
-		drawLayout(layout, entities, false);
+		drawLayout(PlaceType.Synthetic, layout, entities, false);
 	}
 
-	private void drawLayout(FlowLayout layout, List<Entity> entities, Boolean addSparkle) {
+	private void drawLayout(PlaceType placeType, FlowLayout layout, List<Entity> entities, Boolean addSparkle) {
 
 		if (entities.size() == 0) {
 			layout.removeAllViews();
+			if (placeType == PlaceType.Tuned) {
+				((ViewGroup) findViewById(R.id.radar_places_group)).setVisibility(View.GONE);
+			}
+			else if (placeType == PlaceType.Synthetic) {
+				((ViewGroup) findViewById(R.id.radar_synthetics_group)).setVisibility(View.GONE);
+			}
 			return;
 		}
-		
-		/* 
+		else {
+			if (placeType == PlaceType.Tuned) {
+				((ViewGroup) findViewById(R.id.radar_places_group)).setVisibility(View.VISIBLE);
+			}
+			else if (placeType == PlaceType.Synthetic) {
+				((ViewGroup) findViewById(R.id.radar_synthetics_group)).setVisibility(View.VISIBLE);
+			}
+		}
+
+		/*
 		 * Custom typeface can only be set via code. We are keeping it here
 		 * for simplicity even though it would be more efficient to set it
 		 * once when the activity is created.
 		 */
 		if (mCommon.mThemeTone.equals("dark")) {
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.radar_places_header));
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.radar_synthetics_header));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.radar_places_header));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.radar_synthetics_header));
 		}
 		else {
 			FontManager.getInstance().setTypefaceRegular((TextView) findViewById(R.id.radar_places_header));
@@ -516,7 +518,7 @@ public class CandiRadar extends CandiActivity {
 			criteria.setAccuracy(Criteria.ACCURACY_COARSE);
 			GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
 					, 0
-					, criteria, null);
+					, criteria);
 
 			new SearchProcess().start();
 		}
@@ -585,7 +587,7 @@ public class CandiRadar extends CandiActivity {
 										public void run() {
 											FlowLayout layout = (FlowLayout) findViewById(R.id.radar_places);
 											List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarPlaces();
-											drawLayout(layout, entities, true);
+											drawLayout(PlaceType.Tuned, layout, entities, true);
 											new AsyncTask() {
 
 												@Override
@@ -594,6 +596,24 @@ public class CandiRadar extends CandiActivity {
 													Observation observation = GeoLocationManager.getInstance().getObservation();
 													if (observation != null) {
 														ProxiExplorer.getInstance().getPlacesNearLocation(observation);
+													}
+													else {
+														/*
+														 * We are still waiting for a location fix to show the
+														 * synthetics.
+														 * An event handler gets called when we finally have a location
+														 * fix and
+														 * restarts the process to get and display the synthetics.
+														 */
+														mWaitingForLocation = true;
+														runOnUiThread(new Runnable() {
+
+															@Override
+															public void run() {
+																mCommon.hideBusy();
+																mProgressRadar.setVisibility(View.GONE);
+															}
+														});
 													}
 													return null;
 												}
@@ -638,13 +658,12 @@ public class CandiRadar extends CandiActivity {
 										public void run() {
 											FlowLayout layout = (FlowLayout) findViewById(R.id.radar_synthetics);
 											List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarSynthetics();
-											drawLayout(layout, entities, false);
+											drawLayout(PlaceType.Synthetic, layout, entities, false);
 											searchComplete();
 										}
 									});
 									Aircandi.stopwatch.segmentTime("Finished updating radar UI");
 									Logger.d(CandiRadar.this, "Full entity update complete");
-									Aircandi.fullUpdateComplete = true;
 								}
 								else {
 									mCommon.handleServiceError(serviceResponse, ServiceOperation.BeaconScan, CandiRadar.this);
@@ -685,13 +704,6 @@ public class CandiRadar extends CandiActivity {
 		mCommon.hideBusy();
 		mProgressRadar.setVisibility(View.GONE);
 
-		/* Show aircandi tips if this is the first time the application has been run */
-		if (Aircandi.firstRunApp) {
-			Aircandi.settingsEditor.putBoolean(Preferences.SETTING_FIRST_RUN, false);
-			Aircandi.settingsEditor.commit();
-			Aircandi.firstRunApp = false;
-		}
-
 		/* Capture timestamps so we can detect state changes in the entity model */
 		mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 		mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
@@ -707,9 +719,7 @@ public class CandiRadar extends CandiActivity {
 				.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
 				.setParentEntityId(entity.parentId)
-				.setEntityType(entity.type)
-				.setEntityTree(ProxiExplorer.EntityTree.Radar)
-				.setEntityLocation(entity.getLocation());
+				.setEntityType(entity.type);
 
 		if (entity.parentId != null) {
 			intentBuilder.setCollectionId(entity.getParent().id);
@@ -816,6 +826,11 @@ public class CandiRadar extends CandiActivity {
 
 		if (!mInitialized) return;
 		if (hasFocus) {
+
+			synchronized (Events.EventBus.locationChanged) {
+				Events.EventBus.locationChanged.add(mEventLocationChanged);
+			}
+
 			EntityModel entityModel = ProxiExplorer.getInstance().getEntityModel();
 			if (mEntityModelRefreshDate == null) {
 				Logger.d(this, "Start first beacon scan");
@@ -846,6 +861,11 @@ public class CandiRadar extends CandiActivity {
 						searchComplete();
 					}
 				}, 100);
+			}
+		}
+		else {
+			synchronized (Events.EventBus.locationChanged) {
+				Events.EventBus.locationChanged.remove(mEventLocationChanged);
 			}
 		}
 	}
@@ -954,4 +974,7 @@ public class CandiRadar extends CandiActivity {
 		return R.layout.candi_radar;
 	}
 
+	public enum PlaceType {
+		Tuned, Synthetic
+	}
 }

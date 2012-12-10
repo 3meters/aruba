@@ -27,8 +27,8 @@ public class AddressBuilder extends FormActivity {
 	private void initialize() {
 		Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			mPhone = extras.getString(getString(R.string.EXTRA_PHONE));
-			String jsonAddress = extras.getString(getString(R.string.EXTRA_ADDRESS));
+			mPhone = extras.getString(CandiConstants.EXTRA_PHONE);
+			String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
 			if (jsonAddress != null) {
 				mLocation = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
 			}
@@ -37,12 +37,12 @@ public class AddressBuilder extends FormActivity {
 		if (mLocation == null) {
 			mLocation = new Location();
 		}
-		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.phone));
-		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.address));
-		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.cross_street));
-		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.city));
-		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.state));
-		FontManager.getInstance().setTypefaceLight((EditText) findViewById(R.id.zip_code));
+		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.phone));
+		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.address));
+		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.cross_street));
+		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.city));
+		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.state));
+		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.zip_code));
 		
 	}
 
@@ -110,10 +110,10 @@ public class AddressBuilder extends FormActivity {
 
 	private void doSave() {
 		Intent intent = new Intent();
-		intent.putExtra(getString(R.string.EXTRA_PHONE), mPhone);
+		intent.putExtra(CandiConstants.EXTRA_PHONE, mPhone);
 		if (mLocation != null) {
 			String jsonAddress = ProxibaseService.convertObjectToJsonSmart(mLocation, false, true);
-			intent.putExtra(getString(R.string.EXTRA_ADDRESS), jsonAddress);
+			intent.putExtra(CandiConstants.EXTRA_ADDRESS, jsonAddress);
 		}
 		setResult(Activity.RESULT_OK, intent);
 		finish();

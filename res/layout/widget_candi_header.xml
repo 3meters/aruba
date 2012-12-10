@@ -54,7 +54,7 @@
 
         <com.aircandi.widgets.ComboButton
             android:id="@+id/button_call"
-            style="@style/candi_form_button_combo"
+            style="@style/form_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             aircandi:drawableScale="@dimen/combo_button_drawable_scale"
@@ -66,7 +66,7 @@
 
         <com.aircandi.widgets.ComboButton
             android:id="@+id/button_map"
-            style="@style/candi_form_button_combo"
+            style="@style/form_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             aircandi:drawableScale="@dimen/combo_button_drawable_scale"
@@ -78,8 +78,8 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/button_comments"
-        style="@style/button_comments"
+        android:id="@+id/form_button_link"
+        style="@style/form_button_link"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:layout_marginLeft="5dp"

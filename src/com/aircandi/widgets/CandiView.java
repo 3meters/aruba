@@ -90,7 +90,7 @@ public class CandiView extends RelativeLayout {
 		mCategoryImage = (ImageView) mLayout.findViewById(R.id.candi_view_subtitle_badge);
 		
 		FontManager.getInstance().setTypefaceRegular(mTitle);
-		FontManager.getInstance().setTypefaceLight(mSubtitle);
+		FontManager.getInstance().setTypefaceDefault(mSubtitle);
 
 	}
 

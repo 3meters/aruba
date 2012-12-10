@@ -41,10 +41,10 @@ public class CandiTuner extends FormActivity {
 
 	private void initialize() {
 		mListViewCandi = (ListView) findViewById(R.id.list);
-		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.message));
-		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.title));
-		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_cancel));
-		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_tune));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.message));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_tune));
 
 		/*
 		 * Refresh the location fix because tuning can lead to operations
@@ -57,7 +57,7 @@ public class CandiTuner extends FormActivity {
 		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
 		GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
 				, GeoLocationManager.MAXIMUM_AGE
-				, criteria, null);
+				, criteria);
 
 	}
 

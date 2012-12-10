@@ -39,7 +39,7 @@ public abstract class CandiActivity extends SherlockActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
+		if (!Aircandi.getInstance().wasLaunchedNormally()) {
 			/* Try to detect case where this is being created after a crash and bail out. */
 			super.onCreate(savedInstanceState);
 			finish();
@@ -52,7 +52,7 @@ public abstract class CandiActivity extends SherlockActivity {
 			super.onCreate(savedInstanceState);
 			mCommon.initialize();
 
-			Logger.d(this, "Started from radar flag: " + String.valueOf(Aircandi.getInstance().getLaunchedFromRadar()));
+			Logger.d(this, "Started from radar flag: " + String.valueOf(Aircandi.getInstance().wasLaunchedNormally()));
 		}
 	}
 

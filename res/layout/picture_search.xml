@@ -26,7 +26,7 @@
         android:orientation="horizontal" >
 
         <EditText
-            android:id="@+id/text_uri"
+            android:id="@+id/search_text"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_weight="1"
@@ -36,7 +36,6 @@
             android:singleLine="true" />
 
         <ImageView
-            android:id="@+id/btn_link_builder"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_weight="0"
@@ -75,7 +74,7 @@
         android:gravity="center_horizontal" >
 
         <Button
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="onCancelButtonClick"

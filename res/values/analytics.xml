@@ -28,6 +28,7 @@
 
     <!-- The screen names that will appear in the reporting -->
     <string name="com.aircandi.CandiRadar">Radar</string>
+    <string name="com.aircandi.CandiUser">User</string>
     <string name="com.aircandi.SignInForm">Signin</string>
     <string name="com.aircandi.SignUpForm">Signup</string>
     <string name="com.aircandi.ProfileForm">Profile</string>
@@ -35,15 +36,10 @@
     <string name="com.aircandi.Preferences">Preferences</string>
     <string name="com.aircandi.CandiList">CandiList</string>
     <string name="com.aircandi.CandiForm">CandiForm</string>
-    <string name="com.aircandi.UserCandiList">UserCandiList</string>
-    <string name="com.aircandi.UserCandiForm">UserCandiForm</string>
-    <string name="com.aircandi.CandiMap">CandiMap</string>
     <string name="com.aircandi.CandiPicker">CandiPicker</string>
-    <string name="com.aircandi.LinkPicker">LinkPicker</string>
     <string name="com.aircandi.TemplatePicker">TemplatePicker</string>
     <string name="com.aircandi.PictureSearch">PictureSearch</string>
     <string name="com.aircandi.PictureBrowse">PictureBrowse</string>
-    <string name="com.aircandi.MapBrowse">MapBrowse</string>
     <string name="com.aircandi.EntityForm">Entity</string>
     <string name="com.aircandi.CommentForm">Comment</string>
     <string name="com.aircandi.CommentList">CommentList</string>

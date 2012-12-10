@@ -46,8 +46,6 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 	public Number				level;										// Used to evaluate location accuracy 
 
 	// For client use only
-	public Boolean				global				= false;
-	public BeaconState			state				= BeaconState.Normal;
 	public Boolean				test				= false;
 
 	public Beacon() {}
@@ -67,7 +65,6 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 		 * 
 		 * Local state properties we intentionally don't overwrite:
 		 * 
-		 * - global
 		 * - state
 		 * - test
 		 */
@@ -119,11 +116,11 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 		}
 		return location;
 	}
-	
+
 	public Float getDistance() {
-		
+
 		Float distance = 0f;
-		
+
 		if (this.level.intValue() >= -40)
 			distance = 1f;
 		else if (this.level.intValue() >= -50)
@@ -148,7 +145,7 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 			distance = 60f;
 		else
 			distance = 80f;
-			
+
 		return distance;
 	}
 
@@ -181,9 +178,5 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 
 	public static enum BeaconType {
 		Fixed, Mobile, Temporary
-	}
-
-	public static enum BeaconState {
-		New, Normal, Gone
 	}
 }

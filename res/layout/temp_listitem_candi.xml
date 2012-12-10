@@ -66,8 +66,8 @@
             aircandi:layout="@layout/widget_user_view_text_only" />
 
         <Button
-            android:id="@+id/button_comments"
-            style="@style/button_comments"
+            android:id="@+id/form_button_link"
+            style="@style/form_button_link"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:clickable="true"

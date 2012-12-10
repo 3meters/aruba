@@ -26,7 +26,7 @@
     
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/title"
-        style="@style/bookmark_list_title"
+        style="@style/candi_list_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
@@ -34,7 +34,7 @@
 
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/description"
-        style="@style/bookmark_list_uri"
+        style="@style/candi_list_subtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title"

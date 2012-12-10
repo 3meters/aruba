@@ -32,6 +32,7 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestType;
@@ -71,7 +72,7 @@ public class PictureSearch extends FormActivity {
 	private void initialize() {
 		Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			mDefaultSearch = extras.getString(getString(R.string.EXTRA_SEARCH_PHRASE));
+			mDefaultSearch = extras.getString(CandiConstants.EXTRA_SEARCH_PHRASE);
 		}
 
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -83,15 +84,15 @@ public class PictureSearch extends FormActivity {
 				String imageUri = mImages.get(position).getMediaUrl();
 				String imageDescription = mImages.get(position).getTitle();
 				Intent intent = new Intent();
-				intent.putExtra(getString(R.string.EXTRA_URI), imageUri);
-				intent.putExtra(getString(R.string.EXTRA_URI_TITLE), mTitleOptional);
-				intent.putExtra(getString(R.string.EXTRA_URI_DESCRIPTION), imageDescription);
+				intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
+				intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
+				intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, imageDescription);
 				setResult(Activity.RESULT_OK, intent);
 				finish();
 			}
 		});
 
-		mSearch = (EditText) findViewById(R.id.text_uri);
+		mSearch = (EditText) findViewById(R.id.search_text);
 		if (mDefaultSearch != null) {
 			mSearch.setText(mDefaultSearch);
 		}

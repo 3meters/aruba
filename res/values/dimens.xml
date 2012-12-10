@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="candi_form_button_width">200dp</dimen>
-    <dimen name="candi_form_button_height">30dp</dimen>
-    <dimen name="candi_form_button_width_minimum">60dp</dimen>
-    <dimen name="candi_form_button_height_minimum">30dp</dimen>
+    <dimen name="form_button_width">200dp</dimen>
+    <dimen name="form_button_height">30dp</dimen>
+    <dimen name="form_button_width_minimum">60dp</dimen>
+    <dimen name="form_button_height_minimum">30dp</dimen>
     <dimen name="form_field_height">48dp</dimen>
-
+    
+    <dimen name="text_size_extra_large">30sp</dimen>
+    <dimen name="text_size_large">24sp</dimen>
+    <dimen name="text_size_medium">18sp</dimen>
+    <dimen name="text_size_small">16sp</dimen>
+    <dimen name="text_size_tiny">14sp</dimen>
+    <dimen name="text_size_micro">12sp</dimen>
+    
     <item name="combo_button_drawable_scale" format="float" type="dimen">0.9</item>
     <item name="combo_button_drawable_large_scale" format="float" type="dimen">0.6</item>
     

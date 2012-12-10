@@ -34,7 +34,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			mIsRoot = extras.getBoolean(getString(R.string.EXTRA_ENTITY_IS_ROOT));
+			mIsRoot = extras.getBoolean(CandiConstants.EXTRA_ENTITY_IS_ROOT);
 		}
 
 		initialize();
@@ -47,7 +47,6 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		if (mCommon.mThemeTone.equals("dark")) {
 			listData.add(new Template(R.drawable.ic_action_edit_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
 			listData.add(new Template(R.drawable.ic_action_picture_dark, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
-			listData.add(new Template(R.drawable.ic_action_globe_dark, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
 			if (mIsRoot != null && mIsRoot) {
 				listData.add(new Template(R.drawable.ic_action_folder_dark, getString(R.string.name_entity_type_folder), null,
 						CandiConstants.TYPE_CANDI_FOLDER));
@@ -56,7 +55,6 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		else {
 			listData.add(new Template(R.drawable.ic_action_edit_light, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
 			listData.add(new Template(R.drawable.ic_action_picture_light, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
-			listData.add(new Template(R.drawable.ic_action_globe_light, getString(R.string.name_entity_type_link), null, CandiConstants.TYPE_CANDI_LINK));
 			if (mIsRoot != null && mIsRoot) {
 				listData.add(new Template(R.drawable.ic_action_folder_light, getString(R.string.name_entity_type_folder), null,
 						CandiConstants.TYPE_CANDI_FOLDER));
@@ -77,7 +75,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Template template = (Template) view.getTag();
 		Intent intent = new Intent();
-		intent.putExtra(getString(R.string.EXTRA_ENTITY_TYPE), template.type);
+		intent.putExtra(CandiConstants.EXTRA_ENTITY_TYPE, template.type);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
 	}

@@ -7,35 +7,8 @@
     <string name="name_entity_type_picture">picture</string>
     <string name="name_entity_type_post">post</string>
     <string name="name_entity_type_place">place</string>
-    <string name="name_entity_type_link">link</string>
     <string name="name_entity_type_folder">folder</string>
-
-    <!-- Application -->
-
-    <string name="EXTRA_PARENT_ENTITY_ID">com.aircandi.EXTRA_PARENT_ENTITY_ID</string>
-    <string name="EXTRA_BEACON_ID">com.aircandi.EXTRA_BEACON_ID</string>
-    <string name="EXTRA_ENTITY_ID">com.aircandi.EXTRA_ENTITY_ID</string>
-    <string name="EXTRA_USER_ID">com.aircandi.EXTRA_USER_ID</string>
-    <string name="EXTRA_ENTITY_IS_ROOT">com.aircandi.EXTRA_ENTITY_IS_ROOT</string>
-    <string name="EXTRA_ENTITY_TYPE">com.aircandi.EXTRA_ENTITY_TYPE</string>
-    <string name="EXTRA_ENTITY_LOCATION">com.aircandi.EXTRA_ENTITY_LOCATION</string>
-    <string name="EXTRA_USER_ID">com.aircandi.EXTRA_USER_ID</string>
-    <string name="EXTRA_URI">com.aircandi.EXTRA_URI</string>
-    <string name="EXTRA_URI_TITLE">com.aircandi.EXTRA_URI_TITLE</string>
-    <string name="EXTRA_URI_DESCRIPTION">com.aircandi.EXTRA_URI_DESCRIPTION</string>
-    <string name="EXTRA_MESSAGE">com.aircandi.EXTRA_MESSAGE</string>
-    <string name="EXTRA_ADDRESS">com.aircandi.EXTRA_ADDRESS</string>
-    <string name="EXTRA_CATEGORY">com.aircandi.EXTRA_CATEGORY</string>
-    <string name="EXTRA_PHONE">com.aircandi.EXTRA_PHONE</string>
-    <string name="EXTRA_ENTITY_TREE">com.aircandi.EXTRA_ENTITY_TREE</string>
-    <string name="EXTRA_COLLECTION_ID">com.aircandi.EXTRA_COLLECTION_ID</string>
-    <string name="EXTRA_STRING_ID">com.aircandi.EXTRA_STRING_ID</string>
-    <string name="EXTRA_VERIFY_URI">com.aircandi.EXTRA_VERIFY_URI</string>
-    <string name="EXTRA_COMMAND_TYPE">com.aircandi.EXTRA_COMMAND_TYPE</string>
-    <string name="EXTRA_NAVIGATION_TOP">com.aircandi.EXTRA_NAVIGATION_TOP</string>
-    <string name="EXTRA_SEARCH_PHRASE">com.aircandi.EXTRA_SEARCH_PHRASE</string>
-    <string name="EXTRA_AS_PICKER">com.aircandi.EXTRA_AS_PICKER</string>
-
+    
     <!-- Menus -->
 
     <string name="menu_beacons_item">Beacons</string>
@@ -69,7 +42,7 @@
     <string name="dummy_timesince">10 minutes ago</string>
     <string name="dummy_datetime">December 23 at 10:12am</string>
     <string name="dummy_tags">Coffee Shop, Cafe, Tea Room</string>
-    <string name="dummy_subtitle">Be there, do more</string>
+    <string name="dummy_subtitle">Less searching, more doing</string>
     <string name="dummy_tip">Two words: Clover machines. But you\'ll never find a seat. It\'s like study hall for University of Washington students in here. This studious bunch gets prop for not succumbing to Luau\'s noon happy hour</string>
     <string name="dummy_description">Ever wonder why Aircandi fans refuse to use anything else? For more than four days, Aircandi has attracted a growing family of loyal, almost zealous customers, known as “Candiniks”. By remaining true to the quality tenets of our founder – emphasizing knowledge, taste, and using the senses to evaluate quality at every step – Aircandi defines the gold standard by which all other proximity applications are judged.</string>
     <string name="dummy_description_ellipsized">Ever wonder why Aircandi fans refuse to use anything else? For more than&#8230;</string>
@@ -135,19 +108,26 @@
     <string name="error_service_forbidden">Requested operation is not valid</string>
     <string name="error_service_gateway_timeout">Did not receive timely response from service</string>
     <string name="error_service_general">Unspecified service error</string>
+    
     <string name="error_signin_invalid_signin">Wrong email and password combination.</string>
     <string name="error_change_password_unauthorized">Old password is invalid.</string>
+    
     <string name="error_invalid_email">Email address is invalid.</string>
     <string name="error_session_expired_title">Session expired</string>
     <string name="error_session_expired">Your login session expired. Please re-sign in.</string>
     <string name="error_session_invalid">Your login session is invalid. Please re-sign in.</string>
     <string name="error_weburi_invalid">Web address isn\'t in a valid format.</string>
     <string name="error_weburi_unreachable">Web site isn\'t available or can\'t be reached.</string>
+    
     <string name="error_signup_missmatched_passwords_title">Password</string>
     <string name="error_signup_missmatched_passwords_message">Passwords do not match</string>
     <string name="error_signup_email_taken">Email address is already being used.</string>
     <string name="error_signup_password_weak">Password is too weak. Passwords must be at least 6 characters long, not be part of your user name, and not be certain commmon words.</string>
 
+    <string name="error_missing_fullname">Enter a name.</string>
+    <string name="error_missing_email">Enter an email address.</string>
+	<string name="error_missing_password">Enter a password.</string>
+	<string name="error_missing_password_confirmation">Enter password confirmation.</string>
     <!-- Toast -->
 
     <string name="toast_wifi_enabling">Wifi state enabling&#8230;</string>
@@ -173,7 +153,11 @@
     <string name="progress_signing_in">Signing in&#8230;</string>
     <string name="progress_signing_up">Creating&#8230;</string>
     <string name="progress_empty"></string>
+    
+    <!-- Splash -->
 
+    <string name="splash_message">be there, do more</string>
+    
     <!-- Navigation -->
 
     <string name="navigation_radar">Radar</string>
@@ -188,7 +172,6 @@
     <string name="entity_post_title">Post</string>
     <string name="entity_picture_title">Picture</string>
     <string name="entity_place_title">Place</string>
-    <string name="entity_link_title">Link</string>
     <string name="entity_folder_title">Folder</string>
 
     <!-- Radar -->
@@ -223,7 +206,7 @@
     <string name="help_radar">
 <![CDATA[
         <h2>Getting Started</h2>
-		<p>With Aircandi you find, create and share content or “candi” using nearby wi-fi hotspots as virtual dropboxes. Drop a picture, a link or say something in a post. When Aircandi users are in range of the hotspot, your candi is automatically shared with them.</p> 
+		<p>With Aircandi you find, create and share content or “candi” using nearby wi-fi hotspots as virtual dropboxes. Drop a picture or say something in a post. When Aircandi users are in range of the hotspot, your candi is automatically shared with them.</p> 
 
 		<p><b>Radar:</b> Discovery candi attached to nearby wi-fi hotspots.</p>
 		<p><b>My Candi:</b> Browse and edit candi you created.</p>
@@ -254,6 +237,10 @@
 		Make Aircandi faster by marking the places that match where you are.
 ]]>
     </string>
+    
+    <!-- CandiList -->
+
+    <string name="name_entity_list_type_collection">collections</string>
 
     <!-- CandiForm -->
 
@@ -281,19 +268,23 @@
     <!-- Misc -->
 
     <string name="theme_default">aircandi_theme_midnight</string>
+    
+    <!-- Splash -->
 
+    <string name="splash_button_signin">sign in</string>
+    <string name="splash_button_signup">register</string>
+    
     <!-- Forms.titles -->
 
     <string name="form_title_picture">picture</string>
     <string name="form_title_post">post</string>
     <string name="form_title_place">place</string>
-    <string name="form_title_link">link</string>
     <string name="form_title_folder">folder</string>
     <string name="form_title_tuning">tuning</string>
     <string name="form_title_profile">profile settings</string>
     <string name="form_title_password">change password</string>
     <string name="form_title_signin">sign in</string>
-    <string name="form_title_signup">sign up</string>
+    <string name="form_title_signup">register</string>
     <string name="form_title_picture_search">picture search</string>
     <string name="form_title_picture_browse">picture browse</string>
     <string name="form_title_link_picker">link picker</string>
@@ -323,20 +314,17 @@
     <!-- Forms.buttons -->
 
     <string name="form_button_change_picture">select</string>
-    <string name="form_button_pick_link">pick</string>
     <string name="form_button_test_link">test</string>
-    <string name="form_button_change_password">change password&#8230;</string>
-    <string name="form_button_signin_signup">create account&#8230;</string>
-    <string name="form_button_signup">sign up</string>
+    <string name="form_button_change_password">change password</string>
+    <string name="form_button_signup">register</string>
     <string name="form_button_save">save</string>
     <string name="form_button_delete">delete</string>
     <string name="form_button_ok">ok</string>
     <string name="form_button_tune">tune</string>
-    <string name="form_button_custom">add custom\n place</string>
     <string name="form_button_add">add</string>
     <string name="form_button_cancel">cancel</string>
     <string name="form_button_close">close</string>
-    <string name="form_button_terms">terms of service&#8230;</string>
+    <string name="form_button_terms">terms</string>
     <string name="form_button_send_password">forgot password?</string>
     <string name="form_button_move_solo">no collection</string>
 
@@ -351,14 +339,13 @@
     <string name="form_label_bio">bio</string>
     <string name="form_label_link">web</string>
     <string name="form_label_location">location</string>
-    <string name="form_label_password">password</string>
-    <string name="form_label_terms">By clicking the Sign up button, you agree to the terms of service:</string>
+    <string name="form_label_password">password (minimum of 6 characters)</string>
+    <string name="form_label_terms">By clicking the register button, you agree to the terms of service:</string>
     <string name="form_label_password_confirm">confirm password</string>
     <string name="form_label_password_old">old password</string>
     <string name="form_label_email">email</string>
     <string name="form_label_email_hint">(We will email you a confirmation.)</string>
     <string name="form_label_locked">locked</string>
-    <string name="form_label_password_hint">(Minimum of 6 characters.)</string>
 
     <!-- Forms.hints -->
 
@@ -380,6 +367,7 @@
     <string name="form_uri_hint">web address</string>
     <string name="form_twitter_hint">twitter</string>
     <string name="picture_search_query_hint">search</string>
+    <string name="form_password_hint">password (minimum of 6 characters)</string>
     
     <!-- Forms.messages -->
 
@@ -390,10 +378,6 @@
     <string name="signin_message_candi_new">Please sign in to create and share candi with other Aircandi users.</string>
     <string name="signin_message_comment_new">Please sign in to create a candi comment.</string>
     <string name="signin_button_signin">sign In</string>
-    <string name="web_dialog_link_message">build link…</string>
-    <string name="web_dialog_link_bookmark">select a bookmark</string>
-    <string name="web_dialog_link_search">web search</string>
-    <string name="web_dialog_link_negative">cancel</string>
     <string name="web_progress_validating">validating website…</string>
     <string name="web_alert_website_unavailable">website unavailable</string>
     <string name="web_label_html_zoom">zoom html</string>

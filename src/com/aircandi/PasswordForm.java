@@ -41,10 +41,10 @@ public class PasswordForm extends FormActivity {
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
 		mButtonSave = (Button) findViewById(R.id.btn_save);
 
-		FontManager.getInstance().setTypefaceLight(mTextPasswordOld);
-		FontManager.getInstance().setTypefaceLight(mTextPassword);
-		FontManager.getInstance().setTypefaceLight(mTextPasswordConfirm);
-		FontManager.getInstance().setTypefaceLight(mButtonSave);
+		FontManager.getInstance().setTypefaceDefault(mTextPasswordOld);
+		FontManager.getInstance().setTypefaceDefault(mTextPassword);
+		FontManager.getInstance().setTypefaceDefault(mTextPasswordConfirm);
+		FontManager.getInstance().setTypefaceDefault(mButtonSave);
 
 		mTextPasswordOld.addTextChangedListener(new SimpleTextWatcher() {
 

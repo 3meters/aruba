@@ -3,19 +3,13 @@ package com.aircandi;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Criteria;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
-import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -30,7 +24,6 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -41,21 +34,16 @@ import com.aircandi.components.Tracker;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Location;
-import com.aircandi.service.objects.User;
 import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.ImageUtils;
-import com.aircandi.utilities.MiscUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.ImageUtils;
 import com.aircandi.widgets.BuilderButton;
 import com.aircandi.widgets.UserView;
 import com.aircandi.widgets.WebImageView;
@@ -64,32 +52,12 @@ public class EntityForm extends FormActivity {
 
 	private ViewFlipper		mViewFlipper;
 	protected WebImageView	mImageViewPicture;
-	private EditText		mTextUri;
-	private boolean			mUriVerified	= false;
-	private AsyncTask		mAsyncTask		= null;
 	private Bitmap			mEntityBitmap;
 	private Entity			mEntityForForm;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * Signin required if user is anonymous
-		 */
-		User user = Aircandi.getInstance().getUser();
-		Integer messageResId = (mCommon.mCommandType == CommandType.New ? R.string.signin_message_candi_new : R.string.signin_message_candi_edit);
-		if (user != null) {
-			Boolean userAnonymous = user.isAnonymous();
-			if (userAnonymous) {
-				IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
-				intentBuilder.setCommandType(CommandType.Edit);
-				intentBuilder.setMessage(getString(messageResId));
-				Intent intent = intentBuilder.create();
-				startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-				AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-				return;
-			}
-		}
 		initialize();
 		bind();
 		draw();
@@ -105,14 +73,11 @@ public class EntityForm extends FormActivity {
 			criteria.setAccuracy(Criteria.ACCURACY_COARSE);
 			GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
 					, GeoLocationManager.MAXIMUM_AGE
-					, criteria, null);
+					, criteria);
 		}
 
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_place);
-		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
-			mCommon.mActionBar.setTitle(R.string.form_title_link);
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_picture);
@@ -125,17 +90,6 @@ public class EntityForm extends FormActivity {
 		}
 
 		mImageViewPicture = (WebImageView) findViewById(R.id.image_picture);
-		mTextUri = (EditText) findViewById(R.id.text_uri);
-
-		if (mTextUri != null) {
-			mTextUri.addTextChangedListener(new SimpleTextWatcher() {
-
-				@Override
-				public void afterTextChanged(Editable s) {
-					mUriVerified = false;
-				}
-			});
-		}
 
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mCommon.setViewFlipper(mViewFlipper);
@@ -196,18 +150,18 @@ public class EntityForm extends FormActivity {
 		if (mEntityForForm != null) {
 
 			final Entity entity = mEntityForForm;
-			
+
 			/* Fonts */
-			
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_cancel));
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_delete));
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_save));
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.button_change_image));
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.twitter));
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.facebook));
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.text_uri));
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.text_title));
-			FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.description));
+
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_delete));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_image));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.twitter));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.facebook));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_uri));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_title));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.description));
 
 			/* Content */
 
@@ -351,25 +305,25 @@ public class EntityForm extends FormActivity {
 	}
 
 	public void onWebsiteBuilderClick(View view) {
-		showBookmarkActivity(CandiConstants.ACTIVITY_WEBSITE_PICK, mEntityForForm.place.website);
-	}
+		Intent intent = new Intent(this, LinkPicker.class);
+		intent.putExtra(CandiConstants.EXTRA_VERIFY_URI, false);
+		String website = ((EditText) findViewById(R.id.website)).getText().toString();
+		if (website != null && !website.equals("")) {
+			intent.putExtra(CandiConstants.EXTRA_URI, website);
+		}
 
-	public void onFacebookBuilderClick(View view) {
-		showBookmarkActivity(CandiConstants.ACTIVITY_FACEBOOK_PICK, mEntityForForm.place.website);
-	}
-
-	public void onLinkBuilderClick(View view) {
-		showBookmarkActivity(CandiConstants.ACTIVITY_LINK_PICK, mTextUri.getEditableText().toString());
+		startActivityForResult(intent, CandiConstants.ACTIVITY_WEBSITE_EDIT);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	public void onAddressBuilderClick(View view) {
 		Intent intent = new Intent(this, AddressBuilder.class);
 		if (mEntityForForm.getPlace().location != null) {
 			String jsonAddress = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.place.location, false, true);
-			intent.putExtra(getString(R.string.EXTRA_ADDRESS), jsonAddress);
+			intent.putExtra(CandiConstants.EXTRA_ADDRESS, jsonAddress);
 		}
 		if (mEntityForForm.getPlace().contact != null && mEntityForForm.getPlace().contact.phone != null) {
-			intent.putExtra(getString(R.string.EXTRA_PHONE), mEntityForForm.getPlace().contact.phone);
+			intent.putExtra(CandiConstants.EXTRA_PHONE, mEntityForForm.getPlace().contact.phone);
 		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_ADDRESS_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
@@ -379,7 +333,7 @@ public class EntityForm extends FormActivity {
 		Intent intent = new Intent(this, CategoryBuilder.class);
 		if (mEntityForForm.getPlace().categories != null && mEntityForForm.getPlace().categories.size() > 0) {
 			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.getPlace().getCategoryPrimary(), false, true);
-			intent.putExtra(getString(R.string.EXTRA_CATEGORY), jsonCategory);
+			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CATEGORY_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
@@ -404,12 +358,12 @@ public class EntityForm extends FormActivity {
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
 
-					String phone = extras.getString(getString(R.string.EXTRA_PHONE));
+					String phone = extras.getString(CandiConstants.EXTRA_PHONE);
 					phone = phone.replaceAll("[^\\d.]", "");
 					mEntityForForm.getPlace().getContact().phone = phone;
 					mEntityForForm.getPlace().getContact().formattedPhone = PhoneNumberUtils.formatNumber(phone);
 
-					String jsonAddress = extras.getString(getString(R.string.EXTRA_ADDRESS));
+					String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
 					if (jsonAddress != null) {
 						Location locationUpdated = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
 						mEntityForForm.getPlace().location = locationUpdated;
@@ -420,7 +374,7 @@ public class EntityForm extends FormActivity {
 			else if (resultCode == Activity.RESULT_OK && requestCode == CandiConstants.ACTIVITY_CATEGORY_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
-					String jsonCategory = extras.getString(getString(R.string.EXTRA_CATEGORY));
+					String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
 					if (jsonCategory != null) {
 						Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 						if (categoryUpdated != null) {
@@ -434,6 +388,17 @@ public class EntityForm extends FormActivity {
 					}
 				}
 			}
+			else if (resultCode == Activity.RESULT_OK && requestCode == CandiConstants.ACTIVITY_WEBSITE_EDIT) {
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					String linkUri = extras.getString(CandiConstants.EXTRA_URI);
+					if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
+						linkUri = "http://" + linkUri;
+					}
+					mEntityForForm.getPlace().website = linkUri;
+					((BuilderButton) findViewById(R.id.website)).setText(linkUri);
+				}
+			}
 			else {
 				super.onActivityResult(requestCode, resultCode, intent);
 			}
@@ -443,28 +408,6 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
-
-	private boolean validate() {
-		/*
-		 * We only validate the web address if the form had an input for it and
-		 * the user set it to something.
-		 */
-		if (mTextUri != null) {
-			String linkUri = mTextUri.getText().toString();
-			if (linkUri != null && !linkUri.equals("")) {
-
-				if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
-					linkUri = "http://" + linkUri;
-				}
-
-				if (!MiscUtils.validWebUri(linkUri)) {
-					mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
-					return false;
-				}
-			}
-		}
-		return true;
-	}
 
 	private void gather(Entity entity) {
 		if (findViewById(R.id.text_title) != null) {
@@ -498,106 +441,68 @@ public class EntityForm extends FormActivity {
 
 	private void doSave() {
 
-		if (validate()) {
+		new AsyncTask() {
 
-			new AsyncTask() {
+			@Override
+			protected void onPreExecute() {}
 
-				@Override
-				protected void onPreExecute() {
-					if (mTextUri != null && !mUriVerified) {
-						mCommon.showBusy(R.string.progress_verifying);
-					}
-				}
+			@Override
+			protected Object doInBackground(Object... params) {
+				ModelResult result = new ModelResult();
 
-				@Override
-				protected Object doInBackground(Object... params) {
-					ModelResult result = new ModelResult();
-					/*
-					 * If using uri then we have already checked to see if it is a well formed
-					 * web address by now
-					 */
-					if (mTextUri != null) {
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-						String linkUri = mTextUri.getText().toString();
-						if (linkUri != null && !linkUri.equals("")) {
-							if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
-								linkUri = "http://" + linkUri;
-							}
+					runOnUiThread(new Runnable() {
 
-							ServiceRequest serviceRequest = new ServiceRequest()
-									.setUri(linkUri)
-									.setRequestType(RequestType.Get)
-									.setResponseFormat(ResponseFormat.Html)
-									.setSuppressUI(true);
+						@Override
+						public void run() {
+							mCommon.showBusy(R.string.progress_saving);
+						}
+					});
 
-							result.serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+					if (mCommon.mCommandType == CommandType.New) {
+						/*
+						 * Pull all the control values back into the entity object
+						 */
+						gather(mEntityForForm);
+						result = insertEntityAtService();
 
-							/*
-							 * Success means the uri was verified.
-							 */
-							if (result.serviceResponse.responseCode == ResponseCode.Success) {
-								mEntityForForm.getPhoto().setImageUri(linkUri);
-								mEntityForForm.getPhoto().setImageFormat(ImageFormat.Html);
-								mEntityBitmap = null;
-								mUriVerified = true;
-							}
+						if (result.serviceResponse.responseCode == ResponseCode.Success) {
+							ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
+							setResult(CandiConstants.RESULT_ENTITY_INSERTED);
 						}
 					}
+					else if (mCommon.mCommandType == CommandType.Edit) {
+						/*
+						 * Pull all the control values back into the entity object being used to
+						 * update the service. Because the entity reference comes from an entity model
+						 * collection, that entity gets updated.
+						 */
+						gather(mEntityForForm);
+						result = updateEntityAtService();
 
-					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-						runOnUiThread(new Runnable() {
-
-							@Override
-							public void run() {
-								mCommon.showBusy(R.string.progress_saving);
-							}
-						});
-
-						if (mCommon.mCommandType == CommandType.New) {
-							/*
-							 * Pull all the control values back into the entity object
-							 */
-							gather(mEntityForForm);
-							result = insertEntityAtService();
-
-							if (result.serviceResponse.responseCode == ResponseCode.Success) {
-								ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
-								setResult(CandiConstants.RESULT_ENTITY_INSERTED);
-							}
-						}
-						else if (mCommon.mCommandType == CommandType.Edit) {
-							/*
-							 * Pull all the control values back into the entity object being used to
-							 * update the service. Because the entity reference comes from an entity model
-							 * collection, that entity gets updated.
-							 */
-							gather(mEntityForForm);
-							result = updateEntityAtService();
-
-							if (result.serviceResponse.responseCode == ResponseCode.Success) {
-								ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-								setResult(CandiConstants.RESULT_ENTITY_UPDATED);
-							}
+						if (result.serviceResponse.responseCode == ResponseCode.Success) {
+							ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+							setResult(CandiConstants.RESULT_ENTITY_UPDATED);
 						}
 					}
-					return result.serviceResponse;
 				}
+				return result.serviceResponse;
+			}
 
-				@Override
-				protected void onPostExecute(Object response) {
-					ServiceResponse serviceResponse = (ServiceResponse) response;
-					mCommon.hideBusy();
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						finish();
-					}
-					else {
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
-					}
+			@Override
+			protected void onPostExecute(Object response) {
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				mCommon.hideBusy();
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					finish();
 				}
+				else {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
+				}
+			}
 
-			}.execute();
-		}
+		}.execute();
 	}
 
 	private ModelResult insertEntityAtService() {
@@ -702,140 +607,6 @@ public class EntityForm extends FormActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// UI routines
-	// --------------------------------------------------------------------------------------------
-
-	private void showBookmarkActivity(int requestCode, String uri) {
-
-		Intent intent = new Intent(this, LinkPicker.class);
-		intent.putExtra(getString(R.string.EXTRA_VERIFY_URI), false);
-		if (uri != null) {
-			intent.putExtra(getString(R.string.EXTRA_URI), uri);
-		}
-
-		startActivityForResult(intent, requestCode);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-
-		super.mImageRequestListener = new RequestListener() {
-
-			@Override
-			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
-
-				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					/*
-					 * Validate before we move on
-					 */
-					if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
-						linkUri = "http://" + linkUri;
-					}
-
-					if (!MiscUtils.validWebUri(linkUri)) {
-						mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
-						return;
-					}
-					else {
-						mEntityForForm.getPhoto().setImageUri(linkUri);
-						mEntityForForm.getPhoto().setImageFormat(ImageFormat.Html);
-						mEntityForForm.getPhoto().setSourceName("external");
-						mEntityForForm.getPhoto().getDetail().setImageUri(linkUri);
-						mEntityForForm.getPhoto().getDetail().setImageFormat(ImageFormat.Html);
-						mEntityForForm.getPhoto().getDetail().setSourceName("external");
-						mEntityBitmap = null;
-						updateLinkFields(linkUri);
-					}
-				}
-			}
-		};
-	}
-
-	private void updateLinkFields(final String linkUri) {
-		/*
-		 * Link has been validated before we get here.
-		 */
-		final EditText textUri = (EditText) findViewById(R.id.text_uri);
-		@SuppressWarnings("unused")
-		final EditText textTitle = (EditText) findViewById(R.id.text_title);
-		@SuppressWarnings("unused")
-		final EditText textDescription = (EditText) findViewById(R.id.description);
-
-		textUri.setText(linkUri);
-		mUriVerified = false;
-
-		mAsyncTask = new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.getProgressDialog().setOnCancelListener(new DialogInterface.OnCancelListener() {
-
-					public void onCancel(DialogInterface dialog) {
-						mAsyncTask.cancel(true);
-						ImageUtils.showToastNotification("Validation canceled", Toast.LENGTH_SHORT);
-					}
-				});
-				mCommon.showBusy(R.string.progress_verifying);
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-
-				ServiceRequest serviceRequest = new ServiceRequest()
-						.setUri(linkUri)
-						.setRequestType(RequestType.Get)
-						.setResponseFormat(ResponseFormat.Html);
-
-				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-				return serviceResponse;
-			}
-
-			@Override
-			protected void onPostExecute(Object result) {
-				ServiceResponse serviceResponse = (ServiceResponse) result;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mUriVerified = true;
-					/*
-					 * We only push values if the user hasn't already supplied some
-					 */
-					Document document = Jsoup.parse((String) serviceResponse.data);
-
-					((EditText) findViewById(R.id.text_title)).setText(document.title());
-
-					String description = null;
-					Element element = document.select("meta[name=description]").first();
-					if (element != null) {
-						description = element.attr("content");
-					}
-
-					if (description == null) {
-						element = document.select("p[class=description]").first();
-						if (element != null) {
-							description = element.text();
-						}
-					}
-					if (description == null) {
-						element = document.select("p").first();
-						if (element != null) {
-							description = element.text();
-						}
-					}
-
-					if (description != null) {
-						((EditText) findViewById(R.id.description)).setText(description);
-					}
-					else {
-						((EditText) findViewById(R.id.description)).setText("");
-					}
-					mCommon.hideBusy();
-				}
-				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.LinkLookup, EntityForm.this);
-				}
-			}
-		}.execute();
-
-	}
-
-	// --------------------------------------------------------------------------------------------
 	// Persistence routines
 	// --------------------------------------------------------------------------------------------
 
@@ -875,9 +646,6 @@ public class EntityForm extends FormActivity {
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
 			return R.layout.picture_form;
-		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_LINK)) {
-			return R.layout.link_form;
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
 			return R.layout.folder_form;

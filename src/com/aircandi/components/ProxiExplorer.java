@@ -28,7 +28,6 @@ import android.os.Bundle;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiRadar;
 import com.aircandi.Preferences;
-import com.aircandi.R;
 import com.aircandi.components.GeoLocationManager.MeasurementSystem;
 import com.aircandi.components.ImageRequest.ImageShape;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -45,7 +44,6 @@ import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.Query;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
-import com.aircandi.service.objects.Beacon.BeaconState;
 import com.aircandi.service.objects.Beacon.BeaconType;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
@@ -75,10 +73,7 @@ public class ProxiExplorer {
 	public Date						mLastWifiUpdate;
 	private WifiManager				mWifiManager;
 	private boolean					mUsingEmulator			= false;
-	public static String			mGlobalBeaconId			= "0008.00:00:00:00:00:00";
-	public static String			mLocationBeaconId		= "0008.00:00:00:00:00:11";
 
-	private static WifiScanResult	mWifiDemo				= new WifiScanResult("48:5b:39:e6:d3:55", "test_demo", -50, false);
 	private static WifiScanResult	mWifiMassenaUpper		= new WifiScanResult("00:1c:b3:ae:bf:f0", "test_massena_upper", -50, true);
 	private static WifiScanResult	mWifiMassenaLower		= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower", -50, true);
 	private static WifiScanResult	mWifiMassenaLowerStrong	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_strong", -20, true);
@@ -125,27 +120,15 @@ public class ProxiExplorer {
 
 							/* Get the latest scan results */
 							mWifiList.clear();
+
 							for (ScanResult scanResult : mWifiManager.getScanResults()) {
 								mWifiList.add(new WifiScanResult(scanResult));
 							}
-							Collections.sort(mWifiList, new WifiScanResult.SortWifiBySignalLevel());
 
 							String testingBeacons = Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural");
+
 							if (!ListPreferenceMultiSelect.contains("natural", testingBeacons, null)) {
 								mWifiList.clear();
-							}
-
-							if (ListPreferenceMultiSelect.contains("demo", testingBeacons, null)) {
-								boolean demoBeaconFound = false;
-								for (ScanResult scanResult : mWifiManager.getScanResults()) {
-									if ((scanResult.BSSID).equals(mWifiDemo.BSSID)) {
-										demoBeaconFound = true;
-										break;
-									}
-								}
-								if (!demoBeaconFound) {
-									mWifiList.add(mWifiDemo);
-								}
 							}
 
 							if (ListPreferenceMultiSelect.contains("massena_upper", testingBeacons, null)) {
@@ -168,7 +151,10 @@ public class ProxiExplorer {
 								mWifiList.add(mWifiEmpty);
 							}
 
+							Collections.sort(mWifiList, new WifiScanResult.SortWifiBySignalLevel());
+
 							mEntityModel.updateBeacons();
+
 							mLastWifiUpdate = DateUtils.nowDate();
 							Events.EventBus.onWifiScanReceived(mWifiList);
 							if (requestListener != null) {
@@ -226,7 +212,6 @@ public class ProxiExplorer {
 			/* Construct string array of the beacon ids */
 			ArrayList<String> beaconIds = new ArrayList<String>();
 			for (Beacon beacon : mEntityModel.getBeacons()) {
-				beacon.state = BeaconState.Normal;
 				beaconIds.add(beacon.id);
 			}
 
@@ -263,7 +248,7 @@ public class ProxiExplorer {
 			ArrayList<Integer> levels = new ArrayList<Integer>();
 			for (String beaconId : beaconIds) {
 				Beacon beacon = mEntityModel.getBeacon(beaconId);
-				levels.add(beacon.global ? -20 : beacon.level.intValue());
+				levels.add(beacon.level.intValue());
 			}
 			parameters.putIntegerArrayList("beaconLevels", levels);
 		}
@@ -299,7 +284,7 @@ public class ProxiExplorer {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
-		serviceResponse = dispatch(serviceRequest);
+		serviceResponse = dispatch(serviceRequest, false);
 
 		Aircandi.stopwatch.segmentTime("Finished service query");
 
@@ -311,22 +296,6 @@ public class ProxiExplorer {
 			Aircandi.stopwatch.segmentTime("Finished parsing json objects");
 
 			List<Entity> entities = (List<Entity>) serviceData.data;
-
-			/* Do some fixup migrating settings to the children collection */
-			for (Entity rawEntity : entities) {
-				if (rawEntity.getBeaconId() != null && rawEntity.getBeaconId().equals(mGlobalBeaconId)) {
-					rawEntity.global = true;
-				}
-			}
-
-			/* Add any local globals */
-			if (Aircandi.applicationUpdateNeeded) {
-				Entity entity = loadEntityFromResources(R.raw.aircandi_install);
-				entity.global = true;
-				if (entity != null) {
-					entities.add(entity);
-				}
-			}
 
 			/* Merge entities into data model */
 			mEntityModel.mEntityCache.clear();
@@ -365,7 +334,7 @@ public class ProxiExplorer {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
-		serviceResponse = dispatch(serviceRequest);
+		serviceResponse = dispatch(serviceRequest, false);
 		Aircandi.stopwatch.segmentTime("Finished service query");
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -390,14 +359,17 @@ public class ProxiExplorer {
 		return;
 	}
 
-	private ServiceResponse dispatch(ServiceRequest serviceRequest) {
+	private ServiceResponse dispatch(ServiceRequest serviceRequest, Boolean skipUpdateCheck) {
 		/*
 		 * We use this as a choke point for all calls to the aircandi service.
 		 */
 		ModelResult result = new ModelResult();
-		Boolean doUpdateCheck = updateCheckNeeded();
-		if (doUpdateCheck) {
-			result = checkForUpdate();
+
+		if (!skipUpdateCheck) {
+			Boolean doUpdateCheck = updateCheckNeeded();
+			if (doUpdateCheck) {
+				result = checkForUpdate();
+			}
 		}
 
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -590,18 +562,12 @@ public class ProxiExplorer {
 		 * them.
 		 */
 		float signalThresholdFluid = entity.signalFence.floatValue();
-		if (oldIsHidden == false && entity.getBeacon() != null && entity.getBeacon().state != BeaconState.New) {
+		if (oldIsHidden == false && entity.getBeacon() != null) {
 			signalThresholdFluid = entity.signalFence.floatValue() - 5;
 		}
 
 		/* Hide entities that are not within entity declared virtual range */
 		if (Aircandi.settings.getBoolean(Preferences.PREF_ENTITY_FENCING, true) && beacon.level.intValue() < signalThresholdFluid) {
-			entity.hidden = true;
-			return;
-		}
-
-		/* Hide global entities if specified */
-		if (!Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true) && entity.global) {
 			entity.hidden = true;
 			return;
 		}
@@ -626,8 +592,7 @@ public class ProxiExplorer {
 
 	public ModelResult checkForUpdate() {
 
-		Logger.v(this, "Checking update for: " + Aircandi.getInstance().getUser().name);
-		//Logger.v(this, "Checking update for: " + Aircandi.getInstance().getUser().session.ownerId);
+		Logger.v(this, "Checking for update");
 		ModelResult result = new ModelResult();
 
 		Aircandi.applicationUpdateNeeded = false;
@@ -645,9 +610,7 @@ public class ProxiExplorer {
 		 * This causes the user session expiration window to get bumped
 		 * if we are within a week of expiration.
 		 */
-		if (!Aircandi.getInstance().getUser().isAnonymous()) {
-			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
-		}
+		serviceRequest.setSession(Aircandi.getInstance().getUser().session);
 
 		result.serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
@@ -681,30 +644,14 @@ public class ProxiExplorer {
 
 	public List<Beacon> getStrongestWifiAsBeacons(int max) {
 
-		Beacon demoBeacon = null;
 		List<Beacon> beaconStrongest = new ArrayList<Beacon>();
 		int beaconCount = 0;
 		for (Beacon beacon : mEntityModel.getBeacons()) {
-			if (beacon.global || beacon.test) {
-				continue;
-			}
-			if (beacon.id.equals("0008." + mWifiDemo.BSSID)) {
-				demoBeacon = beacon;
-			}
-			else {
-				beaconStrongest.add(beacon);
-				beaconCount++;
-				if (beaconCount >= max) {
-					break;
-				}
-			}
-
+			if (beacon.test) continue;
+			beaconStrongest.add(beacon);
+			beaconCount++;
+			if (beaconCount >= max) break;
 		}
-
-		if (beaconStrongest.size() == 0 && demoBeacon != null) {
-			beaconStrongest.add(demoBeacon);
-		}
-
 		return beaconStrongest;
 	}
 
@@ -861,7 +808,7 @@ public class ProxiExplorer {
 						.setParameters(parameters)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest);
+				result.serviceResponse = dispatch(serviceRequest, false);
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
@@ -931,7 +878,7 @@ public class ProxiExplorer {
 						.setParameters(parameters)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest);
+				result.serviceResponse = dispatch(serviceRequest, false);
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) result.serviceResponse.data;
@@ -973,7 +920,7 @@ public class ProxiExplorer {
 								.setParameters(parameters)
 								.setResponseFormat(ResponseFormat.Json);
 
-						ServiceResponse serviceResponse = dispatch(serviceRequest);
+						ServiceResponse serviceResponse = dispatch(serviceRequest, false);
 
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 							String jsonResponse = (String) serviceResponse.data;
@@ -1016,13 +963,10 @@ public class ProxiExplorer {
 					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getUser")
 					.setRequestType(RequestType.Method)
 					.setParameters(parameters)
-					.setResponseFormat(ResponseFormat.Json);
+					.setResponseFormat(ResponseFormat.Json)
+					.setSession(Aircandi.getInstance().getUser().session);
 
-			if (!Aircandi.getInstance().getUser().isAnonymous()) {
-				serviceRequest.setSession(Aircandi.getInstance().getUser().session);
-			}
-
-			result.serviceResponse = dispatch(serviceRequest);
+			result.serviceResponse = dispatch(serviceRequest, false);
 
 			return result;
 		}
@@ -1040,7 +984,7 @@ public class ProxiExplorer {
 					.setParameters(parameters)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest);
+			result.serviceResponse = dispatch(serviceRequest, false);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
@@ -1066,7 +1010,7 @@ public class ProxiExplorer {
 					.setParameters(parameters)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest);
+			result.serviceResponse = dispatch(serviceRequest, false);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
@@ -1110,7 +1054,7 @@ public class ProxiExplorer {
 						.setRetry(false)
 						.setSession(Aircandi.getInstance().getUser().session);
 
-				result.serviceResponse = dispatch(serviceRequest);
+				result.serviceResponse = dispatch(serviceRequest, false);
 			}
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -1167,7 +1111,7 @@ public class ProxiExplorer {
 						.setRetry(false)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest);
+				result.serviceResponse = dispatch(serviceRequest, false);
 			}
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -1284,7 +1228,7 @@ public class ProxiExplorer {
 							.setRetry(false)
 							.setResponseFormat(ResponseFormat.Json);
 
-					result.serviceResponse = dispatch(serviceRequest);
+					result.serviceResponse = dispatch(serviceRequest, false);
 				}
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -1323,6 +1267,7 @@ public class ProxiExplorer {
 		}
 
 		public ModelResult extendEntities(List<Entity> entities, List<Beacon> beacons, Beacon primaryBeacon) {
+
 			ModelResult result = new ModelResult();
 			Logger.i(this, "Extending entities");
 
@@ -1366,7 +1311,7 @@ public class ProxiExplorer {
 
 				parameters.putStringArrayList("beacons", (ArrayList<String>) beaconStrings);
 			}
-			
+
 			/* Observation */
 			Observation observation = GeoLocationManager.getInstance().getObservation();
 			if (observation != null) {
@@ -1390,7 +1335,7 @@ public class ProxiExplorer {
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest);
+			result.serviceResponse = dispatch(serviceRequest, false);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				/*
@@ -1432,7 +1377,7 @@ public class ProxiExplorer {
 							.setRetry(false)
 							.setResponseFormat(ResponseFormat.Json);
 
-					result.serviceResponse = dispatch(serviceRequest);
+					result.serviceResponse = dispatch(serviceRequest, false);
 				}
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -1464,7 +1409,7 @@ public class ProxiExplorer {
 						.setRetry(false)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest);
+				result.serviceResponse = dispatch(serviceRequest, false);
 			}
 
 			/*
@@ -1495,7 +1440,7 @@ public class ProxiExplorer {
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest);
+			result.serviceResponse = dispatch(serviceRequest, true);
 			return result;
 
 		}
@@ -1517,7 +1462,7 @@ public class ProxiExplorer {
 						.setRetry(false)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest);
+				result.serviceResponse = dispatch(serviceRequest, true);
 			}
 
 			return result;
@@ -1542,7 +1487,7 @@ public class ProxiExplorer {
 					.setSession(Aircandi.getInstance().getUser().session)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest);
+			result.serviceResponse = dispatch(serviceRequest, true);
 
 			return result;
 		}
@@ -1558,7 +1503,7 @@ public class ProxiExplorer {
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest);
+			result.serviceResponse = dispatch(serviceRequest, false);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
@@ -1580,7 +1525,7 @@ public class ProxiExplorer {
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest);
+			result.serviceResponse = dispatch(serviceRequest, false);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
@@ -1606,7 +1551,7 @@ public class ProxiExplorer {
 			/*
 			 * Insert user.
 			 */
-			ServiceResponse serviceResponse = dispatch(serviceRequest);
+			ServiceResponse serviceResponse = dispatch(serviceRequest, true);
 
 			if (serviceResponse.responseCode == ResponseCode.Success) {
 
@@ -1637,7 +1582,7 @@ public class ProxiExplorer {
 								.setResponseFormat(ResponseFormat.Json);
 
 						/* Doing an update so we don't need anything back */
-						serviceResponse = dispatch(serviceRequest);
+						serviceResponse = dispatch(serviceRequest, false);
 					}
 				}
 			}
@@ -1675,7 +1620,7 @@ public class ProxiExplorer {
 							.setSession(Aircandi.getInstance().getUser().session)
 							.setResponseFormat(ResponseFormat.Json);
 
-					result.serviceResponse = dispatch(serviceRequest);
+					result.serviceResponse = dispatch(serviceRequest, false);
 					updateUser(user);
 				}
 			}
@@ -1705,7 +1650,7 @@ public class ProxiExplorer {
 					.setSession(Aircandi.getInstance().getUser().session)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest);
+			result.serviceResponse = dispatch(serviceRequest, false);
 			return result;
 		}
 
@@ -1719,26 +1664,11 @@ public class ProxiExplorer {
 			 * of the latest wifi scan.
 			 */
 
-			/* Flag all current beacons as gone */
 			synchronized (mEntityModel.mBeacons) {
-				for (Beacon beacon : mEntityModel.getBeacons()) {
-					beacon.state = BeaconState.Gone;
-				}
-			}
-
-			/* If beacon is part of latest scan results, reflag it to normal */
-			synchronized (mWifiList) {
-				for (int i = 0; i < mWifiList.size(); i++) {
-					final WifiScanResult scanResult = mWifiList.get(i);
-					Beacon beaconMatch = mEntityModel.getBeacon("0008." + scanResult.BSSID);
-					if (beaconMatch != null) {
-						beaconMatch.state = BeaconState.Normal;
-					}
-				}
+				mEntityModel.mBeacons.clear();
 			}
 			/*
-			 * Insert/update beacons for the latest scan results. New beacons
-			 * are inserted and flagged as new.
+			 * Insert beacons for the latest scan results.
 			 */
 			synchronized (mWifiList) {
 				for (int i = 0; i < mWifiList.size(); i++) {
@@ -1750,23 +1680,7 @@ public class ProxiExplorer {
 							, DateUtils.nowDate()
 							, scanResult.test);
 
-					beacon.global = scanResult.global;
-					beacon.state = BeaconState.Normal;
-					Beacon beaconMatch = mEntityModel.getBeacon("0008." + scanResult.BSSID);
-					if (beaconMatch == null) {
-						beacon.state = BeaconState.New;
-					}
 					mEntityModel.upsertBeacon(beacon);
-				}
-			}
-
-			/* Remove beacons that weren't part of the latest scan */
-			synchronized (mEntityModel.mBeacons) {
-				for (int i = mEntityModel.mBeacons.size() - 1; i >= 0; i--) {
-					Beacon beacon = mEntityModel.mBeacons.get(i);
-					if (beacon.state == BeaconState.Gone) {
-						mEntityModel.mBeacons.remove(beacon.id);
-					}
 				}
 			}
 
@@ -1789,18 +1703,29 @@ public class ProxiExplorer {
 			return null;
 		}
 
-		public Beacon getGlobalBeacon() {
-			for (Beacon beacon : mBeacons) {
-				if (beacon.id.equals(mGlobalBeaconId)) {
-					return beacon;
-				}
-			}
-			return null;
-		}
-
 		// --------------------------------------------------------------------------------------------
 		// Entity cache fetch routines
 		// --------------------------------------------------------------------------------------------
+
+		public ModelResult getEntitiesByListType(EntityListType entityListType, Boolean refresh, String collectionId, String userId, Integer limit) {
+			ModelResult result = new ModelResult();
+			if (entityListType == EntityListType.TunedPlaces) {
+				result.data = getRadarPlaces();
+			}
+			else if (entityListType == EntityListType.SyntheticPlaces) {
+				result.data = getRadarSynthetics();
+			}
+			else if (entityListType == EntityListType.CreatedByUser) {
+				result = getUserEntities(userId, refresh, limit);
+			}
+			else if (entityListType == EntityListType.Collections) {
+				result.data = getCollectionEntities();
+			}
+			else if (entityListType == EntityListType.InCollection) {
+				result.data = getChildEntities(collectionId);
+			}
+			return result;
+		}
 
 		/**
 		 * Returns all the entities that should be visible in radar. Entities that are hidden
@@ -1821,12 +1746,60 @@ public class ProxiExplorer {
 				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 					Entity entity = entry.getValue();
 					if (!entity.hidden && !entity.synthetic) {
-						Float distance = entity.getDistance(MeasurementSystem.Metric);
 						Beacon beacon = entity.getBeacon();
+						/* Must do this to cache the distance before sorting */
+						Float distance = entity.getDistance(MeasurementSystem.Metric);
 						if (beacon != null) {
 							entities.add(entity);
 						}
 						else {
+
+							/*
+							 * Entities that were first found by beacon hang around and could
+							 * later be visible via location if we continue with this approach.
+							 * 
+							 * One thought is that if it qualifies then so be it. Sorting should
+							 * put it in the right priority order and place with beacons should
+							 * sort higher.
+							 */
+							/* No beacon for this entity so check using location */
+							if (distance != null && distance < CandiConstants.SEARCH_RANGE_PLACES_METERS) {
+								entities.add(entity);
+							}
+						}
+					}
+				}
+			}
+			Collections.sort(entities, new Entity.SortEntitiesByTuningScoreDistance());
+			return entities;
+		}
+
+		public EntityList<Entity> getCollectionEntities() {
+			/*
+			 * This is the one case where refresh scenarios have been
+			 * handled outside of this method.
+			 */
+			EntityList<Entity> entities = new EntityList<Entity>();
+			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+				if (entry.getValue().isCollection) {
+					Entity entity = entry.getValue();
+					if (!entity.hidden && !entity.synthetic) {
+						Beacon beacon = entity.getBeacon();
+						/* Must do this to cache the distance before sorting */
+						Float distance = entity.getDistance(MeasurementSystem.Metric);
+						if (beacon != null) {
+							entities.add(entity);
+						}
+						else {
+
+							/*
+							 * Entities that were first found by beacon hang around and could
+							 * later be visible via location if we continue with this approach.
+							 * 
+							 * One thought is that if it qualifies then so be it. Sorting should
+							 * put it in the right priority order and place with beacons should
+							 * sort higher.
+							 */
 							/* No beacon for this entity so check using location */
 							if (distance != null && distance < CandiConstants.SEARCH_RANGE_PLACES_METERS) {
 								entities.add(entity);
@@ -1904,7 +1877,7 @@ public class ProxiExplorer {
 			return entities;
 		}
 
-		public EntityList<Entity> getChildren(String entityId) {
+		public EntityList<Entity> getChildEntities(String entityId) {
 			EntityList<Entity> entities = new EntityList<Entity>();
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().parentId != null && entry.getValue().parentId.equals(entityId)) {
@@ -2012,7 +1985,6 @@ public class ProxiExplorer {
 						Entity removedChild = removedChildren.get(childEntity.id);
 						if (removedChild != null) {
 							childEntity.hidden = removedChild.hidden;
-							childEntity.global = removedChild.global;
 							childEntity.discoveryTime = removedChild.discoveryTime;
 						}
 						mEntityCache.put(childEntity.id, childEntity);
@@ -2104,6 +2076,10 @@ public class ProxiExplorer {
 			return entity;
 		}
 
+		public void removeAllEntities() {
+			mEntityCache.clear();
+		}
+
 		private HashMap<String, Entity> removeChildren(String entityId) {
 
 			HashMap<String, Entity> entities = new HashMap<String, Entity>();
@@ -2165,7 +2141,6 @@ public class ProxiExplorer {
 		public String	BSSID;
 		public String	SSID;
 		public int		level	= 0;
-		public Boolean	global	= false;
 		public Boolean	test	= false;
 
 		public WifiScanResult(String bssid, String ssid, int level, Boolean test) {
@@ -2198,6 +2173,10 @@ public class ProxiExplorer {
 		}
 	}
 
+	public static enum EntityListType {
+		TunedPlaces, SyntheticPlaces, CreatedByUser, Collections, InCollection
+	}
+
 	public static interface IEntityProcessListener {
 		/**
 		 * Callback interface for ProxiExplorer beacon scan requests.
@@ -2214,9 +2193,5 @@ public class ProxiExplorer {
 		 * this method.
 		 */
 		public void onProxibaseServiceException(ProxibaseServiceException exception);
-	}
-
-	public static enum EntityTree {
-		User, Radar, Map
 	}
 }

@@ -11,9 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
@@ -21,10 +19,7 @@ import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Comment;
-import com.aircandi.service.objects.User;
-import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.widgets.UserView;
 
 public class CommentForm extends FormActivity {
@@ -36,23 +31,6 @@ public class CommentForm extends FormActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * Signin required if user is anonymous
-		 */
-		User user = Aircandi.getInstance().getUser();
-		Integer messageResId = R.string.signin_message_comment_new;
-		if (user != null) {
-			Boolean userAnonymous = user.isAnonymous();
-			if (userAnonymous) {
-				IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
-				intentBuilder.setCommandType(CommandType.Edit);
-				intentBuilder.setMessage(getString(messageResId));
-				Intent intent = intentBuilder.create();
-				startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-				AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-				return;
-			}
-		}
 		initialize();
 		bind();
 		draw();
@@ -64,8 +42,8 @@ public class CommentForm extends FormActivity {
 		mButtonSave = (Button) findViewById(R.id.button_save);
 		mButtonSave.setEnabled(false);
 		
-		FontManager.getInstance().setTypefaceLight(mContent);
-		FontManager.getInstance().setTypefaceLight(mButtonSave);
+		FontManager.getInstance().setTypefaceDefault(mContent);
+		FontManager.getInstance().setTypefaceDefault(mButtonSave);
 		
 		mContent.addTextChangedListener(new SimpleTextWatcher() {
 

@@ -3,7 +3,7 @@
 
     <TextView
         android:id="@+id/builder_text"
-        style="@style/form_edit"
+        style="@style/form_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"

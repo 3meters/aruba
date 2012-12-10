@@ -26,6 +26,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.utilities.AnimUtils;
@@ -59,7 +60,7 @@ public class PictureBrowse extends FormActivity {
 
 		Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			mAsPicker = extras.getBoolean(getString(R.string.EXTRA_AS_PICKER));
+			mAsPicker = extras.getBoolean(CandiConstants.EXTRA_AS_PICKER);
 		}
 
 		Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
@@ -76,14 +77,14 @@ public class PictureBrowse extends FormActivity {
 				if (imageUri != null && !imageUri.equals("")) {
 					if (mAsPicker) {
 						Intent intent = new Intent();
-						intent.putExtra(getString(R.string.EXTRA_URI), imageUri);
+						intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
 						setResult(Activity.RESULT_OK, intent);
 						finish();
 					}
 					else {
 						ProxiExplorer.getInstance().getEntityModel().setPhotos(mImages);
 						Intent intent = new Intent(PictureBrowse.this, PictureDetail.class);
-						intent.putExtra(getString(R.string.EXTRA_URI), imageUri);
+						intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
 						startActivity(intent);
 						AnimUtils.doOverridePendingTransition(PictureBrowse.this, TransitionType.CandiPageToForm);
 					}

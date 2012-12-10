@@ -26,6 +26,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PhotoPagerAdapter;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Photo;
@@ -50,7 +51,7 @@ public class PictureDetail extends FormActivity {
 	private void initialize() {
 		Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			mImageUri = extras.getString(getString(R.string.EXTRA_URI));
+			mImageUri = extras.getString(CandiConstants.EXTRA_URI);
 		}
 
 		setSupportProgressBarIndeterminateVisibility(true);
@@ -79,7 +80,7 @@ public class PictureDetail extends FormActivity {
 		((ImageViewTouch) image).setFitToScreen(true);
 		((ImageViewTouch) image).setScrollEnabled(false);
 		
-		FontManager.getInstance().setTypefaceLight(title);
+		FontManager.getInstance().setTypefaceDefault(title);
 
 		/* Title */
 		setVisibility(title, View.GONE);

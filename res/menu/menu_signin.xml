@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <item
-        android:id="@+id/signup"
-        android:showAsAction="always"
-        android:title="@string/menu_signup_item"/>
-
-</menu>

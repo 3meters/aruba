@@ -87,7 +87,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 	/* These are all controlled by the parent in the case of child entities. */
 	public Boolean				hidden				= false;
-	public Boolean				global				= false;
 	public Boolean				synthetic			= false;
 	public Boolean				checked				= false;
 	public Float				distance;										// Cached for easier sorting
@@ -353,7 +352,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			Link strongestLink = null;
 			Integer strongestLevel = -200;
 			for (Link link : links) {
-				if (link.primary) {
+				if (link.primary != null && link.primary) {
 					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
 					if (beacon != null && beacon.level.intValue() > strongestLevel) {
 						strongestLink = link;
@@ -378,7 +377,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public EntityList<Entity> getChildren() {
-		EntityList<Entity> childEntities = ProxiExplorer.getInstance().getEntityModel().getChildren(this.id);
+		EntityList<Entity> childEntities = ProxiExplorer.getInstance().getEntityModel().getChildEntities(this.id);
 		return childEntities;
 	}
 
@@ -510,37 +509,29 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		public int compare(Entity entity1, Entity entity2) {
 
 			/* global versus user */
-			if (!entity1.global && entity2.global) {
+			/* synthetics */
+			if (!entity1.synthetic && entity2.synthetic) {
 				return -1;
 			}
-			if (entity1.global && !entity2.global) {
+			if (entity1.synthetic && !entity2.synthetic) {
 				return 1;
 			}
 			else {
-				/* synthetics */
-				if (!entity1.synthetic && entity2.synthetic) {
+				if (entity1.getTuningScore() > entity2.getTuningScore()) {
 					return -1;
 				}
-				if (entity1.synthetic && !entity2.synthetic) {
+				if (entity1.getTuningScore() < entity2.getTuningScore()) {
 					return 1;
 				}
 				else {
-					if (entity1.getTuningScore() > entity2.getTuningScore()) {
+					if (entity1.distance < entity2.distance.intValue()) {
 						return -1;
 					}
-					if (entity1.getTuningScore() < entity2.getTuningScore()) {
+					else if (entity1.distance.intValue() > entity2.distance.intValue()) {
 						return 1;
 					}
 					else {
-						if (entity1.distance < entity2.distance.intValue()) {
-							return -1;
-						}
-						else if (entity1.distance.intValue() > entity2.distance.intValue()) {
-							return 1;
-						}
-						else {
-							return 0;
-						}
+						return 0;
 					}
 				}
 			}
@@ -560,5 +551,4 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			return -1;
 		}
 	}
-
 }

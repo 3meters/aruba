@@ -1,16 +1,12 @@
 package com.aircandi;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 
-import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.CandiListAdapter.CandiListViewHolder;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiExplorer.EntityListType;
 import com.aircandi.service.objects.Entity;
 
 public class CandiList extends CandiListBase {
@@ -30,56 +26,31 @@ public class CandiList extends CandiListBase {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		Entity collection = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mCollectionId);
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
-		mCommon.mActionBar.setTitle(collection.name);
-	}
-
-	public void bind(final Boolean refresh) {
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showBusy();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mCollectionId, refresh, null, null);
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-				
-				ModelResult result = (ModelResult) response;
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					/*
-					 * Check to see if we got anything back. If not then we want to move up the tree.
-					 */
-					if (result.data == null) {
-						mCommon.hideBusy();
-						onBackPressed();
-					}
-					else {
-						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
-						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
-						mEntityModelUser = Aircandi.getInstance().getUser();
-
-						Entity entity = (Entity) result.data;
-
-						CandiListAdapter adapter = new CandiListAdapter(CandiList.this,  entity.getChildren(), R.layout.temp_listitem_candi);
-						mListView.setAdapter(adapter);
-					}
-				}
-				else {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiList);
-				}
-				mCommon.hideBusy();
-			}
-
-		}.execute();
+		if (mEntityListType == EntityListType.InCollection) {
+			Entity collection = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mCollectionId);
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+			mCommon.mActionBar.setTitle(collection.name);
+		}
+		else if (mEntityListType == EntityListType.Collections) {
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
+			mCommon.mActionBar.setHomeButtonEnabled(false);
+			mCommon.mActionBar.setTitle(getString(R.string.name_entity_list_type_collection));
+		}
+		else if (mEntityListType == EntityListType.CreatedByUser) {
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
+			mCommon.mActionBar.setHomeButtonEnabled(false);
+			mCommon.mActionBar.setTitle(Aircandi.getInstance().getUser().name);
+		}
+		else if (mEntityListType == EntityListType.TunedPlaces) {
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
+			mCommon.mActionBar.setHomeButtonEnabled(false);
+			mCommon.mActionBar.setTitle(getString(R.string.radar_section_places));
+		}
+		else if (mEntityListType == EntityListType.SyntheticPlaces) {
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
+			mCommon.mActionBar.setHomeButtonEnabled(false);
+			mCommon.mActionBar.setTitle(getString(R.string.radar_section_synthetics));
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -95,6 +66,5 @@ public class CandiList extends CandiListBase {
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		mCommon.setActiveTab(0);
 	}
 }

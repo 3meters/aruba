@@ -15,7 +15,6 @@ import android.content.pm.PackageInfo;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
 
 import com.aircandi.components.StopWatch;
 import com.aircandi.service.objects.User;
@@ -80,21 +79,17 @@ public class Aircandi extends Application {
 	public final static int					DEBUG_SIGNATURE_HASH		= -2026043354;
 
 	private static Aircandi					singletonObject;
+	
 	public static SharedPreferences			settings;
 	public static SharedPreferences.Editor	settingsEditor;
 
 	public static Context					applicationContext;
-	public static LayoutInflater			applicationInflater;
 	public static Handler					applicationHandler;
 	public static DisplayMetrics			displayMetrics;
 	public static StopWatch					stopwatch;
 	public static JSONParser				parser						= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
 
-	public static Boolean					firstRunApp					= true;
 	public static Boolean					firstStartApp				= true;
-	public static Boolean					fullUpdateComplete			= false;
-	public static Boolean					runFullScanOnRadarRestart	= true;
-	public static Boolean					lastScanEmpty				= false;
 	public static Boolean					usingEmulator				= false;
 	public static Integer					wifiCount					= 0;
 
@@ -105,7 +100,7 @@ public class Aircandi extends Application {
 
 	private User							mUser;
 	private CandiTask						mCandiTask					= CandiTask.RadarCandi;
-	private Boolean							mLaunchedFromRadar			= false;
+	private Boolean							mLaunchedNormally			= false;
 	private Boolean							mRadarScanInProgress		= false;
 
 	public static Aircandi getInstance() {
@@ -125,14 +120,12 @@ public class Aircandi extends Application {
 		ACRA.init(this);
 
 		applicationContext = getApplicationContext();
-		applicationInflater = (LayoutInflater) applicationContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		applicationHandler = new Handler();
 		stopwatch = new StopWatch();
 
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
-		firstRunApp = Aircandi.settings.getBoolean(Preferences.SETTING_FIRST_RUN, true);
 	}
 
 	public static String getVersionName(Context context, Class cls) {
@@ -162,12 +155,12 @@ public class Aircandi extends Application {
 		return mCandiTask;
 	}
 
-	public void setLaunchedFromRadar(Boolean launchedFromRadar) {
-		this.mLaunchedFromRadar = launchedFromRadar;
+	public void setLaunchedNormally(Boolean launchedNormally) {
+		this.mLaunchedNormally = launchedNormally;
 	}
 
-	public Boolean getLaunchedFromRadar() {
-		return mLaunchedFromRadar;
+	public Boolean wasLaunchedNormally() {
+		return mLaunchedNormally;
 	}
 
 	public Boolean isRadarScanInProgress() {
@@ -179,7 +172,7 @@ public class Aircandi extends Application {
 	}
 
 	public static enum CandiTask {
-		None, MyCandi, RadarCandi, Map
+		None, MyCandi, RadarCandi
 	}
 
 }

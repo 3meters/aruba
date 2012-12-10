@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title"
-        android:textAppearance="@style/app_text_appearance_micro"
+        android:textAppearance="@style/app_text_appearance_tiny"
         android:textAllCaps="true"
         android:layout_toRightOf="@+id/candi_view"
         android:maxLines="3"

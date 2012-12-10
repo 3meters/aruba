@@ -14,23 +14,26 @@
     	We also used the pressed color in radar and that color is hardcoded
     	in CandiPatchPresenter.initializeScene
     -->
+    
+    <!-- Text -->
 
-    <color name="button_pressed">#ff33b5e5</color>
-    <color name="image_pressed">#8833b5e5</color>
+    <color name="text_dark">#ffffffff</color>
+    <color name="text_light">#ff000000</color>
+    <color name="text_secondary">#ffaaaaaa</color>
+    <color name="text_unfocused_dark">#ffcccccc</color>
+    <color name="text_unfocused_light">#ff666666</color>
+    <color name="text_pressed">#ff000000</color>
+    <color name="edit_hint">#ff888888</color>
+    
+    <!-- Beacons -->
+    
     <color name="beacon_stop">#99990000</color>
     <color name="beacon_caution">#99999900</color>
     <color name="beacon_go">#99009900</color>
     <color name="beacon_off">#33ffffff</color>
-    <color name="holo_blue_light">#8833b5e5</color>
-    <color name="accent">#ffffaa00</color>
-    <color name="accent_darker">#ffbb7700</color>
-    <color name="accent_lighter">#ffffcc00</color>
-    <color name="edit_hint">#ff888888</color>
-    <color name="text_dark">#ffffffff</color>
-    <color name="text_light">#ff000000</color>
-    <color name="text_unfocused_dark">#ffcccccc</color>
-    <color name="text_unfocused_light">#ff666666</color>
-    <color name="text_pressed">#ff000000</color>
+    
+    <!-- Backgrounds -->
+    
     <color name="background_dark">@android:color/black</color>
     <color name="background_light">@android:color/white</color>
     <color name="background_help_dark">@android:color/black</color>
@@ -38,6 +41,10 @@
     <color name="background_picture_browse">#ff282828</color>
     <color name="background_form_dark_semi">#90000000</color>
     <color name="background_form_light_semi">#90ffffff</color>
+    
+    <color name="button_pressed">#ff33b5e5</color>
+    <color name="image_pressed">#8833b5e5</color>
+    <color name="holo_blue_light">#8833b5e5</color>
     <color name="drop_start">#66000000</color>
     <color name="drop_end">#00000000</color>
 
@@ -53,9 +60,6 @@
     <color name="background_tabbar_dark">#10ffffff</color>
 	<color name="background_buttonbar_dark">#18ffffff</color>    
 
-    <!-- <color name="background_buttonbar_dark">#cc000000</color> -->
-
-
     <!-- Rules -->
 
     <color name="rule_60_dark">#99ffffff</color>
@@ -66,6 +70,10 @@
     <color name="rule_15_light">#2d000000</color>
 
     <!-- Android accent colors -->
+    
+    <color name="accent">#ffffaa00</color>
+    <color name="accent_darker">#ffbb7700</color>
+    <color name="accent_lighter">#ffffcc00</color>
 
     <color name="accent_red">#ffff4444</color>
     <color name="accent_red_dark">#ffcc0000</color>

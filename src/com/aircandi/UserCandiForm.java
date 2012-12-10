@@ -1,9 +1,6 @@
 package com.aircandi;
 
-import com.aircandi.components.ProxiExplorer.EntityTree;
-
 import android.os.Bundle;
-import android.view.View;
 
 public class UserCandiForm extends CandiFormBase {
 
@@ -17,14 +14,11 @@ public class UserCandiForm extends CandiFormBase {
 	}
 
 	public void bind(Boolean refresh) {
-		doBind(refresh, false, EntityTree.User);
+		doBind(refresh, false);
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Event routines
-	// --------------------------------------------------------------------------------------------
-
-	public void onChildrenButtonClick(View v) {
-		showChildrenForEntity(UserCandiList.class);
+	@Override
+	protected int getLayoutId() {
+		return R.layout.candi_form;
 	}
 }

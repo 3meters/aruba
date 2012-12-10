@@ -84,10 +84,6 @@ public class User extends ServiceEntryBase {
 		}
 	}
 
-	public Boolean isAnonymous() {
-		return this.id.equals("0000.000000.00000.000.000000");
-	}
-
 	public static User setPropertiesFromMap(User user, HashMap map) {
 		/*
 		 * These base properties are done here instead of calling ServiceEntry

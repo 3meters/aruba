@@ -6,7 +6,7 @@
 
     <ImageView
         android:id="@+id/item_image"
-        style="@style/app_picture_framed"
+        style="@style/picture_framed"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:scaleType="centerCrop"

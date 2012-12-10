@@ -210,7 +210,7 @@ public class TipList extends CandiActivity {
 				holder.user = (UserView) view.findViewById(R.id.author);
 				holder.description = (TextView) view.findViewById(R.id.description);
 				
-				FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.description));
+				FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.description));
 				
 				view.setTag(holder);
 			}

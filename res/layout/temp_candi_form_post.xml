@@ -93,7 +93,7 @@
 
         <Button
             android:id="@+id/button_comment"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -102,7 +102,7 @@
 
         <LinearLayout
             android:id="@+id/button_new"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -129,7 +129,7 @@
 
         <Button
             android:id="@+id/button_edit"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -138,7 +138,7 @@
 
         <Button
             android:id="@+id/button_move"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

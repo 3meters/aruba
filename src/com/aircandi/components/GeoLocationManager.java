@@ -107,90 +107,79 @@ public class GeoLocationManager implements LocationListener {
 		mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
 		Criteria criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-		ensureLocation(MINIMUM_ACCURACY, MAXIMUM_AGE, criteria, null);
+		ensureLocation(MINIMUM_ACCURACY, MAXIMUM_AGE, criteria);
 	}
 
-	public void ensureLocation(int minAccuracy, long maxTimeAgo, Criteria criteria, final RequestListener listener) {
-		/*
-		 * Returns the most accurate and timely previously detected location.
-		 * When the last result is beyond the specified maximum distance or
-		 * latency a one-off location update is returned.
-		 */
-		Logger.d(this, "Ensuring location");
-		Location bestLocation = null;
-		float bestAccuracy = Float.MAX_VALUE;
-		long bestTime = Long.MIN_VALUE;
-		Location backupLocation = null;
-		long backupTime = Long.MIN_VALUE;
-		
-		long minTime = System.currentTimeMillis() - maxTimeAgo;
+	/**
+	 * Works to make sure a location is available that meets the accuracy and age
+	 * parameters. We always launch a location request that may or may not be used
+	 * later depending on whether it ends up to be better than what we have.
+	 * 
+	 * It's possible to exit this routine without an available location and there
+	 * are no quarantees about how long it will take to get a viable location fix.
+	 * 
+	 * @param minAccuracy
+	 * @param maxAge
+	 * @param criteria
+	 * @param listener
+	 */
 
+	public void ensureLocation(int minAccuracy, long maxAge, Criteria criteria) {
+		Logger.d(this, "Ensuring location");
+
+		/*
+		 * We always start a single shot update while we look
+		 * over the last known locations.
+		 */
+		if (!mLocationScanActive.get()) {
+			getSingleLocationUpdate(criteria);
+		}
 		/*
 		 * Iterate through all the providers on the system, keeping note of the
 		 * most accurate result within the acceptable time limit. If no result
 		 * is found within maxTime, return the newest Location.
 		 */
+		Location bestLocation = null;
 		for (String provider : mLocationManager.getAllProviders()) {
-
 			Location location = mLocationManager.getLastKnownLocation(provider);
 			if (location != null) {
-				float accuracy = location.getAccuracy();
-				long time = location.getTime();
-				
-				if (time > backupTime) {
-					backupLocation = location;
-				}
-				
-				if ((time > minTime 
-						&& accuracy < bestAccuracy)) {
-					bestLocation = location;
-					bestAccuracy = accuracy;
-					bestTime = time;
-				}
-				else if (time < minTime
-						&& bestAccuracy == Float.MAX_VALUE
-						&& time > bestTime) {
-					bestLocation = location;
-					bestTime = time;
+
+				long fixAge = System.currentTimeMillis() - location.getTime();
+				float fixAccuracy = location.getAccuracy();
+
+				if ((fixAge <= maxAge && fixAccuracy <= minAccuracy)) {
+					if (bestLocation == null || fixAccuracy < bestLocation.getAccuracy()) {
+						bestLocation = location;
+					}
 				}
 			}
 		}
-		
-		/*
-		 * Use the most recent location fix as a backup while
-		 * we get another fix if necessary.
-		 */
-		if (backupLocation != null) {
-			mLocation = backupLocation;
-		}
+
 		/*
 		 * If the best result is beyond the allowed time limit, or the accuracy
 		 * of the best result is wider than the acceptable maximum distance,
 		 * request a single update.
 		 */
-		
-		if (bestLocation == null || bestTime < minTime || bestAccuracy > minAccuracy) {
-			getSingleLocationUpdate(listener, criteria);
-		}
-		else {
+		if (bestLocation != null) {
 			if (isBetterLocation(bestLocation, mLocation)) {
-				Date fixDate = new Date(bestTime);
-				Logger.d(this, "Using last known location: accuracy="
+				Logger.d(this, "Using last known location: provider="
+						+ bestLocation.getProvider()
+						+ " accuracy="
 						+ String.valueOf(bestLocation.getAccuracy())
-						+ " age=" + DateUtils.intervalSince(fixDate, DateUtils.nowDate()));
+						+ " age="
+						+ DateUtils.intervalSince(new Date(bestLocation.getTime()), DateUtils.nowDate()));
 				mLocation = bestLocation;
 				if (mLocationListener != null) {
 					mLocationListener.onLocationChanged(mLocation);
 				}
 			}
 			else {
-				Date fixDate = new Date(mLocation.getTime());
-				Logger.d(this, "Current location is best: accuracy="
+				Logger.d(this, "Current location is best: provider="
+						+ mLocation.getProvider()
+						+ " accuracy="
 						+ String.valueOf(mLocation.getAccuracy())
-						+ " age=" + DateUtils.intervalSince(fixDate, DateUtils.nowDate()));
-			}
-			if (listener != null) {
-				listener.onComplete(mLocation);
+						+ " age="
+						+ DateUtils.intervalSince(new Date(mLocation.getTime()), DateUtils.nowDate()));
 			}
 		}
 	}
@@ -618,32 +607,35 @@ public class GeoLocationManager implements LocationListener {
 	 * @param criteria
 	 */
 
-	public void getSingleLocationUpdate(final RequestListener listener, Criteria criteria) {
+	public void getSingleLocationUpdate(Criteria criteria) {
 
-		String provider = mLocationManager.getBestProvider(criteria, true);
+		final String provider = mLocationManager.getBestProvider(criteria, true);
 
 		if (provider != null) {
-			Logger.d(this, "Starting single location update");
+			Logger.d(this, "Starting single location update: " + provider);
+			mLocationScanActive.set(true);
 
 			mLocationManager.requestLocationUpdates(provider, CandiConstants.ONE_SECOND, 0, new LocationListener() {
 
 				@Override
 				public void onLocationChanged(Location location) {
-					Logger.d(this, "Single location update received: "
+					mLocationScanActive.set(false);
+					Logger.d(this, "Single location update received: " + provider + " "
 							+ location.getLatitude() + ","
 							+ location.getLongitude());
 
 					if (location != null && isBetterLocation(location, mLocation)) {
+						Logger.d(this, "Single location update is better");
 						mLocation = location;
+						/* Notify interested parties */
+						Events.EventBus.onLocationChanged(mLocation);
 					}
 
 					if (mLocationListener != null && location != null) {
 						mLocationListener.onLocationChanged(location);
 					}
+
 					mLocationManager.removeUpdates(this);
-					if (listener != null) {
-						listener.onComplete(location);
-					}
 				}
 
 				@Override
@@ -659,9 +651,6 @@ public class GeoLocationManager implements LocationListener {
 		}
 		else {
 			Logger.d(this, "No location provider available");
-			if (listener != null) {
-				listener.onComplete(null);
-			}
 		}
 	}
 

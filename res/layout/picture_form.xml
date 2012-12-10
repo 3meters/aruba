@@ -30,40 +30,35 @@
 
                 <!-- Public Image -->
 
-                <TextView
-                    style="@style/form_label"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/form_label_picture" />
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="10dp"
-                    android:paddingLeft="0dp"
-                    android:paddingRight="3dp"
-                    android:paddingTop="0dp" >
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="0" >
 
                     <com.aircandi.widgets.WebImageView
                         android:id="@+id/image_picture"
-                        android:layout_width="250px"
-                        android:layout_height="250px"
-                        aircandi:layout="@layout/widget_webimageview"
-                        android:minWidth="250px"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="10dp"
+                        aircandi:layout="@layout/widget_webimageview_framed"
+                        android:clickable="true"
+                        android:minWidth="150dp"
+                        android:onClick="onChangePictureButtonClick"
                         android:scaleType="centerCrop" />
 
                     <Button
                         android:id="@+id/button_change_image"
-                        style="@style/actionbar_button"
+                        style="@style/form_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
+                        android:layout_gravity="center_vertical"
                         android:layout_marginLeft="10dp"
-                        android:layout_marginTop="-4dp"
                         android:layout_toRightOf="@+id/image_picture"
                         android:onClick="onChangePictureButtonClick"
                         android:text="@string/form_button_change_picture" />
-                </RelativeLayout>
+                </LinearLayout>
 
                 <!-- Title and Content -->
 
@@ -117,7 +112,8 @@
         android:gravity="center_horizontal" >
 
         <Button
-            style="@style/actionbar_button_borderless"
+            android:id="@+id/button_cancel"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -126,7 +122,7 @@
 
         <Button
             android:id="@+id/button_delete"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -134,7 +130,8 @@
             android:text="@string/form_button_delete" />
 
         <Button
-            style="@style/actionbar_button_borderless"
+            android:id="@+id/button_save"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

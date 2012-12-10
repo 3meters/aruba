@@ -63,7 +63,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
 			holder.description = (TextViewEllipsizing) view.findViewById(R.id.description);
 			holder.user = (UserView) view.findViewById(R.id.user);
-			holder.comments = (Button) view.findViewById(R.id.button_comments);
+			holder.comments = (Button) view.findViewById(R.id.form_button_link);
 			holder.check = (CheckBox) view.findViewById(R.id.check);
 			if (holder.check != null) {
 				holder.check.setOnClickListener(new OnClickListener() {
@@ -78,10 +78,10 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			}
 			view.setTag(holder);
 			
-			FontManager.getInstance().setTypefaceLight(holder.title);
-			FontManager.getInstance().setTypefaceLight(holder.subtitle);
-			FontManager.getInstance().setTypefaceLight(holder.description);
-			FontManager.getInstance().setTypefaceLight(holder.comments);
+			FontManager.getInstance().setTypefaceDefault(holder.title);
+			FontManager.getInstance().setTypefaceDefault(holder.subtitle);
+			FontManager.getInstance().setTypefaceDefault(holder.description);
+			FontManager.getInstance().setTypefaceDefault(holder.comments);
 		}
 		else {
 			holder = (CandiListViewHolder) view.getTag();

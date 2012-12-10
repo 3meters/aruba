@@ -20,6 +20,7 @@ import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Category;
@@ -50,7 +51,7 @@ public class CategoryBuilder extends FormActivity {
 	private void initialize() {
 		Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			String jsonCategory = extras.getString(getString(R.string.EXTRA_CATEGORY));
+			String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
 			if (jsonCategory != null) {
 				mOriginalCategory = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 			}
@@ -123,7 +124,7 @@ public class CategoryBuilder extends FormActivity {
 		Intent intent = new Intent();
 		if (mSubcategory != null) {
 			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(mSubcategory, false, true);
-			intent.putExtra(getString(R.string.EXTRA_CATEGORY), jsonCategory);
+			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		setResult(Activity.RESULT_OK, intent);
 		finish();
@@ -159,7 +160,7 @@ public class CategoryBuilder extends FormActivity {
 
 				View view = super.getView(position, convertView, parent);
 
-				FontManager.getInstance().setTypefaceLight((TextView) view.findViewById(R.id.spinner_name));
+				FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.spinner_name));
 
 				if (position == getCount()) {
 					((TextView) view.findViewById(R.id.spinner_name)).setText("");
@@ -202,7 +203,7 @@ public class CategoryBuilder extends FormActivity {
 
 							View view = super.getView(position, convertView, parent);
 
-							FontManager.getInstance().setTypefaceLight((TextView) view.findViewById(R.id.spinner_name));
+							FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.spinner_name));
 							
 							if (position == getCount()) {
 								((TextView) view.findViewById(R.id.spinner_name)).setText("");

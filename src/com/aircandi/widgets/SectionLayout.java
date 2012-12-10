@@ -48,8 +48,8 @@ public class SectionLayout extends LinearLayout {
 			
 			mTextViewHeader = (TextView) view.findViewById(R.id.title);
 			mButtonMore = (TextView) view.findViewById(R.id.button_more);
-			FontManager.getInstance().setTypefaceLight(mTextViewHeader);
-			FontManager.getInstance().setTypefaceLight(mButtonMore);
+			FontManager.getInstance().setTypefaceDefault(mTextViewHeader);
+			FontManager.getInstance().setTypefaceDefault(mButtonMore);
 			
 			if (mTextViewHeader != null) {
 				if (mHeaderTitle == null) {

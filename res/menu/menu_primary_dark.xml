@@ -20,12 +20,6 @@
         android:showAsAction="ifRoom"
         android:title="@string/menu_settings_item"/>
     <item
-        android:id="@+id/signin"
-        android:icon="@drawable/ic_action_key_dark"
-        android:orderInCategory="2"
-        android:showAsAction="never"
-        android:title="@string/menu_signin_item"/>
-    <item
         android:id="@+id/signout"
         android:icon="@drawable/ic_action_key_dark"
         android:orderInCategory="2"

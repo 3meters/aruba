@@ -25,8 +25,10 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
+import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
 import com.aircandi.utilities.MiscUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class SignInForm extends FormActivity {
 
@@ -49,10 +51,12 @@ public class SignInForm extends FormActivity {
 		mButtonSignIn = (Button) findViewById(R.id.btn_signin);
 		mButtonSignIn.setEnabled(false);
 		
-		FontManager.getInstance().setTypefaceLight(mTextEmail);
-		FontManager.getInstance().setTypefaceLight(mTextPassword);
-		FontManager.getInstance().setTypefaceLight(mTextMessage);
-		FontManager.getInstance().setTypefaceLight(mButtonSignIn);
+		FontManager.getInstance().setTypefaceDefault(mTextEmail);
+		FontManager.getInstance().setTypefaceDefault(mTextPassword);
+		FontManager.getInstance().setTypefaceDefault(mTextMessage);
+		FontManager.getInstance().setTypefaceDefault(mButtonSignIn);
+		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_send_password));
+		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_cancel));
 		
 		mTextEmail.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -91,10 +95,6 @@ public class SignInForm extends FormActivity {
 				, null
 				, SignInForm.this, android.R.string.ok, null, null, null);
 		Tracker.trackEvent("DialogSendPassword", "Open", null, 0);
-	}
-
-	public void onSignupButtonClick(View view) {
-		mCommon.signup();
 	}
 
 	public void onSignInButtonClick(View view) {
@@ -149,6 +149,7 @@ public class SignInForm extends FormActivity {
 
 						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
 						finish();
+						AnimUtils.doOverridePendingTransition(SignInForm.this, TransitionType.FormToCandiPage);
 					}
 					else {
 						mTextPassword.setText("");

@@ -28,7 +28,7 @@
 
         <!-- Default overrides -->
 
-        <item name="android:editTextStyle">@style/app_edittext</item>
+        <item name="android:editTextStyle">@style/form_edit</item>
         <item name="android:textColorHint">@color/edit_hint</item>
         <item name="android:textColorPrimary">@color/text_dark</item>
         <item name="android:textAppearance">@style/app_text_appearance</item>
@@ -107,7 +107,7 @@
 
         <!-- Default overrides -->
 
-        <item name="android:editTextStyle">@style/app_edittext</item>
+        <item name="android:editTextStyle">@style/form_edit</item>
         <item name="android:textColorHint">@color/edit_hint</item>
         <item name="android:textColorPrimary">@color/text_light</item>
         <item name="android:textAppearance">@style/app_text_appearance</item>

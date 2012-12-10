@@ -21,6 +21,7 @@ import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.EntityListType;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
@@ -51,10 +52,10 @@ public class CandiUser extends CandiActivity {
 			bind(false);
 		}
 	}
-	
+
 	private void initialize() {
 		/* Custom fonts */
-		FontManager.getInstance().setTypefaceLight((TextView) findViewById(R.id.name));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.name));
 	}
 
 	public void bind(Boolean refresh) {
@@ -122,8 +123,9 @@ public class CandiUser extends CandiActivity {
 	public void onMoreButtonClick(View view) {
 		String target = (String) view.getTag();
 		if (target.equals("candi")) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, UserCandiList.class);
+			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
 			intentBuilder.setCommandType(CommandType.View)
+					.setEntityListType(EntityListType.CreatedByUser)
 					.setUserId(mUser.id);
 
 			Intent intent = intentBuilder.create();
@@ -134,7 +136,24 @@ public class CandiUser extends CandiActivity {
 
 	public void onCandiClick(View view) {
 		Entity entity = (Entity) view.getTag();
-		mCommon.showCandiFormForEntity(entity, UserCandiForm.class);
+
+		IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
+				.setCommandType(CommandType.View)
+				.setEntityId(entity.id)
+				.setParentEntityId(entity.parentId)
+				.setEntityType(entity.type);
+
+		if (entity.parentId != null) {
+			intentBuilder.setCollectionId(entity.getParent().id);
+		}
+
+		Intent intent = intentBuilder.create();
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiRadarToCandiForm);
+
+		//mCommon.showCandiFormForEntity(entity, CandiForm.class);
 	}
 
 	public void onImageClick(View view) {
@@ -147,7 +166,7 @@ public class CandiUser extends CandiActivity {
 			ProxiExplorer.getInstance().getEntityModel().getPhotos().clear();
 			ProxiExplorer.getInstance().getEntityModel().getPhotos().add(photo);
 			intent = new Intent(this, PictureDetail.class);
-			intent.putExtra(getString(R.string.EXTRA_URI), mUser.photo.getImageUri());
+			intent.putExtra(CandiConstants.EXTRA_URI, mUser.photo.getImageUri());
 
 			startActivity(intent);
 			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
@@ -176,11 +195,11 @@ public class CandiUser extends CandiActivity {
 		final TextView bio = (TextView) findViewById(R.id.bio);
 		final TextView stats = (TextView) findViewById(R.id.stats);
 
-		FontManager.getInstance().setTypefaceLight(name);
-		FontManager.getInstance().setTypefaceLight(location);
-		FontManager.getInstance().setTypefaceLight(link);
-		FontManager.getInstance().setTypefaceLight(bio);
-		FontManager.getInstance().setTypefaceLight(stats);
+		FontManager.getInstance().setTypefaceDefault(name);
+		FontManager.getInstance().setTypefaceDefault(location);
+		FontManager.getInstance().setTypefaceDefault(link);
+		FontManager.getInstance().setTypefaceDefault(bio);
+		FontManager.getInstance().setTypefaceDefault(stats);
 
 		if (image != null) {
 			image.getImageBadge().setVisibility(View.GONE);

@@ -1,16 +1,14 @@
 package com.aircandi;
 
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -33,7 +31,7 @@ import com.aircandi.utilities.ImageUtils;
 import com.aircandi.utilities.MiscUtils;
 import com.aircandi.widgets.WebImageView;
 
-public class SignUpForm extends FormActivity {
+public class RegisterForm extends FormActivity {
 
 	private EditText		mTextFullname;
 	private EditText		mTextEmail;
@@ -59,48 +57,20 @@ public class SignUpForm extends FormActivity {
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
-		mButtonSignUp = (Button) findViewById(R.id.btn_signup);
-		mButtonSignUp.setEnabled(false);
+		mButtonSignUp = (Button) findViewById(R.id.button_register);
+		mButtonSignUp.setEnabled(true);
 		
-		FontManager.getInstance().setTypefaceLight(mTextFullname);
-		FontManager.getInstance().setTypefaceLight(mTextEmail);
-		FontManager.getInstance().setTypefaceLight(mTextPassword);
-		FontManager.getInstance().setTypefaceLight(mTextPasswordConfirm);
-
-		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSignUp.setEnabled(isValid());
-			}
-		});
-
-		mTextEmail.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSignUp.setEnabled(isValid());
-			}
-
-		});
-
-		mTextPassword.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSignUp.setEnabled(isValid());
-			}
-
-		});
-
-		mTextPasswordConfirm.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSignUp.setEnabled(isValid());
-			}
-
-		});
+		FontManager.getInstance().setTypefaceDefault(mTextFullname);
+		FontManager.getInstance().setTypefaceDefault(mTextEmail);
+		FontManager.getInstance().setTypefaceDefault(mTextPassword);
+		FontManager.getInstance().setTypefaceDefault(mTextPasswordConfirm);
+		FontManager.getInstance().setTypefaceDefault(mButtonSignUp);
+		
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.terms));
+		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_change_image));
+		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_view_terms));
+		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_cancel));
+		
 	}
 
 	protected void bind() {
@@ -189,6 +159,46 @@ public class SignUpForm extends FormActivity {
 	}
 
 	private boolean validate() {
+		if (mTextFullname.getText().length() == 0) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_fullname)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
+		if (mTextEmail.getText().length() == 0) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_email)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
+		if (mTextPassword.getText().length() < 6) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_password)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
+		if (mTextPasswordConfirm.getText().length() < 6) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_password_confirmation)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
 		if (!MiscUtils.validEmail(mTextEmail.getText().toString())) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
@@ -241,22 +251,32 @@ public class SignUpForm extends FormActivity {
 					ModelResult result = (ModelResult) response;
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+						/*
+						 * mUser has been set to the user and session we got back from
+						 * the service when it was inserted. We now consider the user
+						 * signed in.
+						 */
+						Aircandi.getInstance().setUser(mUser);
 
 						Tracker.trackEvent("User", "Insert", null, 0);
 						mCommon.hideBusy();
-						Logger.i(SignUpForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
+						Logger.i(RegisterForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 
-						AircandiCommon.showAlertDialog(R.drawable.ic_app
-								, getResources().getString(R.string.alert_signup_new_user_title)
-								, getResources().getString(R.string.alert_signup_new_user_message)
-								, null
-								, SignUpForm.this, android.R.string.ok, null, new OnClickListener() {
-
-									public void onClick(DialogInterface dialog, int which) {
-										setResult(CandiConstants.RESULT_PROFILE_INSERTED);
-										finish();
-									}
-								}, null);
+//						AircandiCommon.showAlertDialog(R.drawable.ic_app
+//								, getResources().getString(R.string.alert_signup_new_user_title)
+//								, getResources().getString(R.string.alert_signup_new_user_message)
+//								, null
+//								, SignUpForm.this, android.R.string.ok, null, new OnClickListener() {
+//
+//									public void onClick(DialogInterface dialog, int which) {
+//										setResult(CandiConstants.RESULT_USER_SIGNED_IN);
+//										finish();
+//									}
+//								}, null);
+						
+						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
+						finish();
+						AnimUtils.doOverridePendingTransition(RegisterForm.this, TransitionType.FormToCandiPage);
 					}
 					else {
 						mTextPassword.setText("");
@@ -265,27 +285,6 @@ public class SignUpForm extends FormActivity {
 				}
 			}.execute();
 		}
-	}
-
-	private boolean isValid() {
-		/*
-		 * Client validation logic is handle here. The service may still reject based on
-		 * additional validation rules.
-		 */
-		if (mTextFullname.getText().length() == 0) {
-			return false;
-		}
-		if (mTextEmail.getText().length() == 0) {
-			return false;
-		}
-		if (mTextPassword.getText().length() < 6) {
-			return false;
-		}
-		if (mTextPasswordConfirm.getText().length() < 6) {
-			return false;
-		}
-
-		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -309,6 +308,6 @@ public class SignUpForm extends FormActivity {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.signup_form;
+		return R.layout.register_form;
 	}
 }

@@ -22,18 +22,12 @@
             android:paddingBottom="5dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:paddingTop="10dp" >
+            android:paddingTop="5dp" >
 
             <!-- User picture -->
 
-            <TextView
-                style="@style/form_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/form_label_picture" />
-
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:layout_marginLeft="2dp"
@@ -44,23 +38,23 @@
                     android:id="@+id/image_picture"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
+                    android:layout_marginRight="10dp"
                     android:layout_weight="0"
                     aircandi:layout="@layout/widget_webimageview_framed"
                     aircandi:maxHeight="100dp"
                     aircandi:maxWidth="100dp"
+                    android:clickable="true"
+                    android:onClick="onChangePictureButtonClick"
                     android:scaleType="centerCrop"
-                    android:tag="resource:placeholder_logo" />
+                    android:tag="resource:placeholder_logo_bw" />
 
                 <Button
                     android:id="@+id/button_change_image"
-                    style="@style/actionbar_button"
+                    style="@style/form_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="-4dp"
                     android:layout_weight="0"
-                    android:maxWidth="150dp"
                     android:onClick="onChangePictureButtonClick"
                     android:text="@string/form_button_change_picture" />
 
@@ -72,104 +66,68 @@
 
             <!-- Full name -->
 
-            <TextView
-                style="@style/form_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/form_label_fullname" />
-
             <EditText
                 android:id="@+id/text_fullname"
+                style="@style/form_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:inputType="textPersonName" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-                <TextView
-                    style="@style/form_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:text="@string/form_label_email" />
-
-                <TextView
-                    style="@style/form_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_weight="1"
-                    android:text="@string/form_label_email_hint"
-                    android:textSize="12sp" />
-            </LinearLayout>
+                android:hint="@string/form_label_fullname"
+                android:inputType="text"
+                android:textSize="16dp" />
 
             <EditText
                 android:id="@+id/text_email"
+                style="@style/form_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:inputType="textEmailAddress" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-                <TextView
-                    style="@style/form_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:text="@string/form_label_password" />
-
-                <TextView
-                    style="@style/form_hint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_weight="1"
-                    android:text="@string/form_label_password_hint"
-                    android:textSize="12sp" />
-            </LinearLayout>
+                android:hint="@string/form_label_email"
+                android:inputType="textEmailAddress"
+                android:textSize="16dp" />
 
             <EditText
                 android:id="@+id/text_password"
+                style="@style/form_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:inputType="textPassword" />
-
-            <TextView
-                style="@style/form_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/form_label_password_confirm" />
+                android:hint="@string/form_label_password"
+                android:inputType="textPassword"
+                android:textSize="16dp" />
 
             <EditText
                 android:id="@+id/text_password_confirm"
+                style="@style/form_edit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:inputType="textPassword" />
+                android:layout_marginBottom="10dp"
+                android:hint="@string/form_label_password_confirm"
+                android:inputType="textPassword"
+                android:textSize="16dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="3dp"
+                android:layout_marginRight="3dp"
                 android:orientation="horizontal" >
 
                 <TextView
+                    android:id="@+id/terms"
                     style="@style/form_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="top"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
                     android:layout_weight="1"
-                    android:text="@string/form_label_terms" />
+                    android:text="@string/form_label_terms"
+                    android:textAppearance="@style/app_text_appearance_tiny" />
 
                 <Button
-                    android:id="@+id/btn_view_terms"
-                    style="@style/actionbar_button"
+                    android:id="@+id/button_view_terms"
+                    style="@style/form_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:minWidth="200dp"
                     android:onClick="onViewTermsButtonClick"
@@ -189,7 +147,8 @@
         android:gravity="center_horizontal" >
 
         <Button
-            style="@style/actionbar_button_borderless"
+            android:id="@+id/button_cancel"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -197,8 +156,8 @@
             android:text="@string/form_button_cancel" />
 
         <Button
-            android:id="@+id/btn_signup"
-            style="@style/actionbar_button_borderless"
+            android:id="@+id/button_register"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

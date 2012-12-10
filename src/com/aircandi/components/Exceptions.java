@@ -10,12 +10,12 @@ public class Exceptions {
 		 * For now we are re-throwing all exceptions so they get 
 		 * handled by the top level uncaught exception handler. 
 		 */
-		Aircandi.getInstance().setLaunchedFromRadar(false);
+		Aircandi.getInstance().setLaunchedNormally(false);
 		throw new RuntimeException(exception);
 	}
 	
 	public static boolean Handle(ProxibaseServiceException exception) {
-		Aircandi.getInstance().setLaunchedFromRadar(false);
+		Aircandi.getInstance().setLaunchedNormally(false);
 		throw new RuntimeException(exception);
 	}
 }

@@ -20,7 +20,7 @@
 
     <com.aircandi.widgets.TextViewEllipsizing
         android:id="@+id/description"
-        style="@style/bookmark_list_uri"
+        style="@style/candi_list_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="2dp"

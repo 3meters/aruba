@@ -10,7 +10,6 @@ import org.jsoup.nodes.Element;
 import android.app.Activity;
 import android.content.Intent;
 import android.location.Criteria;
-import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -29,13 +28,13 @@ import com.aircandi.components.SearchAdapter;
 import com.aircandi.components.SearchAdapter.SearchListViewHolder;
 import com.aircandi.components.SearchManager;
 import com.aircandi.components.SearchManager.SearchItem;
-import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.MiscUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.MiscUtils;
 
 public class LinkPicker extends FormActivity {
 
@@ -61,8 +60,8 @@ public class LinkPicker extends FormActivity {
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			mVerifyUri = extras.getBoolean(getString(R.string.EXTRA_VERIFY_URI), false);
-			mUri = extras.getString(getString(R.string.EXTRA_URI));
+			mVerifyUri = extras.getBoolean(CandiConstants.EXTRA_VERIFY_URI, false);
+			mUri = extras.getString(CandiConstants.EXTRA_URI);
 		}
 
 		mListView = (ListView) findViewById(R.id.list_bookmarks);
@@ -81,26 +80,17 @@ public class LinkPicker extends FormActivity {
 			}
 		});
 
-		/* 
+		/*
 		 * Get location support setup. We use location to provide
-		 * place suggestions that have websites. 
+		 * place suggestions that have websites.
 		 */
 		Criteria criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
 		GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
 				, GeoLocationManager.MAXIMUM_AGE
-				, criteria, new RequestListener() {
+				, criteria);
 
-					@Override
-					public void onComplete(Object response) {
-						Location location = (Location) response;
-						if (location != null) {
-							bind();
-						}
-
-					}
-				});
-
+		bind();
 	}
 
 	public void bind() {
@@ -258,9 +248,9 @@ public class LinkPicker extends FormActivity {
 							mCommon.hideBusy();
 
 							Intent intent = new Intent();
-							intent.putExtra(getString(R.string.EXTRA_URI), mUri);
-							intent.putExtra(getString(R.string.EXTRA_URI_TITLE), mUriTitle);
-							intent.putExtra(getString(R.string.EXTRA_URI_DESCRIPTION), mUriDescription);
+							intent.putExtra(CandiConstants.EXTRA_URI, mUri);
+							intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mUriTitle);
+							intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, mUriDescription);
 							setResult(Activity.RESULT_OK, intent);
 							finish();
 						}
@@ -272,9 +262,9 @@ public class LinkPicker extends FormActivity {
 			}
 			else {
 				Intent intent = new Intent();
-				intent.putExtra(getString(R.string.EXTRA_URI), mUri);
-				intent.putExtra(getString(R.string.EXTRA_URI_TITLE), mUriTitle);
-				intent.putExtra(getString(R.string.EXTRA_URI_DESCRIPTION), mUriDescription);
+				intent.putExtra(CandiConstants.EXTRA_URI, mUri);
+				intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mUriTitle);
+				intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, mUriDescription);
 				setResult(Activity.RESULT_OK, intent);
 				finish();
 			}

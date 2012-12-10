@@ -149,7 +149,7 @@
                     android:orientation="vertical" >
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="20dp"
                         android:layout_marginLeft="-3dp"
@@ -157,8 +157,8 @@
 
                         <com.aircandi.widgets.ComboButton
                             android:id="@+id/button_share"
-                            style="@style/candi_form_button_combo"
-                            android:layout_width="wrap_content"
+                            style="@style/form_button"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             aircandi:drawableScale="@dimen/combo_button_drawable_scale"
                             android:drawableLeft="@drawable/ic_action_share_dark"
@@ -168,8 +168,8 @@
 
                         <com.aircandi.widgets.ComboButton
                             android:id="@+id/button_website"
-                            style="@style/candi_form_button_combo"
-                            android:layout_width="wrap_content"
+                            style="@style/form_button"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             aircandi:drawableScale="@dimen/combo_button_drawable_scale"
                             android:drawableLeft="@drawable/ic_action_globe_dark"
@@ -179,8 +179,8 @@
 
                         <com.aircandi.widgets.ComboButton
                             android:id="@+id/button_facebook"
-                            style="@style/candi_form_button_combo"
-                            android:layout_width="wrap_content"
+                            style="@style/form_button"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             aircandi:drawableScale="@dimen/combo_button_drawable_scale"
                             android:drawableLeft="@drawable/ic_action_facebook_dark"
@@ -190,8 +190,8 @@
 
                         <com.aircandi.widgets.ComboButton
                             android:id="@+id/button_twitter"
-                            style="@style/candi_form_button_combo"
-                            android:layout_width="wrap_content"
+                            style="@style/form_button"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             aircandi:drawableScale="@dimen/combo_button_drawable_scale"
                             android:drawableLeft="@drawable/ic_action_twitter_dark"
@@ -201,8 +201,8 @@
 
                         <com.aircandi.widgets.ComboButton
                             android:id="@+id/button_menu"
-                            style="@style/candi_form_button_combo"
-                            android:layout_width="wrap_content"
+                            style="@style/form_button"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             aircandi:drawableScale="@dimen/combo_button_drawable_scale"
                             android:drawableLeft="@drawable/ic_action_book_dark"
@@ -213,8 +213,8 @@
                 </com.aircandi.widgets.SectionLayout>
 
                 <Button
-                    android:id="@+id/button_comments"
-                    style="@style/button_comments"
+                    android:id="@+id/form_button_link"
+                    style="@style/form_button_link"
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
                     android:layout_marginLeft="5dp"
@@ -250,7 +250,7 @@
 
         <Button
             android:id="@+id/button_comment"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -259,7 +259,7 @@
 
         <LinearLayout
             android:id="@+id/button_new"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -287,7 +287,7 @@
 
         <Button
             android:id="@+id/button_edit"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -296,7 +296,7 @@
 
         <Button
             android:id="@+id/button_move"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

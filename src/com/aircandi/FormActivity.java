@@ -55,7 +55,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		if (!Aircandi.getInstance().getLaunchedFromRadar()) {
+		if (!Aircandi.getInstance().wasLaunchedNormally()) {
 			/* Try to detect case where this is being created after a crash and bail out. */
 			super.onCreate(savedInstanceState);
 			setResult(Activity.RESULT_CANCELED);
@@ -122,9 +122,9 @@ public abstract class FormActivity extends SherlockActivity {
 
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
-					final String imageUri = extras.getString(getString(R.string.EXTRA_URI));
-					final String imageTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
-					final String imageDescription = extras.getString(getString(R.string.EXTRA_URI_DESCRIPTION));
+					final String imageUri = extras.getString(CandiConstants.EXTRA_URI);
+					final String imageTitle = extras.getString(CandiConstants.EXTRA_URI_TITLE);
+					final String imageDescription = extras.getString(CandiConstants.EXTRA_URI_DESCRIPTION);
 
 					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView)
 							.setFromUris(imageUri, null)
@@ -248,11 +248,11 @@ public abstract class FormActivity extends SherlockActivity {
 					e.printStackTrace();
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_WEBSITE_PICK) {
+			else if (requestCode == CandiConstants.ACTIVITY_WEBSITE_EDIT) {
 				Tracker.trackEvent("Entity", "PickWebsite", "None", 0);
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
-					String linkUri = extras.getString(getString(R.string.EXTRA_URI));
+					String linkUri = extras.getString(CandiConstants.EXTRA_URI);
 					if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
 						linkUri = "http://" + linkUri;
 					}
@@ -264,7 +264,7 @@ public abstract class FormActivity extends SherlockActivity {
 				Tracker.trackEvent("Entity", "PickFacebook", "None", 0);
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
-					String linkUri = extras.getString(getString(R.string.EXTRA_URI));
+					String linkUri = extras.getString(CandiConstants.EXTRA_URI);
 					if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
 						linkUri = "http://" + linkUri;
 					}
@@ -278,14 +278,14 @@ public abstract class FormActivity extends SherlockActivity {
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
 
-					String linkUriPre = extras.getString(getString(R.string.EXTRA_URI));
+					String linkUriPre = extras.getString(CandiConstants.EXTRA_URI);
 					if (!linkUriPre.startsWith("http://") && !linkUriPre.startsWith("https://")) {
 						linkUriPre = "http://" + linkUriPre;
 					}
 
 					final String linkUri = linkUriPre;
-					final String linkTitle = extras.getString(getString(R.string.EXTRA_URI_TITLE));
-					final String linkDescription = extras.getString(getString(R.string.EXTRA_URI_DESCRIPTION));
+					final String linkTitle = extras.getString(CandiConstants.EXTRA_URI_TITLE);
+					final String linkDescription = extras.getString(CandiConstants.EXTRA_URI_DESCRIPTION);
 
 					if (mImageRequestWebImageView != null) {
 						if (linkUri != null && !linkUri.equals("")) {
@@ -359,16 +359,9 @@ public abstract class FormActivity extends SherlockActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
-	private void pickWebPage() {
-		Intent intent = new Intent(this, LinkPicker.class);
-		intent.putExtra(getString(R.string.EXTRA_VERIFY_URI), false);
-		startActivityForResult(intent, CandiConstants.ACTIVITY_LINK_PICK);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-	}
-
 	protected void pictureSearch(String defaultSearch) {
 		Intent intent = new Intent(this, PictureSearch.class);
-		intent.putExtra(getString(R.string.EXTRA_SEARCH_PHRASE), defaultSearch);
+		intent.putExtra(CandiConstants.EXTRA_SEARCH_PHRASE, defaultSearch);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
@@ -376,11 +369,10 @@ public abstract class FormActivity extends SherlockActivity {
 	protected void pickPicturePlace(String entityId) {
 		IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
 		intentBuilder.setCommandType(CommandType.View)
-				.setEntityId(entityId)
-				.setEntityTree(mCommon.mEntityTree);
+				.setEntityId(entityId);
 
 		Intent intent = intentBuilder.create();
-		intent.putExtra(getString(R.string.EXTRA_AS_PICKER), true);
+		intent.putExtra(CandiConstants.EXTRA_AS_PICKER, true);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_PICK_PLACE);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
@@ -458,12 +450,9 @@ public abstract class FormActivity extends SherlockActivity {
 						takePicture();
 					}
 					else if (item == 3) {
-						pickWebPage();
-					}
-					else if (item == 4) {
 						useFacebook();
 					}
-					else if (item == 5) {
+					else if (item == 4) {
 						usePictureDefault(defaultUri);
 					}
 				}
@@ -481,9 +470,6 @@ public abstract class FormActivity extends SherlockActivity {
 						takePicture();
 					}
 					else if (item == 4) {
-						pickWebPage();
-					}
-					else if (item == 5) {
 						usePictureDefault(defaultUri);
 					}
 				}
@@ -498,9 +484,6 @@ public abstract class FormActivity extends SherlockActivity {
 						takePicture();
 					}
 					else if (item == 3) {
-						pickWebPage();
-					}
-					else if (item == 4) {
 						usePictureDefault(defaultUri);
 					}
 				}

@@ -79,12 +79,12 @@ public class ProfileForm extends FormActivity {
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mButtonSave = (Button) findViewById(R.id.btn_save);
 
-		FontManager.getInstance().setTypefaceLight(mTextFullname);
-		FontManager.getInstance().setTypefaceLight(mTextBio);
-		FontManager.getInstance().setTypefaceLight(mTextLink);
-		FontManager.getInstance().setTypefaceLight(mTextLocation);
-		FontManager.getInstance().setTypefaceLight(mTextEmail);
-		FontManager.getInstance().setTypefaceLight(mButtonSave);
+		FontManager.getInstance().setTypefaceDefault(mTextFullname);
+		FontManager.getInstance().setTypefaceDefault(mTextBio);
+		FontManager.getInstance().setTypefaceDefault(mTextLink);
+		FontManager.getInstance().setTypefaceDefault(mTextLocation);
+		FontManager.getInstance().setTypefaceDefault(mTextEmail);
+		FontManager.getInstance().setTypefaceDefault(mButtonSave);
 
 		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
 

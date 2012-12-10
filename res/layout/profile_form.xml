@@ -49,17 +49,17 @@
                         android:layout_weight="0"
                         aircandi:layout="@layout/widget_webimageview_framed"
                         aircandi:maxHeight="150dp"
+                        android:layout_marginRight="10dp"
                         aircandi:maxWidth="150dp"
                         android:scaleType="centerCrop"
                         android:tag="resource:placeholder_logo" />
 
                     <Button
                         android:id="@+id/button_change_image"
-                        style="@style/actionbar_button"
+                        style="@style/form_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
                         android:layout_marginTop="-4dp"
                         android:layout_weight="0"
                         android:maxWidth="150dp"
@@ -130,7 +130,7 @@
 
                 <Button
                     android:id="@+id/btn_change_password"
-                    style="@style/actionbar_button"
+                    style="@style/form_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="onChangePasswordButtonClick"
@@ -150,7 +150,7 @@
         android:gravity="center_horizontal" >
 
         <Button
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -159,7 +159,7 @@
 
         <Button
             android:id="@+id/btn_save"
-            style="@style/actionbar_button_borderless"
+            style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
