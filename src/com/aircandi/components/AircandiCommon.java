@@ -198,26 +198,28 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void updateDebugText() {
-		if (Aircandi.getInstance().getUser() != null
-				&& Aircandi.getInstance().getUser().isDeveloper != null
-				&& Aircandi.getInstance().getUser().isDeveloper) {
+		if (mTextDebug != null) {
+			if (Aircandi.getInstance().getUser() != null
+					&& Aircandi.getInstance().getUser().isDeveloper != null
+					&& Aircandi.getInstance().getUser().isDeveloper) {
 
-			mActivity.runOnUiThread(new Runnable() {
+				mActivity.runOnUiThread(new Runnable() {
 
-				@Override
-				public void run() {
-					if (mMenuItemDebug != null) {
-						mMenuItemDebug.setVisible(true);
+					@Override
+					public void run() {
+						if (mMenuItemDebug != null) {
+							mMenuItemDebug.setVisible(true);
+						}
+						String debugLocationInfo = LocationManager.getInstance().getDebugStringForLocation();
+						if (debugLocationInfo != null) {
+							mTextDebug.setText(debugLocationInfo);
+						}
+						else {
+							mTextDebug.setText("--");
+						}
 					}
-					String debugLocationInfo = LocationManager.getInstance().getDebugStringForLocation();
-					if (debugLocationInfo != null) {
-						mTextDebug.setText(debugLocationInfo);
-					}
-					else {
-						mTextDebug.setText("--");
-					}
-				}
-			});
+				});
+			}
 		}
 	}
 
@@ -389,7 +391,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void updateBeaconIndicator(final List<WifiScanResult> scanList) {
-		
+
 		if (mBeaconIndicator == null) return;
 
 		synchronized (scanList) {
