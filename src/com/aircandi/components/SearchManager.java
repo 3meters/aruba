@@ -99,7 +99,7 @@ public class SearchManager {
 	public List<SearchItem> getPlaceSuggestions() {
 
 		List<SearchItem> searchItems = null;
-		Observation observation = GeoLocationManager.getInstance().getObservation();
+		Observation observation = LocationManager.getInstance().getObservation();
 
 		//		/* Temp for testing */
 		//		Observation observation = new Observation();

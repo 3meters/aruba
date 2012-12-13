@@ -57,8 +57,8 @@
     <string name="alert_entity_locked">This candi has been locked by the owner.</string>
     
     <string name="alert_upgrade_title">New Aircandi version</string>
-    <string name="alert_upgrade_needed_body">A newer version of Aircandi is available. Please download and install as soon possible.</string>
-    <string name="alert_upgrade_required_body">A newer version of Aircandi is required. Please download and install.</string>
+    <string name="alert_upgrade_needed_body">A newer version of Aircandi is available. Please download and install as soon possible.\n</string>
+    <string name="alert_upgrade_required_body">A newer version of Aircandi is required. Please download and install.\n</string>
     <string name="alert_upgrade_ok">Info</string>
     <string name="alert_upgrade_cancel">Cancel</string>
     

@@ -9,7 +9,6 @@ import org.jsoup.nodes.Element;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.location.Criteria;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,7 +19,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.GeoLocationManager;
+import com.aircandi.components.LocationManager;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -84,11 +83,7 @@ public class LinkPicker extends FormActivity {
 		 * Get location support setup. We use location to provide
 		 * place suggestions that have websites.
 		 */
-		Criteria criteria = new Criteria();
-		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-		GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
-				, GeoLocationManager.MAXIMUM_AGE
-				, criteria);
+		LocationManager.getInstance().getLastLocation();
 
 		bind();
 	}

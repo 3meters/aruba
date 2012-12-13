@@ -11,6 +11,7 @@ import java.util.List;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.GeoLocationManager.MeasurementSystem;
+import com.aircandi.components.LocationManager;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.Expose;
@@ -275,7 +276,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			GeoLocation location = getLocation();
 			Float distance = 0f;
 			if (location != null) {
-				Observation observation = GeoLocationManager.getInstance().getObservation();
+				Observation observation = LocationManager.getInstance().getObservation();
 				if (observation != null) {
 					distance = (float) GeoLocationManager.distanceVincenty(observation.latitude.doubleValue()
 							, observation.longitude.doubleValue()

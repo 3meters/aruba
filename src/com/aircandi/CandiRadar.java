@@ -7,7 +7,6 @@ import java.util.Properties;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.location.Criteria;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.AsyncTask;
@@ -35,6 +34,7 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.IntentBuilder;
+import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -42,8 +42,10 @@ import com.aircandi.components.NetworkManager.ResponseDetail;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityModel;
+import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.core.CandiConstants;
+import com.aircandi.core.PlacesConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
@@ -159,8 +161,8 @@ public class CandiRadar extends CandiActivity {
 		 * be launched if the best cached location fix doesn't meet our freshness
 		 * and accuracy requirements.
 		 */
-		GeoLocationManager.getInstance().setContext(getApplicationContext());
-		GeoLocationManager.getInstance().initialize();
+		LocationManager.getInstance().initialize(getApplicationContext());
+		GeoLocationManager.getInstance().initialize(getApplicationContext());
 
 		if (!GeoLocationManager.getInstance().isLocationAccessEnabled()) {
 			/* We won't continue if location services are disabled */
@@ -170,10 +172,10 @@ public class CandiRadar extends CandiActivity {
 		}
 
 		/* We alert that wifi isn't enabled */
-		if (NetworkManager.getInstance().isTethered()
+		if (NetworkManager.getInstance().isWifiTethered()
 				|| (!NetworkManager.getInstance().isWifiEnabled() && !Aircandi.usingEmulator)) {
 
-			showWifiAlertDialog(NetworkManager.getInstance().isTethered()
+			showWifiAlertDialog(NetworkManager.getInstance().isWifiTethered()
 					? R.string.alert_wifi_tethered
 					: R.string.alert_wifi_disabled
 					, new RequestListener() {
@@ -194,7 +196,11 @@ public class CandiRadar extends CandiActivity {
 		 * Here we initialize activity level state. Only called from
 		 * onCreate.
 		 */
-		
+
+		/* Save that we've been run once. */
+		Aircandi.settingsEditor.putBoolean(PlacesConstants.SP_KEY_RUN_ONCE, true);
+		Aircandi.settingsEditor.commit();
+
 		/* Always reset the entity cache */
 		ProxiExplorer.getInstance().getEntityModel().removeAllEntities();
 
@@ -210,7 +216,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void onEvent(Object data) {
 				if (mWaitingForLocation) {
-					final Observation observation = GeoLocationManager.getInstance().getObservation();
+					final Observation observation = LocationManager.getInstance().getObservation();
 					if (observation != null) {
 						mWaitingForLocation = false;
 						new AsyncTask() {
@@ -290,14 +296,8 @@ public class CandiRadar extends CandiActivity {
 		 * for simplicity even though it would be more efficient to set it
 		 * once when the activity is created.
 		 */
-		if (mCommon.mThemeTone.equals("dark")) {
-			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.radar_places_header));
-			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.radar_synthetics_header));
-		}
-		else {
-			FontManager.getInstance().setTypefaceRegular((TextView) findViewById(R.id.radar_places_header));
-			FontManager.getInstance().setTypefaceRegular((TextView) findViewById(R.id.radar_synthetics_header));
-		}
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.radar_places_header));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.radar_synthetics_header));
 
 		String badgeColor = null;
 		String badgeColorSynthetic = null;
@@ -510,15 +510,9 @@ public class CandiRadar extends CandiActivity {
 			mCommon.showBusy();
 			/*
 			 * Start a location update. It may or may not be finished by the
-			 * time we use the location information. We want to force this to
-			 * be as fresh as possible so we don't accept anything even slightly
-			 * stale.
+			 * time we use the location information.
 			 */
-			Criteria criteria = new Criteria();
-			criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-			GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
-					, 0
-					, criteria);
+			LocationManager.getInstance().getLastLocation();
 
 			new SearchProcess().start();
 		}
@@ -593,7 +587,7 @@ public class CandiRadar extends CandiActivity {
 												@Override
 												protected Object doInBackground(Object... params) {
 
-													Observation observation = GeoLocationManager.getInstance().getObservation();
+													Observation observation = LocationManager.getInstance().getObservation();
 													if (observation != null) {
 														ProxiExplorer.getInstance().getPlacesNearLocation(observation);
 													}
@@ -626,9 +620,10 @@ public class CandiRadar extends CandiActivity {
 								else {
 									/* We could have failed because an update is required */
 									if (serviceResponse.responseDetail == ResponseDetail.UpdateRequired) {
-										showUpdateAlert();
+										showUpdateAlert(null);
 									}
 									else {
+										searchComplete();
 										mCommon.handleServiceError(serviceResponse, ServiceOperation.BeaconScan, CandiRadar.this);
 									}
 								}
@@ -741,6 +736,41 @@ public class CandiRadar extends CandiActivity {
 		});
 	}
 
+	private void handleUpdateChecks() {
+
+		/* Update check */
+		if (ProxiExplorer.getInstance().updateCheckNeeded()) {
+
+			new AsyncTask() {
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					ModelResult result = ProxiExplorer.getInstance().checkForUpdate();
+					return result;
+				}
+
+				@Override
+				protected void onPostExecute(Object response) {
+					ModelResult result = (ModelResult) response;
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+						if (Aircandi.applicationUpdateNeeded) {
+							invalidateOptionsMenu();
+							showUpdateAlert(null);
+						}
+					}
+					else {
+						searchComplete();
+						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CheckUpdate, CandiRadar.this);
+					}
+				}
+			}.execute();
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Location routines
+	// --------------------------------------------------------------------------------------------
+
 	// --------------------------------------------------------------------------------------------
 	// System callbacks
 	// --------------------------------------------------------------------------------------------
@@ -757,6 +787,11 @@ public class CandiRadar extends CandiActivity {
 		if (CandiConstants.DEBUG_TRACE) {
 			Debug.startMethodTracing("aircandi", 100000000);
 		}
+
+		/*
+		 * Check for update
+		 */
+		handleUpdateChecks();
 
 		/* Make sure the right tab is active */
 		mCommon.setActiveTab(0);
@@ -784,39 +819,38 @@ public class CandiRadar extends CandiActivity {
 		 * be followed by onStop if we are not visible. Does not fire if the activity window
 		 * loses focus but the activity is still active.
 		 */
+		
 		Logger.d(this, "CandiRadarActivity paused");
 
 		mCommon.stopScanService();
+		LocationManager.getInstance().disableLocationUpdates(isFinishing());
+
+		/* Commit shared preference that says we're in the background. */
+		Aircandi.settingsEditor.putBoolean(PlacesConstants.EXTRA_KEY_IN_BACKGROUND, true);
+		Aircandi.settingsEditor.commit();
+		
 		super.onPause();
-		try {
-			NetworkManager.getInstance().onPause();
-			GeoLocationManager.getInstance().onPause();
-		}
-		catch (Exception exception) {
-			Exceptions.Handle(exception);
-		}
 	}
 
 	@Override
 	protected void onResume() {
 		/*
-		 * Lifecycle ordering
-		 * (onCreate/onRestart)->onStart->onResume->onAttachedToWindow->onWindowFocusChanged
-		 */
-
-		/*
+		 * Lifecycle ordering: (onCreate/onRestart)->onStart->onResume->onAttachedToWindow->onWindowFocusChanged
+		 * 
 		 * OnResume gets called after OnCreate (always) and whenever the activity is being brought back to the
-		 * foreground. Not guaranteed but is usually called just before the activity receives focus. Because code in
-		 * OnCreate could have determined that we aren't ready to roll, isReadyToRun is used to indicate that prep work
-		 * is complete. This is also called when the user jumps out and back from setting preferences so we need to
-		 * refresh the places where they get used. Game engine is started/restarted in BaseGameActivity class if we
-		 * currently have the window focus.
+		 * foreground. Not guaranteed but is usually called just before the activity receives focus.
 		 */
 		super.onResume();
+
+		/* Commit shared preference that says we're in the foreground. */
+		Aircandi.settingsEditor.putBoolean(PlacesConstants.EXTRA_KEY_IN_BACKGROUND, false);
+		Aircandi.settingsEditor.commit();
+
 		if (!mInitialized) return;
 
-		NetworkManager.getInstance().onResume();
-		GeoLocationManager.getInstance().onResume();
+		/* Get the last known location and optionally request location updates. */
+		LocationManager.getInstance().getLastLocation();
+
 		mCommon.startScanService(CandiConstants.INTERVAL_SCAN_RADAR);
 	}
 
@@ -825,42 +859,48 @@ public class CandiRadar extends CandiActivity {
 		super.onWindowFocusChanged(hasFocus);
 
 		if (!mInitialized) return;
+
 		if (hasFocus) {
 
-			synchronized (Events.EventBus.locationChanged) {
-				Events.EventBus.locationChanged.add(mEventLocationChanged);
+			if (Aircandi.applicationUpdateRequired) {
+				showUpdateAlert(null);
 			}
+			else {
+				synchronized (Events.EventBus.locationChanged) {
+					Events.EventBus.locationChanged.add(mEventLocationChanged);
+				}
 
-			EntityModel entityModel = ProxiExplorer.getInstance().getEntityModel();
-			if (mEntityModelRefreshDate == null) {
-				Logger.d(this, "Start first beacon scan");
-				searchForPlaces();
-			}
-			else if (mPrefChangeRefreshNeeded) {
-				Logger.d(this, "Start beacon scan because of preference change");
-				mPrefChangeRefreshNeeded = false;
-				searchForPlaces();
-			}
-			else if ((entityModel.getLastRefreshDate() != null
-					&& entityModel.getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue())
-					|| (entityModel.getLastActivityDate() != null
-					&& entityModel.getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
-				/*
-				 * Everytime we show details for a place, we fetch place details from the service
-				 * when in turn get pushed into the cache and activityDate gets tickled.
-				 */
-				Logger.d(this, "Update radar because of detected entity model change");
-				mHandler.postDelayed(new Runnable() {
+				EntityModel entityModel = ProxiExplorer.getInstance().getEntityModel();
+				if (mEntityModelRefreshDate == null) {
+					Logger.d(this, "Start first beacon scan");
+					searchForPlaces();
+				}
+				else if (mPrefChangeRefreshNeeded) {
+					Logger.d(this, "Start beacon scan because of preference change");
+					mPrefChangeRefreshNeeded = false;
+					searchForPlaces();
+				}
+				else if ((entityModel.getLastRefreshDate() != null
+						&& entityModel.getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue())
+						|| (entityModel.getLastActivityDate() != null
+						&& entityModel.getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
+					/*
+					 * Everytime we show details for a place, we fetch place details from the service
+					 * when in turn get pushed into the cache and activityDate gets tickled.
+					 */
+					Logger.d(this, "Update radar because of detected entity model change");
+					mHandler.postDelayed(new Runnable() {
 
-					@Override
-					public void run() {
-						mCommon.hideBusy();
-						invalidateOptionsMenu();
-						mCommon.showBusy();
-						draw(false);
-						searchComplete();
-					}
-				}, 100);
+						@Override
+						public void run() {
+							mCommon.hideBusy();
+							invalidateOptionsMenu();
+							mCommon.showBusy();
+							draw(false);
+							searchComplete();
+						}
+					}, 100);
+				}
 			}
 		}
 		else {

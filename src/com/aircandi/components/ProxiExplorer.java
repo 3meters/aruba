@@ -31,7 +31,6 @@ import com.aircandi.Preferences;
 import com.aircandi.components.GeoLocationManager.MeasurementSystem;
 import com.aircandi.components.ImageRequest.ImageShape;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ResponseDetail;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
@@ -259,7 +258,7 @@ public class ProxiExplorer {
 		 * 2) To update the location info for the new beacons if it is better than
 		 * what is already stored.
 		 */
-		mObservation = GeoLocationManager.getInstance().getObservation();
+		mObservation = LocationManager.getInstance().getObservation();
 		if (mObservation != null) {
 			parameters.putString("observation"
 					, "object:" + ProxibaseService.convertObjectToJsonSmart(mObservation, true, true));
@@ -363,27 +362,8 @@ public class ProxiExplorer {
 		/*
 		 * We use this as a choke point for all calls to the aircandi service.
 		 */
-		ModelResult result = new ModelResult();
-
-		if (!skipUpdateCheck) {
-			Boolean doUpdateCheck = updateCheckNeeded();
-			if (doUpdateCheck) {
-				result = checkForUpdate();
-			}
-		}
-
-		if (result.serviceResponse.responseCode == ResponseCode.Success) {
-			if (Aircandi.applicationUpdateRequired) {
-				result.serviceResponse.responseCode = ResponseCode.Failed;
-				result.serviceResponse.responseDetail = ResponseDetail.UpdateRequired;
-			}
-			else {
-				ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-				return serviceResponse;
-			}
-		}
-
-		return result.serviceResponse;
+		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		return serviceResponse;
 	}
 
 	public ServiceResponse tune(List<Beacon> beacons, Beacon primaryBeacon, List<Entity> entities) {
@@ -440,6 +420,7 @@ public class ProxiExplorer {
 			entity.id = null;
 			entity.parentId = null;
 			entity.signalFence = -100.0f;
+			entity.isCollection = true;
 			if (primaryBeacon != null) {
 				entity.links = new ArrayList<Link>();
 				entity.links.add(new Link(primaryBeacon.id, null));
@@ -610,7 +591,9 @@ public class ProxiExplorer {
 		 * This causes the user session expiration window to get bumped
 		 * if we are within a week of expiration.
 		 */
-		serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		if (Aircandi.getInstance().getUser() != null) {
+			serviceRequest.setSession(Aircandi.getInstance().getUser().session);
+		}
 
 		result.serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
@@ -1170,7 +1153,7 @@ public class ProxiExplorer {
 
 						for (Beacon beacon : beacons) {
 
-							Location currentLocation = GeoLocationManager.getInstance().getLocation();
+							Location currentLocation = LocationManager.getInstance().getLocation();
 							if (currentLocation != null) {
 
 								beacon.latitude = currentLocation.getLatitude();
@@ -1208,7 +1191,7 @@ public class ProxiExplorer {
 							 * Inserting an entity that isn't linked to anything but will have
 							 * location information.
 							 */
-							Observation observation = GeoLocationManager.getInstance().getObservation();
+							Observation observation = LocationManager.getInstance().getObservation();
 							if (observation != null) {
 								parameters.putString("observation",
 										"object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
@@ -1283,8 +1266,8 @@ public class ProxiExplorer {
 				List<String> beaconStrings = new ArrayList<String>();
 				for (Beacon beacon : beacons) {
 					if (beacon.id.equals(primaryBeacon.id)) {
-						if (GeoLocationManager.getInstance().getLocation() != null) {
-							Location currentLocation = GeoLocationManager.getInstance().getLocation();
+						if (LocationManager.getInstance().getLocation() != null) {
+							Location currentLocation = LocationManager.getInstance().getLocation();
 
 							beacon.latitude = currentLocation.getLatitude();
 							beacon.longitude = currentLocation.getLongitude();
@@ -1313,7 +1296,7 @@ public class ProxiExplorer {
 			}
 
 			/* Observation */
-			Observation observation = GeoLocationManager.getInstance().getObservation();
+			Observation observation = LocationManager.getInstance().getObservation();
 			if (observation != null) {
 				parameters.putString("observation",
 						"object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));

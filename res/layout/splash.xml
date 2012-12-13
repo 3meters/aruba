@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/splash_v" />
+
+    <RelativeLayout
+        android:id="@+id/dialog"
+        style="?attr/buttonBarStyle"
+        android:layout_width="280dp"
+        android:layout_height="175dp"
+        android:layout_gravity="center"
+        android:background="#cc111111"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:visibility="visible"
+        tools:ignore="UselessParent" >
+
+        <LinearLayout
+            android:id="@+id/title_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/form_footer"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="22dp"
+            android:orientation="horizontal"
+            android:paddingRight="10dp"
+            tools:ignore="UseCompoundDrawables" >
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="4dp"
+                android:src="?attr/logo" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/splash_title"
+                    style="@style/splash_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="@string/name_app" />
+
+                <TextView
+                    android:id="@+id/splash_message"
+                    style="@style/splash_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="3.83"
+                    android:text="@string/splash_message" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/form_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/button_signup"
+                style="@style/form_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onSignupButtonClick"
+                android:text="@string/splash_button_signup" />
+
+            <Button
+                android:id="@+id/button_signin"
+                style="@style/form_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onSigninButtonClick"
+                android:text="@string/splash_button_signin" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:scaleType="fitCenter"
+        android:src="@drawable/foursquare_white" />
+
+</FrameLayout>

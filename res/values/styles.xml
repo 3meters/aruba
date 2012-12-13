@@ -114,7 +114,8 @@
         <item name="android:minHeight">48dp</item>
         <item name="android:maxHeight">48dp</item>
         <item name="android:background">?attr/backgroundButton</item>
-    </style>
+        <item name="android:textColor">?attr/textColorComment</item>
+     </style>
 
     <style name="form_button_borderless" parent="Widget.Sherlock.ActionButton">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
@@ -293,4 +294,10 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
+    <style name="actionbar_debug">
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textColor">?attr/textColor</item>
+    </style>
 </resources>

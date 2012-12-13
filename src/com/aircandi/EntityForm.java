@@ -6,7 +6,6 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.location.Criteria;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
@@ -21,9 +20,9 @@ import android.widget.ViewFlipper;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.GeoLocationManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
+import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -69,11 +68,7 @@ public class EntityForm extends FormActivity {
 		 * a single shot coarse location which is usually based on network location method.
 		 */
 		if (mCommon.mCommandType == CommandType.New) {
-			Criteria criteria = new Criteria();
-			criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-			GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
-					, GeoLocationManager.MAXIMUM_AGE
-					, criteria);
+			LocationManager.getInstance().getLastLocation();
 		}
 
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
@@ -543,7 +538,7 @@ public class EntityForm extends FormActivity {
 				/*
 				 * We add location info as a consistent feature
 				 */
-				android.location.Location currentLocation = GeoLocationManager.getInstance().getLocation();
+				android.location.Location currentLocation = LocationManager.getInstance().getLocation();
 				if (currentLocation != null) {
 					mEntityForForm.place.location = new com.aircandi.service.objects.Location();
 					mEntityForForm.place.location.lat = currentLocation.getLatitude();

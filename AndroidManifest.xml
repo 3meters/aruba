@@ -26,6 +26,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".Aircandi"
@@ -35,6 +36,48 @@
         <uses-library
             android:name="com.google.android.maps"
             android:required="false" />
+
+        <!-- Services -->
+
+        <service
+            android:name=".ScanService"
+            android:enabled="true"
+            android:label="@string/name_app" >
+        </service>
+        <!-- 
+        <service
+            android:name=".location.PlacesUpdateService"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="com.aircandi.location.placesupdateservice" />
+            </intent-filter>
+        </service>
+         -->
+
+        <!-- Receivers -->
+
+        <receiver android:name=".receivers.LocationChangedReceiver" />
+        <receiver android:name=".receivers.PassiveLocationChangedReceiver" />
+        <receiver
+            android:name=".receivers.ConnectivityChangedReceiver"
+            android:enabled="false" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receivers.PowerStateChangedReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_BATTERY_LOW" />
+                <action android:name="android.intent.action.ACTION_BATTERY_OKAY" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receivers.BootReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Activities -->
 
         <activity
             android:name=".SplashForm"
@@ -51,13 +94,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app" >
         </activity>
-
-        <service
-            android:name=".ScanService"
-            android:enabled="true"
-            android:label="@string/name_app" >
-        </service>
-
         <activity
             android:name=".SignInForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -215,7 +251,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
-    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
     -->
 
 </manifest>

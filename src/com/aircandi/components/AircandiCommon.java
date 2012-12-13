@@ -106,9 +106,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	/* UI */
 	public TextView						mBeaconIndicator;
+	public TextView						mTextDebug;
 	protected TextView					mTitle;
 	protected MenuItem					mMenuItemRefresh;
-	protected Boolean					mStartBusyIndicator			= false;
+	protected MenuItem					mMenuItemDebug;
+	protected MenuItem					mMenuItemBeacons;
 	private ProgressDialog				mProgressDialog;
 	public String						mPrefTheme;
 	public Boolean						mUsingCustomTheme			= false;
@@ -174,21 +176,49 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		mTitle = (TextView) mActivity.findViewById(R.id.text_title);
+		mEventLocationChanged = new EventHandler() {
+
+			@Override
+			public void onEvent(Object data) {
+				updateDebugText();
+			}
+		};
+		mEventScanReceived = new EventHandler() {
+
+			@Override
+			public void onEvent(Object data) {
+				List<WifiScanResult> scanList = (List<WifiScanResult>) data;
+				updateBeaconIndicator(scanList);
+			}
+		};
 
 		/* Tabs: setup tabs if appropriate */
 		manageTabs();
 
-		/* Beacon indicator */
-		mBeaconIndicator = (TextView) mActivity.findViewById(R.id.beacon_indicator);
-		if (mBeaconIndicator != null) {
-			updateBeaconIndicator(ProxiExplorer.getInstance().mWifiList);
+	}
+
+	public void updateDebugText() {
+		if (Aircandi.getInstance().getUser() != null
+				&& Aircandi.getInstance().getUser().isDeveloper != null
+				&& Aircandi.getInstance().getUser().isDeveloper) {
+
+			mActivity.runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (mMenuItemDebug != null) {
+						mMenuItemDebug.setVisible(true);
+					}
+					String debugLocationInfo = LocationManager.getInstance().getDebugStringForLocation();
+					if (debugLocationInfo != null) {
+						mTextDebug.setText(debugLocationInfo);
+					}
+					else {
+						mTextDebug.setText("--");
+					}
+				}
+			});
 		}
-
-		mEventLocationChanged = new EventHandler() {
-
-			@Override
-			public void onEvent(Object data) {}
-		};
 	}
 
 	public int getActionBarTitleId() {
@@ -262,6 +292,18 @@ public class AircandiCommon implements ActionBar.TabListener {
 		window.setFormat(PixelFormat.RGBA_8888);
 	}
 
+	public void doDebugClick() {
+		AircandiCommon.showAlertDialog(R.drawable.ic_app
+				, mActivity.getString(R.string.alert_beacons_title)
+				, "Nothing to show yet."
+				, null
+				, mActivity, android.R.string.ok, null, new
+				DialogInterface.OnClickListener() {
+
+					public void onClick(DialogInterface dialog, int which) {}
+				}, null);
+	}
+
 	public void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
 			int messageId = R.string.alert_beacons_zero;
@@ -281,7 +323,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						beaconMessage += "\n";
 						beaconMessage += "Wifi fix: " + DateUtils.intervalSince(ProxiExplorer.getInstance().mLastWifiUpdate, DateUtils.nowDate());
 
-						Observation observation = GeoLocationManager.getInstance().getObservation();
+						Observation observation = LocationManager.getInstance().getObservation();
 						if (observation != null) {
 							Date fixDate = new Date(observation.time.longValue());
 							beaconMessage += "\nLocation fix: " + DateUtils.intervalSince(fixDate, DateUtils.nowDate());
@@ -335,7 +377,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				.setEntityId(entity.id)
 				.setParentEntityId(entity.parentId)
 				.setEntityType(entity.type);
-		
+
 		if (entity.parentId != null) {
 			intentBuilder.setCollectionId(entity.getParent().id);
 		}
@@ -347,6 +389,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void updateBeaconIndicator(final List<WifiScanResult> scanList) {
+		
+		if (mBeaconIndicator == null) return;
 
 		synchronized (scanList) {
 			/*
@@ -359,7 +403,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 				public void run() {
 					Drawable drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_stop);
 					mBeaconIndicator.setText(String.valueOf(scanList.size()));
-					mBeaconIndicator.setVisibility(View.GONE);
 
 					WifiScanResult wifiStrongest = null;
 
@@ -378,8 +421,15 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 					mBeaconIndicator.setText(String.valueOf(wifiCount));
 					if (wifiCount > 0) {
-						mBeaconIndicator.setVisibility(View.VISIBLE);
+						//						if (mMenuItemBeacons != null) {
+						//							mMenuItemBeacons.setVisible(true);
+						//						}
 						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
+					}
+					else {
+						//						if (mMenuItemBeacons != null) {
+						//							mMenuItemBeacons.setVisible(false);
+						//						}
 					}
 
 					if (wifiStrongest != null && wifiStrongest.level > CandiConstants.RADAR_BEACON_INDICATOR_CAUTION) {
@@ -737,10 +787,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private void startBusyIndicator() {
 		if (mMenuItemRefresh != null) {
 			mMenuItemRefresh.setActionView(layout.actionbar_refresh);
-			mStartBusyIndicator = false;
-		}
-		else {
-			mStartBusyIndicator = true;
 		}
 	}
 
@@ -748,7 +794,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (mMenuItemRefresh != null) {
 			mMenuItemRefresh.setActionView(null);
 		}
-		mStartBusyIndicator = false;
 	}
 
 	public void showNotification(String title, String message, Context context, Intent intent, int notificationType) {
@@ -780,11 +825,25 @@ public class AircandiCommon implements ActionBar.TabListener {
 		SherlockActivity activity = (SherlockActivity) mActivity;
 		activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
 
+		/* Debug info */
+		mMenuItemDebug = menu.findItem(R.id.debug);
+		if (mMenuItemDebug != null) {
+			mTextDebug = (TextView) mMenuItemDebug.getActionView().findViewById(R.id.text_debug);
+			mMenuItemDebug.getActionView().findViewById(R.id.debug_frame).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					doDebugClick();
+				}
+			});
+
+			updateDebugText();
+		}
+
 		/* Beacon indicator */
-		MenuItem menuItem = menu.findItem(R.id.beacons);
-		if (menuItem != null) {
-			mBeaconIndicator = (TextView) menuItem.getActionView().findViewById(R.id.beacon_indicator);
-			menuItem.getActionView().findViewById(R.id.beacon_frame).setOnClickListener(new View.OnClickListener() {
+		mMenuItemBeacons = menu.findItem(R.id.beacons);
+		if (mMenuItemBeacons != null) {
+			mBeaconIndicator = (TextView) mMenuItemBeacons.getActionView().findViewById(R.id.beacon_indicator);
+			mMenuItemBeacons.getActionView().findViewById(R.id.beacon_frame).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
 					doBeaconIndicatorClick();
@@ -792,15 +851,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			});
 
 			updateBeaconIndicator(ProxiExplorer.getInstance().mWifiList);
-			mEventScanReceived = new EventHandler() {
-
-				@Override
-				public void onEvent(Object data) {
-					List<WifiScanResult> scanList = (List<WifiScanResult>) data;
-					updateBeaconIndicator(scanList);
-				}
-			};
-
 		}
 
 		/* Cache refresh menu item */
@@ -808,18 +858,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void doPrepareOptionsMenu(Menu menu) {
-
-		if (mStartBusyIndicator) {
-			startBusyIndicator();
-		}
-
-		/* Hide the sign out option if we don't have a current session */
+		/*
+		 * Add update item if an update has been flagged
+		 */
 		if (!mPageName.equals("SignInForm")) {
 			if (!Aircandi.applicationUpdateNeeded) {
 				((MenuItem) menu.findItem(R.id.update)).setVisible(false);
 			}
 		}
-
 	}
 
 	public void doOptionsItemSelected(MenuItem menuItem) {
@@ -929,11 +975,21 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		else if (mPageName.equals("CandiList")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
-			setActiveTab(0);
+			if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
+				setActiveTab(0);
+			}
+			else if (Aircandi.getInstance().getCandiTask() == CandiTask.MyCandi) {
+				setActiveTab(1);
+			}
 		}
 		else if (mPageName.equals("CandiForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
-			setActiveTab(0);
+			if (Aircandi.getInstance().getCandiTask() == CandiTask.RadarCandi) {
+				setActiveTab(0);
+			}
+			else if (Aircandi.getInstance().getCandiTask() == CandiTask.MyCandi) {
+				setActiveTab(1);
+			}
 		}
 		else if (mPageName.equals("CommentList")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PRIMARY_ID);
@@ -1083,53 +1139,47 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {
 		Logger.v(this, "onTabReselected: " + tab.getText());
 
-		//		/*
-		//		 * Reselecting a tab should take the user to the top of the
-		//		 * hierarchy but not refresh data.
-		//		 * 
-		//		 * This seems to get fired without user interaction when first
-		//		 * displayed in landscape mode.
-		//		 */
-		//		if (tab.getTag().equals(R.string.radar_tab_radar)) {
-		//			if (!mNavigationTop) {
-		//				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiRadar.class);
-		//				intentBuilder.setNavigationTop(true);
-		//				Intent intent = intentBuilder.create();
-		//				/* Flags let us use existing instance of radar if its already around */
-		//				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		//				intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		//				mActivity.startActivity(intent);
-		//				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageBack);
-		//			}
-		//		}
-		//		else if (tab.getTag().equals(R.string.radar_tab_mycandi)) {
-		//			/*
-		//			 * This seems to get fired without user interaction when first
-		//			 * displayed in landscape mode so we check to see if we are already at the top.
-		//			 */
-		//			
-		//			/*
-		//			 * Problem: this gets fired when we are on candi form on change to landscape.
-		//			 * We then navigate back to candi list. When in candiform, how can we tell the 
-		//			 * different between tabReselected by the user vs tabReselected by system because
-		//			 * of change to landscape?
-		//			 * 
-		//			 * - onTabReselected fires on first orientation change but not subsequent ones.
-		//			 * 
-		//			 */
-		//			if (!mNavigationTop) {
-		//				IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiList.class);
-		//				intentBuilder.setNavigationTop(true);
-		//				intentBuilder.setCollectionType(ProxiExplorer.CollectionType.CandiByUser);
-		//				intentBuilder.setCollectionId(ProxiConstants.ROOT_COLLECTION_ID);
-		//				Intent intent = intentBuilder.create();
-		//
-		//				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		//				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		//				mActivity.startActivity(intent);
-		//				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageBack);
-		//			}
-		//		}
+		/*
+		 * Reselecting a tab should take the user to the top of the
+		 * hierarchy but not refresh data.
+		 * 
+		 * This seems to get fired without user interaction when first
+		 * displayed in landscape mode.
+		 */
+		if (tab.getTag().equals(R.string.radar_tab_radar)) {
+
+			IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiRadar.class);
+			Intent intent = intentBuilder.create();
+
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			mActivity.startActivity(intent);
+			AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageBack);
+		}
+		else if (tab.getTag().equals(R.string.radar_tab_mycandi)) {
+			/*
+			 * This seems to get fired without user interaction when first
+			 * displayed in landscape mode so we check to see if we are already at the top.
+			 */
+
+			/*
+			 * Problem: this gets fired when we are on candi form on change to landscape.
+			 * We then navigate back to candi list. When in candiform, how can we tell the
+			 * different between tabReselected by the user vs tabReselected by system because
+			 * of change to landscape?
+			 * 
+			 * - onTabReselected fires on first orientation change but not subsequent ones.
+			 */
+			IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiUser.class)
+					.setUserId(Aircandi.getInstance().getUser().id);
+
+			Intent intent = intentBuilder.create();
+
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			mActivity.startActivity(intent);
+			AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageBack);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

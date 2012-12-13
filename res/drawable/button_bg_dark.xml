@@ -8,6 +8,6 @@
 		android:angle="270"
 		android:type="linear" />
 	<stroke
-		android:width="1px"
+		android:width="0px"
 		android:color="#bbffffff" />
 </shape>

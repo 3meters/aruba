@@ -1,13 +1,11 @@
 package com.aircandi.components;
 
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -20,11 +18,10 @@ import com.aircandi.Aircandi;
 import com.aircandi.Preferences;
 import com.aircandi.components.Events.EventHandler;
 import com.aircandi.core.CandiConstants;
-import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.location.LocationPollingService;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.utilities.DateUtils;
 
-@SuppressWarnings("unused")
 public class GeoLocationManager implements LocationListener {
 
 	/*
@@ -54,6 +51,10 @@ public class GeoLocationManager implements LocationListener {
 	 * the gps provider is currently enabled even if a good gps fix was
 	 * performed before it was disabled.
 	 * 
+	 * ALERT: Some phones use the DummyLocationProvider is the phone is in airport
+	 * mode. Also, there will be no location updates. A cached location might
+	 * still be around from before airport mode was turned on.
+	 * 
 	 * If network is disabled and gps is enabled, a single update request will
 	 * take longer to complete.
 	 * 
@@ -72,15 +73,15 @@ public class GeoLocationManager implements LocationListener {
 	public static Double				RADIUS_EARTH_MILES			= 3958.75;
 	public static Double				RADIUS_EARTH_KILOMETERS		= 6371.0;
 	private static double				conversionRatioMetersToFeet	= 3.28083989501;
-	private ILocationListener			mLocationListener;
 
-	private Context						mContext;
+	private Context						mApplicationContext;
 	private Location					mLocation;
 	private LocationManager				mLocationManager;
+	protected PackageManager			mPackageManager;
+	@SuppressWarnings("unused")
 	private Runnable					mLocationScanRunnable;
 	protected PendingIntent				mPendingIntentSingleUpdate;
 	private EventHandler				mEventLocationChanged;
-	private AtomicBoolean				mLocationScanActive			= new AtomicBoolean(false);
 
 	protected Criteria					mCriteria;
 
@@ -93,21 +94,12 @@ public class GeoLocationManager implements LocationListener {
 
 	private GeoLocationManager() {}
 
-	public void setContext(Context context) {
-		mContext = context;
-	}
-
-	public void initialize() {
-		/*
-		 * Stash the location manager and get the best available cached location. If
-		 * a cached location doesn't meet our minimum age and accuracy requirements, a
-		 * single location update is requested based on criteria.
-		 */
+	public void initialize(Context applicationContext) {
 		Logger.d(this, "Initializing the GeoLocationManager");
-		mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-		Criteria criteria = new Criteria();
-		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-		ensureLocation(MINIMUM_ACCURACY, MAXIMUM_AGE, criteria);
+
+		mApplicationContext = applicationContext;
+		mLocationManager = (LocationManager) mApplicationContext.getSystemService(Context.LOCATION_SERVICE);
+		mPackageManager = mApplicationContext.getPackageManager();
 	}
 
 	/**
@@ -117,90 +109,152 @@ public class GeoLocationManager implements LocationListener {
 	 * 
 	 * It's possible to exit this routine without an available location and there
 	 * are no quarantees about how long it will take to get a viable location fix.
-	 * 
-	 * @param minAccuracy
-	 * @param maxAge
-	 * @param criteria
-	 * @param listener
 	 */
-
-	public void ensureLocation(int minAccuracy, long maxAge, Criteria criteria) {
+	public void ensureLocation() {
 		Logger.d(this, "Ensuring location");
+//		/*
+//		 * We always clear the current location to make sure we aren't keeping around
+//		 * something stale because nothing better is available yet.
+//		 */
+//		setLocation(null);
+//		/*
+//		 * Start getting location updates. We kick off the gps sensor if available
+//		 * but will stop polling when we get a good fix network or gps
+//		 */
+//		if (isLocationAccessEnabled()) {
+//			//			Criteria criteria = new Criteria();
+//			//			criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+//			//			getSingleLocationUpdate(criteria);
+//			LocationSensorOptions options = new LocationSensorOptions();
+//			options.setEnabledOnly(true);
+//			options.setAccuracy(Criteria.ACCURACY_FINE);
+//			enableLocationSensor(options);
+//		}
+//		/*
+//		 * Iterate through all the providers on the system, keeping note of the
+//		 * most accurate result within the acceptable time limit. If no result
+//		 * is found within maxTime, return the newest Location.
+//		 */
+//		Location bestLocation = null;
+//		for (String provider : mLocationManager.getAllProviders()) {
+//			Location location = mLocationManager.getLastKnownLocation(provider);
+//			if (location != null) {
+//				long fixAge = System.currentTimeMillis() - location.getTime();
+//				float fixAccuracy = location.getAccuracy();
+//				if ((fixAge <= MAXIMUM_AGE && fixAccuracy <= MINIMUM_ACCURACY)) {
+//					if (bestLocation == null || fixAccuracy < bestLocation.getAccuracy()) {
+//						bestLocation = location;
+//					}
+//				}
+//			}
+//		}
+//		/*
+//		 * If the best result is beyond the allowed time limit, or the accuracy
+//		 * of the best result is wider than the acceptable maximum distance,
+//		 * request a single update.
+//		 */
+//		if (bestLocation != null) {
+//			Logger.d(this, "Using last known location: provider="
+//					+ bestLocation.getProvider()
+//					+ " accuracy="
+//					+ String.valueOf(bestLocation.getAccuracy())
+//					+ " age="
+//					+ DateUtils.intervalSince(new Date(bestLocation.getTime()), DateUtils.nowDate()));
+//			setLocation(bestLocation);
+//		}
+	}
 
+	// --------------------------------------------------------------------------------------------
+	// Location listener events
+	// --------------------------------------------------------------------------------------------
+
+	public Boolean enableLocationSensor(final LocationSensorOptions options) {
+
+		final String locationProvider = mLocationManager.getBestProvider(options, options.isEnabledOnly());
 		/*
-		 * We always start a single shot update while we look
-		 * over the last known locations.
+		 * If best provider isn't the network provider then check if it's enabled and get it going.
 		 */
-		if (!mLocationScanActive.get()) {
-			getSingleLocationUpdate(criteria);
+		if (!locationProvider.equals(LocationManager.NETWORK_PROVIDER) && mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER
+					, CandiConstants.ONE_SECOND
+					, 0
+					, this);
 		}
+
+		mLocationManager.requestLocationUpdates(locationProvider
+				, options.getMinimumTriggerTime()
+				, options.getMinimumTriggerDistance()
+				, this);
+
+		return true;
+	}
+
+	public void disableLocationSensor() {
+		mLocationManager.removeUpdates(this);
+	}
+
+	@Override
+	public void onLocationChanged(final Location location) {
 		/*
-		 * Iterate through all the providers on the system, keeping note of the
-		 * most accurate result within the acceptable time limit. If no result
-		 * is found within maxTime, return the newest Location.
+		 * Sometimes, the location.getTime returned from the OS has an age of perhaps 15-20 seconds, according to
+		 * the returned timestamp, although we can tell for certain that it's very old. For example, if the lon/lat fix
+		 * is from a position that the handset was on 30 minutes ago!
+		 * 
+		 * This seems to be caused by the code that collects location info and sends it
+		 * to Google to support the network location provider.
+		 * 
+		 * It seems to happen both from Wifi and network, but not gps. Common workaround
+		 * is to look at distance moved between fixes to determine it's a bad time setting.
 		 */
-		Location bestLocation = null;
-		for (String provider : mLocationManager.getAllProviders()) {
-			Location location = mLocationManager.getLastKnownLocation(provider);
-			if (location != null) {
 
-				long fixAge = System.currentTimeMillis() - location.getTime();
-				float fixAccuracy = location.getAccuracy();
+		if (location != null) {
+			Logger.d(this, "Location update received: " + location.getProvider() + " "
+					+ "; accuracy: " + location.getAccuracy()
+					+ "; lat/lng: " + location.getLatitude() + ","
+					+ location.getLongitude());
 
-				if ((fixAge <= maxAge && fixAccuracy <= minAccuracy)) {
-					if (bestLocation == null || fixAccuracy < bestLocation.getAccuracy()) {
-						bestLocation = location;
-					}
-				}
-			}
-		}
-
-		/*
-		 * If the best result is beyond the allowed time limit, or the accuracy
-		 * of the best result is wider than the acceptable maximum distance,
-		 * request a single update.
-		 */
-		if (bestLocation != null) {
-			if (isBetterLocation(bestLocation, mLocation)) {
-				Logger.d(this, "Using last known location: provider="
-						+ bestLocation.getProvider()
-						+ " accuracy="
-						+ String.valueOf(bestLocation.getAccuracy())
-						+ " age="
-						+ DateUtils.intervalSince(new Date(bestLocation.getTime()), DateUtils.nowDate()));
-				mLocation = bestLocation;
-				if (mLocationListener != null) {
-					mLocationListener.onLocationChanged(mLocation);
-				}
+			if (mLocation == null) {
+				setLocation(location);
 			}
 			else {
-				Logger.d(this, "Current location is best: provider="
-						+ mLocation.getProvider()
-						+ " accuracy="
-						+ String.valueOf(mLocation.getAccuracy())
-						+ " age="
-						+ DateUtils.intervalSince(new Date(mLocation.getTime()), DateUtils.nowDate()));
+				if (location != null && isBetterLocation(location, mLocation)) {
+					setLocation(location);
+					Logger.d(this, "Location update is better: " + location.getProvider());
+				}
+			}
+
+			long fixAge = System.currentTimeMillis() - location.getTime();
+			float fixAccuracy = location.getAccuracy();
+
+			if ((fixAge <= MAXIMUM_AGE && fixAccuracy <= MINIMUM_ACCURACY)) {
+				//				Logger.d(this, "Stopped listening for updates");
+				//				disableLocationSensor();
 			}
 		}
 	}
 
-	private void initializeLocation() {
-		/*
-		 * Look for the best available location fix in the system and use it. This
-		 * does not require powering on any hardware to obtain a fix.
-		 */
-		Location lastKnownLocationNetwork = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		if (lastKnownLocationNetwork != null) {
-			if (isBetterLocation(lastKnownLocationNetwork, mLocation)) {
-				mLocation = lastKnownLocationNetwork;
-			}
-		}
+	@Override
+	public void onProviderDisabled(final String provider) {
+		Logger.d(this, "Location provider disabled: " + provider);
+	}
 
-		Location lastKnownLocationGPS = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (lastKnownLocationGPS != null) {
-			if (isBetterLocation(lastKnownLocationGPS, mLocation)) {
-				mLocation = lastKnownLocationGPS;
-			}
+	@Override
+	public void onProviderEnabled(final String provider) {
+		Logger.d(this, "Location provider enabled: " + provider);
+	}
+
+	@Override
+	public void onStatusChanged(final String provider, final int status, final Bundle extras) {
+		switch (status) {
+			case LocationProvider.AVAILABLE:
+				Logger.d(this, "Location provider available: " + provider);
+				break;
+			case LocationProvider.OUT_OF_SERVICE:
+				Logger.d(this, "Location provider out of service: " + provider);
+				break;
+			case LocationProvider.TEMPORARILY_UNAVAILABLE:
+				Logger.d(this, "Location provider temporarily unavailable: " + provider);
+				break;
 		}
 	}
 
@@ -208,15 +262,12 @@ public class GeoLocationManager implements LocationListener {
 	// Location polling routines
 	// --------------------------------------------------------------------------------------------
 
-	private void configurePolling() {
+	public void configurePolling() {
 		mLocationScanRunnable = new Runnable() {
-
 			@Override
 			public void run() {
-				if (mLocationScanActive.get()) {
-					Logger.d(GeoLocationManager.this, "Location scan stopped: time limit");
-					stopLocationPolling();
-				}
+				Logger.d(GeoLocationManager.this, "Location scan stopped: time limit");
+				stopLocationPolling();
 			}
 		};
 
@@ -243,11 +294,11 @@ public class GeoLocationManager implements LocationListener {
 		/* Start first scan right away */
 		Logger.d(this, "Starting location polling scan service");
 		Intent locationIntent = new Intent(Aircandi.applicationContext, LocationPollingService.class);
-		mContext.startService(locationIntent);
+		mApplicationContext.startService(locationIntent);
 
 		/* Setup a polling schedule */
 		if (CandiConstants.LOCATION_POLLING_INTERVAL > 0) {
-			AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Service.ALARM_SERVICE);
+			AlarmManager alarmManager = (AlarmManager) mApplicationContext.getSystemService(Service.ALARM_SERVICE);
 			PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, locationIntent, 0);
 			alarmManager.cancel(pendingIntent);
 			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -257,7 +308,7 @@ public class GeoLocationManager implements LocationListener {
 	}
 
 	public void stopLocationPolling() {
-		AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Service.ALARM_SERVICE);
+		AlarmManager alarmManager = (AlarmManager) mApplicationContext.getSystemService(Service.ALARM_SERVICE);
 		Intent locationIntent = new Intent(Aircandi.applicationContext, LocationPollingService.class);
 		PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, locationIntent, 0);
 		alarmManager.cancel(pendingIntent);
@@ -265,95 +316,22 @@ public class GeoLocationManager implements LocationListener {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Location listener events
-	// --------------------------------------------------------------------------------------------
-
-	public Boolean enableLocationSensor(final ILocationListener locationListener, final LocationSensorOptions locationSensorOptions) {
-		this.mLocationListener = locationListener;
-		final String locationProvider = mLocationManager.getBestProvider(locationSensorOptions, locationSensorOptions.isEnabledOnly());
-		if (locationProvider == null) {
-			return false;
-		}
-		else {
-			/*
-			 * If best provider isn't the network provider then check if
-			 * it's enabled and get it going.
-			 */
-			if (!locationProvider.equals(LocationManager.NETWORK_PROVIDER)
-					&& mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-				mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER
-						, 1000
-						, 0
-						, this);
-				this.onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
-			}
-
-			mLocationManager.requestLocationUpdates(locationProvider
-					, locationSensorOptions.getMinimumTriggerTime()
-					, locationSensorOptions.getMinimumTriggerDistance()
-					, this);
-
-			this.onLocationChanged(mLocationManager.getLastKnownLocation(locationProvider));
-			return true;
-		}
-	}
-
-	public void disableLocationSensor() {
-		mLocationManager.removeUpdates(this);
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Location listener events
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public void onLocationChanged(final Location location) {
-
-		if (location == null) {
-			mLocationListener.onLocationLost();
-		}
-		else {
-			if (mLocation == null) {
-				mLocation = location;
-				mLocationListener.onLocationChanged(mLocation);
-			}
-			else {
-				if (isBetterLocation(location, mLocation)) {
-					mLocation = location;
-					mLocationListener.onLocationChanged(mLocation);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void onProviderDisabled(final String pProvider) {
-		this.mLocationListener.onLocationProviderDisabled();
-	}
-
-	@Override
-	public void onProviderEnabled(final String pProvider) {
-		this.mLocationListener.onLocationProviderEnabled();
-	}
-
-	@Override
-	public void onStatusChanged(final String pProvider, final int pStatus, final Bundle pExtras) {
-		switch (pStatus) {
-			case LocationProvider.AVAILABLE:
-				this.mLocationListener.onLocationProviderStatusChanged(LocationProviderStatus.AVAILABLE, pExtras);
-				break;
-			case LocationProvider.OUT_OF_SERVICE:
-				this.mLocationListener.onLocationProviderStatusChanged(LocationProviderStatus.OUT_OF_SERVICE, pExtras);
-				break;
-			case LocationProvider.TEMPORARILY_UNAVAILABLE:
-				this.mLocationListener.onLocationProviderStatusChanged(LocationProviderStatus.TEMPORARILY_UNAVAILABLE, pExtras);
-				break;
-		}
-	}
-
-	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
+
+	public String getDebugStringForLocation() {
+		if (mLocation != null) {
+			String debug = "";
+			debug += mLocation.getProvider().substring(0, 1).toUpperCase();
+			if (mLocation.hasAccuracy()) {
+				debug += String.format("%.0f", mLocation.getAccuracy());
+			}
+			return debug;
+		}
+		else {
+			return null;
+		}
+	}
 
 	public static int timeSinceLocationInMillis(Location location) {
 		if (location == null) {
@@ -370,21 +348,20 @@ public class GeoLocationManager implements LocationListener {
 		return radius;
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Location snapshot routines
-	// --------------------------------------------------------------------------------------------
-
-	/**
-	 * Calculates distance between two point specified by decimal degree lat/lon.
-	 * 
-	 * @param lat1
-	 * @param lng1
-	 * @param lat2
-	 * @param lng2
-	 * @returns distance in meters or yards between the two points
-	 */
-
 	public static double distance(double lat1, double lng1, double lat2, double lng2, MeasurementSystem system) {
+		/*
+		 * Calculates distance between two point specified by decimal degree lat/lon.
+		 * 
+		 * @param lat1
+		 * 
+		 * @param lng1
+		 * 
+		 * @param lat2
+		 * 
+		 * @param lng2
+		 * 
+		 * @returns distance in meters or yards between the two points
+		 */
 		double R = RADIUS_EARTH_KILOMETERS;
 
 		/* calculate delta in radians for latitudes and longitudes */
@@ -407,28 +384,28 @@ public class GeoLocationManager implements LocationListener {
 		return (new Float(dist).floatValue() * 1000);
 	}
 
-	private static Double toRad(Double value) {
-		return value * Math.PI / 180;
-	}
-
-	/**
-	 * Calculates geodetic distance between two points specified by latitude/longitude using Vincenty inverse formula
-	 * for ellipsoids
-	 * 
-	 * @param lat1
-	 *            first point latitude in decimal degrees
-	 * @param lng1
-	 *            first point longitude in decimal degrees
-	 * @param lat2
-	 *            second point latitude in decimal degrees
-	 * @param lng2
-	 *            second point longitude in decimal degrees
-	 * @returns distance in meters or yards between points with 5.10<sup>-4</sup> precision
-	 * @see <a href="http://www.movable-type.co.uk/scripts/latlong-vincenty.html">Originally posted here</a>
-	 */
-
 	public static double distanceVincenty(double lat1, double lng1, double lat2, double lng2, MeasurementSystem system) {
-
+		/*
+		 * Calculates geodetic distance between two points specified by latitude/longitude using Vincenty inverse
+		 * formula
+		 * for ellipsoids
+		 * 
+		 * @param lat1
+		 * first point latitude in decimal degrees
+		 * 
+		 * @param lng1
+		 * first point longitude in decimal degrees
+		 * 
+		 * @param lat2
+		 * second point latitude in decimal degrees
+		 * 
+		 * @param lng2
+		 * second point longitude in decimal degrees
+		 * 
+		 * @returns distance in meters or yards between points with 5.10<sup>-4</sup> precision
+		 * 
+		 * @see <a href="http://www.movable-type.co.uk/scripts/latlong-vincenty.html">Originally posted here</a>
+		 */
 		double a = 6378137, b = 6356752.314245, f = 1 / 298.257223563; // WGS-84 ellipsoid params
 		double L = Math.toRadians(lng2 - lng1);
 		double U1 = Math.atan((1 - f) * Math.tan(Math.toRadians(lat1)));
@@ -476,6 +453,10 @@ public class GeoLocationManager implements LocationListener {
 		}
 		return dist;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Location routines
+	// --------------------------------------------------------------------------------------------
 
 	public boolean isProviderEnabled(String provider) {
 		return (mLocationManager.isProviderEnabled(provider));
@@ -593,7 +574,19 @@ public class GeoLocationManager implements LocationListener {
 	}
 
 	public void setLocation(Location location) {
+
+		String message = new String("Location updated:");
+		if (location == null) {
+			message += " none";
+		}
+		else {
+			message += " provider: " + location.getProvider();
+			message += " accuracy: " + String.valueOf(location.getAccuracy());
+		}
+		Logger.d(this, message);
+
 		this.mLocation = location;
+		Events.EventBus.onLocationChanged(mLocation);
 	}
 
 	public Location getLocation() {
@@ -613,26 +606,18 @@ public class GeoLocationManager implements LocationListener {
 
 		if (provider != null) {
 			Logger.d(this, "Starting single location update: " + provider);
-			mLocationScanActive.set(true);
 
 			mLocationManager.requestLocationUpdates(provider, CandiConstants.ONE_SECOND, 0, new LocationListener() {
 
 				@Override
 				public void onLocationChanged(Location location) {
-					mLocationScanActive.set(false);
 					Logger.d(this, "Single location update received: " + provider + " "
 							+ location.getLatitude() + ","
 							+ location.getLongitude());
 
 					if (location != null && isBetterLocation(location, mLocation)) {
 						Logger.d(this, "Single location update is better");
-						mLocation = location;
-						/* Notify interested parties */
-						Events.EventBus.onLocationChanged(mLocation);
-					}
-
-					if (mLocationListener != null && location != null) {
-						mLocationListener.onLocationChanged(location);
+						setLocation(location);
 					}
 
 					mLocationManager.removeUpdates(this);
@@ -647,7 +632,7 @@ public class GeoLocationManager implements LocationListener {
 				@Override
 				public void onStatusChanged(String provider, int status, Bundle extras) {}
 
-			}, mContext.getMainLooper());
+			}, mApplicationContext.getMainLooper());
 		}
 		else {
 			Logger.d(this, "No location provider available");
@@ -660,49 +645,26 @@ public class GeoLocationManager implements LocationListener {
 
 	public void onPause() {
 		// GeoLocationManager.getInstance().stopLocationPolling();
+		// disableLocationSensor();
 	}
 
 	public void onResume() {
 		// GeoLocationManager.getInstance().startLocationPolling();
+		//		if (isLocationAccessEnabled()) {
+		//			LocationSensorOptions options = new LocationSensorOptions();
+		//			options.setEnabledOnly(true);
+		//			options.setAccuracy(Criteria.ACCURACY_FINE);
+		//			enableLocationSensor(options);
+		//		}
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
 
-	public ILocationListener getLocationListener() {
-		return mLocationListener;
-	}
-
-	public static abstract class BaseLocationListener implements ILocationListener {
-
-		public void onLocationProviderStatusChanged(LocationProviderStatus locationProviderStatus, Bundle pBundle) {}
-
-		public void onLocationProviderEnabled() {}
-
-		public void onLocationProviderDisabled() {}
-
-		public void onLocationLost() {}
-
-		public void onLocationChanged(Location location) {}
-
-	}
-
-	public void setLocationListener(ILocationListener locationListener) {
-		mLocationListener = locationListener;
-	}
-
-	public LocationManager getLocationManager() {
-		return mLocationManager;
-	}
-
-	public void setLocationManager(LocationManager locationManager) {
-		mLocationManager = locationManager;
-	}
-
 	public static class LocationSensorOptions extends Criteria {
 
-		private static final long	MINIMUMTRIGGERTIME_DEFAULT		= 1 * CandiConstants.MILLS_PER_SECOND;
+		private static final long	MINIMUMTRIGGERTIME_DEFAULT		= CandiConstants.ONE_SECOND;
 		private static final long	MINIMUMTRIGGERDISTANCE_DEFAULT	= 10;
 		private boolean				mEnabledOnly					= true;
 		private long				mMinimumTriggerTime				= MINIMUMTRIGGERTIME_DEFAULT;

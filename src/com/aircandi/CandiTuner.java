@@ -3,7 +3,6 @@ package com.aircandi;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.location.Criteria;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -15,7 +14,7 @@ import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.GeoLocationManager;
+import com.aircandi.components.LocationManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
@@ -53,11 +52,7 @@ public class CandiTuner extends FormActivity {
 		 * - New beacons getting inserted with the service.
 		 * - Stored with tuning actions.
 		 */
-		Criteria criteria = new Criteria();
-		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-		GeoLocationManager.getInstance().ensureLocation(GeoLocationManager.MINIMUM_ACCURACY
-				, GeoLocationManager.MAXIMUM_AGE
-				, criteria);
+		LocationManager.getInstance().getLastLocation();
 
 	}
 

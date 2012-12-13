@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.location;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
@@ -12,6 +12,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 
+import com.aircandi.components.GeoLocationManager;
+import com.aircandi.components.Logger;
 import com.aircandi.core.CandiConstants;
 
 /**
@@ -88,9 +90,6 @@ public class LocationPollingService extends Service {
 					/* Update the current location */
 					GeoLocationManager.getInstance().setLocation(location);
 					location.setTime(System.currentTimeMillis());
-
-					/* Notify interested parties */
-					Events.EventBus.onLocationChanged(location);
 
 					/*
 					 * Stop if we have an accurate enough network location fix

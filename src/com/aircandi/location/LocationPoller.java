@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.location;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

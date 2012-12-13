@@ -79,9 +79,9 @@ public abstract class CandiActivity extends SherlockActivity {
 		}
 	}
 
-	public void showUpdateAlert() {
+	public void showUpdateAlert(RequestListener listener) {
 		showUpdateNotification();
-		showUpdateAlertDialog(null);
+		showUpdateAlertDialog(listener);
 	}
 
 	public void showUpdateNotification() {
