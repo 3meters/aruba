@@ -21,12 +21,12 @@ import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.ui.widgets.CandiView;
+import com.aircandi.ui.widgets.TextViewEllipsizing;
+import com.aircandi.ui.widgets.UserView;
+import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
-import com.aircandi.widgets.CandiView;
-import com.aircandi.widgets.TextViewEllipsizing;
-import com.aircandi.widgets.UserView;
-import com.aircandi.widgets.WebImageView;
 
 public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable {
 

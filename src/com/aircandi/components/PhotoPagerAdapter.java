@@ -10,9 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.aircandi.PictureDetail;
 import com.aircandi.R;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.ui.PictureDetail;
 
 public class PhotoPagerAdapter extends PagerAdapter {
 

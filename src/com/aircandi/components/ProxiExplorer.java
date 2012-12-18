@@ -27,14 +27,11 @@ import android.os.Bundle;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.CandiRadar;
-import com.aircandi.Preferences;
+import com.aircandi.PlacesConstants;
 import com.aircandi.R;
 import com.aircandi.components.ImageRequest.ImageShape;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.location.LocationManager;
-import com.aircandi.components.location.PlacesConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestType;
@@ -56,6 +53,8 @@ import com.aircandi.service.objects.Result;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.CandiRadar;
+import com.aircandi.ui.Preferences;
 import com.aircandi.utilities.DateUtils;
 import com.aircandi.utilities.ImageUtils;
 

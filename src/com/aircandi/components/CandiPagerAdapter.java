@@ -12,8 +12,8 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 
 import com.aircandi.CandiConstants;
-import com.aircandi.CandiForm;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.ui.CandiForm;
 import com.aircandi.R;
 
 public class CandiPagerAdapter extends PagerAdapter {

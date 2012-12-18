@@ -26,9 +26,9 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.aircandi.CandiConstants;
-import com.aircandi.CandiRadar;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
+import com.aircandi.ui.CandiRadar;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;

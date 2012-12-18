@@ -44,8 +44,8 @@
 
         <!-- Receivers -->
 
-        <receiver android:name=".components.receivers.LocationChangedReceiver" />
-        <!-- 
+        <receiver android:name=".components.LocationChangedReceiver" />
+        <!--
         <receiver android:name=".components.receivers.PassiveLocationChangedReceiver" />
         <receiver android:name=".components.receivers.PowerStateChangedReceiver" >
             <intent-filter>
@@ -57,13 +57,14 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-        </receiver>
- 		-->
- 		
+        </receiver>
+        -->
+
+
         <!-- Activities -->
 
         <activity
-            android:name=".SplashForm"
+            android:name=".ui.SplashForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:windowSoftInputMode="stateHidden" >
             <intent-filter>
@@ -73,77 +74,77 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CandiRadar"
+            android:name=".ui.CandiRadar"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app" >
         </activity>
         <activity
-            android:name=".SignInForm"
+            android:name=".ui.SignInForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_signin"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
-            android:name=".CandiForm"
+            android:name=".ui.CandiForm"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".CandiList"
+            android:name=".ui.CandiList"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".CandiUser"
+            android:name=".ui.CandiUser"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".CandiTuner"
+            android:name=".ui.CandiTuner"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".CommentForm"
+            android:name=".ui.CommentForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_comment"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
-            android:name=".CommentList"
+            android:name=".ui.CommentList"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".PictureSearch"
+            android:name=".ui.PictureSearch"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_search"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".PictureBrowse"
+            android:name=".ui.PictureBrowse"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".TipList"
+            android:name=".ui.TipList"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".builders.LinkPicker"
+            android:name=".ui.builders.LinkPicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_link_picker"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".builders.TemplatePicker"
+            android:name=".ui.builders.TemplatePicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:icon="@drawable/ic_collection_250"
             android:label="@string/form_title_templates"
@@ -151,57 +152,57 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".builders.CandiPicker"
+            android:name=".ui.builders.CandiPicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_candi_picker"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".RegisterForm"
+            android:name=".ui.RegisterForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_signup"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".ProfileForm"
+            android:name=".ui.ProfileForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_profile"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".PasswordForm"
+            android:name=".ui.PasswordForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_password"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".EntityForm"
+            android:name=".ui.EntityForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".builders.AddressBuilder"
+            android:name=".ui.builders.AddressBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_address_builder"
             android:theme="@style/Theme.Sherlock.Light.Dialog"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".builders.CategoryBuilder"
+            android:name=".ui.builders.CategoryBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_category_builder"
             android:theme="@style/Theme.Sherlock.Light.Dialog"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".PictureDetail"
+            android:name=".ui.PictureDetail"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".Preferences"
+            android:name=".ui.Preferences"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
             android:label="@string/form_title_preferences" >
@@ -223,13 +224,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
-    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
-
-
-
-
-
-
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
     -->
 
 </manifest>

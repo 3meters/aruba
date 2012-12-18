@@ -10,8 +10,8 @@ import java.util.List;
 
 import com.aircandi.CandiConstants;
 import com.aircandi.components.EntityList;
+import com.aircandi.components.LocationManager;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.location.LocationManager;
 import com.aircandi.service.Expose;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.SerializedName;

@@ -17,9 +17,9 @@ import com.aircandi.R;
 import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.components.SearchManager.SearchItemType;
 import com.aircandi.service.objects.Entity.ImageFormat;
+import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
-import com.aircandi.widgets.WebImageView;
 
 public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterable {
 

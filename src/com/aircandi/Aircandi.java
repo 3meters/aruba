@@ -17,8 +17,6 @@ import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
 import com.aircandi.components.StopWatch;
-import com.aircandi.components.location.IStrictMode;
-import com.aircandi.components.location.PlatformSpecificImplementationFactory;
 import com.aircandi.service.objects.User;
 
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ", customReportContent = {
@@ -127,13 +125,6 @@ public class Aircandi extends Application {
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
-
-		/* Strict mode */
-		if (CandiConstants.DEVELOPER_MODE) {
-			IStrictMode strictMode = PlatformSpecificImplementationFactory.getStrictMode();
-			if (strictMode != null)
-				strictMode.enableStrictMode();
-		}
 	}
 
 	public static String getVersionName(Context context, Class cls) {
