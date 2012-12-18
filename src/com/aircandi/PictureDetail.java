@@ -26,7 +26,6 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PhotoPagerAdapter;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Photo;

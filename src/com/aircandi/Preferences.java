@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.aircandi.components.AircandiCommon;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.R;

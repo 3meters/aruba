@@ -32,7 +32,6 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestType;

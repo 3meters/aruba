@@ -8,12 +8,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.aircandi.CandiConstants;
 import com.aircandi.components.EntityList;
-import com.aircandi.components.GeoLocationManager;
-import com.aircandi.components.GeoLocationManager.MeasurementSystem;
-import com.aircandi.components.LocationManager;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.core.CandiConstants;
+import com.aircandi.components.location.LocationManager;
 import com.aircandi.service.Expose;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.SerializedName;
@@ -90,6 +88,8 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	public Boolean				hidden				= false;
 	public Boolean				synthetic			= false;
 	public Boolean				checked				= false;
+	public String				source;
+	public String				sourceId;
 	public Float				distance;										// Cached for easier sorting
 
 	/* These have meaning for child entities */
@@ -267,7 +267,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return location;
 	}
 
-	public Float getDistance(MeasurementSystem system) {
+	public Float getDistance() {
 		Beacon beacon = getBeacon();
 		if (beacon != null) {
 			this.distance = beacon.getDistance();
@@ -278,11 +278,13 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			if (location != null) {
 				Observation observation = LocationManager.getInstance().getObservation();
 				if (observation != null) {
-					distance = (float) GeoLocationManager.distanceVincenty(observation.latitude.doubleValue()
-							, observation.longitude.doubleValue()
-							, location.latitude.doubleValue()
-							, location.longitude.doubleValue()
-							, system);
+					android.location.Location locationObserved = new android.location.Location(observation.provider);
+					locationObserved.setLatitude(observation.latitude.doubleValue());
+					locationObserved.setLongitude(observation.longitude.doubleValue());
+					android.location.Location locationPlace = new android.location.Location("place");
+					locationPlace.setLatitude(location.latitude.doubleValue());
+					locationPlace.setLongitude(location.longitude.doubleValue());
+					distance = locationObserved.distanceTo(locationPlace);
 				}
 			}
 			this.distance = distance;

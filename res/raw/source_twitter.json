@@ -1,0 +1,22 @@
+{
+    "_creator": "0001.000000.00000.000.000000",
+    "_id": "0004.000000.00000.000.100001",
+    "_modifier": "0001.000000.00000.000.000000",
+    "_owner": "0001.000000.00000.000.000000",
+    "createdDate": 0,
+    "subtitle":"An information network",
+    "description": "Twitter is a real-time information network that connects you to the latest stories, ideas, opinions and news about what you find interesting.",
+    "enabled": true,
+    "isCollection": false,
+    "locked": false,
+    "modifiedDate": 0,
+    "name": "Twitter",
+    "photo": {
+        "format": "binary",
+        "prefix": "https://twitter.com/images/resources/twitter-bird-light-bgs.png"
+    },
+    "signalFence": -100,
+    "type": "com.aircandi.candi.source",
+    "visibility": "public",
+    "source": "twitter"
+}

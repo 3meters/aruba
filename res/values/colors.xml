@@ -4,7 +4,8 @@
     <!--
 	   	Theme Colors
 	   	- light suffix means a theme where backgrounds are generally light in tone. 
-	   	- dark suffix means a theme where backgrounds are generally dark in tone.
+	   	- dark suffix means a theme where backgrounds are generally dark in tone.
+
     -->
 
     <color name="progress_start">#ffffd300</color>
@@ -12,7 +13,8 @@
 
     <!--
     	We also used the pressed color in radar and that color is hardcoded
-    	in CandiPatchPresenter.initializeScene
+    	in CandiPatchPresenter.initializeScene
+
     -->
     
     <!-- Text -->

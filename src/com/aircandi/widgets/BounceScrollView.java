@@ -1,6 +1,6 @@
 package com.aircandi.widgets;
 
-import com.aircandi.core.CandiConstants;
+import com.aircandi.CandiConstants;
 
 import android.content.Context;
 import android.util.AttributeSet;

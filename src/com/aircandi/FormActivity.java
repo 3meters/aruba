@@ -34,7 +34,6 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.Tracker;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.AnimUtils;
@@ -588,7 +587,7 @@ public abstract class FormActivity extends SherlockActivity {
 	// Inner classes and enums
 	// --------------------------------------------------------------------------------------------
 
-	protected class SimpleTextWatcher implements TextWatcher {
+	public class SimpleTextWatcher implements TextWatcher {
 
 		@Override
 		public void afterTextChanged(Editable s) {}

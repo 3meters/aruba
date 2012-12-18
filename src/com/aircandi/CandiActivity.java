@@ -16,7 +16,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.Logger;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;

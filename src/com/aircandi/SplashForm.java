@@ -18,7 +18,6 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.Tracker;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Session;
@@ -31,10 +30,13 @@ public class SplashForm extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		/*
+		 * Used by other activities to determine if they were launched normally or auto launched after a crash
+		 */
 		Aircandi.getInstance().setLaunchedNormally(true);
+
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		
+
 		if (Aircandi.firstStartApp) {
 			initializeApp();
 		}

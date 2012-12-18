@@ -6,8 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import com.aircandi.CandiConstants;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.Expose;
 
 /**

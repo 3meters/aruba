@@ -9,9 +9,10 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 
+import com.aircandi.CandiConstants;
 import com.aircandi.CandiForm;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.R;
 
@@ -39,14 +40,21 @@ public class CandiPagerAdapter extends PagerAdapter {
 	@Override
 	public Object instantiateItem(View collection, int position) {
 		Entity entity = mEntities.get(position);
-		Integer layoutId = R.layout.temp_candi_form;
+		ViewGroup candiInfoView = null;
+
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-			layoutId = R.layout.temp_candi_form_post;
+			candiInfoView = (ViewGroup) mInflater.inflate(R.layout.temp_candi_form_post, null);
 		}
 		else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			layoutId = R.layout.temp_candi_form_place;
+			candiInfoView = (ViewGroup) mInflater.inflate(R.layout.temp_candi_form_place, null);
+			if (!entity.synthetic) {
+				((ViewStub) candiInfoView.findViewById(R.id.stub_foursquare)).inflate();
+			}
 		}
-		ViewGroup candiInfoView = (ViewGroup) mInflater.inflate(layoutId, null);
+		else {
+			candiInfoView = (ViewGroup) mInflater.inflate(R.layout.temp_candi_form, null);
+		}
+
 		candiInfoView = CandiForm.buildCandiForm(mContext, entity, candiInfoView, null, false);
 		((ViewPager) collection).addView(candiInfoView, 0);
 		return candiInfoView;

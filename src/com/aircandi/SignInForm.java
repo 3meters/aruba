@@ -13,22 +13,20 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.Events;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.ImageUtils;
 import com.aircandi.utilities.MiscUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class SignInForm extends FormActivity {
 
@@ -135,7 +133,6 @@ public class SignInForm extends FormActivity {
 						Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
 
 						Aircandi.getInstance().setUser(user);
-						Events.EventBus.onUserChanged(user);						
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 

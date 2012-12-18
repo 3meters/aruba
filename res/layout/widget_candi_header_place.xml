@@ -90,6 +90,24 @@
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="@color/accent_blue" />
         </LinearLayout>
+
+        <com.aircandi.widgets.SectionLayout
+            android:id="@+id/section_description"
+            style="@style/candi_form_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            aircandi:layoutHeader="@layout/temp_section_header"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/candi_form_description"
+                style="@style/candi_form_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dummy_description"
+                android:visibility="visible" />
+        </com.aircandi.widgets.SectionLayout>
     </LinearLayout>
 
 </LinearLayout>

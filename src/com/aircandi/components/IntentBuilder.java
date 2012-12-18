@@ -3,8 +3,8 @@ package com.aircandi.components;
 import android.content.Context;
 import android.content.Intent;
 
+import com.aircandi.CandiConstants;
 import com.aircandi.components.ProxiExplorer.EntityListType;
-import com.aircandi.core.CandiConstants;
 
 public class IntentBuilder {
 

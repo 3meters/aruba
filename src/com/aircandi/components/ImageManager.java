@@ -28,7 +28,7 @@ import android.support.v4.util.LruCache;
 import android.util.FloatMath;
 import android.util.TypedValue;
 
-import com.aircandi.core.CandiConstants;
+import com.aircandi.CandiConstants;
 import com.aircandi.utilities.ImageUtils;
 import com.aircandi.utilities.MiscUtils;
 

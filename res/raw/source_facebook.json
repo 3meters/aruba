@@ -1,0 +1,21 @@
+{
+    "_creator": "0001.000000.00000.000.000000",
+    "_id": "0004.000000.00000.000.100002",
+    "_modifier": "0001.000000.00000.000.000000",
+    "_owner": "0001.000000.00000.000.000000",
+    "createdDate": 0,
+    "description": "Facebook helps you connect and share with the people in your life.",
+    "enabled": true,
+    "isCollection": false,
+    "locked": false,
+    "modifiedDate": 0,
+    "name": "Facebook",
+    "photo": {
+        "format": "binary",
+        "prefix": "resource:source_facebook"
+    },
+    "signalFence": -100,
+    "type": "com.aircandi.candi.source",
+    "visibility": "public",
+    "source": "facebook"
+}

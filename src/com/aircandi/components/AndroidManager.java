@@ -2,15 +2,18 @@ package com.aircandi.components;
 
 import java.util.List;
 
-import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.AnimUtils.TransitionType;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.BatteryManager;
+
+import com.aircandi.Aircandi;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class AndroidManager {
 
@@ -23,11 +26,19 @@ public class AndroidManager {
 		return singletonObject;
 	}
 
-	/**
-	 * Designed as a singleton. The private Constructor prevents any other class from instantiating.
-	 */
 	private AndroidManager() {}
 
+	protected boolean getIsLowBattery() {
+		/*
+		 * Returns battery status. True if less than 15% remaining.
+		 */
+		IntentFilter batIntentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+		Intent battery = Aircandi.applicationContext.registerReceiver(null, batIntentFilter);
+		float pctLevel = (float) battery.getIntExtra(BatteryManager.EXTRA_LEVEL, 1) /
+				battery.getIntExtra(BatteryManager.EXTRA_SCALE, 1);
+		return pctLevel < 0.15;
+	}
+	
 	public void callMapActivity(Context context, String latitude, String longitude, String label) {
 		String uri = "geo:" + latitude + "," + longitude + "?q="
 				+ latitude

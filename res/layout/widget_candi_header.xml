@@ -30,7 +30,8 @@
             android:gravity="bottom|right"
             android:scaleType="fitCenter"
             android:src="@drawable/placeholder_logo" />
-        <TextView
+
+        <TextView
             android:id="@+id/candi_form_subtitle"
             style="@style/candi_form_subtitle"
             android:layout_width="wrap_content"

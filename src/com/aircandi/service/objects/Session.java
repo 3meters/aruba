@@ -2,7 +2,7 @@ package com.aircandi.service.objects;
 
 import java.util.HashMap;
 
-import com.aircandi.core.CandiConstants;
+import com.aircandi.CandiConstants;
 import com.aircandi.service.Expose;
 
 /**
@@ -23,7 +23,7 @@ public class Session extends ServiceEntryBase {
 	public Session() {}
 
 	public Boolean renewSession(long currentTime) {
-		if (expirationDate.longValue() < (currentTime + CandiConstants.SIXTY_MINUTES)) {
+		if (expirationDate.longValue() < (currentTime + CandiConstants.TIME_SIXTY_MINUTES)) {
 			return true;
 		}
 		return false;

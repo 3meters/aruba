@@ -801,12 +801,6 @@ public class ProxibaseService {
 
 	public static ServiceData convertJsonToObjectsSmart(String jsonString, ServiceDataType serviceDataType) {
 
-		Boolean methodTimingOnly = false;
-		if (!Aircandi.stopwatch.isStarted()) {
-			methodTimingOnly = true;
-			Aircandi.stopwatch.start();
-		}
-		Aircandi.stopwatch.segmentTime("Simple data binding start");
 		ContainerFactory containerFactory = new ContainerFactory() {
 			public Map createObjectContainer() {
 				return new LinkedHashMap();
@@ -881,18 +875,10 @@ public class ProxibaseService {
 					serviceData.data = list;
 				}
 			}
-			Aircandi.stopwatch.segmentTime("Simple data binding complete");
-			if (methodTimingOnly) {
-				Aircandi.stopwatch.stop();
-			}
 			return serviceData;
 		}
 		catch (ParseException exception) {
 			exception.printStackTrace();
-		}
-		Aircandi.stopwatch.segmentTime("Simple data binding complete");
-		if (methodTimingOnly) {
-			Aircandi.stopwatch.stop();
 		}
 		return null;
 	}
@@ -919,13 +905,11 @@ public class ProxibaseService {
 					serviceData.data = beacons;
 				}
 			}
-			Aircandi.stopwatch.segmentTime("Simple data binding complete");
 			return serviceData;
 		}
 		catch (org.json.JSONException exception) {
 			exception.printStackTrace();
 		}
-		Aircandi.stopwatch.segmentTime("Simple data binding complete");
 		return null;
 	}
 

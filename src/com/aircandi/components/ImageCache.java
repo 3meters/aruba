@@ -14,7 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 
-import com.aircandi.core.CandiConstants;
+import com.aircandi.CandiConstants;
 
 /**
  * <p>

@@ -9,10 +9,10 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
 
+import com.aircandi.CandiConstants;
 import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;

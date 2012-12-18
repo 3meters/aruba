@@ -25,8 +25,8 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.aircandi.CandiConstants;
 import com.aircandi.CandiRadar;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
 import com.amazonaws.AmazonClientException;

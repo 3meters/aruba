@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.location.LocationManager;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ServiceRequest;

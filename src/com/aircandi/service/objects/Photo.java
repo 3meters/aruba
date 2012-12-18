@@ -144,7 +144,10 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		if (prefix != null && suffix != null) {
 			imageUri = prefix + String.valueOf(pWidth) + "x" + String.valueOf(pHeight) + suffix;
 		}
-		if (imageUri != null && !imageUri.startsWith("resource:") && sourceName.equals("aircandi")) {
+		if (imageUri != null 
+				&& !imageUri.startsWith("resource:") 
+				&& sourceName != null 
+				&& sourceName.equals("aircandi")) {
 			imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 		}
 		return imageUri;

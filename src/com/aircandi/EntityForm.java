@@ -12,25 +12,26 @@ import android.telephony.PhoneNumberUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.aircandi.builders.AddressBuilder;
+import com.aircandi.builders.CategoryBuilder;
+import com.aircandi.builders.LinkPicker;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.location.LocationManager;
 import com.aircandi.components.Tracker;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
@@ -68,7 +69,7 @@ public class EntityForm extends FormActivity {
 		 * a single shot coarse location which is usually based on network location method.
 		 */
 		if (mCommon.mCommandType == CommandType.New) {
-			LocationManager.getInstance().getLastLocation();
+//			LocationManager.getInstance().ensureLocation();
 		}
 
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
@@ -221,13 +222,13 @@ public class EntityForm extends FormActivity {
 				if (entity.place.contact != null) {
 					if (entity.place.contact.twitter != null && !entity.place.contact.twitter.equals("")) {
 						if (findViewById(R.id.twitter) != null) {
-							((TextView) findViewById(R.id.twitter)).setText(entity.place.facebook);
+							((TextView) findViewById(R.id.twitter)).setText("@" + entity.place.contact.twitter);
 						}
 					}
 				}
 				if (entity.place.facebook != null && !entity.place.facebook.equals("")) {
 					if (findViewById(R.id.facebook) != null) {
-						((TextView) findViewById(R.id.facebook)).setText("@" + entity.place.contact.twitter);
+						((TextView) findViewById(R.id.facebook)).setText(entity.place.facebook);
 					}
 				}
 			}
@@ -302,11 +303,9 @@ public class EntityForm extends FormActivity {
 	public void onWebsiteBuilderClick(View view) {
 		Intent intent = new Intent(this, LinkPicker.class);
 		intent.putExtra(CandiConstants.EXTRA_VERIFY_URI, false);
-		String website = ((EditText) findViewById(R.id.website)).getText().toString();
-		if (website != null && !website.equals("")) {
-			intent.putExtra(CandiConstants.EXTRA_URI, website);
+		if (mEntityForForm.getPlace().website != null && !mEntityForForm.equals("")) {
+			intent.putExtra(CandiConstants.EXTRA_URI, mEntityForForm.place.website);
 		}
-
 		startActivityForResult(intent, CandiConstants.ACTIVITY_WEBSITE_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
@@ -507,7 +506,7 @@ public class EntityForm extends FormActivity {
 
 		/* First we want to make sure we have the freshest set of beacons */
 		if (NetworkManager.getInstance().isWifiEnabled()) {
-			ProxiExplorer.getInstance().scanForWifi(new RequestListener() {});
+			ProxiExplorer.getInstance().scanForWifi();
 		}
 
 		/* If parent id then this is a child */

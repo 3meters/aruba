@@ -17,7 +17,6 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.utilities.ImageUtils;
 import com.aircandi.widgets.UserView;

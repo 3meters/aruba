@@ -2,7 +2,7 @@ package com.aircandi.components;
 
 import android.graphics.Bitmap;
 
-import com.aircandi.core.CandiConstants;
+import com.aircandi.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity.ImageFormat;
 

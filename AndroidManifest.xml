@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi"
     android:versionCode="1"
-    android:versionName="0.5.0" >
+    android:versionName="0.5.1" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -33,9 +33,6 @@
         android:icon="@drawable/ic_app"
         android:label="@string/name_app"
         android:theme="@style/aircandi_theme_midnight" >
-        <uses-library
-            android:name="com.google.android.maps"
-            android:required="false" />
 
         <!-- Services -->
 
@@ -44,39 +41,25 @@
             android:enabled="true"
             android:label="@string/name_app" >
         </service>
-        <!-- 
-        <service
-            android:name=".location.PlacesUpdateService"
-            android:enabled="true" >
-            <intent-filter>
-                <action android:name="com.aircandi.location.placesupdateservice" />
-            </intent-filter>
-        </service>
-         -->
 
         <!-- Receivers -->
 
-        <receiver android:name=".receivers.LocationChangedReceiver" />
-        <receiver android:name=".receivers.PassiveLocationChangedReceiver" />
-        <receiver
-            android:name=".receivers.ConnectivityChangedReceiver"
-            android:enabled="false" >
+        <receiver android:name=".components.receivers.LocationChangedReceiver" />
+        <!-- 
+        <receiver android:name=".components.receivers.PassiveLocationChangedReceiver" />
+        <receiver android:name=".components.receivers.PowerStateChangedReceiver" >
             <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.intent.action.BATTERY_LOW" />
+                <action android:name="android.intent.action.BATTERY_OKAY" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receivers.PowerStateChangedReceiver" >
-            <intent-filter>
-                <action android:name="android.intent.action.ACTION_BATTERY_LOW" />
-                <action android:name="android.intent.action.ACTION_BATTERY_OKAY" />
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".receivers.BootReceiver" >
+        <receiver android:name=".components.receivers.BootReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
+ 		-->
+ 		
         <!-- Activities -->
 
         <activity
@@ -102,11 +85,6 @@
         </activity>
         <activity
             android:name=".CandiForm"
-            android:label="@string/name_app"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
-        <activity
-            android:name=".UserCandiForm"
             android:label="@string/name_app"
             android:windowSoftInputMode="stateHidden" >
         </activity>
@@ -159,13 +137,13 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".LinkPicker"
+            android:name=".builders.LinkPicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_link_picker"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".TemplatePicker"
+            android:name=".builders.TemplatePicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:icon="@drawable/ic_collection_250"
             android:label="@string/form_title_templates"
@@ -173,7 +151,7 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".CandiPicker"
+            android:name=".builders.CandiPicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_candi_picker"
             android:windowSoftInputMode="stateHidden" >
@@ -203,20 +181,14 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".PlaceCustomForm"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/name_app"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
-        <activity
-            android:name=".AddressBuilder"
+            android:name=".builders.AddressBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_address_builder"
             android:theme="@style/Theme.Sherlock.Light.Dialog"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".CategoryBuilder"
+            android:name=".builders.CategoryBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_category_builder"
             android:theme="@style/Theme.Sherlock.Light.Dialog"
@@ -251,7 +223,13 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
-    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+
+
+
+
+
+
     -->
 
 </manifest>

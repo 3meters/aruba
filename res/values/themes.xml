@@ -17,7 +17,8 @@
 		- Tabbar tone
 		- Set window background
 		- Select right set of drawables based on the theme tone.
-		- Custom line and text colors in pages, forms, buttons.
+		- Custom line and text colors in pages, forms, buttons.
+
     -->
 
     <style name="aircandi_theme_dark" parent="Theme.Sherlock">

@@ -3,6 +3,7 @@ package com.aircandi.widgets;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.text.Html;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -11,18 +12,16 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.graphics.PorterDuff;
 
 import com.aircandi.Aircandi;
+import com.aircandi.CandiConstants;
 import com.aircandi.Preferences;
 import com.aircandi.R;
 import com.aircandi.components.DrawableManager.ViewHolder;
-import com.aircandi.components.GeoLocationManager.MeasurementSystem;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
@@ -276,10 +275,10 @@ public class CandiView extends RelativeLayout {
 									, entity.getTuningScore()
 									, entity.links.size()
 									, primaryCount
-									, entity.getDistance(MeasurementSystem.Metric));
+									, entity.getDistance());
 						}
 						else {
-							info = String.format("M:%.0f", entity.getDistance(MeasurementSystem.Metric));
+							info = String.format("M:%.0f", entity.getDistance());
 						}
 
 						if (!info.equals("")) {
@@ -362,10 +361,10 @@ public class CandiView extends RelativeLayout {
 							, entity.getTuningScore()
 							, entity.links.size()
 							, primaryCount
-							, entity.getDistance(MeasurementSystem.Metric));
+							, entity.getDistance());
 				}
 				else {
-					info = String.format("M:%.0f", entity.getDistance(MeasurementSystem.Metric));
+					info = String.format("M:%.0f", entity.getDistance());
 				}
 
 				if (!info.equals("")) {

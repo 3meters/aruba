@@ -2,7 +2,7 @@ package com.aircandi.components;
 
 import android.util.Log;
 
-import com.aircandi.core.CandiConstants;
+import com.aircandi.CandiConstants;
 
 public class Logger {
 

@@ -1,0 +1,21 @@
+{
+    "_creator": "0001.000000.00000.000.000000",
+    "_id": "0004.000000.00000.000.100003",
+    "_modifier": "0001.000000.00000.000.000000",
+    "_owner": "0001.000000.00000.000.000000",
+    "createdDate": 0,
+    "description": "Website.",
+    "enabled": true,
+    "isCollection": false,
+    "locked": false,
+    "modifiedDate": 0,
+    "name": "Website",
+    "photo": {
+        "format": "binary",
+        "prefix": "resource:source_website"
+    },
+    "signalFence": -100,
+    "type": "com.aircandi.candi.source",
+    "visibility": "public",
+    "source": "website"
+}

@@ -26,16 +26,17 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import com.aircandi.Aircandi;
+import com.aircandi.CandiConstants;
 import com.aircandi.CandiRadar;
 import com.aircandi.Preferences;
-import com.aircandi.components.GeoLocationManager.MeasurementSystem;
+import com.aircandi.R;
 import com.aircandi.components.ImageRequest.ImageShape;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.core.CandiConstants;
+import com.aircandi.components.location.LocationManager;
+import com.aircandi.components.location.PlacesConstants;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
@@ -94,7 +95,7 @@ public class ProxiExplorer {
 		}
 	}
 
-	public void scanForWifi(final RequestListener requestListener) {
+	public void scanForWifi() {
 		/*
 		 * If context is null then we probably crashed and the scan service is still calling.
 		 */
@@ -152,13 +153,8 @@ public class ProxiExplorer {
 
 							Collections.sort(mWifiList, new WifiScanResult.SortWifiBySignalLevel());
 
-							mEntityModel.updateBeacons();
-
 							mLastWifiUpdate = DateUtils.nowDate();
 							Events.EventBus.onWifiScanReceived(mWifiList);
-							if (requestListener != null) {
-								requestListener.onComplete(new ServiceResponse());
-							}
 							mScanRequestActive.set(false);
 						}
 					}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -169,27 +165,25 @@ public class ProxiExplorer {
 					mWifiList.clear();
 					Logger.d(ProxiExplorer.this, "Emulator enabled so using dummy scan results");
 					mWifiList.add(mWifiMassenaUpper);
-					mEntityModel.updateBeacons();
-
 					Events.EventBus.onWifiScanReceived(mWifiList);
-					if (requestListener != null) {
-						requestListener.onComplete(new ServiceResponse());
-					}
 					mScanRequestActive.set(false);
 				}
 			}
 		}
+	}
+	
+	public void lockBeacons() {
+		mEntityModel.updateBeacons();
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Public entry points for service calls
 	// --------------------------------------------------------------------------------------------
 
-	public void processBeaconsFromScan() {
+	public void processBeacons() {
 
 		if (!mScanRequestProcessing.get()) {
 			mScanRequestProcessing.set(true);
-			Aircandi.stopwatch.start();
 			/*
 			 * All current beacons ids are sent to the service. Previously discovered beacons are included in separate
 			 * array along with a their freshness date.
@@ -219,8 +213,6 @@ public class ProxiExplorer {
 			 * We should call even if no beacon ids to work with because
 			 * we still might have unlinked entities tied to the current location.
 			 */
-			Aircandi.stopwatch.segmentTime("Finished pre-processing beacons");
-
 			serviceResponse = getEntitiesForLocation(beaconIds);
 
 			if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -264,8 +256,10 @@ public class ProxiExplorer {
 					, "object:" + ProxibaseService.convertObjectToJsonSmart(mObservation, true, true));
 		}
 
-		parameters.putFloat("radius", GeoLocationManager.getRadiusForMeters(0f));
-		//		parameters.putFloat("radius", GeoLocationManager.getRadiusForMeters((float) CandiConstants.SEARCH_RANGE_PLACES_METERS));
+		if (PlacesConstants.INCLUDE_ENTITIES_BY_LOCATION) {
+			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) PlacesConstants.SEARCH_RANGE_PLACES_METERS));
+		}
+
 		parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
 		parameters.putString("options", "object:{\"limit\":"
 				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
@@ -285,22 +279,17 @@ public class ProxiExplorer {
 
 		serviceResponse = dispatch(serviceRequest, false);
 
-		Aircandi.stopwatch.segmentTime("Finished service query");
-
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
 			String jsonResponse = (String) serviceResponse.data;
 			ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
-			Aircandi.stopwatch.segmentTime("Finished parsing json objects");
 
 			List<Entity> entities = (List<Entity>) serviceData.data;
 
 			/* Merge entities into data model */
-			mEntityModel.mEntityCache.clear();
+			//mEntityModel.removeAllEntities();
 			mEntityModel.upsertEntities(entities);
-
-			Aircandi.stopwatch.segmentTime("Finished loading entities into entity model");
 		}
 		return serviceResponse;
 	}
@@ -334,7 +323,6 @@ public class ProxiExplorer {
 				.setResponseFormat(ResponseFormat.Json);
 
 		serviceResponse = dispatch(serviceRequest, false);
-		Aircandi.stopwatch.segmentTime("Finished service query");
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			String jsonResponse = (String) serviceResponse.data;
@@ -347,12 +335,7 @@ public class ProxiExplorer {
 				entity.modifiedDate = DateUtils.nowDate().getTime();
 				entity.synthetic = true;
 			}
-
-			Aircandi.stopwatch.segmentTime("Finished parsing json objects");
-
 			mEntityModel.upsertEntities(entities);
-			Aircandi.stopwatch.segmentTime("Finished merging entities for places into entity model");
-
 		}
 		Events.EventBus.onSyntheticsLoaded(serviceResponse);
 		return;
@@ -884,9 +867,10 @@ public class ProxiExplorer {
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				for (Entity entity : entities) {
 
-					Boolean needPlaceDetail = (entity != null
-							&& entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
-							&& !entity.place.source.equals("user")) ? true : false;
+					//					Boolean needPlaceDetail = (entity != null
+					//							&& entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
+					//							&& !entity.place.source.equals("user")) ? true : false;
+					Boolean needPlaceDetail = (entity != null && entity.type.equals(CandiConstants.TYPE_CANDI_PLACE));
 
 					if (needPlaceDetail && result.serviceResponse.responseCode == ResponseCode.Success) {
 
@@ -914,7 +898,6 @@ public class ProxiExplorer {
 							if (entity.synthetic) {
 								placeEntity.modifiedDate = DateUtils.nowDate().getTime();
 								placeEntity.synthetic = true;
-
 								upsertEntity(placeEntity);
 								entity = getCacheEntity(placeEntity.id);
 							}
@@ -926,6 +909,33 @@ public class ProxiExplorer {
 								if (placeEntity.name != null) {
 									entity.name = placeEntity.name;
 								}
+							}
+							/*
+							 * Add virtual source entities
+							 */
+							if (entity.place != null && entity.place.contact != null && entity.place.contact.twitter != null) {
+								Entity sourceEntity = loadEntityFromResources(R.raw.source_twitter);
+								sourceEntity.id += "." + entity.place.contact.twitter;
+								sourceEntity.source = "twitter";
+								sourceEntity.sourceId = entity.place.contact.twitter;
+								sourceEntity.parentId = entity.id;
+								upsertEntity(sourceEntity);
+							}
+							if (entity.place != null && entity.place.facebook != null && !entity.place.facebook.equals("")) {
+								Entity sourceEntity = loadEntityFromResources(R.raw.source_facebook);
+								sourceEntity.id += "." + entity.place.facebook;
+								sourceEntity.source = "facebook";
+								sourceEntity.sourceId = entity.place.facebook;
+								sourceEntity.parentId = entity.id;
+								upsertEntity(sourceEntity);
+							}
+							if (entity.place != null && entity.place.website != null && !entity.place.website.equals("")) {
+								Entity sourceEntity = loadEntityFromResources(R.raw.source_website);
+								sourceEntity.id += "." + entity.place.website;
+								sourceEntity.source = "website";
+								sourceEntity.sourceId = entity.place.website;
+								sourceEntity.parentId = entity.id;
+								upsertEntity(sourceEntity);
 							}
 						}
 					}
@@ -1671,6 +1681,8 @@ public class ProxiExplorer {
 			synchronized (mEntityModel.mBeacons) {
 				Collections.sort(mEntityModel.mBeacons, new Beacon.SortBeaconsBySignalLevel());
 			}
+			
+			Events.EventBus.onBeaconsLocked(null);
 		}
 
 		public Collection<Beacon> getBeacons() {
@@ -1731,7 +1743,7 @@ public class ProxiExplorer {
 					if (!entity.hidden && !entity.synthetic) {
 						Beacon beacon = entity.getBeacon();
 						/* Must do this to cache the distance before sorting */
-						Float distance = entity.getDistance(MeasurementSystem.Metric);
+						Float distance = entity.getDistance();
 						if (beacon != null) {
 							entities.add(entity);
 						}
@@ -1746,8 +1758,10 @@ public class ProxiExplorer {
 							 * sort higher.
 							 */
 							/* No beacon for this entity so check using location */
-							if (distance != null && distance < CandiConstants.SEARCH_RANGE_PLACES_METERS) {
-								entities.add(entity);
+							if (PlacesConstants.INCLUDE_ENTITIES_BY_LOCATION) {
+								if (distance != null && distance < PlacesConstants.SEARCH_RANGE_PLACES_METERS) {
+									entities.add(entity);
+								}
 							}
 						}
 					}
@@ -1769,7 +1783,7 @@ public class ProxiExplorer {
 					if (!entity.hidden && !entity.synthetic) {
 						Beacon beacon = entity.getBeacon();
 						/* Must do this to cache the distance before sorting */
-						Float distance = entity.getDistance(MeasurementSystem.Metric);
+						Float distance = entity.getDistance();
 						if (beacon != null) {
 							entities.add(entity);
 						}
@@ -1784,7 +1798,7 @@ public class ProxiExplorer {
 							 * sort higher.
 							 */
 							/* No beacon for this entity so check using location */
-							if (distance != null && distance < CandiConstants.SEARCH_RANGE_PLACES_METERS) {
+							if (distance != null && distance < PlacesConstants.SEARCH_RANGE_PLACES_METERS) {
 								entities.add(entity);
 							}
 						}
@@ -1805,14 +1819,14 @@ public class ProxiExplorer {
 				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 					Entity entity = entry.getValue();
 					if (!entity.hidden && entity.synthetic) {
-						Float distance = entity.getDistance(MeasurementSystem.Metric);
+						Float distance = entity.getDistance();
 						Beacon beacon = entity.getBeacon();
 						if (beacon != null) {
 							entities.add(entity);
 						}
 						else {
 							/* No beacon for this entity so check using location */
-							if (distance != null && distance < CandiConstants.SEARCH_RANGE_SYNTHETICS_METERS) {
+							if (distance != null && distance < PlacesConstants.SEARCH_RANGE_SYNTHETICS_METERS) {
 								entities.add(entity);
 							}
 						}

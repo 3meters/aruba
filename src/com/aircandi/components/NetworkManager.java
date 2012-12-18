@@ -13,7 +13,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
 
-import com.aircandi.core.CandiConstants;
+import com.aircandi.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.ServiceRequest;
@@ -148,6 +148,13 @@ public class NetworkManager {
 			}
 		}
 		return false;
+	}
+
+	protected boolean isMobileNetwork() {
+		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
+		NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+		Boolean mobileNetwork = activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE;
+		return mobileNetwork;
 	}
 
 	// --------------------------------------------------------------------------------------------

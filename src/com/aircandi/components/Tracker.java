@@ -2,7 +2,7 @@ package com.aircandi.components;
 
 import android.app.Activity;
 
-import com.aircandi.core.CandiConstants;
+import com.aircandi.CandiConstants;
 import com.google.analytics.tracking.android.EasyTracker;
 
 /*

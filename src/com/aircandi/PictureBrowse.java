@@ -26,7 +26,6 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.utilities.AnimUtils;

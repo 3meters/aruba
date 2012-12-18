@@ -17,8 +17,8 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.aircandi.CandiConstants;
 import com.aircandi.R;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.utilities.AnimUtils;

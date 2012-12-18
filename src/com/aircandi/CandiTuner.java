@@ -14,16 +14,16 @@ import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CandiListAdapter;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.LocationManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.location.LocationManager;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
+@SuppressWarnings("unused")
 public class CandiTuner extends FormActivity {
 
 	private ListView			mListViewCandi;
@@ -52,7 +52,7 @@ public class CandiTuner extends FormActivity {
 		 * - New beacons getting inserted with the service.
 		 * - Stored with tuning actions.
 		 */
-		LocationManager.getInstance().getLastLocation();
+//		LocationManager.getInstance().ensureLocation();
 
 	}
 

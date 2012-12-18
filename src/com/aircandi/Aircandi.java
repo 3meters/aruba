@@ -1,7 +1,5 @@
 package com.aircandi;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-
 import net.minidev.json.parser.JSONParser;
 
 import org.acra.ACRA;
@@ -18,11 +16,9 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
-import com.aircandi.components.LocationManager;
 import com.aircandi.components.StopWatch;
-import com.aircandi.core.PlacesConstants;
-import com.aircandi.location.IStrictMode;
-import com.aircandi.location.PlatformSpecificImplementationFactory;
+import com.aircandi.components.location.IStrictMode;
+import com.aircandi.components.location.PlatformSpecificImplementationFactory;
 import com.aircandi.service.objects.User;
 
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ", customReportContent = {
@@ -104,13 +100,9 @@ public class Aircandi extends Application {
 	public static String					applicationUpdateUri;
 	public static Number					lastApplicationUpdateCheckDate;
 
-	private static UncaughtExceptionHandler	uncaughtExceptionHandler;
-	private UncaughtExceptionHandler		acraUncaughtExceptionHandler;
-
 	private User							mUser;
 	private CandiTask						mCandiTask					= CandiTask.RadarCandi;
 	private Boolean							mLaunchedNormally			= false;
-	private Boolean							mRadarScanInProgress		= false;
 
 	public static Aircandi getInstance() {
 		return singletonObject;
@@ -127,28 +119,6 @@ public class Aircandi extends Application {
 
 		/* The following line triggers the initialization of ACRA */
 		ACRA.init(this);
-		acraUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
-
-		/* Setup uncaught exception handling before initializing acra */
-		uncaughtExceptionHandler = new UncaughtExceptionHandler() {
-
-			@Override
-			public void uncaughtException(Thread thread, Throwable ex) {
-				
-				/* Attempt to kill any orphaned receivers */
-				LocationManager.getInstance().disableLocationUpdates(true);
-
-				/* Give it a bit of time to complete */
-				try {
-					Thread.sleep(1000);
-				}
-				catch (InterruptedException e1) {}
-
-				/* Let acra handle it from here */
-				acraUncaughtExceptionHandler.uncaughtException(thread, ex);
-			}
-		};
-		Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
 
 		applicationContext = getApplicationContext();
 		applicationHandler = new Handler();
@@ -159,7 +129,7 @@ public class Aircandi extends Application {
 		settingsEditor = settings.edit();
 
 		/* Strict mode */
-		if (PlacesConstants.DEVELOPER_MODE) {
+		if (CandiConstants.DEVELOPER_MODE) {
 			IStrictMode strictMode = PlatformSpecificImplementationFactory.getStrictMode();
 			if (strictMode != null)
 				strictMode.enableStrictMode();
@@ -201,16 +171,7 @@ public class Aircandi extends Application {
 		return mLaunchedNormally;
 	}
 
-	public Boolean isRadarScanInProgress() {
-		return mRadarScanInProgress;
-	}
-
-	public void setRadarScanInProgress(Boolean radarScanInProgress) {
-		mRadarScanInProgress = radarScanInProgress;
-	}
-
 	public static enum CandiTask {
 		None, MyCandi, RadarCandi
 	}
-
 }

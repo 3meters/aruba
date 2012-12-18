@@ -12,10 +12,10 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.components.SearchManager.SearchItemType;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;

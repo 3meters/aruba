@@ -23,7 +23,6 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityListType;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.core.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Entity;
