@@ -14,3 +14,4 @@ archive/
 
 /local.properties
 /.settings
+*.db
