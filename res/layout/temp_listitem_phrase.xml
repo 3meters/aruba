@@ -6,7 +6,7 @@
     android:paddingBottom="8dp"
     android:paddingTop="2dp" >
 
-    <com.aircandi.widgets.TextViewEllipsizing
+    <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/phrase"
         style="@style/place_phrase"
         android:layout_width="match_parent"

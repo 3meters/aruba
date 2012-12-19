@@ -81,6 +81,16 @@ public class AndroidManager {
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
+	public void callFoursquareActivity(Context context, String venueId) {
+		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		intent.setType("text/plain");
+		if (intent != null) {
+			intent.setData(Uri.parse("http://m.foursquare.com/venue/" + venueId));
+			context.startActivity(intent);
+		}
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+	}
+
 	public void callFacebookActivity(Context context, String facebookId) {
 		Intent intent = findFacebookApp(context);
 		if (intent != null) {

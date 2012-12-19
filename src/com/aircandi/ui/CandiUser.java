@@ -33,6 +33,7 @@ import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.HorizontalScrollLayout;
 import com.aircandi.ui.widgets.SectionLayout;
 import com.aircandi.ui.widgets.WebImageView;

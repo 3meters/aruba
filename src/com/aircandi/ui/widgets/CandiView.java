@@ -87,7 +87,7 @@ public class CandiView extends RelativeLayout {
 		mSubtitle = (TextView) mLayout.findViewById(R.id.candi_view_subtitle);
 		mDistance = (TextView) mLayout.findViewById(R.id.candi_view_distance);
 		mCategoryImage = (ImageView) mLayout.findViewById(R.id.candi_view_subtitle_badge);
-		
+
 		FontManager.getInstance().setTypefaceRegular(mTitle);
 		FontManager.getInstance().setTypefaceDefault(mSubtitle);
 
@@ -256,37 +256,9 @@ public class CandiView extends RelativeLayout {
 						setVisibility(mSubtitle, View.VISIBLE);
 					}
 				}
-				
+
 				/* Developer only stats */
 				showStats(entity);
-
-				setVisibility(mDistance, View.GONE);
-				if (Aircandi.settings.getBoolean(Preferences.PREF_SHOW_DISTANCE, false)) {
-					if (mDistance != null) {
-						String info = "";
-						if (!entity.synthetic) {
-							int primaryCount = 0;
-							for (Link link : entity.links) {
-								if (link.primary) {
-									primaryCount++;
-								}
-							}
-							info = String.format("T:%d L:%d P:%d M:%.0f"
-									, entity.getTuningScore()
-									, entity.links.size()
-									, primaryCount
-									, entity.getDistance());
-						}
-						else {
-							info = String.format("M:%.0f", entity.getDistance());
-						}
-
-						if (!info.equals("")) {
-							mDistance.setText(Html.fromHtml(info));
-							setVisibility(mDistance, View.VISIBLE);
-						}
-					}
-				}
 
 				setVisibility(mCategoryImage, View.GONE);
 				if (mCategoryImage != null) {
@@ -351,17 +323,22 @@ public class CandiView extends RelativeLayout {
 			if (mDistance != null) {
 				String info = "";
 				if (!entity.synthetic) {
-					int primaryCount = 0;
-					for (Link link : entity.links) {
-						if (link.primary) {
-							primaryCount++;
-						}
+					if (entity.links == null || entity.links.size() == 0) {
+						info = String.format("M:%.0f", entity.getDistance());
 					}
-					info = String.format("T:%d L:%d P:%d M:%.0f"
-							, entity.getTuningScore()
-							, entity.links.size()
-							, primaryCount
-							, entity.getDistance());
+					else {
+						int primaryCount = 0;
+						for (Link link : entity.links) {
+							if (link.primary) {
+								primaryCount++;
+							}
+						}
+						info = String.format("T:%d L:%d P:%d M:%.0f"
+								, entity.getTuningScore()
+								, entity.links.size()
+								, primaryCount
+								, entity.getDistance());
+					}
 				}
 				else {
 					info = String.format("M:%.0f", entity.getDistance());

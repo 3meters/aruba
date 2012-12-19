@@ -5,7 +5,7 @@
 
     <!-- Body -->
 
-    <com.aircandi.widgets.BounceListView
+    <com.aircandi.ui.widgets.BounceListView
         android:id="@+id/list_candi"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

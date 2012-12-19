@@ -8,7 +8,7 @@
         android:layout_height="120dp"
         android:background="@drawable/picture_bg_dark_place" />
 
-    <com.aircandi.widgets.WebImageView
+    <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/candi_view_image"
         android:layout_width="match_parent"
         android:layout_height="120dp"
@@ -58,7 +58,7 @@
             android:layout_gravity="center_vertical"
             android:orientation="vertical" >
 
-            <com.aircandi.widgets.TextViewEllipsizing
+            <com.aircandi.ui.widgets.TextViewEllipsizing
                 android:id="@+id/candi_view_title"
                 style="@style/candi_view_name"
                 android:layout_width="match_parent"

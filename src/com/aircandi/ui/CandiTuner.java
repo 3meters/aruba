@@ -21,6 +21,7 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.ui.base.FormActivity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 

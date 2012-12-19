@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <com.aircandi.widgets.WebImageView
+    <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/image_user_picture"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -18,7 +18,7 @@
         android:clickable="true"
         android:scaleType="centerCrop" />
 
-    <com.aircandi.widgets.TextViewEllipsizing
+    <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/candi_user_fullname"
         style="@style/candi_user"
         android:layout_width="match_parent"

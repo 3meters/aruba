@@ -30,6 +30,7 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.ui.base.FormActivity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 

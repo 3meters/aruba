@@ -6,7 +6,7 @@
     android:background="?attr/backgroundButton"
     android:onClick="onChildrenButtonClick" >
 
-    <com.aircandi.widgets.WebImageView
+    <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/image_collection"
         android:layout_width="65dp"
         android:layout_height="65dp"

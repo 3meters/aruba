@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.location.Location;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -63,10 +62,8 @@ public class ProxiExplorer {
 	private static ProxiExplorer	singletonObject;
 	private Context					mContext;
 	private EntityModel				mEntityModel			= new EntityModel();
-	private Observation				mObservation;
 
 	private AtomicBoolean			mScanRequestActive		= new AtomicBoolean(false);
-	private AtomicBoolean			mScanRequestProcessing	= new AtomicBoolean(false);
 
 	public List<WifiScanResult>		mWifiList				= new ArrayList<WifiScanResult>();
 	public Date						mLastWifiUpdate;
@@ -170,7 +167,7 @@ public class ProxiExplorer {
 			}
 		}
 	}
-	
+
 	public void lockBeacons() {
 		mEntityModel.updateBeacons();
 	}
@@ -179,57 +176,39 @@ public class ProxiExplorer {
 	// Public entry points for service calls
 	// --------------------------------------------------------------------------------------------
 
-	public void processBeacons() {
+	public void getEntitiesForBeacons() {
+		/*
+		 * All current beacons ids are sent to the service. Previously discovered beacons are included in separate
+		 * array along with a their freshness date.
+		 * 
+		 * To force a full rebuild of all entities for all beacons, clear the beacon collection.
+		 * 
+		 * The service returns all entities for new beacons and entities that have had activity since the freshness
+		 * date for old beacons. Unchanged entities from previous scans will still be updated for local changes in
+		 * visibility.
+		 */
+		Logger.d(this, "Processing beacons from scan");
 
-		if (!mScanRequestProcessing.get()) {
-			mScanRequestProcessing.set(true);
-			/*
-			 * All current beacons ids are sent to the service. Previously discovered beacons are included in separate
-			 * array along with a their freshness date.
-			 * 
-			 * To force a full rebuild of all entities for all beacons, clear the beacon collection.
-			 * 
-			 * The service returns all entities for new beacons and entities that have had activity since the freshness
-			 * date for old beacons. Unchanged entities from previous scans will still be updated for local changes in
-			 * visibility.
-			 */
-			Logger.d(this, "Processing beacons from scan");
+		/*
+		 * Call the proxi service to see if the new beacons have been tagged with any entities. If call comes back
+		 * null then there was a network or service problem. The user got a toast notification from the service. We
+		 * are making synchronous calls inside an asynchronous thread.
+		 */
 
-			/*
-			 * Call the proxi service to see if the new beacons have been tagged with any entities. If call comes back
-			 * null then there was a network or service problem. The user got a toast notification from the service. We
-			 * are making synchronous calls inside an asynchronous thread.
-			 */
-
-			/* Construct string array of the beacon ids */
-			ArrayList<String> beaconIds = new ArrayList<String>();
-			for (Beacon beacon : mEntityModel.getBeacons()) {
-				beaconIds.add(beacon.id);
-			}
-
-			ServiceResponse serviceResponse = new ServiceResponse();
-			/*
-			 * We should call even if no beacon ids to work with because
-			 * we still might have unlinked entities tied to the current location.
-			 */
-			serviceResponse = getEntitiesForLocation(beaconIds);
-
-			if (serviceResponse.responseCode == ResponseCode.Success) {
-				ServiceData serviceData = (ServiceData) serviceResponse.data;
-				mEntityModel.setLastRefreshDate(serviceData.date.longValue());
-				manageEntityVisibility();
-			}
-
-			/* Rebuild the top level entity list and manage visibility */
-			Events.EventBus.onEntitiesLoaded(serviceResponse);
-			mScanRequestProcessing.set(false);
+		/* Construct string array of the beacon ids */
+		ArrayList<String> beaconIds = new ArrayList<String>();
+		for (Beacon beacon : mEntityModel.getBeacons()) {
+			beaconIds.add(beacon.id);
 		}
-		return;
-	}
-
-	public ServiceResponse getEntitiesForLocation(ArrayList<String> beaconIds) {
 
 		ServiceResponse serviceResponse = new ServiceResponse();
+
+		if (beaconIds.size() == 0) {
+			mEntityModel.removeBeaconEntities();
+			mEntityModel.setLastRefreshDate(DateUtils.nowDate().getTime());
+			Events.EventBus.onBeaconEntitiesLoaded(serviceResponse);
+			return;
+		}
 
 		/* Set method parameters */
 		Bundle parameters = new Bundle();
@@ -249,14 +228,10 @@ public class ProxiExplorer {
 		 * 2) To update the location info for the new beacons if it is better than
 		 * what is already stored.
 		 */
-		mObservation = LocationManager.getInstance().getObservation();
-		if (mObservation != null) {
+		Observation observation = LocationManager.getInstance().getObservation();
+		if (observation != null) {
 			parameters.putString("observation"
-					, "object:" + ProxibaseService.convertObjectToJsonSmart(mObservation, true, true));
-		}
-
-		if (PlacesConstants.INCLUDE_ENTITIES_BY_LOCATION) {
-			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) PlacesConstants.SEARCH_RANGE_PLACES_METERS));
+					, "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
 		}
 
 		parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
@@ -287,8 +262,88 @@ public class ProxiExplorer {
 			List<Entity> entities = (List<Entity>) serviceData.data;
 
 			/* Merge entities into data model */
-			//mEntityModel.removeAllEntities();
+			mEntityModel.removeBeaconEntities();
 			mEntityModel.upsertEntities(entities);
+
+			mEntityModel.setLastRefreshDate(serviceData.date.longValue());
+			manageEntityVisibility();
+
+			Events.EventBus.onBeaconEntitiesLoaded(serviceResponse);
+		}
+
+		return;
+	}
+
+	public ServiceResponse getEntitiesForLocation() {
+
+		ServiceResponse serviceResponse = new ServiceResponse();
+
+		/* Set method parameters */
+		Bundle parameters = new Bundle();
+
+		Observation observation = LocationManager.getInstance().getObservation();
+		if (observation != null) {
+			parameters.putString("observation", "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
+			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) PlacesConstants.SEARCH_RANGE_PLACES_METERS));
+		}
+		
+		/* We don't want to fetch entities we already have via links to local beacons */
+		ArrayList<String> excludeEntityIds = new ArrayList<String>();
+		for (Entity entity : mEntityModel.getRadarPlaces()) {
+			if (!entity.synthetic 
+					&& entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) 
+					&& entity.links != null 
+					&& entity.links.size() > 0) {
+				excludeEntityIds.add(entity.id);
+			}
+		}
+		
+		if (excludeEntityIds.size() > 0) {
+			parameters.putStringArrayList("excludeEntityIds", excludeEntityIds);
+		}
+
+		parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
+		parameters.putString("options", "object:{\"limit\":"
+				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
+				+ ",\"skip\":0"
+				+ ",\"sort\":{\"modifiedDate\":-1} "
+				+ ",\"children\":{\"limit\":"
+				+ String.valueOf(ProxiConstants.RADAR_CHILDENTITY_LIMIT)
+				+ ",\"skip\":0"
+				+ ",\"sort\":{\"modifiedDate\":-1}}"
+				+ "}");
+
+		ServiceRequest serviceRequest = new ServiceRequest()
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getEntitiesForLocation")
+				.setRequestType(RequestType.Method)
+				.setParameters(parameters)
+				.setResponseFormat(ResponseFormat.Json);
+
+		serviceResponse = dispatch(serviceRequest, false);
+
+		if (serviceResponse.responseCode == ResponseCode.Success) {
+
+			String jsonResponse = (String) serviceResponse.data;
+			ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
+			serviceResponse.data = serviceData;
+
+			List<Entity> entities = (List<Entity>) serviceData.data;
+			/*
+			 * These were found purely using location but they can still come with
+			 * links to beacons not currently visible. To keep things clean, we
+			 * make sure the links are stripped.
+			 */
+			for (Entity entity : entities) {
+				if (entity.links != null) {
+					entity.links.clear();
+				}
+			}
+
+			/* Merge entities into data model */
+			mEntityModel.removeLocationEntities();
+			mEntityModel.upsertEntities(entities);
+
+			Events.EventBus.onLocationEntitiesLoaded(serviceResponse);
 		}
 		return serviceResponse;
 	}
@@ -334,6 +389,7 @@ public class ProxiExplorer {
 				entity.modifiedDate = DateUtils.nowDate().getTime();
 				entity.synthetic = true;
 			}
+			mEntityModel.removeSyntheticEntities();
 			mEntityModel.upsertEntities(entities);
 		}
 		Events.EventBus.onSyntheticsLoaded(serviceResponse);
@@ -912,7 +968,10 @@ public class ProxiExplorer {
 							/*
 							 * Add virtual source entities
 							 */
-							if (entity.place != null && entity.place.contact != null && entity.place.contact.twitter != null) {
+							if (entity.place != null
+									&& entity.place.contact != null
+									&& entity.place.contact.twitter != null
+									&& !entity.place.contact.twitter.equals("")) {
 								Entity sourceEntity = loadEntityFromResources(R.raw.source_twitter);
 								sourceEntity.id += "." + entity.place.contact.twitter;
 								sourceEntity.source = "twitter";
@@ -920,7 +979,9 @@ public class ProxiExplorer {
 								sourceEntity.parentId = entity.id;
 								upsertEntity(sourceEntity);
 							}
-							if (entity.place != null && entity.place.facebook != null && !entity.place.facebook.equals("")) {
+							if (entity.place != null
+									&& entity.place.facebook != null
+									&& !entity.place.facebook.equals("")) {
 								Entity sourceEntity = loadEntityFromResources(R.raw.source_facebook);
 								sourceEntity.id += "." + entity.place.facebook;
 								sourceEntity.source = "facebook";
@@ -928,11 +989,23 @@ public class ProxiExplorer {
 								sourceEntity.parentId = entity.id;
 								upsertEntity(sourceEntity);
 							}
-							if (entity.place != null && entity.place.website != null && !entity.place.website.equals("")) {
+							if (entity.place != null
+									&& entity.place.website != null
+									&& !entity.place.website.equals("")) {
 								Entity sourceEntity = loadEntityFromResources(R.raw.source_website);
 								sourceEntity.id += "." + entity.place.website;
 								sourceEntity.source = "website";
 								sourceEntity.sourceId = entity.place.website;
+								sourceEntity.parentId = entity.id;
+								upsertEntity(sourceEntity);
+							}
+							if (entity.place != null
+									&& entity.place.source != null
+									&& entity.place.source.equals("foursquare")) {
+								Entity sourceEntity = loadEntityFromResources(R.raw.source_foursquare);
+								sourceEntity.id += "." + entity.place.sourceId;
+								sourceEntity.source = "foursquare";
+								sourceEntity.sourceId = entity.place.sourceId;
 								sourceEntity.parentId = entity.id;
 								upsertEntity(sourceEntity);
 							}
@@ -1161,24 +1234,23 @@ public class ProxiExplorer {
 						List<String> beaconStrings = new ArrayList<String>();
 
 						for (Beacon beacon : beacons) {
+							Observation observation = LocationManager.getInstance().getObservation();
+							if (observation != null) {
 
-							Location currentLocation = LocationManager.getInstance().getLocation();
-							if (currentLocation != null) {
+								beacon.latitude = observation.latitude;
+								beacon.longitude = observation.longitude;
 
-								beacon.latitude = currentLocation.getLatitude();
-								beacon.longitude = currentLocation.getLongitude();
-
-								if (currentLocation.hasAltitude()) {
-									beacon.altitude = currentLocation.getAltitude();
+								if (observation.altitude != null) {
+									beacon.altitude = observation.altitude;
 								}
-								if (currentLocation.hasAccuracy()) {
-									beacon.accuracy = currentLocation.getAccuracy();
+								if (observation.accuracy != null) {
+									beacon.accuracy = observation.accuracy;
 								}
-								if (currentLocation.hasBearing()) {
-									beacon.bearing = currentLocation.getBearing();
+								if (observation.bearing != null) {
+									beacon.bearing = observation.bearing;
 								}
-								if (currentLocation.hasSpeed()) {
-									beacon.speed = currentLocation.getSpeed();
+								if (observation.speed != null) {
+									beacon.speed = observation.speed;
 								}
 							}
 
@@ -1275,23 +1347,23 @@ public class ProxiExplorer {
 				List<String> beaconStrings = new ArrayList<String>();
 				for (Beacon beacon : beacons) {
 					if (beacon.id.equals(primaryBeacon.id)) {
-						if (LocationManager.getInstance().getLocation() != null) {
-							Location currentLocation = LocationManager.getInstance().getLocation();
+						Observation observation = LocationManager.getInstance().getObservation();
+						if (observation != null) {
 
-							beacon.latitude = currentLocation.getLatitude();
-							beacon.longitude = currentLocation.getLongitude();
+							beacon.latitude = observation.latitude;
+							beacon.longitude = observation.longitude;
 
-							if (currentLocation.hasAltitude()) {
-								beacon.altitude = currentLocation.getAltitude();
+							if (observation.altitude != null) {
+								beacon.altitude = observation.altitude;
 							}
-							if (currentLocation.hasAccuracy()) {
-								beacon.accuracy = currentLocation.getAccuracy();
+							if (observation.accuracy != null) {
+								beacon.accuracy = observation.accuracy;
 							}
-							if (currentLocation.hasBearing()) {
-								beacon.bearing = currentLocation.getBearing();
+							if (observation.bearing != null) {
+								beacon.bearing = observation.bearing;
 							}
-							if (currentLocation.hasSpeed()) {
-								beacon.speed = currentLocation.getSpeed();
+							if (observation.speed != null) {
+								beacon.speed = observation.speed;
 							}
 						}
 					}
@@ -1680,7 +1752,7 @@ public class ProxiExplorer {
 			synchronized (mEntityModel.mBeacons) {
 				Collections.sort(mEntityModel.mBeacons, new Beacon.SortBeaconsBySignalLevel());
 			}
-			
+
 			Events.EventBus.onBeaconsLocked(null);
 		}
 
@@ -1757,10 +1829,8 @@ public class ProxiExplorer {
 							 * sort higher.
 							 */
 							/* No beacon for this entity so check using location */
-							if (PlacesConstants.INCLUDE_ENTITIES_BY_LOCATION) {
-								if (distance != null && distance < PlacesConstants.SEARCH_RANGE_PLACES_METERS) {
-									entities.add(entity);
-								}
+							if (distance != null && distance < PlacesConstants.SEARCH_RANGE_PLACES_METERS) {
+								entities.add(entity);
 							}
 						}
 					}
@@ -2038,7 +2108,42 @@ public class ProxiExplorer {
 			final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
 			while (iter.hasNext()) {
 				Entity entity = mEntityModel.mEntityCache.get(iter.next());
-				if (entity.synthetic) {
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) 
+						&& entity.synthetic) {
+					iter.remove();
+				}
+			}
+			setLastActivityDate(DateUtils.nowDate().getTime());
+		}
+
+		public void removeLocationEntities() {
+			/*
+			 * We clean out user entities and their children when the entity
+			 * is associated with a beacon that isn't a radar hit.
+			 */
+			final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
+			while (iter.hasNext()) {
+				Entity entity = mEntityModel.mEntityCache.get(iter.next());
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) 
+						&& !entity.synthetic 
+						&& (entity.links == null || entity.links.size() == 0)) {
+					iter.remove();
+				}
+			}
+			setLastActivityDate(DateUtils.nowDate().getTime());
+		}
+
+		public void removeBeaconEntities() {
+			/*
+			 * We clean out user entities and their children when the entity
+			 * is associated with a beacon that isn't a radar hit.
+			 */
+			final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
+			while (iter.hasNext()) {
+				Entity entity = mEntityModel.mEntityCache.get(iter.next());
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) 
+						&& !entity.synthetic 
+						&& (entity.links != null && entity.links.size() > 0)) {
 					iter.remove();
 				}
 			}

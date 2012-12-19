@@ -32,7 +32,7 @@ import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ServiceRequest;
-import com.aircandi.ui.FormActivity;
+import com.aircandi.ui.base.FormActivity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.MiscUtils;

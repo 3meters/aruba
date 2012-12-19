@@ -12,7 +12,7 @@ import com.aircandi.components.FontManager;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Location;
-import com.aircandi.ui.FormActivity;
+import com.aircandi.ui.base.FormActivity;
 
 public class AddressBuilder extends FormActivity {
 

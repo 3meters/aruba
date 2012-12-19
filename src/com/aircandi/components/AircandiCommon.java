@@ -30,6 +30,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.RemoteViews;
@@ -64,11 +65,11 @@ import com.aircandi.ui.CandiList;
 import com.aircandi.ui.CandiRadar;
 import com.aircandi.ui.CandiUser;
 import com.aircandi.ui.CommentList;
-import com.aircandi.ui.FormActivity;
 import com.aircandi.ui.Preferences;
 import com.aircandi.ui.ProfileForm;
 import com.aircandi.ui.SignInForm;
 import com.aircandi.ui.SplashForm;
+import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.builders.CandiPicker;
 import com.aircandi.ui.builders.TemplatePicker;
 import com.aircandi.ui.widgets.WebImageView;
@@ -764,6 +765,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void showBusy(Integer messageResId) {
 
+		startActionbarBusyIndicator();
 		startBusyIndicator();
 		if (messageResId != null) {
 			ProgressDialog progressDialog = getProgressDialog();
@@ -783,18 +785,33 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (progressDialog.isShowing() && progressDialog.getWindow().getWindowManager() != null) {
 			progressDialog.dismiss();
 		}
+		stopActionbarBusyIndicator();
 		stopBusyIndicator();
 	}
 
-	private void startBusyIndicator() {
+	private void startActionbarBusyIndicator() {
 		if (mMenuItemRefresh != null) {
 			mMenuItemRefresh.setActionView(layout.actionbar_refresh);
 		}
 	}
 
-	private void stopBusyIndicator() {
+	private void stopActionbarBusyIndicator() {
 		if (mMenuItemRefresh != null) {
 			mMenuItemRefresh.setActionView(null);
+		}
+	}
+
+	private void startBusyIndicator() {
+		ViewGroup progress = (ViewGroup) mActivity.findViewById(R.id.progress);
+		if (progress != null) {
+			progress.setVisibility(View.VISIBLE);
+		}
+	}
+
+	private void stopBusyIndicator() {
+		ViewGroup progress = (ViewGroup) mActivity.findViewById(R.id.progress);
+		if (progress != null) {
+			progress.setVisibility(View.GONE);
 		}
 	}
 
@@ -883,7 +900,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			case R.id.refresh:
 
 				/* Show busy indicator */
-				startBusyIndicator();
+				startActionbarBusyIndicator();
 
 				if (mPageName.equals("CandiRadar")) {
 					((CandiRadar) mActivity).doRefresh();

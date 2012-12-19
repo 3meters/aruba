@@ -38,9 +38,11 @@ import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Location;
+import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.builders.AddressBuilder;
 import com.aircandi.ui.builders.CategoryBuilder;
 import com.aircandi.ui.builders.LinkPicker;
@@ -540,11 +542,11 @@ public class EntityForm extends FormActivity {
 				/*
 				 * We add location info as a consistent feature
 				 */
-				android.location.Location currentLocation = LocationManager.getInstance().getLocation();
-				if (currentLocation != null) {
+				Observation observation = LocationManager.getInstance().getObservation();
+				if (observation != null) {
 					mEntityForForm.place.location = new com.aircandi.service.objects.Location();
-					mEntityForForm.place.location.lat = currentLocation.getLatitude();
-					mEntityForForm.place.location.lng = currentLocation.getLongitude();
+					mEntityForForm.place.location.lat = observation.latitude;
+					mEntityForForm.place.location.lng = observation.longitude;
 				}
 			}
 		}

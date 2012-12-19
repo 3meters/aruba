@@ -24,7 +24,7 @@
         android:padding="5dp"
         android:text="@string/dummy_title" />
 
-    <com.aircandi.widgets.WebImageView
+    <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/item_image"
         android:layout_width="20dp"
         android:layout_height="20dp"
@@ -37,7 +37,7 @@
         aircandi:maxHeight="20dp"
         aircandi:maxWidth="20dp" />
 
-    <com.aircandi.widgets.TextViewEllipsizing
+    <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/item_name"
         style="@style/candi_list_title"
         android:layout_width="match_parent"
@@ -47,7 +47,7 @@
         android:layout_toRightOf="@+id/item_image"
         android:text="@string/dummy_title" />
 
-    <com.aircandi.widgets.TextViewEllipsizing
+    <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/item_category_name"
         style="@style/candi_list_subtitle"
         android:layout_width="match_parent"
@@ -56,7 +56,7 @@
         android:layout_toRightOf="@+id/item_image"
         android:text="@string/dummy_category_name" />
 
-    <com.aircandi.widgets.TextViewEllipsizing
+    <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/item_uri"
         style="@style/candi_list_description"
         android:layout_width="match_parent"

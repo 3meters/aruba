@@ -15,7 +15,7 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true" />
 
-    <com.aircandi.widgets.CandiView
+    <com.aircandi.ui.widgets.CandiView
         android:id="@+id/candi_view"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -23,7 +23,7 @@
         android:layout_marginRight="10dp"
         android:layout_toRightOf="@+id/check" />
 
-    <com.aircandi.widgets.TextViewEllipsizing
+    <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/title"
         style="@style/candi_list_title"
         android:layout_width="match_parent"
@@ -32,7 +32,7 @@
         android:layout_toRightOf="@+id/candi_view"
         android:text="@string/dummy_title" />
 
-    <com.aircandi.widgets.TextViewEllipsizing
+    <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/subtitle"
         style="@style/candi_list_subtitle"
         android:layout_width="match_parent"

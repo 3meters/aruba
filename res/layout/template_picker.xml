@@ -24,13 +24,13 @@
             android:paddingRight="2dp"
             android:text="@string/dialog_template_picker_message_top" />
 
-        <com.aircandi.widgets.BounceListView
+        <com.aircandi.ui.widgets.BounceListView
             android:id="@+id/form_list"
             android:layout_width="match_parent"
             android:layout_height="180dp" >
 
             <!-- Preview: listitem=@layout/temp_listitem_template -->
-        </com.aircandi.widgets.BounceListView>
+        </com.aircandi.ui.widgets.BounceListView>
     </LinearLayout>
 
     <!-- Footer -->

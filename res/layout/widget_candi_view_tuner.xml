@@ -8,7 +8,7 @@
     android:clickable="true"
     android:onClick="onCandiClick" >
 
-    <com.aircandi.widgets.WebImageView
+    <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/candi_view_image"
         android:layout_width="50dp"
         android:layout_height="50dp"

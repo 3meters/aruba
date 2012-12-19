@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="?attr/backgroundForm" >
 
-    <com.aircandi.widgets.BounceScrollView
+    <com.aircandi.ui.widgets.BounceScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
@@ -39,7 +39,7 @@
                     android:layout_marginBottom="10dp"
                     android:layout_weight="0" >
 
-                    <com.aircandi.widgets.WebImageView
+                    <com.aircandi.ui.widgets.WebImageView
                         android:id="@+id/image_picture"
                         android:layout_width="150dp"
                         android:layout_height="150dp"
@@ -75,7 +75,7 @@
                     android:hint="@string/form_place_title_hint"
                     android:inputType="textNoSuggestions" />
 
-                <com.aircandi.widgets.BuilderButton
+                <com.aircandi.ui.widgets.BuilderButton
                     android:id="@+id/address"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
@@ -88,7 +88,7 @@
                     android:onClick="onAddressBuilderClick"
                     android:paddingLeft="7dp" />
 
-                <com.aircandi.widgets.BuilderButton
+                <com.aircandi.ui.widgets.BuilderButton
                     android:id="@+id/website"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
@@ -122,7 +122,7 @@
                     android:hint="@string/form_twitter_hint"
                     android:inputType="textNoSuggestions" />
 
-                <com.aircandi.widgets.BuilderButton
+                <com.aircandi.ui.widgets.BuilderButton
                     android:id="@+id/category"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
@@ -147,7 +147,7 @@
                     android:inputType="textMultiLine|textAutoCorrect"
                     android:minLines="5" />
 
-                <com.aircandi.widgets.UserView
+                <com.aircandi.ui.widgets.UserView
                     android:id="@+id/author"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -166,7 +166,7 @@
                 <include layout="@layout/temp_form_settings" />
             </LinearLayout>
         </ViewFlipper>
-    </com.aircandi.widgets.BounceScrollView>
+    </com.aircandi.ui.widgets.BounceScrollView>
 
     <!-- Footer -->
 

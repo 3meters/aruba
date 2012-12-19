@@ -7,7 +7,7 @@
     android:background="?attr/backgroundForm"
     tools:ignore="UnusedNamespace" >
 
-    <com.aircandi.widgets.BounceListView
+    <com.aircandi.ui.widgets.BounceListView
         android:id="@+id/list_candi"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,7 +16,7 @@
         android:listSelector="#00000000" >
 
         <!-- Preview: listitem=@layout/temp_listitem_candi_picker -->
-    </com.aircandi.widgets.BounceListView>
+    </com.aircandi.ui.widgets.BounceListView>
 
     <!-- Footer -->
 

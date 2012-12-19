@@ -3,9 +3,6 @@ package com.aircandi;
 
 public class PlacesConstants {
 
-	/* Config */
-	public static boolean		INCLUDE_ENTITIES_BY_LOCATION					= false;
-
 	/* For readability */
 	public static final int		DIST_ONE_METER									= 1;
 	public static final int		DIST_FIVE_METERS								= 5;
@@ -20,7 +17,7 @@ public class PlacesConstants {
 
 	/* Search ranges used when fetching places from the service */
 	public static final double	SEARCH_RANGE_SYNTHETICS_METERS					= DIST_FIVE_HUNDRED_METERS;
-	public static final double	SEARCH_RANGE_PLACES_METERS						= DIST_FIFTY_METERS;
+	public static final double	SEARCH_RANGE_PLACES_METERS						= DIST_TWO_HUNDRED_METERS;
 
 	/*
 	 * Update criteria for active and passive location updates.

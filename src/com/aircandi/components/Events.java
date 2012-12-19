@@ -7,11 +7,12 @@ public class Events {
 
 	public static class EventBus {
 
-		public static List<EventHandler>	wifiScanReceived	= new ArrayList<EventHandler>();
-		public static List<EventHandler>	beaconsLocked		= new ArrayList<EventHandler>();
-		public static List<EventHandler>	locationChanged		= new ArrayList<EventHandler>();
-		public static List<EventHandler>	entitiesLoaded		= new ArrayList<EventHandler>();
-		public static List<EventHandler>	syntheticsLoaded	= new ArrayList<EventHandler>();
+		public static List<EventHandler>	wifiScanReceived		= new ArrayList<EventHandler>();
+		public static List<EventHandler>	beaconsLocked			= new ArrayList<EventHandler>();
+		public static List<EventHandler>	locationChanged			= new ArrayList<EventHandler>();
+		public static List<EventHandler>	locationEntitiesLoaded	= new ArrayList<EventHandler>();
+		public static List<EventHandler>	beaconEntitiesLoaded	= new ArrayList<EventHandler>();
+		public static List<EventHandler>	syntheticsLoaded		= new ArrayList<EventHandler>();
 
 		public static void onWifiScanReceived(Object data) {
 			synchronized (wifiScanReceived) {
@@ -46,9 +47,20 @@ public class Events {
 			}
 		}
 
-		public static void onEntitiesLoaded(Object data) {
-			synchronized (entitiesLoaded) {
-				List<EventHandler> eventHandlers = (List<EventHandler>) ((ArrayList<EventHandler>) entitiesLoaded).clone();
+		public static void onBeaconEntitiesLoaded(Object data) {
+			synchronized (beaconEntitiesLoaded) {
+				List<EventHandler> eventHandlers = (List<EventHandler>) ((ArrayList<EventHandler>) beaconEntitiesLoaded).clone();
+				for (EventHandler eventHandler : eventHandlers) {
+					if (eventHandler != null) {
+						eventHandler.onEvent(data);
+					}
+				}
+			}
+		}
+
+		public static void onLocationEntitiesLoaded(Object data) {
+			synchronized (locationEntitiesLoaded) {
+				List<EventHandler> eventHandlers = (List<EventHandler>) ((ArrayList<EventHandler>) locationEntitiesLoaded).clone();
 				for (EventHandler eventHandler : eventHandlers) {
 					if (eventHandler != null) {
 						eventHandler.onEvent(data);

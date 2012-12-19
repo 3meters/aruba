@@ -26,7 +26,7 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity.ImageFormat;
-import com.aircandi.ui.FormActivity;
+import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 
 public class CategoryBuilder extends FormActivity {

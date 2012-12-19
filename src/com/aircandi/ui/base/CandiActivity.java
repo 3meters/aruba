@@ -1,4 +1,4 @@
-package com.aircandi.ui;
+package com.aircandi.ui.base;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -20,6 +20,7 @@ import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.Logger;
 import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.ui.Preferences;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 

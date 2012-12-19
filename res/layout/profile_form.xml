@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="?attr/backgroundForm" >
 
-    <com.aircandi.widgets.BounceScrollView
+    <com.aircandi.ui.widgets.BounceScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
@@ -42,7 +42,7 @@
                     android:gravity="left"
                     android:orientation="horizontal" >
 
-                    <com.aircandi.widgets.WebImageView
+                    <com.aircandi.ui.widgets.WebImageView
                         android:id="@+id/image_picture"
                         android:layout_width="150dp"
                         android:layout_height="150dp"
@@ -137,7 +137,7 @@
                     android:text="@string/form_button_change_password" />
             </LinearLayout>
         </ViewFlipper>
-    </com.aircandi.widgets.BounceScrollView>
+    </com.aircandi.ui.widgets.BounceScrollView>
 
     <!-- Footer -->
 

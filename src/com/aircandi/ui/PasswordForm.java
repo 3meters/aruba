@@ -19,6 +19,7 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.base.FormActivity;
 import com.aircandi.utilities.ImageUtils;
 
 public class PasswordForm extends FormActivity {

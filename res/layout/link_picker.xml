@@ -32,7 +32,7 @@
             android:text="@string/form_button_test_link" />
     </LinearLayout>
 
-    <com.aircandi.widgets.BounceListView
+    <com.aircandi.ui.widgets.BounceListView
         android:id="@+id/list_bookmarks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -44,7 +44,7 @@
         android:padding="5dp">
 
         <!-- Preview: listitem=@layout/temp_listitem_bookmark -->
-    </com.aircandi.widgets.BounceListView>
+    </com.aircandi.ui.widgets.BounceListView>
 
     <!-- Footer -->
 

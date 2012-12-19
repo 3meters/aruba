@@ -47,7 +47,7 @@
             android:src="?attr/iconSearch" />
     </LinearLayout>
 
-    <com.aircandi.widgets.BounceGridView
+    <com.aircandi.ui.widgets.BounceGridView
         android:id="@+id/grid_gallery"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -61,7 +61,7 @@
         android:verticalSpacing="5dp" >
 
         <!-- Preview: listitem=@layout/temp_galleryitem -->
-    </com.aircandi.widgets.BounceGridView>
+    </com.aircandi.ui.widgets.BounceGridView>
 
     <!-- Footer -->
 

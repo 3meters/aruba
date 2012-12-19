@@ -34,6 +34,7 @@ import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.Tip;
+import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.ui.widgets.WebImageView;
 

@@ -170,7 +170,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 
 			if (holder.image != null) {
-
+				holder.image.setTag(entity);
 				holder.image.getImageBadge().setVisibility(View.GONE);
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
 					if (entity.getImageUri() != null && !entity.getImageUri().toLowerCase().startsWith("resource:")) {

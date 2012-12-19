@@ -12,7 +12,7 @@
         android:layout_alignParentTop="true"
         android:background="?attr/ruleColor" />
 
-    <com.aircandi.widgets.WebImageView
+    <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/item_author_image"
         android:layout_width="60dp"
         android:layout_height="60dp"

@@ -1,4 +1,4 @@
-package com.aircandi.ui;
+package com.aircandi.ui.base;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -39,6 +39,9 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.PictureBrowse;
+import com.aircandi.ui.PictureSearch;
+import com.aircandi.ui.Preferences;
 import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;

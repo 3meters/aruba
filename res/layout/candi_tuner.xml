@@ -39,7 +39,7 @@
         android:layout_below="@+id/header_group"
         android:background="@color/abs__holo_blue_light" />
 
-    <com.aircandi.widgets.BounceListView
+    <com.aircandi.ui.widgets.BounceListView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -51,7 +51,7 @@
         android:listSelector="#00000000" >
 
         <!-- Preview: listitem=@layout/temp_listitem_candi_tuner -->
-    </com.aircandi.widgets.BounceListView>
+    </com.aircandi.ui.widgets.BounceListView>
 
     <!-- Footer -->
 

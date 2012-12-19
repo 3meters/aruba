@@ -26,6 +26,7 @@ import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.DateUtils;
 

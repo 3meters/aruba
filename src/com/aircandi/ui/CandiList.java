@@ -25,6 +25,7 @@ import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 

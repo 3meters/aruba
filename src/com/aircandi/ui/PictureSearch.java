@@ -43,6 +43,7 @@ import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.ServiceData;
+import com.aircandi.ui.base.FormActivity;
 
 /*
  * We often will get duplicates because the ordering of images isn't

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.aircandi.widgets.BounceScrollView
+    <com.aircandi.ui.widgets.BounceScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -42,7 +42,7 @@
                         android:text="@string/radar_section_places"
                         android:visibility="invisible" />
 
-                    <com.aircandi.widgets.FlowLayout
+                    <com.aircandi.ui.widgets.FlowLayout
                         android:id="@+id/radar_places"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
@@ -64,7 +64,7 @@
                         android:text="@string/radar_section_synthetics"
                         android:visibility="invisible" />
 
-                    <com.aircandi.widgets.FlowLayout
+                    <com.aircandi.ui.widgets.FlowLayout
                         android:id="@+id/radar_synthetics"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
@@ -85,7 +85,7 @@
                     android:minHeight="40dp" />
             </RelativeLayout>
         </FrameLayout>
-    </com.aircandi.widgets.BounceScrollView>
+    </com.aircandi.ui.widgets.BounceScrollView>
 
     <!-- Footer -->
 

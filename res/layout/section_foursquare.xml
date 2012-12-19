@@ -8,7 +8,7 @@
 
     <!-- Main body -->
 
-    <com.aircandi.widgets.SectionLayout
+    <com.aircandi.ui.widgets.SectionLayout
         android:id="@+id/section_photos"
         style="@style/candi_form_section"
         android:layout_width="match_parent"
@@ -18,16 +18,16 @@
         aircandi:layoutHeader="@layout/temp_section_header"
         android:orientation="vertical" >
 
-        <com.aircandi.widgets.HorizontalScrollLayout
+        <com.aircandi.ui.widgets.HorizontalScrollLayout
             android:id="@+id/list_photos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             aircandi:layout="@layout/temp_place_photo_item"
             android:fillViewport="true"
             android:visibility="visible" />
-    </com.aircandi.widgets.SectionLayout>
+    </com.aircandi.ui.widgets.SectionLayout>
 
-    <com.aircandi.widgets.SectionLayout
+    <com.aircandi.ui.widgets.SectionLayout
         android:id="@+id/section_candi"
         style="@style/candi_form_section"
         android:layout_width="match_parent"
@@ -37,16 +37,16 @@
         aircandi:layoutHeader="@layout/temp_section_header"
         android:orientation="vertical" >
 
-        <com.aircandi.widgets.HorizontalScrollLayout
+        <com.aircandi.ui.widgets.HorizontalScrollLayout
             android:id="@+id/list_candi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             aircandi:layout="@layout/temp_place_photo_item"
             android:fillViewport="true"
             android:visibility="visible" />
-    </com.aircandi.widgets.SectionLayout>
+    </com.aircandi.ui.widgets.SectionLayout>
 
-    <com.aircandi.widgets.SectionLayout
+    <com.aircandi.ui.widgets.SectionLayout
         android:id="@+id/section_phrases"
         style="@style/candi_form_section"
         android:layout_width="match_parent"
@@ -56,7 +56,7 @@
         aircandi:layoutHeader="@layout/temp_section_header"
         android:orientation="vertical" >
 
-        <com.aircandi.widgets.ListViewExpanded
+        <com.aircandi.ui.widgets.ListViewExpanded
             android:id="@+id/list_phrases"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -67,9 +67,9 @@
             android:orientation="vertical"
             android:paddingLeft="5dp"
             android:paddingRight="5dp" />
-    </com.aircandi.widgets.SectionLayout>
+    </com.aircandi.ui.widgets.SectionLayout>
 
-    <com.aircandi.widgets.SectionLayout
+    <com.aircandi.ui.widgets.SectionLayout
         android:id="@+id/section_tips"
         style="@style/candi_form_section"
         android:layout_width="match_parent"
@@ -79,7 +79,7 @@
         aircandi:layoutHeader="@layout/temp_section_header"
         android:orientation="vertical" >
 
-        <com.aircandi.widgets.ListViewExpanded
+        <com.aircandi.ui.widgets.ListViewExpanded
             android:id="@+id/list_tips"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -88,9 +88,9 @@
             aircandi:layoutItems="@layout/temp_listitem_tip"
             aircandi:showDivider="true"
             android:orientation="vertical" />
-    </com.aircandi.widgets.SectionLayout>
+    </com.aircandi.ui.widgets.SectionLayout>
 
-    <com.aircandi.widgets.SectionLayout
+    <com.aircandi.ui.widgets.SectionLayout
         android:id="@+id/section_buttons"
         style="@style/candi_form_section"
         android:layout_width="match_parent"
@@ -106,7 +106,7 @@
             android:layout_marginLeft="-3dp"
             android:orientation="vertical" >
 
-            <com.aircandi.widgets.ComboButton
+            <com.aircandi.ui.widgets.ComboButton
                 android:id="@+id/button_share"
                 style="@style/form_button"
                 android:layout_width="match_parent"
@@ -117,7 +117,7 @@
                 android:onClick="onShareButtonClick"
                 android:text="@string/candi_button_share" />
 
-            <com.aircandi.widgets.ComboButton
+            <com.aircandi.ui.widgets.ComboButton
                 android:id="@+id/button_website"
                 style="@style/form_button"
                 android:layout_width="match_parent"
@@ -128,7 +128,7 @@
                 android:onClick="onWebsiteButtonClick"
                 android:text="@string/candi_button_website" />
 
-            <com.aircandi.widgets.ComboButton
+            <com.aircandi.ui.widgets.ComboButton
                 android:id="@+id/button_facebook"
                 style="@style/form_button"
                 android:layout_width="match_parent"
@@ -139,7 +139,7 @@
                 android:onClick="onFacebookButtonClick"
                 android:text="@string/dummy_twitter" />
 
-            <com.aircandi.widgets.ComboButton
+            <com.aircandi.ui.widgets.ComboButton
                 android:id="@+id/button_twitter"
                 style="@style/form_button"
                 android:layout_width="match_parent"
@@ -150,7 +150,7 @@
                 android:onClick="onTwitterButtonClick"
                 android:text="@string/dummy_twitter" />
 
-            <com.aircandi.widgets.ComboButton
+            <com.aircandi.ui.widgets.ComboButton
                 android:id="@+id/button_menu"
                 style="@style/form_button"
                 android:layout_width="match_parent"
@@ -161,7 +161,7 @@
                 android:onClick="onMenuButtonClick"
                 android:text="@string/candi_button_menu" />
         </LinearLayout>
-    </com.aircandi.widgets.SectionLayout>
+    </com.aircandi.ui.widgets.SectionLayout>
 
     <Button
         android:id="@+id/form_button_link"
@@ -174,7 +174,7 @@
         android:paddingTop="5dp"
         android:text="@string/candi_label_comments_none" />
 
-    <com.aircandi.widgets.UserView
+    <com.aircandi.ui.widgets.UserView
         android:id="@+id/author"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

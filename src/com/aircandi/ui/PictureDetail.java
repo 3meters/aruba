@@ -31,6 +31,7 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.UserView;
 
 public class PictureDetail extends FormActivity {

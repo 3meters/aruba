@@ -21,6 +21,7 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Comment;
+import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.ImageUtils;
 

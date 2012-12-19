@@ -22,7 +22,7 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.ui.FormActivity;
+import com.aircandi.ui.base.FormActivity;
 
 public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 
