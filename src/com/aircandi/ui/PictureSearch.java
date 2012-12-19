@@ -212,7 +212,7 @@ public class PictureSearch extends FormActivity {
 	private String getBingKey() {
 		Properties properties = new Properties();
 		try {
-			properties.load(getClass().getResourceAsStream("bing_api.properties"));
+			properties.load(getClass().getResourceAsStream("/com/aircandi/bing_api.properties"));
 			String appId = properties.getProperty("appKey");
 			return appId;
 		}

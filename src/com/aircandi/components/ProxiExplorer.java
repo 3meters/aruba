@@ -331,11 +331,16 @@ public class ProxiExplorer {
 			/*
 			 * These were found purely using location but they can still come with
 			 * links to beacons not currently visible. To keep things clean, we
-			 * make sure the links are stripped.
+			 * make sure the links without beacons are stripped.
 			 */
 			for (Entity entity : entities) {
 				if (entity.links != null) {
-					entity.links.clear();
+					for (int i = entity.links.size() - 1; i >= 0; i--) {
+						Beacon beacon = mEntityModel.getBeacon(entity.links.get(i).toId);
+						if (beacon == null) {
+							entity.links.remove(i);
+						}
+					}
 				}
 			}
 
@@ -663,7 +668,7 @@ public class ProxiExplorer {
 		return result;
 	}
 
-	public List<Beacon> getStrongestWifiAsBeacons(int max) {
+	public List<Beacon> getStrongestBeacons(int max) {
 
 		List<Beacon> beaconStrongest = new ArrayList<Beacon>();
 		int beaconCount = 0;
@@ -676,8 +681,8 @@ public class ProxiExplorer {
 		return beaconStrongest;
 	}
 
-	public Beacon getStrongestWifiAsBeacon() {
-		List<Beacon> beacons = getStrongestWifiAsBeacons(1);
+	public Beacon getStrongestBeacon() {
+		List<Beacon> beacons = getStrongestBeacons(1);
 		if (beacons.size() > 1) {
 			return beacons.get(0);
 		}
@@ -905,6 +910,18 @@ public class ProxiExplorer {
 					String jsonResponse = (String) result.serviceResponse.data;
 					ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 					List<Entity> fetchedEntities = (List<Entity>) serviceData.data;
+					
+					/* Remove any links to beacons not currently visible */
+					for (Entity entity : fetchedEntities) {
+						if (entity.links != null) {
+							for (int i = entity.links.size() - 1; i >= 0; i--) {
+								Beacon beacon = getBeacon(entity.links.get(i).toId);
+								if (beacon == null) {
+									entity.links.remove(i);
+								}
+							}
+						}
+					}
 
 					if (fetchedEntities != null && fetchedEntities.size() > 0) {
 						upsertEntities(fetchedEntities);
@@ -922,9 +939,6 @@ public class ProxiExplorer {
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				for (Entity entity : entities) {
 
-					//					Boolean needPlaceDetail = (entity != null
-					//							&& entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
-					//							&& !entity.place.source.equals("user")) ? true : false;
 					Boolean needPlaceDetail = (entity != null && entity.type.equals(CandiConstants.TYPE_CANDI_PLACE));
 
 					if (needPlaceDetail && result.serviceResponse.responseCode == ResponseCode.Success) {

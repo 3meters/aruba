@@ -73,10 +73,6 @@ public class EntityForm extends FormActivity {
 		 * Starting determining the users location if we are creating new candi. We are pulling
 		 * a single shot coarse location which is usually based on network location method.
 		 */
-		if (mCommon.mCommandType == CommandType.New) {
-//			LocationManager.getInstance().ensureLocation();
-		}
-
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_place);
 		}
@@ -530,7 +526,7 @@ public class EntityForm extends FormActivity {
 			/*
 			 * We are linking to a beacon so get the best and alert if none
 			 */
-			beacons = ProxiExplorer.getInstance().getStrongestWifiAsBeacons(5);
+			beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
 			primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
 
 			/*

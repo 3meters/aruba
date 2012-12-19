@@ -45,16 +45,6 @@ public class CandiTuner extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_tune));
-
-		/*
-		 * Refresh the location fix because tuning can lead to operations
-		 * that use the current location:
-		 * 
-		 * - New beacons getting inserted with the service.
-		 * - Stored with tuning actions.
-		 */
-//		LocationManager.getInstance().ensureLocation();
-
 	}
 
 	public void bind() {
@@ -68,6 +58,7 @@ public class CandiTuner extends FormActivity {
 			mEntities.clear();
 			for (Entity entity : entities) {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+					entity.checked = false;
 					mEntities.add(entity);
 				}
 			}
@@ -97,7 +88,7 @@ public class CandiTuner extends FormActivity {
 
 	public void tune() {
 
-		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestWifiAsBeacons(5);
+		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
 		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
 
 		new AsyncTask<Object, Object, Object>() {
@@ -128,6 +119,10 @@ public class CandiTuner extends FormActivity {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.Tuning);
 				}
 				else {
+					/* Clear checks */
+					for (Entity entity : mEntities) {
+						entity.checked = false;
+					}
 					finish();
 					AnimUtils.doOverridePendingTransition(CandiTuner.this, TransitionType.FormToCandiPage);
 				}

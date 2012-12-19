@@ -56,7 +56,6 @@
         <!-- Drawables and backgrounds -->
 
         <item name="textureBodyCandi">@drawable/placeholder_logo</item>
-        <item name="textureBodyZone">@raw/trans_30_dark</item>
         <item name="backgroundButton">@drawable/button_selector_dark</item>
         <item name="backgroundCandi">@android:color/transparent</item>
         <item name="backgroundRadarCandi">@drawable/candi_bg_dark</item>
@@ -137,7 +136,6 @@
         <!-- Drawables and backgrounds -->
 
         <item name="textureBodyCandi">@drawable/placeholder_logo</item>
-        <item name="textureBodyZone">@raw/trans_30_light</item>
         <item name="backgroundButton">@drawable/button_selector_light</item>
         <item name="backgroundCandi">@android:color/transparent</item>
         <item name="backgroundRadarCandi">@drawable/candi_bg_light</item>

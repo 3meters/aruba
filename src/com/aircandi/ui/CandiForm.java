@@ -82,7 +82,6 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void initialize() {
-
 		/* Font for button bar */
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_comment));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_edit));
@@ -428,7 +427,7 @@ public class CandiForm extends CandiActivity {
 
 	public void tune() {
 
-		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestWifiAsBeacons(5);
+		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
 		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
 
 		new AsyncTask<Object, Object, Object>() {
@@ -881,6 +880,30 @@ public class CandiForm extends CandiActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_new_text));
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_edit));
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_move));
+		
+		if (entity.synthetic) {
+			/* Map */
+			GeoLocation location = entity.getLocation();
+			if (location != null) {
+				setVisibility(layout.findViewById(R.id.button_map), View.VISIBLE);
+			}
+			
+			/* Tune and call */
+			if (entity.place != null) {
+				Place place = entity.place;
+
+				setVisibility(layout.findViewById(R.id.button_tune), View.VISIBLE);
+
+				if (place.contact != null) {
+					if (place.contact.phone != null) {
+						setVisibility(layout.findViewById(R.id.button_call), View.VISIBLE);
+					}
+				}
+			}
+			
+			setVisibility(layout.findViewById(R.id.form_footer), View.GONE);
+			return;
+		}
 
 		if (entity.locked != null && !entity.locked) {
 			if (entity.isCollection != null && entity.isCollection) {
@@ -921,7 +944,9 @@ public class CandiForm extends CandiActivity {
 		if (entity.place != null) {
 			Place place = entity.place;
 
-			setVisibility(layout.findViewById(R.id.button_tune), View.VISIBLE);
+			if (entity.synthetic) {
+				setVisibility(layout.findViewById(R.id.button_tune), View.VISIBLE);
+			}
 
 			if (!entity.place.source.equals("user")) {
 				setVisibility(layout.findViewById(R.id.button_edit), View.GONE);

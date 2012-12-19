@@ -82,12 +82,6 @@ public class LinkPicker extends FormActivity {
 			}
 		});
 
-		/*
-		 * Get location support setup. We use location to provide
-		 * place suggestions that have websites.
-		 */
-//		LocationManager.getInstance().ensureLocation();
-
 		bind();
 	}
 

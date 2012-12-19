@@ -38,7 +38,7 @@ public class AndroidManager {
 				battery.getIntExtra(BatteryManager.EXTRA_SCALE, 1);
 		return pctLevel < 0.15;
 	}
-	
+
 	public void callMapActivity(Context context, String latitude, String longitude, String label) {
 		String uri = "geo:" + latitude + "," + longitude + "?q="
 				+ latitude
@@ -82,6 +82,7 @@ public class AndroidManager {
 	}
 
 	public void callFoursquareActivity(Context context, String venueId) {
+		/* First try to get the native app so we can go to it directly */
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setType("text/plain");
 		if (intent != null) {
@@ -95,7 +96,6 @@ public class AndroidManager {
 		Intent intent = findFacebookApp(context);
 		if (intent != null) {
 			intent.setData(Uri.parse("fb://profile/" + facebookId + "/wall"));
-			//intent.setData(Uri.parse("fb://page/" + facebookId));
 		}
 		else {
 			intent = findBrowserApp(context, "http://www.facebook.com/" + facebookId);
@@ -129,8 +129,29 @@ public class AndroidManager {
 		return null;
 	}
 
+	public Intent findFoursquareApp(Context context) {
+		final String[] apps = {
+				"foursquare" };		// official
+
+		Intent intent = new Intent();
+		intent.setType("text/plain");
+		final PackageManager pm = context.getPackageManager();
+		List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+
+		for (int i = 0; i < apps.length; i++) {
+			for (ResolveInfo resolveInfo : list) {
+				String p = resolveInfo.activityInfo.packageName;
+				if (p != null && p.contains(apps[i])) {
+					intent.setPackage(p);
+					return intent;
+				}
+			}
+		}
+		return null;
+	}
+
 	public Intent findFacebookApp(Context context) {
-		final String[] facebookApps = {
+		final String[] apps = {
 				"com.facebook.katana" };		// Official android app
 
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
@@ -138,10 +159,10 @@ public class AndroidManager {
 		final PackageManager packageManager = context.getPackageManager();
 		List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
 
-		for (int i = 0; i < facebookApps.length; i++) {
+		for (int i = 0; i < apps.length; i++) {
 			for (ResolveInfo resolveInfo : list) {
 				String p = resolveInfo.activityInfo.packageName;
-				if (p != null && p.startsWith(facebookApps[i])) {
+				if (p != null && p.startsWith(apps[i])) {
 					intent.setPackage(p);
 					return intent;
 				}

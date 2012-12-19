@@ -948,7 +948,7 @@ public class CandiRadar extends CandiActivity {
 			public void run() {
 				try {
 					Properties properties = new Properties();
-					InputStream inputStream = getClass().getResourceAsStream("aws.properties");
+					InputStream inputStream = getClass().getResourceAsStream("/com/aircandi/aws.properties");
 					properties.load(inputStream);
 
 					String accessKeyId = properties.getProperty("accessKey");
@@ -978,7 +978,7 @@ public class CandiRadar extends CandiActivity {
 		Properties properties = new Properties();
 
 		try {
-			properties.load(getClass().getResourceAsStream("google_analytics.properties"));
+			properties.load(getClass().getResourceAsStream("/com/aircandi/google_analytics.properties"));
 			String analyticsId = properties.getProperty("analyticsId");
 			return analyticsId;
 		}
