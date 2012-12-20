@@ -38,14 +38,6 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp" />
 
-            <ViewStub
-                android:id="@+id/stub_foursquare"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inflatedId="@+id/section_foursquare"
-                android:layout="@layout/section_foursquare"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
     

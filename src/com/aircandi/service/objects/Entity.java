@@ -544,14 +544,23 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	public static class SortEntitiesByModifiedDate implements Comparator<Entity> {
 
 		@Override
-		public int compare(Entity object1, Entity object2) {
-			if (object1.modifiedDate.longValue() < object2.modifiedDate.longValue()) {
+		public int compare(Entity entity1, Entity entity2) {
+			
+			if (!entity1.type.equals(CandiConstants.TYPE_CANDI_SOURCE) && entity2.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
 				return 1;
 			}
-			else if (object1.modifiedDate.longValue() == object2.modifiedDate.longValue()) {
-				return 0;
+			if (entity1.type.equals(CandiConstants.TYPE_CANDI_SOURCE) && !entity2.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+				return -1;
 			}
-			return -1;
+			else {
+				if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
+					return -1;
+				}
+				else if (entity1.modifiedDate.longValue() == entity2.modifiedDate.longValue()) {
+					return 0;
+				}
+				return 1;
+			}
 		}
 	}
 }

@@ -5,12 +5,14 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -20,6 +22,7 @@ import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
+import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
@@ -28,12 +31,15 @@ import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.WebImageView;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.DateUtils;
 
 public class CommentList extends CandiActivity {
 
 	private ListView		mListView;
 	private List<Comment>	mComments		= new ArrayList<Comment>();
+	private Button			mButtonNewComment;
 
 	protected int			mLastResultCode	= Activity.RESULT_OK;
 	private LayoutInflater	mInflater;
@@ -53,6 +59,7 @@ public class CommentList extends CandiActivity {
 	protected void initialize() {
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mListView = (ListView) findViewById(R.id.list_comments);
+		mButtonNewComment = (Button) findViewById(R.id.button_new_comment);
 	}
 
 	private void configureActionBar() {
@@ -91,13 +98,14 @@ public class CommentList extends CandiActivity {
 					if (result.data != null) {
 						Entity entity = (Entity) result.data;
 
-						if (entity.comments != null) {
+						if (entity.comments != null && entity.comments.size() > 0) {
+							mButtonNewComment.setVisibility(View.GONE);
 							mComments = entity.comments;
 							mMore = entity.commentsMore;
-						}
-
-						if (mComments != null) {
 							mListView.setAdapter(new EndlessCommentAdapter(mComments));
+						}
+						else {
+							mButtonNewComment.setVisibility(View.VISIBLE);
 						}
 					}
 				}
@@ -134,6 +142,15 @@ public class CommentList extends CandiActivity {
 		/* Called from AircandiCommon */
 		mComments.clear();
 		bind(true);
+	}
+
+	public void onNewCommentButtonClick(View view) {
+		IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
+		intentBuilder.setEntityId(null);
+		intentBuilder.setParentEntityId(mCommon.mEntityId);
+		Intent intent = intentBuilder.create();
+		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -211,12 +228,12 @@ public class CommentList extends CandiActivity {
 				holder.itemAuthorLocationSeparator = (View) view.findViewById(R.id.item_author_location_separator);
 				holder.itemComment = (TextView) view.findViewById(R.id.item_comment);
 				holder.itemCreatedDate = (TextView) view.findViewById(R.id.item_created_date);
-				
+
 				FontManager.getInstance().setTypefaceDefault(holder.itemAuthorName);
 				FontManager.getInstance().setTypefaceDefault(holder.itemAuthorLocation);
 				FontManager.getInstance().setTypefaceDefault(holder.itemComment);
 				FontManager.getInstance().setTypefaceDefault(holder.itemCreatedDate);
-				
+
 				view.setTag(holder);
 			}
 			else {

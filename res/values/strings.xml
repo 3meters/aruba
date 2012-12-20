@@ -99,7 +99,7 @@
     <string name="error_connection_title">Aircandi disconnected</string>
     <string name="error_connection">Check network connection and retry</string>
     <string name="error_connection_notification">Touch to retry network connection</string>
-    <string name="error_connection_poor">Network connection is poor, retry later</string>
+    <string name="error_connection_poor">Network connection is poor or service is unavailable, retry later</string>
     <string name="error_client_request_socket_error">Resource has moved or been deleted</string>
     <string name="error_client_unknown_host">The website you entered can\'t be found.</string>
     <string name="error_client_request_error">Aircandi request error</string>
@@ -251,6 +251,7 @@
     <string name="candi_button_call">call</string>
     <string name="candi_button_website">view website</string>
     <string name="candi_button_comment">comment</string>
+    <string name="candi_button_comment_first">be the first to comment</string>
     <string name="candi_button_new">add candi</string>
     <string name="candi_button_edit">edit</string>
     <string name="candi_button_move">move</string>
@@ -264,6 +265,7 @@
     <string name="candi_section_phrases">people talk about</string>
     <string name="candi_label_comments_none">no comments yet</string>
     <string name="candi_label_tuning_score">tuning score</string>
+    <string name="candi_label_user_creator">tuned by</string>
     
     <!-- Misc -->
 

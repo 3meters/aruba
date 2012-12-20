@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.aircandi.components.FontManager;
 import com.aircandi.components.ImageRequest;
 import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.service.objects.User;
@@ -56,6 +57,8 @@ public class UserView extends RelativeLayout {
 			mTextName = (TextView) mBoundView.findViewById(R.id.candi_user_fullname);
 			mTextTimeSince = (TextView) mBoundView.findViewById(R.id.candi_user_timesince);
 			mImageLocked = (ImageView) mBoundView.findViewById(R.id.image_locked);
+			FontManager.getInstance().setTypefaceDefault(mTextName);
+			FontManager.getInstance().setTypefaceDefault(mTextTimeSince);
 		}
 
 		this.removeAllViews();

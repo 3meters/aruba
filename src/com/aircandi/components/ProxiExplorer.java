@@ -393,6 +393,19 @@ public class ProxiExplorer {
 			for (Entity entity : entities) {
 				entity.modifiedDate = DateUtils.nowDate().getTime();
 				entity.synthetic = true;
+				
+				/* Add source for foursquare */
+				if (entity.place != null
+						&& entity.place.source != null
+						&& entity.place.source.equals("foursquare")) {
+					Entity sourceEntity = loadEntityFromResources(R.raw.source_foursquare);
+					sourceEntity.id += "." + entity.place.sourceId;
+					sourceEntity.source = "foursquare";
+					sourceEntity.sourceId = entity.place.sourceId;
+					sourceEntity.parentId = entity.id;
+					mEntityModel.upsertEntity(sourceEntity);
+				}
+				
 			}
 			mEntityModel.removeSyntheticEntities();
 			mEntityModel.upsertEntities(entities);
@@ -978,50 +991,58 @@ public class ProxiExplorer {
 								if (placeEntity.name != null) {
 									entity.name = placeEntity.name;
 								}
-							}
-							/*
-							 * Add virtual source entities
-							 */
-							if (entity.place != null
-									&& entity.place.contact != null
-									&& entity.place.contact.twitter != null
-									&& !entity.place.contact.twitter.equals("")) {
-								Entity sourceEntity = loadEntityFromResources(R.raw.source_twitter);
-								sourceEntity.id += "." + entity.place.contact.twitter;
-								sourceEntity.source = "twitter";
-								sourceEntity.sourceId = entity.place.contact.twitter;
-								sourceEntity.parentId = entity.id;
-								upsertEntity(sourceEntity);
-							}
-							if (entity.place != null
-									&& entity.place.facebook != null
-									&& !entity.place.facebook.equals("")) {
-								Entity sourceEntity = loadEntityFromResources(R.raw.source_facebook);
-								sourceEntity.id += "." + entity.place.facebook;
-								sourceEntity.source = "facebook";
-								sourceEntity.sourceId = entity.place.facebook;
-								sourceEntity.parentId = entity.id;
-								upsertEntity(sourceEntity);
-							}
-							if (entity.place != null
-									&& entity.place.website != null
-									&& !entity.place.website.equals("")) {
-								Entity sourceEntity = loadEntityFromResources(R.raw.source_website);
-								sourceEntity.id += "." + entity.place.website;
-								sourceEntity.source = "website";
-								sourceEntity.sourceId = entity.place.website;
-								sourceEntity.parentId = entity.id;
-								upsertEntity(sourceEntity);
-							}
-							if (entity.place != null
-									&& entity.place.source != null
-									&& entity.place.source.equals("foursquare")) {
-								Entity sourceEntity = loadEntityFromResources(R.raw.source_foursquare);
-								sourceEntity.id += "." + entity.place.sourceId;
-								sourceEntity.source = "foursquare";
-								sourceEntity.sourceId = entity.place.sourceId;
-								sourceEntity.parentId = entity.id;
-								upsertEntity(sourceEntity);
+								/*
+								 * Add virtual source entities
+								 */
+								if (entity.place != null
+										&& entity.place.contact != null
+										&& entity.place.contact.twitter != null
+										&& !entity.place.contact.twitter.equals("")) {
+									Entity sourceEntity = loadEntityFromResources(R.raw.source_twitter);
+									sourceEntity.id += "." + entity.place.contact.twitter;
+									sourceEntity.source = "twitter";
+									sourceEntity.sourceId = entity.place.contact.twitter;
+									sourceEntity.parentId = entity.id;
+									upsertEntity(sourceEntity);
+								}
+								if (entity.place != null
+										&& entity.place.facebook != null
+										&& !entity.place.facebook.equals("")) {
+									Entity sourceEntity = loadEntityFromResources(R.raw.source_facebook);
+									sourceEntity.id += "." + entity.place.facebook;
+									sourceEntity.source = "facebook";
+									sourceEntity.sourceId = entity.place.facebook;
+									sourceEntity.parentId = entity.id;
+									upsertEntity(sourceEntity);
+								}
+								if (entity.place != null
+										&& entity.place.website != null
+										&& !entity.place.website.equals("")) {
+									Entity sourceEntity = loadEntityFromResources(R.raw.source_website);
+									sourceEntity.id += "." + entity.place.website;
+									sourceEntity.source = "website";
+									sourceEntity.sourceId = entity.place.website;
+									sourceEntity.parentId = entity.id;
+									upsertEntity(sourceEntity);
+								}
+								if (entity.place != null
+										&& entity.place.source != null
+										&& entity.place.source.equals("foursquare")) {
+									Entity sourceEntity = loadEntityFromResources(R.raw.source_foursquare);
+									sourceEntity.id += "." + entity.place.sourceId;
+									sourceEntity.source = "foursquare";
+									sourceEntity.sourceId = entity.place.sourceId;
+									sourceEntity.parentId = entity.id;
+									upsertEntity(sourceEntity);
+								}
+								if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+									Entity sourceEntity = loadEntityFromResources(R.raw.source_comments);
+									sourceEntity.id += "." + entity.id;
+									sourceEntity.source = "comments";
+									sourceEntity.sourceId = entity.id;
+									sourceEntity.parentId = entity.id;
+									upsertEntity(sourceEntity);
+								}
 							}
 						}
 					}

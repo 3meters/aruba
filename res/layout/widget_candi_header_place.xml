@@ -106,7 +106,6 @@
             style="@style/candi_form_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
             aircandi:layoutHeader="@layout/temp_section_header"
             android:orientation="vertical" >
 
