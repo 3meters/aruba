@@ -266,7 +266,7 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onChangePictureButtonClick(View view) {
-		showChangePictureDialog(false, false, null, null, null, mImageViewPicture, new RequestListener() {
+		showChangePictureDialog((mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)), null, null, null, mImageViewPicture, new RequestListener() {
 
 			@Override
 			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {

@@ -54,6 +54,12 @@ public class FontManager {
 		}
 	}
 
+	public void setTypefaceBoldDefault(TextView view) {
+		if (view != null) {
+			view.setTypeface(fontRobotoRegular);
+		}
+	}
+	
 	public void setTypefaceRegular(TextView view) {
 		if (view != null) {
 			view.setTypeface(fontRobotoRegular);

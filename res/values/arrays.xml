@@ -8,17 +8,10 @@
         <item>None</item>
     </string-array>
     <string-array name="dialog_list_picture_sources_place">
+        <item>Search for pictures</item>
+        <item>Select a gallery picture</item>
+        <item>Take a new picture</item>
         <item>Select a place picture</item>
-        <item>Search for pictures</item>
-        <item>Select a gallery picture</item>
-        <item>Take a new picture</item>
-        <item>None</item>
-    </string-array>
-    <string-array name="dialog_list_picture_sources_facebook">
-        <item>Search for pictures</item>
-        <item>Select a gallery picture</item>
-        <item>Take a new picture</item>
-        <item>Use facebook picture</item>
         <item>None</item>
     </string-array>
     <string-array name="theme_list_preference">
@@ -55,5 +48,5 @@
         <item>zoka</item>
         <item>lucky</item>
     </string-array>
-    
+
 </resources>

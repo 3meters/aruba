@@ -194,7 +194,7 @@ public class ProfileForm extends FormActivity {
 	}
 
 	public void onChangePictureButtonClick(View view) {
-		showChangePictureDialog(true, false, null, null, null, mImageUser, new RequestListener() {
+		showChangePictureDialog(false, null, null, null, mImageUser, new RequestListener() {
 
 			@Override
 			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {

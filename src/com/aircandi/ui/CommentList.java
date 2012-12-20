@@ -229,10 +229,10 @@ public class CommentList extends CandiActivity {
 				holder.itemComment = (TextView) view.findViewById(R.id.item_comment);
 				holder.itemCreatedDate = (TextView) view.findViewById(R.id.item_created_date);
 
-				FontManager.getInstance().setTypefaceDefault(holder.itemAuthorName);
+				FontManager.getInstance().setTypefaceBoldDefault(holder.itemAuthorName);
 				FontManager.getInstance().setTypefaceDefault(holder.itemAuthorLocation);
-				FontManager.getInstance().setTypefaceDefault(holder.itemComment);
 				FontManager.getInstance().setTypefaceDefault(holder.itemCreatedDate);
+				FontManager.getInstance().setTypefaceDefault(holder.itemComment);
 
 				view.setTag(holder);
 			}

@@ -309,6 +309,9 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 			}
 		}
+		else if (this.type.equals(CandiConstants.TYPE_CANDI_LINK)) {
+			imageUri = "resource:source_website_ii";
+		}
 		else {
 			if (this.photo != null) {
 				imageUri = photo.getImageSizedUri(250, 250);

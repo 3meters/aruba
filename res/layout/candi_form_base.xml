@@ -4,43 +4,97 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/candi_form"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:visibility="gone" >
 
     <!-- Body -->
 
     <com.aircandi.ui.widgets.BounceScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
         android:background="?attr/backgroundCandi"
-        android:fillViewport="true" >
+        android:fillViewport="true"
+        tools:ignore="UselessParent" >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="15dp" >
+            android:paddingBottom="15dp"
+            android:paddingTop="7dp"
+            android:visibility="visible" >
+
+            <!-- Main body -->
+
+            <com.aircandi.ui.widgets.WebImageView
+                android:id="@+id/candi_form_image"
+                android:layout_width="250px"
+                android:layout_height="250px"
+                android:layout_marginBottom="15dp"
+                aircandi:layout="@layout/widget_webimageview_framed"
+                aircandi:maxHeight="250px"
+                aircandi:maxWidth="250px"
+                android:background="@drawable/app_image_selector"
+                android:clickable="true"
+                android:onClick="onImageClick"
+                android:scaleType="centerCrop" />
 
             <include
                 android:id="@+id/candi_form_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                layout="@layout/widget_candi_header_place" />
+                android:layout_marginBottom="3dp"
+                android:layout_marginLeft="3dp"
+                layout="@layout/widget_candi_header_compact" />
 
-            <ViewStub
-                android:id="@+id/stub_switchboard"
+            <com.aircandi.ui.widgets.SectionLayout
+                android:id="@+id/section_description"
+                style="@style/candi_form_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inflatedId="@+id/section_switchboard"
-                android:layout="@layout/section_switchboard"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp" />
+                android:layout_marginBottom="10dp"
+                aircandi:layoutHeader="@layout/temp_section_header"
+                android:orientation="vertical" >
 
+                <TextView
+                    android:id="@+id/candi_form_description"
+                    style="@style/candi_form_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dummy_description"
+                    android:visibility="visible" />
+            </com.aircandi.ui.widgets.SectionLayout>
+
+            <com.aircandi.ui.widgets.SectionLayout
+                android:id="@+id/section_candi"
+                style="@style/candi_form_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                aircandi:headerTitle="@string/candi_section_candi"
+                aircandi:layoutHeader="@layout/temp_section_header"
+                android:orientation="vertical" >
+
+                <com.aircandi.ui.widgets.HorizontalScrollLayout
+                    android:id="@+id/list_candi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    aircandi:layout="@layout/temp_place_photo_item"
+                    android:fillViewport="true"
+                    android:visibility="visible" />
+            </com.aircandi.ui.widgets.SectionLayout>
+
+            <com.aircandi.ui.widgets.UserView
+                android:id="@+id/author"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minWidth="175dp" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
-    
+
     <!-- Footer -->
 
     <View
@@ -85,7 +139,6 @@
                 android:visibility="visible" />
 
             <TextView
-                android:id="@+id/button_new_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

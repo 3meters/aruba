@@ -1039,6 +1039,7 @@ public class ProxiExplorer {
 									Entity sourceEntity = loadEntityFromResources(R.raw.source_comments);
 									sourceEntity.id += "." + entity.id;
 									sourceEntity.source = "comments";
+									sourceEntity.commentCount = entity.commentCount;
 									sourceEntity.sourceId = entity.id;
 									sourceEntity.parentId = entity.id;
 									upsertEntity(sourceEntity);

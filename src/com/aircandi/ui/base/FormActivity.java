@@ -412,8 +412,7 @@ public abstract class FormActivity extends SherlockActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	protected void showChangePictureDialog(final boolean showFacebookOption
-			, final boolean showPlaceOption
+	protected void showChangePictureDialog(final boolean showPlaceOption
 			, final String defaultUri
 			, final String defaultSearch
 			, final String entityId
@@ -424,10 +423,7 @@ public abstract class FormActivity extends SherlockActivity {
 		mImageRequestWebImageView = webImageView;
 
 		Integer listId = R.array.dialog_list_picture_sources;
-		if (showFacebookOption) {
-			listId = R.array.dialog_list_picture_sources_facebook;
-		}
-		else if (showPlaceOption) {
+		if (showPlaceOption) {
 			listId = R.array.dialog_list_picture_sources_place;
 		}
 
@@ -444,7 +440,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 			public void onClick(DialogInterface dialog, int item) {
 
-				if (showFacebookOption) {
+				if (showPlaceOption) {
 					if (item == 0) {
 						pictureSearch(defaultSearch);
 					}
@@ -455,24 +451,7 @@ public abstract class FormActivity extends SherlockActivity {
 						takePicture();
 					}
 					else if (item == 3) {
-						useFacebook();
-					}
-					else if (item == 4) {
-						usePictureDefault(defaultUri);
-					}
-				}
-				else if (showPlaceOption) {
-					if (item == 0) {
 						pickPicturePlace(entityId);
-					}
-					else if (item == 1) {
-						pictureSearch(defaultSearch);
-					}
-					else if (item == 2) {
-						pickPicture();
-					}
-					else if (item == 3) {
-						takePicture();
 					}
 					else if (item == 4) {
 						usePictureDefault(defaultUri);

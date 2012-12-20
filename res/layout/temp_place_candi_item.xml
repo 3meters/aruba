@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
@@ -8,6 +8,7 @@
         android:id="@+id/image"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:layout_centerInParent="true"
         aircandi:layout="@layout/widget_webimageview_framed"
         aircandi:maxHeight="100dp"
         aircandi:maxWidth="100dp"
@@ -17,4 +18,15 @@
         android:onClick="onCandiClick"
         android:scaleType="centerCrop" />
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="top|right"
+        android:layout_margin="8dp"
+        android:text="@string/dummy_number"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/accent_blue"
+        android:visibility="gone" />
+
+</RelativeLayout>

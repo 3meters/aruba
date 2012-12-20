@@ -43,14 +43,14 @@ public class CandiPagerAdapter extends PagerAdapter {
 		ViewGroup candiInfoView = null;
 
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-			candiInfoView = (ViewGroup) mInflater.inflate(R.layout.temp_candi_form_post, null);
+			candiInfoView = (ViewGroup) mInflater.inflate(R.layout.candi_form_post, null);
 		}
 		else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			candiInfoView = (ViewGroup) mInflater.inflate(R.layout.temp_candi_form_place, null);
+			candiInfoView = (ViewGroup) mInflater.inflate(R.layout.candi_form_place, null);
 			((ViewStub) candiInfoView.findViewById(R.id.stub_switchboard)).inflate();
 		}
 		else {
-			candiInfoView = (ViewGroup) mInflater.inflate(R.layout.temp_candi_form, null);
+			candiInfoView = (ViewGroup) mInflater.inflate(R.layout.candi_form_base, null);
 		}
 
 		candiInfoView = CandiForm.buildCandiForm(mContext, entity, candiInfoView, null, false);

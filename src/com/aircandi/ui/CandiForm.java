@@ -1,7 +1,6 @@
 package com.aircandi.ui;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -11,14 +10,15 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +28,6 @@ import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AndroidManager;
-import com.aircandi.components.CandiPagerAdapter;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.DrawableManager.ViewHolder;
 import com.aircandi.components.FontManager;
@@ -67,7 +66,9 @@ import com.aircandi.utilities.ImageUtils;
 public class CandiForm extends CandiActivity {
 
 	protected List<Entity>	mEntitiesForPaging	= new ArrayList<Entity>();
-	protected ViewPager		mViewPager;
+	protected ScrollView	mScrollView;
+	protected ViewGroup		mContentView;
+	protected ViewGroup		mCandiForm;
 	protected Entity		mEntity;
 	protected Number		mEntityModelRefreshDate;
 	protected Number		mEntityModelActivityDate;
@@ -82,11 +83,31 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void initialize() {
+		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mContentView = (ViewGroup) findViewById(R.id.candi_body);
+
+		Integer candiFormResId = R.layout.candi_form_base;
+		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
+			candiFormResId = R.layout.candi_form_post;
+		}
+		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			candiFormResId = R.layout.candi_form_place;
+		}
+
+		ViewGroup body = (ViewGroup) inflater.inflate(candiFormResId, null);
+		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			((ViewStub) body.findViewById(R.id.stub_switchboard)).inflate();
+		}
+
+		mCandiForm = (ViewGroup) body.findViewById(R.id.candi_form);
+		mScrollView = (ScrollView) body.findViewById(R.id.scroll_view);
+		mContentView.addView(body, 0);
+		
 		/* Font for button bar */
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_comment));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_edit));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_move));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_new_text));
+		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_comment));
+		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_edit));
+		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_move));
+		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_new_text));
 	}
 
 	public void bind(Boolean refresh) {
@@ -139,7 +160,7 @@ public class CandiForm extends CandiActivity {
 							entities = new ArrayList<Entity>();
 							entities.add(mEntity);
 						}
-						updateViewPager(entities);
+						draw();
 					}
 				}
 				else {
@@ -156,6 +177,11 @@ public class CandiForm extends CandiActivity {
 		 * Called from AircandiCommon
 		 */
 		bind(true);
+	}
+
+	public void draw() {
+		CandiForm.buildCandiForm(this, mEntity, mContentView, null, false);
+		mCandiForm.setVisibility(View.VISIBLE);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -423,6 +449,22 @@ public class CandiForm extends CandiActivity {
 				}
 			}
 		}
+	}
+
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putIntArray("ARTICLE_SCROLL_POSITION", new int[] { mScrollView.getScrollX(), mScrollView.getScrollY() });
+	}
+
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
+		if (position != null)
+			mScrollView.post(new Runnable() {
+				public void run() {
+					mScrollView.scrollTo(position[0], position[1]);
+				}
+			});
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -791,6 +833,7 @@ public class CandiForm extends CandiActivity {
 
 	static private void drawCandi(Context context, FlowLayout layout, List<Entity> entities) {
 
+		layout.removeAllViews();
 		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		View parentView = (View) layout.getParent();
@@ -820,6 +863,13 @@ public class CandiForm extends CandiActivity {
 		for (Entity entity : entities) {
 			View view = inflater.inflate(R.layout.temp_place_candi_item, null);
 			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+			TextView title = (TextView) view.findViewById(R.id.title);
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+				if (entity.source.equals("comments")) {
+					title.setText(String.valueOf(entity.commentCount));
+					title.setVisibility(View.VISIBLE);
+				}
+			}
 
 			String imageUri = entity.getImageUri();
 			ImageRequestBuilder builder = new ImageRequestBuilder(webImageView)
@@ -978,56 +1028,6 @@ public class CandiForm extends CandiActivity {
 		}
 	}
 
-	protected void updateViewPager(List<Entity> entitiesForPaging)
-	{
-		if (mViewPager == null) {
-
-			mViewPager = (ViewPager) findViewById(R.id.view_pager);
-
-			/*
-			 * We clone the collection so our updates don't impact the entity model that
-			 * radar relies on. When radar resumes, it should pickup any changes made so it
-			 * stays consistent with what the user sees in candi form.
-			 */
-			for (Entity entity : entitiesForPaging) {
-				mEntitiesForPaging.add(entity);
-			}
-
-			mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-
-				@Override
-				public void onPageSelected(int position) {
-					mEntity = mEntitiesForPaging.get(position);
-				}
-			});
-
-			mViewPager.setAdapter(new CandiPagerAdapter(this, mViewPager, mEntitiesForPaging));
-
-			synchronized (mEntitiesForPaging) {
-				for (int i = 0; i < mEntitiesForPaging.size(); i++) {
-					if (mEntitiesForPaging.get(i).id.equals(mEntity.id)) {
-						mViewPager.setCurrentItem(i, false);
-						break;
-					}
-				}
-			}
-
-		}
-		else {
-
-			/* Replace the entity in our local collection */
-			for (int i = 0; i < mEntitiesForPaging.size(); i++) {
-				Entity entityOld = mEntitiesForPaging.get(i);
-				if (entityOld.id.equals(mEntity.id) || entityOld.id.equals(mEntity.place.sourceId)) {
-					mEntitiesForPaging.set(i, mEntity);
-					break;
-				}
-			}
-
-			mViewPager.getAdapter().notifyDataSetChanged();
-		}
-	}
-
 	private void showCandiPicker() {
 		IntentBuilder intentBuilder = new IntentBuilder(this, CandiPicker.class);
 		Intent intent = intentBuilder.create();
@@ -1108,5 +1108,4 @@ public class CandiForm extends CandiActivity {
 	protected int getLayoutId() {
 		return R.layout.candi_form;
 	}
-
 }
