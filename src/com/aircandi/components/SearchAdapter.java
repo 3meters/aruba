@@ -1,6 +1,5 @@
 package com.aircandi.components;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
@@ -8,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
@@ -16,6 +14,8 @@ import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.components.SearchManager.SearchItemType;
+import com.aircandi.components.images.ImageRequest;
+import com.aircandi.components.images.ImageRequestBuilder;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -23,12 +23,9 @@ import com.aircandi.utilities.ImageUtils;
 
 public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterable {
 
-	private final Object		mLock			= new Object();
 	private List<SearchItem>	mListItems;
 	private LayoutInflater		mInflater;
 	private Integer				mItemLayoutId	= R.layout.temp_listitem_search;
-	@SuppressWarnings("unused")
-	private SuggestionFilter	mSuggestionFilter;
 
 	public SearchAdapter(Context context, List<SearchItem> searchItems, Integer itemLayoutId) {
 		super(context, 0, searchItems);
@@ -48,10 +45,17 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new SearchListViewHolder();
+			
 			holder.itemName = (TextView) view.findViewById(R.id.item_name);
-			holder.itemUri = (TextView) view.findViewById(R.id.item_uri);
 			holder.itemCategoryName = (TextView) view.findViewById(R.id.item_category_name);
+			holder.itemUri = (TextView) view.findViewById(R.id.item_uri);
 			holder.itemImage = (WebImageView) view.findViewById(R.id.item_image);
+			
+			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_section_title));
+			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_name));
+			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_category_name));
+			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_uri));
+			
 			view.setTag(holder);
 		}
 		else {
@@ -140,7 +144,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 					holder.itemImage.setImageRequest(imageRequest);
 				}
 				else {
-					holder.itemImage.getImageView().setImageResource(R.drawable.ic_action_globe_light);
+					holder.itemImage.getImageView().setImageResource(R.drawable.source_website_iii);
 				}
 			}
 		}
@@ -183,43 +187,4 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 		public String		itemImageUri;
 		public Object		data;
 	}
-
-	private class SuggestionFilter extends Filter {
-
-		protected FilterResults performFiltering(CharSequence filterType) {
-
-			/* Initiate our results object */
-			FilterResults results = new FilterResults();
-
-			/* If the adapter array is empty, check the actual items array and use it */
-			if (mListItems == null) {
-				synchronized (mLock) { // Notice the declaration above
-					mListItems = new ArrayList<SearchItem>();
-				}
-			}
-
-			/* No prefix is sent to filter by so we're going to send back the original array */
-			if (filterType == null || filterType.length() == 0) {
-				synchronized (mLock) {
-					results.values = mListItems;
-					results.count = mListItems.size();
-				}
-			}
-			else {}
-			return results;
-		}
-
-		protected void publishResults(CharSequence prefix, FilterResults results) {
-
-			mListItems = (ArrayList<SearchItem>) results.values;
-			/* Let the adapter know about the updated list */
-			if (results.count > 0) {
-				notifyDataSetChanged();
-			}
-			else {
-				notifyDataSetInvalidated();
-			}
-		}
-	}
-
 }

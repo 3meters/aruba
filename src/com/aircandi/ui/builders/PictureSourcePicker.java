@@ -21,45 +21,61 @@ import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.FontManager;
+import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.Template;
+import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.FormActivity;
 
-public class TemplatePicker extends FormActivity implements OnItemClickListener {
+public class PictureSourcePicker extends FormActivity implements OnItemClickListener {
 
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
 	private TextView	mTextViewMessage;
 	private TextView	mTitle;
+	private String		mEntityId;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
-		
+
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		initialize();
 	}
 
 	private void initialize() {
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			mEntityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
+		}
 
 		/* Shown as a dialog so doesn't have an action bar */
 		List<Object> listData = new ArrayList<Object>();
-		if (mCommon.mThemeTone.equals("dark")) {
-			listData.add(new Template(R.drawable.ic_action_edit_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
-			listData.add(new Template(R.drawable.ic_action_picture_dark, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
+		Integer iconResId = R.drawable.ic_action_picture_dark;
+		if (mCommon.mThemeTone.equals("light")) {
+			iconResId = R.drawable.ic_action_picture_light;
 		}
-		else {
-			listData.add(new Template(R.drawable.ic_action_edit_light, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
-			listData.add(new Template(R.drawable.ic_action_picture_light, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
+		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_search), null, "search"));
+		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_gallery), null, "gallery"));
+		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_camera), null, "camera"));
+		
+		if (mEntityId != null) {
+			Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mEntityId);
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+				if (entity.place != null && entity.place.photos != null && entity.place.photos.size() > 0) {
+					listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_place), null, "place"));
+				}
+			}
 		}
+		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_none), null, "none"));
 
 		mTitle = (TextView) findViewById(R.id.custom_title);
-		mTitle.setText(R.string.dialog_template_picker_title);
-		
+		mTitle.setText(R.string.dialog_picture_source_title);
+
 		mListAdapter = new ListAdapter(this, listData);
 		mListView = (ListView) findViewById(R.id.form_list);
 		mTextViewMessage = (TextView) findViewById(R.id.text_message);
-		mTextViewMessage.setText(R.string.dialog_template_picker_message_folder);
+		mTextViewMessage.setText(R.string.dialog_picture_source_message);
 		mListView.setAdapter(mListAdapter);
 		mListView.setOnItemClickListener(this);
 
@@ -76,7 +92,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Template template = (Template) view.getTag();
 		Intent intent = new Intent();
-		intent.putExtra(CandiConstants.EXTRA_ENTITY_TYPE, template.type);
+		intent.putExtra(CandiConstants.EXTRA_PICTURE_SOURCE, template.type);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
 	}
@@ -126,6 +142,6 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.template_picker;
+		return R.layout.picture_source_picker;
 	}
 }

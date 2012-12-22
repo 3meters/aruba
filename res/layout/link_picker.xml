@@ -1,47 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/backgroundForm"
-     >
+    android:layout_height="match_parent" >
 
     <LinearLayout
         android:id="@+id/group_uri"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_margin="5dp"
+        android:padding="5dp"
+        android:layout_marginBottom="5dp"
         android:orientation="horizontal" >
 
         <EditText
-            android:id="@+id/text_uri"
+            android:id="@+id/uri"
             android:layout_width="0dip"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center|left"
             android:hint="@string/form_uri_hint"
             android:inputType="textUri"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:textAppearance="@style/app_text_appearance_small" />
 
         <Button
-            android:id="@+id/btn_link_test"
+            android:id="@+id/button_test"
             style="@style/form_button"
-            android:layout_width="wrap_content"
+            android:layout_width="60dp"
             android:layout_height="40dp"
             android:onClick="onLinkTestButtonClick"
             android:text="@string/form_button_test_link" />
     </LinearLayout>
 
     <com.aircandi.ui.widgets.BounceListView
-        android:id="@+id/list_bookmarks"
+        android:id="@+id/form_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
-        android:layout_below="@+id/group_uri"
-        android:background="?attr/backgroundForm"
-        android:cacheColorHint="#00000000"
-        android:listSelector="#00000000" 
-        android:padding="5dp">
+        android:layout_below="@+id/group_uri" >
 
         <!-- Preview: listitem=@layout/temp_listitem_bookmark -->
     </com.aircandi.ui.widgets.BounceListView>
@@ -57,6 +53,7 @@
         android:gravity="center_horizontal" >
 
         <Button
+            android:id="@+id/button_cancel"
             style="@style/form_button_borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -64,8 +61,9 @@
             android:maxWidth="150dp"
             android:onClick="onCancelButtonClick"
             android:text="@string/form_button_cancel" />
+
         <Button
-            android:id="@+id/btn_ok"
+            android:id="@+id/button_ok"
             style="@style/form_button_borderless"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
@@ -74,7 +72,6 @@
             android:maxWidth="150dp"
             android:onClick="onOkButtonClick"
             android:text="@string/form_button_ok" />
-
     </LinearLayout>
 
 </RelativeLayout>

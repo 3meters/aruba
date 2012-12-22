@@ -16,12 +16,14 @@
 
     <TextView
         android:id="@+id/item_section_title"
-        style="@style/app_text_appearance_large_accent"
+        style="@style/app_text_appearance_medium"
+        android:textColor="@color/text_secondary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:gravity="center_vertical"
         android:padding="5dp"
+        android:visibility="gone"
         android:text="@string/dummy_title" />
 
     <com.aircandi.ui.widgets.WebImageView
@@ -44,8 +46,10 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/item_section_title"
         android:layout_marginTop="3dp"
+        android:maxLines="1"
         android:layout_toRightOf="@+id/item_image"
-        android:text="@string/dummy_title" />
+        android:text="@string/dummy_title"
+        android:textAppearance="@style/app_text_appearance_small" />
 
     <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/item_category_name"
@@ -54,7 +58,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/item_name"
         android:layout_toRightOf="@+id/item_image"
-        android:text="@string/dummy_category_name" />
+        android:text="@string/dummy_category_name"
+        android:textAppearance="@style/app_text_appearance_small" />
 
     <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/item_uri"
@@ -63,7 +68,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/item_category_name"
         android:layout_toRightOf="@+id/item_image"
+        android:maxLines="1"
         android:paddingBottom="3dp"
-        android:text="@string/dummy_uri" />
+        android:text="@string/dummy_uri"
+        android:textAppearance="@style/app_text_appearance_small" />
 
 </RelativeLayout>

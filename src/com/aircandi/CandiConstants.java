@@ -41,6 +41,7 @@ public interface CandiConstants {
 	public static final String	EXTRA_SEARCH_PHRASE						= "com.aircandi.EXTRA_SEARCH_PHRASE";
 	public static final String	EXTRA_AS_PICKER							= "com.aircandi.EXTRA_AS_PICKER";
 	public static final String	EXTRA_LIST_TYPE							= "com.aircandi.EXTRA_LIST_TARGET";
+	public static final String	EXTRA_PICTURE_SOURCE					= "com.aircandi.EXTRA_PICTURE_SOURCE";
 
 	public static final int		MILLS_PER_SECOND						= 1000;
 	public static final int		TIME_ONE_SECOND							= MILLS_PER_SECOND * 1;
@@ -174,6 +175,7 @@ public interface CandiConstants {
 	public static final int		ACTIVITY_ADDRESS_EDIT					= 800;
 	public static final int		ACTIVITY_CATEGORY_EDIT					= 810;
 	public static final int		ACTIVITY_ENTITY_EDIT					= 900;
+	public static final int		ACTIVITY_PICTURE_SOURCE_PICK			= 950;
 
 	public static final int		RESULT_ENTITY_INSERTED					= 100;
 	public static final int		RESULT_ENTITY_UPDATED					= 110;

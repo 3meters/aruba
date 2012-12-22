@@ -36,7 +36,6 @@ import com.aircandi.components.Events;
 import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.ImageManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
@@ -46,6 +45,7 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityModel;
 import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.images.ImageManager;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
@@ -866,7 +866,7 @@ public class CandiRadar extends CandiActivity {
 
 		/* Don't count on this always getting called when this activity is killed */
 		try {
-			ImageManager.getInstance().getImageLoader().stopLoaderThread();
+			ImageManager.getInstance().getImageLoader().stopImageLoaderThread();
 		}
 		catch (Exception exception) {
 			Exceptions.Handle(exception);

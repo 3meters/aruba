@@ -81,5 +81,4 @@ public class PhotoPagerAdapter extends PagerAdapter {
 	public void setPhotos(List<Photo> photos) {
 		mPhotos = photos;
 	}
-
 }

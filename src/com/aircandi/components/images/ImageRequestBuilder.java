@@ -1,6 +1,6 @@
-package com.aircandi.components;
+package com.aircandi.components.images;
 
-import com.aircandi.components.ImageRequest.ImageShape;
+import com.aircandi.components.images.ImageRequest.ImageShape;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;

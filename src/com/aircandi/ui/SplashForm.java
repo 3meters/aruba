@@ -1,6 +1,7 @@
 package com.aircandi.ui;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -14,12 +15,13 @@ import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.ImageCache;
-import com.aircandi.components.ImageManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.images.ImageCache;
+import com.aircandi.components.images.ImageManager;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
@@ -70,6 +72,10 @@ public class SplashForm extends SherlockActivity {
 		ImageManager.getInstance().setImageCache(new ImageCache(getApplicationContext(), CandiConstants.CACHE_PATH, 100, 16));
 		ImageManager.getInstance().setFileCacheOnly(true);
 		ImageManager.getInstance().setActivity(this);
+		
+		/* Cache categories */
+		loadCategories();
+		
 
 		Aircandi.firstStartApp = false;
 	}
@@ -101,6 +107,17 @@ public class SplashForm extends SherlockActivity {
 		Intent intent = new Intent(this, CandiRadar.class);
 		startActivity(intent);
 		finish();
+	}
+	
+	public void loadCategories() {
+		new AsyncTask<Object, Object, Object>() {
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().loadCategories();
+				return result;
+			}
+		}.execute();
 	}
 
 	// --------------------------------------------------------------------------------------------

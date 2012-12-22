@@ -182,6 +182,9 @@
     <string name="radar_button_tune">tune it!</string>
     <string name="radar_section_places">tuned</string>
     <string name="radar_section_synthetics">nearby</string>
+    
+    <!-- Dialogs -->
+    
     <string name="dialog_map_title">Aircandi beacon</string>
     <string name="dialog_map_message">This beacon has:\n\n</string>
     <string name="dialog_network_message_wifi_tethered">Aircandi radar can\'t scan for candi because your device is currently tethered and acting as a Wifi hotspot. Please turn off tethering and try again.</string>
@@ -196,11 +199,27 @@
     <string name="dialog_install_toast_package_installed"> has been installed. Tap the candi to launch.</string>
     <string name="dialog_info">Copyright 3meters LLC 2012</string>
     <string name="dialog_button_cancel">cancel</string>
-    <string name="dialog_change_picture_title">Select picture…</string>
-    <string name="dialog_template_picker_title">Select template</string>
-    <string name="dialog_template_picker_message_top">Create and share candi with Aircandi users!</string>
-    <string name="dialog_template_picker_message_folder">Add and share candi in this folder.</string>
+    
+    <string name="dialog_change_picture_title">select picture</string>
+    <string name="dialog_template_picker_title">select candi type</string>
+    <string name="dialog_address_builder_title">address</string>
+    <string name="dialog_category_builder_title">category</string>
+    <string name="dialog_link_picker_title">website</string>
+    <string name="dialog_picture_source_picker_title">category</string>
+    <string name="dialog_picture_picker_search_title">picture search</string>
+    <string name="dialog_picture_picker_place_title">place pictures</string>
+    
+    <string name="dialog_template_picker_message_top">Create and share candi with Aircandi users at this place!</string>
+    <string name="dialog_template_picker_message_folder">Create and share candi at this place.</string>
 
+    <string name="dialog_picture_source_title">select picture</string>
+    <string name="dialog_picture_source_search">Search for pictures</string>
+    <string name="dialog_picture_source_gallery">Select a gallery picture</string>
+	<string name="dialog_picture_source_camera">Take a new picture</string>
+	<string name="dialog_picture_source_place">Select a place picture</string>
+    <string name="dialog_picture_source_none">None</string>
+    <string name="dialog_picture_source_message">Select a picture.</string>
+    
     <!-- Help -->
 
     <string name="help_radar">
@@ -296,10 +315,7 @@
     <string name="form_title_comment_list">comments</string>
     <string name="form_title_picture_form">picture viewer</string>
     <string name="form_title_map_browse">location</string>
-    <string name="form_title_templates">templates</string>
-    <string name="form_title_category_builder">category</string>
-        <string name="form_title_address_builder">address</string>
-    <string name="form_title_help">aircandi tips</string>
+    <string name="form_title_templates">add candi</string>
 
     <!-- Forms.misc -->
 

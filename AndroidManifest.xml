@@ -104,7 +104,7 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".ui.PictureSearch"
+            android:name=".ui.builders.PicturePicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_search"
             android:windowSoftInputMode="stateHidden" >
@@ -119,26 +119,6 @@
             android:name=".ui.TipList"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/name_app"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
-        <activity
-            android:name=".ui.builders.LinkPicker"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_link_picker"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
-        <activity
-            android:name=".ui.builders.TemplatePicker"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:icon="@drawable/ic_collection_250"
-            android:label="@string/form_title_templates"
-            android:theme="@style/Theme.Sherlock.Dialog"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
-        <activity
-            android:name=".ui.builders.CandiPicker"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_candi_picker"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
@@ -166,25 +146,56 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
+            android:name=".ui.PictureDetail"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_picture_browse"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+
+        <!-- Builders/pickers -->
+
+        <activity
+            android:name=".ui.builders.TemplatePicker"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_templates"
+            android:theme="@style/Theme.Sherlock.Light.Dialog"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name=".ui.builders.PictureSourcePicker"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Theme.Sherlock.Light.Dialog"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name=".ui.builders.CandiPicker"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_candi_picker"
+            android:theme="@style/Theme.Sherlock.Light.Dialog"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name=".ui.builders.LinkPicker"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_link_picker"
+            android:theme="@style/Theme.Sherlock.Light.Dialog"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
             android:name=".ui.builders.AddressBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_address_builder"
             android:theme="@style/Theme.Sherlock.Light.Dialog"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".ui.builders.CategoryBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_category_builder"
             android:theme="@style/Theme.Sherlock.Light.Dialog"
             android:windowSoftInputMode="stateHidden" >
         </activity>
-        <activity
-            android:name=".ui.PictureDetail"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_picture_browse"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
+
+        <!-- Misc -->
+
         <activity
             android:name=".ui.Preferences"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -209,7 +220,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
     <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />    -->
 
 </manifest>

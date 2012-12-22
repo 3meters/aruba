@@ -20,15 +20,15 @@ import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.ImageRequest;
-import com.aircandi.components.ImageRequest.ImageResponse;
-import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.images.ImageRequest;
+import com.aircandi.components.images.ImageRequestBuilder;
+import com.aircandi.components.images.ImageRequest.ImageResponse;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
@@ -194,18 +194,18 @@ public class ProfileForm extends FormActivity {
 	}
 
 	public void onChangePictureButtonClick(View view) {
-		showChangePictureDialog(false, null, null, null, mImageUser, new RequestListener() {
-
-			@Override
-			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
-
-				ServiceResponse serviceResponse = (ServiceResponse) response;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mUser.getPhoto().setImageUri(imageUri);
-					mUserBitmap = imageBitmap;
-				}
-			}
-		});
+//		showChangePictureDialog(false, null, null, null, mImageUser, new RequestListener() {
+//
+//			@Override
+//			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
+//
+//				ServiceResponse serviceResponse = (ServiceResponse) response;
+//				if (serviceResponse.responseCode == ResponseCode.Success) {
+//					mUser.getPhoto().setImageUri(imageUri);
+//					mUserBitmap = imageBitmap;
+//				}
+//			}
+//		});
 	}
 
 	public void onChangePasswordButtonClick(View view) {

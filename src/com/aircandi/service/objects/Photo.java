@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import android.graphics.Bitmap;
 
+import com.aircandi.components.images.ImageResult;
+import com.aircandi.components.images.ImageResult.Thumbnail;
 import com.aircandi.service.Expose;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Entity.ImageFormat;
@@ -92,6 +94,17 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		}
 
 		return photo;
+	}
+	
+	public ImageResult getAsImageResult() {
+		ImageResult imageResult = new ImageResult();
+		imageResult.setWidth(width.longValue());
+		imageResult.setHeight(height.longValue());
+		imageResult.setMediaUrl(getImageUri());
+		Thumbnail thumbnail = new Thumbnail();
+		thumbnail.setUrl(getImageSizedUri(100, 100));
+		imageResult.setThumbnail(thumbnail);
+		return imageResult;
 	}
 
 	public void setImageUri(String imageUri) {

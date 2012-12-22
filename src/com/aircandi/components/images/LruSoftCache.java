@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.aircandi.components;
+package com.aircandi.components.images;
 
 import java.lang.ref.SoftReference;
 import java.util.LinkedHashMap;

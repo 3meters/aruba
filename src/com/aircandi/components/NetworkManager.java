@@ -66,7 +66,9 @@ public class NetworkManager {
 		 * Don't assume this is being called from the UI thread.
 		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
-		AircandiCommon.mNotificationManager.cancel(CandiConstants.NOTIFICATION_NETWORK);
+		if (AircandiCommon.mNotificationManager != null) {
+			AircandiCommon.mNotificationManager.cancel(CandiConstants.NOTIFICATION_NETWORK);
+		}
 
 		/* Make sure we have a network connection */
 		if (!verifyIsConnected()) {

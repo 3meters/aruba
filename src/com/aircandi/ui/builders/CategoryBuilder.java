@@ -14,14 +14,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.ImageRequest;
-import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.images.ImageRequest;
+import com.aircandi.components.images.ImageRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Category;
@@ -36,6 +37,7 @@ public class CategoryBuilder extends FormActivity {
 	private WebImageView	mImage;
 	private Spinner			mSpinnerCategory;
 	private Spinner			mSpinnerSubcategory;
+	private TextView	mTitle;
 
 	private Category		mCategory;
 	private Integer			mCategoryIndex;
@@ -46,7 +48,9 @@ public class CategoryBuilder extends FormActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		initialize();
 	}
 
@@ -61,6 +65,12 @@ public class CategoryBuilder extends FormActivity {
 		mImage = (WebImageView) findViewById(R.id.image);
 		mSpinnerCategory = (Spinner) findViewById(R.id.category);
 		mSpinnerSubcategory = (Spinner) findViewById(R.id.sub_category);
+		mTitle = (TextView) findViewById(R.id.custom_title);
+		mTitle.setText(R.string.dialog_category_builder_title);
+		
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 
 		if (ProxiExplorer.getInstance().getEntityModel().getCategories().size() == 0) {
 			loadCategories();

@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.components.images;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,6 +15,8 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 
 import com.aircandi.CandiConstants;
+import com.aircandi.components.Exceptions;
+import com.aircandi.components.Logger;
 
 /**
  * <p>

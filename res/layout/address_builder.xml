@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="350dp" >
+    android:layout_height="match_parent" >
 
     <com.aircandi.ui.widgets.BounceScrollView
         android:layout_width="match_parent"
@@ -26,7 +26,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_address_hint"
-                android:inputType="textPostalAddress" />
+                android:inputType="textPostalAddress"
+                android:textAppearance="@style/app_text_appearance_small" />
 
             <EditText
                 android:id="@+id/cross_street"
@@ -34,7 +35,8 @@
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_cross_street_hint"
                 android:inputType="textPostalAddress"
-                android:nextFocusDown="@+id/city" />
+                android:nextFocusDown="@+id/city"
+                android:textAppearance="@style/app_text_appearance_small" />
 
             <EditText
                 android:id="@+id/city"
@@ -42,7 +44,8 @@
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_city_hint"
                 android:inputType="textCapWords"
-                android:nextFocusDown="@+id/state" />
+                android:nextFocusDown="@+id/state"
+                android:textAppearance="@style/app_text_appearance_small" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -56,7 +59,8 @@
                     android:layout_weight="1"
                     android:hint="@string/form_state_hint"
                     android:inputType="textCapCharacters"
-                    android:nextFocusDown="@+id/zip_code" />
+                    android:nextFocusDown="@+id/zip_code"
+                    android:textAppearance="@style/app_text_appearance_small" />
 
                 <EditText
                     android:id="@+id/zip_code"
@@ -65,7 +69,8 @@
                     android:layout_weight="1"
                     android:hint="@string/form_zipcode_hint"
                     android:inputType="number"
-                    android:nextFocusDown="@+id/phone" />
+                    android:nextFocusDown="@+id/phone"
+                    android:textAppearance="@style/app_text_appearance_small" />
             </LinearLayout>
 
             <EditText
@@ -73,7 +78,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_phone_hint"
-                android:inputType="phone" />
+                android:inputType="phone"
+                android:textAppearance="@style/app_text_appearance_small" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 
@@ -88,6 +94,7 @@
         android:gravity="center_horizontal" >
 
         <Button
+            android:id="@+id/button_cancel"
             style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -96,7 +103,7 @@
             android:text="@string/form_button_cancel" />
 
         <Button
-            android:id="@+id/btn_save"
+            android:id="@+id/button_save"
             style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -71,6 +71,7 @@ import com.aircandi.ui.SignInForm;
 import com.aircandi.ui.SplashForm;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.builders.CandiPicker;
+import com.aircandi.ui.builders.PictureSourcePicker;
 import com.aircandi.ui.builders.TemplatePicker;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -370,6 +371,15 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Intent intent = new Intent(mActivity, TemplatePicker.class);
 		intent.putExtra(CandiConstants.EXTRA_ENTITY_IS_ROOT, isRoot);
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_TEMPLATE_PICK);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+	}
+
+	public void showPictureSourcePicker(String entityId) {
+		Intent intent = new Intent(mActivity, PictureSourcePicker.class);
+		if (entityId != null) {
+			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, entityId);
+		}
+		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
 

@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.components.images;
 
 import android.graphics.Bitmap;
 

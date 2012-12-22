@@ -29,11 +29,7 @@ import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.CommandType;
-import com.aircandi.components.DrawableManager.ViewHolder;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.ImageManager;
-import com.aircandi.components.ImageRequest;
-import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -41,6 +37,10 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityListType;
 import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.images.ImageManager;
+import com.aircandi.components.images.ImageRequest;
+import com.aircandi.components.images.ImageRequestBuilder;
+import com.aircandi.components.images.DrawableManager.ViewHolder;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.ImageFormat;
@@ -952,11 +952,14 @@ public class CandiForm extends CandiActivity {
 		if (entity.locked != null && !entity.locked) {
 			setVisibility(layout.findViewById(R.id.button_comment), View.VISIBLE);
 		}
-
-		if (entity.creatorId != null && entity.creatorId.equals(Aircandi.getInstance().getUser().id)) {
+		
+		if (entity.ownerId != null && entity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 			setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
-			if (entity.isCollection == null || !entity.isCollection) {
-				setVisibility(layout.findViewById(R.id.button_move), View.VISIBLE);
+		}
+		else {
+			if (Aircandi.getInstance().getUser().isDeveloper) {
+				setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
+				((Button) layout.findViewById(R.id.button_edit)).setTextColor(ImageUtils.hexToColor("#ff888888"));
 			}
 		}
 

@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.components.images;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -15,9 +15,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.ImageView;
 
-import com.aircandi.components.ImageRequest.ImageResponse;
+import com.aircandi.components.GifDecoder;
+import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.images.ImageRequest.ImageResponse;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
@@ -45,6 +47,7 @@ public class DrawableManager {
 		synchronized (mBitmapCache) {
 			if (mBitmapCache.containsKey(uri) && mBitmapCache.get(uri).get() != null) {
 				Bitmap bitmap = mBitmapCache.get(uri).get();
+				
 				if (listener != null) {
 					bitmap = listener.onFilter(bitmap);
 				}
@@ -67,6 +70,7 @@ public class DrawableManager {
 						ServiceResponse serviceResponse = (ServiceResponse) message.obj;
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+							
 							if (listener != null) {
 								imageResponse.bitmap = listener.onFilter(imageResponse.bitmap);
 							}
@@ -99,7 +103,7 @@ public class DrawableManager {
 				.setUri(uri)
 				.setRequestType(RequestType.Get)
 				.setResponseFormat(ResponseFormat.Bytes)
-				.setRequestListener(listener);;
+				.setRequestListener(listener);
 
 		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 

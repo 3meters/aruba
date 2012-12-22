@@ -21,6 +21,7 @@
         android:id="@+id/item_title"
         android:layout_width="match_parent"
         android:layout_height="40dp"
+		android:textAppearance="@style/app_text_appearance_small"
         android:gravity="center_vertical"
         android:layout_centerVertical="true"
         android:layout_marginTop="3dp"

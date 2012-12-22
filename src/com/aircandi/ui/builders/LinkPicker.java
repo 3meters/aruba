@@ -17,10 +17,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -40,6 +43,7 @@ import com.aircandi.utilities.MiscUtils;
 @SuppressWarnings("unused")
 public class LinkPicker extends FormActivity {
 
+	private TextView			mTitle;
 	private ListView			mListView;
 	private EditText			mTextUri;
 	private String				mUri;
@@ -53,8 +57,10 @@ public class LinkPicker extends FormActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
 
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		initialize();
 	}
 
@@ -66,10 +72,20 @@ public class LinkPicker extends FormActivity {
 			mUri = extras.getString(CandiConstants.EXTRA_URI);
 		}
 
-		mListView = (ListView) findViewById(R.id.list_bookmarks);
-		mOkButton = (Button) findViewById(R.id.btn_ok);
-		mTestButton = (Button) findViewById(R.id.btn_link_test);
-		mTextUri = (EditText) findViewById(R.id.text_uri);
+		mListView = (ListView) findViewById(R.id.form_list);
+		mOkButton = (Button) findViewById(R.id.button_ok);
+		mTestButton = (Button) findViewById(R.id.button_test);
+		mTextUri = (EditText) findViewById(R.id.uri);
+
+		mTitle = (TextView) findViewById(R.id.custom_title);
+		mTitle.setText(R.string.dialog_link_picker_title);
+
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_ok));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_test));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.uri));
+
 		if (mUri != null) {
 			mTextUri.setText(mUri);
 		}
@@ -97,10 +113,6 @@ public class LinkPicker extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				List<SearchItem> placeSuggestions = SearchManager.getInstance().getPlaceSuggestions();
-				if (placeSuggestions != null) {
-					mSearchItems.addAll(placeSuggestions);
-				}
 				List<SearchItem> bookmarks = SearchManager.getInstance().getBookmarks(getContentResolver());
 				if (bookmarks != null) {
 					mSearchItems.addAll(bookmarks);
@@ -284,6 +296,11 @@ public class LinkPicker extends FormActivity {
 	@Override
 	protected int getLayoutID() {
 		return R.layout.link_picker;
+	}
+
+	@Override
+	protected Boolean isDialog() {
+		return true;
 	}
 
 }

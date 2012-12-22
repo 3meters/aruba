@@ -22,8 +22,6 @@ import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.ImageRequest;
-import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -31,6 +29,8 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.images.ImageRequest;
+import com.aircandi.components.images.ImageRequestBuilder;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
@@ -38,10 +38,10 @@ import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Location;
+import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.builders.AddressBuilder;
 import com.aircandi.ui.builders.CategoryBuilder;
@@ -156,7 +156,7 @@ public class EntityForm extends FormActivity {
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_image));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.twitter));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.facebook));
-			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_uri));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.uri));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_title));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.description));
 
@@ -234,9 +234,9 @@ public class EntityForm extends FormActivity {
 				}
 			}
 			else {
-				if (findViewById(R.id.text_uri) != null) {
+				if (findViewById(R.id.uri) != null) {
 					if (!entity.getPhoto().getDetail().isEmpty() && entity.getPhoto().getDetail().getImageFormat() == ImageFormat.Html) {
-						((TextView) findViewById(R.id.text_uri)).setText(entity.getPhoto().getImageUri());
+						((TextView) findViewById(R.id.uri)).setText(entity.getPhoto().getImageUri());
 					}
 				}
 			}
@@ -266,7 +266,9 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onChangePictureButtonClick(View view) {
-		showChangePictureDialog((mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)), null, null, null, mImageViewPicture, new RequestListener() {
+		mCommon.showPictureSourcePicker(mEntityForForm.id);
+		mImageRequestWebImageView = mImageViewPicture;
+		mImageRequestListener = new RequestListener() {
 
 			@Override
 			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
@@ -290,7 +292,7 @@ public class EntityForm extends FormActivity {
 					}
 				}
 			}
-		});
+		};
 	}
 
 	public void onSaveButtonClick(View view) {
@@ -349,53 +351,78 @@ public class EntityForm extends FormActivity {
 			}
 		}
 		else {
-			if (resultCode == Activity.RESULT_OK && requestCode == CandiConstants.ACTIVITY_ADDRESS_EDIT) {
-				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
+			if (resultCode == Activity.RESULT_OK) {
+				if (requestCode == CandiConstants.ACTIVITY_ADDRESS_EDIT) {
+					if (intent != null && intent.getExtras() != null) {
+						Bundle extras = intent.getExtras();
 
-					String phone = extras.getString(CandiConstants.EXTRA_PHONE);
-					phone = phone.replaceAll("[^\\d.]", "");
-					mEntityForForm.getPlace().getContact().phone = phone;
-					mEntityForForm.getPlace().getContact().formattedPhone = PhoneNumberUtils.formatNumber(phone);
+						String phone = extras.getString(CandiConstants.EXTRA_PHONE);
+						phone = phone.replaceAll("[^\\d.]", "");
+						mEntityForForm.getPlace().getContact().phone = phone;
+						mEntityForForm.getPlace().getContact().formattedPhone = PhoneNumberUtils.formatNumber(phone);
 
-					String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
-					if (jsonAddress != null) {
-						Location locationUpdated = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
-						mEntityForForm.getPlace().location = locationUpdated;
-						((BuilderButton) findViewById(R.id.address)).setText(mEntityForForm.place.location.address);
-					}
-				}
-			}
-			else if (resultCode == Activity.RESULT_OK && requestCode == CandiConstants.ACTIVITY_CATEGORY_EDIT) {
-				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-					String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
-					if (jsonCategory != null) {
-						Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
-						if (categoryUpdated != null) {
-							if (mEntityForForm.getPlace().categories == null) {
-								mEntityForForm.getPlace().categories = new ArrayList<Category>();
-							}
-							mEntityForForm.getPlace().categories.clear();
-							mEntityForForm.getPlace().categories.add(categoryUpdated);
-							((BuilderButton) findViewById(R.id.category)).setText(categoryUpdated.name);
+						String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
+						if (jsonAddress != null) {
+							Location locationUpdated = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
+							mEntityForForm.getPlace().location = locationUpdated;
+							((BuilderButton) findViewById(R.id.address)).setText(mEntityForForm.place.location.address);
 						}
 					}
 				}
-			}
-			else if (resultCode == Activity.RESULT_OK && requestCode == CandiConstants.ACTIVITY_WEBSITE_EDIT) {
-				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-					String linkUri = extras.getString(CandiConstants.EXTRA_URI);
-					if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
-						linkUri = "http://" + linkUri;
+				else if (requestCode == CandiConstants.ACTIVITY_CATEGORY_EDIT) {
+					if (intent != null && intent.getExtras() != null) {
+						Bundle extras = intent.getExtras();
+						String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
+						if (jsonCategory != null) {
+							Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
+							if (categoryUpdated != null) {
+								if (mEntityForForm.getPlace().categories == null) {
+									mEntityForForm.getPlace().categories = new ArrayList<Category>();
+								}
+								mEntityForForm.getPlace().categories.clear();
+								mEntityForForm.getPlace().categories.add(categoryUpdated);
+								((BuilderButton) findViewById(R.id.category)).setText(categoryUpdated.name);
+							}
+						}
 					}
-					mEntityForForm.getPlace().website = linkUri;
-					((BuilderButton) findViewById(R.id.website)).setText(linkUri);
 				}
-			}
-			else {
-				super.onActivityResult(requestCode, resultCode, intent);
+				else if (requestCode == CandiConstants.ACTIVITY_WEBSITE_EDIT) {
+					if (intent != null && intent.getExtras() != null) {
+						Bundle extras = intent.getExtras();
+						String linkUri = extras.getString(CandiConstants.EXTRA_URI);
+						if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
+							linkUri = "http://" + linkUri;
+						}
+						mEntityForForm.getPlace().website = linkUri;
+						((BuilderButton) findViewById(R.id.website)).setText(linkUri);
+					}
+				}
+				else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
+					if (intent != null && intent.getExtras() != null) {
+						Bundle extras = intent.getExtras();
+						final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
+						if (pictureSource != null && !pictureSource.equals("")) {
+							if (pictureSource.equals("search")) {
+								pictureSearch(null);
+							}
+							else if (pictureSource.equals("gallery")) {
+								pictureFromGallery();
+							}
+							else if (pictureSource.equals("camera")) {
+								pictureFromCamera();
+							}
+							else if (pictureSource.equals("place")) {
+								pictureFromPlace(mEntityForForm.id);
+							}
+							else if (pictureSource.equals("none")) {
+								usePictureDefault(null);
+							}
+						}
+					}
+				}
+				else {
+					super.onActivityResult(requestCode, resultCode, intent);
+				}
 			}
 		}
 	}

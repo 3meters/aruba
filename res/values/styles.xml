@@ -36,6 +36,10 @@
         <item name="android:textSize">@dimen/text_size_medium</item>
     </style>
 
+    <style name="app_text_appearance_medium_accent" parent="app_text_appearance_medium">
+        <item name="android:textColor">@color/accent_blue</item>
+    </style>
+    
     <style name="app_text_appearance_small" parent="app_text_appearance">
         <item name="android:textSize">@dimen/text_size_small</item>
     </style>

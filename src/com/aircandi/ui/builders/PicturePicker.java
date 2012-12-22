@@ -1,4 +1,4 @@
-package com.aircandi.ui;
+package com.aircandi.ui.builders;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,20 +22,25 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.Spinner;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.actionbarsherlock.view.Window;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.DrawableManager.ViewHolder;
 import com.aircandi.components.EndlessAdapter;
-import com.aircandi.components.ImageManager;
-import com.aircandi.components.ImageResult;
+import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.images.ImageManager;
+import com.aircandi.components.images.ImageResult;
+import com.aircandi.components.images.DrawableManager.ViewHolder;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestType;
@@ -42,66 +48,109 @@ import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceRequest.AuthType;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.ServiceData;
+import com.aircandi.ui.Preferences;
 import com.aircandi.ui.base.FormActivity;
+import com.aircandi.utilities.ImageUtils;
 
 /*
  * We often will get duplicates because the ordering of images isn't
  * guaranteed while paging.
  */
-public class PictureSearch extends FormActivity {
+public class PicturePicker extends FormActivity {
 
 	private GridView				mGridView;
-	@SuppressWarnings("unused")
-	private Spinner					mCategory;
 	private EditText				mSearch;
 	private ArrayList<ImageResult>	mImages;
-	private long					mOffset		= 0;
+	private TextView				mTitle;
+
+	private long					mOffset			= 0;
 	private String					mQuery;
 	private String					mDefaultSearch;
 	private LayoutInflater			mInflater;
 	private String					mTitleOptional;
-	private static long				PAGE_SIZE	= 30L;
-	private static long				LIST_MAX	= 300L;
+	private Boolean					mPlacePhotoMode	= false;
+	private String					mSource;
+	private String					mSourceId;
+	private Integer					mImageWidthPixels;
+	private Integer					mImageMarginPixels;
+
+	private static long				PAGE_SIZE		= 30L;
+	private static long				LIST_MAX		= 300L;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
 
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		initialize();
 		bind();
 	}
 
 	private void initialize() {
-		Bundle extras = this.getIntent().getExtras();
-		if (extras != null) {
-			mDefaultSearch = extras.getString(CandiConstants.EXTRA_SEARCH_PHRASE);
+		if (mCommon.mEntityId != null) {
+			mPlacePhotoMode = true;
+		}
+
+		if (mPlacePhotoMode) {
+			Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+			mSource = entity.place.source;
+			mSourceId = entity.place.sourceId;
+			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
+		}
+		else {
+			Bundle extras = this.getIntent().getExtras();
+			if (extras != null) {
+				mDefaultSearch = extras.getString(CandiConstants.EXTRA_SEARCH_PHRASE);
+			}
+			mSearch = (EditText) findViewById(R.id.search_text);
+			if (mDefaultSearch != null) {
+				mSearch.setText(mDefaultSearch);
+			}
+			else {
+				mSearch.setText(Aircandi.settings.getString(Preferences.SETTING_PICTURE_SEARCH, null));
+			}
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.search_text));
 		}
 
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mGridView = (GridView) findViewById(R.id.grid_gallery);
+		mTitle = (TextView) findViewById(R.id.custom_title);
+		mTitle.setText(mPlacePhotoMode ? R.string.dialog_picture_picker_place_title : R.string.dialog_picture_picker_search_title);
 
 		mGridView.setOnItemClickListener(new OnItemClickListener() {
 
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				String imageUri = mImages.get(position).getMediaUrl();
-				String imageDescription = mImages.get(position).getTitle();
-				Intent intent = new Intent();
-				intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
-				intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
-				intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, imageDescription);
-				setResult(Activity.RESULT_OK, intent);
-				finish();
+				if (mPlacePhotoMode) {
+					Intent intent = new Intent();
+					intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
+					setResult(Activity.RESULT_OK, intent);
+					finish();
+				}
+				else {
+					String imageDescription = mImages.get(position).getTitle();
+					Intent intent = new Intent();
+					intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
+					intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
+					intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, imageDescription);
+					setResult(Activity.RESULT_OK, intent);
+					finish();
+				}
 			}
 		});
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 
-		mSearch = (EditText) findViewById(R.id.search_text);
-		if (mDefaultSearch != null) {
-			mSearch.setText(mDefaultSearch);
-		}
-		else {
-			mSearch.setText(Aircandi.settings.getString(Preferences.SETTING_PICTURE_SEARCH, null));
-		}
+		/* Stash some sizing info */
+		DisplayMetrics metrics = getResources().getDisplayMetrics();
+		View parentView = findViewById(R.id.grid_gallery);
+		Integer layoutWidthPixels = metrics.widthPixels - (parentView.getPaddingLeft() + parentView.getPaddingRight());
+		mImageMarginPixels = ImageUtils.getRawPixels(this, 4);
+		mImageWidthPixels = (layoutWidthPixels / 3) - (mImageMarginPixels * 2);
 	}
 
 	protected void bind() {
@@ -116,42 +165,59 @@ public class PictureSearch extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				String query = mSearch.getText().toString();
-				Aircandi.settingsEditor.putString(Preferences.SETTING_PICTURE_SEARCH, query);
-				Aircandi.settingsEditor.commit();
-
-				mOffset = 0;
-				mTitleOptional = query;
-				if (query == null || query.equals("")) {
-					query = "trending now site:yahoo.com";
+				if (mPlacePhotoMode) {
+					ServiceResponse serviceResponse = loadPlaceImages(PAGE_SIZE, 0);
+					return serviceResponse;
 				}
 				else {
-					query = "wallpaper " + query;
-				}
+					String query = mSearch.getText().toString();
+					Aircandi.settingsEditor.putString(Preferences.SETTING_PICTURE_SEARCH, query);
+					Aircandi.settingsEditor.commit();
 
-				mQuery = query;
-				ServiceResponse serviceResponse = loadImages(query, PAGE_SIZE, 0);
-				return serviceResponse;
+					mOffset = 0;
+					mTitleOptional = query;
+					if (query == null || query.equals("")) {
+						query = "trending now site:yahoo.com";
+					}
+					else {
+						query = "wallpaper " + query;
+					}
+
+					mQuery = query;
+					ServiceResponse serviceResponse = loadSearchImages(query, PAGE_SIZE, 0);
+					return serviceResponse;
+				}
 			}
 
 			@Override
 			protected void onPostExecute(Object result) {
 				ServiceResponse serviceResponse = (ServiceResponse) result;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					mImages = (ArrayList<ImageResult>) serviceResponse.data;
+					if (mPlacePhotoMode) {
+						ArrayList<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
+						mImages = new ArrayList<ImageResult>();
+						for (Photo photo : photos) {
+							ImageResult imageResult = photo.getAsImageResult();
+							imageResult.getThumbnail().setUrl(photo.getImageSizedUri(100, 100));
+							mImages.add(imageResult);
+						}
+					}
+					else {
+						mImages = (ArrayList<ImageResult>) serviceResponse.data;
+					}
 					mOffset += PAGE_SIZE;
-					mCommon.hideBusy();
 					mGridView.setAdapter(new EndlessImageAdapter(mImages));
 				}
 				else {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
 				}
+				mCommon.hideBusy();
 			}
 		}.execute();
 
 	}
 
-	private ServiceResponse loadImages(String query, long count, long offset) {
+	private ServiceResponse loadSearchImages(String query, long count, long offset) {
 
 		ServiceResponse serviceResponse = new ServiceResponse();
 		try {
@@ -182,17 +248,17 @@ public class PictureSearch extends FormActivity {
 		return serviceResponse;
 	}
 
+	private ServiceResponse loadPlaceImages(long count, long offset) {
+		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getPlacePhotos(mSource, mSourceId, count, offset);
+		return result.serviceResponse;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
 	public void onSearchClick(View view) {
 		bind();
-	}
-
-	@Override
-	public void onBackPressed() {
-		super.onBackPressed();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -250,7 +316,11 @@ public class PictureSearch extends FormActivity {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.picture_search;
+		return R.layout.picture_picker;
+	}
+
+	protected Boolean isDialog() {
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -276,7 +346,7 @@ public class PictureSearch extends FormActivity {
 			/* What happens if there is a connectivity error? */
 			moreImages.clear();
 
-			ServiceResponse serviceResponse = loadImages(mQuery, PAGE_SIZE, mOffset);
+			ServiceResponse serviceResponse = loadSearchImages(mQuery, PAGE_SIZE, mOffset);
 			if (serviceResponse.responseCode == ResponseCode.Success) {
 				moreImages = (ArrayList<ImageResult>) serviceResponse.data;
 				Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
@@ -306,7 +376,7 @@ public class PictureSearch extends FormActivity {
 	private class ListAdapter extends ArrayAdapter<ImageResult> {
 
 		public ListAdapter(ArrayList<ImageResult> list) {
-			super(PictureSearch.this, 0, list);
+			super(PicturePicker.this, 0, list);
 		}
 
 		@Override
@@ -319,7 +389,13 @@ public class PictureSearch extends FormActivity {
 			if (view == null) {
 				view = mInflater.inflate(R.layout.temp_picture_search_item, null);
 				holder = new ViewHolder();
-				holder.itemImage = (ImageView) view.findViewById(R.id.item_image);
+				holder.itemImage = (ImageView) view.findViewById(R.id.image);
+				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mImageWidthPixels, mImageWidthPixels);
+				//				params.setMargins(mImageMarginPixels
+				//						, mImageMarginPixels
+				//						, mImageMarginPixels
+				//						, mImageMarginPixels);
+				holder.itemImage.setLayoutParams(params);
 				view.setTag(holder);
 			}
 			else {

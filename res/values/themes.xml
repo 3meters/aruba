@@ -188,8 +188,11 @@
 
     <style name="aircandi_theme_dialog_dark" parent="Theme.Sherlock.Dialog">
         <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        
         <item name="android:textColor">@android:color/white</item>
         <item name="textColorBars">@color/text_dark</item>
+        <item name="textColorComment">@color/accent</item>
         <item name="android:backgroundDimAmount">0.2</item>
         <item name="themeTone">dark</item>
         <item name="ruleColor">@color/rule_30_dark</item>
@@ -198,6 +201,7 @@
         <item name="buttonBarStyle">@style/actionbar_buttonbar_dark</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_dark</item>
         <item name="backgroundPicture">@drawable/picture_bg_dark</item>
+        <item name="backgroundButton">@drawable/button_selector_dark</item>
         <item name="actionBarItemBackground">@drawable/abs__item_background_holo_dark</item>
         <item name="actionBarSize">@dimen/abs__action_bar_default_height</item>
     </style>

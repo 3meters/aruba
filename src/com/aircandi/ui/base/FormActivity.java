@@ -4,8 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -19,7 +17,6 @@ import android.provider.MediaStore.Images.Media;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.actionbarsherlock.app.SherlockActivity;
@@ -28,20 +25,19 @@ import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.CommandType;
-import com.aircandi.components.ImageManager;
-import com.aircandi.components.ImageRequest;
-import com.aircandi.components.ImageRequest.ImageResponse;
-import com.aircandi.components.ImageRequestBuilder;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.images.ImageManager;
+import com.aircandi.components.images.ImageRequest;
+import com.aircandi.components.images.ImageRequestBuilder;
+import com.aircandi.components.images.ImageRequest.ImageResponse;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.PictureBrowse;
-import com.aircandi.ui.PictureSearch;
 import com.aircandi.ui.Preferences;
+import com.aircandi.ui.builders.PicturePicker;
 import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -172,6 +168,46 @@ public abstract class FormActivity extends SherlockActivity {
 							description.setText(imageDescription);
 						}
 					}
+
+					ImageRequest imageRequest = builder.create();
+					mImageRequestWebImageView.setImageRequest(imageRequest, false);
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_PLACE) {
+
+				Tracker.trackEvent("Entity", "PicturePlace", "None", 0);
+
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					final String imageUri = extras.getString(CandiConstants.EXTRA_URI);
+
+					ImageRequestBuilder builder = new ImageRequestBuilder(mImageRequestWebImageView)
+							.setFromUris(imageUri, null)
+							.setRequestListener(new RequestListener() {
+
+								@Override
+								public void onComplete(Object response) {
+
+									final ServiceResponse serviceResponse = (ServiceResponse) response;
+									if (serviceResponse.responseCode == ResponseCode.Success) {
+										runOnUiThread(new Runnable() {
+
+											@Override
+											public void run() {
+												if (mImageRequestListener != null) {
+													ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+													mImageRequestListener.onComplete(serviceResponse
+															, imageResponse.imageUri
+															, null
+															, imageResponse.bitmap
+															, null
+															, null);
+												}
+											}
+										});
+									}
+								}
+							});
 
 					ImageRequest imageRequest = builder.create();
 					mImageRequestWebImageView.setImageRequest(imageRequest, false);
@@ -337,27 +373,14 @@ public abstract class FormActivity extends SherlockActivity {
 	// Picker routines
 	// --------------------------------------------------------------------------------------------
 
-	protected void pickPicture() {
+	protected void pictureFromGallery() {
 		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK);
 		picturePickerIntent.setType("image/*");
 		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
-	protected void pickVideo() {
-		Intent videoPickerIntent = new Intent(Intent.ACTION_PICK);
-		videoPickerIntent.setType("video/*");
-		startActivityForResult(videoPickerIntent, CandiConstants.ACTIVITY_VIDEO_PICK);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-	}
-
-	protected void takeVideo() {
-		Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-		startActivityForResult(takeVideoIntent, CandiConstants.ACTIVITY_VIDEO_MAKE);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-	}
-
-	protected void takePicture() {
+	protected void pictureFromCamera() {
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mCommon.getTempFile(this, "image_capture.tmp")));
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
@@ -365,19 +388,17 @@ public abstract class FormActivity extends SherlockActivity {
 	}
 
 	protected void pictureSearch(String defaultSearch) {
-		Intent intent = new Intent(this, PictureSearch.class);
+		Intent intent = new Intent(this, PicturePicker.class);
 		intent.putExtra(CandiConstants.EXTRA_SEARCH_PHRASE, defaultSearch);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
-	protected void pickPicturePlace(String entityId) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
+	protected void pictureFromPlace(String entityId) {
+		IntentBuilder intentBuilder = new IntentBuilder(this, PicturePicker.class);
 		intentBuilder.setCommandType(CommandType.View)
 				.setEntityId(entityId);
-
 		Intent intent = intentBuilder.create();
-		intent.putExtra(CandiConstants.EXTRA_AS_PICKER, true);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_PICK_PLACE);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
@@ -412,74 +433,6 @@ public abstract class FormActivity extends SherlockActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	protected void showChangePictureDialog(final boolean showPlaceOption
-			, final String defaultUri
-			, final String defaultSearch
-			, final String entityId
-			, WebImageView webImageView
-			, final RequestListener listener) {
-
-		mImageRequestListener = listener;
-		mImageRequestWebImageView = webImageView;
-
-		Integer listId = R.array.dialog_list_picture_sources;
-		if (showPlaceOption) {
-			listId = R.array.dialog_list_picture_sources_place;
-		}
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(FormActivity.this);
-
-		builder.setTitle(R.string.dialog_change_picture_title);
-		builder.setIcon(R.drawable.ic_app);
-
-		builder.setCancelable(true);
-		builder.setNegativeButton(getResources().getString(R.string.dialog_button_cancel), null);
-		builder.setIcon(R.drawable.ic_app);
-
-		builder.setItems(listId, new DialogInterface.OnClickListener() {
-
-			public void onClick(DialogInterface dialog, int item) {
-
-				if (showPlaceOption) {
-					if (item == 0) {
-						pictureSearch(defaultSearch);
-					}
-					else if (item == 1) {
-						pickPicture();
-					}
-					else if (item == 2) {
-						takePicture();
-					}
-					else if (item == 3) {
-						pickPicturePlace(entityId);
-					}
-					else if (item == 4) {
-						usePictureDefault(defaultUri);
-					}
-				}
-				else {
-					if (item == 0) {
-						pictureSearch(defaultSearch);
-					}
-					else if (item == 1) {
-						pickPicture();
-					}
-					else if (item == 2) {
-						takePicture();
-					}
-					else if (item == 3) {
-						usePictureDefault(defaultUri);
-					}
-				}
-
-				dialog.dismiss();
-			}
-		});
-
-		AlertDialog alert = builder.create();
-		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-		alert.show();
-	}
 
 	protected void usePictureDefault(String defaultUri) {
 		/* Tag has the uri to use for the placeholder */

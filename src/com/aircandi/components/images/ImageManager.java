@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.components.images;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -7,28 +7,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.MediaStore.Images;
-import android.support.v4.util.LruCache;
 import android.util.FloatMath;
 import android.util.TypedValue;
 
 import com.aircandi.CandiConstants;
+import com.aircandi.components.Exceptions;
+import com.aircandi.components.Logger;
 import com.aircandi.utilities.ImageUtils;
 import com.aircandi.utilities.MiscUtils;
 
@@ -40,12 +35,9 @@ import com.aircandi.utilities.MiscUtils;
 public class ImageManager {
 
 	private static ImageManager	singletonObject;
-	private static Integer		cache_size	= 100;
 
 	private DrawableManager		mDrawableManager;
 	private ImageCache			mImageCache;
-	private LruSoftCache		mThumbnailCacheSoft;
-	private LruCache			mThumbnailCacheHard;
 	private ImageLoader			mImageLoader;
 	private Activity			mActivity;
 
@@ -56,16 +48,9 @@ public class ImageManager {
 		return singletonObject;
 	}
 
-	/**
-	 * Designed as a singleton. The private Constructor prevents any other class
-	 * from instantiating.
-	 */
 	private ImageManager() {
 		setImageLoader(new ImageLoader());
-		mThumbnailCacheSoft = new LruSoftCache(cache_size);
-		mThumbnailCacheHard = new LruCache(cache_size);
 		mDrawableManager = new DrawableManager();
-
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -172,13 +157,6 @@ public class ImageManager {
 	// --------------------------------------------------------------------------------------------
 	// Processing routines
 	// --------------------------------------------------------------------------------------------
-
-	public static byte[] byteArrayForBitmap(Bitmap bitmap) {
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-		byte[] bitmapBytes = outputStream.toByteArray();
-		return bitmapBytes;
-	}
 
 	public Bitmap bitmapForByteArraySampled(byte[] imageBytes, ImageRequest imageRequest, int imageMemoryBytesMax) {
 
@@ -408,27 +386,6 @@ public class ImageManager {
 		}
 	}
 
-	public float rotationForImage(Context context, Uri uri) {
-		if (uri.getScheme().equals("content")) {
-			String[] projection = { Images.ImageColumns.ORIENTATION };
-			Cursor c = context.getContentResolver().query(uri, projection, null, null, null);
-			if (c.moveToFirst()) {
-				return c.getInt(0);
-			}
-		}
-		else if (uri.getScheme().equals("file")) {
-			try {
-				ExifInterface exif = new ExifInterface(uri.getPath());
-				int rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
-				return rotation;
-			}
-			catch (IOException exception) {
-				Exceptions.Handle(exception);
-			}
-		}
-		return 0f;
-	}
-
 	private float exifOrientationToDegrees(int exifOrientation) {
 		if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
 			return 90;
@@ -440,100 +397,6 @@ public class ImageManager {
 			return 270;
 		}
 		return 0;
-	}
-
-	@SuppressWarnings({ "unused", "deprecation" })
-	private String getExifOrientation(String imagePath, String imageOrientation) {
-
-		/*
-		 * Return image EXIF orientation using reflection (if Android 2.0 or
-		 * higher)
-		 * http://developer.android.com/resources/articles/backward-compatibility
-		 * .html
-		 */
-		Method exifGetAttribute;
-		Constructor<ExifInterface> exifConstructor;
-		String exifOrientation = "";
-
-		int sdkInt = 0;
-		try {
-			sdkInt = Integer.valueOf(Build.VERSION.SDK);
-		}
-		catch (Exception exception) {
-			sdkInt = 3; /* assume they are on cupcake */
-		}
-		if (sdkInt >= 5) {
-			try {
-				exifConstructor = ExifInterface.class.getConstructor(new Class[] { String.class });
-				Object exif = exifConstructor.newInstance(imagePath);
-				exifGetAttribute = ExifInterface.class.getMethod("getAttribute", new Class[] { String.class });
-
-				try {
-					exifOrientation = (String) exifGetAttribute.invoke(exif, ExifInterface.TAG_ORIENTATION);
-					if (exifOrientation != null) {
-						if (exifOrientation.equals("1")) {
-							imageOrientation = "0";
-						}
-						else if (exifOrientation.equals("3")) {
-							imageOrientation = "180";
-						}
-						else if (exifOrientation.equals("6")) {
-							imageOrientation = "90";
-						}
-						else if (exifOrientation.equals("8")) {
-							imageOrientation = "270";
-						}
-					}
-					else {
-						imageOrientation = "0";
-					}
-				}
-				catch (InvocationTargetException exception) {
-
-					/* Unpack original exception when possible */
-					imageOrientation = "0";
-				}
-				catch (IllegalAccessException exception) {
-					System.err.println("unexpected " + exception);
-					imageOrientation = "0";
-				}
-				/* Success, this is a newer device */
-			}
-			catch (NoSuchMethodException exception) {
-				imageOrientation = "0";
-			}
-			catch (IllegalArgumentException exception) {
-				imageOrientation = "0";
-			}
-			catch (InstantiationException exception) {
-				imageOrientation = "0";
-			}
-			catch (IllegalAccessException exception) {
-				imageOrientation = "0";
-			}
-			catch (InvocationTargetException exception) {
-				imageOrientation = "0";
-			}
-		}
-		return imageOrientation;
-	}
-
-	public boolean hasImageCaptureBug() {
-		/*
-		 * List of known devices that have the bug where the OK button does
-		 * nothing when using MediaStore.ACTION_IMAGE_CAPTURE intent.
-		 * http://code.google.com/p/android/issues/detail?id=1480 Nexus S
-		 * fingerprint: google/soju/crespo
-		 */
-		ArrayList<String> devices = new ArrayList<String>();
-		devices.add("android-devphone1/dream_devphone/dream");
-		devices.add("google/soju/crespo");
-		devices.add("generic/sdk/generic");
-		devices.add("vodafone/vfpioneer/sapphire");
-		devices.add("tmobile/kila/dream");
-		devices.add("verizon/voles/sholes");
-		devices.add("google_ion/google_ion/sapphire");
-		return devices.contains(android.os.Build.BRAND + "/" + android.os.Build.PRODUCT + "/" + android.os.Build.DEVICE);
 	}
 
 	public static boolean isLocalImage(String imageUri) {
@@ -570,11 +433,6 @@ public class ImageManager {
 	}
 
 	public void putImage(String key, Bitmap bitmap) {
-		String keyHashed = MiscUtils.md5(key);
-		mImageCache.put(keyHashed, bitmap);
-	}
-
-	public void putImage(String key, Bitmap bitmap, CompressFormat compressFormat) {
 		String keyHashed = MiscUtils.md5(key);
 		mImageCache.put(keyHashed, bitmap);
 	}
@@ -618,14 +476,6 @@ public class ImageManager {
 	// --------------------------------------------------------------------------------------------
 	// Inner classes and enums
 	// --------------------------------------------------------------------------------------------
-
-	public LruSoftCache getThumbnailCacheSoft() {
-		return mThumbnailCacheSoft;
-	}
-
-	public LruCache getThumbnailCacheHard() {
-		return mThumbnailCacheHard;
-	}
 
 	public DrawableManager getDrawableManager() {
 		return mDrawableManager;

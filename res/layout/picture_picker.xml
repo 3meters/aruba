@@ -1,44 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-        android:background="?attr/backgroundForm"
-    android:layout_height="match_parent" >
-
-    <!--
-    <Spinner
-        android:id="@+id/cbo_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/actionbar"
-        android:drawSelectorOnTop="true"
-        android:entries="@array/gallery_categories"
-        android:prompt="@string/gallery_label_category" />
-    -->
+    android:layout_height="match_parent"
+    tools:context=".ui.builders.PicturePicker" >
 
     <LinearLayout
-        android:id="@+id/cbo_category"
+        android:id="@+id/search_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="5dp"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:padding="5dp" >
 
         <EditText
             android:id="@+id/search_text"
+            style="@style/form_edit"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/form_field_height"
             android:layout_weight="1"
             android:gravity="center|left"
             android:hint="@string/picture_search_query_hint"
             android:inputType="textAutoCorrect"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:textAppearance="@style/app_text_appearance_small" />
 
         <ImageView
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_weight="0"
+            android:background="@drawable/button_nooutline_selector"
             android:clickable="true"
             android:maxWidth="40dp"
             android:minWidth="40dp"
@@ -52,16 +43,31 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/form_footer"
-        android:layout_below="@+id/cbo_category"
-        android:columnWidth="100dp"
+        android:layout_below="@+id/search_group"
+        android:layout_marginTop="2dp"
         android:gravity="center"
-        android:horizontalSpacing="5dp"
-        android:numColumns="auto_fit"
+        android:horizontalSpacing="4dp"
+        android:numColumns="3"
+        android:padding="1dp"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="5dp" >
+        android:verticalSpacing="4dp" >
 
         <!-- Preview: listitem=@layout/temp_galleryitem -->
     </com.aircandi.ui.widgets.BounceGridView>
+
+    <RelativeLayout
+        android:id="@+id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center" >
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:maxHeight="40dp"
+            android:minHeight="40dp" />
+    </RelativeLayout>
 
     <!-- Footer -->
 
@@ -74,6 +80,7 @@
         android:gravity="center_horizontal" >
 
         <Button
+            android:id="@+id/button_cancel"
             style="@style/form_button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

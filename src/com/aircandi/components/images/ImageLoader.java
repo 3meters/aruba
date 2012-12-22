@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.components.images;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -10,22 +10,24 @@ import android.os.AsyncTask;
 import android.os.Build;
 
 import com.aircandi.CandiConstants;
-import com.aircandi.components.ImageRequest.ImageResponse;
+import com.aircandi.components.GifDecoder;
+import com.aircandi.components.Logger;
+import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.images.ImageRequest.ImageResponse;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.utilities.ImageUtils;
 
 public class ImageLoader {
 
-	private ImagesQueue		mImagesQueue		= new ImagesQueue();
-	private ImagesLoader	mImageLoaderThread	= new ImagesLoader();
+	private ImageQueue			mImageQueue			= new ImageQueue();
+	private ImageLoaderThread	mImageLoaderThread	= new ImageLoaderThread();
 
 	public ImageLoader() {
 
@@ -149,7 +151,11 @@ public class ImageLoader {
 		}
 	}
 
-	public ServiceResponse getCachedImage(ImageRequest imageRequest) {
+	// --------------------------------------------------------------------------------------------
+	// Processing routines
+	// --------------------------------------------------------------------------------------------
+
+	private ServiceResponse getCachedImage(ImageRequest imageRequest) {
 
 		ServiceResponse serviceResponse = new ServiceResponse();
 		Bitmap bitmap = ImageManager.getInstance().getImage(imageRequest.getImageUri());
@@ -172,20 +178,16 @@ public class ImageLoader {
 		return serviceResponse;
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// Processing routines
-	// --------------------------------------------------------------------------------------------
-
 	private void queueImage(ImageRequest imageRequest) {
 		/*
 		 * The image requestor may have called for other images before. So there may be some old tasks in the queue. We
 		 * need to discard them.
 		 */
-		mImagesQueue.Clean(imageRequest.getImageRequestor());
-		synchronized (mImagesQueue.mImagesToLoad) {
+		mImageQueue.Clean(imageRequest.getImageRequestor());
+		synchronized (mImageQueue.mImagesToLoad) {
 			Logger.v(this, imageRequest.getImageUri() + ": Queued for download");
-			mImagesQueue.mImagesToLoad.add(imageRequest);
-			mImagesQueue.mImagesToLoad.notifyAll();
+			mImageQueue.mImagesToLoad.add(imageRequest);
+			mImageQueue.mImagesToLoad.notifyAll();
 		}
 
 		/* Start thread if it's not started yet */
@@ -246,11 +248,20 @@ public class ImageLoader {
 		return serviceResponse;
 	}
 
+	public void stopImageLoaderThread() {
+		/*
+		 * We call this when the search activity is being destroyed.
+		 */
+		mImageLoaderThread.interrupt();
+		mImageQueue.mImagesToLoad.clear();
+		mImageLoaderThread = new ImageLoaderThread();
+	}
+
 	// --------------------------------------------------------------------------------------------
-	// Loader routines
+	// Inner classes
 	// --------------------------------------------------------------------------------------------
 
-	private class ImagesQueue {
+	private class ImageQueue {
 
 		private LinkedList<ImageRequest>	mImagesToLoad	= new LinkedList<ImageRequest>();
 
@@ -267,7 +278,7 @@ public class ImageLoader {
 		}
 	}
 
-	private class ImagesLoader extends Thread {
+	private class ImageLoaderThread extends Thread {
 
 		public void run() {
 
@@ -276,86 +287,84 @@ public class ImageLoader {
 				while (true) {
 
 					/* Thread waits until there are any images to load in the queue */
-					if (mImagesQueue.mImagesToLoad.size() == 0) {
-						synchronized (mImagesQueue.mImagesToLoad) {
-							mImagesQueue.mImagesToLoad.wait();
+					if (mImageQueue.mImagesToLoad.size() == 0) {
+						synchronized (mImageQueue.mImagesToLoad) {
+							mImageQueue.mImagesToLoad.wait();
 							Logger.v(this, "ImageQueue thread is waiting");
 						}
 					}
 
-					if (mImagesQueue.mImagesToLoad.size() != 0) {
-						Logger.v(this, "ImageQueue has " + String.valueOf(mImagesQueue.mImagesToLoad.size()) + " images requests pending");
+					if (mImageQueue.mImagesToLoad.size() != 0) {
+						
+						Logger.v(this, "ImageQueue has " + String.valueOf(mImageQueue.mImagesToLoad.size()) + " images requests pending");
 						final ImageRequest imageRequest;
-						synchronized (mImagesQueue.mImagesToLoad) {
-							imageRequest = mImagesQueue.mImagesToLoad.poll();
+						synchronized (mImageQueue.mImagesToLoad) {
+							imageRequest = mImageQueue.mImagesToLoad.poll();
 						}
 
 						Bitmap bitmap = null;
 						ServiceResponse serviceResponse = new ServiceResponse();
-						if (imageRequest.getImageFormat() == ImageFormat.Binary) {
 
-							long startTime = System.nanoTime();
-							float estimatedTime = System.nanoTime();
-							Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Download started...");
+						long startTime = System.nanoTime();
+						float estimatedTime = System.nanoTime();
+						Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Download started...");
+						/*
+						 * Gets bitmap at native size and downsamples if necessary to stay within the max size in
+						 * memory.
+						 */
+						serviceResponse = getBitmap(imageRequest.getImageUri(), imageRequest, new RequestListener() {
 
-							/*
-							 * Gets bitmap at native size and downsamples if necessary to stay within the max size in
-							 * memory.
-							 */
-							serviceResponse = getBitmap(imageRequest.getImageUri(), imageRequest, new RequestListener() {
-
-								@Override
-								public void onProgressChanged(int progress) {
-									if (imageRequest.getRequestListener() != null) {
-										if (progress > 0) {
-											imageRequest.getRequestListener().onProgressChanged((int) (70 * ((float) progress / 100f)));
-										}
+							@Override
+							public void onProgressChanged(int progress) {
+								if (imageRequest.getRequestListener() != null) {
+									if (progress > 0) {
+										imageRequest.getRequestListener().onProgressChanged((int) (70 * ((float) progress / 100f)));
 									}
 								}
-							});
-
-							if (serviceResponse.responseCode == ResponseCode.Success) {
-
-								bitmap = (Bitmap) serviceResponse.data;
-								Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000)
-										+ "ms");
-
-								estimatedTime = System.nanoTime() - startTime;
-								startTime = System.nanoTime();
-
-								/* Perform requested post processing */
-								if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL) {
-									bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
-								}
-
-								estimatedTime = System.nanoTime() - startTime;
-								startTime = System.nanoTime();
-								Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000) + "ms");
-
-								/*
-								 * Stuff it into the cache. Overwrites if it already exists. This is a perf hit in the
-								 * process because writing files is slow.
-								 */
-								if (imageRequest.doUpdateCache()) {
-									Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Pushing into cache...");
-									ImageManager.getInstance().putImage(imageRequest.getImageUri(), bitmap);
-								}
-								imageRequest.getRequestListener().onProgressChanged(80);
-
-								Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Progress complete");
-								serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
-								imageRequest.getRequestListener().onProgressChanged(100);
 							}
-							else if (serviceResponse.exception.getErrorCode() == ErrorCode.IllegalStateException) {
-								/*
-								 * Data couldn't be successfully decoded into a bitmap so substitute
-								 * the broken image placeholder
-								 */
-								imageRequest.setImageUri("resource:placeholder_logo");
-								fetchImage(imageRequest, false);
+						});
+
+						if (serviceResponse.responseCode == ResponseCode.Success) {
+
+							bitmap = (Bitmap) serviceResponse.data;
+							Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000)
+									+ "ms");
+
+							estimatedTime = System.nanoTime() - startTime;
+							startTime = System.nanoTime();
+
+							/* Perform requested post processing */
+							if (imageRequest.getScaleToWidth() != CandiConstants.IMAGE_WIDTH_ORIGINAL) {
+								bitmap = ImageUtils.scaleAndCropBitmap(bitmap, imageRequest);
 							}
-							imageRequest.getRequestListener().onComplete(serviceResponse);
+
+							estimatedTime = System.nanoTime() - startTime;
+							startTime = System.nanoTime();
+							Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000) + "ms");
+
+							/*
+							 * Stuff it into the cache. Overwrites if it already exists. This is a perf hit in the
+							 * process because writing files is slow.
+							 */
+							if (imageRequest.doUpdateCache()) {
+								Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Pushing into cache...");
+								ImageManager.getInstance().putImage(imageRequest.getImageUri(), bitmap);
+							}
+							imageRequest.getRequestListener().onProgressChanged(80);
+
+							Logger.v(ImageLoader.this, imageRequest.getImageUri() + ": Progress complete");
+							serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
+							imageRequest.getRequestListener().onProgressChanged(100);
 						}
+						else if (serviceResponse.exception.getErrorCode() == ErrorCode.IllegalStateException) {
+							/*
+							 * Data couldn't be successfully decoded into a bitmap so substitute
+							 * the broken image placeholder
+							 */
+							imageRequest.setImageUri("resource:image_broken");
+							fetchImage(imageRequest, false);
+						}
+						imageRequest.getRequestListener().onComplete(serviceResponse);
 					}
 					if (Thread.interrupted()) {
 						Logger.d(this, "ImageQueue thread interrupted");
@@ -367,14 +376,5 @@ public class ImageLoader {
 				/* Allow thread to exit */
 			}
 		}
-	}
-
-	public void stopLoaderThread() {
-		/*
-		 * We call this when the search activity is being destroyed.
-		 */
-		mImageLoaderThread.interrupt();
-		mImagesQueue.mImagesToLoad.clear();
-		mImageLoaderThread = new ImagesLoader();
 	}
 }

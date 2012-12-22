@@ -17,11 +17,11 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.aircandi.R;
-import com.aircandi.components.ImageManager;
-import com.aircandi.components.ImageRequest;
-import com.aircandi.components.ImageRequest.ImageResponse;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.images.ImageManager;
+import com.aircandi.components.images.ImageRequest;
+import com.aircandi.components.images.ImageRequest.ImageResponse;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
