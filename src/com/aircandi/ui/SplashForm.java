@@ -20,8 +20,6 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageCache;
-import com.aircandi.components.images.ImageManager;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
@@ -68,14 +66,8 @@ public class SplashForm extends SherlockActivity {
 		ProxiExplorer.getInstance().setUsingEmulator(Aircandi.usingEmulator);
 		ProxiExplorer.getInstance().initialize();
 
-		/* Image cache */
-		ImageManager.getInstance().setImageCache(new ImageCache(getApplicationContext(), CandiConstants.CACHE_PATH, 100, 16));
-		ImageManager.getInstance().setFileCacheOnly(true);
-		ImageManager.getInstance().setActivity(this);
-		
 		/* Cache categories */
 		loadCategories();
-		
 
 		Aircandi.firstStartApp = false;
 	}

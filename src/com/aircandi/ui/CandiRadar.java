@@ -45,8 +45,8 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityModel;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageManager;
 import com.aircandi.components.Tracker;
+import com.aircandi.components.images.BitmapManager;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
@@ -550,7 +550,7 @@ public class CandiRadar extends CandiActivity {
 					params.setCenterHorizontal(true);
 					candiView.setLayoutParams(params);
 					candiView.setLayoutId(R.layout.widget_candi_view_radar);
-					candiView.setBadgeColorFilter(badgeColor, null, null, "#ffffff");
+					candiView.setBadgeColorFilter(badgeColor);
 				}
 				else {
 					/*
@@ -564,7 +564,7 @@ public class CandiRadar extends CandiActivity {
 					params.setCenterHorizontal(true);
 					candiView.setLayoutParams(params);
 					candiView.setLayoutId(R.layout.widget_candi_view_radar_synthetic);
-					candiView.setBadgeColorFilter(badgeColorSynthetic, null, null, "#ffffff");
+					candiView.setBadgeColorFilter(badgeColorSynthetic);
 					int colorResId = entity.place.getCategoryColorResId();
 					candiView.setBackgroundResource(colorResId);
 				}
@@ -771,9 +771,6 @@ public class CandiRadar extends CandiActivity {
 			Debug.stopMethodTracing();
 		}
 
-		/* Start thread to check and manage the file cache. */
-		ImageManager.getInstance().cleanCacheAsync(getApplicationContext());
-
 		super.onStop();
 	}
 
@@ -866,7 +863,7 @@ public class CandiRadar extends CandiActivity {
 
 		/* Don't count on this always getting called when this activity is killed */
 		try {
-			ImageManager.getInstance().getImageLoader().stopImageLoaderThread();
+			BitmapManager.getInstance().stopBitmapLoaderThread();
 		}
 		catch (Exception exception) {
 			Exceptions.Handle(exception);

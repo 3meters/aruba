@@ -24,8 +24,8 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityListType;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Entity;
@@ -215,14 +215,14 @@ public class CandiUser extends CandiActivity {
 
 			if (imageUri != null) {
 				ImageFormat imageFormat = user.photo.getImageFormat();
-				ImageRequestBuilder builder = new ImageRequestBuilder(image)
+				BitmapRequestBuilder builder = new BitmapRequestBuilder(image)
 						.setImageUri(imageUri)
 						.setImageFormat(imageFormat)
 						.setLinkZoom(CandiConstants.LINK_ZOOM)
 						.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
 
-				ImageRequest imageRequest = builder.create();
-				image.setImageRequest(imageRequest);
+				BitmapRequest imageRequest = builder.create();
+				image.setBitmapRequest(imageRequest);
 			}
 		}
 
@@ -298,14 +298,14 @@ public class CandiUser extends CandiActivity {
 				WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
 
 				String imageUri = childEntity.getImageUri();
-				ImageRequestBuilder builder = new ImageRequestBuilder(webImageView)
+				BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView)
 						.setImageUri(imageUri)
 						.setImageFormat(childEntity.getImageFormat())
 						.setLinkZoom(CandiConstants.LINK_ZOOM)
 						.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
 
-				ImageRequest imageRequest = builder.create();
-				webImageView.setImageRequest(imageRequest);
+				BitmapRequest imageRequest = builder.create();
+				webImageView.setBitmapRequest(imageRequest);
 				webImageView.setTag(childEntity);
 
 				list.addView(view);

@@ -37,10 +37,10 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityListType;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageManager;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
-import com.aircandi.components.images.DrawableManager.ViewHolder;
+import com.aircandi.components.images.BitmapManager;
+import com.aircandi.components.images.BitmapManager.ViewHolder;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.ImageFormat;
@@ -539,7 +539,6 @@ public class CandiForm extends CandiActivity {
 		final UserView author = (UserView) layout.findViewById(R.id.author);
 
 		if (candiView != null) {
-			candiView.setBadgeColorFilter(null, null, null, "#ffffff");
 			candiView.bindToEntity(entity);
 		}
 		else {
@@ -549,15 +548,15 @@ public class CandiForm extends CandiActivity {
 				if (imageUri != null) {
 
 					ImageFormat imageFormat = entity.getImageFormat();
-					ImageRequestBuilder builder = new ImageRequestBuilder(image)
+					BitmapRequestBuilder builder = new BitmapRequestBuilder(image)
 							.setImageUri(imageUri)
 							.setImageFormat(imageFormat)
 							.setLinkZoom(CandiConstants.LINK_ZOOM)
 							.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
 
-					ImageRequest imageRequest = builder.create();
+					BitmapRequest imageRequest = builder.create();
 
-					image.setImageRequest(imageRequest);
+					image.setBitmapRequest(imageRequest);
 
 					if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
 						if (entity.getImageUri() == null
@@ -691,7 +690,8 @@ public class CandiForm extends CandiActivity {
 						holder.itemImage = webImageView.getImageView();
 						holder.itemImage.setTag(photo.getImageSizedUri(100, 100));
 						holder.itemImage.setImageBitmap(null);
-						ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(photo.getImageSizedUri(100, 100), holder, null);
+						BitmapRequest request = new BitmapRequest(photo.getImageSizedUri(100, 100), holder.itemImage);
+						BitmapManager.getInstance().fetchBitmap(request);
 						list.addView(view);
 					}
 
@@ -798,8 +798,10 @@ public class CandiForm extends CandiActivity {
 							holder.itemImage = webImageView.getImageView();
 							holder.itemImage.setTag(tip.user.photo.getImageSizedUri(100, 100));
 							holder.itemImage.setImageBitmap(null);
-							ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(tip.user.photo.getImageSizedUri(100, 100), holder, null);
-
+							BitmapRequest request = new BitmapRequest(tip.user.photo.getImageSizedUri(100, 100), holder.itemImage);
+							request.setImageRequestor(holder.itemImage);
+							BitmapManager.getInstance().fetchBitmap(request);
+							
 							return view;
 						}
 					});
@@ -872,14 +874,14 @@ public class CandiForm extends CandiActivity {
 			}
 
 			String imageUri = entity.getImageUri();
-			ImageRequestBuilder builder = new ImageRequestBuilder(webImageView)
+			BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView)
 					.setImageUri(imageUri)
 					.setImageFormat(entity.getImageFormat())
 					.setLinkZoom(CandiConstants.LINK_ZOOM)
 					.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
 
-			ImageRequest imageRequest = builder.create();
-			webImageView.setImageRequest(imageRequest);
+			BitmapRequest imageRequest = builder.create();
+			webImageView.setBitmapRequest(imageRequest);
 			webImageView.setTag(entity);
 
 			FlowLayout.LayoutParams params = new FlowLayout.LayoutParams((int) (candiWidthPixels * 0.95), (int) (candiWidthPixels * 0.95));

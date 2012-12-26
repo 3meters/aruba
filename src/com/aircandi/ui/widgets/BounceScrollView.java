@@ -1,11 +1,11 @@
 package com.aircandi.ui.widgets;
 
-import com.aircandi.CandiConstants;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.widget.ScrollView;
+
+import com.aircandi.CandiConstants;
 
 public class BounceScrollView extends ScrollView {
 

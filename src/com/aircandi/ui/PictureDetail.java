@@ -24,10 +24,11 @@ import com.aircandi.components.Exceptions;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.images.ImageManager;
-import com.aircandi.components.images.DrawableManager.ViewHolder;
 import com.aircandi.components.PhotoPagerAdapter;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.images.BitmapManager;
+import com.aircandi.components.images.BitmapManager.ViewHolder;
+import com.aircandi.components.images.BitmapRequest;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Photo;
@@ -107,7 +108,10 @@ public class PictureDetail extends FormActivity {
 		holder.itemImage = image;
 		holder.itemImage.setTag(imageUri);
 		holder.itemImage.setImageBitmap(null);
-		ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(imageUri, holder, new RequestListener() {
+		
+		BitmapRequest request = new BitmapRequest();
+		request.setImageUri(imageUri);
+		request.setRequestListener(new RequestListener() {
 
 			@Override
 			public void onComplete(Object response) {
@@ -140,7 +144,7 @@ public class PictureDetail extends FormActivity {
 				});
 			}
 		});
-
+		BitmapManager.getInstance().fetchBitmap(request);
 		return layout;
 	}
 

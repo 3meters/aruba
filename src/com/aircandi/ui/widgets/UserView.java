@@ -11,12 +11,12 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.aircandi.R;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateUtils;
-import com.aircandi.R;
 
 public class UserView extends RelativeLayout {
 
@@ -88,10 +88,10 @@ public class UserView extends RelativeLayout {
 			}
 			if (mImageUser != null) {
 				if (mAuthor.getImageUri() != null && mAuthor.getImageUri().length() != 0) {
-					ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
+					BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
 					builder.setFromUris(mAuthor.getImageUri(), null);
-					ImageRequest imageRequest = builder.create();
-					mImageUser.setImageRequest(imageRequest);
+					BitmapRequest imageRequest = builder.create();
+					mImageUser.setBitmapRequest(imageRequest);
 				}
 			}
 			if (mImageLocked != null) {
@@ -121,10 +121,10 @@ public class UserView extends RelativeLayout {
 			}
 			if (mImageUser != null) {
 				if (mUser.getImageUri() != null && mUser.getImageUri().length() != 0) {
-					ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
+					BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
 					builder.setFromUris(mUser.getImageUri(), null);
-					ImageRequest imageRequest = builder.create();
-					mImageUser.setImageRequest(imageRequest);
+					BitmapRequest imageRequest = builder.create();
+					mImageUser.setBitmapRequest(imageRequest);
 				}
 			}
 		}

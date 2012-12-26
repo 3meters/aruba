@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.text.Html;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -16,11 +17,13 @@ import android.widget.TextView;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
-import com.aircandi.components.images.ImageManager;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
-import com.aircandi.components.images.DrawableManager.ViewHolder;
 import com.aircandi.components.FontManager;
+import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.images.BitmapManager;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequest.ImageResponse;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
@@ -47,14 +50,9 @@ public class CandiView extends RelativeLayout {
 	private TextView		mDistance;
 	private View			mCandiViewGroup;
 
-	private String			mFromColor;
-	private String			mToColor;
 	private String			mKeepColor;
 	private String			mFilterColor;
 
-	private String			mBadgeFromColor;
-	private String			mBadgeToColor;
-	private String			mBadgeKeepColor;
 	private String			mBadgeFilterColor;
 
 	public CandiView(Context context) {
@@ -135,7 +133,7 @@ public class CandiView extends RelativeLayout {
 					if (imageUri != null) {
 
 						ImageFormat imageFormat = entity.getImageFormat();
-						ImageRequestBuilder builder = new ImageRequestBuilder(mCandiImage)
+						BitmapRequestBuilder builder = new BitmapRequestBuilder(mCandiImage)
 								.setImageUri(imageUri)
 								.setImageFormat(imageFormat)
 								.setLinkZoom(CandiConstants.LINK_ZOOM)
@@ -144,46 +142,26 @@ public class CandiView extends RelativeLayout {
 
 									@Override
 									public void onComplete(Object response) {
+
 										if (mFilterColor != null) {
-											mCandiImage.getImageView().setColorFilter(ImageUtils.hexToColor(mFilterColor), PorterDuff.Mode.MULTIPLY);
+											Aircandi.applicationHandler.post(new Runnable() {
+
+												@Override
+												public void run() {
+													mCandiImage.getImageView().setColorFilter(ImageUtils.hexToColor(mFilterColor), PorterDuff.Mode.MULTIPLY);
+												}
+											});
 										}
 									}
 
-									@Override
-									public Bitmap onFilter(Bitmap bitmap) {
-										/*
-										 * Turn gray pixels to transparent. Making the bitmap mutable will
-										 * put pressure on memory so this should only be done when working with
-										 * small images. There is an ImageUtils routine that will make make a
-										 * bitmap mutable without using extra memory.
-										 */
-										Bitmap transformedBitmap = null;
-										if (mKeepColor == null && mFromColor == null && mToColor == null) {
-											return bitmap;
-										}
-										else {
-											transformedBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-											bitmap.recycle();
-
-											if (mKeepColor != null) {
-												transformedBitmap = ImageUtils.keepPixels(transformedBitmap, mKeepColor);
-											}
-
-											if (mFromColor != null && mToColor != null) {
-												transformedBitmap = ImageUtils.replacePixels(transformedBitmap, mFromColor, mToColor);
-											}
-										}
-
-										return transformedBitmap;
-									}
 								});
 
-						ImageRequest imageRequest = builder.create();
+						BitmapRequest imageRequest = builder.create();
 						if (mEntity.synthetic) {
 							int color = mEntity.place.getCategoryColor();
 							mCandiImage.setColorFilter(color);
 						}
-						mCandiImage.setImageRequest(imageRequest);
+						mCandiImage.setBitmapRequest(imageRequest);
 
 					}
 				}
@@ -262,49 +240,36 @@ public class CandiView extends RelativeLayout {
 
 				setVisibility(mCategoryImage, View.GONE);
 				if (mCategoryImage != null) {
-					//mCategoryImage.setImageResource(R.drawable.ic_action_location_dark);
 					if (entity.place.categories != null && entity.place.categories.size() > 0) {
-						ViewHolder holder = new ViewHolder();
-						holder.itemImage = mCategoryImage;
-						holder.itemImage.setTag(entity.place.categories.get(0).iconUri());
-						ImageManager.getInstance().getDrawableManager()
-								.fetchDrawableOnThread(entity.place.categories.get(0).iconUri(), holder, new RequestListener() {
+
+						BitmapRequest request = new BitmapRequest();
+						request.setImageUri(entity.place.categories.get(0).iconUri(false))
+								.setImageRequestor(this)
+								.setRequestListener(new RequestListener() {
 
 									@Override
 									public void onComplete(Object response) {
-										if (mCategoryImage != null && mBadgeFilterColor != null) {
-											mCategoryImage.setColorFilter(ImageUtils.hexToColor(mBadgeFilterColor), PorterDuff.Mode.MULTIPLY);
+
+										ServiceResponse serviceResponse = (ServiceResponse) response;
+										if (serviceResponse.responseCode == ResponseCode.Success) {
+
+											ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+											Bitmap bitmap = imageResponse.bitmap;
+											final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+
+											Aircandi.applicationHandler.post(new Runnable() {
+												@Override
+												public void run() {
+													ImageUtils.showDrawableInImageView(bitmapDrawable, mCategoryImage, false, AnimUtils.fadeInMedium());
+													if (mCategoryImage != null && mBadgeFilterColor != null) {
+														mCategoryImage.setColorFilter(ImageUtils.hexToColor(mBadgeFilterColor), PorterDuff.Mode.MULTIPLY);
+													}
+												}
+											});
 										}
 									}
-
-									@Override
-									public Bitmap onFilter(Bitmap bitmap) {
-										/*
-										 * Turn gray pixels to transparent. Making the bitmap mutable will
-										 * put pressure on memory so this should only be done when working with
-										 * small images. There is an ImageUtils routine that will make make a
-										 * bitmap mutable without using extra memory.
-										 */
-										Bitmap transformedBitmap = null;
-										if (mBadgeKeepColor == null && mBadgeFromColor == null && mBadgeToColor == null) {
-											return bitmap;
-										}
-										else {
-											transformedBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-											//bitmap.recycle();
-
-											if (mBadgeKeepColor != null) {
-												transformedBitmap = ImageUtils.keepPixels(transformedBitmap, mBadgeKeepColor);
-											}
-
-											if (mBadgeFromColor != null && mBadgeToColor != null) {
-												transformedBitmap = ImageUtils.replacePixels(transformedBitmap, mBadgeFromColor, mBadgeToColor);
-											}
-										}
-										return transformedBitmap;
-									}
-
 								});
+						BitmapManager.getInstance().fetchBitmap(request);
 						mCategoryImage.setVisibility(View.VISIBLE);
 					}
 				}
@@ -375,17 +340,7 @@ public class CandiView extends RelativeLayout {
 		mLayoutId = layoutId;
 	}
 
-	public void setColorFilter(String filterColor, String fromColor, String toColor, String keepColor) {
-		mFromColor = fromColor;
-		mToColor = toColor;
-		mKeepColor = keepColor;
-		mFilterColor = filterColor;
-	}
-
-	public void setBadgeColorFilter(String filterColor, String fromColor, String toColor, String keepColor) {
-		mBadgeFromColor = fromColor;
-		mBadgeToColor = toColor;
-		mBadgeKeepColor = keepColor;
+	public void setBadgeColorFilter(String filterColor) {
 		mBadgeFilterColor = filterColor;
 	}
 

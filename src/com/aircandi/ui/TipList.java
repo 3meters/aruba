@@ -22,9 +22,9 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
 import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestType;
@@ -249,11 +249,11 @@ public class TipList extends CandiActivity {
 						 */
 						holder.image.recycleBitmap();
 						if (imageUri != null && imageUri.length() != 0) {
-							ImageRequestBuilder builder = new ImageRequestBuilder(holder.image)
+							BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.image)
 									.setFromUris(imageUri, null);
 
-							ImageRequest imageRequest = builder.create();
-							holder.image.setImageRequest(imageRequest);
+							BitmapRequest imageRequest = builder.create();
+							holder.image.setBitmapRequest(imageRequest);
 						}
 					}
 				}

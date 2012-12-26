@@ -29,9 +29,9 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
 import com.aircandi.components.Tracker;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
@@ -170,14 +170,14 @@ public class EntityForm extends FormActivity {
 						mImageViewPicture.setVisibility(View.VISIBLE);
 					}
 					else {
-						ImageRequestBuilder builder = new ImageRequestBuilder(mImageViewPicture);
+						BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageViewPicture);
 						builder.setImageUri(entity.getImageUri());
 						builder.setImageFormat(entity.getImageFormat());
 						builder.setLinkZoom(CandiConstants.LINK_ZOOM);
 						builder.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
 
-						ImageRequest imageRequest = builder.create();
-						mImageViewPicture.setImageRequest(imageRequest);
+						BitmapRequest imageRequest = builder.create();
+						mImageViewPicture.setBitmapRequest(imageRequest);
 					}
 				}
 			}

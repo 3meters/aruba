@@ -24,7 +24,6 @@ import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.LocationManager;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -40,7 +39,6 @@ import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.MiscUtils;
 
-@SuppressWarnings("unused")
 public class LinkPicker extends FormActivity {
 
 	private TextView			mTitle;

@@ -38,9 +38,10 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageManager;
+import com.aircandi.components.images.BitmapManager;
+import com.aircandi.components.images.BitmapManager.ViewHolder;
+import com.aircandi.components.images.BitmapRequest;
 import com.aircandi.components.images.ImageResult;
-import com.aircandi.components.images.DrawableManager.ViewHolder;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestType;
@@ -406,7 +407,10 @@ public class PicturePicker extends FormActivity {
 				holder.data = itemData;
 				holder.itemImage.setTag(itemData.getThumbnail().getUrl());
 				holder.itemImage.setImageBitmap(null);
-				ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(itemData.getThumbnail().getUrl(), holder, null);
+				
+				BitmapRequest request = new BitmapRequest(itemData.getThumbnail().getUrl(), holder.itemImage);
+				request.setImageRequestor(holder.itemImage);
+				BitmapManager.getInstance().fetchBitmap(request);
 			}
 			return view;
 		}

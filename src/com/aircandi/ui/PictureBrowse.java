@@ -26,8 +26,9 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageManager;
-import com.aircandi.components.images.DrawableManager.ViewHolder;
+import com.aircandi.components.images.BitmapManager;
+import com.aircandi.components.images.BitmapManager.ViewHolder;
+import com.aircandi.components.images.BitmapRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.FormActivity;
@@ -265,7 +266,8 @@ public class PictureBrowse extends FormActivity {
 				holder.data = itemData;
 				holder.itemImage.setTag(itemData.getImageSizedUri(100, 100));
 				holder.itemImage.setImageBitmap(null);
-				ImageManager.getInstance().getDrawableManager().fetchDrawableOnThread(itemData.getImageSizedUri(100, 100), holder, null);
+				BitmapRequest request = new BitmapRequest(itemData.getImageSizedUri(100, 100), holder.itemImage);
+				BitmapManager.getInstance().fetchBitmap(request);
 			}
 			return view;
 		}

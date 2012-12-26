@@ -1,12 +1,12 @@
 package com.aircandi.components.images;
 
-import com.aircandi.components.images.ImageRequest.ImageShape;
+import com.aircandi.components.images.BitmapRequest.ImageShape;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.ImageFormat;
 
-public class ImageRequestBuilder {
+public class BitmapRequestBuilder {
 
 	public String			mImageUri;
 	public Object			mImageRequestor;
@@ -16,16 +16,14 @@ public class ImageRequestBuilder {
 	public Integer			mScaleToWidth;
 	public Boolean			mLinkZoom;
 	public Boolean			mLinkJavascriptEnabled;
-	public Boolean			mUpdateCache;
-	public Boolean			mSearchCache;
 	public RequestListener	mRequestListener;
 
-	public ImageRequestBuilder(Object imageRequestor) {
+	public BitmapRequestBuilder(Object imageRequestor) {
 		mImageRequestor = imageRequestor;
 	}
 
-	public ImageRequest create() {
-		ImageRequest imageRequest = new ImageRequest();
+	public BitmapRequest create() {
+		BitmapRequest imageRequest = new BitmapRequest();
 
 		if (mImageUri == null) {
 			throw new IllegalStateException("ImageUri must be set on ImageRequest");
@@ -56,12 +54,6 @@ public class ImageRequestBuilder {
 		if (mLinkJavascriptEnabled != null) {
 			imageRequest.setLinkJavascriptEnabled(mLinkJavascriptEnabled);
 		}
-		if (mUpdateCache != null) {
-			imageRequest.setUpdateCache(mUpdateCache);
-		}
-		if (mSearchCache != null) {
-			imageRequest.setSearchCache(mSearchCache);
-		}
 		if (mRequestListener != null) {
 			imageRequest.setRequestListener(mRequestListener);
 		}
@@ -72,7 +64,7 @@ public class ImageRequestBuilder {
 		return entity.getImageUri();
 	}
 
-	public ImageRequestBuilder setFromUris(String imageUri, String linkUri) {
+	public BitmapRequestBuilder setFromUris(String imageUri, String linkUri) {
 		if (imageUri != null && !imageUri.equals("")) {
 			String imageUriFixed = imageUri;
 			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
@@ -89,57 +81,47 @@ public class ImageRequestBuilder {
 		return this;
 	}
 
-	public ImageRequestBuilder setImageUri(String imageUri) {
+	public BitmapRequestBuilder setImageUri(String imageUri) {
 		this.mImageUri = imageUri;
 		return this;
 	}
 
-	public ImageRequestBuilder setImageFormat(ImageFormat imageFormat) {
+	public BitmapRequestBuilder setImageFormat(ImageFormat imageFormat) {
 		this.mImageFormat = imageFormat;
 		return this;
 	}
 
-	public ImageRequestBuilder setImageShape(ImageShape imageShape) {
+	public BitmapRequestBuilder setImageShape(ImageShape imageShape) {
 		this.mImageShape = imageShape;
 		return this;
 	}
 
-	public ImageRequestBuilder setImageRequestor(Object imageRequestor) {
+	public BitmapRequestBuilder setImageRequestor(Object imageRequestor) {
 		this.mImageRequestor = imageRequestor;
 		return this;
 	}
 
-	public ImageRequestBuilder setPriority(Integer priority) {
+	public BitmapRequestBuilder setPriority(Integer priority) {
 		this.mPriority = priority;
 		return this;
 	}
 
-	public ImageRequestBuilder setScaleToWidth(Integer scaleToWidth) {
+	public BitmapRequestBuilder setScaleToWidth(Integer scaleToWidth) {
 		this.mScaleToWidth = scaleToWidth;
 		return this;
 	}
 
-	public ImageRequestBuilder setLinkZoom(Boolean linkZoom) {
+	public BitmapRequestBuilder setLinkZoom(Boolean linkZoom) {
 		this.mLinkZoom = linkZoom;
 		return this;
 	}
 
-	public ImageRequestBuilder setLinkJavascriptEnabled(Boolean linkJavascriptEnabled) {
+	public BitmapRequestBuilder setLinkJavascriptEnabled(Boolean linkJavascriptEnabled) {
 		this.mLinkJavascriptEnabled = linkJavascriptEnabled;
 		return this;
 	}
 
-	public ImageRequestBuilder setUpdateCache(Boolean updateCache) {
-		this.mUpdateCache = updateCache;
-		return this;
-	}
-
-	public ImageRequestBuilder setSearchCache(Boolean searchCache) {
-		this.mSearchCache = searchCache;
-		return this;
-	}
-
-	public ImageRequestBuilder setRequestListener(RequestListener requestListener) {
+	public BitmapRequestBuilder setRequestListener(RequestListener requestListener) {
 		this.mRequestListener = requestListener;
 		return this;
 	}

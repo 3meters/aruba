@@ -21,8 +21,8 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Category;
@@ -203,8 +203,8 @@ public class CategoryBuilder extends FormActivity {
 				if (position < mCategories.size()) {
 
 					mCategory = (Category) mCategories.get(position);
-					if (mCategory.iconUri() != null) {
-						updateCustomImage(mCategory.iconUri());
+					if (mCategory.iconUri(true) != null) {
+						updateCustomImage(mCategory.iconUri(true));
 					}
 					final List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStrings(mCategory.categories);
 					categories.add(getString(R.string.form_place_sub_category_hint));
@@ -246,8 +246,8 @@ public class CategoryBuilder extends FormActivity {
 							/* Do nothing when the hint item is selected */
 							if (position < mCategory.categories.size()) {
 								mSubcategory = (Category) mCategory.categories.get(position);
-								if (mSubcategory.iconUri() != null) {
-									updateCustomImage(mSubcategory.iconUri());
+								if (mSubcategory.iconUri(true) != null) {
+									updateCustomImage(mSubcategory.iconUri(true));
 								}
 							}
 						}
@@ -272,12 +272,12 @@ public class CategoryBuilder extends FormActivity {
 	}
 
 	public void updateCustomImage(String uri) {
-		ImageRequestBuilder builder = new ImageRequestBuilder(mImage)
+		BitmapRequestBuilder builder = new BitmapRequestBuilder(mImage)
 				.setImageUri(uri)
 				.setImageFormat(ImageFormat.Binary);
 
-		final ImageRequest imageRequest = builder.create();
-		mImage.setImageRequest(imageRequest);
+		final BitmapRequest imageRequest = builder.create();
+		mImage.setBitmapRequest(imageRequest);
 	}
 
 	@Override

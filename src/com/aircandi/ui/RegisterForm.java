@@ -21,10 +21,10 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
-import com.aircandi.components.images.ImageRequest.ImageResponse;
 import com.aircandi.components.Tracker;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequest.ImageResponse;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.FormActivity;
@@ -92,7 +92,7 @@ public class RegisterForm extends FormActivity {
 			}
 			else {
 
-				ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
+				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
 				builder.setFromUris(mUser.getImageUri(), null);
 				builder.setRequestListener(new RequestListener() {
 
@@ -110,8 +110,8 @@ public class RegisterForm extends FormActivity {
 					}
 				});
 
-				ImageRequest imageRequest = builder.create();
-				mImageUser.setImageRequest(imageRequest);
+				BitmapRequest imageRequest = builder.create();
+				mImageUser.setBitmapRequest(imageRequest);
 			}
 		}
 	}

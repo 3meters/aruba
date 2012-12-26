@@ -30,9 +30,9 @@ import com.aircandi.PlacesConstants;
 import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.images.ImageManager;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequest.ImageShape;
+import com.aircandi.components.images.BitmapManager;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequest.ImageShape;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestType;
@@ -750,7 +750,7 @@ public class ProxiExplorer {
 
 			/* Preview image might need scaling. */
 			if (bitmapPreview.getWidth() > CandiConstants.IMAGE_WIDTH_DEFAULT) {
-				ImageRequest imageRequest = new ImageRequest()
+				BitmapRequest imageRequest = new BitmapRequest()
 						.setImageShape(ImageShape.Square)
 						.setScaleToWidth(CandiConstants.IMAGE_WIDTH_DEFAULT);
 				bitmapPreview = ImageUtils.scaleAndCropBitmap(bitmapPreview, imageRequest);
@@ -1178,7 +1178,7 @@ public class ProxiExplorer {
 				 * delete it because because it might be needed while aircandi users have current sessions.
 				 */
 				if (entity.photo != null && entity.photo.getImageUri() != null
-						&& !ImageManager.isLocalImage(entity.photo.getImageUri())) {
+						&& !BitmapManager.isLocalImage(entity.photo.getImageUri())) {
 					try {
 						// String imageKey =
 						// mCommon.mEntity.imagePreviewUri.substring(mCommon.mEntity.imagePreviewUri.lastIndexOf("/") +

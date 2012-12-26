@@ -978,10 +978,6 @@ public class ProxibaseService {
 
 		public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {}
 
-		public Bitmap onFilter(Bitmap bitmap) {
-			return bitmap;
-		}
-
 		public void onProgressChanged(int progress) {}
 	}
 

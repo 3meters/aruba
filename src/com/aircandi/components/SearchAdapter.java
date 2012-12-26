@@ -14,8 +14,8 @@ import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.components.SearchManager.SearchItemType;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -131,17 +131,15 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 				else if (suggestion.categoryIconUri != null) {
 
 					final String imageUri = suggestion.categoryIconUri;
-					final ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemImage)
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemImage)
 							.setImageUri(imageUri)
 							.setImageFormat(ImageFormat.Binary)
-							.setSearchCache(true)
-							.setUpdateCache(true)
 							.setScaleToWidth(CandiConstants.IMAGE_WIDTH_ORIGINAL);
 
-					ImageRequest imageRequest = builder.create();
+					BitmapRequest imageRequest = builder.create();
 
 					holder.itemImageUri = imageUri;
-					holder.itemImage.setImageRequest(imageRequest);
+					holder.itemImage.setBitmapRequest(imageRequest);
 				}
 				else {
 					holder.itemImage.getImageView().setImageResource(R.drawable.source_website_iii);

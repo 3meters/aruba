@@ -24,8 +24,8 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Entity;
@@ -283,11 +283,11 @@ public class CommentList extends CandiActivity {
 						 */
 						holder.itemAuthorImage.recycleBitmap();
 						if (comment.imageUri != null && comment.imageUri.length() != 0) {
-							ImageRequestBuilder builder = new ImageRequestBuilder(holder.itemAuthorImage)
+							BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemAuthorImage)
 									.setFromUris(comment.imageUri, null);
 
-							ImageRequest imageRequest = builder.create();
-							holder.itemAuthorImage.setImageRequest(imageRequest);
+							BitmapRequest imageRequest = builder.create();
+							holder.itemAuthorImage.setBitmapRequest(imageRequest);
 						}
 					}
 				}

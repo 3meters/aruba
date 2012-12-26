@@ -35,8 +35,8 @@ import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequest.ImageShape;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequest.ImageShape;
 
 public class ImageUtils {
 
@@ -193,6 +193,11 @@ public class ImageUtils {
 
 		int[] pixels = new int[bitmap.getHeight() * bitmap.getWidth()];
 		bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+		
+//		for( int i = 0; i < pixels.length; i++ ) {
+//		    // Invert the red channel as an alpha bitmask for the desired color.
+//		    pixels[i] = ~( pixels[i] << 8 & 0xFF000000 ) & Color.BLACK;
+//		}		
 
 		for (int i = 0; i < bitmap.getHeight() * bitmap.getWidth(); i++) {
 			int toRed = Color.red(pixels[i]);
@@ -295,8 +300,8 @@ public class ImageUtils {
 		return croppedBitmap;
 	}
 
-	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, ImageRequest imageRequest) {
-		return scaleAndCropBitmap(bitmap, imageRequest.getScaleToWidth(), imageRequest.getImageShape());
+	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, BitmapRequest bitmapRequest) {
+		return scaleAndCropBitmap(bitmap, bitmapRequest.getScaleToWidth(), bitmapRequest.getImageShape());
 	}
 
 	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, int scaleToWidth, ImageShape imageShape) {
@@ -349,19 +354,25 @@ public class ImageUtils {
 		}
 
 		/* Make sure the bitmap format is right */
-		Bitmap bitmapFinal = bitmapScaledAndCropped;
-		if (!bitmapScaledAndCropped.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString())) {
-			bitmapFinal = bitmapScaledAndCropped.copy(CandiConstants.IMAGE_CONFIG_DEFAULT, false);
-			if (!bitmapFinal.equals(bitmapScaledAndCropped)) {
-				bitmapScaledAndCropped.recycle();
-			}
-		}
+		Bitmap bitmapFinal = configBitmap(bitmapScaledAndCropped);
 
 		if (bitmapFinal.isRecycled()) {
 			throw new IllegalArgumentException("bitmapFinal has been recycled");
 		}
 
 		return bitmapFinal;
+	}
+	
+	public static Bitmap configBitmap(Bitmap bitmap) {
+		/* Make sure the bitmap format is right */
+		Bitmap bitmapModified = bitmap;
+		if (!bitmap.getConfig().name().equals(CandiConstants.IMAGE_CONFIG_DEFAULT.toString())) {
+			bitmapModified = bitmap.copy(CandiConstants.IMAGE_CONFIG_DEFAULT, false);
+			if (!bitmapModified.equals(bitmap)) {
+				bitmap.recycle();
+			}
+		}
+		return bitmapModified;
 	}
 
 	public static Bitmap makeReflection(Bitmap originalBitmap, boolean applyReflectionGradient) {

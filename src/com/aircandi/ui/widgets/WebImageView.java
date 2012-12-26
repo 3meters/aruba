@@ -19,9 +19,9 @@ import android.widget.RelativeLayout;
 import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.images.ImageManager;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequest.ImageResponse;
+import com.aircandi.components.images.BitmapManager;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequest.ImageResponse;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
@@ -127,16 +127,16 @@ public class WebImageView extends RelativeLayout {
 		super.onLayout(changed, l, t, r, b);
 	}
 
-	public void doImageRequest(final ImageRequest imageRequest, final boolean okToRecycle) {
+	public void doImageRequest(final BitmapRequest bitmapRequest, final boolean okToRecycle) {
 		/*
 		 * Handles the image request to set the internal ImageView. Creates a separate
 		 * scaled bitmap based on maxWidth and maxHeight or defaults if not set. The original
 		 * bitmap supplied to satisfy the image request may be recycled unless !okToRecycle. If an image
 		 * is not supplied by the image request, the standard broken image is used.
 		 */
-		mImageUri = imageRequest.getImageUri();
+		mImageUri = bitmapRequest.getImageUri();
 
-		final RequestListener originalImageReadyListener = imageRequest.getRequestListener();
+		final RequestListener originalImageReadyListener = bitmapRequest.getRequestListener();
 
 		/* Start the busy indicator */
 
@@ -145,8 +145,9 @@ public class WebImageView extends RelativeLayout {
 		}
 
 		mImageMain.setImageBitmap(null);
-
-		imageRequest.setRequestListener(new RequestListener() {
+		
+		bitmapRequest.setImageRequestor(this);
+		bitmapRequest.setRequestListener(new RequestListener() {
 
 			@Override
 			public void onProgressChanged(int progress) {
@@ -169,9 +170,6 @@ public class WebImageView extends RelativeLayout {
 							 * Give the original listener a chance to modify the
 							 * bitmap before we display it.
 							 */
-							if (originalImageReadyListener != null) {
-								imageResponse.bitmap = originalImageReadyListener.onFilter(imageResponse.bitmap);
-							}
 							setImage(imageResponse.bitmap, imageResponse.imageUri);
 						}
 					}
@@ -202,8 +200,8 @@ public class WebImageView extends RelativeLayout {
 				}
 			}
 		});
-
-		ImageManager.getInstance().getImageLoader().fetchImage(imageRequest, true);
+		
+		BitmapManager.getInstance().fetchBitmap(bitmapRequest);
 
 	}
 
@@ -259,12 +257,12 @@ public class WebImageView extends RelativeLayout {
 		});
 	}
 
-	public void setImageRequest(final ImageRequest imageRequest) {
-		setImageRequest(imageRequest, true);
+	public void setBitmapRequest(final BitmapRequest bitmapRequest) {
+		setBitmapRequest(bitmapRequest, true);
 	}
 
-	public void setImageRequest(final ImageRequest imageRequest, final boolean okToRecycle) {
-		doImageRequest(imageRequest, okToRecycle);
+	public void setBitmapRequest(final BitmapRequest bitmapRequest, final boolean okToRecycle) {
+		doImageRequest(bitmapRequest, okToRecycle);
 	}
 
 	public String getImageUri() {

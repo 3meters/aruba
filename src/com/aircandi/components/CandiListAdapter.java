@@ -19,8 +19,8 @@ import android.widget.TextView;
 
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.widgets.CandiView;
@@ -96,7 +96,6 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			holder.position = position;
 
 			if (holder.candiView != null) {
-				holder.candiView.setBadgeColorFilter("#ffffff", null, null, "#ffffff");
 				if (entity.synthetic) {
 					int colorResId = entity.place.getCategoryColorResId();
 					holder.candiView.setBackgroundResource(colorResId);
@@ -194,13 +193,13 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 					/* Don't do anything if the image is already set to the one we want */
 					if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {
 
-						ImageRequestBuilder builder = new ImageRequestBuilder(holder.image)
+						BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.image)
 								.setImageUri(imageUri)
 								.setImageFormat(entity.getImageFormat())
 								.setLinkZoom(CandiConstants.LINK_ZOOM)
 								.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
 
-						final ImageRequest imageRequest = builder.create();
+						final BitmapRequest imageRequest = builder.create();
 
 						holder.imageUri = imageUri;
 						if (entity.synthetic) {
@@ -211,7 +210,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 							holder.image.setColorFilter(null);
 						}
 
-						holder.image.setImageRequest(imageRequest);
+						holder.image.setBitmapRequest(imageRequest);
 					}
 				}
 			}

@@ -26,10 +26,10 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.images.ImageRequest;
-import com.aircandi.components.images.ImageRequestBuilder;
-import com.aircandi.components.images.ImageRequest.ImageResponse;
 import com.aircandi.components.Tracker;
+import com.aircandi.components.images.BitmapRequest;
+import com.aircandi.components.images.BitmapRequest.ImageResponse;
+import com.aircandi.components.images.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
@@ -159,7 +159,7 @@ public class ProfileForm extends FormActivity {
 				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 			else {
-				ImageRequestBuilder builder = new ImageRequestBuilder(mImageUser);
+				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
 				builder.setFromUris(mUser.getImageUri(), null);
 				builder.setRequestListener(new RequestListener() {
 
@@ -177,8 +177,8 @@ public class ProfileForm extends FormActivity {
 					}
 				});
 
-				ImageRequest imageRequest = builder.create();
-				mImageUser.setImageRequest(imageRequest);
+				BitmapRequest imageRequest = builder.create();
+				mImageUser.setBitmapRequest(imageRequest);
 			}
 		}
 		((ViewGroup) findViewById(R.id.flipper_form)).setVisibility(View.VISIBLE);
