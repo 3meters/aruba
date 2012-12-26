@@ -1,4 +1,4 @@
-package com.aircandi.components.images;
+package com.aircandi.components.bitmaps;
 
 import java.io.File;
 

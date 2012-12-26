@@ -5,8 +5,8 @@ import java.util.HashMap;
 
 import android.graphics.Bitmap;
 
-import com.aircandi.components.images.ImageResult;
-import com.aircandi.components.images.ImageResult.Thumbnail;
+import com.aircandi.components.bitmaps.ImageResult;
+import com.aircandi.components.bitmaps.ImageResult.Thumbnail;
 import com.aircandi.service.Expose;
 import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Entity.ImageFormat;

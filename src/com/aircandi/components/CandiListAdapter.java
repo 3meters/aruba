@@ -19,8 +19,8 @@ import android.widget.TextView;
 
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
-import com.aircandi.components.images.BitmapRequest;
-import com.aircandi.components.images.BitmapRequestBuilder;
+import com.aircandi.components.bitmaps.BitmapRequest;
+import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.widgets.CandiView;

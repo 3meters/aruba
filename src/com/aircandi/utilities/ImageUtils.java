@@ -35,8 +35,8 @@ import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.components.images.BitmapRequest;
-import com.aircandi.components.images.BitmapRequest.ImageShape;
+import com.aircandi.components.bitmaps.BitmapRequest;
+import com.aircandi.components.bitmaps.BitmapRequest.ImageShape;
 
 public class ImageUtils {
 

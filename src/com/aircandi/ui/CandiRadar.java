@@ -46,7 +46,7 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityModel;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
-import com.aircandi.components.images.BitmapManager;
+import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;

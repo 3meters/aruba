@@ -13,8 +13,8 @@ import android.widget.TextView;
 
 import com.aircandi.R;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.images.BitmapRequest;
-import com.aircandi.components.images.BitmapRequestBuilder;
+import com.aircandi.components.bitmaps.BitmapRequest;
+import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateUtils;
 

@@ -65,7 +65,7 @@ import com.aircandi.Aircandi;
 import com.aircandi.components.JsonHelper;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.images.ImageResult;
+import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;

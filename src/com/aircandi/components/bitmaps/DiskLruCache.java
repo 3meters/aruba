@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.aircandi.components.images;
+package com.aircandi.components.bitmaps;
 
 import java.io.BufferedWriter;
 import java.io.Closeable;

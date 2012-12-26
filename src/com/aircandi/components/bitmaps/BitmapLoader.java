@@ -1,4 +1,4 @@
-package com.aircandi.components.images;
+package com.aircandi.components.bitmaps;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.images.BitmapRequest.ImageResponse;
+import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
