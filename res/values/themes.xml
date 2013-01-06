@@ -50,7 +50,7 @@
         <item name="textColorBars">@color/text_dark</item>
         <item name="textColorProgress">@color/text_dark</item>
         <item name="textColorCandiView">@color/text_dark</item>
-        <item name="textColorCandiViewSynthetic">@color/text_light</item>
+        <item name="textColorCandiViewSynthetic">@color/text_dark</item>
         <item name="textOutlineRadar">true</item>
 
         <!-- Drawables and backgrounds -->
@@ -128,7 +128,7 @@
         <item name="textColorBars">@color/text_light</item>
         <item name="textColorProgress">@color/text_light</item>
         <item name="textColorCandiView">@color/text_dark</item>
-        <item name="textColorCandiViewSynthetic">@color/text_light</item>
+        <item name="textColorCandiViewSynthetic">@color/text_dark</item>
         <item name="textOutlineRadar">false</item>
         <item name="badgeColor">@color/text_dark</item>
         <item name="badgeColorSynthetic">@color/text_dark</item>

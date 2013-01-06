@@ -125,22 +125,23 @@ public class User extends ServiceEntryBase {
 		return user;
 	}
 
-	public String getImageUri() {
-		String imageUri = "resource:placeholder_logo";
-		if (this.photo != null) {
-			imageUri = photo.getImageSizedUri(250, 250);
-			if (imageUri == null) {
-				imageUri = photo.getImageUri();
-			}
-		}
-		return imageUri;
+	public Photo getPhoto() {
+		return photo != null ? photo : new Photo();
 	}
 
-	public Photo getPhoto() {
+	public Photo getPhotoForSet() {
 		if (photo == null) {
 			photo = new Photo();
 		}
 		return photo;
+	}
+
+	public String getUserPhotoUri() {
+		String imageUri = "resource:placeholder_logo_bw";
+		if (this.photo != null) {
+			imageUri = photo.getUri();
+		}
+		return imageUri;
 	}
 
 	@Override

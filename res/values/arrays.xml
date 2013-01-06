@@ -14,11 +14,11 @@
         <item>Select a place picture</item>
         <item>None</item>
     </string-array>
-    <string-array name="theme_list_preference">
+    <string-array name="theme_entries">
         <item>Holo Dark</item>
         <item>Holo Light</item>
     </string-array>
-    <string-array name="themevalues_list_preference">
+    <string-array name="theme_values">
         <item>aircandi_theme_midnight</item>
         <item>aircandi_theme_snow</item>
     </string-array>
@@ -47,6 +47,22 @@
         <item>natural</item>
         <item>zoka</item>
         <item>lucky</item>
+    </string-array>
+    <string-array name="search_radius_entries">
+        <item>100 yards</item>
+        <item>250 yards</item>
+        <item>500 yards</item>
+        <item>1 mile</item>
+        <item>2 miles</item>
+        <item>5 miles</item>
+    </string-array>
+    <string-array name="search_radius_values">
+        <item>91</item>
+        <item>229</item>
+        <item>457</item>
+        <item>1609</item>
+        <item>3219</item>
+        <item>8047</item>
     </string-array>
 
 </resources>

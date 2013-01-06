@@ -12,7 +12,7 @@
     "name": "Website",
     "photo": {
         "format": "binary",
-        "prefix": "resource:source_website_ii"
+        "prefix": "resource:source_website"
     },
     "signalFence": -100,
     "type": "com.aircandi.candi.source",

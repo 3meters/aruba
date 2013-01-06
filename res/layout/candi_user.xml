@@ -97,53 +97,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </com.aircandi.ui.widgets.SectionLayout>
-
-            <com.aircandi.ui.widgets.SectionLayout
-                android:id="@+id/section_candi"
-                style="@style/candi_form_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                aircandi:headerTitle="@string/candi_section_candi"
-                aircandi:layoutHeader="@layout/temp_section_header"
-                android:orientation="vertical"
-                android:visibility="gone" >
-
-                <com.aircandi.ui.widgets.HorizontalScrollLayout
-                    android:id="@+id/list_candi"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    aircandi:layout="@layout/temp_place_photo_item"
-                    android:fillViewport="true"
-                    android:visibility="visible" />
-            </com.aircandi.ui.widgets.SectionLayout>
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
-
-    <!-- Footer -->
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_above="@+id/form_footer"
-        android:background="?attr/ruleColor" />
-
-    <LinearLayout
-        android:id="@+id/form_footer"
-        style="?attr/buttonBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/button_edit"
-            style="@style/form_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onEditButtonClick"
-            android:text="@string/candi_button_edit" />
-    </LinearLayout>
 
 </RelativeLayout>

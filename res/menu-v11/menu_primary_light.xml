@@ -2,12 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/debug"
-        android:actionLayout="@layout/actionbar_debug"
-        android:orderInCategory="1"
-        android:showAsAction="always"
-        android:visible="true"/>
-    <item
         android:id="@+id/beacons"
         android:actionLayout="@layout/actionbar_beacons"
         android:orderInCategory="1"
@@ -19,6 +13,18 @@
         android:orderInCategory="1"
         android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>
+    <item
+        android:id="@+id/add_custom_place"
+        android:icon="@drawable/ic_action_add_light"
+        android:orderInCategory="1"
+        android:showAsAction="always"
+        android:title="@string/menu_add_custom_place_item"/>
+    <item
+        android:id="@+id/profile"
+        android:icon="@drawable/ic_action_user_light"
+        android:orderInCategory="1"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_profile_item"/>
     <item
         android:id="@+id/settings"
         android:icon="@drawable/ic_action_settings_light"

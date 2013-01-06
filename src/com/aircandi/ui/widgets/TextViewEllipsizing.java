@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.text.Layout;
 import android.text.Layout.Alignment;
@@ -12,9 +13,11 @@ import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import com.aircandi.R;
+
 public class TextViewEllipsizing extends TextView {
 
-	private static final String				ELLIPSIS						= "...";
+	private static final String				ELLIPSIS						= "&#8230;";
 
 	private final List<EllipsizeListener>	mEllipsizeListeners				= new ArrayList<EllipsizeListener>();
 	private boolean							mIsEllipsized;
@@ -27,15 +30,18 @@ public class TextViewEllipsizing extends TextView {
 	private boolean							mMirrorText						= false;
 
 	public TextViewEllipsizing(Context context) {
-		super(context);
+		this(context, null);
 	}
 
 	public TextViewEllipsizing(Context context, AttributeSet attrs) {
-		super(context, attrs);
+		this(context, attrs, 0);
 	}
 
 	public TextViewEllipsizing(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.TextViewEllipsizing, defStyle, 0);
+		mMaxLines = ta.getInteger(R.styleable.TextViewEllipsizing_maxLines, -1);
+		ta.recycle();
 	}
 
 	@Override

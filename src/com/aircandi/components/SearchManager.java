@@ -2,20 +2,7 @@ package com.aircandi.components;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-
-import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Observation;
-import com.aircandi.service.objects.ServiceData;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -27,6 +14,18 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.Browser;
 import android.webkit.WebIconDatabase.IconListener;
+
+import com.aircandi.ProxiConstants;
+import com.aircandi.components.NetworkManager.ResponseCode;
+import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.service.ProxibaseService;
+import com.aircandi.service.ProxibaseService.RequestType;
+import com.aircandi.service.ProxibaseService.ResponseFormat;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.ServiceRequest;
+import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Observation;
+import com.aircandi.service.objects.ServiceData;
 
 @SuppressWarnings("unused")
 public class SearchManager {
@@ -134,7 +133,7 @@ public class SearchManager {
 				suggestion.name = entity.name;
 				suggestion.uri = entity.place.website;
 				suggestion.categoryName = entity.place.categories.get(0).name;
-				suggestion.categoryIconUri = entity.photo.getImageUri();
+				suggestion.categoryIconUri = entity.getPhoto().getUri();
 				searchItems.add(suggestion);
 			}
 		}

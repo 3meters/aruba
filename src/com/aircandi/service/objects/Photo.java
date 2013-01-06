@@ -5,24 +5,22 @@ import java.util.HashMap;
 
 import android.graphics.Bitmap;
 
+import com.aircandi.ProxiConstants;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.components.bitmaps.ImageResult.Thumbnail;
 import com.aircandi.service.Expose;
-import com.aircandi.service.ProxiConstants;
-import com.aircandi.service.objects.Entity.ImageFormat;
 
 /**
  * @author Jayma
  */
 public class Photo extends ServiceObject implements Cloneable, Serializable {
 	/*
-	 * format: binary, html
 	 * sourceName: aircandi, foursquare, external
 	 */
 	private static final long	serialVersionUID	= 4979315562693226461L;
 
 	@Expose
-	protected String			prefix				= "resource:placeholder_logo";
+	protected String			prefix;
 	@Expose
 	protected String			suffix;
 	@Expose
@@ -30,13 +28,9 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	protected Number			height;
 	@Expose
-	protected String			format				= "binary";
-	@Expose
-	protected String			sourceName			= "aircandi";
+	protected String			sourceName;
 	@Expose
 	protected Number			createdAt;
-	@Expose
-	protected Photo				detail;
 
 	/* Only comes from foursquare */
 	@Expose(serialize = false, deserialize = true)
@@ -52,10 +46,6 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 	public Photo clone() {
 		try {
 			final Photo photo = (Photo) super.clone();
-
-			if (this.detail != null) {
-				photo.detail = this.detail.clone();
-			}
 
 			if (this.user != null) {
 				photo.user = this.user.clone();
@@ -81,13 +71,8 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		photo.suffix = (String) map.get("suffix");
 		photo.width = (Number) map.get("width");
 		photo.height = (Number) map.get("height");
-		photo.format = (String) map.get("format");
 		photo.sourceName = (String) map.get("sourceName");
 		photo.createdAt = (Number) map.get("createdAt");
-
-		if (map.get("detail") != null) {
-			photo.detail = (Photo) Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("detail"));
-		}
 
 		if (map.get("user") != null) {
 			photo.user = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
@@ -100,9 +85,9 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		ImageResult imageResult = new ImageResult();
 		imageResult.setWidth(width.longValue());
 		imageResult.setHeight(height.longValue());
-		imageResult.setMediaUrl(getImageUri());
+		imageResult.setMediaUrl(getUri());
 		Thumbnail thumbnail = new Thumbnail();
-		thumbnail.setUrl(getImageSizedUri(100, 100));
+		thumbnail.setUrl(getSizedUri(100, 100));
 		imageResult.setThumbnail(thumbnail);
 		return imageResult;
 	}
@@ -122,21 +107,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public Boolean isEmpty() {
-		if (prefix == null || prefix.equals("") || prefix.equals("resource:placeholder_logo")) {
-			return true;
-		}
-		return false;
-	}
-
-	public Boolean hasDetail() {
-		if (detail == null || detail.isEmpty()) {
-			return false;
-		}
-		return true;
-	}
-
-	public String getImageUri() {
+	public String getUri() {
 		String imageUri = prefix;
 		if (suffix != null) {
 			if (width != null && height != null) {
@@ -152,7 +123,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		return imageUri;
 	}
 
-	public String getImageSizedUri(Number pWidth, Number pHeight) {
+	public String getSizedUri(Number pWidth, Number pHeight) {
 		String imageUri = prefix;
 		if (prefix != null && suffix != null) {
 			imageUri = prefix + String.valueOf(pWidth) + "x" + String.valueOf(pHeight) + suffix;
@@ -164,31 +135,6 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 			imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 		}
 		return imageUri;
-	}
-
-	public String getFormat() {
-		return this.format;
-	}
-
-	public void setFormat(String format) {
-		this.format = format;
-	}
-
-	public ImageFormat getImageFormat() {
-		ImageFormat imageFormat = ImageFormat.Binary;
-		if (format != null && format.equals("html")) {
-			imageFormat = ImageFormat.Html;
-		}
-		return imageFormat;
-	}
-
-	public void setImageFormat(ImageFormat imageFormat) {
-		if (imageFormat == ImageFormat.Binary) {
-			this.format = "binary";
-		}
-		else if (imageFormat == ImageFormat.Html) {
-			this.format = "html";
-		}
 	}
 
 	public String getSourceName() {
@@ -221,17 +167,6 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 	public void setTitle(String title) {
 		this.title = title;
-	}
-
-	public Photo getDetail() {
-		if (detail == null) {
-			detail = new Photo();
-		}
-		return detail;
-	}
-
-	public void setDetail(Photo detail) {
-		this.detail = detail;
 	}
 
 	public Bitmap getBitmap() {

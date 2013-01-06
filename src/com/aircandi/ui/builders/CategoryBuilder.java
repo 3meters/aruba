@@ -26,7 +26,6 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Category;
-import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 
@@ -87,10 +86,11 @@ public class CategoryBuilder extends FormActivity {
 	}
 
 	public void loadCategories() {
-		new AsyncTask<Object, Object, Object>() {
+		new AsyncTask() {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("LoadCategories");				
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel().loadCategories();
 				return result;
 			}
@@ -203,8 +203,8 @@ public class CategoryBuilder extends FormActivity {
 				if (position < mCategories.size()) {
 
 					mCategory = (Category) mCategories.get(position);
-					if (mCategory.iconUri(true) != null) {
-						updateCustomImage(mCategory.iconUri(true));
+					if (mCategory.iconUri() != null) {
+						updateCustomImage(mCategory.iconUri());
 					}
 					final List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStrings(mCategory.categories);
 					categories.add(getString(R.string.form_place_sub_category_hint));
@@ -246,8 +246,8 @@ public class CategoryBuilder extends FormActivity {
 							/* Do nothing when the hint item is selected */
 							if (position < mCategory.categories.size()) {
 								mSubcategory = (Category) mCategory.categories.get(position);
-								if (mSubcategory.iconUri(true) != null) {
-									updateCustomImage(mSubcategory.iconUri(true));
+								if (mSubcategory.iconUri() != null) {
+									updateCustomImage(mSubcategory.iconUri());
 								}
 							}
 						}
@@ -273,8 +273,7 @@ public class CategoryBuilder extends FormActivity {
 
 	public void updateCustomImage(String uri) {
 		BitmapRequestBuilder builder = new BitmapRequestBuilder(mImage)
-				.setImageUri(uri)
-				.setImageFormat(ImageFormat.Binary);
+				.setImageUri(uri);
 
 		final BitmapRequest imageRequest = builder.create();
 		mImage.setBitmapRequest(imageRequest);

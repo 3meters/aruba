@@ -110,7 +110,7 @@ public class LinkPicker extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-
+				Thread.currentThread().setName("GetBookmarks");				
 				List<SearchItem> bookmarks = SearchManager.getInstance().getBookmarks(getContentResolver());
 				if (bookmarks != null) {
 					mSearchItems.addAll(bookmarks);
@@ -191,6 +191,7 @@ public class LinkPicker extends FormActivity {
 
 					@Override
 					protected Object doInBackground(Object... params) {
+						Thread.currentThread().setName("GetHtml");				
 						ServiceResponse serviceResponse = new ServiceResponse();
 						/*
 						 * If using uri then we have already checked to see if it is a well formed

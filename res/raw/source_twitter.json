@@ -13,7 +13,7 @@
     "name": "Twitter",
     "photo": {
         "format": "binary",
-        "prefix": "https://twitter.com/images/resources/twitter-bird-light-bgs.png"
+        "prefix": "resource:source_twitter"
     },
     "signalFence": -100,
     "type": "com.aircandi.candi.source",

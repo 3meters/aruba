@@ -218,53 +218,149 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		return categories;
 	}
 
-	public Integer getCategoryColorResId() {
+	public Integer getCategoryColorResId(Boolean dark, Boolean mute, Boolean semi) {
 		int colorResId = R.color.accent_gray;
+		if (semi) {
+			colorResId = R.color.accent_gray_semi;
+		}
 		Category category = getCategoryPrimary();
 		if (category != null) {
 
 			Random rand = new Random(category.name.hashCode());
 			int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
 			if (colorIndex == 1) {
-				colorResId = R.color.accent_blue_dark_mute;
+				colorResId = R.color.accent_blue;
+				if (dark) {
+					colorResId = R.color.accent_blue_dark;
+				}
+				if (mute) {
+					colorResId = R.color.accent_blue_dark_mute;
+				}
+				if (semi) {
+					colorResId = R.color.accent_blue_dark_mute_semi;
+				}
 			}
 			else if (colorIndex == 2) {
-				colorResId = R.color.accent_orange_dark_mute;
+				colorResId = R.color.accent_orange;
+				if (dark) {
+					colorResId = R.color.accent_orange_dark;
+				}
+				if (mute) {
+					colorResId = R.color.accent_orange_dark_mute;
+				}
+				if (semi) {
+					colorResId = R.color.accent_orange_dark_mute_semi;
+				}
 			}
 			else if (colorIndex == 3) {
-				colorResId = R.color.accent_green_dark_mute;
+				colorResId = R.color.accent_green;
+				if (dark) {
+					colorResId = R.color.accent_green_dark;
+				}
+				if (mute) {
+					colorResId = R.color.accent_green_dark_mute;
+				}
+				if (semi) {
+					colorResId = R.color.accent_green_dark_mute_semi;
+				}
 			}
 			else if (colorIndex == 4) {
-				colorResId = R.color.accent_purple_dark_mute;
+				colorResId = R.color.accent_purple;
+				if (dark) {
+					colorResId = R.color.accent_purple_dark;
+				}
+				if (mute) {
+					colorResId = R.color.accent_purple_dark_mute;
+				}
+				if (semi) {
+					colorResId = R.color.accent_purple_dark_mute_semi;
+				}
 			}
 			else if (colorIndex == 5) {
-				colorResId = R.color.accent_red_dark_mute;
+				colorResId = R.color.accent_red;
+				if (dark) {
+					colorResId = R.color.accent_red_dark;
+				}
+				if (mute) {
+					colorResId = R.color.accent_red_dark_mute;
+				}
+				if (semi) {
+					colorResId = R.color.accent_red_dark_mute_semi;
+				}
 			}
 		}
 		return colorResId;
 	}
-	
-	public Integer getCategoryColor() {
+
+	public Integer getCategoryColor(Boolean dark, Boolean mute, Boolean semi) {
 		int colorResId = R.color.accent_gray;
+		if (semi) {
+			colorResId = R.color.accent_gray_semi;
+		}
 		Category category = getCategoryPrimary();
 		if (category != null) {
 
 			Random rand = new Random(category.name.hashCode());
 			int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
 			if (colorIndex == 1) {
-				colorResId = R.color.accent_blue_dark_mute;
+				colorResId = R.color.accent_blue;
+				if (dark) {
+					colorResId = R.color.accent_blue_dark;
+				}
+				if (mute) {
+					colorResId = R.color.accent_blue_dark_mute;
+				}
+				if (semi) {
+					colorResId = R.color.accent_blue_dark_mute_semi;
+				}
 			}
 			else if (colorIndex == 2) {
-				colorResId = R.color.accent_orange_dark_mute;
+				colorResId = R.color.accent_orange;
+				if (dark) {
+					colorResId = R.color.accent_orange_dark;
+				}
+				if (mute) {
+					colorResId = R.color.accent_orange_dark_mute;
+				}
+				if (semi) {
+					colorResId = R.color.accent_orange_dark_mute_semi;
+				}
 			}
 			else if (colorIndex == 3) {
-				colorResId = R.color.accent_green_dark_mute;
+				colorResId = R.color.accent_green;
+				if (dark) {
+					colorResId = R.color.accent_green_dark;
+				}
+				if (mute) {
+					colorResId = R.color.accent_green_dark_mute;
+				}
+				if (semi) {
+					colorResId = R.color.accent_green_dark_mute_semi;
+				}
 			}
 			else if (colorIndex == 4) {
-				colorResId = R.color.accent_purple_dark_mute;
+				colorResId = R.color.accent_purple;
+				if (dark) {
+					colorResId = R.color.accent_purple_dark;
+				}
+				if (mute) {
+					colorResId = R.color.accent_purple_dark_mute;
+				}
+				if (semi) {
+					colorResId = R.color.accent_purple_dark_mute_semi;
+				}
 			}
 			else if (colorIndex == 5) {
-				colorResId = R.color.accent_red_dark_mute;
+				colorResId = R.color.accent_red;
+				if (dark) {
+					colorResId = R.color.accent_red_dark;
+				}
+				if (mute) {
+					colorResId = R.color.accent_red_dark_mute;
+				}
+				if (semi) {
+					colorResId = R.color.accent_red_dark_mute_semi;
+				}
 			}
 		}
 		return Aircandi.getInstance().getResources().getColor(colorResId);

@@ -12,7 +12,7 @@
     "name": "Foursquare",
     "photo": {
         "format": "binary",
-        "prefix": "resource:source_foursquare_ii"
+        "prefix": "resource:source_foursquare"
     },
     "signalFence": -100,
     "type": "com.aircandi.candi.source",

@@ -1,55 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-	xmlns:android="http://schemas.android.com/apk/res/android">
-	<PreferenceCategory
-		android:title="Search preferences">
-		<ListPreference
-			android:defaultValue="@string/theme_default"
-			android:summary="Choose a theme"
-			android:entries="@array/theme_list_preference"
-			android:entryValues="@array/themevalues_list_preference"
-			android:dialogTitle="Select theme"
-			android:id="@+id/Pref_Theme"
-			android:key="Pref_Theme"
-			android:positiveButtonText="OK"
-			android:negativeButtonText="Cancel"
-			android:title="Themes" />
-		<CheckBoxPreference
-			android:key="Pref_Sound_Effects"
-			android:defaultValue="true"
-			android:title="Sounds"
-			android:summary="Play sound notifications and effects"
-			android:id="@+id/Pref_Sound_Effects" />
-		<CheckBoxPreference
-			android:id="@+id/Pref_Global_Beacons"
-			android:key="Pref_Global_Beacons"
-			android:defaultValue="true"
-			android:title="Aircandi feed"
-			android:summary="Show Aircandi feed" />
-	</PreferenceCategory>
-	<PreferenceCategory
-		android:title="Error reporting">
-		<CheckBoxPreference
-			android:key="acra.enable"
-			android:title="@string/pref_disable_acra"
-			android:summaryOn="@string/pref_acra_enabled"
-			android:summaryOff="@string/pref_acra_disabled"
-			android:defaultValue="true" />
-		<CheckBoxPreference
-			android:key="acra.syslog.enable"
-			android:summaryOn="@string/pref_acra_syslog_enabled"
-			android:summaryOff="@string/pref_acra_syslog_disabled"
-			android:title="@string/pref_acra_syslog"
-			android:defaultValue="false" />
-		<EditTextPreference
-			android:key="acra.user.email"
-			android:title="@string/pref_acra_user_email"
-			android:summary="@string/pref_acra_user_email_summary" />
-		<CheckBoxPreference
-			android:key="acra.alwaysaccept"
-			android:title="@string/pref_acra_alwaysaccept"
-			android:summaryOn="@string/pref_acra_alwaysaccept_enabled"
-			android:summaryOff="@string/pref_acra_alwaysaccept_disabled"
-			android:defaultValue="false" />
-	</PreferenceCategory>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="Search preferences" >
+        <ListPreference
+            android:id="@+id/Pref_Search_Radius"
+            android:defaultValue="@string/search_radius_default"
+            android:dialogTitle="Select search distance"
+            android:entries="@array/search_radius_entries"
+            android:entryValues="@array/search_radius_values"
+            android:key="Pref_Search_Radius"
+            android:negativeButtonText="Cancel"
+            android:positiveButtonText="OK"
+            android:summary="Default search distance"
+            android:title="Distances" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="General preferences" >
+        <ListPreference
+            android:id="@+id/Pref_Theme"
+            android:defaultValue="@string/theme_default"
+            android:dialogTitle="Select theme"
+            android:entries="@array/theme_entries"
+            android:entryValues="@array/theme_values"
+            android:key="Pref_Theme"
+            android:negativeButtonText="Cancel"
+            android:positiveButtonText="OK"
+            android:summary="Choose a theme"
+            android:title="Themes" />
+
+        <CheckBoxPreference
+            android:id="@+id/Pref_Sound_Effects"
+            android:defaultValue="true"
+            android:key="Pref_Sound_Effects"
+            android:summary="Play sound notifications and effects"
+            android:title="Sounds" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Error reporting" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="acra.enable"
+            android:summaryOff="@string/pref_acra_disabled"
+            android:summaryOn="@string/pref_acra_enabled"
+            android:title="@string/pref_disable_acra" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="acra.syslog.enable"
+            android:summaryOff="@string/pref_acra_syslog_disabled"
+            android:summaryOn="@string/pref_acra_syslog_enabled"
+            android:title="@string/pref_acra_syslog" />
+
+        <EditTextPreference
+            android:key="acra.user.email"
+            android:summary="@string/pref_acra_user_email_summary"
+            android:title="@string/pref_acra_user_email" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="acra.alwaysaccept"
+            android:summaryOff="@string/pref_acra_alwaysaccept_disabled"
+            android:summaryOn="@string/pref_acra_alwaysaccept_enabled"
+            android:title="@string/pref_acra_alwaysaccept" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

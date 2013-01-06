@@ -36,7 +36,6 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequest.ImageShape;
 
 public class ImageUtils {
 
@@ -301,22 +300,13 @@ public class ImageUtils {
 	}
 
 	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, BitmapRequest bitmapRequest) {
-		return scaleAndCropBitmap(bitmap, bitmapRequest.getScaleToWidth(), bitmapRequest.getImageShape());
+		/*
+		 * Only being used when sending an image to S3
+		 */
+		return scaleAndCropBitmap(bitmap, 500);
 	}
 
-	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, int scaleToWidth, ImageShape imageShape) {
-
-		//		/* Create a matrix for the manipulation */
-		//		Matrix matrix = new Matrix();
-		//
-		//		/* Resize the bitmap */
-		//		matrix.postScale(scaleBy, scaleBy);
-		//		if (rotation != 0) {
-		//			matrix.postRotate(rotation);
-		//		}
-		//
-		//		Bitmap bitmapSampledAndScaled = Bitmap.createBitmap(bitmapSampled, 0, 0, bitmapSampled.getWidth(), bitmapSampled.getHeight(), matrix,
-		//				true);
+	public static Bitmap scaleAndCropBitmap(Bitmap bitmap, int scaleToWidth) {
 
 		/* Scale if needed */
 		Bitmap bitmapScaled = bitmap;
@@ -344,17 +334,8 @@ public class ImageUtils {
 			}
 		}
 
-		/* Crop if requested */
-		Bitmap bitmapScaledAndCropped = bitmapScaled;
-		if (imageShape == ImageShape.Square) {
-			bitmapScaledAndCropped = ImageUtils.cropToSquare(bitmapScaled);
-			if (!bitmapScaledAndCropped.equals(bitmapScaled)) {
-				bitmapScaled.recycle();
-			}
-		}
-
 		/* Make sure the bitmap format is right */
-		Bitmap bitmapFinal = configBitmap(bitmapScaledAndCropped);
+		Bitmap bitmapFinal = configBitmap(bitmapScaled);
 
 		if (bitmapFinal.isRecycled()) {
 			throw new IllegalArgumentException("bitmapFinal has been recycled");

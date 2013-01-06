@@ -3,8 +3,6 @@ package com.aircandi.ui.widgets;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -47,7 +45,6 @@ public class WebImageView extends RelativeLayout {
 	private Boolean						mLayoutWidthMatchParent	= false;
 	private boolean						mShowBusy;
 	private Integer						mLayoutId;
-	private Integer						mColorFilter;
 	private ScaleType					mScaleType				= ScaleType.CENTER_CROP;
 
 	private static final String			androidNamespace		= "http://schemas.android.com/apk/res/android";
@@ -81,14 +78,14 @@ public class WebImageView extends RelativeLayout {
 		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.widget_webimageview);
 
+		ta.recycle();
+
 		if (!isInEditMode()) {
 			int scaleTypeValue = attributes.getAttributeIntValue(androidNamespace, "scaleType", 6);
 			if (scaleTypeValue >= 0) {
 				mScaleType = sScaleTypeArray[scaleTypeValue];
 			}
 		}
-
-		ta.recycle();
 
 		initialize(context);
 	}
@@ -97,10 +94,13 @@ public class WebImageView extends RelativeLayout {
 		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View view = inflater.inflate(mLayoutId, this, true);
 
-		mImageBadge = (ImageView) view.findViewById(R.id.image_badge);
-		mImageZoom = (ImageView) view.findViewById(R.id.image_zoom);
 		mImageMain = (ImageView) view.findViewById(R.id.image_main);
-		mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+
+		if (!isInEditMode()) {
+			mImageBadge = (ImageView) view.findViewById(R.id.image_badge);
+			mImageZoom = (ImageView) view.findViewById(R.id.image_zoom);
+			mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+		}
 
 		if (mImageMain != null) {
 			mImageMain.setScaleType((ScaleType) mScaleType);
@@ -123,7 +123,9 @@ public class WebImageView extends RelativeLayout {
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		mImageMain.layout(l, t, r, b);
+		if (mImageMain != null) {
+			mImageMain.layout(l, t, r, b);
+		}
 		super.onLayout(changed, l, t, r, b);
 	}
 
@@ -144,8 +146,9 @@ public class WebImageView extends RelativeLayout {
 			showLoading();
 		}
 
+		/* Clear the current bitmap */
 		mImageMain.setImageBitmap(null);
-		
+
 		bitmapRequest.setImageRequestor(this);
 		bitmapRequest.setRequestListener(new RequestListener() {
 
@@ -187,6 +190,7 @@ public class WebImageView extends RelativeLayout {
 						}
 					});
 				}
+
 				mThreadHandler.post(new Runnable() {
 
 					@Override
@@ -200,9 +204,8 @@ public class WebImageView extends RelativeLayout {
 				}
 			}
 		});
-		
-		BitmapManager.getInstance().fetchBitmap(bitmapRequest);
 
+		BitmapManager.getInstance().fetchBitmap(bitmapRequest);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -246,12 +249,6 @@ public class WebImageView extends RelativeLayout {
 			@Override
 			public void run() {
 				mImageMain.setImageBitmap(null);
-				if (mColorFilter != null) {
-					mImageMain.setColorFilter(mColorFilter, PorterDuff.Mode.MULTIPLY);
-				}
-				else {
-					mImageMain.clearColorFilter();
-				}
 				ImageUtils.showImageInImageView(bitmap, mImageMain, true, AnimUtils.fadeInMedium());
 			}
 		});
@@ -287,31 +284,5 @@ public class WebImageView extends RelativeLayout {
 
 	public ImageView getImageZoom() {
 		return mImageZoom;
-	}
-
-	public void recycleBitmap() {
-		if (mImageMain.getDrawable() != null) {
-			BitmapDrawable bitmapDrawable = (BitmapDrawable) mImageMain.getDrawable();
-			if (bitmapDrawable != null && bitmapDrawable.getBitmap() != null && !bitmapDrawable.getBitmap().isRecycled()) {
-				bitmapDrawable.getBitmap().recycle();
-			}
-		}
-		mImageMain.setImageBitmap(null);
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
-	// --------------------------------------------------------------------------------------------
-
-	public void onDestroy() {
-		recycleBitmap();
-	}
-
-	public Integer getColorFilter() {
-		return mColorFilter;
-	}
-
-	public void setColorFilter(Integer colorFilter) {
-		mColorFilter = colorFilter;
 	}
 }

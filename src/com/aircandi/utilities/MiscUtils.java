@@ -10,10 +10,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-import com.aircandi.components.Logger;
-
 import android.os.CountDownTimer;
 import android.os.Debug;
+
+import com.aircandi.components.Logger;
 
 public class MiscUtils {
 

@@ -66,4 +66,10 @@ public class Link extends ServiceEntryBase {
 	public String getCollection() {
 		return "links";
 	}
+
+	public enum LinkType {
+		proximity,
+		browse,
+		content
+	}
 }

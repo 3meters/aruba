@@ -59,7 +59,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		mListAdapter = new ListAdapter(this, listData);
 		mListView = (ListView) findViewById(R.id.form_list);
 		mTextViewMessage = (TextView) findViewById(R.id.text_message);
-		mTextViewMessage.setText(R.string.dialog_template_picker_message_folder);
+		mTextViewMessage.setText(R.string.dialog_template_picker_message);
 		mListView.setAdapter(mListAdapter);
 		mListView.setOnItemClickListener(this);
 

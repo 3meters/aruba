@@ -45,8 +45,7 @@
                     aircandi:maxWidth="100dp"
                     android:clickable="true"
                     android:onClick="onChangePictureButtonClick"
-                    android:scaleType="centerCrop"
-                    android:tag="resource:placeholder_logo_bw" />
+                    android:scaleType="centerCrop" />
 
                 <Button
                     android:id="@+id/button_change_image"

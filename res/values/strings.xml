@@ -7,13 +7,14 @@
     <string name="name_entity_type_picture">picture</string>
     <string name="name_entity_type_post">post</string>
     <string name="name_entity_type_place">place</string>
-    <string name="name_entity_type_folder">folder</string>
     
     <!-- Menus -->
 
     <string name="menu_beacons_item">Beacons</string>
+    <string name="menu_add_custom_place_item">Add custom place</string>
     <string name="menu_refresh_item">Refresh</string>
-    <string name="menu_profile_item">Profile</string>
+    <string name="menu_edit_item">Edit</string>
+    <string name="menu_profile_item">About me</string>
     <string name="menu_settings_item">Settings</string>
     <string name="menu_update_item">Update</string>
     <string name="menu_signin_item">Sign in</string>
@@ -128,6 +129,7 @@
     <string name="error_missing_email">Enter an email address.</string>
 	<string name="error_missing_password">Enter a password.</string>
 	<string name="error_missing_password_confirmation">Enter password confirmation.</string>
+	
     <!-- Toast -->
 
     <string name="toast_wifi_enabling">Wifi state enabling&#8230;</string>
@@ -135,10 +137,12 @@
     <string name="toast_wifi_disabled">Wifi state disabled.</string>
     <string name="toast_signed_in">Signed in as</string>
     <string name="toast_signed_out">Signed out.</string>
-
+    <string name="toast_tuned">Thank you for making aircandi better!</string>
+    
     <!-- UI General -->
 
     <string name="progress_scanning">Scanning&#8230;</string>
+    <string name="progress_expanding">Expanding&#8230;</string>
     <string name="progress_loading">Loading&#8230;</string>
     <string name="progress_more">Paging&#8230;</string>
     <string name="progress_signing_out">Signing out&#8230;</string>
@@ -172,14 +176,12 @@
     <string name="entity_post_title">Post</string>
     <string name="entity_picture_title">Picture</string>
     <string name="entity_place_title">Place</string>
-    <string name="entity_folder_title">Folder</string>
 
     <!-- Radar -->
 
     <string name="radar_tab_radar">radar</string>
     <string name="radar_tab_mycandi">my candi</string>
     <string name="radar_button_custom">add custom place</string>
-    <string name="radar_button_tune">tune it!</string>
     <string name="radar_section_places">tuned</string>
     <string name="radar_section_synthetics">nearby</string>
     
@@ -209,8 +211,7 @@
     <string name="dialog_picture_picker_search_title">picture search</string>
     <string name="dialog_picture_picker_place_title">place pictures</string>
     
-    <string name="dialog_template_picker_message_top">Create and share candi with Aircandi users at this place!</string>
-    <string name="dialog_template_picker_message_folder">Create and share candi at this place.</string>
+    <string name="dialog_template_picker_message">Add some candi to this place!</string>
 
     <string name="dialog_picture_source_title">select picture</string>
     <string name="dialog_picture_source_search">Search for pictures</string>
@@ -266,7 +267,7 @@
     <string name="candi_button_menu">menu</string>
     <string name="candi_button_share">send to a friend</string>
     <string name="candi_button_map">map</string>
-    <string name="candi_button_tune">tune it!</string>
+    <string name="candi_button_tune">i\'m here</string>
     <string name="candi_button_call">call</string>
     <string name="candi_button_website">view website</string>
     <string name="candi_button_comment">comment</string>
@@ -284,11 +285,12 @@
     <string name="candi_section_phrases">people talk about</string>
     <string name="candi_label_comments_none">no comments yet</string>
     <string name="candi_label_tuning_score">tuning score</string>
-    <string name="candi_label_user_creator">tuned by</string>
+    <string name="candi_label_user_creator">first discovered by</string>
     
     <!-- Misc -->
 
     <string name="theme_default">aircandi_theme_midnight</string>
+    <string name="search_radius_default">457</string>
     
     <!-- Splash -->
 
@@ -300,7 +302,6 @@
     <string name="form_title_picture">picture</string>
     <string name="form_title_post">post</string>
     <string name="form_title_place">place</string>
-    <string name="form_title_folder">folder</string>
     <string name="form_title_tuning">tuning</string>
     <string name="form_title_profile">profile settings</string>
     <string name="form_title_password">change password</string>
@@ -338,7 +339,6 @@
     <string name="form_button_save">save</string>
     <string name="form_button_delete">delete</string>
     <string name="form_button_ok">ok</string>
-    <string name="form_button_tune">tune</string>
     <string name="form_button_add">add</string>
     <string name="form_button_cancel">cancel</string>
     <string name="form_button_close">close</string>
@@ -349,7 +349,6 @@
     <!-- Forms.labels -->
 
     <string name="form_label_picture">picture</string>
-    <string name="form_label_picture_folder">folder badge</string>
     <string name="form_label_picture_place">photo</string>
     <string name="post_label_picture_post">post badge</string>
     <string name="post_label_picture_profile">picture</string>

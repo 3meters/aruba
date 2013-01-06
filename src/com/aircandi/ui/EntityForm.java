@@ -6,11 +6,11 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,7 +38,6 @@ import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.Observation;
@@ -63,9 +62,11 @@ public class EntityForm extends FormActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initialize();
-		bind();
-		draw();
+		if (!isFinishing()) {
+			initialize();
+			bind();
+			draw();
+		}
 	}
 
 	private void initialize() {
@@ -82,12 +83,8 @@ public class EntityForm extends FormActivity {
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_POST)) {
 			mCommon.mActionBar.setTitle(R.string.form_title_post);
 		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
-			mCommon.mActionBar.setTitle(R.string.form_title_folder);
-		}
 
 		mImageViewPicture = (WebImageView) findViewById(R.id.image_picture);
-
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mCommon.setViewFlipper(mViewFlipper);
 	}
@@ -103,22 +100,10 @@ public class EntityForm extends FormActivity {
 			entity.signalFence = -100.0f;
 			entity.enabled = true;
 			entity.locked = false;
-			entity.isCollection = false;
+			entity.isCollection = (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE));
 			entity.visibility = Visibility.Public.toString().toLowerCase();
 			entity.type = mCommon.mEntityType;
 
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)
-					|| mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				entity.getPhoto().setImageUri("resource:placeholder_logo_bw");
-			}
-			else if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
-				entity.isCollection = true;
-				entity.name = getString(R.string.entity_folder_title);
-				entity.getPhoto().setImageUri("resource:ic_collection_250");
-			}
-			else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				entity.isCollection = true;
-			}
 			mEntityForForm = entity;
 		}
 		else {
@@ -131,12 +116,6 @@ public class EntityForm extends FormActivity {
 				Entity entityForModel = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 				if (entityForModel != null) {
 					mEntityForForm = entityForModel.clone();
-					mImageUriOriginal = mEntityForForm.getPhoto().getImageUri();
-				}
-			}
-			else {
-				if (mEntityForForm != null) {
-					mImageUriOriginal = mEntityForForm.getPhoto().getImageUri();
 				}
 			}
 		}
@@ -162,25 +141,7 @@ public class EntityForm extends FormActivity {
 
 			/* Content */
 
-			if (mImageViewPicture != null) {
-				if (entity.getPhoto().getImageUri() != null) {
-					if (mEntityBitmap != null) {
-						mImageViewPicture.hideLoading();
-						ImageUtils.showImageInImageView(mEntityBitmap, mImageViewPicture.getImageView(), true, AnimUtils.fadeInMedium());
-						mImageViewPicture.setVisibility(View.VISIBLE);
-					}
-					else {
-						BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageViewPicture);
-						builder.setImageUri(entity.getImageUri());
-						builder.setImageFormat(entity.getImageFormat());
-						builder.setLinkZoom(CandiConstants.LINK_ZOOM);
-						builder.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
-
-						BitmapRequest imageRequest = builder.create();
-						mImageViewPicture.setBitmapRequest(imageRequest);
-					}
-				}
-			}
+			drawImage(entity);
 
 			if (entity.name != null && !entity.name.equals("")) {
 				if (findViewById(R.id.text_title) != null) {
@@ -233,13 +194,6 @@ public class EntityForm extends FormActivity {
 					}
 				}
 			}
-			else {
-				if (findViewById(R.id.uri) != null) {
-					if (!entity.getPhoto().getDetail().isEmpty() && entity.getPhoto().getDetail().getImageFormat() == ImageFormat.Html) {
-						((TextView) findViewById(R.id.uri)).setText(entity.getPhoto().getImageUri());
-					}
-				}
-			}
 
 			/* Author */
 
@@ -252,11 +206,55 @@ public class EntityForm extends FormActivity {
 			}
 
 			/* Configure UI */
+			setVisibility(findViewById(R.id.button_delete), View.GONE);
+			if (entity.ownerId != null
+					&& (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
+					|| Aircandi.getInstance().getUser().isDeveloper)) {
+				setVisibility(findViewById(R.id.button_delete), View.VISIBLE);
+			}
+		}
+	}
 
-			if (mCommon.mCommandType == CommandType.New) {
-				if (findViewById(R.id.button_delete) != null) {
-					((Button) findViewById(R.id.button_delete)).setVisibility(View.GONE);
+	public void drawImage(Entity entity) {
+		if (mImageViewPicture != null) {
+
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+				if (mEntityBitmap == null && entity.photo == null && entity.place != null) {
+					Boolean boostColor = !android.os.Build.MODEL.toLowerCase().equals("nexus 4");
+					int color = entity.place.getCategoryColor(true, boostColor, false);
+					mImageViewPicture.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+
+					int colorResId = entity.place.getCategoryColorResId(true, boostColor, false);
+					if (findViewById(R.id.color_layer) != null) {
+						((View) findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
+						((View) findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+					}
+					else {
+						mImageViewPicture.getImageView().setBackgroundResource(colorResId);
+					}
 				}
+				else {
+					mImageViewPicture.getImageView().clearColorFilter();
+					if (findViewById(R.id.color_layer) != null) {
+						((View) findViewById(R.id.color_layer)).setBackground(null);
+						((View) findViewById(R.id.color_layer)).setVisibility(View.GONE);
+					}
+					else {
+						mImageViewPicture.getImageView().setBackground(null);
+					}
+				}
+			}
+
+			if (mEntityBitmap != null) {
+				mImageViewPicture.hideLoading();
+				ImageUtils.showImageInImageView(mEntityBitmap, mImageViewPicture.getImageView(), true, AnimUtils.fadeInMedium());
+				mImageViewPicture.setVisibility(View.VISIBLE);
+			}
+			else {
+				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageViewPicture);
+				builder.setImageUri(entity.getEntityPhotoUri());
+				BitmapRequest imageRequest = builder.create();
+				mImageViewPicture.setBitmapRequest(imageRequest);
 			}
 		}
 	}
@@ -271,25 +269,16 @@ public class EntityForm extends FormActivity {
 		mImageRequestListener = new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
+			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					/*
-					 * If we get back a bitmap and an imageUri we want to just store a preview.
-					 * otherwise if the bitmap is wider that our default, we want to store
-					 * both preview and native versions.
-					 */
+					/* Could get set to null if we are using the default */
 					mEntityBitmap = imageBitmap;
-					if (linkUri != null) {
-						mEntityForForm.getPhoto().setImageUri(linkUri);
-						mEntityForForm.getPhoto().setImageFormat(ImageFormat.Html);
+					if (imageUri != null) {
+						mEntityForForm.getPhotoForSet().setImageUri(imageUri);
 					}
-					else {
-						if (imageUri != null) {
-							mEntityForForm.getPhoto().setImageUri(imageUri);
-						}
-					}
+					drawImage(mEntityForForm);
 				}
 			}
 		};
@@ -415,7 +404,7 @@ public class EntityForm extends FormActivity {
 								pictureFromPlace(mEntityForForm.id);
 							}
 							else if (pictureSource.equals("none")) {
-								usePictureDefault(null);
+								usePictureDefault(mEntityForForm);
 							}
 						}
 					}
@@ -425,6 +414,19 @@ public class EntityForm extends FormActivity {
 				}
 			}
 		}
+	}
+
+	protected void usePictureDefault(Entity entity) {
+		/*
+		 * Setting the photo to null will trigger correct default handling.
+		 */
+		if (entity.photo != null) {
+			entity.photo.setBitmap(null);
+			entity.photo = null;
+		}
+		mEntityBitmap = null;
+		drawImage(entity);
+		Tracker.trackEvent("Entity", "DefaultPicture", "None", 0);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -470,6 +472,7 @@ public class EntityForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("InsertUpdateEntity");
 				ModelResult result = new ModelResult();
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -598,7 +601,7 @@ public class EntityForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-
+				Thread.currentThread().setName("DeleteEntity");
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm.id, false);
 				return result;
 			}
@@ -648,15 +651,6 @@ public class EntityForm extends FormActivity {
 		super.onPause();
 	}
 
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mEntityBitmap != null && !mEntityBitmap.isRecycled()) {
-			mEntityBitmap.recycle();
-			mEntityBitmap = null;
-		}
-		System.gc();
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
@@ -668,9 +662,6 @@ public class EntityForm extends FormActivity {
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
 			return R.layout.picture_form;
-		}
-		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
-			return R.layout.folder_form;
 		}
 		else if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			return R.layout.place_form;

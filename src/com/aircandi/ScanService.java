@@ -38,6 +38,7 @@ public class ScanService extends Service {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			Thread.currentThread().setName("ScanForWifi");				
 			/*
 			 * Kicks off the scan but we won't know if it was completed. Will exit
 			 * early if a scan is already active.

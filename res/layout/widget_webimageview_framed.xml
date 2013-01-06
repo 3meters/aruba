@@ -16,7 +16,9 @@
         android:id="@+id/image_main"
         style="@style/picture_framed"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop" />
 
     <ImageView
         android:id="@+id/image_badge"

@@ -69,6 +69,11 @@
         <item name="android:padding">3dp</item>
     </style>
 
+    <style name="picture_framed_thick" parent="picture">
+        <item name="android:background">?attr/backgroundPicture</item>
+        <item name="android:padding">20dp</item>
+    </style>
+    
     <style name="bullet">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">?attr/textColorBullet</item>
@@ -194,7 +199,6 @@
 
     <style name="candi_view_distance" parent="candi_view_name">
         <item name="android:textAppearance">@style/app_text_appearance_tiny</item>
-        <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">normal</item>
     </style>
 
@@ -206,7 +210,6 @@
 
     <style name="candi_view_distance_synthetic" parent="candi_view_name">
         <item name="android:textAppearance">@style/app_text_appearance_tiny</item>
-        <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">?attr/textColorCandiViewSynthetic</item>
     </style>

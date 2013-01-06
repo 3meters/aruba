@@ -16,17 +16,18 @@ import android.os.Debug;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.Aircandi.CandiTask;
 import com.aircandi.CandiConstants;
 import com.aircandi.PlacesConstants;
 import com.aircandi.R;
@@ -48,6 +49,7 @@ import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.base.CandiActivity;
@@ -159,38 +161,40 @@ public class CandiRadar extends CandiActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * Get setup for location snapshots. Initialize will populate location
-		 * with the best of any cached location fixes. A single update will
-		 * be launched if the best cached location fix doesn't meet our freshness
-		 * and accuracy requirements.
-		 */
-		LocationManager.getInstance().initialize(getApplicationContext());
+		if (!isFinishing()) {
+			/*
+			 * Get setup for location snapshots. Initialize will populate location
+			 * with the best of any cached location fixes. A single update will
+			 * be launched if the best cached location fix doesn't meet our freshness
+			 * and accuracy requirements.
+			 */
+			LocationManager.getInstance().initialize(getApplicationContext());
 
-		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
-			/* We won't continue if location services are disabled */
-			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-			AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
-			finish();
-		}
+			if (!LocationManager.getInstance().isLocationAccessEnabled()) {
+				/* We won't continue if location services are disabled */
+				startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+				AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
+				finish();
+			}
 
-		/* We alert that wifi isn't enabled */
-		if (NetworkManager.getInstance().isWifiTethered()
-				|| (!NetworkManager.getInstance().isWifiEnabled() && !Aircandi.usingEmulator)) {
+			/* We alert that wifi isn't enabled */
+			if (NetworkManager.getInstance().isWifiTethered()
+					|| (!NetworkManager.getInstance().isWifiEnabled() && !Aircandi.usingEmulator)) {
 
-			showWifiAlertDialog(NetworkManager.getInstance().isWifiTethered()
-					? R.string.alert_wifi_tethered
-					: R.string.alert_wifi_disabled
-					, new RequestListener() {
+				showWifiAlertDialog(NetworkManager.getInstance().isWifiTethered()
+						? R.string.alert_wifi_tethered
+						: R.string.alert_wifi_disabled
+						, new RequestListener() {
 
-						@Override
-						public void onComplete() {
-							initialize();
-						}
-					});
-		}
-		else {
-			initialize();
+							@Override
+							public void onComplete() {
+								initialize();
+							}
+						});
+			}
+			else {
+				initialize();
+			}
 		}
 	}
 
@@ -246,6 +250,7 @@ public class CandiRadar extends CandiActivity {
 
 							@Override
 							protected Object doInBackground(Object... params) {
+								Thread.currentThread().setName("GetEntitiesForBeacons");
 								ProxiExplorer.getInstance().getEntitiesForBeacons();
 								return null;
 							}
@@ -292,6 +297,7 @@ public class CandiRadar extends CandiActivity {
 
 										@Override
 										protected Object doInBackground(Object... params) {
+											Thread.currentThread().setName("GetByLocation");
 											ProxiExplorer.getInstance().getEntitiesForLocation();
 											ProxiExplorer.getInstance().getPlacesNearLocation(observation);
 											return null;
@@ -323,7 +329,7 @@ public class CandiRadar extends CandiActivity {
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 							/* Start looking for entities by location now that beacon entities are finished */
 							LocationManager.getInstance().lockLocationBurst();
-							
+
 							mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 							mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 							drawTuned(false);
@@ -386,16 +392,9 @@ public class CandiRadar extends CandiActivity {
 		/* Other UI references */
 		mScrollView = (BounceScrollView) findViewById(R.id.scroll_view);
 
-		/* Fonts */
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_custom));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_tune_text));
-
 		/* Store sounds */
 		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
 		mNewCandiSoundId = mSoundPool.load(this, R.raw.notification_candi_discovered, 1);
-
-		/* Set the current task so we can handle initial tab selection */
-		Aircandi.getInstance().setCandiTask(CandiTask.RadarCandi);
 
 		/* AWS Credentials */
 		startGetAWSCredentials();
@@ -404,7 +403,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	private void drawTuned(Boolean configChange) {
-		FlowLayout layout = (FlowLayout) findViewById(R.id.radar_places);
+		ViewGroup layout = (ViewGroup) findViewById(R.id.radar_places);
 		List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarPlaces();
 		if (configChange) {
 			layout.removeAllViews();
@@ -413,7 +412,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	private void drawSynthetics(Boolean configChange) {
-		FlowLayout layout = (FlowLayout) findViewById(R.id.radar_synthetics);
+		ViewGroup layout = (ViewGroup) findViewById(R.id.radar_synthetics);
 		List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarSynthetics();
 		if (configChange) {
 			layout.removeAllViews();
@@ -421,7 +420,7 @@ public class CandiRadar extends CandiActivity {
 		drawLayout(PlaceType.Synthetic, layout, entities, false);
 	}
 
-	private void drawLayout(PlaceType placeType, FlowLayout layout, List<Entity> entities, Boolean addSparkle) {
+	private void drawLayout(PlaceType placeType, ViewGroup layout, List<Entity> entities, Boolean addSparkle) {
 
 		if (entities.size() == 0) {
 			layout.removeAllViews();
@@ -450,40 +449,28 @@ public class CandiRadar extends CandiActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.radar_places_header));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.radar_synthetics_header));
 
-		String badgeColor = null;
-		String badgeColorSynthetic = null;
-
-		TypedValue resourceName = new TypedValue();
-		if (getTheme().resolveAttribute(R.attr.badgeColor, resourceName, true)) {
-			badgeColor = (String) resourceName.coerceToString();
-		}
-		if (getTheme().resolveAttribute(R.attr.badgeColorSynthetic, resourceName, true)) {
-			badgeColorSynthetic = (String) resourceName.coerceToString();
-		}
-
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		View parentView = findViewById(R.id.radar);
 		Integer layoutWidthPixels = metrics.widthPixels
 				- (parentView.getPaddingLeft() + parentView.getPaddingRight() + layout.getPaddingLeft() + layout.getPaddingRight());
 
-		Integer marginDip = 1;
-		Integer marginPixels = ImageUtils.getRawPixels(CandiRadar.this, marginDip);
+		Integer spacing = 3;
+		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(CandiRadar.this, spacing);
+		Integer spacingVerticalPixels = ImageUtils.getRawPixels(CandiRadar.this, spacing);
 
-		Integer superCandiWidthPixels = layoutWidthPixels - (marginPixels * 2);
-		Integer candiHeightPixels = (int) superCandiWidthPixels / 3;
-		Integer candiWidthPixels = (int) (superCandiWidthPixels - (marginPixels * 6)) / 3;
+		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * 2)) / 3;
 
 		/* We need to cap the dimensions so we don't look crazy in landscape orientation */
-		int orientation = getResources().getConfiguration().orientation;
-		if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			superCandiWidthPixels = (layoutWidthPixels / 2) - (marginPixels * 2);
-			candiHeightPixels = (int) (((float) superCandiWidthPixels) / 2.5f);
-			candiWidthPixels = (int) (layoutWidthPixels - (marginPixels * 10)) / 5;
+		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * 4)) / 5;
 		}
-		else {
-			candiWidthPixels = (int) (superCandiWidthPixels - (marginPixels * 4)) / 3;
-			superCandiWidthPixels = (layoutWidthPixels / 2) - (marginPixels * 2);
-			candiHeightPixels = (int) ((((float) superCandiWidthPixels) / 1) * 1);
+
+		Integer candiHeightPixels = (int) (candiWidthPixels * 0.95);
+
+		if (placeType == PlaceType.Synthetic) {
+			FlowLayout flowLayout = (FlowLayout) layout;
+			flowLayout.setSpacingHorizontal(spacingHorizontalPixels);
+			flowLayout.setSpacingVertical(spacingVerticalPixels);
 		}
 
 		/*
@@ -498,7 +485,6 @@ public class CandiRadar extends CandiActivity {
 					match = true;
 					break;
 				}
-
 			}
 			if (!match) {
 				layout.removeViewAt(i);
@@ -542,31 +528,29 @@ public class CandiRadar extends CandiActivity {
 					/*
 					 * Service entity
 					 */
-					FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(superCandiWidthPixels, candiHeightPixels);
-					params.setMargins(marginPixels
-							, marginPixels
-							, marginPixels
-							, marginPixels);
-					params.setCenterHorizontal(true);
-					candiView.setLayoutParams(params);
+					LinearLayout.LayoutParams candiViewParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+					candiViewParams.bottomMargin = spacingHorizontalPixels;
+					candiView.setLayoutParams(candiViewParams);
 					candiView.setLayoutId(R.layout.widget_candi_view_radar);
-					candiView.setBadgeColorFilter(badgeColor);
+					candiView.initialize();
+
+					RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(candiWidthPixels, candiHeightPixels);
+					candiView.getCandiImage().setLayoutParams(paramsImage);
+					candiView.bindToEntity(entity);
 				}
 				else {
 					/*
 					 * Synthetic entity
 					 */
-					FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(candiWidthPixels, (int) (candiWidthPixels * 0.95));
-					params.setMargins(marginPixels
-							, marginPixels
-							, marginPixels
-							, marginPixels);
-					params.setCenterHorizontal(true);
-					candiView.setLayoutParams(params);
+					FlowLayout.LayoutParams candiViewParams = new FlowLayout.LayoutParams(candiWidthPixels, candiHeightPixels);
+					candiViewParams.setCenterHorizontal(true);
+					candiView.setLayoutParams(candiViewParams);
 					candiView.setLayoutId(R.layout.widget_candi_view_radar_synthetic);
-					candiView.setBadgeColorFilter(badgeColorSynthetic);
-					int colorResId = entity.place.getCategoryColorResId();
-					candiView.setBackgroundResource(colorResId);
+					candiView.initialize();
+
+					RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(candiWidthPixels, candiHeightPixels);
+					candiView.getCandiImage().setLayoutParams(paramsImage);
+					candiView.bindToEntity(entity);
 				}
 
 				candiView.setOnClickListener(new OnClickListener() {
@@ -577,19 +561,17 @@ public class CandiRadar extends CandiActivity {
 					}
 				});
 
-				candiView.initialize();
-				candiView.bindToEntity(entity);
 				layout.addView(candiView);
 			}
 			entityIndex++;
 		}
 
-		if (layout.getId() == R.id.radar_places) {
-			AnimUtils.showView(findViewById(R.id.radar_places_header));
-		}
-		else if (layout.getId() == R.id.radar_synthetics) {
-			AnimUtils.showView(findViewById(R.id.radar_synthetics_header));
-		}
+		//		if (layout.getId() == R.id.radar_places) {
+		//			AnimUtils.showView(findViewById(R.id.radar_places_header));
+		//		}
+		//		else if (layout.getId() == R.id.radar_synthetics) {
+		//			AnimUtils.showView(findViewById(R.id.radar_synthetics_header));
+		//		}
 
 		mCommon.hideBusy();
 
@@ -606,28 +588,37 @@ public class CandiRadar extends CandiActivity {
 	// Event handlers
 	// --------------------------------------------------------------------------------------------
 
-	public void onCustomPlaceButtonClick(View view) {
-		if (Aircandi.getInstance().getUser() != null) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
-					.setCommandType(CommandType.New)
-					.setEntityId(null)
-					.setEntityType(CandiConstants.TYPE_CANDI_PLACE);
-
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-		}
-	}
-
-	public void onTuneButtonClick(View view) {
-		Intent intent = new Intent(this, CandiTuner.class);
-		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-	}
-
 	public void onCandiClick(View view) {
-		Entity entity = (Entity) view.getTag();
-		showCandiForm(entity);
+		final Entity entity = (Entity) view.getTag();
+
+		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
+		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
+
+		if (entity.synthetic) {
+			showCandiForm(entity, true);
+		}
+		else {
+			new AsyncTask() {
+
+				@Override
+				protected void onPreExecute() {
+					mCommon.showBusy();
+				}
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("TrackEntityBrowse");
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().trackEntity(entity, beacons, primaryBeacon, "browse");
+					return result;
+				}
+
+				@Override
+				protected void onPostExecute(Object response) {
+					mCommon.hideBusy();
+					showCandiForm(entity, false);
+				}
+			}.execute();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -661,7 +652,7 @@ public class CandiRadar extends CandiActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	private void showCandiForm(Entity entity) {
+	private void showCandiForm(Entity entity, Boolean upsize) {
 
 		IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
 				.setCommandType(CommandType.View)
@@ -674,6 +665,9 @@ public class CandiRadar extends CandiActivity {
 		}
 
 		Intent intent = intentBuilder.create();
+		if (upsize) {
+			intent.putExtra(CandiConstants.EXTRA_UPSIZE_SYNTHETIC, true);
+		}
 
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiRadarToCandiForm);
@@ -698,6 +692,7 @@ public class CandiRadar extends CandiActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("CheckForUpdate");
 					ModelResult result = ProxiExplorer.getInstance().checkForUpdate();
 					return result;
 				}
@@ -841,6 +836,7 @@ public class CandiRadar extends CandiActivity {
 							invalidateOptionsMenu();
 							mCommon.showBusy();
 							drawTuned(false);
+							drawSynthetics(false); // place could have been upsized
 						}
 					}, 100);
 				}

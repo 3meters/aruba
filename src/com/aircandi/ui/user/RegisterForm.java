@@ -1,4 +1,4 @@
-package com.aircandi.ui;
+package com.aircandi.ui.user;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -23,8 +23,8 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.FormActivity;
@@ -62,23 +62,22 @@ public class RegisterForm extends FormActivity {
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
 		mButtonSignUp = (Button) findViewById(R.id.button_register);
 		mButtonSignUp.setEnabled(true);
-		
+
 		FontManager.getInstance().setTypefaceDefault(mTextFullname);
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
 		FontManager.getInstance().setTypefaceDefault(mTextPassword);
 		FontManager.getInstance().setTypefaceDefault(mTextPasswordConfirm);
 		FontManager.getInstance().setTypefaceDefault(mButtonSignUp);
-		
+
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.terms));
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_change_image));
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_view_terms));
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_cancel));
-		
+
 	}
 
 	protected void bind() {
 		mUser = new User();
-		mUser.getPhoto().setImageUri("resource:placeholder_logo");
 	}
 
 	protected void draw() {
@@ -86,33 +85,30 @@ public class RegisterForm extends FormActivity {
 		 * We only want to enable the save button when there is something in all
 		 * the required fields: fullname, email, password
 		 */
-		if (mUser.getImageUri() != null && !mUser.getImageUri().equals("")) {
-			if (mUserBitmap != null) {
-				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, AnimUtils.fadeInMedium());
-			}
-			else {
+		if (mUserBitmap != null) {
+			ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, AnimUtils.fadeInMedium());
+		}
+		else {
+			BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
+			builder.setFromUri(mUser.getUserPhotoUri());
+			builder.setRequestListener(new RequestListener() {
 
-				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
-				builder.setFromUris(mUser.getImageUri(), null);
-				builder.setRequestListener(new RequestListener() {
-
-					@Override
-					public void onComplete(Object response) {
-						ServiceResponse serviceResponse = (ServiceResponse) response;
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-							mUserBitmap = imageResponse.bitmap;
-						}
-						else {
-							mImageUser.getImageView().setImageResource(R.drawable.image_broken);
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.Signup);
-						}
+				@Override
+				public void onComplete(Object response) {
+					ServiceResponse serviceResponse = (ServiceResponse) response;
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+						mUserBitmap = imageResponse.bitmap;
 					}
-				});
+					else {
+						mImageUser.getImageView().setImageResource(R.drawable.image_broken);
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.Signup);
+					}
+				}
+			});
 
-				BitmapRequest imageRequest = builder.create();
-				mImageUser.setBitmapRequest(imageRequest);
-			}
+			BitmapRequest imageRequest = builder.create();
+			mImageUser.setBitmapRequest(imageRequest);
 		}
 	}
 
@@ -130,18 +126,18 @@ public class RegisterForm extends FormActivity {
 
 	public void onChangePictureButtonClick(View view) {
 
-//		showChangePictureDialog(false, null, null, null, mImageUser, new RequestListener() {
-//
-//			@Override
-//			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
-//
-//				ServiceResponse serviceResponse = (ServiceResponse) response;
-//				if (serviceResponse.responseCode == ResponseCode.Success) {
-//					mUser.getPhoto().setImageUri(imageUri);
-//					mUserBitmap = imageBitmap;
-//				}
-//			}
-//		});
+		//		showChangePictureDialog(false, null, null, null, mImageUser, new RequestListener() {
+		//
+		//			@Override
+		//			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
+		//
+		//				ServiceResponse serviceResponse = (ServiceResponse) response;
+		//				if (serviceResponse.responseCode == ResponseCode.Success) {
+		//					mUser.getPhoto().setImageUri(imageUri);
+		//					mUserBitmap = imageBitmap;
+		//				}
+		//			}
+		//		});
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -245,6 +241,7 @@ public class RegisterForm extends FormActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("InsertUser");
 					ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertUser(mUser, mUserBitmap);
 					return result;
 				}
@@ -265,18 +262,18 @@ public class RegisterForm extends FormActivity {
 						mCommon.hideBusy();
 						Logger.i(RegisterForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 
-//						AircandiCommon.showAlertDialog(R.drawable.ic_app
-//								, getResources().getString(R.string.alert_signup_new_user_title)
-//								, getResources().getString(R.string.alert_signup_new_user_message)
-//								, null
-//								, SignUpForm.this, android.R.string.ok, null, new OnClickListener() {
-//
-//									public void onClick(DialogInterface dialog, int which) {
-//										setResult(CandiConstants.RESULT_USER_SIGNED_IN);
-//										finish();
-//									}
-//								}, null);
-						
+						//						AircandiCommon.showAlertDialog(R.drawable.ic_app
+						//								, getResources().getString(R.string.alert_signup_new_user_title)
+						//								, getResources().getString(R.string.alert_signup_new_user_message)
+						//								, null
+						//								, SignUpForm.this, android.R.string.ok, null, new OnClickListener() {
+						//
+						//									public void onClick(DialogInterface dialog, int which) {
+						//										setResult(CandiConstants.RESULT_USER_SIGNED_IN);
+						//										finish();
+						//									}
+						//								}, null);
+
 						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
 						finish();
 						AnimUtils.doOverridePendingTransition(RegisterForm.this, TransitionType.FormToCandiPage);
@@ -293,17 +290,6 @@ public class RegisterForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle events
 	// --------------------------------------------------------------------------------------------
-
-	protected void onDestroy() {
-
-		/* This activity gets destroyed everytime we leave using back or finish(). */
-		super.onDestroy();
-		if (mUserBitmap != null && !mUserBitmap.isRecycled()) {
-			mUserBitmap.recycle();
-			mUserBitmap = null;
-		}
-		System.gc();
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines

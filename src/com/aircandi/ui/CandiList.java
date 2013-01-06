@@ -9,6 +9,7 @@ import android.widget.ListView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AndroidManager;
@@ -22,7 +23,6 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityListType;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.CandiActivity;
@@ -99,6 +99,7 @@ public class CandiList extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("GetEntities");				
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel()
 						.getEntitiesByListType(mEntityListType, refresh, mCommon.mCollectionId, mCommon.mUserId, ProxiConstants.RADAR_ENTITY_LIMIT);
 				return result;

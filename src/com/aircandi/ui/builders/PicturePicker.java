@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.actionbarsherlock.view.Window;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EndlessAdapter;
@@ -39,10 +40,9 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
+import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.ImageResult;
-import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
-import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
@@ -156,7 +156,7 @@ public class PicturePicker extends FormActivity {
 
 	protected void bind() {
 
-		new AsyncTask<Object, Object, Object>() {
+		new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
@@ -165,6 +165,7 @@ public class PicturePicker extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("LoadSearchImages");				
 
 				if (mPlacePhotoMode) {
 					ServiceResponse serviceResponse = loadPlaceImages(PAGE_SIZE, 0);
@@ -199,7 +200,7 @@ public class PicturePicker extends FormActivity {
 						mImages = new ArrayList<ImageResult>();
 						for (Photo photo : photos) {
 							ImageResult imageResult = photo.getAsImageResult();
-							imageResult.getThumbnail().setUrl(photo.getImageSizedUri(100, 100));
+							imageResult.getThumbnail().setUrl(photo.getSizedUri(100, 100));
 							mImages.add(imageResult);
 						}
 					}

@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.FontManager;
@@ -27,9 +28,8 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PhotoPagerAdapter;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.bitmaps.BitmapManager;
-import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
-import com.aircandi.service.ProxiConstants;
+import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.FormActivity;
@@ -47,8 +47,10 @@ public class PictureDetail extends FormActivity {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 
-		initialize();
-		bind(true);
+		if (!isFinishing()) {
+			initialize();
+			bind(true);
+		}
 	}
 
 	private void initialize() {
@@ -82,7 +84,7 @@ public class PictureDetail extends FormActivity {
 		final ImageView image = (ImageView) layout.findViewById(R.id.image);
 		((ImageViewTouch) image).setFitToScreen(true);
 		((ImageViewTouch) image).setScrollEnabled(false);
-		
+
 		FontManager.getInstance().setTypefaceDefault(title);
 
 		/* Title */
@@ -100,7 +102,7 @@ public class PictureDetail extends FormActivity {
 		}
 
 		/* Image */
-		String imageUri = photo.getImageUri();
+		String imageUri = photo.getUri();
 		if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
 			imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 		}
@@ -108,7 +110,7 @@ public class PictureDetail extends FormActivity {
 		holder.itemImage = image;
 		holder.itemImage.setTag(imageUri);
 		holder.itemImage.setImageBitmap(null);
-		
+
 		BitmapRequest request = new BitmapRequest();
 		request.setImageUri(imageUri);
 		request.setRequestListener(new RequestListener() {
@@ -165,14 +167,14 @@ public class PictureDetail extends FormActivity {
 
 			synchronized (mPhotosForPaging) {
 				for (int i = 0; i < mPhotosForPaging.size(); i++) {
-					if (mPhotosForPaging.get(i).getImageUri() != null) {
-						if (mPhotosForPaging.get(i).getImageUri().equals(mImageUri)) {
+					if (mPhotosForPaging.get(i).getUri() != null) {
+						if (mPhotosForPaging.get(i).getUri().equals(mImageUri)) {
 							mViewPager.setCurrentItem(i, false);
 							break;
 						}
 					}
 					else {
-						if (mPhotosForPaging.get(i).getImageUri().equals(mImageUri)) {
+						if (mPhotosForPaging.get(i).getUri().equals(mImageUri)) {
 							mViewPager.setCurrentItem(i, false);
 							break;
 						}

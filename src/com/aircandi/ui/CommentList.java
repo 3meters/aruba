@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EndlessAdapter;
@@ -26,7 +27,6 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.CandiActivity;
@@ -82,6 +82,7 @@ public class CommentList extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("GetComments");				
 				/*
 				 * Just get the comments without updating the entity in the cache
 				 */
@@ -281,10 +282,8 @@ public class CommentList extends CandiActivity {
 						/*
 						 * We are aggresive about recycling bitmaps when we can.
 						 */
-						holder.itemAuthorImage.recycleBitmap();
 						if (comment.imageUri != null && comment.imageUri.length() != 0) {
-							BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemAuthorImage)
-									.setFromUris(comment.imageUri, null);
+							BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemAuthorImage).setFromUri(comment.imageUri);
 
 							BitmapRequest imageRequest = builder.create();
 							holder.itemAuthorImage.setBitmapRequest(imageRequest);

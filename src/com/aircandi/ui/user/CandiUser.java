@@ -1,4 +1,4 @@
-package com.aircandi.ui;
+package com.aircandi.ui.user;
 
 import java.util.List;
 
@@ -7,16 +7,13 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
-import com.aircandi.components.AndroidManager;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
@@ -29,13 +26,13 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.CandiForm;
+import com.aircandi.ui.CandiList;
+import com.aircandi.ui.PictureDetail;
 import com.aircandi.ui.base.CandiActivity;
-import com.aircandi.ui.widgets.HorizontalScrollLayout;
-import com.aircandi.ui.widgets.SectionLayout;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
@@ -80,6 +77,7 @@ public class CandiUser extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("GetUser");
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getUser(mCommon.mUserId);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) result.serviceResponse.data;
@@ -162,21 +160,16 @@ public class CandiUser extends CandiActivity {
 	public void onImageClick(View view) {
 		Intent intent = null;
 		Photo photo = mUser.photo;
-		if (photo.getImageFormat() == ImageFormat.Binary) {
-			photo.setCreatedAt(mUser.photo.getCreatedAt());
-			photo.setTitle(mUser.name);
-			photo.setUser(mUser);
-			ProxiExplorer.getInstance().getEntityModel().getPhotos().clear();
-			ProxiExplorer.getInstance().getEntityModel().getPhotos().add(photo);
-			intent = new Intent(this, PictureDetail.class);
-			intent.putExtra(CandiConstants.EXTRA_URI, mUser.photo.getImageUri());
+		photo.setCreatedAt(mUser.photo.getCreatedAt());
+		photo.setTitle(mUser.name);
+		photo.setUser(mUser);
+		ProxiExplorer.getInstance().getEntityModel().getPhotos().clear();
+		ProxiExplorer.getInstance().getEntityModel().getPhotos().add(photo);
+		intent = new Intent(this, PictureDetail.class);
+		intent.putExtra(CandiConstants.EXTRA_URI, mUser.photo.getUri());
 
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-		}
-		else {
-			AndroidManager.getInstance().callBrowserActivity(this, photo.getImageUri());
-		}
+		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	public void onEditButtonClick(View view) {
@@ -188,8 +181,6 @@ public class CandiUser extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void buildCandiUser(Context context, final User user) {
-
-		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		final WebImageView image = (WebImageView) findViewById(R.id.image);
 		final TextView name = (TextView) findViewById(R.id.name);
@@ -210,17 +201,11 @@ public class CandiUser extends CandiActivity {
 			String imageUri = null;
 
 			if (user.photo != null) {
-				imageUri = user.photo.getImageUri();
+				imageUri = user.photo.getUri();
 			}
 
 			if (imageUri != null) {
-				ImageFormat imageFormat = user.photo.getImageFormat();
-				BitmapRequestBuilder builder = new BitmapRequestBuilder(image)
-						.setImageUri(imageUri)
-						.setImageFormat(imageFormat)
-						.setLinkZoom(CandiConstants.LINK_ZOOM)
-						.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
-
+				BitmapRequestBuilder builder = new BitmapRequestBuilder(image).setImageUri(imageUri);
 				BitmapRequest imageRequest = builder.create();
 				image.setBitmapRequest(imageRequest);
 			}
@@ -282,44 +267,6 @@ public class CandiUser extends CandiActivity {
 			stats.setText(Html.fromHtml(statString));
 			setVisibility(stats, View.VISIBLE);
 			setVisibility(findViewById(R.id.section_stats), View.VISIBLE);
-		}
-
-		/* Candi */
-
-		setVisibility(findViewById(R.id.section_candi), View.GONE);
-		if (mEntities.size() > 0) {
-
-			SectionLayout section = (SectionLayout) findViewById(R.id.section_candi);
-			section.getTextViewHeader().setText(String.valueOf(mEntities.size()) + " " + context.getString(R.string.candi_section_candi));
-			HorizontalScrollLayout list = (HorizontalScrollLayout) findViewById(R.id.list_candi);
-
-			for (Entity childEntity : mEntities) {
-				View view = inflater.inflate(R.layout.temp_place_candi_item, null);
-				WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
-
-				String imageUri = childEntity.getImageUri();
-				BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView)
-						.setImageUri(imageUri)
-						.setImageFormat(childEntity.getImageFormat())
-						.setLinkZoom(CandiConstants.LINK_ZOOM)
-						.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
-
-				BitmapRequest imageRequest = builder.create();
-				webImageView.setBitmapRequest(imageRequest);
-				webImageView.setTag(childEntity);
-
-				list.addView(view);
-			}
-
-			if (mEntities.size() > 3) {
-				View footer = inflater.inflate(R.layout.temp_section_footer, null);
-				Button button = (Button) footer.findViewById(R.id.button_more);
-				button.setText(R.string.candi_section_candi_more);
-				button.setTag("candi");
-				section.addView(footer);
-			}
-
-			setVisibility(findViewById(R.id.section_candi), View.VISIBLE);
 		}
 
 		/* Buttons */

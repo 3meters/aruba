@@ -25,6 +25,8 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.user.RegisterForm;
+import com.aircandi.ui.user.SignInForm;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
@@ -81,8 +83,8 @@ public class SplashForm extends SherlockActivity {
 
 	public void signinAuto() {
 
-		String jsonUser = Aircandi.settings.getString(Preferences.PREF_USER, null);
-		String jsonSession = Aircandi.settings.getString(Preferences.PREF_USER_SESSION, null);
+		String jsonUser = Aircandi.settings.getString(Preferences.SETTING_USER, null);
+		String jsonSession = Aircandi.settings.getString(Preferences.SETTING_USER_SESSION, null);
 
 		if (jsonUser != null && jsonSession != null) {
 			Logger.i(this, "Auto sign in...");
@@ -102,10 +104,11 @@ public class SplashForm extends SherlockActivity {
 	}
 	
 	public void loadCategories() {
-		new AsyncTask<Object, Object, Object>() {
+		new AsyncTask() {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("LoadCategories");				
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel().loadCategories();
 				return result;
 			}

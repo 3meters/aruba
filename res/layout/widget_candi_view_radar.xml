@@ -1,81 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/candi_view_group"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-    
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/picture_bg_dark_place" />
-    
+    android:layout_height="wrap_content" >
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/candi_view_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        aircandi:layout="@layout/widget_webimageview"
-        aircandi:maxHeight="700dp"
-        aircandi:maxWidth="700dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        aircandi:layout="@layout/widget_webimageview_candi_view"
         android:scaleType="centerCrop" />
 
-    <View
-        android:id="@+id/candi_view_group"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/image_nooutline_selector"
-        android:clickable="true"
-        android:onClick="onCandiClick" />
-
     <LinearLayout
-        android:id="@+id/text_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/picture_overlay_dark"
-        android:orientation="horizontal"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/candi_view_image"
+        android:orientation="vertical"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="10dp" >
 
-        <ImageView
-            android:id="@+id/candi_view_subtitle_badge"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginRight="10dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter" />
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/candi_view_title"
+            style="@style/candi_view_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:orientation="vertical" >
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/dummy_title_short" />
 
-            <TextView
-                android:id="@+id/candi_view_title"
-                style="@style/candi_view_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/dummy_title_short" />
-
-            <TextView
-                android:id="@+id/candi_view_subtitle"
-                style="@style/candi_view_subtitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/dummy_tags" />
-
-            <TextView
-                android:id="@+id/candi_view_distance"
-                style="@style/candi_view_distance"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/dummy_distance" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/candi_view_subtitle"
+            style="@style/candi_view_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/dummy_tags" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/candi_view_sources"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/candi_view_image"
+        android:layout_toRightOf="@+id/candi_view_image"
+        android:orientation="horizontal"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+
+    <TextView
+        android:id="@+id/candi_view_distance"
+        style="@style/candi_view_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/candi_view_image"
+        android:layout_alignParentRight="true"
+        android:paddingBottom="12dp"
+        android:paddingRight="10dp"
+        android:text="@string/dummy_distance" />
+
+    <TextView
+        android:id="@+id/candi_view_place_rank_score"
+        style="@style/candi_view_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/candi_view_image"
+        android:paddingRight="10dp"
+        android:paddingTop="12dp"
+        android:text="@string/dummy_distance" />
 
 </RelativeLayout>

@@ -62,6 +62,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import android.graphics.Bitmap;
 
 import com.aircandi.Aircandi;
+import com.aircandi.ProxiConstants;
 import com.aircandi.components.JsonHelper;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -976,7 +977,7 @@ public class ProxibaseService {
 
 		public void onComplete(Object response, Object extra) {}
 
-		public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {}
+		public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description) {}
 
 		public void onProgressChanged(int progress) {}
 	}

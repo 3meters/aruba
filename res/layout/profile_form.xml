@@ -51,8 +51,7 @@
                         aircandi:maxHeight="150dp"
                         android:layout_marginRight="10dp"
                         aircandi:maxWidth="150dp"
-                        android:scaleType="centerCrop"
-                        android:tag="resource:placeholder_logo" />
+                        android:scaleType="centerCrop" />
 
                     <Button
                         android:id="@+id/button_change_image"

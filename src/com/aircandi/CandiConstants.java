@@ -42,6 +42,7 @@ public interface CandiConstants {
 	public static final String	EXTRA_AS_PICKER							= "com.aircandi.EXTRA_AS_PICKER";
 	public static final String	EXTRA_LIST_TYPE							= "com.aircandi.EXTRA_LIST_TARGET";
 	public static final String	EXTRA_PICTURE_SOURCE					= "com.aircandi.EXTRA_PICTURE_SOURCE";
+	public static final String	EXTRA_UPSIZE_SYNTHETIC					= "com.aircandi.EXTRA_UPSIZE_SYNTHETIC";
 
 	public static final int		MILLS_PER_SECOND						= 1000;
 	public static final int		TIME_ONE_SECOND							= MILLS_PER_SECOND * 1;
@@ -111,15 +112,12 @@ public interface CandiConstants {
 	public static final int		TABS_ENTITY_FORM_ID						= 3;
 	public static final int		TABS_CANDI_PICKER_ID					= 4;
 	public static final int		TABS_LINK_PICKER_ID						= 5;
+	public static final int		TABS_USER_FORM_ID						= 6;
 
 	public static final int		VERTEX_INDEX_X							= 0;
 	public static final int		VERTEX_INDEX_Y							= 1;
 
 	public static final String	IMAGE_CAPTURE_PATH						= "/aircandi/images/";
-
-	public static final String	CACHE_PATH								= "/imagecache/aircandi";
-	public static final long	CACHE_TARGET_SIZE						= 8000000;
-	public static final long	CACHE_TRIGGER_SIZE						= 10000000;
 
 	public static final int		IMAGE_MEMORY_BYTES_MAX					= 4096000;
 	public static final int		IMAGE_MEMORY_CACHE_WIDTH_MAX			= 100;																						// (100x100x4) + 10000 extra
@@ -139,16 +137,9 @@ public interface CandiConstants {
 
 	public static final String	TYPE_CANDI_POST							= "com.aircandi.candi.post";
 	public static final String	TYPE_CANDI_PICTURE						= "com.aircandi.candi.picture";
-	public static final String	TYPE_CANDI_FOLDER						= "com.aircandi.candi.folder";
 	public static final String	TYPE_CANDI_PLACE						= "com.aircandi.candi.place";
 	public static final String	TYPE_CANDI_SOURCE						= "com.aircandi.candi.source";
 	public static final String	TYPE_CANDI_LINK							= "com.aircandi.candi.link";
-
-	public static final String	USER_ANONYMOUS							= "{\"_id\": \"0000.000000.00000.000.000000\",\"_modifier\": \"0000.000000.00000.000.000001\","
-																				+ "\"_creator\": \"0000.000000.00000.000.000001\",\"_owner\": \"0000.000000.00000.000.000001\","
-																				+ "\"name\": \"Anonymous\",\"email\": \"anonymous@3meters.com\",\"password\": \"12345678\","
-																				+ "\"imageUri\": \"resource:placeholder_logo\", \"isDeveloper\": false,"
-																				+ " \"createdDate\": 1317427200,\"modifiedDate\": 1317427200}";
 
 	public static final int		ACTIVITY_ENTITY_HANDLER					= 100;
 	public static final int		ACTIVITY_MARKET							= 200;

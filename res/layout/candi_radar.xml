@@ -8,8 +8,6 @@
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/form_footer"
-        android:layout_alignParentTop="true"
         android:background="?attr/backgroundCandi"
         android:fillViewport="true"
         tools:ignore="UselessParent" >
@@ -24,7 +22,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="2dp" >
+                android:padding="6dp" >
 
                 <LinearLayout
                     android:id="@+id/radar_places_group"
@@ -40,12 +38,13 @@
                         android:gravity="center_vertical"
                         android:padding="5dp"
                         android:text="@string/radar_section_places"
-                        android:visibility="invisible" />
+                        android:visibility="gone" />
 
-                    <com.aircandi.ui.widgets.FlowLayout
+                    <LinearLayout
                         android:id="@+id/radar_places"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -62,7 +61,7 @@
                         android:gravity="center_vertical"
                         android:padding="5dp"
                         android:text="@string/radar_section_synthetics"
-                        android:visibility="invisible" />
+                        android:visibility="gone" />
 
                     <com.aircandi.ui.widgets.FlowLayout
                         android:id="@+id/radar_synthetics"
@@ -70,76 +69,16 @@
                         android:layout_height="wrap_content" />
                 </LinearLayout>
             </LinearLayout>
-
-            <RelativeLayout
-                android:id="@+id/progress"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center" >
-
-                <ProgressBar
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:maxHeight="40dp"
-                    android:minHeight="40dp" />
-            </RelativeLayout>
         </FrameLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 
-    <!-- Footer -->
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_above="@+id/form_footer"
-        android:background="?attr/ruleColor" />
-
-    <LinearLayout
-        android:id="@+id/form_footer"
-        style="?attr/buttonBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal" >
-
-        <Button
-            android:id="@+id/button_custom"
-            style="@style/form_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onCustomPlaceButtonClick"
-            android:text="@string/radar_button_custom" />
-
-        <LinearLayout
-            android:id="@+id/button_tune"
-            style="@style/form_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:onClick="onTuneButtonClick"
-            android:orientation="horizontal"
-            tools:ignore="UseCompoundDrawables" >
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:src="?attr/iconTune"
-                android:visibility="visible" />
-
-            <TextView
-                android:id="@+id/button_tune_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:paddingLeft="2dp"
-                android:text="@string/radar_button_tune"
-                android:textColor="?attr/textColorBars" />
-        </LinearLayout>
-    </LinearLayout>
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="35dp"
+        android:background="#aa000000"
+        android:padding="10dp" />
 
 </RelativeLayout>

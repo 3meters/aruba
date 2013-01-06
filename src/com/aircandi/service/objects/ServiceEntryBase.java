@@ -5,8 +5,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
+import com.aircandi.ProxiConstants;
 import com.aircandi.service.Expose;
-import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.SerializedName;
 
 /*
@@ -43,6 +43,9 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public String					namelc;
 
+	@Expose
+	public String					type;
+	
 	/* Property bag */
 
 	@Expose
@@ -105,6 +108,7 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 
 		entry.createdDate = (Number) map.get("createdDate");
 		entry.modifiedDate = (Number) map.get("modifiedDate");
+		entry.type = (String) map.get("type");
 
 		if (map.get("creator") != null) {
 			entry.creator = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));
@@ -131,6 +135,7 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 		toEntry.creatorId = fromEntry.creatorId;
 		toEntry.creator = fromEntry.creator;
 		toEntry.createdDate = fromEntry.createdDate;
+		toEntry.type = fromEntry.type;
 	}
 
 	public HashMap<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
@@ -168,7 +173,10 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 						map.put(name, childMap);
 					}
 					else {
-						if (value != null || (!excludeNulls)) {
+						if (name.equals("photo") && value == null) {
+							map.put(name, value);
+						}
+						else if (value != null || (!excludeNulls)) {
 							map.put(name, value);
 						}
 					}

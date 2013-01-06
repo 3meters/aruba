@@ -1,7 +1,6 @@
 package com.aircandi.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
@@ -15,15 +14,17 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
-import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -33,30 +34,21 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityListType;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.service.objects.Phrase;
 import com.aircandi.service.objects.Place;
-import com.aircandi.service.objects.Tip;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.builders.CandiPicker;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.FlowLayout;
-import com.aircandi.ui.widgets.HorizontalScrollLayout;
-import com.aircandi.ui.widgets.ListViewExpanded;
 import com.aircandi.ui.widgets.SectionLayout;
-import com.aircandi.ui.widgets.TextViewEllipsizing;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -72,6 +64,7 @@ public class CandiForm extends CandiActivity {
 	protected Entity		mEntity;
 	protected Number		mEntityModelRefreshDate;
 	protected Number		mEntityModelActivityDate;
+	protected Boolean		mUpsize;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -102,19 +95,24 @@ public class CandiForm extends CandiActivity {
 		mCandiForm = (ViewGroup) body.findViewById(R.id.candi_form);
 		mScrollView = (ScrollView) body.findViewById(R.id.scroll_view);
 		mContentView.addView(body, 0);
-		
+
 		/* Font for button bar */
 		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_comment));
 		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_edit));
 		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_move));
 		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_new_text));
+
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			mUpsize = extras.getBoolean(CandiConstants.EXTRA_UPSIZE_SYNTHETIC);
+		}
 	}
 
 	public void bind(Boolean refresh) {
-		doBind(refresh, false);
+		doBind(refresh);
 	}
 
-	public void doBind(final Boolean refresh, final Boolean pagingEnabled) {
+	public void doBind(final Boolean refresh) {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -130,14 +128,8 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				ModelResult result = new ModelResult();
-				Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
-				if (entity == null || !entity.synthetic) {
-					result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, null, null);
-				}
-				else {
-					result.data = entity;
-				}
+				Thread.currentThread().setName("GetEntity");
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, null, null);
 				return result;
 			}
 
@@ -156,11 +148,13 @@ public class CandiForm extends CandiActivity {
 						 * if paging is disabled and we only want to show the current entity.
 						 */
 						List<Entity> entities = null;
-						if (!pagingEnabled) {
-							entities = new ArrayList<Entity>();
-							entities.add(mEntity);
-						}
+						entities = new ArrayList<Entity>();
+						entities.add(mEntity);
 						draw();
+						if (mUpsize) {
+							mUpsize = false;
+							upsize();
+						}
 					}
 				}
 				else {
@@ -169,6 +163,41 @@ public class CandiForm extends CandiActivity {
 				mCommon.hideBusy();
 			}
 
+		}.execute();
+	}
+
+	public void upsize() {
+
+		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
+		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
+
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				mCommon.showBusy(R.string.progress_expanding);
+			}
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("UpsizeSynthetic");
+				ModelResult result = ProxiExplorer.getInstance().upsizeSynthetic(mEntity, beacons, primaryBeacon);
+				return result;
+			}
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ModelResult result = (ModelResult) response;
+				mCommon.hideBusy();
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					Entity upsizedEntity = (Entity) result.data;
+					mCommon.mEntityId = upsizedEntity.id;
+					doBind(false);
+				}
+				else {
+					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Tuning);
+				}
+			}
 		}.execute();
 	}
 
@@ -236,7 +265,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onTuneButtonClick(View view) {
-		tune();
+		tuneProximity();
 	}
 
 	public void onCallButtonClick(View view) {
@@ -245,26 +274,7 @@ public class CandiForm extends CandiActivity {
 
 	public void onMoreButtonClick(View view) {
 		String target = (String) view.getTag();
-		if (target.equals("photos")) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, PictureBrowse.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setEntityId(mEntity.id);
-
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
-		}
-		else if (target.equals("tips")) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, TipList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setEntityId(mEntity.id)
-					.setCollectionId(mEntity.id);
-
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
-		}
-		else if (target.equals("candi")) {
+		if (target.equals("candi")) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setEntityListType(EntityListType.InCollection)
@@ -295,7 +305,7 @@ public class CandiForm extends CandiActivity {
 		ProxiExplorer.getInstance().getEntityModel().setPhotos(photos);
 		Photo photo = (Photo) view.getTag();
 		Intent intent = new Intent(this, PictureDetail.class);
-		intent.putExtra(CandiConstants.EXTRA_URI, photo.getImageUri());
+		intent.putExtra(CandiConstants.EXTRA_URI, photo.getUri());
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
@@ -311,6 +321,9 @@ public class CandiForm extends CandiActivity {
 			}
 			else if (entity.source.equals("facebook")) {
 				AndroidManager.getInstance().callFacebookActivity(this, entity.sourceId);
+			}
+			else if (entity.source.equals("yelp")) {
+				AndroidManager.getInstance().callYelpActivity(this, entity.sourceId, entity.sourceUri);
 			}
 			else if (entity.source.equals("website")) {
 				AndroidManager.getInstance().callBrowserActivity(this, entity.sourceId);
@@ -333,22 +346,17 @@ public class CandiForm extends CandiActivity {
 
 	public void onImageClick(View view) {
 		Intent intent = null;
-		Photo photo = mEntity.photo.hasDetail() ? mEntity.photo.getDetail() : mEntity.photo;
-		if (photo.getImageFormat() == ImageFormat.Binary) {
-			photo.setCreatedAt(mEntity.modifiedDate);
-			photo.setTitle(mEntity.name);
-			photo.setUser(mEntity.creator);
-			ProxiExplorer.getInstance().getEntityModel().getPhotos().clear();
-			ProxiExplorer.getInstance().getEntityModel().getPhotos().add(photo);
-			intent = new Intent(this, PictureDetail.class);
-			intent.putExtra(CandiConstants.EXTRA_URI, mEntity.photo.getImageUri());
+		Photo photo = mEntity.photo;
+		photo.setCreatedAt(mEntity.modifiedDate);
+		photo.setTitle(mEntity.name);
+		photo.setUser(mEntity.creator);
+		ProxiExplorer.getInstance().getEntityModel().getPhotos().clear();
+		ProxiExplorer.getInstance().getEntityModel().getPhotos().add(photo);
+		intent = new Intent(this, PictureDetail.class);
+		intent.putExtra(CandiConstants.EXTRA_URI, mEntity.photo.getUri());
 
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-		}
-		else {
-			AndroidManager.getInstance().callBrowserActivity(this, photo.getImageUri());
-		}
+		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	public void onAddCandiButtonClick(View view) {
@@ -471,12 +479,12 @@ public class CandiForm extends CandiActivity {
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	public void tune() {
+	public void tuneProximity() {
 
 		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
 		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
 
-		new AsyncTask<Object, Object, Object>() {
+		new AsyncTask() {
 
 			@Override
 			protected void onPreExecute() {
@@ -485,35 +493,24 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				List<Entity> entities = new ArrayList<Entity>();
-				entities.add(mEntity);
-				ServiceResponse serviceResponse = ProxiExplorer.getInstance().tune(beacons, primaryBeacon, entities);
-				return serviceResponse;
+				Thread.currentThread().setName("TrackEntityProximity");
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().trackEntity(mEntity, beacons, primaryBeacon, "proximity");
+				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
-				ServiceResponse serviceResponse = (ServiceResponse) response;
+				/*
+				 * Rebind so distance info gets updated.
+				 * 
+				 * TODO: We could check to see if proximity is new and only
+				 * refresh if true.
+				 */
+				doBind(true);
 				setSupportProgressBarIndeterminateVisibility(false);
 				mCommon.hideBusy();
-				if (serviceResponse.responseCode != ResponseCode.Success) {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.Tuning);
-				}
-				else {
-					if (mEntity.synthetic) {
-						if (serviceResponse.data != null) {
-							/*
-							 * Has map to go from original id to new id
-							 */
-							HashMap map = (HashMap) serviceResponse.data;
-							String newId = (String) map.get(mCommon.mEntityId);
-							mCommon.mEntityId = newId;
-						}
-						bind(true);
-					}
-				}
+				ImageUtils.showToastNotification(getString(R.string.toast_tuned), Toast.LENGTH_SHORT);
 			}
-
 		}.execute();
 	}
 
@@ -527,8 +524,6 @@ public class CandiForm extends CandiActivity {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
-		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
 		final CandiView candiView = (CandiView) layout.findViewById(R.id.candi_view);
 		final WebImageView image = (WebImageView) layout.findViewById(R.id.candi_form_image);
 		final TextView title = (TextView) layout.findViewById(R.id.candi_form_title);
@@ -539,40 +534,22 @@ public class CandiForm extends CandiActivity {
 		final UserView author = (UserView) layout.findViewById(R.id.author);
 
 		if (candiView != null) {
+			/*
+			 * This is a place entity with a fancy image widget
+			 */
 			candiView.bindToEntity(entity);
 		}
 		else {
-
 			if (image != null) {
-				String imageUri = entity.getImageUri();
+				String imageUri = entity.getEntityPhotoUri();
 				if (imageUri != null) {
 
-					ImageFormat imageFormat = entity.getImageFormat();
-					BitmapRequestBuilder builder = new BitmapRequestBuilder(image)
-							.setImageUri(imageUri)
-							.setImageFormat(imageFormat)
-							.setLinkZoom(CandiConstants.LINK_ZOOM)
-							.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
-
+					BitmapRequestBuilder builder = new BitmapRequestBuilder(image).setImageUri(imageUri);
 					BitmapRequest imageRequest = builder.create();
 
 					image.setBitmapRequest(imageRequest);
 
-					if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
-						if (entity.getImageUri() == null
-								|| !entity.getImageUri().toLowerCase().startsWith("resource:")) {
-							image.getImageBadge().setImageResource(R.drawable.ic_collection_250);
-							image.getImageBadge().setVisibility(View.VISIBLE);
-							image.getImageZoom().setVisibility(View.VISIBLE);
-							image.setClickable(true);
-						}
-						else {
-							image.getImageBadge().setVisibility(View.GONE);
-							image.getImageZoom().setVisibility(View.GONE);
-							image.setClickable(false);
-						}
-					}
-					else if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+					if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 						image.getImageBadge().setVisibility(View.GONE);
 						image.getImageZoom().setVisibility(View.GONE);
 						image.setClickable(false);
@@ -631,22 +608,9 @@ public class CandiForm extends CandiActivity {
 				FlowLayout flow = (FlowLayout) layout.findViewById(R.id.flow_candi);
 				drawCandi(context, flow, childEntities);
 
-				//				if (visibleChildrenCount > 3) {
-				//					View footer = inflater.inflate(R.layout.temp_section_footer, null);
-				//					Button button = (Button) footer.findViewById(R.id.button_more);
-				//					FontManager.getInstance().setTypefaceDefault(button);
-				//					button.setText(R.string.candi_section_candi_more);
-				//					button.setTag("candi");
-				//					section.addView(footer);
-				//				}
-
 				setVisibility(layout.findViewById(R.id.section_candi), View.VISIBLE);
 			}
 		}
-
-		/* Hidden unless it's a place */
-		//setVisibility(layout.findViewById(R.id.label_tuning_score), View.GONE);
-		setVisibility(layout.findViewById(R.id.tuning_score), View.GONE);
 
 		/* Place specific info */
 		if (entity.place != null) {
@@ -663,158 +627,6 @@ public class CandiForm extends CandiActivity {
 				address.setText(Html.fromHtml(addressBlock));
 				FontManager.getInstance().setTypefaceDefault(address);
 				setVisibility(address, View.VISIBLE);
-			}
-
-			/* Tuning score */
-			setVisibility(layout.findViewById(R.id.tuning_score), View.GONE);
-			if (!entity.synthetic) {
-				FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.tuning_score));
-				setVisibility(layout.findViewById(R.id.tuning_score), View.VISIBLE);
-				TextView text = (TextView) layout.findViewById(R.id.tuning_score);
-				text.setText(String.valueOf(entity.getTuningScore()));
-			}
-
-			/* Photos */
-			setVisibility(layout.findViewById(R.id.section_photos), View.GONE);
-			if (place.photos != null && place.photos.size() > 0) {
-				SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_photos);
-				if (section != null) {
-					section.getTextViewHeader().setText(String.valueOf(place.photoCount) + " " + context.getString(R.string.candi_section_photos));
-					HorizontalScrollLayout list = (HorizontalScrollLayout) layout.findViewById(R.id.list_photos);
-
-					for (Photo photo : place.photos) {
-						ViewHolder holder = new ViewHolder();
-						View view = inflater.inflate(R.layout.temp_place_photo_item, null);
-						WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
-						webImageView.setTag(photo);
-						holder.itemImage = webImageView.getImageView();
-						holder.itemImage.setTag(photo.getImageSizedUri(100, 100));
-						holder.itemImage.setImageBitmap(null);
-						BitmapRequest request = new BitmapRequest(photo.getImageSizedUri(100, 100), holder.itemImage);
-						BitmapManager.getInstance().fetchBitmap(request);
-						list.addView(view);
-					}
-
-					if (place.photoCount > place.photos.size()) {
-						TextView button = section.getButtonMore();
-						button.setText(R.string.candi_section_photos_more);
-						button.setTag("photos");
-						setVisibility(button, View.VISIBLE);
-					}
-
-					setVisibility(layout.findViewById(R.id.section_photos), View.VISIBLE);
-				}
-			}
-
-			/* Phrases */
-			setVisibility(layout.findViewById(R.id.section_phrases), View.GONE);
-			if (place.phrases != null && place.phrases.size() > 0) {
-				SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_phrases);
-				if (section != null) {
-					ListViewExpanded list = (ListViewExpanded) layout.findViewById(R.id.list_phrases);
-					list.setAdapter(new BaseAdapter() {
-
-						@Override
-						public int getCount() {
-							return place.phrases.size();
-						}
-
-						@Override
-						public Object getItem(int position) {
-							return null;
-						}
-
-						@Override
-						public long getItemId(int position) {
-							return 0;
-						}
-
-						@Override
-						public View getView(int position, View convertView, ViewGroup parent) {
-							Phrase phrase = place.phrases.get(position);
-							View view = inflater.inflate(R.layout.temp_listitem_phrase, null);
-
-							TextViewEllipsizing phraseText = (TextViewEllipsizing) view.findViewById(R.id.phrase);
-							FontManager.getInstance().setTypefaceDefault(phraseText);
-							String sampleText = new String(phrase.sampleText);
-							sampleText = sampleText.replace(phrase.phrase, "<font color='#ffaa00'>" + phrase.phrase + "</font>");
-							sampleText += " <font color='#aaaaaa'>(" + String.valueOf(phrase.sampleCount) + " tips)</font>";
-							phraseText.setText(Html.fromHtml(sampleText));
-
-							return view;
-						}
-					});
-					setVisibility(layout.findViewById(R.id.section_phrases), View.VISIBLE);
-				}
-			}
-
-			/* Tips */
-			setVisibility(layout.findViewById(R.id.section_tips), View.GONE);
-			if (place.tips != null && place.tips.size() > 0) {
-				SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_tips);
-				if (section != null) {
-					section.getTextViewHeader().setText(String.valueOf(place.tipCount) + " " + context.getString(R.string.candi_section_tips));
-					ListViewExpanded list = (ListViewExpanded) layout.findViewById(R.id.list_tips);
-					list.setAdapter(new BaseAdapter() {
-
-						@Override
-						public int getCount() {
-							return place.tips.size();
-						}
-
-						@Override
-						public Object getItem(int position) {
-							return null;
-						}
-
-						@Override
-						public long getItemId(int position) {
-							return 0;
-						}
-
-						@Override
-						public View getView(int position, View convertView, ViewGroup parent) {
-							Tip tip = place.tips.get(position);
-							View view = inflater.inflate(R.layout.temp_listitem_tip, null);
-
-							WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
-							TextViewEllipsizing description = (TextViewEllipsizing) view.findViewById(R.id.description);
-							UserView user = (UserView) view.findViewById(R.id.author);
-
-							/* Tip text */
-							FontManager.getInstance().setTypefaceDefault(description);
-							description.setText(tip.text);
-
-							/* Author block */
-							if (user != null) {
-								setVisibility(user, View.GONE);
-								if (tip.user != null) {
-									user.bindToAuthor(tip.user, tip.createdAt.longValue(), false);
-									setVisibility(user, View.VISIBLE);
-								}
-							}
-
-							ViewHolder holder = new ViewHolder();
-							holder.itemImage = webImageView.getImageView();
-							holder.itemImage.setTag(tip.user.photo.getImageSizedUri(100, 100));
-							holder.itemImage.setImageBitmap(null);
-							BitmapRequest request = new BitmapRequest(tip.user.photo.getImageSizedUri(100, 100), holder.itemImage);
-							request.setImageRequestor(holder.itemImage);
-							BitmapManager.getInstance().fetchBitmap(request);
-							
-							return view;
-						}
-					});
-
-					if (place.tipCount > list.getItemMaxCount()) {
-						TextView button = section.getButtonMore();
-						button.setText(R.string.candi_section_tips_more);
-						button.setTag("tips");
-						setVisibility(button, View.VISIBLE);
-					}
-
-					setVisibility(layout.findViewById(R.id.section_tips), View.VISIBLE);
-				}
 			}
 		}
 
@@ -833,31 +645,31 @@ public class CandiForm extends CandiActivity {
 		return layout;
 	}
 
-	static private void drawCandi(Context context, FlowLayout layout, List<Entity> entities) {
+	static public void drawCandi(Context context, FlowLayout layout, List<Entity> entities) {
 
 		layout.removeAllViews();
 		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		View parentView = (View) layout.getParent();
 		Integer layoutWidthPixels = metrics.widthPixels
 				- (parentView.getPaddingLeft() + parentView.getPaddingRight() + layout.getPaddingLeft() + layout.getPaddingRight());
 
-		Integer marginDip = 0;
-		Integer marginPixels = ImageUtils.getRawPixels(context, marginDip);
+		Integer spacing = 3;
+		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(context, spacing);
+		Integer spacingVerticalPixels = ImageUtils.getRawPixels(context, spacing);
 
-		Integer adjustedLayoutWidthPixels = layoutWidthPixels - (marginPixels * 2);
-		Integer candiWidthPixels = (int) (adjustedLayoutWidthPixels - (marginPixels * 6)) / 3;
+		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * 2)) / 3;
 
 		/* We need to cap the dimensions so we don't look crazy in landscape orientation */
-		int orientation = context.getResources().getConfiguration().orientation;
-		if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			adjustedLayoutWidthPixels = (layoutWidthPixels / 2) - (marginPixels * 2);
-			candiWidthPixels = (int) (layoutWidthPixels - (marginPixels * 10)) / 5;
+		if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * 4)) / 5;
 		}
-		else {
-			candiWidthPixels = (int) (adjustedLayoutWidthPixels - (marginPixels * 4)) / 3;
-			adjustedLayoutWidthPixels = (layoutWidthPixels / 2) - (marginPixels * 2);
-		}
+
+		Integer candiHeightPixels = (int) (candiWidthPixels * 0.95);
+
+		layout.setSpacingHorizontal(spacingHorizontalPixels);
+		layout.setSpacingVertical(spacingVerticalPixels);
 
 		/*
 		 * Insert views for entities that we don't already have a view for
@@ -866,31 +678,32 @@ public class CandiForm extends CandiActivity {
 			View view = inflater.inflate(R.layout.temp_place_candi_item, null);
 			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
 			TextView title = (TextView) view.findViewById(R.id.title);
+			TextView badge = (TextView) view.findViewById(R.id.badge);
+			FontManager.getInstance().setTypefaceDefault(title);
+			FontManager.getInstance().setTypefaceDefault(badge);
+			
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
 				if (entity.source.equals("comments")) {
-					title.setText(String.valueOf(entity.commentCount));
-					title.setVisibility(View.VISIBLE);
+					badge.setText(String.valueOf(entity.commentCount));
+					badge.setVisibility(View.VISIBLE);
 				}
+				title.setText(entity.source);
+				title.setVisibility(View.VISIBLE);
 			}
 
-			String imageUri = entity.getImageUri();
-			BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView)
-					.setImageUri(imageUri)
-					.setImageFormat(entity.getImageFormat())
-					.setLinkZoom(CandiConstants.LINK_ZOOM)
-					.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
-
+			String imageUri = entity.getEntityPhotoUri();
+			BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
 			BitmapRequest imageRequest = builder.create();
 			webImageView.setBitmapRequest(imageRequest);
 			webImageView.setTag(entity);
 
-			FlowLayout.LayoutParams params = new FlowLayout.LayoutParams((int) (candiWidthPixels * 0.95), (int) (candiWidthPixels * 0.95));
-			params.setMargins(marginPixels
-					, marginPixels
-					, marginPixels
-					, marginPixels);
+			FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(candiWidthPixels, LayoutParams.WRAP_CONTENT);
 			params.setCenterHorizontal(false);
 			view.setLayoutParams(params);
+			
+			RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(candiWidthPixels, candiHeightPixels);
+			webImageView.setLayoutParams(paramsImage);
+			
 			layout.addView(view);
 		}
 	}
@@ -900,17 +713,11 @@ public class CandiForm extends CandiActivity {
 		setVisibility(layout.findViewById(R.id.button_map), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_call), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_tune), View.GONE);
-
 		setVisibility(layout.findViewById(R.id.button_comment), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_new), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_edit), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_move), View.GONE);
-
-		setVisibility(layout.findViewById(R.id.button_menu), View.GONE);
-		setVisibility(layout.findViewById(R.id.form_button_link), View.GONE);
-		setVisibility(layout.findViewById(R.id.button_twitter), View.GONE);
-		setVisibility(layout.findViewById(R.id.button_website), View.GONE);
-		setVisibility(layout.findViewById(R.id.button_facebook), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_comments_browse), View.GONE);
 
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_map));
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_call));
@@ -919,19 +726,19 @@ public class CandiForm extends CandiActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_new_text));
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_edit));
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_move));
-		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.form_button_link));
+		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_comments_browse));
 
-		if (entity.synthetic) {
-			/* Map */
+		if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+
+			/* Tune, map, dial */
 			GeoLocation location = entity.getLocation();
 			if (location != null) {
 				setVisibility(layout.findViewById(R.id.button_map), View.VISIBLE);
 			}
 
-			/* Tune and call */
 			if (entity.place != null) {
-				Place place = entity.place;
 
+				Place place = entity.place;
 				setVisibility(layout.findViewById(R.id.button_tune), View.VISIBLE);
 
 				if (place.contact != null) {
@@ -941,95 +748,41 @@ public class CandiForm extends CandiActivity {
 				}
 			}
 
-			setVisibility(layout.findViewById(R.id.form_footer), View.GONE);
-			return;
+			if (entity.synthetic) {
+				setVisibility(layout.findViewById(R.id.form_footer), View.GONE);
+				return;
+			}
+			else {
+				setVisibility(layout.findViewById(R.id.form_footer), View.VISIBLE);
+			}
 		}
 
+		/* Browse comments */
+		setVisibility(layout.findViewById(R.id.button_comments_browse), View.VISIBLE);
+		if (entity.commentCount != null && entity.commentCount > 0) {
+			Button button = (Button) layout.findViewById(R.id.button_comments_browse);
+			if (button != null) {
+				button.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
+			}
+		}
+
+		/* Add candi */
 		if (entity.locked != null && !entity.locked) {
 			if (entity.isCollection != null && entity.isCollection) {
 				setVisibility(layout.findViewById(R.id.button_new), View.VISIBLE);
 			}
 		}
 
+		/* Add comment */
 		if (entity.locked != null && !entity.locked) {
 			setVisibility(layout.findViewById(R.id.button_comment), View.VISIBLE);
 		}
-		
-		if (entity.ownerId != null && entity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+
+		/* Edit */
+		if (entity.ownerId != null
+				&& (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
+				|| entity.ownerId.equals(ProxiConstants.ADMIN_USER_ID))) {
 			setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
-		}
-		else {
-			if (Aircandi.getInstance().getUser().isDeveloper) {
-				setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
-				((Button) layout.findViewById(R.id.button_edit)).setTextColor(ImageUtils.hexToColor("#ff888888"));
-			}
-		}
-
-		if (!entity.synthetic) {
-			setVisibility(layout.findViewById(R.id.form_button_link), View.VISIBLE);
-			if (entity.commentCount != null && entity.commentCount > 0) {
-				Button button = (Button) layout.findViewById(R.id.form_button_link);
-				if (button != null) {
-					button.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
-				}
-			}
-		}
-
-		/* Map */
-
-		GeoLocation location = entity.getLocation();
-		if (location != null) {
-			setVisibility(layout.findViewById(R.id.button_map), View.VISIBLE);
-		}
-
-		/* Dial, twitter, website, menu */
-
-		if (entity.place != null) {
-			Place place = entity.place;
-
-			if (entity.synthetic) {
-				setVisibility(layout.findViewById(R.id.button_tune), View.VISIBLE);
-			}
-
-			if (!entity.place.source.equals("user")) {
-				setVisibility(layout.findViewById(R.id.button_edit), View.GONE);
-			}
-
-			if (!entity.synthetic && Aircandi.getInstance().getUser().isDeveloper) {
-				setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
-			}
-
-			if (place.contact != null) {
-				if (place.contact.phone != null) {
-					setVisibility(layout.findViewById(R.id.button_call), View.VISIBLE);
-				}
-
-				if (place.contact.twitter != null && !place.contact.twitter.equals("")) {
-					Button button = (Button) layout.findViewById(R.id.button_twitter);
-					if (button != null) {
-						button.setText("@" + place.contact.twitter);
-						setVisibility(button, View.VISIBLE);
-					}
-				}
-			}
-
-			if (place.website != null && !place.website.equals("")) {
-				setVisibility(layout.findViewById(R.id.button_website), View.VISIBLE);
-			}
-
-			if (place.facebook != null && !place.facebook.equals("")) {
-				Button button = (Button) layout.findViewById(R.id.button_facebook);
-				if (button != null) {
-					button.setText(place.facebook);
-					setVisibility(layout.findViewById(R.id.button_facebook), View.VISIBLE);
-				}
-			}
-
-			if (place.menu != null) {
-				if (place.menu.mobileUri != null || place.menu.uri != null) {
-					setVisibility(layout.findViewById(R.id.button_menu), View.VISIBLE);
-				}
-			}
 		}
 	}
 
@@ -1055,7 +808,7 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-
+				Thread.currentThread().setName("MoveEntity");
 				String newParentId = collectionEntityId != null ? collectionEntityId : entityToMove.getParent().getBeaconId();
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel()
 						.moveEntity(entityToMove.id, newParentId, collectionEntityId == null ? true : false, false);

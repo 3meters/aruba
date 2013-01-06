@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,7 +66,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			holder.subtitle = (TextView) view.findViewById(R.id.subtitle);
 			holder.description = (TextViewEllipsizing) view.findViewById(R.id.description);
 			holder.user = (UserView) view.findViewById(R.id.user);
-			holder.comments = (Button) view.findViewById(R.id.form_button_link);
+			holder.comments = (Button) view.findViewById(R.id.button_comments_browse);
 			holder.check = (CheckBox) view.findViewById(R.id.check);
 			if (holder.check != null) {
 				holder.check.setOnClickListener(new OnClickListener() {
@@ -95,19 +96,6 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			holder.data = itemData;
 			holder.position = position;
 
-			if (holder.candiView != null) {
-				if (entity.synthetic) {
-					int colorResId = entity.place.getCategoryColorResId();
-					holder.candiView.setBackgroundResource(colorResId);
-					holder.candiView.setLayoutId(R.layout.widget_candi_view_tuner_synthetic);
-				}
-				else {
-					holder.candiView.setLayoutId(R.layout.widget_candi_view_tuner);
-				}
-				holder.candiView.initialize();
-				holder.candiView.bindToEntity(entity);
-			}
-			
 			setVisibility(holder.check, View.GONE);
 			if (holder.check != null && entity.checked != null) {
 				holder.check.setChecked(entity.checked);
@@ -173,41 +161,32 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			if (holder.image != null) {
 				holder.image.setTag(entity);
 				holder.image.getImageBadge().setVisibility(View.GONE);
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
-					if (entity.getImageUri() != null && !entity.getImageUri().toLowerCase().startsWith("resource:")) {
-						holder.image.getImageBadge().setImageResource(R.drawable.ic_collection_250);
-						holder.image.getImageBadge().setVisibility(View.VISIBLE);
-					}
-				}
 				/*
 				 * The WebImageView sets the current bitmap ref being held
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
-				if (entity.photo != null && entity.photo.getBitmap() != null) {
-					ImageUtils.showImageInImageView(entity.photo.getBitmap(), holder.image.getImageView(), true, AnimUtils.fadeInMedium());
+				if (entity.getPhoto().getBitmap() != null) {
+					ImageUtils.showImageInImageView(entity.getPhoto().getBitmap(), holder.image.getImageView(), true, AnimUtils.fadeInMedium());
 				}
 				else {
-					final String imageUri = entity.getImageUri();
+					final String imageUri = entity.getEntityPhotoUri();
 
 					/* Don't do anything if the image is already set to the one we want */
 					if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {
 
 						BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.image)
-								.setImageUri(imageUri)
-								.setImageFormat(entity.getImageFormat())
-								.setLinkZoom(CandiConstants.LINK_ZOOM)
-								.setLinkJavascriptEnabled(CandiConstants.LINK_JAVASCRIPT_ENABLED);
+								.setImageUri(imageUri);
 
 						final BitmapRequest imageRequest = builder.create();
 
 						holder.imageUri = imageUri;
 						if (entity.synthetic) {
-							int color = entity.place.getCategoryColor();
-							holder.image.setColorFilter(color);
+							int color = entity.place.getCategoryColor(true, true, false);
+							holder.image.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 						}
 						else {
-							holder.image.setColorFilter(null);
+							holder.image.getImageView().clearColorFilter();
 						}
 
 						holder.image.setBitmapRequest(imageRequest);
@@ -308,10 +287,8 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 				if (filterType.toString().toLowerCase().equals("candipatches")) {
 					final ArrayList<Entity> filteredEntities = new ArrayList<Entity>(mListItems.size());
 					for (int i = 0; i < mListItems.size(); i++) {
+						@SuppressWarnings("unused")
 						Entity entity = mListItems.get(i);
-						if (entity.type.equals(CandiConstants.TYPE_CANDI_FOLDER) && !entity.locked) {
-							filteredEntities.add(entity);
-						}
 					}
 					results.values = filteredEntities;
 					results.count = filteredEntities.size();

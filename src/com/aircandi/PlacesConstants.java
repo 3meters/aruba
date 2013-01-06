@@ -1,6 +1,5 @@
 package com.aircandi;
 
-
 public class PlacesConstants {
 
 	/* For readability */
@@ -14,10 +13,13 @@ public class PlacesConstants {
 	public static final int		DIST_ONE_HUNDRED_METERS							= 100;
 	public static final int		DIST_TWO_HUNDRED_METERS							= 200;
 	public static final int		DIST_FIVE_HUNDRED_METERS						= 500;
+	public static final int		DIST_ONE_KILOMETER								= 1000;
+	public static final int		DIST_TWO_KILOMETERS								= 2000;
+	public static final int		DIST_FIVE_KILOMETERS							= 5000;
 
 	/* Search ranges used when fetching places from the service */
 	public static final double	SEARCH_RANGE_SYNTHETICS_METERS					= DIST_FIVE_HUNDRED_METERS;
-	public static final double	SEARCH_RANGE_PLACES_METERS						= DIST_TWO_HUNDRED_METERS;
+	public static final double	SEARCH_RANGE_PLACES_METERS						= DIST_FIVE_KILOMETERS;
 
 	/*
 	 * Update criteria for active and passive location updates.

@@ -16,7 +16,6 @@ import com.aircandi.components.SearchManager.SearchItem;
 import com.aircandi.components.SearchManager.SearchItemType;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.objects.Entity.ImageFormat;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
@@ -133,7 +132,6 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 					final String imageUri = suggestion.categoryIconUri;
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemImage)
 							.setImageUri(imageUri)
-							.setImageFormat(ImageFormat.Binary)
 							.setScaleToWidth(CandiConstants.IMAGE_WIDTH_ORIGINAL);
 
 					BitmapRequest imageRequest = builder.create();
@@ -142,7 +140,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 					holder.itemImage.setBitmapRequest(imageRequest);
 				}
 				else {
-					holder.itemImage.getImageView().setImageResource(R.drawable.source_website_iii);
+					holder.itemImage.getImageView().setImageResource(R.drawable.source_website);
 				}
 			}
 		}

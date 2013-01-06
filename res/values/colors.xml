@@ -38,6 +38,8 @@
     
     <color name="background_dark">@android:color/black</color>
     <color name="background_light">@android:color/white</color>
+    <color name="background_gray_light">#55333333</color>
+	<color name="background_gray_dark">#ff555555</color>
     <color name="background_help_dark">@android:color/black</color>
     <color name="background_help_light">@android:color/white</color>
     <color name="background_picture_browse">#ff282828</color>
@@ -45,7 +47,7 @@
     <color name="background_form_light_semi">#90ffffff</color>
     
     <color name="button_pressed">#ff33b5e5</color>
-    <color name="image_pressed">#8833b5e5</color>
+    <color name="image_pressed">@color/accent_blue</color>
     <color name="holo_blue_light">#8833b5e5</color>
     <color name="drop_start">#66000000</color>
     <color name="drop_end">#00000000</color>
@@ -80,19 +82,30 @@
     <color name="accent_red">#ffff4444</color>
     <color name="accent_red_dark">#ffcc0000</color>
     <color name="accent_red_dark_mute">#ffbd4852</color>
+    <color name="accent_red_dark_mute_semi">#66bd4852</color>
+    
     <color name="accent_orange">#ffffbb33</color>
     <color name="accent_orange_dark">#ffff8800</color>
     <color name="accent_orange_dark_mute">#ffe0904e</color>
+    <color name="accent_orange_dark_mute_semi">#66e0904e</color>
+    
     <color name="accent_green">#ff99cc00</color>
     <color name="accent_green_dark">#ff669900</color>
     <color name="accent_green_dark_mute">#ff839942</color>
+    <color name="accent_green_dark_mute_semi">#66839942</color>
+    
     <color name="accent_purple">#ffaa66cc</color>
     <color name="accent_purple_dark">#ff9933cc</color>
     <color name="accent_purple_dark_mute">#ff9e6bc3</color>
+    <color name="accent_purple_dark_mute_semi">#669e6bc3</color>
+    
     <color name="accent_blue">#ff33b5e5</color>
     <color name="accent_blue_dark">#ff0099cc</color>
     <color name="accent_blue_dark_mute">#ff48a8bd</color>
+    <color name="accent_blue_dark_mute_semi">#6648a8bd</color>
+    
     <color name="accent_gray">#ffaaaaaa</color>
     <color name="accent_gray_dark">#ff777777</color>
-
+    <color name="accent_gray_semi">#66aaaaaa</color>
+    
 </resources>

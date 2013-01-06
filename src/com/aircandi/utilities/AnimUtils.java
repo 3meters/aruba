@@ -5,23 +5,23 @@ import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.aircandi.Aircandi;
-import com.aircandi.R;
-
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.XmlResourceParser;
 import android.content.res.Resources.NotFoundException;
+import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
 import android.util.Xml;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
-import android.view.animation.Animation.AnimationListener;
+
+import com.aircandi.Aircandi;
+import com.aircandi.R;
 
 public class AnimUtils {
 

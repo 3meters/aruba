@@ -225,12 +225,6 @@ public abstract class CandiActivity extends SherlockActivity {
 			mPrefTestingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
 		}
 
-		if (mPrefGlobalBeacons != Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true)) {
-			mPrefChangeRefreshNeeded = true;
-			Logger.d(this, "Pref change: global beacons");
-			mPrefGlobalBeacons = Aircandi.settings.getBoolean(Preferences.PREF_GLOBAL_BEACONS, true);
-		}
-
 		if (firstUpdate) {
 			mPrefChangeRefreshNeeded = false;
 		}

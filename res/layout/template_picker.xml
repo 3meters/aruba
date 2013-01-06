@@ -23,7 +23,7 @@
             android:paddingBottom="15dp"
             android:paddingLeft="2dp"
             android:paddingRight="2dp"
-            android:text="@string/dialog_template_picker_message_top" />
+            android:text="@string/dialog_template_picker_message" />
 
         <com.aircandi.ui.widgets.BounceListView
             android:id="@+id/form_list"

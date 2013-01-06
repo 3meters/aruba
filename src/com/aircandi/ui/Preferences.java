@@ -16,20 +16,24 @@ public class Preferences extends SherlockPreferenceActivity {
 	SharedPreferences			prefs;
 	protected AircandiCommon	mCommon;
 
-	public static final String	PREF_GLOBAL_BEACONS		= "Pref_Global_Beacons";
-	public static final String	PREF_ENTITY_FENCING		= "Pref_Entity_Fencing";
-	public static final String	PREF_SHOW_DISTANCE		= "Pref_Show_Distance";
-	public static final String	PREF_SOUND_EFFECTS		= "Pref_Sound_Effects";
-	public static final String	PREF_THEME				= "Pref_Theme";
-	public static final String	PREF_USER				= "Pref_User";
-	public static final String	PREF_USER_SESSION		= "Pref_User_Session";
-	public static final String	PREF_TESTING_BEACONS	= "Pref_Testing_Beacons";
-	public static final String	PREF_TESTING_LOCATION	= "Pref_Testing_Location";
+	/* Prefs - users */
+	public static final String	PREF_SEARCH_RADIUS			= "Pref_Search_Radius";
+	public static final String	PREF_SOUND_EFFECTS			= "Pref_Sound_Effects";
+	public static final String	PREF_THEME					= "Pref_Theme";
 
-	public static final String	SETTING_VERSION_NAME	= "Setting_Version_Name";
-	public static final String	SETTING_PICTURE_SEARCH	= "Setting_Picture_Search";
-	public static final String	SETTING_FIRST_RUN		= "Setting_First_Run";
-	public static final String	SETTING_LAST_EMAIL		= "Setting_Last_Email";
+	/* Prefs - dev only */
+	public static final String	PREF_ENTITY_FENCING			= "Pref_Entity_Fencing";
+	public static final String	PREF_SHOW_PLACE_RANK_SCORE	= "Pref_Show_Place_Rank_Score";
+	public static final String	PREF_TESTING_BEACONS		= "Pref_Testing_Beacons";
+	public static final String	PREF_TESTING_LOCATION		= "Pref_Testing_Location";
+
+	/* Settings */
+	public static final String	SETTING_USER				= "Setting_User";
+	public static final String	SETTING_USER_SESSION		= "Setting_User_Session";
+	public static final String	SETTING_VERSION_NAME		= "Setting_Version_Name";
+	public static final String	SETTING_PICTURE_SEARCH		= "Setting_Picture_Search";
+	public static final String	SETTING_FIRST_RUN			= "Setting_First_Run";
+	public static final String	SETTING_LAST_EMAIL			= "Setting_Last_Email";
 
 	@SuppressWarnings("deprecation")
 	@Override

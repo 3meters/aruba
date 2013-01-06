@@ -72,6 +72,9 @@
         <attr name="minHeight" format="dimension" />
         <attr name="maxHeight" format="dimension" />
     </declare-styleable>
+    <declare-styleable name="TextViewEllipsizing">
+        <attr name="maxLines" format="integer" />
+    </declare-styleable>
     <declare-styleable name="BuilderButton">
         <attr name="hint" format="string" />
     </declare-styleable>

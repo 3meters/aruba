@@ -34,20 +34,22 @@ public class CommentForm extends FormActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initialize();
-		bind();
-		draw();
+		if (!isFinishing()) {
+			initialize();
+			bind();
+			draw();
+		}
 	}
 
 	private void initialize() {
 		mContent = (EditText) findViewById(R.id.description);
-		
+
 		mButtonSave = (Button) findViewById(R.id.button_save);
 		mButtonSave.setEnabled(false);
-		
+
 		FontManager.getInstance().setTypefaceDefault(mContent);
 		FontManager.getInstance().setTypefaceDefault(mButtonSave);
-		
+
 		mContent.addTextChangedListener(new SimpleTextWatcher() {
 
 			@Override
@@ -64,7 +66,7 @@ public class CommentForm extends FormActivity {
 		mComment = new Comment();
 		mComment.creatorId = Aircandi.getInstance().getUser().id;
 		mComment.location = Aircandi.getInstance().getUser().location;
-		mComment.imageUri = Aircandi.getInstance().getUser().getPhoto().getImageUri();
+		mComment.imageUri = Aircandi.getInstance().getUser().getPhoto().getUri();
 		mComment.name = Aircandi.getInstance().getUser().name;
 	}
 
@@ -133,7 +135,7 @@ public class CommentForm extends FormActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
-
+					Thread.currentThread().setName("InsertComment");				
 					ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertComment(mCommon.mParentId, mComment, false);
 					return result;
 				}

@@ -4,11 +4,24 @@
 
     <PreferenceCategory android:title="Search preferences" >
         <ListPreference
+            android:id="@+id/Pref_Search_Radius"
+            android:defaultValue="@string/search_radius_default"
+            android:dialogTitle="Select search distance"
+            android:entries="@array/search_radius_entries"
+            android:entryValues="@array/search_radius_values"
+            android:key="Pref_Search_Radius"
+            android:negativeButtonText="Cancel"
+            android:positiveButtonText="OK"
+            android:summary="Default search distance"
+            android:title="Distances" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="General preferences" >
+        <ListPreference
             android:id="@+id/Pref_Theme"
             android:defaultValue="@string/theme_default"
             android:dialogTitle="Select theme"
-            android:entries="@array/theme_list_preference"
-            android:entryValues="@array/themevalues_list_preference"
+            android:entries="@array/theme_entries"
+            android:entryValues="@array/theme_values"
             android:key="Pref_Theme"
             android:negativeButtonText="Cancel"
             android:positiveButtonText="OK"
@@ -21,12 +34,6 @@
             android:key="Pref_Sound_Effects"
             android:summary="Play sound notifications and effects"
             android:title="Sounds" />
-        <CheckBoxPreference
-            android:id="@+id/Pref_Global_Beacons"
-            android:defaultValue="true"
-            android:key="Pref_Global_Beacons"
-            android:summary="Show Aircandi feed"
-            android:title="Aircandi feed" />
     </PreferenceCategory>
     <PreferenceCategory
         android:id="@+id/Pref_Category_Dev"
@@ -65,11 +72,11 @@
             android:summary="Use fence settings to filter entities"
             android:title="Entity fencing" />
         <CheckBoxPreference
-            android:id="@+id/Pref_Show_Distance"
+            android:id="@+id/Pref_Show_Place_Rank_Score"
             android:defaultValue="false"
-            android:key="Pref_Show_Distance"
-            android:summary="Show distance to places"
-            android:title="Distance" />
+            android:key="Pref_Show_Place_Rank_Score"
+            android:summary="Show place rank score"
+            android:title="Place rank score" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Error reporting" >
         <CheckBoxPreference

@@ -3,17 +3,16 @@ package com.aircandi.service.objects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.service.Expose;
-import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.SerializedName;
 import com.aircandi.utilities.MiscUtils;
 
@@ -30,8 +29,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 	/* Database fields */
 
-	@Expose
-	public String				type;
 	@Expose
 	public String				subtitle;
 	@Expose
@@ -52,6 +49,8 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	public String				visibility			= "public";
 	@Expose
 	public List<Comment>		comments;
+	@Expose
+	public List<Source>			sources;
 
 	@Expose(serialize = false, deserialize = true)
 	public List<Link>			links;
@@ -88,12 +87,14 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	public Boolean				hidden				= false;
 	public Boolean				synthetic			= false;
 	public Boolean				checked				= false;
+	
+	/* Used when this is a source entity */
 	public String				source;
 	public String				sourceId;
-	public Float				distance;										// Cached for easier sorting
-
-	/* These have meaning for child entities */
-	public Date					discoveryTime;
+	public String				sourceUri;
+	
+	/* Cached for easier sorting */
+	public Float				distance;
 
 	public Entity() {}
 
@@ -103,6 +104,9 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			final Entity entity = (Entity) super.clone();
 			if (this.comments != null) {
 				entity.comments = (List<Comment>) ((ArrayList) this.comments).clone();
+			}
+			if (this.sources != null) {
+				entity.sources = (List<Source>) ((ArrayList) this.sources).clone();
 			}
 			if (this.links != null) {
 				entity.links = (List<Link>) ((ArrayList) this.links).clone();
@@ -135,7 +139,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 */
 		entity = (Entity) ServiceEntryBase.setPropertiesFromMap(entity, map);
 
-		entity.type = (String) map.get("type");
 		entity.name = (String) map.get("name");
 		entity.subtitle = (String) map.get("subtitle");
 		entity.description = (String) map.get("description");
@@ -152,6 +155,14 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			}
 		}
 
+		if (map.get("sources") != null) {
+			entity.sources = new ArrayList<Source>();
+			List<LinkedHashMap<String, Object>> sourceMaps = (List<LinkedHashMap<String, Object>>) map.get("sources");
+			for (LinkedHashMap<String, Object> sourceMap : sourceMaps) {
+				entity.sources.add(Source.setPropertiesFromMap(new Source(), sourceMap));
+			}
+		}
+
 		if (map.get("comments") != null) {
 			entity.comments = new ArrayList<Comment>();
 			List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
@@ -159,6 +170,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 				entity.comments.add(Comment.setPropertiesFromMap(new Comment(), commentMap));
 			}
 		}
+
 		entity.commentCount = (Integer) map.get("commentCount");
 		entity.commentsMore = (Boolean) map.get("commentsMore");
 
@@ -219,6 +231,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 		to.childCount = from.childCount;
 		to.comments = from.comments;
+		to.sources = from.sources;
 		to.commentCount = from.commentCount;
 		to.commentsMore = from.commentsMore;
 
@@ -249,6 +262,43 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return count;
 	}
 
+	public static Entity upsizeFromSynthetic(Entity synthetic) {
+		/*
+		 * Sythetic entity created from foursquare data
+		 * 
+		 * We make a copy so these changes don't effect the synthetic entity
+		 * in the entity model in case we keep it because of a failure.
+		 */
+		Entity entity = synthetic.clone();
+		entity.id = null;
+		entity.subtitle = synthetic.getCategories();
+		return entity;
+	}
+
+	public Photo getPhotoForSet() {
+		if (photo == null) {
+			photo = new Photo();
+		}
+		return photo;
+	}
+
+	public Photo getPhoto() {
+		return photo != null ? photo : new Photo();
+	}
+
+	public void setPhoto(Photo photo) {
+		this.photo = photo;
+	}
+
+	public Source getSource(String targetSource) {
+		for (Source source : sources) {
+			if (source.source.equals(targetSource)) {
+				return source;
+			}
+		}
+		return null;
+	}
+
 	public GeoLocation getLocation() {
 		GeoLocation location = null;
 		Entity parent = getParent();
@@ -256,7 +306,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			location = parent.getLocation();
 		}
 		else {
-			Beacon beacon = getBeacon();
+			Beacon beacon = getActiveBeacon("proximity");
 			if (beacon != null) {
 				location = beacon.getLocation();
 			}
@@ -268,31 +318,32 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public Float getDistance() {
-		Beacon beacon = getBeacon();
+		this.distance = -1f;
+		Beacon beacon = getActiveBeacon("proximity");
 		if (beacon != null) {
 			this.distance = beacon.getDistance();
 		}
 		else {
 			GeoLocation location = getLocation();
-			Float distance = 0f;
 			if (location != null) {
 				Observation observation = LocationManager.getInstance().getObservation();
 				if (observation != null) {
+					Float distanceByLocation = 0f;
 					android.location.Location locationObserved = new android.location.Location(observation.provider);
 					locationObserved.setLatitude(observation.latitude.doubleValue());
 					locationObserved.setLongitude(observation.longitude.doubleValue());
 					android.location.Location locationPlace = new android.location.Location("place");
 					locationPlace.setLatitude(location.latitude.doubleValue());
 					locationPlace.setLongitude(location.longitude.doubleValue());
-					distance = locationObserved.distanceTo(locationPlace);
+					distanceByLocation = locationObserved.distanceTo(locationPlace);
+					this.distance = distanceByLocation;
 				}
 			}
-			this.distance = distance;
 		}
-		return distance;
+		return this.distance;
 	}
 
-	public String getImageUri() {
+	public String getEntityPhotoUri() {
 
 		/*
 		 * If a special preview photo is available, we use it otherwise
@@ -300,10 +351,10 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 * 
 		 * Only posts and collections do not have photo objects
 		 */
-		String imageUri = "resource:placeholder_logo";
+		String imageUri = "resource:placeholder_logo_bw";
 		if (this.type.equals(CandiConstants.TYPE_CANDI_POST)) {
 			if (this.creator.photo != null) {
-				imageUri = this.creator.photo.getImageUri();
+				imageUri = this.creator.photo.getUri();
 			}
 			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
 				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
@@ -312,16 +363,34 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		else if (this.type.equals(CandiConstants.TYPE_CANDI_LINK)) {
 			imageUri = "resource:source_website_ii";
 		}
+		else if (this.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			if (this.photo != null) {
+				imageUri = photo.getSizedUri(250, 250);
+				if (imageUri == null) {
+					imageUri = photo.getUri();
+				}
+			}
+			else if (this.place != null
+					&& this.place.categories != null
+					&& this.place.categories.size() > 0) {
+				imageUri = this.place.categories.get(0).iconUri();
+			}
+			else if (creator != null) {
+				if (creator.getUserPhotoUri() != null && !creator.getUserPhotoUri().equals("")) {
+					imageUri = creator.getUserPhotoUri();
+				}
+			}
+		}
 		else {
 			if (this.photo != null) {
-				imageUri = photo.getImageSizedUri(250, 250);
+				imageUri = photo.getSizedUri(250, 250);
 				if (imageUri == null) {
-					imageUri = photo.getImageUri();
+					imageUri = photo.getUri();
 				}
 			}
 			else if (creator != null) {
-				if (creator.getImageUri() != null && !creator.getImageUri().equals("")) {
-					imageUri = creator.getImageUri();
+				if (creator.getUserPhotoUri() != null && !creator.getUserPhotoUri().equals("")) {
+					imageUri = creator.getUserPhotoUri();
 				}
 			}
 		}
@@ -329,23 +398,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return imageUri;
 	}
 
-	public ImageFormat getImageFormat() {
-
-		ImageFormat imageFormat = ImageFormat.Binary;
-
-		if (this.photo != null) {
-			imageFormat = photo.getImageFormat();
-		}
-		else if (creator != null && creator.photo != null) {
-			if (creator.photo.getImageUri() != null && !creator.getImageUri().equals("")) {
-				imageFormat = creator.photo.getImageFormat();
-			}
-		}
-
-		return imageFormat;
-	}
-
-	public Link getActiveLink() {
+	public Link getActiveLink(String linkType) {
 		/*
 		 * If an entity has more than one viable link, we choose the one
 		 * using the following priority:
@@ -358,21 +411,25 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			Link strongestLink = null;
 			Integer strongestLevel = -200;
 			for (Link link : links) {
-				if (link.primary != null && link.primary) {
-					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
-					if (beacon != null && beacon.level.intValue() > strongestLevel) {
-						strongestLink = link;
-						strongestLevel = beacon.level.intValue();
+				if (link.type.equals(linkType)) {
+					if (link.primary != null && link.primary) {
+						Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
+						if (beacon != null && beacon.level.intValue() > strongestLevel) {
+							strongestLink = link;
+							strongestLevel = beacon.level.intValue();
+						}
 					}
 				}
 			}
 
 			if (strongestLink == null) {
 				for (Link link : links) {
-					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
-					if (beacon != null && beacon.level.intValue() > strongestLevel) {
-						strongestLink = link;
-						strongestLevel = beacon.level.intValue();
+					if (link.type.equals(linkType)) {
+						Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
+						if (beacon != null && beacon.level.intValue() > strongestLevel) {
+							strongestLink = link;
+							strongestLevel = beacon.level.intValue();
+						}
 					}
 				}
 			}
@@ -387,13 +444,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return childEntities;
 	}
 
-	public Photo getPhoto() {
-		if (photo == null) {
-			photo = new Photo();
-		}
-		return photo;
-	}
-
 	public Place getPlace() {
 		if (place == null) {
 			place = new Place();
@@ -406,8 +456,8 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return entity;
 	}
 
-	public Beacon getBeacon() {
-		Link link = getActiveLink();
+	public Beacon getActiveBeacon(String linkType) {
+		Link link = getActiveLink(linkType);
 		if (link != null) {
 			Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
 			return beacon;
@@ -415,64 +465,77 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return null;
 	}
 
-	public Integer getTuningScore() {
+	public Link getLink(Beacon beacon, String linkType) {
+		if (links != null) {
+			for (Link link : links) {
+				if (link.toId.equals(beacon.id) && link.type.equals(linkType)) {
+					return link;
+				}
+			}
+		}
+		return null;
+	}
+
+	public Integer getPlaceRankScore() {
 		/*
-		 * Our primary goal is to make sure that if you are standing
-		 * in the same spot that was previously used to pin a place, that place
-		 * should be first in radar.
+		 * Place entities can get high scores in the following ways:
+		 * 
+		 * 1) Proximity: they have been tagged as physically near/at a beacon we can currently see.
+		 * 2) Popular: they have been browsed a lot in range of a beacon we can currently see.
 		 * 
 		 * Inputs:
-		 * - How many beacons is the entity is linked to
-		 * - How many beacon links have been tuned to the place entity
-		 * - How many beacons are flagged as primary.
+		 * - How many primary links are there.
+		 * - Is the link a proximity or browse type.
+		 * - How many times has the link been 'voted' on.
 		 * - How close to a primary is the device. (signal level)
 		 * 
 		 * Only primary links get tuning points.
 		 * A place entity can have multiple primary links as it gets extended.
 		 */
-		Integer tuningScore = 0;
+		Integer placeRankScore = 0;
 		if (links != null) {
 			for (Link link : links) {
 				/* One point for each link */
-				tuningScore++;
-
-				/* Bonus points for each tuned link */
-				if (link.tuneCount != null) {
-					tuningScore += link.tuneCount.intValue();
-				}
+				placeRankScore++;
 
 				/* Add points for being close to a primary */
 				if (link.primary) {
-					Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
-					if (beacon != null) {
-						int level = beacon.level.intValue();
 
-						if (level <= -90)
-							tuningScore += 1;
-						else if (level <= -80)
-							tuningScore += 2;
-						else if (level <= -70)
-							tuningScore += 4;
-						else
-							tuningScore += 8;
+					/* Bonus points for each tuned link */
+					if (link.tuneCount != null) {
+						if (link.type.equals("proximity")) {
+							placeRankScore += (link.tuneCount.intValue() * 5);
+
+							Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
+							if (beacon != null) {
+								int level = beacon.level.intValue();
+
+								if (level <= -90)
+									placeRankScore += 1;
+								else if (level <= -80)
+									placeRankScore += 2;
+								else if (level <= -70)
+									placeRankScore += 4;
+								else
+									placeRankScore += 8;
+							}
+						}
+						else if (link.type.equals("browse")) {
+							placeRankScore += (link.tuneCount.intValue() * 1);
+						}
 					}
 				}
 			}
 		}
-		return tuningScore;
+		return placeRankScore;
 	}
 
 	public String getBeaconId() {
-		Link link = getActiveLink();
+		Link link = getActiveLink("proximity");
 		if (link != null) {
 			return link.toId;
 		}
 		return null;
-	}
-
-	public String getLinkId() {
-		String linkId = getActiveLink().id;
-		return linkId;
 	}
 
 	public String getCategories() {
@@ -487,10 +550,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return null;
 	}
 
-	public static enum ImageFormat {
-		Binary, Html
-	}
-
 	public static enum EntityState {
 		Normal,
 		New,
@@ -503,18 +562,11 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		Private
 	}
 
-	public static enum Source {
-		Aircandi,
-		Foursquare,
-		User
-	}
-
-	public static class SortEntitiesByTuningScoreDistance implements Comparator<Entity> {
+	public static class SortEntitiesByPlaceRankScoreDistance implements Comparator<Entity> {
 
 		@Override
 		public int compare(Entity entity1, Entity entity2) {
 
-			/* global versus user */
 			/* synthetics */
 			if (!entity1.synthetic && entity2.synthetic) {
 				return -1;
@@ -523,10 +575,10 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 				return 1;
 			}
 			else {
-				if (entity1.getTuningScore() > entity2.getTuningScore()) {
+				if (entity1.getPlaceRankScore() > entity2.getPlaceRankScore()) {
 					return -1;
 				}
-				if (entity1.getTuningScore() < entity2.getTuningScore()) {
+				if (entity1.getPlaceRankScore() < entity2.getPlaceRankScore()) {
 					return 1;
 				}
 				else {
@@ -548,7 +600,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 		@Override
 		public int compare(Entity entity1, Entity entity2) {
-			
+
 			if (!entity1.type.equals(CandiConstants.TYPE_CANDI_SOURCE) && entity2.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
 				return 1;
 			}

@@ -105,24 +105,41 @@ public class AndroidManager {
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
+	public void callYelpActivity(Context context, String sourceId, String sourceUri) {
+		Intent intent = findFacebookApp(context);
+		if (intent != null) {
+			intent.setData(Uri.parse(sourceUri));
+			context.startActivity(intent);
+		}
+		else {
+			intent = new Intent(android.content.Intent.ACTION_VIEW);
+			intent.addCategory("android.intent.category.DEFAULT");
+			if (intent != null) {
+				intent.setData(Uri.parse(sourceUri));
+				context.startActivity(intent);
+			}
+		}
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+	}
+
 	public Intent findTwitterApp(Context context) {
-		final String[] twitterApps = {
+		final String[] apps = {
 				"com.twitter.android", 			// official
 				"com.twidroid", 				// twidroyd
 				"com.handmark.tweetcaster", 	// Tweecaster
 				"com.thedeck.android" };		// TweetDeck
 
-		Intent tweetIntent = new Intent();
-		tweetIntent.setType("text/plain");
-		final PackageManager packageManager = context.getPackageManager();
-		List<ResolveInfo> list = packageManager.queryIntentActivities(tweetIntent, PackageManager.MATCH_DEFAULT_ONLY);
+		Intent intent = new Intent();
+		intent.setType("text/plain");
+		final PackageManager pm = context.getPackageManager();
+		List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
 
-		for (int i = 0; i < twitterApps.length; i++) {
+		for (int i = 0; i < apps.length; i++) {
 			for (ResolveInfo resolveInfo : list) {
 				String p = resolveInfo.activityInfo.packageName;
-				if (p != null && p.startsWith(twitterApps[i])) {
-					tweetIntent.setPackage(p);
-					return tweetIntent;
+				if (p != null && p.startsWith(apps[i])) {
+					intent.setPackage(p);
+					return intent;
 				}
 			}
 		}
@@ -132,6 +149,27 @@ public class AndroidManager {
 	public Intent findFoursquareApp(Context context) {
 		final String[] apps = {
 				"foursquare" };		// official
+
+		Intent intent = new Intent();
+		intent.setType("text/plain");
+		final PackageManager pm = context.getPackageManager();
+		List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+
+		for (int i = 0; i < apps.length; i++) {
+			for (ResolveInfo resolveInfo : list) {
+				String p = resolveInfo.activityInfo.packageName;
+				if (p != null && p.contains(apps[i])) {
+					intent.setPackage(p);
+					return intent;
+				}
+			}
+		}
+		return null;
+	}
+
+	public Intent findYelpApp(Context context) {
+		final String[] apps = {
+				"yelp" };		// official
 
 		Intent intent = new Intent();
 		intent.setType("text/plain");

@@ -99,7 +99,6 @@ public class Aircandi extends Application {
 	public static Number					lastApplicationUpdateCheckDate;
 
 	private User							mUser;
-	private CandiTask						mCandiTask					= CandiTask.RadarCandi;
 	private Boolean							mLaunchedNormally			= false;
 
 	public static Aircandi getInstance() {
@@ -144,14 +143,6 @@ public class Aircandi extends Application {
 
 	public User getUser() {
 		return mUser;
-	}
-
-	public void setCandiTask(CandiTask candiTask) {
-		this.mCandiTask = candiTask;
-	}
-
-	public CandiTask getCandiTask() {
-		return mCandiTask;
 	}
 
 	public void setLaunchedNormally(Boolean launchedNormally) {

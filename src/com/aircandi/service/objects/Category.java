@@ -69,9 +69,9 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 		return category;
 	}
 
-	public String iconUri(Boolean grayBackground) {
+	public String iconUri() {
 		if (icon != null && icon.prefix != null) {
-			String iconUri = icon.prefix + (grayBackground ? "bg_88" : "88") + icon.suffix;
+			String iconUri = icon.prefix + "88" + icon.suffix;
 			return iconUri;
 		}
 		return null;

@@ -2,14 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:paddingBottom="5dp" >
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/image"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_centerInParent="true"
-        aircandi:layout="@layout/widget_webimageview_framed"
+        aircandi:layout="@layout/widget_webimageview_framed_thick"
         aircandi:maxHeight="100dp"
         aircandi:maxWidth="100dp"
         aircandi:showBusy="true"
@@ -19,7 +20,7 @@
         android:scaleType="centerCrop" />
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/badge"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="top|right"
@@ -29,4 +30,15 @@
         android:textColor="@color/accent_blue"
         android:visibility="gone" />
 
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_below="@+id/image"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/dummy_title"
+        android:textAppearance="@style/app_text_appearance_small"
+        android:visibility="visible" />
 </RelativeLayout>

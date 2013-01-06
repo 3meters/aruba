@@ -1,4 +1,4 @@
-package com.aircandi.ui;
+package com.aircandi.ui.user;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -28,12 +28,13 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.Preferences;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -121,6 +122,7 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("GetUser");
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getUser(mUser.id);
 				return result;
 			}
@@ -134,7 +136,7 @@ public class ProfileForm extends FormActivity {
 
 					/* We got fresh user data but we want to hook up the old session. */
 					mUser.session = Aircandi.getInstance().getUser().session;
-					mImageUriOriginal = mUser.getImageUri();
+					mImageUriOriginal = mUser.getUserPhotoUri();
 
 					mCommon.hideBusy();
 					draw();
@@ -154,13 +156,13 @@ public class ProfileForm extends FormActivity {
 		mTextLocation.setText(mUser.location);
 		mTextEmail.setText(mUser.email);
 
-		if (mUser.getImageUri() != null && mUser.getImageUri().length() > 0) {
+		if (mUser.getUserPhotoUri() != null && mUser.getUserPhotoUri().length() > 0) {
 			if (mUserBitmap != null) {
 				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 			else {
 				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
-				builder.setFromUris(mUser.getImageUri(), null);
+				builder.setFromUri(mUser.getUserPhotoUri());
 				builder.setRequestListener(new RequestListener() {
 
 					@Override
@@ -194,18 +196,18 @@ public class ProfileForm extends FormActivity {
 	}
 
 	public void onChangePictureButtonClick(View view) {
-//		showChangePictureDialog(false, null, null, null, mImageUser, new RequestListener() {
-//
-//			@Override
-//			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
-//
-//				ServiceResponse serviceResponse = (ServiceResponse) response;
-//				if (serviceResponse.responseCode == ResponseCode.Success) {
-//					mUser.getPhoto().setImageUri(imageUri);
-//					mUserBitmap = imageBitmap;
-//				}
-//			}
-//		});
+		//		showChangePictureDialog(false, null, null, null, mImageUser, new RequestListener() {
+		//
+		//			@Override
+		//			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
+		//
+		//				ServiceResponse serviceResponse = (ServiceResponse) response;
+		//				if (serviceResponse.responseCode == ResponseCode.Success) {
+		//					mUser.getPhoto().setImageUri(imageUri);
+		//					mUserBitmap = imageBitmap;
+		//				}
+		//			}
+		//		});
 	}
 
 	public void onChangePasswordButtonClick(View view) {
@@ -258,6 +260,7 @@ public class ProfileForm extends FormActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("UpdateUser");
 					ModelResult result = ProxiExplorer.getInstance().getEntityModel().updateUser(mUser, mUserBitmap, false);
 					return result;
 				}
@@ -282,7 +285,7 @@ public class ProfileForm extends FormActivity {
 						 * We also need to update the user that has been persisted for auto sign in.
 						 */
 						String jsonUser = ProxibaseService.convertObjectToJsonSmart(mUser, true, false);
-						Aircandi.settingsEditor.putString(Preferences.PREF_USER, jsonUser);
+						Aircandi.settingsEditor.putString(Preferences.SETTING_USER, jsonUser);
 						Aircandi.settingsEditor.commit();
 
 						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
@@ -330,17 +333,6 @@ public class ProfileForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle events
 	// --------------------------------------------------------------------------------------------
-
-	protected void onDestroy() {
-
-		/* This activity gets destroyed everytime we leave using back or finish(). */
-		super.onDestroy();
-		if (mUserBitmap != null && !mUserBitmap.isRecycled()) {
-			mUserBitmap.recycle();
-			mUserBitmap = null;
-		}
-		System.gc();
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines

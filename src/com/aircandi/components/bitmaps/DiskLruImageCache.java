@@ -8,14 +8,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.aircandi.BuildConfig;
-import com.aircandi.components.Logger;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+
+import com.aircandi.BuildConfig;
+import com.aircandi.components.Logger;
 
 public class DiskLruImageCache {
 
@@ -45,9 +45,13 @@ public class DiskLruImageCache {
 
 	private boolean writeBitmapToFile(Bitmap bitmap, DiskLruCache.Editor editor) throws IOException, FileNotFoundException {
 		OutputStream out = null;
+		CompressFormat compressFormat = mCompressFormat;
 		try {
+			if (bitmap.hasAlpha()) {
+				compressFormat = CompressFormat.PNG;
+			}
 			out = new BufferedOutputStream(editor.newOutputStream(0), Utils.IO_BUFFER_SIZE);
-			return bitmap.compress(mCompressFormat, mCompressQuality, out);
+			return bitmap.compress(compressFormat, mCompressQuality, out);
 		}
 		finally {
 			if (out != null) {
@@ -77,8 +81,8 @@ public class DiskLruImageCache {
 			}
 
 			if (writeBitmapToFile(data, editor)) {
-				mDiskCache.flush();
 				editor.commit();
+				mDiskCache.flush();
 				if (BuildConfig.DEBUG) {
 					Logger.d(this, "image put on disk cache " + key);
 				}

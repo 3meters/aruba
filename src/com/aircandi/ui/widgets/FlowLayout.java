@@ -12,8 +12,10 @@ import android.view.ViewGroup;
 
 public class FlowLayout extends ViewGroup
 {
-	private int[]	rowHeights;
-	private int[]	rowWidths;
+	private int[]	mRowHeights;
+	private int[]	mRowWidths;
+	private int		mSpacingVertical	= 0;
+	private int		mSpacingHorizontal	= 0;
 
 	public FlowLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -29,50 +31,46 @@ public class FlowLayout extends ViewGroup
 		List<RowMeasurement> rows = new ArrayList<RowMeasurement>();
 
 		RowMeasurement currentRow = null;
+
 		for (View child : getLayoutChildren()) {
+
 			LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
 			int childWidthSpec = createChildMeasureSpec(lp.width, maxInternalWidth, widthMode);
 			int childHeightSpec = createChildMeasureSpec(lp.height, maxInternalHeight, heightMode);
-
 			child.measure(childWidthSpec, childHeightSpec);
 
 			int childWidth = child.getMeasuredWidth();
 			int childHeight = child.getMeasuredHeight();
 
-			if (currentRow == null
-					|| currentRow.isWouldExceedMax(lp.leftMargin + childWidth + lp.rightMargin)) {
-
+			/* If child won't fit then create new row */
+			if (currentRow == null || currentRow.isWouldExceedMax(lp.leftMargin + childWidth + lp.rightMargin)) {
 				currentRow = new RowMeasurement(maxInternalWidth, widthMode);
 				rows.add(currentRow);
 			}
 
-			currentRow.addChildDimensions(lp.leftMargin + childWidth + lp.rightMargin
+			currentRow.addChildDimensions(lp.leftMargin + childWidth + lp.rightMargin + mSpacingHorizontal
 					, lp.topMargin + childHeight + lp.bottomMargin);
 		}
 
 		int longestRowWidth = 0;
 		int totalRowHeight = 0;
 		int rowCount = rows.size();
-		this.rowHeights = new int[rowCount];
-		this.rowWidths = new int[rowCount];
+		this.mRowHeights = new int[rowCount];
+		this.mRowWidths = new int[rowCount];
 
 		for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
 			RowMeasurement row = rows.get(rowIndex);
 			int rowHeight = row.getHeight();
 			int rowWidth = row.getWidth();
-			this.rowHeights[rowIndex] = rowHeight;
-			this.rowWidths[rowIndex] = rowWidth;
-			totalRowHeight = totalRowHeight + rowHeight;
+			this.mRowHeights[rowIndex] = rowHeight;
+			this.mRowWidths[rowIndex] = rowWidth;
+			totalRowHeight = totalRowHeight + rowHeight + mSpacingVertical;
 			longestRowWidth = Math.max(longestRowWidth, row.getWidth());
 		}
 
-		setMeasuredDimension((widthMode == MeasureSpec.EXACTLY)
-				? MeasureSpec.getSize(widthMeasureSpec)
-				: (longestRowWidth + getHorizontalPadding())
-				, (heightMode == MeasureSpec.EXACTLY)
-						? MeasureSpec.getSize(heightMeasureSpec)
-						: (totalRowHeight + getVerticalPadding()));
+		setMeasuredDimension((widthMode == MeasureSpec.EXACTLY) ? MeasureSpec.getSize(widthMeasureSpec) : (longestRowWidth + getHorizontalPadding())
+				, (heightMode == MeasureSpec.EXACTLY) ? MeasureSpec.getSize(heightMeasureSpec) : (totalRowHeight + getVerticalPadding()));
 	}
 
 	private int createChildMeasureSpec(int childLayoutParam, int max, int parentMode) {
@@ -125,13 +123,13 @@ public class FlowLayout extends ViewGroup
 			LayoutParams lp = (LayoutParams) child.getLayoutParams();
 			if ((childLeft + lp.leftMargin + childWidth + lp.rightMargin) > widthOffset) {
 				childLeft = getPaddingLeft();
-				childTop = childTop + this.rowHeights[rowIndex];
+				childTop = childTop + this.mRowHeights[rowIndex] + mSpacingVertical;
 				rowIndex = rowIndex + 1;
 			}
 
 			int _y;
 			if (lp.centerVertical) {
-				_y = childTop + ((this.rowHeights[rowIndex] - childHeight) / 2);
+				_y = childTop + ((this.mRowHeights[rowIndex] - childHeight) / 2);
 			}
 			else {
 				_y = childTop;
@@ -140,14 +138,14 @@ public class FlowLayout extends ViewGroup
 			int _x;
 			if (lp.centerHorizontal) {
 				childLeft += lp.leftMargin;
-				_x = (((rightPosition - leftPosition) - this.rowWidths[rowIndex]) / 2) + childLeft;
+				_x = (((rightPosition - leftPosition) - this.mRowWidths[rowIndex]) / 2) + childLeft;
 			}
 			else {
 				_x = childLeft += lp.leftMargin;
 			}
 
 			child.layout(_x, _y, _x + childWidth, _y + childHeight);
-			childLeft += childWidth + lp.rightMargin;
+			childLeft += childWidth + lp.rightMargin + mSpacingHorizontal;
 		}
 	}
 
@@ -168,6 +166,14 @@ public class FlowLayout extends ViewGroup
 
 	private int getHorizontalPadding() {
 		return getPaddingLeft() + getPaddingRight();
+	}
+
+	public void setSpacingVertical(int spacingVertical) {
+		this.mSpacingVertical = spacingVertical;
+	}
+
+	public void setSpacingHorizontal(int spacingHorizontal) {
+		this.mSpacingHorizontal = spacingHorizontal;
 	}
 
 	public static class LayoutParams extends MarginLayoutParams {

@@ -32,8 +32,8 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
+import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.Preferences;
@@ -42,7 +42,6 @@ import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
-import com.aircandi.utilities.ImageUtils;
 
 public abstract class FormActivity extends SherlockActivity {
 
@@ -128,7 +127,7 @@ public abstract class FormActivity extends SherlockActivity {
 					final String imageDescription = extras.getString(CandiConstants.EXTRA_URI_DESCRIPTION);
 
 					BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
-							.setFromUris(imageUri, null)
+							.setFromUri(imageUri)
 							.setRequestListener(new RequestListener() {
 
 								@Override
@@ -144,7 +143,6 @@ public abstract class FormActivity extends SherlockActivity {
 													ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 													mImageRequestListener.onComplete(serviceResponse
 															, imageResponse.imageUri
-															, null
 															, imageResponse.bitmap
 															, imageTitle
 															, imageDescription);
@@ -155,6 +153,9 @@ public abstract class FormActivity extends SherlockActivity {
 								}
 							});
 
+					BitmapRequest imageRequest = builder.create();
+					mImageRequestWebImageView.setBitmapRequest(imageRequest, false);
+					
 					if (imageTitle != null && !imageTitle.equals("")) {
 						EditText title = (EditText) findViewById(R.id.text_title);
 						if (title != null && title.getText().toString().equals("")) {
@@ -168,9 +169,6 @@ public abstract class FormActivity extends SherlockActivity {
 							description.setText(imageDescription);
 						}
 					}
-
-					BitmapRequest imageRequest = builder.create();
-					mImageRequestWebImageView.setBitmapRequest(imageRequest, false);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_PLACE) {
@@ -182,7 +180,7 @@ public abstract class FormActivity extends SherlockActivity {
 					final String imageUri = extras.getString(CandiConstants.EXTRA_URI);
 
 					BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
-							.setFromUris(imageUri, null)
+							.setFromUri(imageUri)
 							.setRequestListener(new RequestListener() {
 
 								@Override
@@ -198,7 +196,6 @@ public abstract class FormActivity extends SherlockActivity {
 													ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 													mImageRequestListener.onComplete(serviceResponse
 															, imageResponse.imageUri
-															, null
 															, imageResponse.bitmap
 															, null
 															, null);
@@ -223,9 +220,7 @@ public abstract class FormActivity extends SherlockActivity {
 				bitmap = BitmapManager.getInstance().loadBitmapFromDevice(imageUri, "original");
 
 				if (bitmap != null && mImageRequestListener != null) {
-					mImageRequestWebImageView.getImageView().setImageBitmap(null);
-					ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, AnimUtils.fadeInMedium());
-					mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap, null, null);
+					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
@@ -276,10 +271,8 @@ public abstract class FormActivity extends SherlockActivity {
 						bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 					}
 
-					mImageRequestWebImageView.getImageView().setImageBitmap(null);
 					if (mImageRequestListener != null) {
-						ImageUtils.showImageInImageView(bitmap, mImageRequestWebImageView.getImageView(), true, AnimUtils.fadeInMedium());
-						mImageRequestListener.onComplete(new ServiceResponse(), null, null, bitmap, null, null);
+						mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null);
 					}
 				}
 				catch (FileNotFoundException e) {
@@ -311,59 +304,6 @@ public abstract class FormActivity extends SherlockActivity {
 					}
 
 					((BuilderButton) findViewById(R.id.facebook)).setText(linkUri);
-				}
-			}
-			else if (requestCode == CandiConstants.ACTIVITY_LINK_PICK) {
-
-				Tracker.trackEvent("Entity", "PickBookmark", "None", 0);
-				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-
-					String linkUriPre = extras.getString(CandiConstants.EXTRA_URI);
-					if (!linkUriPre.startsWith("http://") && !linkUriPre.startsWith("https://")) {
-						linkUriPre = "http://" + linkUriPre;
-					}
-
-					final String linkUri = linkUriPre;
-					final String linkTitle = extras.getString(CandiConstants.EXTRA_URI_TITLE);
-					final String linkDescription = extras.getString(CandiConstants.EXTRA_URI_DESCRIPTION);
-
-					if (mImageRequestWebImageView != null) {
-						if (linkUri != null && !linkUri.equals("")) {
-
-							BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView);
-							builder.setFromUris(null, linkUri);
-							builder.setRequestListener(new RequestListener() {
-
-								@Override
-								public void onComplete(Object response) {
-
-									final ServiceResponse serviceResponse = (ServiceResponse) response;
-									if (serviceResponse.responseCode == ResponseCode.Success) {
-										runOnUiThread(new Runnable() {
-
-											@Override
-											public void run() {
-												if (mImageRequestListener != null) {
-													ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-													mImageRequestListener.onComplete(serviceResponse, null, linkUri, imageResponse.bitmap, linkTitle,
-															linkDescription);
-												}
-											}
-										});
-									}
-								}
-							});
-
-							BitmapRequest imageRequest = builder.create();
-							mImageRequestWebImageView.setBitmapRequest(imageRequest, false);
-						}
-					}
-					else {
-						if (mImageRequestListener != null) {
-							mImageRequestListener.onComplete(new ServiceResponse(), null, linkUri, null, linkTitle, linkDescription);
-						}
-					}
 				}
 			}
 		}
@@ -412,7 +352,7 @@ public abstract class FormActivity extends SherlockActivity {
 		user.getPhoto().setSourceName("external");
 
 		BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView);
-		builder.setFromUris(user.getPhoto().getImageUri(), null);
+		builder.setFromUri(user.getPhoto().getUri());
 		builder.setRequestListener(new RequestListener() {
 
 			@Override
@@ -420,7 +360,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 				/* Used to pass back the bitmap and imageUri (sometimes) for the entity */
 				if (mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse(), user.getImageUri(), null, null, null, null);
+					mImageRequestListener.onComplete(new ServiceResponse(), user.getUserPhotoUri(), null, null, null);
 				}
 			}
 		});
@@ -432,30 +372,6 @@ public abstract class FormActivity extends SherlockActivity {
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
-
-
-	protected void usePictureDefault(String defaultUri) {
-		/* Tag has the uri to use for the placeholder */
-		String imageUri = "resource:placeholder_logo";
-		if (mCommon.mEntityType != null && mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_FOLDER)) {
-			imageUri = "resource:ic_collection_250";
-		}
-		if (defaultUri != null) {
-			imageUri = defaultUri;
-		}
-		BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView);
-		builder.setFromUris(imageUri, null);
-
-		BitmapRequest imageRequest = builder.create();
-
-		mImageRequestWebImageView.setBitmapRequest(imageRequest);
-
-		if (mImageRequestListener != null) {
-			mImageRequestListener.onComplete(new ServiceResponse(), imageUri, null, null, null, null);
-		}
-
-		Tracker.trackEvent("Entity", "DefaultPicture", "None", 0);
-	}
 
 	protected Boolean isDialog() {
 		return false;
@@ -492,8 +408,6 @@ public abstract class FormActivity extends SherlockActivity {
 		Logger.d(this, "onDestroy called");
 		try {
 			if (mCommon != null) {
-				mCommon.recycleImageViewDrawable(R.id.image_picture);
-				mCommon.recycleImageViewDrawable(R.id.image_user_picture);
 				mCommon.doDestroy();
 			}
 		}

@@ -12,6 +12,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CandiListAdapter;
@@ -20,7 +21,6 @@ import com.aircandi.components.EntityList;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.service.ProxiConstants;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.FormActivity;
 
@@ -74,6 +74,7 @@ public class CandiPicker extends FormActivity implements ActionBar.TabListener {
 
 				@Override
 				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("GetUserEntities");				
 					ModelResult result = ProxiExplorer.getInstance().getEntityModel()
 							.getUserEntities(Aircandi.getInstance().getUser().id, false, ProxiConstants.RADAR_ENTITY_LIMIT);
 					return result;

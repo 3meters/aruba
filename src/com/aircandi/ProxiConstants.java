@@ -1,4 +1,4 @@
-package com.aircandi.service;
+package com.aircandi;
 
 public interface ProxiConstants {
 
@@ -14,8 +14,9 @@ public interface ProxiConstants {
 
 	public static final String	INSERT_USER_SECRET									= "larissa";
 
-	public static final String	_URL_PROXIBASE_SERVICE								= "http://ariseditions.com:8080/";
-	public static final String	URL_PROXIBASE_SERVICE								= "https://aircandi.com:643/";
+	public static final String	URL_PROXIBASE_SERVICE								= "http://ariseditions.com:8080/";
+	public static final String	_URL_PROXIBASE_SERVICE								= "https://aircandi.com:643/";
+	public static final String	ADMIN_USER_ID										= "0001.000000.00000.000.000000";
 
 	public static final String	URL_PROXIBASE_SERVICE_REST							= URL_PROXIBASE_SERVICE + "data/";
 	public static final String	URL_PROXIBASE_SERVICE_USER							= URL_PROXIBASE_SERVICE + "user/";

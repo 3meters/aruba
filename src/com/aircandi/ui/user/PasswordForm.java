@@ -1,4 +1,4 @@
-package com.aircandi.ui;
+package com.aircandi.ui.user;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -115,6 +115,7 @@ public class PasswordForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("UpdatePassword");								
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel()
 						.updatePassword(mUser.id, mTextPasswordOld.getText().toString(), mTextPassword.getText().toString());
 				return result;

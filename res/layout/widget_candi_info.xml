@@ -10,7 +10,7 @@
         android:minWidth="175dp" />
 
     <Button
-        android:id="@+id/form_button_link"
+        android:id="@+id/button_comments_browse"
         style="@style/form_button_link"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
