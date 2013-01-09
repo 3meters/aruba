@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:ptr="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.builders.PicturePicker" >
@@ -38,7 +39,7 @@
             android:src="?attr/iconSearch" />
     </LinearLayout>
 
-    <com.aircandi.ui.widgets.BounceGridView
+    <GridView
         android:id="@+id/grid_gallery"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -46,14 +47,12 @@
         android:layout_below="@+id/search_group"
         android:layout_marginTop="2dp"
         android:gravity="center"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="4dp"
         android:horizontalSpacing="4dp"
-        android:numColumns="3"
         android:padding="1dp"
-        android:stretchMode="columnWidth"
-        android:verticalSpacing="4dp" >
-
-        <!-- Preview: listitem=@layout/temp_galleryitem -->
-    </com.aircandi.ui.widgets.BounceGridView>
+        android:stretchMode="columnWidth" >
+    </GridView>
 
     <RelativeLayout
         android:id="@+id/progress"

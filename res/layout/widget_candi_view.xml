@@ -8,8 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="120dp"
         aircandi:layout="@layout/widget_webimageview_candi_view"
-        aircandi:maxHeight="700dp"
-        aircandi:maxWidth="700dp"
+        aircandi:sizeHint="700dp"
         android:scaleType="centerCrop" />
 
     <LinearLayout

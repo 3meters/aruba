@@ -2,20 +2,28 @@ package com.aircandi.ui.builders;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.AsyncTask;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -39,9 +47,7 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
-import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestType;
@@ -54,6 +60,7 @@ import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.Preferences;
 import com.aircandi.ui.base.FormActivity;
+import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
 
 /*
@@ -62,9 +69,11 @@ import com.aircandi.utilities.ImageUtils;
  */
 public class PicturePicker extends FormActivity {
 
+	private DrawableManager			mDrawableManager;
+
 	private GridView				mGridView;
 	private EditText				mSearch;
-	private ArrayList<ImageResult>	mImages;
+	private ArrayList<ImageResult>	mImages			= new ArrayList<ImageResult>();
 	private TextView				mTitle;
 
 	private long					mOffset			= 0;
@@ -83,15 +92,23 @@ public class PicturePicker extends FormActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		if (isDialog()) {
+			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		}
 		super.onCreate(savedInstanceState);
 
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
+		if (isDialog()) {
+			getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
+		}
 		initialize();
 		bind();
 	}
 
 	private void initialize() {
+
+		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mDrawableManager = new DrawableManager();
+
 		if (mCommon.mEntityId != null) {
 			mPlacePhotoMode = true;
 		}
@@ -114,35 +131,10 @@ public class PicturePicker extends FormActivity {
 			else {
 				mSearch.setText(Aircandi.settings.getString(Preferences.SETTING_PICTURE_SEARCH, null));
 			}
+			mQuery = mSearch.getText().toString();
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.search_text));
 		}
 
-		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mGridView = (GridView) findViewById(R.id.grid_gallery);
-		mTitle = (TextView) findViewById(R.id.custom_title);
-		mTitle.setText(mPlacePhotoMode ? R.string.dialog_picture_picker_place_title : R.string.dialog_picture_picker_search_title);
-
-		mGridView.setOnItemClickListener(new OnItemClickListener() {
-
-			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-				String imageUri = mImages.get(position).getMediaUrl();
-				if (mPlacePhotoMode) {
-					Intent intent = new Intent();
-					intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
-					setResult(Activity.RESULT_OK, intent);
-					finish();
-				}
-				else {
-					String imageDescription = mImages.get(position).getTitle();
-					Intent intent = new Intent();
-					intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
-					intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
-					intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, imageDescription);
-					setResult(Activity.RESULT_OK, intent);
-					finish();
-				}
-			}
-		});
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 
@@ -150,73 +142,43 @@ public class PicturePicker extends FormActivity {
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		View parentView = findViewById(R.id.grid_gallery);
 		Integer layoutWidthPixels = metrics.widthPixels - (parentView.getPaddingLeft() + parentView.getPaddingRight());
-		mImageMarginPixels = ImageUtils.getRawPixels(this, 4);
+		mImageMarginPixels = ImageUtils.getRawPixels(this, 2);
 		mImageWidthPixels = (layoutWidthPixels / 3) - (mImageMarginPixels * 2);
+
+		if (isDialog()) {
+			mTitle = (TextView) findViewById(R.id.custom_title);
+			mTitle.setText(mPlacePhotoMode ? R.string.dialog_picture_picker_place_title : R.string.dialog_picture_picker_search_title);
+		}
+
+		mGridView = (GridView) findViewById(R.id.grid_gallery);
+		mGridView.setColumnWidth(mImageWidthPixels);
+		mGridView.setOnItemClickListener(new OnItemClickListener() {
+
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+				if (((EndlessImageAdapter) mGridView.getAdapter()).getItemViewType(position) != Adapter.IGNORE_ITEM_VIEW_TYPE) {
+					String imageUri = mImages.get(position).getMediaUrl();
+					if (mPlacePhotoMode) {
+						Intent intent = new Intent();
+						intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
+						setResult(Activity.RESULT_OK, intent);
+						finish();
+					}
+					else {
+						String imageDescription = mImages.get(position).getTitle();
+						Intent intent = new Intent();
+						intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
+						intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
+						intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, imageDescription);
+						setResult(Activity.RESULT_OK, intent);
+						finish();
+					}
+				}
+			}
+		});
 	}
 
 	protected void bind() {
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showBusy();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("LoadSearchImages");				
-
-				if (mPlacePhotoMode) {
-					ServiceResponse serviceResponse = loadPlaceImages(PAGE_SIZE, 0);
-					return serviceResponse;
-				}
-				else {
-					String query = mSearch.getText().toString();
-					Aircandi.settingsEditor.putString(Preferences.SETTING_PICTURE_SEARCH, query);
-					Aircandi.settingsEditor.commit();
-
-					mOffset = 0;
-					mTitleOptional = query;
-					if (query == null || query.equals("")) {
-						query = "trending now site:yahoo.com";
-					}
-					else {
-						query = "wallpaper " + query;
-					}
-
-					mQuery = query;
-					ServiceResponse serviceResponse = loadSearchImages(query, PAGE_SIZE, 0);
-					return serviceResponse;
-				}
-			}
-
-			@Override
-			protected void onPostExecute(Object result) {
-				ServiceResponse serviceResponse = (ServiceResponse) result;
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					if (mPlacePhotoMode) {
-						ArrayList<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
-						mImages = new ArrayList<ImageResult>();
-						for (Photo photo : photos) {
-							ImageResult imageResult = photo.getAsImageResult();
-							imageResult.getThumbnail().setUrl(photo.getSizedUri(100, 100));
-							mImages.add(imageResult);
-						}
-					}
-					else {
-						mImages = (ArrayList<ImageResult>) serviceResponse.data;
-					}
-					mOffset += PAGE_SIZE;
-					mGridView.setAdapter(new EndlessImageAdapter(mImages));
-				}
-				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
-				}
-				mCommon.hideBusy();
-			}
-		}.execute();
-
+		mGridView.setAdapter(new EndlessImageAdapter(mImages));
 	}
 
 	private ServiceResponse loadSearchImages(String query, long count, long offset) {
@@ -260,7 +222,13 @@ public class PicturePicker extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void onSearchClick(View view) {
-		bind();
+		mQuery = mSearch.getText().toString();
+		Aircandi.settingsEditor.putString(Preferences.SETTING_PICTURE_SEARCH, mQuery);
+		Aircandi.settingsEditor.commit();
+		mOffset = 0;
+		mTitleOptional = mQuery;
+		mImages.clear();
+		((EndlessImageAdapter) mGridView.getAdapter()).notifyDataSetChanged();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -322,7 +290,7 @@ public class PicturePicker extends FormActivity {
 	}
 
 	protected Boolean isDialog() {
-		return true;
+		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -339,36 +307,79 @@ public class PicturePicker extends FormActivity {
 
 		@Override
 		protected View getPendingView(ViewGroup parent) {
-			View view = mInflater.inflate(R.layout.temp_picture_search_item_placeholder, null);
-			return (view);
+			if (mImages.size() == 0) {
+				return new View(PicturePicker.this);
+			}
+			return mInflater.inflate(R.layout.temp_picture_search_item_placeholder, null);
 		}
 
 		@Override
 		protected boolean cacheInBackground() {
-			/* What happens if there is a connectivity error? */
+			/*
+			 * This is called on background thread from an AsyncTask started by EndlessAdapter
+			 */
 			moreImages.clear();
-
-			ServiceResponse serviceResponse = loadSearchImages(mQuery, PAGE_SIZE, mOffset);
-			if (serviceResponse.responseCode == ResponseCode.Success) {
-				moreImages = (ArrayList<ImageResult>) serviceResponse.data;
-				Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
-						+ " new total = "
-						+ String.valueOf(getWrappedAdapter().getCount() + moreImages.size()));
+			ServiceResponse serviceResponse = new ServiceResponse();
+			if (mPlacePhotoMode) {
+				serviceResponse = loadPlaceImages(PAGE_SIZE, mOffset);
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					ArrayList<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
+					moreImages = new ArrayList<ImageResult>();
+					for (Photo photo : photos) {
+						ImageResult imageResult = photo.getAsImageResult();
+						imageResult.getThumbnail().setUrl(photo.getSizedUri(100, 100));
+						moreImages.add(imageResult);
+					}
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
+					return false;
+				}
 				mOffset += PAGE_SIZE;
-				return ((getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX);
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						mCommon.hideBusy();
+					}
+				});
+				return (moreImages.size() >= PAGE_SIZE);
 			}
 			else {
-				mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
-				return false;
+				String queryDecorated = mQuery;
+				if (queryDecorated == null || queryDecorated.equals("")) {
+					queryDecorated = "trending now site:yahoo.com";
+				}
+				else {
+					queryDecorated = "wallpaper " + queryDecorated;
+				}
+
+				serviceResponse = loadSearchImages(queryDecorated, PAGE_SIZE, mOffset);
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					moreImages = (ArrayList<ImageResult>) serviceResponse.data;
+					Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
+							+ " new total = "
+							+ String.valueOf(getWrappedAdapter().getCount() + moreImages.size()));
+				}
+				else {
+					mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
+					return false;
+				}
+				mOffset += PAGE_SIZE;
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						mCommon.hideBusy();
+					}
+				});
+				return ((getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX);
 			}
 		}
 
 		@Override
 		protected void appendCachedData() {
-
-			@SuppressWarnings("unchecked")
 			ArrayAdapter<ImageResult> list = (ArrayAdapter<ImageResult>) getWrappedAdapter();
-
 			for (ImageResult imageResult : moreImages) {
 				list.add(imageResult);
 			}
@@ -393,27 +404,113 @@ public class PicturePicker extends FormActivity {
 				holder = new ViewHolder();
 				holder.itemImage = (ImageView) view.findViewById(R.id.image);
 				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mImageWidthPixels, mImageWidthPixels);
-				//				params.setMargins(mImageMarginPixels
-				//						, mImageMarginPixels
-				//						, mImageMarginPixels
-				//						, mImageMarginPixels);
 				holder.itemImage.setLayoutParams(params);
 				view.setTag(holder);
 			}
 			else {
 				holder = (ViewHolder) view.getTag();
+				if (holder.itemImage.getTag().equals(itemData.getThumbnail().getUrl())) {
+					return view;
+				}
 			}
 
 			if (itemData != null) {
 				holder.data = itemData;
 				holder.itemImage.setTag(itemData.getThumbnail().getUrl());
 				holder.itemImage.setImageBitmap(null);
-				
-				BitmapRequest request = new BitmapRequest(itemData.getThumbnail().getUrl(), holder.itemImage);
-				request.setImageRequestor(holder.itemImage);
-				BitmapManager.getInstance().fetchBitmap(request);
+				mDrawableManager.fetchDrawableOnThread(itemData.getThumbnail().getUrl(), holder);
 			}
 			return view;
 		}
 	}
+
+	public class DrawableManager {
+		/*
+		 * Serves up BitmapDrawables but caches just the bitmap. The cache holds
+		 * a soft reference to the bitmap that allows the gc to collect it if memory
+		 * needs to be freed. If collected, we download the bitmap again.
+		 */
+		private final HashMap<String, SoftReference<Bitmap>>	mBitmapCache;
+
+		public DrawableManager() {
+			mBitmapCache = new HashMap<String, SoftReference<Bitmap>>();
+		}
+
+		public void fetchDrawableOnThread(final String uri, final ViewHolder holder) {
+
+			synchronized (mBitmapCache) {
+				if (mBitmapCache.containsKey(uri) && mBitmapCache.get(uri).get() != null) {
+					BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), mBitmapCache.get(uri).get());
+					ImageUtils.showDrawableInImageView(bitmapDrawable, holder.itemImage, false, AnimUtils.fadeInMedium());
+					return;
+				}
+			}
+
+			final DrawableHandler handler = new DrawableHandler(this) {
+
+				@Override
+				public void handleMessage(Message message) {
+					DrawableManager drawableManager = getDrawableManager().get();
+					if (drawableManager != null) {
+						if (((String) holder.itemImage.getTag()).equals(uri)) {
+							ImageUtils.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true, AnimUtils.fadeInMedium());
+						}
+					}
+				}
+			};
+
+			Thread thread = new Thread() {
+
+				@Override
+				public void run() {
+					Drawable drawable = fetchDrawable(uri);
+					Message message = handler.obtainMessage(1, drawable);
+					handler.sendMessage(message);
+				}
+			};
+			thread.start();
+		}
+
+		private Drawable fetchDrawable(final String uri) {
+
+			ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(uri)
+					.setRequestType(RequestType.Get)
+					.setResponseFormat(ResponseFormat.Bytes);
+
+			ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+
+			if (serviceResponse.responseCode == ResponseCode.Success) {
+
+				byte[] imageBytes = (byte[]) serviceResponse.data;
+				Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+
+				if (bitmap == null) {
+					throw new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);
+				}
+				BitmapDrawable drawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+				mBitmapCache.put(uri, new SoftReference(bitmap));
+				return drawable;
+			}
+			return null;
+		}
+
+		/*
+		 * We add a weak reference to the containing class which can
+		 * be checked when handling messages to ensure we don't leak memory.
+		 */
+		class DrawableHandler extends Handler {
+
+			private final WeakReference<DrawableManager>	mDrawableManager;
+
+			DrawableHandler(DrawableManager drawableManager) {
+				mDrawableManager = new WeakReference<DrawableManager>(drawableManager);
+			}
+
+			public WeakReference<DrawableManager> getDrawableManager() {
+				return mDrawableManager;
+			}
+		}
+	}
+
 }

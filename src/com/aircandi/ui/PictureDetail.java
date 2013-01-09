@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.ProgressBar;
@@ -40,6 +41,7 @@ public class PictureDetail extends FormActivity {
 	protected List<Photo>	mPhotosForPaging	= new ArrayList<Photo>();
 	private String			mImageUri;
 	protected ViewPager		mViewPager;
+	protected Boolean		mPagingEnabled		= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -49,7 +51,7 @@ public class PictureDetail extends FormActivity {
 
 		if (!isFinishing()) {
 			initialize();
-			bind(true);
+			bind();
 		}
 	}
 
@@ -57,6 +59,7 @@ public class PictureDetail extends FormActivity {
 		Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			mImageUri = extras.getString(CandiConstants.EXTRA_URI);
+			mPagingEnabled = extras.getBoolean(CandiConstants.EXTRA_PAGING_ENABLED, false);
 		}
 
 		setSupportProgressBarIndeterminateVisibility(true);
@@ -64,17 +67,21 @@ public class PictureDetail extends FormActivity {
 
 	}
 
-	private void bind(Boolean pagingEnabled) {
+	private void bind() {
 		List<Photo> photos = ProxiExplorer.getInstance().getEntityModel().getPhotos();
 		Photo photo = ProxiExplorer.getInstance().getEntityModel().getPhoto(mImageUri);
-		if (!pagingEnabled) {
+		if (!mPagingEnabled) {
 			photos = new ArrayList<Photo>();
 			photos.add(photo);
+			View layout = ((ViewStub) findViewById(R.id.stub_picture_detail)).inflate();
+			buildPictureDetail(this, photo, layout);
 		}
-		updateViewPager(photos);
+		else {
+			updateViewPager(photos);
+		}
 	}
 
-	public static ViewGroup buildPictureDetail(final Context context, Photo photo, ViewGroup layout) {
+	public static View buildPictureDetail(final Context context, Photo photo, View layout) {
 
 		final SherlockActivity activity = (SherlockActivity) context;
 		final TextView title = (TextView) layout.findViewById(R.id.text_title);
@@ -83,7 +90,7 @@ public class PictureDetail extends FormActivity {
 		final ViewGroup progressGroup = (ViewGroup) layout.findViewById(R.id.progress_group);
 		final ImageView image = (ImageView) layout.findViewById(R.id.image);
 		((ImageViewTouch) image).setFitToScreen(true);
-		((ImageViewTouch) image).setScrollEnabled(false);
+		((ImageViewTouch) image).setScrollEnabled(true);
 
 		FontManager.getInstance().setTypefaceDefault(title);
 
@@ -113,6 +120,7 @@ public class PictureDetail extends FormActivity {
 
 		BitmapRequest request = new BitmapRequest();
 		request.setImageUri(imageUri);
+		request.setImageView(image);
 		request.setRequestListener(new RequestListener() {
 
 			@Override
@@ -155,6 +163,7 @@ public class PictureDetail extends FormActivity {
 		if (mViewPager == null) {
 
 			mViewPager = (ViewPager) findViewById(R.id.view_pager);
+			mViewPager.setVisibility(View.VISIBLE);
 			mPhotosForPaging = photos;
 
 			mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {

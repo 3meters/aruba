@@ -19,16 +19,15 @@
         android:layout_alignParentTop="true"
         android:layout_marginRight="15dp"
         android:layout_marginTop="5dp"
-        aircandi:maxHeight="50dp"
-        aircandi:maxWidth="50dp" />
+        aircandi:sizeHint="50dp" />
 
     <RelativeLayout
         android:id="@+id/group_author"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/item_author_image"
-        android:layout_toRightOf="@+id/item_author_image"
         android:layout_marginBottom="5dp"
+        android:layout_toRightOf="@+id/item_author_image"
         android:orientation="horizontal" >
 
         <TextView

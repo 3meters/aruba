@@ -1,19 +1,14 @@
 package com.aircandi.ui.base;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.File;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Images.Media;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -24,6 +19,7 @@ import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.AndroidManager;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
@@ -50,7 +46,8 @@ public abstract class FormActivity extends SherlockActivity {
 	protected AircandiCommon	mCommon;
 	protected RequestListener	mImageRequestListener;
 	protected WebImageView		mImageRequestWebImageView;
-	protected String			mImagePath;
+	protected Uri				mMediaFileUri;
+	protected String			mMediaFilePath;
 	protected String			mImageName;
 
 	@Override
@@ -72,7 +69,6 @@ public abstract class FormActivity extends SherlockActivity {
 			super.onCreate(savedInstanceState);
 			super.setContentView(this.getLayoutID());
 			mCommon.initialize();
-			mImagePath = Environment.getExternalStorageDirectory() + CandiConstants.IMAGE_CAPTURE_PATH;
 		}
 	}
 
@@ -116,7 +112,27 @@ public abstract class FormActivity extends SherlockActivity {
 		 * decided to start an install or not.
 		 */
 		if (resultCode == Activity.RESULT_OK) {
-			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
+			if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
+
+				Tracker.trackEvent("Entity", "PickPicture", "None", 0);
+				Uri imageUri = intent.getData();
+				Bitmap bitmap = null;
+
+				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
+				bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(imageUri);
+				if (bitmap != null && mImageRequestListener != null) {
+					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null);
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
+
+				Tracker.trackEvent("Entity", "TakePicture", "None", 0);
+				Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
+				if (mImageRequestListener != null) {
+					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null);
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
 
 				Tracker.trackEvent("Entity", "PictureSearch", "None", 0);
 
@@ -210,79 +226,8 @@ public abstract class FormActivity extends SherlockActivity {
 					mImageRequestWebImageView.setBitmapRequest(imageRequest, false);
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
-
-				Tracker.trackEvent("Entity", "PickPicture", "None", 0);
-				Uri imageUri = intent.getData();
-				Bitmap bitmap = null;
-
-				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
-				bitmap = BitmapManager.getInstance().loadBitmapFromDevice(imageUri, "original");
-
-				if (bitmap != null && mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null);
-				}
-			}
-			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
-
-				Tracker.trackEvent("Entity", "TakePicture", "None", 0);
-				try {
-					/* Get bitmap */
-					Bitmap bitmap = Media.getBitmap(getContentResolver(), Uri.fromFile(mCommon.getTempFile(this, "image_capture.tmp")));
-
-					/* Adjust rotation using file Exif information */
-					ExifInterface exif = new ExifInterface(mCommon.getTempFile(this, "image_capture.tmp").getAbsolutePath());
-					int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-					int rotation = 0;
-					switch (orientation) {
-						case ExifInterface.ORIENTATION_ROTATE_270:
-							rotation = 270;
-							break;
-						case ExifInterface.ORIENTATION_ROTATE_180:
-							rotation = 180;
-							break;
-						case ExifInterface.ORIENTATION_ROTATE_90:
-							rotation = 90;
-							break;
-					}
-					/*
-					 * Camera images can be huge. For example a 2560x1920 image takes up 20MBs of memory.
-					 * To prevent OM errors, we need to make sure the image size is managed.
-					 */
-					Boolean scalingNeeded = (bitmap.getWidth() > CandiConstants.IMAGE_WIDTH_MAXIMUM || bitmap.getHeight() > CandiConstants.IMAGE_WIDTH_MAXIMUM);
-					if (scalingNeeded || rotation != 0) {
-
-						Matrix matrix = new Matrix();
-
-						/* Resize the bitmap */
-						if (scalingNeeded) {
-							float scalingRatio = (float) CandiConstants.IMAGE_WIDTH_MAXIMUM / (float) bitmap.getWidth();
-							matrix.postScale(scalingRatio, scalingRatio);
-						}
-
-						if (rotation != 0) {
-							matrix.postRotate(rotation);
-						}
-						/*
-						 * Create a new bitmap from the original using the matrix to transform the result.
-						 * Potential for OM condition because if the garbage collector is behind, we could
-						 * have several large bitmaps in memory at the same time.
-						 */
-						bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-					}
-
-					if (mImageRequestListener != null) {
-						mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null);
-					}
-				}
-				catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 			else if (requestCode == CandiConstants.ACTIVITY_WEBSITE_EDIT) {
+				
 				Tracker.trackEvent("Entity", "PickWebsite", "None", 0);
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
@@ -294,18 +239,7 @@ public abstract class FormActivity extends SherlockActivity {
 					((BuilderButton) findViewById(R.id.website)).setText(linkUri);
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_FACEBOOK_PICK) {
-				Tracker.trackEvent("Entity", "PickFacebook", "None", 0);
-				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-					String linkUri = extras.getString(CandiConstants.EXTRA_URI);
-					if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
-						linkUri = "http://" + linkUri;
-					}
-
-					((BuilderButton) findViewById(R.id.facebook)).setText(linkUri);
-				}
-			}
+			
 		}
 	}
 
@@ -322,14 +256,19 @@ public abstract class FormActivity extends SherlockActivity {
 
 	protected void pictureFromCamera() {
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mCommon.getTempFile(this, "image_capture.tmp")));
+		
+		File mediaFile = AndroidManager.getOutputMediaFile(AndroidManager.MEDIA_TYPE_IMAGE);
+		mMediaFilePath = mediaFile.getAbsolutePath();
+		mMediaFileUri = Uri.fromFile(mediaFile);
+		
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaFileUri);		
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
-	protected void pictureSearch(String defaultSearch) {
+	protected void pictureSearch() {
 		Intent intent = new Intent(this, PicturePicker.class);
-		intent.putExtra(CandiConstants.EXTRA_SEARCH_PHRASE, defaultSearch);
+		//intent.putExtra(CandiConstants.EXTRA_SEARCH_PHRASE, defaultSearch);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}

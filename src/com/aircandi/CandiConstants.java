@@ -43,6 +43,7 @@ public interface CandiConstants {
 	public static final String	EXTRA_LIST_TYPE							= "com.aircandi.EXTRA_LIST_TARGET";
 	public static final String	EXTRA_PICTURE_SOURCE					= "com.aircandi.EXTRA_PICTURE_SOURCE";
 	public static final String	EXTRA_UPSIZE_SYNTHETIC					= "com.aircandi.EXTRA_UPSIZE_SYNTHETIC";
+	public static final String	EXTRA_PAGING_ENABLED					= "com.aircandi.EXTRA_PAGING_ENABLED";
 
 	public static final int		MILLS_PER_SECOND						= 1000;
 	public static final int		TIME_ONE_SECOND							= MILLS_PER_SECOND * 1;
@@ -119,13 +120,12 @@ public interface CandiConstants {
 
 	public static final String	IMAGE_CAPTURE_PATH						= "/aircandi/images/";
 
-	public static final int		IMAGE_MEMORY_BYTES_MAX					= 4096000;
+	public static final int		IMAGE_MEMORY_BYTES_MAX					= 2048000;
 	public static final int		IMAGE_MEMORY_CACHE_WIDTH_MAX			= 100;																						// (100x100x4) + 10000 extra
 	public static final Config	IMAGE_CONFIG_DEFAULT					= Config.ARGB_8888;
-	public static final int		IMAGE_WIDTH_SMALL						= 60;
-	public static final int		IMAGE_WIDTH_DEFAULT						= 250;
+
 	public static final int		IMAGE_WIDTH_MAXIMUM						= 1024;
-	public static final int		IMAGE_WIDTH_ORIGINAL					= -1;
+	public static final int		S3_IMAGE_WIDTH_MAXIMUM					= 1024;
 
 	public static final boolean	LINK_JAVASCRIPT_ENABLED					= false;
 	public static final boolean	LINK_ZOOM								= false;

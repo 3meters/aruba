@@ -24,7 +24,6 @@ import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
 
-@SuppressWarnings("unused")
 public class WebImageView extends RelativeLayout {
 
 	private ImageView					mImageMain;
@@ -35,14 +34,8 @@ public class WebImageView extends RelativeLayout {
 	private String						mImageUri;
 	private Handler						mThreadHandler			= new Handler();
 
-	private Integer						mMinWidth;
-	private Integer						mMaxWidth;
-	private Integer						mMinHeight;
-	private Integer						mMaxHeight;
+	private Integer						mSizeHint;
 
-	private String						mLayoutWidth;
-	private String						mLayoutHeight;
-	private Boolean						mLayoutWidthMatchParent	= false;
 	private boolean						mShowBusy;
 	private Integer						mLayoutId;
 	private ScaleType					mScaleType				= ScaleType.CENTER_CROP;
@@ -72,9 +65,7 @@ public class WebImageView extends RelativeLayout {
 
 		TypedArray ta = context.obtainStyledAttributes(attributes, R.styleable.WebImageView, defStyle, 0);
 
-		mMaxWidth = ta.getDimensionPixelSize(R.styleable.WebImageView_maxWidth, Integer.MAX_VALUE);
-		mMaxHeight = ta.getDimensionPixelSize(R.styleable.WebImageView_maxHeight, Integer.MAX_VALUE);
-
+		mSizeHint = ta.getDimensionPixelSize(R.styleable.WebImageView_sizeHint, Integer.MAX_VALUE);
 		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.widget_webimageview);
 
@@ -150,6 +141,9 @@ public class WebImageView extends RelativeLayout {
 		mImageMain.setImageBitmap(null);
 
 		bitmapRequest.setImageRequestor(this);
+		if (mSizeHint != null) {
+			bitmapRequest.setImageSize(mSizeHint);
+		}
 		bitmapRequest.setRequestListener(new RequestListener() {
 
 			@Override

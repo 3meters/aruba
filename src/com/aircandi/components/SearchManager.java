@@ -11,21 +11,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
 import android.provider.Browser;
 import android.webkit.WebIconDatabase.IconListener;
-
-import com.aircandi.ProxiConstants;
-import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.RequestType;
-import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
-import com.aircandi.service.ServiceRequest;
-import com.aircandi.service.objects.Entity;
-import com.aircandi.service.objects.Observation;
-import com.aircandi.service.objects.ServiceData;
 
 @SuppressWarnings("unused")
 public class SearchManager {
@@ -84,58 +71,6 @@ public class SearchManager {
 			}
 			searchItems.add(searchItem);
 			succeeded = cursor.moveToNext();
-		}
-
-		//		Browser.requestAllIcons(mContentResolver,
-		//				Browser.BookmarkColumns.FAVICON
-		//						+ " is NULL AND "
-		//						+ Browser.BookmarkColumns.BOOKMARK
-		//						+ " == 1", mIconReceiver);
-
-		return searchItems;
-	}
-
-	public List<SearchItem> getPlaceSuggestions() {
-
-		List<SearchItem> searchItems = null;
-		Observation observation = LocationManager.getInstance().getObservation();
-
-		//		/* Temp for testing */
-		//		Observation observation = new Observation();
-		//		observation.latitude = 47.5825666;
-		//		observation.longitude = -122.1672287;
-
-		if (observation == null) {
-			return null;
-		}
-
-		Bundle parameters = new Bundle();
-		parameters.putBoolean("placesWithUriOnly", true);
-		parameters.putFloat("latitude", observation.latitude.floatValue());
-		parameters.putFloat("longitude", observation.longitude.floatValue());
-		parameters.putString("source", "foursquare");
-
-		ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getPlacesNearLocation")
-				.setRequestType(RequestType.Method)
-				.setParameters(parameters)
-				.setResponseFormat(ResponseFormat.Json);
-
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
-		if (serviceResponse.responseCode == ResponseCode.Success) {
-			String jsonResponse = (String) serviceResponse.data;
-			ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
-			List<Entity> entities = (List<Entity>) serviceData.data;
-			searchItems = new ArrayList<SearchItem>();
-			for (Entity entity : entities) {
-				SearchItem suggestion = new SearchItem();
-				suggestion.type = SearchItemType.Suggestions;
-				suggestion.name = entity.name;
-				suggestion.uri = entity.place.website;
-				suggestion.categoryName = entity.place.categories.get(0).name;
-				suggestion.categoryIconUri = entity.getPhoto().getUri();
-				searchItems.add(suggestion);
-			}
 		}
 
 		return searchItems;

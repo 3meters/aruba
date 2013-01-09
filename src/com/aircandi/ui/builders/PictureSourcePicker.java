@@ -7,6 +7,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ import android.widget.TextView;
 import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
+import com.aircandi.components.AndroidManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.Template;
@@ -57,16 +60,22 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 		}
 		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_search), null, "search"));
 		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_gallery), null, "gallery"));
-		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_camera), null, "camera"));
-		
+
+		/* Only show the camera choice if there is one and there is a place to store the image */
+		if (AndroidManager.isIntentAvailable(this, MediaStore.ACTION_IMAGE_CAPTURE)) {
+			if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+				listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_camera), null, "camera"));
+			}
+		}
+
+		/* Add place photo option if this is a place entity */
 		if (mEntityId != null) {
 			Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mEntityId);
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				if (entity.place != null && entity.place.photos != null && entity.place.photos.size() > 0) {
-					listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_place), null, "place"));
-				}
+				listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_place), null, "place"));
 			}
 		}
+		
 		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_none), null, "none"));
 
 		mTitle = (TextView) findViewById(R.id.custom_title);

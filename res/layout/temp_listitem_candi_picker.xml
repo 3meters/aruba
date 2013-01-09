@@ -21,9 +21,8 @@
         android:layout_alignParentTop="true"
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
-        aircandi:maxHeight="60dp"
-        aircandi:maxWidth="60dp" />
-    
+        aircandi:sizeHint="60dp" />
+
     <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/title"
         style="@style/candi_list_title"

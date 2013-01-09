@@ -13,6 +13,8 @@ public class BitmapRequest {
 	private WeakReference<Object>		mImageRequestor		= null;
 	private RequestListener				mRequestListener	= null;
 	private WeakReference<ImageView>	mImageView			= null;
+	private Integer						mImageSize			= null;
+	private Boolean						mUseThumbnailCache = false;
 
 	public BitmapRequest() {}
 
@@ -65,6 +67,24 @@ public class BitmapRequest {
 
 	public BitmapRequest setImageView(ImageView imageView) {
 		mImageView = new WeakReference<ImageView>(imageView);
+		return this;
+	}
+
+	public Integer getImageSize() {
+		return mImageSize;
+	}
+
+	public BitmapRequest setImageSize(Integer imageSize) {
+		mImageSize = imageSize;
+		return this;
+	}
+
+	public Boolean getUseThumbnailCache() {
+		return mUseThumbnailCache;
+	}
+
+	public BitmapRequest setUseThumbnailCache(Boolean useThumbnailCache) {
+		mUseThumbnailCache = useThumbnailCache;
 		return this;
 	}
 

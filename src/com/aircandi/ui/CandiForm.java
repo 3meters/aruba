@@ -65,6 +65,7 @@ public class CandiForm extends CandiActivity {
 	protected Number		mEntityModelRefreshDate;
 	protected Number		mEntityModelActivityDate;
 	protected Boolean		mUpsize;
+	protected Boolean		mTracked			= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -143,18 +144,15 @@ public class CandiForm extends CandiActivity {
 						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
 						mCommon.mActionBar.setTitle(mEntity.name);
-						/*
-						 * The set of entities to page are built up by the pager. We only pass the entities
-						 * if paging is disabled and we only want to show the current entity.
-						 */
-						List<Entity> entities = null;
-						entities = new ArrayList<Entity>();
-						entities.add(mEntity);
+
 						draw();
 						if (mUpsize) {
 							mUpsize = false;
+							mTracked = true;
 							upsize();
 						}
+						
+						if (!mTracked) track();
 					}
 				}
 				else {
@@ -163,6 +161,22 @@ public class CandiForm extends CandiActivity {
 				mCommon.hideBusy();
 			}
 
+		}.execute();
+	}
+
+	public void track() {
+
+		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
+		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
+
+		new AsyncTask() {
+
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("TrackEntityBrowse");
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().trackEntity(mEntity, beacons, primaryBeacon, "browse");
+				return result;
+			}
 		}.execute();
 	}
 
@@ -354,6 +368,7 @@ public class CandiForm extends CandiActivity {
 		ProxiExplorer.getInstance().getEntityModel().getPhotos().add(photo);
 		intent = new Intent(this, PictureDetail.class);
 		intent.putExtra(CandiConstants.EXTRA_URI, mEntity.photo.getUri());
+		intent.putExtra(CandiConstants.EXTRA_PAGING_ENABLED, false);
 
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
@@ -658,15 +673,17 @@ public class CandiForm extends CandiActivity {
 		Integer spacing = 3;
 		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(context, spacing);
 		Integer spacingVerticalPixels = ImageUtils.getRawPixels(context, spacing);
+		Integer candiCountPortrait = context.getResources().getInteger(R.integer.candi_per_row_portrait);
+		Integer candiCountLandscape = context.getResources().getInteger(R.integer.candi_per_row_landscape);
 
-		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * 2)) / 3;
+		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * 2)) / candiCountPortrait;
 
 		/* We need to cap the dimensions so we don't look crazy in landscape orientation */
 		if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * 4)) / 5;
+			candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * 4)) / candiCountLandscape;
 		}
 
-		Integer candiHeightPixels = (int) (candiWidthPixels * 0.95);
+		Integer candiHeightPixels = (int) (candiWidthPixels * 1);
 
 		layout.setSpacingHorizontal(spacingHorizontalPixels);
 		layout.setSpacingVertical(spacingVerticalPixels);
@@ -681,7 +698,7 @@ public class CandiForm extends CandiActivity {
 			TextView badge = (TextView) view.findViewById(R.id.badge);
 			FontManager.getInstance().setTypefaceDefault(title);
 			FontManager.getInstance().setTypefaceDefault(badge);
-			
+
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
 				if (entity.source.equals("comments")) {
 					badge.setText(String.valueOf(entity.commentCount));
@@ -689,6 +706,12 @@ public class CandiForm extends CandiActivity {
 				}
 				title.setText(entity.source);
 				title.setVisibility(View.VISIBLE);
+			}
+			else {
+				if (entity.name != null && !entity.name.equals("")) {
+					title.setText(entity.name);
+					title.setVisibility(View.VISIBLE);
+				}
 			}
 
 			String imageUri = entity.getEntityPhotoUri();
@@ -700,10 +723,10 @@ public class CandiForm extends CandiActivity {
 			FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(candiWidthPixels, LayoutParams.WRAP_CONTENT);
 			params.setCenterHorizontal(false);
 			view.setLayoutParams(params);
-			
+
 			RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(candiWidthPixels, candiHeightPixels);
 			webImageView.setLayoutParams(paramsImage);
-			
+
 			layout.addView(view);
 		}
 	}

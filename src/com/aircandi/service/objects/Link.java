@@ -21,14 +21,14 @@ public class Link extends ServiceEntryBase {
 	@Expose
 	public Number				signal;
 	@Expose
-	public Boolean				primary;
+	public Boolean				primary = false;
 
 	@Expose(serialize = false, deserialize = true)
 	public String				fromCollectionId;
 	@Expose(serialize = false, deserialize = true)
 	public String				toCollectionId;
 	@Expose(serialize = false, deserialize = true)
-	public Number				tuneCount;
+	public Number				tuneCount = 0;
 
 	public Link() {}
 

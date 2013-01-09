@@ -67,11 +67,13 @@
     <style name="picture_framed" parent="picture">
         <item name="android:background">?attr/backgroundPicture</item>
         <item name="android:padding">3dp</item>
+        <item name="android:cropToPadding">true</item>
     </style>
 
     <style name="picture_framed_thick" parent="picture">
         <item name="android:background">?attr/backgroundPicture</item>
         <item name="android:padding">20dp</item>
+        <item name="android:cropToPadding">true</item>
     </style>
     
     <style name="bullet">

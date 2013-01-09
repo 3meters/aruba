@@ -31,13 +31,12 @@
 
             <com.aircandi.ui.widgets.WebImageView
                 android:id="@+id/candi_form_image"
-                android:layout_width="250px"
-                android:layout_height="250px"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
                 android:layout_marginBottom="15dp"
                 aircandi:layout="@layout/widget_webimageview_framed"
-                aircandi:maxHeight="250px"
-                aircandi:maxWidth="250px"
                 android:background="@drawable/app_image_selector"
+                aircandi:sizeHint="250dp"
                 android:clickable="true"
                 android:onClick="onImageClick"
                 android:scaleType="centerCrop" />

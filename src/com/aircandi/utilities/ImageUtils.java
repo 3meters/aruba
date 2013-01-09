@@ -140,6 +140,44 @@ public class ImageUtils {
 		return bitmap;
 	}
 
+	@SuppressWarnings("unused")
+	public static File saveBitmapToFile(Bitmap bitmap) {
+		try {
+			/* File to hold byte array */
+			File file = new File(Environment.getExternalStorageDirectory() + File.separator + "temp.tmp");
+
+			/* Open an RandomAccessFile */
+			RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+
+			int width = bitmap.getWidth();
+			int height = bitmap.getHeight();
+			Config type = bitmap.getConfig();
+
+			/*
+			 * Copy the byte to the file
+			 * Assume source bitmap loaded using options.inPreferredConfig = Config.ARGB_8888;
+			 */
+			FileChannel channel = randomAccessFile.getChannel();
+			MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0, bitmap.getRowBytes() * height);
+			bitmap.copyPixelsToBuffer(map);
+			bitmap.recycle();
+
+			/* close the temporary file and channel */
+			channel.close();
+			randomAccessFile.close();
+
+			return file;
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
 	public static int getRawPixels(Context context, String displayPixels) {
 		displayPixels = displayPixels.replaceAll("[^\\d.]", "");
 		float pixels = getRawPixels(context, (int) Float.parseFloat(displayPixels));
@@ -192,11 +230,11 @@ public class ImageUtils {
 
 		int[] pixels = new int[bitmap.getHeight() * bitmap.getWidth()];
 		bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-		
-//		for( int i = 0; i < pixels.length; i++ ) {
-//		    // Invert the red channel as an alpha bitmask for the desired color.
-//		    pixels[i] = ~( pixels[i] << 8 & 0xFF000000 ) & Color.BLACK;
-//		}		
+
+		//		for( int i = 0; i < pixels.length; i++ ) {
+		//		    // Invert the red channel as an alpha bitmask for the desired color.
+		//		    pixels[i] = ~( pixels[i] << 8 & 0xFF000000 ) & Color.BLACK;
+		//		}		
 
 		for (int i = 0; i < bitmap.getHeight() * bitmap.getWidth(); i++) {
 			int toRed = Color.red(pixels[i]);
@@ -343,7 +381,55 @@ public class ImageUtils {
 
 		return bitmapFinal;
 	}
-	
+
+	public static Bitmap scaleBitmap(Bitmap bitmap, int scaleToWidth) {
+
+		/* Scale if needed */
+		Bitmap bitmapScaled = bitmap;
+		if (scaleToWidth > 0) {
+			boolean portrait = bitmap.getHeight() > bitmap.getWidth();
+			if (portrait) {
+				if (bitmap.getWidth() != scaleToWidth) {
+					float scalingRatio = (float) scaleToWidth / (float) bitmap.getWidth();
+					float newHeight = (float) bitmap.getHeight() * scalingRatio;
+					bitmapScaled = Bitmap.createScaledBitmap(bitmap, scaleToWidth, (int) (newHeight), true);
+					if (!bitmapScaled.equals(bitmap)) {
+						bitmap.recycle();
+					}
+				}
+			}
+			else {
+				if (bitmap.getHeight() != scaleToWidth) {
+					float scalingRatio = (float) scaleToWidth / (float) bitmap.getHeight();
+					float newWidth = (float) bitmap.getWidth() * scalingRatio;
+					bitmapScaled = Bitmap.createScaledBitmap(bitmap, (int) (newWidth), scaleToWidth, true);
+					if (!bitmapScaled.equals(bitmap)) {
+						bitmap.recycle();
+					}
+				}
+			}
+		}
+
+		return bitmapScaled;
+	}
+
+	public static Bitmap ensureBitmapScale(Bitmap bitmap) {
+		Bitmap bitmapScaled = bitmap;
+		Boolean scalingNeeded = (bitmap.getWidth() > CandiConstants.IMAGE_WIDTH_MAXIMUM || bitmap.getHeight() > CandiConstants.IMAGE_WIDTH_MAXIMUM);
+		if (scalingNeeded) {
+			Matrix matrix = new Matrix();
+			float scalingRatio = (float) CandiConstants.IMAGE_WIDTH_MAXIMUM / (float) bitmap.getWidth();
+			matrix.postScale(scalingRatio, scalingRatio);
+			/*
+			 * Create a new bitmap from the original using the matrix to transform the result.
+			 * Potential for OM condition because if the garbage collector is behind, we could
+			 * have several large bitmaps in memory at the same time.
+			 */
+			bitmapScaled = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+		}
+		return bitmapScaled;
+	}
+
 	public static Bitmap configBitmap(Bitmap bitmap) {
 		/* Make sure the bitmap format is right */
 		Bitmap bitmapModified = bitmap;

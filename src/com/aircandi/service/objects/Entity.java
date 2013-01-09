@@ -495,9 +495,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		Integer placeRankScore = 0;
 		if (links != null) {
 			for (Link link : links) {
-				/* One point for each link */
-				placeRankScore++;
-
 				/* Add points for being close to a primary */
 				if (link.primary) {
 

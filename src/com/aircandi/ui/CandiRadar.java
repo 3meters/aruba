@@ -49,7 +49,6 @@ import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.base.CandiActivity;
@@ -457,15 +456,17 @@ public class CandiRadar extends CandiActivity {
 		Integer spacing = 3;
 		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(CandiRadar.this, spacing);
 		Integer spacingVerticalPixels = ImageUtils.getRawPixels(CandiRadar.this, spacing);
+		Integer candiCountPortrait = getResources().getInteger(R.integer.candi_per_row_portrait);
+		Integer candiCountLandscape = getResources().getInteger(R.integer.candi_per_row_landscape);
 
-		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * 2)) / 3;
+		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * (candiCountPortrait - 1))) / candiCountPortrait;
 
 		/* We need to cap the dimensions so we don't look crazy in landscape orientation */
 		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * 4)) / 5;
+			candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * (candiCountLandscape - 1))) / candiCountLandscape;
 		}
 
-		Integer candiHeightPixels = (int) (candiWidthPixels * 0.95);
+		Integer candiHeightPixels = (int) (candiWidthPixels * 1);
 
 		if (placeType == PlaceType.Synthetic) {
 			FlowLayout flowLayout = (FlowLayout) layout;
@@ -590,35 +591,7 @@ public class CandiRadar extends CandiActivity {
 
 	public void onCandiClick(View view) {
 		final Entity entity = (Entity) view.getTag();
-
-		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
-		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
-
-		if (entity.synthetic) {
-			showCandiForm(entity, true);
-		}
-		else {
-			new AsyncTask() {
-
-				@Override
-				protected void onPreExecute() {
-					mCommon.showBusy();
-				}
-
-				@Override
-				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("TrackEntityBrowse");
-					ModelResult result = ProxiExplorer.getInstance().getEntityModel().trackEntity(entity, beacons, primaryBeacon, "browse");
-					return result;
-				}
-
-				@Override
-				protected void onPostExecute(Object response) {
-					mCommon.hideBusy();
-					showCandiForm(entity, false);
-				}
-			}.execute();
-		}
+		showCandiForm(entity, entity.synthetic);
 	}
 
 	// --------------------------------------------------------------------------------------------

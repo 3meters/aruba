@@ -1,4 +1,4 @@
-package com.aircandi.components;
+package com.aircandi.components.bitmaps;
 
 import java.io.InputStream;
 import java.util.Vector;

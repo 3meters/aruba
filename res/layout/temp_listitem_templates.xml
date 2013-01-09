@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/item_row"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="@dimen/form_field_height" >
 
     <ImageView
         android:id="@+id/item_image"

@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -125,12 +126,17 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 *            ViewGroup containing the returned View
 	 */
 	@Override
-	public View getView(int position, View convertView,
-			ViewGroup parent) {
+	public View getView(int position, View convertView, ViewGroup parent) {
 		if (position == super.getCount() && keepOnAppending.get()) {
 			if (pendingView == null) {
 				pendingView = getPendingView(parent);
-				new AppendTask().execute();
+				AppendTask task = new AppendTask();
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+					task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				}
+				else {
+					task.execute();
+				}
 			}
 
 			return (pendingView);
@@ -166,7 +172,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 
 		@Override
 		protected Exception doInBackground(Void... params) {
-			Thread.currentThread().setName("EndlessAdapter");				
+			Thread.currentThread().setName("EndlessAdapter");
 			Exception result = null;
 
 			try {

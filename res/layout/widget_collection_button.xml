@@ -11,8 +11,7 @@
         android:layout_width="65dp"
         android:layout_height="65dp"
         aircandi:layout="@layout/widget_webimageview"
-        aircandi:maxHeight="65dp"
-        aircandi:maxWidth="65dp"
+        aircandi:sizeHint="65dp"
         android:background="@drawable/app_image_selector"
         android:scaleType="centerCrop" />
 

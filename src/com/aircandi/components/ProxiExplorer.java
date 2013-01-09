@@ -26,7 +26,6 @@ import android.os.Bundle;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.PlacesConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -55,6 +54,7 @@ import com.aircandi.service.objects.User;
 import com.aircandi.ui.CandiRadar;
 import com.aircandi.ui.Preferences;
 import com.aircandi.utilities.DateUtils;
+import com.aircandi.utilities.ImageUtils;
 
 public class ProxiExplorer {
 
@@ -283,7 +283,9 @@ public class ProxiExplorer {
 		Observation observation = LocationManager.getInstance().getObservation();
 		if (observation != null) {
 			parameters.putString("observation", "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
-			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) PlacesConstants.SEARCH_RANGE_PLACES_METERS));
+			Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
+					Aircandi.applicationContext.getString(R.string.search_radius_default)));
+			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) searchRangeMeters));
 		}
 
 		/* We don't want to fetch entities we already have via links to local beacons */
@@ -366,13 +368,16 @@ public class ProxiExplorer {
 		}
 
 		Bundle parameters = new Bundle();
-		parameters.putBoolean("placesWithUriOnly", false);
 		if (excludePlaceIds.size() > 0) {
 			parameters.putStringArrayList("excludePlaceIds", excludePlaceIds);
 		}
+		parameters.putString("source", "foursquare");
 		parameters.putFloat("latitude", observation.latitude.floatValue());
 		parameters.putFloat("longitude", observation.longitude.floatValue());
-		parameters.putString("source", "foursquare");
+		parameters.putInt("limit", 50);
+		Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
+				Aircandi.applicationContext.getString(R.string.search_radius_default)));
+		parameters.putInt("radius", searchRangeMeters);
 
 		ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getPlacesNearLocation")
@@ -595,15 +600,18 @@ public class ProxiExplorer {
 	private ServiceResponse storeImageAtS3(Entity entity, User user, Bitmap bitmap) {
 
 		/*
-		 * Delete image from S3 if it has been orphaned TODO: We are going with a garbage collection scheme for orphaned
+		 * Delete image from S3 if it has been orphaned 
+		 * 
+		 * TODO: We are going with a garbage collection scheme for orphaned
 		 * images. We need to use an extended property on S3 items that is set to a date when collection is ok. This
 		 * allows downloaded entities to keep working even if an image for entity has changed.
 		 */
 		ServiceResponse serviceResponse = new ServiceResponse();
 
-		/*
-		 * TODO: Image might need scaling if it exceeds the maximum size we want to store.
-		 */
+		/* Make sure the bitmap is less than or equal to the maximum size we want to persist. */
+		bitmap = ImageUtils.ensureBitmapScale(bitmap);
+		
+		/* Push it to S3 */
 		try {
 			String stringDate = DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME);
 			String imageKey = String.valueOf(Aircandi.getInstance().getUser().id) + "_" + stringDate + ".jpg";
@@ -1191,7 +1199,12 @@ public class ProxiExplorer {
 						Link link = entity.getLink(beacon, actionType);
 						if (link != null) {
 							if (primary) {
-								link.tuneCount = link.tuneCount.intValue() + 1;
+								if (link.tuneCount != null) {
+									link.tuneCount = link.tuneCount.intValue() + 1;
+								}
+								else {
+									link.tuneCount = 1;
+								}
 								if (!link.primary) {
 									link.primary = true;
 								}
@@ -1202,7 +1215,12 @@ public class ProxiExplorer {
 							link.type = actionType;
 							link.signal = beacon.level;
 							if (primary) {
-								link.tuneCount = link.tuneCount.intValue() + 1;
+								if (link.tuneCount != null) {
+									link.tuneCount = link.tuneCount.intValue() + 1;
+								}
+								else {
+									link.tuneCount = 1;
+								}
 								link.primary = true;
 							}
 							entity.links.add(link);
@@ -1233,7 +1251,7 @@ public class ProxiExplorer {
 					 * Note: A property will be removed from the document if it is set to null. The routine
 					 * to convert objects to json takes a parameter to ignore or serialize props set to null.
 					 * For now, I have special case code to ensure that photo is seriallized as null even
-					 * if ignoreNulls = true. 
+					 * if ignoreNulls = true.
 					 */
 					Bundle parameters = new Bundle();
 					parameters.putBoolean("skipActivityDate", false);
@@ -1616,6 +1634,8 @@ public class ProxiExplorer {
 			 * handled outside of this method.
 			 */
 			EntityList<Entity> entities = new EntityList<Entity>();
+			Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
+					Aircandi.applicationContext.getString(R.string.search_radius_default)));
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 					Entity entity = entry.getValue();
@@ -1628,7 +1648,6 @@ public class ProxiExplorer {
 						}
 						else {
 							beacon = entity.getActiveBeacon(LinkType.browse.name());
-
 							/*
 							 * Entities that were first found by beacon hang around and could
 							 * later be visible via location if we continue with this approach.
@@ -1638,7 +1657,7 @@ public class ProxiExplorer {
 							 * sort higher.
 							 */
 							/* No beacon for this entity so check using location */
-							if (beacon != null || (distance != null && distance != -1 && distance < PlacesConstants.SEARCH_RANGE_PLACES_METERS)) {
+							if (beacon != null || (distance != null && distance != -1 && distance < searchRangeMeters)) {
 								entities.add(entity);
 							}
 						}
@@ -1655,6 +1674,8 @@ public class ProxiExplorer {
 			 * handled outside of this method.
 			 */
 			EntityList<Entity> entities = new EntityList<Entity>();
+			Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
+					Aircandi.applicationContext.getString(R.string.search_radius_default)));
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().isCollection) {
 					Entity entity = entry.getValue();
@@ -1666,7 +1687,6 @@ public class ProxiExplorer {
 							entities.add(entity);
 						}
 						else {
-
 							/*
 							 * Entities that were first found by beacon hang around and could
 							 * later be visible via location if we continue with this approach.
@@ -1676,7 +1696,7 @@ public class ProxiExplorer {
 							 * sort higher.
 							 */
 							/* No beacon for this entity so check using location */
-							if (distance != null && distance < PlacesConstants.SEARCH_RANGE_PLACES_METERS) {
+							if (distance != null && distance < searchRangeMeters) {
 								entities.add(entity);
 							}
 						}
@@ -1693,6 +1713,8 @@ public class ProxiExplorer {
 			 * handled outside of this method.
 			 */
 			EntityList<Entity> entities = new EntityList<Entity>();
+			Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
+					Aircandi.applicationContext.getString(R.string.search_radius_default)));
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 					Entity entity = entry.getValue();
@@ -1704,7 +1726,7 @@ public class ProxiExplorer {
 						}
 						else {
 							/* No beacon for this entity so check using location */
-							if (distance != null && distance < PlacesConstants.SEARCH_RANGE_SYNTHETICS_METERS) {
+							if (distance != null && distance < searchRangeMeters) {
 								entities.add(entity);
 							}
 						}

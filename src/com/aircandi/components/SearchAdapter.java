@@ -10,10 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.SearchManager.SearchItem;
-import com.aircandi.components.SearchManager.SearchItemType;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.ui.widgets.WebImageView;
@@ -44,17 +42,17 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new SearchListViewHolder();
-			
+
 			holder.itemName = (TextView) view.findViewById(R.id.item_name);
 			holder.itemCategoryName = (TextView) view.findViewById(R.id.item_category_name);
 			holder.itemUri = (TextView) view.findViewById(R.id.item_uri);
 			holder.itemImage = (WebImageView) view.findViewById(R.id.item_image);
-			
+
 			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_section_title));
 			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_name));
 			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_category_name));
 			FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.item_uri));
-			
+
 			view.setTag(holder);
 		}
 		else {
@@ -79,12 +77,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 			}
 			else {
 				((TextView) view.findViewById(R.id.item_section_title)).setVisibility(View.VISIBLE);
-				if (suggestion.type == SearchItemType.Suggestions) {
-					((TextView) view.findViewById(R.id.item_section_title)).setText(getContext().getString(R.id.radar_synthetics_header));
-				}
-				else {
-					((TextView) view.findViewById(R.id.item_section_title)).setText(suggestion.type.name());
-				}
+				((TextView) view.findViewById(R.id.item_section_title)).setText(suggestion.type.name());
 			}
 
 			if (holder.itemName != null) {
@@ -123,17 +116,13 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 				 * by the internal image view to null before doing the work
 				 * to satisfy the new request.
 				 */
-
 				if (suggestion.icon != null) {
 					ImageUtils.showImageInImageView(suggestion.icon, holder.itemImage.getImageView(), true, AnimUtils.fadeInMedium());
 				}
 				else if (suggestion.categoryIconUri != null) {
 
 					final String imageUri = suggestion.categoryIconUri;
-					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemImage)
-							.setImageUri(imageUri)
-							.setScaleToWidth(CandiConstants.IMAGE_WIDTH_ORIGINAL);
-
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemImage).setImageUri(imageUri);
 					BitmapRequest imageRequest = builder.create();
 
 					holder.itemImageUri = imageUri;

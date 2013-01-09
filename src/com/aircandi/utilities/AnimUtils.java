@@ -27,6 +27,7 @@ public class AnimUtils {
 
 	private static Animation	mFadeInMedium;
 	private static Animation	mFadeOutMedium;
+	private static Animation	mFadeInLong;
 
 	public static Animation fadeInMedium() {
 		/*
@@ -48,6 +49,18 @@ public class AnimUtils {
 		return mFadeOutMedium;
 	}
 
+	public static Animation fadeInLong() {
+		/*
+		 * We make a new animation object each time because when I
+		 * tried sharing one, there was lots of flashing and weird behavior.
+		 * 
+		 * If there is a better way to do this later then this will serve
+		 * as a choke point for the implementation.
+		 */
+		mFadeInLong = AnimUtils.loadAnimation(R.anim.fade_in_long);
+		return mFadeInLong;
+	}
+	
 	public static void showView(final View view) {
 		Animation animation = AnimUtils.fadeInMedium();
 		if (view.getVisibility() != View.VISIBLE) {

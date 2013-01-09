@@ -11,8 +11,8 @@
             android:key="Pref_Search_Radius"
             android:negativeButtonText="Cancel"
             android:positiveButtonText="OK"
-            android:summary="Default search distance"
-            android:title="Distances" />
+            android:summary="Search distance"
+            android:title="Search" />
     </PreferenceCategory>
     <PreferenceCategory android:title="General preferences" >
         <ListPreference

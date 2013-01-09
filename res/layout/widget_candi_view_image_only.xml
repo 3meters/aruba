@@ -1,13 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
-    xmlns:tools="http://schemas.android.com/tools" >
-
-    <com.aircandi.ui.widgets.WebImageView
-        android:id="@+id/candi_view_image"
-        style="@style/picture_framed"        
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        aircandi:layout="@layout/widget_webimageview_candi_view"
-        android:scaleType="centerCrop" />
-</merge>

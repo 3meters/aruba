@@ -35,7 +35,7 @@ public class ListViewExpanded extends LinearLayout {
 
 		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ListViewExpanded, defStyle, 0);
 
-		mLayoutItemId = ta.getResourceId(R.styleable.ListViewExpanded_layoutItems, R.layout.temp_listitem_tip);
+		mLayoutItemId = ta.getResourceId(R.styleable.ListViewExpanded_layoutItems, 0);
 		mItemMaxCount = ta.getInteger(R.styleable.ListViewExpanded_itemMaxCount, 2);
 		mShowDivider = ta.getBoolean(R.styleable.ListViewExpanded_showDivider, true);
 

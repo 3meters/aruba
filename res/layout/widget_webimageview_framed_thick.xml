@@ -16,7 +16,8 @@
         android:id="@+id/image_main"
         style="@style/picture_framed_thick"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
 
     <ImageView
         android:id="@+id/image_badge"
@@ -26,12 +27,9 @@
         android:layout_alignRight="@+id/image_main"
         android:layout_marginBottom="12dp"
         android:layout_marginRight="12dp"
-        aircandi:maxHeight="60dp"
-        aircandi:maxWidth="60dp"
+        aircandi:sizeHint="30dp"
         android:adjustViewBounds="true"
         android:gravity="bottom|right"
-        android:maxHeight="30dp"
-        android:maxWidth="30dp"
         android:scaleType="fitCenter"
         android:visibility="gone" />
 

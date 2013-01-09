@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <integer name="candi_per_row_landscape">6</integer>
+    <integer name="candi_per_row_portrait">4</integer>
+
+</resources>

@@ -47,6 +47,7 @@
                         android:layout_marginLeft="4dp"
                         android:layout_marginRight="10dp"
                         aircandi:layout="@layout/widget_webimageview_candi_view"
+                        aircandi:sizeHint="150dp"
                         android:clickable="true"
                         android:minWidth="150dp"
                         android:onClick="onChangePictureButtonClick"

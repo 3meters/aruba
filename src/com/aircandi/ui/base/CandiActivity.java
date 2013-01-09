@@ -64,6 +64,7 @@ public abstract class CandiActivity extends SherlockActivity {
 
 	@Override
 	public void onBackPressed() {
+		/* Activity is destroyed */
 		super.onBackPressed();
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageBack);
 	}

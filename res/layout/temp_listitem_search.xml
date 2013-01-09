@@ -17,14 +17,14 @@
     <TextView
         android:id="@+id/item_section_title"
         style="@style/app_text_appearance_medium"
-        android:textColor="@color/text_secondary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:gravity="center_vertical"
         android:padding="5dp"
-        android:visibility="gone"
-        android:text="@string/dummy_title" />
+        android:text="@string/dummy_title"
+        android:textColor="@color/text_secondary"
+        android:visibility="gone" />
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/item_image"
@@ -36,8 +36,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
         aircandi:layout="@layout/widget_webimageview"
-        aircandi:maxHeight="20dp"
-        aircandi:maxWidth="20dp" />
+        aircandi:sizeHint="20dp" />
 
     <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/item_name"
@@ -46,8 +45,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/item_section_title"
         android:layout_marginTop="3dp"
-        android:maxLines="1"
         android:layout_toRightOf="@+id/item_image"
+        android:maxLines="1"
         android:text="@string/dummy_title"
         android:textAppearance="@style/app_text_appearance_small" />
 

@@ -242,7 +242,7 @@ public class CandiView extends RelativeLayout {
 			if (mCategoryImage != null) {
 				if (entity.place.categories != null && entity.place.categories.size() > 0) {
 
-					BitmapRequest request = new BitmapRequest();
+					final BitmapRequest request = new BitmapRequest();
 					request.setImageUri(entity.place.categories.get(0).iconUri())
 							.setImageRequestor(this)
 							.setRequestListener(new RequestListener() {
@@ -260,12 +260,13 @@ public class CandiView extends RelativeLayout {
 										Aircandi.applicationHandler.post(new Runnable() {
 											@Override
 											public void run() {
-												ImageUtils.showDrawableInImageView(bitmapDrawable, mCategoryImage, false, AnimUtils.fadeInMedium());
+												ImageUtils.showDrawableInImageView(bitmapDrawable, mCategoryImage, true, AnimUtils.fadeInMedium());
 											}
 										});
 									}
 								}
 							});
+					
 					BitmapManager.getInstance().fetchBitmap(request);
 					mCategoryImage.setVisibility(View.VISIBLE);
 				}
@@ -288,8 +289,11 @@ public class CandiView extends RelativeLayout {
 
 				/* We only show the first five */
 				int sourceCount = 0;
-				for (Entity sourceEntity : entities) {
-					if (sourceEntity.source.equals("comments") && entity.commentCount == 0) {
+				for (Entity childEntity : entities) {
+					if (!childEntity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+						continue;
+					}
+					if (childEntity.source != null && childEntity.source.equals("comments") && entity.commentCount == 0) {
 						continue;
 					}
 					if (sourceCount >= 5) {
@@ -298,13 +302,15 @@ public class CandiView extends RelativeLayout {
 					View view = inflater.inflate(R.layout.temp_radar_candi_item, null);
 					WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
 
-					String imageUri = sourceEntity.getEntityPhotoUri();
+					String imageUri = childEntity.getEntityPhotoUri();
 					/* TODO: temp fixup until I figure out what to do with icons that look bad against color backgrounds */
-					if (sourceEntity.source.equals("yelp")) {
-						imageUri = "resource:source_yelp_white";
-					}
-					if (sourceEntity.source.equals("twitter")) {
-						imageUri = "resource:source_twitter_ii";
+					if (childEntity.source != null) {
+						if (childEntity.source.equals("yelp")) {
+							imageUri = "resource:source_yelp_white";
+						}
+						if (childEntity.source.equals("twitter")) {
+							imageUri = "resource:source_twitter_ii";
+						}
 					}
 					BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
 					BitmapRequest imageRequest = builder.create();
@@ -358,7 +364,7 @@ public class CandiView extends RelativeLayout {
 					else if (feet >= 50) {
 						info = String.format("%.0f yds", yards);
 					}
-					else  {
+					else {
 						info = String.format("%.0f ft", feet);
 					}
 				}

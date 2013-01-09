@@ -392,7 +392,7 @@ public class EntityForm extends FormActivity {
 						final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
 						if (pictureSource != null && !pictureSource.equals("")) {
 							if (pictureSource.equals("search")) {
-								pictureSearch(null);
+								pictureSearch();
 							}
 							else if (pictureSource.equals("gallery")) {
 								pictureFromGallery();

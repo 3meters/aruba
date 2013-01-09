@@ -39,7 +39,7 @@ public class PhotoPagerAdapter extends PagerAdapter {
 	public Object instantiateItem(View collection, int position) {
 		Photo photo = mPhotos.get(position);
 		Integer layoutId = R.layout.temp_photo_detail;
-		ViewGroup layout = (ViewGroup) mInflater.inflate(layoutId, null);
+		View layout = (View) mInflater.inflate(layoutId, null);
 		layout = PictureDetail.buildPictureDetail(mContext, photo, layout);
 		((ViewPager) collection).addView(layout, 0);
 		return layout;

@@ -41,8 +41,7 @@
                     android:layout_marginRight="10dp"
                     android:layout_weight="0"
                     aircandi:layout="@layout/widget_webimageview_framed"
-                    aircandi:maxHeight="100dp"
-                    aircandi:maxWidth="100dp"
+                 	aircandi:sizeHint="100dp"
                     android:clickable="true"
                     android:onClick="onChangePictureButtonClick"
                     android:scaleType="centerCrop" />
