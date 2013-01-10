@@ -167,122 +167,108 @@ public class BitmapLoader {
 						/* Make sure this is still a valid request */
 						if (imageRequest.getImageView() == null || imageRequest.getImageView().getTag().equals(imageRequest.getImageUri())) {
 							/*
-							 * Start a new thread so we can do the actual image fetching in parallel 
+							 * Start a new thread so we can do the actual image fetching in parallel
 							 * like DrawableManager does.
 							 */
-							Thread thread = new Thread() {
+							Thread.currentThread().setName("BitmapDownload");
+							Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Download started...");
+							Bitmap bitmap = null;
+							ServiceResponse serviceResponse = new ServiceResponse();
+
+							long startTime = System.nanoTime();
+							float estimatedTime = System.nanoTime();
+							/*
+							 * Gets bitmap at native size and downsamples if necessary to stay within the max
+							 * size in
+							 * memory.
+							 */
+							serviceResponse = downloadAsByteArray(imageRequest.getImageUri(), new RequestListener() {
 
 								@Override
-								public void run() {
-									Thread.currentThread().setName("BitmapDownload");
-									Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Download started...");
-									Bitmap bitmap = null;
-									ServiceResponse serviceResponse = new ServiceResponse();
-
-									long startTime = System.nanoTime();
-									float estimatedTime = System.nanoTime();
-									/*
-									 * Gets bitmap at native size and downsamples if necessary to stay within the max
-									 * size in
-									 * memory.
-									 */
-									serviceResponse = downloadAsByteArray(imageRequest.getImageUri(), new RequestListener() {
-
-										@Override
-										public void onProgressChanged(int progress) {
+								public void onProgressChanged(int progress) {
+									if (imageRequest.getRequestListener() != null) {
+										if (progress > 0) {
 											if (imageRequest.getRequestListener() != null) {
-												if (progress > 0) {
-													if (imageRequest.getRequestListener() != null) {
-														imageRequest.getRequestListener().onProgressChanged((int) (70 * ((float) progress / 100f)));
-													}
-												}
+												imageRequest.getRequestListener().onProgressChanged((int) (70 * ((float) progress / 100f)));
 											}
 										}
-									});
-
-									if (serviceResponse.responseCode == ResponseCode.Success) {
-
-										if (imageRequest.getImageView() == null || imageRequest.getImageView().getTag().equals(imageRequest.getImageUri())) {
-
-											Logger.v(BitmapLoader.this,
-													imageRequest.getImageUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000)
-															+ "ms");
-
-											estimatedTime = System.nanoTime() - startTime;
-											startTime = System.nanoTime();
-
-											estimatedTime = System.nanoTime() - startTime;
-											startTime = System.nanoTime();
-											Logger.v(BitmapLoader.this,
-													imageRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000)
-															+ "ms");
-											/*
-											 * Stuff it into the cache. Overwrites if it already exists. This is a perf
-											 * hit in
-											 * the
-											 * process because writing files is slow.
-											 * 
-											 * We aren't doing anything to shrink the raw size of the image before
-											 * storing it to
-											 * disk. We also aren't
-											 * handling the case where the image format is gif.
-											 */
-											Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Pushing into cache...");
-											if (imageRequest.getUseThumbnailCache()) {
-												bitmap = BitmapManager.getInstance().putThumbnailBytes(imageRequest.getImageUri(),
-														(byte[]) serviceResponse.data,
-														imageRequest.getImageSize());
-											}
-											else {
-												bitmap = BitmapManager.getInstance().putImageBytes(imageRequest.getImageUri(), (byte[]) serviceResponse.data,
-														imageRequest.getImageSize());
-											}
-
-											/* Update progress */
-											if (imageRequest.getRequestListener() != null) {
-												imageRequest.getRequestListener().onProgressChanged(80);
-											}
-
-											Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Progress complete");
-											serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
-
-											if (imageRequest.getRequestListener() != null) {
-												imageRequest.getRequestListener().onProgressChanged(100);
-											}
-
-											if (imageRequest.getRequestListener() != null) {
-												imageRequest.getRequestListener().onComplete(serviceResponse);
-											}
-
-											if (imageRequest.getImageView() != null) {
-												if (imageRequest.getImageView().getTag().equals(imageRequest.getImageUri())) {
-
-													final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-													/* Put this on the main thread */
-													Aircandi.applicationHandler.post(new Runnable() {
-
-														@Override
-														public void run() {
-															ImageUtils.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true,
-																	AnimUtils.fadeInMedium());
-														}
-													});
-												}
-											}
-										}
-
-									}
-									else if (serviceResponse.exception.getErrorCode() == ErrorCode.IllegalStateException) {
-										/*
-										 * Data couldn't be successfully decoded into a bitmap so substitute
-										 * the broken image placeholder
-										 */
-										imageRequest.setImageUri("resource:image_broken");
-										BitmapManager.getInstance().fetchBitmap(imageRequest);
 									}
 								}
-							};
-							thread.start();
+							});
+
+							if (serviceResponse.responseCode == ResponseCode.Success) {
+
+								if (imageRequest.getImageView() == null || imageRequest.getImageView().getTag().equals(imageRequest.getImageUri())) {
+
+									Logger.v(BitmapLoader.this,
+											imageRequest.getImageUri() + ": Download finished: " + String.valueOf(estimatedTime / 1000000)
+													+ "ms");
+
+									estimatedTime = System.nanoTime() - startTime;
+									startTime = System.nanoTime();
+
+									estimatedTime = System.nanoTime() - startTime;
+									startTime = System.nanoTime();
+									Logger.v(BitmapLoader.this,
+											imageRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000)
+													+ "ms");
+									/*
+									 * Stuff it into the cache. Overwrites if it already exists. This is a perf
+									 * hit in
+									 * the
+									 * process because writing files is slow.
+									 * 
+									 * We aren't doing anything to shrink the raw size of the image before
+									 * storing it to
+									 * disk. We also aren't
+									 * handling the case where the image format is gif.
+									 */
+									Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Pushing into cache...");
+									bitmap = BitmapManager.getInstance().putImageBytes(imageRequest.getImageUri(), (byte[]) serviceResponse.data,
+											imageRequest.getImageSize());
+
+									/* Update progress */
+									if (imageRequest.getRequestListener() != null) {
+										imageRequest.getRequestListener().onProgressChanged(80);
+									}
+
+									Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Progress complete");
+									serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
+
+									if (imageRequest.getRequestListener() != null) {
+										imageRequest.getRequestListener().onProgressChanged(100);
+									}
+
+									if (imageRequest.getRequestListener() != null) {
+										imageRequest.getRequestListener().onComplete(serviceResponse);
+									}
+
+									if (imageRequest.getImageView() != null) {
+										if (imageRequest.getImageView().getTag().equals(imageRequest.getImageUri())) {
+
+											final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+											/* Put this on the main thread */
+											Aircandi.mainThreadHandler.post(new Runnable() {
+
+												@Override
+												public void run() {
+													ImageUtils.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true,
+															AnimUtils.fadeInMedium());
+												}
+											});
+										}
+									}
+								}
+
+							}
+							else if (serviceResponse.exception.getErrorCode() == ErrorCode.IllegalStateException) {
+								/*
+								 * Data couldn't be successfully decoded into a bitmap so substitute
+								 * the broken image placeholder
+								 */
+								imageRequest.setImageUri("resource:image_broken");
+								BitmapManager.getInstance().fetchBitmap(imageRequest);
+							}
 
 						}
 					}

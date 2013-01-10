@@ -944,6 +944,7 @@ public class ProxibaseService {
 
 		@Override
 		public void run() {
+			Thread.currentThread().setName("IdleConnectionMonitorThread");
 			try {
 				while (!shutdown) {
 					synchronized (this) {

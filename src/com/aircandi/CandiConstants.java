@@ -96,18 +96,6 @@ public interface CandiConstants {
 	public static final int		MAP_VIEW_MARKER_HEIGHT					= 50;
 	public static final int		MAP_VIEW_TITLE_LENGTH_MAX				= 150;
 
-	/* Dimensions at mdpi */
-	public static final int		ANDROID_STATUSBAR_HEIGHT				= 25;
-	public static final int		ANDROID_ACTIONBAR_HEIGHT				= 48;
-
-	public static final int		SWIPE_MAX_OFF_PATH						= 500;
-	public static final float	SWIPE_SMALL_FLING						= 100;
-	public static final long	TOUCH_MAX_TIME							= 500;
-
-	public static final int		DIALOG_INSTALL_ID						= 1;
-	public static final int		DIALOG_WIFIENABLE_ID					= 2;
-	public static final int		DIALOG_NEW_CANDI_ID						= 3;
-
 	public static final int		TABS_PRIMARY_ID							= 1;
 	public static final int		TABS_PROFILE_FORM_ID					= 2;
 	public static final int		TABS_ENTITY_FORM_ID						= 3;
@@ -115,17 +103,22 @@ public interface CandiConstants {
 	public static final int		TABS_LINK_PICKER_ID						= 5;
 	public static final int		TABS_USER_FORM_ID						= 6;
 
-	public static final int		VERTEX_INDEX_X							= 0;
-	public static final int		VERTEX_INDEX_Y							= 1;
-
-	public static final String	IMAGE_CAPTURE_PATH						= "/aircandi/images/";
-
-	public static final int		IMAGE_MEMORY_BYTES_MAX					= 2048000;
-	public static final int		IMAGE_MEMORY_CACHE_WIDTH_MAX			= 100;																						// (100x100x4) + 10000 extra
+	/*
+	 * Using quality = 70 for jpeg compression reduces image file size by 85% with
+	 * an acceptable degradation of image quality. A 1280x960 image went from
+	 * 1007K to 152K.
+	 */
+	public static final int		IMAGE_QUALITY_S3						= 70;
+	/*
+	 * Will handle a typical 5 megapixel 2560x1920 image that has been sampled by two to 1280x960
+	 * Sampling by 4 produces 640x480. Assumes four channel ARGB including alpha.
+	 */
+	public static final int		IMAGE_MEMORY_BYTES_MAX					= 4915200;																					// 4 megapixels
 	public static final Config	IMAGE_CONFIG_DEFAULT					= Config.ARGB_8888;
-
-	public static final int		IMAGE_WIDTH_MAXIMUM						= 1024;
-	public static final int		S3_IMAGE_WIDTH_MAXIMUM					= 1024;
+	/*
+	 * Consistent with 5 megapixel sampled by two.
+	 */
+	public static final int		IMAGE_DIMENSION_MAX						= 960;
 
 	public static final boolean	LINK_JAVASCRIPT_ENABLED					= false;
 	public static final boolean	LINK_ZOOM								= false;
@@ -203,19 +196,6 @@ public interface CandiConstants {
 	public static final float	DURATION_INSTANT						= 0.0f;
 
 	public static final boolean	TRANSITIONS_ACTIVE						= true;
-
-	public static final String	USER_AGENT_MOBILE						= "Mozilla/5.0 (Linux; U; Android 2.1.3; en-us; "
-																				+ "Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) "
-																				+ "Version/4.0 Mobile Safari/533.1";
-	public static final String	USER_AGENT_DESKTOP						= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) "
-																				+ "AppleWebKit/533.16 (KHTML, like Gecko) "
-																				+ "Version/5.0 Safari/533.16";
-	public static final String	USER_AGENT_BACK							= "Mozilla/5.0 (Linux; U; Android 2.2.1; fr-ch; A43 Build/FROYO) "
-																				+ "AppleWebKit/533.1 (KHTML, like Gecko) "
-																				+ "Version/4.0 Mobile Safari/533.1";
-	public static final String	USER_AGENT_NEXUS_S						= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) "
-																				+ "AppleWebKit/533.1 (KHTML, like Gecko) "
-																				+ "Version/4.0 Mobile Safari/533.1";
 
 	/* The default search radius in meters when searching for nearby beacons. */
 	public static int			LOCATION_DEFAULT_RADIUS					= 150;

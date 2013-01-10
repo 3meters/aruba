@@ -257,7 +257,7 @@ public class CandiView extends RelativeLayout {
 										Bitmap bitmap = imageResponse.bitmap;
 										final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
 
-										Aircandi.applicationHandler.post(new Runnable() {
+										Aircandi.mainThreadHandler.post(new Runnable() {
 											@Override
 											public void run() {
 												ImageUtils.showDrawableInImageView(bitmapDrawable, mCategoryImage, true, AnimUtils.fadeInMedium());
@@ -301,7 +301,8 @@ public class CandiView extends RelativeLayout {
 					}
 					View view = inflater.inflate(R.layout.temp_radar_candi_item, null);
 					WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
-
+					webImageView.setSizeHint(sizePixels);
+					
 					String imageUri = childEntity.getEntityPhotoUri();
 					/* TODO: temp fixup until I figure out what to do with icons that look bad against color backgrounds */
 					if (childEntity.source != null) {

@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
@@ -47,14 +48,15 @@ public class SplashForm extends SherlockActivity {
 		}
 
 		signinAuto();
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.splash);
-
-		initialize();
+		if (!isFinishing()) {
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			setContentView(R.layout.splash);
+			initialize();
+		}
 	}
 
 	private void initializeApp() {
-
+		
 		if (Build.PRODUCT.contains("sdk")) {
 			Aircandi.usingEmulator = true;
 		}
@@ -68,13 +70,20 @@ public class SplashForm extends SherlockActivity {
 		ProxiExplorer.getInstance().setUsingEmulator(Aircandi.usingEmulator);
 		ProxiExplorer.getInstance().initialize();
 
-		/* Cache categories */
-		loadCategories();
+		/* Cache categories - we delay until after the initial rush for data */
+		Aircandi.mainThreadHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				loadCategories();
+			}
+		}, 30000);
 
 		Aircandi.firstStartApp = false;
 	}
 
 	private void initialize() {
+		((ImageView) findViewById(R.id.image_background)).setBackgroundResource(R.drawable.splash_v);
+		
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.splash_title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.splash_message));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_signup));
@@ -102,13 +111,13 @@ public class SplashForm extends SherlockActivity {
 		startActivity(intent);
 		finish();
 	}
-	
+
 	public void loadCategories() {
 		new AsyncTask() {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("LoadCategories");				
+				Thread.currentThread().setName("LoadCategories");
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel().loadCategories();
 				return result;
 			}

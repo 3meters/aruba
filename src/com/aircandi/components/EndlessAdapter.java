@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -131,12 +130,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 			if (pendingView == null) {
 				pendingView = getPendingView(parent);
 				AppendTask task = new AppendTask();
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-					task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-				}
-				else {
-					task.execute();
-				}
+				task.execute();
 			}
 
 			return (pendingView);

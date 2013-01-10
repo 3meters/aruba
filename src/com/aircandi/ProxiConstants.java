@@ -8,8 +8,6 @@ public interface ProxiConstants {
 	public static final int		JSON_NOT_INT_PRIMITIVE								= 999999;
 	public static final int		RESULT_OK											= -1;
 	public static final int		RESULT_FAIL											= 0;
-	public static final int		TWO_MINUTES											= 1000 * 60 * 2;
-	public static final int		FIVE_MINUTES										= 1000 * 60 * 5;
 	public static final boolean	MODE_DEBUG											= true;
 
 	public static final String	INSERT_USER_SECRET									= "larissa";
@@ -33,9 +31,9 @@ public interface ProxiConstants {
 	public static final String	USER_AGENT_NEXUS_S									= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 
 	public static final int		RADAR_ENTITY_LIMIT									= 50;
+	public static final int		RADAR_PLACES_LIMIT									= 30;
 	public static final int		RADAR_CHILDENTITY_LIMIT								= 20;
 	public static final int		RADAR_COMMENT_LIMIT									= 50;
-	public static final int		RADAR_ENTITY_MAX_LIMIT								= 300;
 
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS			= 401.1f;
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED		= 401.2f;

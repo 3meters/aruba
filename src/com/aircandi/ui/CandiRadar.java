@@ -912,6 +912,7 @@ public class CandiRadar extends CandiActivity {
 
 			@Override
 			public void run() {
+				Thread.currentThread().setName("GetAwsCredentials");
 				try {
 					Properties properties = new Properties();
 					InputStream inputStream = getClass().getResourceAsStream("/com/aircandi/aws.properties");

@@ -279,4 +279,12 @@ public class WebImageView extends RelativeLayout {
 	public ImageView getImageZoom() {
 		return mImageZoom;
 	}
+
+	public Integer getSizeHint() {
+		return mSizeHint;
+	}
+
+	public void setSizeHint(Integer sizeHint) {
+		mSizeHint = sizeHint;
+	}
 }

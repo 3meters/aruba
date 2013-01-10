@@ -52,7 +52,7 @@ public class ImageUtils {
 	}
 
 	public static void showToastNotification(final String message, final int duration) {
-		Aircandi.applicationHandler.post(new Runnable() {
+		Aircandi.mainThreadHandler.post(new Runnable() {
 
 			@Override
 			public void run() {
@@ -64,7 +64,7 @@ public class ImageUtils {
 	}
 
 	public static void showToastNotification(final int messageId, final int duration) {
-		Aircandi.applicationHandler.post(new Runnable() {
+		Aircandi.mainThreadHandler.post(new Runnable() {
 
 			@Override
 			public void run() {
@@ -413,12 +413,13 @@ public class ImageUtils {
 		return bitmapScaled;
 	}
 
-	public static Bitmap ensureBitmapScale(Bitmap bitmap) {
+	public static Bitmap ensureBitmapScaleForS3(Bitmap bitmap) {
 		Bitmap bitmapScaled = bitmap;
-		Boolean scalingNeeded = (bitmap.getWidth() > CandiConstants.IMAGE_WIDTH_MAXIMUM || bitmap.getHeight() > CandiConstants.IMAGE_WIDTH_MAXIMUM);
+		Boolean scalingNeeded = (bitmap.getWidth() > CandiConstants.IMAGE_DIMENSION_MAX && bitmap.getHeight() > CandiConstants.IMAGE_DIMENSION_MAX);
 		if (scalingNeeded) {
+			
 			Matrix matrix = new Matrix();
-			float scalingRatio = (float) CandiConstants.IMAGE_WIDTH_MAXIMUM / (float) bitmap.getWidth();
+			float scalingRatio = Math.max((float) CandiConstants.IMAGE_DIMENSION_MAX / (float) bitmap.getWidth(), (float) CandiConstants.IMAGE_DIMENSION_MAX / (float) bitmap.getHeight());
 			matrix.postScale(scalingRatio, scalingRatio);
 			/*
 			 * Create a new bitmap from the original using the matrix to transform the result.

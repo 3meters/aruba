@@ -18,7 +18,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.provider.MediaStore.Images;
 import android.support.v4.util.LruCache;
 import android.util.TypedValue;
@@ -46,7 +45,6 @@ public class BitmapManager {
 	private BitmapLoader				mBitmapLoader;
 
 	private LruCache<String, Bitmap>	mMemoryCache;
-	private LruCache<String, Bitmap>	mThumbnailCache;
 
 	public static synchronized BitmapManager getInstance() {
 		if (singletonObject == null) {
@@ -67,14 +65,6 @@ public class BitmapManager {
 		final int cacheSize = 1024 * 1024 * memClass / 2;
 
 		mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
-			@Override
-			protected int sizeOf(String key, Bitmap bitmap) {
-				/* The cache size will be measured in bytes rather than number of items. */
-				return bitmap.getByteCount();
-			}
-		};
-
-		mThumbnailCache = new LruCache<String, Bitmap>(cacheSize / 2) {
 			@Override
 			protected int sizeOf(String key, Bitmap bitmap) {
 				/* The cache size will be measured in bytes rather than number of items. */
@@ -113,78 +103,64 @@ public class BitmapManager {
 			String resolvedResourceName = resolveResourceName(rawResourceName);
 
 			int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable", "com.aircandi");
-			Bitmap bitmap = loadBitmapFromResources(resourceId);
+			String memCacheKey = String.valueOf(resourceId);
+			if (imageRequest.getImageSize() != null) {
+				memCacheKey += "." + String.valueOf(imageRequest.getImageSize());
+			}
+			String memKeyHashed = MiscUtils.md5(memCacheKey);
+			Bitmap bitmap = mMemoryCache.get(memKeyHashed);
 
-			if (bitmap != null) {
-				if (imageRequest.getRequestListener() != null) {
-					serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
-					imageRequest.getRequestListener().onComplete(serviceResponse);
-				}
-
-				if (imageRequest.getImageView() != null) {
-					BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-					ImageUtils.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true, AnimUtils.fadeInMedium());
+			if (bitmap == null) {
+				bitmap = loadBitmapFromResourcesSampled(resourceId, imageRequest.getImageSize());
+				synchronized (mMemoryCache) {
+					mMemoryCache.put(memKeyHashed, bitmap);
 				}
 			}
-			else {
-				throw new IllegalStateException("Bitmap resource is null: " + resolvedResourceName);
+
+			if (imageRequest.getRequestListener() != null) {
+				serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
+				imageRequest.getRequestListener().onComplete(serviceResponse);
+			}
+
+			if (imageRequest.getImageView() != null) {
+				BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+				ImageUtils.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 		}
 		else {
 			/*
 			 * Fetching from cache often involves file io so we take this off the main (ui) thread.
 			 */
-			AsyncTask task = new AsyncTask() {
+			ServiceResponse serviceResponse = new ServiceResponse();
+			Bitmap bitmap = getBitmap(imageRequest.getImageUri(), imageRequest.getImageSize());
 
-				@Override
-				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("FetchImage");
-					ServiceResponse serviceResponse = new ServiceResponse();
-					Bitmap bitmap = null;
-					if (imageRequest.getUseThumbnailCache()) {
-						bitmap = getThumbnail(imageRequest.getImageUri(), imageRequest.getImageSize());
-					}
-					else {
-						bitmap = getBitmap(imageRequest.getImageUri(), imageRequest.getImageSize());
-					}
+			if (bitmap != null) {
+				Logger.v(this, "Image request satisfied from cache: " + imageRequest.getImageUri());
+				serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
 
-					if (bitmap != null) {
-						Logger.v(this, "Image request satisfied from cache: " + imageRequest.getImageUri());
-						serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
-
-						if (imageRequest.getRequestListener() != null) {
-							serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
-							imageRequest.getRequestListener().onComplete(serviceResponse);
-						}
-
-						if (imageRequest.getImageView() != null) {
-							final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-
-							/* Put this on the main thread */
-							Aircandi.applicationHandler.post(new Runnable() {
-								@Override
-								public void run() {
-									ImageUtils.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true, AnimUtils.fadeInMedium());
-								}
-							});
-						}
-					}
-					else {
-						serviceResponse.responseCode = ResponseCode.Failed;
-					}
-
-					if (serviceResponse.responseCode != ResponseCode.Success) {
-						mBitmapLoader.queueBitmapRequest(imageRequest);
-					}
-					return null;
+				if (imageRequest.getRequestListener() != null) {
+					serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
+					imageRequest.getRequestListener().onComplete(serviceResponse);
 				}
-			};
 
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-				task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				if (imageRequest.getImageView() != null) {
+					final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+
+					/* Put this on the main thread */
+					Aircandi.mainThreadHandler.post(new Runnable() {
+						@Override
+						public void run() {
+							ImageUtils.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true, AnimUtils.fadeInMedium());
+						}
+					});
+				}
 			}
 			else {
-				task.execute();
+				serviceResponse.responseCode = ResponseCode.Failed;
+			}
+
+			if (serviceResponse.responseCode != ResponseCode.Success) {
+				mBitmapLoader.queueBitmapRequest(imageRequest);
 			}
 		}
 	}
@@ -249,9 +225,10 @@ public class BitmapManager {
 		String memKeyHashed = MiscUtils.md5(memCacheKey);
 		String diskKeyHashed = MiscUtils.md5(diskCacheKey);
 
-		if (mMemoryCache.get(memKeyHashed) != null) {
-			Logger.v(this, "Image request satisfied from MEMORY cache: " + memCacheKey);
-			return mMemoryCache.get(memKeyHashed);
+		Bitmap bitmap = mMemoryCache.get(memKeyHashed);
+		if (bitmap != null) {
+			Logger.v(this, "Image request satisfied from MEMORY cache: " + key);
+			return bitmap;
 		}
 		else {
 			synchronized (mDiskCacheLock) {
@@ -264,8 +241,6 @@ public class BitmapManager {
 				}
 				if (mDiskLruCache != null) {
 					if (mDiskLruCache.containsKey(diskKeyHashed)) {
-						Logger.v(this, "Image request satisfied from FILE cache: " + key);
-						Bitmap bitmap = null;
 
 						/* Push to the mem cache */
 						byte[] imageBytes = mDiskLruCache.getImageBytes(diskKeyHashed);
@@ -278,39 +253,13 @@ public class BitmapManager {
 						}
 
 						/* Deliver to caller */
+						Logger.v(this, "Image request satisfied from FILE cache: " + key);
 						return bitmap;
 					}
 				}
 			}
 			return null;
 		}
-	}
-
-	public Bitmap putThumbnailBytes(String key, byte[] imageBytes, Integer size) {
-		String memCacheKey = key;
-		if (size != null) {
-			memCacheKey += "." + String.valueOf(size);
-		}
-		String memKeyHashed = MiscUtils.md5(memCacheKey);
-
-		/* Scale if needed and push */
-		Bitmap bitmap = bitmapForByteArraySampled(imageBytes, size, null);
-		mThumbnailCache.put(memKeyHashed, bitmap);
-		return bitmap;
-	}
-
-	public Bitmap getThumbnail(String key, Integer size) {
-		String memCacheKey = key;
-		if (size != null) {
-			memCacheKey += "." + String.valueOf(size);
-		}
-		String memKeyHashed = MiscUtils.md5(memCacheKey);
-
-		if (mThumbnailCache.get(memKeyHashed) != null) {
-			Logger.v(this, "Image request satisfied from THUMBNAIL cache: " + memCacheKey);
-			return mThumbnailCache.get(memKeyHashed);
-		}
-		return null;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -406,6 +355,31 @@ public class BitmapManager {
 
 	public Bitmap loadBitmapFromResources(final int resourceId) {
 		Bitmap bitmap = BitmapFactory.decodeResource(Aircandi.applicationContext.getResources(), resourceId);
+		return bitmap;
+	}
+
+	public Bitmap loadBitmapFromResourcesSampled(final Integer resourceId, Integer size) {
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		options.inPurgeable = true;
+		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+
+		BitmapFactory.decodeResource(Aircandi.applicationContext.getResources(), resourceId, options);
+
+		int width = options.outWidth;
+		int height = options.outHeight;
+
+		int scale = 1;
+		if (size != null) {
+			if (width > size && height > size) {
+				scale = Math.min(width / size, height / size);
+			}
+		}
+
+		options.inSampleSize = scale;
+		options.inJustDecodeBounds = false;
+
+		Bitmap bitmap = BitmapFactory.decodeResource(Aircandi.applicationContext.getResources(), resourceId, options);
 		return bitmap;
 	}
 

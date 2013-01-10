@@ -463,6 +463,7 @@ public class PicturePicker extends FormActivity {
 
 				@Override
 				public void run() {
+					Thread.currentThread().setName("DrawableManagerFetch");					
 					Drawable drawable = fetchDrawable(uri);
 					Message message = handler.obtainMessage(1, drawable);
 					handler.sendMessage(message);

@@ -371,10 +371,10 @@ public class ProxiExplorer {
 		if (excludePlaceIds.size() > 0) {
 			parameters.putStringArrayList("excludePlaceIds", excludePlaceIds);
 		}
-		parameters.putString("source", "foursquare");
+		parameters.putString("source", PlaceSources.foursquare.name());
 		parameters.putFloat("latitude", observation.latitude.floatValue());
 		parameters.putFloat("longitude", observation.longitude.floatValue());
-		parameters.putInt("limit", 50);
+		parameters.putInt("limit", ProxiConstants.RADAR_PLACES_LIMIT);
 		Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
 				Aircandi.applicationContext.getString(R.string.search_radius_default)));
 		parameters.putInt("radius", searchRangeMeters);
@@ -598,24 +598,22 @@ public class ProxiExplorer {
 	}
 
 	private ServiceResponse storeImageAtS3(Entity entity, User user, Bitmap bitmap) {
-
 		/*
-		 * Delete image from S3 if it has been orphaned 
-		 * 
 		 * TODO: We are going with a garbage collection scheme for orphaned
 		 * images. We need to use an extended property on S3 items that is set to a date when collection is ok. This
 		 * allows downloaded entities to keep working even if an image for entity has changed.
 		 */
-		ServiceResponse serviceResponse = new ServiceResponse();
 
 		/* Make sure the bitmap is less than or equal to the maximum size we want to persist. */
-		bitmap = ImageUtils.ensureBitmapScale(bitmap);
-		
-		/* Push it to S3 */
+		bitmap = ImageUtils.ensureBitmapScaleForS3(bitmap);
+
+		/*
+		 * Push it to S3. It is always formatted/compressed as a jpeg.
+		 */
 		try {
 			String stringDate = DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME);
 			String imageKey = String.valueOf(Aircandi.getInstance().getUser().id) + "_" + stringDate + ".jpg";
-			S3.putImage(imageKey, bitmap);
+			S3.putImage(imageKey, bitmap, CandiConstants.IMAGE_QUALITY_S3);
 
 			/* Update the photo object for the entity or user */
 			if (entity != null) {
@@ -629,7 +627,7 @@ public class ProxiExplorer {
 			return new ServiceResponse(ResponseCode.Failed, null, exception);
 		}
 
-		return serviceResponse;
+		return new ServiceResponse();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -2154,6 +2152,11 @@ public class ProxiExplorer {
 
 	public static enum EntityListType {
 		TunedPlaces, SyntheticPlaces, CreatedByUser, Collections, InCollection
+	}
+
+	public static enum PlaceSources {
+		foursquare,
+		factual
 	}
 
 	public static interface IEntityProcessListener {

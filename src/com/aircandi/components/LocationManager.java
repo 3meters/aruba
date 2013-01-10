@@ -65,7 +65,7 @@ public class LocationManager {
 			mLocationManager.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 0, 0, mLocationListenerPendingIntent);
 		}
 
-		Aircandi.applicationHandler.postDelayed(new Runnable() {
+		Aircandi.mainThreadHandler.postDelayed(new Runnable() {
 
 			@Override
 			public void run() {

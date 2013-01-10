@@ -152,7 +152,12 @@ public class CandiForm extends CandiActivity {
 							upsize();
 						}
 						
-						if (!mTracked) track();
+						if (!mTracked) {
+							mTracked = true;
+							if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+								track();
+							}
+						}
 					}
 				}
 				else {

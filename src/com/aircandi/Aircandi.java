@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
@@ -84,7 +85,7 @@ public class Aircandi extends Application {
 	public static SharedPreferences.Editor	settingsEditor;
 
 	public static Context					applicationContext;
-	public static Handler					applicationHandler;
+	public static Handler					mainThreadHandler;
 	public static DisplayMetrics			displayMetrics;
 	public static StopWatch					stopwatch;
 	public static JSONParser				parser						= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
@@ -118,7 +119,7 @@ public class Aircandi extends Application {
 		ACRA.init(this);
 
 		applicationContext = getApplicationContext();
-		applicationHandler = new Handler();
+		mainThreadHandler = new Handler(Looper.getMainLooper());
 		stopwatch = new StopWatch();
 
 		/* Make settings available app wide */

@@ -6,10 +6,10 @@
     tools:context=".ui.SplashForm" >
 
     <ImageView
+        android:id="@+id/image_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY"
-        android:src="@drawable/splash_v" />
+        android:scaleType="fitXY" />
 
     <RelativeLayout
         android:id="@+id/dialog"

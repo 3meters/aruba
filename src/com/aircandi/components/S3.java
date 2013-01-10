@@ -74,9 +74,9 @@ public class S3 {
 	
 	/* Jayma: Added routines */
 
-	public static void putImage(String imageKey, Bitmap bitmap) throws ProxibaseServiceException {
+	public static void putImage(String imageKey, Bitmap bitmap, Integer quality) throws ProxibaseServiceException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+		bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
 		byte[] bitmapBytes = outputStream.toByteArray();
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(bitmapBytes);
 		ObjectMetadata metadata = new ObjectMetadata();
