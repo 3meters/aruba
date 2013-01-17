@@ -214,6 +214,7 @@ public class CandiView extends RelativeLayout {
 							imageUri = "resource:source_twitter_ii";
 						}
 					}
+					webImageView.getImageView().setTag(imageUri);
 					BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
 					if (mCandiImage.getSizeHint() != null) {
 						bitmapRequest.setImageSize(mCandiImage.getSizeHint());
