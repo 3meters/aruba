@@ -15,16 +15,9 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.provider.Settings;
-import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -37,7 +30,6 @@ import com.aircandi.components.CommandType;
 import com.aircandi.components.Events;
 import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.Exceptions;
-import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
@@ -55,11 +47,8 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.BounceListView;
-import com.aircandi.ui.widgets.CandiView;
-import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
-import com.aircandi.utilities.ImageUtils;
 
 /*
  * Library Notes
@@ -460,185 +449,6 @@ public class CandiRadar extends CandiActivity {
 		mInitialized = true;
 	}
 
-	private void drawTuned(Boolean configChange) {}
-
-	private void drawSynthetics(Boolean configChange) {
-		List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarSynthetics();
-		mEntities.addAll(entities);
-		mList.invalidateViews();
-	}
-
-	@SuppressWarnings("unused")
-	private void drawLayout(PlaceType placeType, ViewGroup layout, List<Entity> entities, Boolean addSparkle) {
-
-		if (entities.size() == 0) {
-			layout.removeAllViews();
-			if (placeType == PlaceType.Tuned) {
-				((ViewGroup) findViewById(R.id.radar_places_group)).setVisibility(View.GONE);
-			}
-			else if (placeType == PlaceType.Synthetic) {
-				((ViewGroup) findViewById(R.id.radar_synthetics_group)).setVisibility(View.GONE);
-			}
-			return;
-		}
-		else {
-			if (placeType == PlaceType.Tuned) {
-				((ViewGroup) findViewById(R.id.radar_places_group)).setVisibility(View.VISIBLE);
-			}
-			else if (placeType == PlaceType.Synthetic) {
-				((ViewGroup) findViewById(R.id.radar_synthetics_group)).setVisibility(View.VISIBLE);
-			}
-		}
-
-		/*
-		 * Custom typeface can only be set via code. We are keeping it here
-		 * for simplicity even though it would be more efficient to set it
-		 * once when the activity is created.
-		 */
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.radar_places_header));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.radar_synthetics_header));
-
-		DisplayMetrics metrics = getResources().getDisplayMetrics();
-		View parentView = findViewById(R.id.radar);
-		Integer layoutWidthPixels = metrics.widthPixels
-				- (parentView.getPaddingLeft() + parentView.getPaddingRight() + layout.getPaddingLeft() + layout.getPaddingRight());
-
-		Integer spacing = 3;
-		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(CandiRadar.this, spacing);
-		Integer spacingVerticalPixels = ImageUtils.getRawPixels(CandiRadar.this, spacing);
-		Integer candiCountPortrait = getResources().getInteger(R.integer.candi_per_row_portrait_radar);
-		Integer candiCountLandscape = getResources().getInteger(R.integer.candi_per_row_landscape_radar);
-
-		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * (candiCountPortrait - 1))) / candiCountPortrait;
-
-		/* We need to cap the dimensions so we don't look crazy in landscape orientation */
-		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * (candiCountLandscape - 1))) / candiCountLandscape;
-		}
-
-		Integer candiHeightPixels = (int) (candiWidthPixels * 1);
-
-		if (placeType == PlaceType.Synthetic) {
-			FlowLayout flowLayout = (FlowLayout) layout;
-			flowLayout.setSpacingHorizontal(spacingHorizontalPixels);
-			flowLayout.setSpacingVertical(spacingVerticalPixels);
-		}
-
-		/*
-		 * Removes all views that are not part of the new set of entities
-		 */
-		for (int i = layout.getChildCount() - 1; i >= 0; i--) {
-			View view = layout.getChildAt(i);
-			Entity viewEntity = (Entity) view.getTag();
-			Boolean match = false;
-			for (Entity entity : entities) {
-				if (entity.id.equals(viewEntity.id)) {
-					match = true;
-					break;
-				}
-			}
-			if (!match) {
-				layout.removeViewAt(i);
-			}
-		}
-
-		/*
-		 * Insert views for entities that we don't already have a view for
-		 */
-		int entityIndex = 0;
-		Boolean topIsNew = false;
-		for (final Entity entity : entities) {
-			View viewForEntity = null;
-			Integer viewForEntityIndex = 0;
-			for (int i = 0; i < layout.getChildCount(); i++) {
-				View view = layout.getChildAt(i);
-				Entity viewEntity = (Entity) view.getTag();
-				if (viewEntity.id.equals(entity.id)) {
-					viewForEntity = view;
-					viewForEntityIndex = i;
-					break;
-				}
-			}
-			if (viewForEntity != null) {
-				layout.removeViewAt(viewForEntityIndex);
-				layout.addView(viewForEntity, entityIndex);
-				((CandiView) viewForEntity).setTag(entity);
-				((CandiView) viewForEntity).bindToEntity(entity);
-			}
-			else {
-				if (entityIndex == 0 && !entity.synthetic) {
-					topIsNew = true;
-				}
-
-				final CandiView candiView = new CandiView(CandiRadar.this);
-				candiView.setTag(entity);
-				candiView.setClickable(true);
-				candiView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && !entity.synthetic) {
-					/*
-					 * Service entity
-					 */
-					LinearLayout.LayoutParams candiViewParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-					candiViewParams.bottomMargin = spacingHorizontalPixels;
-					candiView.setLayoutParams(candiViewParams);
-					candiView.setLayoutId(R.layout.widget_candi_view_radar);
-					candiView.initialize();
-
-					RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(candiWidthPixels, candiHeightPixels);
-					candiView.getCandiImage().setLayoutParams(paramsImage);
-					candiView.bindToEntity(entity);
-				}
-				else {
-					/*
-					 * Synthetic entity
-					 */
-					FlowLayout.LayoutParams candiViewParams = new FlowLayout.LayoutParams(candiWidthPixels, candiHeightPixels);
-					candiViewParams.setCenterHorizontal(true);
-					candiView.setLayoutParams(candiViewParams);
-					candiView.setLayoutId(R.layout.widget_candi_view_radar_synthetic);
-					candiView.initialize();
-
-					RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(candiWidthPixels, candiHeightPixels);
-					candiView.getCandiImage().setLayoutParams(paramsImage);
-					candiView.bindToEntity(entity);
-				}
-
-				candiView.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View view) {
-						//onCandiClick(view);
-					}
-				});
-
-				layout.addView(candiView);
-			}
-			entityIndex++;
-		}
-
-		//		if (layout.getId() == R.id.radar_places) {
-		//			AnimUtils.showView(findViewById(R.id.radar_places_header));
-		//		}
-		//		else if (layout.getId() == R.id.radar_synthetics) {
-		//			AnimUtils.showView(findViewById(R.id.radar_synthetics_header));
-		//		}
-
-		mCommon.hideBusy();
-
-		/* Check for rookies and play a sound */
-		if (addSparkle && topIsNew) {
-			scrollToTop();
-			if (mPrefSoundEffects) {
-				mSoundPool.play(mNewCandiSoundId, 0.2f, 0.2f, 1, 0, 1f);
-			}
-		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Event handlers
-	// --------------------------------------------------------------------------------------------
-
 	// --------------------------------------------------------------------------------------------
 	// Entity routines
 	// --------------------------------------------------------------------------------------------
@@ -910,8 +720,6 @@ public class CandiRadar extends CandiActivity {
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
-		drawTuned(true);
-		drawSynthetics(true);
 		super.onConfigurationChanged(newConfig);
 	}
 
