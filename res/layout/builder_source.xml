@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <!-- Content -->
+
+    <com.aircandi.ui.widgets.BounceScrollView
+        android:id="@+id/form_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/form_footer"
+        android:layout_alignParentTop="true"
+        android:fillViewport="true"
+        android:padding="10dp" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <!-- Public Image -->
+
+            <com.aircandi.ui.widgets.WebImageView
+                android:id="@+id/image"
+                style="@style/picture_framed"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="left"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="10dp"
+                aircandi:brokenDrawable="@drawable/ic_app"
+                aircandi:layout="@layout/widget_webimageview_source_builder"
+                aircandi:sizeHint="80dp"
+                android:scaleType="centerCrop" />
+
+            <!-- Title and Content -->
+
+            <Spinner
+                android:id="@+id/source_type_picker"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/form_field_height"
+                android:spinnerMode="dropdown"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/form_field_height"
+                android:hint="@string/form_source_name_hint"
+                android:inputType="textNoSuggestions"
+                android:textAppearance="@style/app_text_appearance_small" />
+
+            <EditText
+                android:id="@+id/id"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/form_field_height"
+                android:hint="@string/form_source_id_hint"
+                android:inputType="textUri"
+                android:textAppearance="@style/app_text_appearance_small" />
+        </LinearLayout>
+    </com.aircandi.ui.widgets.BounceScrollView>
+
+    <!-- Footer -->
+
+    <LinearLayout
+        android:id="@+id/form_footer"
+        style="?attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal" >
+
+        <Button
+            android:id="@+id/button_cancel"
+            style="@style/form_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onCancelButtonClick"
+            android:text="@string/form_button_cancel" />
+
+        <Button
+            android:id="@+id/button_save"
+            style="@style/form_button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onSaveButtonClick"
+            android:text="@string/form_button_ok" />
+    </LinearLayout>
+
+</RelativeLayout>
