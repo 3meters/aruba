@@ -354,7 +354,7 @@ public class CandiView extends RelativeLayout {
 					}
 				}
 				
-				if (feet < 60) {
+				if (feet < 60 && entity.hasProximityLink()) {
 					info = "here";
 				}
 			}

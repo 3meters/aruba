@@ -131,7 +131,7 @@ public abstract class CandiActivity extends SherlockActivity {
 											finish();
 										}
 										if (listener != null) {
-											listener.onComplete();
+											listener.onComplete(true);
 										}
 									}
 								}
@@ -146,7 +146,7 @@ public abstract class CandiActivity extends SherlockActivity {
 										finish();
 									}
 									if (listener != null) {
-										listener.onComplete();
+										listener.onComplete(true);
 									}
 								}
 							});

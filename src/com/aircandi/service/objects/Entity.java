@@ -484,6 +484,17 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		}
 		return null;
 	}
+	
+	public Boolean hasProximityLink() {
+		if (links != null) {
+			for (Link link : links) {
+				if (link.primary) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	public Integer getPlaceRankScore() {
 		/*

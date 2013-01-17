@@ -377,21 +377,23 @@ public class CandiRadar extends CandiActivity {
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 
 							final Observation observation = LocationManager.getInstance().getObservation();
-							new AsyncTask() {
+							if (observation != null) {
+								new AsyncTask() {
 
-								@Override
-								protected Object doInBackground(Object... params) {
-									Thread.currentThread().setName("GetPlacesNearLocation");
-									ProxiExplorer.getInstance().getPlacesNearLocation(observation);
-									return null;
-								}
+									@Override
+									protected Object doInBackground(Object... params) {
+										Thread.currentThread().setName("GetPlacesNearLocation");
+										ProxiExplorer.getInstance().getPlacesNearLocation(observation);
+										return null;
+									}
 
-								@Override
-								protected void onPostExecute(Object result) {
-									mCommon.hideBusy();
-								}
+									@Override
+									protected void onPostExecute(Object result) {
+										mCommon.hideBusy();
+									}
 
-							}.execute();
+								}.execute();
+							}
 
 							mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 							mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
@@ -699,10 +701,11 @@ public class CandiRadar extends CandiActivity {
 		});
 	}
 
-	private void handleUpdateChecks() {
+	private Boolean handleUpdateChecks(final RequestListener listener) {
 
 		/* Update check */
-		if (ProxiExplorer.getInstance().updateCheckNeeded()) {
+		Boolean updateCheckNeeded = ProxiExplorer.getInstance().updateCheckNeeded();
+		if (updateCheckNeeded) {
 
 			new AsyncTask() {
 
@@ -719,7 +722,10 @@ public class CandiRadar extends CandiActivity {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						if (Aircandi.applicationUpdateNeeded) {
 							invalidateOptionsMenu();
-							showUpdateAlert(null);
+							showUpdateAlert(listener);
+						}
+						else {
+							listener.onComplete(false);
 						}
 					}
 					else {
@@ -728,6 +734,7 @@ public class CandiRadar extends CandiActivity {
 				}
 			}.execute();
 		}
+		return updateCheckNeeded;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -758,9 +765,6 @@ public class CandiRadar extends CandiActivity {
 		if (CandiConstants.DEBUG_TRACE) {
 			Debug.startMethodTracing("aircandi", 100000000);
 		}
-
-		/* Check for update */
-		handleUpdateChecks();
 
 		/* Make sure the right tab is active */
 		mCommon.setActiveTab(0);
@@ -820,44 +824,65 @@ public class CandiRadar extends CandiActivity {
 		if (!mInitialized) return;
 
 		if (hasFocus) {
-
 			if (Aircandi.applicationUpdateRequired) {
 				showUpdateAlert(null);
 			}
 			else {
-				EntityModel entityModel = ProxiExplorer.getInstance().getEntityModel();
-				if (mEntityModelRefreshDate == null) {
-					Logger.d(this, "Start first place search");
-					searchForPlaces();
-				}
-				else if (mPrefChangeRefreshNeeded) {
-					Logger.d(this, "Start place search because of preference change");
-					mPrefChangeRefreshNeeded = false;
-					searchForPlaces();
-				}
-				else if ((entityModel.getLastRefreshDate() != null
-						&& entityModel.getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue())
-						|| (entityModel.getLastActivityDate() != null
-						&& entityModel.getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
-					/*
-					 * Everytime we show details for a place, we fetch place details from the service
-					 * when in turn get pushed into the cache and activityDate gets tickled.
-					 */
-					Logger.d(this, "Update radar ui because of detected entity model change");
-					mHandler.postDelayed(new Runnable() {
-
-						@Override
-						public void run() {
-							mCommon.showBusy();
-							invalidateOptionsMenu();
-							mRadarAdapter.clear();
-							mRadarAdapter.addAll(ProxiExplorer.getInstance().getEntityModel().getPlaces());
-							mRadarAdapter.notifyDataSetChanged();
-							mCommon.hideBusy();
+				/* Check for update */
+				Boolean updateCheckNeeded = handleUpdateChecks(new RequestListener() {
+					@Override
+					public void onComplete(Object dialogDisplayed) {
+						/*
+						 * We don't do anything right now because window focus returning
+						 * when dismissing the update dialog will restart the logic
+						 * to trigger data updates.
+						 */
+						if (!(Boolean) dialogDisplayed) {
+							manageData();
 						}
-					}, 100);
+					}
+				});
+
+				if (!updateCheckNeeded) {
+					manageData();
 				}
 			}
+		}
+	}
+
+	public void manageData() {
+
+		EntityModel entityModel = ProxiExplorer.getInstance().getEntityModel();
+		if (mEntityModelRefreshDate == null) {
+			Logger.d(this, "Start first place search");
+			searchForPlaces();
+		}
+		else if (mPrefChangeRefreshNeeded) {
+			Logger.d(this, "Start place search because of preference change");
+			mPrefChangeRefreshNeeded = false;
+			searchForPlaces();
+		}
+		else if ((entityModel.getLastRefreshDate() != null
+				&& entityModel.getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue())
+				|| (entityModel.getLastActivityDate() != null
+				&& entityModel.getLastActivityDate().longValue() > mEntityModelActivityDate.longValue())) {
+			/*
+			 * Everytime we show details for a place, we fetch place details from the service
+			 * when in turn get pushed into the cache and activityDate gets tickled.
+			 */
+			Logger.d(this, "Update radar ui because of detected entity model change");
+			mHandler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					mCommon.showBusy();
+					invalidateOptionsMenu();
+					mRadarAdapter.clear();
+					mRadarAdapter.addAll(ProxiExplorer.getInstance().getEntityModel().getPlaces());
+					mRadarAdapter.notifyDataSetChanged();
+					mCommon.hideBusy();
+				}
+			}, 100);
 		}
 	}
 
