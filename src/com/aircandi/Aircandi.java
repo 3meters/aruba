@@ -19,6 +19,7 @@ import android.util.DisplayMetrics;
 
 import com.aircandi.components.StopWatch;
 import com.aircandi.service.objects.User;
+import com.amazonaws.auth.BasicAWSCredentials;
 
 @ReportsCrashes(formKey = "dFBjSFl2eWpOdkF0TlR5ZUlvaDlrUUE6MQ", customReportContent = {
 		ReportField.REPORT_ID,
@@ -78,6 +79,7 @@ import com.aircandi.service.objects.User;
 public class Aircandi extends Application {
 
 	public final static int					DEBUG_SIGNATURE_HASH		= -2026043354;
+	public static BasicAWSCredentials		mAwsCredentials				= null;
 
 	private static Aircandi					singletonObject;
 

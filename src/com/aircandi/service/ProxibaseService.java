@@ -14,7 +14,6 @@ import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -83,10 +82,10 @@ import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.ServiceEntryBase;
 import com.aircandi.service.objects.ServiceObject;
 import com.aircandi.service.objects.Session;
+import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.Tip;
 import com.aircandi.service.objects.User;
-import com.aircandi.utilities.DateUtils;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 
@@ -719,18 +718,6 @@ public class ProxibaseService {
 				+ String.valueOf(downloadTimeMills) + "ms");
 	}
 
-	@SuppressWarnings("deprecation")
-	public String generateId(int schemaId, Long timeUtc) {
-
-		Date dateUtc = new Date(timeUtc);
-		Date midnightUtc = new Date(dateUtc.getYear(), dateUtc.getMonth(), dateUtc.getDate());
-		Integer secondsUtc = DateUtils.intervalInSeconds(midnightUtc, dateUtc);
-		Integer rand = (int) Math.floor(Math.random() * 1000000);
-
-		String id = String.format("%1$04d.%2$ty%2$tm%2$td.%3$05d.%2$tL.%4$06d", schemaId, timeUtc, secondsUtc, rand);
-		return id;
-	}
-
 	public String sessionInfo(ServiceRequest serviceRequest) {
 		String sessionInfo = "";
 		if (serviceRequest.getSession() != null) {
@@ -769,6 +756,9 @@ public class ProxibaseService {
 			}
 			else if (serviceDataType == ServiceDataType.Category) {
 				return Category.setPropertiesFromMap(new Category(), rootMap);
+			}
+			else if (serviceDataType == ServiceDataType.Source) {
+				return Source.setPropertiesFromMap(new Source(), rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.GeoLocation) {
 				return GeoLocation.setPropertiesFromMap(new GeoLocation(), rootMap);
@@ -838,8 +828,15 @@ public class ProxibaseService {
 					serviceData.data = Result.setPropertiesFromMap(new Result(), (HashMap) serviceData.data);
 				}
 				else {
-
-					List<LinkedHashMap<String, Object>> maps = (List<LinkedHashMap<String, Object>>) serviceData.data;
+					List<LinkedHashMap<String, Object>> maps = null;					
+					if (serviceData.data instanceof List) {
+						maps = (List<LinkedHashMap<String, Object>>) serviceData.data;
+					}
+					else {
+						LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) serviceData.data;
+						maps = new ArrayList<LinkedHashMap<String, Object>>();
+						maps.add(map);
+					}
 					List<Object> list = new ArrayList<Object>();
 					for (LinkedHashMap<String, Object> map : maps) {
 						if (serviceDataType == ServiceDataType.ServiceEntry) {
@@ -973,7 +970,7 @@ public class ProxibaseService {
 	public static class RequestListener {
 
 		public void onComplete() {}
-		
+
 		public void onComplete(Object response) {}
 
 		public void onComplete(Object response, Object extra) {}
@@ -996,7 +993,7 @@ public class ProxibaseService {
 		ImageResult,
 		GeoLocation,
 		Category,
-		None, Location, Stat, ServiceEntry,
+		None, Location, Stat, ServiceEntry, Source,
 	}
 
 	public static enum RequestType {

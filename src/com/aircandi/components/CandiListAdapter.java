@@ -2,6 +2,7 @@ package com.aircandi.components;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
@@ -67,7 +68,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			holder.description = (TextViewEllipsizing) view.findViewById(R.id.description);
 			holder.user = (UserView) view.findViewById(R.id.user);
 			holder.comments = (Button) view.findViewById(R.id.button_comments_browse);
-			holder.check = (CheckBox) view.findViewById(R.id.check);
+			//holder.check = (CheckBox) view.findViewById(R.id.check);
 			if (holder.check != null) {
 				holder.check.setOnClickListener(new OnClickListener() {
 
@@ -284,7 +285,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 				}
 			}
 			else {
-				if (filterType.toString().toLowerCase().equals("candipatches")) {
+				if (filterType.toString().toLowerCase(Locale.US).equals("candipatches")) {
 					final ArrayList<Entity> filteredEntities = new ArrayList<Entity>(mListItems.size());
 					for (int i = 0; i < mListItems.size(); i++) {
 						@SuppressWarnings("unused")

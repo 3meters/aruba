@@ -22,6 +22,7 @@ public class Preferences extends SherlockPreferenceActivity {
 	public static final String	PREF_THEME					= "Pref_Theme";
 
 	/* Prefs - dev only */
+	public static final String	PREF_ENABLE_DEV				= "Pref_Enable_Dev";
 	public static final String	PREF_ENTITY_FENCING			= "Pref_Entity_Fencing";
 	public static final String	PREF_SHOW_PLACE_RANK_SCORE	= "Pref_Show_Place_Rank_Score";
 	public static final String	PREF_TESTING_BEACONS		= "Pref_Testing_Beacons";

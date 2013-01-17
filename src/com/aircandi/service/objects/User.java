@@ -17,8 +17,6 @@ public class User extends ServiceEntryBase {
 	private static final long	serialVersionUID	= 127428776257201065L;
 
 	@Expose
-	public String				name;
-	@Expose
 	public String				email;										// Required
 	@Expose
 	public String				role;
@@ -32,6 +30,8 @@ public class User extends ServiceEntryBase {
 	public Boolean				isDeveloper;
 	@Expose
 	public Photo				photo;
+	@Expose
+	public String				password;
 
 	@Expose(serialize = false, deserialize = true)
 	public String				facebookId;
@@ -39,8 +39,6 @@ public class User extends ServiceEntryBase {
 	public String				twitterId;
 	@Expose(serialize = false, deserialize = true)
 	public String				googleId;
-	@Expose(serialize = false, deserialize = true)
-	public String				password;
 	@Expose(serialize = false, deserialize = true)
 	public Number				lastSignedInDate;
 	@Expose(serialize = false, deserialize = true)

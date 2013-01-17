@@ -19,9 +19,11 @@
         style="@style/form_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:layout_centerInParent="true"
         android:onClick="onNewCommentButtonClick"
-        android:text="@string/candi_button_comment_first" 
-        android:visibility="gone"/>
+        android:text="@string/comment_button_comment_first"
+        android:visibility="gone" />
 
 </RelativeLayout>

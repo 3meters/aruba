@@ -11,39 +11,20 @@
     <!-- Main body -->
 
     <com.aircandi.ui.widgets.SectionLayout
-        android:id="@+id/section_candi"
+        android:id="@+id/section_layout_switchboard"
         style="@style/candi_form_section"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        aircandi:headerTitle="@string/candi_section_candi"
+        aircandi:headerTitle="@string/candi_section_switchboard"
         aircandi:layoutHeader="@layout/temp_section_header"
         android:orientation="vertical" >
 
         <com.aircandi.ui.widgets.FlowLayout
-            android:id="@+id/flow_candi"
+            android:id="@+id/flow_switchboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </com.aircandi.ui.widgets.SectionLayout>
 
-    <LinearLayout
-        android:id="@+id/author_group"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/author_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
-            android:text="@string/candi_label_user_creator" />
-
-        <com.aircandi.ui.widgets.UserView
-            android:id="@+id/author"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minWidth="175dp" />
-    </LinearLayout>
 
 </LinearLayout>

@@ -18,6 +18,8 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				name;
 	@Expose
+	public String				id;
+	@Expose
 	public String				pluralName;
 	@Expose
 	public String				shortName;
@@ -52,6 +54,7 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 		category.name = (String) map.get("name");
 		category.pluralName = (String) map.get("pluralName");
 		category.primary = (Boolean) map.get("primary");
+		category.id = (String) map.get("id");
 
 		if (map.get("icon") != null) {
 			category.icon = (Icon) Icon.setPropertiesFromMap(new Icon(), (HashMap<String, Object>) map.get("icon"));

@@ -143,6 +143,6 @@ public class AddressBuilder extends FormActivity {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.address_builder;
+		return R.layout.builder_address;
 	}
 }

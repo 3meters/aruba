@@ -18,14 +18,14 @@
 
     <TextView
         android:id="@+id/title"
-        style="@android:style/TextAppearance.StatusBar.EventContent.Title"
+        style="@android:style/TextAppearance.Medium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/image" />
 
     <TextView
         android:id="@+id/text"
-        style="@android:style/TextAppearance.StatusBar.EventContent"
+        style="@android:style/TextAppearance.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/title"

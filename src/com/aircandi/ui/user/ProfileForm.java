@@ -28,7 +28,6 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
@@ -46,7 +45,7 @@ import com.aircandi.utilities.MiscUtils;
 public class ProfileForm extends FormActivity {
 
 	private ViewFlipper		mViewFlipper;
-	private WebImageView	mImageUser;
+	private WebImageView	mImage;
 	private EditText		mTextFullname;
 	private EditText		mTextBio;
 	private EditText		mTextLink;
@@ -54,7 +53,7 @@ public class ProfileForm extends FormActivity {
 	private EditText		mTextEmail;
 	private Button			mButtonSave;
 	private User			mUser;
-	private Bitmap			mUserBitmap;
+	private Bitmap			mBitmap;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +74,7 @@ public class ProfileForm extends FormActivity {
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mCommon.setViewFlipper(mViewFlipper);
 
-		mImageUser = (WebImageView) findViewById(R.id.image_picture);
+		mImage = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
 		mTextBio = (EditText) findViewById(R.id.text_bio);
 		mTextLink = (EditText) findViewById(R.id.text_link);
@@ -150,41 +149,33 @@ public class ProfileForm extends FormActivity {
 
 	private void draw() {
 
+		drawImage(mUser);
+
 		mTextFullname.setText(mUser.name);
 		mTextBio.setText(mUser.bio);
 		mTextLink.setText(mUser.webUri);
 		mTextLocation.setText(mUser.location);
 		mTextEmail.setText(mUser.email);
 
-		if (mUser.getUserPhotoUri() != null && mUser.getUserPhotoUri().length() > 0) {
-			if (mUserBitmap != null) {
-				ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, AnimUtils.fadeInMedium());
-			}
-			else {
-				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
-				builder.setFromUri(mUser.getUserPhotoUri());
-				builder.setRequestListener(new RequestListener() {
-
-					@Override
-					public void onComplete(Object response) {
-						ServiceResponse serviceResponse = (ServiceResponse) response;
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-							mUserBitmap = imageResponse.bitmap;
-						}
-						else {
-							mImageUser.getImageView().setImageResource(R.drawable.image_broken);
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureBrowse);
-						}
-					}
-				});
-
-				BitmapRequest imageRequest = builder.create();
-				mImageUser.setBitmapRequest(imageRequest);
-			}
-		}
 		((ViewGroup) findViewById(R.id.flipper_form)).setVisibility(View.VISIBLE);
 
+	}
+
+	public void drawImage(User user) {
+		
+		if (mImage != null) {
+			if (mBitmap != null) {
+				mImage.hideLoading();
+				ImageUtils.showImageInImageView(mBitmap, mImage.getImageView(), true, AnimUtils.fadeInMedium());
+				mImage.setVisibility(View.VISIBLE);
+			}
+			else {
+				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImage);
+				builder.setImageUri(user.getUserPhotoUri());
+				BitmapRequest imageRequest = builder.create();
+				mImage.setBitmapRequest(imageRequest);
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -196,18 +187,25 @@ public class ProfileForm extends FormActivity {
 	}
 
 	public void onChangePictureButtonClick(View view) {
-		//		showChangePictureDialog(false, null, null, null, mImageUser, new RequestListener() {
-		//
-		//			@Override
-		//			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
-		//
-		//				ServiceResponse serviceResponse = (ServiceResponse) response;
-		//				if (serviceResponse.responseCode == ResponseCode.Success) {
-		//					mUser.getPhoto().setImageUri(imageUri);
-		//					mUserBitmap = imageBitmap;
-		//				}
-		//			}
-		//		});
+
+		mCommon.showPictureSourcePicker(null);
+		mImageRequestWebImageView = mImage;
+		mImageRequestListener = new RequestListener() {
+
+			@Override
+			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description) {
+
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					/* Could get set to null if we are using the default */
+					mBitmap = imageBitmap;
+					if (imageUri != null) {
+						mUser.getPhotoForSet().setImageUri(imageUri);
+					}
+					drawImage(mUser);
+				}
+			}
+		};
 	}
 
 	public void onChangePasswordButtonClick(View view) {
@@ -221,20 +219,44 @@ public class ProfileForm extends FormActivity {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
-		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
-			if (resultCode == Activity.RESULT_CANCELED) {
-				setResult(resultCode);
-				finish();
+		if (resultCode == Activity.RESULT_OK) {
+			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
+					if (pictureSource != null && !pictureSource.equals("")) {
+						if (pictureSource.equals("search")) {
+							pictureSearch();
+						}
+						else if (pictureSource.equals("gallery")) {
+							pictureFromGallery();
+						}
+						else if (pictureSource.equals("camera")) {
+							pictureFromCamera();
+						}
+						else if (pictureSource.equals("default")) {
+							usePictureDefault(mUser);
+						}
+					}
+				}
 			}
 			else {
-				initialize();
-				bind();
-				draw();
+				super.onActivityResult(requestCode, resultCode, intent);
 			}
 		}
-		else {
-			super.onActivityResult(requestCode, resultCode, intent);
+	}
+
+	protected void usePictureDefault(User user) {
+		/*
+		 * Setting the photo to null will trigger correct default handling.
+		 */
+		if (user.photo != null) {
+			user.photo.setBitmap(null);
+			user.photo = null;
 		}
+		mBitmap = null;
+		drawImage(user);
+		Tracker.trackEvent("User", "DefaultPicture", "None", 0);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -261,7 +283,7 @@ public class ProfileForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("UpdateUser");
-					ModelResult result = ProxiExplorer.getInstance().getEntityModel().updateUser(mUser, mUserBitmap, false);
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().updateUser(mUser, mBitmap, false);
 					return result;
 				}
 

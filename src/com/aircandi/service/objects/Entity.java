@@ -87,12 +87,13 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	public Boolean				hidden				= false;
 	public Boolean				synthetic			= false;
 	public Boolean				checked				= false;
+
+	/* Stash for place entities */
+	public List<Source>			sourceSuggestions;
 	
 	/* Used when this is a source entity */
-	public String				source;
-	public String				sourceId;
-	public String				sourceUri;
-	
+	public Source				source;
+
 	/* Cached for easier sorting */
 	public Float				distance;
 
@@ -271,7 +272,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 */
 		Entity entity = synthetic.clone();
 		entity.id = null;
-		entity.subtitle = synthetic.getCategories();
+		entity.subtitle = synthetic.getCategoriesAsText();
 		return entity;
 	}
 
@@ -363,9 +364,12 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		else if (this.type.equals(CandiConstants.TYPE_CANDI_LINK)) {
 			imageUri = "resource:source_website_ii";
 		}
+		else if (this.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+			imageUri = this.source.getImageUri();
+		}
 		else if (this.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			if (this.photo != null) {
-				imageUri = photo.getSizedUri(250, 250);
+				imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
 				if (imageUri == null) {
 					imageUri = photo.getUri();
 				}
@@ -383,7 +387,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		}
 		else {
 			if (this.photo != null) {
-				imageUri = photo.getSizedUri(250, 250);
+				imageUri = photo.getSizedUri(250, 250); // sizing ignored if source doesn't support it
 				if (imageUri == null) {
 					imageUri = photo.getUri();
 				}
@@ -440,8 +444,13 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public EntityList<Entity> getChildren() {
-		EntityList<Entity> childEntities = ProxiExplorer.getInstance().getEntityModel().getChildEntities(this.id);
-		return childEntities;
+		EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getChildEntities(this.id);
+		return entities;
+	}
+	
+	public EntityList<Entity> getSourceEntities() {
+		EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getSourceEntities(this.id);
+		return entities;
 	}
 
 	public Place getPlace() {
@@ -535,7 +544,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return null;
 	}
 
-	public String getCategories() {
+	public String getCategoriesAsText() {
 		if (place != null && place.categories != null && place.categories.size() > 0) {
 			String categories = "";
 			for (Category category : place.categories) {
@@ -543,6 +552,18 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			}
 			categories = categories.substring(0, categories.length() - 2);
 			return categories;
+		}
+		return null;
+	}
+
+	public String getSourcesAsText() {
+		if (sources != null && sources.size() > 0) {
+			String sourcesAsText = "";
+			for (Source source : sources) {
+				sourcesAsText += source.name + ", ";
+			}
+			sourcesAsText = sourcesAsText.substring(0, sourcesAsText.length() - 2);
+			return sourcesAsText;
 		}
 		return null;
 	}
@@ -590,6 +611,21 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 					}
 				}
 			}
+		}
+	}
+
+	public static class SortEntitiesBySourcePosition implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity entity1, Entity entity2) {
+
+			if (entity1.source.position < entity2.source.position) {
+				return -1;
+			}
+			if (entity1.source.position == entity2.source.position) {
+				return 0;
+			}
+			return 1;
 		}
 	}
 

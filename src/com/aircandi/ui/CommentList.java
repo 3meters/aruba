@@ -11,11 +11,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -49,6 +51,7 @@ public class CommentList extends CandiActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		if (!isFinishing()) {
 			initialize();
 			configureActionBar();
@@ -60,6 +63,9 @@ public class CommentList extends CandiActivity {
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mListView = (ListView) findViewById(R.id.list_comments);
 		mButtonNewComment = (Button) findViewById(R.id.button_new_comment);
+		
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_new_comment));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_comment));
 	}
 
 	private void configureActionBar() {
@@ -82,7 +88,7 @@ public class CommentList extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("GetComments");				
+				Thread.currentThread().setName("GetComments");
 				/*
 				 * Just get the comments without updating the entity in the cache
 				 */
@@ -97,12 +103,15 @@ public class CommentList extends CandiActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					if (result.data != null) {
-						Entity entity = (Entity) result.data;
+						mCommon.mEntity = (Entity) result.data;
+						if (mCommon.mEntity.locked) {
+							((View) findViewById(R.id.form_footer)).setVisibility(View.GONE);
+						}
 
-						if (entity.comments != null && entity.comments.size() > 0) {
+						if (mCommon.mEntity.comments != null && mCommon.mEntity.comments.size() > 0) {
 							mButtonNewComment.setVisibility(View.GONE);
-							mComments = entity.comments;
-							mMore = entity.commentsMore;
+							mComments = mCommon.mEntity.comments;
+							mMore = mCommon.mEntity.commentsMore;
 							mListView.setAdapter(new EndlessCommentAdapter(mComments));
 						}
 						else {
@@ -146,12 +155,23 @@ public class CommentList extends CandiActivity {
 	}
 
 	public void onNewCommentButtonClick(View view) {
+		/*
+		 * We assume the new comment button wouldn't be visible if the
+		 * entity is locked.
+		 */
 		IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
 		intentBuilder.setEntityId(null);
 		intentBuilder.setParentEntityId(mCommon.mEntityId);
 		Intent intent = intentBuilder.create();
-		startActivity(intent);
+		startActivityForResult(intent, CandiConstants.ACTIVITY_COMMENT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		if (resultCode == CandiConstants.RESULT_COMMENT_INSERTED) {
+			bind(true);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -168,8 +188,11 @@ public class CommentList extends CandiActivity {
 
 		@Override
 		protected View getPendingView(ViewGroup parent) {
-			View view = mInflater.inflate(R.layout.temp_candi_list_item_placeholder, null);
-			return (view);
+			if (mComments.size() == 0) {
+				return new View(CommentList.this);
+
+			}
+			return mInflater.inflate(R.layout.temp_candi_list_item_placeholder, null);
 		}
 
 		@Override
@@ -284,7 +307,6 @@ public class CommentList extends CandiActivity {
 						 */
 						if (comment.imageUri != null && comment.imageUri.length() != 0) {
 							BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemAuthorImage).setFromUri(comment.imageUri);
-
 							BitmapRequest imageRequest = builder.create();
 							holder.itemAuthorImage.setBitmapRequest(imageRequest);
 						}

@@ -4,35 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <!-- Header -->
-    
-    <LinearLayout
+    <com.aircandi.ui.widgets.BounceListView
+        android:id="@+id/form_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
         android:layout_alignParentTop="true"
-        android:gravity="center_vertical|top"
-        android:orientation="vertical"
-        android:padding="15dp" >
-
-        <TextView
-            android:id="@+id/text_message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/app_text_appearance_small"
-            android:paddingBottom="15dp"
-            android:paddingLeft="2dp"
-            android:paddingRight="2dp"
-            android:text="@string/dialog_template_picker_message" />
-
-        <com.aircandi.ui.widgets.BounceListView
-            android:id="@+id/form_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <!-- Preview: listitem=@layout/temp_listitem_template -->
-        </com.aircandi.ui.widgets.BounceListView>
-    </LinearLayout>
+        android:paddingTop="10dp" />
 
     <!-- Footer -->
 
@@ -51,7 +29,7 @@
         android:gravity="center_horizontal" >
 
         <Button
-        	android:id="@+id/button_cancel"
+            android:id="@+id/button_cancel"
             style="@style/form_button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -26,6 +26,8 @@ public class UserView extends RelativeLayout {
 	private WebImageView	mImageUser;
 	private ImageView		mImageLocked;
 	private TextView		mTextName;
+	private TextView		mTextLabel;
+	private String			mLabel;
 	private TextView		mTextTimeSince;
 	private User			mAuthor;
 	private User			mUser;
@@ -53,12 +55,14 @@ public class UserView extends RelativeLayout {
 
 	private void bindToView() {
 		if (!isInEditMode()) {
-			mImageUser = (WebImageView) mBoundView.findViewById(R.id.image_user_picture);
+			mImageUser = (WebImageView) mBoundView.findViewById(R.id.candi_user_picture);
 			mTextName = (TextView) mBoundView.findViewById(R.id.candi_user_fullname);
+			mTextLabel = (TextView) mBoundView.findViewById(R.id.candi_user_label);
 			mTextTimeSince = (TextView) mBoundView.findViewById(R.id.candi_user_timesince);
 			mImageLocked = (ImageView) mBoundView.findViewById(R.id.image_locked);
 			FontManager.getInstance().setTypefaceDefault(mTextName);
 			FontManager.getInstance().setTypefaceDefault(mTextTimeSince);
+			FontManager.getInstance().setTypefaceDefault(mTextLabel);
 		}
 
 		this.removeAllViews();
@@ -68,6 +72,14 @@ public class UserView extends RelativeLayout {
 	public void bindToAuthor(User author, Long date, boolean locked) {
 		mAuthor = author;
 		if (mAuthor != null) {
+			if (mTextLabel != null) {
+				if (mLabel != null) {
+					mTextLabel.setText(mLabel);
+				}
+				else {
+					mTextLabel.setVisibility(View.GONE);
+				}
+			}
 			if (mTextName != null) {
 				String authorName = mAuthor.name;
 				if (authorName == null) {
@@ -108,6 +120,14 @@ public class UserView extends RelativeLayout {
 	public void bindToUser(User user, Long date) {
 		mUser = user;
 		if (mUser != null) {
+			if (mTextLabel != null) {
+				if (mLabel != null) {
+					mTextLabel.setText(mLabel);
+				}
+				else {
+					mTextLabel.setVisibility(View.GONE);
+				}
+			}
 			if (mTextName != null) {
 				mTextName.setText(mUser.name);
 			}
@@ -153,5 +173,21 @@ public class UserView extends RelativeLayout {
 
 	public Activity getActivity() {
 		return mActivity;
+	}
+
+	public TextView getTextLabel() {
+		return mTextLabel;
+	}
+
+	public void setTextLabel(TextView textLabel) {
+		mTextLabel = textLabel;
+	}
+
+	public String getLabel() {
+		return mLabel;
+	}
+
+	public void setLabel(String label) {
+		mLabel = label;
 	}
 }

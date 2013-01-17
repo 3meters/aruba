@@ -294,7 +294,7 @@ public class LinkPicker extends FormActivity {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.link_picker;
+		return R.layout.picker_link;
 	}
 
 	@Override

@@ -13,24 +13,20 @@ import com.aircandi.components.FontManager;
 
 public class SectionLayout extends LinearLayout {
 
-	private Integer	mLayoutHeaderId;
-	private Integer	mLayoutFooterId;
-	private String	mHeaderTitle;
-	private TextView mTextViewHeader;
-	private TextView mButtonMore;
+	private Integer		mLayoutHeaderId;
+	private Integer		mLayoutFooterId;
+	private String		mHeaderTitle;
+	private TextView	mTextViewHeader;
+	private TextView	mButtonMore;
 
 	public SectionLayout(Context context) {
 		this(context, null);
 	}
 
 	public SectionLayout(Context context, AttributeSet attrs) {
-		this(context, attrs, 0);
-	}
+		super(context, attrs);
 
-	public SectionLayout(Context context, AttributeSet attrs, int defStyle) {
-		super(context, attrs, defStyle);
-
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.SectionLayout, defStyle, 0);
+		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.SectionLayout);
 
 		mLayoutHeaderId = ta.getResourceId(R.styleable.SectionLayout_layoutHeader, R.layout.temp_section_header);
 		mLayoutFooterId = ta.getResourceId(R.styleable.SectionLayout_layoutFooter, 0);
@@ -45,12 +41,12 @@ public class SectionLayout extends LinearLayout {
 		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (mLayoutHeaderId != 0) {
 			View view = inflater.inflate(mLayoutHeaderId, null);
-			
+
 			mTextViewHeader = (TextView) view.findViewById(R.id.title);
 			mButtonMore = (TextView) view.findViewById(R.id.button_more);
 			FontManager.getInstance().setTypefaceDefault(mTextViewHeader);
 			FontManager.getInstance().setTypefaceDefault(mButtonMore);
-			
+
 			if (mTextViewHeader != null) {
 				if (mHeaderTitle == null) {
 					mTextViewHeader.setVisibility(View.GONE);

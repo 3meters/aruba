@@ -27,13 +27,9 @@ public class ListViewExpanded extends LinearLayout {
 	}
 
 	public ListViewExpanded(Context context, AttributeSet attrs) {
-		this(context, attrs, 0);
-	}
+		super(context, attrs);
 
-	public ListViewExpanded(Context context, AttributeSet attrs, int defStyle) {
-		super(context, attrs, defStyle);
-
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ListViewExpanded, defStyle, 0);
+		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ListViewExpanded);
 
 		mLayoutItemId = ta.getResourceId(R.styleable.ListViewExpanded_layoutItems, 0);
 		mItemMaxCount = ta.getInteger(R.styleable.ListViewExpanded_itemMaxCount, 2);

@@ -281,6 +281,6 @@ public class CategoryBuilder extends FormActivity {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.category_builder;
+		return R.layout.builder_category;
 	}
 }

@@ -12,10 +12,11 @@ import android.view.ViewGroup;
 
 public class FlowLayout extends ViewGroup
 {
-	private int[]	mRowHeights;
-	private int[]	mRowWidths;
-	private int		mSpacingVertical	= 0;
-	private int		mSpacingHorizontal	= 0;
+	private int[]					mRowHeights;
+	private int[]					mRowWidths;
+	private int						mSpacingVertical	= 0;
+	private int						mSpacingHorizontal	= 0;
+	private List<RowMeasurement>	mRows				= new ArrayList<RowMeasurement>();
 
 	public FlowLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -28,7 +29,7 @@ public class FlowLayout extends ViewGroup
 		int maxInternalWidth = MeasureSpec.getSize(widthMeasureSpec) - getHorizontalPadding();
 		int maxInternalHeight = MeasureSpec.getSize(heightMeasureSpec) - getVerticalPadding();
 
-		List<RowMeasurement> rows = new ArrayList<RowMeasurement>();
+		mRows.clear();
 
 		RowMeasurement currentRow = null;
 
@@ -46,7 +47,7 @@ public class FlowLayout extends ViewGroup
 			/* If child won't fit then create new row */
 			if (currentRow == null || currentRow.isWouldExceedMax(lp.leftMargin + childWidth + lp.rightMargin)) {
 				currentRow = new RowMeasurement(maxInternalWidth, widthMode);
-				rows.add(currentRow);
+				mRows.add(currentRow);
 			}
 
 			currentRow.addChildDimensions(lp.leftMargin + childWidth + lp.rightMargin + mSpacingHorizontal
@@ -55,12 +56,12 @@ public class FlowLayout extends ViewGroup
 
 		int longestRowWidth = 0;
 		int totalRowHeight = 0;
-		int rowCount = rows.size();
+		int rowCount = mRows.size();
 		this.mRowHeights = new int[rowCount];
 		this.mRowWidths = new int[rowCount];
 
 		for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-			RowMeasurement row = rows.get(rowIndex);
+			RowMeasurement row = mRows.get(rowIndex);
 			int rowHeight = row.getHeight();
 			int rowWidth = row.getWidth();
 			this.mRowHeights[rowIndex] = rowHeight;

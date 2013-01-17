@@ -7,15 +7,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toLeftOf="@+id/image_forward" />
+        android:layout_toLeftOf="@+id/image_forward"
+        android:ellipsize="end"
+        android:maxLines="1" />
 
     <ImageView
         android:id="@+id/image_forward"
-        android:layout_width="wrap_content"
+        android:layout_width="6dp"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:paddingRight="7dp"
+        android:layout_marginRight="5dp"
         android:scaleType="fitXY"
         android:src="?attr/iconForward" />
 

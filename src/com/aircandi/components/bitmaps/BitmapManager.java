@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -68,7 +69,7 @@ public class BitmapManager {
 			@Override
 			protected int sizeOf(String key, Bitmap bitmap) {
 				/* The cache size will be measured in bytes rather than number of items. */
-				return bitmap.getByteCount();
+				return ImageUtils.getImageMemorySize(bitmap.getHeight(), bitmap.getWidth(), bitmap.hasAlpha());
 			}
 		};
 
@@ -92,39 +93,46 @@ public class BitmapManager {
 	// Public cache routines
 	// --------------------------------------------------------------------------------------------
 
-	public void fetchBitmap(final BitmapRequest imageRequest) {
+	public void fetchBitmap(final BitmapRequest bitmapRequest) {
 		/*
 		 * We keep drawables on the main thread.
 		 */
-		if (imageRequest.getImageUri().toLowerCase().startsWith("resource:")) {
+		if (bitmapRequest.getImageUri().toLowerCase(Locale.US).startsWith("resource:")) {
 
 			ServiceResponse serviceResponse = new ServiceResponse();
-			String rawResourceName = imageRequest.getImageUri().substring(imageRequest.getImageUri().indexOf("resource:") + 9);
+			String rawResourceName = bitmapRequest.getImageUri().substring(bitmapRequest.getImageUri().indexOf("resource:") + 9);
 			String resolvedResourceName = resolveResourceName(rawResourceName);
+			if (resolvedResourceName == null) {
+				serviceResponse.responseCode = ResponseCode.Failed;
+				if (bitmapRequest.getRequestListener() != null) {
+					bitmapRequest.getRequestListener().onComplete(serviceResponse);
+				}
+				return;
+			}
 
 			int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable", "com.aircandi");
 			String memCacheKey = String.valueOf(resourceId);
-			if (imageRequest.getImageSize() != null) {
-				memCacheKey += "." + String.valueOf(imageRequest.getImageSize());
+			if (bitmapRequest.getImageSize() != null) {
+				memCacheKey += "." + String.valueOf(bitmapRequest.getImageSize());
 			}
 			String memKeyHashed = MiscUtils.md5(memCacheKey);
 			Bitmap bitmap = mMemoryCache.get(memKeyHashed);
 
 			if (bitmap == null) {
-				bitmap = loadBitmapFromResourcesSampled(resourceId, imageRequest.getImageSize());
+				bitmap = loadBitmapFromResourcesSampled(resourceId, bitmapRequest.getImageSize());
 				synchronized (mMemoryCache) {
 					mMemoryCache.put(memKeyHashed, bitmap);
 				}
 			}
 
-			if (imageRequest.getRequestListener() != null) {
-				serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
-				imageRequest.getRequestListener().onComplete(serviceResponse);
+			if (bitmapRequest.getRequestListener() != null) {
+				serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
+				bitmapRequest.getRequestListener().onComplete(serviceResponse);
 			}
 
-			if (imageRequest.getImageView() != null) {
+			if (bitmapRequest.getImageView() != null) {
 				BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-				ImageUtils.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true, AnimUtils.fadeInMedium());
+				ImageUtils.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 		}
 		else {
@@ -132,25 +140,25 @@ public class BitmapManager {
 			 * Fetching from cache often involves file io so we take this off the main (ui) thread.
 			 */
 			ServiceResponse serviceResponse = new ServiceResponse();
-			Bitmap bitmap = getBitmap(imageRequest.getImageUri(), imageRequest.getImageSize());
+			Bitmap bitmap = getBitmap(bitmapRequest.getImageUri(), bitmapRequest.getImageSize());
 
 			if (bitmap != null) {
-				Logger.v(this, "Image request satisfied from cache: " + imageRequest.getImageUri());
-				serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
+				Logger.v(this, "Image request satisfied from cache: " + bitmapRequest.getImageUri());
+				serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
 
-				if (imageRequest.getRequestListener() != null) {
-					serviceResponse.data = new ImageResponse(bitmap, imageRequest.getImageUri());
-					imageRequest.getRequestListener().onComplete(serviceResponse);
+				if (bitmapRequest.getRequestListener() != null) {
+					serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
+					bitmapRequest.getRequestListener().onComplete(serviceResponse);
 				}
 
-				if (imageRequest.getImageView() != null) {
+				if (bitmapRequest.getImageView() != null) {
 					final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
 
 					/* Put this on the main thread */
 					Aircandi.mainThreadHandler.post(new Runnable() {
 						@Override
 						public void run() {
-							ImageUtils.showDrawableInImageView(bitmapDrawable, imageRequest.getImageView(), true, AnimUtils.fadeInMedium());
+							ImageUtils.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, AnimUtils.fadeInMedium());
 						}
 					});
 				}
@@ -160,7 +168,7 @@ public class BitmapManager {
 			}
 
 			if (serviceResponse.responseCode != ResponseCode.Success) {
-				mBitmapLoader.queueBitmapRequest(imageRequest);
+				mBitmapLoader.queueBitmapRequest(bitmapRequest);
 			}
 		}
 	}
@@ -447,8 +455,7 @@ public class BitmapManager {
 				return redirectedResourceName;
 			}
 			else {
-				/* We failed to resolve the resource name */
-				throw new IllegalStateException("Resource not resolved: " + rawResourceName);
+				return null;
 			}
 		}
 		else {
@@ -473,10 +480,10 @@ public class BitmapManager {
 		if (imageUri == null) {
 			return false;
 		}
-		if (imageUri.toLowerCase().startsWith("resource:")) {
+		if (imageUri.toLowerCase(Locale.US).startsWith("resource:")) {
 			return true;
 		}
-		if (imageUri.toLowerCase().startsWith("asset:")) {
+		if (imageUri.toLowerCase(Locale.US).startsWith("asset:")) {
 			return true;
 		}
 		return false;

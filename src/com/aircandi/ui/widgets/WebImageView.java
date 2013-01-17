@@ -32,25 +32,26 @@ public class WebImageView extends RelativeLayout {
 	private ProgressBar					mProgressBar;
 
 	private String						mImageUri;
-	private Handler						mThreadHandler			= new Handler();
+	private Handler						mThreadHandler		= new Handler();
 
 	private Integer						mSizeHint;
 
 	private boolean						mShowBusy;
 	private Integer						mLayoutId;
-	private ScaleType					mScaleType				= ScaleType.CENTER_CROP;
+	private Integer						mBrokenDrawable;
+	private ScaleType					mScaleType			= ScaleType.CENTER_CROP;
 
-	private static final String			androidNamespace		= "http://schemas.android.com/apk/res/android";
-	private static final ScaleType[]	sScaleTypeArray			= {
-																ScaleType.MATRIX,
-																ScaleType.FIT_XY,
-																ScaleType.FIT_START,
-																ScaleType.FIT_CENTER,
-																ScaleType.FIT_END,
-																ScaleType.CENTER,
-																ScaleType.CENTER_CROP,
-																ScaleType.CENTER_INSIDE
-																};
+	private static final String			androidNamespace	= "http://schemas.android.com/apk/res/android";
+	private static final ScaleType[]	sScaleTypeArray		= {
+															ScaleType.MATRIX,
+															ScaleType.FIT_XY,
+															ScaleType.FIT_START,
+															ScaleType.FIT_CENTER,
+															ScaleType.FIT_END,
+															ScaleType.CENTER,
+															ScaleType.CENTER_CROP,
+															ScaleType.CENTER_INSIDE
+															};
 
 	public WebImageView(Context context) {
 		this(context, null);
@@ -68,6 +69,7 @@ public class WebImageView extends RelativeLayout {
 		mSizeHint = ta.getDimensionPixelSize(R.styleable.WebImageView_sizeHint, Integer.MAX_VALUE);
 		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.widget_webimageview);
+		mBrokenDrawable = ta.getResourceId(R.styleable.WebImageView_brokenDrawable, R.drawable.image_broken);
 
 		ta.recycle();
 
@@ -179,7 +181,7 @@ public class WebImageView extends RelativeLayout {
 
 						@Override
 						public void run() {
-							Drawable drawable = WebImageView.this.getContext().getResources().getDrawable(R.drawable.image_broken);
+							Drawable drawable = WebImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
 							ImageUtils.showDrawableInImageView(drawable, mImageMain, true, AnimUtils.fadeInMedium());
 						}
 					});
@@ -200,6 +202,7 @@ public class WebImageView extends RelativeLayout {
 		});
 
 		BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+
 	}
 
 	// --------------------------------------------------------------------------------------------

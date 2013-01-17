@@ -417,9 +417,10 @@ public class ImageUtils {
 		Bitmap bitmapScaled = bitmap;
 		Boolean scalingNeeded = (bitmap.getWidth() > CandiConstants.IMAGE_DIMENSION_MAX && bitmap.getHeight() > CandiConstants.IMAGE_DIMENSION_MAX);
 		if (scalingNeeded) {
-			
+
 			Matrix matrix = new Matrix();
-			float scalingRatio = Math.max((float) CandiConstants.IMAGE_DIMENSION_MAX / (float) bitmap.getWidth(), (float) CandiConstants.IMAGE_DIMENSION_MAX / (float) bitmap.getHeight());
+			float scalingRatio = Math.max((float) CandiConstants.IMAGE_DIMENSION_MAX / (float) bitmap.getWidth(), (float) CandiConstants.IMAGE_DIMENSION_MAX
+					/ (float) bitmap.getHeight());
 			matrix.postScale(scalingRatio, scalingRatio);
 			/*
 			 * Create a new bitmap from the original using the matrix to transform the result.
@@ -543,12 +544,14 @@ public class ImageUtils {
 	}
 
 	public static void showDrawableInImageView(Drawable drawable, ImageView imageView, boolean animate, Animation animation) {
-		imageView.setImageDrawable(drawable);
-		if (animate) {
-			animation.setFillEnabled(true);
-			animation.setFillAfter(true);
-			imageView.startAnimation(animation);
+		if (imageView != null) {
+			imageView.setImageDrawable(drawable);
+			if (animate) {
+				animation.setFillEnabled(true);
+				animation.setFillAfter(true);
+				imageView.startAnimation(animation);
+			}
+			imageView.postInvalidate();
 		}
-		imageView.postInvalidate();
 	}
 }

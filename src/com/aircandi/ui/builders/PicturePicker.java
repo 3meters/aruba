@@ -75,6 +75,8 @@ public class PicturePicker extends FormActivity {
 	private EditText				mSearch;
 	private ArrayList<ImageResult>	mImages			= new ArrayList<ImageResult>();
 	private TextView				mTitle;
+	private TextView				mMessage;
+	private Entity					mEntity;
 
 	private long					mOffset			= 0;
 	private String					mQuery;
@@ -114,9 +116,9 @@ public class PicturePicker extends FormActivity {
 		}
 
 		if (mPlacePhotoMode) {
-			Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
-			mSource = entity.place.source;
-			mSourceId = entity.place.sourceId;
+			mEntity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+			mSource = mEntity.place.source;
+			mSourceId = mEntity.place.sourceId;
 			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
 		}
 		else {
@@ -137,6 +139,7 @@ public class PicturePicker extends FormActivity {
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.message));
 
 		/* Stash some sizing info */
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
@@ -150,6 +153,7 @@ public class PicturePicker extends FormActivity {
 			mTitle.setText(mPlacePhotoMode ? R.string.dialog_picture_picker_place_title : R.string.dialog_picture_picker_search_title);
 		}
 
+		mMessage = (TextView) findViewById(R.id.message);
 		mGridView = (GridView) findViewById(R.id.grid_gallery);
 		mGridView.setColumnWidth(mImageWidthPixels);
 		mGridView.setOnItemClickListener(new OnItemClickListener() {
@@ -164,11 +168,9 @@ public class PicturePicker extends FormActivity {
 						finish();
 					}
 					else {
-						String imageDescription = mImages.get(position).getTitle();
 						Intent intent = new Intent();
 						intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
 						intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
-						intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, imageDescription);
 						setResult(Activity.RESULT_OK, intent);
 						finish();
 					}
@@ -223,6 +225,7 @@ public class PicturePicker extends FormActivity {
 
 	public void onSearchClick(View view) {
 		mQuery = mSearch.getText().toString();
+		mMessage.setVisibility(View.VISIBLE);
 		Aircandi.settingsEditor.putString(Preferences.SETTING_PICTURE_SEARCH, mQuery);
 		Aircandi.settingsEditor.commit();
 		mOffset = 0;
@@ -286,7 +289,7 @@ public class PicturePicker extends FormActivity {
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.picture_picker;
+		return R.layout.picker_picture;
 	}
 
 	protected Boolean isDialog() {
@@ -324,11 +327,23 @@ public class PicturePicker extends FormActivity {
 				serviceResponse = loadPlaceImages(PAGE_SIZE, mOffset);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					ArrayList<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
-					moreImages = new ArrayList<ImageResult>();
-					for (Photo photo : photos) {
-						ImageResult imageResult = photo.getAsImageResult();
-						imageResult.getThumbnail().setUrl(photo.getSizedUri(100, 100));
-						moreImages.add(imageResult);
+					if (mOffset == 0 && photos.size() == 0) {
+						runOnUiThread(new Runnable(){
+
+							@Override
+							public void run() {
+								mMessage.setText(getString(R.string.picture_picker_places_empty) + " " + mEntity.name);
+								mMessage.setVisibility(View.VISIBLE);
+								
+							}});
+					}
+					else {
+						moreImages = new ArrayList<ImageResult>();
+						for (Photo photo : photos) {
+							ImageResult imageResult = photo.getAsImageResult();
+							imageResult.getThumbnail().setUrl(photo.getSizedUri(100, 100));
+							moreImages.add(imageResult);
+						}
 					}
 				}
 				else {
@@ -357,6 +372,16 @@ public class PicturePicker extends FormActivity {
 				serviceResponse = loadSearchImages(queryDecorated, PAGE_SIZE, mOffset);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					moreImages = (ArrayList<ImageResult>) serviceResponse.data;
+					if (mOffset == 0 && moreImages.size() == 0) {
+						runOnUiThread(new Runnable(){
+
+							@Override
+							public void run() {
+								mMessage.setText(getString(R.string.picture_picker_search_empty) + " " + mQuery);
+								mMessage.setVisibility(View.VISIBLE);
+								
+							}});
+					}
 					Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
 							+ " new total = "
 							+ String.valueOf(getWrappedAdapter().getCount() + moreImages.size()));
@@ -463,7 +488,7 @@ public class PicturePicker extends FormActivity {
 
 				@Override
 				public void run() {
-					Thread.currentThread().setName("DrawableManagerFetch");					
+					Thread.currentThread().setName("DrawableManagerFetch");
 					Drawable drawable = fetchDrawable(uri);
 					Message message = handler.obtainMessage(1, drawable);
 					handler.sendMessage(message);

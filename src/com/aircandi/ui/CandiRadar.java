@@ -1,7 +1,7 @@
 package com.aircandi.ui;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -20,9 +20,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
@@ -46,19 +47,19 @@ import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityModel;
 import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.RadarListAdapter;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.base.CandiActivity;
-import com.aircandi.ui.widgets.BounceScrollView;
+import com.aircandi.ui.widgets.BounceListView;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.ImageUtils;
-import com.amazonaws.auth.BasicAWSCredentials;
 
 /*
  * Library Notes
@@ -138,24 +139,26 @@ import com.amazonaws.auth.BasicAWSCredentials;
 
 public class CandiRadar extends CandiActivity {
 
-	private Handler						mHandler		= new Handler();
-	public static BasicAWSCredentials	mAwsCredentials	= null;
+	private Handler				mHandler		= new Handler();
 
-	private Number						mEntityModelRefreshDate;
-	private Number						mEntityModelActivityDate;
-	private Location					mActiveLocation	= null;
+	private Number				mEntityModelRefreshDate;
+	private Number				mEntityModelActivityDate;
+	private Location			mActiveLocation	= null;
 
-	private BounceScrollView			mScrollView;
+	private BounceListView		mList;
 
-	private SoundPool					mSoundPool;
-	private int							mNewCandiSoundId;
-	private Boolean						mInitialized	= false;
-	private EventHandler				mEventWifiScanReceived;
-	private EventHandler				mEventBeaconsLocked;
-	private EventHandler				mEventLocationChanged;
-	private EventHandler				mEventBeaconEntitiesLoaded;
-	private EventHandler				mEventLocationEntitiesLoaded;
-	private EventHandler				mEventSyntheticsLoaded;
+	private SoundPool			mSoundPool;
+	private int					mNewCandiSoundId;
+	private Boolean				mInitialized	= false;
+	private EventHandler		mEventWifiScanReceived;
+	private EventHandler		mEventBeaconsLocked;
+	private EventHandler		mEventLocationChanged;
+	private EventHandler		mEventBeaconEntitiesLoaded;
+	private EventHandler		mEventLocationEntitiesLoaded;
+	private EventHandler		mEventSyntheticsLoaded;
+
+	private List<Entity>		mEntities		= new ArrayList<Entity>();
+	private RadarListAdapter	mRadarAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -296,9 +299,8 @@ public class CandiRadar extends CandiActivity {
 
 										@Override
 										protected Object doInBackground(Object... params) {
-											Thread.currentThread().setName("GetByLocation");
+											Thread.currentThread().setName("GetEntitiesForLocation");
 											ProxiExplorer.getInstance().getEntitiesForLocation();
-											ProxiExplorer.getInstance().getPlacesNearLocation(observation);
 											return null;
 										}
 
@@ -331,8 +333,28 @@ public class CandiRadar extends CandiActivity {
 
 							mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 							mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
-							drawTuned(false);
-							mCommon.hideBusy();
+							Entity firstLast = null;
+							if (mRadarAdapter.getCount() > 0) {
+								firstLast = mRadarAdapter.getItem(0);
+							}
+							mRadarAdapter.clear();
+							List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+							mRadarAdapter.addAll(entities);
+							mRadarAdapter.notifyDataSetChanged();
+							/* Check for rookies and add some sparkle */
+							Entity firstNext = null;
+							if (mRadarAdapter.getCount() > 0) {
+								firstNext = mRadarAdapter.getItem(0);
+							}
+							if ((firstLast == null && firstNext != null) || (firstLast != null && firstNext != null && !firstLast.id.equals(firstNext.id))) {
+								scrollToTop();
+								if (mPrefSoundEffects) {
+									mSoundPool.play(mNewCandiSoundId, 0.2f, 0.2f, 1, 0, 1f);
+								}
+							}
+							if (entities.size() > 0) {
+								mCommon.hideBusy();
+							}
 						}
 						else {
 							mCommon.handleServiceError(serviceResponse, ServiceOperation.BeaconScan, CandiRadar.this);
@@ -353,10 +375,33 @@ public class CandiRadar extends CandiActivity {
 
 						ServiceResponse serviceResponse = (ServiceResponse) data;
 						if (serviceResponse.responseCode == ResponseCode.Success) {
+
+							final Observation observation = LocationManager.getInstance().getObservation();
+							new AsyncTask() {
+
+								@Override
+								protected Object doInBackground(Object... params) {
+									Thread.currentThread().setName("GetPlacesNearLocation");
+									ProxiExplorer.getInstance().getPlacesNearLocation(observation);
+									return null;
+								}
+
+								@Override
+								protected void onPostExecute(Object result) {
+									mCommon.hideBusy();
+								}
+
+							}.execute();
+
 							mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
 							mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
-							drawTuned(false);
-							mCommon.hideBusy();
+							mRadarAdapter.clear();
+							List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+							mRadarAdapter.addAll(entities);
+							mRadarAdapter.notifyDataSetChanged();
+							if (entities.size() > 0) {
+								mCommon.hideBusy();
+							}
 						}
 						else {
 							mCommon.handleServiceError(serviceResponse, ServiceOperation.BeaconScan, CandiRadar.this);
@@ -377,8 +422,13 @@ public class CandiRadar extends CandiActivity {
 
 						ServiceResponse serviceResponse = (ServiceResponse) data;
 						if (serviceResponse.responseCode == ResponseCode.Success) {
-							drawSynthetics(false);
-							mCommon.hideBusy();
+							mRadarAdapter.clear();
+							List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+							mRadarAdapter.addAll(entities);
+							mRadarAdapter.notifyDataSetChanged();
+							if (entities.size() > 0) {
+								mCommon.hideBusy();
+							}
 						}
 						else {
 							mCommon.handleServiceError(serviceResponse, ServiceOperation.BeaconScan, CandiRadar.this);
@@ -389,36 +439,34 @@ public class CandiRadar extends CandiActivity {
 		};
 
 		/* Other UI references */
-		mScrollView = (BounceScrollView) findViewById(R.id.scroll_view);
+		mList = (BounceListView) findViewById(R.id.radar_list);
+		mList.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				final Entity entity = mEntities.get(position);
+				showCandiForm(entity, entity.synthetic);
+			}
+		});
+		mRadarAdapter = new RadarListAdapter(this, mEntities);
+		mList.setAdapter(mRadarAdapter);
 
 		/* Store sounds */
 		mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
 		mNewCandiSoundId = mSoundPool.load(this, R.raw.notification_candi_discovered, 1);
 
-		/* AWS Credentials */
-		startGetAWSCredentials();
-
 		mInitialized = true;
 	}
 
-	private void drawTuned(Boolean configChange) {
-		ViewGroup layout = (ViewGroup) findViewById(R.id.radar_places);
-		List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarPlaces();
-		if (configChange) {
-			layout.removeAllViews();
-		}
-		drawLayout(PlaceType.Tuned, layout, entities, configChange ? false : true);
-	}
+	private void drawTuned(Boolean configChange) {}
 
 	private void drawSynthetics(Boolean configChange) {
-		ViewGroup layout = (ViewGroup) findViewById(R.id.radar_synthetics);
 		List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getRadarSynthetics();
-		if (configChange) {
-			layout.removeAllViews();
-		}
-		drawLayout(PlaceType.Synthetic, layout, entities, false);
+		mEntities.addAll(entities);
+		mList.invalidateViews();
 	}
 
+	@SuppressWarnings("unused")
 	private void drawLayout(PlaceType placeType, ViewGroup layout, List<Entity> entities, Boolean addSparkle) {
 
 		if (entities.size() == 0) {
@@ -456,8 +504,8 @@ public class CandiRadar extends CandiActivity {
 		Integer spacing = 3;
 		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(CandiRadar.this, spacing);
 		Integer spacingVerticalPixels = ImageUtils.getRawPixels(CandiRadar.this, spacing);
-		Integer candiCountPortrait = getResources().getInteger(R.integer.candi_per_row_portrait);
-		Integer candiCountLandscape = getResources().getInteger(R.integer.candi_per_row_landscape);
+		Integer candiCountPortrait = getResources().getInteger(R.integer.candi_per_row_portrait_radar);
+		Integer candiCountLandscape = getResources().getInteger(R.integer.candi_per_row_landscape_radar);
 
 		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * (candiCountPortrait - 1))) / candiCountPortrait;
 
@@ -558,7 +606,7 @@ public class CandiRadar extends CandiActivity {
 
 					@Override
 					public void onClick(View view) {
-						onCandiClick(view);
+						//onCandiClick(view);
 					}
 				});
 
@@ -588,11 +636,6 @@ public class CandiRadar extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event handlers
 	// --------------------------------------------------------------------------------------------
-
-	public void onCandiClick(View view) {
-		final Entity entity = (Entity) view.getTag();
-		showCandiForm(entity, entity.synthetic);
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// Entity routines
@@ -651,7 +694,7 @@ public class CandiRadar extends CandiActivity {
 
 			@Override
 			public void run() {
-				mScrollView.fullScroll(ScrollView.FOCUS_UP);
+				mList.setSelection(0);
 			}
 		});
 	}
@@ -805,11 +848,12 @@ public class CandiRadar extends CandiActivity {
 
 						@Override
 						public void run() {
-							mCommon.hideBusy();
-							invalidateOptionsMenu();
 							mCommon.showBusy();
-							drawTuned(false);
-							drawSynthetics(false); // place could have been upsized
+							invalidateOptionsMenu();
+							mRadarAdapter.clear();
+							mRadarAdapter.addAll(ProxiExplorer.getInstance().getEntityModel().getPlaces());
+							mRadarAdapter.notifyDataSetChanged();
+							mCommon.hideBusy();
 						}
 					}, 100);
 				}
@@ -905,39 +949,6 @@ public class CandiRadar extends CandiActivity {
 		synchronized (Events.EventBus.syntheticsLoaded) {
 			Events.EventBus.syntheticsLoaded.remove(mEventSyntheticsLoaded);
 		}
-	}
-
-	private void startGetAWSCredentials() {
-		Thread t = new Thread() {
-
-			@Override
-			public void run() {
-				Thread.currentThread().setName("GetAwsCredentials");
-				try {
-					Properties properties = new Properties();
-					InputStream inputStream = getClass().getResourceAsStream("/com/aircandi/aws.properties");
-					properties.load(inputStream);
-
-					String accessKeyId = properties.getProperty("accessKey");
-					String secretKey = properties.getProperty("secretKey");
-
-					if ((accessKeyId == null) || (accessKeyId.equals(""))
-							|| (accessKeyId.equals("CHANGEME"))
-							|| (secretKey == null)
-							|| (secretKey.equals(""))
-							|| (secretKey.equals("CHANGEME"))) {
-						Logger.e(CandiRadar.this, "Aws Credentials not configured correctly.");
-					}
-					else {
-						mAwsCredentials = new BasicAWSCredentials(properties.getProperty("accessKey"), properties.getProperty("secretKey"));
-					}
-				}
-				catch (Exception exception) {
-					Logger.e(CandiRadar.this, exception.getMessage(), exception);
-				}
-			}
-		};
-		t.start();
 	}
 
 	@SuppressWarnings("unused")

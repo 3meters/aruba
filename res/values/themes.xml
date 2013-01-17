@@ -60,7 +60,6 @@
         <item name="backgroundCandi">@android:color/transparent</item>
         <item name="backgroundRadarCandi">@drawable/candi_bg_dark</item>
         <item name="backgroundForm">@android:color/black</item>
-        <item name="backgroundHelp">@color/background_help_dark</item>
         <item name="backgroundPicture">@drawable/picture_bg_dark</item>
         <item name="backgroundProgress">@drawable/progress_bg_dark</item>
         <item name="backgroundActionBar">@color/background_actionbar_dark</item>
@@ -140,7 +139,6 @@
         <item name="backgroundCandi">@android:color/transparent</item>
         <item name="backgroundRadarCandi">@drawable/candi_bg_light</item>
         <item name="backgroundForm">@android:color/white</item>
-        <item name="backgroundHelp">@color/background_help_light</item>
         <item name="backgroundPicture">@drawable/picture_bg_light</item>
         <item name="backgroundProgress">@drawable/progress_bg_light</item>
         <item name="backgroundActionBar">@color/background_actionbar_light</item>

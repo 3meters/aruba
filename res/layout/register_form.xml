@@ -71,7 +71,7 @@
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_label_fullname"
                 android:inputType="text"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/text_email"
@@ -80,7 +80,7 @@
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_label_email"
                 android:inputType="textEmailAddress"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/text_password"
@@ -89,7 +89,7 @@
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_label_password"
                 android:inputType="textPassword"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/text_password_confirm"
@@ -99,7 +99,7 @@
                 android:layout_marginBottom="10dp"
                 android:hint="@string/form_label_password_confirm"
                 android:inputType="textPassword"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"

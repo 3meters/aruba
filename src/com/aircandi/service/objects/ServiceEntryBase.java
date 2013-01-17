@@ -3,6 +3,7 @@ package com.aircandi.service.objects;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.aircandi.ProxiConstants;
@@ -45,7 +46,7 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 
 	@Expose
 	public String					type;
-	
+
 	/* Property bag */
 
 	@Expose
@@ -99,8 +100,8 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		entry.id = (String) (map.get("_id") != null ? map.get("_id") : map.get("id"));		
-		entry.data  = (HashMap<String, Object>) map.get("data");
+		entry.id = (String) (map.get("_id") != null ? map.get("_id") : map.get("id"));
+		entry.data = (HashMap<String, Object>) map.get("data");
 
 		entry.ownerId = (String) (map.get("_owner") != null ? map.get("_owner") : map.get("ownerId"));
 		entry.creatorId = (String) (map.get("_creator") != null ? map.get("_creator") : map.get("creatorId"));
@@ -171,6 +172,21 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 					if (value instanceof ServiceObject) {
 						HashMap childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
 						map.put(name, childMap);
+					}
+					else if (value instanceof ArrayList) {
+						ArrayList<Object> list = new ArrayList<Object>();
+						for (Object obj : (ArrayList) value) {
+							if (obj instanceof ServiceObject) {
+								HashMap childMap = ((ServiceObject) obj).getHashMap(useAnnotations, excludeNulls);
+								list.add(childMap);
+							}
+							else {
+								if (obj != null || (!excludeNulls)) {
+									list.add(obj);
+								}
+							}
+						}
+						map.put(name, list);
 					}
 					else {
 						if (name.equals("photo") && value == null) {

@@ -28,7 +28,6 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
-	private TextView	mTextViewMessage;
 	private TextView	mTitle;
 
 	@Override
@@ -45,12 +44,12 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		/* Shown as a dialog so doesn't have an action bar */
 		List<Object> listData = new ArrayList<Object>();
 		if (mCommon.mThemeTone.equals("dark")) {
-			listData.add(new Template(R.drawable.ic_action_edit_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
 			listData.add(new Template(R.drawable.ic_action_picture_dark, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
+			listData.add(new Template(R.drawable.ic_action_edit_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
 		}
 		else {
-			listData.add(new Template(R.drawable.ic_action_edit_light, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
 			listData.add(new Template(R.drawable.ic_action_picture_light, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
+			listData.add(new Template(R.drawable.ic_action_edit_light, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
 		}
 
 		mTitle = (TextView) findViewById(R.id.custom_title);
@@ -58,13 +57,10 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		
 		mListAdapter = new ListAdapter(this, listData);
 		mListView = (ListView) findViewById(R.id.form_list);
-		mTextViewMessage = (TextView) findViewById(R.id.text_message);
-		mTextViewMessage.setText(R.string.dialog_template_picker_message);
 		mListView.setAdapter(mListAdapter);
 		mListView.setOnItemClickListener(this);
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_message));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 	}
 
@@ -126,6 +122,6 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.template_picker;
+		return R.layout.picker_template;
 	}
 }

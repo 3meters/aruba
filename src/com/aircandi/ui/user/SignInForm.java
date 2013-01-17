@@ -1,5 +1,7 @@
 package com.aircandi.ui.user;
 
+import java.util.Locale;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -104,7 +106,7 @@ public class SignInForm extends FormActivity {
 
 		if (validate()) {
 
-			final String email = mTextEmail.getText().toString().toLowerCase();
+			final String email = mTextEmail.getText().toString().toLowerCase(Locale.US);
 			final String password = mTextPassword.getText().toString();
 
 			new AsyncTask() {

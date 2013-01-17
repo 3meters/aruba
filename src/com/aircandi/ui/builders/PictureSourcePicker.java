@@ -33,7 +33,6 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 	private ListView	mListView;
 	private ListAdapter	mListAdapter;
-	private TextView	mTextViewMessage;
 	private TextView	mTitle;
 	private String		mEntityId;
 
@@ -47,6 +46,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 	}
 
 	private void initialize() {
+		
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mEntityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
@@ -58,6 +58,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 		if (mCommon.mThemeTone.equals("light")) {
 			iconResId = R.drawable.ic_action_picture_light;
 		}
+		
 		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_search), null, "search"));
 		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_gallery), null, "gallery"));
 
@@ -76,20 +77,17 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 			}
 		}
 		
-		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_none), null, "none"));
+		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_default), null, "default"));
 
 		mTitle = (TextView) findViewById(R.id.custom_title);
 		mTitle.setText(R.string.dialog_picture_source_title);
 
 		mListAdapter = new ListAdapter(this, listData);
 		mListView = (ListView) findViewById(R.id.form_list);
-		mTextViewMessage = (TextView) findViewById(R.id.text_message);
-		mTextViewMessage.setText(R.string.dialog_picture_source_message);
 		mListView.setAdapter(mListAdapter);
 		mListView.setOnItemClickListener(this);
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_message));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 	}
 
@@ -127,7 +125,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 			if (view == null) {
 				LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				view = inflater.inflate(R.layout.temp_listitem_templates, null);
+				view = inflater.inflate(R.layout.temp_listitem_picture_source, null);
 			}
 
 			if (itemData != null) {
@@ -151,6 +149,6 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 	@Override
 	protected int getLayoutID() {
-		return R.layout.picture_source_picker;
+		return R.layout.picker_picture_source;
 	}
 }

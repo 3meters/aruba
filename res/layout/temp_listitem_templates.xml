@@ -2,14 +2,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/item_row"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/form_field_height" >
+    android:layout_height="wrap_content"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp" >
 
     <ImageView
         android:id="@+id/item_image"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="6dp"
         android:layout_marginTop="3dp"
@@ -20,24 +24,18 @@
     <com.aircandi.ui.widgets.TextViewEllipsizing
         android:id="@+id/item_title"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-		android:textAppearance="@style/app_text_appearance_small"
-        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginTop="3dp"
         android:layout_toRightOf="@+id/item_image"
-        android:text="@string/dummy_title" />
+        android:text="@string/dummy_title"
+        android:textAppearance="@style/app_text_appearance_small" />
 
-    <!--
-    <com.aircandi.ui.widgets.TextViewEllipsizing
-        android:id="@+id/item_description"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/item_title"
-        android:paddingBottom="3dp"
-        android:layout_toRightOf="@+id/item_image" 
-        android:text="This is just some sample text showing what a template description might look like in the user interface."/>
-
-    -->
+        android:layout_height="1px"
+        android:layout_alignParentBottom="true"
+        android:background="?attr/ruleColor"
+        android:visibility="gone" />
 
 </RelativeLayout>

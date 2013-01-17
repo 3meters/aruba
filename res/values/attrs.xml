@@ -31,7 +31,6 @@
         <attr name="backgroundActionBar" format="string" />
         <attr name="backgroundButtonBar" format="string" />
         <attr name="backgroundTabBar" format="string" />
-        <attr name="backgroundHelp" format="color|reference" />
         <attr name="badgeColor" format="color|reference" />
         <attr name="badgeColorSynthetic" format="color|reference" />
         <attr name="iconSearch" format="string" />
@@ -65,6 +64,7 @@
         </declare-styleable>
     <declare-styleable name="WebImageView">
         <attr name="layout" />
+    	<attr name="brokenDrawable" format="integer" />
         <attr name="showBusy" format="boolean" />
         <attr name="sizeHint" format="dimension" />
     </declare-styleable>
@@ -72,6 +72,7 @@
         <attr name="maxLines" format="integer" />
     </declare-styleable>
     <declare-styleable name="BuilderButton">
+        <attr name="layout" />
         <attr name="hint" format="string" />
     </declare-styleable>
     <declare-styleable name="ComboButton">

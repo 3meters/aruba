@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Context;
@@ -65,8 +66,15 @@ public class AndroidManager {
 
 	public void callBrowserActivity(Context context, String uri) {
 		Intent intent = findBrowserApp(context, uri);
-		intent.setData(Uri.parse(uri));
-		context.startActivity(intent);
+		if (intent != null) {
+			intent.setData(Uri.parse(uri));
+			context.startActivity(intent);
+		}
+		else {
+			intent = new Intent(android.content.Intent.ACTION_VIEW);
+			intent.setData(Uri.parse(uri));
+			context.startActivity(intent);
+		}
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
@@ -99,6 +107,26 @@ public class AndroidManager {
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
+	public void callGenericActivity(Context context, String venueId) {
+		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		intent.setType("text/plain");
+		if (intent != null) {
+			intent.setData(Uri.parse(venueId));
+			context.startActivity(intent);
+		}
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+	}
+	
+	public void callOpentableActivity(Context context, String sourceId, String sourceUri) {
+		Intent intent = new Intent("com.opentable.action.RESERVE");
+		intent.setType("text/plain");
+		if (intent != null) {
+			intent.setData(Uri.parse("reserve://opentable.com/" + sourceId + "?partySize=2"));
+			context.startActivity(intent);
+		}
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+	}
+	
 	public void callFacebookActivity(Context context, String facebookId) {
 		Intent intent = findFacebookApp(context);
 		if (intent != null) {
@@ -155,7 +183,10 @@ public class AndroidManager {
 
 	public Intent findFoursquareApp(Context context) {
 		final String[] apps = {
-				"foursquare" };		// official
+				"foursquare",
+				"joelapenna",
+				"foursquared"
+				};
 
 		Intent intent = new Intent();
 		intent.setType("text/plain");
@@ -219,6 +250,7 @@ public class AndroidManager {
 	public Intent findBrowserApp(Context context, String uri) {
 		final String[] browserApps = {
 				"com.android.browser",
+				"com.android.chrome",
 				"com.google.android.browser" };
 
 		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
@@ -286,7 +318,7 @@ public class AndroidManager {
 		}
 
 		/* Create a media file name */
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
 		File mediaFile;
 		if (type == MEDIA_TYPE_IMAGE) {
 			mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");

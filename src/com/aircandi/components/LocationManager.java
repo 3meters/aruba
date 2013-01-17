@@ -1,5 +1,7 @@
 package com.aircandi.components;
 
+import java.util.Locale;
+
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -157,7 +159,7 @@ public class LocationManager {
 					String message = new String("Location changed:");
 					message += " provider: " + location.getProvider();
 					message += " accuracy: " + String.valueOf(location.getAccuracy());
-					message += " reason: ** " + reason.name().toLowerCase() + " **";
+					message += " reason: ** " + reason.name().toLowerCase(Locale.US) + " **";
 					Logger.d(this, message);
 
 					mLocation = location;
@@ -181,7 +183,7 @@ public class LocationManager {
 	public String getDebugStringForLocation() {
 		if (mLocation != null) {
 			String debug = "";
-			debug += mLocation.getProvider().substring(0, 1).toUpperCase();
+			debug += mLocation.getProvider().substring(0, 1).toUpperCase(Locale.US);
 			if (mLocation.hasAccuracy()) {
 				debug += String.format("%.0f", mLocation.getAccuracy());
 			}

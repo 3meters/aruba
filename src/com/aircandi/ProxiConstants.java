@@ -21,6 +21,8 @@ public interface ProxiConstants {
 	public static final String	URL_PROXIBASE_SERVICE_ADMIN							= URL_PROXIBASE_SERVICE + "admin/";
 	public static final String	URL_PROXIBASE_SERVICE_METHOD						= URL_PROXIBASE_SERVICE + "do/";
 	public static final String	URL_PROXIBASE_SERVICE_AUTH							= URL_PROXIBASE_SERVICE + "auth/";
+	public static final String	URL_PROXIBASE_SERVICE_ASSETS_ICONS					= URL_PROXIBASE_SERVICE + "img/icons/";
+	public static final String	URL_PROXIBASE_SERVICE_ASSETS_CATEGORIES				= URL_PROXIBASE_SERVICE + "img/categories/foursquare/";
 
 	public static final String	URL_PROXIBASE_MEDIA_IMAGES							= "https://aircandi-images.s3.amazonaws.com/";
 	public static final String	URL_PROXIBASE_SEARCH_IMAGES							= "https://api.datamarket.azure.com/Data.ashx/Bing/Search/v1/Image";
@@ -34,6 +36,7 @@ public interface ProxiConstants {
 	public static final int		RADAR_PLACES_LIMIT									= 30;
 	public static final int		RADAR_CHILDENTITY_LIMIT								= 20;
 	public static final int		RADAR_COMMENT_LIMIT									= 50;
+	public static final int		SOURCE_SUGGESTIONS_TIMEOUT							= 2000;
 
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS			= 401.1f;
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED		= 401.2f;

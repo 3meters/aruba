@@ -10,7 +10,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_centerInParent="true"
-        aircandi:layout="@layout/widget_webimageview_framed_thick"
+        aircandi:layout="@layout/widget_webimageview_framed"
         aircandi:showBusy="true"
         aircandi:sizeHint="100dp"
         android:background="@drawable/app_image_selector"

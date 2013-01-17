@@ -3,6 +3,7 @@ package com.aircandi.utilities;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,13 +19,13 @@ public class DateUtils {
 
 	public static String nowString() {
 		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_NOW_FORMAT);
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_NOW_FORMAT, Locale.US);
 		return sdf.format(cal.getTime());
 	}
 
 	public static String nowString(String pattern) {
 		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+		SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.US);
 		return sdf.format(cal.getTime());
 	}
 
@@ -100,17 +101,17 @@ public class DateUtils {
 
 		String interval = "";
 		if (days >= 1) {
-			SimpleDateFormat datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE);
+			SimpleDateFormat datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE, Locale.US);
 			if (dateOld.getYear() != DateUtils.nowDate().getYear()) {
-				datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE_WITH_YEAR);
+				datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE_WITH_YEAR, Locale.US);
 				return datePart.format(dateOld.getTime());
 			}
 			else {
-				SimpleDateFormat timePart = new SimpleDateFormat(TIME_FORMAT_TIME_SINCE);
-				SimpleDateFormat ampmPart = new SimpleDateFormat(AMPM_FORMAT_TIME_SINCE);
+				SimpleDateFormat timePart = new SimpleDateFormat(TIME_FORMAT_TIME_SINCE, Locale.US);
+				SimpleDateFormat ampmPart = new SimpleDateFormat(AMPM_FORMAT_TIME_SINCE, Locale.US);
 				return datePart.format(dateOld.getTime()) + " at "
 						+ timePart.format(dateOld.getTime())
-						+ ampmPart.format(dateOld.getTime()).toLowerCase();
+						+ ampmPart.format(dateOld.getTime()).toLowerCase(Locale.US);
 			}
 		}
 		else if (hours == 1) /* x hours x minutes ago */

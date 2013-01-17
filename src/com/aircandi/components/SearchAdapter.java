@@ -129,7 +129,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 					holder.itemImage.setBitmapRequest(imageRequest);
 				}
 				else {
-					holder.itemImage.getImageView().setImageResource(R.drawable.source_website);
+					holder.itemImage.getImageView().setImageResource(R.drawable.globe);
 				}
 			}
 		}

@@ -55,7 +55,6 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="10dp"
-                        android:layout_toRightOf="@+id/image_picture"
                         android:onClick="onChangePictureButtonClick"
                         android:text="@string/form_button_change_picture" />
                 </LinearLayout>

@@ -1,5 +1,8 @@
 package com.aircandi.ui;
 
+import java.io.InputStream;
+import java.util.Properties;
+
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -30,6 +33,7 @@ import com.aircandi.ui.user.RegisterForm;
 import com.aircandi.ui.user.SignInForm;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.amazonaws.auth.BasicAWSCredentials;
 
 public class SplashForm extends SherlockActivity {
 
@@ -56,10 +60,12 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void initializeApp() {
-		
+
 		if (Build.PRODUCT.contains("sdk")) {
 			Aircandi.usingEmulator = true;
 		}
+		/* AWS Credentials */
+		startGetAWSCredentials();
 
 		/* Connectivity monitoring */
 		NetworkManager.getInstance().setContext(getApplicationContext());
@@ -83,7 +89,7 @@ public class SplashForm extends SherlockActivity {
 
 	private void initialize() {
 		((ImageView) findViewById(R.id.image_background)).setBackgroundResource(R.drawable.splash_v);
-		
+
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.splash_title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.splash_message));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_signup));
@@ -122,6 +128,39 @@ public class SplashForm extends SherlockActivity {
 				return result;
 			}
 		}.execute();
+	}
+
+	private void startGetAWSCredentials() {
+		Thread t = new Thread() {
+
+			@Override
+			public void run() {
+				Thread.currentThread().setName("GetAwsCredentials");
+				try {
+					Properties properties = new Properties();
+					InputStream inputStream = getClass().getResourceAsStream("/com/aircandi/aws.properties");
+					properties.load(inputStream);
+
+					String accessKeyId = properties.getProperty("accessKey");
+					String secretKey = properties.getProperty("secretKey");
+
+					if ((accessKeyId == null) || (accessKeyId.equals(""))
+							|| (accessKeyId.equals("CHANGEME"))
+							|| (secretKey == null)
+							|| (secretKey.equals(""))
+							|| (secretKey.equals("CHANGEME"))) {
+						Logger.e(SplashForm.this, "Aws Credentials not configured correctly.");
+					}
+					else {
+						Aircandi.mAwsCredentials = new BasicAWSCredentials(properties.getProperty("accessKey"), properties.getProperty("secretKey"));
+					}
+				}
+				catch (Exception exception) {
+					Logger.e(SplashForm.this, exception.getMessage(), exception);
+				}
+			}
+		};
+		t.start();
 	}
 
 	// --------------------------------------------------------------------------------------------

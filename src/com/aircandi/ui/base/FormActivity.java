@@ -34,7 +34,6 @@ import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.Preferences;
 import com.aircandi.ui.builders.PicturePicker;
-import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
@@ -226,20 +225,6 @@ public abstract class FormActivity extends SherlockActivity {
 					mImageRequestWebImageView.setBitmapRequest(imageRequest, false);
 				}
 			}
-			else if (requestCode == CandiConstants.ACTIVITY_WEBSITE_EDIT) {
-				
-				Tracker.trackEvent("Entity", "PickWebsite", "None", 0);
-				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-					String linkUri = extras.getString(CandiConstants.EXTRA_URI);
-					if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
-						linkUri = "http://" + linkUri;
-					}
-
-					((BuilderButton) findViewById(R.id.website)).setText(linkUri);
-				}
-			}
-			
 		}
 	}
 

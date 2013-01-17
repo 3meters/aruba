@@ -17,7 +17,6 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
-import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ServiceRequest;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
@@ -170,7 +169,6 @@ public class BitmapLoader {
 							 * Start a new thread so we can do the actual image fetching in parallel
 							 * like DrawableManager does.
 							 */
-							Thread.currentThread().setName("BitmapDownload");
 							Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Download started...");
 							Bitmap bitmap = null;
 							ServiceResponse serviceResponse = new ServiceResponse();
@@ -261,15 +259,15 @@ public class BitmapLoader {
 								}
 
 							}
-							else if (serviceResponse.exception.getErrorCode() == ErrorCode.IllegalStateException) {
-								/*
-								 * Data couldn't be successfully decoded into a bitmap so substitute
-								 * the broken image placeholder
-								 */
-								imageRequest.setImageUri("resource:image_broken");
-								BitmapManager.getInstance().fetchBitmap(imageRequest);
+							else {
+								if (imageRequest.getRequestListener() != null) {
+									imageRequest.getRequestListener().onComplete(serviceResponse);
+								}
+								else {
+									imageRequest.setImageUri("resource:image_broken");
+									BitmapManager.getInstance().fetchBitmap(imageRequest);
+								}
 							}
-
 						}
 					}
 					if (Thread.interrupted()) {

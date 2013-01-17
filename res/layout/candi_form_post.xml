@@ -138,14 +138,6 @@
             android:onClick="onEditCandiButtonClick"
             android:text="@string/candi_button_edit" />
 
-        <Button
-            android:id="@+id/button_move"
-            style="@style/form_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onMoveCandiButtonClick"
-            android:text="@string/candi_button_move" />
     </LinearLayout>
 
 </RelativeLayout>

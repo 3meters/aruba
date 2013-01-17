@@ -2,16 +2,20 @@ package com.aircandi.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -41,10 +45,11 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.Observation;
+import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.builders.AddressBuilder;
 import com.aircandi.ui.builders.CategoryBuilder;
-import com.aircandi.ui.builders.LinkPicker;
+import com.aircandi.ui.builders.SourcesBuilder;
 import com.aircandi.ui.widgets.BuilderButton;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.ui.widgets.WebImageView;
@@ -101,7 +106,7 @@ public class EntityForm extends FormActivity {
 			entity.enabled = true;
 			entity.locked = false;
 			entity.isCollection = (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE));
-			entity.visibility = Visibility.Public.toString().toLowerCase();
+			entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);
 			entity.type = mCommon.mEntityType;
 
 			mEntityForForm = entity;
@@ -133,8 +138,6 @@ public class EntityForm extends FormActivity {
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_delete));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_image));
-			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.twitter));
-			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.facebook));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.uri));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_title));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.description));
@@ -162,6 +165,9 @@ public class EntityForm extends FormActivity {
 
 			/* Place content */
 			if (entity.place != null) {
+
+				drawSources(entity);
+
 				if (entity.place.location != null) {
 					if (findViewById(R.id.address) != null) {
 						String addressBlock = entity.place.location.getAddressBlock();
@@ -170,27 +176,10 @@ public class EntityForm extends FormActivity {
 						}
 					}
 				}
-				if (entity.place.website != null && !entity.place.website.equals("")) {
-					if (findViewById(R.id.website) != null) {
-						((BuilderButton) findViewById(R.id.website)).setText(entity.place.website);
-					}
-				}
 				if (entity.place.categories != null && entity.place.categories.size() > 0) {
 					Category category = entity.place.getCategoryPrimary();
 					if (findViewById(R.id.category) != null) {
 						((BuilderButton) findViewById(R.id.category)).setText(category.name);
-					}
-				}
-				if (entity.place.contact != null) {
-					if (entity.place.contact.twitter != null && !entity.place.contact.twitter.equals("")) {
-						if (findViewById(R.id.twitter) != null) {
-							((TextView) findViewById(R.id.twitter)).setText("@" + entity.place.contact.twitter);
-						}
-					}
-				}
-				if (entity.place.facebook != null && !entity.place.facebook.equals("")) {
-					if (findViewById(R.id.facebook) != null) {
-						((TextView) findViewById(R.id.facebook)).setText(entity.place.facebook);
 					}
 				}
 			}
@@ -209,18 +198,21 @@ public class EntityForm extends FormActivity {
 			setVisibility(findViewById(R.id.button_delete), View.GONE);
 			if (entity.ownerId != null
 					&& (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
-					|| Aircandi.getInstance().getUser().isDeveloper)) {
+					|| (Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+							&& Aircandi.getInstance().getUser().isDeveloper != null
+							&& Aircandi.getInstance().getUser().isDeveloper))) {
 				setVisibility(findViewById(R.id.button_delete), View.VISIBLE);
 			}
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public void drawImage(Entity entity) {
 		if (mImageViewPicture != null) {
 
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 				if (mEntityBitmap == null && entity.photo == null && entity.place != null) {
-					Boolean boostColor = !android.os.Build.MODEL.toLowerCase().equals("nexus 4");
+					Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
 					int color = entity.place.getCategoryColor(true, boostColor, false);
 					mImageViewPicture.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 
@@ -236,11 +228,11 @@ public class EntityForm extends FormActivity {
 				else {
 					mImageViewPicture.getImageView().clearColorFilter();
 					if (findViewById(R.id.color_layer) != null) {
-						((View) findViewById(R.id.color_layer)).setBackground(null);
+						((View) findViewById(R.id.color_layer)).setBackgroundDrawable(null);
 						((View) findViewById(R.id.color_layer)).setVisibility(View.GONE);
 					}
 					else {
-						mImageViewPicture.getImageView().setBackground(null);
+						mImageViewPicture.getImageView().setBackgroundDrawable(null);
 					}
 				}
 			}
@@ -255,6 +247,53 @@ public class EntityForm extends FormActivity {
 				builder.setImageUri(entity.getEntityPhotoUri());
 				BitmapRequest imageRequest = builder.create();
 				mImageViewPicture.setBitmapRequest(imageRequest);
+			}
+		}
+	}
+
+	public void drawSources(Entity entity) {
+		if (findViewById(R.id.sources) != null) {
+			/*
+			 * We are expecting a builder button with a viewgroup to
+			 * hold a set of images.
+			 */
+			BuilderButton button = (BuilderButton) findViewById(R.id.sources);
+			if (entity.sources == null || entity.sources.size() == 0) {
+				button.getTextView().setVisibility(View.VISIBLE);
+				button.getViewGroup().setVisibility(View.GONE);
+			}
+			else {
+				button.getTextView().setVisibility(View.GONE);
+				button.getViewGroup().setVisibility(View.VISIBLE);
+				button.getViewGroup().removeAllViews();
+				final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				int sizePixels = ImageUtils.getRawPixels(this, 30);
+				int marginPixels = ImageUtils.getRawPixels(this, 5);
+
+				/* We only show the first five */
+				int sourceCount = 0;
+				for (Source source : entity.sources) {
+					if (sourceCount >= 5) {
+						break;
+					}
+					View view = inflater.inflate(R.layout.temp_radar_candi_item, null);
+					WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+					webImageView.setSizeHint(sizePixels);
+
+					String imageUri = source.getImageUri();
+					BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
+					BitmapRequest imageRequest = builder.create();
+					webImageView.setBitmapRequest(imageRequest);
+
+					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
+					params.setMargins(marginPixels
+							, marginPixels
+							, marginPixels
+							, marginPixels);
+					view.setLayoutParams(params);
+					button.getViewGroup().addView(view);
+					sourceCount++;
+				}
 			}
 		}
 	}
@@ -292,16 +331,6 @@ public class EntityForm extends FormActivity {
 		deleteEntityAtService();
 	}
 
-	public void onWebsiteBuilderClick(View view) {
-		Intent intent = new Intent(this, LinkPicker.class);
-		intent.putExtra(CandiConstants.EXTRA_VERIFY_URI, false);
-		if (mEntityForForm.getPlace().website != null && !mEntityForForm.equals("")) {
-			intent.putExtra(CandiConstants.EXTRA_URI, mEntityForForm.place.website);
-		}
-		startActivityForResult(intent, CandiConstants.ACTIVITY_WEBSITE_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-	}
-
 	public void onAddressBuilderClick(View view) {
 		Intent intent = new Intent(this, AddressBuilder.class);
 		if (mEntityForForm.getPlace().location != null) {
@@ -325,93 +354,97 @@ public class EntityForm extends FormActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
-	@Override
+	public void onSourcesBuilderClick(View view) {
+		Intent intent = new Intent(this, SourcesBuilder.class);
+		intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntityForForm.id);
+
+		/* Serialize the sources for the current entity */
+		if (mEntityForForm.sources != null && mEntityForForm.sources.size() > 0) {
+			List<String> sourceStrings = new ArrayList<String>();
+			for (Source source : mEntityForForm.sources) {
+				sourceStrings.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
+			}
+			intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
+		}
+		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCES_EDIT);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	}
+
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
-		if (requestCode == CandiConstants.ACTIVITY_SIGNIN) {
-			if (resultCode == Activity.RESULT_CANCELED) {
-				setResult(resultCode);
-				finish();
+		if (resultCode == Activity.RESULT_OK) {
+			if (requestCode == CandiConstants.ACTIVITY_ADDRESS_EDIT) {
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+
+					String phone = extras.getString(CandiConstants.EXTRA_PHONE);
+					phone = phone.replaceAll("[^\\d.]", "");
+					mEntityForForm.getPlace().getContact().phone = phone;
+					mEntityForForm.getPlace().getContact().formattedPhone = PhoneNumberUtils.formatNumber(phone);
+
+					String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
+					if (jsonAddress != null) {
+						Location locationUpdated = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
+						mEntityForForm.getPlace().location = locationUpdated;
+						((BuilderButton) findViewById(R.id.address)).setText(mEntityForForm.place.location.address);
+					}
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_CATEGORY_EDIT) {
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
+					if (jsonCategory != null) {
+						Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
+						if (categoryUpdated != null) {
+							if (mEntityForForm.getPlace().categories == null) {
+								mEntityForForm.getPlace().categories = new ArrayList<Category>();
+							}
+							mEntityForForm.getPlace().categories.clear();
+							mEntityForForm.getPlace().categories.add(categoryUpdated);
+							((BuilderButton) findViewById(R.id.category)).setText(categoryUpdated.name);
+						}
+					}
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_SOURCES_EDIT) {
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					ArrayList<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
+					List<Source> sources = new ArrayList<Source>();
+					for (String jsonSource : jsonSources) {
+						Source source = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+						sources.add(source);
+					}
+					mEntityForForm.sources = sources;
+					drawSources(mEntityForForm);
+				}
+			}
+			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
+					if (pictureSource != null && !pictureSource.equals("")) {
+						if (pictureSource.equals("search")) {
+							pictureSearch();
+						}
+						else if (pictureSource.equals("gallery")) {
+							pictureFromGallery();
+						}
+						else if (pictureSource.equals("camera")) {
+							pictureFromCamera();
+						}
+						else if (pictureSource.equals("place")) {
+							pictureFromPlace(mEntityForForm.id);
+						}
+						else if (pictureSource.equals("default")) {
+							usePictureDefault(mEntityForForm);
+						}
+					}
+				}
 			}
 			else {
-				initialize();
-				bind();
-				draw();
-			}
-		}
-		else {
-			if (resultCode == Activity.RESULT_OK) {
-				if (requestCode == CandiConstants.ACTIVITY_ADDRESS_EDIT) {
-					if (intent != null && intent.getExtras() != null) {
-						Bundle extras = intent.getExtras();
-
-						String phone = extras.getString(CandiConstants.EXTRA_PHONE);
-						phone = phone.replaceAll("[^\\d.]", "");
-						mEntityForForm.getPlace().getContact().phone = phone;
-						mEntityForForm.getPlace().getContact().formattedPhone = PhoneNumberUtils.formatNumber(phone);
-
-						String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
-						if (jsonAddress != null) {
-							Location locationUpdated = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
-							mEntityForForm.getPlace().location = locationUpdated;
-							((BuilderButton) findViewById(R.id.address)).setText(mEntityForForm.place.location.address);
-						}
-					}
-				}
-				else if (requestCode == CandiConstants.ACTIVITY_CATEGORY_EDIT) {
-					if (intent != null && intent.getExtras() != null) {
-						Bundle extras = intent.getExtras();
-						String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
-						if (jsonCategory != null) {
-							Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
-							if (categoryUpdated != null) {
-								if (mEntityForForm.getPlace().categories == null) {
-									mEntityForForm.getPlace().categories = new ArrayList<Category>();
-								}
-								mEntityForForm.getPlace().categories.clear();
-								mEntityForForm.getPlace().categories.add(categoryUpdated);
-								((BuilderButton) findViewById(R.id.category)).setText(categoryUpdated.name);
-							}
-						}
-					}
-				}
-				else if (requestCode == CandiConstants.ACTIVITY_WEBSITE_EDIT) {
-					if (intent != null && intent.getExtras() != null) {
-						Bundle extras = intent.getExtras();
-						String linkUri = extras.getString(CandiConstants.EXTRA_URI);
-						if (!linkUri.startsWith("http://") && !linkUri.startsWith("https://")) {
-							linkUri = "http://" + linkUri;
-						}
-						mEntityForForm.getPlace().website = linkUri;
-						((BuilderButton) findViewById(R.id.website)).setText(linkUri);
-					}
-				}
-				else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
-					if (intent != null && intent.getExtras() != null) {
-						Bundle extras = intent.getExtras();
-						final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
-						if (pictureSource != null && !pictureSource.equals("")) {
-							if (pictureSource.equals("search")) {
-								pictureSearch();
-							}
-							else if (pictureSource.equals("gallery")) {
-								pictureFromGallery();
-							}
-							else if (pictureSource.equals("camera")) {
-								pictureFromCamera();
-							}
-							else if (pictureSource.equals("place")) {
-								pictureFromPlace(mEntityForForm.id);
-							}
-							else if (pictureSource.equals("none")) {
-								usePictureDefault(mEntityForForm);
-							}
-						}
-					}
-				}
-				else {
-					super.onActivityResult(requestCode, resultCode, intent);
-				}
+				super.onActivityResult(requestCode, resultCode, intent);
 			}
 		}
 	}
@@ -442,20 +475,6 @@ public class EntityForm extends FormActivity {
 		}
 		if (findViewById(R.id.chk_locked) != null) {
 			entity.locked = ((CheckBox) findViewById(R.id.chk_locked)).isChecked();
-		}
-		if (findViewById(R.id.website) != null) {
-			entity.getPlace().website = ((BuilderButton) findViewById(R.id.website)).getText();
-		}
-		if (findViewById(R.id.twitter) != null) {
-			String twitter = ((TextView) findViewById(R.id.twitter)).getText().toString();
-			/* We don't store the at sign */
-			twitter = twitter.replace("@", "");
-			entity.getPlace().getContact().twitter = twitter;
-		}
-		if (findViewById(R.id.facebook) != null) {
-			String facebook = ((TextView) findViewById(R.id.facebook)).getText().toString();
-			/* We don't store the at sign */
-			entity.getPlace().facebook = facebook;
 		}
 	}
 
@@ -582,7 +601,7 @@ public class EntityForm extends FormActivity {
 	}
 
 	private ModelResult updateEntityAtService() {
-		ModelResult result = ProxiExplorer.getInstance().getEntityModel().updateEntity(mEntityForForm, mEntityBitmap, false);
+		ModelResult result = ProxiExplorer.getInstance().getEntityModel().updateEntity(mEntityForForm, mEntityBitmap);
 		return result;
 	}
 

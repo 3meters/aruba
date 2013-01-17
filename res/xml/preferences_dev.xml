@@ -38,7 +38,13 @@
     <PreferenceCategory
         android:id="@+id/Pref_Category_Dev"
         android:title="Development preferences" >
-        <PreferenceScreen
+        <CheckBoxPreference
+            android:id="@+id/Pref_Enable_Dev"
+            android:defaultValue="true"
+            android:key="Pref_Enable_Dev"
+            android:summary="Enable all developer features"
+            android:title="Developer features" />
+        <PreferenceScreen
             android:key="Pref_Testing_Screen"
             android:summary="Settings used to test functionality"
             android:title="Test settings" >

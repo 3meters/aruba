@@ -60,7 +60,6 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="10dp"
-                        android:layout_toRightOf="@+id/image_picture"
                         android:onClick="onChangePictureButtonClick"
                         android:text="@string/form_button_change_picture" />
                 </LinearLayout>
@@ -91,38 +90,19 @@
                     android:paddingLeft="7dp" />
 
                 <com.aircandi.ui.widgets.BuilderButton
-                    android:id="@+id/website"
+                    android:id="@+id/sources"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="5dp"
                     android:layout_marginLeft="4dp"
                     android:layout_marginRight="4dp"
-                    aircandi:hint="@string/form_place_website_hint"
+                    aircandi:hint="@string/form_place_sources_hint"
+                    aircandi:layout="@layout/widget_builder_button_images"
                     android:addStatesFromChildren="true"
                     android:background="?attr/backgroundButton"
                     android:clickable="true"
-                    android:onClick="onWebsiteBuilderClick"
+                    android:onClick="onSourcesBuilderClick"
                     android:paddingLeft="7dp" />
-
-                <EditText
-                    android:id="@+id/facebook"
-                    style="@style/form_edit"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/form_field_height"
-                    android:layout_marginBottom="1dp"
-                    android:layout_weight="0"
-                    android:hint="@string/form_place_facebook_hint"
-                    android:inputType="textNoSuggestions" />
-
-                <EditText
-                    android:id="@+id/twitter"
-                    style="@style/form_edit"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/form_field_height"
-                    android:layout_marginBottom="1dp"
-                    android:layout_weight="0"
-                    android:hint="@string/form_twitter_hint"
-                    android:inputType="textNoSuggestions" />
 
                 <com.aircandi.ui.widgets.BuilderButton
                     android:id="@+id/category"

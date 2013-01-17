@@ -2,6 +2,7 @@ package com.aircandi.components.bitmaps;
 
 import java.io.File;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
@@ -11,6 +12,7 @@ public class Utils {
 
 	private Utils() {};
 
+	@SuppressLint("NewApi")
 	public static boolean isExternalStorageRemovable() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
 			return Environment.isExternalStorageRemovable();

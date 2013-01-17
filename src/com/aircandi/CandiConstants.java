@@ -31,6 +31,8 @@ public interface CandiConstants {
 	public static final String	EXTRA_MESSAGE							= "com.aircandi.EXTRA_MESSAGE";
 	public static final String	EXTRA_ADDRESS							= "com.aircandi.EXTRA_ADDRESS";
 	public static final String	EXTRA_CATEGORY							= "com.aircandi.EXTRA_CATEGORY";
+	public static final String	EXTRA_SOURCE							= "com.aircandi.EXTRA_SOURCE";
+	public static final String	EXTRA_SOURCES							= "com.aircandi.EXTRA_SOURCES";
 	public static final String	EXTRA_PHONE								= "com.aircandi.EXTRA_PHONE";
 	public static final String	EXTRA_ENTITY_TREE						= "com.aircandi.EXTRA_ENTITY_TREE";
 	public static final String	EXTRA_COLLECTION_ID						= "com.aircandi.EXTRA_COLLECTION_ID";
@@ -152,6 +154,9 @@ public interface CandiConstants {
 	public static final int		ACTIVITY_LINK_PICK						= 500;
 	public static final int		ACTIVITY_WEBSITE_EDIT					= 525;
 	public static final int		ACTIVITY_FACEBOOK_PICK					= 530;
+	public static final int		ACTIVITY_SOURCES_EDIT					= 535;
+	public static final int		ACTIVITY_SOURCE_EDIT					= 540;
+	public static final int		ACTIVITY_SOURCE_NEW						= 545;
 	public static final int		ACTIVITY_CANDI_PICK						= 550;
 	public static final int		ACTIVITY_TEMPLATE_PICK					= 560;
 	public static final int		ACTIVITY_PREFERENCES					= 600;

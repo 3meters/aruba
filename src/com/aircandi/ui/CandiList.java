@@ -147,14 +147,14 @@ public class CandiList extends CandiActivity {
 		Logger.v(this, "List item clicked");
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			if (entity.source.equals("twitter")) {
-				AndroidManager.getInstance().callTwitterActivity(this, entity.sourceId);
+			if (entity.source.name.equals("twitter")) {
+				AndroidManager.getInstance().callTwitterActivity(this, entity.source.id);
 			}
-			else if (entity.source.equals("facebook")) {
-				AndroidManager.getInstance().callFacebookActivity(this, entity.sourceId);
+			else if (entity.source.name.equals("facebook")) {
+				AndroidManager.getInstance().callFacebookActivity(this, entity.source.id);
 			}
-			else if (entity.source.equals("website")) {
-				AndroidManager.getInstance().callBrowserActivity(this, entity.sourceId);
+			else if (entity.source.name.equals("website")) {
+				AndroidManager.getInstance().callBrowserActivity(this, entity.source.id);
 			}
 		}
 		else {

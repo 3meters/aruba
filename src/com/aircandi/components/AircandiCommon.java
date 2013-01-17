@@ -61,12 +61,12 @@ import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.CandiForm;
 import com.aircandi.ui.CandiList;
 import com.aircandi.ui.CandiRadar;
+import com.aircandi.ui.CommentForm;
 import com.aircandi.ui.CommentList;
 import com.aircandi.ui.EntityForm;
 import com.aircandi.ui.Preferences;
 import com.aircandi.ui.SplashForm;
 import com.aircandi.ui.base.FormActivity;
-import com.aircandi.ui.builders.CandiPicker;
 import com.aircandi.ui.builders.PictureSourcePicker;
 import com.aircandi.ui.builders.TemplatePicker;
 import com.aircandi.ui.user.CandiUser;
@@ -91,6 +91,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public String						mEntityId;
 	public String						mEntityType;
 	public List<Entity>					mEntities;
+	public Entity						mEntity;
 	public String						mMessage;
 	public String						mUserId;
 	public String						mCollectionId;
@@ -196,6 +197,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public void updateDebugText() {
 		if (mTextDebug != null) {
 			if (Aircandi.getInstance().getUser() != null
+					&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
 					&& Aircandi.getInstance().getUser().isDeveloper != null
 					&& Aircandi.getInstance().getUser().isDeveloper) {
 
@@ -310,6 +312,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				if (Aircandi.wifiCount > 0) {
 					messageId = R.string.alert_beacons_available;
 					if (Aircandi.getInstance().getUser() != null
+							&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
 							&& Aircandi.getInstance().getUser().isDeveloper != null
 							&& Aircandi.getInstance().getUser().isDeveloper) {
 						beaconMessage = mActivity.getString(messageId) + "\n\n";
@@ -598,9 +601,15 @@ public class AircandiCommon implements ActionBar.TabListener {
 			, OnClickListener listenerClick
 			, OnCancelListener listenerCancel) {
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(context)
-				.setIcon(iconResource)
-				.setTitle(titleText);
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+		if (iconResource != null) {
+			builder.setIcon(iconResource);
+		}
+
+		if (titleText != null) {
+			builder.setTitle(titleText);
+		}
 
 		if (customView == null) {
 			builder.setMessage(message);
@@ -845,42 +854,77 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 
 	public void doCreateOptionsMenu(Menu menu) {
-
+		/*
+		 * Android 2.3 or lower: called when user hits the menu button for the first time.
+		 * Android 3.0 or higher: called when activity is first started.
+		 * 
+		 * Behavior might be modified because we are using ABS.
+		 */
 		SherlockActivity activity = (SherlockActivity) mActivity;
 		if (mPageName.equals("CandiUser")) {
 			activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_user_light : R.menu.menu_user_dark, menu);
+		}
+		else if (mPageName.equals("CommentList")) {
+			activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_comment_light : R.menu.menu_comment_dark, menu);
 		}
 		else {
 			activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
 		}
 
-		/* Beacon indicator */
-		mMenuItemBeacons = menu.findItem(R.id.beacons);
-		if (mMenuItemBeacons != null) {
-			mBeaconIndicator = (TextView) mMenuItemBeacons.getActionView().findViewById(R.id.beacon_indicator);
-			mMenuItemBeacons.getActionView().findViewById(R.id.beacon_frame).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					doBeaconIndicatorClick();
-				}
-			});
-
-			updateBeaconIndicator(ProxiExplorer.getInstance().mWifiList);
+		/* Hide add comment menu item if not in commentlist */
+		if (!mPageName.equals("CommentList")) {
+			if (mEntity != null && mEntity.locked) {
+				((MenuItem) menu.findItem(R.id.add_comment)).setVisible(false);
+			}
 		}
 
-		/* Cache refresh menu item */
-		mMenuItemRefresh = menu.findItem(R.id.refresh);
-	}
+		/* Hide add custom place menuitem if this is not the CandiRadar activity */
+		MenuItem menuItem = menu.findItem(R.id.add_custom_place);
+		if (menuItem != null && !mPageName.equals("CandiRadar")) {
+			menuItem.setVisible(false);
+		}
 
-	public void doPrepareOptionsMenu(Menu menu) {
-		/*
-		 * Add update item if an update has been flagged
-		 */
+		/* Show update menuitem if one is needed */
 		if (!mPageName.equals("SignInForm")) {
 			if (!Aircandi.applicationUpdateNeeded) {
 				((MenuItem) menu.findItem(R.id.update)).setVisible(false);
 			}
 		}
+
+		/* Beacon indicator */
+		mMenuItemBeacons = menu.findItem(R.id.beacons);
+		if (mMenuItemBeacons != null) {
+
+			/* Only show beacon indicator if user is a developer */
+			if (!Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+					|| Aircandi.getInstance().getUser() == null
+					|| Aircandi.getInstance().getUser().isDeveloper == null
+					|| !Aircandi.getInstance().getUser().isDeveloper) {
+				mMenuItemBeacons.setVisible(false);
+			}
+			else {
+				mBeaconIndicator = (TextView) mMenuItemBeacons.getActionView().findViewById(R.id.beacon_indicator);
+				mMenuItemBeacons.getActionView().findViewById(R.id.beacon_frame).setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						doBeaconIndicatorClick();
+					}
+				});
+				updateBeaconIndicator(ProxiExplorer.getInstance().mWifiList);
+			}
+		}
+
+		/* Cache refresh menu item for later ui updates */
+		mMenuItemRefresh = menu.findItem(R.id.refresh);
+	}
+
+	public void doPrepareOptionsMenu(Menu menu) {
+		/*
+		 * Android 2.3 or lower: called every time the user hits the menu button.
+		 * Android 3.0 or higher: called when invalidateOptionsMenu is called.
+		 * 
+		 * Behavior might be modified because we are using ABS.
+		 */
 	}
 
 	public void doOptionsItemSelected(MenuItem menuItem) {
@@ -939,6 +983,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 				intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				mActivity.startActivity(intent);
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToCandiRadar);
+				return;
+			case R.id.add_comment:
+				/*
+				 * We assume the new comment button wouldn't be visible if the
+				 * entity is locked.
+				 */
+				intentBuilder = new IntentBuilder(mActivity, CommentForm.class);
+				intentBuilder.setEntityId(null);
+				intentBuilder.setParentEntityId(mEntityId);
+				mActivity.startActivityForResult(intentBuilder.create(), CandiConstants.ACTIVITY_COMMENT);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 				return;
 			case R.id.add_custom_place:
 				if (Aircandi.getInstance().getUser() != null) {
@@ -1011,13 +1066,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		else if (mPageName.equals("EntityForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
-		}
-		else if (mPageName.equals("CandiPicker")) {
-			/*
-			 * We let candi picker handle tab changes because there
-			 * is extra work to do.
-			 */
-			addTabsToActionBar((CandiPicker) mActivity, CandiConstants.TABS_CANDI_PICKER_ID);
 		}
 	}
 

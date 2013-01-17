@@ -12,6 +12,7 @@
 
     <string name="menu_beacons_item">Beacons</string>
     <string name="menu_add_custom_place_item">Add custom place</string>
+    <string name="menu_add_comment_item">Add comment</string>
     <string name="menu_refresh_item">Refresh</string>
     <string name="menu_edit_item">Edit</string>
     <string name="menu_profile_item">About me</string>
@@ -31,12 +32,12 @@
     <string name="dummy_uri">http://goodeats.com</string>
     <string name="dummy_name">Jay Massena</string>
     <string name="dummy_twitter">\ @zokacoffee</string>
-    <string name="dummy_phrase">after your two hour wifi code expires you can ask for more!! for...</string>
+    <string name="dummy_phrase">after your two hour wifi code expires you can ask for more!! for&#8230;</string>
     <string name="dummy_pattern">hour wifi</string>
     <string name="dummy_phrase_stats">(2 tips)</string>
     <string name="dummy_section_title">aection</string>
     <string name="dummy_location">Seattle, WA</string>
-    <string name="dummy_address">"2200 N 56th (at Keystone Pl N)\nSeattle, WA 98103\n(206) 545-4277"</string>
+    <string name="dummy_address">"2200 N 56th (at Keystone Pl N)\nSeattle, WA 98103\n(206) 545&#8211;4277"</string>
     <string name="dummy_comments">21 comments</string>
     <string name="dummy_distance">0.15mi</string>
     <string name="dummy_number">10</string>
@@ -61,13 +62,18 @@
     <string name="alert_upgrade_needed_body">A newer version of Aircandi is available. Please download and install as soon possible.\n</string>
     <string name="alert_upgrade_required_body">A newer version of Aircandi is required. Please download and install.\n</string>
     <string name="alert_upgrade_ok">Info</string>
-    <string name="alert_upgrade_cancel">Cancel</string>
+    <string name="alert_upgrade_cancel">cancel</string>
     
     <string name="alert_wifi_title">Aircandi</string>
     <string name="alert_wifi_tethered">Turn off hotspot tethering for best results using Aircandi.</string>
     <string name="alert_wifi_disabled">Enable wifi for best results using Aircandi.</string>
     <string name="alert_wifi_settings">Settings</string>
-    <string name="alert_wifi_cancel">Cancel</string>
+    <string name="alert_wifi_cancel">cancel</string>
+    
+    <string name="alert_source_delete_title">Delete link</string>
+    <string name="alert_source_delete_message_single">Are you sure you want to delete this link?</string>
+    <string name="alert_source_delete_message_multiple">Are you sure you want to delete these links?</string>
+    
     
     <string name="alert_deleted">deleted</string>
     <string name="alert_updated">saved</string>
@@ -130,6 +136,10 @@
 	<string name="error_missing_password">Enter a password.</string>
 	<string name="error_missing_password_confirmation">Enter password confirmation.</string>
 	
+    <string name="error_missing_source_name">Enter a name.</string>
+    <string name="error_missing_source_id">Enter a web address or id.</string>
+    <string name="error_source_id_as_weburi_invalid">Web address isn\'t in a valid format.</string>
+    
     <!-- Toast -->
 
     <string name="toast_wifi_enabling">Wifi state enabling&#8230;</string>
@@ -162,6 +172,11 @@
 
     <string name="splash_message">be there, do more</string>
     
+    <!-- Splash -->
+
+    <string name="picture_picker_places_empty">No pictures found for</string>
+    <string name="picture_picker_search_empty">No pictures found for</string>
+    
     <!-- Navigation -->
 
     <string name="navigation_radar">Radar</string>
@@ -193,7 +208,7 @@
     <string name="dialog_network_message_wifi_ready">Wifi enabled, ready for retry</string>
     <string name="dialog_network_message_wifi_notready">Enable wifi and retry</string>
     <string name="dialog_network_retry_button">Retry</string>
-    <string name="dialog_network_cancel_button">Cancel</string>
+    <string name="dialog_network_cancel_button">cancel</string>
     <string name="dialog_network_enable_wifi_checkbox">Wifi enabled</string>
     <string name="dialog_install_message"> A custom application is available for this candi.</string>
     <string name="dialog_install_ok"> Install</string>
@@ -206,7 +221,10 @@
     <string name="dialog_template_picker_title">select candi type</string>
     <string name="dialog_address_builder_title">address</string>
     <string name="dialog_category_builder_title">category</string>
+    <string name="dialog_source_builder_title_new">new link</string>
+    <string name="dialog_source_builder_title_editing">edit link</string>
     <string name="dialog_link_picker_title">website</string>
+    <string name="dialog_sources_builder_title">place links</string>
     <string name="dialog_picture_source_picker_title">category</string>
     <string name="dialog_picture_picker_search_title">picture search</string>
     <string name="dialog_picture_picker_place_title">place pictures</string>
@@ -218,7 +236,7 @@
     <string name="dialog_picture_source_gallery">Select a gallery picture</string>
 	<string name="dialog_picture_source_camera">Take a new picture</string>
 	<string name="dialog_picture_source_place">Select a place picture</string>
-    <string name="dialog_picture_source_none">None</string>
+    <string name="dialog_picture_source_default">Default</string>
     <string name="dialog_picture_source_message">Select a picture.</string>
     
     <!-- Help -->
@@ -270,13 +288,12 @@
     <string name="candi_button_tune">i\'m here</string>
     <string name="candi_button_call">call</string>
     <string name="candi_button_website">view website</string>
-    <string name="candi_button_comment">comment</string>
-    <string name="candi_button_comment_first">be the first to comment</string>
     <string name="candi_button_new">add candi</string>
     <string name="candi_button_edit">edit</string>
     <string name="candi_button_move">move</string>
     <string name="candi_button_more">view all</string>
     <string name="candi_section_photos">photos</string>
+    <string name="candi_section_switchboard">place info</string>
     <string name="candi_section_candi">candi</string>
     <string name="candi_section_tips">tips</string>
     <string name="candi_section_photos_more">view all photos</string>
@@ -286,6 +303,12 @@
     <string name="candi_label_comments_none">no comments yet</string>
     <string name="candi_label_tuning_score">tuning score</string>
     <string name="candi_label_user_creator">first discovered by</string>
+    
+    <!-- Comments -->
+    
+    <string name="candi_button_comment">comment</string>
+    <string name="comment_button_comment">add comment</string>
+    <string name="comment_button_comment_first">start the conversation</string>
     
     <!-- Misc -->
 
@@ -310,6 +333,7 @@
     <string name="form_title_picture_search">picture search</string>
     <string name="form_title_picture_browse">picture browse</string>
     <string name="form_title_link_picker">link picker</string>
+    <string name="form_title_source_builder">links</string>
     <string name="form_title_preferences">aircandi settings</string>
     <string name="form_title_candi_picker">pick a new collection</string>
     <string name="form_title_comment">comment</string>
@@ -366,10 +390,14 @@
 
     <!-- Forms.hints -->
 
+    <string name="form_source_type_hint">type of link</string>
+    <string name="form_source_name_hint">label</string>
+	<string name="form_source_id_hint">web address or id</string>
+        
+
     <string name="form_title_hint">title</string>
     <string name="form_place_title_hint">name</string>
-    <string name="form_place_website_hint">website</string>
-    <string name="form_place_facebook_hint">facebook page</string>
+    <string name="form_place_sources_hint">links</string>
     <string name="form_place_category_hint">category</string>
     <string name="form_place_sub_category_hint">subcategory</string>
     <string name="form_subtitle_hint">subtitle</string>
@@ -382,7 +410,6 @@
     <string name="form_zipcode_hint">zipcode</string>
     <string name="form_comment_hint">comment</string>
     <string name="form_uri_hint">web address</string>
-    <string name="form_twitter_hint">twitter</string>
     <string name="picture_search_query_hint">search</string>
     <string name="form_password_hint">password (minimum of 6 characters)</string>
     

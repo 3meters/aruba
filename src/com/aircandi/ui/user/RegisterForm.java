@@ -1,5 +1,8 @@
 package com.aircandi.ui.user;
 
+import java.util.Locale;
+
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -9,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
@@ -23,10 +27,11 @@ import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
-import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
+import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
+import com.aircandi.ui.Preferences;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -40,10 +45,10 @@ public class RegisterForm extends FormActivity {
 	private EditText		mTextEmail;
 	private EditText		mTextPassword;
 	private EditText		mTextPasswordConfirm;
-	private WebImageView	mImageUser;
+	private WebImageView	mImage;
 	private Button			mButtonSignUp;
 	private User			mUser;
-	private Bitmap			mUserBitmap;
+	private Bitmap			mBitmap;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -55,7 +60,7 @@ public class RegisterForm extends FormActivity {
 	}
 
 	protected void initialize() {
-		mImageUser = (WebImageView) findViewById(R.id.image_picture);
+		mImage = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
@@ -81,34 +86,22 @@ public class RegisterForm extends FormActivity {
 	}
 
 	protected void draw() {
-		/*
-		 * We only want to enable the save button when there is something in all
-		 * the required fields: fullname, email, password
-		 */
-		if (mUserBitmap != null) {
-			ImageUtils.showImageInImageView(mUserBitmap, mImageUser.getImageView(), true, AnimUtils.fadeInMedium());
-		}
-		else {
-			BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
-			builder.setFromUri(mUser.getUserPhotoUri());
-			builder.setRequestListener(new RequestListener() {
+		drawImage(mUser);
+	}
 
-				@Override
-				public void onComplete(Object response) {
-					ServiceResponse serviceResponse = (ServiceResponse) response;
-					if (serviceResponse.responseCode == ResponseCode.Success) {
-						ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-						mUserBitmap = imageResponse.bitmap;
-					}
-					else {
-						mImageUser.getImageView().setImageResource(R.drawable.image_broken);
-						mCommon.handleServiceError(serviceResponse, ServiceOperation.Signup);
-					}
-				}
-			});
-
-			BitmapRequest imageRequest = builder.create();
-			mImageUser.setBitmapRequest(imageRequest);
+	public void drawImage(User user) {
+		if (mImage != null) {
+			if (mBitmap != null) {
+				mImage.hideLoading();
+				ImageUtils.showImageInImageView(mBitmap, mImage.getImageView(), true, AnimUtils.fadeInMedium());
+				mImage.setVisibility(View.VISIBLE);
+			}
+			else {
+				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImage);
+				builder.setImageUri(user.getUserPhotoUri());
+				BitmapRequest imageRequest = builder.create();
+				mImage.setBitmapRequest(imageRequest);
+			}
 		}
 	}
 
@@ -126,18 +119,67 @@ public class RegisterForm extends FormActivity {
 
 	public void onChangePictureButtonClick(View view) {
 
-		//		showChangePictureDialog(false, null, null, null, mImageUser, new RequestListener() {
-		//
-		//			@Override
-		//			public void onComplete(Object response, String imageUri, String linkUri, Bitmap imageBitmap, String title, String description) {
-		//
-		//				ServiceResponse serviceResponse = (ServiceResponse) response;
-		//				if (serviceResponse.responseCode == ResponseCode.Success) {
-		//					mUser.getPhoto().setImageUri(imageUri);
-		//					mUserBitmap = imageBitmap;
-		//				}
-		//			}
-		//		});
+		mCommon.showPictureSourcePicker(null);
+		mImageRequestWebImageView = mImage;
+		mImageRequestListener = new RequestListener() {
+
+			@Override
+			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description) {
+
+				ServiceResponse serviceResponse = (ServiceResponse) response;
+				if (serviceResponse.responseCode == ResponseCode.Success) {
+					/* Could get set to null if we are using the default */
+					mBitmap = imageBitmap;
+					if (imageUri != null) {
+						mUser.getPhotoForSet().setImageUri(imageUri);
+					}
+					drawImage(mUser);
+				}
+			}
+		};
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+		if (resultCode == Activity.RESULT_OK) {
+			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
+				if (intent != null && intent.getExtras() != null) {
+					Bundle extras = intent.getExtras();
+					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
+					if (pictureSource != null && !pictureSource.equals("")) {
+						if (pictureSource.equals("search")) {
+							pictureSearch();
+						}
+						else if (pictureSource.equals("gallery")) {
+							pictureFromGallery();
+						}
+						else if (pictureSource.equals("camera")) {
+							pictureFromCamera();
+						}
+						else if (pictureSource.equals("default")) {
+							usePictureDefault(mUser);
+						}
+					}
+				}
+			}
+			else {
+				super.onActivityResult(requestCode, resultCode, intent);
+			}
+		}
+	}
+
+	protected void usePictureDefault(User user) {
+		/*
+		 * Setting the photo to null will trigger correct default handling.
+		 */
+		if (user.photo != null) {
+			user.photo.setBitmap(null);
+			user.photo = null;
+		}
+		mBitmap = null;
+		drawImage(user);
+		Tracker.trackEvent("User", "DefaultPicture", "None", 0);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -226,7 +268,7 @@ public class RegisterForm extends FormActivity {
 
 		if (validate()) {
 
-			mUser.email = mTextEmail.getText().toString().trim().toLowerCase();
+			mUser.email = mTextEmail.getText().toString().trim().toLowerCase(Locale.US);
 			mUser.name = mTextFullname.getText().toString().trim();
 			mUser.password = mTextPassword.getText().toString().trim();
 
@@ -242,7 +284,7 @@ public class RegisterForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("InsertUser");
-					ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertUser(mUser, mUserBitmap);
+					ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertUser(mUser, mBitmap);
 					return result;
 				}
 
@@ -256,7 +298,8 @@ public class RegisterForm extends FormActivity {
 						 * the service when it was inserted. We now consider the user
 						 * signed in.
 						 */
-						Aircandi.getInstance().setUser(mUser);
+						User insertedUser = (User) result.data;
+						Aircandi.getInstance().setUser(insertedUser);
 
 						Tracker.trackEvent("User", "Insert", null, 0);
 						mCommon.hideBusy();
@@ -273,13 +316,29 @@ public class RegisterForm extends FormActivity {
 						//										finish();
 						//									}
 						//								}, null);
+						
+						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
+								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+
+						String jsonUser = ProxibaseService.convertObjectToJsonSmart(insertedUser, false, true);
+						String jsonSession = ProxibaseService.convertObjectToJsonSmart(insertedUser.session, false, true);
+
+						Aircandi.settingsEditor.putString(Preferences.SETTING_USER, jsonUser);
+						Aircandi.settingsEditor.putString(Preferences.SETTING_USER_SESSION, jsonSession);
+						Aircandi.settingsEditor.putString(Preferences.SETTING_LAST_EMAIL, insertedUser.email);
+						Aircandi.settingsEditor.commit();
 
 						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
 						finish();
 						AnimUtils.doOverridePendingTransition(RegisterForm.this, TransitionType.FormToCandiPage);
 					}
 					else {
+						/*
+						 * TODO: Need to handle AmazonClientException.
+						 * Does clearing the password fields always make sense?
+						 */
 						mTextPassword.setText("");
+						mTextPasswordConfirm.setText("");
 						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.Signup);
 					}
 				}

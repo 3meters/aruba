@@ -1,5 +1,7 @@
 package com.aircandi.components;
 
+import java.util.Locale;
+
 public class StopWatch {
 	protected long	totalTime;
 	protected long	lastThreshold;
@@ -11,7 +13,7 @@ public class StopWatch {
 	 * @return time in seconds
 	 */
 	public static final String toSeconds(long nanoTime) {
-		return String.format("%.9f", nanoTime / 1000000000.0);
+		return String.format(Locale.US, "%.9f", nanoTime / 1000000000.0);
 	}
 
 	public long getTotalTime() {
@@ -33,14 +35,14 @@ public class StopWatch {
 		final long lapTime = now - lastThreshold;
 		totalTime += lapTime;
 		lastThreshold = System.nanoTime();
-		String stats = "segment time: " + String.valueOf(lapTime/1000000) + "ms, total time: " + String.valueOf(totalTime/1000000) + "ms";
+		String stats = "segment time: " + String.valueOf(lapTime / 1000000) + "ms, total time: " + String.valueOf(totalTime / 1000000) + "ms";
 		if (message != null) {
 			stats = message + ": " + stats;
 		}
 		Logger.v(this, stats);
 		return lapTime;
 	}
-	
+
 	public Boolean isStarted() {
 		return (lastThreshold != 0);
 	}
