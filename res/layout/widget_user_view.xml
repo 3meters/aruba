@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:text="@string/dummy_name"
-            android:textColor="?attr/textColorComment"
+            android:textColor="?attr/textColorButtonLink"
             android:textStyle="bold" />
 
         <LinearLayout

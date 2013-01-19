@@ -91,7 +91,7 @@ public class ProxiExplorer {
 		}
 	}
 
-	public void scanForWifi() {
+	public void scanForWifi(final ScanReason reason) {
 		/*
 		 * If context is null then we probably crashed and the scan service is still calling.
 		 */
@@ -99,70 +99,82 @@ public class ProxiExplorer {
 			return;
 		}
 
-		if (!mScanRequestActive.get()) {
-			mScanRequestActive.set(true);
+		Aircandi.stopwatch2.start("Wifi scan");
+		synchronized (mWifiList) {
 
-			synchronized (mWifiList) {
+			if (!mUsingEmulator) {
 
-				if (!mUsingEmulator) {
+				mContext.registerReceiver(new BroadcastReceiver() {
 
-					mContext.registerReceiver(new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
 
-						@Override
-						public void onReceive(Context context, Intent intent) {
+							Aircandi.stopwatch2.segmentTime("Wifi scan: results received");
+						Logger.v(ProxiExplorer.this, "Received wifi scan results for " + reason.name().toString());
+						mContext.unregisterReceiver(this);
 
-							Logger.v(ProxiExplorer.this, "Received wifi scan results");
-							mContext.unregisterReceiver(this);
+						/* Get the latest scan results */
+						mWifiList.clear();
 
-							/* Get the latest scan results */
-							mWifiList.clear();
-
-							for (ScanResult scanResult : mWifiManager.getScanResults()) {
-								mWifiList.add(new WifiScanResult(scanResult));
-							}
-
-							String testingBeacons = Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural");
-
-							if (!ListPreferenceMultiSelect.contains("natural", testingBeacons, null)) {
-								mWifiList.clear();
-							}
-
-							if (ListPreferenceMultiSelect.contains("massena_upper", testingBeacons, null)) {
-								mWifiList.add(mWifiMassenaUpper);
-							}
-
-							if (ListPreferenceMultiSelect.contains("massena_lower", testingBeacons, null)) {
-								mWifiList.add(mWifiMassenaLower);
-							}
-
-							if (ListPreferenceMultiSelect.contains("massena_lower_strong", testingBeacons, null)) {
-								mWifiList.add(mWifiMassenaLowerStrong);
-							}
-
-							if (ListPreferenceMultiSelect.contains("massena_lower_weak", testingBeacons, null)) {
-								mWifiList.add(mWifiMassenaLowerWeak);
-							}
-
-							if (ListPreferenceMultiSelect.contains("empty", testingBeacons, null)) {
-								mWifiList.add(mWifiEmpty);
-							}
-
-							Collections.sort(mWifiList, new WifiScanResult.SortWifiBySignalLevel());
-
-							mLastWifiUpdate = DateUtils.nowDate();
-							Events.EventBus.onWifiScanReceived(mWifiList);
-							mScanRequestActive.set(false);
+						for (ScanResult scanResult : mWifiManager.getScanResults()) {
+							mWifiList.add(new WifiScanResult(scanResult));
 						}
-					}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
-					mWifiManager.startScan();
+						String testingBeacons = Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural");
+
+						if (!ListPreferenceMultiSelect.contains("natural", testingBeacons, null)) {
+							mWifiList.clear();
+						}
+
+						if (ListPreferenceMultiSelect.contains("massena_upper", testingBeacons, null)) {
+							mWifiList.add(mWifiMassenaUpper);
+						}
+
+						if (ListPreferenceMultiSelect.contains("massena_lower", testingBeacons, null)) {
+							mWifiList.add(mWifiMassenaLower);
+						}
+
+						if (ListPreferenceMultiSelect.contains("massena_lower_strong", testingBeacons, null)) {
+							mWifiList.add(mWifiMassenaLowerStrong);
+						}
+
+						if (ListPreferenceMultiSelect.contains("massena_lower_weak", testingBeacons, null)) {
+							mWifiList.add(mWifiMassenaLowerWeak);
+						}
+
+						if (ListPreferenceMultiSelect.contains("empty", testingBeacons, null)) {
+							mWifiList.add(mWifiEmpty);
+						}
+						Aircandi.stopwatch2.segmentTime("Wifi scan: objects created");
+						Collections.sort(mWifiList, new WifiScanResult.SortWifiBySignalLevel());
+						Aircandi.stopwatch2.segmentTime("Wifi scan: objects sorted");
+
+						mLastWifiUpdate = DateUtils.nowDate();
+						if (reason == ScanReason.monitoring) {
+							BusProvider.getInstance().post(new MonitoringWifiScanReceivedEvent(mWifiList));
+						}
+						else if (reason == ScanReason.query) {
+							BusProvider.getInstance().post(new QueryWifiScanReceivedEvent(mWifiList));
+						}
+						Aircandi.stopwatch2.segmentTime("Wifi scan: bus events sent");
+						mScanRequestActive.set(false);
+						Aircandi.stopwatch2.stop("Wifi scan: routine finished");
+
+					}
+				}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+
+				Aircandi.stopwatch2.segmentTime("Wifi scan: requesting");
+				mWifiManager.startScan();
+			}
+			else {
+				mWifiList.clear();
+				Logger.d(ProxiExplorer.this, "Emulator enabled so using dummy scan results");
+				mWifiList.add(mWifiMassenaUpper);
+				if (reason == ScanReason.monitoring) {
+					BusProvider.getInstance().post(new MonitoringWifiScanReceivedEvent(mWifiList));
 				}
-				else {
-					mWifiList.clear();
-					Logger.d(ProxiExplorer.this, "Emulator enabled so using dummy scan results");
-					mWifiList.add(mWifiMassenaUpper);
-					Events.EventBus.onWifiScanReceived(mWifiList);
-					mScanRequestActive.set(false);
+				else if (reason == ScanReason.query) {
+					BusProvider.getInstance().post(new QueryWifiScanReceivedEvent(mWifiList));
 				}
 			}
 		}
@@ -187,6 +199,7 @@ public class ProxiExplorer {
 		 * date for old beacons. Unchanged entities from previous scans will still be updated for local changes in
 		 * visibility.
 		 */
+		Aircandi.stopwatch3.start("Entities for beacons");
 		Logger.d(this, "Processing beacons from scan");
 
 		/*
@@ -206,7 +219,8 @@ public class ProxiExplorer {
 		if (beaconIds.size() == 0) {
 			mEntityModel.removeBeaconEntities();
 			mEntityModel.setLastRefreshDate(DateUtils.nowDate().getTime());
-			Events.EventBus.onBeaconEntitiesLoaded(serviceResponse);
+			List<Entity> entitiesForEvent = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 			return;
 		}
 
@@ -251,8 +265,10 @@ public class ProxiExplorer {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
+		Aircandi.stopwatch3.segmentTime("Entities for beacons: service call started");
 		serviceResponse = dispatch(serviceRequest, false);
 
+		Aircandi.stopwatch3.segmentTime("Entities for beacons: service call complete");
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
 			String jsonResponse = (String) serviceResponse.data;
@@ -260,6 +276,7 @@ public class ProxiExplorer {
 			serviceResponse.data = serviceData;
 
 			List<Entity> entities = (List<Entity>) serviceData.data;
+			Aircandi.stopwatch3.segmentTime("Entities for beacons: objects deserialized");
 
 			/* Merge entities into data model */
 			mEntityModel.removeBeaconEntities();
@@ -268,8 +285,14 @@ public class ProxiExplorer {
 			mEntityModel.setLastRefreshDate(serviceData.date.longValue());
 			manageEntityVisibility();
 
-			Events.EventBus.onBeaconEntitiesLoaded(serviceResponse);
+			List<Entity> entitiesForEvent = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+			Aircandi.stopwatch3.segmentTime("Entities for beacons: objects processed");
+
+			BusProvider.getInstance().post(new EntitiesForBeaconsFinishedEvent());
+			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 		}
+
+		Aircandi.stopwatch3.stop("Entities for beacons: finished");
 
 		return;
 	}
@@ -350,7 +373,10 @@ public class ProxiExplorer {
 			mEntityModel.removeLocationEntities();
 			mEntityModel.upsertEntities(entities);
 
-			Events.EventBus.onLocationEntitiesLoaded(serviceResponse);
+			List<Entity> entitiesForEvent = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+
+			BusProvider.getInstance().post(new EntitiesForLocationFinishedEvent());
+			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 		}
 		return serviceResponse;
 	}
@@ -401,8 +427,12 @@ public class ProxiExplorer {
 			}
 			mEntityModel.removeSyntheticEntities();
 			mEntityModel.upsertEntities(entities);
+
+			List<Entity> entitiesForEvent = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+
+			BusProvider.getInstance().post(new PlacesNearLocationFinishedEvent());
+			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 		}
-		Events.EventBus.onSyntheticsLoaded(serviceResponse);
 		return;
 	}
 
@@ -1629,7 +1659,7 @@ public class ProxiExplorer {
 				Collections.sort(mEntityModel.mBeacons, new Beacon.SortBeaconsBySignalLevel());
 			}
 
-			Events.EventBus.onBeaconsLocked(null);
+			BusProvider.getInstance().post(new BeaconsLockedEvent());
 		}
 
 		public Collection<Beacon> getBeacons() {
@@ -1684,29 +1714,32 @@ public class ProxiExplorer {
 			EntityList<Entity> entities = new EntityList<Entity>();
 			Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
 					Aircandi.applicationContext.getString(R.string.search_radius_default)));
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					Entity entity = entry.getValue();
-					if (!entity.hidden) {
-						Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
-						/* Must do this to cache the distance before sorting */
-						Float distance = entity.getDistance();
-						if (beacon != null) {
-							entities.add(entity);
-						}
-						else {
-							beacon = entity.getActiveBeacon(LinkType.browse.name());
-							/*
-							 * Entities that were first found by beacon hang around and could
-							 * later be visible via location if we continue with this approach.
-							 * 
-							 * One thought is that if it qualifies then so be it. Sorting should
-							 * put it in the right priority order and place with beacons should
-							 * sort higher.
-							 */
-							/* No beacon for this entity so check using location */
-							if (beacon != null || (distance != null && distance != -1 && distance < searchRangeMeters)) {
+
+			synchronized (mEntityCache) {
+				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+					if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+						Entity entity = entry.getValue();
+						if (!entity.hidden) {
+							Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
+							/* Must do this to cache the distance before sorting */
+							Float distance = entity.getDistance();
+							if (beacon != null) {
 								entities.add(entity);
+							}
+							else {
+								beacon = entity.getActiveBeacon(LinkType.browse.name());
+								/*
+								 * Entities that were first found by beacon hang around and could
+								 * later be visible via location if we continue with this approach.
+								 * 
+								 * One thought is that if it qualifies then so be it. Sorting should
+								 * put it in the right priority order and place with beacons should
+								 * sort higher.
+								 */
+								/* No beacon for this entity so check using location */
+								if (beacon != null || (distance != null && distance != -1 && distance < searchRangeMeters)) {
+									entities.add(entity);
+								}
 							}
 						}
 					}
@@ -1733,29 +1766,32 @@ public class ProxiExplorer {
 			EntityList<Entity> entities = new EntityList<Entity>();
 			Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
 					Aircandi.applicationContext.getString(R.string.search_radius_default)));
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					Entity entity = entry.getValue();
-					if (!entity.hidden && !entity.synthetic) {
-						Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
-						/* Must do this to cache the distance before sorting */
-						Float distance = entity.getDistance();
-						if (beacon != null) {
-							entities.add(entity);
-						}
-						else {
-							beacon = entity.getActiveBeacon(LinkType.browse.name());
-							/*
-							 * Entities that were first found by beacon hang around and could
-							 * later be visible via location if we continue with this approach.
-							 * 
-							 * One thought is that if it qualifies then so be it. Sorting should
-							 * put it in the right priority order and place with beacons should
-							 * sort higher.
-							 */
-							/* No beacon for this entity so check using location */
-							if (beacon != null || (distance != null && distance != -1 && distance < searchRangeMeters)) {
+
+			synchronized (mEntityCache) {
+				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+					if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+						Entity entity = entry.getValue();
+						if (!entity.hidden && !entity.synthetic) {
+							Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
+							/* Must do this to cache the distance before sorting */
+							Float distance = entity.getDistance();
+							if (beacon != null) {
 								entities.add(entity);
+							}
+							else {
+								beacon = entity.getActiveBeacon(LinkType.browse.name());
+								/*
+								 * Entities that were first found by beacon hang around and could
+								 * later be visible via location if we continue with this approach.
+								 * 
+								 * One thought is that if it qualifies then so be it. Sorting should
+								 * put it in the right priority order and place with beacons should
+								 * sort higher.
+								 */
+								/* No beacon for this entity so check using location */
+								if (beacon != null || (distance != null && distance != -1 && distance < searchRangeMeters)) {
+									entities.add(entity);
+								}
 							}
 						}
 					}
@@ -1773,28 +1809,30 @@ public class ProxiExplorer {
 			EntityList<Entity> entities = new EntityList<Entity>();
 			Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
 					Aircandi.applicationContext.getString(R.string.search_radius_default)));
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().isCollection) {
-					Entity entity = entry.getValue();
-					if (!entity.hidden && !entity.synthetic) {
-						Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
-						/* Must do this to cache the distance before sorting */
-						Float distance = entity.getDistance();
-						if (beacon != null) {
-							entities.add(entity);
-						}
-						else {
-							/*
-							 * Entities that were first found by beacon hang around and could
-							 * later be visible via location if we continue with this approach.
-							 * 
-							 * One thought is that if it qualifies then so be it. Sorting should
-							 * put it in the right priority order and place with beacons should
-							 * sort higher.
-							 */
-							/* No beacon for this entity so check using location */
-							if (distance != null && distance < searchRangeMeters) {
+			synchronized (mEntityCache) {
+				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+					if (entry.getValue().isCollection) {
+						Entity entity = entry.getValue();
+						if (!entity.hidden && !entity.synthetic) {
+							Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
+							/* Must do this to cache the distance before sorting */
+							Float distance = entity.getDistance();
+							if (beacon != null) {
 								entities.add(entity);
+							}
+							else {
+								/*
+								 * Entities that were first found by beacon hang around and could
+								 * later be visible via location if we continue with this approach.
+								 * 
+								 * One thought is that if it qualifies then so be it. Sorting should
+								 * put it in the right priority order and place with beacons should
+								 * sort higher.
+								 */
+								/* No beacon for this entity so check using location */
+								if (distance != null && distance < searchRangeMeters) {
+									entities.add(entity);
+								}
 							}
 						}
 					}
@@ -1812,19 +1850,21 @@ public class ProxiExplorer {
 			EntityList<Entity> entities = new EntityList<Entity>();
 			Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
 					Aircandi.applicationContext.getString(R.string.search_radius_default)));
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-					Entity entity = entry.getValue();
-					if (!entity.hidden && entity.synthetic) {
-						Float distance = entity.getDistance();
-						Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
-						if (beacon != null) {
-							entities.add(entity);
-						}
-						else {
-							/* No beacon for this entity so check using location */
-							if (distance != null && distance < searchRangeMeters) {
+			synchronized (mEntityCache) {
+				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+					if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+						Entity entity = entry.getValue();
+						if (!entity.hidden && entity.synthetic) {
+							Float distance = entity.getDistance();
+							Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
+							if (beacon != null) {
 								entities.add(entity);
+							}
+							else {
+								/* No beacon for this entity so check using location */
+								if (distance != null && distance < searchRangeMeters) {
+									entities.add(entity);
+								}
 							}
 						}
 					}
@@ -1836,9 +1876,11 @@ public class ProxiExplorer {
 
 		public EntityList<Entity> getUserEntities(String userId) {
 			EntityList<Entity> entities = new EntityList<Entity>();
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().creatorId != null && entry.getValue().creatorId.equals(userId)) {
-					entities.add(entry.getValue());
+			synchronized (mEntityCache) {
+				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+					if (entry.getValue().creatorId != null && entry.getValue().creatorId.equals(userId)) {
+						entities.add(entry.getValue());
+					}
 				}
 			}
 			Collections.sort(entities, new Entity.SortEntitiesByModifiedDate());
@@ -1847,9 +1889,11 @@ public class ProxiExplorer {
 
 		public EntityList<Entity> getBeaconEntities(String beaconId) {
 			EntityList<Entity> entities = new EntityList<Entity>();
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().getBeaconId() != null && entry.getValue().getBeaconId().equals(beaconId)) {
-					entities.add(entry.getValue());
+			synchronized (mEntityCache) {
+				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+					if (entry.getValue().getBeaconId() != null && entry.getValue().getBeaconId().equals(beaconId)) {
+						entities.add(entry.getValue());
+					}
 				}
 			}
 			Collections.sort((List<Entity>) entities, new Entity.SortEntitiesByModifiedDate());
@@ -1857,15 +1901,19 @@ public class ProxiExplorer {
 		}
 
 		public Entity getCacheEntity(String entityId) {
-			return mEntityCache.get(entityId);
+			synchronized (mEntityCache) {
+				return mEntityCache.get(entityId);
+			}
 		}
 
 		public List<Entity> getCacheEntities(List<String> entityIds) {
 			List<Entity> entities = new ArrayList<Entity>();
-			for (String entityId : entityIds) {
-				Entity entity = mEntityCache.get(entityId);
-				if (entity != null) {
-					entities.add(entity);
+			synchronized (mEntityCache) {
+				for (String entityId : entityIds) {
+					Entity entity = mEntityCache.get(entityId);
+					if (entity != null) {
+						entities.add(entity);
+					}
 				}
 			}
 			return entities;
@@ -1873,11 +1921,13 @@ public class ProxiExplorer {
 
 		public EntityList<Entity> getChildEntities(String entityId) {
 			EntityList<Entity> entities = new EntityList<Entity>();
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (!entry.getValue().type.equals(CandiConstants.TYPE_CANDI_SOURCE)
-						&& entry.getValue().parentId != null
-						&& entry.getValue().parentId.equals(entityId)) {
-					entities.add(entry.getValue());
+			synchronized (mEntityCache) {
+				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+					if (!entry.getValue().type.equals(CandiConstants.TYPE_CANDI_SOURCE)
+							&& entry.getValue().parentId != null
+							&& entry.getValue().parentId.equals(entityId)) {
+						entities.add(entry.getValue());
+					}
 				}
 			}
 			Collections.sort(entities, new Entity.SortEntitiesByModifiedDate());
@@ -1886,11 +1936,13 @@ public class ProxiExplorer {
 
 		public EntityList<Entity> getSourceEntities(String entityId) {
 			EntityList<Entity> entities = new EntityList<Entity>();
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_SOURCE)
-						&& entry.getValue().parentId != null
-						&& entry.getValue().parentId.equals(entityId)) {
-					entities.add(entry.getValue());
+			synchronized (mEntityCache) {
+				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+					if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_SOURCE)
+							&& entry.getValue().parentId != null
+							&& entry.getValue().parentId.equals(entityId)) {
+						entities.add(entry.getValue());
+					}
 				}
 			}
 			Collections.sort(entities, new Entity.SortEntitiesBySourcePosition());
@@ -1975,36 +2027,40 @@ public class ProxiExplorer {
 			}
 		}
 
-		public void upsertEntity(Entity entity) {
+		public Entity upsertEntity(Entity entity) {
 			/*
 			 * This is the only place we use the children property
 			 * set when deserializing from the service. After this
 			 * all references to the children are dynamically assembled
 			 * in the getChildren method on entities.
 			 */
-			Entity entityOriginal = mEntityModel.mEntityCache.get(entity.id);
-			if (entityOriginal != null) {
-				Entity.copyProperties(entity, entityOriginal);
-				/*
-				 * We only do children work if the new entity has them.
-				 */
-				if (entity.children != null) {
-					/* Removes all children except source entities */
-					HashMap<String, Entity> removedChildren = removeChildren(entityOriginal.id);
-					for (Entity childEntity : entity.children) {
-						Entity removedChild = removedChildren.get(childEntity.id);
-						if (removedChild != null) {
-							childEntity.hidden = removedChild.hidden;
+			Entity original = entity;
+			synchronized (mEntityCache) {
+				Entity entityOriginal = mEntityModel.mEntityCache.get(entity.id);
+				if (entityOriginal != null) {
+					original = entityOriginal;
+					Entity.copyProperties(entity, entityOriginal);
+					/*
+					 * We only do children work if the new entity has them.
+					 */
+					if (entity.children != null) {
+						/* Removes all children except source entities */
+						HashMap<String, Entity> removedChildren = removeChildren(entityOriginal.id);
+						for (Entity childEntity : entity.children) {
+							Entity removedChild = removedChildren.get(childEntity.id);
+							if (removedChild != null) {
+								childEntity.hidden = removedChild.hidden;
+							}
+							mEntityCache.put(childEntity.id, childEntity);
 						}
-						mEntityCache.put(childEntity.id, childEntity);
 					}
 				}
-			}
-			else {
-				mEntityCache.put(entity.id, entity);
-				if (entity.children != null) {
-					for (Entity childEntity : entity.children) {
-						mEntityCache.put(childEntity.id, childEntity);
+				else {
+					mEntityCache.put(entity.id, entity);
+					if (entity.children != null) {
+						for (Entity childEntity : entity.children) {
+							mEntityCache.put(childEntity.id, childEntity);
+						}
 					}
 				}
 			}
@@ -2050,15 +2106,24 @@ public class ProxiExplorer {
 			}
 
 			setLastActivityDate(DateUtils.nowDate().getTime());
+
+			//			if (original.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			//				Logger.v(this, "Proxi pushing entity: " + original.name);
+			//				BusProvider.getInstance().post(new EntityChangedEvent(original));
+			//			}
+
+			return original;
 		}
 
 		public void updateUser(User user) {
-			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-				if (entry.getValue().creatorId != null && entry.getValue().creatorId.equals(user.id)) {
-					if (entry.getValue().creator != null) {
-						entry.getValue().creator.getPhotoForSet().setImageUri(user.photo.getUri());
-						entry.getValue().creator.location = user.location;
-						entry.getValue().creator.name = user.name;
+			synchronized (mEntityCache) {
+				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+					if (entry.getValue().creatorId != null && entry.getValue().creatorId.equals(user.id)) {
+						if (entry.getValue().creator != null) {
+							entry.getValue().creator.getPhotoForSet().setImageUri(user.photo.getUri());
+							entry.getValue().creator.location = user.location;
+							entry.getValue().creator.name = user.name;
+						}
 					}
 				}
 			}
@@ -2076,11 +2141,13 @@ public class ProxiExplorer {
 			 * We clean out user entities and their children when the entity
 			 * is associated with a beacon that isn't a radar hit.
 			 */
-			final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
-			while (iter.hasNext()) {
-				Entity entity = mEntityModel.mEntityCache.get(iter.next());
-				if (entity.parentId == null && entity.creatorId.equals(userId)) {
-					iter.remove();
+			synchronized (mEntityCache) {
+				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
+				while (iter.hasNext()) {
+					Entity entity = mEntityModel.mEntityCache.get(iter.next());
+					if (entity.parentId == null && entity.creatorId.equals(userId)) {
+						iter.remove();
+					}
 				}
 			}
 			setLastActivityDate(DateUtils.nowDate().getTime());
@@ -2091,12 +2158,14 @@ public class ProxiExplorer {
 			 * We clean out user entities and their children when the entity
 			 * is associated with a beacon that isn't a radar hit.
 			 */
-			final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
-			while (iter.hasNext()) {
-				Entity entity = mEntityModel.mEntityCache.get(iter.next());
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
-						&& entity.synthetic) {
-					iter.remove();
+			synchronized (mEntityCache) {
+				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
+				while (iter.hasNext()) {
+					Entity entity = mEntityModel.mEntityCache.get(iter.next());
+					if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
+							&& entity.synthetic) {
+						iter.remove();
+					}
 				}
 			}
 			setLastActivityDate(DateUtils.nowDate().getTime());
@@ -2107,13 +2176,15 @@ public class ProxiExplorer {
 			 * We clean out user entities and their children when the entity
 			 * is associated with a beacon that isn't a radar hit.
 			 */
-			final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
-			while (iter.hasNext()) {
-				Entity entity = mEntityModel.mEntityCache.get(iter.next());
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
-						&& !entity.synthetic
-						&& (entity.links == null || entity.links.size() == 0)) {
-					iter.remove();
+			synchronized (mEntityCache) {
+				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
+				while (iter.hasNext()) {
+					Entity entity = mEntityModel.mEntityCache.get(iter.next());
+					if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
+							&& !entity.synthetic
+							&& (entity.links == null || entity.links.size() == 0)) {
+						iter.remove();
+					}
 				}
 			}
 			setLastActivityDate(DateUtils.nowDate().getTime());
@@ -2124,13 +2195,15 @@ public class ProxiExplorer {
 			 * We clean out user entities and their children when the entity
 			 * is associated with a beacon that isn't a radar hit.
 			 */
-			final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
-			while (iter.hasNext()) {
-				Entity entity = mEntityModel.mEntityCache.get(iter.next());
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
-						&& !entity.synthetic
-						&& (entity.links != null && entity.links.size() > 0)) {
-					iter.remove();
+			synchronized (mEntityCache) {
+				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
+				while (iter.hasNext()) {
+					Entity entity = mEntityModel.mEntityCache.get(iter.next());
+					if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
+							&& !entity.synthetic
+							&& (entity.links != null && entity.links.size() > 0)) {
+						iter.remove();
+					}
 				}
 			}
 			setLastActivityDate(DateUtils.nowDate().getTime());
@@ -2141,13 +2214,15 @@ public class ProxiExplorer {
 			 * We clean out entities and their children when the top
 			 * level entity is associated with the beacon.
 			 */
-			final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
-			while (iter.hasNext()) {
-				Entity entity = mEntityModel.mEntityCache.get(iter.next());
-				if (entity.parentId == null
-						&& entity.getBeaconId() != null
-						&& entity.getBeaconId().equals(beaconId)) {
-					iter.remove();
+			synchronized (mEntityCache) {
+				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
+				while (iter.hasNext()) {
+					Entity entity = mEntityModel.mEntityCache.get(iter.next());
+					if (entity.parentId == null
+							&& entity.getBeaconId() != null
+							&& entity.getBeaconId().equals(beaconId)) {
+						iter.remove();
+					}
 				}
 			}
 			setLastActivityDate(DateUtils.nowDate().getTime());
@@ -2157,7 +2232,10 @@ public class ProxiExplorer {
 			/*
 			 * Clean out every entity related to entityId
 			 */
-			Entity entity = mEntityCache.remove(entityId);
+			Entity entity = null;
+			synchronized (mEntityCache) {
+				entity = mEntityCache.remove(entityId);
+			}
 			removeChildren(entityId);
 			removeSourceEntities(entityId);
 			setLastActivityDate(DateUtils.nowDate().getTime());
@@ -2165,7 +2243,9 @@ public class ProxiExplorer {
 		}
 
 		public void removeAllEntities() {
-			mEntityCache.clear();
+			synchronized (mEntityCache) {
+				mEntityCache.clear();
+			}
 		}
 
 		private HashMap<String, Entity> removeChildren(String entityId) {
@@ -2174,14 +2254,16 @@ public class ProxiExplorer {
 			 * will take care synthesized source entities as well.
 			 */
 			HashMap<String, Entity> entities = new HashMap<String, Entity>();
-			final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
-			while (iter.hasNext()) {
-				Entity entity = mEntityModel.mEntityCache.get(iter.next());
-				if (!entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)
-						&& entity.parentId != null
-						&& entity.parentId.equals(entityId)) {
-					entities.put(entity.id, entity);
-					iter.remove();
+			synchronized (mEntityCache) {
+				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
+				while (iter.hasNext()) {
+					Entity entity = mEntityModel.mEntityCache.get(iter.next());
+					if (!entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)
+							&& entity.parentId != null
+							&& entity.parentId.equals(entityId)) {
+						entities.put(entity.id, entity);
+						iter.remove();
+					}
 				}
 			}
 			return entities;
@@ -2193,14 +2275,16 @@ public class ProxiExplorer {
 			 * will take care synthesized source entities as well.
 			 */
 			HashMap<String, Entity> entities = new HashMap<String, Entity>();
-			final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
-			while (iter.hasNext()) {
-				Entity entity = mEntityModel.mEntityCache.get(iter.next());
-				if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)
-						&& entity.parentId != null
-						&& entity.parentId.equals(entityId)) {
-					entities.put(entity.id, entity);
-					iter.remove();
+			synchronized (mEntityCache) {
+				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
+				while (iter.hasNext()) {
+					Entity entity = mEntityModel.mEntityCache.get(iter.next());
+					if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)
+							&& entity.parentId != null
+							&& entity.parentId.equals(entityId)) {
+						entities.put(entity.id, entity);
+						iter.remove();
+					}
 				}
 			}
 			return entities;
@@ -2292,6 +2376,11 @@ public class ProxiExplorer {
 	public static enum PlaceSources {
 		foursquare,
 		factual
+	}
+
+	public static enum ScanReason {
+		query,
+		monitoring
 	}
 
 	public static interface IEntityProcessListener {

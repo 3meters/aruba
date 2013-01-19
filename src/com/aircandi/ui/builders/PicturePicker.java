@@ -355,7 +355,7 @@ public class PicturePicker extends FormActivity {
 
 					@Override
 					public void run() {
-						mCommon.hideBusy();
+						mCommon.hideBusy(false);
 					}
 				});
 				return (moreImages.size() >= PAGE_SIZE);
@@ -395,7 +395,7 @@ public class PicturePicker extends FormActivity {
 
 					@Override
 					public void run() {
-						mCommon.hideBusy();
+						mCommon.hideBusy(false);
 					}
 				});
 				return ((getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX);

@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/candi_form"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" 
-    android:visibility="gone">
+    android:layout_height="match_parent"
+    android:visibility="gone" >
 
     <!-- Body -->
 
@@ -128,16 +128,6 @@
                 android:text="@string/candi_button_new"
                 android:textColor="?attr/textColorBars" />
         </LinearLayout>
-
-        <Button
-            android:id="@+id/button_edit"
-            style="@style/form_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onEditCandiButtonClick"
-            android:text="@string/candi_button_edit" />
-
     </LinearLayout>
 
 </RelativeLayout>

@@ -26,10 +26,27 @@
         android:layout_height="60dp"
         android:layout_centerInParent="true"
         android:layout_marginTop="35dp"
-        android:background="#aa000000"
+        android:background="?attr/backgroundProgress"
         android:padding="10dp" />
-    
+
+    <TextView
+        android:id="@+id/message"
+        style="@style/form_text"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:gravity="center_horizontal"
+        android:visibility="gone" />
+
     <!-- Footer -->
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_above="@+id/form_footer"
+        android:background="?attr/ruleColor" />
 
     <LinearLayout
         android:id="@+id/form_footer"
@@ -47,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_weight=".5"
             android:onClick="onDeleteButtonClick"
-            android:src="@drawable/ic_action_trash_dark" />
+            android:src="?attr/iconDelete" />
 
         <View
             android:layout_width="1dp"
@@ -61,7 +78,7 @@
             android:layout_height="wrap_content"
             android:layout_weight=".5"
             android:onClick="onMoveUpButtonClick"
-            android:src="@drawable/ic_action_arrow_up_dark" />
+            android:src="?attr/iconMoveUp" />
 
         <ImageButton
             android:id="@+id/button_move_down"
@@ -70,7 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_weight=".5"
             android:onClick="onMoveDownButtonClick"
-            android:src="@drawable/ic_action_arrow_down_dark" />
+            android:src="?attr/iconMoveDown" />
 
         <ImageButton
             android:id="@+id/button_add"
@@ -79,7 +96,7 @@
             android:layout_height="wrap_content"
             android:layout_weight=".5"
             android:onClick="onAddButtonClick"
-            android:src="@drawable/ic_action_add_dark" />
+            android:src="?attr/iconAdd" />
     </LinearLayout>
 
 </RelativeLayout>

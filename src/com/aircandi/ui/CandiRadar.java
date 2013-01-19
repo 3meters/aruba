@@ -26,19 +26,26 @@ import com.aircandi.CandiConstants;
 import com.aircandi.PlacesConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
+import com.aircandi.components.BeaconsLockedEvent;
+import com.aircandi.components.BusProvider;
 import com.aircandi.components.CommandType;
-import com.aircandi.components.Events;
-import com.aircandi.components.Events.EventHandler;
+import com.aircandi.components.EntitiesChangedEvent;
+import com.aircandi.components.EntitiesForBeaconsFinishedEvent;
+import com.aircandi.components.EntitiesForLocationFinishedEvent;
+import com.aircandi.components.EntityChangedEvent;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.IntentBuilder;
+import com.aircandi.components.LocationChangedEvent;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.NetworkManager.ServiceResponse;
+import com.aircandi.components.PlacesNearLocationFinishedEvent;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.EntityModel;
 import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiExplorer.ScanReason;
+import com.aircandi.components.QueryWifiScanReceivedEvent;
 import com.aircandi.components.RadarListAdapter;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
@@ -49,6 +56,7 @@ import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.BounceListView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.squareup.otto.Subscribe;
 
 /*
  * Library Notes
@@ -139,12 +147,6 @@ public class CandiRadar extends CandiActivity {
 	private SoundPool			mSoundPool;
 	private int					mNewCandiSoundId;
 	private Boolean				mInitialized	= false;
-	private EventHandler		mEventWifiScanReceived;
-	private EventHandler		mEventBeaconsLocked;
-	private EventHandler		mEventLocationChanged;
-	private EventHandler		mEventBeaconEntitiesLoaded;
-	private EventHandler		mEventLocationEntitiesLoaded;
-	private EventHandler		mEventSyntheticsLoaded;
 
 	private List<Entity>		mEntities		= new ArrayList<Entity>();
 	private RadarListAdapter	mRadarAdapter;
@@ -205,240 +207,18 @@ public class CandiRadar extends CandiActivity {
 		/* Initialize preferences */
 		updatePreferences(true);
 
-		/* Location support */
-
-		mEventWifiScanReceived = new EventHandler() {
-
-			@Override
-			public void onEvent(Object data) {
-				synchronized (Events.EventBus.wifiScanReceived) {
-					Events.EventBus.wifiScanReceived.remove(this);
-				}
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						ProxiExplorer.getInstance().lockBeacons();
-					}
-				});
-			}
-		};
-
-		mEventBeaconsLocked = new EventHandler() {
-
-			@Override
-			public void onEvent(Object data) {
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						new AsyncTask() {
-
-							@Override
-							protected void onPreExecute() {
-								mCommon.showBusy();
-							}
-
-							@Override
-							protected Object doInBackground(Object... params) {
-								Thread.currentThread().setName("GetEntitiesForBeacons");
-								ProxiExplorer.getInstance().getEntitiesForBeacons();
-								return null;
-							}
-
-							@Override
-							protected void onPostExecute(Object result) {
-								mCommon.hideBusy();
-							}
-
-						}.execute();
-					}
-				});
-			}
-		};
-
-		mEventLocationChanged = new EventHandler() {
-
-			@Override
-			public void onEvent(final Object data) {
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-
-						Location location = (Location) data;
-						if (location == null) {
-							mCommon.showBusy();
-						}
-						else {
-							Boolean hasMoved = LocationManager.hasMoved(location, mActiveLocation);
-							if (mActiveLocation == null || hasMoved) {
-
-								Logger.d(CandiRadar.this, "Location change: updating synthetics");
-								mActiveLocation = location;
-
-								final Observation observation = LocationManager.getInstance().getObservation();
-								if (observation != null) {
-									new AsyncTask() {
-
-										@Override
-										protected void onPreExecute() {
-											mCommon.showBusy();
-										}
-
-										@Override
-										protected Object doInBackground(Object... params) {
-											Thread.currentThread().setName("GetEntitiesForLocation");
-											ProxiExplorer.getInstance().getEntitiesForLocation();
-											return null;
-										}
-
-										@Override
-										protected void onPostExecute(Object result) {
-											mCommon.hideBusy();
-										}
-									}.execute();
-								}
-							}
-						}
-					}
-				});
-			}
-		};
-
-		mEventBeaconEntitiesLoaded = new EventHandler() {
-
-			@Override
-			public void onEvent(final Object data) {
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-
-						ServiceResponse serviceResponse = (ServiceResponse) data;
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							/* Start looking for entities by location now that beacon entities are finished */
-							LocationManager.getInstance().lockLocationBurst();
-
-							mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
-							mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
-							Entity firstLast = null;
-							if (mRadarAdapter.getCount() > 0) {
-								firstLast = mRadarAdapter.getItem(0);
-							}
-							mRadarAdapter.clear();
-							List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getPlaces();
-							mRadarAdapter.addAll(entities);
-							mRadarAdapter.notifyDataSetChanged();
-							/* Check for rookies and add some sparkle */
-							Entity firstNext = null;
-							if (mRadarAdapter.getCount() > 0) {
-								firstNext = mRadarAdapter.getItem(0);
-							}
-							if ((firstLast == null && firstNext != null) || (firstLast != null && firstNext != null && !firstLast.id.equals(firstNext.id))) {
-								scrollToTop();
-								if (mPrefSoundEffects) {
-									mSoundPool.play(mNewCandiSoundId, 0.2f, 0.2f, 1, 0, 1f);
-								}
-							}
-							if (entities.size() > 0) {
-								mCommon.hideBusy();
-							}
-						}
-						else {
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.BeaconScan, CandiRadar.this);
-						}
-					}
-				});
-			}
-		};
-
-		mEventLocationEntitiesLoaded = new EventHandler() {
-
-			@Override
-			public void onEvent(final Object data) {
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-
-						ServiceResponse serviceResponse = (ServiceResponse) data;
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-
-							final Observation observation = LocationManager.getInstance().getObservation();
-							if (observation != null) {
-								new AsyncTask() {
-
-									@Override
-									protected Object doInBackground(Object... params) {
-										Thread.currentThread().setName("GetPlacesNearLocation");
-										ProxiExplorer.getInstance().getPlacesNearLocation(observation);
-										return null;
-									}
-
-									@Override
-									protected void onPostExecute(Object result) {
-										mCommon.hideBusy();
-									}
-
-								}.execute();
-							}
-
-							mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
-							mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
-							mRadarAdapter.clear();
-							List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getPlaces();
-							mRadarAdapter.addAll(entities);
-							mRadarAdapter.notifyDataSetChanged();
-							if (entities.size() > 0) {
-								mCommon.hideBusy();
-							}
-						}
-						else {
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.BeaconScan, CandiRadar.this);
-						}
-					}
-				});
-			}
-		};
-
-		mEventSyntheticsLoaded = new EventHandler() {
-
-			@Override
-			public void onEvent(final Object data) {
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-
-						ServiceResponse serviceResponse = (ServiceResponse) data;
-						if (serviceResponse.responseCode == ResponseCode.Success) {
-							mRadarAdapter.clear();
-							List<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getPlaces();
-							mRadarAdapter.addAll(entities);
-							mRadarAdapter.notifyDataSetChanged();
-							if (entities.size() > 0) {
-								mCommon.hideBusy();
-							}
-						}
-						else {
-							mCommon.handleServiceError(serviceResponse, ServiceOperation.BeaconScan, CandiRadar.this);
-						}
-					}
-				});
-			}
-		};
-
 		/* Other UI references */
 		mList = (BounceListView) findViewById(R.id.radar_list);
 		mList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				final Entity entity = mEntities.get(position);
+				final Entity entity = mRadarAdapter.getItems().get(position);
 				showCandiForm(entity, entity.synthetic);
 			}
 		});
+
+		/* Adapter snapshots the items in mEntities */
 		mRadarAdapter = new RadarListAdapter(this, mEntities);
 		mList.setAdapter(mRadarAdapter);
 
@@ -447,6 +227,197 @@ public class CandiRadar extends CandiActivity {
 		mNewCandiSoundId = mSoundPool.load(this, R.raw.notification_candi_discovered, 1);
 
 		mInitialized = true;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Event bus routines
+	// --------------------------------------------------------------------------------------------
+
+	@Subscribe
+	public void onQueryWifiScanReceived(QueryWifiScanReceivedEvent event) {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				Aircandi.stopwatch1.segmentTime("Wifi scan received event");
+				Logger.d(CandiRadar.this, "Query wifi scan received event: locking beacons");
+				ProxiExplorer.getInstance().lockBeacons();
+			}
+		});
+	}
+
+	@Subscribe
+	public void onBeaconsLocked(BeaconsLockedEvent event) {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				Aircandi.stopwatch1.segmentTime("Beacons locked event");
+				Logger.d(CandiRadar.this, "Beacons locked event: get entities for beacons");
+				new AsyncTask() {
+
+					@Override
+					protected Object doInBackground(Object... params) {
+						Thread.currentThread().setName("GetEntitiesForBeacons");
+						ProxiExplorer.getInstance().getEntitiesForBeacons();
+						return null;
+					}
+
+				}.execute();
+			}
+		});
+	}
+
+	@Subscribe
+	public void onEntitiesForBeaconsFinished(EntitiesForBeaconsFinishedEvent event) {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				Aircandi.stopwatch1.segmentTime("Entities for beacons finished event");
+				Logger.d(CandiRadar.this, "Entities for beacons finished event: get location fix");
+				mActiveLocation = null;
+				LocationManager.getInstance().lockLocationBurst();
+			}
+		});
+	}
+
+	@Subscribe
+	public void onLocationChanged(final LocationChangedEvent event) {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				Location location = event.location;
+				if (location != null) {
+
+					Boolean hasMoved = LocationManager.hasMoved(location, mActiveLocation);
+					if (mActiveLocation == null || hasMoved) {
+
+						mActiveLocation = location;
+
+						Aircandi.stopwatch1.segmentTime("Location acquired event");
+						Logger.d(CandiRadar.this, "Location change event: getting entities for location");
+						final Observation observation = LocationManager.getInstance().getObservationForLocation(mActiveLocation);
+						if (observation != null) {
+
+							new AsyncTask() {
+
+								@Override
+								protected Object doInBackground(Object... params) {
+									Thread.currentThread().setName("GetEntitiesForLocation");
+									ProxiExplorer.getInstance().getEntitiesForLocation();
+									return null;
+								}
+
+							}.execute();
+						}
+					}
+				}
+			}
+		});
+	}
+
+	@Subscribe
+	public void onEntitiesForLocationFinished(EntitiesForLocationFinishedEvent event) {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				Aircandi.stopwatch1.segmentTime("Entities for location finished event");
+				Logger.d(CandiRadar.this, "Entities for location finished event: getting places near location");
+				final Observation observation = LocationManager.getInstance().getObservationForLocation(mActiveLocation);
+				new AsyncTask() {
+
+					@Override
+					protected Object doInBackground(Object... params) {
+						Thread.currentThread().setName("GetPlacesNearLocation");
+						ProxiExplorer.getInstance().getPlacesNearLocation(observation);
+						return null;
+					}
+
+				}.execute();
+			}
+		});
+	}
+
+	@Subscribe
+	public void onPlacesNearLocationFinished(PlacesNearLocationFinishedEvent event) {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				Aircandi.stopwatch1.segmentTime("Places near location finished event");
+				Aircandi.stopwatch1.stop("Search for places stopped");
+				Logger.d(CandiRadar.this, "Places near location finished event: ** all done **");
+				mCommon.hideBusy(true);
+			}
+		});
+	}
+
+	@Subscribe
+	public void onEntitiesChanged(final EntitiesChangedEvent event) {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				Logger.d(CandiRadar.this, "Entities changed event: updating radar");
+
+				mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
+				mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
+
+				/* Point radar adapter at the updated entities */
+				int previousCount = mRadarAdapter.getCount();
+				List<Entity> entities = event.entities;
+				mRadarAdapter.setItems(entities);
+				mRadarAdapter.notifyDataSetChanged();
+
+				/* Add some sparkle */
+				if (previousCount == 0 && entities.size() > 0) {
+					if (mPrefSoundEffects) {
+						new AsyncTask() {
+
+							@Override
+							protected Object doInBackground(Object... params) {
+								Thread.currentThread().setName("PlaySound");
+								mSoundPool.play(mNewCandiSoundId, 0.2f, 0.2f, 0, 0, 1f);
+								return null;
+							}
+
+						}.execute();
+					}
+				}
+			}
+		});
+
+	}
+
+	@Subscribe
+	public void onEntityChanged(final EntityChangedEvent event) {
+		Logger.d(CandiRadar.this, "Entities changed event: updating radar");
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				Entity entityNew = event.entity;
+				entityNew.getDistance(); // To force distance computation
+				if (mRadarAdapter.getItems().contains(entityNew)) {
+					mRadarAdapter.getItems().set(mRadarAdapter.getItems().indexOf(entityNew), entityNew);
+				}
+				else {
+					mRadarAdapter.getItems().set(0, entityNew);
+				}
+				mRadarAdapter.notifyDataSetChanged();
+			}
+		});
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -460,19 +431,17 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	private void searchForPlaces() {
+
 		/* We won't perform a search if location access is disabled */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
 			AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
 		}
 		else {
-			/* We remove this when we get the scan results */
-			synchronized (Events.EventBus.wifiScanReceived) {
-				Events.EventBus.wifiScanReceived.add(mEventWifiScanReceived);
-			}
-			//ProxiExplorer.getInstance().getEntityModel().removeAllEntities();
-			mActiveLocation = null;
-			ProxiExplorer.getInstance().scanForWifi();
+			/* Start wifi scan. Once received, the search process continues to the next step. */
+			mCommon.showBusy();
+			Aircandi.stopwatch1.start("Search for places");
+			ProxiExplorer.getInstance().scanForWifi(ScanReason.query);
 		}
 	}
 
@@ -501,6 +470,7 @@ public class CandiRadar extends CandiActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiRadarToCandiForm);
 	}
 
+	@SuppressWarnings("unused")
 	private void scrollToTop() {
 		runOnUiThread(new Runnable() {
 
@@ -665,6 +635,7 @@ public class CandiRadar extends CandiActivity {
 		EntityModel entityModel = ProxiExplorer.getInstance().getEntityModel();
 		if (mEntityModelRefreshDate == null) {
 			Logger.d(this, "Start first place search");
+			Aircandi.stopwatch1.stop("Aircandi start");
 			searchForPlaces();
 		}
 		else if (mPrefChangeRefreshNeeded) {
@@ -687,10 +658,10 @@ public class CandiRadar extends CandiActivity {
 				public void run() {
 					mCommon.showBusy();
 					invalidateOptionsMenu();
-					mRadarAdapter.clear();
-					mRadarAdapter.addAll(ProxiExplorer.getInstance().getEntityModel().getPlaces());
+					mRadarAdapter.getItems().clear();
+					mRadarAdapter.getItems().addAll(ProxiExplorer.getInstance().getEntityModel().getPlaces());
 					mRadarAdapter.notifyDataSetChanged();
-					mCommon.hideBusy();
+					mCommon.hideBusy(false);
 				}
 			}, 100);
 		}
@@ -749,39 +720,11 @@ public class CandiRadar extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	public void enableEvents() {
-		synchronized (Events.EventBus.beaconsLocked) {
-			Events.EventBus.beaconsLocked.add(mEventBeaconsLocked);
-		}
-		synchronized (Events.EventBus.locationChanged) {
-			Events.EventBus.locationChanged.add(mEventLocationChanged);
-		}
-		synchronized (Events.EventBus.beaconEntitiesLoaded) {
-			Events.EventBus.beaconEntitiesLoaded.add(mEventBeaconEntitiesLoaded);
-		}
-		synchronized (Events.EventBus.locationEntitiesLoaded) {
-			Events.EventBus.locationEntitiesLoaded.add(mEventLocationEntitiesLoaded);
-		}
-		synchronized (Events.EventBus.syntheticsLoaded) {
-			Events.EventBus.syntheticsLoaded.add(mEventSyntheticsLoaded);
-		}
+		BusProvider.getInstance().register(this);
 	}
 
 	public void disableEvents() {
-		synchronized (Events.EventBus.beaconsLocked) {
-			Events.EventBus.beaconsLocked.remove(mEventBeaconsLocked);
-		}
-		synchronized (Events.EventBus.locationChanged) {
-			Events.EventBus.locationChanged.remove(mEventLocationChanged);
-		}
-		synchronized (Events.EventBus.beaconEntitiesLoaded) {
-			Events.EventBus.beaconEntitiesLoaded.remove(mEventBeaconEntitiesLoaded);
-		}
-		synchronized (Events.EventBus.locationEntitiesLoaded) {
-			Events.EventBus.locationEntitiesLoaded.remove(mEventLocationEntitiesLoaded);
-		}
-		synchronized (Events.EventBus.syntheticsLoaded) {
-			Events.EventBus.syntheticsLoaded.remove(mEventSyntheticsLoaded);
-		}
+		BusProvider.getInstance().unregister(this);
 	}
 
 	@SuppressWarnings("unused")

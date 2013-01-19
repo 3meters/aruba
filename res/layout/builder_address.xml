@@ -85,6 +85,12 @@
 
     <!-- Footer -->
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_above="@+id/form_footer"
+        android:background="?attr/ruleColor" />
+
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"

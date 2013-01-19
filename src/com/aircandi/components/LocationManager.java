@@ -83,8 +83,18 @@ public class LocationManager {
 	// --------------------------------------------------------------------------------------------
 
 	public Observation getObservation() {
+		return getObservationForLocation(null);
+	}
 
-		if (mLocation == null || !mLocation.hasAccuracy()) {
+	public Observation getObservationForLocation(Location location) {
+		
+		Location locationTarget = location;
+		
+		if (location == null) {
+			locationTarget = mLocation;
+		}
+
+		if (locationTarget == null || !locationTarget.hasAccuracy()) {
 			return null;
 		}
 
@@ -150,7 +160,7 @@ public class LocationManager {
 		if (location == null) {
 			Logger.d(this, "Location cleared");
 			mLocation = null;
-			Events.EventBus.onLocationChanged(mLocation);
+			BusProvider.getInstance().post(new LocationChangedEvent(mLocation));
 		}
 		else {
 			if (isGoodLocation(location)) {
@@ -163,7 +173,7 @@ public class LocationManager {
 					Logger.d(this, message);
 
 					mLocation = location;
-					Events.EventBus.onLocationChanged(mLocation);
+					BusProvider.getInstance().post(new LocationChangedEvent(mLocation));
 					if (mLocationModeBurst) {
 						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY) {
 							Logger.d(this, "Burst mode stopped: desired accuracy reached");

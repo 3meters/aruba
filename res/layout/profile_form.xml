@@ -139,6 +139,12 @@
 
     <!-- Footer -->
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_above="@+id/form_footer"
+        android:background="?attr/ruleColor" />
+
     <LinearLayout
         android:id="@+id/form_footer"
         style="?attr/buttonBarStyle"
@@ -148,6 +154,7 @@
         android:gravity="center_horizontal" >
 
         <Button
+            android:id="@+id/button_cancel"
             style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -156,7 +163,7 @@
             android:text="@string/form_button_cancel" />
 
         <Button
-            android:id="@+id/btn_save"
+            android:id="@+id/button_save"
             style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

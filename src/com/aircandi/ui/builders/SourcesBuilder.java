@@ -38,6 +38,7 @@ import com.aircandi.utilities.AnimUtils.TransitionType;
 public class SourcesBuilder extends FormActivity {
 
 	private BounceListView	mList;
+	private TextView		mMessage;
 	private List<Source>	mSources	= new ArrayList<Source>();
 	private Entity			mEntity;
 	private Source			mSourceEditing;
@@ -48,12 +49,15 @@ public class SourcesBuilder extends FormActivity {
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
 		initialize();
-		if (mEntity != null && mEntity.sourceSuggestions == null) {
+		if (mEntity != null
+				&& mEntity.sourceSuggestions == null
+				&& mEntity.sources != null
+				&& mEntity.sources.size() > 0) {
 			loadSourceSuggestions(mEntity);
 		}
 		else {
 			bind();
-			mCommon.hideBusy();
+			mCommon.hideBusy(false);
 		}
 	}
 
@@ -76,6 +80,7 @@ public class SourcesBuilder extends FormActivity {
 
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 
+		mMessage = (TextView) findViewById(R.id.message);
 		mList = (BounceListView) findViewById(R.id.list);
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
@@ -83,13 +88,20 @@ public class SourcesBuilder extends FormActivity {
 
 	public void bind() {
 
-		Integer position = 0;
-		for (Source source : mSources) {
-			source.checked = false;
-			source.position = position;
-			position++;
+		if (mSources.size() == 0) {
+			mCommon.hideBusy(true);
+			mMessage.setText(R.string.sources_builder_empty);
+			mMessage.setVisibility(View.VISIBLE);
 		}
-
+		else {
+			mMessage.setVisibility(View.GONE);
+			Integer position = 0;
+			for (Source source : mSources) {
+				source.checked = false;
+				source.position = position;
+				position++;
+			}
+		}
 		SourceListAdapter adapter = new SourceListAdapter(this, mSources, R.layout.temp_listitem_sources_builder);
 		mList.setAdapter(adapter);
 	}
@@ -141,7 +153,7 @@ public class SourcesBuilder extends FormActivity {
 							mSources.add(sourceNew);
 
 							/* Remove as a suggestion candidate */
-							if (mEntity != null) {
+							if (mEntity != null && mEntity.sourceSuggestions != null) {
 								for (int i = mEntity.sourceSuggestions.size() - 1; i >= 0; i--) {
 									if (mEntity.sourceSuggestions.get(i).source.equals(sourceNew.source)) {
 										mEntity.sourceSuggestions.remove(i);
@@ -190,7 +202,7 @@ public class SourcesBuilder extends FormActivity {
 					}
 				}
 				bind();
-				mCommon.hideBusy();
+				mCommon.hideBusy(false);
 			}
 		}.execute();
 	}

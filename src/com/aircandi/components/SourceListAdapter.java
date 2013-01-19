@@ -62,6 +62,7 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 			view.setTag(holder);
 
 			FontManager.getInstance().setTypefaceDefault(holder.title);
+			FontManager.getInstance().setTypefaceDefault(holder.subtitle);
 		}
 		else {
 			holder = (ViewHolder) view.getTag();

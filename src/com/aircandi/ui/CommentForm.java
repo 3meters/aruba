@@ -127,7 +127,7 @@ public class CommentForm extends FormActivity {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.trackEvent("Comment", "Insert", null, 0);
-						mCommon.hideBusy();
+						mCommon.hideBusy(false);
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_COMMENT_INSERTED);
 						finish();

@@ -302,7 +302,7 @@ public class RegisterForm extends FormActivity {
 						Aircandi.getInstance().setUser(insertedUser);
 
 						Tracker.trackEvent("User", "Insert", null, 0);
-						mCommon.hideBusy();
+						mCommon.hideBusy(false);
 						Logger.i(RegisterForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 
 						//						AircandiCommon.showAlertDialog(R.drawable.ic_app

@@ -2,9 +2,15 @@ package com.aircandi.components;
 
 import java.util.Locale;
 
-public class StopWatch {
-	protected long	totalTime;
-	protected long	lastThreshold;
+public class Stopwatch {
+
+	protected long		totalTime;
+	protected long		lastThreshold;
+	protected String	name;
+
+	public Stopwatch(String name) {
+		this.name = name;
+	}
 
 	/**
 	 * Human readable time in seconds
@@ -29,7 +35,7 @@ public class StopWatch {
 
 	private long processSegmentTime(String message) {
 		if (lastThreshold == 0) {
-			throw new IllegalStateException("Stopwatch is stopped.");
+			return 0;
 		}
 		final long now = System.nanoTime();
 		final long lapTime = now - lastThreshold;
@@ -37,7 +43,7 @@ public class StopWatch {
 		lastThreshold = System.nanoTime();
 		String stats = "segment time: " + String.valueOf(lapTime / 1000000) + "ms, total time: " + String.valueOf(totalTime / 1000000) + "ms";
 		if (message != null) {
-			stats = message + ": " + stats;
+			stats = name + ": " + message + ": " + stats;
 		}
 		Logger.v(this, stats);
 		return lapTime;
@@ -50,8 +56,8 @@ public class StopWatch {
 	/**
 	 * Starts time watching.
 	 */
-	public void start() {
-		Logger.v(this, "Stopwatch started");
+	public void start(String message) {
+		Logger.v(this, name + ": *** Started ***: " + message);
 		totalTime = 0;
 		lastThreshold = System.nanoTime();
 	}
@@ -59,11 +65,9 @@ public class StopWatch {
 	/**
 	 * Suspends time watching, returns last lap time.
 	 */
-	public long stop() {
-		final long lapTime = processSegmentTime(null);
+	public long stop(String message) {
+		final long lapTime = processSegmentTime("*** Stopped ***: " + message);
 		lastThreshold = 0;
-		//totalTime = 0;
-		Logger.v(this, "Stopwatch stopped");
 		return lapTime;
 	}
 }

@@ -41,7 +41,7 @@
                     android:layout_marginRight="10dp"
                     android:layout_weight="0"
                     aircandi:layout="@layout/widget_webimageview_framed"
-                 	aircandi:sizeHint="100dp"
+                    aircandi:sizeHint="100dp"
                     android:clickable="true"
                     android:onClick="onChangePictureButtonClick"
                     android:scaleType="centerCrop" />
@@ -135,6 +135,12 @@
     </com.aircandi.ui.widgets.BounceScrollView>
 
     <!-- Footer -->
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_above="@+id/form_footer"
+        android:background="?attr/ruleColor" />
 
     <LinearLayout
         android:id="@+id/form_footer"

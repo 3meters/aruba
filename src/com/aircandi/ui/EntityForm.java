@@ -28,7 +28,6 @@ import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
-import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer;
@@ -141,6 +140,7 @@ public class EntityForm extends FormActivity {
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.uri));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_title));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.description));
+			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.chk_locked));
 
 			/* Content */
 
@@ -537,7 +537,7 @@ public class EntityForm extends FormActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				mCommon.hideBusy();
+				mCommon.hideBusy(false);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					finish();
 				}
@@ -553,11 +553,6 @@ public class EntityForm extends FormActivity {
 		ModelResult result = new ModelResult();
 		List<Beacon> beacons = null;
 		Beacon primaryBeacon = null;
-
-		/* First we want to make sure we have the freshest set of beacons */
-		if (NetworkManager.getInstance().isWifiEnabled()) {
-			ProxiExplorer.getInstance().scanForWifi();
-		}
 
 		/* If parent id then this is a child */
 		if (mEntityForForm.links != null) {
@@ -633,7 +628,7 @@ public class EntityForm extends FormActivity {
 					Tracker.trackEvent("Entity", "Delete", mEntityForForm.type, 0);
 					Logger.i(this, "Deleted entity: " + mEntityForForm.name);
 
-					mCommon.hideBusy();
+					mCommon.hideBusy(false);
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 					setResult(CandiConstants.RESULT_ENTITY_DELETED);
 					/*
@@ -661,12 +656,10 @@ public class EntityForm extends FormActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mCommon.startScanService(CandiConstants.INTERVAL_SCAN_RADAR);
 	}
 
 	@Override
 	protected void onPause() {
-		mCommon.stopScanService();
 		super.onPause();
 	}
 

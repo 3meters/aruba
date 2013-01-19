@@ -172,10 +172,11 @@
 
     <string name="splash_message">be there, do more</string>
     
-    <!-- Splash -->
+    <!-- Pickers -->
 
     <string name="picture_picker_places_empty">No pictures found for</string>
     <string name="picture_picker_search_empty">No pictures found for</string>
+    <string name="sources_builder_empty">No links yet. Use the new menu item to add a custom link."</string>
     
     <!-- Navigation -->
 

@@ -13,7 +13,7 @@
         <attr name="ruleColorStrong" format="color|reference" />
         <attr name="textColor" format="color|reference" />
         <attr name="textColorUnfocused" format="color|reference" />
-        <attr name="textColorComment" format="color|reference" />
+        <attr name="textColorButtonLink" format="color|reference" />
         <attr name="textColorBullet" format="color|reference" />
         <attr name="textColorBars" format="color|reference" />
         <attr name="textColorProgress" format="color|reference" />
@@ -22,6 +22,7 @@
         <attr name="textOutlineRadar" format="boolean" />
         <attr name="textureBodyZone" format="reference" />
         <attr name="textureBodyCandi" format="reference" />
+        
         <attr name="backgroundButton" format="string" />
         <attr name="backgroundCandi" format="color|reference" />
         <attr name="backgroundRadarCandi" format="color|reference" />
@@ -33,15 +34,19 @@
         <attr name="backgroundTabBar" format="string" />
         <attr name="badgeColor" format="color|reference" />
         <attr name="badgeColorSynthetic" format="color|reference" />
+        
         <attr name="iconSearch" format="string" />
-        <attr name="iconRefresh" format="string" />
-        <attr name="iconHelp" format="string" />
         <attr name="iconNewCandi" format="string" />
         <attr name="iconLocked" format="string" />
-        <attr name="iconLocation" format="string" />
-        <attr name="iconBookmarks" format="string" />
         <attr name="iconForward" format="string" />
+        <attr name="iconDelete" format="string" />
+        <attr name="iconMoveUp" format="string" />
+		<attr name="iconMoveDown" format="string" />
+		<attr name="iconAdd" format="string" />
         <attr name="iconTune" format="string" />
+		<attr name="iconMap" format="string" />
+		<attr name="iconCall" format="string" />
+				
         </declare-styleable>
     <declare-styleable name="CandiView">
         <attr name="layout" />

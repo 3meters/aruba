@@ -1,7 +1,5 @@
 package com.aircandi;
 
-import net.minidev.json.parser.JSONParser;
-
 import org.acra.ACRA;
 import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
@@ -17,7 +15,7 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
-import com.aircandi.components.StopWatch;
+import com.aircandi.components.Stopwatch;
 import com.aircandi.service.objects.User;
 import com.amazonaws.auth.BasicAWSCredentials;
 
@@ -89,8 +87,9 @@ public class Aircandi extends Application {
 	public static Context					applicationContext;
 	public static Handler					mainThreadHandler;
 	public static DisplayMetrics			displayMetrics;
-	public static StopWatch					stopwatch;
-	public static JSONParser				parser						= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+	public static Stopwatch					stopwatch1;
+	public static Stopwatch					stopwatch2;
+	public static Stopwatch					stopwatch3;
 
 	public static Boolean					firstStartApp				= true;
 	public static Boolean					usingEmulator				= false;
@@ -122,7 +121,9 @@ public class Aircandi extends Application {
 
 		applicationContext = getApplicationContext();
 		mainThreadHandler = new Handler(Looper.getMainLooper());
-		stopwatch = new StopWatch();
+		stopwatch1 = new Stopwatch("Stopwatch1");
+		stopwatch2 = new Stopwatch("Stopwatch2");
+		stopwatch3 = new Stopwatch("Stopwatch3");
 
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());

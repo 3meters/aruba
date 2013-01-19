@@ -17,8 +17,7 @@
 		- Tabbar tone
 		- Set window background
 		- Select right set of drawables based on the theme tone.
-		- Custom line and text colors in pages, forms, buttons.
-
+		- Custom line and text colors in pages, forms, buttons.
     -->
 
     <style name="aircandi_theme_dark" parent="Theme.Sherlock">
@@ -45,13 +44,15 @@
         <item name="ruleColorStrong">@color/rule_60_dark</item>
         <item name="textColor">@color/text_dark</item>
         <item name="textColorUnfocused">@color/text_dark</item>
-        <item name="textColorComment">@color/accent</item>
+        <item name="textColorButtonLink">@color/accent</item>
         <item name="textColorBullet">@color/accent</item>
         <item name="textColorBars">@color/text_dark</item>
         <item name="textColorProgress">@color/text_dark</item>
         <item name="textColorCandiView">@color/text_dark</item>
         <item name="textColorCandiViewSynthetic">@color/text_dark</item>
         <item name="textOutlineRadar">true</item>
+        <item name="badgeColor">@color/text_dark</item>
+        <item name="badgeColorSynthetic">@color/text_dark</item>
 
         <!-- Drawables and backgrounds -->
 
@@ -66,18 +67,18 @@
         <item name="backgroundTabBar">@color/background_tabbar_dark</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_dark</item>
         <item name="logo">@drawable/ic_app</item>
-        <item name="iconBookmarks">@drawable/ic_action_search_dark</item>
-        <item name="iconForward">@drawable/ic_forward_dark</item>
-        <item name="iconLocation">@drawable/ic_action_location_dark</item>
-        <item name="iconLocked">@drawable/ic_action_lock_closed_dark</item>
-        <item name="iconRefresh">@drawable/ic_action_reload_dark</item>
         <item name="iconSearch">@drawable/ic_action_search_dark</item>
-        <item name="iconHelp">@drawable/ic_action_help_dark</item>
+        <item name="iconForward">@drawable/ic_forward_dark</item>
+        <item name="iconLocked">@drawable/ic_action_lock_closed_dark</item>
         <item name="iconNewCandi">@drawable/ic_new_candi_dark</item>
         <item name="iconTune">@drawable/ic_app</item>
-        <item name="badgeColor">@color/text_dark</item>
-        <item name="badgeColorSynthetic">@color/text_dark</item>
-
+        <item name="iconDelete">@drawable/ic_action_trash_dark</item>
+        <item name="iconAdd">@drawable/ic_action_add_dark</item>
+        <item name="iconMoveUp">@drawable/ic_action_arrow_up_dark</item>
+        <item name="iconMoveDown">@drawable/ic_action_arrow_down_dark</item>
+        <item name="iconMap">@drawable/ic_action_map_dark</item>
+        <item name="iconCall">@drawable/ic_action_dialer_dark</item>
+        
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_dark</item>
@@ -122,8 +123,8 @@
         <item name="ruleColorStrong">@color/rule_60_light</item>
         <item name="textColor">@color/text_light</item>
         <item name="textColorUnfocused">@color/text_light</item>
-        <item name="textColorComment">@color/accent</item>
-        <item name="textColorBullet">@color/accent</item>
+        <item name="textColorButtonLink">@color/accent_darker</item>
+        <item name="textColorBullet">@color/accent_darker</item>
         <item name="textColorBars">@color/text_light</item>
         <item name="textColorProgress">@color/text_light</item>
         <item name="textColorCandiView">@color/text_dark</item>
@@ -145,16 +146,18 @@
         <item name="backgroundTabBar">@color/background_tabbar_light</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_light</item>
         <item name="logo">@drawable/ic_app</item>
-        <item name="iconBookmarks">@drawable/ic_action_search_light</item>
-        <item name="iconForward">@drawable/ic_forward_light</item>
-        <item name="iconLocation">@drawable/ic_action_location_light</item>
-        <item name="iconLocked">@drawable/ic_action_lock_closed_light</item>
-        <item name="iconRefresh">@drawable/ic_action_reload_light</item>
         <item name="iconSearch">@drawable/ic_action_search_light</item>
-        <item name="iconHelp">@drawable/ic_action_help_light</item>
+        <item name="iconForward">@drawable/ic_forward_light</item>
+        <item name="iconLocked">@drawable/ic_action_lock_closed_light</item>
         <item name="iconNewCandi">@drawable/ic_new_candi_light</item>
         <item name="iconTune">@drawable/ic_app</item>
-
+        <item name="iconDelete">@drawable/ic_action_trash_light</item>
+        <item name="iconAdd">@drawable/ic_action_add_light</item>
+        <item name="iconMoveUp">@drawable/ic_action_arrow_up_light</item>
+        <item name="iconMoveDown">@drawable/ic_action_arrow_down_light</item>
+        <item name="iconMap">@drawable/ic_action_map_light</item>
+        <item name="iconCall">@drawable/ic_action_dialer_light</item>
+        
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_light</item>
@@ -187,10 +190,9 @@
     <style name="aircandi_theme_dialog_dark" parent="Theme.Sherlock.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowIsTranslucent">true</item>
-        
         <item name="android:textColor">@android:color/white</item>
         <item name="textColorBars">@color/text_dark</item>
-        <item name="textColorComment">@color/accent</item>
+        <item name="textColorButtonLink">@color/accent</item>
         <item name="android:backgroundDimAmount">0.2</item>
         <item name="themeTone">dark</item>
         <item name="ruleColor">@color/rule_30_dark</item>

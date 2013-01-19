@@ -24,6 +24,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import net.minidev.json.JSONValue;
 import net.minidev.json.parser.ContainerFactory;
+import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 
 import org.apache.http.Header;
@@ -56,11 +57,9 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import android.graphics.Bitmap;
 
-import com.aircandi.Aircandi;
 import com.aircandi.ProxiConstants;
 import com.aircandi.components.JsonHelper;
 import com.aircandi.components.Logger;
@@ -117,16 +116,26 @@ import com.amazonaws.AmazonServiceException;
 public class ProxibaseService {
 
 	private static ProxibaseService		singletonObject;
-	private DefaultHttpClient			mHttpClient;
+	
 	private static final int			MAX_BACKOFF_IN_MILLISECONDS		= 5 * 1000;
 	private static final int			MAX_BACKOFF_RETRIES				= 6;
 	public static final int				DEFAULT_MAX_CONNECTIONS			= 50;
 	public static final int				DEFAULT_CONNECTIONS_PER_ROUTE	= 20;
-	public static final ObjectMapper	objectMapper					= new ObjectMapper();
+	
+	private DefaultHttpClient			mHttpClient;
 	private final HttpParams			mHttpParams;
+	
+	public static JSONParser			parser							= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+	private static ContainerFactory		containerFactory				= new ContainerFactory() {
+																			public Map createObjectContainer() {
+																				return new LinkedHashMap();
+																			}
 
-	@SuppressWarnings("unused")
-	private IdleConnectionMonitorThread	mIdleConnectionMonitorThread;
+																			@Override
+																			public List<Object> createArrayContainer() {
+																				return new ArrayList<Object>();
+																			}
+																		};
 
 	public static synchronized ProxibaseService getInstance() {
 		if (singletonObject == null) {
@@ -732,19 +741,9 @@ public class ProxibaseService {
 	// ----------------------------------------------------------------------------------------
 
 	public static Object convertJsonToObjectInternalSmart(String jsonString, ServiceDataType serviceDataType) {
-		ContainerFactory containerFactory = new ContainerFactory() {
-			public Map createObjectContainer() {
-				return new LinkedHashMap();
-			}
-
-			@Override
-			public List<Object> createArrayContainer() {
-				return new ArrayList<Object>();
-			}
-		};
 
 		try {
-			LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) Aircandi.parser.parse(jsonString, containerFactory);
+			LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
 			if (serviceDataType == ServiceDataType.User) {
 				return User.setPropertiesFromMap(new User(), rootMap);
 			}
@@ -792,19 +791,8 @@ public class ProxibaseService {
 
 	public static ServiceData convertJsonToObjectsSmart(String jsonString, ServiceDataType serviceDataType) {
 
-		ContainerFactory containerFactory = new ContainerFactory() {
-			public Map createObjectContainer() {
-				return new LinkedHashMap();
-			}
-
-			@Override
-			public List<Object> createArrayContainer() {
-				return new ArrayList<Object>();
-			}
-		};
-
 		try {
-			LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) Aircandi.parser.parse(jsonString, containerFactory);
+			LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
 			ServiceData serviceData = ServiceData.setPropertiesFromMap(new ServiceData(), rootMap);
 
 			/*
@@ -828,7 +816,7 @@ public class ProxibaseService {
 					serviceData.data = Result.setPropertiesFromMap(new Result(), (HashMap) serviceData.data);
 				}
 				else {
-					List<LinkedHashMap<String, Object>> maps = null;					
+					List<LinkedHashMap<String, Object>> maps = null;
 					if (serviceData.data instanceof List) {
 						maps = (List<LinkedHashMap<String, Object>>) serviceData.data;
 					}

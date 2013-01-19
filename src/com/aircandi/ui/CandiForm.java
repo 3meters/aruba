@@ -23,6 +23,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
@@ -61,7 +63,7 @@ public class CandiForm extends CandiActivity {
 	protected ScrollView	mScrollView;
 	protected ViewGroup		mContentView;
 	protected ViewGroup		mCandiForm;
-	protected Entity		mEntity;
+	private Entity			mEntity;
 	protected Number		mEntityModelRefreshDate;
 	protected Number		mEntityModelActivityDate;
 	protected Boolean		mUpsize;
@@ -100,7 +102,6 @@ public class CandiForm extends CandiActivity {
 
 		/* Font for button bar */
 		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_comment));
-		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_edit));
 		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_new_text));
 
 		Bundle extras = getIntent().getExtras();
@@ -163,7 +164,7 @@ public class CandiForm extends CandiActivity {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
 				}
-				mCommon.hideBusy();
+				mCommon.hideBusy(false);
 			}
 
 		}.execute();
@@ -207,7 +208,7 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
-				mCommon.hideBusy();
+				mCommon.hideBusy(false);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Entity upsizedEntity = (Entity) result.data;
 					mCommon.mEntityId = upsizedEntity.id;
@@ -228,7 +229,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void draw() {
-		CandiForm.buildCandiForm(this, mEntity, mContentView, null, false);
+		CandiForm.buildCandiForm(this, mEntity, mContentView, mCommon.mMenu, null, false);
 		mCandiForm.setVisibility(View.VISIBLE);
 	}
 
@@ -530,13 +531,13 @@ public class CandiForm extends CandiActivity {
 				 */
 				doBind(true);
 				setSupportProgressBarIndeterminateVisibility(false);
-				mCommon.hideBusy();
+				mCommon.hideBusy(false);
 				ImageUtils.showToastNotification(getString(R.string.toast_tuned), Toast.LENGTH_SHORT);
 			}
 		}.execute();
 	}
 
-	static public ViewGroup buildCandiForm(Context context, final Entity entity, final ViewGroup layout, GeoLocation mLocation, boolean refresh) {
+	static public ViewGroup buildCandiForm(Context context, final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation, boolean refresh) {
 		/*
 		 * For now, we assume that the candi form isn't recycled.
 		 * 
@@ -681,7 +682,7 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Buttons */
-		buildCandiButtons(context, entity, layout, mLocation);
+		buildCandiButtons(context, entity, layout, menu, mLocation);
 
 		return layout;
 	}
@@ -764,14 +765,13 @@ public class CandiForm extends CandiActivity {
 		}
 	}
 
-	static private void buildCandiButtons(Context context, final Entity entity, final ViewGroup layout, GeoLocation mLocation) {
+	static private void buildCandiButtons(Context context, final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation) {
 
 		setVisibility(layout.findViewById(R.id.button_map), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_call), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_tune), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_comment), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_new), View.GONE);
-		setVisibility(layout.findViewById(R.id.button_edit), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_comments_browse), View.GONE);
 
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_map));
@@ -779,7 +779,6 @@ public class CandiForm extends CandiActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_tune));
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_comment));
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_new_text));
-		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_edit));
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_comments_browse));
 
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
@@ -833,10 +832,18 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Edit */
-		if (entity.ownerId != null
-				&& (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
-				|| entity.ownerId.equals(ProxiConstants.ADMIN_USER_ID))) {
-			setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
+		if (menu != null) {
+			MenuItem menuItem = menu.findItem(R.id.edit_candi);
+			if (menuItem != null) {
+				if (entity.ownerId != null
+						&& (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
+						|| entity.ownerId.equals(ProxiConstants.ADMIN_USER_ID))) {
+					menuItem.setVisible(true);
+				}
+				else {
+					menuItem.setVisible(false);
+				}
+			}
 		}
 	}
 
@@ -912,5 +919,13 @@ public class CandiForm extends CandiActivity {
 
 	protected int getLayoutId() {
 		return R.layout.candi_form;
+	}
+
+	public Entity getEntity() {
+		return mEntity;
+	}
+
+	public void setEntity(Entity entity) {
+		mEntity = entity;
 	}
 }

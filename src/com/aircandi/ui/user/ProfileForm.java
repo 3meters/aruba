@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -80,7 +81,7 @@ public class ProfileForm extends FormActivity {
 		mTextLink = (EditText) findViewById(R.id.text_link);
 		mTextLocation = (EditText) findViewById(R.id.text_location);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
-		mButtonSave = (Button) findViewById(R.id.btn_save);
+		mButtonSave = (Button) findViewById(R.id.button_save);
 
 		FontManager.getInstance().setTypefaceDefault(mTextFullname);
 		FontManager.getInstance().setTypefaceDefault(mTextBio);
@@ -88,6 +89,8 @@ public class ProfileForm extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault(mTextLocation);
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
 		FontManager.getInstance().setTypefaceDefault(mButtonSave);
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
+		
 
 		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -137,7 +140,7 @@ public class ProfileForm extends FormActivity {
 					mUser.session = Aircandi.getInstance().getUser().session;
 					mImageUriOriginal = mUser.getUserPhotoUri();
 
-					mCommon.hideBusy();
+					mCommon.hideBusy(false);
 					draw();
 				}
 				else {
@@ -294,7 +297,7 @@ public class ProfileForm extends FormActivity {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "Updated user profile: " + mUser.name + " (" + mUser.id + ")");
 						Tracker.trackEvent("User", "Update", null, 0);
-						mCommon.hideBusy();
+						mCommon.hideBusy(false);
 						/*
 						 * We treat updating the profile like a change to an entity in the entity model. This forces
 						 * UI to update itself and pickup the changes like a new profile name, picture, etc.

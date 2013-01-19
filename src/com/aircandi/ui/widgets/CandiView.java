@@ -169,6 +169,7 @@ public class CandiView extends RelativeLayout {
 			setVisibility(mCategoryImage, View.GONE);
 			if (mCategoryImage != null) {
 				if (entity.place.categories != null && entity.place.categories.size() > 0) {
+					mCategoryImage.setTag(entity.place.categories.get(0).iconUri());
 					BitmapRequest bitmapRequest = new BitmapRequest(entity.place.categories.get(0).iconUri(), mCategoryImage);
 					BitmapManager.getInstance().fetchBitmap(bitmapRequest);
 					mCategoryImage.setVisibility(View.VISIBLE);

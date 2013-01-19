@@ -124,7 +124,7 @@ public class PasswordForm extends FormActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
-				mCommon.hideBusy();
+				mCommon.hideBusy(false);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");

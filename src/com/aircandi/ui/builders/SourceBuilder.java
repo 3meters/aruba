@@ -140,6 +140,11 @@ public class SourceBuilder extends FormActivity {
 			mSource.name = mSourceName.getEditableText().toString();
 			mSource.id = mSourceId.getEditableText().toString();
 		}
+		if (mSource.source.equals("website")) {
+			if (!mSource.id.startsWith("http://") && !mSource.id.startsWith("https://")) {
+				mSource.id = "http://" + mSource.id;
+			}
+		}
 	}
 
 	@Override
@@ -251,7 +256,7 @@ public class SourceBuilder extends FormActivity {
 				}
 				else {
 					if (position != parent.getCount()) {
-						if (position < mEntity.sourceSuggestions.size()) {
+						if (mEntity.sourceSuggestions != null && position < mEntity.sourceSuggestions.size()) {
 							mSource = (Source) mEntity.sourceSuggestions.get(position);
 							mSourceName.setText(mSource.name);
 							mSourceId.setText(mSource.id);

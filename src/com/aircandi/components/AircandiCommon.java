@@ -49,7 +49,6 @@ import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.R.layout;
 import com.aircandi.ScanService;
-import com.aircandi.components.Events.EventHandler;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiExplorer.ModelResult;
@@ -76,6 +75,7 @@ import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.DateUtils;
 import com.aircandi.utilities.ImageUtils;
+import com.squareup.otto.Subscribe;
 
 public class AircandiCommon implements ActionBar.TabListener {
 
@@ -108,20 +108,18 @@ public class AircandiCommon implements ActionBar.TabListener {
 	protected MenuItem					mMenuItemRefresh;
 	protected MenuItem					mMenuItemDebug;
 	protected MenuItem					mMenuItemBeacons;
+	public Menu							mMenu;
 	private ProgressDialog				mProgressDialog;
 	public String						mPrefTheme;
 	public Boolean						mUsingCustomTheme	= false;
 	public Integer						mTabIndex;
 	public ActionBar					mActionBar;
 	private ViewFlipper					mViewFlipper;
-	@SuppressWarnings("unused")
-	private Integer						mActionBarHomeImageView;
 
 	/* Other */
-	public EventHandler					mEventScanReceived;
-	private EventHandler				mEventLocationChanged;
 	public String						mPageName;
 	public Boolean						mConfigChange		= false;
+	public Integer						mBusyCount			= 0;
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
 		mContext = context;
@@ -133,7 +131,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			mActivity.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		}
-
 		/*
 		 * Base activity class handles restoring view state as long as they have
 		 * an id property. We handle ourselves any other state that needs to
@@ -154,10 +151,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* Stash the action bar */
 		mActionBar = ((SherlockActivity) mActivity).getSupportActionBar();
-		mActionBarHomeImageView = android.R.id.home;
-		if (mActivity.findViewById(android.R.id.home) == null) {
-			mActionBarHomeImageView = R.id.abs__home;
-		}
 
 		/* Fonts */
 		Integer titleId = getActionBarTitleId();
@@ -173,27 +166,22 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		mTitle = (TextView) mActivity.findViewById(R.id.text_title);
-		mEventLocationChanged = new EventHandler() {
-
-			@Override
-			public void onEvent(Object data) {
-				updateDebugText();
-			}
-		};
-		mEventScanReceived = new EventHandler() {
-
-			@Override
-			public void onEvent(Object data) {
-				List<WifiScanResult> scanList = (List<WifiScanResult>) data;
-				updateBeaconIndicator(scanList);
-			}
-		};
 
 		/* Tabs: setup tabs if appropriate */
 		manageTabs();
 
 	}
 
+	@Subscribe
+	public void onLocationChanged(LocationChangedEvent event) {
+		updateDebugText();		
+	}
+
+	@Subscribe
+	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
+		updateBeaconIndicator(event.wifiList);		
+	}
+	
 	public void updateDebugText() {
 		if (mTextDebug != null) {
 			if (Aircandi.getInstance().getUser() != null
@@ -266,6 +254,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 		intentBuilder.setCommandType(CommandType.View);
 		Intent intent = intentBuilder.create();
 		mActivity.startActivity(intent);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+	}
+
+	public void doEditCandiClick() {
+		IntentBuilder intentBuilder = new IntentBuilder(mActivity, EntityForm.class)
+				.setCommandType(CommandType.Edit)
+				.setEntityId(((CandiForm) mActivity).getEntity().id)
+				.setParentEntityId(((CandiForm) mActivity).getEntity().parentId)
+				.setEntityType(((CandiForm) mActivity).getEntity().type);
+		Intent intent = intentBuilder.create();
+		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_EDIT);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
 
@@ -468,7 +467,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 			@Override
 			public void run() {
-				hideBusy();
+				hideBusy(true);
 			}
 		});
 
@@ -720,7 +719,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						/* Notify interested parties */
 						ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
 						Tracker.trackEvent("User", "Signout", null, 0);
-						hideBusy();
+						hideBusy(false);
 						Intent intent = new Intent(mActivity, SplashForm.class);
 						mActivity.startActivity(intent);
 						mActivity.finish();
@@ -779,7 +778,15 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void showBusy(Integer messageResId) {
 
-		startActionbarBusyIndicator();
+		synchronized (mBusyCount) {
+			mBusyCount++;
+			Logger.v(this, "Busy count: " + String.valueOf(mBusyCount));
+		}
+
+		if (mBusyCount == 1) {
+			startActionbarBusyIndicator();
+		}
+
 		if (messageResId != null) {
 			ProgressDialog progressDialog = getProgressDialog();
 			progressDialog.setMessage(mActivity.getString(messageResId));
@@ -793,18 +800,28 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	public void hideBusy() {
+	public void hideBusy(Boolean force) {
 		ProgressDialog progressDialog = getProgressDialog();
 		if (progressDialog.isShowing() && progressDialog.getWindow().getWindowManager() != null) {
 			progressDialog.dismiss();
 		}
-		stopActionbarBusyIndicator();
-		stopBusyIndicator();
+
+		synchronized (mBusyCount) {
+			mBusyCount--;
+			Logger.v(this, "Busy count: " + String.valueOf(mBusyCount));
+		}
+
+		if (mBusyCount == 0 || force) {
+			stopActionbarBusyIndicator();
+			stopBusyIndicator();
+		}
 	}
 
 	private void startActionbarBusyIndicator() {
 		if (mMenuItemRefresh != null) {
-			mMenuItemRefresh.setActionView(layout.actionbar_refresh);
+			if (mMenuItemRefresh.getActionView() == null) {
+				mMenuItemRefresh.setActionView(layout.actionbar_refresh);
+			}
 		}
 	}
 
@@ -891,6 +908,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 			}
 		}
 
+		/* Show edit menuitem if one is needed */
+		menuItem = menu.findItem(R.id.edit_candi);
+		if (menuItem != null && !mPageName.equals("CandiForm")) {
+			((MenuItem) menu.findItem(R.id.edit_candi)).setVisible(false);
+		}
+
 		/* Beacon indicator */
 		mMenuItemBeacons = menu.findItem(R.id.beacons);
 		if (mMenuItemBeacons != null) {
@@ -916,6 +939,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* Cache refresh menu item for later ui updates */
 		mMenuItemRefresh = menu.findItem(R.id.refresh);
+
+		mMenu = menu;
 	}
 
 	public void doPrepareOptionsMenu(Menu menu) {
@@ -965,8 +990,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 			case R.id.signout:
 				signout();
 				return;
-			case R.id.edit:
+			case R.id.edit_user:
 				doProfileClick();
+				return;
+			case R.id.edit_candi:
+				doEditCandiClick();
 				return;
 			case R.id.update:
 				Logger.d(this, "Update menu item: navigating to install page");
@@ -1227,12 +1255,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public void doDestroy() {}
 
 	public void doPause() {
-		synchronized (Events.EventBus.locationChanged) {
-			Events.EventBus.locationChanged.remove(mEventLocationChanged);
-		}
-		synchronized (Events.EventBus.wifiScanReceived) {
-			Events.EventBus.wifiScanReceived.remove(mEventScanReceived);
-		}
+		BusProvider.getInstance().unregister(this);
 	}
 
 	public void doStop() {
@@ -1244,12 +1267,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void doResume() {
-		synchronized (Events.EventBus.locationChanged) {
-			Events.EventBus.locationChanged.add(mEventLocationChanged);
-		}
-		synchronized (Events.EventBus.wifiScanReceived) {
-			Events.EventBus.wifiScanReceived.add(mEventScanReceived);
-		}
+		BusProvider.getInstance().register(this);
 	}
 
 	public void doSaveInstanceState(Bundle savedInstanceState) {

@@ -122,7 +122,7 @@ public class CommentList extends CandiActivity {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CommentBrowse);
 				}
-				mCommon.hideBusy();
+				mCommon.hideBusy(false);
 			}
 
 		}.execute();

@@ -10,7 +10,6 @@ import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
 
-import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -104,7 +103,7 @@ public class CandiUser extends CandiActivity {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiUser);
 				}
-				mCommon.hideBusy();
+				mCommon.hideBusy(false);
 			}
 
 		}.execute();
@@ -267,17 +266,6 @@ public class CandiUser extends CandiActivity {
 			stats.setText(Html.fromHtml(statString));
 			setVisibility(stats, View.VISIBLE);
 			setVisibility(findViewById(R.id.section_stats), View.VISIBLE);
-		}
-
-		/* Buttons */
-		buildCandiButtons(context, user);
-	}
-
-	private void buildCandiButtons(Context context, final User user) {
-
-		setVisibility(findViewById(R.id.button_edit), View.GONE);
-		if (user.id.equals(Aircandi.getInstance().getUser().id)) {
-			setVisibility(findViewById(R.id.button_edit), View.VISIBLE);
 		}
 	}
 

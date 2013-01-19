@@ -122,7 +122,7 @@ public class LinkPicker extends FormActivity {
 			protected void onPostExecute(Object response) {
 				mSearchAdapter = new SearchAdapter(LinkPicker.this, mSearchItems, null);
 				mListView.setAdapter(mSearchAdapter);
-				mCommon.hideBusy();
+				mCommon.hideBusy(false);
 			}
 
 		}.execute();
@@ -248,7 +248,7 @@ public class LinkPicker extends FormActivity {
 							if (description != null) {
 								mUriDescription = description;
 							}
-							mCommon.hideBusy();
+							mCommon.hideBusy(false);
 
 							Intent intent = new Intent();
 							intent.putExtra(CandiConstants.EXTRA_URI, mUri);

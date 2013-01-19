@@ -66,6 +66,14 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 		return mItems.size();
 	}
 
+	public List<Entity> getItems() {
+		return mItems;
+	}
+
+	public void setItems(List<Entity> items) {
+		mItems = items;
+	}
+
 	public static class RadarViewHolder {
 
 		public int			position;

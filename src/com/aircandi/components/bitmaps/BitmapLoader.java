@@ -264,8 +264,8 @@ public class BitmapLoader {
 									imageRequest.getRequestListener().onComplete(serviceResponse);
 								}
 								else {
-									imageRequest.setImageUri("resource:image_broken");
-									BitmapManager.getInstance().fetchBitmap(imageRequest);
+//									imageRequest.setImageUri("resource:image_broken");
+//									BitmapManager.getInstance().fetchBitmap(imageRequest);
 								}
 							}
 						}
