@@ -34,7 +34,7 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public Location				location;
 	@Expose
-	public List<Category>		categories;
+	public CategorySimple		category;
 
 	/* Only comes from foursquare */
 
@@ -71,9 +71,6 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	public Place clone() {
 		try {
 			final Place place = (Place) super.clone();
-			if (this.categories != null) {
-				place.categories = (List<Category>) ((ArrayList) this.categories).clone();
-			}
 			if (this.photos != null) {
 				place.photos = (List<Photo>) ((ArrayList) this.photos).clone();
 			}
@@ -88,6 +85,9 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 			}
 			if (this.contact != null) {
 				place.contact = this.contact.clone();
+			}
+			if (this.category != null) {
+				place.category = this.category.clone();
 			}
 			if (this.menu != null) {
 				place.menu = this.menu.clone();
@@ -119,13 +119,8 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 			place.contact = (Contact) Contact.setPropertiesFromMap(new Contact(), (HashMap<String, Object>) map.get("contact"));
 		}
 
-		if (map.get("categories") != null) {
-			List<LinkedHashMap<String, Object>> categoryMaps = (List<LinkedHashMap<String, Object>>) map.get("categories");
-
-			place.categories = new ArrayList<Category>();
-			for (LinkedHashMap<String, Object> categoryMap : categoryMaps) {
-				place.categories.add(Category.setPropertiesFromMap(new Category(), categoryMap));
-			}
+		if (map.get("category") != null) {
+			place.category = (CategorySimple) CategorySimple.setPropertiesFromMap(new CategorySimple(), (HashMap<String, Object>) map.get("category"));
 		}
 
 		if (map.get("menu") != null) {
@@ -189,44 +184,14 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		return location;
 	}
 
-	public Category getCategoryPrimary() {
-		Category categoryDefault = null;
-		if (categories != null && categories.size() > 0) {
-			for (Category category : categories) {
-				categoryDefault = category;
-				if (category.primary != null && category.primary) {
-					return category;
-				}
-			}
-		}
-		return categoryDefault;
-	}
-
-	public String getCategoryString() {
-		String categories = "";
-		if (this.categories != null && this.categories.size() > 0) {
-			for (Category category : this.categories) {
-				if (category.primary != null && category.primary) {
-					categories += "<b>" + category.name + "</b>, ";
-				}
-				else {
-					categories += category.name + ", ";
-				}
-			}
-			categories = categories.substring(0, categories.length() - 2);
-		}
-		return categories;
-	}
-
-	public Integer getCategoryColorResId(Boolean dark, Boolean mute, Boolean semi) {
+	static public Integer getCategoryColorResId(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
 		int colorResId = R.color.accent_gray;
 		if (semi) {
 			colorResId = R.color.accent_gray_semi;
 		}
-		Category category = getCategoryPrimary();
-		if (category != null) {
+		if (categoryName != null) {
 
-			Random rand = new Random(category.name.hashCode());
+			Random rand = new Random(categoryName.hashCode());
 			int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
 			if (colorIndex == 1) {
 				colorResId = R.color.accent_blue;
@@ -292,15 +257,15 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		return colorResId;
 	}
 
-	public Integer getCategoryColor(Boolean dark, Boolean mute, Boolean semi) {
+	static public Integer getCategoryColor(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
 		int colorResId = R.color.accent_gray;
 		if (semi) {
 			colorResId = R.color.accent_gray_semi;
 		}
-		Category category = getCategoryPrimary();
-		if (category != null) {
+		
+		if (categoryName != null) {
 
-			Random rand = new Random(category.name.hashCode());
+			Random rand = new Random(categoryName.hashCode());
 			int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
 			if (colorIndex == 1) {
 				colorResId = R.color.accent_blue;

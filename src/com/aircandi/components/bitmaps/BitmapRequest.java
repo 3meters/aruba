@@ -9,11 +9,12 @@ import com.aircandi.service.ProxibaseService.RequestListener;
 
 public class BitmapRequest {
 
-	private String						mImageUri			= null;
-	private WeakReference<Object>		mImageRequestor		= null;
-	private RequestListener				mRequestListener	= null;
-	private WeakReference<ImageView>	mImageView			= null;
-	private Integer						mImageSize			= null;
+	private String						mImageUri				= null;
+	private WeakReference<Object>		mImageRequestor			= null;
+	private RequestListener				mRequestListener		= null;
+	private WeakReference<ImageView>	mImageView				= null;
+	private Integer						mImageSize				= null;
+	private Integer						mBrokenDrawableResId	= null;
 
 	public BitmapRequest() {}
 
@@ -76,6 +77,14 @@ public class BitmapRequest {
 	public BitmapRequest setImageSize(Integer imageSize) {
 		mImageSize = imageSize;
 		return this;
+	}
+
+	public Integer getBrokenDrawableResId() {
+		return mBrokenDrawableResId;
+	}
+
+	public void setBrokenDrawableResId(Integer brokenDrawableResId) {
+		mBrokenDrawableResId = brokenDrawableResId;
 	}
 
 	public static class ImageResponse {

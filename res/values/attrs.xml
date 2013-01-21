@@ -39,6 +39,7 @@
         <attr name="iconNewCandi" format="string" />
         <attr name="iconLocked" format="string" />
         <attr name="iconForward" format="string" />
+        <attr name="iconMore" format="string" />
         <attr name="iconDelete" format="string" />
         <attr name="iconMoveUp" format="string" />
 		<attr name="iconMoveDown" format="string" />
@@ -82,14 +83,6 @@
     </declare-styleable>
     <declare-styleable name="ComboButton">
         <attr name="drawableScale" format="float" />
-    </declare-styleable>
-    <declare-styleable name="Debug">
-        <attr name="imageSliderHandleInfo" format="string" />
-        <attr name="imageSliderHandleSearch" format="string" />
-        <attr name="backgroundSliderHandleInfo" format="string" />
-        <attr name="backgroundSliderContentInfo" format="string" />
-        <attr name="backgroundSliderHandleSearch" format="string" />
-        <attr name="backgroundSliderContentSearch" format="string" />
     </declare-styleable>
     <declare-styleable name="ListPreferenceMultiSelect">
         <attr name="checkAll" format="string" />

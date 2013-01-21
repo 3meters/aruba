@@ -926,7 +926,7 @@ public class ProxiExplorer {
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
 				ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Source);
-				result.serviceResponse.data = (List<Category>) serviceData.data;
+				result.serviceResponse.data = (List<Source>) serviceData.data;
 			}
 			return result;
 		}
@@ -1969,7 +1969,7 @@ public class ProxiExplorer {
 			return null;
 		}
 
-		public List<String> getCategoriesAsStrings(List<Category> categories) {
+		public List<String> getCategoriesAsStringArray(List<Category> categories) {
 			List<String> categoryStrings = new ArrayList<String>();
 			for (Category category : categories) {
 				categoryStrings.add(category.name);
@@ -2096,7 +2096,7 @@ public class ProxiExplorer {
 				sourceEntity.name = "comments";
 				Source source = new Source();
 				source.name = "comments";
-				source.icon = "resource:post";
+				source.icon = "resource:img_post";
 				source.position = position;
 				sourceEntity.source = source;
 
@@ -2322,9 +2322,6 @@ public class ProxiExplorer {
 			return mCategories;
 		}
 
-		public void setCategories(List<Category> categories) {
-			mCategories = categories;
-		}
 	}
 
 	public static class ModelResult {

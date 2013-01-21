@@ -174,14 +174,19 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	@Subscribe
 	public void onLocationChanged(LocationChangedEvent event) {
-		updateDebugText();		
+		updateDebugText();
 	}
 
 	@Subscribe
 	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
-		updateBeaconIndicator(event.wifiList);		
+		updateBeaconIndicator(event.wifiList);
 	}
-	
+
+	@Subscribe
+	public void onWifiScanReceived(QueryWifiScanReceivedEvent event) {
+		updateBeaconIndicator(event.wifiList);
+	}
+
 	public void updateDebugText() {
 		if (mTextDebug != null) {
 			if (Aircandi.getInstance().getUser() != null
@@ -884,34 +889,39 @@ public class AircandiCommon implements ActionBar.TabListener {
 		else if (mPageName.equals("CommentList")) {
 			activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_comment_light : R.menu.menu_comment_dark, menu);
 		}
+		else if (mPageName.equals("SourcesBuilder")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_sources_builder, menu);
+		}
 		else {
 			activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
 		}
 
 		/* Hide add comment menu item if not in commentlist */
-		if (!mPageName.equals("CommentList")) {
+		MenuItem menuItem = menu.findItem(R.id.add_comment);
+		if (menuItem != null && !mPageName.equals("CommentList")) {
 			if (mEntity != null && mEntity.locked) {
-				((MenuItem) menu.findItem(R.id.add_comment)).setVisible(false);
+				menuItem.setVisible(false);
 			}
 		}
 
 		/* Hide add custom place menuitem if this is not the CandiRadar activity */
-		MenuItem menuItem = menu.findItem(R.id.add_custom_place);
+		menuItem = menu.findItem(R.id.add_custom_place);
 		if (menuItem != null && !mPageName.equals("CandiRadar")) {
 			menuItem.setVisible(false);
 		}
 
 		/* Show update menuitem if one is needed */
-		if (!mPageName.equals("SignInForm")) {
+		menuItem = menu.findItem(R.id.update);
+		if (menuItem != null && !mPageName.equals("SignInForm")) {
 			if (!Aircandi.applicationUpdateNeeded) {
-				((MenuItem) menu.findItem(R.id.update)).setVisible(false);
+				menuItem.setVisible(false);
 			}
 		}
 
 		/* Show edit menuitem if one is needed */
 		menuItem = menu.findItem(R.id.edit_candi);
 		if (menuItem != null && !mPageName.equals("CandiForm")) {
-			((MenuItem) menu.findItem(R.id.edit_candi)).setVisible(false);
+			menuItem.setVisible(false);
 		}
 
 		/* Beacon indicator */

@@ -54,9 +54,9 @@
 
     <!-- Darken bars: mostly transparent -->
 
-    <color name="background_actionbar_light">#10000000</color>
-    <color name="background_tabbar_light">#14000000</color>
-    <color name="background_buttonbar_light">#14000000</color>
+    <color name="background_actionbar_light">#ffefefef</color>
+    <color name="background_tabbar_light">#ffdfdfdf</color>
+    <color name="background_buttonbar_light">#ffdfdfdf</color>
 
     <!-- Lighten bars: mostly transparent -->
 

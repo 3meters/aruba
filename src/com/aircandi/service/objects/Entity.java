@@ -90,7 +90,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 	/* Stash for place entities */
 	public List<Source>			sourceSuggestions;
-	
+
 	/* Used when this is a source entity */
 	public Source				source;
 
@@ -272,7 +272,9 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 */
 		Entity entity = synthetic.clone();
 		entity.id = null;
-		entity.subtitle = synthetic.getCategoriesAsText();
+		if (synthetic.place.category != null) {
+			entity.subtitle = synthetic.place.category.name;
+		}
 		return entity;
 	}
 
@@ -352,7 +354,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 * 
 		 * Only posts and collections do not have photo objects
 		 */
-		String imageUri = "resource:placeholder_logo_bw";
+		String imageUri = "resource:img_placeholder_logo_bw";
 		if (this.type.equals(CandiConstants.TYPE_CANDI_POST)) {
 			if (this.creator.photo != null) {
 				imageUri = this.creator.photo.getUri();
@@ -374,10 +376,8 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 					imageUri = photo.getUri();
 				}
 			}
-			else if (this.place != null
-					&& this.place.categories != null
-					&& this.place.categories.size() > 0) {
-				imageUri = this.place.categories.get(0).iconUri();
+			else if (this.place != null && this.place.category != null){
+				imageUri = this.place.category.iconUri();
 			}
 			else if (creator != null) {
 				if (creator.getUserPhotoUri() != null && !creator.getUserPhotoUri().equals("")) {
@@ -447,7 +447,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getChildEntities(this.id);
 		return entities;
 	}
-	
+
 	public EntityList<Entity> getSourceEntities() {
 		EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getSourceEntities(this.id);
 		return entities;
@@ -484,7 +484,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		}
 		return null;
 	}
-	
+
 	public Boolean hasProximityLink() {
 		if (links != null) {
 			for (Link link : links) {
@@ -551,18 +551,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		Link link = getActiveLink("proximity");
 		if (link != null) {
 			return link.toId;
-		}
-		return null;
-	}
-
-	public String getCategoriesAsText() {
-		if (place != null && place.categories != null && place.categories.size() > 0) {
-			String categories = "";
-			for (Category category : place.categories) {
-				categories += category.name + ", ";
-			}
-			categories = categories.substring(0, categories.length() - 2);
-			return categories;
 		}
 		return null;
 	}

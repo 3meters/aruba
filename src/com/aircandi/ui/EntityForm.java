@@ -5,16 +5,22 @@ import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
+import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +29,7 @@ import android.widget.ViewFlipper;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
+import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
@@ -39,11 +46,12 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Beacon;
-import com.aircandi.service.objects.Category;
+import com.aircandi.service.objects.CategorySimple;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.Observation;
+import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.builders.AddressBuilder;
@@ -62,6 +70,10 @@ public class EntityForm extends FormActivity {
 	protected WebImageView	mImageViewPicture;
 	private Bitmap			mEntityBitmap;
 	private Entity			mEntityForForm;
+	private Boolean			mDirty	= false;
+	private TextView		mTitle;
+	private TextView		mDescription;
+	private CheckBox		mLocked;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -88,9 +100,45 @@ public class EntityForm extends FormActivity {
 			mCommon.mActionBar.setTitle(R.string.form_title_post);
 		}
 
+		mTitle = (TextView) findViewById(R.id.text_title);
+		mDescription = (TextView) findViewById(R.id.description);
+		mLocked = (CheckBox) findViewById(R.id.chk_locked);
 		mImageViewPicture = (WebImageView) findViewById(R.id.image_picture);
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper_form);
 		mCommon.setViewFlipper(mViewFlipper);
+
+		if (mTitle != null) {
+			mTitle.addTextChangedListener(new SimpleTextWatcher() {
+
+				@Override
+				public void afterTextChanged(Editable s) {
+					if (!s.toString().equals(mEntityForForm.name)) {
+						mDirty = true;
+					}
+				}
+			});
+		}
+		if (mDescription != null) {
+			mDescription.addTextChangedListener(new SimpleTextWatcher() {
+
+				@Override
+				public void afterTextChanged(Editable s) {
+					if (!s.toString().equals(mEntityForForm.description)) {
+						mDirty = true;
+					}
+				}
+			});
+		}
+		if (mLocked != null) {
+			mLocked.setOnCheckedChangeListener(new OnCheckedChangeListener(){
+
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					if (mEntityForForm.locked != isChecked) {
+						mDirty = true;
+					}
+				}});
+		}
 	}
 
 	private void bind() {
@@ -107,6 +155,10 @@ public class EntityForm extends FormActivity {
 			entity.isCollection = (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE));
 			entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);
 			entity.type = mCommon.mEntityType;
+			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+				entity.getPlace().source = "user";
+				entity.getPlace().sourceId = Aircandi.getInstance().getUser().id;
+			}
 
 			mEntityForForm = entity;
 		}
@@ -176,10 +228,9 @@ public class EntityForm extends FormActivity {
 						}
 					}
 				}
-				if (entity.place.categories != null && entity.place.categories.size() > 0) {
-					Category category = entity.place.getCategoryPrimary();
+				if (entity.place.category != null) {
 					if (findViewById(R.id.category) != null) {
-						((BuilderButton) findViewById(R.id.category)).setText(category.name);
+						((BuilderButton) findViewById(R.id.category)).setText(entity.place.category.name);
 					}
 				}
 			}
@@ -212,11 +263,12 @@ public class EntityForm extends FormActivity {
 
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 				if (mEntityBitmap == null && entity.photo == null && entity.place != null) {
+
 					Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
-					int color = entity.place.getCategoryColor(true, boostColor, false);
+					int color = Place.getCategoryColor(entity.place.category != null ? entity.place.category.name : null, true, boostColor, false);
 					mImageViewPicture.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 
-					int colorResId = entity.place.getCategoryColorResId(true, boostColor, false);
+					int colorResId = Place.getCategoryColorResId(entity.place.category != null ? entity.place.category.name : null, true, boostColor, false);
 					if (findViewById(R.id.color_layer) != null) {
 						((View) findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
 						((View) findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
@@ -302,6 +354,18 @@ public class EntityForm extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@Override
+	public void onBackPressed() {
+		if (isDirty()) {
+			confirmDirtyExit();
+		}
+		else {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToCandiPage);
+		}
+	}
+
 	public void onChangePictureButtonClick(View view) {
 		mCommon.showPictureSourcePicker(mEntityForForm.id);
 		mImageRequestWebImageView = mImageViewPicture;
@@ -312,6 +376,7 @@ public class EntityForm extends FormActivity {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					mDirty = true;
 					/* Could get set to null if we are using the default */
 					mEntityBitmap = imageBitmap;
 					if (imageUri != null) {
@@ -325,6 +390,18 @@ public class EntityForm extends FormActivity {
 
 	public void onSaveButtonClick(View view) {
 		doSave();
+	}
+
+	@Override
+	public void onCancelButtonClick(View view) {
+		if (isDirty()) {
+			confirmDirtyExit();
+		}
+		else {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToCandiPage);
+		}
 	}
 
 	public void onDeleteButtonClick(View view) {
@@ -346,8 +423,8 @@ public class EntityForm extends FormActivity {
 
 	public void onCategoryBuilderClick(View view) {
 		Intent intent = new Intent(this, CategoryBuilder.class);
-		if (mEntityForForm.getPlace().categories != null && mEntityForForm.getPlace().categories.size() > 0) {
-			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.getPlace().getCategoryPrimary(), false, true);
+		if (mEntityForForm.getPlace().category != null) {
+			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.getPlace().category, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CATEGORY_EDIT);
@@ -375,6 +452,7 @@ public class EntityForm extends FormActivity {
 		if (resultCode == Activity.RESULT_OK) {
 			if (requestCode == CandiConstants.ACTIVITY_ADDRESS_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
+					mDirty = true;
 					Bundle extras = intent.getExtras();
 
 					String phone = extras.getString(CandiConstants.EXTRA_PHONE);
@@ -395,14 +473,13 @@ public class EntityForm extends FormActivity {
 					Bundle extras = intent.getExtras();
 					String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
 					if (jsonCategory != null) {
-						Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
+						CategorySimple categoryUpdated = (CategorySimple) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory,
+								ServiceDataType.CategorySimple);
 						if (categoryUpdated != null) {
-							if (mEntityForForm.getPlace().categories == null) {
-								mEntityForForm.getPlace().categories = new ArrayList<Category>();
-							}
-							mEntityForForm.getPlace().categories.clear();
-							mEntityForForm.getPlace().categories.add(categoryUpdated);
+							mDirty = true;
+							mEntityForForm.getPlace().category = categoryUpdated;
 							((BuilderButton) findViewById(R.id.category)).setText(categoryUpdated.name);
+							drawImage(mEntityForForm);
 						}
 					}
 				}
@@ -416,6 +493,7 @@ public class EntityForm extends FormActivity {
 						Source source = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 						sources.add(source);
 					}
+					mDirty = true;
 					mEntityForForm.sources = sources;
 					drawSources(mEntityForForm);
 				}
@@ -453,6 +531,7 @@ public class EntityForm extends FormActivity {
 		/*
 		 * Setting the photo to null will trigger correct default handling.
 		 */
+		mDirty = true;
 		if (entity.photo != null) {
 			entity.photo.setBitmap(null);
 			entity.photo = null;
@@ -540,6 +619,7 @@ public class EntityForm extends FormActivity {
 				mCommon.hideBusy(false);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					finish();
+					AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToCandiPage);
 				}
 				else {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
@@ -547,6 +627,32 @@ public class EntityForm extends FormActivity {
 			}
 
 		}.execute();
+	}
+
+	private Boolean isDirty() {
+		return mDirty;
+	}
+
+	public void confirmDirtyExit() {
+		AlertDialog dialog = AircandiCommon.showAlertDialog(null
+				, getResources().getString(R.string.alert_entity_dirty_exit_title)
+				, getResources().getString(R.string.alert_entity_dirty_exit_message)
+				, null
+				, this
+				, android.R.string.ok
+				, android.R.string.cancel
+				, new DialogInterface.OnClickListener() {
+
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							setResult(Activity.RESULT_CANCELED);
+							finish();
+							AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToCandiPage);
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
 	}
 
 	private ModelResult insertEntityAtService() {

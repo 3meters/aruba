@@ -118,10 +118,11 @@ public class PictureDetail extends FormActivity {
 		holder.itemImage.setTag(imageUri);
 		holder.itemImage.setImageBitmap(null);
 
-		BitmapRequest request = new BitmapRequest();
-		request.setImageUri(imageUri);
-		request.setImageView(image);
-		request.setRequestListener(new RequestListener() {
+		BitmapRequest bitmapRequest = new BitmapRequest(imageUri, image);
+		bitmapRequest.setImageRequestor(image);
+		bitmapRequest.setImageUri(imageUri);
+		bitmapRequest.setImageView(image);
+		bitmapRequest.setRequestListener(new RequestListener() {
 
 			@Override
 			public void onComplete(Object response) {
@@ -132,7 +133,7 @@ public class PictureDetail extends FormActivity {
 					public void run() {
 						if (serviceResponse.responseCode != ResponseCode.Success) {
 							image.setScaleType(ScaleType.CENTER);
-							image.setImageResource(R.drawable.image_broken);
+							image.setImageResource(R.drawable.img_broken);
 						}
 						progressGroup.setVisibility(View.GONE);
 						activity.setSupportProgressBarIndeterminateVisibility(false);
@@ -154,7 +155,7 @@ public class PictureDetail extends FormActivity {
 				});
 			}
 		});
-		BitmapManager.getInstance().fetchBitmap(request);
+		BitmapManager.getInstance().fetchBitmap(bitmapRequest);
 		return layout;
 	}
 

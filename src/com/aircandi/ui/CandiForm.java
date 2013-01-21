@@ -696,6 +696,8 @@ public class CandiForm extends CandiActivity {
 		View parentView = (View) layout.getParent();
 		Integer layoutWidthPixels = metrics.widthPixels
 				- (parentView.getPaddingLeft() + parentView.getPaddingRight() + layout.getPaddingLeft() + layout.getPaddingRight());
+		Integer bonusPadding = ImageUtils.getRawPixels(context, 20);
+		layoutWidthPixels -= bonusPadding;
 
 		Integer spacing = 3;
 		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(context, spacing);

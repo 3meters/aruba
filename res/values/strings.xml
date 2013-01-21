@@ -15,7 +15,7 @@
     <string name="menu_add_comment_item">Add comment</string>
     <string name="menu_refresh_item">Refresh</string>
     <string name="menu_edit_item">Edit</string>
-    <string name="menu_profile_item">About me</string>
+    <string name="menu_profile_item">Profile</string>
     <string name="menu_settings_item">Settings</string>
     <string name="menu_update_item">Update</string>
     <string name="menu_signin_item">Sign in</string>
@@ -23,7 +23,8 @@
     <string name="menu_signup_item">Create account</string>
     <string name="menu_about_item">About</string>
     <string name="menu_refresh_all">Refresh All</string>
-
+    <string name="menu_suggest_links_item">Suggest links</string>
+    
     <!-- Testing (used for view previews) -->
 
     <string name="dummy_title">Zoka Coffee Roaster &amp; Tea Company</string>
@@ -73,7 +74,12 @@
     <string name="alert_source_delete_title">Delete link</string>
     <string name="alert_source_delete_message_single">Are you sure you want to delete this link?</string>
     <string name="alert_source_delete_message_multiple">Are you sure you want to delete these links?</string>
-    
+    <string name="alert_entity_dirty_exit_title">Editing</string>
+    <string name="alert_entity_dirty_exit_message">Do you want to discard your editing changes?</string>
+    <string name="alert_comment_dirty_exit_title">Unposted</string>
+    <string name="alert_comment_dirty_exit_message">Do you want to discard your comment?</string>
+    <string name="alert_sources_dirty_exit_title">Editing</string>
+    <string name="alert_sources_dirty_exit_message">Do you want to discard your editing changes?</string>
     
     <string name="alert_deleted">deleted</string>
     <string name="alert_updated">saved</string>
@@ -148,6 +154,8 @@
     <string name="toast_signed_in">Signed in as</string>
     <string name="toast_signed_out">Signed out.</string>
     <string name="toast_tuned">Thank you for making aircandi better!</string>
+    <string name="toast_source_linked">Found additional link.</string>
+    <string name="toast_sources_linked">Found additional links.</string>
     
     <!-- UI General -->
 
@@ -362,6 +370,7 @@
     <string name="form_button_change_password">change password</string>
     <string name="form_button_signup">register</string>
     <string name="form_button_save">save</string>
+    <string name="form_button_post">post</string>
     <string name="form_button_delete">delete</string>
     <string name="form_button_ok">ok</string>
     <string name="form_button_add">add</string>

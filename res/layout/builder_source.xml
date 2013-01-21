@@ -31,7 +31,7 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="10dp"
                 aircandi:brokenDrawable="@drawable/ic_app"
-                aircandi:layout="@layout/widget_webimageview_source_builder"
+                aircandi:layout="@layout/widget_webimageview_candi_view"
                 aircandi:sizeHint="80dp"
                 android:scaleType="centerCrop" />
 

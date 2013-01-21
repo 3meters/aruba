@@ -1,5 +1,9 @@
 package com.aircandi.ui;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,6 +17,7 @@ import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
+import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -22,7 +27,9 @@ import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.UserView;
+import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class CommentForm extends FormActivity {
 
@@ -78,9 +85,32 @@ public class CommentForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
+	@Override
+	public void onBackPressed() {
+		if (isDirty()) {
+			confirmDirtyExit();
+		}
+		else {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+		}
+	}
 
 	public void onSaveButtonClick(View view) {
 		doSave();
+	}
+
+	@Override
+	public void onCancelButtonClick(View view) {
+		if (isDirty()) {
+			confirmDirtyExit();
+		}
+		else {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -89,6 +119,35 @@ public class CommentForm extends FormActivity {
 
 	private void doSave() {
 		insertComment();
+	}
+
+	private Boolean isDirty() {
+		if (mContent.getText().toString().length() > 0) {
+			return true;
+		}
+		return false;
+	}
+
+	public void confirmDirtyExit() {
+		AlertDialog dialog = AircandiCommon.showAlertDialog(null
+				, getResources().getString(R.string.alert_comment_dirty_exit_title)
+				, getResources().getString(R.string.alert_comment_dirty_exit_message)
+				, null
+				, this
+				, android.R.string.ok
+				, android.R.string.cancel
+				, new DialogInterface.OnClickListener() {
+
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							setResult(Activity.RESULT_CANCELED);
+							finish();
+							AnimUtils.doOverridePendingTransition(CommentForm.this, TransitionType.FormToCandiPage);
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
 	}
 
 	private boolean validate() {
@@ -116,7 +175,7 @@ public class CommentForm extends FormActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("InsertComment");				
+					Thread.currentThread().setName("InsertComment");
 					ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertComment(mCommon.mParentId, mComment, false);
 					return result;
 				}

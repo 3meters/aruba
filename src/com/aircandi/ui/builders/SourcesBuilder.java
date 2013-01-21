@@ -7,14 +7,19 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -26,38 +31,45 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.SourceListAdapter;
+import com.aircandi.components.bitmaps.BitmapManager;
+import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.BounceListView;
+import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.ImageUtils;
 
 public class SourcesBuilder extends FormActivity {
 
-	private BounceListView	mList;
-	private TextView		mMessage;
-	private List<Source>	mSources	= new ArrayList<Source>();
-	private Entity			mEntity;
-	private Source			mSourceEditing;
+	private BounceListView		mList;
+	private TextView			mMessage;
+	private List<Source>		mSources	= new ArrayList<Source>();
+	private Entity				mEntity;
+	private Source				mSourceEditing;
+	private ArrayList<String>	mJsonSourcesOriginal;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-		initialize();
-		if (mEntity != null
-				&& mEntity.sourceSuggestions == null
-				&& mEntity.sources != null
-				&& mEntity.sources.size() > 0) {
-			loadSourceSuggestions(mEntity);
-		}
-		else {
-			bind();
-			mCommon.hideBusy(false);
+		if (!isFinishing()) {
+			initialize();
+			if (mEntity != null
+					&& mEntity.sourceSuggestions == null
+					&& mEntity.sources != null
+					&& mEntity.sources.size() > 0) {
+				loadSourceSuggestions(mEntity, mEntity.sources, false);
+			}
+			else {
+				bind();
+				mCommon.hideBusy(true);
+			}
 		}
 	}
 
@@ -71,14 +83,13 @@ public class SourcesBuilder extends FormActivity {
 		if (extras != null) {
 			ArrayList<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
 			if (jsonSources != null) {
+				mJsonSourcesOriginal = jsonSources;
 				for (String jsonSource : jsonSources) {
 					Source source = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 					mSources.add(source);
 				}
 			}
 		}
-
-		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 
 		mMessage = (TextView) findViewById(R.id.message);
 		mList = (BounceListView) findViewById(R.id.list);
@@ -106,21 +117,94 @@ public class SourcesBuilder extends FormActivity {
 		mList.setAdapter(adapter);
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Event routines
+	// --------------------------------------------------------------------------------------------
+
 	@Override
 	public void onBackPressed() {
+		if (isDirty()) {
+			confirmDirtyExit();
+		}
+		else {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToCandiPage);
+		}
+	}
+
+	public void onSaveButtonClick(View view) {
 		gatherAndExit();
 	}
 
-	public void gatherAndExit() {
-		Intent intent = new Intent();
-		List<String> sourceStrings = new ArrayList<String>();
-		for (Source source : mSources) {
-			sourceStrings.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
+	@Override
+	public void onCancelButtonClick(View view) {
+		if (isDirty()) {
+			confirmDirtyExit();
 		}
-		intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
-		setResult(Activity.RESULT_OK, intent);
-		finish();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+		else {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToCandiPage);
+		}
+	}
+
+	public void onDeleteButtonClick(View view) {
+		for (int i = mSources.size() - 1; i >= 0; i--) {
+			if (mSources.get(i).checked) {
+				confirmSourceDelete();
+				return;
+			}
+		}
+	}
+
+	public void onAddButtonClick(View view) {
+		Intent intent = new Intent(this, SourceBuilder.class);
+		if (mEntity != null) {
+			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntity.id);
+		}
+		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_NEW);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	}
+
+	public void onMoveUpButtonClick(View view) {
+		for (int i = mSources.size() - 1; i >= 0; i--) {
+			if (mSources.get(i).checked) {
+				mSources.get(i).position -= 2;
+			}
+		}
+		Collections.sort(mSources, new Source.SortSourcesBySourcePosition());
+		Integer position = 0;
+		for (Source source : mSources) {
+			source.position = position;
+			position++;
+		}
+		mList.invalidateViews();
+	}
+
+	public void onMoveDownButtonClick(View view) {
+		for (int i = mSources.size() - 1; i >= 0; i--) {
+			if (mSources.get(i).checked) {
+				mSources.get(i).position += 2;
+			}
+		}
+		Collections.sort(mSources, new Source.SortSourcesBySourcePosition());
+		Integer position = 0;
+		for (Source source : mSources) {
+			source.position = position;
+			position++;
+		}
+		mList.invalidateViews();
+	}
+
+	public void onListItemClick(View view) {
+		Intent intent = new Intent(this, SourceBuilder.class);
+		CheckBox check = (CheckBox) view.findViewById(R.id.check);
+		mSourceEditing = (Source) check.getTag();
+		String jsonSource = ProxibaseService.convertObjectToJsonSmart(mSourceEditing, false, true);
+		intent.putExtra(CandiConstants.EXTRA_SOURCE, jsonSource);
+		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_EDIT);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
 	@Override
@@ -177,70 +261,51 @@ public class SourcesBuilder extends FormActivity {
 		}
 	}
 
-	public void loadSourceSuggestions(final Entity entity) {
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showBusy();
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("LoadSourceSuggestions");
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getSourceSuggestions(entity.sources);
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					entity.sourceSuggestions = (List<Source>) result.serviceResponse.data;
-					if (entity.sourceSuggestions == null) {
-						entity.sourceSuggestions = new ArrayList<Source>();
-					}
-				}
-				bind();
-				mCommon.hideBusy(false);
-			}
-		}.execute();
-	}
-
-	private void scrollToBottom() {
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				mList.setSelection(mList.getAdapter().getCount() - 1);
-			}
-		});
-	}
-
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
 
-	public void onDeleteButtonClick(View view) {
+	public void confirmSourceDelete() {
 
 		/* How many are we deleting? */
-		String deleteNames = "";
 		Integer deleteCount = 0;
 		for (int i = mSources.size() - 1; i >= 0; i--) {
 			if (mSources.get(i).checked) {
 				deleteCount++;
-				deleteNames += "    " + mSources.get(i).name + "\n";
 			}
 		}
 
-		String message = getResources().getString(
-				deleteCount == 1 ? R.string.alert_source_delete_message_single : R.string.alert_source_delete_message_multiple);
-		message += "\n\n" + deleteNames;
+		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_delete_sources, null);
+		TextView message = (TextView) customView.findViewById(R.id.message);
+		LinearLayout list = (LinearLayout) customView.findViewById(R.id.list);
+		for (Source source : mSources) {
+			if (source.checked) {
+				View sourceView = inflater.inflate(R.layout.temp_listitem_delete_sources, null);
+				WebImageView image = (WebImageView) sourceView.findViewById(R.id.image);
+				TextView title = (TextView) sourceView.findViewById(R.id.title);
+				if (source.name != null) {
+					title.setText(source.name);
+				}
+				image.setTag(source);
+				final String imageUri = source.getImageUri();
+				BitmapRequest bitmapRequest = new BitmapRequest(imageUri, image.getImageView());
+				bitmapRequest.setImageSize(image.getSizeHint());
+				bitmapRequest.setImageRequestor(image.getImageView());
+
+				BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+				list.addView(sourceView);
+			}
+		}
+
+		message.setText(deleteCount == 1
+				? R.string.alert_source_delete_message_single
+				: R.string.alert_source_delete_message_multiple);
 
 		AlertDialog dialog = AircandiCommon.showAlertDialog(null
 				, getResources().getString(R.string.alert_source_delete_title)
-				, message
 				, null
+				, customView
 				, this
 				, android.R.string.ok
 				, android.R.string.cancel
@@ -258,59 +323,91 @@ public class SourcesBuilder extends FormActivity {
 							}
 							mList.invalidateViews();
 						}
+
 					}
 				}
 				, null);
 		dialog.setCanceledOnTouchOutside(false);
 	}
 
-	public void onAddButtonClick(View view) {
-		Intent intent = new Intent(this, SourceBuilder.class);
-		if (mEntity != null) {
-			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntity.id);
-		}
-		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_NEW);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	public void confirmDirtyExit() {
+		AlertDialog dialog = AircandiCommon.showAlertDialog(null
+				, getResources().getString(R.string.alert_sources_dirty_exit_title)
+				, getResources().getString(R.string.alert_sources_dirty_exit_message)
+				, null
+				, this
+				, android.R.string.ok
+				, android.R.string.cancel
+				, new DialogInterface.OnClickListener() {
+
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							setResult(Activity.RESULT_CANCELED);
+							finish();
+							AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToCandiPage);
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
 	}
 
-	public void onMoveUpButtonClick(View view) {
-		for (int i = mSources.size() - 1; i >= 0; i--) {
-			if (mSources.get(i).checked) {
-				mSources.get(i).position -= 2;
+	public void loadSourceSuggestions(final Entity entity, final List<Source> sources, final Boolean autoInsert) {
+		new AsyncTask() {
+
+			@Override
+			protected void onPreExecute() {
+				mCommon.showBusy();
 			}
-		}
-		Collections.sort(mSources, new Source.SortSourcesBySourcePosition());
-		Integer position = 0;
-		for (Source source : mSources) {
-			source.position = position;
-			position++;
-		}
-		mList.invalidateViews();
-	}
 
-	public void onMoveDownButtonClick(View view) {
-		for (int i = mSources.size() - 1; i >= 0; i--) {
-			if (mSources.get(i).checked) {
-				mSources.get(i).position += 2;
+			@Override
+			protected Object doInBackground(Object... params) {
+				Thread.currentThread().setName("LoadSourceSuggestions");
+				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getSourceSuggestions(sources);
+				return result;
 			}
-		}
-		Collections.sort(mSources, new Source.SortSourcesBySourcePosition());
-		Integer position = 0;
-		for (Source source : mSources) {
-			source.position = position;
-			position++;
-		}
-		mList.invalidateViews();
+
+			@Override
+			protected void onPostExecute(Object response) {
+				ModelResult result = (ModelResult) response;
+				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+					if (entity != null) {
+						List<Source> sourceSuggestions = (List<Source>) result.serviceResponse.data;
+						entity.sourceSuggestions = sourceSuggestions;
+						if (entity.sourceSuggestions == null) {
+							entity.sourceSuggestions = new ArrayList<Source>();
+						}
+						if (autoInsert) {
+							if (sourceSuggestions.size() > 0) {
+								mSources.addAll(sourceSuggestions);
+								ImageUtils.showToastNotification(getResources().getString(sourceSuggestions.size() == 1
+										? R.string.toast_source_linked
+										: R.string.toast_sources_linked), Toast.LENGTH_SHORT);
+							}
+
+						}
+					}
+					else {
+						List<Source> sourceSuggestions = (List<Source>) result.serviceResponse.data;
+						mSources.addAll(sourceSuggestions);
+					}
+				}
+				bind();
+				mCommon.hideBusy(true);
+			}
+		}.execute();
 	}
 
-	public void onListItemClick(View view) {
-		Intent intent = new Intent(this, SourceBuilder.class);
-		CheckBox check = (CheckBox) view.findViewById(R.id.check);
-		mSourceEditing = (Source) check.getTag();
-		String jsonSource = ProxibaseService.convertObjectToJsonSmart(mSourceEditing, false, true);
-		intent.putExtra(CandiConstants.EXTRA_SOURCE, jsonSource);
-		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+	public void gatherAndExit() {
+		Intent intent = new Intent();
+		List<String> sourceStrings = new ArrayList<String>();
+		for (Source source : mSources) {
+			sourceStrings.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
+		}
+		intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
+		setResult(Activity.RESULT_OK, intent);
+		finish();
+		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
 	}
 
 	@Override
@@ -318,9 +415,41 @@ public class SourcesBuilder extends FormActivity {
 		return false;
 	}
 
+	private Boolean isDirty() {
+
+		/* Gather */
+		List<String> jsonSources = new ArrayList<String>();
+		for (Source source : mSources) {
+			jsonSources.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
+		}
+
+		if (jsonSources.size() != mJsonSourcesOriginal.size()) {
+			return true;
+		}
+
+		int position = 0;
+		for (String jsonSource : jsonSources) {
+			if (!jsonSource.toString().equals(mJsonSourcesOriginal.get(position).toString())) {
+				return true;
+			}
+			position++;
+		}
+		return false;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
+
+	private void scrollToBottom() {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				mList.setSelection(mList.getAdapter().getCount() - 1);
+			}
+		});
+	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 		mCommon.doCreateOptionsMenu(menu);
@@ -334,6 +463,16 @@ public class SourcesBuilder extends FormActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+
+		switch (item.getItemId()) {
+			case R.id.suggest_links:
+				/* Go get source suggestions again */
+				if (mSources.size() > 0) {
+					loadSourceSuggestions(mEntity, mSources, true);
+				}
+				return true;
+		}
+		/* In case we add general menu items later */
 		mCommon.doOptionsItemSelected(item);
 		return true;
 	}

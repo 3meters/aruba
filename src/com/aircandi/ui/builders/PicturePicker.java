@@ -152,6 +152,14 @@ public class PicturePicker extends FormActivity {
 			mTitle = (TextView) findViewById(R.id.custom_title);
 			mTitle.setText(mPlacePhotoMode ? R.string.dialog_picture_picker_place_title : R.string.dialog_picture_picker_search_title);
 		}
+		else {
+			if (mPlacePhotoMode) {
+				mCommon.mActionBar.setTitle(mEntity.name);
+			}
+			else {
+				mCommon.mActionBar.setTitle(R.string.dialog_picture_picker_search_title);
+			}
+		}
 
 		mMessage = (TextView) findViewById(R.id.message);
 		mGridView = (GridView) findViewById(R.id.grid_gallery);
@@ -355,7 +363,7 @@ public class PicturePicker extends FormActivity {
 
 					@Override
 					public void run() {
-						mCommon.hideBusy(false);
+						mCommon.hideBusy(true);
 					}
 				});
 				return (moreImages.size() >= PAGE_SIZE);
@@ -395,7 +403,7 @@ public class PicturePicker extends FormActivity {
 
 					@Override
 					public void run() {
-						mCommon.hideBusy(false);
+						mCommon.hideBusy(true);
 					}
 				});
 				return ((getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX);

@@ -40,7 +40,7 @@
         android:layout_height="20dp"
         android:layout_alignBottom="@+id/image_main"
         android:layout_alignRight="@+id/image_main"
-        android:src="@drawable/ic_zoom_light"
+        android:src="@drawable/ic_action_zoom"
         android:visibility="gone" />
 
 </merge>

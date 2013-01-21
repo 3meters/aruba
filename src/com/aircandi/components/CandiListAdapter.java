@@ -23,8 +23,8 @@ import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Place;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.TextViewEllipsizing;
 import com.aircandi.ui.widgets.UserView;
@@ -118,13 +118,8 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 						setVisibility(holder.subtitle, View.VISIBLE);
 					}
 					else {
-						if (entity.place.categories != null && entity.place.categories.size() > 0) {
-							String categories = "";
-							for (Category category : entity.place.categories) {
-								categories += category.name + ", ";
-							}
-							categories = categories.substring(0, categories.length() - 2);
-							holder.subtitle.setText(Html.fromHtml(categories));
+						if (entity.place.category != null) {
+							holder.subtitle.setText(Html.fromHtml(entity.place.category.name));
 							setVisibility(holder.subtitle, View.VISIBLE);
 						}
 					}
@@ -183,7 +178,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 						holder.imageUri = imageUri;
 						if (entity.synthetic) {
-							int color = entity.place.getCategoryColor(true, true, false);
+							int color = Place.getCategoryColor(entity.place.category != null ? entity.place.category.name : null, true, true, false);
 							holder.image.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 						}
 						else {

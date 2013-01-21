@@ -24,11 +24,13 @@
 
             <com.aircandi.ui.widgets.WebImageView
                 android:id="@+id/image"
+                style="@style/picture_framed"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_gravity="left"
                 android:layout_marginBottom="5dp"
-                aircandi:layout="@layout/widget_webimageview_framed"
+                aircandi:layout="@layout/widget_webimageview_candi_view"
+                aircandi:sizeHint="80dp"
                 android:minWidth="80dp"
                 android:scaleType="centerCrop" />
 
@@ -42,6 +44,13 @@
 
             <Spinner
                 android:id="@+id/sub_category"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/form_field_height"
+                android:spinnerMode="dropdown"
+                android:visibility="visible" />
+
+            <Spinner
+                android:id="@+id/sub_sub_category"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:spinnerMode="dropdown"

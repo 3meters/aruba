@@ -34,9 +34,8 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 			view = mInflater.inflate(mItemLayoutId, null);
 			holder = new RadarViewHolder();
 			holder.candiView = (CandiView) view.findViewById(R.id.candi_view);
+			/* Need this line so clicks bubble up to the listview click handler */
 			holder.candiView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-			holder.candiView.initialize();
-			holder.candiView.setLayoutId(R.layout.widget_candi_view_radar);
 			view.setTag(holder);
 		}
 		else {
@@ -49,11 +48,6 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 			holder.candiView.bindToEntity(entity);
 		}
 		return view;
-	}
-
-	@Override
-	public void notifyDataSetChanged() {
-		super.notifyDataSetChanged();
 	}
 
 	@Override
@@ -75,8 +69,6 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 	}
 
 	public static class RadarViewHolder {
-
-		public int			position;
 		public CandiView	candiView;
 		public Object		data;
 	}

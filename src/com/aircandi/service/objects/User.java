@@ -135,7 +135,7 @@ public class User extends ServiceEntryBase {
 	}
 
 	public String getUserPhotoUri() {
-		String imageUri = "resource:placeholder_logo_bw";
+		String imageUri = "resource:img_placeholder_logo_bw";
 		if (this.photo != null) {
 			imageUri = photo.getUri();
 		}

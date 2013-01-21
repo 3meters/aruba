@@ -69,7 +69,7 @@ public class WebImageView extends RelativeLayout {
 		mSizeHint = ta.getDimensionPixelSize(R.styleable.WebImageView_sizeHint, Integer.MAX_VALUE);
 		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
 		mLayoutId = ta.getResourceId(R.styleable.WebImageView_layout, R.layout.widget_webimageview);
-		mBrokenDrawable = ta.getResourceId(R.styleable.WebImageView_brokenDrawable, R.drawable.image_broken);
+		mBrokenDrawable = ta.getResourceId(R.styleable.WebImageView_brokenDrawable, R.drawable.img_broken);
 
 		ta.recycle();
 
@@ -100,7 +100,7 @@ public class WebImageView extends RelativeLayout {
 			mImageMain.invalidate();
 
 			if (isInEditMode()) {
-				mImageMain.setImageResource(R.drawable.placeholder_logo);
+				mImageMain.setImageResource(R.drawable.img_placeholder_logo);
 			}
 		}
 
@@ -142,10 +142,9 @@ public class WebImageView extends RelativeLayout {
 		/* Clear the current bitmap */
 		mImageMain.setImageBitmap(null);
 
-		bitmapRequest.setImageRequestor(this);
-		if (mSizeHint != null) {
-			bitmapRequest.setImageSize(mSizeHint);
-		}
+		bitmapRequest.setImageRequestor(mImageMain);
+		bitmapRequest.setImageSize(mSizeHint);
+
 		bitmapRequest.setRequestListener(new RequestListener() {
 
 			@Override

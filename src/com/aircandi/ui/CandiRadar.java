@@ -333,16 +333,18 @@ public class CandiRadar extends CandiActivity {
 				Aircandi.stopwatch1.segmentTime("Entities for location finished event");
 				Logger.d(CandiRadar.this, "Entities for location finished event: getting places near location");
 				final Observation observation = LocationManager.getInstance().getObservationForLocation(mActiveLocation);
-				new AsyncTask() {
+				if (observation != null) {
+					new AsyncTask() {
 
-					@Override
-					protected Object doInBackground(Object... params) {
-						Thread.currentThread().setName("GetPlacesNearLocation");
-						ProxiExplorer.getInstance().getPlacesNearLocation(observation);
-						return null;
-					}
+						@Override
+						protected Object doInBackground(Object... params) {
+							Thread.currentThread().setName("GetPlacesNearLocation");
+							ProxiExplorer.getInstance().getPlacesNearLocation(observation);
+							return null;
+						}
 
-				}.execute();
+					}.execute();
+				}
 			}
 		});
 	}
@@ -579,7 +581,7 @@ public class CandiRadar extends CandiActivity {
 
 		Logger.d(this, "CandiRadarActivity paused");
 
-		mCommon.stopScanService();
+		//mCommon.stopScanService();
 		super.onPause();
 	}
 
@@ -594,7 +596,7 @@ public class CandiRadar extends CandiActivity {
 		super.onResume();
 		if (!mInitialized) return;
 
-		mCommon.startScanService(CandiConstants.INTERVAL_SCAN_RADAR);
+		//mCommon.startScanService(CandiConstants.INTERVAL_SCAN_RADAR);
 	}
 
 	@Override

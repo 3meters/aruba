@@ -191,7 +191,7 @@ public interface CandiConstants {
 	public static final float	DURATION_CANDIBODY_COLLAPSE				= 0.8f * DURATION_MULTIPLIER;
 	public static final float	DURATION_CANDIBODY_EXPAND				= 0.8f * DURATION_MULTIPLIER;
 	public static final float	DURATION_REFLECTION_HIDESHOW			= 0.8f * DURATION_MULTIPLIER;
-	public static final float	DURATION_PLACEHOLDER_HIDESHOW			= 0.5f * DURATION_MULTIPLIER;
+	public static final float	DURATION_img_placeholder_HIDESHOW			= 0.5f * DURATION_MULTIPLIER;
 	public static final float	DURATION_ZONE_HIDESHOW					= 1.5f * DURATION_MULTIPLIER;
 	public static final float	DURATION_TRANSITIONS_OVERFLOW_FADE		= 0.5f * DURATION_MULTIPLIER;
 	public static final float	DURATION_TRANSITIONS_FADE				= 0.8f * DURATION_MULTIPLIER;

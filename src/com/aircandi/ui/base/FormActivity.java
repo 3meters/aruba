@@ -77,11 +77,13 @@ public abstract class FormActivity extends SherlockActivity {
 
 	@Override
 	public void onBackPressed() {
+		setResult(Activity.RESULT_CANCELED);
 		super.onBackPressed();
 		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
 	}
 
 	public void onCancelButtonClick(View view) {
+		setResult(Activity.RESULT_CANCELED);
 		finish();
 		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
 	}
@@ -170,7 +172,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 					BitmapRequest imageRequest = builder.create();
 					mImageRequestWebImageView.setBitmapRequest(imageRequest, false);
-					
+
 					if (imageTitle != null && !imageTitle.equals("")) {
 						EditText title = (EditText) findViewById(R.id.text_title);
 						if (title != null && title.getText().toString().equals("")) {
@@ -241,12 +243,12 @@ public abstract class FormActivity extends SherlockActivity {
 
 	protected void pictureFromCamera() {
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		
+
 		File mediaFile = AndroidManager.getOutputMediaFile(AndroidManager.MEDIA_TYPE_IMAGE);
 		mMediaFilePath = mediaFile.getAbsolutePath();
 		mMediaFileUri = Uri.fromFile(mediaFile);
-		
-		intent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaFileUri);		
+
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaFileUri);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
@@ -259,8 +261,8 @@ public abstract class FormActivity extends SherlockActivity {
 	}
 
 	protected void pictureFromPlace(String entityId) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, PicturePicker.class);
-		intentBuilder.setCommandType(CommandType.View)
+		IntentBuilder intentBuilder = new IntentBuilder(this, PicturePicker.class)
+				.setCommandType(CommandType.View)
 				.setEntityId(entityId);
 		Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_PICK_PLACE);

@@ -211,15 +211,11 @@ public class BitmapLoader {
 											imageRequest.getImageUri() + ": Post processing: " + String.valueOf(estimatedTime / 1000000)
 													+ "ms");
 									/*
-									 * Stuff it into the cache. Overwrites if it already exists. This is a perf
-									 * hit in
-									 * the
-									 * process because writing files is slow.
+									 * Stuff it into the cache. Overwrites if it already exists. This is a perf hit in
+									 * the process because writing files is slow.
 									 * 
-									 * We aren't doing anything to shrink the raw size of the image before
-									 * storing it to
-									 * disk. We also aren't
-									 * handling the case where the image format is gif.
+									 * We aren't doing anything to shrink the raw size of the image before storing it to
+									 * disk. We also aren't handling the case where the image format is gif.
 									 */
 									Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Pushing into cache...");
 									bitmap = BitmapManager.getInstance().putImageBytes(imageRequest.getImageUri(), (byte[]) serviceResponse.data,
@@ -262,10 +258,6 @@ public class BitmapLoader {
 							else {
 								if (imageRequest.getRequestListener() != null) {
 									imageRequest.getRequestListener().onComplete(serviceResponse);
-								}
-								else {
-//									imageRequest.setImageUri("resource:image_broken");
-//									BitmapManager.getInstance().fetchBitmap(imageRequest);
 								}
 							}
 						}

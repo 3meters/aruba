@@ -93,7 +93,7 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void initialize() {
-		((ImageView) findViewById(R.id.image_background)).setBackgroundResource(R.drawable.splash_v);
+		((ImageView) findViewById(R.id.image_background)).setBackgroundResource(R.drawable.img_splash_v);
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.splash_title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.splash_message));

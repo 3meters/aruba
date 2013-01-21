@@ -72,7 +72,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 		/* Add place photo option if this is a place entity */
 		if (mEntityId != null) {
 			Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mEntityId);
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && entity.place.source != null && entity.place.source.equals("foursquare")) {
 				listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_place), null, "place"));
 			}
 		}

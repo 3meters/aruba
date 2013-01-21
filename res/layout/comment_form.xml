@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onSaveButtonClick"
-            android:text="@string/form_button_save" />
+            android:text="@string/form_button_post" />
     </LinearLayout>
 
 </RelativeLayout>

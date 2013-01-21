@@ -2,8 +2,8 @@
 <resources>
 
     <string-array name="theme_entries">
-        <item>Holo Dark</item>
-        <item>Holo Light</item>
+        <item>Simply Black</item>
+        <item>Simply White</item>
     </string-array>
     <string-array name="theme_values">
         <item>aircandi_theme_midnight</item>
