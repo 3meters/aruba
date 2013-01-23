@@ -63,6 +63,7 @@ public class CandiForm extends CandiActivity {
 	protected ScrollView	mScrollView;
 	protected ViewGroup		mContentView;
 	protected ViewGroup		mCandiForm;
+	protected CandiView		mCandiView;
 	private Entity			mEntity;
 	protected Number		mEntityModelRefreshDate;
 	protected Number		mEntityModelActivityDate;
@@ -98,6 +99,8 @@ public class CandiForm extends CandiActivity {
 
 		mCandiForm = (ViewGroup) body.findViewById(R.id.candi_form);
 		mScrollView = (ScrollView) body.findViewById(R.id.scroll_view);
+		mCandiView = (CandiView) body.findViewById(R.id.candi_view);
+
 		mContentView.addView(body, 0);
 
 		/* Font for button bar */
@@ -183,6 +186,13 @@ public class CandiForm extends CandiActivity {
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel().trackEntity(mEntity, beacons, primaryBeacon, "browse");
 				return result;
 			}
+
+			@Override
+			protected void onPostExecute(Object result) {
+				Integer placeRankScore = mEntity.getPlaceRankScore();
+				mCandiView.getPlaceRankScore().setText(String.valueOf(placeRankScore));
+			}
+
 		}.execute();
 	}
 
@@ -396,14 +406,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onEditCandiButtonClick(View view) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, EntityForm.class)
-				.setCommandType(CommandType.Edit)
-				.setEntityId(mEntity.id)
-				.setParentEntityId(mEntity.parentId)
-				.setEntityType(mEntity.type);
-		Intent intent = intentBuilder.create();
-		startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		mCommon.doEditCandiClick();
 	}
 
 	public void onNewCommentButtonClick(View view) {

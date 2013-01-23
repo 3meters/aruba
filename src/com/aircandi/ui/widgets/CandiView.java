@@ -407,4 +407,12 @@ public class CandiView extends RelativeLayout {
 	public void setTextGroup(LinearLayout textGroup) {
 		mTextGroup = textGroup;
 	}
+
+	public TextView getPlaceRankScore() {
+		return mPlaceRankScore;
+	}
+
+	public void setPlaceRankScore(TextView placeRankScore) {
+		mPlaceRankScore = placeRankScore;
+	}
 }
