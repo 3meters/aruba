@@ -24,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
@@ -106,6 +105,7 @@ public class CandiForm extends CandiActivity {
 		/* Font for button bar */
 		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_comment));
 		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_new_text));
+		FontManager.getInstance().setTypefaceDefault((TextView) mContentView.findViewById(R.id.button_edit));
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -532,7 +532,12 @@ public class CandiForm extends CandiActivity {
 				 * TODO: We could check to see if proximity is new and only
 				 * refresh if true.
 				 */
-				doBind(true);
+				if (mCandiView != null) {
+					mCandiView.showDistance(mEntity);
+					Integer placeRankScore = mEntity.getPlaceRankScore();
+					mCandiView.getPlaceRankScore().setText(String.valueOf(placeRankScore));
+				}
+				//doBind(true);
 				setSupportProgressBarIndeterminateVisibility(false);
 				mCommon.hideBusy(false);
 				ImageUtils.showToastNotification(getString(R.string.toast_tuned), Toast.LENGTH_SHORT);
@@ -777,6 +782,7 @@ public class CandiForm extends CandiActivity {
 		setVisibility(layout.findViewById(R.id.button_tune), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_comment), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_new), View.GONE);
+		setVisibility(layout.findViewById(R.id.button_edit), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_comments_browse), View.GONE);
 
 		FontManager.getInstance().setTypefaceDefault((TextView) layout.findViewById(R.id.button_map));
@@ -837,18 +843,9 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Edit */
-		if (menu != null) {
-			MenuItem menuItem = menu.findItem(R.id.edit_candi);
-			if (menuItem != null) {
-				if (entity.ownerId != null
-						&& (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
-						|| entity.ownerId.equals(ProxiConstants.ADMIN_USER_ID))) {
-					menuItem.setVisible(true);
-				}
-				else {
-					menuItem.setVisible(false);
-				}
-			}
+		if (entity.ownerId != null && (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
+				|| entity.ownerId.equals(ProxiConstants.ADMIN_USER_ID))) {
+			setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
 		}
 	}
 

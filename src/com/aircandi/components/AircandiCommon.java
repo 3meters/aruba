@@ -918,12 +918,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			}
 		}
 
-		/* Show edit menuitem if one is needed */
-		menuItem = menu.findItem(R.id.edit_candi);
-		if (menuItem != null && !mPageName.equals("CandiForm")) {
-			menuItem.setVisible(false);
-		}
-
 		/* Beacon indicator */
 		mMenuItemBeacons = menu.findItem(R.id.beacons);
 		if (mMenuItemBeacons != null) {
@@ -1002,9 +996,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 				return;
 			case R.id.edit_user:
 				doProfileClick();
-				return;
-			case R.id.edit_candi:
-				doEditCandiClick();
 				return;
 			case R.id.update:
 				Logger.d(this, "Update menu item: navigating to install page");

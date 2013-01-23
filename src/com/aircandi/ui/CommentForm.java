@@ -16,8 +16,8 @@ import android.widget.Toast;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
-import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AircandiCommon;
+import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -28,8 +28,8 @@ import com.aircandi.service.objects.Comment;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.UserView;
 import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.ImageUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.ImageUtils;
 
 public class CommentForm extends FormActivity {
 

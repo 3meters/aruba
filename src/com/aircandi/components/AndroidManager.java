@@ -59,7 +59,7 @@ public class AndroidManager {
 
 	public void callDialerActivity(Context context, String phoneNumber) {
 		String number = "tel:" + phoneNumber.trim();
-		Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse(number));
+		Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(number));
 		context.startActivity(callIntent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
