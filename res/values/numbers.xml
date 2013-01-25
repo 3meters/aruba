@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <integer name="candi_per_row_landscape_radar">5</integer>
-    <integer name="candi_per_row_portrait_radar">3</integer>
     <integer name="candi_per_row_landscape_form">6</integer>
     <integer name="candi_per_row_portrait_form">4</integer>
     

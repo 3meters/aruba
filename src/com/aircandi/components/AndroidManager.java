@@ -10,8 +10,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Environment;
@@ -35,6 +37,35 @@ public class AndroidManager {
 	}
 
 	private AndroidManager() {}
+
+	public String getPublicName(String packageName) {
+
+		try {
+			ApplicationInfo info = Aircandi.packageManager.getApplicationInfo(packageName, 0);
+			String publicName = (String) info.loadLabel(Aircandi.packageManager);
+			return publicName;
+		}
+		catch (NameNotFoundException exception) {
+			exception.printStackTrace();
+			return null;
+		}
+	}
+
+	public boolean doesPackageExist(String targetPackage) {
+		List<ApplicationInfo> packages;
+		packages = Aircandi.packageManager.getInstalledApplications(0);
+		for (ApplicationInfo packageInfo : packages) {
+			if (packageInfo.packageName.equals(targetPackage)) return true;
+		}
+		return false;
+	}
+
+	public static boolean isIntentAvailable(Context context, String action) {
+		final PackageManager pm = context.getPackageManager();
+		final Intent intent = new Intent(action);
+		List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+		return list.size() > 0;
+	}
 
 	protected boolean getIsLowBattery() {
 		/*
@@ -88,163 +119,53 @@ public class AndroidManager {
 	}
 
 	public void callTwitterActivity(Context context, String twitterHandle) {
-		Intent intent = findTwitterApp(context);
-		if (intent != null) {
-			intent.setData(Uri.parse("https://www.twitter.com/" + twitterHandle));
-			context.startActivity(intent);
-		}
+
+		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		intent.setData(Uri.parse("https://www.twitter.com/" + twitterHandle));
+		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
 	public void callFoursquareActivity(Context context, String venueId) {
-		/* First try to get the native app so we can go to it directly */
+
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-		intent.setType("text/plain");
-		if (intent != null) {
-			intent.setData(Uri.parse("http://m.foursquare.com/venue/" + venueId));
-			context.startActivity(intent);
-		}
+		intent.setData(Uri.parse("http://m.foursquare.com/venue/" + venueId));
+		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
-	public void callGenericActivity(Context context, String venueId) {
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-		intent.setType("text/plain");
-		if (intent != null) {
-			intent.setData(Uri.parse(venueId));
-			context.startActivity(intent);
-		}
-		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
-	}
-	
 	public void callOpentableActivity(Context context, String sourceId, String sourceUri) {
-		Intent intent = new Intent("com.opentable.action.RESERVE");
-		intent.setType("text/plain");
-		if (intent != null) {
-			intent.setData(Uri.parse("reserve://opentable.com/" + sourceId + "?partySize=2"));
-			context.startActivity(intent);
-		}
+		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(sourceUri));
+		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
-	
+
 	public void callFacebookActivity(Context context, String facebookId) {
-		Intent intent = findFacebookApp(context);
-		if (intent != null) {
-			intent.setData(Uri.parse("fb://profile/" + facebookId + "/wall"));
-		}
-		else {
-			intent = findBrowserApp(context, "http://www.facebook.com/" + facebookId);
-			intent.setData(Uri.parse("http://www.facebook.com/" + facebookId));
-		}
+		/*
+		 * Calling the facebook app is actually a poorer experience than
+		 * calling the web app. The facebook app does not lock on to the profile id.
+		 * 
+		 * intent.setData(Uri.parse("fb://place/" + facebookId + ""));
+		 */
+		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		intent.setData(Uri.parse("http://www.facebook.com/" + facebookId));
 		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
 	public void callYelpActivity(Context context, String sourceId, String sourceUri) {
-		Intent intent = findFacebookApp(context);
-		if (intent != null) {
-			intent.setData(Uri.parse(sourceUri));
-			context.startActivity(intent);
-		}
-		else {
-			intent = new Intent(android.content.Intent.ACTION_VIEW);
-			intent.addCategory("android.intent.category.DEFAULT");
-			if (intent != null) {
-				intent.setData(Uri.parse(sourceUri));
-				context.startActivity(intent);
-			}
-		}
+		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(sourceUri));
+		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
-	public Intent findTwitterApp(Context context) {
-		final String[] apps = {
-				"com.twitter.android", 			// official
-				"com.twidroid", 				// twidroyd
-				"com.handmark.tweetcaster", 	// Tweecaster
-				"com.thedeck.android" };		// TweetDeck
-
-		Intent intent = new Intent();
-		intent.setType("text/plain");
-		final PackageManager pm = context.getPackageManager();
-		List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-
-		for (int i = 0; i < apps.length; i++) {
-			for (ResolveInfo resolveInfo : list) {
-				String p = resolveInfo.activityInfo.packageName;
-				if (p != null && p.startsWith(apps[i])) {
-					intent.setPackage(p);
-					return intent;
-				}
-			}
-		}
-		return null;
-	}
-
-	public Intent findFoursquareApp(Context context) {
-		final String[] apps = {
-				"foursquare",
-				"joelapenna",
-				"foursquared"
-				};
-
-		Intent intent = new Intent();
-		intent.setType("text/plain");
-		final PackageManager pm = context.getPackageManager();
-		List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-
-		for (int i = 0; i < apps.length; i++) {
-			for (ResolveInfo resolveInfo : list) {
-				String p = resolveInfo.activityInfo.packageName;
-				if (p != null && p.contains(apps[i])) {
-					intent.setPackage(p);
-					return intent;
-				}
-			}
-		}
-		return null;
-	}
-
-	public Intent findYelpApp(Context context) {
-		final String[] apps = {
-				"yelp" };		// official
-
-		Intent intent = new Intent();
-		intent.setType("text/plain");
-		final PackageManager pm = context.getPackageManager();
-		List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-
-		for (int i = 0; i < apps.length; i++) {
-			for (ResolveInfo resolveInfo : list) {
-				String p = resolveInfo.activityInfo.packageName;
-				if (p != null && p.contains(apps[i])) {
-					intent.setPackage(p);
-					return intent;
-				}
-			}
-		}
-		return null;
-	}
-
-	public Intent findFacebookApp(Context context) {
-		final String[] apps = {
-				"com.facebook.katana" };		// Official android app
-
+	public void callGenericActivity(Context context, String sourceId) {
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-		intent.setType("text/plain");
-		final PackageManager packageManager = context.getPackageManager();
-		List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-
-		for (int i = 0; i < apps.length; i++) {
-			for (ResolveInfo resolveInfo : list) {
-				String p = resolveInfo.activityInfo.packageName;
-				if (p != null && p.startsWith(apps[i])) {
-					intent.setPackage(p);
-					return intent;
-				}
-			}
-		}
-		return null;
+		intent.setData(Uri.parse(sourceId));
+		context.startActivity(intent);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
 	public Intent findBrowserApp(Context context, String uri) {
@@ -269,8 +190,8 @@ public class AndroidManager {
 		return null;
 	}
 
-	/** Check if this device has a camera */
 	public boolean checkCameraHardware(Context context) {
+		/* Check if this device has a camera */
 		if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
 			return true;
 		}
@@ -279,21 +200,15 @@ public class AndroidManager {
 		}
 	}
 
-	public static boolean isIntentAvailable(Context context, String action) {
-		final PackageManager pm = context.getPackageManager();
-		final Intent intent = new Intent(action);
-		List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-		return list.size() > 0;
-	}
-
 	public static Uri getOutputMediaFileUri(int type) {
 		/* Create a file Uri for saving an image or video */
 		return Uri.fromFile(getOutputMediaFile(type));
 	}
 
-	/** Create a File for saving an image or video */
 	public static File getOutputMediaFile(int type) {
 		/*
+		 * Create a File for saving an image or video
+		 * 
 		 * To be safe, you should check that the SDCard is mounted
 		 * using Environment.getExternalStorageState() before doing this.
 		 */

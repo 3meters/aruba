@@ -10,6 +10,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -86,6 +87,8 @@ public class Aircandi extends Application {
 
 	public static Context					applicationContext;
 	public static Handler					mainThreadHandler;
+	public static PackageManager			packageManager;
+	
 	public static DisplayMetrics			displayMetrics;
 	public static Stopwatch					stopwatch1;
 	public static Stopwatch					stopwatch2;
@@ -121,6 +124,8 @@ public class Aircandi extends Application {
 
 		applicationContext = getApplicationContext();
 		mainThreadHandler = new Handler(Looper.getMainLooper());
+		packageManager = applicationContext.getPackageManager();
+		
 		stopwatch1 = new Stopwatch("Stopwatch1");
 		stopwatch2 = new Stopwatch("Stopwatch2");
 		stopwatch3 = new Stopwatch("Stopwatch3");

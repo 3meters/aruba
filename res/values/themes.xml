@@ -17,7 +17,7 @@
 		- Tabbar tone
 		- Set window background
 		- Select right set of drawables based on the theme tone.
-		- Custom line and text colors in pages, forms, buttons.
+		- Custom line and text colors in pages, forms, buttons.
     -->
 
     <style name="aircandi_theme_dark" parent="Theme.Sherlock">
@@ -79,7 +79,18 @@
         <item name="iconMoveDown">@drawable/ic_action_arrow_bottom_dark</item>
         <item name="iconMap">@drawable/ic_action_map_dark</item>
         <item name="iconCall">@drawable/ic_action_dialer_dark</item>
-
+        <item name="iconUser">@drawable/ic_action_user_dark</item>
+        <item name="iconReload">@drawable/ic_action_reload_dark</item>
+        <item name="iconSettings">@drawable/ic_action_settings_dark</item>
+        <item name="iconKey">@drawable/ic_action_key_dark</item>
+        <item name="iconInfo">@drawable/ic_action_info_dark</item>
+        <item name="iconCamera">@drawable/ic_action_camera_dark</item>
+        <item name="iconPicture">@drawable/ic_action_picture_dark</item>
+        <item name="iconEdit">@drawable/ic_action_edit_dark</item>
+        <item name="iconLocation">@drawable/ic_action_location_dark</item>
+        <item name="iconGallery">@drawable/ic_action_tiles_large_dark</item>
+        <item name="iconZoom">@drawable/ic_action_zoom</item>
+        
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_dark</item>
@@ -150,7 +161,18 @@
         <item name="iconMoveDown">@drawable/ic_action_arrow_bottom_light</item>
         <item name="iconMap">@drawable/ic_action_map_light</item>
         <item name="iconCall">@drawable/ic_action_dialer_light</item>
-
+        <item name="iconUser">@drawable/ic_action_user_light</item>
+        <item name="iconReload">@drawable/ic_action_reload_light</item>
+        <item name="iconSettings">@drawable/ic_action_settings_light</item>
+        <item name="iconKey">@drawable/ic_action_key_light</item>
+        <item name="iconInfo">@drawable/ic_action_info_light</item>
+        <item name="iconCamera">@drawable/ic_action_camera_light</item>
+        <item name="iconPicture">@drawable/ic_action_picture_light</item>
+        <item name="iconEdit">@drawable/ic_action_edit_light</item>
+        <item name="iconLocation">@drawable/ic_action_location_light</item>
+        <item name="iconGallery">@drawable/ic_action_tiles_large_light</item>
+        <item name="iconZoom">@drawable/ic_action_zoom</item>
+        
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_light</item>

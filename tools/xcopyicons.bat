@@ -1,0 +1,8 @@
+for /f "delims=" %%i in (icon_list_dark.txt) do echo D|xcopy "d:\Files\Proxibase\Images\Icons\Opoloo\assets\white\xhdpi\%%i" "d:\Files\Proxibase\Code\Aircandi\Client\res\drawable-xhdpi"  /z /y
+for /f "delims=" %%i in (icon_list_light.txt) do echo D|xcopy "d:\Files\Proxibase\Images\Icons\Opoloo\assets\holo_light\xhdpi\%%i" "d:\Files\Proxibase\Code\Aircandi\Client\res\drawable-xhdpi"  /z /y
+for /f "delims=" %%i in (icon_list_dark.txt) do echo D|xcopy "d:\Files\Proxibase\Images\Icons\Opoloo\assets\white\hdpi\%%i" "d:\Files\Proxibase\Code\Aircandi\Client\res\drawable-hdpi"  /z /y
+for /f "delims=" %%i in (icon_list_light.txt) do echo D|xcopy "d:\Files\Proxibase\Images\Icons\Opoloo\assets\holo_light\hdpi\%%i" "d:\Files\Proxibase\Code\Aircandi\Client\res\drawable-hdpi"  /z /y
+for /f "delims=" %%i in (icon_list_dark.txt) do echo D|xcopy "d:\Files\Proxibase\Images\Icons\Opoloo\assets\white\mdpi\%%i" "d:\Files\Proxibase\Code\Aircandi\Client\res\drawable-mdpi"  /z /y
+for /f "delims=" %%i in (icon_list_light.txt) do echo D|xcopy "d:\Files\Proxibase\Images\Icons\Opoloo\assets\holo_light\mdpi\%%i" "d:\Files\Proxibase\Code\Aircandi\Client\res\drawable-mdpi"  /z /y
+for /f "delims=" %%i in (icon_list_dark.txt) do echo D|xcopy "d:\Files\Proxibase\Images\Icons\Opoloo\assets\white\ldpi\%%i" "d:\Files\Proxibase\Code\Aircandi\Client\res\drawable-ldpi"  /z /y
+for /f "delims=" %%i in (icon_list_light.txt) do echo D|xcopy "d:\Files\Proxibase\Images\Icons\Opoloo\assets\holo_light\ldpi\%%i" "d:\Files\Proxibase\Code\Aircandi\Client\res\drawable-ldpi"  /z /y

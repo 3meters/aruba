@@ -97,6 +97,6 @@
         android:layout_height="50dp"
         android:layout_gravity="bottom|center_horizontal"
         android:scaleType="fitCenter"
-        android:src="@drawable/foursquare_white" />
+        android:src="@drawable/img_foursquare_white" />
 
 </merge>

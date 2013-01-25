@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -336,14 +337,15 @@ public class PicturePicker extends FormActivity {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					ArrayList<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
 					if (mOffset == 0 && photos.size() == 0) {
-						runOnUiThread(new Runnable(){
+						runOnUiThread(new Runnable() {
 
 							@Override
 							public void run() {
 								mMessage.setText(getString(R.string.picture_picker_places_empty) + " " + mEntity.name);
 								mMessage.setVisibility(View.VISIBLE);
-								
-							}});
+
+							}
+						});
 					}
 					else {
 						moreImages = new ArrayList<ImageResult>();
@@ -381,14 +383,15 @@ public class PicturePicker extends FormActivity {
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					moreImages = (ArrayList<ImageResult>) serviceResponse.data;
 					if (mOffset == 0 && moreImages.size() == 0) {
-						runOnUiThread(new Runnable(){
+						runOnUiThread(new Runnable() {
 
 							@Override
 							public void run() {
 								mMessage.setText(getString(R.string.picture_picker_search_empty) + " " + mQuery);
 								mMessage.setVisibility(View.VISIBLE);
-								
-							}});
+
+							}
+						});
 					}
 					Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
 							+ " new total = "
@@ -469,6 +472,7 @@ public class PicturePicker extends FormActivity {
 			mBitmapCache = new HashMap<String, SoftReference<Bitmap>>();
 		}
 
+		@SuppressLint("HandlerLeak")
 		public void fetchDrawableOnThread(final String uri, final ViewHolder holder) {
 
 			synchronized (mBitmapCache) {
@@ -486,7 +490,8 @@ public class PicturePicker extends FormActivity {
 					DrawableManager drawableManager = getDrawableManager().get();
 					if (drawableManager != null) {
 						if (((String) holder.itemImage.getTag()).equals(uri)) {
-							ImageUtils.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true, AnimUtils.fadeInMedium());
+							ImageUtils.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true,
+									AnimUtils.fadeInMedium());
 						}
 					}
 				}
@@ -533,18 +538,18 @@ public class PicturePicker extends FormActivity {
 		 * We add a weak reference to the containing class which can
 		 * be checked when handling messages to ensure we don't leak memory.
 		 */
-		class DrawableHandler extends Handler {
-
-			private final WeakReference<DrawableManager>	mDrawableManager;
-
-			DrawableHandler(DrawableManager drawableManager) {
-				mDrawableManager = new WeakReference<DrawableManager>(drawableManager);
-			}
-
-			public WeakReference<DrawableManager> getDrawableManager() {
-				return mDrawableManager;
-			}
-		}
 	}
 
+	static class DrawableHandler extends Handler {
+
+		private final WeakReference<DrawableManager>	mDrawableManager;
+
+		DrawableHandler(DrawableManager drawableManager) {
+			mDrawableManager = new WeakReference<DrawableManager>(drawableManager);
+		}
+
+		public WeakReference<DrawableManager> getDrawableManager() {
+			return mDrawableManager;
+		}
+	}
 }

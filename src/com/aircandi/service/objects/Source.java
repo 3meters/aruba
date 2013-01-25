@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 import com.aircandi.ProxiConstants;
+import com.aircandi.components.AndroidManager;
 import com.aircandi.service.Expose;
 
 /**
@@ -27,11 +28,17 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				iconInverse;
 	@Expose
+	public String				marketUri;
+	@Expose
+	public String				packageName;
+	@Expose
 	public String				origin;
 
 	public Boolean				checked;
 	public Integer				position;
 	public Boolean				custom;
+	public Boolean				intentSupport;
+	public Boolean				installDeclined;
 
 	public Source() {}
 
@@ -40,6 +47,11 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		this.id = id;
 	}
 
+	public Source(Boolean intentSupport, Boolean installDeclined) {
+		this.intentSupport = intentSupport;
+		this.installDeclined = installDeclined;
+	}
+	
 	public static Source setPropertiesFromMap(Source source, HashMap map) {
 		source.name = (String) map.get("name");
 		source.source = (String) map.get("source");
@@ -48,6 +60,8 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		source.icon = (String) map.get("icon");
 		source.iconInverse = (String) map.get("iconInverse");
 		source.origin = (String) map.get("origin");
+		source.marketUri = (String) map.get("marketUri");
+		source.packageName = (String) map.get("packageName");
 		return source;
 	}
 
@@ -71,5 +85,14 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 			}
 			return 1;
 		}
+	}
+	
+	public Boolean appExists() {
+		return (packageName != null);
+	}
+	
+	public Boolean appInstalled() {
+		Boolean exists = AndroidManager.getInstance().doesPackageExist(this.packageName);
+		return exists;
 	}
 }

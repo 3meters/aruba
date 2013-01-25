@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             aircandi:drawableScale="@dimen/combo_button_drawable_scale"
-            android:drawableLeft="@drawable/ic_action_location_dark"
+            android:drawableLeft="?attr/iconLocation"
             android:maxWidth="96dp"
             android:minWidth="96dp"
             android:onClick="onMapButtonClick"

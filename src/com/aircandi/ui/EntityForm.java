@@ -158,6 +158,7 @@ public class EntityForm extends FormActivity {
 			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 				entity.getPlace().source = "user";
 				entity.getPlace().sourceId = Aircandi.getInstance().getUser().id;
+				entity.locked = true;
 			}
 
 			mEntityForForm = entity;

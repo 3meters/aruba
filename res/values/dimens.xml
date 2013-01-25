@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="form_button_width">200dp</dimen>
-    <dimen name="form_button_height">30dp</dimen>
-    <dimen name="form_button_width_minimum">60dp</dimen>
-    <dimen name="form_button_height_minimum">30dp</dimen>
     <dimen name="form_field_height">48dp</dimen>
     
-    <dimen name="text_size_extra_large">30sp</dimen>
     <dimen name="text_size_large">24sp</dimen>
     <dimen name="text_size_medium">18sp</dimen>
     <dimen name="text_size_small">16sp</dimen>

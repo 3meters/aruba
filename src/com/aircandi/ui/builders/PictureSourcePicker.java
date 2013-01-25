@@ -54,18 +54,18 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 		/* Shown as a dialog so doesn't have an action bar */
 		List<Object> listData = new ArrayList<Object>();
-		Integer iconResId = R.drawable.ic_action_picture_dark;
-		if (mCommon.mThemeTone.equals("light")) {
-			iconResId = R.drawable.ic_action_picture_light;
-		}
 		
-		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_search), null, "search"));
-		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_gallery), null, "gallery"));
+		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_search_light : R.drawable.ic_action_search_dark
+				, getString(R.string.dialog_picture_source_search), null, "search"));
+		
+		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_tiles_large_light : R.drawable.ic_action_tiles_large_dark
+				, getString(R.string.dialog_picture_source_gallery), null, "gallery"));
 
 		/* Only show the camera choice if there is one and there is a place to store the image */
 		if (AndroidManager.isIntentAvailable(this, MediaStore.ACTION_IMAGE_CAPTURE)) {
 			if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-				listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_camera), null, "camera"));
+				listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_camera_light : R.drawable.ic_action_camera_dark
+						, getString(R.string.dialog_picture_source_camera), null, "camera"));
 			}
 		}
 
@@ -73,11 +73,13 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 		if (mEntityId != null) {
 			Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mEntityId);
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && entity.place.source != null && entity.place.source.equals("foursquare")) {
-				listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_place), null, "place"));
+				listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
+						, getString(R.string.dialog_picture_source_place), null, "place"));
 			}
 		}
 		
-		listData.add(new Template(iconResId, getString(R.string.dialog_picture_source_default), null, "default"));
+		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
+				, getString(R.string.dialog_picture_source_default), null, "default"));
 
 		mTitle = (TextView) findViewById(R.id.custom_title);
 		mTitle.setText(R.string.dialog_picture_source_title);

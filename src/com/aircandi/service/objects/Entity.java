@@ -272,6 +272,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 */
 		Entity entity = synthetic.clone();
 		entity.id = null;
+		entity.locked = false;
 		if (synthetic.place.category != null) {
 			entity.subtitle = synthetic.place.category.name;
 		}

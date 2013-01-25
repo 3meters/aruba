@@ -109,7 +109,7 @@ public class ProxiExplorer {
 					@Override
 					public void onReceive(Context context, Intent intent) {
 
-							Aircandi.stopwatch2.segmentTime("Wifi scan: results received");
+						Aircandi.stopwatch2.segmentTime("Wifi scan: results received");
 						Logger.v(ProxiExplorer.this, "Received wifi scan results for " + reason.name().toString());
 						mContext.unregisterReceiver(this);
 
@@ -705,6 +705,7 @@ public class ProxiExplorer {
 		private List<Beacon>			mBeacons			= new ArrayList<Beacon>();
 		private List<Photo>				mPhotos				= new ArrayList<Photo>();
 		private List<Category>			mCategories			= new ArrayList<Category>();
+		private HashMap<String, Source> mSourceMeta			= new HashMap<String, Source>();
 
 		private Number					mLastRefreshDate;
 		private Number					mLastActivityDate	= DateUtils.nowDate().getTime();
@@ -2075,6 +2076,20 @@ public class ProxiExplorer {
 				Integer position = 0;
 				if (entity.sources != null) {
 					for (Source source : entity.sources) {
+						source.intentSupport = true;
+						if (source.source.equals("facebook")
+								|| source.source.equals("yahoolocal")
+								|| source.source.equals("citysearch")
+								|| source.source.equals("citygrid")
+								|| source.source.equals("urbanspoon")
+								|| source.source.equals("opentable")
+								|| source.source.equals("openmenu")) {
+							source.intentSupport = false;
+						}
+						
+						if (!mEntityModel.mSourceMeta.containsKey(source.source)) {
+							mEntityModel.mSourceMeta.put(source.source, new Source(source.intentSupport, false));
+						}
 
 						/* We are getting duplicates which will have to be addressed on the service side */
 						Entity sourceEntity = loadEntityFromResources(R.raw.source_entity);
@@ -2098,6 +2113,7 @@ public class ProxiExplorer {
 				source.name = "comments";
 				source.icon = "resource:img_post";
 				source.position = position;
+				source.intentSupport = false;
 				sourceEntity.source = source;
 
 				sourceEntity.commentCount = entity.commentCount;
@@ -2320,6 +2336,11 @@ public class ProxiExplorer {
 
 		public List<Category> getCategories() {
 			return mCategories;
+		}
+
+		
+		public HashMap<String, Source> getSourceMeta() {
+			return mSourceMeta;
 		}
 
 	}

@@ -4,9 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -46,6 +52,7 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
+import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.FlowLayout;
@@ -68,6 +75,7 @@ public class CandiForm extends CandiActivity {
 	protected Number		mEntityModelActivityDate;
 	protected Boolean		mUpsize;
 	protected Boolean		mTracked			= false;
+	private PackageReceiver	mPackageReceiver	= new PackageReceiver();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -338,37 +346,51 @@ public class CandiForm extends CandiActivity {
 
 	public void onCandiClick(View view) {
 		Entity entity = (Entity) view.getTag();
+		doCandiClick(entity);
+	}
+	
+	public void doCandiClick(Entity entity) {
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			if (entity.source.name.equals("twitter")) {
-				AndroidManager.getInstance().callTwitterActivity(this, entity.source.id);
-			}
-			else if (entity.source.name.equals("foursquare")) {
-				AndroidManager.getInstance().callFoursquareActivity(this, entity.source.id);
-			}
-			else if (entity.source.name.equals("facebook")) {
-				AndroidManager.getInstance().callFacebookActivity(this, entity.source.id);
-			}
-			else if (entity.source.name.equals("yelp")) {
-				AndroidManager.getInstance().callYelpActivity(this, entity.source.id, entity.source.url);
-			}
-			else if (entity.source.name.equals("opentable")) {
-				AndroidManager.getInstance().callGenericActivity(this, entity.source.url != null ? entity.source.url : entity.source.id);
-			}
-			else if (entity.source.name.equals("website")) {
-				AndroidManager.getInstance().callBrowserActivity(this, entity.source.id);
-			}
-			else if (entity.source.name.equals("comments")) {
-				IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
-				intentBuilder.setCommandType(CommandType.View)
-						.setEntityId(mEntity.id)
-						.setParentEntityId(mEntity.parentId)
-						.setCollectionId(mEntity.id);
-				Intent intent = intentBuilder.create();
-				startActivity(intent);
-				AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+			Source meta = ProxiExplorer.getInstance().getEntityModel().getSourceMeta().get(entity.source.source);
+			if (!meta.installDeclined
+					&& meta.intentSupport
+					&& entity.source.appExists()
+					&& !entity.source.appInstalled()) {
+				showInstallDialog(entity);
 			}
 			else {
-				AndroidManager.getInstance().callGenericActivity(this, entity.source.url != null ? entity.source.url : entity.source.id);
+
+				if (entity.source.name.equals("twitter")) {
+					AndroidManager.getInstance().callTwitterActivity(this, entity.source.id);
+				}
+				else if (entity.source.name.equals("foursquare")) {
+					AndroidManager.getInstance().callFoursquareActivity(this, entity.source.id);
+				}
+				else if (entity.source.name.equals("facebook")) {
+					AndroidManager.getInstance().callFacebookActivity(this, entity.source.id);
+				}
+				else if (entity.source.name.equals("yelp")) {
+					AndroidManager.getInstance().callYelpActivity(this, entity.source.id, entity.source.url);
+				}
+				else if (entity.source.name.equals("opentable")) {
+					AndroidManager.getInstance().callOpentableActivity(this, entity.source.id, entity.source.url);
+				}
+				else if (entity.source.name.equals("website")) {
+					AndroidManager.getInstance().callBrowserActivity(this, entity.source.id);
+				}
+				else if (entity.source.name.equals("comments")) {
+					IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
+					intentBuilder.setCommandType(CommandType.View)
+							.setEntityId(mEntity.id)
+							.setParentEntityId(mEntity.parentId)
+							.setCollectionId(mEntity.id);
+					Intent intent = intentBuilder.create();
+					startActivity(intent);
+					AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+				}
+				else {
+					AndroidManager.getInstance().callGenericActivity(this, entity.source.url != null ? entity.source.url : entity.source.id);
+				}
 			}
 		}
 		else {
@@ -393,7 +415,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onAddCandiButtonClick(View view) {
-		if (!mEntity.locked) {
+		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 			mCommon.showTemplatePicker(false);
 		}
 		else {
@@ -410,7 +432,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onNewCommentButtonClick(View view) {
-		if (!mEntity.locked) {
+		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
 			intentBuilder.setEntityId(null);
 			intentBuilder.setParentEntityId(mEntity.id);
@@ -427,7 +449,11 @@ public class CandiForm extends CandiActivity {
 		}
 	}
 
-	@Override
+	public void onInstallButtonClick(View view) {
+		Entity entity = (Entity) view.getTag();
+		showInstallDialog(entity);
+	}
+
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 
@@ -461,25 +487,6 @@ public class CandiForm extends CandiActivity {
 						startActivity(redirectIntent);
 						AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 					}
-				}
-			}
-			else if (requestCode == CandiConstants.ACTIVITY_CANDI_PICK) {
-				if (intent != null) {
-					String parentEntityId = null;
-					Bundle extras = intent.getExtras();
-					if (extras != null) {
-						parentEntityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
-					}
-					/*
-					 * If parentEntityId is null then the candi is being moved to the top on its own.
-					 * 
-					 * Special case: user could have a top level candi and choose to move it to
-					 * top so it's a no-op.
-					 */
-					if (parentEntityId == null && mEntity.getParent() == null) {
-						return;
-					}
-					moveCandi(mEntity, parentEntityId);
 				}
 			}
 		}
@@ -732,10 +739,14 @@ public class CandiForm extends CandiActivity {
 
 			View view = inflater.inflate(viewResId, null);
 			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+
 			TextView title = (TextView) view.findViewById(R.id.title);
 			TextView badge = (TextView) view.findViewById(R.id.badge);
+			Button install = (Button) view.findViewById(R.id.button_install);
+
 			FontManager.getInstance().setTypefaceDefault(title);
 			FontManager.getInstance().setTypefaceDefault(badge);
+			FontManager.getInstance().setTypefaceDefault(install);
 
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
 				if (entity.source.name.equals("comments")) {
@@ -749,6 +760,11 @@ public class CandiForm extends CandiActivity {
 				}
 				title.setText(entity.name);
 				title.setVisibility(View.VISIBLE);
+
+//				if (entity.source.intentSupport && entity.source.appExists() && !entity.source.appInstalled()) {
+//					install.setVisibility(View.VISIBLE);
+//					install.setTag(entity);
+//				}
 			}
 			else {
 				if (entity.name != null && !entity.name.equals("")) {
@@ -831,65 +847,30 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Add candi */
-		if (entity.locked != null && !entity.locked) {
-			if (entity.isCollection != null && entity.isCollection) {
-				setVisibility(layout.findViewById(R.id.button_new), View.VISIBLE);
-			}
+		if (entity.isCollection != null && entity.isCollection) {
+			setVisibility(layout.findViewById(R.id.button_new), View.VISIBLE);
 		}
 
 		/* Add comment */
-		if (entity.locked != null && !entity.locked) {
-			setVisibility(layout.findViewById(R.id.button_comment), View.VISIBLE);
-		}
+		setVisibility(layout.findViewById(R.id.button_comment), View.VISIBLE);
 
 		/* Edit */
-		if (entity.ownerId != null && (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
-				|| entity.ownerId.equals(ProxiConstants.ADMIN_USER_ID))) {
-			setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
+		if (entity.ownerId != null) {
+			if (entity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
+				setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
+			}
+			else if (entity.ownerId.equals(ProxiConstants.ADMIN_USER_ID)) {
+				setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
+			}
+			else if (!entity.ownerId.equals(ProxiConstants.ADMIN_USER_ID) && !entity.locked) {
+				setVisibility(layout.findViewById(R.id.button_edit), View.VISIBLE);
+			}
 		}
-	}
-
-	private void moveCandi(final Entity entityToMove, final String collectionEntityId) {
-		/*
-		 * We only move within radar tree or within user tree. A candi can still be
-		 * currently shown in both trees so we still need to fixup across both.
-		 */
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_moving);
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("MoveEntity");
-				String newParentId = collectionEntityId != null ? collectionEntityId : entityToMove.getParent().getBeaconId();
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel()
-						.moveEntity(entityToMove.id, newParentId, collectionEntityId == null ? true : false, false);
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-
-				ModelResult result = (ModelResult) response;
-				if (result.serviceResponse.responseCode != ResponseCode.Success) {
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiMove, CandiForm.this);
-				}
-				else {
-					ImageUtils.showToastNotification(getString(R.string.alert_moved), Toast.LENGTH_SHORT);
-					bind(false);
-				}
-			}
-
-		}.execute();
-
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
+
+	// Lifecycle
 	// --------------------------------------------------------------------------------------------
 
 	@Override
@@ -912,7 +893,71 @@ public class CandiForm extends CandiActivity {
 				invalidateOptionsMenu();
 				bind(true);
 			}
+			/* Package receiver */
+			IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+			filter.addDataScheme("package");
+			registerReceiver(mPackageReceiver, filter);
 		}
+	}
+
+	@Override
+	protected void onPause() {
+		try {
+			unregisterReceiver(mPackageReceiver);
+		}
+		catch (Exception e) {}
+		super.onPause();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Dialogs
+	// --------------------------------------------------------------------------------------------
+
+	private void showInstallDialog(final Entity entity) {
+
+		AlertDialog installDialog = AircandiCommon.showAlertDialog(null
+				, getString(R.string.dialog_install_title)
+				, getString(R.string.dialog_install_message)
+				, null
+				, this
+				, R.string.dialog_install_ok
+				, R.string.dialog_install_cancel
+				, new DialogInterface.OnClickListener() {
+
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							try {
+								Logger.d(this, "Install: navigating to market install page");
+								Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + entity.source.packageName
+										+ "&referrer=utm_source%3Dcom.aircandi"));
+								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+								intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+								startActivity(intent);
+							}
+							catch (Exception e) {
+								/*
+								 * In case the market app isn't installed on the phone
+								 */
+								Logger.d(this, "Install: navigating to play website install page");
+								Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://play.google.com/store/apps/details?id="
+										+ entity.source.packageName + "&referrer=utm_source%3Dcom.aircandi"));
+								intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+								startActivityForResult(intent, CandiConstants.ACTIVITY_MARKET);
+							}
+							dialog.dismiss();
+							AnimUtils.doOverridePendingTransition(CandiForm.this, TransitionType.CandiPageToForm);
+						}
+						else if (which == Dialog.BUTTON_NEGATIVE) {
+							Source meta = ProxiExplorer.getInstance().getEntityModel().getSourceMeta().get(entity.source.source);
+							meta.installDeclined = true;
+							doCandiClick(entity);
+							dialog.dismiss();
+						}
+					}
+				}
+				, null);
+		installDialog.setCanceledOnTouchOutside(false);
+		installDialog.show();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -927,7 +972,27 @@ public class CandiForm extends CandiActivity {
 		return mEntity;
 	}
 
-	public void setEntity(Entity entity) {
-		mEntity = entity;
+	class PackageReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(final Context context, Intent intent) {
+
+			/* This is on the main UI thread */
+			if (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)) {
+				String publicName = AndroidManager.getInstance().getPublicName(intent.getData().getEncodedSchemeSpecificPart());
+				if (publicName != null) {
+					ImageUtils.showToastNotification(publicName + getText(R.string.dialog_install_toast_package_installed),
+							Toast.LENGTH_SHORT);
+					Aircandi.mainThreadHandler.postDelayed(new Runnable() {
+
+						@Override
+						public void run() {
+							bind(false);
+						}
+					}, 1500);
+				}
+			}
+		}
 	}
+
 }

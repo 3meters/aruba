@@ -22,7 +22,6 @@
         <attr name="textOutlineRadar" format="boolean" />
         <attr name="textureBodyZone" format="reference" />
         <attr name="textureBodyCandi" format="reference" />
-        
         <attr name="backgroundButton" format="string" />
         <attr name="backgroundCandi" format="color|reference" />
         <attr name="backgroundRadarCandi" format="color|reference" />
@@ -34,20 +33,29 @@
         <attr name="backgroundTabBar" format="string" />
         <attr name="badgeColor" format="color|reference" />
         <attr name="badgeColorSynthetic" format="color|reference" />
-        
-        <attr name="iconSearch" format="string" />
-        <attr name="iconNewCandi" format="string" />
-        <attr name="iconLocked" format="string" />
-        <attr name="iconForward" format="string" />
-        <attr name="iconMore" format="string" />
-        <attr name="iconDelete" format="string" />
-        <attr name="iconMoveUp" format="string" />
-		<attr name="iconMoveDown" format="string" />
-		<attr name="iconAdd" format="string" />
-        <attr name="iconTune" format="string" />
-		<attr name="iconMap" format="string" />
-		<attr name="iconCall" format="string" />
-				
+        <attr name="iconSearch" format="reference" />
+        <attr name="iconNewCandi" format="reference" />
+        <attr name="iconLocked" format="reference" />
+        <attr name="iconForward" format="reference" />
+        <attr name="iconMore" format="reference" />
+        <attr name="iconDelete" format="reference" />
+        <attr name="iconMoveUp" format="reference" />
+        <attr name="iconMoveDown" format="reference" />
+        <attr name="iconAdd" format="reference" />
+        <attr name="iconTune" format="reference" />
+        <attr name="iconMap" format="reference" />
+        <attr name="iconCall" format="reference" />
+        <attr name="iconUser" format="reference" />
+        <attr name="iconReload" format="reference" />
+        <attr name="iconSettings" format="reference" />
+        <attr name="iconKey" format="reference" />
+        <attr name="iconInfo" format="reference" />
+        <attr name="iconCamera" format="reference" />
+        <attr name="iconPicture" format="reference" />
+        <attr name="iconEdit" format="reference" />
+        <attr name="iconLocation" format="reference" />
+        <attr name="iconGallery" format="reference" />
+        <attr name="iconZoom" format="reference" />
         </declare-styleable>
     <declare-styleable name="CandiView">
         <attr name="layout" />
@@ -67,10 +75,10 @@
         <attr name="layoutItems" format="integer" />
         <attr name="itemMaxCount" format="integer" />
         <attr name="showDivider" format="boolean" />
-        </declare-styleable>
+    </declare-styleable>
     <declare-styleable name="WebImageView">
         <attr name="layout" />
-    	<attr name="brokenDrawable" format="integer" />
+        <attr name="brokenDrawable" format="integer" />
         <attr name="showBusy" format="boolean" />
         <attr name="sizeHint" format="dimension" />
     </declare-styleable>

@@ -1,0 +1,34 @@
+    <string name="help_radar">
+<![CDATA[
+        <h2>Getting Started</h2>
+		<p>With Aircandi you find, create and share content or “candi” using nearby wi-fi hotspots as virtual dropboxes. Drop a picture or say something in a post. When Aircandi users are in range of the hotspot, your candi is automatically shared with them.</p> 
+
+		<p><b>Radar:</b> Discovery candi attached to nearby wi-fi hotspots.</p>
+		<p><b>My Candi:</b> Browse and edit candi you created.</p>
+		<p><b>Map:</b> Locate candi drops in other areas.</p>
+]]>
+    </string>
+    <string name="help_radar_empty">
+<![CDATA[
+        <h2>No Candi Nearby</h2>
+		<p>Radar scanned nearby wi-fi hotspots for candi.</p> 
+
+		<p><b>Share:</b> Be the first to create and share some candi here.</p>
+		<p><b>Discover:</b> Use the refresh command when you want to scan for new candi.</p>
+		<p><b>Map:</b> Locate candi drops in other areas.</p>
+]]>
+    </string>
+    <string name="help_radar_empty_no_beacons">
+<![CDATA[
+        <h2>No Wi-fi Hotspots Nearby</h2>
+		<p>The Aircandi radar doesn\'t detect any wi-fi hotspots nearby. You can still use these features:</p> 
+
+		<p><b>My Candi:</b> Browse and edit candi you created.</p>
+		<p><b>Map:</b> Locate candi drops in other areas.</p>
+]]>
+    </string>
+    <string name="help_tuning">
+<![CDATA[
+		Make Aircandi faster by marking the places that match where you are.
+]]>
+    </string>

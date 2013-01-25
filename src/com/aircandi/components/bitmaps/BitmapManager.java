@@ -258,12 +258,12 @@ public class BitmapManager {
 						/* Scale if needed */
 						bitmap = bitmapForByteArraySampled(imageBytes, size, null);
 
-						synchronized (mMemoryCache) {
-							mMemoryCache.put(memKeyHashed, bitmap);
+						if (bitmap != null) {
+							synchronized (mMemoryCache) {
+								mMemoryCache.put(memKeyHashed, bitmap);
+							}
+							Logger.v(this, "Image request satisfied from FILE cache: " + key);
 						}
-
-						/* Deliver to caller */
-						Logger.v(this, "Image request satisfied from FILE cache: " + key);
 						return bitmap;
 					}
 				}
@@ -445,6 +445,14 @@ public class BitmapManager {
 		}
 
 		return bitmapSampled;
+	}
+
+	public Integer getResIdForResourceName(String rawResourceName) {
+		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "drawable", "com.aircandi");
+		if (resourceId == 0) {
+			resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "attr", "com.aircandi");
+		}
+		return resourceId;
 	}
 
 	public String resolveResourceName(String rawResourceName) {

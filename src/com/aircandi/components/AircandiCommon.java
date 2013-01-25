@@ -40,7 +40,6 @@ import android.widget.ViewFlipper;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
@@ -884,16 +883,16 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 */
 		SherlockActivity activity = (SherlockActivity) mActivity;
 		if (mPageName.equals("CandiUser")) {
-			activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_user_light : R.menu.menu_user_dark, menu);
+			activity.getSupportMenuInflater().inflate(R.menu.menu_user, menu);
 		}
 		else if (mPageName.equals("CommentList")) {
-			activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_comment_light : R.menu.menu_comment_dark, menu);
+			activity.getSupportMenuInflater().inflate(R.menu.menu_comment, menu);
 		}
 		else if (mPageName.equals("SourcesBuilder")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_sources_builder, menu);
 		}
 		else {
-			activity.getSupportMenuInflater().inflate(mThemeTone.equals("light") ? R.menu.menu_primary_light : R.menu.menu_primary_dark, menu);
+			activity.getSupportMenuInflater().inflate(R.menu.menu_primary, menu);
 		}
 
 		/* Hide add comment menu item if not in commentlist */
@@ -1041,49 +1040,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	public final class ActionModeRefresh implements ActionMode.Callback {
-
-		@Override
-		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-			((SherlockActivity) mActivity).getSupportMenuInflater().inflate(
-					mThemeTone.equals("light") ? R.menu.menu_context_refresh_light : R.menu.menu_context_refresh_dark, menu);
-			return true;
-		}
-
-		@Override
-		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-			return false;
-		}
-
-		@Override
-		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-			if (mPageName.equals("CandiRadar")) {
-				if (item.getItemId() == R.id.refresh) {
-					((CandiRadar) mActivity).doRefresh();
-				}
-				else if (item.getItemId() == R.id.refresh_all) {
-					((CandiRadar) mActivity).doRefresh();
-				}
-			}
-			else if (item.getItemId() == R.id.refresh || item.getItemId() == R.id.refresh_all) {
-				if (mPageName.equals("CandiList")) {
-					((CandiList) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("CandiForm")) {
-					((CandiForm) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("CommentList")) {
-					((CommentList) mActivity).doRefresh();
-				}
-			}
-			mode.finish();
-			return true;
-		}
-
-		@Override
-		public void onDestroyActionMode(ActionMode mode) {}
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Tab routines
 	// --------------------------------------------------------------------------------------------
@@ -1094,7 +1050,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 			addTabsToActionBar(this, CandiConstants.TABS_PROFILE_FORM_ID);
 		}
 		else if (mPageName.equals("EntityForm")) {
-			addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
+			if (mEntityId != null) {
+				mEntity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mEntityId);
+				if (mEntity != null) {
+					if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
+						addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
+					}
+				}
+			}
 		}
 	}
 

@@ -104,9 +104,6 @@ public class CommentList extends CandiActivity {
 
 					if (result.data != null) {
 						mCommon.mEntity = (Entity) result.data;
-						if (mCommon.mEntity.locked) {
-							((View) findViewById(R.id.form_footer)).setVisibility(View.GONE);
-						}
 
 						if (mCommon.mEntity.comments != null && mCommon.mEntity.comments.size() > 0) {
 							mButtonNewComment.setVisibility(View.GONE);

@@ -29,7 +29,6 @@ package com.aircandi.ui.widgets;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
@@ -95,14 +94,14 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		mCurrentX = 0;
 		mNextX = 0;
 		mMaxX = Integer.MAX_VALUE;
-		
+
 		mRequestLayoutRunnable = new Runnable() {
 
 			@Override
 			public void run() {
 				requestLayout();
 			}
-		};		
+		};
 
 		mScroller = new Scroller(getContext(), new DecelerateInterpolator());
 		if (!this.isInEditMode()) {
@@ -169,11 +168,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 												}
 
 											};
-
-	@SuppressLint("FieldGetter")
-	public ListAdapter getAdapter() {
-		return mAdapter;
-	}
 
 	@Override
 	public View getSelectedView() {
@@ -429,4 +423,9 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 													return true;
 												}
 											};
+
+	@Override
+	public ListAdapter getAdapter() {
+		return null;
+	}
 }
