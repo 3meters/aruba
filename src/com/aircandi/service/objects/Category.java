@@ -21,13 +21,7 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				id;
 	@Expose
-	public String				pluralName;
-	@Expose
-	public String				shortName;
-	@Expose
-	public Boolean				primary;
-	@Expose
-	public Icon					icon;
+	public String					icon;
 	@Expose
 	public List<Category>		categories;
 
@@ -37,9 +31,6 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 	public Category clone() {
 		try {
 			final Category category = (Category) super.clone();
-			if (this.icon != null) {
-				category.icon = this.icon.clone();
-			}
 			if (this.categories != null) {
 				category.categories = (List<Category>) ((ArrayList) this.categories).clone();
 			}
@@ -53,13 +44,8 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 	public static Category setPropertiesFromMap(Category category, HashMap map) {
 
 		category.name = (String) map.get("name");
-		category.pluralName = (String) map.get("pluralName");
-		category.primary = (Boolean) map.get("primary");
 		category.id = (String) map.get("id");
-
-		if (map.get("icon") != null) {
-			category.icon = (Icon) Icon.setPropertiesFromMap(new Icon(), (HashMap<String, Object>) map.get("icon"));
-		}
+		category.icon = (String) map.get("icon");
 
 		if (map.get("categories") != null) {
 			List<LinkedHashMap<String, Object>> categoryMaps = (List<LinkedHashMap<String, Object>>) map.get("categories");
@@ -74,10 +60,6 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public String iconUri() {
-		if (icon != null && icon.prefix != null) {
-			String iconUri = icon.prefix + "88" + icon.suffix;
-			return iconUri;
-		}
-		return null;
+		return icon;
 	}
 }
