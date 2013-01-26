@@ -16,7 +16,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.FontManager;
@@ -54,9 +53,7 @@ public class CategoryBuilder extends FormActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		initialize();
 	}
 
@@ -72,10 +69,10 @@ public class CategoryBuilder extends FormActivity {
 		mSpinnerCategory = (Spinner) findViewById(R.id.category);
 		mSpinnerSubcategory = (Spinner) findViewById(R.id.sub_category);
 		mSpinnerSubsubcategory = (Spinner) findViewById(R.id.sub_sub_category);
-		mTitle = (TextView) findViewById(R.id.custom_title);
+		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText(R.string.dialog_category_builder_title);
 
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 
@@ -93,7 +90,7 @@ public class CategoryBuilder extends FormActivity {
 		}
 	}
 
-	public void loadCategories() {
+	private void loadCategories() {
 		new AsyncTask() {
 
 			@Override
@@ -124,6 +121,7 @@ public class CategoryBuilder extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onSaveButtonClick(View view) {
 		gather();
 		doSave();
@@ -357,7 +355,7 @@ public class CategoryBuilder extends FormActivity {
 		}
 	}
 
-	public void updateCustomImage(String uri, Category category) {
+	private void updateCustomImage(String uri, Category category) {
 
 		Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
 		int color = Place.getCategoryColor(category.name, true, boostColor, false);

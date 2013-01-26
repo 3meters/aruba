@@ -173,7 +173,7 @@
     <string name="dialog_install_message">An android application is available for this link.</string>
     <string name="dialog_install_ok">install</string>
     <string name="dialog_install_cancel">no thanks</string>
-    <string name="dialog_install_toast_package_installed"> has been installed. Tap the link to launch.</string>
+    <string name="dialog_install_toast_package_installed">has been installed. Tap the link to launch.</string>
         
     <!-- Help -->
 
@@ -193,8 +193,12 @@
     <string name="candi_section_switchboard">place info</string>
     <string name="candi_section_candi">candi</string>
     <string name="candi_label_comments_none">no comments yet</string>
-    <string name="candi_label_user_creator">first discovered by</string>
-
+    <string name="candi_label_user_created_by">created</string>
+    <string name="candi_label_user_discovered_by">discovered</string>
+    <string name="candi_label_user_added_by">added</string>
+    <string name="candi_label_user_posted_by">posted</string>
+    <string name="candi_label_user_edited_by">edited</string>
+    
     <!-- Comments -->
 
     <string name="candi_button_comment">comment</string>
@@ -219,13 +223,9 @@
     <string name="form_title_password">change password</string>
     <string name="form_title_signin">sign in</string>
     <string name="form_title_signup">register</string>
-    <string name="form_title_picture_search">picture search</string>
     <string name="form_title_picture_browse">picture browse</string>
-    <string name="form_title_link_picker">link picker</string>
-    <string name="form_title_source_builder">links</string>
     <string name="form_title_preferences">aircandi settings</string>
     <string name="form_title_comment">comment</string>
-    <string name="form_title_templates">add candi</string>
 
     <!-- Forms.misc -->
 

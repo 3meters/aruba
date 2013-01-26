@@ -4,12 +4,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="15sp"
+        android:textAppearance="@style/app_text_appearance_large"
+        android:textColor="@color/accent_blue" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/title"
+        android:background="@color/accent_blue" />
+
     <com.aircandi.ui.widgets.BounceListView
         android:id="@+id/form_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/title"
         android:paddingTop="10dp" >
 
         <!-- Preview: listitem=@layout/temp_listitem_place_source -->

@@ -64,19 +64,6 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	}
 
 	/**
-	 * Constructor wrapping a supplied ListAdapter and providing a id for a pending view.
-	 * 
-	 * @param context
-	 * @param wrapped
-	 * @param pendingResource
-	 */
-	public EndlessAdapter(Context context, ListAdapter wrapped, int pendingResource) {
-		super(wrapped);
-		this.context = context;
-		this.pendingResource = pendingResource;
-	}
-
-	/**
 	 * How many items are in the data set represented by this
 	 * Adapter.
 	 */
@@ -92,6 +79,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 * Masks ViewType so the AdapterView replaces the "Pending" row when new
 	 * data is loaded.
 	 */
+	@Override
 	public int getItemViewType(int position) {
 		if (position == getWrappedAdapter().getCount()) {
 			return (IGNORE_ITEM_VIEW_TYPE);
@@ -105,6 +93,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 * 
 	 * @see #getItemViewType(int)
 	 */
+	@Override
 	public int getViewTypeCount() {
 		return (super.getViewTypeCount() + 1);
 	}
@@ -150,7 +139,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 *            Exception that was raised by cacheInBackground()
 	 * @return true if should allow retrying appending new data, false otherwise
 	 */
-	protected boolean onException(View pendingView, Exception e) {
+	private boolean onException(View pendingView, Exception e) {
 		Log.e("EndlessAdapter", "Exception in cacheInBackground()", e);
 
 		return (false);
@@ -162,7 +151,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 * subclass, to append the data in the background thread and
 	 * rebind the pending view once that is done.
 	 */
-	class AppendTask extends AsyncTask<Void, Void, Exception> {
+	private class AppendTask extends AsyncTask<Void, Void, Exception> {
 
 		@Override
 		protected Exception doInBackground(Void... params) {
@@ -208,12 +197,5 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 		throw new RuntimeException("You must either override getPendingView() or supply a pending View resource via the constructor");
 	}
 
-	/**
-	 * Getter method for the Context being held by the adapter
-	 * 
-	 * @return Context
-	 */
-	protected Context getContext() {
-		return (context);
-	}
+	
 }

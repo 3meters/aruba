@@ -1,6 +1,5 @@
 package com.aircandi.components;
 
-import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -24,11 +23,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.SystemClock;
 import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -64,12 +61,10 @@ import com.aircandi.ui.CommentList;
 import com.aircandi.ui.EntityForm;
 import com.aircandi.ui.Preferences;
 import com.aircandi.ui.SplashForm;
-import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.builders.PictureSourcePicker;
 import com.aircandi.ui.builders.TemplatePicker;
 import com.aircandi.ui.user.CandiUser;
 import com.aircandi.ui.user.ProfileForm;
-import com.aircandi.ui.user.SignInForm;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.DateUtils;
@@ -78,58 +73,44 @@ import com.squareup.otto.Subscribe;
 
 public class AircandiCommon implements ActionBar.TabListener {
 
-	public Context						mContext;
-	public Activity						mActivity;
-	public String						mActivityName;
-	public static NotificationManager	mNotificationManager;
-	public static LayoutInflater		mLayoutInflater;
+	private Context				mContext;
+	private Activity			mActivity;
+
+	static NotificationManager	mNotificationManager;
 
 	/* Parameters */
-	public CommandType					mCommandType;
-	public String						mParentId;
-	public String						mEntityId;
-	public String						mEntityType;
-	public List<Entity>					mEntities;
-	public Entity						mEntity;
-	public String						mMessage;
-	public String						mUserId;
-	public String						mCollectionId;
+	public CommandType			mCommandType;
+	public String				mParentId;
+	public String				mEntityId;
+	public String				mEntityType;
+	public String				mMessage;
+	public Entity				mEntity;
+	public String				mUserId;
+	public String				mCollectionId;
 
 	/* Theme */
-	public String						mThemeTone;
-	public Integer						mThemeBusyIndicatorResId;
-	public Integer						mThemeDialogResId;
+	public String				mThemeTone;
 
 	/* UI */
-	public TextView						mBeaconIndicator;
-	public TextView						mTextDebug;
-	protected TextView					mTitle;
-	protected MenuItem					mMenuItemRefresh;
-	protected MenuItem					mMenuItemDebug;
-	protected MenuItem					mMenuItemBeacons;
-	public Menu							mMenu;
-	private ProgressDialog				mProgressDialog;
-	public String						mPrefTheme;
-	public Boolean						mUsingCustomTheme	= false;
-	public Integer						mTabIndex;
-	public ActionBar					mActionBar;
-	private ViewFlipper					mViewFlipper;
+	private TextView			mBeaconIndicator;
+	private TextView			mTextDebug;
+	private MenuItem			mMenuItemRefresh;
+	private MenuItem			mMenuItemDebug;
+	private MenuItem			mMenuItemBeacons;
+	public Menu					mMenu;
+	private ProgressDialog		mProgressDialog;
+	public String				mPrefTheme;
+	public ActionBar			mActionBar;
+	private ViewFlipper			mViewFlipper;
 
 	/* Other */
-	public String						mPageName;
-	public Boolean						mConfigChange		= false;
-	public Integer						mBusyCount			= 0;
+	private String				mPageName;
+	private Integer				mBusyCount	= 0;
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
 		mContext = context;
 		mActivity = (Activity) context;
 		mPageName = mActivity.getClass().getSimpleName();
-		/*
-		 * ActionBarSherlock takes over if version < 4.0 (Ice Cream Sandwich).
-		 */
-		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			mActivity.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		}
 		/*
 		 * Base activity class handles restoring view state as long as they have
 		 * an id property. We handle ourselves any other state that needs to
@@ -142,7 +123,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void initialize() {
 
-		mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
 
 		Logger.i(this, "Activity created: " + mPageName);
@@ -160,11 +140,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (mActivity.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
 			mThemeTone = (String) resourceName.coerceToString();
 		}
-		if (mContext.getTheme().resolveAttribute(R.attr.busy, resourceName, true)) {
-			mThemeBusyIndicatorResId = (Integer) resourceName.resourceId;
-		}
-
-		mTitle = (TextView) mActivity.findViewById(R.id.text_title);
 
 		/* Tabs: setup tabs if appropriate */
 		manageTabs();
@@ -172,21 +147,24 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onLocationChanged(LocationChangedEvent event) {
 		updateDebugText();
 	}
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
 		updateBeaconIndicator(event.wifiList);
 	}
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onWifiScanReceived(QueryWifiScanReceivedEvent event) {
 		updateBeaconIndicator(event.wifiList);
 	}
 
-	public void updateDebugText() {
+	private void updateDebugText() {
 		if (mTextDebug != null) {
 			if (Aircandi.getInstance().getUser() != null
 					&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
@@ -253,7 +231,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	public void doProfileClick() {
+	private void doProfileClick() {
 		IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
 		intentBuilder.setCommandType(CommandType.View);
 		Intent intent = intentBuilder.create();
@@ -272,7 +250,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
 
-	public void doInfoClick() {
+	private void doInfoClick() {
 		String title = mActivity.getString(R.string.alert_about_title);
 		String message = mActivity.getString(R.string.alert_about_message) + " "
 				+ Aircandi.getVersionName(mContext, CandiRadar.class) + "\n"
@@ -282,32 +260,19 @@ public class AircandiCommon implements ActionBar.TabListener {
 				, message
 				, null
 				, mActivity, android.R.string.ok, null, new DialogInterface.OnClickListener() {
+					@Override
 					public void onClick(DialogInterface dialog, int which) {}
 				}, null);
 		Tracker.trackEvent("DialogAbout", "Open", null, 0);
 
 	}
 
-	public void doRefreshClick(View view) {}
-
 	public void doAttachedToWindow() {
 		Window window = mActivity.getWindow();
 		window.setFormat(PixelFormat.RGBA_8888);
 	}
 
-	public void doDebugClick() {
-		AircandiCommon.showAlertDialog(R.drawable.ic_app
-				, mActivity.getString(R.string.alert_beacons_title)
-				, "Nothing to show yet."
-				, null
-				, mActivity, android.R.string.ok, null, new
-				DialogInterface.OnClickListener() {
-
-					public void onClick(DialogInterface dialog, int which) {}
-				}, null);
-	}
-
-	public void doBeaconIndicatorClick() {
+	private void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
 			int messageId = R.string.alert_beacons_zero;
 			String beaconMessage = mActivity.getString(messageId);
@@ -350,6 +315,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					, mActivity, android.R.string.ok, null, new
 					DialogInterface.OnClickListener() {
 
+						@Override
 						public void onClick(DialogInterface dialog, int which) {}
 					}, null);
 			Tracker.trackEvent("DialogBeacon", "Open", null, 0);
@@ -401,7 +367,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiListToCandiForm);
 	}
 
-	public void updateBeaconIndicator(final List<WifiScanResult> scanList) {
+	private void updateBeaconIndicator(final List<WifiScanResult> scanList) {
 
 		if (mBeaconIndicator == null) return;
 
@@ -633,7 +599,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 			builder.setNegativeButton(cancelButtonId, listenerClick);
 		}
 
-		AlertDialog alert = builder.show();
+		AlertDialog alert = builder.create();
+		alert.show();
 
 		/* Hardcoded size for body text in the alert */
 		TextView textView = (TextView) alert.findViewById(android.R.id.message);
@@ -648,23 +615,33 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void showAlertDialogSimple(final String titleText, final String message) {
-		mActivity.runOnUiThread(new Runnable() {
+		if (!mActivity.isFinishing()) {
+			mActivity.runOnUiThread(new Runnable() {
 
-			@Override
-			public void run() {
-				AircandiCommon.showAlertDialog(R.drawable.ic_app
-						, titleText
-						, message
-						, null
-						, mContext, android.R.string.ok, null, new OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {}
-						}, null);
-			}
-		});
+				@Override
+				public void run() {
+					AircandiCommon.showAlertDialog(R.drawable.ic_app
+							, titleText
+							, message
+							, null
+							, mContext
+							, android.R.string.ok
+							, null
+							, null
+							, null);
+				}
+			});
+		}
 	}
 
 	public void setTheme(Integer themeResId, Boolean isDialog) {
 		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
+		/*
+		 * ActionBarSherlock takes over the title area if version < 4.0 (Ice Cream Sandwich).
+		 */
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			mActivity.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		}
 		/*
 		 * Need to use application context so our app level themes and attributes are available to actionbarsherlock
 		 */
@@ -681,7 +658,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		((Activity) mContext).setTheme(themeResId);
 	}
 
-	public void signout() {
+	private void signout() {
 		mActivity.runOnUiThread(new Runnable() {
 
 			@Override
@@ -735,16 +712,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		});
 	}
 
-	public void signin(Integer messageResId) {
-		IntentBuilder intentBuilder = new IntentBuilder(mActivity, SignInForm.class);
-		if (messageResId != null) {
-			intentBuilder.setMessage(mActivity.getString(messageResId));
-		}
-		Intent intent = intentBuilder.create();
-		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
-	}
-
+	@SuppressWarnings("ucd")
 	public void startScanService(int scanInterval) {
 
 		/* Start first scan right away */
@@ -763,6 +731,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void stopScanService() {
 		AlarmManager alarmManager = (AlarmManager) mActivity.getSystemService(Service.ALARM_SERVICE);
 		Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
@@ -852,7 +821,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void showNotification(String title, String message, Context context, Intent intent, int notificationType) {
 		@SuppressWarnings("deprecation")
-		Notification note = new Notification(R.drawable.ic_app_status
+		Notification note = new Notification(R.drawable.ic_app_status_bw
 				, title
 				, System.currentTimeMillis());
 
@@ -982,6 +951,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 				else if (mPageName.equals("CandiForm")) {
 					((CandiForm) mActivity).doRefresh();
 				}
+				else if (mPageName.equals("CandiUser")) {
+					((CandiUser) mActivity).doRefresh();
+				}
 				else if (mPageName.equals("CommentList")) {
 					((CommentList) mActivity).doRefresh();
 				}
@@ -1044,7 +1016,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// Tab routines
 	// --------------------------------------------------------------------------------------------
 
-	public void manageTabs() {
+	private void manageTabs() {
 		Logger.v(this, "Building tabs: " + mPageName);
 		if (mPageName.equals("ProfileForm")) {
 			addTabsToActionBar(this, CandiConstants.TABS_PROFILE_FORM_ID);
@@ -1061,7 +1033,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	public void addTabsToActionBar(ActionBar.TabListener tabListener, int tabsId)
+	private void addTabsToActionBar(ActionBar.TabListener tabListener, int tabsId)
 	{
 		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
@@ -1243,7 +1215,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	public void doRestoreInstanceState(Bundle savedInstanceState) {
+	private void doRestoreInstanceState(Bundle savedInstanceState) {
 		/*
 		 * This gets everytime Common is created and savedInstanceState bundle is
 		 * passed to the constructor.
@@ -1269,14 +1241,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mViewFlipper = viewFlipper;
 	}
 
-	public File getTempFile(FormActivity formActivity, String tempFileName) {
-		File path = new File(Environment.getExternalStorageDirectory(), formActivity.getPackageName());
-		if (!path.exists()) {
-			path.mkdir();
-		}
-		return new File(path, tempFileName);
-	}
-
 	public ProgressDialog getProgressDialog() {
 
 		if (mProgressDialog == null) {
@@ -1295,37 +1259,21 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public enum ServiceOperation {
 		Signin,
-		Signout,
 		Signup,
 		PasswordChange,
 		ProfileBrowse,
 		ProfileUpdate,
-		BeaconScan,
 		CandiForm,
 		CandiList,
-		CandiBrowse,
 		CandiSave,
-		CandiMove,
 		CandiDelete,
-		ImageLoad,
 		CommentBrowse,
 		CommentSave,
-		PictureBrowse,
-		PictureForm,
 		PictureSearch,
-		MapBrowse,
-		LinkLookup,
-		Unknown,
 		PickBookmark,
-		PickCandi,
 		CheckUpdate,
-		TipBrowse,
 		Tuning,
 		CandiUser
-	}
-
-	public static enum ActionButtonSet {
-		Radar, CandiForm, CandiList, CommentList
 	}
 
 }

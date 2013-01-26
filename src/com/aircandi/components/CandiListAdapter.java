@@ -39,7 +39,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 	private Integer			mItemLayoutId	= R.layout.temp_listitem_candi;
 	private List<Entity>	mListItems;
 	private CandiFilter		mCandiFilter;
-	protected int			mScrollState	= CandiScrollManager.SCROLL_STATE_IDLE;
+	private int				mScrollState	= CandiScrollManager.SCROLL_STATE_IDLE;
 
 	public CandiListAdapter(Context context, List<Entity> entities, Integer itemLayoutId) {
 		super(context, 0, entities);
@@ -81,7 +81,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 				});
 			}
 			view.setTag(holder);
-			
+
 			FontManager.getInstance().setTypefaceDefault(holder.title);
 			FontManager.getInstance().setTypefaceDefault(holder.subtitle);
 			FontManager.getInstance().setTypefaceDefault(holder.description);
@@ -153,7 +153,6 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 				setVisibility(holder.user, View.VISIBLE);
 			}
 
-
 			if (holder.image != null) {
 				holder.image.setTag(entity);
 				holder.image.getImageBadge().setVisibility(View.GONE);
@@ -203,10 +202,12 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 		return mListItems.size();
 	}
 
+	@Override
 	public boolean areAllItemsEnabled() {
 		return false;
 	}
 
+	@Override
 	public boolean isEnabled(int position) {
 		return true;
 	}
@@ -227,22 +228,25 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 		mScrollState = scrollState;
 	}
 
-	protected static void setVisibility(View view, Integer visibility) {
+	private static void setVisibility(View view, Integer visibility) {
 		if (view != null) {
 			view.setVisibility(visibility);
 		}
 	}
 
-	public class CandiScrollManager implements AbsListView.OnScrollListener {
+	private class CandiScrollManager implements AbsListView.OnScrollListener {
 
+		@Override
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
 			mScrollState = scrollState;
 			notifyDataSetChanged();
 		}
 
+		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {}
 	}
 
+	@SuppressWarnings("ucd")
 	public static class CandiListViewHolder {
 
 		public int					position;
@@ -260,6 +264,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 	private class CandiFilter extends Filter {
 
+		@Override
 		protected FilterResults performFiltering(CharSequence filterType) {
 
 			/* Initiate our results object */
@@ -293,6 +298,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			return results;
 		}
 
+		@Override
 		protected void publishResults(CharSequence prefix, FilterResults results) {
 
 			mListItems = (ArrayList<Entity>) results.values;

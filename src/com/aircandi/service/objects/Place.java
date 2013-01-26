@@ -1,10 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Random;
 
 import com.aircandi.Aircandi;
@@ -14,6 +11,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class Place extends ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= -3599862145425838670L;
@@ -25,10 +23,6 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 
 	/* Can come from foursquare or our own custom places */
 
-	@Expose
-	public String				website;
-	@Expose
-	public String				facebook;
 	@Expose
 	public Contact				contact;
 	@Expose
@@ -42,28 +36,6 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	public String				sourceUri;										// Link to foursquare page
 	@Expose(serialize = false)
 	public String				sourceUriShort;								// Link to foursquare page
-	@Expose(serialize = false)
-	public Number				rating;
-	@Expose(serialize = false)
-	public Menu					menu;
-	/*
-	 * There could be more photos available than we actually received.
-	 */
-	@Expose(serialize = false)
-	public Integer				photoCount			= 0;
-	@Expose(serialize = false)
-	public List<Photo>			photos;
-	/*
-	 * There could be more tips available than we actually received.
-	 */
-	@Expose(serialize = false)
-	public Integer				tipCount			= 0;
-	@Expose(serialize = false)
-	public List<Tip>			tips;
-	@Expose(serialize = false)
-	public List<String>			tags;
-	@Expose(serialize = false)
-	public List<Phrase>			phrases;
 
 	public Place() {}
 
@@ -71,15 +43,6 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	public Place clone() {
 		try {
 			final Place place = (Place) super.clone();
-			if (this.photos != null) {
-				place.photos = (List<Photo>) ((ArrayList) this.photos).clone();
-			}
-			if (this.tips != null) {
-				place.tips = (List<Tip>) ((ArrayList) this.tips).clone();
-			}
-			if (this.phrases != null) {
-				place.phrases = (List<Phrase>) ((ArrayList) this.phrases).clone();
-			}
 			if (this.location != null) {
 				place.location = this.location.clone();
 			}
@@ -88,9 +51,6 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 			}
 			if (this.category != null) {
 				place.category = this.category.clone();
-			}
-			if (this.menu != null) {
-				place.menu = this.menu.clone();
 			}
 			return place;
 		}
@@ -107,9 +67,6 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		place.sourceId = (String) map.get("sourceId");
 		place.sourceUri = (String) map.get("sourceUri");
 		place.sourceUriShort = (String) map.get("sourceUriShort");
-		place.website = (String) map.get("website");
-		place.facebook = (String) map.get("facebook");
-		place.rating = (Number) map.get("rating");
 
 		if (map.get("location") != null) {
 			place.location = (Location) Location.setPropertiesFromMap(new Location(), (HashMap<String, Object>) map.get("location"));
@@ -123,50 +80,6 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 			place.category = (CategorySimple) CategorySimple.setPropertiesFromMap(new CategorySimple(), (HashMap<String, Object>) map.get("category"));
 		}
 
-		if (map.get("menu") != null) {
-			place.menu = (Menu) Menu.setPropertiesFromMap(new Menu(), (HashMap<String, Object>) map.get("menu"));
-		}
-
-		if (map.get("photos") != null) {
-			LinkedHashMap<String, Object> photosMap = (LinkedHashMap<String, Object>) map.get("photos");
-			List<LinkedHashMap<String, Object>> photoGroups = (List<LinkedHashMap<String, Object>>) photosMap.get("groups");
-			place.photoCount = (Integer) photosMap.get("count");
-
-			place.photos = new ArrayList<Photo>();
-			for (LinkedHashMap<String, Object> photoGroup : photoGroups) {
-				List<LinkedHashMap<String, Object>> photoItems = (List<LinkedHashMap<String, Object>>) photoGroup.get("items");
-				for (LinkedHashMap<String, Object> photoItem : photoItems) {
-					place.photos.add(Photo.setPropertiesFromMap(new Photo(), photoItem));
-				}
-			}
-		}
-
-		if (map.get("tips") != null) {
-			LinkedHashMap<String, Object> tipsMap = (LinkedHashMap<String, Object>) map.get("tips");
-			List<LinkedHashMap<String, Object>> tipGroups = (List<LinkedHashMap<String, Object>>) tipsMap.get("groups");
-			place.tipCount = (Integer) tipsMap.get("count");
-
-			place.tips = new ArrayList<Tip>();
-			for (LinkedHashMap<String, Object> tipGroup : tipGroups) {
-				List<LinkedHashMap<String, Object>> tipItems = (List<LinkedHashMap<String, Object>>) tipGroup.get("items");
-				for (LinkedHashMap<String, Object> tipItem : tipItems) {
-					place.tips.add(Tip.setPropertiesFromMap(new Tip(), tipItem));
-				}
-			}
-		}
-
-		if (map.get("tags") != null) {
-			place.tags = (List<String>) map.get("tags");
-		}
-
-		if (map.get("phrases") != null) {
-			List<LinkedHashMap<String, Object>> phraseMaps = (List<LinkedHashMap<String, Object>>) map.get("phrases");
-
-			place.phrases = new ArrayList<Phrase>();
-			for (LinkedHashMap<String, Object> phraseMap : phraseMaps) {
-				place.phrases.add(Phrase.setPropertiesFromMap(new Phrase(), phraseMap));
-			}
-		}
 		return place;
 	}
 

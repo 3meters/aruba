@@ -8,6 +8,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class ServiceError {
 
 	@Expose

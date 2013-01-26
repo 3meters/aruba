@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
@@ -31,6 +30,7 @@ import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.MiscUtils;
 
+@SuppressWarnings("ucd")
 public class SourceBuilder extends FormActivity {
 
 	private Source			mSource;
@@ -47,15 +47,13 @@ public class SourceBuilder extends FormActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		initialize();
 		bind();
 	}
 
 	private void initialize() {
-		mTitle = (TextView) findViewById(R.id.custom_title);
+		mTitle = (TextView) findViewById(R.id.title);
 		Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
@@ -76,14 +74,14 @@ public class SourceBuilder extends FormActivity {
 		mSourceName = (EditText) findViewById(R.id.name);
 		mSourceId = (EditText) findViewById(R.id.id);
 
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.name));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.id));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 	}
 
-	public void bind() {
+	private void bind() {
 		if (mEditing) {
 			mSourceName.setText(mSource.name);
 			mSourceId.setText(mSource.id);
@@ -103,7 +101,7 @@ public class SourceBuilder extends FormActivity {
 		}
 	}
 
-	public Source buildCustomSource(String sourceType) {
+	private Source buildCustomSource(String sourceType) {
 		Source source = new Source();
 		source.source = sourceType;
 		source.origin = "user";
@@ -113,7 +111,7 @@ public class SourceBuilder extends FormActivity {
 		return source;
 	}
 
-	public void drawSourceIcon() {
+	private void drawSourceIcon() {
 		String imageUri = mSource.getImageUri();
 		BitmapRequestBuilder builder = new BitmapRequestBuilder(mSourceIcon).setImageUri(imageUri);
 		BitmapRequest bitmapRequest = builder.create();
@@ -124,6 +122,7 @@ public class SourceBuilder extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onSaveButtonClick(View view) {
 		if (validate()) {
 			gather();

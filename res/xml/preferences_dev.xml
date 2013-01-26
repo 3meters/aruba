@@ -69,7 +69,18 @@
                 android:positiveButtonText="OK"
                 android:summary="Specify which location should be used for places"
                 android:title="Location testing" />
-        </PreferenceScreen>
+            <ListPreference
+                android:id="@+id/Pref_Testing_Place_Source"
+                android:defaultValue="foursquare"
+                android:dialogTitle="Place authority to use"
+                android:entries="@array/testing_place_source_entries"
+                android:entryValues="@array/testing_place_source_values"
+                android:key="Pref_Testing_Place_Source"
+                android:negativeButtonText="Cancel"
+                android:positiveButtonText="OK"
+                android:summary="Specify which place authority should be used for places near location"
+                android:title="Place authority" />
+            </PreferenceScreen>
 
         <CheckBoxPreference
             android:id="@+id/Pref_Entity_Fencing"

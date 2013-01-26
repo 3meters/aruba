@@ -17,6 +17,7 @@ package com.aircandi.service;
  * 
  * @see ProxibaseServiceException
  */
+@SuppressWarnings("ucd")
 public class ProxibaseClientException extends RuntimeException {
 
 	private static final long	serialVersionUID	= 1L;

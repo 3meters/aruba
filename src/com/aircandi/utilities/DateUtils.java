@@ -4,24 +4,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DateUtils {
 
-	public static final String	DATE_NOW_FORMAT						= "yyyy-MM-dd HH:mm:ss";
 	public static final String	DATE_NOW_FORMAT_FILENAME			= "yyyyMMdd_HHmmss";
-	public static final String	DATE_FORMAT_TIME_SINCE				= "MMM d";
-	public static final String	DATE_FORMAT_TIME_SINCE_WITH_YEAR	= "MMM d, yyyy";
-	public static final String	TIME_FORMAT_TIME_SINCE				= "h:mm";
-	public static final String	AMPM_FORMAT_TIME_SINCE				= "a";
-
-	public static String nowString() {
-		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_NOW_FORMAT, Locale.US);
-		return sdf.format(cal.getTime());
-	}
+	private static final String	DATE_FORMAT_TIME_SINCE				= "MMM d";
+	private static final String	DATE_FORMAT_TIME_SINCE_WITH_YEAR	= "MMM d, yyyy";
+	private static final String	TIME_FORMAT_TIME_SINCE				= "h:mm";
+	private static final String	AMPM_FORMAT_TIME_SINCE				= "a";
 
 	public static String nowString(String pattern) {
 		Calendar cal = Calendar.getInstance();
@@ -32,48 +22,6 @@ public class DateUtils {
 	public static Date nowDate() {
 		Calendar cal = Calendar.getInstance();
 		return cal.getTime();
-	}
-
-	public static Date wcfToDate(String wcfDate) {
-		String JSONDateToMilliseconds = "\\/(Date\\((.*?)(\\+.*)?\\))\\/";
-		Pattern pattern = Pattern.compile(JSONDateToMilliseconds);
-		Matcher matcher = pattern.matcher(wcfDate);
-		String result = matcher.replaceAll("$2");
-		return new Date(Long.valueOf(result));
-	}
-
-	public static int intervalInSeconds(Date dateOld, Date dateNew) {
-		Long diff = dateNew.getTime() - dateOld.getTime();
-		int seconds = (int) (diff / 1000);
-		return seconds;
-	}
-
-	/* Change a Date to GMT */
-	public static Date toGMT(Date date) {
-		return changeTimeZone(date, TimeZone.getTimeZone("GMT"));
-	}
-
-	/* Change a date to GMT from a given timezone */
-	public static Date toGmtFromZone(Date date, String fromZone) {
-		TimeZone pst = TimeZone.getTimeZone(fromZone);
-		return new Date(date.getTime() - pst.getRawOffset());
-	}
-
-	/* Change a date in another timezone */
-	public static Date changeTimeZone(Date date, TimeZone zone) {
-		Calendar first = Calendar.getInstance(zone);
-		first.setTimeInMillis(date.getTime());
-
-		Calendar output = Calendar.getInstance();
-		output.set(Calendar.YEAR, first.get(Calendar.YEAR));
-		output.set(Calendar.MONTH, first.get(Calendar.MONTH));
-		output.set(Calendar.DAY_OF_MONTH, first.get(Calendar.DAY_OF_MONTH));
-		output.set(Calendar.HOUR_OF_DAY, first.get(Calendar.HOUR_OF_DAY));
-		output.set(Calendar.MINUTE, first.get(Calendar.MINUTE));
-		output.set(Calendar.SECOND, first.get(Calendar.SECOND));
-		output.set(Calendar.MILLISECOND, first.get(Calendar.MILLISECOND));
-
-		return output.getTime();
 	}
 
 	@SuppressWarnings("deprecation")

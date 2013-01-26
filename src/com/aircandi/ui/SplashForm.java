@@ -86,7 +86,7 @@ public class SplashForm extends SherlockActivity {
 			public void run() {
 				loadCategories();
 			}
-		}, 30000);
+		}, 60000);
 
 		Aircandi.firstStartApp = false;
 		Aircandi.stopwatch2.stop("initializeApp function stop");
@@ -101,7 +101,7 @@ public class SplashForm extends SherlockActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_signin));
 	}
 
-	public void signinAuto() {
+	private void signinAuto() {
 
 		String jsonUser = Aircandi.settings.getString(Preferences.SETTING_USER, null);
 		String jsonSession = Aircandi.settings.getString(Preferences.SETTING_USER_SESSION, null);
@@ -117,13 +117,13 @@ public class SplashForm extends SherlockActivity {
 		}
 	}
 
-	public void startMainApp() {
+	private void startMainApp() {
 		Intent intent = new Intent(this, CandiRadar.class);
 		startActivity(intent);
 		finish();
 	}
 
-	public void loadCategories() {
+	private void loadCategories() {
 		new AsyncTask() {
 
 			@Override
@@ -157,7 +157,7 @@ public class SplashForm extends SherlockActivity {
 						Logger.e(SplashForm.this, "Aws Credentials not configured correctly.");
 					}
 					else {
-						Aircandi.mAwsCredentials = new BasicAWSCredentials(properties.getProperty("accessKey"), properties.getProperty("secretKey"));
+						Aircandi.awsCredentials = new BasicAWSCredentials(properties.getProperty("accessKey"), properties.getProperty("secretKey"));
 					}
 				}
 				catch (Exception exception) {
@@ -172,6 +172,7 @@ public class SplashForm extends SherlockActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onSigninButtonClick(View view) {
 		IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
 		Intent intent = intentBuilder.create();
@@ -179,6 +180,7 @@ public class SplashForm extends SherlockActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
+	@SuppressWarnings("ucd")
 	public void onSignupButtonClick(View view) {
 		IntentBuilder intentBuilder = new IntentBuilder(this, RegisterForm.class);
 		intentBuilder.setCommandType(CommandType.New);

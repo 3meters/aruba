@@ -1,6 +1,5 @@
 package com.aircandi.service;
 
-
 /**
  * Extension of ProxibaseClientException that represents an error response returned
  * by the Proxibase web service. Receiving an exception of this type indicates that
@@ -12,6 +11,7 @@ package com.aircandi.service;
  * about the error and why it occurred. In particular, the errorType field can be used to determine if the caller's
  * request was invalid, or the service encountered an error on the server side while processing it.
  */
+@SuppressWarnings("ucd")
 public class ProxibaseServiceException extends ProxibaseClientException {
 
 	private static final long	serialVersionUID	= 1L;
@@ -79,6 +79,7 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 				+ "Proxi Error Message: " + getMessage();
 	}
 
+	@SuppressWarnings("ucd")
 	public static enum ErrorCode {
 		URISyntaxException,
 		IOException,
@@ -99,8 +100,8 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 		ForbiddenException,
 		DuplicateException,
 		SessionException,
-		PasswordException, 
-		GatewayTimeoutException, 
+		PasswordException,
+		GatewayTimeoutException,
 		SocketException
 	}
 

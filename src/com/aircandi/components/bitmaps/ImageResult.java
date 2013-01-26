@@ -8,15 +8,15 @@ import java.util.HashMap;
  */
 public class ImageResult
 {
-	protected String	title;
-	protected String	mediaUrl;
-	protected String	url;
-	protected String	displayUrl;
-	protected Long		width;
-	protected Long		height;
-	protected Long		fileSize;
-	protected String	contentType;
-	protected Thumbnail	thumbnail;
+	private String		title;
+	private String		mediaUrl;
+	private String		url;
+	private String		displayUrl;
+	private Long		width;
+	private Long		height;
+	private Long		fileSize;
+	private String		contentType;
+	private Thumbnail	thumbnail;
 
 	public static ImageResult setPropertiesFromMap(ImageResult imageResult, HashMap map) {
 		/*
@@ -215,14 +215,14 @@ public class ImageResult
 	public static class Thumbnail
 	{
 
-		protected String	mediaUrl;
-		protected String	contentType;
-		protected Long		width;
-		protected Long		height;
-		protected Long		fileSize;
-		protected Long		runTime;
+		private String	mediaUrl;
+		private String	contentType;
+		private Long	width;
+		private Long	height;
+		private Long	fileSize;
+		private Long	runTime;
 
-		public static Thumbnail setPropertiesFromMap(Thumbnail thumbnail, HashMap map) {
+		private static Thumbnail setPropertiesFromMap(Thumbnail thumbnail, HashMap map) {
 			/*
 			 * Properties involved with editing are copied from one entity to another.
 			 */

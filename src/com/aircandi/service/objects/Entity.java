@@ -21,6 +21,7 @@ import com.aircandi.utilities.MiscUtils;
  * 
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class Entity extends ServiceEntryBase implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= -3902834532692561618L;
@@ -249,18 +250,9 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return entityCopy;
 	}
 
+	@Override
 	public String getCollection() {
 		return "entities";
-	}
-
-	public Integer visibleChildrenCount() {
-		int count = 0;
-		for (Entity childEntity : getChildren()) {
-			if (!childEntity.hidden) {
-				count++;
-			}
-		}
-		return count;
 	}
 
 	public static Entity upsizeFromSynthetic(Entity synthetic) {
@@ -292,15 +284,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 	public void setPhoto(Photo photo) {
 		this.photo = photo;
-	}
-
-	public Source getSource(String targetSource) {
-		for (Source source : sources) {
-			if (source.source.equals(targetSource)) {
-				return source;
-			}
-		}
-		return null;
 	}
 
 	public GeoLocation getLocation() {
@@ -377,7 +360,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 					imageUri = photo.getUri();
 				}
 			}
-			else if (this.place != null && this.place.category != null){
+			else if (this.place != null && this.place.category != null) {
 				imageUri = this.place.category.iconUri();
 			}
 			else if (creator != null) {
@@ -403,7 +386,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return imageUri;
 	}
 
-	public Link getActiveLink(String linkType) {
+	private Link getActiveLink(String linkType) {
 		/*
 		 * If an entity has more than one viable link, we choose the one
 		 * using the following priority:
@@ -568,13 +551,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return null;
 	}
 
-	public static enum EntityState {
-		Normal,
-		New,
-		Refreshed,
-		Missing
-	}
-
+	@SuppressWarnings("ucd")
 	public static enum Visibility {
 		Public,
 		Private

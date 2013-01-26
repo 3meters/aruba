@@ -34,7 +34,7 @@
                 android:orientation="horizontal" >
 
                 <com.aircandi.ui.widgets.UserView
-                    android:id="@+id/author"
+                    android:id="@+id/created_by"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     aircandi:layout="@layout/widget_user_view_large_image"
@@ -102,32 +102,15 @@
             android:onClick="onNewCommentButtonClick"
             android:text="@string/candi_button_comment" />
 
-        <LinearLayout
-            android:id="@+id/button_new"
+        <Button
+            android:id="@+id/button_edit"
             style="@style/form_button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:clickable="true"
-            android:onClick="onAddCandiButtonClick"
-            android:orientation="horizontal"
-            tools:ignore="UseCompoundDrawables" >
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="?attr/iconNewCandi"
-                android:visibility="visible" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:paddingLeft="2dp"
-                android:text="@string/candi_button_new"
-                android:textColor="?attr/textColorBars" />
-        </LinearLayout>
+            android:minWidth="100dp"
+            android:onClick="onEditCandiButtonClick"
+            android:text="@string/candi_button_edit" />
     </LinearLayout>
 
 </RelativeLayout>

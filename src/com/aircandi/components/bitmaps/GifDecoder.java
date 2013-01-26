@@ -6,6 +6,7 @@ import java.util.Vector;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 
+@SuppressWarnings("ucd")
 public class GifDecoder {
 	/**
 	 * File read status: No errors.

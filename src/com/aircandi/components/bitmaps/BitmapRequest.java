@@ -18,12 +18,6 @@ public class BitmapRequest {
 
 	public BitmapRequest() {}
 
-	public BitmapRequest(String imageUri, Object imageRequestor, RequestListener requestListener) {
-		mImageUri = imageUri;
-		mImageRequestor = new WeakReference<Object>(imageRequestor);
-		mRequestListener = requestListener;
-	}
-
 	public BitmapRequest(String imageUri, ImageView imageView) {
 		mImageUri = imageUri;
 		mImageView = new WeakReference<ImageView>(imageView);
@@ -92,7 +86,7 @@ public class BitmapRequest {
 		public Bitmap	bitmap;
 		public String	imageUri;
 
-		public ImageResponse(Bitmap bitmap, String imageUri) {
+		ImageResponse(Bitmap bitmap, String imageUri) {
 			this.bitmap = bitmap;
 			this.imageUri = imageUri;
 		}

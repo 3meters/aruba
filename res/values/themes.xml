@@ -17,8 +17,7 @@
 		- Tabbar tone
 		- Set window background
 		- Select right set of drawables based on the theme tone.
-		- Custom line and text colors in pages, forms, buttons.
-    -->
+		- Custom line and text colors in pages, forms, buttons.    -->
 
     <style name="aircandi_theme_dark" parent="Theme.Sherlock">
         <item name="themeTone">dark</item>
@@ -90,7 +89,7 @@
         <item name="iconLocation">@drawable/ic_action_location_dark</item>
         <item name="iconGallery">@drawable/ic_action_tiles_large_dark</item>
         <item name="iconZoom">@drawable/ic_action_zoom</item>
-        
+
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_dark</item>
@@ -172,7 +171,7 @@
         <item name="iconLocation">@drawable/ic_action_location_light</item>
         <item name="iconGallery">@drawable/ic_action_tiles_large_light</item>
         <item name="iconZoom">@drawable/ic_action_zoom</item>
-        
+
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_light</item>
@@ -188,6 +187,10 @@
 
     <style name="aircandi_theme_midnight" parent="aircandi_theme_dark" />
 
+    <style name="aircandi_theme_midnight_notitlebar" parent="aircandi_theme_dark">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- Snow theme -->
 
     <style name="aircandi_theme_snow" parent="aircandi_theme_light" />
@@ -195,29 +198,39 @@
     <!-- Dialog Themes -->
 
     <style name="aircandi_theme_dialog_dark" parent="Theme.Sherlock.Dialog">
+        <item name="themeTone">dark</item>
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimAmount">0.2</item>
+        
+        <!-- Text and line colors -->
+
         <item name="android:textColor">@android:color/white</item>
+        <item name="textColor">@color/text_dark</item>
         <item name="textColorBars">@color/text_dark</item>
         <item name="textColorButtonLink">@color/accent</item>
-        <item name="android:backgroundDimAmount">0.2</item>
-        <item name="themeTone">dark</item>
         <item name="ruleColor">@color/rule_30_dark</item>
         <item name="ruleColorStrong">@color/rule_60_dark</item>
-        <item name="textColor">@color/text_dark</item>
-        <item name="buttonBarStyle">@style/actionbar_buttonbar_dark</item>
-        <item name="backgroundButtonBar">@color/background_buttonbar_dark</item>
+
+        <!-- Drawables and backgrounds -->
+
         <item name="backgroundPicture">@drawable/picture_bg_dark</item>
+        <item name="backgroundButtonBar">@color/background_buttonbar_dark</item>
         <item name="backgroundButton">@drawable/button_selector_dark</item>
+
+        <!-- Actionbar Sherlock -->
+
+        <item name="buttonBarStyle">@style/actionbar_buttonbar_dark</item>
         <item name="actionBarItemBackground">@drawable/abs__item_background_holo_dark</item>
         <item name="actionBarSize">@dimen/abs__action_bar_default_height</item>
     </style>
 
     <style name="aircandi_theme_dialog_light" parent="Theme.Sherlock.Light.Dialog">
         <item name="themeTone">light</item>
+        <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:backgroundDimAmount">0.2</item>
-
+        
         <!-- Default overrides -->
 
         <item name="android:textAppearance">@style/app_text_appearance</item>

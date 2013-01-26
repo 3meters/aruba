@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
 
+@SuppressWarnings("ucd")
 public class Utils {
 	public static final int	IO_BUFFER_SIZE	= 8 * 1024;
 

@@ -105,7 +105,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onSignInButtonClick"
-            android:state_enabled="false"
             android:text="@string/signin_button_signin" />
     </LinearLayout>
 

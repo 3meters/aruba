@@ -1,3 +1,4 @@
+// $codepro.audit.disable fileComment
 package com.aircandi;
 
 import org.acra.ACRA;
@@ -16,6 +17,7 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
+import com.aircandi.components.Logger;
 import com.aircandi.components.Stopwatch;
 import com.aircandi.service.objects.User;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -77,8 +79,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 )
 public class Aircandi extends Application {
 
-	public final static int					DEBUG_SIGNATURE_HASH		= -2026043354;
-	public static BasicAWSCredentials		mAwsCredentials				= null;
+	public static BasicAWSCredentials		awsCredentials				= null;
 
 	private static Aircandi					singletonObject;
 
@@ -88,7 +89,7 @@ public class Aircandi extends Application {
 	public static Context					applicationContext;
 	public static Handler					mainThreadHandler;
 	public static PackageManager			packageManager;
-	
+
 	public static DisplayMetrics			displayMetrics;
 	public static Stopwatch					stopwatch1;
 	public static Stopwatch					stopwatch2;
@@ -117,7 +118,7 @@ public class Aircandi extends Application {
 		singletonObject.initializeInstance();
 	}
 
-	protected void initializeInstance() {
+	private void initializeInstance() {
 
 		/* The following line triggers the initialization of ACRA */
 		ACRA.init(this);
@@ -125,10 +126,10 @@ public class Aircandi extends Application {
 		applicationContext = getApplicationContext();
 		mainThreadHandler = new Handler(Looper.getMainLooper());
 		packageManager = applicationContext.getPackageManager();
-		
-		stopwatch1 = new Stopwatch("Stopwatch1");
-		stopwatch2 = new Stopwatch("Stopwatch2");
-		stopwatch3 = new Stopwatch("Stopwatch3");
+
+		stopwatch1 = new Stopwatch("Stopwatch1"); // $codepro.audit.disable stringLiterals
+		stopwatch2 = new Stopwatch("Stopwatch2"); // $codepro.audit.disable stringLiterals
+		stopwatch3 = new Stopwatch("Stopwatch3"); // $codepro.audit.disable stringLiterals
 
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
@@ -137,17 +138,18 @@ public class Aircandi extends Application {
 
 	public static String getVersionName(Context context, Class cls) {
 		try {
-			ComponentName comp = new ComponentName(context, cls);
-			PackageInfo pinfo = context.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
+			final ComponentName comp = new ComponentName(context, cls);
+			final PackageInfo pinfo = context.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
 			return pinfo.versionName;
 		}
 		catch (android.content.pm.PackageManager.NameNotFoundException e) {
+			Logger.e(applicationContext, e.getMessage());
 			return null;
 		}
 	}
 
 	public void setUser(User user) {
-		this.mUser = user;
+		mUser = user;
 	}
 
 	public User getUser() {
@@ -155,14 +157,11 @@ public class Aircandi extends Application {
 	}
 
 	public void setLaunchedNormally(Boolean launchedNormally) {
-		this.mLaunchedNormally = launchedNormally;
+		mLaunchedNormally = launchedNormally;
 	}
 
 	public Boolean wasLaunchedNormally() {
 		return mLaunchedNormally;
 	}
 
-	public static enum CandiTask {
-		None, MyCandi, RadarCandi
-	}
 }

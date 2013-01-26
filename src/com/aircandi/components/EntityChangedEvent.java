@@ -2,6 +2,7 @@ package com.aircandi.components;
 
 import com.aircandi.service.objects.Entity;
 
+@SuppressWarnings("ucd")
 public class EntityChangedEvent {
 
 	public final Entity	entity;

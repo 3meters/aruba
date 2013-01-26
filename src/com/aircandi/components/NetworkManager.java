@@ -58,7 +58,7 @@ public class NetworkManager {
 		return serviceResponse;
 	}
 
-	public ServiceResponse request(ServiceRequest serviceRequest, ServiceResponse testServiceResponse) {
+	private ServiceResponse request(ServiceRequest serviceRequest, ServiceResponse testServiceResponse) {
 		if (testServiceResponse != null) {
 			return testServiceResponse;
 		}
@@ -152,6 +152,7 @@ public class NetworkManager {
 		return false;
 	}
 
+	@SuppressWarnings("ucd")
 	protected boolean isMobileNetwork() {
 		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
 		NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
@@ -165,10 +166,6 @@ public class NetworkManager {
 
 	public Boolean isWifiEnabled() {
 		return (mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED);
-	}
-
-	public void enableWifi(boolean enable) {
-		mWifiManager.setWifiEnabled(enable);
 	}
 
 	public boolean isWifiTethered() {
@@ -232,11 +229,12 @@ public class NetworkManager {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public static class ServiceResponse {
 
 		public Object						data;
 		public ResponseCode					responseCode	= ResponseCode.Success;
-		public ResponseDetail				responseDetail	= ResponseDetail.None;
+
 		public ProxibaseServiceException	exception;
 
 		public ServiceResponse() {}
@@ -250,10 +248,5 @@ public class NetworkManager {
 
 	public static enum ResponseCode {
 		Success, Failed
-	}
-
-	public static enum ResponseDetail {
-		None,
-		UpdateRequired
 	}
 }

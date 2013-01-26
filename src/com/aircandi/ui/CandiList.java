@@ -30,13 +30,12 @@ import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class CandiList extends CandiActivity {
-	
-	protected ListView			mListView;
-	protected Number			mEntityModelRefreshDate;
-	protected Number			mEntityModelActivityDate;
-	protected User				mEntityModelUser;
-	protected String			mFilter;
-	protected EntityListType	mEntityListType;
+
+	private ListView		mListView;
+	private Number			mEntityModelRefreshDate;
+	private Number			mEntityModelActivityDate;
+	private User			mEntityModelUser;
+	private EntityListType	mEntityListType;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -80,7 +79,7 @@ public class CandiList extends CandiActivity {
 		}
 	}
 
-	protected void initialize() {
+	private void initialize() {
 		mListView = (ListView) findViewById(R.id.list_candi);
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -88,7 +87,7 @@ public class CandiList extends CandiActivity {
 		}
 	}
 
-	public void bind(final Boolean refresh) {
+	private void bind(final Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -99,7 +98,7 @@ public class CandiList extends CandiActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("GetEntities");				
+				Thread.currentThread().setName("GetEntities");
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel()
 						.getEntitiesByListType(mEntityListType, refresh, mCommon.mCollectionId, mCommon.mUserId, ProxiConstants.RADAR_ENTITY_LIMIT);
 				return result;
@@ -143,6 +142,7 @@ public class CandiList extends CandiActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {
 		Logger.v(this, "List item clicked");
 		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
@@ -162,6 +162,7 @@ public class CandiList extends CandiActivity {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onCommentsClick(View view) {
 		Entity entity = (Entity) view.getTag();
 		if (entity.commentCount > 0) {

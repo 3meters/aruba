@@ -80,6 +80,7 @@ import java.util.regex.Pattern;
  * be dropped from the cache. If an error occurs while writing a cache value, the edit will fail silently. Callers
  * should handle other problems by catching {@code IOException} and responding appropriately.
  */
+@SuppressWarnings("ucd")
 public final class DiskLruCache implements Closeable {
 	static final String							JOURNAL_FILE		= "journal";
 	static final String							JOURNAL_FILE_TMP	= "journal.tmp";
@@ -154,6 +155,7 @@ public final class DiskLruCache implements Closeable {
 	final ThreadPoolExecutor					executorService		= new ThreadPoolExecutor(0, 1,
 																			60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 	private final Callable<Void>				cleanupCallable		= new Callable<Void>() {
+																		@Override
 																		public Void call() throws Exception {
 																			synchronized (DiskLruCache.this) {
 																				if (journalWriter == null) {
@@ -596,6 +598,7 @@ public final class DiskLruCache implements Closeable {
 	/**
 	 * Closes this cache. Stored values will remain on the filesystem.
 	 */
+	@Override
 	public synchronized void close() throws IOException {
 		if (journalWriter == null) {
 			return; // already closed
@@ -642,6 +645,7 @@ public final class DiskLruCache implements Closeable {
 	/**
 	 * A snapshot of the values for an entry.
 	 */
+	@SuppressWarnings("ucd")
 	public final class Snapshot implements Closeable {
 		private final String		key;
 		private final long			sequenceNumber;
@@ -685,6 +689,7 @@ public final class DiskLruCache implements Closeable {
 			return lengths[index];
 		}
 
+		@Override
 		public void close() {
 			for (InputStream in : ins) {
 				IoUtils.closeQuietly(in);
@@ -702,6 +707,7 @@ public final class DiskLruCache implements Closeable {
 	/**
 	 * Edits the values for an entry.
 	 */
+	@SuppressWarnings("ucd")
 	public final class Editor {
 		private final Entry		entry;
 		private final boolean[]	written;

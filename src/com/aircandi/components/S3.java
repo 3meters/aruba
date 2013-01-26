@@ -46,6 +46,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
  * import com.amazonaws.services.s3.model.CannedAccessControlList;
  * import com.amazonaws.services.s3.model.ObjectMetadata;
  */
+@SuppressWarnings("ucd")
 public class S3 {
 
 	private static AmazonS3		s3			= null;
@@ -66,7 +67,7 @@ public class S3 {
 
 	public static AmazonS3 getInstance() {
 		if (s3 == null) {
-			s3 = new AmazonS3Client(Aircandi.mAwsCredentials);
+			s3 = new AmazonS3Client(Aircandi.awsCredentials);
 		}
 
 		return s3;

@@ -12,8 +12,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Environment;
@@ -22,6 +22,7 @@ import com.aircandi.Aircandi;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
+@SuppressWarnings("ucd")
 public class AndroidManager {
 
 	public static final int			MEDIA_TYPE_IMAGE	= 1;
@@ -67,6 +68,7 @@ public class AndroidManager {
 		return list.size() > 0;
 	}
 
+	@SuppressWarnings("ucd")
 	protected boolean getIsLowBattery() {
 		/*
 		 * Returns battery status. True if less than 15% remaining.
@@ -109,6 +111,7 @@ public class AndroidManager {
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
+	@SuppressWarnings("ucd")
 	public void callSendActivity(Context context, String placeName, String uri) {
 		Intent intent = new Intent(android.content.Intent.ACTION_SEND);
 		intent.setType("text/plain");
@@ -168,7 +171,7 @@ public class AndroidManager {
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
 	}
 
-	public Intent findBrowserApp(Context context, String uri) {
+	private Intent findBrowserApp(Context context, String uri) {
 		final String[] browserApps = {
 				"com.android.browser",
 				"com.android.chrome",
@@ -190,6 +193,7 @@ public class AndroidManager {
 		return null;
 	}
 
+	@SuppressWarnings("ucd")
 	public boolean checkCameraHardware(Context context) {
 		/* Check if this device has a camera */
 		if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
@@ -200,6 +204,7 @@ public class AndroidManager {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public static Uri getOutputMediaFileUri(int type) {
 		/* Create a file Uri for saving an image or video */
 		return Uri.fromFile(getOutputMediaFile(type));

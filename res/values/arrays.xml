@@ -35,6 +35,17 @@
         <item>zoka</item>
         <item>lucky</item>
     </string-array>
+    
+    <string-array name="testing_place_source_entries">
+        <item>Foursquare</item>
+        <item>Factual</item>
+        <item>Google</item>
+	</string-array>
+    <string-array name="testing_place_source_values">
+        <item>foursquare</item>
+        <item>factual</item>
+        <item>google</item>
+	</string-array>
     <string-array name="search_radius_entries">
         <item>100 yards</item>
         <item>250 yards</item>

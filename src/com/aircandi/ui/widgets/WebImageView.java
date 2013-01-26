@@ -24,6 +24,7 @@ import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
 
+@SuppressWarnings("ucd")
 public class WebImageView extends RelativeLayout {
 
 	private ImageView					mImageMain;
@@ -122,7 +123,7 @@ public class WebImageView extends RelativeLayout {
 		super.onLayout(changed, l, t, r, b);
 	}
 
-	public void doImageRequest(final BitmapRequest bitmapRequest, final boolean okToRecycle) {
+	private void doImageRequest(final BitmapRequest bitmapRequest, final boolean okToRecycle) {
 		/*
 		 * Handles the image request to set the internal ImageView. Creates a separate
 		 * scaled bitmap based on maxWidth and maxHeight or defaults if not set. The original
@@ -218,7 +219,7 @@ public class WebImageView extends RelativeLayout {
 		});
 	}
 
-	public void showLoading() {
+	private void showLoading() {
 		mProgressBar.setVisibility(View.VISIBLE);
 	}
 
@@ -237,7 +238,7 @@ public class WebImageView extends RelativeLayout {
 	// Setters/Getters routines
 	// --------------------------------------------------------------------------------------------
 
-	public void setImage(final Bitmap bitmap, String imageUri) {
+	private void setImage(final Bitmap bitmap, String imageUri) {
 
 		mImageUri = imageUri;
 		mThreadHandler.post(new Runnable() {

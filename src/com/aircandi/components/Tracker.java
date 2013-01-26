@@ -23,6 +23,7 @@ import com.google.analytics.tracking.android.EasyTracker;
  * - Preferences modified
  */
 
+@SuppressWarnings("ucd")
 public class Tracker {
 
 	public static void trackEvent(String arg0, String arg1, String arg2, long arg3) {

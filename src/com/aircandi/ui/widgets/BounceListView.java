@@ -7,6 +7,7 @@ import android.widget.ListView;
 
 import com.aircandi.CandiConstants;
 
+@SuppressWarnings("ucd")
 public class BounceListView extends ListView {
 	
 	private Context	mContext;

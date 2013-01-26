@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.aircandi.CandiConstants;
 
+@SuppressWarnings("ucd")
 public class Logger {
 
 	/*

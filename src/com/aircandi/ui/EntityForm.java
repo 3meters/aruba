@@ -67,7 +67,7 @@ import com.aircandi.utilities.ImageUtils;
 public class EntityForm extends FormActivity {
 
 	private ViewFlipper		mViewFlipper;
-	protected WebImageView	mImageViewPicture;
+	private WebImageView	mImageViewPicture;
 	private Bitmap			mEntityBitmap;
 	private Entity			mEntityForForm;
 	private Boolean			mDirty	= false;
@@ -259,7 +259,7 @@ public class EntityForm extends FormActivity {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void drawImage(Entity entity) {
+	private void drawImage(Entity entity) {
 		if (mImageViewPicture != null) {
 
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
@@ -304,7 +304,7 @@ public class EntityForm extends FormActivity {
 		}
 	}
 
-	public void drawSources(Entity entity) {
+	private void drawSources(Entity entity) {
 		if (findViewById(R.id.sources) != null) {
 			/*
 			 * We are expecting a builder button with a viewgroup to
@@ -367,6 +367,7 @@ public class EntityForm extends FormActivity {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
 		mCommon.showPictureSourcePicker(mEntityForForm.id);
 		mImageRequestWebImageView = mImageViewPicture;
@@ -389,6 +390,7 @@ public class EntityForm extends FormActivity {
 		};
 	}
 
+	@SuppressWarnings("ucd")
 	public void onSaveButtonClick(View view) {
 		doSave();
 	}
@@ -405,10 +407,12 @@ public class EntityForm extends FormActivity {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onDeleteButtonClick(View view) {
 		deleteEntityAtService();
 	}
 
+	@SuppressWarnings("ucd")
 	public void onAddressBuilderClick(View view) {
 		Intent intent = new Intent(this, AddressBuilder.class);
 		if (mEntityForForm.getPlace().location != null) {
@@ -422,6 +426,7 @@ public class EntityForm extends FormActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
+	@SuppressWarnings("ucd")
 	public void onCategoryBuilderClick(View view) {
 		Intent intent = new Intent(this, CategoryBuilder.class);
 		if (mEntityForForm.getPlace().category != null) {
@@ -432,6 +437,7 @@ public class EntityForm extends FormActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
+	@SuppressWarnings("ucd")
 	public void onSourcesBuilderClick(View view) {
 		Intent intent = new Intent(this, SourcesBuilder.class);
 		intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntityForForm.id);
@@ -448,6 +454,7 @@ public class EntityForm extends FormActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
+	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
 		if (resultCode == Activity.RESULT_OK) {
@@ -528,7 +535,7 @@ public class EntityForm extends FormActivity {
 		}
 	}
 
-	protected void usePictureDefault(Entity entity) {
+	private void usePictureDefault(Entity entity) {
 		/*
 		 * Setting the photo to null will trigger correct default handling.
 		 */
@@ -634,7 +641,7 @@ public class EntityForm extends FormActivity {
 		return mDirty;
 	}
 
-	public void confirmDirtyExit() {
+	private void confirmDirtyExit() {
 		AlertDialog dialog = AircandiCommon.showAlertDialog(null
 				, getResources().getString(R.string.alert_entity_dirty_exit_title)
 				, getResources().getString(R.string.alert_entity_dirty_exit_message)
@@ -644,6 +651,7 @@ public class EntityForm extends FormActivity {
 				, android.R.string.cancel
 				, new DialogInterface.OnClickListener() {
 
+					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							setResult(Activity.RESULT_CANCELED);

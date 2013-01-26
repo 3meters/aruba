@@ -22,6 +22,7 @@ import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.utilities.ImageUtils;
 
+@SuppressWarnings("ucd")
 public class PasswordForm extends FormActivity {
 
 	private EditText	mTextPasswordOld;
@@ -37,7 +38,7 @@ public class PasswordForm extends FormActivity {
 		initialize();
 	}
 
-	protected void initialize() {
+	private void initialize() {
 		mUser = Aircandi.getInstance().getUser();
 		mTextPasswordOld = (EditText) findViewById(R.id.text_password_old);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
@@ -78,6 +79,7 @@ public class PasswordForm extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onSaveButtonClick(View view) {
 		if (validate()) {
 			doSave();

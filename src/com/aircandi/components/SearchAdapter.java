@@ -62,8 +62,6 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 		if (itemData != null) {
 			SearchItem suggestion = itemData;
 			holder.data = itemData;
-			holder.position = position;
-
 			Boolean needSeparator = false;
 			if (position == 0) {
 				needSeparator = true;
@@ -136,13 +134,9 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 		return view;
 	}
 
-	public String getTitle(int position) {
-		return mListItems.get(position).name;
-	}
+	
 
-	public String getUrl(int position) {
-		return mListItems.get(position).uri;
-	}
+	
 
 	@Override
 	public SearchItem getItem(int position) {
@@ -154,22 +148,24 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 		return mListItems.size();
 	}
 
+	@Override
 	public boolean areAllItemsEnabled() {
 		return false;
 	}
 
+	@Override
 	public boolean isEnabled(int position) {
 		return true;
 	}
 
+	@SuppressWarnings("ucd")
 	public static class SearchListViewHolder {
 
-		public int			position;
-		public TextView		itemName;
-		public TextView		itemUri;
-		public TextView		itemCategoryName;
-		public WebImageView	itemImage;
-		public String		itemImageUri;
-		public Object		data;
+		private TextView		itemName;
+		private TextView		itemUri;
+		private TextView		itemCategoryName;
+		private WebImageView	itemImage;
+		public String			itemImageUri;
+		public Object			data;
 	}
 }

@@ -3,7 +3,6 @@ package com.aircandi.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -43,7 +42,7 @@ public class CommentList extends CandiActivity {
 	private List<Comment>	mComments		= new ArrayList<Comment>();
 	private Button			mButtonNewComment;
 
-	protected int			mLastResultCode	= Activity.RESULT_OK;
+	
 	private LayoutInflater	mInflater;
 	private Boolean			mMore			= false;
 	private static long		LIST_MAX		= 300L;
@@ -59,7 +58,7 @@ public class CommentList extends CandiActivity {
 		}
 	}
 
-	protected void initialize() {
+	private void initialize() {
 		mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mListView = (ListView) findViewById(R.id.list_comments);
 		mButtonNewComment = (Button) findViewById(R.id.button_new_comment);
@@ -77,7 +76,7 @@ public class CommentList extends CandiActivity {
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
-	protected void bind(final Boolean refresh) {
+	private void bind(final Boolean refresh) {
 
 		new AsyncTask() {
 
@@ -125,7 +124,7 @@ public class CommentList extends CandiActivity {
 		}.execute();
 	}
 
-	public ModelResult loadComments() {
+	private ModelResult loadComments() {
 
 		String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
 		String jsonOptions = "{\"limit\":"
@@ -151,6 +150,7 @@ public class CommentList extends CandiActivity {
 		bind(true);
 	}
 
+	@SuppressWarnings("ucd")
 	public void onNewCommentButtonClick(View view) {
 		/*
 		 * We assume the new comment button wouldn't be visible if the
@@ -175,11 +175,11 @@ public class CommentList extends CandiActivity {
 	// Inner classes/enums
 	// --------------------------------------------------------------------------------------------
 
-	class EndlessCommentAdapter extends EndlessAdapter {
+	private class EndlessCommentAdapter extends EndlessAdapter {
 
-		List<Comment>	moreComments	= new ArrayList<Comment>();
+		private List<Comment>	moreComments	= new ArrayList<Comment>();
 
-		EndlessCommentAdapter(List<Comment> list) {
+		private EndlessCommentAdapter(List<Comment> list) {
 			super(new ListAdapter(list));
 		}
 
@@ -228,9 +228,9 @@ public class CommentList extends CandiActivity {
 		}
 	}
 
-	public class ListAdapter extends ArrayAdapter<Comment> {
+	private class ListAdapter extends ArrayAdapter<Comment> {
 
-		public ListAdapter(List<Comment> items) {
+		private ListAdapter(List<Comment> items) {
 			super(CommentList.this, 0, items);
 		}
 
@@ -322,10 +322,12 @@ public class CommentList extends CandiActivity {
 			return mComments.get(position);
 		}
 
+		@Override
 		public boolean areAllItemsEnabled() {
 			return false;
 		}
 
+		@Override
 		public boolean isEnabled(int position) {
 			return true;
 		}

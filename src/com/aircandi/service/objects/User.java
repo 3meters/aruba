@@ -10,6 +10,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class User extends ServiceEntryBase {
 
 	/* syntax: @Expose (serialize = false, deserialize = false) */
@@ -59,8 +60,7 @@ public class User extends ServiceEntryBase {
 	@Expose(serialize = false, deserialize = true)
 	public List<Stat>			stats;
 
-	/* For client use only */
-	public boolean				keepSignedIn		= false;
+	
 	public Session				session;
 	public String				firstName;
 	public String				lastName;

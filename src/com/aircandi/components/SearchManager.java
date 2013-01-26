@@ -12,15 +12,11 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.provider.Browser;
-import android.webkit.WebIconDatabase.IconListener;
 
-@SuppressWarnings("unused")
+@SuppressWarnings("ucd")
 public class SearchManager {
 
 	private static SearchManager	singletonObject;
-
-	private Context					mContext;
-	private final IconReceiver		mIconReceiver	= new IconReceiver();
 
 	public static synchronized SearchManager getInstance() {
 		if (singletonObject == null) {
@@ -35,7 +31,6 @@ public class SearchManager {
 	private SearchManager() {}
 
 	public void setContext(Context context) {
-		mContext = context;
 	}
 
 	public List<SearchItem> getBookmarks(ContentResolver contentResolver) {
@@ -115,6 +110,7 @@ public class SearchManager {
 		c.close();
 	}
 
+	@SuppressWarnings("ucd")
 	public static class SearchItem {
 
 		public String			name;
@@ -126,14 +122,8 @@ public class SearchManager {
 
 	}
 
-	public enum SearchItemType {
+	@SuppressWarnings("ucd")
+	enum SearchItemType {
 		Bookmarks, Suggestions
 	}
-
-	private class IconReceiver implements IconListener {
-		public void onReceivedIcon(String url, Bitmap icon) {
-			//updateBookmarkFavicon(mContentResolver, url, icon);
-		}
-	}
-
 }

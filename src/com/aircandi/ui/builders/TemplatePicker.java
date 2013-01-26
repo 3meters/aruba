@@ -17,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.FontManager;
@@ -32,10 +31,8 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
-		
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
+
 		initialize();
 	}
 
@@ -52,15 +49,15 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 			listData.add(new Template(R.drawable.ic_action_edit_light, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
 		}
 
-		mTitle = (TextView) findViewById(R.id.custom_title);
+		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText(R.string.dialog_template_picker_title);
-		
+
 		mListAdapter = new ListAdapter(this, listData);
 		mListView = (ListView) findViewById(R.id.form_list);
 		mListView.setAdapter(mListAdapter);
 		mListView.setOnItemClickListener(this);
 
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 	}
 

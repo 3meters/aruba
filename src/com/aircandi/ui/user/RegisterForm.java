@@ -59,7 +59,7 @@ public class RegisterForm extends FormActivity {
 		draw();
 	}
 
-	protected void initialize() {
+	private void initialize() {
 		mImage = (WebImageView) findViewById(R.id.image_picture);
 		mTextFullname = (EditText) findViewById(R.id.text_fullname);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
@@ -81,15 +81,15 @@ public class RegisterForm extends FormActivity {
 
 	}
 
-	protected void bind() {
+	private void bind() {
 		mUser = new User();
 	}
 
-	protected void draw() {
+	private void draw() {
 		drawImage(mUser);
 	}
 
-	public void drawImage(User user) {
+	private void drawImage(User user) {
 		if (mImage != null) {
 			if (mBitmap != null) {
 				mImage.hideLoading();
@@ -109,14 +109,17 @@ public class RegisterForm extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onSignUpButtonClick(View view) {
 		doSave();
 	}
 
+	@SuppressWarnings("ucd")
 	public void onViewTermsButtonClick(View view) {
 		doViewTerms();
 	}
 
+	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
 
 		mCommon.showPictureSourcePicker(null);
@@ -169,7 +172,7 @@ public class RegisterForm extends FormActivity {
 		}
 	}
 
-	protected void usePictureDefault(User user) {
+	private void usePictureDefault(User user) {
 		/*
 		 * Setting the photo to null will trigger correct default handling.
 		 */
@@ -186,7 +189,7 @@ public class RegisterForm extends FormActivity {
 	// Service routines
 	// --------------------------------------------------------------------------------------------
 
-	protected void doViewTerms() {
+	private void doViewTerms() {
 
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(CandiConstants.URL_AIRCANDI_TERMS));
@@ -195,7 +198,7 @@ public class RegisterForm extends FormActivity {
 
 	}
 
-	protected void doSave() {
+	private void doSave() {
 		insert();
 	}
 
@@ -264,7 +267,7 @@ public class RegisterForm extends FormActivity {
 		return true;
 	}
 
-	protected void insert() {
+	private void insert() {
 
 		if (validate()) {
 

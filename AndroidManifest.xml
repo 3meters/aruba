@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi"
     android:versionCode="1"
-    android:versionName="0.6.5" >
+    android:versionName="0.6.6" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="9"
         android:targetSdkVersion="17" />
 
     <supports-screens
@@ -49,7 +49,8 @@
         <activity
             android:name=".ui.SplashForm"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:windowSoftInputMode="stateHidden" >
+            android:windowSoftInputMode="stateHidden"
+            android:theme="@style/aircandi_theme_midnight_notitlebar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -136,46 +137,42 @@
         <activity
             android:name=".ui.builders.PicturePicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_picture_search"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".ui.builders.TemplatePicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_templates"
-            android:theme="@style/Theme.Sherlock.Light.Dialog"
+            android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".ui.builders.PictureSourcePicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/Theme.Sherlock.Light.Dialog"
+            android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".ui.builders.LinkPicker"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/form_title_link_picker"
-            android:theme="@style/Theme.Sherlock.Light.Dialog"
+            android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".ui.builders.AddressBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/Theme.Sherlock.Light.Dialog"
+            android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".ui.builders.CategoryBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/Theme.Sherlock.Light.Dialog"
+            android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".ui.builders.SourcesBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/Theme.Sherlock.Light.Dialog"
-            android:label="@string/form_title_source_builder"
+            android:theme="@style/aircandi_theme_dialog_dark"
             android:windowSoftInputMode="stateHidden" >
         </activity>
 		<activity

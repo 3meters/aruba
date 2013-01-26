@@ -13,6 +13,7 @@ import com.aircandi.PlacesConstants;
  * that a location change has occurred. This is used instead of a LocationListener
  * within an Activity is our only action is to start a service.
  */
+@SuppressWarnings("ucd")
 public class LocationChangedReceiver extends BroadcastReceiver {
 
 	protected static String	TAG	= "LocationChangedReceiver";

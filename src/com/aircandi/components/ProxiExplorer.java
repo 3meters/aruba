@@ -65,7 +65,9 @@ public class ProxiExplorer {
 
 	private AtomicBoolean			mScanRequestActive		= new AtomicBoolean(false);
 
+	@SuppressWarnings("ucd")
 	public List<WifiScanResult>		mWifiList				= new ArrayList<WifiScanResult>();
+	@SuppressWarnings("ucd")
 	public Date						mLastWifiUpdate;
 	private WifiManager				mWifiManager;
 	private boolean					mUsingEmulator			= false;
@@ -398,7 +400,10 @@ public class ProxiExplorer {
 		if (excludePlaceIds.size() > 0) {
 			parameters.putStringArrayList("excludePlaceIds", excludePlaceIds);
 		}
-		parameters.putString("source", PlaceSources.foursquare.name());
+
+		String placeSource = Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_SOURCE, "foursquare");
+
+		parameters.putString("source", placeSource);
 		parameters.putFloat("latitude", observation.latitude.floatValue());
 		parameters.putFloat("longitude", observation.longitude.floatValue());
 		parameters.putInt("limit", ProxiConstants.RADAR_PLACES_LIMIT);
@@ -416,6 +421,7 @@ public class ProxiExplorer {
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			String jsonResponse = (String) serviceResponse.data;
+			Logger.v(this, jsonResponse);
 			ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
 
@@ -475,7 +481,7 @@ public class ProxiExplorer {
 	// Entity management
 	// --------------------------------------------------------------------------------------------
 
-	public void manageEntityVisibility() {
+	private void manageEntityVisibility() {
 
 		/* Visibility status effects all entities regardless of whether this is a full or partial update. */
 		Logger.v(this, "Managing entity visibility");
@@ -616,7 +622,7 @@ public class ProxiExplorer {
 		return null;
 	}
 
-	public Entity loadEntityFromResources(Integer entityResId) {
+	private Entity loadEntityFromResources(Integer entityResId) {
 		try {
 			InputStream inputStream = mContext.getResources().openRawResource(entityResId);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -691,6 +697,7 @@ public class ProxiExplorer {
 		return mEntityModel;
 	}
 
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
 	}
@@ -705,7 +712,7 @@ public class ProxiExplorer {
 		private List<Beacon>			mBeacons			= new ArrayList<Beacon>();
 		private List<Photo>				mPhotos				= new ArrayList<Photo>();
 		private List<Category>			mCategories			= new ArrayList<Category>();
-		private HashMap<String, Source> mSourceMeta			= new HashMap<String, Source>();
+		private HashMap<String, Source>	mSourceMeta			= new HashMap<String, Source>();
 
 		private Number					mLastRefreshDate;
 		private Number					mLastActivityDate	= DateUtils.nowDate().getTime();
@@ -782,7 +789,7 @@ public class ProxiExplorer {
 			return result;
 		}
 
-		public ModelResult getEntities(List<String> entityIds, Boolean refresh, String jsonEagerLoad, String jsonOptions) {
+		private ModelResult getEntities(List<String> entityIds, Boolean refresh, String jsonEagerLoad, String jsonOptions) {
 			ModelResult result = new ModelResult();
 
 			ArrayList<String> getEntityIds = new ArrayList<String>();
@@ -963,6 +970,7 @@ public class ProxiExplorer {
 		// Combo service/cache updates
 		// --------------------------------------------------------------------------------------------
 
+		@SuppressWarnings("ucd")
 		public ModelResult moveEntity(String entityId, String newParentId, Boolean toBeacon, Boolean cacheOnly) {
 
 			ModelResult result = new ModelResult();
@@ -1401,6 +1409,7 @@ public class ProxiExplorer {
 
 		}
 
+		@SuppressWarnings("ucd")
 		public ModelResult signout() {
 			ModelResult result = new ModelResult();
 
@@ -1448,6 +1457,7 @@ public class ProxiExplorer {
 			return result;
 		}
 
+		@SuppressWarnings("ucd")
 		public ModelResult insertLink(Link link) {
 			ModelResult result = new ModelResult();
 
@@ -1470,7 +1480,7 @@ public class ProxiExplorer {
 			return result;
 		}
 
-		public ModelResult insertBeacon(Beacon beacon) {
+		private ModelResult insertBeacon(Beacon beacon) {
 			ModelResult result = new ModelResult();
 
 			ServiceRequest serviceRequest = new ServiceRequest()
@@ -1606,6 +1616,7 @@ public class ProxiExplorer {
 			return result;
 		}
 
+		@SuppressWarnings("ucd")
 		public ModelResult logAction(String targetId, String targetSource, String actionType) {
 			ModelResult result = new ModelResult();
 			Bundle parameters = new Bundle();
@@ -1629,7 +1640,7 @@ public class ProxiExplorer {
 		// Beacon routines
 		// --------------------------------------------------------------------------------------------
 
-		public void updateBeacons() {
+		private void updateBeacons() {
 			/*
 			 * Makes sure that the beacon collection is an accurate representation
 			 * of the latest wifi scan.
@@ -1875,7 +1886,7 @@ public class ProxiExplorer {
 			return entities;
 		}
 
-		public EntityList<Entity> getUserEntities(String userId) {
+		private EntityList<Entity> getUserEntities(String userId) {
 			EntityList<Entity> entities = new EntityList<Entity>();
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
@@ -1907,6 +1918,7 @@ public class ProxiExplorer {
 			}
 		}
 
+		@SuppressWarnings("ucd")
 		public List<Entity> getCacheEntities(List<String> entityIds) {
 			List<Entity> entities = new ArrayList<Entity>();
 			synchronized (mEntityCache) {
@@ -1982,7 +1994,7 @@ public class ProxiExplorer {
 		// Entity cache modification routines
 		// --------------------------------------------------------------------------------------------
 
-		public void insertComment(String entityId, Comment comment) {
+		private void insertComment(String entityId, Comment comment) {
 			Entity entity = getCacheEntity(entityId);
 			if (entity != null) {
 				if (entity.comments == null) {
@@ -1997,18 +2009,7 @@ public class ProxiExplorer {
 			}
 		}
 
-		public void upsertBeacons(List<Beacon> beacons) {
-			/*
-			 * We could be over writing data that has been set locally
-			 * and would be lost if we replace beacons that already are
-			 * cached.
-			 */
-			for (Beacon beacon : beacons) {
-				upsertBeacon(beacon);
-			}
-		}
-
-		public void upsertBeacon(Beacon beacon) {
+		private void upsertBeacon(Beacon beacon) {
 			synchronized (mBeacons) {
 
 				Beacon beaconOriginal = getBeacon(beacon.id);
@@ -2022,13 +2023,13 @@ public class ProxiExplorer {
 			setLastActivityDate(DateUtils.nowDate().getTime());
 		}
 
-		public void upsertEntities(List<Entity> entities) {
+		private void upsertEntities(List<Entity> entities) {
 			for (Entity entity : entities) {
 				upsertEntity(entity);
 			}
 		}
 
-		public Entity upsertEntity(Entity entity) {
+		private Entity upsertEntity(Entity entity) {
 			/*
 			 * This is the only place we use the children property
 			 * set when deserializing from the service. After this
@@ -2086,7 +2087,7 @@ public class ProxiExplorer {
 								|| source.source.equals("openmenu")) {
 							source.intentSupport = false;
 						}
-						
+
 						if (!mEntityModel.mSourceMeta.containsKey(source.source)) {
 							mEntityModel.mSourceMeta.put(source.source, new Source(source.intentSupport, false));
 						}
@@ -2112,8 +2113,10 @@ public class ProxiExplorer {
 				Source source = new Source();
 				source.name = "comments";
 				source.icon = "resource:img_post";
+				source.source = "comments";
 				source.position = position;
 				source.intentSupport = false;
+				source.installDeclined = false;
 				sourceEntity.source = source;
 
 				sourceEntity.commentCount = entity.commentCount;
@@ -2131,7 +2134,7 @@ public class ProxiExplorer {
 			return original;
 		}
 
-		public void updateUser(User user) {
+		private void updateUser(User user) {
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (entry.getValue().creatorId != null && entry.getValue().creatorId.equals(user.id)) {
@@ -2146,12 +2149,13 @@ public class ProxiExplorer {
 			setLastActivityDate(DateUtils.nowDate().getTime());
 		}
 
-		public void moveEntity(String moveEntityId, String parentId, String beaconId) {
+		private void moveEntity(String moveEntityId, String parentId, String beaconId) {
 			Entity entity = getCacheEntity(moveEntityId);
 			entity.parentId = parentId;
 			setLastActivityDate(DateUtils.nowDate().getTime());
 		}
 
+		@SuppressWarnings("ucd")
 		public void removeEntitiesForUser(String userId) {
 			/*
 			 * We clean out user entities and their children when the entity
@@ -2169,7 +2173,7 @@ public class ProxiExplorer {
 			setLastActivityDate(DateUtils.nowDate().getTime());
 		}
 
-		public void removeSyntheticEntities() {
+		private void removeSyntheticEntities() {
 			/*
 			 * We clean out user entities and their children when the entity
 			 * is associated with a beacon that isn't a radar hit.
@@ -2187,7 +2191,7 @@ public class ProxiExplorer {
 			setLastActivityDate(DateUtils.nowDate().getTime());
 		}
 
-		public void removeLocationEntities() {
+		private void removeLocationEntities() {
 			/*
 			 * We clean out user entities and their children when the entity
 			 * is associated with a beacon that isn't a radar hit.
@@ -2206,7 +2210,7 @@ public class ProxiExplorer {
 			setLastActivityDate(DateUtils.nowDate().getTime());
 		}
 
-		public void removeBeaconEntities() {
+		private void removeBeaconEntities() {
 			/*
 			 * We clean out user entities and their children when the entity
 			 * is associated with a beacon that isn't a radar hit.
@@ -2225,6 +2229,7 @@ public class ProxiExplorer {
 			setLastActivityDate(DateUtils.nowDate().getTime());
 		}
 
+		@SuppressWarnings("ucd")
 		public void removeEntitiesForBeacon(String beaconId) {
 			/*
 			 * We clean out entities and their children when the top
@@ -2244,7 +2249,7 @@ public class ProxiExplorer {
 			setLastActivityDate(DateUtils.nowDate().getTime());
 		}
 
-		public Entity removeEntity(String entityId) {
+		private Entity removeEntity(String entityId) {
 			/*
 			 * Clean out every entity related to entityId
 			 */
@@ -2285,7 +2290,7 @@ public class ProxiExplorer {
 			return entities;
 		}
 
-		public HashMap<String, Entity> removeSourceEntities(String entityId) {
+		private HashMap<String, Entity> removeSourceEntities(String entityId) {
 			/*
 			 * This will clean all entities that have entityId as parentId. This
 			 * will take care synthesized source entities as well.
@@ -2338,7 +2343,6 @@ public class ProxiExplorer {
 			return mCategories;
 		}
 
-		
 		public HashMap<String, Source> getSourceMeta() {
 			return mSourceMeta;
 		}
@@ -2350,27 +2354,27 @@ public class ProxiExplorer {
 		public ServiceResponse	serviceResponse	= new ServiceResponse();
 	}
 
-	public static class WifiScanResult {
+	static class WifiScanResult {
 
-		public String	BSSID;
-		public String	SSID;
-		public int		level	= 0;
+		String			BSSID;
+		String			SSID;
+		int				level	= 0;
 		public Boolean	test	= false;
 
-		public WifiScanResult(String bssid, String ssid, int level, Boolean test) {
+		private WifiScanResult(String bssid, String ssid, int level, Boolean test) {
 			this.BSSID = bssid;
 			this.SSID = ssid;
 			this.level = level;
 			this.test = test;
 		}
 
-		public WifiScanResult(ScanResult scanResult) {
+		private WifiScanResult(ScanResult scanResult) {
 			this.BSSID = scanResult.BSSID;
 			this.SSID = scanResult.SSID;
 			this.level = scanResult.level;
 		}
 
-		public static class SortWifiBySignalLevel implements Comparator<WifiScanResult> {
+		private static class SortWifiBySignalLevel implements Comparator<WifiScanResult> {
 
 			@Override
 			public int compare(WifiScanResult object1, WifiScanResult object2) {
@@ -2391,31 +2395,9 @@ public class ProxiExplorer {
 		TunedPlaces, SyntheticPlaces, CreatedByUser, Collections, InCollection
 	}
 
-	public static enum PlaceSources {
-		foursquare,
-		factual
-	}
-
 	public static enum ScanReason {
 		query,
 		monitoring
 	}
 
-	public static interface IEntityProcessListener {
-		/**
-		 * Callback interface for ProxiExplorer beacon scan requests.
-		 */
-
-		/**
-		 * Called when a request completes with the given response. Executed by a background thread: do not update the
-		 * UI in this method.
-		 */
-		public void onComplete(List<Entity> proxiEntities);
-
-		/**
-		 * Called when the server-side Proxibase method fails. Executed by a background thread: do not update the UI in
-		 * this method.
-		 */
-		public void onProxibaseServiceException(ProxibaseServiceException exception);
-	}
 }

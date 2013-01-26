@@ -23,6 +23,7 @@ import com.aircandi.service.SerializedName;
  * observations: admin, user
  */
 
+@SuppressWarnings("ucd")
 public abstract class ServiceEntryBase implements Cloneable, Serializable {
 
 	private static final long		serialVersionUID	= 5341986472204947191L;

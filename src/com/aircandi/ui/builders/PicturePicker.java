@@ -34,7 +34,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.Window;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
@@ -95,14 +94,7 @@ public class PicturePicker extends FormActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		if (isDialog()) {
-			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-		}
 		super.onCreate(savedInstanceState);
-
-		if (isDialog()) {
-			getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
-		}
 		initialize();
 		bind();
 	}
@@ -138,7 +130,7 @@ public class PicturePicker extends FormActivity {
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.search_text));
 		}
 
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.message));
 
@@ -150,7 +142,7 @@ public class PicturePicker extends FormActivity {
 		mImageWidthPixels = (layoutWidthPixels / 3) - (mImageMarginPixels * 2);
 
 		if (isDialog()) {
-			mTitle = (TextView) findViewById(R.id.custom_title);
+			mTitle = (TextView) findViewById(R.id.title);
 			mTitle.setText(mPlacePhotoMode ? R.string.dialog_picture_picker_place_title : R.string.dialog_picture_picker_search_title);
 		}
 		else {
@@ -167,6 +159,7 @@ public class PicturePicker extends FormActivity {
 		mGridView.setColumnWidth(mImageWidthPixels);
 		mGridView.setOnItemClickListener(new OnItemClickListener() {
 
+			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				if (((EndlessImageAdapter) mGridView.getAdapter()).getItemViewType(position) != Adapter.IGNORE_ITEM_VIEW_TYPE) {
 					String imageUri = mImages.get(position).getMediaUrl();
@@ -188,7 +181,7 @@ public class PicturePicker extends FormActivity {
 		});
 	}
 
-	protected void bind() {
+	private void bind() {
 		mGridView.setAdapter(new EndlessImageAdapter(mImages));
 	}
 
@@ -232,6 +225,7 @@ public class PicturePicker extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onSearchClick(View view) {
 		mQuery = mSearch.getText().toString();
 		mMessage.setVisibility(View.VISIBLE);
@@ -269,38 +263,12 @@ public class PicturePicker extends FormActivity {
 		}
 	}
 
-	protected void unbindDrawables(View view) {
-		if (view.getBackground() != null) {
-			view.getBackground().setCallback(null);
-		}
-		if (view instanceof ViewGroup) {
-			for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-				unbindDrawables(((ViewGroup) view).getChildAt(i));
-			}
-			try {
-				((ViewGroup) view).removeAllViews();
-			}
-			catch (Throwable e) {
-				// NOP
-			}
-		}
-	}
-
-	protected void unbindImageViewDrawables(ImageView imageView) {
-		if (imageView.getBackground() != null) {
-			imageView.getBackground().setCallback(null);
-		}
-		if (imageView.getDrawable() != null) {
-			imageView.getDrawable().setCallback(null);
-			((BitmapDrawable) imageView.getDrawable()).getBitmap().recycle();
-		}
-	}
-
 	@Override
 	protected int getLayoutID() {
 		return R.layout.picker_picture;
 	}
 
+	@Override
 	protected Boolean isDialog() {
 		return false;
 	}
@@ -309,11 +277,11 @@ public class PicturePicker extends FormActivity {
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
 
-	class EndlessImageAdapter extends EndlessAdapter {
+	private class EndlessImageAdapter extends EndlessAdapter {
 
-		ArrayList<ImageResult>	moreImages	= new ArrayList<ImageResult>();
+		private ArrayList<ImageResult>	moreImages	= new ArrayList<ImageResult>();
 
-		EndlessImageAdapter(ArrayList<ImageResult> list) {
+		private EndlessImageAdapter(ArrayList<ImageResult> list) {
 			super(new ListAdapter(list));
 		}
 
@@ -460,7 +428,7 @@ public class PicturePicker extends FormActivity {
 		}
 	}
 
-	public class DrawableManager {
+	private class DrawableManager {
 		/*
 		 * Serves up BitmapDrawables but caches just the bitmap. The cache holds
 		 * a soft reference to the bitmap that allows the gc to collect it if memory
@@ -473,7 +441,7 @@ public class PicturePicker extends FormActivity {
 		}
 
 		@SuppressLint("HandlerLeak")
-		public void fetchDrawableOnThread(final String uri, final ViewHolder holder) {
+		private void fetchDrawableOnThread(final String uri, final ViewHolder holder) {
 
 			synchronized (mBitmapCache) {
 				if (mBitmapCache.containsKey(uri) && mBitmapCache.get(uri).get() != null) {
@@ -540,11 +508,11 @@ public class PicturePicker extends FormActivity {
 		 */
 	}
 
-	static class DrawableHandler extends Handler {
+	private static class DrawableHandler extends Handler {
 
 		private final WeakReference<DrawableManager>	mDrawableManager;
 
-		DrawableHandler(DrawableManager drawableManager) {
+		private DrawableHandler(DrawableManager drawableManager) {
 			mDrawableManager = new WeakReference<DrawableManager>(drawableManager);
 		}
 

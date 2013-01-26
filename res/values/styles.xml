@@ -130,6 +130,7 @@
 
     <style name="form_button_borderless" parent="Widget.Sherlock.ActionButton">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:textColor">?attr/textColor</item>
     </style>
 
     <style name="form_button_link" parent="android:Widget.Button">
@@ -139,7 +140,6 @@
 
     <style name="form_edit" parent="@android:style/Widget.EditText">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textColor">?attr/textColor</item>
         <item name="android:textColorHint">@color/edit_hint</item>
     </style>
 

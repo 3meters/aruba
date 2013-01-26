@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.aircandi.R;
 
+@SuppressWarnings("ucd")
 public class TextViewEllipsizing extends TextView {
 
 	private static final String				ELLIPSIS						= "&#8230;";
@@ -123,17 +124,6 @@ public class TextViewEllipsizing extends TextView {
 				Alignment.ALIGN_NORMAL, mLineSpacingMultiplier, mLineAdditionalVerticalPadding, false);
 	}
 
-	public void addEllipsizeListener(EllipsizeListener listener) {
-		if (listener == null) {
-			throw new NullPointerException();
-		}
-		mEllipsizeListeners.add(listener);
-	}
-
-	public void removeEllipsizeListener(EllipsizeListener listener) {
-		mEllipsizeListeners.remove(listener);
-	}
-
 	public boolean isEllipsized() {
 		return mIsEllipsized;
 	}
@@ -149,6 +139,7 @@ public class TextViewEllipsizing extends TextView {
 		mIsStale = true;
 	}
 
+	@Override
 	public int getMaxLines() {
 		return mMaxLines;
 	}
@@ -169,7 +160,7 @@ public class TextViewEllipsizing extends TextView {
 		this.mMirrorText = mirrorText;
 	}
 
-	public interface EllipsizeListener {
+	private interface EllipsizeListener {
 		void ellipsizeStateChanged(boolean ellipsized);
 	}
 

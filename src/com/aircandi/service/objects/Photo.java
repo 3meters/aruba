@@ -13,6 +13,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class Photo extends ServiceObject implements Cloneable, Serializable {
 	/*
 	 * sourceName: aircandi, foursquare, external
@@ -58,12 +59,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public Photo(String pImageUri, String pTitle, Number pCreatedAt, User pUser) {
-		prefix = pImageUri;
-		createdAt = pCreatedAt;
-		title = pTitle;
-		user = pUser;
-	}
+	
 
 	public static Photo setPropertiesFromMap(Photo photo, HashMap map) {
 

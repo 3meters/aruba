@@ -164,7 +164,7 @@ public class ProfileForm extends FormActivity {
 
 	}
 
-	public void drawImage(User user) {
+	private void drawImage(User user) {
 		
 		if (mImage != null) {
 			if (mBitmap != null) {
@@ -185,10 +185,12 @@ public class ProfileForm extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onSaveButtonClick(View view) {
 		updateProfile();
 	}
 
+	@SuppressWarnings("ucd")
 	public void onChangePictureButtonClick(View view) {
 
 		mCommon.showPictureSourcePicker(null);
@@ -211,6 +213,7 @@ public class ProfileForm extends FormActivity {
 		};
 	}
 
+	@SuppressWarnings("ucd")
 	public void onChangePasswordButtonClick(View view) {
 		IntentBuilder intentBuilder = new IntentBuilder(this, PasswordForm.class);
 		intentBuilder.setCommandType(CommandType.Edit);
@@ -249,7 +252,7 @@ public class ProfileForm extends FormActivity {
 		}
 	}
 
-	protected void usePictureDefault(User user) {
+	private void usePictureDefault(User user) {
 		/*
 		 * Setting the photo to null will trigger correct default handling.
 		 */

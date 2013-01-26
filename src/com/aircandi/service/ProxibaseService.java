@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -40,7 +39,6 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRoute;
 import org.apache.http.conn.routing.HttpRoute;
@@ -84,7 +82,6 @@ import com.aircandi.service.objects.ServiceObject;
 import com.aircandi.service.objects.Session;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.Stat;
-import com.aircandi.service.objects.Tip;
 import com.aircandi.service.objects.User;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -116,27 +113,28 @@ import com.amazonaws.AmazonServiceException;
  */
 public class ProxibaseService {
 
-	private static ProxibaseService		singletonObject;
-	
-	private static final int			MAX_BACKOFF_IN_MILLISECONDS		= 5 * 1000;
-	private static final int			MAX_BACKOFF_RETRIES				= 6;
-	public static final int				DEFAULT_MAX_CONNECTIONS			= 50;
-	public static final int				DEFAULT_CONNECTIONS_PER_ROUTE	= 20;
-	
-	private DefaultHttpClient			mHttpClient;
-	private final HttpParams			mHttpParams;
-	
-	public static JSONParser			parser							= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
-	private static ContainerFactory		containerFactory				= new ContainerFactory() {
-																			public Map createObjectContainer() {
-																				return new LinkedHashMap();
-																			}
+	private static ProxibaseService	singletonObject;
 
-																			@Override
-																			public List<Object> createArrayContainer() {
-																				return new ArrayList<Object>();
-																			}
-																		};
+	private static final int		MAX_BACKOFF_IN_MILLISECONDS		= 5 * 1000;
+	private static final int		MAX_BACKOFF_RETRIES				= 6;
+	private static final int		DEFAULT_MAX_CONNECTIONS			= 50;
+	private static final int		DEFAULT_CONNECTIONS_PER_ROUTE	= 20;
+
+	private DefaultHttpClient		mHttpClient;
+	private final HttpParams		mHttpParams;
+
+	private static JSONParser		parser							= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+	private static ContainerFactory	containerFactory				= new ContainerFactory() {
+																		@Override
+																		public Map createObjectContainer() {
+																			return new LinkedHashMap();
+																		}
+
+																		@Override
+																		public List<Object> createArrayContainer() {
+																			return new ArrayList<Object>();
+																		}
+																	};
 
 	public static synchronized ProxibaseService getInstance() {
 		if (singletonObject == null) {
@@ -145,6 +143,7 @@ public class ProxibaseService {
 		return singletonObject;
 	}
 
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
 	}
@@ -189,6 +188,7 @@ public class ProxibaseService {
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
+
 		sslSocketFactory.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER); /* Might not work */
 		schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
 		HttpsURLConnection.setDefaultHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
@@ -566,7 +566,7 @@ public class ProxibaseService {
 				response.getHeaders("Location").length > 0;
 	}
 
-	public boolean shouldRetry(HttpRequestBase httpAction, Exception exception, int retries) {
+	private boolean shouldRetry(HttpRequestBase httpAction, Exception exception, int retries) {
 
 		if (retries > MAX_BACKOFF_RETRIES) {
 			return false;
@@ -614,17 +614,6 @@ public class ProxibaseService {
 		return false;
 	}
 
-	public long getDelay(int retries) {
-		/*
-		 * Exponential sleep on failed request to avoid flooding a service with retries.
-		 */
-		long delay = 0;
-		long scaleFactor = 100;
-		delay = (long) (Math.pow(2, retries) * scaleFactor);
-		delay = Math.min(delay, MAX_BACKOFF_IN_MILLISECONDS);
-		return delay;
-	}
-
 	private void pauseExponentially(int retries) throws ProxibaseClientException {
 		/*
 		 * Exponential sleep on failed request to avoid flooding a service with retries.
@@ -648,7 +637,7 @@ public class ProxibaseService {
 	// Inner helper methods
 	// ----------------------------------------------------------------------------------------
 
-	public static byte[] getBytes(InputStream inputStream, long lengthOfFile, RequestListener listener) throws IOException {
+	private static byte[] getBytes(InputStream inputStream, long lengthOfFile, RequestListener listener) throws IOException {
 
 		int len;
 		int size = 1024;
@@ -707,7 +696,7 @@ public class ProxibaseService {
 		return uri;
 	}
 
-	public static String convertStreamToString(InputStream inputStream) throws IOException {
+	private static String convertStreamToString(InputStream inputStream) throws IOException {
 
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 		StringBuilder stringBuilder = new StringBuilder();
@@ -728,7 +717,7 @@ public class ProxibaseService {
 				+ String.valueOf(downloadTimeMills) + "ms");
 	}
 
-	public String sessionInfo(ServiceRequest serviceRequest) {
+	private String sessionInfo(ServiceRequest serviceRequest) {
 		String sessionInfo = "";
 		if (serviceRequest.getSession() != null) {
 			sessionInfo = "user=" + serviceRequest.getSession().ownerId + "&";
@@ -852,9 +841,6 @@ public class ProxibaseService {
 						else if (serviceDataType == ServiceDataType.Photo) {
 							list.add(Photo.setPropertiesFromMap(new Photo(), map));
 						}
-						else if (serviceDataType == ServiceDataType.Tip) {
-							list.add(Tip.setPropertiesFromMap(new Tip(), map));
-						}
 						else if (serviceDataType == ServiceDataType.Stat) {
 							list.add(Stat.setPropertiesFromMap(new Stat(), map));
 						}
@@ -879,13 +865,14 @@ public class ProxibaseService {
 		return null;
 	}
 
+	@SuppressWarnings("ucd")
 	public static ServiceData convertJsonToObjectNative(String jsonString, ServiceDataType serviceDataType) {
 		try {
 			ServiceData serviceData = new ServiceData();
 			org.json.JSONObject jsonObject = new org.json.JSONObject(jsonString);
 
 			if (serviceDataType == ServiceDataType.Entity || serviceDataType == ServiceDataType.Beacon) {
-				List<HashMap<String, Object>> maps = (List<HashMap<String, Object>>) JsonHelper.toList(jsonObject.getJSONArray("data"));;
+				List<HashMap<String, Object>> maps = (List<HashMap<String, Object>>) JsonHelper.toList(jsonObject.getJSONArray("data"));
 				if (serviceDataType == ServiceDataType.Entity) {
 					List<Entity> entities = new ArrayList<Entity>();
 					for (HashMap<String, Object> entityMap : maps) {
@@ -927,51 +914,11 @@ public class ProxibaseService {
 	// Inner classes and enums
 	// ----------------------------------------------------------------------------------------
 
-	public static class IdleConnectionMonitorThread extends Thread {
-
-		private final ClientConnectionManager	connMgr;
-		private volatile boolean				shutdown;
-
-		public IdleConnectionMonitorThread(ClientConnectionManager connMgr) {
-			super();
-			this.connMgr = connMgr;
-		}
-
-		@Override
-		public void run() {
-			Thread.currentThread().setName("IdleConnectionMonitorThread");
-			try {
-				while (!shutdown) {
-					synchronized (this) {
-						wait(5000);
-						// Close expired connections
-						connMgr.closeExpiredConnections();
-						// Optionally, close connections
-						// that have been idle longer than 30 sec
-						connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
-					}
-				}
-			}
-			catch (InterruptedException ex) {
-				// terminate
-			}
-		}
-
-		public void shutdown() {
-			shutdown = true;
-			synchronized (this) {
-				notifyAll();
-			}
-		}
-	}
-
 	public static class RequestListener {
 
 		public void onComplete() {}
 
 		public void onComplete(Object response) {}
-
-		public void onComplete(Object response, Object extra) {}
 
 		public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description) {}
 
@@ -985,42 +932,26 @@ public class ProxibaseService {
 		Session,
 		Photo,
 		Link,
-		Tip,
-		VersionInfo,
 		Result,
 		ImageResult,
 		GeoLocation,
 		Category,
-		None, Location, Stat, ServiceEntry, Source, CategorySimple,
+		None,
+		Location,
+		Stat,
+		ServiceEntry,
+		Source,
+		CategorySimple,
 	}
 
 	public static enum RequestType {
 		Get, Insert, Update, Delete, Method
 	}
 
-	public static enum GsonType {
-		Internal,
-		ProxibaseService,
-		ProxibaseServiceNew,
-		BingService
-	}
-
 	public static enum ResponseFormat {
 		Json,
-		Xml,
 		Html,
 		Stream,
 		Bytes
-	}
-
-	public static enum UrlEncodingType {
-		All,
-		SpacesOnly,
-		None
-	}
-
-	public static enum UriConfig {
-		DomainAndFilePath,
-		FilePath
 	}
 }

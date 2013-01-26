@@ -28,6 +28,7 @@ import com.aircandi.ui.Preferences;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
 
+@SuppressWarnings("ucd")
 public class CandiView extends RelativeLayout {
 
 	public static final int		HORIZONTAL				= 0;
@@ -74,7 +75,7 @@ public class CandiView extends RelativeLayout {
 		}
 	}
 
-	public void initialize() {
+	private void initialize() {
 		mInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mLayout = (ViewGroup) mInflater.inflate(mLayoutId, this, true);
 
@@ -247,7 +248,7 @@ public class CandiView extends RelativeLayout {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void drawImage() {
+	private void drawImage() {
 		if (mCandiImage != null) {
 
 			/* Handle image background coloring if we are using default treatment */
@@ -365,7 +366,7 @@ public class CandiView extends RelativeLayout {
 	// Setters/getters
 	// --------------------------------------------------------------------------------------------
 
-	protected static void setVisibility(View view, Integer visibility) {
+	private static void setVisibility(View view, Integer visibility) {
 		if (view != null) {
 			view.setVisibility(visibility);
 		}

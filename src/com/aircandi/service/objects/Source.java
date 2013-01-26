@@ -11,6 +11,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class Source extends ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 4362288672245719448L;
@@ -41,11 +42,6 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	public Boolean				installDeclined;
 
 	public Source() {}
-
-	public Source(String source, String id) {
-		this.source = source;
-		this.id = id;
-	}
 
 	public Source(Boolean intentSupport, Boolean installDeclined) {
 		this.intentSupport = intentSupport;

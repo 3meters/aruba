@@ -3,6 +3,7 @@ package com.aircandi.ui.widgets;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.text.Html;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,14 +19,14 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.User;
 import com.aircandi.utilities.DateUtils;
 
+@SuppressWarnings("ucd")
 public class UserView extends RelativeLayout {
 
-	public static final int	HORIZONTAL	= 0;
-	public static final int	VERTICAL	= 1;
 	private ViewGroup		mBoundView;
 	private WebImageView	mImageUser;
 	private ImageView		mImageLocked;
 	private TextView		mTextName;
+	private TextView		mTextLocation;
 	private TextView		mTextLabel;
 	private String			mLabel;
 	private TextView		mTextTimeSince;
@@ -57,10 +58,12 @@ public class UserView extends RelativeLayout {
 		if (!isInEditMode()) {
 			mImageUser = (WebImageView) mBoundView.findViewById(R.id.candi_user_picture);
 			mTextName = (TextView) mBoundView.findViewById(R.id.candi_user_fullname);
+			mTextLocation = (TextView) mBoundView.findViewById(R.id.candi_user_location);
 			mTextLabel = (TextView) mBoundView.findViewById(R.id.candi_user_label);
 			mTextTimeSince = (TextView) mBoundView.findViewById(R.id.candi_user_timesince);
 			mImageLocked = (ImageView) mBoundView.findViewById(R.id.image_locked);
 			FontManager.getInstance().setTypefaceDefault(mTextName);
+			FontManager.getInstance().setTypefaceDefault(mTextLocation);
 			FontManager.getInstance().setTypefaceDefault(mTextTimeSince);
 			FontManager.getInstance().setTypefaceDefault(mTextLabel);
 		}
@@ -69,7 +72,7 @@ public class UserView extends RelativeLayout {
 		this.addView(mBoundView);
 	}
 
-	public void bindToAuthor(User author, Long date, boolean locked) {
+	public void bindToAuthor(User author, Long date, Boolean locked) {
 		mAuthor = author;
 		if (mAuthor != null) {
 			if (mTextLabel != null) {
@@ -80,6 +83,7 @@ public class UserView extends RelativeLayout {
 					mTextLabel.setVisibility(View.GONE);
 				}
 			}
+
 			if (mTextName != null) {
 				String authorName = mAuthor.name;
 				if (authorName == null) {
@@ -90,6 +94,11 @@ public class UserView extends RelativeLayout {
 				}
 				mTextName.setText(authorName);
 			}
+
+			if (mTextLocation != null && mAuthor.location != null && !mAuthor.location.equals("")) {
+				mTextLocation.setText(Html.fromHtml(mAuthor.location));
+			}
+
 			if (mTextTimeSince != null) {
 				if (date != null) {
 					mTextTimeSince.setText(DateUtils.timeSince(date, DateUtils.nowDate().getTime()));
@@ -98,6 +107,7 @@ public class UserView extends RelativeLayout {
 					mTextTimeSince.setVisibility(View.GONE);
 				}
 			}
+
 			if (mImageUser != null) {
 				if (mAuthor.getUserPhotoUri() != null && mAuthor.getUserPhotoUri().length() != 0) {
 					BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
@@ -106,8 +116,9 @@ public class UserView extends RelativeLayout {
 					mImageUser.setBitmapRequest(imageRequest);
 				}
 			}
+
 			if (mImageLocked != null) {
-				if (locked) {
+				if (locked != null && locked) {
 					mImageLocked.setVisibility(View.VISIBLE);
 				}
 				else {

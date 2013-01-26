@@ -97,7 +97,7 @@ public class SourcesBuilder extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
 	}
 
-	public void bind() {
+	private void bind() {
 
 		if (mSources.size() == 0) {
 			mCommon.hideBusy(true);
@@ -133,6 +133,7 @@ public class SourcesBuilder extends FormActivity {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onSaveButtonClick(View view) {
 		gatherAndExit();
 	}
@@ -149,6 +150,7 @@ public class SourcesBuilder extends FormActivity {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onDeleteButtonClick(View view) {
 		for (int i = mSources.size() - 1; i >= 0; i--) {
 			if (mSources.get(i).checked) {
@@ -158,6 +160,7 @@ public class SourcesBuilder extends FormActivity {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onAddButtonClick(View view) {
 		Intent intent = new Intent(this, SourceBuilder.class);
 		if (mEntity != null) {
@@ -167,6 +170,7 @@ public class SourcesBuilder extends FormActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
+	@SuppressWarnings("ucd")
 	public void onMoveUpButtonClick(View view) {
 		for (int i = mSources.size() - 1; i >= 0; i--) {
 			if (mSources.get(i).checked) {
@@ -182,6 +186,7 @@ public class SourcesBuilder extends FormActivity {
 		mList.invalidateViews();
 	}
 
+	@SuppressWarnings("ucd")
 	public void onMoveDownButtonClick(View view) {
 		for (int i = mSources.size() - 1; i >= 0; i--) {
 			if (mSources.get(i).checked) {
@@ -197,6 +202,7 @@ public class SourcesBuilder extends FormActivity {
 		mList.invalidateViews();
 	}
 
+	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {
 		Intent intent = new Intent(this, SourceBuilder.class);
 		CheckBox check = (CheckBox) view.findViewById(R.id.check);
@@ -265,7 +271,7 @@ public class SourcesBuilder extends FormActivity {
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
 
-	public void confirmSourceDelete() {
+	private void confirmSourceDelete() {
 
 		/* How many are we deleting? */
 		Integer deleteCount = 0;
@@ -311,6 +317,7 @@ public class SourcesBuilder extends FormActivity {
 				, android.R.string.cancel
 				, new DialogInterface.OnClickListener() {
 
+					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							for (int i = mSources.size() - 1; i >= 0; i--) {
@@ -330,7 +337,7 @@ public class SourcesBuilder extends FormActivity {
 		dialog.setCanceledOnTouchOutside(false);
 	}
 
-	public void confirmDirtyExit() {
+	private void confirmDirtyExit() {
 		AlertDialog dialog = AircandiCommon.showAlertDialog(null
 				, getResources().getString(R.string.alert_sources_dirty_exit_title)
 				, getResources().getString(R.string.alert_sources_dirty_exit_message)
@@ -340,6 +347,7 @@ public class SourcesBuilder extends FormActivity {
 				, android.R.string.cancel
 				, new DialogInterface.OnClickListener() {
 
+					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							setResult(Activity.RESULT_CANCELED);
@@ -352,7 +360,7 @@ public class SourcesBuilder extends FormActivity {
 		dialog.setCanceledOnTouchOutside(false);
 	}
 
-	public void loadSourceSuggestions(final Entity entity, final List<Source> sources, final Boolean autoInsert) {
+	private void loadSourceSuggestions(final Entity entity, final List<Source> sources, final Boolean autoInsert) {
 		new AsyncTask() {
 
 			@Override
@@ -398,7 +406,7 @@ public class SourcesBuilder extends FormActivity {
 		}.execute();
 	}
 
-	public void gatherAndExit() {
+	private void gatherAndExit() {
 		Intent intent = new Intent();
 		List<String> sourceStrings = new ArrayList<String>();
 		for (Source source : mSources) {
@@ -451,11 +459,13 @@ public class SourcesBuilder extends FormActivity {
 		});
 	}
 
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		mCommon.doCreateOptionsMenu(menu);
 		return true;
 	}
 
+	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		mCommon.doPrepareOptionsMenu(menu);
 		return true;

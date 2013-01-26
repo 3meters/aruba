@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/backgroundButton"
+    android:paddingBottom="5dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="5dp" >
+
+    <LinearLayout
+        android:id="@+id/action_block"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/candi_user_label"
+            style="@style/candi_user"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/candi_label_user_created_by" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/candi_user_timesince"
+                style="@style/candi_user"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:text="@string/dummy_timesince" />
+
+            <ImageView
+                android:id="@+id/image_locked"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:gravity="center_vertical"
+                android:maxHeight="20dp"
+                android:maxWidth="20dp"
+                android:scaleType="fitCenter"
+                android:src="?attr/iconLocked"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.aircandi.ui.widgets.WebImageView
+        android:id="@+id/candi_user_picture"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/action_block"
+        android:layout_marginRight="5dp"
+        aircandi:layout="@layout/widget_webimageview"
+        aircandi:sizeHint="35dp"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/candi_user_picture"
+        android:layout_toRightOf="@+id/candi_user_picture"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/candi_user_fullname"
+            style="@style/candi_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/dummy_name"
+            android:textColor="?attr/textColorButtonLink"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/candi_user_location"
+            style="@style/candi_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1" />
+    </LinearLayout>
+
+</RelativeLayout>

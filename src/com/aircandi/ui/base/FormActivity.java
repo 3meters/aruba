@@ -38,16 +38,15 @@ import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
+@SuppressWarnings("ucd")
 public abstract class FormActivity extends SherlockActivity {
 
-	protected Boolean			mBeaconUnregistered;
 	protected String			mImageUriOriginal;
 	protected AircandiCommon	mCommon;
 	protected RequestListener	mImageRequestListener;
 	protected WebImageView		mImageRequestWebImageView;
 	protected Uri				mMediaFileUri;
 	protected String			mMediaFilePath;
-	protected String			mImageName;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -269,6 +268,7 @@ public abstract class FormActivity extends SherlockActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
+	@SuppressWarnings("ucd")
 	protected void useFacebook() {
 		/*
 		 * Only used for user pictures
@@ -329,6 +329,7 @@ public abstract class FormActivity extends SherlockActivity {
 		mCommon.doPause();
 	}
 
+	@Override
 	protected void onDestroy() {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 		Logger.d(this, "onDestroy called");

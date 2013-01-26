@@ -4,15 +4,12 @@ import java.util.Locale;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
@@ -54,7 +51,6 @@ public class SignInForm extends FormActivity {
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextMessage = (TextView) findViewById(R.id.form_message);
 		mButtonSignIn = (Button) findViewById(R.id.btn_signin);
-		mButtonSignIn.setEnabled(false);
 		
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
 		FontManager.getInstance().setTypefaceDefault(mTextPassword);
@@ -62,24 +58,9 @@ public class SignInForm extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault(mButtonSignIn);
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_send_password));
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_cancel));
-		
-		mTextEmail.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSignIn.setEnabled(isValid());
-			}
-		});
-		mTextPassword.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSignIn.setEnabled(isValid());
-			}
-		});
 	}
 
-	public void draw() {
+	private void draw() {
 		if (mCommon.mMessage != null) {
 			mTextMessage.setText(mCommon.mMessage);
 		}
@@ -93,6 +74,7 @@ public class SignInForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
+	@SuppressWarnings("ucd")
 	public void onSendPasswordButtonClick(View view) {
 		AircandiCommon.showAlertDialog(R.drawable.ic_app
 				, getResources().getString(R.string.alert_send_password_title)
@@ -102,6 +84,7 @@ public class SignInForm extends FormActivity {
 		Tracker.trackEvent("DialogSendPassword", "Open", null, 0);
 	}
 
+	@SuppressWarnings("ucd")
 	public void onSignInButtonClick(View view) {
 
 		if (validate()) {
@@ -164,46 +147,27 @@ public class SignInForm extends FormActivity {
 		}
 	}
 
-	private boolean isValid() {
-		/*
-		 * Client validation logic is handle here. The service may still reject based on
-		 * additional validation rules.
-		 */
-		if (mTextEmail.getText().length() == 0) {
-			return false;
-		}
-		if (mTextPassword.getText().length() < 6) {
-			return false;
-		}
-
-		return true;
-	}
-
 	private boolean validate() {
-		if (!MiscUtils.validEmail(mTextEmail.getText().toString())) {
-			mCommon.showAlertDialogSimple(null, getString(R.string.error_invalid_email));
+		if (mTextPassword.getText().length() < 6) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_password)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
 			return false;
 		}
-		return true;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
-	// --------------------------------------------------------------------------------------------
-
-	public boolean onCreateOptionsMenu(Menu menu) {
-		mCommon.doCreateOptionsMenu(menu);
-		return true;
-	}
-
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		mCommon.doPrepareOptionsMenu(menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		mCommon.doOptionsItemSelected(item);
+		if (!MiscUtils.validEmail(mTextEmail.getText().toString())) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_invalid_email)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
 		return true;
 	}
 

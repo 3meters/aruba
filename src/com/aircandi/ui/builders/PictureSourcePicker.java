@@ -19,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AndroidManager;
@@ -38,10 +37,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
-
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		initialize();
 	}
 
@@ -81,7 +77,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
 				, getString(R.string.dialog_picture_source_default), null, "default"));
 
-		mTitle = (TextView) findViewById(R.id.custom_title);
+		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText(R.string.dialog_picture_source_title);
 
 		mListAdapter = new ListAdapter(this, listData);
@@ -89,7 +85,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 		mListView.setAdapter(mListAdapter);
 		mListView.setOnItemClickListener(this);
 
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 	}
 

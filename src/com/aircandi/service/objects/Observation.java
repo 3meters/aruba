@@ -6,6 +6,7 @@ import com.aircandi.service.SerializedName;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class Observation extends ServiceEntryBase {
 
 	private static final long	serialVersionUID	= 5247954279209162831L;
@@ -50,6 +51,7 @@ public class Observation extends ServiceEntryBase {
 		this.longitude = pLongitude;
 	}
 
+	@Override
 	public String getCollection() {
 		return "observations";
 	}

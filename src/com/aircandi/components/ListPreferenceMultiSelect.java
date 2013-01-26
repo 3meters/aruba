@@ -33,6 +33,7 @@ import com.aircandi.R;
  *              Whether you decide to then use those attributes is up to you.
  * 
  */
+@SuppressWarnings("ucd")
 public class ListPreferenceMultiSelect extends ListPreference {
 	private static final String	DEFAULT_SEPARATOR	= "OV=I=XseparatorX=I=VO";
 	private String				mSeparator			= DEFAULT_SEPARATOR;
@@ -80,6 +81,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 		restoreCheckedEntries();
 		builder.setMultiChoiceItems(entries, mClickedDialogEntryIndices,
 				new DialogInterface.OnMultiChoiceClickListener() {
+					@Override
 					public void onClick(DialogInterface dialog, int which, boolean val) {
 						if (isCheckAllValue(which) == true) {
 							checkAll(dialog, val);
@@ -106,7 +108,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 		}
 	}
 
-	public String[] parseStoredValue(CharSequence val) {
+	private String[] parseStoredValue(CharSequence val) {
 		if (val.equals("")) {
 			return null;
 		}
@@ -154,7 +156,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 		}
 	}
 
-	protected static String join(Iterable<? extends Object> pColl, String separator)
+	private static String join(Iterable<? extends Object> pColl, String separator)
 	{
 		Iterator<? extends Object> oIter;
 		if (pColl == null || (!(oIter = pColl.iterator()).hasNext())) {

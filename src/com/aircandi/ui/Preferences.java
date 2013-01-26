@@ -1,6 +1,5 @@
 package com.aircandi.ui;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
@@ -13,8 +12,7 @@ import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class Preferences extends SherlockPreferenceActivity {
 
-	SharedPreferences			prefs;
-	protected AircandiCommon	mCommon;
+	private AircandiCommon		mCommon;
 
 	/* Prefs - users */
 	public static final String	PREF_SEARCH_RADIUS			= "Pref_Search_Radius";
@@ -27,13 +25,12 @@ public class Preferences extends SherlockPreferenceActivity {
 	public static final String	PREF_SHOW_PLACE_RANK_SCORE	= "Pref_Show_Place_Rank_Score";
 	public static final String	PREF_TESTING_BEACONS		= "Pref_Testing_Beacons";
 	public static final String	PREF_TESTING_LOCATION		= "Pref_Testing_Location";
+	public static final String	PREF_TESTING_PLACE_SOURCE	= "Pref_Testing_Place_Source";
 
 	/* Settings */
 	public static final String	SETTING_USER				= "Setting_User";
 	public static final String	SETTING_USER_SESSION		= "Setting_User_Session";
-	public static final String	SETTING_VERSION_NAME		= "Setting_Version_Name";
 	public static final String	SETTING_PICTURE_SEARCH		= "Setting_Picture_Search";
-	public static final String	SETTING_FIRST_RUN			= "Setting_First_Run";
 	public static final String	SETTING_LAST_EMAIL			= "Setting_Last_Email";
 
 	@SuppressWarnings("deprecation")
@@ -84,7 +81,4 @@ public class Preferences extends SherlockPreferenceActivity {
 		mCommon.doStart();
 	}
 
-	public static enum PrefResponse {
-		None, Change, Refresh, Restart, Rebuild, Test
-	}
 }

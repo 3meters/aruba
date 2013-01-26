@@ -2,12 +2,12 @@ package com.aircandi.service.objects;
 
 import java.util.HashMap;
 
-import com.aircandi.CandiConstants;
 import com.aircandi.service.Expose;
 
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class Session extends ServiceEntryBase {
 
 	private static final long	serialVersionUID	= 127428776257201066L;
@@ -21,13 +21,6 @@ public class Session extends ServiceEntryBase {
 	public Number				expirationDate;
 
 	public Session() {}
-
-	public Boolean renewSession(long currentTime) {
-		if (expirationDate.longValue() < (currentTime + CandiConstants.TIME_SIXTY_MINUTES)) {
-			return true;
-		}
-		return false;
-	}
 
 	public static Session setPropertiesFromMap(Session session, HashMap map) {
 		/*

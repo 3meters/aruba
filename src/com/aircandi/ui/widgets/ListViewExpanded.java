@@ -10,8 +10,9 @@ import android.widget.ListAdapter;
 
 import com.aircandi.R;
 
+@SuppressWarnings("ucd")
 public class ListViewExpanded extends LinearLayout {
-	
+
 	/*
 	 * Layout attribute is used for design purposes but at runtime, the code
 	 * setting the adapter and providing views chooses the item layout.
@@ -47,11 +48,11 @@ public class ListViewExpanded extends LinearLayout {
 		if (mLayoutItemId != 0) {
 			int itemCount = 0;
 			while (itemCount < mItemMaxCount) {
-				
+
 				if (mShowDivider && itemCount > 0) {
 					inflater.inflate(R.layout.temp_rule, this);
 				}
-				
+
 				View view = inflater.inflate(mLayoutItemId, null);
 				this.addView(view);
 				itemCount++;

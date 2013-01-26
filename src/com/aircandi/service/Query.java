@@ -2,16 +2,14 @@ package com.aircandi.service;
 
 import java.net.URLEncoder;
 
-import com.aircandi.service.ProxibaseService.UrlEncodingType;
-
+@SuppressWarnings("ucd")
 public class Query {
 
-	public String			entityName;
-	public String			filter;
-	public Integer			topCount		= 0;
-	public Boolean			lookups = false;
-	public String			orderBy;
-	public UrlEncodingType	urlEncodingType	= UrlEncodingType.All;
+	public String	entityName;
+	public String	filter;
+	public Integer	topCount	= 0;
+	public Boolean	lookups		= false;
+	public String	orderBy;
 
 	public Query() {}
 
@@ -33,7 +31,7 @@ public class Query {
 		this.lookups = lookups;
 		return this;
 	}
-	
+
 	public Query top(Integer topCount) {
 		this.topCount = topCount;
 		return this;
@@ -58,7 +56,7 @@ public class Query {
 			}
 			atRoot = false;
 		}
-		
+
 		if (this.orderBy != null) {
 			if (atRoot) {
 				query += "?$orderby=" + URLEncoder.encode(this.orderBy);

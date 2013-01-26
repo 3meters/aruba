@@ -30,6 +30,7 @@ import com.aircandi.service.objects.Session;
  * @author Jayma
  */
 
+@SuppressWarnings("ucd")
 public class ServiceRequest {
 
 	private String			mUri;
@@ -44,10 +45,11 @@ public class ServiceRequest {
 	private String			mPassword;
 	private AuthType		mAuthType	= AuthType.None;
 	private Integer			mSocketTimeout;
-	private Boolean			mRetry = true;
-	private Boolean			mUseSecret = false;
+	private Boolean			mRetry		= true;
+	private Boolean			mUseSecret	= false;
 	private boolean			mSuppressUI	= false;
 
+	@SuppressWarnings("ucd")
 	public enum AuthType {
 		None,
 		Basic,
@@ -56,32 +58,8 @@ public class ServiceRequest {
 
 	public ServiceRequest() {}
 
-	public ServiceRequest(String uri, String requestBody, Query query, RequestType requestType, ResponseFormat responseFormat,
-			RequestListener requestListener) {
-		this.mUri = uri;
-		this.mRequestBody = requestBody;
-		this.mQuery = query;
-		this.mRequestType = requestType;
-		this.mResponseFormat = responseFormat;
-		this.mRequestListener = requestListener;
-	}
-
 	public ServiceRequest(String uri, RequestType requestType, ResponseFormat responseFormat) {
 		this.mUri = uri;
-		this.mRequestType = requestType;
-		this.mResponseFormat = responseFormat;
-	}
-
-	public ServiceRequest(String uri, Bundle parameters, RequestType requestType, ResponseFormat responseFormat) {
-		this.mUri = uri;
-		this.mParameters = parameters;
-		this.mRequestType = requestType;
-		this.mResponseFormat = responseFormat;
-	}
-
-	public ServiceRequest(String uri, Query query, RequestType requestType, ResponseFormat responseFormat) {
-		this.mUri = uri;
-		this.mQuery = query;
 		this.mRequestType = requestType;
 		this.mResponseFormat = responseFormat;
 	}

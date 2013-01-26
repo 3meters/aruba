@@ -17,6 +17,7 @@ import android.os.Environment;
 import com.aircandi.BuildConfig;
 import com.aircandi.components.Logger;
 
+@SuppressWarnings("ucd")
 public class DiskLruImageCache {
 
 	private DiskLruCache		mDiskCache;

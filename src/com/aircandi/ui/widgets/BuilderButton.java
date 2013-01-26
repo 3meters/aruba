@@ -13,12 +13,13 @@ import android.widget.TextView;
 import com.aircandi.R;
 import com.aircandi.components.FontManager;
 
+@SuppressWarnings("ucd")
 public class BuilderButton extends RelativeLayout {
 
 	private TextView		mTextView;
 	private LinearLayout	mViewGroup;
 	private String			mHint;
-	public String			mThemeTone;
+	private String			mThemeTone;
 	private Integer			mLayoutId;
 
 	public BuilderButton(Context context) {

@@ -7,6 +7,7 @@ import android.widget.GridView;
 
 import com.aircandi.CandiConstants;
 
+@SuppressWarnings("ucd")
 public class BounceGridView extends GridView {
 	
 	private Context	mContext;

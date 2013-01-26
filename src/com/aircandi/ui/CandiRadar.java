@@ -234,6 +234,7 @@ public class CandiRadar extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onQueryWifiScanReceived(QueryWifiScanReceivedEvent event) {
 
 		runOnUiThread(new Runnable() {
@@ -248,6 +249,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onBeaconsLocked(BeaconsLockedEvent event) {
 
 		runOnUiThread(new Runnable() {
@@ -271,6 +273,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onEntitiesForBeaconsFinished(EntitiesForBeaconsFinishedEvent event) {
 
 		runOnUiThread(new Runnable() {
@@ -286,6 +289,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onLocationChanged(final LocationChangedEvent event) {
 
 		runOnUiThread(new Runnable() {
@@ -324,6 +328,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onEntitiesForLocationFinished(EntitiesForLocationFinishedEvent event) {
 
 		runOnUiThread(new Runnable() {
@@ -350,6 +355,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onPlacesNearLocationFinished(PlacesNearLocationFinishedEvent event) {
 
 		runOnUiThread(new Runnable() {
@@ -365,6 +371,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onEntitiesChanged(final EntitiesChangedEvent event) {
 
 		runOnUiThread(new Runnable() {
@@ -403,6 +410,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	@Subscribe
+	@SuppressWarnings("ucd")
 	public void onEntityChanged(final EntityChangedEvent event) {
 		Logger.d(CandiRadar.this, "Entities changed event: updating radar");
 		runOnUiThread(new Runnable() {
@@ -548,9 +556,6 @@ public class CandiRadar extends CandiActivity {
 			Debug.startMethodTracing("aircandi", 100000000);
 		}
 
-		/* Make sure the right tab is active */
-		mCommon.setActiveTab(0);
-
 		/* Start listening for events */
 		enableEvents();
 	}
@@ -632,7 +637,7 @@ public class CandiRadar extends CandiActivity {
 		}
 	}
 
-	public void manageData() {
+	private void manageData() {
 
 		EntityModel entityModel = ProxiExplorer.getInstance().getEntityModel();
 		if (mEntityModelRefreshDate == null) {
@@ -706,6 +711,7 @@ public class CandiRadar extends CandiActivity {
 		return true;
 	}
 
+	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		mCommon.doPrepareOptionsMenu(menu);
 		return true;
@@ -721,11 +727,11 @@ public class CandiRadar extends CandiActivity {
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
 
-	public void enableEvents() {
+	private void enableEvents() {
 		BusProvider.getInstance().register(this);
 	}
 
-	public void disableEvents() {
+	private void disableEvents() {
 		BusProvider.getInstance().unregister(this);
 	}
 
@@ -748,7 +754,5 @@ public class CandiRadar extends CandiActivity {
 		return R.layout.candi_radar;
 	}
 
-	public enum PlaceType {
-		Tuned, Synthetic
-	}
+	
 }

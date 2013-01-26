@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@SuppressWarnings("ucd")
 public class JsonHelper {
 	public static Object toJSON(Object object) throws JSONException {
 		if (object instanceof Map) {
@@ -40,7 +41,7 @@ public class JsonHelper {
 		return toMap(object.getJSONObject(key));
 	}
 
-	public static Map<String, Object> toMap(JSONObject object) throws JSONException {
+	private static Map<String, Object> toMap(JSONObject object) throws JSONException {
 		Map<String, Object> map = new HashMap();
 		Iterator keys = object.keys();
 		while (keys.hasNext()) {

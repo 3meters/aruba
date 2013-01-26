@@ -1,6 +1,5 @@
 package com.aircandi.ui.base;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -26,23 +25,19 @@ import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public abstract class CandiActivity extends SherlockActivity {
 
-	protected int				mLastResultCode				= Activity.RESULT_OK;
 	protected AircandiCommon	mCommon;
-	protected AlertDialog		mUpdateAlertDialog;
-	protected AlertDialog		mWifiAlertDialog;
+	private AlertDialog			mUpdateAlertDialog;
+	private AlertDialog			mWifiAlertDialog;
 	protected Boolean			mPrefChangeRefreshNeeded	= false;
 
-	/* We use these to track whether a preference gets changed */
-	public boolean				mPrefDemoMode				= false;
-	public boolean				mPrefGlobalBeacons			= true;
-	public boolean				mPrefEntityFencing			= true;
 	public boolean				mPrefSoundEffects			= true;
-	public String				mPrefTestingBeacons			= "natural";
-	public String				mPrefTestingLocation		= "natural";
+	private String				mPrefTestingBeacons			= "natural";
+	private String				mPrefTestingLocation		= "natural";
+	private String				mPrefTestingPlaceSource		= "default";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Logger.d(this, "Launched normally: " + String.valueOf(Aircandi.getInstance().wasLaunchedNormally()));		
+		Logger.d(this, "Launched normally: " + String.valueOf(Aircandi.getInstance().wasLaunchedNormally()));
 		if (!Aircandi.getInstance().wasLaunchedNormally()) {
 			/* Try to detect case where this is being created after a crash and bail out. */
 			super.onCreate(savedInstanceState);
@@ -72,7 +67,6 @@ public abstract class CandiActivity extends SherlockActivity {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		Logger.d(this, "Configuration changed");
-		mCommon.mConfigChange = true;
 		super.onConfigurationChanged(newConfig);
 	}
 
@@ -87,7 +81,7 @@ public abstract class CandiActivity extends SherlockActivity {
 		showUpdateAlertDialog(listener);
 	}
 
-	public void showUpdateNotification() {
+	private void showUpdateNotification() {
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
 		mCommon.showNotification(getString(R.string.alert_upgrade_title)
@@ -97,7 +91,7 @@ public abstract class CandiActivity extends SherlockActivity {
 				, CandiConstants.NOTIFICATION_UPDATE);
 	}
 
-	public void showUpdateAlertDialog(final RequestListener listener) {
+	private void showUpdateAlertDialog(final RequestListener listener) {
 		runOnUiThread(new Runnable() {
 
 			@Override
@@ -113,6 +107,7 @@ public abstract class CandiActivity extends SherlockActivity {
 							, R.string.alert_upgrade_cancel
 							, new DialogInterface.OnClickListener() {
 
+								@Override
 								public void onClick(DialogInterface dialog, int which) {
 									if (which == Dialog.BUTTON_POSITIVE) {
 										Logger.d(this, "Update check: navigating to install page");
@@ -171,6 +166,7 @@ public abstract class CandiActivity extends SherlockActivity {
 							, R.string.alert_wifi_cancel
 							, new DialogInterface.OnClickListener() {
 
+								@Override
 								public void onClick(DialogInterface dialog, int which) {
 									if (which == Dialog.BUTTON_POSITIVE) {
 										Logger.d(this, "Wifi check: navigating to wifi settings");
@@ -226,6 +222,12 @@ public abstract class CandiActivity extends SherlockActivity {
 			mPrefTestingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
 		}
 
+		if (mPrefTestingPlaceSource != Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_SOURCE, "foursquare")) {
+			mPrefChangeRefreshNeeded = true;
+			Logger.d(this, "Pref change: place authority");
+			mPrefTestingPlaceSource = Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_SOURCE, "foursquare");
+		}
+
 		if (firstUpdate) {
 			mPrefChangeRefreshNeeded = false;
 		}
@@ -237,11 +239,13 @@ public abstract class CandiActivity extends SherlockActivity {
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
 
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		mCommon.doCreateOptionsMenu(menu);
 		return true;
 	}
 
+	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		mCommon.doPrepareOptionsMenu(menu);
 		return true;
@@ -292,6 +296,7 @@ public abstract class CandiActivity extends SherlockActivity {
 		return 0;
 	}
 
+	@Override
 	protected void onDestroy() {
 		/* This activity gets destroyed everytime we leave using back or finish(). */
 		super.onDestroy();

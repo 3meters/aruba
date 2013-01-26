@@ -122,24 +122,26 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 		return mListItems.size();
 	}
 
+	@Override
 	public boolean areAllItemsEnabled() {
 		return false;
 	}
 
+	@Override
 	public boolean isEnabled(int position) {
 		return true;
 	}
 
-	protected static void setVisibility(View view, Integer visibility) {
+	private static void setVisibility(View view, Integer visibility) {
 		if (view != null) {
 			view.setVisibility(visibility);
 		}
 	}
 
-	public static class ViewHolder {
-		public WebImageView	image;
-		public TextView		title;
-		public TextView		subtitle;
-		public CheckBox		check;
+	private static class ViewHolder {
+		private WebImageView	image;
+		private TextView		title;
+		private TextView		subtitle;
+		private CheckBox		check;
 	}
 }

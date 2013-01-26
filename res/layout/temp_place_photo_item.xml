@@ -13,7 +13,6 @@
         aircandi:sizeHint="100dp"
         android:background="@drawable/app_image_selector"
         android:clickable="true"
-        android:onClick="onPhotoClick"
         android:scaleType="centerCrop" />
 
 </LinearLayout>

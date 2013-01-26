@@ -97,6 +97,7 @@ public class CommentForm extends FormActivity {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onSaveButtonClick(View view) {
 		doSave();
 	}
@@ -128,7 +129,7 @@ public class CommentForm extends FormActivity {
 		return false;
 	}
 
-	public void confirmDirtyExit() {
+	private void confirmDirtyExit() {
 		AlertDialog dialog = AircandiCommon.showAlertDialog(null
 				, getResources().getString(R.string.alert_comment_dirty_exit_title)
 				, getResources().getString(R.string.alert_comment_dirty_exit_message)
@@ -138,6 +139,7 @@ public class CommentForm extends FormActivity {
 				, android.R.string.cancel
 				, new DialogInterface.OnClickListener() {
 
+					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							setResult(Activity.RESULT_CANCELED);

@@ -38,10 +38,10 @@ import com.aircandi.ui.widgets.UserView;
 
 public class PictureDetail extends FormActivity {
 
-	protected List<Photo>	mPhotosForPaging	= new ArrayList<Photo>();
-	private String			mImageUri;
-	protected ViewPager		mViewPager;
-	protected Boolean		mPagingEnabled		= false;
+	private List<Photo>	mPhotosForPaging	= new ArrayList<Photo>();
+	private String		mImageUri;
+	private ViewPager	mViewPager;
+	private Boolean		mPagingEnabled		= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -159,7 +159,7 @@ public class PictureDetail extends FormActivity {
 		return layout;
 	}
 
-	protected void updateViewPager(List<Photo> photos)
+	private void updateViewPager(List<Photo> photos)
 	{
 		if (mViewPager == null) {
 
@@ -204,6 +204,7 @@ public class PictureDetail extends FormActivity {
 		super.onConfigurationChanged(newConfig);
 	}
 
+	@Override
 	protected void onDestroy() {
 		/*
 		 * This activity gets destroyed everytime we leave using back or

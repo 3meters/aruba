@@ -9,6 +9,7 @@ import com.aircandi.service.Expose;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class Contact extends ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= -4242495727786003116L;

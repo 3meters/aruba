@@ -1,7 +1,6 @@
 package com.aircandi.components;
 
 import com.aircandi.Aircandi;
-import com.aircandi.service.ProxibaseServiceException;
 
 public class Exceptions {
 
@@ -14,8 +13,5 @@ public class Exceptions {
 		throw new RuntimeException(exception);
 	}
 	
-	public static boolean Handle(ProxibaseServiceException exception) {
-		Aircandi.getInstance().setLaunchedNormally(false);
-		throw new RuntimeException(exception);
-	}
+	
 }

@@ -36,9 +36,10 @@ import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
+@SuppressWarnings("ucd")
 public class CandiUser extends CandiActivity {
 
-	protected User			mUser;
+	private User			mUser;
 	protected List<Entity>	mEntities;
 	protected Number		mEntityModelRefreshDate;
 	protected Number		mEntityModelActivityDate;
@@ -57,11 +58,11 @@ public class CandiUser extends CandiActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.name));
 	}
 
-	public void bind(Boolean refresh) {
+	private void bind(Boolean refresh) {
 		doBind(refresh);
 	}
 
-	public void doBind(final Boolean refresh) {
+	private void doBind(final Boolean refresh) {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
@@ -110,9 +111,7 @@ public class CandiUser extends CandiActivity {
 	}
 
 	public void doRefresh() {
-		/*
-		 * Called from AircandiCommon
-		 */
+		/* Called from AircandiCommon */
 		bind(true);
 	}
 
@@ -120,6 +119,7 @@ public class CandiUser extends CandiActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onMoreButtonClick(View view) {
 		String target = (String) view.getTag();
 		if (target.equals("candi")) {
@@ -134,6 +134,7 @@ public class CandiUser extends CandiActivity {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onCandiClick(View view) {
 		Entity entity = (Entity) view.getTag();
 
@@ -156,6 +157,7 @@ public class CandiUser extends CandiActivity {
 		//mCommon.showCandiFormForEntity(entity, CandiForm.class);
 	}
 
+	@SuppressWarnings("ucd")
 	public void onImageClick(View view) {
 		Intent intent = null;
 		Photo photo = mUser.photo;
@@ -171,15 +173,11 @@ public class CandiUser extends CandiActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
 	}
 
-	public void onEditButtonClick(View view) {
-		mCommon.doProfileClick();
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
-	public void buildCandiUser(Context context, final User user) {
+	private void buildCandiUser(Context context, final User user) {
 
 		final WebImageView image = (WebImageView) findViewById(R.id.image);
 		final TextView name = (TextView) findViewById(R.id.name);

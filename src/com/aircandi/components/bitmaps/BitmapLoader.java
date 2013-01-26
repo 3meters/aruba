@@ -21,6 +21,7 @@ import com.aircandi.service.ServiceRequest;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
 
+@SuppressWarnings("ucd")
 public class BitmapLoader {
 
 	private BitmapQueue			mBitmapQueue		= new BitmapQueue();
@@ -119,7 +120,7 @@ public class BitmapLoader {
 		return serviceResponse;
 	}
 
-	public static ServiceResponse downloadAsByteArray(String url, RequestListener listener) {
+	private static ServiceResponse downloadAsByteArray(String url, RequestListener listener) {
 		/*
 		 * We request a byte array for decoding because of a bug in pre 2.3 versions of android.
 		 */
@@ -139,6 +140,7 @@ public class BitmapLoader {
 
 	private class BitmapLoaderThread extends Thread {
 
+		@Override
 		public void run() {
 
 			Thread.currentThread().setName("BitmapLoader");

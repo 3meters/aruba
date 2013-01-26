@@ -11,6 +11,7 @@ import com.aircandi.service.SerializedName;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class Comment extends ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 4362288672244719448L;

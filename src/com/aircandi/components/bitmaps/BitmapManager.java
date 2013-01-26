@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
 
 import android.app.ActivityManager;
@@ -35,6 +34,7 @@ import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
 import com.aircandi.utilities.MiscUtils;
 
+@SuppressWarnings("ucd")
 public class BitmapManager {
 
 	private static BitmapManager		singletonObject;
@@ -175,31 +175,6 @@ public class BitmapManager {
 		}
 	}
 
-	public void putBitmap(String key, Bitmap bitmap, Integer size) {
-		/*
-		 * Our strategy is to push the raw bitmap into the file cache
-		 * and a scaled bitmap into the memory cache.
-		 */
-		String diskCacheKey = key;
-		String diskKeyHashed = MiscUtils.md5(diskCacheKey);
-
-		/* First add unscaled version to disk cache */
-		synchronized (mDiskCacheLock) {
-			if (mDiskLruCache != null) {
-				if (!mDiskLruCache.containsKey(diskKeyHashed)) {
-					mDiskLruCache.put(diskKeyHashed, bitmap);
-				}
-			}
-		}
-
-		/*
-		 * Next push scaled version to mem cache. The call will create
-		 * the sized memory cache entry from the disk cache data we
-		 * just pushed
-		 */
-		getBitmap(key, size);
-	}
-
 	public Bitmap putImageBytes(String key, byte[] imageBytes, Integer size) {
 		/*
 		 * Our strategy is to push the raw bitmap into the file cache
@@ -226,7 +201,7 @@ public class BitmapManager {
 		return bitmap;
 	}
 
-	public Bitmap getBitmap(String key, Integer size) {
+	private Bitmap getBitmap(String key, Integer size) {
 		String memCacheKey = key;
 		String diskCacheKey = key;
 		if (size != null) {
@@ -347,28 +322,7 @@ public class BitmapManager {
 		return bitmap;
 	}
 
-	public Bitmap loadBitmapFromAssets(final String assetPath) {
-		InputStream in = null;
-		try {
-			final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
-			decodeOptions.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
-
-			in = Aircandi.applicationContext.getAssets().open(assetPath);
-			in.close();
-			return BitmapFactory.decodeStream(in, null, decodeOptions);
-		}
-		catch (final IOException exception) {
-			Exceptions.Handle(exception);
-			return null;
-		}
-	}
-
-	public Bitmap loadBitmapFromResources(final int resourceId) {
-		Bitmap bitmap = BitmapFactory.decodeResource(Aircandi.applicationContext.getResources(), resourceId);
-		return bitmap;
-	}
-
-	public Bitmap loadBitmapFromResourcesSampled(final Integer resourceId, Integer size) {
+	private Bitmap loadBitmapFromResourcesSampled(final Integer resourceId, Integer size) {
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		options.inPurgeable = true;
@@ -406,6 +360,7 @@ public class BitmapManager {
 	 * @param rotation
 	 * @return
 	 */
+	@SuppressWarnings("ucd")
 	public Bitmap bitmapForByteArraySampled(byte[] imageBytes, Integer size, Integer rotation) {
 
 		BitmapFactory.Options options = new BitmapFactory.Options();
@@ -447,15 +402,7 @@ public class BitmapManager {
 		return bitmapSampled;
 	}
 
-	public Integer getResIdForResourceName(String rawResourceName) {
-		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "drawable", "com.aircandi");
-		if (resourceId == 0) {
-			resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "attr", "com.aircandi");
-		}
-		return resourceId;
-	}
-
-	public String resolveResourceName(String rawResourceName) {
+	private String resolveResourceName(String rawResourceName) {
 		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "drawable", "com.aircandi");
 		if (resourceId == 0) {
 			resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "attr", "com.aircandi");
@@ -507,13 +454,16 @@ public class BitmapManager {
 	// Setters/Getters routines
 	// --------------------------------------------------------------------------------------------
 
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
 	}
 
+	@SuppressWarnings("ucd")
 	public static class ViewHolder {
 
 		public ImageView	itemImage;
-		public Object		data;
+		public ImageResult	data;
+
 	}
 }

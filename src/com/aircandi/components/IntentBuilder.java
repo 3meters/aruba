@@ -66,11 +66,6 @@ public class IntentBuilder {
 		return intent;
 	}
 
-	public IntentBuilder setContext(Context context) {
-		this.mContext = context;
-		return this;
-	}
-
 	public IntentBuilder setParentEntityId(String parentEntityId) {
 		this.mParentEntityId = parentEntityId;
 		return this;
@@ -78,16 +73,6 @@ public class IntentBuilder {
 
 	public IntentBuilder setEntityType(String entityType) {
 		this.mEntityType = entityType;
-		return this;
-	}
-
-	public IntentBuilder setMessage(String message) {
-		this.mMessage = message;
-		return this;
-	}
-
-	public IntentBuilder setClass(Class<?> _class) {
-		this.mClass = _class;
 		return this;
 	}
 

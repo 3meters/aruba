@@ -8,11 +8,11 @@ import com.aircandi.Aircandi;
 public class FontManager {
 
 	private static FontManager	singletonObject;
-	public static Typeface		fontRobotoThin;
-	public static Typeface		fontRobotoLight;
-	public static Typeface		fontRobotoRegular;
-	public static Typeface		fontRobotoCondensed;
-	public static Typeface		fontRobotoBoldCondensed;
+	private static Typeface		fontRobotoThin;
+	private static Typeface		fontRobotoLight;
+	private static Typeface		fontRobotoRegular;
+	private static Typeface		fontRobotoCondensed;
+	private static Typeface		fontRobotoBoldCondensed;
 
 	public static synchronized FontManager getInstance() {
 		if (singletonObject == null) {
@@ -21,7 +21,7 @@ public class FontManager {
 		return singletonObject;
 	}
 
-	public void initialize() {
+	private void initialize() {
 		fontRobotoThin = Typeface.createFromAsset(Aircandi.applicationContext.getAssets(), "Roboto-Thin.ttf");
 		fontRobotoLight = Typeface.createFromAsset(Aircandi.applicationContext.getAssets(), "Roboto-Light.ttf");
 		fontRobotoRegular = Typeface.createFromAsset(Aircandi.applicationContext.getAssets(), "Roboto-Regular.ttf");
@@ -59,13 +59,13 @@ public class FontManager {
 			view.setTypeface(fontRobotoRegular);
 		}
 	}
-	
+
 	public void setTypefaceRegular(TextView view) {
 		if (view != null) {
 			view.setTypeface(fontRobotoRegular);
 		}
 	}
-	
+
 	public void setTypefaceCondensed(TextView view) {
 		if (view != null) {
 			view.setTypeface(fontRobotoCondensed);
@@ -77,5 +77,4 @@ public class FontManager {
 			view.setTypeface(fontRobotoBoldCondensed);
 		}
 	}
-
 }

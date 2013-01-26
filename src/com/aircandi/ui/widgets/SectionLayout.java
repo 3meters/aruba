@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.aircandi.R;
 import com.aircandi.components.FontManager;
 
+@SuppressWarnings("ucd")
 public class SectionLayout extends LinearLayout {
 
 	private Integer		mLayoutHeaderId;

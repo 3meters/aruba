@@ -14,6 +14,7 @@ import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.Preferences;
 import com.aircandi.utilities.DateUtils;
 
+@SuppressWarnings("ucd")
 public class LocationManager {
 
 	private static LocationManager				singletonObject;
@@ -204,7 +205,7 @@ public class LocationManager {
 		}
 	}
 
-	public static boolean isGoodLocation(Location location) {
+	private static boolean isGoodLocation(Location location) {
 		if (location == null) return false;
 
 		long fixAge = System.currentTimeMillis() - location.getTime();
@@ -215,7 +216,7 @@ public class LocationManager {
 		return false;
 	}
 
-	public static LocationBetterReason isBetterLocation(Location locationToEvaluate, Location currentBestLocation) {
+	private static LocationBetterReason isBetterLocation(Location locationToEvaluate, Location currentBestLocation) {
 		/*
 		 * Evaluates based on distance moved, freshness, and accuracy.
 		 */
@@ -288,7 +289,7 @@ public class LocationManager {
 		return false;
 	}
 
-	public boolean isProviderEnabled(String provider) {
+	private boolean isProviderEnabled(String provider) {
 		return (mLocationManager.isProviderEnabled(provider));
 	}
 
@@ -301,14 +302,14 @@ public class LocationManager {
 		return radius;
 	}
 
-	static boolean isSameProvider(String provider1, String provider2) {
+	private static boolean isSameProvider(String provider1, String provider2) {
 		if (provider1 == null) {
 			return provider2 == null;
 		}
 		return provider1.equals(provider2);
 	}
 
-	public enum LocationBetterReason {
+	private enum LocationBetterReason {
 		Distance,
 		Recency,
 		Accuracy,

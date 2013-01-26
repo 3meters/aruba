@@ -2,12 +2,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
+    
+    <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="15sp"
+        android:textAppearance="@style/app_text_appearance_large"
+        android:textColor="@color/accent_blue" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/title"
+        android:background="@color/accent_blue" />
+    
     <LinearLayout
         android:id="@+id/group_uri"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/title" 
         android:layout_marginBottom="5dp"
         android:orientation="horizontal"
         android:padding="5dp" >
@@ -37,7 +53,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
-        android:layout_below="@+id/group_uri" >
+        android:layout_below="@+id/group_uri" 
+        >
 
         <!-- Preview: listitem=@layout/temp_listitem_bookmark -->
     </com.aircandi.ui.widgets.BounceListView>

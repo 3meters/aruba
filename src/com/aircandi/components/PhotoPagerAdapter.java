@@ -45,6 +45,7 @@ public class PhotoPagerAdapter extends PagerAdapter {
 		return layout;
 	}
 
+	@Override
 	public int getItemPosition(Object object) {
 		/*
 		 * Causes the view pager to recreate all the pages

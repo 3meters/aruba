@@ -1,3 +1,4 @@
+// $codepro.audit.disable fileComment
 package com.aircandi;
 
 import android.app.Service;
@@ -39,12 +40,12 @@ public class ScanService extends Service {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			Thread.currentThread().setName("ScanForWifi");				
+			Thread.currentThread().setName("ScanForWifi");				 //$NON-NLS-1$
 			/*
 			 * Kicks off the scan but we won't know if it was completed. Will exit
 			 * early if a scan is already active.
 			 */
-			Logger.v(ScanService.this, "Wifi scan service: requesting wifi scan");
+			Logger.v(ScanService.this, "Wifi scan service: requesting wifi scan"); //$NON-NLS-1$
 			ProxiExplorer.getInstance().scanForWifi(ScanReason.monitoring);
 			return null;
 		}
@@ -53,9 +54,5 @@ public class ScanService extends Service {
 		protected void onPostExecute(Void result) {
 			stopSelf();
 		}
-	}
-
-	public void onDestroy() {
-		super.onDestroy();
 	}
 }

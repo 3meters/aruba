@@ -14,6 +14,7 @@ import com.aircandi.service.Expose;
  * @author Jayma
  */
 
+@SuppressWarnings("ucd")
 public class Beacon extends ServiceEntryBase implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 694133954499515095L;
@@ -176,7 +177,10 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public static enum BeaconType {
-		Fixed, Mobile, Temporary
+		Fixed,
+		Mobile,
+		Temporary
 	}
 }

@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
+@SuppressWarnings("ucd")
 public class FittedGridView extends GridView {
 
 	private boolean	mExpanded	= false;

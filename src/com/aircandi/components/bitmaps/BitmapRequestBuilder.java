@@ -2,14 +2,12 @@ package com.aircandi.components.bitmaps;
 
 import com.aircandi.ProxiConstants;
 import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.objects.Entity;
 
 public class BitmapRequestBuilder {
 
-	public String			mImageUri;
-	public Object			mImageRequestor;
-	public Integer			mScaleToWidth;
-	public RequestListener	mRequestListener;
+	private String			mImageUri;
+	private Object			mImageRequestor;
+	private RequestListener	mRequestListener;
 
 	public BitmapRequestBuilder(Object imageRequestor) {
 		mImageRequestor = imageRequestor;
@@ -35,10 +33,6 @@ public class BitmapRequestBuilder {
 		return bitmapRequest;
 	}
 
-	public static String getImageUriFromEntity(Entity entity) {
-		return entity.getEntityPhotoUri();
-	}
-
 	public BitmapRequestBuilder setFromUri(String imageUri) {
 		if (imageUri != null && !imageUri.equals("")) {
 			String imageUriFixed = imageUri;
@@ -52,16 +46,6 @@ public class BitmapRequestBuilder {
 
 	public BitmapRequestBuilder setImageUri(String imageUri) {
 		this.mImageUri = imageUri;
-		return this;
-	}
-
-	public BitmapRequestBuilder setImageRequestor(Object imageRequestor) {
-		this.mImageRequestor = imageRequestor;
-		return this;
-	}
-
-	public BitmapRequestBuilder setScaleToWidth(Integer scaleToWidth) {
-		this.mScaleToWidth = scaleToWidth;
 		return this;
 	}
 

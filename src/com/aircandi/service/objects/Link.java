@@ -8,6 +8,7 @@ import com.aircandi.service.SerializedName;
 /**
  * @author Jayma
  */
+@SuppressWarnings("ucd")
 public class Link extends ServiceEntryBase {
 
 	private static final long	serialVersionUID	= 8839291281700760437L;
@@ -21,14 +22,14 @@ public class Link extends ServiceEntryBase {
 	@Expose
 	public Number				signal;
 	@Expose
-	public Boolean				primary = false;
+	public Boolean				primary				= false;
 
 	@Expose(serialize = false, deserialize = true)
 	public String				fromCollectionId;
 	@Expose(serialize = false, deserialize = true)
 	public String				toCollectionId;
 	@Expose(serialize = false, deserialize = true)
-	public Number				tuneCount = 0;
+	public Number				tuneCount			= 0;
 
 	public Link() {}
 
@@ -63,10 +64,12 @@ public class Link extends ServiceEntryBase {
 		return link;
 	}
 
+	@Override
 	public String getCollection() {
 		return "links";
 	}
 
+	@SuppressWarnings("ucd")
 	public enum LinkType {
 		proximity,
 		browse,

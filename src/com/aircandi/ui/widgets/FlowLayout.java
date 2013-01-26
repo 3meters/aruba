@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
+@SuppressWarnings("ucd")
 public class FlowLayout extends ViewGroup
 {
 	private int[]					mRowHeights;
@@ -177,9 +178,10 @@ public class FlowLayout extends ViewGroup
 		this.mSpacingHorizontal = spacingHorizontal;
 	}
 
+	@SuppressWarnings("ucd")
 	public static class LayoutParams extends MarginLayoutParams {
-		boolean	centerVertical;
-		boolean	centerHorizontal;
+		private boolean	centerVertical;
+		private boolean	centerHorizontal;
 
 		public LayoutParams() {
 			this(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);

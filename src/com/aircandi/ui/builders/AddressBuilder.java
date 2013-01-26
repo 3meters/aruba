@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.FontManager;
@@ -24,10 +23,7 @@ public class AddressBuilder extends FormActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
-		
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		initialize();
 		draw();
 	}
@@ -46,10 +42,10 @@ public class AddressBuilder extends FormActivity {
 			mLocation = new Location();
 		}
 
-		mTitle = (TextView) findViewById(R.id.custom_title);
+		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText(R.string.dialog_address_builder_title);
 
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.phone));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.address));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.cross_street));
@@ -86,6 +82,7 @@ public class AddressBuilder extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("ucd")
 	public void onSaveButtonClick(View view) {
 		gather();
 		doSave();
@@ -137,6 +134,7 @@ public class AddressBuilder extends FormActivity {
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
 
+	@Override
 	protected Boolean isDialog() {
 		return true;
 	}

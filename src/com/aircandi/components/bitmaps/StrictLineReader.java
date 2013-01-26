@@ -107,7 +107,7 @@ class StrictLineReader implements Closeable {
      * @throws IllegalArgumentException if {@code capacity} is negative or zero
      *         or the specified charset is not supported.
      */
-    public StrictLineReader(InputStream in, int capacity, Charset charset) {
+    private StrictLineReader(InputStream in, int capacity, Charset charset) {
         if (in == null || charset == null) {
             throw new NullPointerException();
         }
@@ -129,7 +129,8 @@ class StrictLineReader implements Closeable {
      *
      * @throws java.io.IOException for errors when closing the underlying {@code InputStream}.
      */
-    public void close() throws IOException {
+    @Override
+	public void close() throws IOException {
         synchronized (in) {
             if (buf != null) {
                 buf = null;

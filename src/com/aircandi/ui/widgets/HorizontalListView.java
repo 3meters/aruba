@@ -47,6 +47,7 @@ import android.widget.Scroller;
 
 import com.aircandi.R;
 
+@SuppressWarnings("ucd")
 public class HorizontalListView extends AdapterView<ListAdapter> {
 
 	@Override
@@ -66,20 +67,19 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		return super.onTouchEvent(event);
 	}
 
-	public boolean					mAlwaysOverrideTouch	= true;
-	protected ListAdapter			mAdapter;
-	private int						mLeftViewIndex			= -1;
-	private int						mRightViewIndex			= 0;
-	protected int					mCurrentX;
-	protected int					mNextX;
-	private int						mMaxX					= Integer.MAX_VALUE;
-	private int						mDisplayOffset			= 0;
-	protected Scroller				mScroller;
+	private ListAdapter				mAdapter;
+	private int						mLeftViewIndex		= -1;
+	private int						mRightViewIndex		= 0;
+	private int						mCurrentX;
+	private int						mNextX;
+	private int						mMaxX				= Integer.MAX_VALUE;
+	private int						mDisplayOffset		= 0;
+	private Scroller				mScroller;
 	private GestureDetector			mGesture;
-	private Queue<View>				mRemovedViewQueue		= new LinkedList<View>();
+	private Queue<View>				mRemovedViewQueue	= new LinkedList<View>();
 	private OnItemSelectedListener	mOnItemSelected;
 	private OnItemClickListener		mOnItemClicked;
-	private boolean					mDataChanged			= false;
+	private boolean					mDataChanged		= false;
 	private Runnable				mRequestLayoutRunnable;
 
 	public HorizontalListView(Context context, AttributeSet attrs) {
@@ -324,10 +324,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 				left += childWidth;
 			}
 		}
-	}
-
-	public synchronized void scrollTo(int x) {
-		mScroller.startScroll(mNextX, 0, x - mNextX, 0);
 	}
 
 	@Override

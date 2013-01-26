@@ -11,10 +11,8 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
 import android.util.Xml;
-import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
@@ -27,7 +25,6 @@ public class AnimUtils {
 
 	private static Animation	mFadeInMedium;
 	private static Animation	mFadeOutMedium;
-	private static Animation	mFadeInLong;
 
 	public static Animation fadeInMedium() {
 		/*
@@ -49,69 +46,10 @@ public class AnimUtils {
 		return mFadeOutMedium;
 	}
 
-	public static Animation fadeInLong() {
-		/*
-		 * We make a new animation object each time because when I
-		 * tried sharing one, there was lots of flashing and weird behavior.
-		 * 
-		 * If there is a better way to do this later then this will serve
-		 * as a choke point for the implementation.
-		 */
-		mFadeInLong = AnimUtils.loadAnimation(R.anim.fade_in_long);
-		return mFadeInLong;
-	}
-	
-	public static void showView(final View view) {
-		Animation animation = AnimUtils.fadeInMedium();
-		if (view.getVisibility() != View.VISIBLE) {
-			view.setVisibility(View.VISIBLE);
-		}
-		else {
-			return;
-		}
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		animation.setAnimationListener(new AnimationListener() {
-
-			@Override
-			public void onAnimationStart(Animation animation) {}
-
-			@Override
-			public void onAnimationEnd(Animation animation) {
-				view.clearAnimation();
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation) {}
-		});
-		view.startAnimation(animation);
-	}
-
-	public static void hideView(final View view) {
-		Animation animation = AnimUtils.fadeOutMedium();
-		animation.setFillEnabled(true);
-		animation.setFillAfter(true);
-		animation.setAnimationListener(new AnimationListener() {
-
-			@Override
-			public void onAnimationStart(Animation animation) {}
-
-			@Override
-			public void onAnimationEnd(Animation animation) {
-				view.clearAnimation();
-			}
-
-			@Override
-			public void onAnimationRepeat(Animation animation) {}
-		});
-		view.startAnimation(animation);
-	}
-
 	public static enum TransitionType {
 		CandiPageToForm,
 		FormToCandiPage,
 		FormToCandiPageAfterDelete,
-		CandiPageToCandiPage,
 		CandiMapToCandiPage,
 		CandiFormToCandiList,
 		CandiRadarToCandiForm,
@@ -186,7 +124,7 @@ public class AnimUtils {
 		}
 	}
 
-	public static Animation loadAnimation(int animationResId) throws NotFoundException {
+	private static Animation loadAnimation(int animationResId) throws NotFoundException {
 		/*
 		 * Loads an animation object from a resource
 		 * 

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 
 /** From libcore.io.IoUtils */
+@SuppressWarnings("ucd")
 class IoUtils {
     static void deleteContents(File dir) throws IOException {
         File[] files = dir.listFiles();

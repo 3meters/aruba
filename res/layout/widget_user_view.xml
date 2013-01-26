@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
-        android:text="@string/candi_label_user_creator" />
+        android:text="@string/candi_label_user_created_by" />
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/candi_user_picture"

@@ -19,7 +19,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.actionbarsherlock.view.Window;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -39,6 +38,7 @@ import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.MiscUtils;
 
+@SuppressWarnings("ucd")
 public class LinkPicker extends FormActivity {
 
 	private TextView			mTitle;
@@ -55,10 +55,7 @@ public class LinkPicker extends FormActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		super.onCreate(savedInstanceState);
-
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		initialize();
 	}
 
@@ -75,10 +72,10 @@ public class LinkPicker extends FormActivity {
 		mTestButton = (Button) findViewById(R.id.button_test);
 		mTextUri = (EditText) findViewById(R.id.uri);
 
-		mTitle = (TextView) findViewById(R.id.custom_title);
+		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText(R.string.dialog_link_picker_title);
 
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.custom_title));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_ok));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_test));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
@@ -99,7 +96,7 @@ public class LinkPicker extends FormActivity {
 		bind();
 	}
 
-	public void bind() {
+	private void bind() {
 
 		new AsyncTask() {
 
@@ -128,6 +125,7 @@ public class LinkPicker extends FormActivity {
 		}.execute();
 	}
 
+	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {
 		SearchItem searchItem = (SearchItem) ((SearchListViewHolder) view.getTag()).data;
 		mUri = searchItem.uri;
@@ -135,6 +133,7 @@ public class LinkPicker extends FormActivity {
 		mTextUri.setText(mUri);
 	}
 
+	@SuppressWarnings("ucd")
 	public void onLinkTestButtonClick(View view) {
 		String linkUri = mTextUri.getText().toString();
 
@@ -153,6 +152,7 @@ public class LinkPicker extends FormActivity {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public void onOkButtonClick(View view) {
 		mUri = mTextUri.getText().toString();
 		doVerify();

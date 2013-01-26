@@ -1,25 +1,14 @@
 package com.aircandi.components;
 
-import java.util.Locale;
 
 public class Stopwatch {
 
-	protected long		totalTime;
-	protected long		lastThreshold;
-	protected String	name;
+	private long	totalTime;
+	private long	lastThreshold;
+	private String	name;
 
 	public Stopwatch(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * Human readable time in seconds
-	 * 
-	 * @param nanoTime
-	 * @return time in seconds
-	 */
-	public static final String toSeconds(long nanoTime) {
-		return String.format(Locale.US, "%.9f", nanoTime / 1000000000.0);
 	}
 
 	public long getTotalTime() {
@@ -47,10 +36,6 @@ public class Stopwatch {
 		}
 		Logger.v(this, stats);
 		return lapTime;
-	}
-
-	public Boolean isStarted() {
-		return (lastThreshold != 0);
 	}
 
 	/**

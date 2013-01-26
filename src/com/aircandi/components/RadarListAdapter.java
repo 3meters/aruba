@@ -68,8 +68,10 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 		mItems = items;
 	}
 
-	public static class RadarViewHolder {
-		public CandiView	candiView;
+	@SuppressWarnings("ucd")
+	private static class RadarViewHolder {
+		private CandiView	candiView;
+		@SuppressWarnings("unused")
 		public Object		data;
 	}
 }
