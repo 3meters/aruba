@@ -28,7 +28,7 @@
     <string name="dummy_category_name">Restaurant</string>
     <string name="dummy_uri">http://goodeats.com</string>
     <string name="dummy_name">Jay Massena</string>
-    <string name="dummy_section_title">aection</string>
+    <string name="dummy_section_title">section</string>
     <string name="dummy_location">Seattle, WA</string>
     <string name="dummy_address">"2200 N 56th (at Keystone Pl N)\nSeattle, WA 98103\n(206) 545&#8211;4277"</string>
     <string name="dummy_comments">21 comments</string>

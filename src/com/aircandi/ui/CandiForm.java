@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.DisplayMetrics;
+import android.util.FloatMath;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -300,17 +301,6 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {}
-
-	//	@SuppressWarnings("ucd")
-	//	public void onPhotoClick(View view) {
-	//		List<Photo> photos = mEntity.place.photos;
-	//		ProxiExplorer.getInstance().getEntityModel().setPhotos(photos);
-	//		Photo photo = (Photo) view.getTag();
-	//		Intent intent = new Intent(this, PictureDetail.class);
-	//		intent.putExtra(CandiConstants.EXTRA_URI, photo.getUri());
-	//		startActivity(intent);
-	//		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
-	//	}
 
 	@SuppressWarnings("ucd")
 	public void onCandiClick(View view) {
@@ -716,15 +706,14 @@ public class CandiForm extends CandiActivity {
 		Integer spacing = 3;
 		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(context, spacing);
 		Integer spacingVerticalPixels = ImageUtils.getRawPixels(context, spacing);
-		Integer candiCountPortrait = context.getResources().getInteger(R.integer.candi_per_row_portrait_form);
-		Integer candiCountLandscape = context.getResources().getInteger(R.integer.candi_per_row_landscape_form);
 
-		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * (candiCountPortrait - 1))) / candiCountPortrait;
-
-		/* We need to cap the dimensions so we don't look crazy in landscape orientation */
+		Integer desiredWidthPixels = (int) (metrics.xdpi * 0.45f);
 		if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * (candiCountLandscape - 1))) / candiCountLandscape;
+			desiredWidthPixels = (int) (metrics.ydpi * 0.45f);
 		}
+
+		Integer candiCount = (int) FloatMath.ceil(layoutWidthPixels / desiredWidthPixels);
+		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * (candiCount - 1))) / candiCount;
 
 		Integer candiHeightPixels = (int) (candiWidthPixels * 1);
 

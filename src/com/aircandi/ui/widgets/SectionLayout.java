@@ -18,7 +18,6 @@ public class SectionLayout extends LinearLayout {
 	private Integer		mLayoutFooterId;
 	private String		mHeaderTitle;
 	private TextView	mTextViewHeader;
-	private TextView	mButtonMore;
 
 	public SectionLayout(Context context) {
 		this(context, null);
@@ -44,9 +43,7 @@ public class SectionLayout extends LinearLayout {
 			View view = inflater.inflate(mLayoutHeaderId, null);
 
 			mTextViewHeader = (TextView) view.findViewById(R.id.title);
-			mButtonMore = (TextView) view.findViewById(R.id.button_more);
 			FontManager.getInstance().setTypefaceDefault(mTextViewHeader);
-			FontManager.getInstance().setTypefaceDefault(mButtonMore);
 
 			if (mTextViewHeader != null) {
 				if (mHeaderTitle == null) {
@@ -72,13 +69,5 @@ public class SectionLayout extends LinearLayout {
 
 	public void setTextViewHeader(TextView textViewHeader) {
 		mTextViewHeader = textViewHeader;
-	}
-
-	public TextView getButtonMore() {
-		return mButtonMore;
-	}
-
-	public void setButtonMore(TextView buttonMore) {
-		mButtonMore = buttonMore;
 	}
 }

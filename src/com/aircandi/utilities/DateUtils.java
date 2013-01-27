@@ -47,7 +47,7 @@ public class DateUtils {
 		@SuppressWarnings("unused")
 		int minutesPart = minutes - (hours * 60);
 
-		String interval = "";
+		String interval = "just now";
 		if (days >= 1) {
 			SimpleDateFormat datePart = new SimpleDateFormat(DATE_FORMAT_TIME_SINCE, Locale.US);
 			if (dateOld.getYear() != DateUtils.nowDate().getYear()) {

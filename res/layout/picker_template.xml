@@ -24,8 +24,8 @@
         android:id="@+id/form_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/title"
         android:layout_above="@+id/form_footer"
+        android:layout_below="@+id/title"
         android:paddingTop="10dp" />
 
     <!-- Footer -->

@@ -90,6 +90,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	/* Theme */
 	public String				mThemeTone;
+	public Boolean				mIsDialog;
 
 	/* UI */
 	private TextView			mBeaconIndicator;
@@ -144,6 +145,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 		/* Tabs: setup tabs if appropriate */
 		manageTabs();
 
+		/* Default sizing if this is a dialog */
+		if (mIsDialog) {
+			WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
+			params.height = ImageUtils.getRawPixels(mActivity, 500);
+			params.width = ImageUtils.getRawPixels(mActivity, 300);
+			mActivity.getWindow().setAttributes(params);
+		}
 	}
 
 	@Subscribe
@@ -636,6 +644,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void setTheme(Integer themeResId, Boolean isDialog) {
 		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
+		mIsDialog = isDialog;
 		/*
 		 * ActionBarSherlock takes over the title area if version < 4.0 (Ice Cream Sandwich).
 		 */
