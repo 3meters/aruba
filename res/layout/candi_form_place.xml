@@ -18,13 +18,14 @@
         android:background="?attr/backgroundCandi"
         android:fillViewport="true" >
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingBottom="15dp" >
 
             <RelativeLayout
+                android:id="@+id/candi_view_holder"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
                 android:layout_marginBottom="10dp" >
@@ -32,13 +33,15 @@
                 <com.aircandi.ui.widgets.CandiView
                     android:id="@+id/candi_view"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="120dp"
                     aircandi:layout="@layout/widget_candi_view" />
             </RelativeLayout>
 
             <LinearLayout
+                android:id="@+id/body_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/candi_view_holder"
                 android:orientation="vertical"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp" >
@@ -48,7 +51,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
-                    android:background="#33ff0000"
                     layout="@layout/widget_candi_header_place" />
 
                 <ViewStub
@@ -68,30 +70,36 @@
                     android:layout="@layout/section_candi"
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp" />
+            </LinearLayout>
 
-                <LinearLayout
+            <LinearLayout
+                android:id="@+id/authoring_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/body_holder"
+                android:gravity="bottom"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" >
+
+                <com.aircandi.ui.widgets.UserView
+                    android:id="@+id/edited_by"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal" >
+                    android:layout_marginRight="2dp"
+                    android:layout_weight="1"
+                    aircandi:layout="@layout/widget_user_view_detailed" />
 
-                    <com.aircandi.ui.widgets.UserView
-                        android:id="@+id/edited_by"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="2dp"
-                        android:layout_weight="1"
-                        aircandi:layout="@layout/widget_user_view_detailed" />
-
-                    <com.aircandi.ui.widgets.UserView
-                        android:id="@+id/created_by"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:layout_weight="1"
-                        aircandi:layout="@layout/widget_user_view_detailed" />
-                </LinearLayout>
+                <com.aircandi.ui.widgets.UserView
+                    android:id="@+id/created_by"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
+                    android:layout_weight="1"
+                    aircandi:layout="@layout/widget_user_view_detailed" />
             </LinearLayout>
-        </LinearLayout>
+        </RelativeLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 
     <!-- Footer -->

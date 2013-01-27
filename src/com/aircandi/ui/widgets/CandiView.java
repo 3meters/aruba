@@ -53,7 +53,7 @@ public class CandiView extends RelativeLayout {
 	private LinearLayout		mTextGroup;
 
 	private Integer				mColorResId;
-	private Boolean				mBoostColor;
+	private Boolean				mMuteColor;
 	private LayoutInflater		mInflater;
 
 	public CandiView(Context context) {
@@ -121,8 +121,8 @@ public class CandiView extends RelativeLayout {
 
 		mEntity = entity;
 		mEntityActivityDate = entity.activityDate;
-		mBoostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
-		mColorResId = Place.getCategoryColorResId(mEntity.place.category != null ? mEntity.place.category.name : null, true, mBoostColor, false);
+		mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
+		mColorResId = Place.getCategoryColorResId(mEntity.place.category != null ? mEntity.place.category.name : null, true, mMuteColor, false);
 
 		/* Primary candi image */
 
@@ -289,7 +289,7 @@ public class CandiView extends RelativeLayout {
 
 					/* Tint the image if we are using the default treatment */
 					if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntity.photo == null) {
-						int color = Place.getCategoryColor(mEntity.place.category != null ? mEntity.place.category.name : null, true, mBoostColor, false);
+						int color = Place.getCategoryColor(mEntity.place.category != null ? mEntity.place.category.name : null, true, mMuteColor, false);
 						mCandiImage.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 					}
 					else {
