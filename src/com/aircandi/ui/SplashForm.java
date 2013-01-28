@@ -25,6 +25,7 @@ import com.aircandi.components.NetworkManager;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.Tracker;
+import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Session;
@@ -68,9 +69,12 @@ public class SplashForm extends SherlockActivity {
 		if (Build.PRODUCT.contains("sdk")) {
 			Aircandi.usingEmulator = true;
 		}
+		/* Tickle the bitmap manager to get it initialized */
+		BitmapManager.getInstance();
+
 		/* AWS Credentials */
 		startGetAWSCredentials();
-
+		
 		/* Connectivity monitoring */
 		NetworkManager.getInstance().setContext(getApplicationContext());
 		NetworkManager.getInstance().initialize();

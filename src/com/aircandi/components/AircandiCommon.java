@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.FragmentTransaction;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
@@ -149,7 +150,16 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (mIsDialog) {
 			WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
 			params.height = ImageUtils.getRawPixels(mActivity, 500);
-			params.width = ImageUtils.getRawPixels(mActivity, 300);
+			DisplayMetrics metrics = mActivity.getResources().getDisplayMetrics();
+			if (metrics != null) {
+				int displayWidth = metrics.widthPixels;
+				int desiredWidth = ImageUtils.getRawPixels(mActivity, 350);
+				params.width = Math.min(desiredWidth, displayWidth - 50);
+			}
+			else {
+				params.width = ImageUtils.getRawPixels(mActivity, 300);
+			}
+
 			mActivity.getWindow().setAttributes(params);
 		}
 	}

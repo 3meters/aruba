@@ -375,7 +375,7 @@ public class CategoryBuilder extends FormActivity {
 		bitmapRequest.setBrokenDrawableResId(R.drawable.ic_app);
 		bitmapRequest.setImageSize(mImage.getSizeHint());
 		bitmapRequest.setImageRequestor(mImage.getImageView());
-		BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+		BitmapManager.getInstance().masterFetch(bitmapRequest);
 	}
 
 	@Override

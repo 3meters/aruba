@@ -38,6 +38,7 @@
         android:layout_toRightOf="@+id/image"
         android:ellipsize="end"
         android:maxLines="1"
+        android:textColor="?attr/textColor"
         android:text="@string/dummy_title" />
 
     <TextView

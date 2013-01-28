@@ -155,7 +155,7 @@ public class PictureDetail extends FormActivity {
 				});
 			}
 		});
-		BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+		BitmapManager.getInstance().masterFetch(bitmapRequest);
 		return layout;
 	}
 

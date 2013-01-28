@@ -201,7 +201,7 @@ public class WebImageView extends RelativeLayout {
 			}
 		});
 
-		BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+		BitmapManager.getInstance().masterFetch(bitmapRequest);
 
 	}
 

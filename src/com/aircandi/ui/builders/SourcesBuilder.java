@@ -299,7 +299,7 @@ public class SourcesBuilder extends FormActivity {
 				bitmapRequest.setImageSize(image.getSizeHint());
 				bitmapRequest.setImageRequestor(image.getImageView());
 
-				BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+				BitmapManager.getInstance().masterFetch(bitmapRequest);
 				list.addView(sourceView);
 			}
 		}

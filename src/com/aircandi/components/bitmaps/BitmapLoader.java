@@ -37,7 +37,7 @@ public class BitmapLoader {
 	// Primary entry routines
 	// --------------------------------------------------------------------------------------------
 
-	public void queueBitmapRequest(BitmapRequest bitmapRequest) {
+	public synchronized void queueBitmapRequest(BitmapRequest bitmapRequest) {
 		/*
 		 * The image requestor may have called for other images before. So there may be some old tasks in the queue. We
 		 * need to discard them.

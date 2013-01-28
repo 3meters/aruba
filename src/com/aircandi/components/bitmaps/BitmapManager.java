@@ -95,37 +95,79 @@ public class BitmapManager {
 	// Public cache routines
 	// --------------------------------------------------------------------------------------------
 
-	public void fetchBitmap(final BitmapRequest bitmapRequest) {
+	public static Boolean isDrawable(BitmapRequest bitmapRequest) {
+		if (bitmapRequest.getImageUri().toLowerCase(Locale.US).startsWith("resource:")) {
+			return true;
+		}
+		return false;
+	}
+	
+	public void masterFetch(final BitmapRequest bitmapRequest){
+		if (BitmapManager.isDrawable(bitmapRequest)) {
+			BitmapManager.getInstance().fetchDrawable(bitmapRequest);
+		}
+		else {
+			ServiceResponse serviceResponse = BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+			if (serviceResponse.responseCode != ResponseCode.Success) {
+				BitmapManager.getInstance().downloadBitmap(bitmapRequest);
+			}
+		}
+	}
+
+	public synchronized ServiceResponse fetchDrawable(final BitmapRequest bitmapRequest) {
 		/*
 		 * We keep drawables on the main thread.
 		 */
-		if (bitmapRequest.getImageUri().toLowerCase(Locale.US).startsWith("resource:")) {
 
-			ServiceResponse serviceResponse = new ServiceResponse();
-			String rawResourceName = bitmapRequest.getImageUri().substring(bitmapRequest.getImageUri().indexOf("resource:") + 9);
-			String resolvedResourceName = resolveResourceName(rawResourceName);
-			if (resolvedResourceName == null) {
-				serviceResponse.responseCode = ResponseCode.Failed;
-				if (bitmapRequest.getRequestListener() != null) {
-					bitmapRequest.getRequestListener().onComplete(serviceResponse);
-				}
-				return;
+		ServiceResponse serviceResponse = new ServiceResponse();
+		String rawResourceName = bitmapRequest.getImageUri().substring(bitmapRequest.getImageUri().indexOf("resource:") + 9);
+		String resolvedResourceName = resolveResourceName(rawResourceName);
+		if (resolvedResourceName == null) {
+			serviceResponse.responseCode = ResponseCode.Failed;
+			if (bitmapRequest.getRequestListener() != null) {
+				bitmapRequest.getRequestListener().onComplete(serviceResponse);
 			}
+			return serviceResponse;
+		}
 
-			int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable", "com.aircandi");
-			String memCacheKey = String.valueOf(resourceId);
-			if (bitmapRequest.getImageSize() != null) {
-				memCacheKey += "." + String.valueOf(bitmapRequest.getImageSize());
-			}
-			String memKeyHashed = MiscUtils.md5(memCacheKey);
-			Bitmap bitmap = mMemoryCache.get(memKeyHashed);
+		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable", "com.aircandi");
+		String memCacheKey = String.valueOf(resourceId);
+		if (bitmapRequest.getImageSize() != null) {
+			memCacheKey += "." + String.valueOf(bitmapRequest.getImageSize());
+		}
+		String memKeyHashed = MiscUtils.md5(memCacheKey);
+		Bitmap bitmap = mMemoryCache.get(memKeyHashed);
 
-			if (bitmap == null) {
-				bitmap = loadBitmapFromResourcesSampled(resourceId, bitmapRequest.getImageSize());
-				synchronized (mMemoryCache) {
-					mMemoryCache.put(memKeyHashed, bitmap);
-				}
+		if (bitmap == null) {
+			bitmap = loadBitmapFromResourcesSampled(resourceId, bitmapRequest.getImageSize());
+			synchronized (mMemoryCache) {
+				mMemoryCache.put(memKeyHashed, bitmap);
 			}
+		}
+
+		if (bitmapRequest.getRequestListener() != null) {
+			serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
+			bitmapRequest.getRequestListener().onComplete(serviceResponse);
+		}
+
+		if (bitmapRequest.getImageView() != null) {
+			BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+			ImageUtils.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, AnimUtils.fadeInMedium());
+		}
+
+		return serviceResponse;
+	}
+
+	public synchronized ServiceResponse fetchBitmap(final BitmapRequest bitmapRequest) {
+		/*
+		 * Fetching from cache often involves file io so we take this off the main (ui) thread.
+		 */
+		ServiceResponse serviceResponse = new ServiceResponse();
+		Bitmap bitmap = getBitmap(bitmapRequest.getImageUri(), bitmapRequest.getImageSize());
+
+		if (bitmap != null) {
+			Logger.v(this, "Image request satisfied from cache: " + bitmapRequest.getImageUri());
+			serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
 
 			if (bitmapRequest.getRequestListener() != null) {
 				serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
@@ -133,46 +175,26 @@ public class BitmapManager {
 			}
 
 			if (bitmapRequest.getImageView() != null) {
-				BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-				ImageUtils.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, AnimUtils.fadeInMedium());
+				final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+
+				/* Put this on the main thread */
+				Aircandi.mainThreadHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						ImageUtils.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, AnimUtils.fadeInMedium());
+					}
+				});
 			}
 		}
 		else {
-			/*
-			 * Fetching from cache often involves file io so we take this off the main (ui) thread.
-			 */
-			ServiceResponse serviceResponse = new ServiceResponse();
-			Bitmap bitmap = getBitmap(bitmapRequest.getImageUri(), bitmapRequest.getImageSize());
-
-			if (bitmap != null) {
-				Logger.v(this, "Image request satisfied from cache: " + bitmapRequest.getImageUri());
-				serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
-
-				if (bitmapRequest.getRequestListener() != null) {
-					serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
-					bitmapRequest.getRequestListener().onComplete(serviceResponse);
-				}
-
-				if (bitmapRequest.getImageView() != null) {
-					final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-
-					/* Put this on the main thread */
-					Aircandi.mainThreadHandler.post(new Runnable() {
-						@Override
-						public void run() {
-							ImageUtils.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, AnimUtils.fadeInMedium());
-						}
-					});
-				}
-			}
-			else {
-				serviceResponse.responseCode = ResponseCode.Failed;
-			}
-
-			if (serviceResponse.responseCode != ResponseCode.Success) {
-				mBitmapLoader.queueBitmapRequest(bitmapRequest);
-			}
+			serviceResponse.responseCode = ResponseCode.Failed;
 		}
+		
+		return serviceResponse;
+	}
+
+	public void downloadBitmap(final BitmapRequest bitmapRequest) {
+		mBitmapLoader.queueBitmapRequest(bitmapRequest);
 	}
 
 	public Bitmap putImageBytes(String key, byte[] imageBytes, Integer size) {

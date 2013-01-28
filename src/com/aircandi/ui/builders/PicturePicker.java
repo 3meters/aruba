@@ -13,6 +13,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -21,8 +22,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
+import android.util.FloatMath;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -120,6 +124,17 @@ public class PicturePicker extends FormActivity {
 				mDefaultSearch = extras.getString(CandiConstants.EXTRA_SEARCH_PHRASE);
 			}
 			mSearch = (EditText) findViewById(R.id.search_text);
+			mSearch.setOnKeyListener(new OnKeyListener() {
+	            @Override
+				public boolean onKey(View view, int keyCode, KeyEvent event) {
+	                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+	                    onSearchClick(view);
+	                    return true;
+	                } else {
+	                    return false;
+	                }
+	            }
+	        });			
 			if (mDefaultSearch != null) {
 				mSearch.setText(mDefaultSearch);
 			}
@@ -138,8 +153,14 @@ public class PicturePicker extends FormActivity {
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		View parentView = findViewById(R.id.grid_gallery);
 		Integer layoutWidthPixels = metrics.widthPixels - (parentView.getPaddingLeft() + parentView.getPaddingRight());
+		
+		Integer desiredWidthPixels = (int) (metrics.xdpi * 0.60f);
+		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			desiredWidthPixels = (int) (metrics.ydpi * 0.60f);
+		}
+		Integer count = (int) FloatMath.ceil(layoutWidthPixels / desiredWidthPixels);
 		mImageMarginPixels = ImageUtils.getRawPixels(this, 2);
-		mImageWidthPixels = (layoutWidthPixels / 3) - (mImageMarginPixels * 2);
+		mImageWidthPixels = (layoutWidthPixels / count) - (mImageMarginPixels * (count - 1));
 
 		if (isDialog()) {
 			mTitle = (TextView) findViewById(R.id.title);

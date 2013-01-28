@@ -167,7 +167,7 @@ public class CandiView extends RelativeLayout {
 					BitmapRequest bitmapRequest = new BitmapRequest(entity.place.category.iconUri(), mCategoryImage);
 					bitmapRequest.setImageRequestor(mCategoryImage);
 					bitmapRequest.setImageSize(ImageUtils.getRawPixels(this.getContext(), 50));
-					BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+					BitmapManager.getInstance().masterFetch(bitmapRequest);
 					mCategoryImage.setVisibility(View.VISIBLE);
 				}
 			}
@@ -219,7 +219,7 @@ public class CandiView extends RelativeLayout {
 					bitmapRequest.setImageSize(mCandiImage.getSizeHint());
 					bitmapRequest.setImageRequestor(webImageView.getImageView());
 
-					BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+					BitmapManager.getInstance().masterFetch(bitmapRequest);
 
 					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
 					params.setMargins(marginPixels
@@ -295,8 +295,18 @@ public class CandiView extends RelativeLayout {
 					else {
 						mCandiImage.getImageView().clearColorFilter();
 					}
-
-					BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+					
+					BitmapManager.getInstance().masterFetch(bitmapRequest);
+					
+//					new AsyncTask<BitmapRequest, Void, Object>() {
+//
+//						@Override
+//						protected Object doInBackground(BitmapRequest... params) {
+//							BitmapRequest bitmapRequest = (BitmapRequest) params[0];
+//							BitmapManager.getInstance().masterFetch(bitmapRequest);
+//							return null;
+//						}
+//					}.execute(bitmapRequest);
 				}
 			}
 			if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
