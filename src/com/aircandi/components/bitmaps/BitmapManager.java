@@ -101,8 +101,8 @@ public class BitmapManager {
 		}
 		return false;
 	}
-	
-	public void masterFetch(final BitmapRequest bitmapRequest){
+
+	public void masterFetch(final BitmapRequest bitmapRequest) {
 		if (BitmapManager.isDrawable(bitmapRequest)) {
 			BitmapManager.getInstance().fetchDrawable(bitmapRequest);
 		}
@@ -115,9 +115,6 @@ public class BitmapManager {
 	}
 
 	public synchronized ServiceResponse fetchDrawable(final BitmapRequest bitmapRequest) {
-		/*
-		 * We keep drawables on the main thread.
-		 */
 
 		ServiceResponse serviceResponse = new ServiceResponse();
 		String rawResourceName = bitmapRequest.getImageUri().substring(bitmapRequest.getImageUri().indexOf("resource:") + 9);
@@ -151,22 +148,26 @@ public class BitmapManager {
 		}
 
 		if (bitmapRequest.getImageView() != null) {
-			BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
-			ImageUtils.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, AnimUtils.fadeInMedium());
+			final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+
+			/* Put this on the main thread */
+			Aircandi.mainThreadHandler.post(new Runnable() {
+				@Override
+				public void run() {
+					ImageUtils.showDrawableInImageView(bitmapDrawable, bitmapRequest.getImageView(), true, AnimUtils.fadeInMedium());
+				}
+			});
 		}
 
 		return serviceResponse;
 	}
 
 	public synchronized ServiceResponse fetchBitmap(final BitmapRequest bitmapRequest) {
-		/*
-		 * Fetching from cache often involves file io so we take this off the main (ui) thread.
-		 */
+		
 		ServiceResponse serviceResponse = new ServiceResponse();
 		Bitmap bitmap = getBitmap(bitmapRequest.getImageUri(), bitmapRequest.getImageSize());
 
 		if (bitmap != null) {
-			Logger.v(this, "Image request satisfied from cache: " + bitmapRequest.getImageUri());
 			serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
 
 			if (bitmapRequest.getRequestListener() != null) {
@@ -189,7 +190,7 @@ public class BitmapManager {
 		else {
 			serviceResponse.responseCode = ResponseCode.Failed;
 		}
-		
+
 		return serviceResponse;
 	}
 

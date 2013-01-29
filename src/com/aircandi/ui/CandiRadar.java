@@ -18,6 +18,7 @@ import android.provider.Settings;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -53,7 +54,6 @@ import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.base.CandiActivity;
-import com.aircandi.ui.widgets.BounceListView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.squareup.otto.Subscribe;
@@ -142,7 +142,7 @@ public class CandiRadar extends CandiActivity {
 	private Number				mEntityModelActivityDate;
 	private Location			mActiveLocation	= null;
 
-	private BounceListView		mList;
+	private ListView			mList;
 
 	private SoundPool			mSoundPool;
 	private int					mNewCandiSoundId;
@@ -208,7 +208,7 @@ public class CandiRadar extends CandiActivity {
 		updatePreferences(true);
 
 		/* Other UI references */
-		mList = (BounceListView) findViewById(R.id.radar_list);
+		mList = (ListView) findViewById(R.id.radar_list);
 		mList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -754,5 +754,4 @@ public class CandiRadar extends CandiActivity {
 		return R.layout.candi_radar;
 	}
 
-	
 }

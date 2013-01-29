@@ -16,7 +16,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.DisplayMetrics;
-import android.util.FloatMath;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -319,25 +318,25 @@ public class CandiForm extends CandiActivity {
 			}
 			else {
 
-				if (entity.source.name.equals("twitter")) {
+				if (entity.source.source.equals("twitter")) {
 					AndroidManager.getInstance().callTwitterActivity(this, entity.source.id);
 				}
-				else if (entity.source.name.equals("foursquare")) {
+				else if (entity.source.source.equals("foursquare")) {
 					AndroidManager.getInstance().callFoursquareActivity(this, entity.source.id);
 				}
-				else if (entity.source.name.equals("facebook")) {
+				else if (entity.source.source.equals("facebook")) {
 					AndroidManager.getInstance().callFacebookActivity(this, entity.source.id);
 				}
-				else if (entity.source.name.equals("yelp")) {
+				else if (entity.source.source.equals("yelp")) {
 					AndroidManager.getInstance().callYelpActivity(this, entity.source.id, entity.source.url);
 				}
-				else if (entity.source.name.equals("opentable")) {
+				else if (entity.source.source.equals("opentable")) {
 					AndroidManager.getInstance().callOpentableActivity(this, entity.source.id, entity.source.url);
 				}
-				else if (entity.source.name.equals("website")) {
+				else if (entity.source.source.equals("website")) {
 					AndroidManager.getInstance().callBrowserActivity(this, entity.source.id);
 				}
-				else if (entity.source.name.equals("comments")) {
+				else if (entity.source.source.equals("comments")) {
 					IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 					intentBuilder.setCommandType(CommandType.View)
 							.setEntityId(mEntity.id)
@@ -712,7 +711,7 @@ public class CandiForm extends CandiActivity {
 			desiredWidthPixels = (int) (metrics.ydpi * 0.45f);
 		}
 
-		Integer candiCount = (int) FloatMath.ceil(layoutWidthPixels / desiredWidthPixels);
+		Integer candiCount = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
 		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * (candiCount - 1))) / candiCount;
 
 		Integer candiHeightPixels = (int) (candiWidthPixels * 1);

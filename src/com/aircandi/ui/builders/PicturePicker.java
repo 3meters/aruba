@@ -22,7 +22,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
-import android.util.FloatMath;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -158,7 +157,7 @@ public class PicturePicker extends FormActivity {
 		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
 			desiredWidthPixels = (int) (metrics.ydpi * 0.60f);
 		}
-		Integer count = (int) FloatMath.ceil(layoutWidthPixels / desiredWidthPixels);
+		Integer count = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
 		mImageMarginPixels = ImageUtils.getRawPixels(this, 2);
 		mImageWidthPixels = (layoutWidthPixels / count) - (mImageMarginPixels * (count - 1));
 

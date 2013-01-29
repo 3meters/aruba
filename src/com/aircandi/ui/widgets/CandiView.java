@@ -247,7 +247,7 @@ public class CandiView extends RelativeLayout {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation" })
 	private void drawImage() {
 		if (mCandiImage != null) {
 

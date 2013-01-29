@@ -29,6 +29,7 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 		View view = convertView;
 		final RadarViewHolder holder;
 		Entity itemData = (Entity) mItems.get(position);
+		Logger.v(this, "getView: position = " + String.valueOf(position) + " name = " + itemData.name);
 
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);

@@ -96,6 +96,8 @@ public class SourceBuilder extends FormActivity {
 				}
 			}
 			mSourceSuggestionStrings.add("website");
+			mSourceSuggestionStrings.add("facebook");
+			mSourceSuggestionStrings.add("twitter");
 			mSourceSuggestionStrings.add(getString(R.string.form_source_type_hint));
 			initializeSpinner(mSourceSuggestionStrings);
 		}
@@ -107,6 +109,12 @@ public class SourceBuilder extends FormActivity {
 		source.origin = "user";
 		if (sourceType.equals("website")) {
 			source.icon = "source_website.png";
+		}
+		else if (sourceType.equals("facebook")) {
+			source.icon = "source_facebook.png";
+		}
+		else if (sourceType.equals("twitter")) {
+			source.icon = "source_twitter.png";
 		}
 		return source;
 	}

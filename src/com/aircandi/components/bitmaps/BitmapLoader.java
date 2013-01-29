@@ -167,10 +167,7 @@ public class BitmapLoader {
 
 						/* Make sure this is still a valid request */
 						if (imageRequest.getImageView() == null || imageRequest.getImageView().getTag().equals(imageRequest.getImageUri())) {
-							/*
-							 * Start a new thread so we can do the actual image fetching in parallel
-							 * like DrawableManager does.
-							 */
+							
 							Logger.v(BitmapLoader.this, imageRequest.getImageUri() + ": Download started...");
 							Bitmap bitmap = null;
 							ServiceResponse serviceResponse = new ServiceResponse();

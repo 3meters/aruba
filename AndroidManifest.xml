@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi"
     android:versionCode="1"
-    android:versionName="0.6.7" >
+    android:versionName="0.6.8" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -97,6 +97,12 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/form_title_picture_browse"
             android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name=".ui.FeedbackForm"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/form_title_feedback"
+            android:windowSoftInputMode="adjustResize" >
         </activity>
         
         <!-- User activities -->
