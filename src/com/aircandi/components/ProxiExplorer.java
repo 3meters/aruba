@@ -43,6 +43,7 @@ import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Beacon.BeaconType;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
+import com.aircandi.service.objects.Document;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link;
 import com.aircandi.service.objects.Link.LinkType;
@@ -268,7 +269,7 @@ public class ProxiExplorer {
 				.setResponseFormat(ResponseFormat.Json);
 
 		Aircandi.stopwatch3.segmentTime("Entities for beacons: service call started");
-		serviceResponse = dispatch(serviceRequest, false);
+		serviceResponse = dispatch(serviceRequest);
 
 		Aircandi.stopwatch3.segmentTime("Entities for beacons: service call complete");
 		if (serviceResponse.responseCode == ResponseCode.Success) {
@@ -346,7 +347,7 @@ public class ProxiExplorer {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
-		serviceResponse = dispatch(serviceRequest, false);
+		serviceResponse = dispatch(serviceRequest);
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
@@ -417,11 +418,10 @@ public class ProxiExplorer {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
-		serviceResponse = dispatch(serviceRequest, false);
+		serviceResponse = dispatch(serviceRequest);
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 			String jsonResponse = (String) serviceResponse.data;
-			Logger.v(this, jsonResponse);
 			ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
 
@@ -442,7 +442,7 @@ public class ProxiExplorer {
 		return;
 	}
 
-	private ServiceResponse dispatch(ServiceRequest serviceRequest, Boolean skipUpdateCheck) {
+	private ServiceResponse dispatch(ServiceRequest serviceRequest) {
 		/*
 		 * We use this as a choke point for all calls to the aircandi service.
 		 */
@@ -749,7 +749,7 @@ public class ProxiExplorer {
 						.setParameters(parameters)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest, false);
+				result.serviceResponse = dispatch(serviceRequest);
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
@@ -829,7 +829,7 @@ public class ProxiExplorer {
 						.setParameters(parameters)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest, false);
+				result.serviceResponse = dispatch(serviceRequest);
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) result.serviceResponse.data;
@@ -877,7 +877,7 @@ public class ProxiExplorer {
 					.setResponseFormat(ResponseFormat.Json)
 					.setSession(Aircandi.getInstance().getUser().session);
 
-			result.serviceResponse = dispatch(serviceRequest, false);
+			result.serviceResponse = dispatch(serviceRequest);
 
 			return result;
 		}
@@ -895,7 +895,7 @@ public class ProxiExplorer {
 					.setParameters(parameters)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest, false);
+			result.serviceResponse = dispatch(serviceRequest);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
@@ -929,7 +929,7 @@ public class ProxiExplorer {
 					.setParameters(parameters)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest, false);
+			result.serviceResponse = dispatch(serviceRequest);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
@@ -954,7 +954,7 @@ public class ProxiExplorer {
 					.setParameters(parameters)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest, false);
+			result.serviceResponse = dispatch(serviceRequest);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
@@ -999,7 +999,7 @@ public class ProxiExplorer {
 						.setRetry(false)
 						.setSession(Aircandi.getInstance().getUser().session);
 
-				result.serviceResponse = dispatch(serviceRequest, false);
+				result.serviceResponse = dispatch(serviceRequest);
 			}
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -1056,7 +1056,7 @@ public class ProxiExplorer {
 						.setRetry(false)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest, false);
+				result.serviceResponse = dispatch(serviceRequest);
 			}
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -1172,7 +1172,7 @@ public class ProxiExplorer {
 							.setRetry(false)
 							.setResponseFormat(ResponseFormat.Json);
 
-					result.serviceResponse = dispatch(serviceRequest, false);
+					result.serviceResponse = dispatch(serviceRequest);
 				}
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -1262,7 +1262,7 @@ public class ProxiExplorer {
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest, false);
+			result.serviceResponse = dispatch(serviceRequest);
 
 			/* Reproduce the service call effect locally */
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -1341,7 +1341,7 @@ public class ProxiExplorer {
 						.setRetry(false)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest, false);
+				result.serviceResponse = dispatch(serviceRequest);
 			}
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -1373,7 +1373,7 @@ public class ProxiExplorer {
 						.setRetry(false)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest, false);
+				result.serviceResponse = dispatch(serviceRequest);
 			}
 
 			/*
@@ -1383,6 +1383,23 @@ public class ProxiExplorer {
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				insertComment(entityId, comment);
 			}
+
+			return result;
+		}
+
+		public ModelResult insertDocument(Document document) {
+			ModelResult result = new ModelResult();
+
+			ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_REST + document.getCollection())
+					.setRequestType(RequestType.Insert)
+					.setRequestBody(ProxibaseService.convertObjectToJsonSmart(document, true, true))
+					.setSocketTimeout(ProxiConstants.TIMEOUT_SOCKET_UPDATES)
+					.setRetry(false)
+					.setSession(Aircandi.getInstance().getUser().session)
+					.setResponseFormat(ResponseFormat.Json);
+
+			result.serviceResponse = dispatch(serviceRequest);
 
 			return result;
 		}
@@ -1404,7 +1421,7 @@ public class ProxiExplorer {
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest, true);
+			result.serviceResponse = dispatch(serviceRequest);
 			return result;
 
 		}
@@ -1427,7 +1444,7 @@ public class ProxiExplorer {
 						.setRetry(false)
 						.setResponseFormat(ResponseFormat.Json);
 
-				result.serviceResponse = dispatch(serviceRequest, true);
+				result.serviceResponse = dispatch(serviceRequest);
 			}
 
 			return result;
@@ -1452,7 +1469,7 @@ public class ProxiExplorer {
 					.setSession(Aircandi.getInstance().getUser().session)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest, true);
+			result.serviceResponse = dispatch(serviceRequest);
 
 			return result;
 		}
@@ -1469,7 +1486,7 @@ public class ProxiExplorer {
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest, false);
+			result.serviceResponse = dispatch(serviceRequest);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
@@ -1491,7 +1508,7 @@ public class ProxiExplorer {
 					.setRetry(false)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest, false);
+			result.serviceResponse = dispatch(serviceRequest);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
@@ -1524,7 +1541,7 @@ public class ProxiExplorer {
 			/*
 			 * Insert user.
 			 */
-			result.serviceResponse = dispatch(serviceRequest, true);
+			result.serviceResponse = dispatch(serviceRequest);
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
@@ -1554,7 +1571,7 @@ public class ProxiExplorer {
 							.setResponseFormat(ResponseFormat.Json);
 
 					/* Doing an update so we don't need anything back */
-					result.serviceResponse = dispatch(serviceRequest, false);
+					result.serviceResponse = dispatch(serviceRequest);
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						jsonResponse = (String) result.serviceResponse.data;
@@ -1601,7 +1618,7 @@ public class ProxiExplorer {
 							.setSession(Aircandi.getInstance().getUser().session)
 							.setResponseFormat(ResponseFormat.Json);
 
-					result.serviceResponse = dispatch(serviceRequest, false);
+					result.serviceResponse = dispatch(serviceRequest);
 					updateUser(user);
 				}
 			}
@@ -1632,7 +1649,7 @@ public class ProxiExplorer {
 					.setSession(Aircandi.getInstance().getUser().session)
 					.setResponseFormat(ResponseFormat.Json);
 
-			result.serviceResponse = dispatch(serviceRequest, false);
+			result.serviceResponse = dispatch(serviceRequest);
 			return result;
 		}
 

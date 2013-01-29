@@ -60,6 +60,7 @@ import com.aircandi.ui.CandiRadar;
 import com.aircandi.ui.CommentForm;
 import com.aircandi.ui.CommentList;
 import com.aircandi.ui.EntityForm;
+import com.aircandi.ui.FeedbackForm;
 import com.aircandi.ui.Preferences;
 import com.aircandi.ui.SplashForm;
 import com.aircandi.ui.builders.PictureSourcePicker;
@@ -265,6 +266,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 				.setEntityType(((CandiForm) mActivity).getEntity().type);
 		Intent intent = intentBuilder.create();
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_EDIT);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+	}
+
+	private void doFeedbackClick() {
+		IntentBuilder intentBuilder = new IntentBuilder(mActivity, FeedbackForm.class);
+		Intent intent = intentBuilder.create();
+		mActivity.startActivity(intent);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 	}
 
@@ -994,6 +1002,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 				mActivity.startActivity(intent);
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
 				return;
+			case R.id.feedback:
+				doFeedbackClick();
+				return;
 			case R.id.profile:
 				intentBuilder = new IntentBuilder(mActivity, CandiUser.class)
 						.setUserId(Aircandi.getInstance().getUser().id);
@@ -1288,6 +1299,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		CandiDelete,
 		CommentBrowse,
 		CommentSave,
+		FeedbackSave,
 		PictureSearch,
 		PickBookmark,
 		CheckUpdate,
