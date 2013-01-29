@@ -79,6 +79,34 @@ public class LocationManager {
 		}, PlacesConstants.BURST_TIMEOUT);
 	}
 
+	public Location getLastKnownLocation() {
+		Location location = null;
+		
+		Location locationCandidate =mLocationManager.getLastKnownLocation(android.location.LocationManager.PASSIVE_PROVIDER);
+		LocationBetterReason reason = isBetterLocation(locationCandidate, location);
+		if (reason != LocationBetterReason.None) {
+			location = locationCandidate;
+		}
+		
+		locationCandidate =mLocationManager.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
+		reason = isBetterLocation(locationCandidate, location);
+		if (reason != LocationBetterReason.None) {
+			location = locationCandidate;
+		}
+		
+		locationCandidate =mLocationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);
+		reason = isBetterLocation(locationCandidate, location);
+		if (reason != LocationBetterReason.None) {
+			location = locationCandidate;
+		}
+		
+		if (!isGoodLocation(location)) {
+			location = null;
+		}
+		
+		return location;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Support routines
 	// --------------------------------------------------------------------------------------------
@@ -88,9 +116,9 @@ public class LocationManager {
 	}
 
 	public Observation getObservationForLocation(Location location) {
-		
+
 		Location locationTarget = location;
-		
+
 		if (location == null) {
 			locationTarget = mLocation;
 		}
@@ -274,13 +302,13 @@ public class LocationManager {
 		return LocationBetterReason.None;
 	}
 
-	public static Boolean hasMoved(Location locationToEvaluate, Location currentBestLocation) {
+	public static Boolean hasMoved(Location locationToEvaluate, Location currentBestLocation, Integer minDistance) {
 		if (currentBestLocation == null) {
 			return true;
 		}
 		/* Check distance moved and adjust for accuracy */
 		float distance = currentBestLocation.distanceTo(locationToEvaluate);
-		if (distance >= PlacesConstants.DIST_FIVE_METERS) {
+		if (distance >= minDistance) {
 			return true;
 		}
 		//		if (distance - locationToEvaluate.getAccuracy() > PlacesConstants.MIN_DISTANCE_UPDATES) {

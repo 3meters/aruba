@@ -21,12 +21,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
+import com.aircandi.PlacesConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
@@ -545,6 +547,29 @@ public class ProxiExplorer {
 			Logger.v(this, "No update check needed: Last check " + interval);
 		}
 		return doUpdateCheck;
+	}
+
+	public Boolean refreshNeeded(Location activeLocation) {
+		if (mEntityModel.getLastRefreshDate() != null) {
+			Long interval = DateUtils.nowDate().getTime() - mEntityModel.getLastRefreshDate().longValue();
+			if (interval > CandiConstants.INTERVAL_REFRESH) {
+				Logger.v(this, "Refresh needed: past interval");
+				return true;
+			}
+		}
+
+		Location lastKnownLocation = LocationManager.getInstance().getLastKnownLocation();
+		if (lastKnownLocation != null) {
+			Boolean hasMoved = LocationManager.hasMoved(lastKnownLocation, activeLocation, PlacesConstants.DIST_ONE_HUNDRED_METERS);
+			if (hasMoved) {
+				Logger.v(this, "Refresh needed: moved location");
+				return true;
+			}
+		}
+
+		String interval = DateUtils.timeSince(Aircandi.lastApplicationUpdateCheckDate.longValue(), DateUtils.nowDate().getTime());
+		Logger.v(this, "No update check needed: Last check " + interval);
+		return false;
 	}
 
 	public ModelResult checkForUpdate() {

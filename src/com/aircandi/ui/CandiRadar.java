@@ -150,6 +150,7 @@ public class CandiRadar extends CandiActivity {
 
 	private List<Entity>		mEntities		= new ArrayList<Entity>();
 	private RadarListAdapter	mRadarAdapter;
+	private Boolean				mAttachedWindow	= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -300,7 +301,7 @@ public class CandiRadar extends CandiActivity {
 				Location location = event.location;
 				if (location != null) {
 
-					Boolean hasMoved = LocationManager.hasMoved(location, mActiveLocation);
+					Boolean hasMoved = LocationManager.hasMoved(location, mActiveLocation, PlacesConstants.DIST_FIVE_METERS);
 					if (mActiveLocation == null || hasMoved) {
 
 						mActiveLocation = location;
@@ -584,9 +585,13 @@ public class CandiRadar extends CandiActivity {
 		 * loses focus but the activity is still active.
 		 */
 
-		Logger.d(this, "CandiRadarActivity paused");
+		if (Aircandi.getInstance().getUser() != null
+				&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+				&& Aircandi.getInstance().getUser().isDeveloper != null
+				&& Aircandi.getInstance().getUser().isDeveloper) {
+			mCommon.stopScanService();
+		}
 
-		//mCommon.stopScanService();
 		super.onPause();
 	}
 
@@ -599,9 +604,16 @@ public class CandiRadar extends CandiActivity {
 		 * foreground. Not guaranteed but is usually called just before the activity receives focus.
 		 */
 		super.onResume();
+		Logger.d(this, "onResume called");
 		if (!mInitialized) return;
+		mAttachedWindow = true;
 
-		//mCommon.startScanService(CandiConstants.INTERVAL_SCAN_RADAR);
+		if (Aircandi.getInstance().getUser() != null
+				&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+				&& Aircandi.getInstance().getUser().isDeveloper != null
+				&& Aircandi.getInstance().getUser().isDeveloper) {
+			mCommon.startScanService(CandiConstants.INTERVAL_SCAN_WIFI);
+		}
 	}
 
 	@Override
@@ -610,7 +622,8 @@ public class CandiRadar extends CandiActivity {
 
 		if (!mInitialized) return;
 
-		if (hasFocus) {
+		if (hasFocus && mAttachedWindow) {
+			mAttachedWindow = false;
 			if (Aircandi.applicationUpdateRequired) {
 				showUpdateAlert(null);
 			}
@@ -648,6 +661,10 @@ public class CandiRadar extends CandiActivity {
 		else if (mPrefChangeRefreshNeeded) {
 			Logger.d(this, "Start place search because of preference change");
 			mPrefChangeRefreshNeeded = false;
+			searchForPlaces();
+		}
+		else if (ProxiExplorer.getInstance().refreshNeeded(mActiveLocation)) {
+			Logger.d(this, "Start place search because of staleness or location change");
 			searchForPlaces();
 		}
 		else if ((entityModel.getLastRefreshDate() != null

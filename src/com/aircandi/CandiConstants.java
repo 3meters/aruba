@@ -52,6 +52,7 @@ public final class CandiConstants {
 	/* Wifi scanning */
 	public static final int		INTERVAL_SCAN_WIFI				= TIME_ONE_MINUTE;
 	public static final int		INTERVAL_UPDATE_CHECK			= TIME_SIXTY_MINUTES;
+	public static final int		INTERVAL_REFRESH				= TIME_THIRTY_MINUTES;
 
 	public static final int		MAX_Y_OVERSCROLL_DISTANCE		= 50;
 
