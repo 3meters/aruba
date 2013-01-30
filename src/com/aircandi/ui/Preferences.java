@@ -66,7 +66,7 @@ public class Preferences extends SherlockPreferenceActivity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 	}
 
 	@Override

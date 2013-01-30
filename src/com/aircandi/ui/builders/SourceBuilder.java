@@ -217,7 +217,7 @@ public class SourceBuilder extends FormActivity {
 
 	private void initializeSpinner(final List<String> items) {
 
-		ArrayAdapter adapter = new ArrayAdapter(this, R.layout.spinner_item, items) {
+		ArrayAdapter adapter = new ArrayAdapter(this, mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light, items) {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {

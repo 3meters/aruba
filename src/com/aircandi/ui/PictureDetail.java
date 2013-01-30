@@ -5,6 +5,7 @@ import it.sephiroth.android.library.imagezoom.ImageViewTouch;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -35,6 +36,8 @@ import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.UserView;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class PictureDetail extends FormActivity {
 
@@ -79,6 +82,20 @@ public class PictureDetail extends FormActivity {
 		else {
 			updateViewPager(photos);
 		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		setResult(Activity.RESULT_CANCELED);
+		super.onBackPressed();
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
+	}
+
+	@Override
+	public void onCancelButtonClick(View view) {
+		setResult(Activity.RESULT_CANCELED);
+		finish();
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
 	}
 
 	public static View buildPictureDetail(final Context context, Photo photo, View layout) {

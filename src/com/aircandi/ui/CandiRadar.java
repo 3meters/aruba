@@ -167,7 +167,7 @@ public class CandiRadar extends CandiActivity {
 			if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 				/* We won't continue if location services are disabled */
 				startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-				AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
+				AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.PageToForm);
 				finish();
 			}
 
@@ -446,7 +446,7 @@ public class CandiRadar extends CandiActivity {
 		/* We won't perform a search if location access is disabled */
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-			AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
+			AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.PageToForm);
 		}
 		else {
 			/* Start wifi scan. Once received, the search process continues to the next step. */
@@ -478,7 +478,7 @@ public class CandiRadar extends CandiActivity {
 		}
 
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiRadarToCandiForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.RadarToPage);
 	}
 
 	@SuppressWarnings("unused")
@@ -549,7 +549,7 @@ public class CandiRadar extends CandiActivity {
 		if (!LocationManager.getInstance().isLocationAccessEnabled()) {
 			/* We won't continue if location services are disabled */
 			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-			AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.CandiPageToForm);
+			AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.PageToForm);
 			finish();
 		}
 

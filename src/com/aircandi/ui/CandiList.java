@@ -175,7 +175,7 @@ public class CandiList extends CandiActivity {
 
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 		}
 	}
 

@@ -129,7 +129,7 @@ public class SourcesBuilder extends FormActivity {
 		else {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToCandiPage);
+			AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToPage);
 		}
 	}
 
@@ -146,7 +146,7 @@ public class SourcesBuilder extends FormActivity {
 		else {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToCandiPage);
+			AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToPage);
 		}
 	}
 
@@ -167,7 +167,7 @@ public class SourcesBuilder extends FormActivity {
 			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntity.id);
 		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_NEW);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
@@ -210,7 +210,7 @@ public class SourcesBuilder extends FormActivity {
 		String jsonSource = ProxibaseService.convertObjectToJsonSmart(mSourceEditing, false, true);
 		intent.putExtra(CandiConstants.EXTRA_SOURCE, jsonSource);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override
@@ -352,7 +352,7 @@ public class SourcesBuilder extends FormActivity {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
-							AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToCandiPage);
+							AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToPage);
 						}
 					}
 				}
@@ -415,7 +415,7 @@ public class SourcesBuilder extends FormActivity {
 		intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 	}
 
 	@Override

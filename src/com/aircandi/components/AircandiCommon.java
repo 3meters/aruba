@@ -155,7 +155,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			if (metrics != null) {
 				int displayWidth = metrics.widthPixels;
 				int desiredWidth = ImageUtils.getRawPixels(mActivity, 350);
-				params.width = Math.min(desiredWidth, displayWidth - 50);
+				params.width = Math.min(desiredWidth, displayWidth);
 			}
 			else {
 				params.width = ImageUtils.getRawPixels(mActivity, 300);
@@ -255,7 +255,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		intentBuilder.setCommandType(CommandType.View);
 		Intent intent = intentBuilder.create();
 		mActivity.startActivity(intent);
-		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
 	public void doEditCandiClick() {
@@ -266,14 +266,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 				.setEntityType(((CandiForm) mActivity).getEntity().type);
 		Intent intent = intentBuilder.create();
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_EDIT);
-		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
 	private void doFeedbackClick() {
 		IntentBuilder intentBuilder = new IntentBuilder(mActivity, FeedbackForm.class);
 		Intent intent = intentBuilder.create();
 		mActivity.startActivity(intent);
-		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
 	private void doInfoClick() {
@@ -363,7 +363,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Intent intent = new Intent(mActivity, TemplatePicker.class);
 		intent.putExtra(CandiConstants.EXTRA_ENTITY_IS_ROOT, isRoot);
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_TEMPLATE_PICK);
-		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
 	public void showPictureSourcePicker(String entityId) {
@@ -372,7 +372,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, entityId);
 		}
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK);
-		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
 	public void showCandiFormForEntity(Entity entity, Class<?> clazz) {
@@ -390,7 +390,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Intent intent = intentBuilder.create();
 
 		mActivity.startActivity(intent);
-		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiListToCandiForm);
+		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToPage);
 	}
 
 	private void updateBeaconIndicator(final List<WifiScanResult> scanList) {
@@ -731,7 +731,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						Intent intent = new Intent(mActivity, SplashForm.class);
 						mActivity.startActivity(intent);
 						mActivity.finish();
-						AnimUtils.doOverridePendingTransition(mActivity, TransitionType.FormToCandiPage);
+						AnimUtils.doOverridePendingTransition(mActivity, TransitionType.FormToPage);
 					}
 				}.execute();
 
@@ -987,7 +987,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				return;
 			case R.id.settings:
 				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
-				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 				return;
 			case R.id.signout:
 				signout();
@@ -1000,7 +1000,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				intent = new Intent(android.content.Intent.ACTION_VIEW);
 				intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
 				mActivity.startActivity(intent);
-				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToSource);
 				return;
 			case R.id.feedback:
 				doFeedbackClick();
@@ -1012,7 +1012,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				mActivity.startActivity(intent);
-				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToCandiRadar);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.RadarToPage);
 				return;
 			case R.id.add_comment:
 				/*
@@ -1023,7 +1023,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				intentBuilder.setEntityId(null);
 				intentBuilder.setParentEntityId(mEntityId);
 				mActivity.startActivityForResult(intentBuilder.create(), CandiConstants.ACTIVITY_COMMENT);
-				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 				return;
 			case R.id.add_custom_place:
 				if (Aircandi.getInstance().getUser() != null) {
@@ -1033,7 +1033,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 							.setEntityType(CandiConstants.TYPE_CANDI_PLACE);
 
 					mActivity.startActivity(intentBuilder.create());
-					AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageToForm);
+					AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 				}
 				return;
 			case R.id.about:
@@ -1067,21 +1067,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	{
 		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		if (tabsId == CandiConstants.TABS_PRIMARY_ID) {
-
-			ActionBar.Tab tab = mActionBar.newTab();
-			tab.setText(R.string.radar_tab_radar);
-			tab.setTag(R.string.radar_tab_radar);
-			tab.setTabListener(tabListener);
-			mActionBar.addTab(tab, false);
-
-			tab = mActionBar.newTab();
-			tab.setText(R.string.radar_tab_mycandi);
-			tab.setTag(R.string.radar_tab_mycandi);
-			tab.setTabListener(tabListener);
-			mActionBar.addTab(tab, false);
-		}
-		else if (tabsId == CandiConstants.TABS_ENTITY_FORM_ID) {
+		if (tabsId == CandiConstants.TABS_ENTITY_FORM_ID) {
 
 			ActionBar.Tab tab = mActionBar.newTab();
 			tab.setText(R.string.form_tab_content);
@@ -1106,20 +1092,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 			tab = mActionBar.newTab();
 			tab.setText(R.string.profile_tab_account);
 			tab.setTag(R.string.profile_tab_account);
-			tab.setTabListener(tabListener);
-			mActionBar.addTab(tab, false);
-		}
-		else if (tabsId == CandiConstants.TABS_CANDI_PICKER_ID) {
-
-			ActionBar.Tab tab = mActionBar.newTab();
-			tab.setText(R.string.candi_picker_tab_radar);
-			tab.setTag(R.string.candi_picker_tab_radar);
-			tab.setTabListener(tabListener);
-			mActionBar.addTab(tab, false);
-
-			tab = mActionBar.newTab();
-			tab.setText(R.string.candi_picker_tab_mycandi);
-			tab.setTag(R.string.candi_picker_tab_mycandi);
 			tab.setTabListener(tabListener);
 			mActionBar.addTab(tab, false);
 		}
@@ -1149,51 +1121,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public void onTabUnselected(Tab tab, FragmentTransaction ft) {}
 
 	@Override
-	public void onTabReselected(Tab tab, FragmentTransaction ft) {
-		Logger.v(this, "onTabReselected: " + tab.getText());
-
-		/*
-		 * Reselecting a tab should take the user to the top of the
-		 * hierarchy but not refresh data.
-		 * 
-		 * This seems to get fired without user interaction when first
-		 * displayed in landscape mode.
-		 */
-		if (tab.getTag().equals(R.string.radar_tab_radar)) {
-
-			IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiRadar.class);
-			Intent intent = intentBuilder.create();
-
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-			mActivity.startActivity(intent);
-			AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageBack);
-		}
-		else if (tab.getTag().equals(R.string.radar_tab_mycandi)) {
-			/*
-			 * This seems to get fired without user interaction when first
-			 * displayed in landscape mode so we check to see if we are already at the top.
-			 */
-
-			/*
-			 * Problem: this gets fired when we are on candi form on change to landscape.
-			 * We then navigate back to candi list. When in candiform, how can we tell the
-			 * different between tabReselected by the user vs tabReselected by system because
-			 * of change to landscape?
-			 * 
-			 * - onTabReselected fires on first orientation change but not subsequent ones.
-			 */
-			IntentBuilder intentBuilder = new IntentBuilder(mActivity, CandiUser.class)
-					.setUserId(Aircandi.getInstance().getUser().id);
-
-			Intent intent = intentBuilder.create();
-
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-			mActivity.startActivity(intent);
-			AnimUtils.doOverridePendingTransition(mActivity, TransitionType.CandiPageBack);
-		}
-	}
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {}
 
 	// --------------------------------------------------------------------------------------------
 	// Utility routines

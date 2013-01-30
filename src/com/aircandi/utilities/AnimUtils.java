@@ -47,80 +47,82 @@ public class AnimUtils {
 	}
 
 	public static enum TransitionType {
-		CandiPageToForm,
-		FormToCandiPage,
-		FormToCandiPageAfterDelete,
-		CandiMapToCandiPage,
-		CandiFormToCandiList,
-		CandiRadarToCandiForm,
-		CandiListToCandiForm,
-		CandiPageToMyCandi,
-		CandiPageToCandiMap,
-		CandiPageToCandiRadar,
-		CandiPageToAndroidApp,
-		CandiPageBack,
-		HelpShow,
-		HelpHide,
-		None
+		PageToForm,
+		FormToPage,
+		RadarToPage,
+		PageToSource,
+		PageBack,
+		PageToPage,
+		FormToPageAfterDelete,
+		PageToRadarAfterDelete,
+		None,
 	}
 
 	public static void doOverridePendingTransition(Activity activity, TransitionType transitionType) {
 		/*
-		 * Generic candi to candi
+		 * Browsing transitions
 		 */
-		if (transitionType == TransitionType.CandiRadarToCandiForm) {
-			activity.overridePendingTransition(R.anim.activity_open_enter, R.anim.hold);
+		if (transitionType == TransitionType.RadarToPage) {
+			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.fade_zoom_out);
 		}
-		else if (transitionType == TransitionType.CandiPageBack) {
-			activity.overridePendingTransition(R.anim.hold, R.anim.activity_close_exit);
+		else if (transitionType == TransitionType.PageBack) {
+			activity.overridePendingTransition(R.anim.fade_zoom_in, R.anim.slide_out_right);
 		}
-		else if (transitionType == TransitionType.CandiFormToCandiList) {
-			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		else if (transitionType == TransitionType.PageToPage) {
+			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.fade_zoom_out);
 		}
-		else if (transitionType == TransitionType.CandiListToCandiForm) {
-			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
-		}
-		else if (transitionType == TransitionType.CandiPageToAndroidApp) {
-			activity.overridePendingTransition(R.anim.activity_open_enter, R.anim.hold);
-		}
-		/*
-		 * Moving between primary tabs
-		 */
-		else if (transitionType == TransitionType.CandiMapToCandiPage) {
-			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
-		}
-		else if (transitionType == TransitionType.CandiPageToCandiRadar) {
-			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
-		}
-		else if (transitionType == TransitionType.CandiPageToMyCandi) {
-			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_long);
-		}
-		else if (transitionType == TransitionType.CandiPageToCandiMap) {
-			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_long);
+		else if (transitionType == TransitionType.PageToSource) {
+			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.fade_zoom_out);
 		}
 		/*
 		 * Jumping to and from forms
 		 */
-		else if (transitionType == TransitionType.CandiPageToForm) {
+		else if (transitionType == TransitionType.PageToForm) {
 			activity.overridePendingTransition(R.anim.fade_zoom_in, R.anim.hold);
 		}
-		else if (transitionType == TransitionType.FormToCandiPage) {
+		else if (transitionType == TransitionType.FormToPage) {
 			activity.overridePendingTransition(R.anim.hold, R.anim.fade_zoom_out);
 		}
-		else if (transitionType == TransitionType.FormToCandiPageAfterDelete) {
+		else if (transitionType == TransitionType.PageToRadarAfterDelete) {}
+		else if (transitionType == TransitionType.FormToPageAfterDelete) {
 			activity.overridePendingTransition(R.anim.hold, R.anim.help_zoom_out);
 		}
 		else if (transitionType == TransitionType.None) {
 			activity.overridePendingTransition(0, 0);
 		}
+	}
+
+	public static void doOverridePendingTransitionOld(Activity activity, TransitionType transitionType) {
 		/*
-		 * Jumping to and from help
+		 * Browsing transitions
 		 */
-		else if (transitionType == TransitionType.HelpShow) {
-			activity.overridePendingTransition(R.anim.help_zoom_in, R.anim.hold);
+		if (transitionType == TransitionType.RadarToPage) {
+			activity.overridePendingTransition(R.anim.activity_open_enter, R.anim.hold);
 		}
-		else if (transitionType == TransitionType.HelpHide) {
+		else if (transitionType == TransitionType.PageToPage) {
+			activity.overridePendingTransition(R.anim.fade_in_medium, R.anim.fade_out_medium);
+		}
+		else if (transitionType == TransitionType.PageBack) {
+			activity.overridePendingTransition(R.anim.hold, R.anim.activity_close_exit);
+		}
+		else if (transitionType == TransitionType.PageToSource) {
+			activity.overridePendingTransition(R.anim.activity_open_enter, R.anim.hold);
+		}
+		/*
+		 * Jumping to and from forms
+		 */
+		else if (transitionType == TransitionType.PageToForm) {
+			activity.overridePendingTransition(R.anim.fade_zoom_in, R.anim.hold);
+		}
+		else if (transitionType == TransitionType.FormToPage) {
+			activity.overridePendingTransition(R.anim.hold, R.anim.fade_zoom_out);
+		}
+		else if (transitionType == TransitionType.PageToRadarAfterDelete) {}
+		else if (transitionType == TransitionType.FormToPageAfterDelete) {
 			activity.overridePendingTransition(R.anim.hold, R.anim.help_zoom_out);
+		}
+		else if (transitionType == TransitionType.None) {
+			activity.overridePendingTransition(0, 0);
 		}
 	}
 

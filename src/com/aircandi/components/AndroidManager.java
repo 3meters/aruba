@@ -87,14 +87,14 @@ public class AndroidManager {
 				+ "(" + label + ")";
 		Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 		context.startActivity(searchAddress);
-		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callDialerActivity(Context context, String phoneNumber) {
 		String number = "tel:" + phoneNumber.trim();
 		Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(number));
 		context.startActivity(callIntent);
-		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callBrowserActivity(Context context, String uri) {
@@ -108,7 +108,7 @@ public class AndroidManager {
 			intent.setData(Uri.parse(uri));
 			context.startActivity(intent);
 		}
-		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	@SuppressWarnings("ucd")
@@ -126,7 +126,7 @@ public class AndroidManager {
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse("https://www.twitter.com/" + twitterHandle));
 		context.startActivity(intent);
-		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callFoursquareActivity(Context context, String venueId) {
@@ -134,14 +134,14 @@ public class AndroidManager {
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse("http://m.foursquare.com/venue/" + venueId));
 		context.startActivity(intent);
-		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callOpentableActivity(Context context, String sourceId, String sourceUri) {
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(sourceUri));
 		context.startActivity(intent);
-		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callFacebookActivity(Context context, String facebookId) {
@@ -154,21 +154,21 @@ public class AndroidManager {
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse("http://www.facebook.com/" + facebookId));
 		context.startActivity(intent);
-		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callYelpActivity(Context context, String sourceId, String sourceUri) {
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(sourceUri));
 		context.startActivity(intent);
-		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callGenericActivity(Context context, String sourceId) {
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(sourceId));
 		context.startActivity(intent);
-		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.CandiPageToAndroidApp);
+		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	private Intent findBrowserApp(Context context, String uri) {

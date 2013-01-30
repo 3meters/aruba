@@ -164,11 +164,18 @@
     <style name="form_spinner">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:layout_height">36dp</item>
         <item name="android:paddingLeft">10dp</item>
         <item name="android:paddingRight">10dp</item>
     </style>
 
+    <style name="form_spinner_item">
+        <item name="android:textAppearance">@style/app_text_appearance_small</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:background">#00000000</item>
+    </style>
+    
     <style name="form_text_placeholder">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:background">?attr/backgroundTabBar</item>

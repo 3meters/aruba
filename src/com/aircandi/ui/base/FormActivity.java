@@ -78,13 +78,13 @@ public abstract class FormActivity extends SherlockActivity {
 	public void onBackPressed() {
 		setResult(Activity.RESULT_CANCELED);
 		super.onBackPressed();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 	}
 
 	public void onCancelButtonClick(View view) {
 		setResult(Activity.RESULT_CANCELED);
 		finish();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 	}
 
 	@Override
@@ -237,7 +237,7 @@ public abstract class FormActivity extends SherlockActivity {
 		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK);
 		picturePickerIntent.setType("image/*");
 		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
 	}
 
 	protected void pictureFromCamera() {
@@ -249,14 +249,14 @@ public abstract class FormActivity extends SherlockActivity {
 
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaFileUri);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
 	}
 
 	protected void pictureSearch() {
 		Intent intent = new Intent(this, PicturePicker.class);
 		//intent.putExtra(CandiConstants.EXTRA_SEARCH_PHRASE, defaultSearch);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	protected void pictureFromPlace(String entityId) {
@@ -265,7 +265,7 @@ public abstract class FormActivity extends SherlockActivity {
 				.setEntityId(entityId);
 		Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_PICK_PLACE);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")

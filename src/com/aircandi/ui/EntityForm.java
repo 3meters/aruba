@@ -363,7 +363,7 @@ public class EntityForm extends FormActivity {
 		else {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToCandiPage);
+			AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
 		}
 	}
 
@@ -403,7 +403,7 @@ public class EntityForm extends FormActivity {
 		else {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToCandiPage);
+			AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
 		}
 	}
 
@@ -423,7 +423,7 @@ public class EntityForm extends FormActivity {
 			intent.putExtra(CandiConstants.EXTRA_PHONE, mEntityForForm.getPlace().contact.phone);
 		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_ADDRESS_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
@@ -434,7 +434,7 @@ public class EntityForm extends FormActivity {
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CATEGORY_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
@@ -451,7 +451,7 @@ public class EntityForm extends FormActivity {
 			intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
 		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCES_EDIT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override
@@ -627,7 +627,7 @@ public class EntityForm extends FormActivity {
 				mCommon.hideBusy(false);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					finish();
-					AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToCandiPage);
+					AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
 				}
 				else {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.CandiSave, EntityForm.this);
@@ -656,7 +656,7 @@ public class EntityForm extends FormActivity {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
-							AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToCandiPage);
+							AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
 						}
 					}
 				}
@@ -750,7 +750,7 @@ public class EntityForm extends FormActivity {
 					 * We either go back to a list or to radar.
 					 */
 					finish();
-					AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToCandiPageAfterDelete);
+					AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPageAfterDelete);
 				}
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiDelete, EntityForm.this);

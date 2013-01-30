@@ -93,7 +93,7 @@ public class CommentForm extends FormActivity {
 		else {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 		}
 	}
 
@@ -110,7 +110,7 @@ public class CommentForm extends FormActivity {
 		else {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
-			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 		}
 	}
 
@@ -144,7 +144,7 @@ public class CommentForm extends FormActivity {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
-							AnimUtils.doOverridePendingTransition(CommentForm.this, TransitionType.FormToCandiPage);
+							AnimUtils.doOverridePendingTransition(CommentForm.this, TransitionType.FormToPage);
 						}
 					}
 				}

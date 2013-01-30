@@ -148,7 +148,7 @@ public class LinkPicker extends FormActivity {
 			Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 			intent.setData(Uri.parse(linkUri));
 			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
 		}
 	}
 

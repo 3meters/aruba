@@ -161,7 +161,7 @@ public class CommentList extends CandiActivity {
 		intentBuilder.setParentEntityId(mCommon.mEntityId);
 		Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_COMMENT);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override

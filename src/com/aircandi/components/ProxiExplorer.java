@@ -907,7 +907,7 @@ public class ProxiExplorer {
 			return result;
 		}
 
-		public ModelResult loadCategories() {
+		public synchronized ModelResult loadCategories() {
 
 			ModelResult result = new ModelResult();
 
@@ -925,8 +925,10 @@ public class ProxiExplorer {
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
 				String jsonResponse = (String) result.serviceResponse.data;
 				ServiceData serviceData = (ServiceData) ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Category);
-				mCategories = (List<Category>) serviceData.data;
-				result.serviceResponse.data = mCategories;
+				synchronized (mCategories) {
+					mCategories = (List<Category>) serviceData.data;
+					result.serviceResponse.data = mCategories;
+				}
 			}
 			return result;
 		}

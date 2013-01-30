@@ -74,7 +74,7 @@ public class SplashForm extends SherlockActivity {
 
 		/* AWS Credentials */
 		startGetAWSCredentials();
-		
+
 		/* Connectivity monitoring */
 		NetworkManager.getInstance().setContext(getApplicationContext());
 		NetworkManager.getInstance().initialize();
@@ -133,7 +133,10 @@ public class SplashForm extends SherlockActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadCategories");
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().loadCategories();
+				ModelResult result = new ModelResult();
+				if (ProxiExplorer.getInstance().getEntityModel().getCategories().size() == 0) {
+					result = ProxiExplorer.getInstance().getEntityModel().loadCategories();
+				}
 				return result;
 			}
 		}.execute();
@@ -181,7 +184,7 @@ public class SplashForm extends SherlockActivity {
 		IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
 		Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
@@ -190,7 +193,7 @@ public class SplashForm extends SherlockActivity {
 		intentBuilder.setCommandType(CommandType.New);
 		Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override

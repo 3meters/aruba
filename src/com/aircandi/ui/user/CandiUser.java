@@ -18,7 +18,6 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.EntityListType;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -29,7 +28,6 @@ import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.CandiForm;
-import com.aircandi.ui.CandiList;
 import com.aircandi.ui.PictureDetail;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.WebImageView;
@@ -120,21 +118,6 @@ public class CandiUser extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
-	public void onMoreButtonClick(View view) {
-		String target = (String) view.getTag();
-		if (target.equals("candi")) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setEntityListType(EntityListType.CreatedByUser)
-					.setUserId(mUser.id);
-
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
-		}
-	}
-
-	@SuppressWarnings("ucd")
 	public void onCandiClick(View view) {
 		Entity entity = (Entity) view.getTag();
 
@@ -152,7 +135,7 @@ public class CandiUser extends CandiActivity {
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiRadarToCandiForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 
 		//mCommon.showCandiFormForEntity(entity, CandiForm.class);
 	}
@@ -170,7 +153,7 @@ public class CandiUser extends CandiActivity {
 		intent.putExtra(CandiConstants.EXTRA_URI, mUser.photo.getUri());
 
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -194,7 +194,7 @@ public class RegisterForm extends FormActivity {
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(CandiConstants.URL_AIRCANDI_TERMS));
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 
 	}
 
@@ -308,18 +308,6 @@ public class RegisterForm extends FormActivity {
 						mCommon.hideBusy(false);
 						Logger.i(RegisterForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 
-						//						AircandiCommon.showAlertDialog(R.drawable.ic_app
-						//								, getResources().getString(R.string.alert_signup_new_user_title)
-						//								, getResources().getString(R.string.alert_signup_new_user_message)
-						//								, null
-						//								, SignUpForm.this, android.R.string.ok, null, new OnClickListener() {
-						//
-						//									public void onClick(DialogInterface dialog, int which) {
-						//										setResult(CandiConstants.RESULT_USER_SIGNED_IN);
-						//										finish();
-						//									}
-						//								}, null);
-						
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
@@ -333,7 +321,7 @@ public class RegisterForm extends FormActivity {
 
 						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
 						finish();
-						AnimUtils.doOverridePendingTransition(RegisterForm.this, TransitionType.FormToCandiPage);
+						AnimUtils.doOverridePendingTransition(RegisterForm.this, TransitionType.FormToPage);
 					}
 					else {
 						/*

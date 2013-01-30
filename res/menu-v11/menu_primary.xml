@@ -2,24 +2,38 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
+        android:id="@+id/beacons"
+        android:actionLayout="@layout/actionbar_beacons"
+        android:orderInCategory="1"
+        android:showAsAction="always"
+        android:title="@string/menu_beacons_item"/>
+    <item
         android:id="@+id/refresh"
         android:icon="?attr/iconReload"
         android:orderInCategory="1"
         android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>
     <item
-        android:id="@+id/edit_user"
-        android:icon="?attr/iconEdit"
+        android:id="@+id/add_custom_place"
+        android:icon="?attr/iconAdd"
         android:orderInCategory="1"
         android:showAsAction="always"
-        android:title="@string/menu_edit_item"/>
+        android:title="@string/menu_add_custom_place_item"/>
+    <item
+        android:id="@+id/profile"
+        android:icon="?attr/iconUser"
+        android:orderInCategory="1"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_profile_item"/>
     <item
         android:id="@+id/settings"
+        android:icon="?attr/iconSettings"
         android:orderInCategory="1"
         android:showAsAction="never"
         android:title="@string/menu_settings_item"/>
     <item
         android:id="@+id/signout"
+        android:icon="?attr/iconKey"
         android:orderInCategory="2"
         android:showAsAction="never"
         android:title="@string/menu_signout_item"/>
@@ -35,6 +49,7 @@
         android:title="@string/menu_feedback_item"/>
     <item
         android:id="@+id/about"
+        android:icon="?attr/iconInfo"
         android:orderInCategory="2"
         android:showAsAction="never"
         android:title="@string/menu_about_item"/>

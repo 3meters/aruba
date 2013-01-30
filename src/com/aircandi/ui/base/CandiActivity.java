@@ -61,7 +61,7 @@ public abstract class CandiActivity extends SherlockActivity {
 	public void onBackPressed() {
 		/* Activity is destroyed */
 		super.onBackPressed();
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageBack);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
 	}
 
 	@Override
@@ -114,7 +114,7 @@ public abstract class CandiActivity extends SherlockActivity {
 										Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 										intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
 										startActivity(intent);
-										AnimUtils.doOverridePendingTransition(CandiActivity.this, TransitionType.CandiPageToForm);
+										AnimUtils.doOverridePendingTransition(CandiActivity.this, TransitionType.PageToSource);
 									}
 									else if (which == Dialog.BUTTON_NEGATIVE) {
 										/*
@@ -171,7 +171,7 @@ public abstract class CandiActivity extends SherlockActivity {
 									if (which == Dialog.BUTTON_POSITIVE) {
 										Logger.d(this, "Wifi check: navigating to wifi settings");
 										startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
-										AnimUtils.doOverridePendingTransition(CandiActivity.this, TransitionType.CandiPageToForm);
+										AnimUtils.doOverridePendingTransition(CandiActivity.this, TransitionType.PageToForm);
 									}
 									else if (which == Dialog.BUTTON_NEGATIVE) {
 										Logger.d(this, "Wifi check: user declined");

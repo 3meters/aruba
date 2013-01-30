@@ -57,7 +57,7 @@
                 android:id="@+id/source_type_picker"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:spinnerMode="dropdown"
+                android:spinnerMode="dialog"
                 android:visibility="gone" />
 
             <EditText

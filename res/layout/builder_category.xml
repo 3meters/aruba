@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-        <TextView
+    <TextView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/title"
         android:layout_width="match_parent"
@@ -19,13 +19,13 @@
         android:layout_height="1dp"
         android:layout_below="@+id/title"
         android:background="@color/accent_blue" />
-    
+
     <!-- Content -->
 
     <com.aircandi.ui.widgets.BounceScrollView
         android:id="@+id/form_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_above="@+id/form_footer"
         android:layout_below="@+id/title"
         android:fillViewport="true"
@@ -56,21 +56,21 @@
                 android:id="@+id/category"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:spinnerMode="dropdown" />
+                android:spinnerMode="dialog" />
 
             <Spinner
                 android:id="@+id/sub_category"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:spinnerMode="dropdown"
-                android:visibility="visible" />
+                android:spinnerMode="dialog"
+                android:visibility="invisible" />
 
             <Spinner
                 android:id="@+id/sub_sub_category"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:spinnerMode="dropdown"
-                android:visibility="visible" />
+                android:spinnerMode="dialog"
+                android:visibility="invisible" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 

@@ -42,7 +42,6 @@ import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.EntityListType;
 import com.aircandi.components.ProxiExplorer.ModelResult;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -258,7 +257,7 @@ public class CandiForm extends CandiActivity {
 					.setCollectionId(mEntity.id);
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 		}
 		else {
 			onNewCommentButtonClick(view);
@@ -281,21 +280,6 @@ public class CandiForm extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onCallButtonClick(View view) {
 		AndroidManager.getInstance().callDialerActivity(this, mEntity.place.contact.phone);
-	}
-
-	@SuppressWarnings("ucd")
-	public void onMoreButtonClick(View view) {
-		String target = (String) view.getTag();
-		if (target.equals("candi")) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setEntityListType(EntityListType.InCollection)
-					.setCollectionId(mEntity.id);
-
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiListToCandiForm);
-		}
 	}
 
 	@SuppressWarnings("ucd")
@@ -344,7 +328,7 @@ public class CandiForm extends CandiActivity {
 							.setCollectionId(mEntity.id);
 					Intent intent = intentBuilder.create();
 					startActivity(intent);
-					AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+					AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 				}
 				else {
 					AndroidManager.getInstance().callGenericActivity(this, entity.source.url != null ? entity.source.url : entity.source.id);
@@ -370,7 +354,7 @@ public class CandiForm extends CandiActivity {
 		intent.putExtra(CandiConstants.EXTRA_PAGING_ENABLED, false);
 
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 	}
 
 	@SuppressWarnings("ucd")
@@ -400,7 +384,7 @@ public class CandiForm extends CandiActivity {
 			intentBuilder.setParentEntityId(mEntity.id);
 			Intent intent = intentBuilder.create();
 			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 		}
 		else {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
@@ -431,7 +415,7 @@ public class CandiForm extends CandiActivity {
 			if (requestCode == CandiConstants.ACTIVITY_ENTITY_EDIT) {
 				if (resultCode == CandiConstants.RESULT_ENTITY_DELETED) {
 					finish();
-					AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToCandiMap);
+					AnimUtils.doOverridePendingTransition(this, TransitionType.PageToRadarAfterDelete);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_TEMPLATE_PICK) {
@@ -449,7 +433,7 @@ public class CandiForm extends CandiActivity {
 
 						Intent redirectIntent = intentBuilder.create();
 						startActivity(redirectIntent);
-						AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+						AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 					}
 				}
 			}
@@ -876,6 +860,7 @@ public class CandiForm extends CandiActivity {
 		 * - User profile could have been updated and we don't catch that.
 		 */
 		if (!isFinishing() && mEntity != null) {
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
 			if (ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
 					|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
@@ -934,7 +919,7 @@ public class CandiForm extends CandiActivity {
 								startActivityForResult(intent, CandiConstants.ACTIVITY_MARKET);
 							}
 							dialog.dismiss();
-							AnimUtils.doOverridePendingTransition(CandiForm.this, TransitionType.CandiPageToForm);
+							AnimUtils.doOverridePendingTransition(CandiForm.this, TransitionType.PageToForm);
 						}
 						else if (which == Dialog.BUTTON_NEGATIVE) {
 							Source meta = ProxiExplorer.getInstance().getEntityModel().getSourceMeta().get(entity.source.source);

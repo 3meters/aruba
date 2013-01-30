@@ -219,7 +219,7 @@ public class ProfileForm extends FormActivity {
 		intentBuilder.setCommandType(CommandType.Edit);
 		Intent intent = intentBuilder.create();
 		startActivity(intent);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.CandiPageToForm);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@Override

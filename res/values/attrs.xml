@@ -12,6 +12,7 @@
         <attr name="ruleColor" format="color|reference" />
         <attr name="ruleColorStrong" format="color|reference" />
         <attr name="textColor" format="color|reference" />
+        <attr name="textColorSpinner" format="color|reference" />
         <attr name="textColorUnfocused" format="color|reference" />
         <attr name="textColorButtonLink" format="color|reference" />
         <attr name="textColorBullet" format="color|reference" />

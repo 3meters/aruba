@@ -4,11 +4,14 @@ import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -34,20 +37,21 @@ import com.aircandi.ui.widgets.WebImageView;
 
 public class CategoryBuilder extends FormActivity {
 
-	private CategorySimple	mOriginalCategory;
-
 	private WebImageView	mImage;
 	private Spinner			mSpinnerCategory;
-	private Spinner			mSpinnerSubcategory;
-	private Spinner			mSpinnerSubsubcategory;
+	private Spinner			mSpinnerSubCategory;
+	private Spinner			mSpinnerSubSubCategory;
 	private TextView		mTitle;
+	private Integer			mSpinnerItem;
+
+	private CategorySimple	mOriginalCategory;
+	private Integer			mOriginalCategoryIndex;
+	private Integer			mOriginalSubCategoryIndex;
+	private Integer			mOriginalSubSubCategoryIndex;
 
 	private Category		mCategory;
-	private Integer			mCategoryIndex;
-	private Category		mSubcategory;
-	private Integer			mSubcategoryIndex;
-	private Category		mSubsubcategory;
-	private Integer			mSubsubcategoryIndex;
+	private Category		mSubCategory;
+	private Category		mSubSubCategory;
 
 	private List<Category>	mCategories;
 
@@ -67,10 +71,12 @@ public class CategoryBuilder extends FormActivity {
 		}
 		mImage = (WebImageView) findViewById(R.id.image);
 		mSpinnerCategory = (Spinner) findViewById(R.id.category);
-		mSpinnerSubcategory = (Spinner) findViewById(R.id.sub_category);
-		mSpinnerSubsubcategory = (Spinner) findViewById(R.id.sub_sub_category);
+		mSpinnerSubCategory = (Spinner) findViewById(R.id.sub_category);
+		mSpinnerSubSubCategory = (Spinner) findViewById(R.id.sub_sub_category);
 		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText(R.string.dialog_category_builder_title);
+
+		mSpinnerItem = mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
@@ -85,7 +91,7 @@ public class CategoryBuilder extends FormActivity {
 				if (mOriginalCategory != null) {
 					setCategoryIndexes();
 				}
-				initializeSpinners();
+				initCategorySpinner();
 			}
 		}
 	}
@@ -109,7 +115,7 @@ public class CategoryBuilder extends FormActivity {
 						if (mOriginalCategory != null) {
 							setCategoryIndexes();
 						}
-						initializeSpinners();
+						initCategorySpinner();
 					}
 				}
 			}
@@ -140,19 +146,19 @@ public class CategoryBuilder extends FormActivity {
 
 	private void doSave() {
 		Intent intent = new Intent();
-		if (mSubsubcategory != null) {
+		if (mSubSubCategory != null) {
 			CategorySimple categorySimple = new CategorySimple();
-			categorySimple.id = mSubsubcategory.id;
-			categorySimple.name = mSubsubcategory.name;
-			categorySimple.icon = mSubsubcategory.iconUri();
+			categorySimple.id = mSubSubCategory.id;
+			categorySimple.name = mSubSubCategory.name;
+			categorySimple.icon = mSubSubCategory.iconUri();
 			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(categorySimple, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
-		else if (mSubcategory != null) {
+		else if (mSubCategory != null) {
 			CategorySimple categorySimple = new CategorySimple();
-			categorySimple.id = mSubcategory.id;
-			categorySimple.name = mSubcategory.name;
-			categorySimple.icon = mSubcategory.iconUri();
+			categorySimple.id = mSubCategory.id;
+			categorySimple.name = mSubCategory.name;
+			categorySimple.icon = mSubCategory.iconUri();
 			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(categorySimple, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
@@ -167,58 +173,51 @@ public class CategoryBuilder extends FormActivity {
 	private void setCategoryIndexes() {
 		int categoryIndex = 0;
 		for (Category category : mCategories) {
-			int subcategoryIndex = 0;
-			for (Category subcategory : category.categories) {
-				if (subcategory.id.equals(mOriginalCategory.id)) {
-					mCategoryIndex = categoryIndex;
-					mSubcategoryIndex = subcategoryIndex;
-					return;
-				}
-				else if (subcategory.categories != null && subcategory.categories.size() > 0) {
-					int subsubcategoryIndex = 0;
-					for (Category subsubcategory : subcategory.categories) {
-						if (subsubcategory.id.equals(mOriginalCategory.id)) {
-							mCategoryIndex = categoryIndex;
-							mSubcategoryIndex = subcategoryIndex;
-							mSubsubcategoryIndex = subsubcategoryIndex;
-							return;
-						}
-						subsubcategoryIndex++;
+			if (category.id.equals(mOriginalCategory.id)) {
+				mOriginalCategoryIndex = categoryIndex;
+				return;
+			}
+			else {
+				int subcategoryIndex = 0;
+				for (Category subcategory : category.categories) {
+					if (subcategory.id.equals(mOriginalCategory.id)) {
+						mOriginalCategoryIndex = categoryIndex;
+						mOriginalSubCategoryIndex = subcategoryIndex;
+						return;
 					}
+					else if (subcategory.categories != null && subcategory.categories.size() > 0) {
+						int subsubcategoryIndex = 0;
+						for (Category subsubcategory : subcategory.categories) {
+							if (subsubcategory.id.equals(mOriginalCategory.id)) {
+								mOriginalCategoryIndex = categoryIndex;
+								mOriginalSubCategoryIndex = subcategoryIndex;
+								mOriginalSubSubCategoryIndex = subsubcategoryIndex;
+								return;
+							}
+							subsubcategoryIndex++;
+						}
+					}
+					subcategoryIndex++;
 				}
-				subcategoryIndex++;
 			}
 			categoryIndex++;
 		}
 	}
 
-	private void initializeSpinners() {
-		final List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStringArray(mCategories);
-		categories.add(getString(R.string.form_place_category_hint));
+	private void initCategorySpinner() {
 
-		ArrayAdapter adapter = new ArrayAdapter(this, R.layout.spinner_item, categories) {
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
+		List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStringArray(mCategories);
+		CategoryAdapter adapter = new CategoryAdapter(CategoryBuilder.this
+				, mSpinnerItem
+				, categories
+				, R.string.form_place_category_hint);
 
-				View view = super.getView(position, convertView, parent);
-
-				FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.spinner_name));
-
-				if (position == getCount()) {
-					((TextView) view.findViewById(R.id.spinner_name)).setText("");
-					((TextView) view.findViewById(R.id.spinner_name)).setHint(categories.get(getCount())); //"Hint to be displayed"
-				}
-
-				return view;
+		if (mCommon.mThemeTone.equals("dark")) {
+			if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+				adapter.setDropDownViewResource(R.layout.spinner_item_light);
 			}
+		}
 
-			@Override
-			public int getCount() {
-				return super.getCount() - 1; // you dont display last item. It is used as hint.
-			}
-		};
-
-		//adapter.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
 		mSpinnerCategory.setAdapter(adapter);
 
 		if (mOriginalCategory == null) {
@@ -230,119 +229,19 @@ public class CategoryBuilder extends FormActivity {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-				/* Do nothing when the hint item is selected */
 				if (position < mCategories.size()) {
 
 					mCategory = (Category) mCategories.get(position);
 					if (mCategory.iconUri() != null) {
 						updateCustomImage(mCategory.iconUri(), mCategory);
 					}
-					final List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStringArray(mCategory.categories);
-					categories.add(getString(R.string.form_place_sub_category_hint));
 
-					ArrayAdapter adapter = new ArrayAdapter(CategoryBuilder.this, R.layout.spinner_item, categories) {
-						@Override
-						public View getView(int position, View convertView, ViewGroup parent) {
+					mSubCategory = null;
+					mSubSubCategory = null;
+					mSpinnerSubCategory.setVisibility(View.INVISIBLE);
+					mSpinnerSubSubCategory.setVisibility(View.INVISIBLE);
 
-							View view = super.getView(position, convertView, parent);
-
-							FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.spinner_name));
-
-							if (position == getCount()) {
-								((TextView) view.findViewById(R.id.spinner_name)).setText("");
-								((TextView) view.findViewById(R.id.spinner_name)).setHint(categories.get(getCount())); //"Hint to be displayed"
-							}
-
-							return view;
-						}
-
-						@Override
-						public int getCount() {
-							return super.getCount() - 1; // you dont display last item. It is used as hint.
-						}
-					};
-
-					mSpinnerSubcategory.setVisibility(View.VISIBLE);
-					mSpinnerSubcategory.setAdapter(adapter);
-
-					if (mOriginalCategory == null) {
-						mSpinnerSubcategory.setSelection(adapter.getCount());
-					}
-					mSpinnerSubcategory.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-						@Override
-						public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-							/* Do nothing when the hint item is selected */
-							if (position < mCategory.categories.size()) {
-								mSubcategory = (Category) mCategory.categories.get(position);
-								if (mSubcategory.iconUri() != null) {
-									updateCustomImage(mSubcategory.iconUri(), mSubcategory);
-								}
-
-								final List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStringArray(mSubcategory.categories);
-								categories.add(getString(R.string.form_place_sub_category_hint));
-
-								ArrayAdapter adapter = new ArrayAdapter(CategoryBuilder.this, R.layout.spinner_item, categories) {
-									@Override
-									public View getView(int position, View convertView, ViewGroup parent) {
-
-										View view = super.getView(position, convertView, parent);
-
-										FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.spinner_name));
-
-										if (position == getCount()) {
-											((TextView) view.findViewById(R.id.spinner_name)).setText("");
-											((TextView) view.findViewById(R.id.spinner_name)).setHint(categories.get(getCount())); //"Hint to be displayed"
-										}
-
-										return view;
-									}
-
-									@Override
-									public int getCount() {
-										return super.getCount() - 1; // you dont display last item. It is used as hint.
-									}
-								};
-
-								mSpinnerSubsubcategory.setVisibility(View.VISIBLE);
-								mSpinnerSubsubcategory.setAdapter(adapter);
-
-								if (mOriginalCategory == null) {
-									mSpinnerSubsubcategory.setSelection(adapter.getCount());
-								}
-								mSpinnerSubsubcategory.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-									@Override
-									public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-										/* Do nothing when the hint item is selected */
-										if (position < mSubcategory.categories.size()) {
-											mSubsubcategory = (Category) mSubcategory.categories.get(position);
-											if (mSubsubcategory.iconUri() != null) {
-												updateCustomImage(mSubsubcategory.iconUri(), mSubsubcategory);
-											}
-										}
-									}
-
-									@Override
-									public void onNothingSelected(AdapterView<?> parent) {}
-								});
-								
-								if (mOriginalCategory != null && mSubsubcategoryIndex != null) {
-									mSpinnerSubsubcategory.setSelection(mSubsubcategoryIndex);
-									mOriginalCategory = null;
-								}
-							}
-						}
-
-						@Override
-						public void onNothingSelected(AdapterView<?> parent) {}
-					});
-					
-					if (mOriginalCategory != null && mSubcategoryIndex != null) {
-						mSpinnerSubcategory.setSelection(mSubcategoryIndex);
-					}
+					initSubcategorySpinner(position);
 				}
 			}
 
@@ -350,8 +249,141 @@ public class CategoryBuilder extends FormActivity {
 			public void onNothingSelected(AdapterView<?> parent) {}
 		});
 
-		if (mOriginalCategory != null && mCategoryIndex != null) {
-			mSpinnerCategory.setSelection(mCategoryIndex);
+		if (mOriginalCategory != null && mOriginalCategoryIndex != null) {
+			mSpinnerCategory.setSelection(mOriginalCategoryIndex);
+			if (mOriginalSubCategoryIndex == null ) {
+				mOriginalCategory = null;
+			}
+		}
+	}
+
+	private void initSubcategorySpinner(Integer position) {
+
+		final List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStringArray(mCategory.categories);
+
+		if (categories.size() > 0) {
+
+			final CategoryAdapter adapter = new CategoryAdapter(CategoryBuilder.this
+					, mSpinnerItem
+					, categories
+					, R.string.form_place_sub_category_hint);
+
+			if (mCommon.mThemeTone.equals("dark")) {
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+					adapter.setDropDownViewResource(R.layout.spinner_item_light);
+				}
+			}
+
+			mSpinnerSubCategory.setVisibility(View.VISIBLE);
+			mSpinnerSubCategory.setAdapter(adapter);
+
+			if (mOriginalCategory == null) {
+				mSpinnerSubCategory.setSelection(adapter.getCount());
+			}
+			
+			mSpinnerSubCategory.setOnTouchListener(new OnTouchListener() {
+
+					@Override
+					public boolean onTouch(View v, MotionEvent event) {
+	                    if (event.getAction() == MotionEvent.ACTION_UP) {
+	                    	if (mSpinnerSubCategory.getSelectedItemPosition() == adapter.getCount()) {
+	                    		mSpinnerSubCategory.setSelection(0);
+	                    	}
+	                    }
+	                    return false;
+					}
+	            });			
+			
+			mSpinnerSubCategory.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+					/* Do nothing when the hint item is selected */
+					if (position < mCategory.categories.size()) {
+						mSubCategory = (Category) mCategory.categories.get(position);
+						if (mSubCategory.iconUri() != null) {
+							updateCustomImage(mSubCategory.iconUri(), mSubCategory);
+						}
+
+						mSubSubCategory = null;
+						mSpinnerSubSubCategory.setVisibility(View.INVISIBLE);
+
+						initSubsubcategorySpinner(position);
+					}
+				}
+
+				@Override
+				public void onNothingSelected(AdapterView<?> parent) {}
+			});
+
+			if (mOriginalCategory != null && mOriginalSubCategoryIndex != null) {
+				mSpinnerSubCategory.setSelection(mOriginalSubCategoryIndex);
+				if (mOriginalSubSubCategoryIndex == null ) {
+					mOriginalCategory = null;
+				}
+			}
+		}
+	}
+
+	private void initSubsubcategorySpinner(Integer position) {
+
+		List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStringArray(mSubCategory.categories);
+		if (categories.size() > 0) {
+
+			final CategoryAdapter adapter = new CategoryAdapter(CategoryBuilder.this
+					, mSpinnerItem
+					, categories
+					, R.string.form_place_sub_category_hint);
+
+			if (mCommon.mThemeTone.equals("dark")) {
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+					adapter.setDropDownViewResource(R.layout.spinner_item_light);
+				}
+			}
+
+			mSpinnerSubSubCategory.setVisibility(View.VISIBLE);
+			mSpinnerSubSubCategory.setAdapter(adapter);
+
+			if (mOriginalCategory == null) {
+				mSpinnerSubSubCategory.setSelection(adapter.getCount());
+			}
+			
+			mSpinnerSubSubCategory.setOnTouchListener(new OnTouchListener() {
+
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                    	if (mSpinnerSubSubCategory.getSelectedItemPosition() == adapter.getCount()) {
+                    		mSpinnerSubSubCategory.setSelection(0);
+                    	}
+                    }
+                    return false;
+				}
+            });
+			
+			mSpinnerSubSubCategory.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+					/* Do nothing when the hint item is selected */
+					if (position < mSubCategory.categories.size()) {
+						mSubSubCategory = (Category) mSubCategory.categories.get(position);
+						if (mSubSubCategory.iconUri() != null) {
+							updateCustomImage(mSubSubCategory.iconUri(), mSubSubCategory);
+						}
+					}
+				}
+
+				@Override
+				public void onNothingSelected(AdapterView<?> parent) {}
+			});
+
+			if (mOriginalCategory != null && mOriginalSubSubCategoryIndex != null) {
+				mSpinnerSubSubCategory.setSelection(mOriginalSubSubCategoryIndex);
+				mOriginalCategory = null;
+			}
 		}
 	}
 
@@ -376,6 +408,44 @@ public class CategoryBuilder extends FormActivity {
 		bitmapRequest.setImageSize(mImage.getSizeHint());
 		bitmapRequest.setImageRequestor(mImage.getImageView());
 		BitmapManager.getInstance().masterFetch(bitmapRequest);
+	}
+
+	private class CategoryAdapter extends ArrayAdapter {
+
+		private List<String>	mCategories;
+
+		public CategoryAdapter(Context context, int textViewResourceId, List categories, Integer categoryHint) {
+			super(context, textViewResourceId, categories);
+			categories.add(getString(categoryHint));
+			mCategories = categories;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+
+			View view = super.getView(position, convertView, parent);
+
+			TextView text = (TextView) view.findViewById(R.id.spinner_name);
+			if (mCommon.mThemeTone.equals("dark")) {
+				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+					text.setTextColor(R.color.text_dark);
+				}
+			}
+
+			FontManager.getInstance().setTypefaceDefault(text);
+
+			if (position == getCount()) {
+				text.setText("");
+				text.setHint(mCategories.get(getCount())); //"Hint to be displayed"
+			}
+
+			return view;
+		}
+
+		@Override
+		public int getCount() {
+			return super.getCount() - 1; // you dont display last item. It is used as hint.
+		}
 	}
 
 	@Override

@@ -136,7 +136,7 @@ public class SignInForm extends FormActivity {
 
 						setResult(CandiConstants.RESULT_USER_SIGNED_IN);
 						finish();
-						AnimUtils.doOverridePendingTransition(SignInForm.this, TransitionType.FormToCandiPage);
+						AnimUtils.doOverridePendingTransition(SignInForm.this, TransitionType.FormToPage);
 					}
 					else {
 						mTextPassword.setText("");

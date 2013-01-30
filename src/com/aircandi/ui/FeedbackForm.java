@@ -95,7 +95,7 @@ public class FeedbackForm extends FormActivity {
 		}
 		else {
 			finish();
-			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 		}
 	}
 
@@ -111,7 +111,7 @@ public class FeedbackForm extends FormActivity {
 		}
 		else {
 			finish();
-			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToCandiPage);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
 		}
 	}
 
@@ -145,7 +145,7 @@ public class FeedbackForm extends FormActivity {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
-							AnimUtils.doOverridePendingTransition(FeedbackForm.this, TransitionType.FormToCandiPage);
+							AnimUtils.doOverridePendingTransition(FeedbackForm.this, TransitionType.FormToPage);
 						}
 					}
 				}
