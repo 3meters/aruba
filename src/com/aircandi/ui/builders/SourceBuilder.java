@@ -41,6 +41,7 @@ public class SourceBuilder extends FormActivity {
 	private Spinner			mSourceTypePicker;
 	private EditText		mSourceName;
 	private EditText		mSourceId;
+	private Integer			mSpinnerItem;
 
 	private List<String>	mSourceSuggestionStrings;
 	private Entity			mEntity;
@@ -73,6 +74,8 @@ public class SourceBuilder extends FormActivity {
 		mSourceTypePicker = (Spinner) findViewById(R.id.source_type_picker);
 		mSourceName = (EditText) findViewById(R.id.name);
 		mSourceId = (EditText) findViewById(R.id.id);
+		
+		mSpinnerItem = mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.name));
@@ -217,12 +220,20 @@ public class SourceBuilder extends FormActivity {
 
 	private void initializeSpinner(final List<String> items) {
 
-		ArrayAdapter adapter = new ArrayAdapter(this, mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light, items) {
+		ArrayAdapter adapter = new ArrayAdapter(this, mSpinnerItem, items) {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 
 				View view = super.getView(position, convertView, parent);
+				
+				TextView text = (TextView) view.findViewById(R.id.spinner_name);
+				if (mCommon.mThemeTone.equals("dark")) {
+					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+						text.setTextColor(R.color.text_dark);
+					}
+				}
+				
 				FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.spinner_name));
 
 				if (position == getCount()) {
@@ -238,6 +249,12 @@ public class SourceBuilder extends FormActivity {
 				return super.getCount() - 1; // dont display last item. It is used as hint.
 			}
 		};
+		
+		if (mCommon.mThemeTone.equals("dark")) {
+			if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+				adapter.setDropDownViewResource(R.layout.spinner_item_light);
+			}
+		}
 
 		mSourceTypePicker.setAdapter(adapter);
 
