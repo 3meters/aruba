@@ -47,6 +47,7 @@ public abstract class FormActivity extends SherlockActivity {
 	protected WebImageView		mImageRequestWebImageView;
 	protected Uri				mMediaFileUri;
 	protected String			mMediaFilePath;
+	protected File				mMediaFile;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +129,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 				Tracker.trackEvent("Entity", "TakePicture", "None", 0);
 				Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
+				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 				if (mImageRequestListener != null) {
 					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null);
 				}
@@ -242,14 +244,14 @@ public abstract class FormActivity extends SherlockActivity {
 
 	protected void pictureFromCamera() {
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-		File mediaFile = AndroidManager.getOutputMediaFile(AndroidManager.MEDIA_TYPE_IMAGE);
-		mMediaFilePath = mediaFile.getAbsolutePath();
-		mMediaFileUri = Uri.fromFile(mediaFile);
-
-		intent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaFileUri);
-		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
-		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
+		mMediaFile = AndroidManager.getOutputMediaFile(AndroidManager.MEDIA_TYPE_IMAGE);
+		if (mMediaFile != null) {
+			mMediaFilePath = mMediaFile.getAbsolutePath();
+			mMediaFileUri = Uri.fromFile(mMediaFile);
+			intent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaFileUri);
+			startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_MAKE);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
+		}
 	}
 
 	protected void pictureSearch() {

@@ -644,7 +644,12 @@ public class CandiForm extends CandiActivity {
 		setVisibility(creator, View.GONE);
 		if (creator != null && entity.creator != null) {
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				creator.setLabel(context.getString(R.string.candi_label_user_discovered_by));
+				if (entity.place.source.equals("user")) {
+					creator.setLabel(context.getString(R.string.candi_label_user_created_by));
+				}
+				else {
+					creator.setLabel(context.getString(R.string.candi_label_user_discovered_by));
+				}
 			}
 			else if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
 				creator.setLabel(context.getString(R.string.candi_label_user_added_by));

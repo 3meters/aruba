@@ -8,7 +8,7 @@ import android.util.Log;
 public final class CandiConstants {
 
 	public static final boolean	DEBUG_TRACE						= false;
-	public static final int		LOG_LEVEL						= Log.VERBOSE;
+	public static final int		LOG_LEVEL						= BuildConfig.DEBUG ? Log.VERBOSE : Log.DEBUG;
 	public static final boolean	TRACKING_ENABLED				= true;
 
 	public static final String	APP_NAME						= "Aircandi";																				//$NON-NLS-1$

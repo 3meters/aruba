@@ -209,7 +209,7 @@ public class AndroidManager {
 		/* Create a file Uri for saving an image or video */
 		return Uri.fromFile(getOutputMediaFile(type));
 	}
-
+	
 	public static File getOutputMediaFile(int type) {
 		/*
 		 * Create a File for saving an image or video
