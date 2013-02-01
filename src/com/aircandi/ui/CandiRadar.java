@@ -138,22 +138,23 @@ import com.squareup.otto.Subscribe;
 
 public class CandiRadar extends CandiActivity {
 
-	private Handler				mHandler		= new Handler();
+	private Handler				mHandler			= new Handler();
 
 	private Number				mEntityModelRefreshDate;
 	private Number				mEntityModelActivityDate;
-	private Location			mActiveLocation	= null;
-	private Integer				mWifiState		= WifiManager.WIFI_STATE_UNKNOWN;
+	private Location			mActiveLocation		= null;
+	private Integer				mWifiState			= WifiManager.WIFI_STATE_UNKNOWN;
 
 	private ListView			mList;
 
 	private SoundPool			mSoundPool;
 	private int					mNewCandiSoundId;
-	private Boolean				mInitialized	= false;
+	private Boolean				mInitialized		= false;
 
-	private List<Entity>		mEntities		= new ArrayList<Entity>();
+	private List<Entity>		mEntities			= new ArrayList<Entity>();
 	private RadarListAdapter	mRadarAdapter;
-	private Boolean				mAttachedWindow	= false;
+	private Boolean				mFreshWindow		= false;
+	private Boolean				mUpdateCheckNeeded	= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -628,7 +629,7 @@ public class CandiRadar extends CandiActivity {
 		super.onResume();
 		Logger.d(this, "onResume called");
 		if (!mInitialized) return;
-		mAttachedWindow = true;
+		mFreshWindow = true;
 
 		if (Aircandi.getInstance().getUser() != null
 				&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
@@ -644,14 +645,15 @@ public class CandiRadar extends CandiActivity {
 
 		if (!mInitialized) return;
 
-		if (hasFocus && mAttachedWindow) {
-			mAttachedWindow = false;
+		if (hasFocus && (mFreshWindow || mUpdateCheckNeeded)) {
+			mFreshWindow = false;
+			mUpdateCheckNeeded = false;
 			if (Aircandi.applicationUpdateRequired) {
 				showUpdateAlert(null);
 			}
 			else {
 				/* Check for update */
-				Boolean updateCheckNeeded = handleUpdateChecks(new RequestListener() {
+				mUpdateCheckNeeded = handleUpdateChecks(new RequestListener() {
 					@Override
 					public void onComplete(Object dialogDisplayed) {
 						/*
@@ -665,7 +667,7 @@ public class CandiRadar extends CandiActivity {
 					}
 				});
 
-				if (!updateCheckNeeded) {
+				if (!mUpdateCheckNeeded) {
 					manageData();
 				}
 			}
