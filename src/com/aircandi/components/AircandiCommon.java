@@ -300,16 +300,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	private void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
-			int messageId = R.string.alert_beacons_zero;
-			String beaconMessage = mActivity.getString(messageId);
+			String beaconMessage = "";
 			synchronized (ProxiExplorer.getInstance().mWifiList) {
-				if (Aircandi.wifiCount > 0) {
-					messageId = R.string.alert_beacons_available;
-					if (Aircandi.getInstance().getUser() != null
-							&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
-							&& Aircandi.getInstance().getUser().isDeveloper != null
-							&& Aircandi.getInstance().getUser().isDeveloper) {
-						beaconMessage = mActivity.getString(messageId) + "\n\n";
+				if (Aircandi.getInstance().getUser() != null
+						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+						&& Aircandi.getInstance().getUser().isDeveloper != null
+						&& Aircandi.getInstance().getUser().isDeveloper) {
+					if (Aircandi.wifiCount > 0) {
 						for (WifiScanResult wifi : ProxiExplorer.getInstance().mWifiList) {
 							if (!wifi.SSID.equals("candi_feed")) {
 								beaconMessage += wifi.SSID + ": (" + String.valueOf(wifi.level) + ") " + wifi.BSSID + "\n";
@@ -317,21 +314,21 @@ public class AircandiCommon implements ActionBar.TabListener {
 						}
 						beaconMessage += "\n";
 						beaconMessage += "Wifi fix: " + DateUtils.intervalSince(ProxiExplorer.getInstance().mLastWifiUpdate, DateUtils.nowDate());
+					}
 
-						Observation observation = LocationManager.getInstance().getObservation();
-						if (observation != null) {
-							Date fixDate = new Date(observation.time.longValue());
-							beaconMessage += "\nLocation fix: " + DateUtils.intervalSince(fixDate, DateUtils.nowDate());
-							beaconMessage += "\nLocation accuracy: " + String.valueOf(observation.accuracy);
-							beaconMessage += "\nLocation provider: " + observation.provider;
-						}
-						else {
-							beaconMessage += "\nLocation fix: none";
-						}
+					Observation observation = LocationManager.getInstance().getObservation();
+					if (observation != null) {
+						Date fixDate = new Date(observation.time.longValue());
+						beaconMessage += "\nLocation fix: " + DateUtils.intervalSince(fixDate, DateUtils.nowDate());
+						beaconMessage += "\nLocation accuracy: " + String.valueOf(observation.accuracy);
+						beaconMessage += "\nLocation provider: " + observation.provider;
 					}
 					else {
-						beaconMessage = mActivity.getString(messageId);
+						beaconMessage += "\nLocation fix: none";
 					}
+				}
+				else {
+					return;
 				}
 			}
 			AircandiCommon.showAlertDialog(R.drawable.ic_app

@@ -6,8 +6,7 @@
     android:addStatesFromChildren="true"
     android:focusable="true"
     android:gravity="center"
-    android:paddingLeft="13dp"
-    android:paddingRight="13dp"
+    android:minWidth="@dimen/action_button_min_width"
     tools:ignore="UnusedResources" >
 
     <ProgressBar

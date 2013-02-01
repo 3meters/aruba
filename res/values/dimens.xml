@@ -9,6 +9,8 @@
     <dimen name="text_size_tiny">14sp</dimen>
     <dimen name="text_size_micro">12sp</dimen>
     
+    <dimen name="action_button_min_width">56dp</dimen>
+    
     <item name="combo_button_drawable_scale" format="float" type="dimen">0.9</item>
     <item name="combo_button_drawable_large_scale" format="float" type="dimen">0.6</item>
     
