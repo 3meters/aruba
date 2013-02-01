@@ -34,7 +34,7 @@
                 android:layout_width="250dp"
                 android:layout_height="250dp"
                 android:layout_marginBottom="15dp"
-                aircandi:layout="@layout/widget_webimageview_framed"
+                aircandi:layout="@layout/widget_webimageview_zoom"
                 aircandi:sizeHint="250dp"
                 android:background="@drawable/app_image_selector"
                 android:clickable="true"

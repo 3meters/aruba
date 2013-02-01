@@ -28,7 +28,6 @@ import com.aircandi.utilities.ImageUtils;
 public class WebImageView extends RelativeLayout {
 
 	private ImageView					mImageMain;
-	private ImageView					mImageBadge;
 	private ImageView					mImageZoom;
 	private ProgressBar					mProgressBar;
 
@@ -91,7 +90,6 @@ public class WebImageView extends RelativeLayout {
 		mImageMain = (ImageView) view.findViewById(R.id.image_main);
 
 		if (!isInEditMode()) {
-			mImageBadge = (ImageView) view.findViewById(R.id.image_badge);
 			mImageZoom = (ImageView) view.findViewById(R.id.image_zoom);
 			mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
 		}
@@ -273,10 +271,6 @@ public class WebImageView extends RelativeLayout {
 
 	public ImageView getImageView() {
 		return mImageMain;
-	}
-
-	public ImageView getImageBadge() {
-		return mImageBadge;
 	}
 
 	public ImageView getImageZoom() {

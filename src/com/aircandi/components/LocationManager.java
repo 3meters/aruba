@@ -81,29 +81,36 @@ public class LocationManager {
 
 	public Location getLastKnownLocation() {
 		Location location = null;
-		
-		Location locationCandidate =mLocationManager.getLastKnownLocation(android.location.LocationManager.PASSIVE_PROVIDER);
-		LocationBetterReason reason = isBetterLocation(locationCandidate, location);
-		if (reason != LocationBetterReason.None) {
-			location = locationCandidate;
+
+		Location locationCandidate = mLocationManager.getLastKnownLocation(android.location.LocationManager.PASSIVE_PROVIDER);
+		LocationBetterReason reason = LocationBetterReason.None;
+		if (locationCandidate != null) {
+			reason = isBetterLocation(locationCandidate, location);
+			if (reason != LocationBetterReason.None) {
+				location = locationCandidate;
+			}
 		}
-		
-		locationCandidate =mLocationManager.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
-		reason = isBetterLocation(locationCandidate, location);
-		if (reason != LocationBetterReason.None) {
-			location = locationCandidate;
+
+		locationCandidate = mLocationManager.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
+		if (locationCandidate != null) {
+			reason = isBetterLocation(locationCandidate, location);
+			if (reason != LocationBetterReason.None) {
+				location = locationCandidate;
+			}
 		}
-		
-		locationCandidate =mLocationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);
-		reason = isBetterLocation(locationCandidate, location);
-		if (reason != LocationBetterReason.None) {
-			location = locationCandidate;
+
+		locationCandidate = mLocationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);
+		if (locationCandidate != null) {
+			reason = isBetterLocation(locationCandidate, location);
+			if (reason != LocationBetterReason.None) {
+				location = locationCandidate;
+			}
 		}
-		
+
 		if (!isGoodLocation(location)) {
 			location = null;
 		}
-		
+
 		return location;
 	}
 

@@ -2131,6 +2131,10 @@ public class ProxiExplorer {
 								|| source.source.equals("openmenu")) {
 							source.intentSupport = false;
 						}
+						
+						if (source.name == null) {
+							source.name = source.source;
+						}
 
 						if (!mEntityModel.mSourceMeta.containsKey(source.source)) {
 							mEntityModel.mSourceMeta.put(source.source, new Source(source.intentSupport, false));

@@ -145,6 +145,10 @@
     <string name="picture_picker_search_empty">No pictures found for</string>
     <string name="sources_builder_empty">No links yet. Use the new menu item to add a custom link."</string>
 
+    <!-- Android choosers -->
+
+    <string name="chooser_gallery_title">Select a picture</string>
+    
     <!-- Symbols -->
 
     <string name="symbol_bullet">•</string>
@@ -158,7 +162,7 @@
 
     <!-- Dialogs -->
 
-    <string name="dialog_info">Copyright 3meters LLC 2012</string>
+    <string name="dialog_info">Copyright 3meters LLC 2013</string>
     <string name="dialog_template_picker_title">select candi type</string>
     <string name="dialog_address_builder_title">address</string>
     <string name="dialog_category_builder_title">category</string>
@@ -302,13 +306,13 @@
 
     <!-- Crash reporting -->
 
-    <string name="crash_toast_text">Ouch! Aircandi crashed, but a report can be sent to help fix the issue!</string>
+    <string name="crash_toast_text">Ouch! Aircandi stopped, but a report can be sent to help us fix the error!</string>
     <string name="crash_notif_ticker_text">Unexpected error, please send a report&#8230;</string>
-    <string name="crash_notif_title">Aircandi has crashed&#8230;</string>
-    <string name="crash_notif_text">Please click here to help fix the issue.</string>
-    <string name="crash_dialog_title">Aircandi has crashed</string>
-    <string name="crash_dialog_text">An unexpected error occurred forcing the application to stop. Please help us fix this by sending us error data, all you have to do is click \'OK\'.</string>
-    <string name="crash_dialog_comment_prompt">If possible, please describe below what you were doing in the application:</string>
+    <string name="crash_notif_title">Aircandi has stopped&#8230;</string>
+    <string name="crash_notif_text">Please click here to help us fix the error.</string>
+    <string name="crash_dialog_title">Aircandi has stopped</string>
+    <string name="crash_dialog_text">An unexpected error has stopped Aircandi. You can help us fix it by sending a report about the error.</string>
+    <string name="crash_dialog_comment_prompt">If possible, please describe below what you were doing in the application:\n</string>
     <string name="crash_dialog_ok_toast">Thank you!</string>
     <string name="pref_disable_acra">Error reporting</string>
     <string name="pref_acra_disabled">Disabled</string>

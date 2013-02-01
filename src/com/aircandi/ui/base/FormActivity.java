@@ -236,9 +236,21 @@ public abstract class FormActivity extends SherlockActivity {
 	// --------------------------------------------------------------------------------------------
 
 	protected void pictureFromGallery() {
-		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK);
-		picturePickerIntent.setType("image/*");
-		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
+		//		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+		//		picturePickerIntent.setType("image/*");
+		//		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
+
+		Intent intent = new Intent();
+		intent.setType("image/*");
+		intent.setAction(Intent.ACTION_GET_CONTENT);
+		/*
+		 * We want to filter out remove images like the linked in from picasa. 
+		 */
+		if (CandiConstants.SUPPORTS_HONEYCOMB) {
+			intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+		}
+		startActivityForResult(Intent.createChooser(intent, getString(R.string.chooser_gallery_title))
+				, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
 	}
 

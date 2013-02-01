@@ -20,27 +20,4 @@
         android:adjustViewBounds="true"
         android:scaleType="centerCrop" />
 
-    <ImageView
-        android:id="@+id/image_badge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/image_main"
-        android:layout_alignRight="@+id/image_main"
-        android:layout_marginBottom="12dp"
-        android:layout_marginRight="12dp"
-        aircandi:sizeHint="30dp"
-        android:adjustViewBounds="true"
-        android:gravity="bottom|right"
-        android:scaleType="fitCenter"
-        android:visibility="gone" />
-
-    <ImageView
-        android:id="@+id/image_zoom"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_alignBottom="@+id/image_main"
-        android:layout_alignRight="@+id/image_main"
-        android:src="?attr/iconZoom"
-        android:visibility="gone" />
-
 </merge>

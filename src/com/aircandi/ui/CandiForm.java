@@ -538,20 +538,9 @@ public class CandiForm extends CandiActivity {
 					BitmapRequest imageRequest = builder.create();
 
 					image.setBitmapRequest(imageRequest);
-
-					if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-						image.getImageBadge().setVisibility(View.GONE);
-						image.getImageZoom().setVisibility(View.GONE);
-						image.setClickable(false);
-					}
-					else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-						image.getImageBadge().setVisibility(View.GONE);
-						image.getImageZoom().setVisibility(View.GONE);
-						image.setClickable(false);
-					}
-					else {
-						image.getImageBadge().setVisibility(View.GONE);
-						image.getImageZoom().setVisibility(View.VISIBLE);
+					image.setClickable(false);
+					
+					if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
 						image.setClickable(true);
 					}
 				}
@@ -718,14 +707,12 @@ public class CandiForm extends CandiActivity {
 
 			TextView title = (TextView) view.findViewById(R.id.title);
 			TextView badge = (TextView) view.findViewById(R.id.badge);
-			Button install = (Button) view.findViewById(R.id.button_install);
 
 			FontManager.getInstance().setTypefaceDefault(title);
 			FontManager.getInstance().setTypefaceDefault(badge);
-			FontManager.getInstance().setTypefaceDefault(install);
 
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-				if (entity.source.name.equals("comments")) {
+				if (entity.source.name != null && entity.source.name.equals("comments")) {
 					if (entity.commentCount != null && entity.commentCount > 0) {
 						badge.setText(String.valueOf(entity.commentCount));
 						badge.setVisibility(View.VISIBLE);
@@ -736,11 +723,6 @@ public class CandiForm extends CandiActivity {
 				}
 				title.setText(entity.name);
 				title.setVisibility(View.VISIBLE);
-
-				//				if (entity.source.intentSupport && entity.source.appExists() && !entity.source.appInstalled()) {
-				//					install.setVisibility(View.VISIBLE);
-				//					install.setTag(entity);
-				//				}
 			}
 			else {
 				if (entity.name != null && !entity.name.equals("")) {

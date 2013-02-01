@@ -297,36 +297,7 @@ public class CandiView extends RelativeLayout {
 					}
 					
 					BitmapManager.getInstance().masterFetch(bitmapRequest);
-					
-//					new AsyncTask<BitmapRequest, Void, Object>() {
-//
-//						@Override
-//						protected Object doInBackground(BitmapRequest... params) {
-//							BitmapRequest bitmapRequest = (BitmapRequest) params[0];
-//							BitmapManager.getInstance().masterFetch(bitmapRequest);
-//							return null;
-//						}
-//					}.execute(bitmapRequest);
 				}
-			}
-			if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				if (mCandiImage.getImageBadge() != null) {
-					mCandiImage.getImageBadge().setVisibility(View.GONE);
-				}
-				if (mCandiImage.getImageZoom() != null) {
-					mCandiImage.getImageZoom().setVisibility(View.GONE);
-				}
-				mCandiImage.setClickable(false);
-			}
-			else if (mEntity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-				mCandiImage.getImageBadge().setVisibility(View.GONE);
-				mCandiImage.getImageZoom().setVisibility(View.GONE);
-				mCandiImage.setClickable(false);
-			}
-			else {
-				mCandiImage.getImageBadge().setVisibility(View.GONE);
-				mCandiImage.getImageZoom().setVisibility(View.VISIBLE);
-				mCandiImage.setClickable(true);
 			}
 		}
 	}

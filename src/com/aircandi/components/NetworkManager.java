@@ -199,22 +199,30 @@ public class NetworkManager {
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
 
+	public Integer getWifiState() {
+		return mWifiState;
+	}
+
+	private void setWifiState(Integer wifiState) {
+		mWifiState = wifiState;
+	}
+
 	private class WifiStateChangedReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(final Context context, Intent intent) {
 
 			/* This is on the main UI thread */
-			mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
+			setWifiState(intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN));
 
-			if (mWifiState == WifiManager.WIFI_STATE_ENABLED) {
+			if (getWifiState() == WifiManager.WIFI_STATE_ENABLED) {
 				Logger.d(this, "Wifi state enabled");
 			}
-			else if (mWifiState == WifiManager.WIFI_STATE_ENABLING) {
+			else if (getWifiState() == WifiManager.WIFI_STATE_ENABLING) {
 				Logger.d(this, "Wifi state enabling");
 			}
 			else {
-				switch (mWifiState) {
+				switch (getWifiState()) {
 					case WifiManager.WIFI_STATE_DISABLED:
 						Logger.d(this, "Wifi state disabled");
 						break;
@@ -226,6 +234,7 @@ public class NetworkManager {
 						break;
 				}
 			}
+			BusProvider.getInstance().post(new WifiChangedEvent(getWifiState()));
 		}
 	}
 

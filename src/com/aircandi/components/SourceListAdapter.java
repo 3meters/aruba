@@ -92,7 +92,6 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 			
 			if (holder.image != null) {
 				holder.image.setTag(source);
-				holder.image.getImageBadge().setVisibility(View.GONE);
 				/*
 				 * The WebImageView sets the current bitmap ref being held
 				 * by the internal image view to null before doing the work

@@ -155,7 +155,6 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 			if (holder.image != null) {
 				holder.image.setTag(entity);
-				holder.image.getImageBadge().setVisibility(View.GONE);
 				/*
 				 * The WebImageView sets the current bitmap ref being held
 				 * by the internal image view to null before doing the work

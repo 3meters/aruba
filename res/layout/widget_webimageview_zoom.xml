@@ -14,9 +14,18 @@
 
     <ImageView
         android:id="@+id/image_main"
-        style="@style/picture_framed_thick"
+        style="@style/picture_framed"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:adjustViewBounds="true"
         android:scaleType="centerCrop" />
+
+    <ImageView
+        android:id="@+id/image_zoom"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignBottom="@+id/image_main"
+        android:layout_alignRight="@+id/image_main"
+        android:src="?attr/iconZoom" />
 
 </merge>

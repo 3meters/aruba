@@ -21,7 +21,7 @@
     <TextView
         android:id="@+id/badge"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:gravity="top|right"
         android:text="@string/dummy_number"
@@ -39,16 +39,5 @@
         android:maxLines="1"
         android:textAppearance="@style/app_text_appearance_small"
         android:visibility="visible" />
-
-    <Button
-        android:id="@+id/button_install"
-        style="@style/form_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_below="@+id/title"
-        android:visibility="gone"
-        android:onClick="onInstallButtonClick"
-        android:text="@string/form_button_install" />
 
 </RelativeLayout>

@@ -176,8 +176,6 @@ public class CandiUser extends CandiActivity {
 		FontManager.getInstance().setTypefaceDefault(stats);
 
 		if (image != null) {
-			image.getImageBadge().setVisibility(View.GONE);
-			image.getImageZoom().setVisibility(View.GONE);
 			String imageUri = null;
 
 			if (user.photo != null) {

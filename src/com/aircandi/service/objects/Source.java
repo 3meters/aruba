@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import com.aircandi.ProxiConstants;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.service.Expose;
 
@@ -26,10 +25,6 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	public String				url;
 	@Expose
 	public String				icon;
-	@Expose
-	public String				iconInverse;
-	@Expose
-	public String				marketUri;
 	@Expose
 	public String				packageName;
 	@Expose
@@ -54,18 +49,13 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		source.id = (String) map.get("id");
 		source.url = (String) map.get("url");
 		source.icon = (String) map.get("icon");
-		source.iconInverse = (String) map.get("iconInverse");
 		source.origin = (String) map.get("origin");
-		source.marketUri = (String) map.get("marketUri");
 		source.packageName = (String) map.get("packageName");
 		return source;
 	}
 
 	public String getImageUri() {
 		String imageUri = icon;
-		if (imageUri != null && !imageUri.startsWith("resource:")) {
-			imageUri = ProxiConstants.URL_PROXIBASE_SERVICE_ASSETS_ICONS + icon;
-		}
 		return imageUri;
 	}
 
