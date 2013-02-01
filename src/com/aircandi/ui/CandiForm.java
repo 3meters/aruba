@@ -40,6 +40,7 @@ import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
+import com.aircandi.components.Tracker;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiExplorer;
 import com.aircandi.components.ProxiExplorer.ModelResult;
@@ -301,7 +302,7 @@ public class CandiForm extends CandiActivity {
 				showInstallDialog(entity);
 			}
 			else {
-
+				Tracker.trackEvent(entity.source.source, "View", null, 0);
 				if (entity.source.source.equals("twitter")) {
 					AndroidManager.getInstance().callTwitterActivity(this, entity.source.id);
 				}
@@ -888,6 +889,7 @@ public class CandiForm extends CandiActivity {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
+								Tracker.trackEvent(entity.source.source, "ReferInstall", entity.source.packageName, 0);
 								Logger.d(this, "Install: navigating to market install page");
 								Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + entity.source.packageName
 										+ "&referrer=utm_source%3Dcom.aircandi"));

@@ -59,20 +59,24 @@ public class AnimUtils {
 	}
 
 	public static void doOverridePendingTransition(Activity activity, TransitionType transitionType) {
+		doOverridePendingTransitionStackTop(activity, transitionType);
+	}
+
+	public static void doOverridePendingTransitionStackTop(Activity activity, TransitionType transitionType) {
 		/*
 		 * Browsing transitions
 		 */
 		if (transitionType == TransitionType.RadarToPage) {
-			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.fade_zoom_out);
+			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.page_fade_zoom_out);
 		}
 		else if (transitionType == TransitionType.PageBack) {
-			activity.overridePendingTransition(R.anim.fade_zoom_in, R.anim.slide_out_right);
+			activity.overridePendingTransition(R.anim.page_fade_zoom_in, R.anim.slide_out_right);
 		}
 		else if (transitionType == TransitionType.PageToPage) {
-			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.fade_zoom_out);
+			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.page_fade_zoom_out);
 		}
 		else if (transitionType == TransitionType.PageToSource) {
-			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.fade_zoom_out);
+			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.page_fade_zoom_out);
 		}
 		/*
 		 * Jumping to and from forms
@@ -82,6 +86,40 @@ public class AnimUtils {
 		}
 		else if (transitionType == TransitionType.FormToPage) {
 			activity.overridePendingTransition(R.anim.hold, R.anim.fade_zoom_out);
+		}
+		else if (transitionType == TransitionType.PageToRadarAfterDelete) {}
+		else if (transitionType == TransitionType.FormToPageAfterDelete) {
+			activity.overridePendingTransition(R.anim.hold, R.anim.help_zoom_out);
+		}
+		else if (transitionType == TransitionType.None) {
+			activity.overridePendingTransition(0, 0);
+		}
+	}
+
+	public static void doOverridePendingTransitionStackBottom(Activity activity, TransitionType transitionType) {
+		/*
+		 * Browsing transitions
+		 */
+		if (transitionType == TransitionType.RadarToPage) {
+			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.fade_zoom_in);
+		}
+		else if (transitionType == TransitionType.PageBack) {
+			activity.overridePendingTransition(R.anim.fade_zoom_out, R.anim.slide_out_right);
+		}
+		else if (transitionType == TransitionType.PageToPage) {
+			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.fade_zoom_in);
+		}
+		else if (transitionType == TransitionType.PageToSource) {
+			activity.overridePendingTransition(R.anim.slide_in_right, R.anim.fade_zoom_in);
+		}
+		/*
+		 * Jumping to and from forms
+		 */
+		else if (transitionType == TransitionType.PageToForm) {
+			activity.overridePendingTransition(R.anim.fade_zoom_out, R.anim.hold);
+		}
+		else if (transitionType == TransitionType.FormToPage) {
+			activity.overridePendingTransition(R.anim.hold, R.anim.fade_zoom_in);
 		}
 		else if (transitionType == TransitionType.PageToRadarAfterDelete) {}
 		else if (transitionType == TransitionType.FormToPageAfterDelete) {

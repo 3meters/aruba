@@ -136,8 +136,6 @@ public class CandiUser extends CandiActivity {
 
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
-
-		//mCommon.showCandiFormForEntity(entity, CandiForm.class);
 	}
 
 	@SuppressWarnings("ucd")

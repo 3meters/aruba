@@ -190,7 +190,7 @@ public class RegisterForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private void doViewTerms() {
-
+		Tracker.trackEvent("Terms", "View", null, 0);
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(CandiConstants.URL_AIRCANDI_TERMS));
 		startActivity(intent);

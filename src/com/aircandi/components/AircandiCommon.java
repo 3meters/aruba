@@ -341,7 +341,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {}
 					}, null);
-			Tracker.trackEvent("DialogBeacon", "Open", null, 0);
 		}
 	}
 
