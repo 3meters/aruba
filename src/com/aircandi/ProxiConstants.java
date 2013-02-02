@@ -19,7 +19,7 @@ public final class ProxiConstants {
 	public static final String	URL_PROXIBASE_SERVICE_ADMIN							= URL_PROXIBASE_SERVICE + "admin/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_METHOD						= URL_PROXIBASE_SERVICE + "do/";																												//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_AUTH							= URL_PROXIBASE_SERVICE + "auth/";																												//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE_ASSETS_ICONS					= URL_PROXIBASE_SERVICE + "img/icons/";																										//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS			= URL_PROXIBASE_SERVICE + "img/sources/";																										//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ASSETS_CATEGORIES				= URL_PROXIBASE_SERVICE + "img/categories/foursquare/";																						//$NON-NLS-1$
 
 	public static final String	URL_PROXIBASE_MEDIA_IMAGES							= "http://aircandi-images.s3.amazonaws.com/";																									//$NON-NLS-1$

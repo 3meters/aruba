@@ -16,6 +16,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.FontManager;
@@ -101,6 +102,7 @@ public class SourceBuilder extends FormActivity {
 			mSourceSuggestionStrings.add("website");
 			mSourceSuggestionStrings.add("facebook");
 			mSourceSuggestionStrings.add("twitter");
+			mSourceSuggestionStrings.add("email");
 			mSourceSuggestionStrings.add(getString(R.string.form_source_type_hint));
 			initializeSpinner(mSourceSuggestionStrings);
 		}
@@ -111,13 +113,16 @@ public class SourceBuilder extends FormActivity {
 		source.source = sourceType;
 		source.origin = "user";
 		if (sourceType.equals("website")) {
-			source.icon = "source_website.png";
+			source.icon = ProxiConstants.URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "website.png";
 		}
 		else if (sourceType.equals("facebook")) {
-			source.icon = "source_facebook.png";
+			source.icon = ProxiConstants.URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "facebook.png";
 		}
 		else if (sourceType.equals("twitter")) {
-			source.icon = "source_twitter.png";
+			source.icon = ProxiConstants.URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "twitter.png";
+		}
+		else if (sourceType.equals("email")) {
+			source.icon = ProxiConstants.URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "email.png";
 		}
 		return source;
 	}

@@ -111,13 +111,16 @@ public class AndroidManager {
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
-	@SuppressWarnings("ucd")
-	public void callSendActivity(Context context, String placeName, String uri) {
-		Intent intent = new Intent(android.content.Intent.ACTION_SEND);
-		intent.setType("text/plain");
-		String shareBody = "Here is some aircandi info on a cool place I was at! " + uri;
-		intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
-		intent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+	public void callSendToActivity(Context context, String placeName, String emailAddress, String subject, String body) {
+		StringBuilder uriText = new StringBuilder();
+		uriText.append("mailto:" + Uri.encode(emailAddress));
+		if (subject != null) {
+			uriText.append("?subject=" + subject);
+		}
+		if (body != null) {
+			uriText.append("&body=" + body);
+		}
+		Intent intent = new Intent(android.content.Intent.ACTION_SENDTO, Uri.parse(uriText.toString()));
 		context.startActivity(intent);
 	}
 

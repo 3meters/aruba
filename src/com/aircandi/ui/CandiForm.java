@@ -321,6 +321,9 @@ public class CandiForm extends CandiActivity {
 				else if (entity.source.source.equals("website")) {
 					AndroidManager.getInstance().callBrowserActivity(this, entity.source.id);
 				}
+				else if (entity.source.source.equals("email")) {
+					AndroidManager.getInstance().callSendToActivity(this,entity.source.name, entity.source.id, null, null);
+				}
 				else if (entity.source.source.equals("comments")) {
 					IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 					intentBuilder.setCommandType(CommandType.View)
