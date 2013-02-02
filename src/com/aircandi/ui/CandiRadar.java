@@ -591,6 +591,9 @@ public class CandiRadar extends CandiActivity {
 		 */
 		/* Start listening for events */
 		disableEvents();
+		
+		/* Stop any location burst that might be active */
+		LocationManager.getInstance().stopLocationBurst();
 
 		Logger.d(this, "CandiRadarActivity stopped");
 		if (CandiConstants.DEBUG_TRACE) {

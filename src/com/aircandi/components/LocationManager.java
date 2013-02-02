@@ -18,15 +18,17 @@ import com.aircandi.utilities.DateUtils;
 public class LocationManager {
 
 	private static LocationManager				singletonObject;
-	public static Double						RADIUS_EARTH_MILES		= 3958.75;
-	public static Double						RADIUS_EARTH_KILOMETERS	= 6371.0;
+	public static Double						RADIUS_EARTH_MILES			= 3958.75;
+	public static Double						RADIUS_EARTH_KILOMETERS		= 6371.0;
 
 	private Context								mApplicationContext;
 	protected android.location.LocationManager	mLocationManager;
 
 	private Location							mLocation;
-	private Boolean								mLocationModeBurst		= false;
-	protected PendingIntent						mLocationListenerPendingIntent;
+	private Boolean								mLocationModeBurstNetwork	= false;
+	private Boolean								mLocationModeBurstGps		= false;
+	protected PendingIntent						mLocationListenerPendingIntentNetwork;
+	protected PendingIntent						mLocationListenerPendingIntentGps;
 
 	public static synchronized LocationManager getInstance() {
 		if (singletonObject == null) {
@@ -44,8 +46,11 @@ public class LocationManager {
 		mLocationManager = (android.location.LocationManager) mApplicationContext.getSystemService(Context.LOCATION_SERVICE);
 
 		/* Setup the location update Pending Intents */
-		Intent activeIntent = new Intent(mApplicationContext, LocationChangedReceiver.class);
-		mLocationListenerPendingIntent = PendingIntent.getBroadcast(mApplicationContext, 0, activeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		Intent activeIntentNetwork = new Intent(mApplicationContext, LocationChangedReceiver.class);
+		mLocationListenerPendingIntentNetwork = PendingIntent.getBroadcast(mApplicationContext, 0, activeIntentNetwork, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		Intent activeIntentGps = new Intent(mApplicationContext, LocationChangedReceiver.class);
+		mLocationListenerPendingIntentGps = PendingIntent.getBroadcast(mApplicationContext, 0, activeIntentGps, PendingIntent.FLAG_UPDATE_CURRENT);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -57,15 +62,19 @@ public class LocationManager {
 		 * This will produce rapid updates across all available providers until we get an acceptable
 		 * location fix.
 		 */
-		Logger.d(this, "Burst mode started");
-		mLocationManager.removeUpdates(mLocationListenerPendingIntent);
+		mLocationManager.removeUpdates(mLocationListenerPendingIntentNetwork);
+		mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
+
 		setLocation(null);
-		mLocationModeBurst = true;
 		if (isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)) {
-			mLocationManager.requestLocationUpdates(android.location.LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListenerPendingIntent);
+			Logger.d(this, "Network burst mode started");
+			mLocationManager.requestLocationUpdates(android.location.LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListenerPendingIntentNetwork);
+			mLocationModeBurstNetwork = true;
 		}
 		if (isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
-			mLocationManager.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 0, 0, mLocationListenerPendingIntent);
+			Logger.d(this, "Gps burst mode started");
+			mLocationManager.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 0, 0, mLocationListenerPendingIntentGps);
+			mLocationModeBurstGps = true;
 		}
 
 		Aircandi.mainThreadHandler.postDelayed(new Runnable() {
@@ -73,10 +82,24 @@ public class LocationManager {
 			@Override
 			public void run() {
 				Logger.d(LocationManager.this, "Burst mode stopped: timed out");
-				mLocationManager.removeUpdates(mLocationListenerPendingIntent);
-				mLocationModeBurst = false;
+				mLocationManager.removeUpdates(mLocationListenerPendingIntentNetwork);
+				mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
+				mLocationModeBurstNetwork = false;
+				mLocationModeBurstGps = false;
 			}
 		}, PlacesConstants.BURST_TIMEOUT);
+	}
+
+	public void stopLocationBurst() {
+		Logger.d(LocationManager.this, "Burst mode stopped: disabled");
+		if (mLocationModeBurstNetwork) {
+			mLocationManager.removeUpdates(mLocationListenerPendingIntentNetwork);
+		}
+		if (mLocationModeBurstGps) {
+			mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
+		}
+		mLocationModeBurstNetwork = false;
+		mLocationModeBurstGps = false;
 	}
 
 	public Location getLastKnownLocation() {
@@ -210,11 +233,23 @@ public class LocationManager {
 
 					mLocation = location;
 					BusProvider.getInstance().post(new LocationChangedEvent(mLocation));
-					if (mLocationModeBurst) {
-						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY) {
-							Logger.d(this, "Burst mode stopped: desired accuracy reached");
-							mLocationManager.removeUpdates(mLocationListenerPendingIntent);
-							mLocationModeBurst = false;
+
+					if (location.getProvider().equals("network") && mLocationModeBurstNetwork) {
+						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_NETWORK) {
+							Logger.d(this, "Network burst mode stopped: desired accuracy reached");
+							mLocationModeBurstNetwork = false;
+							if (!mLocationModeBurstGps) {
+								mLocationManager.removeUpdates(mLocationListenerPendingIntentNetwork);
+							}
+						}
+					}
+					else if (location.getProvider().equals("gps") && mLocationModeBurstGps) {
+						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_GPS) {
+							Logger.d(this, "Gps burst mode stopped: desired accuracy reached");
+							mLocationModeBurstGps = false;
+							if (!mLocationModeBurstNetwork) {
+								mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
+							}
 						}
 					}
 				}
@@ -259,6 +294,16 @@ public class LocationManager {
 		/* A new location is always better than no location */
 		if (currentBestLocation == null) {
 			return LocationBetterReason.NotNull;
+		}
+
+		/* A good gps location is always better than an excellent network location */
+		if (currentBestLocation.getProvider().equals("network") && locationToEvaluate.getProvider().equals("gps")) {
+			return LocationBetterReason.Provider;
+		}
+
+		/* Do not replace a good gps location with a network location */
+		if (currentBestLocation.getProvider().equals("gps") && locationToEvaluate.getProvider().equals("network")) {
+			return LocationBetterReason.None;
 		}
 
 		/* Check distance moved and adjust for accuracy */
@@ -348,6 +393,7 @@ public class LocationManager {
 		Distance,
 		Recency,
 		Accuracy,
+		Provider,
 		NotNull,
 		None
 	}

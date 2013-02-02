@@ -59,7 +59,7 @@ public class AnimUtils {
 	}
 
 	public static void doOverridePendingTransition(Activity activity, TransitionType transitionType) {
-		doOverridePendingTransitionStackTop(activity, transitionType);
+		doOverridePendingTransitionDefault(activity, transitionType);
 	}
 
 	public static void doOverridePendingTransitionStackTop(Activity activity, TransitionType transitionType) {
@@ -96,6 +96,10 @@ public class AnimUtils {
 		}
 	}
 
+	public static void doOverridePendingTransitionDefault(Activity activity, TransitionType transitionType) {
+		return;
+	}
+	
 	public static void doOverridePendingTransitionStackBottom(Activity activity, TransitionType transitionType) {
 		/*
 		 * Browsing transitions
