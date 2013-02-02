@@ -2144,7 +2144,7 @@ public class ProxiExplorer {
 						Entity sourceEntity = loadEntityFromResources(R.raw.source_entity);
 						if (sourceEntity != null) {
 							/* Transfers from source item */
-							sourceEntity.id = entity.id + "." + source.id;
+							sourceEntity.id = entity.id + "." + source.source + "." + String.valueOf(DateUtils.nowDate().getTime());
 							sourceEntity.name = source.name;
 							sourceEntity.getPhotoForSet().setImageUri(source.icon, null, null, null);
 							source.position = position;

@@ -96,9 +96,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	/* UI */
 	private TextView			mBeaconIndicator;
-	private TextView			mTextDebug;
 	private MenuItem			mMenuItemRefresh;
-	private MenuItem			mMenuItemDebug;
 	private MenuItem			mMenuItemBeacons;
 	public Menu					mMenu;
 	private ProgressDialog		mProgressDialog;
@@ -167,12 +165,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	@Subscribe
 	@SuppressWarnings("ucd")
-	public void onLocationChanged(LocationChangedEvent event) {
-		updateDebugText();
-	}
-
-	@Subscribe
-	@SuppressWarnings("ucd")
 	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
 		updateBeaconIndicator(event.wifiList);
 	}
@@ -181,33 +173,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 	@SuppressWarnings("ucd")
 	public void onWifiScanReceived(QueryWifiScanReceivedEvent event) {
 		updateBeaconIndicator(event.wifiList);
-	}
-
-	private void updateDebugText() {
-		if (mTextDebug != null) {
-			if (Aircandi.getInstance().getUser() != null
-					&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
-					&& Aircandi.getInstance().getUser().isDeveloper != null
-					&& Aircandi.getInstance().getUser().isDeveloper) {
-
-				mActivity.runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						if (mMenuItemDebug != null) {
-							mMenuItemDebug.setVisible(true);
-						}
-						String debugLocationInfo = LocationManager.getInstance().getDebugStringForLocation();
-						if (debugLocationInfo != null) {
-							mTextDebug.setText(debugLocationInfo);
-						}
-						else {
-							mTextDebug.setText("--");
-						}
-					}
-				});
-			}
-		}
 	}
 
 	public int getActionBarTitleId() {

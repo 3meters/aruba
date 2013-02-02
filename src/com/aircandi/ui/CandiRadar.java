@@ -300,28 +300,32 @@ public class CandiRadar extends CandiActivity {
 
 				Location location = event.location;
 				if (location != null) {
-
-					Boolean hasMoved = LocationManager.hasMoved(location, mActiveLocation, PlacesConstants.DIST_FIVE_METERS);
-					if (mActiveLocation == null || hasMoved) {
-
-						mActiveLocation = location;
-
-						Aircandi.stopwatch1.segmentTime("Location acquired event");
-						Logger.d(CandiRadar.this, "Location change event: getting entities for location");
-						final Observation observation = LocationManager.getInstance().getObservationForLocation(mActiveLocation);
-						if (observation != null) {
-
-							new AsyncTask() {
-
-								@Override
-								protected Object doInBackground(Object... params) {
-									Thread.currentThread().setName("GetEntitiesForLocation");
-									ProxiExplorer.getInstance().getEntitiesForLocation();
-									return null;
-								}
-
-							}.execute();
+					
+					if (mActiveLocation != null && mActiveLocation.getProvider().equals("gps")) {
+						int accuracyDelta = (int) (location.getAccuracy() - mActiveLocation.getAccuracy());
+						boolean isSignificantlyMoreAccurate = (accuracyDelta < -20);
+						if (!isSignificantlyMoreAccurate) {
+							return;
 						}
+					}
+
+					mActiveLocation = location;
+
+					Aircandi.stopwatch1.segmentTime("Location acquired event");
+					Logger.d(CandiRadar.this, "Location change event: getting entities for location");
+					final Observation observation = LocationManager.getInstance().getObservationForLocation(mActiveLocation);
+					if (observation != null) {
+
+						new AsyncTask() {
+
+							@Override
+							protected Object doInBackground(Object... params) {
+								Thread.currentThread().setName("GetEntitiesForLocation");
+								ProxiExplorer.getInstance().getEntitiesForLocation();
+								return null;
+							}
+
+						}.execute();
 					}
 				}
 			}
@@ -591,7 +595,7 @@ public class CandiRadar extends CandiActivity {
 		 */
 		/* Start listening for events */
 		disableEvents();
-		
+
 		/* Stop any location burst that might be active */
 		LocationManager.getInstance().stopLocationBurst();
 
@@ -688,6 +692,10 @@ public class CandiRadar extends CandiActivity {
 		else if (mPrefChangeRefreshNeeded) {
 			Logger.d(this, "Start place search because of preference change");
 			mPrefChangeRefreshNeeded = false;
+			searchForPlaces();
+		}
+		else if (mActiveLocation == null) {
+			Logger.d(this, "Start place search because didn't complete location fix");
 			searchForPlaces();
 		}
 		else if (ProxiExplorer.getInstance().refreshNeeded(mActiveLocation)) {

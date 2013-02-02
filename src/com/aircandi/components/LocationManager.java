@@ -66,6 +66,7 @@ public class LocationManager {
 		mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
 
 		setLocation(null);
+
 		if (isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)) {
 			Logger.d(this, "Network burst mode started");
 			mLocationManager.requestLocationUpdates(android.location.LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListenerPendingIntentNetwork);
@@ -86,6 +87,7 @@ public class LocationManager {
 				mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
 				mLocationModeBurstNetwork = false;
 				mLocationModeBurstGps = false;
+				Aircandi.mainThreadHandler.removeCallbacks(this);
 			}
 		}, PlacesConstants.BURST_TIMEOUT);
 	}
@@ -231,24 +233,29 @@ public class LocationManager {
 					message += " reason: ** " + reason.name().toLowerCase(Locale.US) + " **";
 					Logger.d(this, message);
 
-					mLocation = location;
-					BusProvider.getInstance().post(new LocationChangedEvent(mLocation));
+					if (reason == LocationBetterReason.NotNull
+							|| reason == LocationBetterReason.Provider
+							|| reason == LocationBetterReason.Accuracy) {
 
-					if (location.getProvider().equals("network") && mLocationModeBurstNetwork) {
-						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_NETWORK) {
-							Logger.d(this, "Network burst mode stopped: desired accuracy reached");
-							mLocationModeBurstNetwork = false;
-							if (!mLocationModeBurstGps) {
-								mLocationManager.removeUpdates(mLocationListenerPendingIntentNetwork);
+						mLocation = location;
+						BusProvider.getInstance().post(new LocationChangedEvent(mLocation));
+
+						if (location.getProvider().equals("network") && mLocationModeBurstNetwork) {
+							if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_NETWORK) {
+								Logger.d(this, "Network burst mode stopped: desired accuracy reached");
+								mLocationModeBurstNetwork = false;
+								if (!mLocationModeBurstGps) {
+									mLocationManager.removeUpdates(mLocationListenerPendingIntentNetwork);
+								}
 							}
 						}
-					}
-					else if (location.getProvider().equals("gps") && mLocationModeBurstGps) {
-						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_GPS) {
-							Logger.d(this, "Gps burst mode stopped: desired accuracy reached");
-							mLocationModeBurstGps = false;
-							if (!mLocationModeBurstNetwork) {
-								mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
+						else if (location.getProvider().equals("gps") && mLocationModeBurstGps) {
+							if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_GPS) {
+								Logger.d(this, "Gps burst mode stopped: desired accuracy reached");
+								mLocationModeBurstGps = false;
+								if (!mLocationModeBurstNetwork) {
+									mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
+								}
 							}
 						}
 					}
@@ -306,29 +313,11 @@ public class LocationManager {
 			return LocationBetterReason.None;
 		}
 
-		/* Check distance moved and adjust for accuracy */
-		float distance = currentBestLocation.distanceTo(locationToEvaluate);
-		if (distance - locationToEvaluate.getAccuracy() > PlacesConstants.MIN_DISTANCE_UPDATES) {
-			return LocationBetterReason.Distance;
-		}
-
 		/* Check whether the new location fix is newer or older */
 		long timeDelta = locationToEvaluate.getTime() - currentBestLocation.getTime();
 		boolean isSignificantlyNewer = timeDelta > CandiConstants.TIME_TWO_MINUTES;
 		boolean isSignificantlyOlder = timeDelta < -CandiConstants.TIME_TWO_MINUTES;
 		boolean isNewer = timeDelta > 0;
-
-		/*
-		 * If it's been more than two minutes since the current location, use
-		 * the new location because the user has likely moved
-		 */
-		if (isSignificantlyNewer) {
-			/* If the new location is more than two minutes older, it must be worse */
-			return LocationBetterReason.Recency;
-		}
-		else if (isSignificantlyOlder) {
-			return LocationBetterReason.None;
-		}
 
 		/* Check whether the new location fix is more or less accurate */
 		int accuracyDelta = (int) (locationToEvaluate.getAccuracy() - currentBestLocation.getAccuracy());
@@ -338,7 +327,6 @@ public class LocationManager {
 
 		/* Check if the old and new location are from the same provider */
 		boolean isFromSameProvider = LocationManager.isSameProvider(locationToEvaluate.getProvider(), currentBestLocation.getProvider());
-
 		/*
 		 * Determine location quality using a combination of timeliness and accuracy
 		 */
@@ -351,6 +339,24 @@ public class LocationManager {
 		else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
 			return LocationBetterReason.Recency;
 		}
+		/*
+		 * If it's been more than two minutes since the current location, use
+		 * the new location because the user has likely moved
+		 */
+		if (isSignificantlyNewer) {
+			/* If the new location is more than two minutes older, it must be worse */
+			return LocationBetterReason.Recency;
+		}
+		else if (isSignificantlyOlder) {
+			return LocationBetterReason.None;
+		}
+
+		/* Check distance moved and adjust for accuracy */
+		float distance = currentBestLocation.distanceTo(locationToEvaluate);
+		if (distance - locationToEvaluate.getAccuracy() > PlacesConstants.MIN_DISTANCE_UPDATES) {
+			return LocationBetterReason.Distance;
+		}
+
 		return LocationBetterReason.None;
 	}
 

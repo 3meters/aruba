@@ -306,6 +306,7 @@ public class CandiView extends RelativeLayout {
 		setVisibility(mDistance, View.GONE);
 		if (mDistance != null) {
 			String info = "here";
+			
 			float distance = entity.getDistance();
 			/*
 			 * If distance = -1 then we don't have the location info
