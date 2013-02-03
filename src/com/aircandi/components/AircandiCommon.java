@@ -54,6 +54,7 @@ import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Observation;
+import com.aircandi.service.objects.User;
 import com.aircandi.ui.CandiForm;
 import com.aircandi.ui.CandiList;
 import com.aircandi.ui.CandiRadar;
@@ -306,6 +307,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {}
 					}, null);
+		}
+	}
+
+	public void doUserClick(User user) {
+		if (user != null) {
+			Intent intent = new Intent(mActivity, CandiUser.class);
+			intent.putExtra(CandiConstants.EXTRA_USER_ID, user.id);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			mActivity.startActivity(intent);
+			AnimUtils.doOverridePendingTransition(mActivity, TransitionType.RadarToPage);
 		}
 	}
 
@@ -841,6 +853,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 		SherlockActivity activity = (SherlockActivity) mActivity;
 		if (mPageName.equals("CandiUser")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_user, menu);
+
+			/* Hide user edit menu item if not the current user */
+			MenuItem menuItem = menu.findItem(R.id.edit_user);
+			if (menuItem != null && !Aircandi.getInstance().getUser().id.equals(mUserId)) {
+				menuItem.setVisible(false);
+			}
 		}
 		else if (mPageName.equals("CommentList")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_comment, menu);
@@ -967,13 +985,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				doFeedbackClick();
 				return;
 			case R.id.profile:
-				intentBuilder = new IntentBuilder(mActivity, CandiUser.class)
-						.setUserId(Aircandi.getInstance().getUser().id);
-				intent = intentBuilder.create();
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-				mActivity.startActivity(intent);
-				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.RadarToPage);
+				doUserClick(Aircandi.getInstance().getUser());
 				return;
 			case R.id.add_comment:
 				/*

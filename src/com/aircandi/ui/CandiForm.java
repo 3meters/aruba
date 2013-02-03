@@ -52,6 +52,7 @@ import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Source;
+import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.FlowLayout;
@@ -342,6 +343,11 @@ public class CandiForm extends CandiActivity {
 		else {
 			mCommon.showCandiFormForEntity(entity, CandiForm.class);
 		}
+	}
+
+	public void onUserClick(View view) {
+		User user = (User) view.getTag();
+		mCommon.doUserClick(user);
 	}
 
 	@SuppressWarnings("ucd")

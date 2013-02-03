@@ -90,7 +90,9 @@
                 android:id="@+id/created_by"
                 android:layout_width="160dp"
                 android:layout_height="wrap_content"
-                aircandi:layout="@layout/widget_user_view_detailed" />
+                aircandi:layout="@layout/widget_user_view_detailed"
+                android:clickable="true"
+                android:onClick="onUserClick" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 

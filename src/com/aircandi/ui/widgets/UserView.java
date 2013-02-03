@@ -74,6 +74,7 @@ public class UserView extends RelativeLayout {
 
 	public void bindToAuthor(User author, Long date, Boolean locked) {
 		mAuthor = author;
+		this.setTag(author);
 		if (mAuthor != null) {
 			if (mTextLabel != null) {
 				if (mLabel != null) {

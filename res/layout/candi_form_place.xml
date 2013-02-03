@@ -89,6 +89,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="2dp"
                     android:layout_weight="1"
+                    android:clickable="true"
+                    android:onClick="onUserClick"
                     aircandi:layout="@layout/widget_user_view_detailed" />
 
                 <com.aircandi.ui.widgets.UserView
@@ -97,6 +99,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="2dp"
                     android:layout_weight="1"
+                    android:clickable="true"
+                    android:onClick="onUserClick"
                     aircandi:layout="@layout/widget_user_view_detailed" />
             </LinearLayout>
         </RelativeLayout>

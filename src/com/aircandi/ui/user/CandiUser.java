@@ -1,13 +1,21 @@
 package com.aircandi.ui.user;
 
 import java.util.List;
+import java.util.Locale;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewStub;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aircandi.CandiConstants;
@@ -25,13 +33,17 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.CandiForm;
 import com.aircandi.ui.PictureDetail;
 import com.aircandi.ui.base.CandiActivity;
+import com.aircandi.ui.widgets.FlowLayout;
+import com.aircandi.ui.widgets.SectionLayout;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.ImageUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
 @SuppressWarnings("ucd")
@@ -227,22 +239,142 @@ public class CandiUser extends CandiActivity {
 		if (stats != null && user.stats != null && user.stats.size() > 0) {
 			String statString = "";
 			for (Stat stat : user.stats) {
-				if (stat.type.equals("tune_link_primary")) {
-					statString += "Place tunings: " + String.valueOf(stat.countBy) + "<br/>";
+				if (stat.type.equals("insert_entity_place_custom")) {
+					statString += "Places created: " + String.valueOf(stat.countBy) + "<br/>";
 				}
-				else if (stat.type.equals("insert_entity")) {
+				else if (stat.type.equals("insert_entity_picture")) {
+					statString += "Pictures created: " + String.valueOf(stat.countBy) + "<br/>";
+				}
+				else if (stat.type.equals("insert_entity_picture")) {
 					statString += "Candi created: " + String.valueOf(stat.countBy) + "<br/>";
 				}
-				else if (stat.type.equals("insert_entity_linked")) {
-					statString += "First to tune: " + String.valueOf(stat.countBy) + "<br/>";
-				}
-				else if (stat.type.equals("insert_entity_custom")) {
-					statString += "Custom places created: " + String.valueOf(stat.countBy) + "<br/>";
+				else if (stat.type.equals("insert_entity_place_linked")) {
+					statString += "Places discovered first: " + String.valueOf(stat.countBy) + "<br/>";
 				}
 			}
 			stats.setText(Html.fromHtml(statString));
 			setVisibility(stats, View.VISIBLE);
 			setVisibility(findViewById(R.id.section_stats), View.VISIBLE);
+		}
+
+		/* All non-source children */
+		List<Entity> entities = mEntities;
+		if (entities.size() > 0) {
+			ViewStub stub = (ViewStub) findViewById(R.id.stub_candi);
+			if (stub != null) {
+				((ViewStub) findViewById(R.id.stub_candi)).inflate();
+			}
+		}
+
+		setVisibility(findViewById(R.id.section_candi), View.GONE);
+		if (entities.size() > 0) {
+
+			SectionLayout section = (SectionLayout) findViewById(R.id.section_layout_candi);
+			if (section != null) {
+				section.getTextViewHeader().setText(context.getString(R.string.candi_section_candi));
+				FlowLayout flow = (FlowLayout) findViewById(R.id.flow_candi);
+				drawCandi(context, flow, entities, R.layout.temp_place_candi_item);
+				setVisibility(findViewById(R.id.section_candi), View.VISIBLE);
+			}
+		}
+
+	}
+
+	static private void drawCandi(Context context, FlowLayout layout, List<Entity> entities, Integer viewResId) {
+
+		layout.removeAllViews();
+		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+		View parentView = (View) layout.getParent();
+		Integer layoutWidthPixels = metrics.widthPixels
+				- (parentView.getPaddingLeft() + parentView.getPaddingRight() + layout.getPaddingLeft() + layout.getPaddingRight());
+		Integer bonusPadding = ImageUtils.getRawPixels(context, 20);
+		layoutWidthPixels -= bonusPadding;
+
+		Integer spacing = 3;
+		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(context, spacing);
+		Integer spacingVerticalPixels = ImageUtils.getRawPixels(context, spacing);
+
+		Integer desiredWidthPixels = (int) (metrics.xdpi * 0.45f);
+		if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			desiredWidthPixels = (int) (metrics.ydpi * 0.45f);
+		}
+
+		Integer candiCount = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
+		Integer candiWidthPixels = (int) (layoutWidthPixels - (spacingHorizontalPixels * (candiCount - 1))) / candiCount;
+
+		Integer candiHeightPixels = (int) (candiWidthPixels * 1);
+
+		layout.setSpacingHorizontal(spacingHorizontalPixels);
+		layout.setSpacingVertical(spacingVerticalPixels);
+
+		/*
+		 * Insert views for entities that we don't already have a view for
+		 */
+		for (Entity entity : entities) {
+
+			View view = inflater.inflate(viewResId, null);
+			WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+
+			TextView title = (TextView) view.findViewById(R.id.title);
+			TextView badge = (TextView) view.findViewById(R.id.badge);
+
+			FontManager.getInstance().setTypefaceDefault(title);
+			FontManager.getInstance().setTypefaceDefault(badge);
+
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+				if (entity.source.name != null && entity.source.name.equals("comments")) {
+					if (entity.commentCount != null && entity.commentCount > 0) {
+						badge.setText(String.valueOf(entity.commentCount));
+						badge.setVisibility(View.VISIBLE);
+					}
+					else {
+						badge.setVisibility(View.GONE);
+					}
+				}
+				title.setText(entity.name);
+				title.setVisibility(View.VISIBLE);
+			}
+			else {
+				if (entity.name != null && !entity.name.equals("")) {
+					title.setText(entity.name);
+					title.setVisibility(View.VISIBLE);
+				}
+			}
+
+			if (entity.photo == null && entity.place != null) {
+				Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
+				int color = Place.getCategoryColor(entity.place.category != null ? entity.place.category.name : null, true, boostColor, false);
+				webImageView.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+
+				int colorResId = Place.getCategoryColorResId(entity.place.category != null ? entity.place.category.name : null, true, boostColor, false);
+				if (view.findViewById(R.id.color_layer) != null) {
+					((View) view.findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
+					((View) view.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+				}
+				else {
+					webImageView.getImageView().setBackgroundResource(colorResId);
+				}
+			}
+
+			String imageUri = entity.getEntityPhotoUri();
+			if (imageUri != null) {
+				BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
+				BitmapRequest imageRequest = builder.create();
+				webImageView.setSizeHint(candiWidthPixels);
+				webImageView.setBitmapRequest(imageRequest);
+				webImageView.setTag(entity);
+			}
+
+			FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(candiWidthPixels, LayoutParams.WRAP_CONTENT);
+			params.setCenterHorizontal(false);
+			view.setLayoutParams(params);
+
+			RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(candiWidthPixels, candiHeightPixels);
+			webImageView.setLayoutParams(paramsImage);
+
+			layout.addView(view);
 		}
 	}
 

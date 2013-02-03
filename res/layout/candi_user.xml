@@ -95,6 +95,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </com.aircandi.ui.widgets.SectionLayout>
+            
+            <ViewStub
+                android:id="@+id/stub_candi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inflatedId="@+id/section_candi"
+                android:layout="@layout/section_candi"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp" />
+            
 
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
