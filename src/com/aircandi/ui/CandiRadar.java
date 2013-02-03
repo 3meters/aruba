@@ -300,8 +300,14 @@ public class CandiRadar extends CandiActivity {
 
 				Location location = event.location;
 				if (location != null) {
-					
-					if (mActiveLocation != null && mActiveLocation.getProvider().equals("gps")) {
+
+					/*
+					 * We pass on gps updates that are too small an improvement to warrent
+					 * pulling entities from the service again.
+					 */
+					if (mActiveLocation != null
+							&& location.getProvider().equals("gps")
+							&& mActiveLocation.getProvider().equals("gps")) {
 						int accuracyDelta = (int) (location.getAccuracy() - mActiveLocation.getAccuracy());
 						boolean isSignificantlyMoreAccurate = (accuracyDelta < -20);
 						if (!isSignificantlyMoreAccurate) {
@@ -685,24 +691,43 @@ public class CandiRadar extends CandiActivity {
 
 		EntityModel entityModel = ProxiExplorer.getInstance().getEntityModel();
 		if (mEntityModelRefreshDate == null) {
+			/*
+			 * Get set everytime onEntitiesChanged gets called. Means
+			 * we have never completed even the first search for entities.
+			 */
 			Logger.d(this, "Start first place search");
 			Aircandi.stopwatch1.stop("Aircandi start");
 			searchForPlaces();
 		}
 		else if (mPrefChangeRefreshNeeded) {
+			/*
+			 * Gets set based on evaluation of pref changes
+			 */
 			Logger.d(this, "Start place search because of preference change");
 			mPrefChangeRefreshNeeded = false;
 			searchForPlaces();
 		}
 		else if (mActiveLocation == null) {
+			/*
+			 * Gets set everytime we accept a location change in onLocationChange. Means
+			 * we didn't get an acceptable fix yet from either the network or gps providers.
+			 */
 			Logger.d(this, "Start place search because didn't complete location fix");
-			searchForPlaces();
+			LocationManager.getInstance().lockLocationBurst();
 		}
 		else if (ProxiExplorer.getInstance().refreshNeeded(mActiveLocation)) {
+			/*
+			 * We check to see if it's been awhile since the last search or if we
+			 * can determin the user has moved.
+			 */
 			Logger.d(this, "Start place search because of staleness or location change");
 			searchForPlaces();
 		}
 		else if (mWifiState != NetworkManager.getInstance().getWifiState()) {
+			/*
+			 * Changes in wifi state have a big effect on what we can show
+			 * for a search.
+			 */
 			Logger.d(this, "Start place search because wifi state has changed");
 			searchForPlaces();
 		}
