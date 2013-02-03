@@ -430,17 +430,24 @@ public class SourcesBuilder extends FormActivity {
 		for (Source source : mSources) {
 			jsonSources.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
 		}
-
-		if (jsonSources.size() != mJsonSourcesOriginal.size()) {
-			return true;
-		}
-
-		int position = 0;
-		for (String jsonSource : jsonSources) {
-			if (!jsonSource.toString().equals(mJsonSourcesOriginal.get(position).toString())) {
+		if (mJsonSourcesOriginal == null) {
+			if (jsonSources.size() > 0) {
 				return true;
 			}
-			position++;
+		}
+		else {
+
+			if (jsonSources.size() != mJsonSourcesOriginal.size()) {
+				return true;
+			}
+
+			int position = 0;
+			for (String jsonSource : jsonSources) {
+				if (!jsonSource.toString().equals(mJsonSourcesOriginal.get(position).toString())) {
+					return true;
+				}
+				position++;
+			}
 		}
 		return false;
 	}

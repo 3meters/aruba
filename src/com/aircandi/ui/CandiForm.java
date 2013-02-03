@@ -322,7 +322,7 @@ public class CandiForm extends CandiActivity {
 					AndroidManager.getInstance().callBrowserActivity(this, entity.source.id);
 				}
 				else if (entity.source.source.equals("email")) {
-					AndroidManager.getInstance().callSendToActivity(this,entity.source.name, entity.source.id, null, null);
+					AndroidManager.getInstance().callSendToActivity(this, entity.source.name, entity.source.id, null, null);
 				}
 				else if (entity.source.source.equals("comments")) {
 					IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
@@ -543,7 +543,7 @@ public class CandiForm extends CandiActivity {
 
 					image.setBitmapRequest(imageRequest);
 					image.setClickable(false);
-					
+
 					if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
 						image.setClickable(true);
 					}
@@ -736,11 +736,13 @@ public class CandiForm extends CandiActivity {
 			}
 
 			String imageUri = entity.getEntityPhotoUri();
-			BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
-			BitmapRequest imageRequest = builder.create();
-			webImageView.setSizeHint(candiWidthPixels);
-			webImageView.setBitmapRequest(imageRequest);
-			webImageView.setTag(entity);
+			if (imageUri != null) {
+				BitmapRequestBuilder builder = new BitmapRequestBuilder(webImageView).setImageUri(imageUri);
+				BitmapRequest imageRequest = builder.create();
+				webImageView.setSizeHint(candiWidthPixels);
+				webImageView.setBitmapRequest(imageRequest);
+				webImageView.setTag(entity);
+			}
 
 			FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(candiWidthPixels, LayoutParams.WRAP_CONTENT);
 			params.setCenterHorizontal(false);

@@ -2131,7 +2131,7 @@ public class ProxiExplorer {
 								|| source.source.equals("openmenu")) {
 							source.intentSupport = false;
 						}
-						
+
 						if (source.name == null) {
 							source.name = source.source;
 						}
@@ -2146,7 +2146,9 @@ public class ProxiExplorer {
 							/* Transfers from source item */
 							sourceEntity.id = entity.id + "." + source.source + "." + String.valueOf(DateUtils.nowDate().getTime());
 							sourceEntity.name = source.name;
-							sourceEntity.getPhotoForSet().setImageUri(source.icon, null, null, null);
+							if (source.icon != null) {
+								sourceEntity.getPhotoForSet().setImageUri(source.icon, null, null, null);
+							}
 							source.position = position;
 							sourceEntity.source = source;
 							sourceEntity.parentId = entity.id;

@@ -1,6 +1,9 @@
 package com.aircandi.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.aircandi.Aircandi;
@@ -61,6 +64,24 @@ public class Preferences extends SherlockPreferenceActivity {
 		else {
 			addPreferencesFromResource(R.xml.preferences);
 		}
+
+		Preference myPref = (Preference) findPreference("Pref_Theme");
+
+		myPref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				Aircandi.settingsEditor.putString(Preferences.PREF_THEME, (String) newValue);
+				Aircandi.settingsEditor.commit();
+
+				Intent intent = getIntent();
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+				finish();
+				overridePendingTransition(0, 0);
+				startActivity(intent);
+				return false;
+			}
+		});
 	}
 
 	@Override
