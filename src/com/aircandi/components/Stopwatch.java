@@ -55,4 +55,8 @@ public class Stopwatch {
 		lastThreshold = 0;
 		return lapTime;
 	}
+	
+	public boolean isStarted() {
+		return (lastThreshold > 0);
+	}
 }

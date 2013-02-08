@@ -18,7 +18,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -106,6 +106,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	/* Other */
 	private String				mPageName;
+	private String				mDebugWifi;
+	private String				mDebugLocation;
 	private Integer				mBusyCount	= 0;
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
@@ -166,13 +168,19 @@ public class AircandiCommon implements ActionBar.TabListener {
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
-		updateBeaconIndicator(event.wifiList);
+		updateDevIndicator(event.wifiList, null);
 	}
 
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onWifiScanReceived(QueryWifiScanReceivedEvent event) {
-		updateBeaconIndicator(event.wifiList);
+		updateDevIndicator(event.wifiList, null);
+	}
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onLocationReceived(LocationReceivedEvent event) {
+		updateDevIndicator(null, event.location);
 	}
 
 	public int getActionBarTitleId() {
@@ -354,59 +362,72 @@ public class AircandiCommon implements ActionBar.TabListener {
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToPage);
 	}
 
-	private void updateBeaconIndicator(final List<WifiScanResult> scanList) {
+	private void updateDevIndicator(final List<WifiScanResult> scanList, Location location) {
 
 		if (mBeaconIndicator == null) return;
 
-		synchronized (scanList) {
-			/*
-			 * In case we get called from a background thread.
-			 */
-			mActivity.runOnUiThread(new Runnable() {
+		if (scanList != null) {
 
-				@SuppressWarnings("deprecation")
-				@Override
-				public void run() {
-					Drawable drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_stop);
-					mBeaconIndicator.setText(String.valueOf(scanList.size()));
+			synchronized (scanList) {
+				/*
+				 * In case we get called from a background thread.
+				 */
+				mActivity.runOnUiThread(new Runnable() {
 
-					WifiScanResult wifiStrongest = null;
+					@Override
+					public void run() {
 
-					int wifiCount = 0;
-					for (WifiScanResult wifi : scanList) {
-						wifiCount++;
-						if (wifiStrongest == null) {
-							wifiStrongest = wifi;
+						WifiScanResult wifiStrongest = null;
+						int wifiCount = 0;
+						for (WifiScanResult wifi : scanList) {
+							wifiCount++;
+							if (wifiStrongest == null) {
+								wifiStrongest = wifi;
+							}
+							else if (wifi.level > wifiStrongest.level) {
+								wifiStrongest = wifi;
+							}
 						}
-						else if (wifi.level > wifiStrongest.level) {
-							wifiStrongest = wifi;
-						}
-					}
 
-					Aircandi.wifiCount = wifiCount;
+						Aircandi.wifiCount = wifiCount;
+						mDebugWifi = String.valueOf(wifiCount);
 
-					mBeaconIndicator.setText(String.valueOf(wifiCount));
-					if (wifiCount > 0) {
-						//						if (mMenuItemBeacons != null) {
-						//							mMenuItemBeacons.setVisible(true);
+						//						Drawable drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_stop);
+						//						if (wifiCount > 0) {
+						//							//						if (mMenuItemBeacons != null) {
+						//							//							mMenuItemBeacons.setVisible(true);
+						//							//						}
+						//							drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
 						//						}
-						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
-					}
-					else {
-						//						if (mMenuItemBeacons != null) {
-						//							mMenuItemBeacons.setVisible(false);
+						//						else {
+						//							//						if (mMenuItemBeacons != null) {
+						//							//							mMenuItemBeacons.setVisible(false);
+						//							//						}
 						//						}
+						//
+						//						if (wifiStrongest != null && wifiStrongest.level > CandiConstants.RADAR_BEACON_INDICATOR_CAUTION) {
+						//							drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_go);
+						//						}
+						//						mBeaconIndicator.setBackgroundDrawable(drawable);
+
 					}
+				});
 
-					if (wifiStrongest != null && wifiStrongest.level > CandiConstants.RADAR_BEACON_INDICATOR_CAUTION) {
-						drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_go);
-					}
-					mBeaconIndicator.setBackgroundDrawable(drawable);
-
-				}
-			});
-
+			}
 		}
+
+		if (location != null) {
+			String debugLocation = location.getProvider().substring(0, 1).toUpperCase();
+			if (location.hasAccuracy()) {
+				debugLocation += String.valueOf((int) location.getAccuracy());
+			}
+			else {
+				debugLocation += "--";
+			}
+			mDebugLocation = debugLocation;
+		}
+
+		mBeaconIndicator.setText(mDebugWifi + ":" + mDebugLocation);
 	}
 
 	public void handleServiceError(ServiceResponse serviceResponse, ServiceOperation serviceOperation) {
@@ -893,7 +914,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						doBeaconIndicatorClick();
 					}
 				});
-				updateBeaconIndicator(ProxiExplorer.getInstance().mWifiList);
+				updateDevIndicator(ProxiExplorer.getInstance().mWifiList, LocationManager.getInstance().getLocation());
 			}
 		}
 

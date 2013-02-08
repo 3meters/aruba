@@ -531,6 +531,11 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return placeRankScore;
 	}
 
+	public Integer getPlaceRankImpact() {
+		int placeRankScore = getPlaceRankScore();
+		return placeRankScore >= 5 ? placeRankScore : 0;
+	}
+
 	public String getBeaconId() {
 		Link link = getActiveLink("proximity");
 		if (link != null) {
@@ -562,18 +567,18 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		@Override
 		public int compare(Entity entity1, Entity entity2) {
 
-			/* synthetics */
-			if (!entity1.synthetic && entity2.synthetic) {
-				return -1;
-			}
-			if (entity1.synthetic && !entity2.synthetic) {
-				return 1;
-			}
-			else {
-				if (entity1.getPlaceRankScore() > entity2.getPlaceRankScore()) {
+//			/* synthetics */
+//			if (!entity1.synthetic && entity2.synthetic) {
+//				return -1;
+//			}
+//			if (entity1.synthetic && !entity2.synthetic) {
+//				return 1;
+//			}
+//			else {
+				if (entity1.getPlaceRankImpact() > entity2.getPlaceRankImpact()) {
 					return -1;
 				}
-				if (entity1.getPlaceRankScore() < entity2.getPlaceRankScore()) {
+				if (entity1.getPlaceRankImpact() < entity2.getPlaceRankImpact()) {
 					return 1;
 				}
 				else {
@@ -587,7 +592,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 						return 0;
 					}
 				}
-			}
+//			}
 		}
 	}
 

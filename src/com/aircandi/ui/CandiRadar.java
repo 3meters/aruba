@@ -34,7 +34,6 @@ import com.aircandi.components.CommandType;
 import com.aircandi.components.EntitiesChangedEvent;
 import com.aircandi.components.EntitiesForBeaconsFinishedEvent;
 import com.aircandi.components.EntitiesForLocationFinishedEvent;
-import com.aircandi.components.EntityChangedEvent;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.LocationChangedEvent;
@@ -281,10 +280,8 @@ public class CandiRadar extends CandiActivity {
 
 			@Override
 			public void run() {
-				Aircandi.stopwatch1.segmentTime("Entities for beacons finished event");
-				Logger.d(CandiRadar.this, "Entities for beacons finished event: get location fix");
-				mActiveLocation = null;
-				LocationManager.getInstance().lockLocationBurst();
+				Aircandi.stopwatch1.stop("Search for places by beacon complete");
+				Logger.d(CandiRadar.this, "Entities for beacons finished event");
 			}
 		});
 	}
@@ -308,8 +305,8 @@ public class CandiRadar extends CandiActivity {
 					if (mActiveLocation != null
 							&& location.getProvider().equals("gps")
 							&& mActiveLocation.getProvider().equals("gps")) {
-						int accuracyDelta = (int) (location.getAccuracy() - mActiveLocation.getAccuracy());
-						boolean isSignificantlyMoreAccurate = (accuracyDelta < -20);
+						float accuracyImprovement = mActiveLocation.getAccuracy() / location.getAccuracy();
+						boolean isSignificantlyMoreAccurate = (accuracyImprovement >= 2);
 						if (!isSignificantlyMoreAccurate) {
 							return;
 						}
@@ -317,8 +314,7 @@ public class CandiRadar extends CandiActivity {
 
 					mActiveLocation = location;
 
-					Aircandi.stopwatch1.segmentTime("Location acquired event");
-					Logger.d(CandiRadar.this, "Location change event: getting entities for location");
+					Aircandi.stopwatch2.segmentTime("Location acquired event");
 					final Observation observation = LocationManager.getInstance().getObservationForLocation(mActiveLocation);
 					if (observation != null) {
 
@@ -326,6 +322,19 @@ public class CandiRadar extends CandiActivity {
 
 							@Override
 							protected Object doInBackground(Object... params) {
+								Logger.d(CandiRadar.this, "Location changed event: getting places near location");
+								Thread.currentThread().setName("GetPlacesNearLocation");
+								ProxiExplorer.getInstance().getPlacesNearLocation(observation);
+								return null;
+							}
+
+						}.execute();
+
+						new AsyncTask() {
+
+							@Override
+							protected Object doInBackground(Object... params) {
+								Logger.d(CandiRadar.this, "Location changed event: getting entities for location");
 								Thread.currentThread().setName("GetEntitiesForLocation");
 								ProxiExplorer.getInstance().getEntitiesForLocation();
 								return null;
@@ -340,42 +349,27 @@ public class CandiRadar extends CandiActivity {
 
 	@Subscribe
 	@SuppressWarnings("ucd")
-	public void onEntitiesForLocationFinished(EntitiesForLocationFinishedEvent event) {
-
-		runOnUiThread(new Runnable() {
+	public void onPlacesNearLocationFinished(PlacesNearLocationFinishedEvent event) {
+		Aircandi.stopwatch2.segmentTime("Places near location complete");
+		mHandler.post(new Runnable() {
 
 			@Override
 			public void run() {
-				Aircandi.stopwatch1.segmentTime("Entities for location finished event");
-				Logger.d(CandiRadar.this, "Entities for location finished event: getting places near location");
-				final Observation observation = LocationManager.getInstance().getObservationForLocation(mActiveLocation);
-				if (observation != null) {
-					new AsyncTask() {
-
-						@Override
-						protected Object doInBackground(Object... params) {
-							Thread.currentThread().setName("GetPlacesNearLocation");
-							ProxiExplorer.getInstance().getPlacesNearLocation(observation);
-							return null;
-						}
-
-					}.execute();
-				}
+				Logger.d(CandiRadar.this, "Places near location finished event: getting entities for location");
+				mCommon.hideBusy(true);
 			}
 		});
 	}
 
 	@Subscribe
 	@SuppressWarnings("ucd")
-	public void onPlacesNearLocationFinished(PlacesNearLocationFinishedEvent event) {
-
-		runOnUiThread(new Runnable() {
+	public void onEntitiesForLocationFinished(EntitiesForLocationFinishedEvent event) {
+		Aircandi.stopwatch2.segmentTime("Entities for location complete");
+		mHandler.post(new Runnable() {
 
 			@Override
 			public void run() {
-				Aircandi.stopwatch1.segmentTime("Places near location finished event");
-				Aircandi.stopwatch1.stop("Search for places stopped");
-				Logger.d(CandiRadar.this, "Places near location finished event: ** all done **");
+				Logger.d(CandiRadar.this, "Entities for location finished event: ** all done **");
 				mCommon.hideBusy(true);
 			}
 		});
@@ -422,27 +416,6 @@ public class CandiRadar extends CandiActivity {
 
 	@Subscribe
 	@SuppressWarnings("ucd")
-	public void onEntityChanged(final EntityChangedEvent event) {
-		Logger.d(CandiRadar.this, "Entities changed event: updating radar");
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				Entity entityNew = event.entity;
-				entityNew.getDistance(); // To force distance computation
-				if (mRadarAdapter.getItems().contains(entityNew)) {
-					mRadarAdapter.getItems().set(mRadarAdapter.getItems().indexOf(entityNew), entityNew);
-				}
-				else {
-					mRadarAdapter.getItems().set(0, entityNew);
-				}
-				mRadarAdapter.notifyDataSetChanged();
-			}
-		});
-	}
-
-	@Subscribe
-	@SuppressWarnings("ucd")
 	public void onWifiChanged(final WifiChangedEvent event) {
 		runOnUiThread(new Runnable() {
 
@@ -475,18 +448,24 @@ public class CandiRadar extends CandiActivity {
 			AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.PageToForm);
 		}
 		else {
-			/* Start wifi scan. Once received, the search process continues to the next step. */
 			mCommon.showBusy();
-			Aircandi.stopwatch1.start("Search for places");
-			mWifiState = NetworkManager.getInstance().getWifiState();
-			if (NetworkManager.getInstance().isWifiEnabled()) {
-				ProxiExplorer.getInstance().scanForWifi(ScanReason.query);
-			}
-			else {
-				mActiveLocation = null;
-				LocationManager.getInstance().lockLocationBurst();
-			}
+			searchForPlacesByBeacon();
+			searchForPlacesByLocation();
 		}
+	}
+
+	private void searchForPlacesByBeacon() {
+		Aircandi.stopwatch1.start("Search for places by beacon");
+		mWifiState = NetworkManager.getInstance().getWifiState();
+		if (NetworkManager.getInstance().isWifiEnabled()) {
+			ProxiExplorer.getInstance().scanForWifi(ScanReason.query);
+		}
+	}
+
+	private void searchForPlacesByLocation() {
+		Aircandi.stopwatch2.start("Search for places by location");
+		mActiveLocation = null;
+		LocationManager.getInstance().lockLocationBurst();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -696,7 +675,6 @@ public class CandiRadar extends CandiActivity {
 			 * we have never completed even the first search for entities.
 			 */
 			Logger.d(this, "Start first place search");
-			Aircandi.stopwatch1.stop("Aircandi start");
 			searchForPlaces();
 		}
 		else if (mPrefChangeRefreshNeeded) {
