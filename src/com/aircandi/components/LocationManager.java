@@ -138,55 +138,54 @@ public class LocationManager {
 
 	public Observation getObservationForLocation(Location location) {
 
-		Location locationTarget = location;
-
-		if (location == null) {
-			locationTarget = mLocation;
-		}
-
-		if (locationTarget == null || !locationTarget.hasAccuracy()) {
-			return null;
-		}
-
+		Location locationTarget = location == null ? mLocation : location;
 		Observation observation = new Observation();
-		if (Aircandi.usingEmulator) {
-			observation = new Observation(47.616245, -122.201645); // earls
-			observation.time = DateUtils.nowDate().getTime();
-			observation.provider = "emulator_lucky";
-		}
-		else {
-			String testingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
-			if (ListPreferenceMultiSelect.contains("zoka", testingLocation, null)) {
-				observation = new Observation(47.6686489, -122.3320842); // zoka
-				observation.time = DateUtils.nowDate().getTime();
-				observation.provider = "testing_zoka";
+
+		synchronized (locationTarget) {
+			
+			if (locationTarget == null || !locationTarget.hasAccuracy()) {
+				return null;
 			}
-			else if (ListPreferenceMultiSelect.contains("lucky", testingLocation, null)) {
-				observation = new Observation(47.616245, -122.201645); // lucky
+
+			if (Aircandi.usingEmulator) {
+				observation = new Observation(47.616245, -122.201645); // earls
 				observation.time = DateUtils.nowDate().getTime();
-				observation.provider = "testing_lucky";
+				observation.provider = "emulator_lucky";
 			}
 			else {
-				observation.latitude = mLocation.getLatitude();
-				observation.longitude = mLocation.getLongitude();
+				String testingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
+				if (ListPreferenceMultiSelect.contains("zoka", testingLocation, null)) {
+					observation = new Observation(47.6686489, -122.3320842); // zoka
+					observation.time = DateUtils.nowDate().getTime();
+					observation.provider = "testing_zoka";
+				}
+				else if (ListPreferenceMultiSelect.contains("lucky", testingLocation, null)) {
+					observation = new Observation(47.616245, -122.201645); // lucky
+					observation.time = DateUtils.nowDate().getTime();
+					observation.provider = "testing_lucky";
+				}
+				else {
+					observation.latitude = locationTarget.getLatitude();
+					observation.longitude = locationTarget.getLongitude();
 
-				if (mLocation.hasAltitude()) {
-					observation.altitude = mLocation.getAltitude();
+					if (locationTarget.hasAltitude()) {
+						observation.altitude = locationTarget.getAltitude();
+					}
+					if (locationTarget.hasAccuracy()) {
+						/* In meters. */
+						observation.accuracy = locationTarget.getAccuracy();
+					}
+					if (locationTarget.hasBearing()) {
+						/* Direction of travel in degrees East of true North. */
+						observation.bearing = locationTarget.getBearing();
+					}
+					if (locationTarget.hasSpeed()) {
+						/* Speed of the device over ground in meters/second. */
+						observation.speed = locationTarget.getSpeed();
+					}
+					observation.time = locationTarget.getTime();
+					observation.provider = locationTarget.getProvider();
 				}
-				if (mLocation.hasAccuracy()) {
-					/* In meters. */
-					observation.accuracy = mLocation.getAccuracy();
-				}
-				if (mLocation.hasBearing()) {
-					/* Direction of travel in degrees East of true North. */
-					observation.bearing = mLocation.getBearing();
-				}
-				if (mLocation.hasSpeed()) {
-					/* Speed of the device over ground in meters/second. */
-					observation.speed = mLocation.getSpeed();
-				}
-				observation.time = mLocation.getTime();
-				observation.provider = mLocation.getProvider();
 			}
 		}
 
