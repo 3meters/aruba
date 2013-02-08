@@ -104,7 +104,6 @@ public class ProxiExplorer {
 			return;
 		}
 
-		Aircandi.stopwatch2.start("Wifi scan");
 		synchronized (mWifiList) {
 
 			if (!mUsingEmulator) {
@@ -114,7 +113,6 @@ public class ProxiExplorer {
 					@Override
 					public void onReceive(Context context, Intent intent) {
 
-						Aircandi.stopwatch2.segmentTime("Wifi scan: results received");
 						Logger.v(ProxiExplorer.this, "Received wifi scan results for " + reason.name().toString());
 						mContext.unregisterReceiver(this);
 
@@ -150,9 +148,7 @@ public class ProxiExplorer {
 						if (ListPreferenceMultiSelect.contains("empty", testingBeacons, null)) {
 							mWifiList.add(mWifiEmpty);
 						}
-						Aircandi.stopwatch2.segmentTime("Wifi scan: objects created");
 						Collections.sort(mWifiList, new WifiScanResult.SortWifiBySignalLevel());
-						Aircandi.stopwatch2.segmentTime("Wifi scan: objects sorted");
 
 						mLastWifiUpdate = DateUtils.nowDate();
 						if (reason == ScanReason.monitoring) {
@@ -161,14 +157,11 @@ public class ProxiExplorer {
 						else if (reason == ScanReason.query) {
 							BusProvider.getInstance().post(new QueryWifiScanReceivedEvent(mWifiList));
 						}
-						Aircandi.stopwatch2.segmentTime("Wifi scan: bus events sent");
 						mScanRequestActive.set(false);
-						Aircandi.stopwatch2.stop("Wifi scan: routine finished");
 
 					}
 				}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
-				Aircandi.stopwatch2.segmentTime("Wifi scan: requesting");
 				mWifiManager.startScan();
 			}
 			else {
@@ -204,7 +197,6 @@ public class ProxiExplorer {
 		 * date for old beacons. Unchanged entities from previous scans will still be updated for local changes in
 		 * visibility.
 		 */
-		Aircandi.stopwatch3.start("Entities for beacons");
 		Logger.d(this, "Processing beacons from scan");
 
 		/*
@@ -270,10 +262,10 @@ public class ProxiExplorer {
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
 
-		Aircandi.stopwatch3.segmentTime("Entities for beacons: service call started");
+		Aircandi.stopwatch1.segmentTime("Entities for beacons: service call started");
 		serviceResponse = dispatch(serviceRequest);
 
-		Aircandi.stopwatch3.segmentTime("Entities for beacons: service call complete");
+		Aircandi.stopwatch1.segmentTime("Entities for beacons: service call complete");
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
 			String jsonResponse = (String) serviceResponse.data;
@@ -281,7 +273,7 @@ public class ProxiExplorer {
 			serviceResponse.data = serviceData;
 
 			List<Entity> entities = (List<Entity>) serviceData.data;
-			Aircandi.stopwatch3.segmentTime("Entities for beacons: objects deserialized");
+			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects deserialized");
 
 			/* Merge entities into data model */
 			mEntityModel.removeBeaconEntities();
@@ -291,13 +283,11 @@ public class ProxiExplorer {
 			manageEntityVisibility();
 
 			List<Entity> entitiesForEvent = ProxiExplorer.getInstance().getEntityModel().getPlaces();
-			Aircandi.stopwatch3.segmentTime("Entities for beacons: objects processed");
+			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects processed");
 
 			BusProvider.getInstance().post(new EntitiesForBeaconsFinishedEvent());
 			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 		}
-
-		Aircandi.stopwatch3.stop("Entities for beacons: finished");
 
 		return;
 	}
@@ -374,6 +364,18 @@ public class ProxiExplorer {
 				}
 			}
 
+			/* Double check to make sure we don't have any duplicates of radar places */
+			List<Entity> radarPlaces = mEntityModel.getRadarPlaces();
+			for (int i = entities.size() - 1; i >= 0; i--) {
+				for (Entity entity : radarPlaces) {
+					if (!entity.synthetic && entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && !entity.place.source.equals("user")) {
+						if (entity.place.sourceId.equals(entities.get(i).id)) {
+							entities.remove(i);
+						}
+					}
+				}
+			}
+			
 			/* Merge entities into data model */
 			mEntityModel.removeLocationEntities();
 			mEntityModel.upsertEntities(entities);
@@ -391,6 +393,9 @@ public class ProxiExplorer {
 		/*
 		 * Make a list of places that should be excluded because
 		 * we already have entities for them.
+		 * 
+		 * Note: It is possible for this to get called before places by beacons has
+		 * completed.
 		 */
 		ArrayList<String> excludePlaceIds = new ArrayList<String>();
 		for (Entity entity : mEntityModel.getRadarPlaces()) {
@@ -433,6 +438,19 @@ public class ProxiExplorer {
 				entity.modifiedDate = DateUtils.nowDate().getTime();
 				entity.synthetic = true;
 			}
+			
+			/* Double check to make sure we don't have any duplicates of radar places */
+			List<Entity> radarPlaces = mEntityModel.getRadarPlaces();
+			for (int i = entities.size() - 1; i >= 0; i--) {
+				for (Entity entity : radarPlaces) {
+					if (!entity.synthetic && entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && !entity.place.source.equals("user")) {
+						if (entity.place.sourceId.equals(entities.get(i).id)) {
+							entities.remove(i);
+						}
+					}
+				}
+			}
+			
 			mEntityModel.removeSyntheticEntities();
 			mEntityModel.upsertEntities(entities);
 

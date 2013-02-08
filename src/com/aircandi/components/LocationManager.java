@@ -27,8 +27,7 @@ public class LocationManager {
 	private Location							mLocation;
 	private Boolean								mLocationModeBurstNetwork	= false;
 	private Boolean								mLocationModeBurstGps		= false;
-	protected PendingIntent						mLocationListenerPendingIntentNetwork;
-	protected PendingIntent						mLocationListenerPendingIntentGps;
+	protected PendingIntent						mLocationListenerPendingIntent;
 
 	public static synchronized LocationManager getInstance() {
 		if (singletonObject == null) {
@@ -47,10 +46,7 @@ public class LocationManager {
 
 		/* Setup the location update Pending Intents */
 		Intent activeIntentNetwork = new Intent(mApplicationContext, LocationChangedReceiver.class);
-		mLocationListenerPendingIntentNetwork = PendingIntent.getBroadcast(mApplicationContext, 0, activeIntentNetwork, PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Intent activeIntentGps = new Intent(mApplicationContext, LocationChangedReceiver.class);
-		mLocationListenerPendingIntentGps = PendingIntent.getBroadcast(mApplicationContext, 0, activeIntentGps, PendingIntent.FLAG_UPDATE_CURRENT);
+		mLocationListenerPendingIntent = PendingIntent.getBroadcast(mApplicationContext, 0, activeIntentNetwork, PendingIntent.FLAG_UPDATE_CURRENT);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -62,19 +58,18 @@ public class LocationManager {
 		 * This will produce rapid updates across all available providers until we get an acceptable
 		 * location fix.
 		 */
-		mLocationManager.removeUpdates(mLocationListenerPendingIntentNetwork);
-		mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
+		mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 
 		setLocation(null);
 
 		if (isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)) {
 			Logger.d(this, "Network burst mode started");
-			mLocationManager.requestLocationUpdates(android.location.LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListenerPendingIntentNetwork);
+			mLocationManager.requestLocationUpdates(android.location.LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListenerPendingIntent);
 			mLocationModeBurstNetwork = true;
 		}
 		if (isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
 			Logger.d(this, "Gps burst mode started");
-			mLocationManager.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 0, 0, mLocationListenerPendingIntentGps);
+			mLocationManager.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 0, 0, mLocationListenerPendingIntent);
 			mLocationModeBurstGps = true;
 		}
 
@@ -83,8 +78,7 @@ public class LocationManager {
 			@Override
 			public void run() {
 				Logger.d(LocationManager.this, "Burst mode stopped: timed out");
-				mLocationManager.removeUpdates(mLocationListenerPendingIntentNetwork);
-				mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
+				mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 				mLocationModeBurstNetwork = false;
 				mLocationModeBurstGps = false;
 				Aircandi.mainThreadHandler.removeCallbacks(this);
@@ -94,12 +88,7 @@ public class LocationManager {
 
 	public void stopLocationBurst() {
 		Logger.d(LocationManager.this, "Burst mode stopped: disabled");
-		if (mLocationModeBurstNetwork) {
-			mLocationManager.removeUpdates(mLocationListenerPendingIntentNetwork);
-		}
-		if (mLocationModeBurstGps) {
-			mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
-		}
+		mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 		mLocationModeBurstNetwork = false;
 		mLocationModeBurstGps = false;
 	}
@@ -239,24 +228,21 @@ public class LocationManager {
 
 						mLocation = location;
 						BusProvider.getInstance().post(new LocationChangedEvent(mLocation));
+					}
 
-						if (location.getProvider().equals("network") && mLocationModeBurstNetwork) {
-							if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_NETWORK) {
-								Logger.d(this, "Network burst mode stopped: desired accuracy reached");
-								mLocationModeBurstNetwork = false;
-								if (!mLocationModeBurstGps) {
-									mLocationManager.removeUpdates(mLocationListenerPendingIntentNetwork);
-								}
+					if (location.getProvider().equals("network") && mLocationModeBurstNetwork) {
+						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_NETWORK) {
+							Logger.d(this, "Network burst mode stopped: desired accuracy reached");
+							mLocationManager.removeUpdates(mLocationListenerPendingIntent);
+							if (mLocationModeBurstGps) {
+								mLocationManager.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 0, 0, mLocationListenerPendingIntent);
 							}
 						}
-						else if (location.getProvider().equals("gps") && mLocationModeBurstGps) {
-							if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_GPS) {
-								Logger.d(this, "Gps burst mode stopped: desired accuracy reached");
-								mLocationModeBurstGps = false;
-								if (!mLocationModeBurstNetwork) {
-									mLocationManager.removeUpdates(mLocationListenerPendingIntentGps);
-								}
-							}
+					}
+					else if (location.getProvider().equals("gps") && mLocationModeBurstGps) {
+						if (location.getAccuracy() <= PlacesConstants.DESIRED_ACCURACY_GPS) {
+							Logger.d(this, "Gps burst mode stopped: desired accuracy reached");
+							mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 						}
 					}
 				}
@@ -313,23 +299,22 @@ public class LocationManager {
 			return LocationBetterReason.None;
 		}
 
+		/* Check whether the new location fix is more or less accurate */
+		float accuracyImprovement = currentBestLocation.getAccuracy() / locationToEvaluate.getAccuracy();
+		boolean isLessAccurate = (accuracyImprovement > 1);
+		boolean isMoreAccurate = (accuracyImprovement < 1);
+		boolean isSignificantlyLessAccurate = (accuracyImprovement <= 0.5f);
+
 		/* Check whether the new location fix is newer or older */
 		long timeDelta = locationToEvaluate.getTime() - currentBestLocation.getTime();
 		boolean isSignificantlyNewer = timeDelta > CandiConstants.TIME_TWO_MINUTES;
 		boolean isSignificantlyOlder = timeDelta < -CandiConstants.TIME_TWO_MINUTES;
 		boolean isNewer = timeDelta > 0;
 
-		/* Check whether the new location fix is more or less accurate */
-		int accuracyDelta = (int) (locationToEvaluate.getAccuracy() - currentBestLocation.getAccuracy());
-		boolean isLessAccurate = accuracyDelta > 0;
-		boolean isMoreAccurate = accuracyDelta < 0;
-		boolean isSignificantlyLessAccurate = accuracyDelta > 50;
-
 		/* Check if the old and new location are from the same provider */
 		boolean isFromSameProvider = LocationManager.isSameProvider(locationToEvaluate.getProvider(), currentBestLocation.getProvider());
-		/*
-		 * Determine location quality using a combination of timeliness and accuracy
-		 */
+
+		/* Determine location quality using a combination of timeliness and accuracy */
 		if (isMoreAccurate) {
 			return LocationBetterReason.Accuracy;
 		}

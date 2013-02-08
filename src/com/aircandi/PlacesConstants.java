@@ -29,7 +29,7 @@ public class PlacesConstants {
 	public static long		BURST_TIMEOUT								= CandiConstants.TIME_TWO_MINUTES;
 
 	public static int		MIN_DISTANCE_UPDATES						= DIST_FIFTY_METERS;
-	public static Integer	MINIMUM_ACCURACY							= DIST_ONE_HUNDRED_METERS;
+	public static Integer	MINIMUM_ACCURACY							= DIST_ONE_KILOMETER;
 	public static Integer	DESIRED_ACCURACY_GPS						= DIST_THIRTY_METERS;
 	public static Integer	DESIRED_ACCURACY_NETWORK					= DIST_THIRTY_METERS;
 

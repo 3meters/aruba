@@ -53,6 +53,8 @@
         <item>1 mile</item>
         <item>2 miles</item>
         <item>5 miles</item>
+        <item>20 miles</item>
+        <item>50 miles</item>
     </string-array>
     <string-array name="search_radius_values">
         <item>91</item>
@@ -61,6 +63,8 @@
         <item>1609</item>
         <item>3219</item>
         <item>8047</item>
-    </string-array>
+        <item>32188</item>
+		<item>80470</item>
+	</string-array>
 
 </resources>

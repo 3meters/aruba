@@ -45,7 +45,7 @@ public class LocationChangedReceiver extends BroadcastReceiver {
 						+ "; accuracy: " + location.getAccuracy()
 						+ "; lat/lng: " + location.getLatitude() + ","
 						+ location.getLongitude());
-
+				BusProvider.getInstance().post(new LocationReceivedEvent(location));
 				LocationManager.getInstance().setLocation(location);
 			}
 		}

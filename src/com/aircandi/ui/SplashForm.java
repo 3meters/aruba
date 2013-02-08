@@ -40,14 +40,13 @@ public class SplashForm extends SherlockActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Aircandi.stopwatch2.start("sherlockActivity onCreate start");
+		Aircandi.stopwatch3.start("sherlockActivity onCreate start");
 		super.onCreate(savedInstanceState);
-		Aircandi.stopwatch2.stop("sherlockActivity onCreate stop");
+		Aircandi.stopwatch3.stop("sherlockActivity onCreate stop");
 		/*
 		 * Used by other activities to determine if they were launched normally or auto launched after a crash
 		 */
 		Aircandi.getInstance().setLaunchedNormally(true);
-		Aircandi.stopwatch1.start("Aircandi start");
 
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -65,7 +64,7 @@ public class SplashForm extends SherlockActivity {
 
 	private void initializeApp() {
 
-		Aircandi.stopwatch2.start("initializeApp function start");
+		Aircandi.stopwatch3.start("initializeApp function start");
 		if (Build.PRODUCT.contains("sdk")) {
 			Aircandi.usingEmulator = true;
 		}
@@ -93,7 +92,7 @@ public class SplashForm extends SherlockActivity {
 		}, 60000);
 
 		Aircandi.firstStartApp = false;
-		Aircandi.stopwatch2.stop("initializeApp function stop");
+		Aircandi.stopwatch3.stop("initializeApp function stop");
 	}
 
 	private void initialize() {

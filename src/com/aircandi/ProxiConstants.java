@@ -30,7 +30,7 @@ public final class ProxiConstants {
 	public static final String	USER_AGENT_NEXUS_S									= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";	//$NON-NLS-1$
 
 	public static final int		RADAR_ENTITY_LIMIT									= 50;
-	public static final int		RADAR_PLACES_LIMIT									= 30;
+	public static final int		RADAR_PLACES_LIMIT									= 50;
 	public static final int		RADAR_CHILDENTITY_LIMIT								= 20;
 	public static final int		RADAR_COMMENT_LIMIT									= 50;
 	public static final int		SOURCE_SUGGESTIONS_TIMEOUT							= 2000;
