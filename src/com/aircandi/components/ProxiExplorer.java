@@ -1222,8 +1222,6 @@ public class ProxiExplorer {
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
-					Tracker.trackEvent("Entity", "New", entity.type, 0);
-
 					String jsonResponse = (String) result.serviceResponse.data;
 					ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.Entity);
 
@@ -1387,10 +1385,6 @@ public class ProxiExplorer {
 						.setResponseFormat(ResponseFormat.Json);
 
 				result.serviceResponse = dispatch(serviceRequest);
-			}
-
-			if (result.serviceResponse.responseCode == ResponseCode.Success) {
-				Tracker.trackEvent("Entity", "Update", entity.type, 0);
 			}
 
 			if (result.serviceResponse.responseCode == ResponseCode.Success) {
@@ -1952,7 +1946,7 @@ public class ProxiExplorer {
 			EntityList<Entity> entities = new EntityList<Entity>();
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
-					if (entry.getValue().creatorId != null && entry.getValue().creatorId.equals(userId)) {
+					if (entry.getValue().ownerId != null && entry.getValue().ownerId.equals(userId)) {
 						entities.add(entry.getValue());
 					}
 				}
@@ -2212,6 +2206,20 @@ public class ProxiExplorer {
 							entry.getValue().creator.name = user.name;
 						}
 					}
+					if (entry.getValue().ownerId != null && entry.getValue().ownerId.equals(user.id)) {
+						if (entry.getValue().owner != null) {
+							entry.getValue().owner.getPhotoForSet().setImageUri(user.photo.getUri());
+							entry.getValue().owner.location = user.location;
+							entry.getValue().owner.name = user.name;
+						}
+					}
+					if (entry.getValue().modifierId != null && entry.getValue().modifierId.equals(user.id)) {
+						if (entry.getValue().modifier != null) {
+							entry.getValue().modifier.getPhotoForSet().setImageUri(user.photo.getUri());
+							entry.getValue().modifier.location = user.location;
+							entry.getValue().modifier.name = user.name;
+						}
+					}
 				}
 			}
 			setLastActivityDate(DateUtils.nowDate().getTime());
@@ -2233,7 +2241,7 @@ public class ProxiExplorer {
 				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
 				while (iter.hasNext()) {
 					Entity entity = mEntityModel.mEntityCache.get(iter.next());
-					if (entity.parentId == null && entity.creatorId.equals(userId)) {
+					if (entity.parentId == null && entity.ownerId.equals(userId)) {
 						iter.remove();
 					}
 				}

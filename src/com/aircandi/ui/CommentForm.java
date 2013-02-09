@@ -187,7 +187,7 @@ public class CommentForm extends FormActivity {
 					ModelResult result = (ModelResult) response;
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-						Tracker.trackEvent("Comment", "Insert", null, 0);
+						Tracker.sendEvent("ui_action", "add_comment", null, 0);
 						mCommon.hideBusy(false);
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_COMMENT_INSERTED);

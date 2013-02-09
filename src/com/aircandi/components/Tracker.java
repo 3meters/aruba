@@ -26,25 +26,25 @@ import com.google.analytics.tracking.android.EasyTracker;
 @SuppressWarnings("ucd")
 public class Tracker {
 
-	public static void trackEvent(String arg0, String arg1, String arg2, long arg3) {
+	public static void sendEvent(String category, String action, String target, long value) {
 		/*
 		 * Arguments should be free of whitespace.
 		 */
 		try {
 			if (CandiConstants.TRACKING_ENABLED) {
-				EasyTracker.getTracker().trackEvent(arg0, arg1, arg2, arg3);
+				EasyTracker.getTracker().sendEvent(category, action, target, value);
 			}
 		}
 		catch (Exception exception) {}
 	}
 
-	public static void trackView(String viewName) {
+	public static void sendView(String viewName) {
 		/*
 		 * Arguments should be free of whitespace.
 		 */
 		try {
 			if (CandiConstants.TRACKING_ENABLED) {
-				EasyTracker.getTracker().trackView(viewName);
+				EasyTracker.getTracker().sendView(viewName);
 			}
 		}
 		catch (Exception exception) {}

@@ -130,14 +130,15 @@ public class EntityForm extends FormActivity {
 			});
 		}
 		if (mLocked != null) {
-			mLocked.setOnCheckedChangeListener(new OnCheckedChangeListener(){
+			mLocked.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 					if (mEntityForForm.locked != isChecked) {
 						mDirty = true;
 					}
-				}});
+				}
+			});
 		}
 	}
 
@@ -546,7 +547,7 @@ public class EntityForm extends FormActivity {
 		}
 		mEntityBitmap = null;
 		drawImage(entity);
-		Tracker.trackEvent("Entity", "DefaultPicture", "None", 0);
+		Tracker.sendEvent("ui_action", "set_entity_picture_to_default", null, 0);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -706,11 +707,13 @@ public class EntityForm extends FormActivity {
 			}
 		}
 
+		Tracker.sendEvent("ui_action", "entity_insert", mEntityForForm.type, 0);
 		result = ProxiExplorer.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, mEntityBitmap, false);
 		return result;
 	}
 
 	private ModelResult updateEntityAtService() {
+		Tracker.sendEvent("ui_action", "entity_update", mEntityForForm.type, 0);
 		ModelResult result = ProxiExplorer.getInstance().getEntityModel().updateEntity(mEntityForForm, mEntityBitmap);
 		return result;
 	}
@@ -731,6 +734,7 @@ public class EntityForm extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("DeleteEntity");
+				Tracker.sendEvent("ui_action", "entity_delete", mEntityForForm.type, 0);
 				ModelResult result = ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm.id, false);
 				return result;
 			}
@@ -740,7 +744,6 @@ public class EntityForm extends FormActivity {
 				ModelResult result = (ModelResult) response;
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					Tracker.trackEvent("Entity", "Delete", mEntityForForm.type, 0);
 					Logger.i(this, "Deleted entity: " + mEntityForForm.name);
 
 					mCommon.hideBusy(false);
@@ -758,7 +761,7 @@ public class EntityForm extends FormActivity {
 			}
 
 		}.execute();
-	}
+}
 
 	// --------------------------------------------------------------------------------------------
 	// Persistence routines

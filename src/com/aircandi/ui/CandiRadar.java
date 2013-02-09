@@ -438,7 +438,7 @@ public class CandiRadar extends CandiActivity {
 
 	public void doRefresh() {
 		Logger.d(this, "Starting refresh");
-		Tracker.trackEvent("Radar", "Refresh", "Full", 0);
+		Tracker.sendEvent("ui_action", "refresh_radar", null, 0);
 		searchForPlaces();
 	}
 
