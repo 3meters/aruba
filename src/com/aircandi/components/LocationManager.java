@@ -28,6 +28,7 @@ public class LocationManager {
 	private Boolean								mLocationModeBurstNetwork	= false;
 	private Boolean								mLocationModeBurstGps		= false;
 	protected PendingIntent						mLocationListenerPendingIntent;
+	private Runnable							mBurstTimeout;
 
 	public static synchronized LocationManager getInstance() {
 		if (singletonObject == null) {
@@ -47,6 +48,20 @@ public class LocationManager {
 		/* Setup the location update Pending Intents */
 		Intent activeIntentNetwork = new Intent(mApplicationContext, LocationChangedReceiver.class);
 		mLocationListenerPendingIntent = PendingIntent.getBroadcast(mApplicationContext, 0, activeIntentNetwork, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		/* Timeout handler */
+		mBurstTimeout = new Runnable() {
+
+			@Override
+			public void run() {
+				Logger.d(LocationManager.this, "Burst mode stopped: timed out");
+				mLocationManager.removeUpdates(mLocationListenerPendingIntent);
+				mLocationModeBurstNetwork = false;
+				mLocationModeBurstGps = false;
+				Aircandi.mainThreadHandler.removeCallbacks(mBurstTimeout);
+			}
+		};
+
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -73,21 +88,12 @@ public class LocationManager {
 			mLocationModeBurstGps = true;
 		}
 
-		Aircandi.mainThreadHandler.postDelayed(new Runnable() {
-
-			@Override
-			public void run() {
-				Logger.d(LocationManager.this, "Burst mode stopped: timed out");
-				mLocationManager.removeUpdates(mLocationListenerPendingIntent);
-				mLocationModeBurstNetwork = false;
-				mLocationModeBurstGps = false;
-				Aircandi.mainThreadHandler.removeCallbacks(this);
-			}
-		}, PlacesConstants.BURST_TIMEOUT);
+		Aircandi.mainThreadHandler.postDelayed(mBurstTimeout, PlacesConstants.BURST_TIMEOUT);
 	}
 
 	public void stopLocationBurst() {
 		Logger.d(LocationManager.this, "Burst mode stopped: disabled");
+		Aircandi.mainThreadHandler.removeCallbacks(mBurstTimeout);
 		mLocationManager.removeUpdates(mLocationListenerPendingIntent);
 		mLocationModeBurstNetwork = false;
 		mLocationModeBurstGps = false;
@@ -141,11 +147,11 @@ public class LocationManager {
 		Location locationTarget = location == null ? mLocation : location;
 		Observation observation = new Observation();
 
+		if (locationTarget == null || !locationTarget.hasAccuracy()) {
+			return null;
+		}
+
 		synchronized (locationTarget) {
-			
-			if (locationTarget == null || !locationTarget.hasAccuracy()) {
-				return null;
-			}
 
 			if (Aircandi.usingEmulator) {
 				observation = new Observation(47.616245, -122.201645); // earls
