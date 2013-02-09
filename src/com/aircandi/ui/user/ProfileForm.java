@@ -262,7 +262,7 @@ public class ProfileForm extends FormActivity {
 		}
 		mBitmap = null;
 		drawImage(user);
-		Tracker.trackEvent("User", "DefaultPicture", "None", 0);
+		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -299,7 +299,7 @@ public class ProfileForm extends FormActivity {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "Updated user profile: " + mUser.name + " (" + mUser.id + ")");
-						Tracker.trackEvent("User", "Update", null, 0);
+						Tracker.sendEvent("ui_action", "update_user", null, 0);
 						mCommon.hideBusy(false);
 						/*
 						 * We treat updating the profile like a change to an entity in the entity model. This forces

@@ -188,7 +188,7 @@ public class FeedbackForm extends FormActivity {
 					ModelResult result = (ModelResult) response;
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
-						Tracker.trackEvent("Feedback", "Insert", null, 0);
+						Tracker.sendEvent("ui_action", "send_feedback", null, 0);
 						mCommon.hideBusy(false);
 						ImageUtils.showToastNotification(getString(R.string.alert_feedback_sent), Toast.LENGTH_SHORT);
 						finish();

@@ -81,7 +81,7 @@ public class SignInForm extends FormActivity {
 				, getResources().getString(R.string.alert_send_password_message)
 				, null
 				, SignInForm.this, android.R.string.ok, null, null, null);
-		Tracker.trackEvent("DialogSendPassword", "Open", null, 0);
+		Tracker.sendEvent("ui_action", "recover_password", null, 0);
 	}
 
 	@SuppressWarnings("ucd")
@@ -114,7 +114,7 @@ public class SignInForm extends FormActivity {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Tracker.startNewSession();
-						Tracker.trackEvent("User", "Signin", null, 0);
+						Tracker.sendEvent("ui_action", "signin_user", null, 0);
 
 						String jsonResponse = (String) result.serviceResponse.data;
 						ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);

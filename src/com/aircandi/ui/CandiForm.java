@@ -252,6 +252,7 @@ public class CandiForm extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onBrowseCommentsButtonClick(View view) {
 		if (mEntity.commentCount != null && mEntity.commentCount > 0) {
+			Tracker.sendEvent("ui_action", "browse_comments", null, 0);  			
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setEntityId(mEntity.id)
@@ -268,6 +269,7 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onMapButtonClick(View view) {
+		Tracker.sendEvent("ui_action", "map_place", null, 0);  			
 		GeoLocation location = mEntity.getLocation();
 		AndroidManager.getInstance().callMapActivity(this, String.valueOf(location.latitude.doubleValue())
 				, String.valueOf(location.longitude.doubleValue())
@@ -276,11 +278,13 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onTuneButtonClick(View view) {
+		Tracker.sendEvent("ui_action", "tune_place", null, 0);  			
 		tuneProximity();
 	}
 
 	@SuppressWarnings("ucd")
 	public void onCallButtonClick(View view) {
+		Tracker.sendEvent("ui_action", "call_place", null, 0);  			
 		AndroidManager.getInstance().callDialerActivity(this, mEntity.place.contact.phone);
 	}
 
@@ -303,7 +307,7 @@ public class CandiForm extends CandiActivity {
 				showInstallDialog(entity);
 			}
 			else {
-				Tracker.trackEvent(entity.source.source, "View", null, 0);
+				Tracker.sendEvent("ui_action", "browse_source", entity.source.source, 0);
 				if (entity.source.source.equals("twitter")) {
 					AndroidManager.getInstance().callTwitterActivity(this, entity.source.id);
 				}
@@ -346,6 +350,7 @@ public class CandiForm extends CandiActivity {
 	}
 
 	public void onUserClick(View view) {
+		Tracker.sendEvent("ui_action", "browse_user", null, 0);  			
 		User user = (User) view.getTag();
 		mCommon.doUserClick(user);
 	}
@@ -369,6 +374,7 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onAddCandiButtonClick(View view) {
+		Tracker.sendEvent("ui_action", "add_candi", null, 0);  			
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 			mCommon.showTemplatePicker(false);
 		}
@@ -383,6 +389,7 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onEditCandiButtonClick(View view) {
+		Tracker.sendEvent("ui_action", "edit_entity", null, 0);  			
 		mCommon.doEditCandiClick();
 	}
 
@@ -900,7 +907,7 @@ public class CandiForm extends CandiActivity {
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							try {
-								Tracker.trackEvent(entity.source.source, "ReferInstall", entity.source.packageName, 0);
+								Tracker.sendEvent("ui_action", "install_source", entity.source.packageName, 0);
 								Logger.d(this, "Install: navigating to market install page");
 								Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + entity.source.packageName
 										+ "&referrer=utm_source%3Dcom.aircandi"));

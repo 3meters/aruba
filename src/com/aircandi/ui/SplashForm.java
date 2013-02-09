@@ -35,6 +35,7 @@ import com.aircandi.ui.user.SignInForm;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.google.analytics.tracking.android.GoogleAnalytics;
 
 public class SplashForm extends SherlockActivity {
 
@@ -73,6 +74,9 @@ public class SplashForm extends SherlockActivity {
 
 		/* AWS Credentials */
 		startGetAWSCredentials();
+		
+		/* Google analytics tracking */
+		GoogleAnalytics.getInstance(this).setDebug(false);
 
 		/* Connectivity monitoring */
 		NetworkManager.getInstance().setContext(getApplicationContext());
@@ -114,7 +118,7 @@ public class SplashForm extends SherlockActivity {
 			User user = (User) ProxibaseService.convertJsonToObjectInternalSmart(jsonUser, ServiceDataType.User);
 			user.session = (Session) ProxibaseService.convertJsonToObjectInternalSmart(jsonSession, ServiceDataType.Session);
 			Tracker.startNewSession();
-			Tracker.trackEvent("User", "AutoSignin", null, 0);
+			Tracker.sendEvent("action", "signin_auto", null, 0);
 			Aircandi.getInstance().setUser(user);
 			startMainApp();
 		}

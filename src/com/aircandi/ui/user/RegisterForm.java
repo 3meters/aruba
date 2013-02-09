@@ -182,7 +182,7 @@ public class RegisterForm extends FormActivity {
 		}
 		mBitmap = null;
 		drawImage(user);
-		Tracker.trackEvent("User", "DefaultPicture", "None", 0);
+		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ public class RegisterForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private void doViewTerms() {
-		Tracker.trackEvent("Terms", "View", null, 0);
+		Tracker.sendEvent("ui_action", "view_terms", null, 0);
 		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(CandiConstants.URL_AIRCANDI_TERMS));
 		startActivity(intent);
@@ -275,6 +275,7 @@ public class RegisterForm extends FormActivity {
 			mUser.name = mTextFullname.getText().toString().trim();
 			mUser.password = mTextPassword.getText().toString().trim();
 
+			Tracker.sendEvent("ui_action", "register_user", null, 0);
 			Logger.d(this, "Inserting user: " + mUser.name);
 
 			new AsyncTask() {
@@ -304,7 +305,6 @@ public class RegisterForm extends FormActivity {
 						User insertedUser = (User) result.data;
 						Aircandi.getInstance().setUser(insertedUser);
 
-						Tracker.trackEvent("User", "Insert", null, 0);
 						mCommon.hideBusy(false);
 						Logger.i(RegisterForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 

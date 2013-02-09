@@ -115,7 +115,7 @@ public abstract class FormActivity extends SherlockActivity {
 		if (resultCode == Activity.RESULT_OK) {
 			if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
 
-				Tracker.trackEvent("Entity", "PickPicture", "None", 0);
+				Tracker.sendEvent("ui_action", "select_picture_device", null, 0);
 				Uri imageUri = intent.getData();
 				Bitmap bitmap = null;
 
@@ -127,7 +127,7 @@ public abstract class FormActivity extends SherlockActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
 
-				Tracker.trackEvent("Entity", "TakePicture", "None", 0);
+				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0);
 				Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 				if (mImageRequestListener != null) {
@@ -136,8 +136,7 @@ public abstract class FormActivity extends SherlockActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
 
-				Tracker.trackEvent("Entity", "PictureSearch", "None", 0);
-
+				Tracker.sendEvent("ui_action", "select_picture_search", null, 0);
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
 					final String imageUri = extras.getString(CandiConstants.EXTRA_URI);
@@ -191,8 +190,7 @@ public abstract class FormActivity extends SherlockActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_PLACE) {
 
-				Tracker.trackEvent("Entity", "PicturePlace", "None", 0);
-
+				Tracker.sendEvent("ui_action", "select_picture_place", null, 0);
 				if (intent != null && intent.getExtras() != null) {
 					Bundle extras = intent.getExtras();
 					final String imageUri = extras.getString(CandiConstants.EXTRA_URI);
@@ -244,7 +242,7 @@ public abstract class FormActivity extends SherlockActivity {
 		intent.setType("image/*");
 		intent.setAction(Intent.ACTION_GET_CONTENT);
 		/*
-		 * We want to filter out remove images like the linked in from picasa. 
+		 * We want to filter out remove images like the linked in from picasa.
 		 */
 		if (CandiConstants.SUPPORTS_HONEYCOMB) {
 			intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);

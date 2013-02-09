@@ -263,7 +263,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {}
 				}, null);
-		Tracker.trackEvent("DialogAbout", "Open", null, 0);
+		Tracker.sendEvent("ui_action", "open_dialog", "about", 0);
 
 	}
 
@@ -720,7 +720,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 						/* Notify interested parties */
 						ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
-						Tracker.trackEvent("User", "Signout", null, 0);
 						hideBusy(false);
 						Intent intent = new Intent(mActivity, SplashForm.class);
 						mActivity.startActivity(intent);
@@ -990,6 +989,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 				return;
 			case R.id.signout:
+				Tracker.sendEvent("ui_action", "signout_user", null , 0);
 				signout();
 				return;
 			case R.id.edit_user:
