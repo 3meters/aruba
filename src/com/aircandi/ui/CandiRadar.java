@@ -317,6 +317,8 @@ public class CandiRadar extends CandiActivity {
 					Aircandi.stopwatch2.segmentTime("Location acquired event");
 					final Observation observation = LocationManager.getInstance().getObservationForLocation(mActiveLocation);
 					if (observation != null) {
+						
+						mCommon.showBusy();
 
 						new AsyncTask() {
 
