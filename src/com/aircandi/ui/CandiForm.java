@@ -348,12 +348,6 @@ public class CandiForm extends CandiActivity {
 		}
 	}
 
-	public void onUserClick(View view) {
-		Tracker.sendEvent("ui_action", "browse_user", null, 0);  			
-		User user = (User) view.getTag();
-		mCommon.doUserClick(user);
-	}
-
 	@SuppressWarnings("ucd")
 	public void onImageClick(View view) {
 		Intent intent = null;

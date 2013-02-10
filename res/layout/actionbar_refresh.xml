@@ -1,17 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/refresh_frame"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:addStatesFromChildren="true"
-    android:focusable="true"
+    android:background="@drawable/abs__item_background_holo_dark"
+    android:clickable="true"
+    android:clipToPadding="false"
     android:gravity="center"
-    android:minWidth="@dimen/action_button_min_width"
-    tools:ignore="UnusedResources" >
+    android:minWidth="@dimen/action_button_min_width" >
+
+    <View
+        android:id="@+id/accuracy_indicator"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:background="@drawable/accuracy_indicator_none"
+        android:visibility="visible"/>
+    
+    <ImageView
+        android:id="@+id/refresh_image"
+        style="@style/actionbar_beacons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="?attr/iconReload" />
 
     <ProgressBar
+        android:id="@+id/refresh_progress"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:focusable="true" />
+        android:layout_gravity="center"
+        android:focusable="true" 
+        android:visibility="gone"/>
 
-</LinearLayout>
+</FrameLayout>

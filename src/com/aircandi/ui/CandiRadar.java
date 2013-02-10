@@ -298,26 +298,30 @@ public class CandiRadar extends CandiActivity {
 				Location location = event.location;
 				if (location != null) {
 
-					/*
-					 * We pass on gps updates that are too small an improvement to warrent
-					 * pulling entities from the service again.
-					 */
-					if (mActiveLocation != null
-							&& location.getProvider().equals("gps")
-							&& mActiveLocation.getProvider().equals("gps")) {
-						float accuracyImprovement = mActiveLocation.getAccuracy() / location.getAccuracy();
-						boolean isSignificantlyMoreAccurate = (accuracyImprovement >= 2);
-						if (!isSignificantlyMoreAccurate) {
+					if (mActiveLocation != null) {
+						
+						/* We never go from gps provider to network provider */
+						if (mActiveLocation.getProvider().equals("gps") && location.getProvider().equals("network")) {
 							return;
+						}
+						
+						/* If same provider then look for improved accuracy */
+						if (mActiveLocation.getProvider().equals(location.getProvider())) {
+							float accuracyImprovement = mActiveLocation.getAccuracy() / location.getAccuracy();
+							boolean isSignificantlyMoreAccurate = (accuracyImprovement >= 2);
+							if (!isSignificantlyMoreAccurate) {
+								return;
+							}
 						}
 					}
 
 					mActiveLocation = location;
+					mCommon.updateAccuracyIndicator(mActiveLocation);
 
 					Aircandi.stopwatch2.segmentTime("Location acquired event");
 					final Observation observation = LocationManager.getInstance().getObservationForLocation(mActiveLocation);
 					if (observation != null) {
-						
+
 						mCommon.showBusy();
 
 						new AsyncTask() {

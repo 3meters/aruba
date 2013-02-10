@@ -229,7 +229,8 @@ public class LocationManager {
 
 					if (reason == LocationBetterReason.NotNull
 							|| reason == LocationBetterReason.Provider
-							|| reason == LocationBetterReason.Accuracy) {
+							|| reason == LocationBetterReason.Accuracy
+							|| reason == LocationBetterReason.Recency) {
 
 						mLocation = location;
 						BusProvider.getInstance().post(new LocationChangedEvent(mLocation));

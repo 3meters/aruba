@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/refresh"
-        android:icon="?attr/iconReload"
+        android:actionLayout="@layout/actionbar_refresh"
         android:orderInCategory="1"
         android:showAsAction="always"
         android:title="@string/menu_refresh_item"/>

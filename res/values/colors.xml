@@ -34,6 +34,11 @@
     <color name="beacon_go">#99009900</color>
     <color name="beacon_off">#33ffffff</color>
     
+    <!-- Accuracy -->
+    
+    <color name="accuracy_none">#10000000</color>
+    <color name="accuracy">#cc33b5e5</color>
+        
     <!-- Backgrounds -->
     
     <color name="background_dark">@android:color/black</color>
