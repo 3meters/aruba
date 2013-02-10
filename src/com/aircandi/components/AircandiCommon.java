@@ -27,9 +27,11 @@ import android.os.SystemClock;
 import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,7 +46,6 @@ import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
-import com.aircandi.R.layout;
 import com.aircandi.ScanService;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -97,6 +98,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	/* UI */
 	private TextView			mBeaconIndicator;
+	private View				mAccuracyIndicator;
+	private View				mRefreshImage;
+	private View				mRefreshProgress;
 	private MenuItem			mMenuItemRefresh;
 	private MenuItem			mMenuItemBeacons;
 	public Menu					mMenu;
@@ -318,6 +322,27 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
+	private void doRefreshClick() {
+		/* Show busy indicator */
+		startActionbarBusyIndicator();
+
+		if (mPageName.equals("CandiRadar")) {
+			((CandiRadar) mActivity).doRefresh();
+		}
+		else if (mPageName.equals("CandiList")) {
+			((CandiList) mActivity).doRefresh();
+		}
+		else if (mPageName.equals("CandiForm")) {
+			((CandiForm) mActivity).doRefresh();
+		}
+		else if (mPageName.equals("CandiUser")) {
+			((CandiUser) mActivity).doRefresh();
+		}
+		else if (mPageName.equals("CommentList")) {
+			((CommentList) mActivity).doRefresh();
+		}
+	}
+
 	public void doUserClick(User user) {
 		if (user != null) {
 			Intent intent = new Intent(mActivity, CandiUser.class);
@@ -372,6 +397,40 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		mActivity.startActivity(intent);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToPage);
+	}
+
+	public void updateAccuracyIndicator(final Location location) {
+
+		mActivity.runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (location == null) {
+					mAccuracyIndicator.setBackgroundResource(R.drawable.accuracy_indicator_none);
+					Logger.v(this, "Location accuracy: none");
+				}
+				else if (location.hasAccuracy()) {
+
+					int sizeDip = 40;
+
+					if (location.getAccuracy() <= 100) {
+						sizeDip = 25;
+					}
+					if (location.getAccuracy() <= 50) {
+						sizeDip = 12;
+					}
+					if (location.getAccuracy() <= 30) {
+						sizeDip = 8;
+					}
+
+					Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
+					int sizePixels = ImageUtils.getRawPixels(mActivity, sizeDip);
+					FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
+					mAccuracyIndicator.setLayoutParams(layoutParams);
+					mAccuracyIndicator.setBackgroundResource(R.drawable.accuracy_indicator);
+				}
+			}
+		});
 	}
 
 	private void updateDevIndicator(final List<WifiScanResult> scanList, Location location) {
@@ -811,16 +870,16 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	private void startActionbarBusyIndicator() {
-		if (mMenuItemRefresh != null) {
-			if (mMenuItemRefresh.getActionView() == null) {
-				mMenuItemRefresh.setActionView(layout.actionbar_refresh);
-			}
+		if (mRefreshImage != null) {
+			mRefreshImage.setVisibility(View.GONE);
+			mRefreshProgress.setVisibility(View.VISIBLE);
 		}
 	}
 
 	private void stopActionbarBusyIndicator() {
-		if (mMenuItemRefresh != null) {
-			mMenuItemRefresh.setActionView(null);
+		if (mRefreshImage != null) {
+			mRefreshProgress.setVisibility(View.GONE);
+			mRefreshImage.setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -937,6 +996,20 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* Cache refresh menu item for later ui updates */
 		mMenuItemRefresh = menu.findItem(R.id.refresh);
+		if (mMenuItemRefresh != null) {
+
+			mRefreshImage = mMenuItemRefresh.getActionView().findViewById(R.id.refresh_image);
+			mRefreshProgress = mMenuItemRefresh.getActionView().findViewById(R.id.refresh_progress);
+			mAccuracyIndicator = mMenuItemRefresh.getActionView().findViewById(R.id.accuracy_indicator);
+			mMenuItemRefresh.getActionView().findViewById(R.id.refresh_frame).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					doRefreshClick();
+				}
+			});
+
+			updateAccuracyIndicator(null);
+		}
 
 		mMenu = menu;
 	}
@@ -963,33 +1036,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 				 */
 				mActivity.onBackPressed();
 				return;
-			case R.id.refresh:
-
-				/* Show busy indicator */
-				startActionbarBusyIndicator();
-
-				if (mPageName.equals("CandiRadar")) {
-					((CandiRadar) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("CandiList")) {
-					((CandiList) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("CandiForm")) {
-					((CandiForm) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("CandiUser")) {
-					((CandiUser) mActivity).doRefresh();
-				}
-				else if (mPageName.equals("CommentList")) {
-					((CommentList) mActivity).doRefresh();
-				}
-				return;
 			case R.id.settings:
 				mActivity.startActivityForResult(new Intent(mActivity, Preferences.class), CandiConstants.ACTIVITY_PREFERENCES);
 				AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 				return;
 			case R.id.signout:
-				Tracker.sendEvent("ui_action", "signout_user", null , 0);
+				Tracker.sendEvent("ui_action", "signout_user", null, 0);
 				signout();
 				return;
 			case R.id.edit_user:

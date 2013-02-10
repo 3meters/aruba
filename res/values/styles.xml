@@ -307,7 +307,7 @@
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical|left</item>
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">?attr/textColor</item>
     </style>
 
     <style name="actionbar_debug">
