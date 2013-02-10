@@ -366,6 +366,11 @@ public class CandiForm extends CandiActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 	}
 
+	public void onUserClick(View view) {
+		User user = (User) view.getTag();
+		mCommon.doUserClick(user);
+	}
+	
 	@SuppressWarnings("ucd")
 	public void onAddCandiButtonClick(View view) {
 		Tracker.sendEvent("ui_action", "add_candi", null, 0);  			

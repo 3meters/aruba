@@ -13,8 +13,8 @@ import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewStub;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewStub;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -43,8 +43,8 @@ import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
-import com.aircandi.utilities.ImageUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
+import com.aircandi.utilities.ImageUtils;
 
 @SuppressWarnings("ucd")
 public class CandiUser extends CandiActivity {

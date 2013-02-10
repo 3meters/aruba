@@ -16,8 +16,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        android:background="@drawable/accuracy_indicator_none"
-        android:visibility="visible"/>
+        android:background="@drawable/accuracy_indicator_none"/>
     
     <ImageView
         android:id="@+id/refresh_image"

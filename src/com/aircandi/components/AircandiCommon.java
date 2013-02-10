@@ -112,7 +112,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	/* Other */
 	private String				mPageName;
 	private String				mDebugWifi;
-	private String				mDebugLocation;
+	private String				mDebugLocation = "--";
 	private Integer				mBusyCount	= 0;
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
@@ -420,7 +420,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						sizeDip = 12;
 					}
 					if (location.getAccuracy() <= 30) {
-						sizeDip = 8;
+						sizeDip = 7;
 					}
 
 					Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));

@@ -10,7 +10,7 @@
         android:type="linear" />
 
     <size
-        android:width="30dp"
-        android:height="30dp" />    
+        android:height="30dp"
+        android:width="30dp" />
 
 </shape>
