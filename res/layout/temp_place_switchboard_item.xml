@@ -13,7 +13,7 @@
         aircandi:layout="@layout/widget_webimageview_framed_thick"
         aircandi:showBusy="true"
         aircandi:sizeHint="100dp"
-        android:background="@drawable/app_image_selector"
+        android:background="@drawable/selector_image"
         android:clickable="true"
         android:onClick="onCandiClick"
         android:scaleType="centerCrop" />

@@ -375,7 +375,7 @@ public class ProxiExplorer {
 					}
 				}
 			}
-			
+
 			/* Merge entities into data model */
 			mEntityModel.removeLocationEntities();
 			mEntityModel.upsertEntities(entities);
@@ -438,7 +438,7 @@ public class ProxiExplorer {
 				entity.modifiedDate = DateUtils.nowDate().getTime();
 				entity.synthetic = true;
 			}
-			
+
 			/* Double check to make sure we don't have any duplicates of radar places */
 			List<Entity> radarPlaces = mEntityModel.getRadarPlaces();
 			for (int i = entities.size() - 1; i >= 0; i--) {
@@ -450,7 +450,7 @@ public class ProxiExplorer {
 					}
 				}
 			}
-			
+
 			mEntityModel.removeSyntheticEntities();
 			mEntityModel.upsertEntities(entities);
 
@@ -1815,6 +1815,17 @@ public class ProxiExplorer {
 			}
 			Collections.sort(entities, new Entity.SortEntitiesByPlaceRankScoreDistance());
 			return entities;
+		}
+
+		public Float getMaxPlaceDistance() {
+			List<Entity> places = getPlaces(); // refreshes distance calculation
+			Float maxDistance = 0f;
+			for (Entity entity : places) {
+				if (entity.distance > maxDistance) {
+					maxDistance = entity.distance;
+				}
+			}
+			return maxDistance;
 		}
 
 		/**

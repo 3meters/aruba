@@ -12,10 +12,10 @@
 	<!-- Focused states -->
 	<item
 		android:state_focused="true"
-		android:drawable="@drawable/image_pressed_bg" />
+		android:drawable="@drawable/bg_button_pressed" />
 
 	<!-- Pressed -->
 	<item
 		android:state_pressed="true"
-		android:drawable="@drawable/image_pressed_bg" />
+		android:drawable="@drawable/bg_button_pressed" />
 </selector>

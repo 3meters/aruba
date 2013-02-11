@@ -36,7 +36,7 @@
                 android:layout_marginBottom="15dp"
                 aircandi:layout="@layout/widget_webimageview_zoom"
                 aircandi:sizeHint="250dp"
-                android:background="@drawable/app_image_selector"
+                android:background="@drawable/selector_image"
                 android:clickable="true"
                 android:onClick="onImageClick"
                 android:scaleType="centerCrop" />

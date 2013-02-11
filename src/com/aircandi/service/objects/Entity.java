@@ -319,10 +319,13 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 					android.location.Location locationObserved = new android.location.Location(observation.provider);
 					locationObserved.setLatitude(observation.latitude.doubleValue());
 					locationObserved.setLongitude(observation.longitude.doubleValue());
+					
 					android.location.Location locationPlace = new android.location.Location("place");
 					locationPlace.setLatitude(location.latitude.doubleValue());
 					locationPlace.setLongitude(location.longitude.doubleValue());
+					
 					distanceByLocation = locationObserved.distanceTo(locationPlace);
+					
 					this.distance = distanceByLocation;
 				}
 			}
@@ -522,7 +525,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 							}
 						}
 						else if (link.type.equals("browse")) {
-							placeRankScore += (link.tuneCount.intValue() * 1);
+							//placeRankScore += (link.tuneCount.intValue() * 1);
 						}
 					}
 				}

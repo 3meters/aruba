@@ -21,16 +21,14 @@
         <attr name="textColorCandiView" format="color|reference" />
         <attr name="textColorCandiViewSynthetic" format="color|reference" />
         <attr name="textOutlineRadar" format="boolean" />
-        <attr name="textureBodyZone" format="reference" />
-        <attr name="textureBodyCandi" format="reference" />
-        <attr name="backgroundButton" format="string" />
+        <attr name="backgroundButton" format="color|reference" />
         <attr name="backgroundCandi" format="color|reference" />
-        <attr name="backgroundRadarCandi" format="color|reference" />
         <attr name="backgroundForm" format="color|reference" />
         <attr name="backgroundProgress" format="string" />
-        <attr name="backgroundPicture" format="string" />
+        <attr name="backgroundPictureFramed" format="string" />
         <attr name="backgroundActionBar" format="string" />
         <attr name="backgroundButtonBar" format="string" />
+        <attr name="backgroundAccuracyNone" format="string" />
         <attr name="backgroundTabBar" format="string" />
         <attr name="badgeColor" format="color|reference" />
         <attr name="badgeColorSynthetic" format="color|reference" />

@@ -16,7 +16,15 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        android:background="@drawable/accuracy_indicator_none"
+        android:background="@drawable/bg_accuracy_indicator"
+        android:visibility="visible"/>
+    
+    <View
+        android:id="@+id/accuracy_center"
+        android:layout_width="7dp"
+        android:layout_height="7dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_accuracy_center"
         android:visibility="visible"/>
     
     <ImageView

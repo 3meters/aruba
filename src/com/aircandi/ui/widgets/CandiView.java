@@ -131,7 +131,7 @@ public class CandiView extends RelativeLayout {
 		if (mCandiViewGroup != null) {
 			Integer padding = ImageUtils.getRawPixels(this.getContext(), 3);
 			this.setPadding(padding, padding, padding, padding);
-			this.setBackgroundResource(R.drawable.app_image_selector);
+			this.setBackgroundResource(R.drawable.selector_image);
 			mCandiViewGroup.setBackgroundResource(mColorResId);
 		}
 
@@ -265,7 +265,7 @@ public class CandiView extends RelativeLayout {
 					mTextGroup.setBackgroundDrawable(null);
 				}
 				else {
-					mTextGroup.setBackgroundResource(R.drawable.picture_overlay_dark);
+					mTextGroup.setBackgroundResource(R.drawable.overlay_picture);
 				}
 			}
 

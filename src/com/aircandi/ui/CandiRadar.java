@@ -71,29 +71,8 @@ import com.squareup.otto.Subscribe;
  * 
  * - AsyncTasks: AsyncTask uses a static internal work queue with a hard-coded limit of 10 elements.
  * Once we have 10 tasks going concurrently, task 11 causes a RejectedExecutionException. ThreadPoolExecutor is a way to
- * get more control over thread pooling but it requires Android version 11/3.0 (we currently target 7/2.1 and higher).
+ * get more control over thread pooling but it requires Android version 11/3.0 (we currently target 8/2.2 and higher).
  * AsyncTasks are hard-coded with a low priority and continue their work even if the activity is paused.
- */
-
-/*
- * Bitmap Management
- * 
- * gc calls are evil but necessary sometimes. It forces code exection to stop while
- * the gc makes an explicit garbage pass. Behavior may be a bit different with
- * the introduction of concurrent gc in Gingerbread (v2.3)
- * 
- * Explicit gc calls to free bitmap memory:
- * 
- * - EntityForm: onDestroy.
- * - PictureSearch: onDestroy.
- * - ProfileForm: onDestroy.
- * - SignUpForm: onDestroy.
- * 
- * Explicit bitmap recycling
- * 
- * - Anyplace where a new bitmap has been processed from another bitmap.
- * - Releasing bitmaps when forms are destroyed.
- * - Releasing bitmaps when list items are reused.
  */
 
 /*
@@ -115,24 +94,6 @@ import com.squareup.otto.Subscribe;
  * Power off with Aircandi in foreground: Pause->Stop
  * Power on with Aircandi in foreground: Nothing
  * Unlock screen with Aircandi in foreground: Restart->Start->Resume
- */
-
-/*
- * Scan management
- * 
- * There are three cases that trigger scans:
- * 
- * - First run scan: When application is first started, we load the entity model with a full scan. The
- * entity model lives on even if the radar activity is killed.
- * 
- * - User requested scan: (doRefresh) This can be either full or standard.
- * 
- * - Autoscan: Causes another scan to be scheduled as soon as a scan is finished. We also need
- * to handle suspending autoscan when the activity is paused and restarting when resumed.
- * ---Starting: BeaconScanWatcher, onWindowFocusChange
- * ---Stopping: onStop, scanForBeacons
- * 
- * - Fixup scan: These are done because a settings change requires that the UI is rebuilt.
  */
 
 public class CandiRadar extends CandiActivity {

@@ -393,13 +393,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 			@Override
 			public void run() {
-				if (location == null) {
-					mAccuracyIndicator.setBackgroundResource(R.drawable.accuracy_indicator_none);
-					Logger.v(this, "Location accuracy: none");
-				}
-				else if (location.hasAccuracy()) {
+				
+				int sizeDip = 40;
+				
+				if (location != null && location.hasAccuracy()) {
 
-					int sizeDip = 40;
+					sizeDip = 40;
 
 					if (location.getAccuracy() <= 100) {
 						sizeDip = 25;
@@ -411,12 +410,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 						sizeDip = 8;
 					}
 
-					Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
-					int sizePixels = ImageUtils.getRawPixels(mActivity, sizeDip);
-					FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
-					mAccuracyIndicator.setLayoutParams(layoutParams);
-					mAccuracyIndicator.setBackgroundResource(R.drawable.accuracy_indicator);
 				}
+				
+				Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
+				int sizePixels = ImageUtils.getRawPixels(mActivity, sizeDip);
+				FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
+				mAccuracyIndicator.setLayoutParams(layoutParams);
+				mAccuracyIndicator.setBackgroundResource(R.drawable.bg_accuracy_indicator);
 			}
 		});
 	}
@@ -450,25 +450,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 						Aircandi.wifiCount = wifiCount;
 						mDebugWifi = String.valueOf(wifiCount);
-
-						//						Drawable drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_stop);
-						//						if (wifiCount > 0) {
-						//							//						if (mMenuItemBeacons != null) {
-						//							//							mMenuItemBeacons.setVisible(true);
-						//							//						}
-						//							drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
-						//						}
-						//						else {
-						//							//						if (mMenuItemBeacons != null) {
-						//							//							mMenuItemBeacons.setVisible(false);
-						//							//						}
-						//						}
-						//
-						//						if (wifiStrongest != null && wifiStrongest.level > CandiConstants.RADAR_BEACON_INDICATOR_CAUTION) {
-						//							drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_go);
-						//						}
-						//						mBeaconIndicator.setBackgroundDrawable(drawable);
-
 					}
 				});
 
