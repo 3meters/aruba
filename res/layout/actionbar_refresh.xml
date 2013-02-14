@@ -11,13 +11,6 @@
     android:gravity="center"
     android:minWidth="@dimen/action_button_min_width" >
 
-    <View
-        android:id="@+id/accuracy_indicator"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:background="@drawable/accuracy_indicator_none"/>
-    
     <ImageView
         android:id="@+id/refresh_image"
         style="@style/actionbar_beacons"

@@ -424,18 +424,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 						if (location.getAccuracy() <= 30) {
 							sizeDip = 7;
 						}
-
-<<<<<<< HEAD
-					if (location.getAccuracy() <= 100) {
-						sizeDip = 25;
-					}
-					if (location.getAccuracy() <= 50) {
-						sizeDip = 12;
-					}
-					if (location.getAccuracy() <= 30) {
-						sizeDip = 7;
-=======
->>>>>>> dev
 					}
 
 					Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
