@@ -60,9 +60,9 @@ import com.aircandi.ui.Preferences;
 import com.aircandi.utilities.DateUtils;
 import com.aircandi.utilities.ImageUtils;
 
-public class ProxiExplorer {
+public class ProxiManager {
 
-	private static ProxiExplorer	singletonObject;
+	private static ProxiManager		singletonObject;
 	private Context					mContext;
 	private EntityModel				mEntityModel			= new EntityModel();
 
@@ -81,14 +81,14 @@ public class ProxiExplorer {
 	private static WifiScanResult	mWifiMassenaLowerWeak	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_weak", -100, true);
 	private static WifiScanResult	mWifiEmpty				= new WifiScanResult("aa:aa:bb:bb:cc:cc", "test_empty", -50, true);
 
-	public static synchronized ProxiExplorer getInstance() {
+	public static synchronized ProxiManager getInstance() {
 		if (singletonObject == null) {
-			singletonObject = new ProxiExplorer();
+			singletonObject = new ProxiManager();
 		}
 		return singletonObject;
 	}
 
-	private ProxiExplorer() {}
+	private ProxiManager() {}
 
 	public void initialize() {
 		if (!mUsingEmulator) {
@@ -113,7 +113,7 @@ public class ProxiExplorer {
 					@Override
 					public void onReceive(Context context, Intent intent) {
 
-						Logger.v(ProxiExplorer.this, "Received wifi scan results for " + reason.name().toString());
+						Logger.v(ProxiManager.this, "Received wifi scan results for " + reason.name().toString());
 						mContext.unregisterReceiver(this);
 
 						/* Get the latest scan results */
@@ -166,7 +166,7 @@ public class ProxiExplorer {
 			}
 			else {
 				mWifiList.clear();
-				Logger.d(ProxiExplorer.this, "Emulator enabled so using dummy scan results");
+				Logger.d(ProxiManager.this, "Emulator enabled so using dummy scan results");
 				mWifiList.add(mWifiMassenaUpper);
 				if (reason == ScanReason.monitoring) {
 					BusProvider.getInstance().post(new MonitoringWifiScanReceivedEvent(mWifiList));
@@ -186,7 +186,7 @@ public class ProxiExplorer {
 	// Public entry points for service calls
 	// --------------------------------------------------------------------------------------------
 
-	public void getEntitiesForBeacons() {
+	public ServiceResponse getEntitiesForBeacons() {
 		/*
 		 * All current beacons ids are sent to the service. Previously discovered beacons are included in separate
 		 * array along with a their freshness date.
@@ -215,10 +215,10 @@ public class ProxiExplorer {
 
 		if (beaconIds.size() == 0) {
 			mEntityModel.removeBeaconEntities();
-			mEntityModel.setLastRefreshDate(DateUtils.nowDate().getTime());
-			List<Entity> entitiesForEvent = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+			mEntityModel.setLastBeaconRefreshDate(DateUtils.nowDate().getTime());
+			List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
 			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
-			return;
+			return serviceResponse;
 		}
 
 		/* Set method parameters */
@@ -233,13 +233,16 @@ public class ProxiExplorer {
 			parameters.putIntegerArrayList("beaconLevels", levels);
 		}
 
+		/* Only entities linked by proximity */
+		parameters.putString("linkType", "proximity");
+
 		/*
 		 * The observation is used two ways:
 		 * 1) To include entities that have loc info but are not linked to a beacon
 		 * 2) To update the location info for the new beacons if it is better than
 		 * what is already stored.
 		 */
-		Observation observation = LocationManager.getInstance().getObservation();
+		Observation observation = LocationManager.getInstance().getObservationLocked();
 		if (observation != null) {
 			parameters.putString("observation"
 					, "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
@@ -275,21 +278,33 @@ public class ProxiExplorer {
 			List<Entity> entities = (List<Entity>) serviceData.data;
 			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects deserialized");
 
+			/*
+			 * Make sure we don't have duplicates keyed on sourceId because
+			 * getPlacesNearLocation could have already completed.
+			 */
+			for (Entity entity : entities) {
+				if (entity.place != null) {
+					if (mEntityModel.mEntityCache.containsKey(entity.place.sourceId)) {
+						mEntityModel.mEntityCache.remove(entity.place.sourceId);
+					}
+				}
+			}
+
 			/* Merge entities into data model */
-			mEntityModel.removeBeaconEntities();
 			mEntityModel.upsertEntities(entities);
 
-			mEntityModel.setLastRefreshDate(serviceData.date.longValue());
+			mEntityModel.setLastBeaconRefreshDate(serviceData.date.longValue());
 			manageEntityVisibility();
 
-			List<Entity> entitiesForEvent = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+			/* All cached place entities that qualify based on current distance pref setting */
+			List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
 			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects processed");
 
 			BusProvider.getInstance().post(new EntitiesForBeaconsFinishedEvent());
 			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 		}
 
-		return;
+		return serviceResponse;
 	}
 
 	public ServiceResponse getEntitiesForLocation() {
@@ -299,7 +314,7 @@ public class ProxiExplorer {
 		/* Set method parameters */
 		Bundle parameters = new Bundle();
 
-		Observation observation = LocationManager.getInstance().getObservation();
+		Observation observation = LocationManager.getInstance().getObservationLocked();
 		if (observation != null) {
 			parameters.putString("observation", "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
 			Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
@@ -307,15 +322,10 @@ public class ProxiExplorer {
 			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) searchRangeMeters));
 		}
 
-		/* We don't want to fetch entities we already have via links to local beacons */
+		/* We don't want to fetch entities we already have via proximity links to local beacons */
 		ArrayList<String> excludeEntityIds = new ArrayList<String>();
-		for (Entity entity : mEntityModel.getRadarPlaces()) {
-			if (!entity.synthetic
-					&& entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
-					&& entity.links != null
-					&& entity.links.size() > 0) {
-				excludeEntityIds.add(entity.id);
-			}
+		for (Entity entity : mEntityModel.getProximityPlaces()) {
+			excludeEntityIds.add(entity.id);
 		}
 
 		if (excludeEntityIds.size() > 0) {
@@ -349,38 +359,41 @@ public class ProxiExplorer {
 
 			List<Entity> entities = (List<Entity>) serviceData.data;
 			/*
+			 * Make sure we don't have duplicates keyed on sourceId because
+			 * getPlacesNearLocation could have already completed.
+			 */
+			for (Entity entity : entities) {
+				if (entity.place != null) {
+					if (mEntityModel.mEntityCache.containsKey(entity.place.sourceId)) {
+						mEntityModel.mEntityCache.remove(entity.place.sourceId);
+					}
+				}
+			}
+			/*
 			 * These were found purely using location but they can still come with
 			 * links to beacons not currently visible. To keep things clean, we
 			 * make sure the links without beacons are stripped.
 			 */
 			for (Entity entity : entities) {
 				if (entity.links != null) {
-					for (int i = entity.links.size() - 1; i >= 0; i--) {
-						Beacon beacon = mEntityModel.getBeacon(entity.links.get(i).toId);
-						if (beacon == null) {
-							entity.links.remove(i);
-						}
+					entity.links.clear();
+				}
+			}
+
+			/* Proximity place trumps location place with the same id */
+			List<Entity> proximityPlaces = mEntityModel.getProximityPlaces();
+			for (int i = entities.size() - 1; i >= 0; i--) {
+				for (Entity entity : proximityPlaces) {
+					if (entity.id.equals(entities.get(i).id)) {
+						entities.remove(i);
 					}
 				}
 			}
 
-			/* Double check to make sure we don't have any duplicates of radar places */
-			List<Entity> radarPlaces = mEntityModel.getRadarPlaces();
-			for (int i = entities.size() - 1; i >= 0; i--) {
-				for (Entity entity : radarPlaces) {
-					if (!entity.synthetic && entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && !entity.place.source.equals("user")) {
-						if (entity.place.sourceId.equals(entities.get(i).id)) {
-							entities.remove(i);
-						}
-					}
-				}
-			}
-			
 			/* Merge entities into data model */
-			mEntityModel.removeLocationEntities();
 			mEntityModel.upsertEntities(entities);
 
-			List<Entity> entitiesForEvent = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+			List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
 
 			BusProvider.getInstance().post(new EntitiesForLocationFinishedEvent());
 			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
@@ -388,7 +401,7 @@ public class ProxiExplorer {
 		return serviceResponse;
 	}
 
-	public void getPlacesNearLocation(Observation observation) {
+	public ServiceResponse getPlacesNearLocation(Observation observation) {
 		ServiceResponse serviceResponse = new ServiceResponse();
 		/*
 		 * Make a list of places that should be excluded because
@@ -398,8 +411,8 @@ public class ProxiExplorer {
 		 * completed.
 		 */
 		ArrayList<String> excludePlaceIds = new ArrayList<String>();
-		for (Entity entity : mEntityModel.getRadarPlaces()) {
-			if (!entity.synthetic && entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && !entity.place.source.equals("user")) {
+		for (Entity entity : mEntityModel.getAircandiPlaces()) {
+			if (!entity.place.source.equals("user")) {
 				excludePlaceIds.add(entity.place.sourceId);
 			}
 		}
@@ -438,28 +451,28 @@ public class ProxiExplorer {
 				entity.modifiedDate = DateUtils.nowDate().getTime();
 				entity.synthetic = true;
 			}
-			
+
 			/* Double check to make sure we don't have any duplicates of radar places */
-			List<Entity> radarPlaces = mEntityModel.getRadarPlaces();
+			List<Entity> aircandiPlaces = mEntityModel.getAircandiPlaces();
 			for (int i = entities.size() - 1; i >= 0; i--) {
-				for (Entity entity : radarPlaces) {
-					if (!entity.synthetic && entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && !entity.place.source.equals("user")) {
+				for (Entity entity : aircandiPlaces) {
+					if (!entity.place.source.equals("user")) {
 						if (entity.place.sourceId.equals(entities.get(i).id)) {
 							entities.remove(i);
 						}
 					}
 				}
 			}
-			
+
 			mEntityModel.removeSyntheticEntities();
 			mEntityModel.upsertEntities(entities);
 
-			List<Entity> entitiesForEvent = ProxiExplorer.getInstance().getEntityModel().getPlaces();
+			List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
 
 			BusProvider.getInstance().post(new PlacesNearLocationFinishedEvent());
 			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 		}
-		return;
+		return serviceResponse;
 	}
 
 	private ServiceResponse dispatch(ServiceRequest serviceRequest) {
@@ -472,7 +485,7 @@ public class ProxiExplorer {
 
 	public ModelResult upsizeSynthetic(Entity synthetic, List<Beacon> beacons, Beacon primaryBeacon) {
 		Entity entity = Entity.upsizeFromSynthetic(synthetic);
-		ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertEntity(entity
+		ModelResult result = ProxiManager.getInstance().getEntityModel().insertEntity(entity
 				, beacons
 				, primaryBeacon
 				, entity.getPhoto().getBitmap()
@@ -482,7 +495,7 @@ public class ProxiExplorer {
 			/*
 			 * Success so remove the synthetic entity.
 			 */
-			ProxiExplorer.getInstance().getEntityModel().removeEntity(synthetic.id);
+			ProxiManager.getInstance().getEntityModel().removeEntity(synthetic.id);
 			/*
 			 * Cached beacons come from the beacon scan process so tuning won't add them
 			 * so we need to do it here.
@@ -533,7 +546,7 @@ public class ProxiExplorer {
 		 * them.
 		 */
 		float signalThresholdFluid = entity.signalFence.floatValue();
-		if (oldIsHidden == false && entity.getActiveBeacon(LinkType.proximity.name()) != null) {
+		if (oldIsHidden == false && entity.getActivePrimaryBeacon(LinkType.proximity.name()) != null) {
 			signalThresholdFluid = entity.signalFence.floatValue() - 5;
 		}
 
@@ -568,8 +581,8 @@ public class ProxiExplorer {
 	}
 
 	public Boolean refreshNeeded(Location activeLocation) {
-		if (mEntityModel.getLastRefreshDate() != null) {
-			Long interval = DateUtils.nowDate().getTime() - mEntityModel.getLastRefreshDate().longValue();
+		if (mEntityModel.getLastBeaconRefreshDate() != null) {
+			Long interval = DateUtils.nowDate().getTime() - mEntityModel.getLastBeaconRefreshDate().longValue();
 			if (interval > CandiConstants.INTERVAL_REFRESH) {
 				Logger.v(this, "Refresh needed: past interval");
 				return true;
@@ -627,7 +640,7 @@ public class ProxiExplorer {
 			String currentVersionName = Aircandi.getVersionName(mContext, CandiRadar.class);
 
 			if (enabled && !currentVersionName.equals(versionName)) {
-				Logger.i(ProxiExplorer.this, "Update check: update needed");
+				Logger.i(ProxiManager.this, "Update check: update needed");
 				Aircandi.applicationUpdateNeeded = true;
 
 				String updateUri = (String) map.get("updateUri");
@@ -636,7 +649,7 @@ public class ProxiExplorer {
 				Aircandi.applicationUpdateUri = updateUri != null ? updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
 				if (updateRequired) {
 					Aircandi.applicationUpdateRequired = true;
-					Logger.i(ProxiExplorer.this, "Update check: update required");
+					Logger.i(ProxiManager.this, "Update check: update required");
 				}
 			}
 			Aircandi.lastApplicationUpdateCheckDate = DateUtils.nowDate().getTime();
@@ -1159,7 +1172,7 @@ public class ProxiExplorer {
 						List<String> beaconStrings = new ArrayList<String>();
 
 						for (Beacon beacon : beacons) {
-							Observation observation = LocationManager.getInstance().getObservation();
+							Observation observation = LocationManager.getInstance().getObservationLocked();
 							if (observation != null) {
 
 								beacon.latitude = observation.latitude;
@@ -1193,7 +1206,7 @@ public class ProxiExplorer {
 					}
 
 					/* Observation: only used as data package for the action that gets logged. */
-					Observation observation = LocationManager.getInstance().getObservation();
+					Observation observation = LocationManager.getInstance().getObservationLocked();
 					if (observation != null) {
 						parameters.putString("observation",
 								"object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
@@ -1254,7 +1267,7 @@ public class ProxiExplorer {
 				List<String> beaconStrings = new ArrayList<String>();
 				for (Beacon beacon : beacons) {
 					if (beacon.id.equals(primaryBeacon.id)) {
-						Observation observation = LocationManager.getInstance().getObservation();
+						Observation observation = LocationManager.getInstance().getObservationLocked();
 						if (observation != null) {
 
 							beacon.latitude = observation.latitude;
@@ -1284,7 +1297,7 @@ public class ProxiExplorer {
 			}
 
 			/* Observation */
-			Observation observation = LocationManager.getInstance().getObservation();
+			Observation observation = LocationManager.getInstance().getObservationLocked();
 			if (observation != null) {
 				parameters.putString("observation",
 						"object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
@@ -1750,7 +1763,7 @@ public class ProxiExplorer {
 		public ModelResult getEntitiesByListType(EntityListType entityListType, Boolean refresh, String collectionId, String userId, Integer limit) {
 			ModelResult result = new ModelResult();
 			if (entityListType == EntityListType.TunedPlaces) {
-				result.data = getRadarPlaces();
+				result.data = getAircandiPlaces();
 			}
 			else if (entityListType == EntityListType.SyntheticPlaces) {
 				result.data = getRadarSynthetics();
@@ -1774,7 +1787,7 @@ public class ProxiExplorer {
 		 * @return
 		 */
 
-		public EntityList<Entity> getPlaces() {
+		public EntityList<Entity> getAllPlaces(Boolean includeHidden) {
 			/*
 			 * This is the one case where refresh scenarios have been
 			 * handled outside of this method.
@@ -1787,15 +1800,17 @@ public class ProxiExplorer {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 						Entity entity = entry.getValue();
-						if (!entity.hidden) {
-							Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
+						if (includeHidden || !entity.hidden) {
+
 							/* Must do this to cache the distance before sorting */
 							Float distance = entity.getDistance();
+
+							Beacon beacon = entity.getActivePrimaryBeacon(LinkType.proximity.name());
 							if (beacon != null) {
 								entities.add(entity);
 							}
 							else {
-								beacon = entity.getActiveBeacon(LinkType.browse.name());
+								beacon = entity.getActivePrimaryBeacon(LinkType.browse.name());
 								/*
 								 * Entities that were first found by beacon hang around and could
 								 * later be visible via location if we continue with this approach.
@@ -1817,16 +1832,25 @@ public class ProxiExplorer {
 			return entities;
 		}
 
+		public Float getMaxPlaceDistance() {
+			List<Entity> places = getAllPlaces(true); // refreshes distance calculation
+			Float maxDistance = 0f;
+			for (Entity entity : places) {
+				if (entity.distance > maxDistance) {
+					maxDistance = entity.distance;
+				}
+			}
+			return maxDistance;
+		}
+
 		/**
-		 * Returns all the entities that should be visible in radar. Entities that are hidden
-		 * have already been screened out. Only includes top level entities which currently are
-		 * only places or global candi (like the update notice). Entities are pre-sorted by
-		 * tuning score.
+		 * Returns sorted list of all the entities that came from the aircandi service. Entities that are hidden
+		 * have already been screened out. Only includes top level place entities.
 		 * 
 		 * @return
 		 */
 
-		public EntityList<Entity> getRadarPlaces() {
+		public EntityList<Entity> getAircandiPlaces() {
 			/*
 			 * This is the one case where refresh scenarios have been
 			 * handled outside of this method.
@@ -1839,15 +1863,15 @@ public class ProxiExplorer {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 						Entity entity = entry.getValue();
-						if (!entity.hidden && !entity.synthetic) {
-							Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
+						if (!entity.synthetic) {
+							Beacon beacon = entity.getActivePrimaryBeacon(LinkType.proximity.name());
 							/* Must do this to cache the distance before sorting */
 							Float distance = entity.getDistance();
 							if (beacon != null) {
 								entities.add(entity);
 							}
 							else {
-								beacon = entity.getActiveBeacon(LinkType.browse.name());
+								beacon = entity.getActivePrimaryBeacon(LinkType.browse.name());
 								/*
 								 * Entities that were first found by beacon hang around and could
 								 * later be visible via location if we continue with this approach.
@@ -1866,6 +1890,27 @@ public class ProxiExplorer {
 				}
 			}
 			Collections.sort(entities, new Entity.SortEntitiesByPlaceRankScoreDistance());
+			return entities;
+		}
+
+		public EntityList<Entity> getProximityPlaces() {
+			/*
+			 * This is the one case where refresh scenarios have been
+			 * handled outside of this method.
+			 */
+			EntityList<Entity> entities = new EntityList<Entity>();
+
+			synchronized (mEntityCache) {
+				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+					if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+						Entity entity = entry.getValue();
+						Beacon beacon = entity.getActivePrimaryBeacon(LinkType.proximity.name());
+						if (beacon != null) {
+							entities.add(entity);
+						}
+					}
+				}
+			}
 			return entities;
 		}
 
@@ -1882,7 +1927,7 @@ public class ProxiExplorer {
 					if (entry.getValue().isCollection) {
 						Entity entity = entry.getValue();
 						if (!entity.hidden && !entity.synthetic) {
-							Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
+							Beacon beacon = entity.getActivePrimaryBeacon(LinkType.proximity.name());
 							/* Must do this to cache the distance before sorting */
 							Float distance = entity.getDistance();
 							if (beacon != null) {
@@ -1924,7 +1969,7 @@ public class ProxiExplorer {
 						Entity entity = entry.getValue();
 						if (!entity.hidden && entity.synthetic) {
 							Float distance = entity.getDistance();
-							Beacon beacon = entity.getActiveBeacon(LinkType.proximity.name());
+							Beacon beacon = entity.getActivePrimaryBeacon(LinkType.proximity.name());
 							if (beacon != null) {
 								entities.add(entity);
 							}
@@ -2095,6 +2140,8 @@ public class ProxiExplorer {
 			Entity original = entity;
 			synchronized (mEntityCache) {
 				Entity entityOriginal = mEntityModel.mEntityCache.get(entity.id);
+
+				/* Check to see if we have this entity keyed to the sourceId */
 				if (entityOriginal != null) {
 					original = entityOriginal;
 					Entity.copyProperties(entity, entityOriginal);
@@ -2267,25 +2314,6 @@ public class ProxiExplorer {
 			setLastActivityDate(DateUtils.nowDate().getTime());
 		}
 
-		private void removeLocationEntities() {
-			/*
-			 * We clean out user entities and their children when the entity
-			 * is associated with a beacon that isn't a radar hit.
-			 */
-			synchronized (mEntityCache) {
-				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
-				while (iter.hasNext()) {
-					Entity entity = mEntityModel.mEntityCache.get(iter.next());
-					if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)
-							&& !entity.synthetic
-							&& (entity.links == null || entity.links.size() == 0)) {
-						iter.remove();
-					}
-				}
-			}
-			setLastActivityDate(DateUtils.nowDate().getTime());
-		}
-
 		private void removeBeaconEntities() {
 			/*
 			 * We clean out user entities and their children when the entity
@@ -2391,11 +2419,11 @@ public class ProxiExplorer {
 		// Set/Get routines
 		// --------------------------------------------------------------------------------------------
 
-		public Number getLastRefreshDate() {
+		public Number getLastBeaconRefreshDate() {
 			return mLastRefreshDate;
 		}
 
-		public void setLastRefreshDate(Number lastRefreshDate) {
+		public void setLastBeaconRefreshDate(Number lastRefreshDate) {
 			mLastRefreshDate = lastRefreshDate;
 		}
 

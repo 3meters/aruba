@@ -21,8 +21,8 @@ import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.ui.base.FormActivity;
@@ -178,7 +178,7 @@ public class CommentForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("InsertComment");
-					ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertComment(mCommon.mParentId, mComment, false);
+					ModelResult result = ProxiManager.getInstance().getEntityModel().insertComment(mCommon.mParentId, mComment, false);
 					return result;
 				}
 

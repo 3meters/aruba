@@ -11,7 +11,7 @@ import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.components.EntityList;
 import com.aircandi.components.LocationManager;
-import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiManager;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
 import com.aircandi.utilities.MiscUtils;
@@ -215,8 +215,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 */
 		ServiceEntryBase.copyProperties(from, to);
 
-		to.type = from.type;
-		to.name = from.name;
 		to.subtitle = from.subtitle;
 		to.description = from.description;
 
@@ -293,7 +291,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			location = parent.getLocation();
 		}
 		else {
-			Beacon beacon = getActiveBeacon("proximity");
+			Beacon beacon = getActivePrimaryBeacon("proximity");
 			if (beacon != null) {
 				location = beacon.getLocation();
 			}
@@ -306,23 +304,26 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 	public Float getDistance() {
 		this.distance = -1f;
-		Beacon beacon = getActiveBeacon("proximity");
+		Beacon beacon = getActivePrimaryBeacon("proximity");
 		if (beacon != null) {
 			this.distance = beacon.getDistance();
 		}
 		else {
 			GeoLocation location = getLocation();
 			if (location != null) {
-				Observation observation = LocationManager.getInstance().getObservation();
+				Observation observation = LocationManager.getInstance().getObservationLocked();
 				if (observation != null) {
 					Float distanceByLocation = 0f;
 					android.location.Location locationObserved = new android.location.Location(observation.provider);
 					locationObserved.setLatitude(observation.latitude.doubleValue());
 					locationObserved.setLongitude(observation.longitude.doubleValue());
+
 					android.location.Location locationPlace = new android.location.Location("place");
 					locationPlace.setLatitude(location.latitude.doubleValue());
 					locationPlace.setLongitude(location.longitude.doubleValue());
+
 					distanceByLocation = locationObserved.distanceTo(locationPlace);
+
 					this.distance = distanceByLocation;
 				}
 			}
@@ -340,8 +341,10 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 */
 		String imageUri = "resource:img_placeholder_logo_bw";
 		if (this.type.equals(CandiConstants.TYPE_CANDI_POST)) {
-			if (this.creator.photo != null) {
-				imageUri = this.creator.photo.getUri();
+			if (creator != null) {
+				if (creator.getUserPhotoUri() != null && !creator.getUserPhotoUri().equals("")) {
+					imageUri = creator.getUserPhotoUri();
+				}
 			}
 			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
 				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
@@ -363,11 +366,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			else if (this.place != null && this.place.category != null) {
 				imageUri = this.place.category.iconUri();
 			}
-			else if (creator != null) {
-				if (creator.getUserPhotoUri() != null && !creator.getUserPhotoUri().equals("")) {
-					imageUri = creator.getUserPhotoUri();
-				}
-			}
 		}
 		else {
 			if (this.photo != null) {
@@ -376,17 +374,12 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 					imageUri = photo.getUri();
 				}
 			}
-			else if (creator != null) {
-				if (creator.getUserPhotoUri() != null && !creator.getUserPhotoUri().equals("")) {
-					imageUri = creator.getUserPhotoUri();
-				}
-			}
 		}
 
 		return imageUri;
 	}
 
-	private Link getActiveLink(String linkType) {
+	private Link getActiveLink(String linkType, Boolean primaryOnly) {
 		/*
 		 * If an entity has more than one viable link, we choose the one
 		 * using the following priority:
@@ -401,7 +394,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			for (Link link : links) {
 				if (link.type.equals(linkType)) {
 					if (link.primary != null && link.primary) {
-						Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
+						Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
 						if (beacon != null && beacon.level.intValue() > strongestLevel) {
 							strongestLink = link;
 							strongestLevel = beacon.level.intValue();
@@ -410,10 +403,10 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 				}
 			}
 
-			if (strongestLink == null) {
+			if (strongestLink == null && !primaryOnly) {
 				for (Link link : links) {
 					if (link.type.equals(linkType)) {
-						Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
+						Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
 						if (beacon != null && beacon.level.intValue() > strongestLevel) {
 							strongestLink = link;
 							strongestLevel = beacon.level.intValue();
@@ -428,12 +421,12 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public EntityList<Entity> getChildren() {
-		EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getChildEntities(this.id);
+		EntityList<Entity> entities = ProxiManager.getInstance().getEntityModel().getChildEntities(this.id);
 		return entities;
 	}
 
 	public EntityList<Entity> getSourceEntities() {
-		EntityList<Entity> entities = ProxiExplorer.getInstance().getEntityModel().getSourceEntities(this.id);
+		EntityList<Entity> entities = ProxiManager.getInstance().getEntityModel().getSourceEntities(this.id);
 		return entities;
 	}
 
@@ -445,14 +438,14 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public Entity getParent() {
-		Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(this.parentId);
+		Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(this.parentId);
 		return entity;
 	}
 
-	public Beacon getActiveBeacon(String linkType) {
-		Link link = getActiveLink(linkType);
+	public Beacon getActivePrimaryBeacon(String linkType) {
+		Link link = getActiveLink(linkType, true);
 		if (link != null) {
-			Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
+			Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
 			return beacon;
 		}
 		return null;
@@ -472,7 +465,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	public Boolean hasProximityLink() {
 		if (links != null) {
 			for (Link link : links) {
-				if (link.primary) {
+				if (link.primary && link.type.equals("proximity")) {
 					return true;
 				}
 			}
@@ -507,7 +500,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 						if (link.type.equals("proximity")) {
 							placeRankScore += (link.tuneCount.intValue() * 5);
 
-							Beacon beacon = ProxiExplorer.getInstance().getEntityModel().getBeacon(link.toId);
+							Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
 							if (beacon != null) {
 								int level = beacon.level.intValue();
 
@@ -522,7 +515,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 							}
 						}
 						else if (link.type.equals("browse")) {
-							placeRankScore += (link.tuneCount.intValue() * 1);
+							//placeRankScore += (link.tuneCount.intValue() * 1);
 						}
 					}
 				}
@@ -537,7 +530,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public String getBeaconId() {
-		Link link = getActiveLink("proximity");
+		Link link = getActiveLink("proximity", true);
 		if (link != null) {
 			return link.toId;
 		}
@@ -567,32 +560,32 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		@Override
 		public int compare(Entity entity1, Entity entity2) {
 
-//			/* synthetics */
-//			if (!entity1.synthetic && entity2.synthetic) {
-//				return -1;
-//			}
-//			if (entity1.synthetic && !entity2.synthetic) {
-//				return 1;
-//			}
-//			else {
-				if (entity1.getPlaceRankImpact() > entity2.getPlaceRankImpact()) {
-					return -1;
-				}
-				if (entity1.getPlaceRankImpact() < entity2.getPlaceRankImpact()) {
-					return 1;
-				}
-				else {
-					if (entity1.distance < entity2.distance.intValue()) {
-						return -1;
-					}
-					else if (entity1.distance.intValue() > entity2.distance.intValue()) {
-						return 1;
-					}
-					else {
-						return 0;
-					}
-				}
-//			}
+			//			/* synthetics */
+			//			if (!entity1.synthetic && entity2.synthetic) {
+			//				return -1;
+			//			}
+			//			if (entity1.synthetic && !entity2.synthetic) {
+			//				return 1;
+			//			}
+			//			else {
+			//			if (entity1.getPlaceRankImpact() > entity2.getPlaceRankImpact()) {
+			//				return -1;
+			//			}
+			//			if (entity1.getPlaceRankImpact() < entity2.getPlaceRankImpact()) {
+			//				return 1;
+			//			}
+			//			else {
+			if (entity1.distance < entity2.distance.intValue()) {
+				return -1;
+			}
+			else if (entity1.distance.intValue() > entity2.distance.intValue()) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+			//			}
+			//			}
 		}
 	}
 

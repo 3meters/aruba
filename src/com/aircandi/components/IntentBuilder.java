@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.aircandi.CandiConstants;
-import com.aircandi.components.ProxiExplorer.EntityListType;
+import com.aircandi.components.ProxiManager.EntityListType;
 
 public class IntentBuilder {
 

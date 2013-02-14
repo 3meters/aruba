@@ -60,7 +60,7 @@ public class Link extends ServiceEntryBase {
 
 		link.fromCollectionId = (String) map.get("fromCollectionId");
 		link.toCollectionId = (String) map.get("toCollectionId");
-		link.tuneCount = (Number) map.get("tuneCount");
+		//link.tuneCount = (Number) map.get("tuneCount");
 		return link;
 	}
 

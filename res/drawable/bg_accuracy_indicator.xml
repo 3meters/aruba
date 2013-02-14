@@ -2,12 +2,7 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval" >
 
-    <gradient
-        android:angle="270"
-        android:centerColor="@color/accuracy"
-        android:endColor="@color/accuracy"
-        android:startColor="@color/accuracy"
-        android:type="linear" />
+    <solid android:color="@color/accuracy_halo" />
 
     <size
         android:height="30dp"

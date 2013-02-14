@@ -37,9 +37,10 @@ import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
+import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
@@ -74,6 +75,8 @@ public class EntityForm extends FormActivity {
 	private TextView		mTitle;
 	private TextView		mDescription;
 	private CheckBox		mLocked;
+	private Boolean			mMuteColor;
+	private Integer			mColorResId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -171,7 +174,7 @@ public class EntityForm extends FormActivity {
 				 * that any changes only show up in the entity model if the changes make it
 				 * to the service.
 				 */
-				Entity entityForModel = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+				Entity entityForModel = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 				if (entityForModel != null) {
 					mEntityForForm = entityForModel.clone();
 				}
@@ -184,6 +187,10 @@ public class EntityForm extends FormActivity {
 		if (mEntityForForm != null) {
 
 			final Entity entity = mEntityForForm;
+
+			/* Color */
+			
+			mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others		
 
 			/* Fonts */
 
@@ -259,36 +266,15 @@ public class EntityForm extends FormActivity {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private void drawImage(Entity entity) {
 		if (mImageViewPicture != null) {
 
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				if (mEntityBitmap == null && entity.photo == null && entity.place != null) {
-
-					Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
-					int color = Place.getCategoryColor(entity.place.category != null ? entity.place.category.name : null, true, boostColor, false);
-					mImageViewPicture.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-
-					int colorResId = Place.getCategoryColorResId(entity.place.category != null ? entity.place.category.name : null, true, boostColor, false);
-					if (findViewById(R.id.color_layer) != null) {
-						((View) findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
-						((View) findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
-					}
-					else {
-						mImageViewPicture.getImageView().setBackgroundResource(colorResId);
-					}
-				}
-				else {
-					mImageViewPicture.getImageView().clearColorFilter();
-					if (findViewById(R.id.color_layer) != null) {
-						((View) findViewById(R.id.color_layer)).setBackgroundDrawable(null);
-						((View) findViewById(R.id.color_layer)).setVisibility(View.GONE);
-					}
-					else {
-						mImageViewPicture.getImageView().setBackgroundDrawable(null);
-					}
-				}
+			mImageViewPicture.getImageView().clearColorFilter();
+			mImageViewPicture.getImageView().setBackgroundResource(0);
+			if (findViewById(R.id.color_layer) != null) {
+				((View) findViewById(R.id.color_layer)).setBackgroundResource(0);
+				((View) findViewById(R.id.color_layer)).setVisibility(View.GONE);
+				((View) findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
 			}
 
 			if (mEntityBitmap != null) {
@@ -297,10 +283,33 @@ public class EntityForm extends FormActivity {
 				mImageViewPicture.setVisibility(View.VISIBLE);
 			}
 			else {
-				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageViewPicture);
-				builder.setImageUri(entity.getEntityPhotoUri());
-				BitmapRequest imageRequest = builder.create();
-				mImageViewPicture.setBitmapRequest(imageRequest);
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+					if (entity.photo == null && entity.place != null && entity.place.category != null) {
+
+						int color = Place.getCategoryColor(entity.place.category != null
+								? entity.place.category.name
+								: null, true, mMuteColor, false);
+						
+						mImageViewPicture.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+						mColorResId = Place.getCategoryColorResId((entity.place != null && entity.place.category != null) ? entity.place.category.name : null, true, mMuteColor, false);
+						
+						if (findViewById(R.id.color_layer) != null) {
+							((View) findViewById(R.id.color_layer)).setBackgroundResource(mColorResId);
+							((View) findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+							((View) findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+						}
+						else {
+							mImageViewPicture.getImageView().setBackgroundResource(mColorResId);
+						}
+					}
+				}
+				
+				String imageUri = entity.getEntityPhotoUri();				
+				BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mImageViewPicture.getImageView());
+				bitmapRequest.setImageSize(mImageViewPicture.getSizeHint());
+				bitmapRequest.setImageRequestor(mImageViewPicture.getImageView());
+				mImageViewPicture.getImageView().setTag(imageUri);
+				BitmapManager.getInstance().masterFetch(bitmapRequest);
 			}
 		}
 	}
@@ -686,7 +695,7 @@ public class EntityForm extends FormActivity {
 			/*
 			 * We are linking to a beacon so get the best and alert if none
 			 */
-			beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
+			beacons = ProxiManager.getInstance().getStrongestBeacons(5);
 			primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
 
 			/*
@@ -698,7 +707,7 @@ public class EntityForm extends FormActivity {
 				/*
 				 * We add location info as a consistent feature
 				 */
-				Observation observation = LocationManager.getInstance().getObservation();
+				Observation observation = LocationManager.getInstance().getObservationLocked();
 				if (observation != null) {
 					mEntityForForm.place.location = new com.aircandi.service.objects.Location();
 					mEntityForForm.place.location.lat = observation.latitude;
@@ -708,13 +717,13 @@ public class EntityForm extends FormActivity {
 		}
 
 		Tracker.sendEvent("ui_action", "entity_insert", mEntityForForm.type, 0);
-		result = ProxiExplorer.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, mEntityBitmap, false);
+		result = ProxiManager.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, mEntityBitmap, false);
 		return result;
 	}
 
 	private ModelResult updateEntityAtService() {
 		Tracker.sendEvent("ui_action", "entity_update", mEntityForForm.type, 0);
-		ModelResult result = ProxiExplorer.getInstance().getEntityModel().updateEntity(mEntityForForm, mEntityBitmap);
+		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, mEntityBitmap);
 		return result;
 	}
 
@@ -735,7 +744,7 @@ public class EntityForm extends FormActivity {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("DeleteEntity");
 				Tracker.sendEvent("ui_action", "entity_delete", mEntityForForm.type, 0);
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().deleteEntity(mEntityForForm.id, false);
+				ModelResult result = ProxiManager.getInstance().getEntityModel().deleteEntity(mEntityForForm.id, false);
 				return result;
 			}
 
@@ -761,7 +770,7 @@ public class EntityForm extends FormActivity {
 			}
 
 		}.execute();
-}
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Persistence routines

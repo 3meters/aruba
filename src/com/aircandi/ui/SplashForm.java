@@ -22,8 +22,8 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.ProxibaseService;
@@ -83,17 +83,17 @@ public class SplashForm extends SherlockActivity {
 		NetworkManager.getInstance().initialize();
 
 		/* Proxibase sdk components */
-		ProxiExplorer.getInstance().setContext(getApplicationContext());
-		ProxiExplorer.getInstance().setUsingEmulator(Aircandi.usingEmulator);
-		ProxiExplorer.getInstance().initialize();
+		ProxiManager.getInstance().setContext(getApplicationContext());
+		ProxiManager.getInstance().setUsingEmulator(Aircandi.usingEmulator);
+		ProxiManager.getInstance().initialize();
 
 		/* Cache categories - we delay until after the initial rush for data */
-		Aircandi.mainThreadHandler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				loadCategories();
-			}
-		}, 60000);
+//		Aircandi.mainThreadHandler.postDelayed(new Runnable() {
+//			@Override
+//			public void run() {
+//				loadCategories();
+//			}
+//		}, 60000);
 
 		Aircandi.firstStartApp = false;
 		Aircandi.stopwatch3.stop("initializeApp function stop");
@@ -130,6 +130,7 @@ public class SplashForm extends SherlockActivity {
 		finish();
 	}
 
+	@SuppressWarnings("unused")
 	private void loadCategories() {
 		new AsyncTask() {
 
@@ -137,8 +138,8 @@ public class SplashForm extends SherlockActivity {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadCategories");
 				ModelResult result = new ModelResult();
-				if (ProxiExplorer.getInstance().getEntityModel().getCategories().size() == 0) {
-					result = ProxiExplorer.getInstance().getEntityModel().loadCategories();
+				if (ProxiManager.getInstance().getEntityModel().getCategories().size() == 0) {
+					result = ProxiManager.getInstance().getEntityModel().loadCategories();
 				}
 				return result;
 			}

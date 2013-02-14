@@ -41,8 +41,8 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -136,7 +136,7 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntity");
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, null, null);
+				ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, null, null);
 				return result;
 			}
 
@@ -147,8 +147,8 @@ public class CandiForm extends CandiActivity {
 
 					if (result.data != null) {
 						mEntity = (Entity) result.data;
-						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
-						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
+						mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
+						mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
 						mCommon.mActionBar.setTitle(mEntity.name);
 
 						draw();
@@ -177,7 +177,7 @@ public class CandiForm extends CandiActivity {
 
 	private void track() {
 
-		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
+		final List<Beacon> beacons = ProxiManager.getInstance().getStrongestBeacons(5);
 		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
 
 		new AsyncTask() {
@@ -185,7 +185,7 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("TrackEntityBrowse");
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().trackEntity(mEntity, beacons, primaryBeacon, "browse");
+				ModelResult result = ProxiManager.getInstance().getEntityModel().trackEntity(mEntity, beacons, primaryBeacon, "browse");
 				return result;
 			}
 
@@ -200,7 +200,7 @@ public class CandiForm extends CandiActivity {
 
 	private void upsize() {
 
-		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
+		final List<Beacon> beacons = ProxiManager.getInstance().getStrongestBeacons(5);
 		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
 
 		new AsyncTask() {
@@ -213,7 +213,7 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("UpsizeSynthetic");
-				ModelResult result = ProxiExplorer.getInstance().upsizeSynthetic(mEntity, beacons, primaryBeacon);
+				ModelResult result = ProxiManager.getInstance().upsizeSynthetic(mEntity, beacons, primaryBeacon);
 				return result;
 			}
 
@@ -299,7 +299,7 @@ public class CandiForm extends CandiActivity {
 
 	private void doCandiClick(Entity entity) {
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			Source meta = ProxiExplorer.getInstance().getEntityModel().getSourceMeta().get(entity.source.source);
+			Source meta = ProxiManager.getInstance().getEntityModel().getSourceMeta().get(entity.source.source);
 			if (meta != null && !meta.installDeclined
 					&& meta.intentSupport
 					&& entity.source.appExists()
@@ -356,8 +356,8 @@ public class CandiForm extends CandiActivity {
 		photo.setCreatedAt(mEntity.modifiedDate);
 		photo.setTitle(mEntity.name);
 		photo.setUser(mEntity.creator);
-		ProxiExplorer.getInstance().getEntityModel().getPhotos().clear();
-		ProxiExplorer.getInstance().getEntityModel().getPhotos().add(photo);
+		ProxiManager.getInstance().getEntityModel().getPhotos().clear();
+		ProxiManager.getInstance().getEntityModel().getPhotos().add(photo);
 		intent = new Intent(this, PictureDetail.class);
 		intent.putExtra(CandiConstants.EXTRA_URI, mEntity.photo.getUri());
 		intent.putExtra(CandiConstants.EXTRA_PAGING_ENABLED, false);
@@ -481,7 +481,7 @@ public class CandiForm extends CandiActivity {
 
 	private void tuneProximity() {
 
-		final List<Beacon> beacons = ProxiExplorer.getInstance().getStrongestBeacons(5);
+		final List<Beacon> beacons = ProxiManager.getInstance().getStrongestBeacons(5);
 		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
 
 		new AsyncTask() {
@@ -494,7 +494,7 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("TrackEntityProximity");
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().trackEntity(mEntity, beacons, primaryBeacon, "proximity");
+				ModelResult result = ProxiManager.getInstance().getEntityModel().trackEntity(mEntity, beacons, primaryBeacon, "proximity");
 				return result;
 			}
 
@@ -866,8 +866,8 @@ public class CandiForm extends CandiActivity {
 		 */
 		if (!isFinishing() && mEntity != null) {
 			AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
-			if (ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
-					|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+			if (ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
+					|| ProxiManager.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}
@@ -928,7 +928,7 @@ public class CandiForm extends CandiActivity {
 							AnimUtils.doOverridePendingTransition(CandiForm.this, TransitionType.PageToForm);
 						}
 						else if (which == Dialog.BUTTON_NEGATIVE) {
-							Source meta = ProxiExplorer.getInstance().getEntityModel().getSourceMeta().get(entity.source.source);
+							Source meta = ProxiManager.getInstance().getEntityModel().getSourceMeta().get(entity.source.source);
 							meta.installDeclined = true;
 							doCandiClick(entity);
 							dialog.dismiss();

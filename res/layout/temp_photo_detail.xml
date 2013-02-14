@@ -3,7 +3,7 @@
     xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_picture_browse" >
+    android:background="@color/background_picture_detail" >
 
     <RelativeLayout
         android:id="@+id/progress_group"
@@ -24,7 +24,7 @@
             android:layout_height="10dp"
             android:layout_alignParentTop="true"
             android:progress="0"
-            android:progressDrawable="@drawable/progress" />
+            android:progressDrawable="@drawable/shape_progress" />
     </RelativeLayout>
 
     <it.sephiroth.android.library.imagezoom.ImageViewTouch
@@ -37,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#66000000"
+        android:background="@color/overlay_photo_detail"
         android:orientation="vertical"
         android:padding="10dp" >
 
@@ -46,7 +46,7 @@
             style="@style/form_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#ffffffff" />
+            android:textColor="@color/text_dark" />
 
         <com.aircandi.ui.widgets.UserView
             android:id="@+id/author"

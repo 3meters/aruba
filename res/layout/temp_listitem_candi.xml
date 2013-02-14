@@ -4,7 +4,7 @@
     android:id="@+id/item_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/button_nooutline_selector"
+    android:background="?attr/backgroundButton"
     android:clickable="true"
     android:onClick="onListItemClick"
     android:paddingBottom="10dp" >
@@ -66,7 +66,7 @@
 
         <Button
             android:id="@+id/button_comments_browse"
-            style="@style/form_button_link"
+            style="@style/form_button"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:clickable="true"

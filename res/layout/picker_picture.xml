@@ -31,7 +31,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_weight="0"
-            android:background="@drawable/button_nooutline_selector"
+            android:background="?attr/backgroundButton"
             android:clickable="true"
             android:maxWidth="40dp"
             android:minWidth="40dp"

@@ -19,12 +19,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.ProxibaseService;
@@ -82,11 +83,11 @@ public class CategoryBuilder extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 
-		if (ProxiExplorer.getInstance().getEntityModel().getCategories().size() == 0) {
+		if (ProxiManager.getInstance().getEntityModel().getCategories().size() == 0) {
 			loadCategories();
 		}
 		else {
-			mCategories = ProxiExplorer.getInstance().getEntityModel().getCategories();
+			mCategories = ProxiManager.getInstance().getEntityModel().getCategories();
 			if (mCategories != null) {
 				if (mOriginalCategory != null) {
 					setCategoryIndexes();
@@ -102,7 +103,7 @@ public class CategoryBuilder extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadCategories");
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().loadCategories();
+				ModelResult result = ProxiManager.getInstance().getEntityModel().loadCategories();
 				return result;
 			}
 
@@ -110,7 +111,7 @@ public class CategoryBuilder extends FormActivity {
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					mCategories = ProxiExplorer.getInstance().getEntityModel().getCategories();
+					mCategories = ProxiManager.getInstance().getEntityModel().getCategories();
 					if (mCategories != null) {
 						if (mOriginalCategory != null) {
 							setCategoryIndexes();
@@ -206,7 +207,7 @@ public class CategoryBuilder extends FormActivity {
 
 	private void initCategorySpinner() {
 
-		List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStringArray(mCategories);
+		List<String> categories = ProxiManager.getInstance().getEntityModel().getCategoriesAsStringArray(mCategories);
 		CategoryAdapter adapter = new CategoryAdapter(CategoryBuilder.this
 				, mSpinnerItem
 				, categories
@@ -259,7 +260,7 @@ public class CategoryBuilder extends FormActivity {
 
 	private void initSubcategorySpinner(Integer position) {
 
-		final List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStringArray(mCategory.categories);
+		final List<String> categories = ProxiManager.getInstance().getEntityModel().getCategoriesAsStringArray(mCategory.categories);
 
 		if (categories.size() > 0) {
 
@@ -328,7 +329,7 @@ public class CategoryBuilder extends FormActivity {
 
 	private void initSubsubcategorySpinner(Integer position) {
 
-		List<String> categories = ProxiExplorer.getInstance().getEntityModel().getCategoriesAsStringArray(mSubCategory.categories);
+		List<String> categories = ProxiManager.getInstance().getEntityModel().getCategoriesAsStringArray(mSubCategory.categories);
 		if (categories.size() > 0) {
 
 			final CategoryAdapter adapter = new CategoryAdapter(CategoryBuilder.this
@@ -397,6 +398,7 @@ public class CategoryBuilder extends FormActivity {
 		if (findViewById(R.id.color_layer) != null) {
 			((View) findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
 			((View) findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+			((View) findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
 		}
 		else {
 			mImage.getImageView().setBackgroundResource(colorResId);
@@ -428,7 +430,7 @@ public class CategoryBuilder extends FormActivity {
 			TextView text = (TextView) view.findViewById(R.id.spinner_name);
 			if (mCommon.mThemeTone.equals("dark")) {
 				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
-					text.setTextColor(R.color.text_dark);
+					text.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_dark));
 				}
 			}
 

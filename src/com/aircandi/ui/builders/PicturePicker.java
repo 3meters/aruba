@@ -48,8 +48,8 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.ImageResult;
 import com.aircandi.service.ProxibaseService;
@@ -112,7 +112,7 @@ public class PicturePicker extends FormActivity {
 		}
 
 		if (mPlacePhotoMode) {
-			mEntity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+			mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 			mSource = mEntity.place.source;
 			mSourceId = mEntity.place.sourceId;
 			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
@@ -237,7 +237,7 @@ public class PicturePicker extends FormActivity {
 	}
 
 	private ServiceResponse loadPlaceImages(long count, long offset) {
-		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getPlacePhotos(mSource, mSourceId, count, offset);
+		ModelResult result = ProxiManager.getInstance().getEntityModel().getPlacePhotos(mSource, mSourceId, count, offset);
 		return result.serviceResponse;
 	}
 

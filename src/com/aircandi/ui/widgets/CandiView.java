@@ -94,7 +94,6 @@ public class CandiView extends RelativeLayout {
 		FontManager.getInstance().setTypefaceDefault(mDistance);
 	}
 
-	@SuppressWarnings("deprecation")
 	public void bindToEntity(Entity entity) {
 		/*
 		 * If it is the same entity and it hasn't changed then nothing to do
@@ -116,7 +115,7 @@ public class CandiView extends RelativeLayout {
 
 		/* Clear image as quickly as possible */
 		if (mCandiImage != null) {
-			mCandiImage.getImageView().setBackgroundDrawable(null);
+			mCandiImage.getImageView().setImageDrawable(null);
 		}
 
 		mEntity = entity;
@@ -131,7 +130,7 @@ public class CandiView extends RelativeLayout {
 		if (mCandiViewGroup != null) {
 			Integer padding = ImageUtils.getRawPixels(this.getContext(), 3);
 			this.setPadding(padding, padding, padding, padding);
-			this.setBackgroundResource(R.drawable.app_image_selector);
+			this.setBackgroundResource(R.drawable.selector_image);
 			mCandiViewGroup.setBackgroundResource(mColorResId);
 		}
 
@@ -202,33 +201,38 @@ public class CandiView extends RelativeLayout {
 					webImageView.setSizeHint(sizePixels);
 
 					String imageUri = sourceEntity.getEntityPhotoUri();
-					/* TODO: temp fixup until I figure out what to do with icons that look bad against color backgrounds */
-					if (sourceEntity.source != null) {
-						if (sourceEntity.source.source.equals("yelp")) {
-							imageUri = "resource:ic_yelp_dark";
+					if (!imageUri.equals("resource:img_placeholder_logo_bw")) {
+						/*
+						 * TODO: temp fixup until I figure out what to do with icons that look bad against color
+						 * backgrounds
+						 */
+						if (sourceEntity.source != null) {
+							if (sourceEntity.source.source.equals("yelp")) {
+								imageUri = "resource:ic_yelp_dark";
+							}
+							if (sourceEntity.source.source.equals("twitter")) {
+								imageUri = "resource:ic_twitter_dark";
+							}
+							if (sourceEntity.source.source.equals("website")) {
+								imageUri = "resource:ic_website_dark";
+							}
 						}
-						if (sourceEntity.source.source.equals("twitter")) {
-							imageUri = "resource:ic_twitter_dark";
-						}
-						if (sourceEntity.source.source.equals("website")) {
-							imageUri = "resource:ic_website_dark";
-						}
+						webImageView.getImageView().setTag(imageUri);
+						BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
+						bitmapRequest.setImageSize(mCandiImage.getSizeHint());
+						bitmapRequest.setImageRequestor(webImageView.getImageView());
+
+						BitmapManager.getInstance().masterFetch(bitmapRequest);
+
+						LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
+						params.setMargins(marginPixels
+								, marginPixels
+								, marginPixels
+								, marginPixels);
+						view.setLayoutParams(params);
+						mCandiSources.addView(view);
+						sourceCount++;
 					}
-					webImageView.getImageView().setTag(imageUri);
-					BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
-					bitmapRequest.setImageSize(mCandiImage.getSizeHint());
-					bitmapRequest.setImageRequestor(webImageView.getImageView());
-
-					BitmapManager.getInstance().masterFetch(bitmapRequest);
-
-					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
-					params.setMargins(marginPixels
-							, marginPixels
-							, marginPixels
-							, marginPixels);
-					view.setLayoutParams(params);
-					mCandiSources.addView(view);
-					sourceCount++;
 				}
 				setVisibility(mCandiSources, View.VISIBLE);
 			}
@@ -247,26 +251,12 @@ public class CandiView extends RelativeLayout {
 		}
 	}
 
-	@SuppressWarnings({ "deprecation" })
 	private void drawImage() {
 		if (mCandiImage != null) {
 
-			/* Handle image background coloring if we are using default treatment */
-			if (mEntity.photo == null) {
-				mCandiImage.setBackgroundResource(mColorResId);
-			}
-			else {
-				mCandiImage.setBackgroundDrawable(null);
-			}
-
 			/* Don't use gradient if we are not using a photo */
 			if (mTextGroup != null) {
-				if (mEntity.photo == null) {
-					mTextGroup.setBackgroundDrawable(null);
-				}
-				else {
-					mTextGroup.setBackgroundResource(R.drawable.picture_overlay_dark);
-				}
+				mTextGroup.setBackgroundResource(mEntity.photo != null ? R.drawable.overlay_picture : 0);
 			}
 
 			if (mEntity.getPhoto().getBitmap() != null) {
@@ -276,27 +266,45 @@ public class CandiView extends RelativeLayout {
 				ImageUtils.showImageInImageView(mEntity.photo.getBitmap(), mCandiImage.getImageView(), true, AnimUtils.fadeInMedium());
 			}
 			else {
-				/*
-				 * Go get the image for the entity regardless of type
-				 */
+
+				/* Remove colored filters */
+				mCandiImage.getImageView().clearColorFilter();
+				mCandiImage.setBackgroundResource(0);
+				((View) mLayout.findViewById(R.id.color_layer)).setVisibility(View.GONE);
+				((View) mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
+
+				/* Go get the image for the entity regardless of type */
 				String imageUri = mEntity.getEntityPhotoUri();
+
 				if (imageUri != null) {
-					mCandiImage.getImageView().setTag(imageUri);
 
-					BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mCandiImage.getImageView());
-					bitmapRequest.setImageSize(mCandiImage.getSizeHint());
-					bitmapRequest.setImageRequestor(mCandiImage.getImageView());
-
-					/* Tint the image if we are using the default treatment */
-					if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntity.photo == null) {
-						int color = Place.getCategoryColor(mEntity.place.category != null ? mEntity.place.category.name : null, true, mMuteColor, false);
-						mCandiImage.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+					if (imageUri.equals("resource:img_placeholder_logo_bw")) {
+						((View) mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+						mCandiImage.getImageView().setImageDrawable(null);
 					}
 					else {
-						mCandiImage.getImageView().clearColorFilter();
+
+						/* Tint the image if we are using the default treatment */
+						if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+							if (mEntity.photo == null && mEntity.place != null && mEntity.place.category != null) {
+
+								int color = Place.getCategoryColor(mEntity.place.category != null
+										? mEntity.place.category.name
+										: null, true, mMuteColor, false);
+
+								mCandiImage.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+								mCandiImage.setBackgroundResource(mColorResId);
+								((View) mLayout.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+								((View) mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+							}
+						}
+
+						BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mCandiImage.getImageView());
+						bitmapRequest.setImageSize(mCandiImage.getSizeHint());
+						bitmapRequest.setImageRequestor(mCandiImage.getImageView());
+						mCandiImage.getImageView().setTag(imageUri);
+						BitmapManager.getInstance().masterFetch(bitmapRequest);
 					}
-					
-					BitmapManager.getInstance().masterFetch(bitmapRequest);
 				}
 			}
 		}
@@ -306,8 +314,9 @@ public class CandiView extends RelativeLayout {
 		setVisibility(mDistance, View.GONE);
 		if (mDistance != null) {
 			String info = "here";
-			
+
 			float distance = entity.getDistance();
+			String target = entity.hasProximityLink() ? "B:" : "L:";
 			/*
 			 * If distance = -1 then we don't have the location info
 			 * yet needed to correctly determine distance.
@@ -320,7 +329,7 @@ public class CandiView extends RelativeLayout {
 				float feet = distance * MetersToFeetConversion;
 				float yards = distance * MetersToYardsConversion;
 
-				if (feet > 0) {
+				if (feet >= 0) {
 					if (miles >= 0.1) {
 						info = String.format(Locale.US, "%.1f mi", miles);
 					}
@@ -332,8 +341,16 @@ public class CandiView extends RelativeLayout {
 					}
 				}
 
-				if (feet < 60 && entity.hasProximityLink()) {
-					info = "here";
+				if (Aircandi.getInstance().getUser() != null
+						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+						&& Aircandi.getInstance().getUser().isDeveloper != null
+						&& Aircandi.getInstance().getUser().isDeveloper) {
+					info = target + info;
+				}
+				else {
+					if (feet <= 60) {
+						info = "here";
+					}
 				}
 			}
 

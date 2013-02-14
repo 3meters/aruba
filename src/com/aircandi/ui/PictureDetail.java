@@ -28,7 +28,7 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PhotoPagerAdapter;
-import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapManager.ViewHolder;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -71,8 +71,8 @@ public class PictureDetail extends FormActivity {
 	}
 
 	private void bind() {
-		List<Photo> photos = ProxiExplorer.getInstance().getEntityModel().getPhotos();
-		Photo photo = ProxiExplorer.getInstance().getEntityModel().getPhoto(mImageUri);
+		List<Photo> photos = ProxiManager.getInstance().getEntityModel().getPhotos();
+		Photo photo = ProxiManager.getInstance().getEntityModel().getPhoto(mImageUri);
 		if (!mPagingEnabled) {
 			photos = new ArrayList<Photo>();
 			photos.add(photo);

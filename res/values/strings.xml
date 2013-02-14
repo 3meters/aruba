@@ -42,8 +42,6 @@
 
     <!-- Alerts general -->
 
-    <string name="alert_beacons_zero">The beacon detecter shows green when there are beacons nearby you can add new candi to.</string>
-    <string name="alert_beacons_available">There are beacons nearby you can add new candi to.</string>
     <string name="alert_entity_locked">This candi has been locked by the owner.</string>
     <string name="alert_upgrade_title">New Aircandi version</string>
     <string name="alert_upgrade_needed_body">A newer version of Aircandi is available. Please download and install as soon possible.\n</string>
@@ -155,8 +153,6 @@
 
     <!-- Radar -->
 
-    <string name="radar_tab_radar">radar</string>
-    <string name="radar_tab_mycandi">my candi</string>
     <string name="radar_section_places">tuned</string>
     <string name="radar_section_synthetics">nearby</string>
 
@@ -243,8 +239,6 @@
     <string name="form_tab_settings">settings</string>
     <string name="profile_tab_profile">profile</string>
     <string name="profile_tab_account">account</string>
-    <string name="candi_picker_tab_radar">radar</string>
-    <string name="candi_picker_tab_mycandi">my candi</string>
 
     <!-- Forms.buttons -->
 
@@ -260,7 +254,6 @@
     <string name="form_button_cancel" tools:ignore="ButtonCase">cancel</string>
     <string name="form_button_terms">terms</string>
     <string name="form_button_send_password">forgot password?</string>
-    <string name="form_button_install">install</string>
     
     <!-- Forms.labels -->
 

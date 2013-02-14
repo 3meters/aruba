@@ -25,8 +25,8 @@ import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
@@ -88,12 +88,12 @@ public class CandiUser extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetUser");
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getUser(mCommon.mUserId);
+				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mCommon.mUserId);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					String jsonResponse = (String) result.serviceResponse.data;
 					mUser = (User) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User).data;
 
-					result = ProxiExplorer.getInstance().getEntityModel().getUserEntities(mCommon.mUserId, true, 25);
+					result = ProxiManager.getInstance().getEntityModel().getUserEntities(mCommon.mUserId, true, 25);
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						mEntities = (List<Entity>) result.data;
 					}
@@ -106,8 +106,8 @@ public class CandiUser extends CandiActivity {
 			protected void onPostExecute(Object modelResult) {
 				ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
-					mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
+					mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
+					mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
 					mCommon.mActionBar.setTitle(mUser.name);
 					buildCandiUser(CandiUser.this, mUser);
 				}
@@ -157,8 +157,8 @@ public class CandiUser extends CandiActivity {
 		photo.setCreatedAt(mUser.photo.getCreatedAt());
 		photo.setTitle(mUser.name);
 		photo.setUser(mUser);
-		ProxiExplorer.getInstance().getEntityModel().getPhotos().clear();
-		ProxiExplorer.getInstance().getEntityModel().getPhotos().add(photo);
+		ProxiManager.getInstance().getEntityModel().getPhotos().clear();
+		ProxiManager.getInstance().getEntityModel().getPhotos().add(photo);
 		intent = new Intent(this, PictureDetail.class);
 		intent.putExtra(CandiConstants.EXTRA_URI, mUser.photo.getUri());
 
@@ -398,14 +398,14 @@ public class CandiUser extends CandiActivity {
 		 */
 		if (!isFinishing()) {
 			if (mEntityModelRefreshDate != null
-					&& ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate() != null
-					&& ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()) {
+					&& ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate() != null
+					&& ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate().longValue() > mEntityModelRefreshDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}
 			else if (mEntityModelActivityDate != null
-					&& ProxiExplorer.getInstance().getEntityModel().getLastActivityDate() != null
-					&& ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+					&& ProxiManager.getInstance().getEntityModel().getLastActivityDate() != null
+					&& ProxiManager.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}

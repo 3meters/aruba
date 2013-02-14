@@ -7,8 +7,8 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 
 import com.aircandi.components.Logger;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ScanReason;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ScanReason;
 
 public class ScanService extends Service {
 
@@ -46,7 +46,7 @@ public class ScanService extends Service {
 			 * early if a scan is already active.
 			 */
 			Logger.v(ScanService.this, "Wifi scan service: requesting wifi scan"); //$NON-NLS-1$
-			ProxiExplorer.getInstance().scanForWifi(ScanReason.monitoring);
+			ProxiManager.getInstance().scanForWifi(ScanReason.monitoring);
 			return null;
 		}
 

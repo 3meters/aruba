@@ -4,7 +4,7 @@
     android:id="@+id/item_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/button_nooutline_selector"
+    android:background="@drawable/selector_button"
     android:clickable="true"
     android:onClick="onListItemClick" >
 

@@ -2,6 +2,7 @@ package com.aircandi.components;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -49,8 +50,8 @@ import com.aircandi.R;
 import com.aircandi.ScanService;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiExplorer.ModelResult;
-import com.aircandi.components.ProxiExplorer.WifiScanResult;
+import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProxiManager.WifiScanResult;
 import com.aircandi.service.ProxibaseServiceException.ErrorCode;
 import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.aircandi.service.objects.Entity;
@@ -279,22 +280,22 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
 			String beaconMessage = "";
-			synchronized (ProxiExplorer.getInstance().mWifiList) {
+			synchronized (ProxiManager.getInstance().mWifiList) {
 				if (Aircandi.getInstance().getUser() != null
 						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
 						&& Aircandi.getInstance().getUser().isDeveloper != null
 						&& Aircandi.getInstance().getUser().isDeveloper) {
 					if (Aircandi.wifiCount > 0) {
-						for (WifiScanResult wifi : ProxiExplorer.getInstance().mWifiList) {
+						for (WifiScanResult wifi : ProxiManager.getInstance().mWifiList) {
 							if (!wifi.SSID.equals("candi_feed")) {
 								beaconMessage += wifi.SSID + ": (" + String.valueOf(wifi.level) + ") " + wifi.BSSID + "\n";
 							}
 						}
 						beaconMessage += "\n";
-						beaconMessage += "Wifi fix: " + DateUtils.intervalSince(ProxiExplorer.getInstance().mLastWifiUpdate, DateUtils.nowDate());
+						beaconMessage += "Wifi fix: " + DateUtils.intervalSince(ProxiManager.getInstance().mLastWifiUpdate, DateUtils.nowDate());
 					}
 
-					Observation observation = LocationManager.getInstance().getObservation();
+					Observation observation = LocationManager.getInstance().getObservationLocked();
 					if (observation != null) {
 						Date fixDate = new Date(observation.time.longValue());
 						beaconMessage += "\nLocation fix: " + DateUtils.intervalSince(fixDate, DateUtils.nowDate());
@@ -401,18 +402,30 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void updateAccuracyIndicator(final Location location) {
 
-		mActivity.runOnUiThread(new Runnable() {
+		if (mAccuracyIndicator != null) {
 
-			@Override
-			public void run() {
-				if (location == null) {
-					mAccuracyIndicator.setBackgroundResource(R.drawable.accuracy_indicator_none);
-					Logger.v(this, "Location accuracy: none");
-				}
-				else if (location.hasAccuracy()) {
+			mActivity.runOnUiThread(new Runnable() {
 
-					int sizeDip = 40;
+				@Override
+				public void run() {
 
+					int sizeDip = 35;
+
+					if (location != null && location.hasAccuracy()) {
+
+						sizeDip = 35;
+
+						if (location.getAccuracy() <= 100) {
+							sizeDip = 25;
+						}
+						if (location.getAccuracy() <= 50) {
+							sizeDip = 13;
+						}
+						if (location.getAccuracy() <= 30) {
+							sizeDip = 7;
+						}
+
+<<<<<<< HEAD
 					if (location.getAccuracy() <= 100) {
 						sizeDip = 25;
 					}
@@ -421,19 +434,21 @@ public class AircandiCommon implements ActionBar.TabListener {
 					}
 					if (location.getAccuracy() <= 30) {
 						sizeDip = 7;
+=======
+>>>>>>> dev
 					}
 
 					Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
 					int sizePixels = ImageUtils.getRawPixels(mActivity, sizeDip);
 					FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
 					mAccuracyIndicator.setLayoutParams(layoutParams);
-					mAccuracyIndicator.setBackgroundResource(R.drawable.accuracy_indicator);
+					mAccuracyIndicator.setBackgroundResource(R.drawable.bg_accuracy_indicator);
 				}
-			}
-		});
+			});
+		}
 	}
 
-	private void updateDevIndicator(final List<WifiScanResult> scanList, Location location) {
+	public void updateDevIndicator(final List<WifiScanResult> scanList, Location location) {
 
 		if (mBeaconIndicator == null) return;
 
@@ -462,25 +477,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 						Aircandi.wifiCount = wifiCount;
 						mDebugWifi = String.valueOf(wifiCount);
-
-						//						Drawable drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_stop);
-						//						if (wifiCount > 0) {
-						//							//						if (mMenuItemBeacons != null) {
-						//							//							mMenuItemBeacons.setVisible(true);
-						//							//						}
-						//							drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_caution);
-						//						}
-						//						else {
-						//							//						if (mMenuItemBeacons != null) {
-						//							//							mMenuItemBeacons.setVisible(false);
-						//							//						}
-						//						}
-						//
-						//						if (wifiStrongest != null && wifiStrongest.level > CandiConstants.RADAR_BEACON_INDICATOR_CAUTION) {
-						//							drawable = mActivity.getResources().getDrawable(R.drawable.beacon_indicator_go);
-						//						}
-						//						mBeaconIndicator.setBackgroundDrawable(drawable);
-
 					}
 				});
 
@@ -488,7 +484,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		if (location != null) {
-			String debugLocation = location.getProvider().substring(0, 1).toUpperCase();
+			String debugLocation = location.getProvider().substring(0, 1).toUpperCase(Locale.ROOT);
 			if (location.hasAccuracy()) {
 				debugLocation += String.valueOf((int) location.getAccuracy());
 			}
@@ -753,7 +749,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					@Override
 					protected Object doInBackground(Object... params) {
 						Thread.currentThread().setName("SignOut");
-						ModelResult result = ProxiExplorer.getInstance().getEntityModel().signout();
+						ModelResult result = ProxiManager.getInstance().getEntityModel().signout();
 						return result;
 					}
 
@@ -930,7 +926,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * Behavior might be modified because we are using ABS.
 		 */
 		SherlockActivity activity = (SherlockActivity) mActivity;
-		if (mPageName.equals("CandiUser")) {
+		if (mPageName.equals("CandiRadar")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_primary_radar, menu);
+		}
+		else if (mPageName.equals("CandiUser")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_user, menu);
 
 			/* Hide user edit menu item if not the current user */
@@ -990,7 +989,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						doBeaconIndicatorClick();
 					}
 				});
-				updateDevIndicator(ProxiExplorer.getInstance().mWifiList, LocationManager.getInstance().getLocation());
+				updateDevIndicator(ProxiManager.getInstance().mWifiList, LocationManager.getInstance().getLocationLocked());
 			}
 		}
 
@@ -1007,8 +1006,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					doRefreshClick();
 				}
 			});
-
-			updateAccuracyIndicator(null);
+			updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());			
 		}
 
 		mMenu = menu;
@@ -1099,7 +1097,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		else if (mPageName.equals("EntityForm")) {
 			if (mEntityId != null) {
-				mEntity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mEntityId);
+				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
 				if (mEntity != null) {
 					if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
 						addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);

@@ -363,7 +363,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 												public void onShowPress(MotionEvent e) {
 													View view = getGestureTarget(e);
 													if (view != null) {
-														view.setBackgroundResource(R.drawable.button_pressed_bg);
+														view.setBackgroundResource(R.drawable.bg_button_pressed);
 													}
 												}
 
@@ -371,7 +371,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 												public boolean onSingleTapUp(MotionEvent e) {
 													View view = getGestureTarget(e);
 													if (view != null) {
-														view.setBackgroundResource(R.drawable.button_nooutline_bg);
+														view.setBackgroundResource(android.R.color.transparent);
 													}
 													return true;
 												}

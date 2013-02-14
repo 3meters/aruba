@@ -53,18 +53,20 @@
         <item name="badgeColor">@color/text_dark</item>
         <item name="badgeColorSynthetic">@color/text_dark</item>
 
-        <!-- Drawables and backgrounds -->
+        <!-- Backgrounds -->
 
-        <item name="textureBodyCandi">@drawable/img_placeholder_logo</item>
-        <item name="backgroundButton">@drawable/button_selector_dark</item>
+        <item name="backgroundButton">@drawable/selector_button_dark</item>
         <item name="backgroundCandi">@android:color/transparent</item>
-        <item name="backgroundRadarCandi">@drawable/candi_bg_dark</item>
         <item name="backgroundForm">@android:color/black</item>
-        <item name="backgroundPicture">@drawable/picture_bg_dark</item>
-        <item name="backgroundProgress">@drawable/progress_bg_dark</item>
+        <item name="backgroundPictureFramed">@drawable/bg_image_framed_dark</item>
+        <item name="backgroundProgress">@drawable/bg_progress_dark</item>
         <item name="backgroundActionBar">@color/background_actionbar_dark</item>
         <item name="backgroundTabBar">@color/background_tabbar_dark</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_dark</item>
+        <item name="backgroundAccuracyNone">@color/background_button_dark</item>
+        
+        <!-- Images and icons -->
+        
         <item name="logo">@drawable/ic_app</item>
         <item name="iconSearch">@drawable/ic_action_search_dark</item>
         <item name="iconForward">@drawable/ic_action_more_arrow_dark</item>
@@ -125,7 +127,7 @@
         <item name="ruleColorStrong">@color/rule_60_light</item>
         <item name="textColor">@color/text_light</item>
         <item name="textColorUnfocused">@color/text_light</item>
-        <item name="textColorButtonLink">@color/accent_darker</item>
+        <item name="textColorButtonLink">@color/accent_red_dark</item>
         <item name="textColorBullet">@color/accent_darker</item>
         <item name="textColorBars">@color/text_light</item>
         <item name="textColorProgress">@color/text_light</item>
@@ -137,16 +139,18 @@
 
         <!-- Drawables and backgrounds -->
 
-        <item name="textureBodyCandi">@drawable/img_placeholder_logo</item>
-        <item name="backgroundButton">@drawable/button_selector_light</item>
+        <item name="backgroundButton">@drawable/selector_button_light</item>
         <item name="backgroundCandi">@android:color/transparent</item>
-        <item name="backgroundRadarCandi">@drawable/candi_bg_light</item>
         <item name="backgroundForm">@android:color/white</item>
-        <item name="backgroundPicture">@drawable/picture_bg_light</item>
-        <item name="backgroundProgress">@drawable/progress_bg_light</item>
+        <item name="backgroundPictureFramed">@drawable/bg_image_framed_light</item>
+        <item name="backgroundProgress">@drawable/bg_progress_light</item>
         <item name="backgroundActionBar">@color/background_actionbar_light</item>
         <item name="backgroundTabBar">@color/background_tabbar_light</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_light</item>
+        <item name="backgroundAccuracyNone">@color/background_button_light</item>
+        
+        <!-- Images and icons -->
+        
         <item name="logo">@drawable/ic_app</item>
         <item name="iconSearch">@drawable/ic_action_search_light</item>
         <item name="iconForward">@drawable/ic_action_more_arrow_light</item>
@@ -214,9 +218,9 @@
 
         <!-- Drawables and backgrounds -->
 
-        <item name="backgroundPicture">@drawable/picture_bg_dark</item>
+        <item name="backgroundPictureFramed">@drawable/bg_image_framed_dark</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_dark</item>
-        <item name="backgroundButton">@drawable/button_selector_dark</item>
+        <item name="backgroundButton">@drawable/selector_link_button</item>
 
         <!-- Actionbar Sherlock -->
 
@@ -248,7 +252,7 @@
 
         <!-- Drawables and backgrounds -->
 
-        <item name="backgroundPicture">@drawable/picture_bg_light</item>
+        <item name="backgroundPictureFramed">@drawable/bg_image_framed_light</item>
         <item name="backgroundButtonBar">@color/background_buttonbar_light</item>
 
         <!-- Actionbar Sherlock -->
