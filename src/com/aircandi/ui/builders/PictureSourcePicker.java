@@ -23,7 +23,7 @@ import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiManager;
 import com.aircandi.components.Template;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.base.FormActivity;
@@ -67,7 +67,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 		/* Add place photo option if this is a place entity */
 		if (mEntityId != null) {
-			Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mEntityId);
+			Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && entity.place.source != null && entity.place.source.equals("foursquare")) {
 				listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
 						, getString(R.string.dialog_picture_source_place), null, "place"));

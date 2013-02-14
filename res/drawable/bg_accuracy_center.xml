@@ -5,7 +5,7 @@
     <solid android:color="@color/accuracy_center" />
 
     <size
-        android:height="7dp"
-        android:width="7dp" />
+        android:height="6dp"
+        android:width="6dp" />
 
 </shape>

@@ -15,12 +15,13 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.FontManager;
-import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
@@ -66,7 +67,7 @@ public class SourceBuilder extends FormActivity {
 			}
 			String entityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
 			if (entityId != null) {
-				mEntity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(entityId);
+				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(entityId);
 				mEditing = false;
 				mTitle.setText(R.string.dialog_source_builder_title_new);
 			}
@@ -235,7 +236,7 @@ public class SourceBuilder extends FormActivity {
 				TextView text = (TextView) view.findViewById(R.id.spinner_name);
 				if (mCommon.mThemeTone.equals("dark")) {
 					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
-						text.setTextColor(R.color.text_dark);
+						text.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_dark));
 					}
 				}
 				

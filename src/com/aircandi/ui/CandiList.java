@@ -20,9 +20,9 @@ import com.aircandi.components.EntityList;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.EntityListType;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.EntityListType;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.CandiActivity;
@@ -53,7 +53,7 @@ public class CandiList extends CandiActivity {
 		 * Navigation setup for action bar icon and title
 		 */
 		if (mEntityListType == EntityListType.InCollection) {
-			Entity collection = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mCollectionId);
+			Entity collection = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mCollectionId);
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			mCommon.mActionBar.setTitle(collection.name);
 		}
@@ -99,7 +99,7 @@ public class CandiList extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntities");
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel()
+				ModelResult result = ProxiManager.getInstance().getEntityModel()
 						.getEntitiesByListType(mEntityListType, refresh, mCommon.mCollectionId, mCommon.mUserId, ProxiConstants.RADAR_ENTITY_LIMIT);
 				return result;
 			}
@@ -116,8 +116,8 @@ public class CandiList extends CandiActivity {
 						onBackPressed();
 					}
 					else {
-						mEntityModelRefreshDate = ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate();
-						mEntityModelActivityDate = ProxiExplorer.getInstance().getEntityModel().getLastActivityDate();
+						mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
+						mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
 						mEntityModelUser = Aircandi.getInstance().getUser();
 
 						CandiListAdapter adapter = new CandiListAdapter(CandiList.this, (EntityList<Entity>) result.data, R.layout.temp_listitem_candi);
@@ -218,8 +218,8 @@ public class CandiList extends CandiActivity {
 		 */
 		if (!isFinishing() && mEntityModelUser != null) {
 			if (!Aircandi.getInstance().getUser().id.equals(mEntityModelUser.id)
-					|| ProxiExplorer.getInstance().getEntityModel().getLastRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
-					|| ProxiExplorer.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+					|| ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
+					|| ProxiManager.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}

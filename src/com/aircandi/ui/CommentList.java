@@ -24,8 +24,8 @@ import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Comment;
@@ -71,7 +71,7 @@ public class CommentList extends CandiActivity {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		Entity entity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+		Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 		mCommon.mActionBar.setTitle(entity.name);
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 	}
@@ -92,7 +92,7 @@ public class CommentList extends CandiActivity {
 				 * Just get the comments without updating the entity in the cache
 				 */
 				String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, jsonEagerLoad, null);
+				ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, jsonEagerLoad, null);
 				return result;
 			}
 
@@ -140,7 +140,7 @@ public class CommentList extends CandiActivity {
 				+ ",\"skip\":" + String.valueOf(mComments.size())
 				+ "}}";
 
-		ModelResult result = ProxiExplorer.getInstance().getEntityModel().getEntity(mCommon.mEntityId, true, jsonEagerLoad, jsonOptions);
+		ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, true, jsonEagerLoad, jsonOptions);
 		return result;
 	}
 

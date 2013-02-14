@@ -28,8 +28,8 @@ import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.SourceListAdapter;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -76,7 +76,7 @@ public class SourcesBuilder extends FormActivity {
 	private void initialize() {
 		/* We use this to access the source suggestions */
 		if (mCommon.mEntityId != null) {
-			mEntity = ProxiExplorer.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+			mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 		}
 
 		Bundle extras = this.getIntent().getExtras();
@@ -371,7 +371,7 @@ public class SourcesBuilder extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadSourceSuggestions");
-				ModelResult result = ProxiExplorer.getInstance().getEntityModel().getSourceSuggestions(sources);
+				ModelResult result = ProxiManager.getInstance().getEntityModel().getSourceSuggestions(sources);
 				return result;
 			}
 

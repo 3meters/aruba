@@ -24,7 +24,9 @@ public class LocationManager {
 	private Context								mApplicationContext;
 	protected android.location.LocationManager	mLocationManager;
 
-	private Location							mLocation;
+	private Location							mLocationLatest;
+	private Location							mLocationLocked;
+	private Observation							mObservationLocked;
 	private Boolean								mLocationModeBurstNetwork	= false;
 	private Boolean								mLocationModeBurstGps		= false;
 	protected PendingIntent						mLocationListenerPendingIntent;
@@ -138,20 +140,15 @@ public class LocationManager {
 	// Support routines
 	// --------------------------------------------------------------------------------------------
 
-	public Observation getObservation() {
-		return getObservationForLocation(null);
-	}
+	private Observation getObservationForLockedLocation() {
 
-	public Observation getObservationForLocation(Location location) {
-
-		Location locationTarget = location == null ? mLocation : location;
 		Observation observation = new Observation();
 
-		if (locationTarget == null || !locationTarget.hasAccuracy()) {
+		if (mLocationLocked == null || !mLocationLocked.hasAccuracy()) {
 			return null;
 		}
 
-		synchronized (locationTarget) {
+		synchronized (mLocationLocked) {
 
 			if (Aircandi.usingEmulator) {
 				observation = new Observation(47.616245, -122.201645); // earls
@@ -171,26 +168,26 @@ public class LocationManager {
 					observation.provider = "testing_lucky";
 				}
 				else {
-					observation.latitude = locationTarget.getLatitude();
-					observation.longitude = locationTarget.getLongitude();
+					observation.latitude = mLocationLocked.getLatitude();
+					observation.longitude = mLocationLocked.getLongitude();
 
-					if (locationTarget.hasAltitude()) {
-						observation.altitude = locationTarget.getAltitude();
+					if (mLocationLocked.hasAltitude()) {
+						observation.altitude = mLocationLocked.getAltitude();
 					}
-					if (locationTarget.hasAccuracy()) {
+					if (mLocationLocked.hasAccuracy()) {
 						/* In meters. */
-						observation.accuracy = locationTarget.getAccuracy();
+						observation.accuracy = mLocationLocked.getAccuracy();
 					}
-					if (locationTarget.hasBearing()) {
+					if (mLocationLocked.hasBearing()) {
 						/* Direction of travel in degrees East of true North. */
-						observation.bearing = locationTarget.getBearing();
+						observation.bearing = mLocationLocked.getBearing();
 					}
-					if (locationTarget.hasSpeed()) {
+					if (mLocationLocked.hasSpeed()) {
 						/* Speed of the device over ground in meters/second. */
-						observation.speed = locationTarget.getSpeed();
+						observation.speed = mLocationLocked.getSpeed();
 					}
-					observation.time = locationTarget.getTime();
-					observation.provider = locationTarget.getProvider();
+					observation.time = mLocationLocked.getTime();
+					observation.provider = mLocationLocked.getProvider();
 				}
 			}
 		}
@@ -214,12 +211,12 @@ public class LocationManager {
 		 */
 		if (location == null) {
 			Logger.d(this, "Location cleared");
-			mLocation = null;
-			BusProvider.getInstance().post(new LocationChangedEvent(mLocation));
+			mLocationLatest = null;
+			BusProvider.getInstance().post(new LocationChangedEvent(mLocationLatest));
 		}
 		else {
 			if (isGoodLocation(location)) {
-				LocationBetterReason reason = isBetterLocation(location, mLocation);
+				LocationBetterReason reason = isBetterLocation(location, mLocationLatest);
 				if (reason != LocationBetterReason.None) {
 					String message = new String("Location changed:");
 					message += " provider: " + location.getProvider();
@@ -232,8 +229,8 @@ public class LocationManager {
 							|| reason == LocationBetterReason.Accuracy
 							|| reason == LocationBetterReason.Recency) {
 
-						mLocation = location;
-						BusProvider.getInstance().post(new LocationChangedEvent(mLocation));
+						mLocationLatest = location;
+						BusProvider.getInstance().post(new LocationChangedEvent(mLocationLatest));
 					}
 
 					if (location.getProvider().equals("network") && mLocationModeBurstNetwork) {
@@ -257,15 +254,15 @@ public class LocationManager {
 	}
 
 	public Location getLocation() {
-		return mLocation;
+		return mLocationLatest;
 	}
 
 	public String getDebugStringForLocation() {
-		if (mLocation != null) {
+		if (mLocationLatest != null) {
 			String debug = "";
-			debug += mLocation.getProvider().substring(0, 1).toUpperCase(Locale.US);
-			if (mLocation.hasAccuracy()) {
-				debug += String.format("%.0f", mLocation.getAccuracy());
+			debug += mLocationLatest.getProvider().substring(0, 1).toUpperCase(Locale.US);
+			if (mLocationLatest.hasAccuracy()) {
+				debug += String.format("%.0f", mLocationLatest.getAccuracy());
 			}
 			return debug;
 		}
@@ -384,6 +381,23 @@ public class LocationManager {
 			return provider2 == null;
 		}
 		return provider1.equals(provider2);
+	}
+
+	public Location getLocationLocked() {
+		return mLocationLocked;
+	}
+
+	public void setLocationLocked(Location locationLocked) {
+		mLocationLocked = locationLocked;
+		mObservationLocked = getObservationForLockedLocation();
+	}
+
+	public Observation getObservationLocked() {
+		return mObservationLocked;
+	}
+
+	public void setObservationLocked(Observation observationLocked) {
+		mObservationLocked = observationLocked;
 	}
 
 	private enum LocationBetterReason {

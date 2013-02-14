@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.aircandi.CandiConstants;
-import com.aircandi.components.ProxiExplorer;
+import com.aircandi.components.ProxiManager;
 import com.aircandi.service.Expose;
 
 /**
@@ -156,7 +156,7 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public List<Entity> getEntities() {
-		return (ProxiExplorer.getInstance().getEntityModel().getBeaconEntities(this.id));
+		return (ProxiManager.getInstance().getEntityModel().getBeaconEntities(this.id));
 	}
 
 	public static class SortBeaconsBySignalLevel implements Comparator<Beacon> {

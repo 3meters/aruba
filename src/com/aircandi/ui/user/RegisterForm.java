@@ -23,8 +23,8 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -288,7 +288,7 @@ public class RegisterForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("InsertUser");
-					ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertUser(mUser, mBitmap);
+					ModelResult result = ProxiManager.getInstance().getEntityModel().insertUser(mUser, mBitmap);
 					return result;
 				}
 

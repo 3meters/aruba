@@ -15,12 +15,14 @@
         android:id="@+id/color_layer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
-    
+        android:visibility="visible" />
+
     <View
+        android:id="@+id/reverse_layer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background_gray_light" />
+        android:background="@color/background_gray_light"
+        android:visibility="visible" />
 
     <ImageView
         android:id="@+id/image_main"

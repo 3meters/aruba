@@ -22,8 +22,8 @@ import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager.ResponseCode;
-import com.aircandi.components.ProxiExplorer;
-import com.aircandi.components.ProxiExplorer.ModelResult;
+import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.Tracker;
 import com.aircandi.service.objects.Document;
 import com.aircandi.ui.base.FormActivity;
@@ -179,7 +179,7 @@ public class FeedbackForm extends FormActivity {
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("InsertFeedback");
 					mDocument.createdDate = DateUtils.nowDate().getTime();
-					ModelResult result = ProxiExplorer.getInstance().getEntityModel().insertDocument(mDocument);
+					ModelResult result = ProxiManager.getInstance().getEntityModel().insertDocument(mDocument);
 					return result;
 				}
 

@@ -36,8 +36,8 @@
     
     <!-- Accuracy -->
     
-    <color name="accuracy_halo">#5533b5e5</color>
-    <color name="accuracy_center">#8833b5e5</color>
+    <color name="accuracy_halo">#9933b5e5</color>
+    <color name="accuracy_center">#ff33b5e5</color>
     
     <!-- Backgrounds -->
     

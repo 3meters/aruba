@@ -2,7 +2,7 @@ package com.aircandi.components;
 
 import java.util.List;
 
-import com.aircandi.components.ProxiExplorer.WifiScanResult;
+import com.aircandi.components.ProxiManager.WifiScanResult;
 
 @SuppressWarnings("ucd")
 public class MonitoringWifiScanReceivedEvent {

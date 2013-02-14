@@ -19,4 +19,4 @@
 -->
 
 <accelerateInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:factor="2.5" />
+    android:factor="2.5" xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources"/>
