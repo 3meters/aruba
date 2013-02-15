@@ -45,6 +45,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
+import com.aircandi.PlacesConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.ScanService;
@@ -109,6 +110,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public String				mPrefTheme;
 	public ActionBar			mActionBar;
 	private ViewFlipper			mViewFlipper;
+	private Runnable			mBusyTimeout;
 
 	/* Other */
 	private String				mPageName;
@@ -169,6 +171,16 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 			mActivity.getWindow().setAttributes(params);
 		}
+		
+		mBusyTimeout = new Runnable() {
+
+			@Override
+			public void run() {
+				Logger.d(this, "Busy indicators stopped: timed out");
+				hideBusy(true);
+			}
+		};
+		
 	}
 
 	@Subscribe
@@ -818,7 +830,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 			mBusyCount++;
 			Logger.v(this, "Busy count: " + String.valueOf(mBusyCount));
 		}
-
+		
+		/* Stop and restart the timeout window */
+		Aircandi.mainThreadHandler.removeCallbacks(mBusyTimeout);
+		Aircandi.mainThreadHandler.postDelayed(mBusyTimeout, PlacesConstants.BUSY_TIMEOUT);
+		
 		if (mBusyCount == 1) {
 			startActionbarBusyIndicator();
 		}
@@ -839,7 +855,16 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public void hideBusy(Boolean force) {
 		ProgressDialog progressDialog = getProgressDialog();
 		if (progressDialog.isShowing() && progressDialog.getWindow().getWindowManager() != null) {
-			progressDialog.dismiss();
+			try {
+				progressDialog.dismiss();
+			}
+			catch (Exception e) {
+				/*
+				 * Sometime we get a harmless exception that the view is not attached to window manager.
+				 * It could be that the activity is getting destroyed before the dismiss can happen.
+				 * We catch it and move on.
+				 */
+			}
 		}
 
 		synchronized (mBusyCount) {
@@ -847,7 +872,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 			Logger.v(this, "Busy count: " + String.valueOf(mBusyCount));
 		}
 
-		if (mBusyCount == 0 || force) {
+		if (mBusyCount <= 0 || force) {
+			Aircandi.mainThreadHandler.removeCallbacks(mBusyTimeout);			
 			stopActionbarBusyIndicator();
 			stopBusyIndicator();
 		}
@@ -994,7 +1020,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					doRefreshClick();
 				}
 			});
-			updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());			
+			updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());
 		}
 
 		mMenu = menu;

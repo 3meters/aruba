@@ -770,8 +770,9 @@ public class ProxiManager {
 		private List<Category>			mCategories			= new ArrayList<Category>();
 		private HashMap<String, Source>	mSourceMeta			= new HashMap<String, Source>();
 
-		private Number					mLastRefreshDate;
 		private Number					mLastActivityDate	= DateUtils.nowDate().getTime();
+		private Number					mLastRefreshDate;
+		private Number					mLastBeaconDate;
 
 		public EntityModel() {}
 
@@ -1739,6 +1740,8 @@ public class ProxiManager {
 			synchronized (mEntityModel.mBeacons) {
 				Collections.sort(mEntityModel.mBeacons, new Beacon.SortBeaconsBySignalLevel());
 			}
+			
+			mLastBeaconDate = DateUtils.nowDate().getTime();
 
 			BusProvider.getInstance().post(new BeaconsLockedEvent());
 		}
@@ -2449,6 +2452,14 @@ public class ProxiManager {
 
 		public HashMap<String, Source> getSourceMeta() {
 			return mSourceMeta;
+		}
+
+		public Number getLastBeaconDate() {
+			return mLastBeaconDate;
+		}
+
+		public void setLastBeaconDate(Number lastBeaconDate) {
+			mLastBeaconDate = lastBeaconDate;
 		}
 
 	}

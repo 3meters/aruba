@@ -102,6 +102,7 @@ public class CandiRadar extends CandiActivity {
 
 	private Number				mEntityModelRefreshDate;
 	private Number				mEntityModelActivityDate;
+	private Number				mEntityModelBeaconDate;
 	private Integer				mWifiState			= WifiManager.WIFI_STATE_UNKNOWN;
 
 	private ListView			mList;
@@ -221,6 +222,7 @@ public class CandiRadar extends CandiActivity {
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Beacons locked event");
 				Logger.d(CandiRadar.this, "Beacons locked event: get entities for beacons");
+				mEntityModelBeaconDate = ProxiManager.getInstance().getEntityModel().getLastBeaconDate();
 				new AsyncTask() {
 
 					@Override
@@ -700,6 +702,24 @@ public class CandiRadar extends CandiActivity {
 			 */
 			Logger.d(this, "Start place search because wifi state has changed");
 			searchForPlaces();
+		}
+		else if (entityModel.getLastBeaconDate().longValue() > mEntityModelBeaconDate.longValue()) {
+			/*
+			 * The beacons we are locked to have changed so we need to search for new places linked
+			 * to beacons.
+			 */
+			Logger.d(this, "Refresh places for beacons because beacon date has changed");
+			mEntityModelBeaconDate = ProxiManager.getInstance().getEntityModel().getLastBeaconDate();
+			new AsyncTask() {
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("GetEntitiesForBeacons");
+					ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForBeacons();
+					return serviceResponse;
+				}
+
+			}.execute();
 		}
 		else if ((entityModel.getLastBeaconRefreshDate() != null
 				&& entityModel.getLastBeaconRefreshDate().longValue() > mEntityModelRefreshDate.longValue())
