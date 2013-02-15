@@ -27,6 +27,7 @@ public class PlacesConstants {
 	 */
 	public static long		MAXIMUM_AGE									= CandiConstants.TIME_TWO_MINUTES;
 	public static long		BURST_TIMEOUT								= CandiConstants.TIME_TWO_MINUTES;
+	public static long		BUSY_TIMEOUT								= CandiConstants.TIME_THIRTY_SECONDS;
 
 	public static int		MIN_DISTANCE_UPDATES						= DIST_FIFTY_METERS;
 	public static Integer	MINIMUM_ACCURACY							= DIST_ONE_KILOMETER;

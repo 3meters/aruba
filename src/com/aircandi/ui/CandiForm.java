@@ -36,13 +36,18 @@ import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.AndroidManager;
+import com.aircandi.components.BeaconsLockedEvent;
+import com.aircandi.components.BusProvider;
 import com.aircandi.components.CommandType;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.Logger;
+import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.components.ProxiManager.ModelResult;
+import com.aircandi.components.ProxiManager.ScanReason;
+import com.aircandi.components.QueryWifiScanReceivedEvent;
 import com.aircandi.components.Tracker;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -61,6 +66,7 @@ import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.ImageUtils;
+import com.squareup.otto.Subscribe;
 
 public class CandiForm extends CandiActivity {
 
@@ -245,13 +251,47 @@ public class CandiForm extends CandiActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Event bus routines
+	// --------------------------------------------------------------------------------------------
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onQueryWifiScanReceived(final QueryWifiScanReceivedEvent event) {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				Logger.d(CandiForm.this, "Query wifi scan received event: locking beacons");
+				if (event.wifiList != null && event.wifiList.size() > 0) {
+					ProxiManager.getInstance().lockBeacons();
+				}
+			}
+		});
+	}
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onBeaconsLocked(BeaconsLockedEvent event) {
+
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				Logger.d(CandiForm.this, "Beacons locked event: tune entity");
+				tuneProximity();
+			}
+		});
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
 	public void onBrowseCommentsButtonClick(View view) {
 		if (mEntity.commentCount != null && mEntity.commentCount > 0) {
-			Tracker.sendEvent("ui_action", "browse_comments", null, 0);  			
+			Tracker.sendEvent("ui_action", "browse_comments", null, 0);
 			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setEntityId(mEntity.id)
@@ -268,7 +308,7 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onMapButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "map_place", null, 0);  			
+		Tracker.sendEvent("ui_action", "map_place", null, 0);
 		GeoLocation location = mEntity.getLocation();
 		AndroidManager.getInstance().callMapActivity(this, String.valueOf(location.latitude.doubleValue())
 				, String.valueOf(location.longitude.doubleValue())
@@ -277,13 +317,19 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onTuneButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "tune_place", null, 0);  			
-		tuneProximity();
+		Tracker.sendEvent("ui_action", "tune_place", null, 0);
+		mCommon.showBusy(R.string.progress_tuning);
+		if (NetworkManager.getInstance().isWifiEnabled()) {
+			ProxiManager.getInstance().scanForWifi(ScanReason.query);
+		}
+		else {
+			tuneProximity();
+		}
 	}
 
 	@SuppressWarnings("ucd")
 	public void onCallButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "call_place", null, 0);  			
+		Tracker.sendEvent("ui_action", "call_place", null, 0);
 		AndroidManager.getInstance().callDialerActivity(this, mEntity.place.contact.phone);
 	}
 
@@ -367,7 +413,7 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onAddCandiButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "add_candi", null, 0);  			
+		Tracker.sendEvent("ui_action", "add_candi", null, 0);
 		if (!mEntity.locked || mEntity.ownerId.equals(Aircandi.getInstance().getUser().id)) {
 			mCommon.showTemplatePicker(false);
 		}
@@ -382,7 +428,7 @@ public class CandiForm extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onEditCandiButtonClick(View view) {
-		Tracker.sendEvent("ui_action", "edit_entity", null, 0);  			
+		Tracker.sendEvent("ui_action", "edit_entity", null, 0);
 		mCommon.doEditCandiClick();
 	}
 
@@ -479,11 +525,6 @@ public class CandiForm extends CandiActivity {
 		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
 
 		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_tuning);
-			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
@@ -881,6 +922,18 @@ public class CandiForm extends CandiActivity {
 		super.onPause();
 	}
 
+	@Override
+	protected void onStart() {
+		super.onStart();
+		enableEvents();
+	}
+
+	@Override
+	protected void onStop() {
+		disableEvents();
+		super.onStop();
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Dialogs
 	// --------------------------------------------------------------------------------------------
@@ -937,6 +990,17 @@ public class CandiForm extends CandiActivity {
 	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
+
+	private void enableEvents() {
+		BusProvider.getInstance().register(this);
+	}
+
+	private void disableEvents() {
+		try {
+			BusProvider.getInstance().unregister(this);
+		}
+		catch (Exception e) {}
+	}
 
 	@Override
 	protected int getLayoutId() {
