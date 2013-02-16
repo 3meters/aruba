@@ -43,8 +43,8 @@
         <item name="ruleColorStrong">@color/rule_60_dark</item>
         <item name="textColor">@color/text_dark</item>
         <item name="textColorUnfocused">@color/text_dark</item>
-        <item name="textColorButtonLink">@color/brand_pink_lighter</item>
-        <item name="textColorBullet">@color/brand_pink_lighter</item>
+        <item name="textColorButtonLink">@color/accent</item>
+        <item name="textColorBullet">@color/brand_pink</item>
         <item name="textColorBars">@color/text_dark</item>
         <item name="textColorProgress">@color/text_dark</item>
         <item name="textColorCandiView">@color/text_dark</item>
@@ -127,8 +127,8 @@
         <item name="ruleColorStrong">@color/rule_60_light</item>
         <item name="textColor">@color/text_light</item>
         <item name="textColorUnfocused">@color/text_light</item>
-        <item name="textColorButtonLink">@color/brand_pink_dark</item>
-        <item name="textColorBullet">@color/brand_pink_dark</item>
+        <item name="textColorButtonLink">@color/accent_darker</item>
+        <item name="textColorBullet">@color/brand_pink</item>
         <item name="textColorBars">@color/text_light</item>
         <item name="textColorProgress">@color/text_light</item>
         <item name="textColorCandiView">@color/text_dark</item>
@@ -212,7 +212,7 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="textColor">@color/text_dark</item>
         <item name="textColorBars">@color/text_dark</item>
-        <item name="textColorButtonLink">@color/brand_pink_lighter</item>
+        <item name="textColorButtonLink">@color/accent</item>
         <item name="ruleColor">@color/rule_30_dark</item>
         <item name="ruleColorStrong">@color/rule_60_dark</item>
 

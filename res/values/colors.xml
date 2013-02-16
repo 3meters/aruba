@@ -88,6 +88,7 @@
     <color name="brand_pink">#ffA552A5</color>
     <color name="brand_pink_light">#ffBF5FBF</color>
     <color name="brand_pink_lighter">#ffD86CD8</color>
+    <color name="brand_pink_lighter_mute">#ffD8ADD8</color>
     <color name="brand_pink_dark">#ff7F3B7F</color>
     <color name="brand_pink_darker">#ff662F66</color>
 
