@@ -158,7 +158,7 @@
 
     <!-- Dialogs -->
 
-    <string name="dialog_info">Copyright 3meters LLC 2013</string>
+    <string name="dialog_info">copyright 3meters LLC 2010-2013</string>
     <string name="dialog_template_picker_title">select candi type</string>
     <string name="dialog_address_builder_title">address</string>
     <string name="dialog_category_builder_title">category</string>
