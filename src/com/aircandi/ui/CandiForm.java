@@ -104,9 +104,6 @@ public class CandiForm extends CandiActivity {
 		}
 
 		ViewGroup body = (ViewGroup) inflater.inflate(candiFormResId, null);
-		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			((ViewStub) body.findViewById(R.id.stub_switchboard)).inflate();
-		}
 
 		mCandiForm = (ViewGroup) body.findViewById(R.id.candi_form);
 		mScrollView = (ScrollView) body.findViewById(R.id.scroll_view);
@@ -135,7 +132,7 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy();
+				mCommon.showBusy(true);
 			}
 
 			@Override
@@ -174,7 +171,7 @@ public class CandiForm extends CandiActivity {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
 				}
-				mCommon.hideBusy(false);
+				mCommon.hideBusy(true);
 			}
 
 		}.execute();
@@ -212,7 +209,7 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_expanding);
+				mCommon.showBusy(R.string.progress_expanding, true);
 			}
 
 			@Override
@@ -225,7 +222,7 @@ public class CandiForm extends CandiActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
-				mCommon.hideBusy(false);
+				mCommon.hideBusy(true);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Entity upsizedEntity = (Entity) result.data;
 					mCommon.mEntityId = upsizedEntity.id;
@@ -318,7 +315,7 @@ public class CandiForm extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onTuneButtonClick(View view) {
 		Tracker.sendEvent("ui_action", "tune_place", null, 0);
-		mCommon.showBusy(R.string.progress_tuning);
+		mCommon.showBusy(R.string.progress_tuning, true);
 		if (NetworkManager.getInstance().isWifiEnabled()) {
 			ProxiManager.getInstance().scanForWifi(ScanReason.query);
 		}
@@ -548,7 +545,7 @@ public class CandiForm extends CandiActivity {
 				}
 				//doBind(true);
 				setSupportProgressBarIndeterminateVisibility(false);
-				mCommon.hideBusy(false);
+				mCommon.hideBusy(true);
 				ImageUtils.showToastNotification(getString(R.string.toast_tuned), Toast.LENGTH_SHORT);
 			}
 		}.execute();
@@ -627,16 +624,15 @@ public class CandiForm extends CandiActivity {
 		}
 
 		/* Switchboard - source entities */
-		setVisibility(layout.findViewById(R.id.section_switchboard), View.GONE);
+		setVisibility(layout.findViewById(R.id.section_layout_switchboard), View.GONE);
 		List<Entity> entities = entity.getSourceEntities();
 		if (entities.size() > 0) {
 
 			SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_layout_switchboard);
 			if (section != null) {
-				section.getTextViewHeader().setText(context.getString(R.string.candi_section_switchboard));
 				FlowLayout flow = (FlowLayout) layout.findViewById(R.id.flow_switchboard);
 				drawCandi(context, flow, entities, R.layout.temp_place_switchboard_item);
-				setVisibility(layout.findViewById(R.id.section_switchboard), View.VISIBLE);
+				setVisibility(layout.findViewById(R.id.section_layout_switchboard), View.VISIBLE);
 			}
 		}
 
@@ -778,7 +774,9 @@ public class CandiForm extends CandiActivity {
 			else {
 				if (entity.name != null && !entity.name.equals("")) {
 					title.setText(entity.name);
-					title.setVisibility(View.VISIBLE);
+				}
+				else {
+					title.setVisibility(View.GONE);
 				}
 			}
 

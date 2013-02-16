@@ -6,6 +6,7 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aircandi.Aircandi;
@@ -43,12 +44,17 @@ public class PasswordForm extends FormActivity {
 		mTextPasswordOld = (EditText) findViewById(R.id.text_password_old);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
-		mButtonSave = (Button) findViewById(R.id.btn_save);
+		mButtonSave = (Button) findViewById(R.id.button_save);
 
 		FontManager.getInstance().setTypefaceDefault(mTextPasswordOld);
 		FontManager.getInstance().setTypefaceDefault(mTextPassword);
 		FontManager.getInstance().setTypefaceDefault(mTextPasswordConfirm);
 		FontManager.getInstance().setTypefaceDefault(mButtonSave);
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_label_password_old));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_label_password));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_label_password_confirm));
+		
 
 		mTextPasswordOld.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -112,7 +118,7 @@ public class PasswordForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_changing_password);
+				mCommon.showBusy(R.string.progress_changing_password, true);
 			}
 
 			@Override
@@ -126,7 +132,7 @@ public class PasswordForm extends FormActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				ModelResult result = (ModelResult) response;
-				mCommon.hideBusy(false);
+				mCommon.hideBusy(true);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");

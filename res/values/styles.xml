@@ -39,7 +39,7 @@
     <style name="app_text_appearance_medium_accent" parent="app_text_appearance_medium">
         <item name="android:textColor">@color/accent_blue</item>
     </style>
-    
+
     <style name="app_text_appearance_small" parent="app_text_appearance">
         <item name="android:textSize">@dimen/text_size_small</item>
     </style>
@@ -75,7 +75,7 @@
         <item name="android:padding">15dp</item>
         <item name="android:cropToPadding">true</item>
     </style>
-    
+
     <style name="bullet">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">?attr/textColorBullet</item>
@@ -90,6 +90,20 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="form_content_layout">
+        <item name="android:paddingBottom">@dimen/form_body_padding</item>
+        <item name="android:paddingLeft">@dimen/form_body_padding</item>
+        <item name="android:paddingRight">@dimen/form_body_padding</item>
+        <item name="android:paddingTop">@dimen/form_body_padding_top</item>
+    </style>
+
+    <style name="dialog_content_layout">
+        <item name="android:paddingBottom">@dimen/dialog_body_padding</item>
+        <item name="android:paddingLeft">@dimen/dialog_body_padding</item>
+        <item name="android:paddingRight">@dimen/dialog_body_padding</item>
+        <item name="android:paddingTop">@dimen/dialog_body_padding_top</item>
+    </style>
+    
     <!-- Edit forms -->
 
     <style name="form_title" parent="android:Widget.TextView">
@@ -126,7 +140,7 @@
         <item name="android:maxHeight">48dp</item>
         <item name="android:background">?attr/backgroundButton</item>
         <item name="android:textColor">?attr/textColorButtonLink</item>
-     </style>
+    </style>
 
     <style name="form_button_borderless" parent="Widget.Sherlock.ActionButton">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
@@ -169,7 +183,7 @@
         <item name="android:paddingRight">10dp</item>
         <item name="android:background">#00000000</item>
     </style>
-    
+
     <style name="form_text_placeholder">
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:background">?attr/backgroundTabBar</item>
@@ -310,4 +324,5 @@
         <item name="android:textAppearance">@style/app_text_appearance_small</item>
         <item name="android:textColor">?attr/textColor</item>
     </style>
+
 </resources>

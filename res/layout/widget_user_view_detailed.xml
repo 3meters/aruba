@@ -51,13 +51,13 @@
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/candi_user_picture"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
+        android:layout_width="@dimen/image_extra_small"
+        android:layout_height="@dimen/image_extra_small"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/action_block"
         android:layout_marginRight="5dp"
         aircandi:layout="@layout/widget_webimageview"
-        aircandi:sizeHint="35dp"
+        aircandi:sizeHint="@dimen/image_extra_small"
         android:scaleType="centerCrop" />
 
     <LinearLayout

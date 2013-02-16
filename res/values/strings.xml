@@ -194,7 +194,7 @@
     <string name="candi_button_call">call</string>
     <string name="candi_button_new">add candi</string>
     <string name="candi_button_edit">edit</string>
-    <string name="candi_section_switchboard">place info</string>
+    <string name="candi_section_switchboard_place">place info</string>
     <string name="candi_section_candi">candi</string>
     <string name="candi_label_comments_none">no comments yet</string>
     <string name="candi_label_user_created_by">created</string>

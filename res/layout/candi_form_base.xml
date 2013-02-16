@@ -20,22 +20,21 @@
         tools:ignore="UselessParent" >
 
         <LinearLayout
+            style="@style/form_content_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="15dp"
-            android:paddingTop="7dp"
             android:visibility="visible" >
 
             <!-- Main body -->
 
             <com.aircandi.ui.widgets.WebImageView
                 android:id="@+id/candi_form_image"
-                android:layout_width="250dp"
-                android:layout_height="250dp"
+                android:layout_width="@dimen/image_extra_large"
+                android:layout_height="@dimen/image_extra_large"
                 android:layout_marginBottom="15dp"
                 aircandi:layout="@layout/widget_webimageview_zoom"
-                aircandi:sizeHint="250dp"
+                aircandi:sizeHint="@dimen/image_extra_large"
                 android:background="@drawable/selector_image"
                 android:clickable="true"
                 android:onClick="onImageClick"
@@ -68,22 +67,18 @@
             </com.aircandi.ui.widgets.SectionLayout>
 
             <com.aircandi.ui.widgets.SectionLayout
-                android:id="@+id/section_candi"
+                android:id="@+id/section_layout_switchboard"
                 style="@style/candi_form_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                aircandi:headerTitle="@string/candi_section_candi"
+                android:layout_marginBottom="20dp"
                 aircandi:layoutHeader="@layout/temp_section_header"
                 android:orientation="vertical" >
 
-                <com.aircandi.ui.widgets.HorizontalScrollLayout
-                    android:id="@+id/list_candi"
+                <com.aircandi.ui.widgets.FlowLayout
+                    android:id="@+id/flow_switchboard"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    aircandi:layout="@layout/temp_place_photo_item"
-                    android:fillViewport="true"
-                    android:visibility="visible" />
+                    android:layout_height="wrap_content" />
             </com.aircandi.ui.widgets.SectionLayout>
 
             <com.aircandi.ui.widgets.UserView

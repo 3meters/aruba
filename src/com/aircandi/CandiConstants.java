@@ -90,7 +90,6 @@ public final class CandiConstants {
 	public static final String	TYPE_CANDI_PICTURE				= "com.aircandi.candi.picture";															//$NON-NLS-1$
 	public static final String	TYPE_CANDI_PLACE				= "com.aircandi.candi.place";																//$NON-NLS-1$
 	public static final String	TYPE_CANDI_SOURCE				= "com.aircandi.candi.source";																//$NON-NLS-1$
-	public static final String	TYPE_CANDI_LINK					= "com.aircandi.candi.link";																//$NON-NLS-1$
 
 	public static final int		ACTIVITY_MARKET					= 200;
 	public static final int		ACTIVITY_PICTURE_PICK_DEVICE	= 300;

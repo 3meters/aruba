@@ -102,7 +102,7 @@ public class LinkPicker extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_searching);
+				mCommon.showBusy(R.string.progress_searching, true);
 			}
 
 			@Override
@@ -119,7 +119,7 @@ public class LinkPicker extends FormActivity {
 			protected void onPostExecute(Object response) {
 				mSearchAdapter = new SearchAdapter(LinkPicker.this, mSearchItems, null);
 				mListView.setAdapter(mSearchAdapter);
-				mCommon.hideBusy(false);
+				mCommon.hideBusy(true);
 			}
 
 		}.execute();
@@ -186,7 +186,7 @@ public class LinkPicker extends FormActivity {
 
 					@Override
 					protected void onPreExecute() {
-						mCommon.showBusy(R.string.progress_verifying);
+						mCommon.showBusy(R.string.progress_verifying, true);
 					}
 
 					@Override
@@ -248,7 +248,7 @@ public class LinkPicker extends FormActivity {
 							if (description != null) {
 								mUriDescription = description;
 							}
-							mCommon.hideBusy(false);
+							mCommon.hideBusy(true);
 
 							Intent intent = new Intent();
 							intent.putExtra(CandiConstants.EXTRA_URI, mUri);

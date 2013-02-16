@@ -22,11 +22,11 @@
             <!-- Content -->
 
             <LinearLayout
+                style="@style/form_content_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical|top"
-                android:orientation="vertical"
-                android:padding="5dp" >
+                android:orientation="vertical" >
 
                 <!-- Title and Content -->
 
@@ -56,11 +56,11 @@
             <!-- Settings -->
 
             <LinearLayout
+                style="@style/form_content_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical|top"
-                android:orientation="vertical"
-                android:padding="5dp" >
+                android:orientation="vertical" >
 
                 <include layout="@layout/temp_form_settings" />
             </LinearLayout>

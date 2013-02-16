@@ -282,7 +282,7 @@ public class RegisterForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(R.string.progress_signing_up);
+					mCommon.showBusy(R.string.progress_signing_up, true);
 				}
 
 				@Override
@@ -305,7 +305,7 @@ public class RegisterForm extends FormActivity {
 						User insertedUser = (User) result.data;
 						Aircandi.getInstance().setUser(insertedUser);
 
-						mCommon.hideBusy(false);
+						mCommon.hideBusy(true);
 						Logger.i(RegisterForm.this, "Inserted new user: " + mUser.name + " (" + mUser.id + ")");
 
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)

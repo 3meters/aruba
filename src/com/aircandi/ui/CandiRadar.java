@@ -289,7 +289,7 @@ public class CandiRadar extends CandiActivity {
 					Aircandi.stopwatch2.segmentTime("Location acquired event");
 					if (LocationManager.getInstance().getObservationLocked() != null) {
 
-						mCommon.showBusy();
+						mCommon.showBusy(true);
 
 						new AsyncTask() {
 
@@ -428,7 +428,7 @@ public class CandiRadar extends CandiActivity {
 			AnimUtils.doOverridePendingTransition(CandiRadar.this, TransitionType.PageToForm);
 		}
 		else {
-			mCommon.showBusy();
+			mCommon.showBusy(true);
 			searchForPlacesByBeacon();
 
 			/* We give the beacon query a bit of a head start */
@@ -734,12 +734,12 @@ public class CandiRadar extends CandiActivity {
 
 				@Override
 				public void run() {
-					mCommon.showBusy();
+					mCommon.showBusy(true);
 					invalidateOptionsMenu();
 					mRadarAdapter.getItems().clear();
 					mRadarAdapter.getItems().addAll(ProxiManager.getInstance().getEntityModel().getAllPlaces(false));
 					mRadarAdapter.notifyDataSetChanged();
-					mCommon.hideBusy(false);
+					mCommon.hideBusy(true);
 				}
 			}, 100);
 		}

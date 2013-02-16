@@ -82,7 +82,7 @@ public class CommentList extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy();
+				mCommon.showBusy(true);
 			}
 
 			@Override
@@ -118,7 +118,7 @@ public class CommentList extends CandiActivity {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CommentBrowse);
 				}
-				mCommon.hideBusy(false);
+				mCommon.hideBusy(true);
 			}
 
 		}.execute();

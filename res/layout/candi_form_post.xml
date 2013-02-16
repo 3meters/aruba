@@ -20,13 +20,10 @@
         tools:ignore="UselessParent" >
 
         <LinearLayout
+            style="@style/form_content_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="15dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingTop="7dp" >
+            android:orientation="vertical" >
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -71,6 +68,21 @@
                             android:layout_height="wrap_content"
                             android:text="@string/dummy_description"
                             android:visibility="visible" />
+                    </com.aircandi.ui.widgets.SectionLayout>
+
+                    <com.aircandi.ui.widgets.SectionLayout
+                        android:id="@+id/section_layout_switchboard"
+                        style="@style/candi_form_section"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        aircandi:layoutHeader="@layout/temp_section_header"
+                        android:orientation="vertical" >
+
+                        <com.aircandi.ui.widgets.FlowLayout
+                            android:id="@+id/flow_switchboard"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
                     </com.aircandi.ui.widgets.SectionLayout>
                 </LinearLayout>
             </LinearLayout>

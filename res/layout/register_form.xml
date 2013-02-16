@@ -15,14 +15,11 @@
         <!-- Content -->
 
         <LinearLayout
+            style="@style/form_content_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical|top"
-            android:orientation="vertical"
-            android:paddingBottom="5dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingTop="5dp" >
+            android:orientation="vertical" >
 
             <!-- User picture -->
 
@@ -36,12 +33,12 @@
 
                 <com.aircandi.ui.widgets.WebImageView
                     android:id="@+id/image_picture"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
+                    android:layout_width="@dimen/image_medium"
+                    android:layout_height="@dimen/image_medium"
                     android:layout_marginRight="10dp"
                     android:layout_weight="0"
                     aircandi:layout="@layout/widget_webimageview_framed"
-                    aircandi:sizeHint="100dp"
+                    aircandi:sizeHint="@dimen/image_medium"
                     android:clickable="true"
                     android:onClick="onChangePictureButtonClick"
                     android:scaleType="centerCrop" />

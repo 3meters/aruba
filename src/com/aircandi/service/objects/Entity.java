@@ -350,9 +350,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 			}
 		}
-		else if (this.type.equals(CandiConstants.TYPE_CANDI_LINK)) {
-			imageUri = "resource:source_website_ii";
-		}
 		else if (this.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
 			imageUri = this.source.getImageUri();
 		}
@@ -617,12 +614,12 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			}
 			else {
 				if (entity1.modifiedDate.longValue() < entity2.modifiedDate.longValue()) {
-					return -1;
+					return 1;
 				}
 				else if (entity1.modifiedDate.longValue() == entity2.modifiedDate.longValue()) {
 					return 0;
 				}
-				return 1;
+				return -1;
 			}
 		}
 	}

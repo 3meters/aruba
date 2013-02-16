@@ -8,11 +8,11 @@
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/candi_user_picture"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="@dimen/image_medium"
+        android:layout_height="@dimen/image_medium"
         android:layout_gravity="left"
         aircandi:layout="@layout/widget_webimageview_framed"
-        aircandi:sizeHint="100dp"
+        aircandi:sizeHint="@dimen/image_medium"
         android:background="@drawable/selector_image"
         android:clickable="true"
         android:scaleType="centerCrop" />

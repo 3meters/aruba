@@ -172,7 +172,7 @@ public class FeedbackForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(R.string.progress_sending);
+					mCommon.showBusy(R.string.progress_sending, true);
 				}
 
 				@Override
@@ -189,7 +189,7 @@ public class FeedbackForm extends FormActivity {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.sendEvent("ui_action", "send_feedback", null, 0);
-						mCommon.hideBusy(false);
+						mCommon.hideBusy(true);
 						ImageUtils.showToastNotification(getString(R.string.alert_feedback_sent), Toast.LENGTH_SHORT);
 						finish();
 					}

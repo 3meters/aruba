@@ -7,12 +7,12 @@
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/image"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="@dimen/image_extra_small"
+        android:layout_height="@dimen/image_extra_small"
         android:layout_centerVertical="true"
         android:layout_marginRight="10dp"
         aircandi:layout="@layout/widget_webimageview"
-        aircandi:sizeHint="30dp"
+        aircandi:sizeHint="@dimen/image_extra_small"
         android:scaleType="centerCrop" />
 
     <TextView
