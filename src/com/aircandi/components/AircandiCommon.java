@@ -114,13 +114,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 	/* Other */
 	private String				mPageName;
 	private String				mDebugWifi;
-<<<<<<< HEAD
-	private String				mDebugLocation = "--";
-	private Integer				mBusyCount	= 0;
-=======
 	private String				mDebugLocation;
 	private AtomicInteger		mBusyCount	= new AtomicInteger(0);
->>>>>>> dev
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
 		mContext = context;
