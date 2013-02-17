@@ -172,7 +172,7 @@ public class CommentForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(R.string.progress_saving);
+					mCommon.showBusy(R.string.progress_saving, true);
 				}
 
 				@Override
@@ -188,7 +188,7 @@ public class CommentForm extends FormActivity {
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.sendEvent("ui_action", "add_comment", null, 0);
-						mCommon.hideBusy(false);
+						mCommon.hideBusy(true);
 						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
 						setResult(CandiConstants.RESULT_COMMENT_INSERTED);
 						finish();

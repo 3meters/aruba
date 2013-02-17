@@ -14,12 +14,12 @@
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/item_author_image"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/image_small"
+        android:layout_height="@dimen/image_small"
         android:layout_alignParentTop="true"
         android:layout_marginRight="15dp"
         android:layout_marginTop="5dp"
-        aircandi:sizeHint="50dp" />
+        aircandi:sizeHint="@dimen/image_small" />
 
     <RelativeLayout
         android:id="@+id/group_author"

@@ -28,8 +28,8 @@
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/item_image"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="@dimen/image_extra_small"
+        android:layout_height="@dimen/image_extra_small"
         android:layout_alignWithParentIfMissing="true"
         android:layout_below="@+id/item_section_title"
         android:layout_marginLeft="5dp"

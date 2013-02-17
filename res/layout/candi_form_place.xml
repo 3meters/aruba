@@ -21,8 +21,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="15dp" >
+            android:orientation="vertical" >
 
             <RelativeLayout
                 android:id="@+id/candi_view_holder"
@@ -39,12 +38,11 @@
 
             <LinearLayout
                 android:id="@+id/body_holder"
+                style="@style/form_content_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/candi_view_holder"
-                android:orientation="vertical"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp" >
+                android:orientation="vertical" >
 
                 <include
                     android:id="@+id/candi_form_header"
@@ -53,14 +51,21 @@
                     android:layout_marginBottom="15dp"
                     layout="@layout/widget_candi_header_place" />
 
-                <ViewStub
-                    android:id="@+id/stub_switchboard"
+                <com.aircandi.ui.widgets.SectionLayout
+                    android:id="@+id/section_layout_switchboard"
+                    style="@style/candi_form_section"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inflatedId="@+id/section_switchboard"
-                    android:layout="@layout/section_switchboard"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp" />
+                    android:layout_marginBottom="20dp"
+                    aircandi:headerTitle="@string/candi_section_switchboard_place"
+                    aircandi:layoutHeader="@layout/temp_section_header"
+                    android:orientation="vertical" >
+
+                    <com.aircandi.ui.widgets.FlowLayout
+                        android:id="@+id/flow_switchboard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </com.aircandi.ui.widgets.SectionLayout>
 
                 <ViewStub
                     android:id="@+id/stub_candi"
@@ -74,14 +79,13 @@
 
             <LinearLayout
                 android:id="@+id/authoring_holder"
+                style="@style/form_content_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_below="@+id/body_holder"
                 android:gravity="bottom"
-                android:orientation="horizontal"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp" >
+                android:orientation="horizontal" >
 
                 <com.aircandi.ui.widgets.UserView
                     android:id="@+id/edited_by"

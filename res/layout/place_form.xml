@@ -23,13 +23,10 @@
             <!-- Content -->
 
             <LinearLayout
+                style="@style/form_content_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:paddingBottom="5dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:paddingTop="5dp" >
+                android:orientation="vertical" >
 
                 <!-- Public Image -->
 
@@ -44,7 +41,6 @@
                         style="@style/picture_framed"
                         android:layout_width="150dp"
                         android:layout_height="150dp"
-                        android:layout_marginLeft="4dp"
                         android:layout_marginRight="10dp"
                         aircandi:layout="@layout/widget_webimageview_candi_view"
                         aircandi:sizeHint="150dp"
@@ -72,6 +68,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="1dp"
+                    android:layout_marginLeft="-4dp"
                     android:layout_weight="0"
                     android:hint="@string/form_place_title_hint"
                     android:inputType="textNoSuggestions" />
@@ -81,7 +78,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="4dp"
                     android:layout_marginRight="4dp"
                     aircandi:hint="@string/form_address_hint"
                     android:background="?attr/backgroundButton"
@@ -94,7 +90,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="4dp"
                     android:layout_marginRight="4dp"
                     aircandi:hint="@string/form_place_sources_hint"
                     aircandi:layout="@layout/widget_builder_button_images"
@@ -109,7 +104,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/form_field_height"
                     android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="4dp"
                     android:layout_marginRight="4dp"
                     aircandi:hint="@string/form_place_category_hint"
                     android:background="?attr/backgroundButton"
@@ -123,6 +117,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="-4dp"
                     android:layout_weight="0"
                     android:gravity="top"
                     android:hint="@string/form_description_hint"

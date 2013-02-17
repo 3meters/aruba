@@ -44,7 +44,7 @@
         <item name="textColor">@color/text_dark</item>
         <item name="textColorUnfocused">@color/text_dark</item>
         <item name="textColorButtonLink">@color/accent</item>
-        <item name="textColorBullet">@color/accent</item>
+        <item name="textColorBullet">@color/brand_pink</item>
         <item name="textColorBars">@color/text_dark</item>
         <item name="textColorProgress">@color/text_dark</item>
         <item name="textColorCandiView">@color/text_dark</item>
@@ -127,8 +127,8 @@
         <item name="ruleColorStrong">@color/rule_60_light</item>
         <item name="textColor">@color/text_light</item>
         <item name="textColorUnfocused">@color/text_light</item>
-        <item name="textColorButtonLink">@color/accent_red_dark</item>
-        <item name="textColorBullet">@color/accent_darker</item>
+        <item name="textColorButtonLink">@color/accent_darker</item>
+        <item name="textColorBullet">@color/brand_pink</item>
         <item name="textColorBars">@color/text_light</item>
         <item name="textColorProgress">@color/text_light</item>
         <item name="textColorCandiView">@color/text_dark</item>

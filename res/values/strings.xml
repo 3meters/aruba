@@ -158,7 +158,7 @@
 
     <!-- Dialogs -->
 
-    <string name="dialog_info">Copyright 3meters LLC 2013</string>
+    <string name="dialog_info">copyright 3meters LLC 2010-2013</string>
     <string name="dialog_template_picker_title">select candi type</string>
     <string name="dialog_address_builder_title">address</string>
     <string name="dialog_category_builder_title">category</string>
@@ -194,7 +194,7 @@
     <string name="candi_button_call">call</string>
     <string name="candi_button_new">add candi</string>
     <string name="candi_button_edit">edit</string>
-    <string name="candi_section_switchboard">place info</string>
+    <string name="candi_section_switchboard_place">place info</string>
     <string name="candi_section_candi">candi</string>
     <string name="candi_section_user_candi">my candi</string>
     <string name="candi_label_comments_none">no comments yet</string>

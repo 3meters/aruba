@@ -1740,7 +1740,7 @@ public class ProxiManager {
 			synchronized (mEntityModel.mBeacons) {
 				Collections.sort(mEntityModel.mBeacons, new Beacon.SortBeaconsBySignalLevel());
 			}
-			
+
 			mLastBeaconDate = DateUtils.nowDate().getTime();
 
 			BusProvider.getInstance().post(new BeaconsLockedEvent());
@@ -2160,6 +2160,8 @@ public class ProxiManager {
 								childEntity.hidden = removedChild.hidden;
 							}
 							mEntityCache.put(childEntity.id, childEntity);
+							removeSourceEntities(childEntity.id);
+							addCommentSource(childEntity, null);
 						}
 					}
 				}
@@ -2168,19 +2170,22 @@ public class ProxiManager {
 					if (entity.children != null) {
 						for (Entity childEntity : entity.children) {
 							mEntityCache.put(childEntity.id, childEntity);
+							removeSourceEntities(childEntity.id);
+							addCommentSource(childEntity, null);
 						}
 					}
 				}
 			}
 
 			/* Create virtual candi for sources */
+
+			/* First remove any old stuff */
+			removeSourceEntities(entity.id);
+
+			Integer position = 0;
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 
-				/* First remove any old stuff */
-				removeSourceEntities(entity.id);
-
 				/* Add the current stuff */
-				Integer position = 0;
 				if (entity.sources != null) {
 					for (Source source : entity.sources) {
 						source.intentSupport = true;
@@ -2219,31 +2224,36 @@ public class ProxiManager {
 						}
 					}
 				}
-				Entity sourceEntity = loadEntityFromResources(R.raw.source_entity);
-				sourceEntity.id = entity.id + ".comments";
-				sourceEntity.name = "comments";
-				Source source = new Source();
-				source.name = "comments";
-				source.icon = "resource:img_post";
-				source.source = "comments";
-				source.position = position;
-				source.intentSupport = false;
-				source.installDeclined = false;
-				sourceEntity.source = source;
+			}
 
-				sourceEntity.commentCount = entity.commentCount;
-				sourceEntity.parentId = entity.id;
-				upsertEntity(sourceEntity);
+			/* Add comment source */
+
+			if (!entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+				addCommentSource(entity, position);
 			}
 
 			setLastActivityDate(DateUtils.nowDate().getTime());
 
-			//			if (original.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			//				Logger.v(this, "Proxi pushing entity: " + original.name);
-			//				BusProvider.getInstance().post(new EntityChangedEvent(original));
-			//			}
-
 			return original;
+		}
+
+		private void addCommentSource(Entity entity, Integer position) {
+
+			Entity sourceEntity = loadEntityFromResources(R.raw.source_entity);
+			sourceEntity.id = entity.id + ".comments";
+			sourceEntity.name = "comments";
+			Source source = new Source();
+			source.name = "comments";
+			source.icon = "resource:img_post";
+			source.source = "comments";
+			source.position = position != null ? position : 0;
+			source.intentSupport = false;
+			source.installDeclined = false;
+			sourceEntity.source = source;
+
+			sourceEntity.commentCount = entity.commentCount;
+			sourceEntity.parentId = entity.id;
+			upsertEntity(sourceEntity);
 		}
 
 		private void updateUser(User user) {

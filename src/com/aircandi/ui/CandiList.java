@@ -93,7 +93,7 @@ public class CandiList extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy();
+				mCommon.showBusy(true);
 			}
 
 			@Override
@@ -112,7 +112,7 @@ public class CandiList extends CandiActivity {
 					 * Check to see if we got anything back. If not then we want to move up the tree.
 					 */
 					if (result.data == null || ((EntityList<Entity>) result.data).size() == 0) {
-						mCommon.hideBusy(false);
+						mCommon.hideBusy(true);
 						onBackPressed();
 					}
 					else {
@@ -127,7 +127,7 @@ public class CandiList extends CandiActivity {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiList);
 				}
-				mCommon.hideBusy(false);
+				mCommon.hideBusy(true);
 			}
 
 		}.execute();

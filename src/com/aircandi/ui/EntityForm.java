@@ -597,7 +597,7 @@ public class EntityForm extends FormActivity {
 
 						@Override
 						public void run() {
-							mCommon.showBusy(R.string.progress_saving);
+							mCommon.showBusy(R.string.progress_saving, true);
 						}
 					});
 
@@ -634,7 +634,7 @@ public class EntityForm extends FormActivity {
 			@Override
 			protected void onPostExecute(Object response) {
 				ServiceResponse serviceResponse = (ServiceResponse) response;
-				mCommon.hideBusy(false);
+				mCommon.hideBusy(true);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					finish();
 					AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
@@ -737,7 +737,7 @@ public class EntityForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_deleting);
+				mCommon.showBusy(R.string.progress_deleting, true);
 			}
 
 			@Override
@@ -755,7 +755,7 @@ public class EntityForm extends FormActivity {
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Logger.i(this, "Deleted entity: " + mEntityForForm.name);
 
-					mCommon.hideBusy(false);
+					mCommon.hideBusy(true);
 					ImageUtils.showToastNotification(getString(R.string.alert_deleted), Toast.LENGTH_SHORT);
 					setResult(CandiConstants.RESULT_ENTITY_DELETED);
 					/*

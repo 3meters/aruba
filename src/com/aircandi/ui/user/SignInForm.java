@@ -96,7 +96,7 @@ public class SignInForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(R.string.progress_signing_in);
+					mCommon.showBusy(R.string.progress_signing_in, true);
 				}
 
 				@Override
@@ -110,7 +110,7 @@ public class SignInForm extends FormActivity {
 				protected void onPostExecute(Object response) {
 					
 					ModelResult result = (ModelResult) response;
-					mCommon.hideBusy(false);
+					mCommon.hideBusy(true);
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Tracker.startNewSession();

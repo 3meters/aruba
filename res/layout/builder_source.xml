@@ -24,12 +24,12 @@
 
     <com.aircandi.ui.widgets.BounceScrollView
         android:id="@+id/form_list"
+        style="@style/dialog_content_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/form_footer"
         android:layout_below="@+id/title"
-        android:fillViewport="true"
-        android:padding="10dp" >
+        android:fillViewport="true" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -41,14 +41,14 @@
             <com.aircandi.ui.widgets.WebImageView
                 android:id="@+id/image"
                 style="@style/picture_framed"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="@dimen/image_medium"
+                android:layout_height="@dimen/image_medium"
                 android:layout_gravity="left"
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="10dp"
                 aircandi:brokenDrawable="@drawable/ic_app"
                 aircandi:layout="@layout/widget_webimageview_candi_view"
-                aircandi:sizeHint="80dp"
+                aircandi:sizeHint="@dimen/image_medium"
                 android:scaleType="centerCrop" />
 
             <!-- Title and Content -->

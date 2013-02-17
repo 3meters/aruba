@@ -11,6 +11,17 @@
     android:gravity="center"
     android:minWidth="@dimen/action_button_min_width" >
 
+    <!-- textview is a hack to force the action bar button to the height we want -->
+
+    <TextView
+        style="@style/actionbar_beacons"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/abs__action_bar_default_height"
+        android:layout_gravity="center"
+        android:focusable="false"
+        android:gravity="center"
+        android:visibility="invisible" />
+
     <ImageView
         android:id="@+id/refresh_image"
         style="@style/actionbar_beacons"

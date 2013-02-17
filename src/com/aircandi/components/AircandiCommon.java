@@ -3,6 +3,7 @@ package com.aircandi.components;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -45,7 +46,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.PlacesConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
 import com.aircandi.ScanService;
@@ -110,13 +110,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public String				mPrefTheme;
 	public ActionBar			mActionBar;
 	private ViewFlipper			mViewFlipper;
-	private Runnable			mBusyTimeout;
 
 	/* Other */
 	private String				mPageName;
 	private String				mDebugWifi;
+<<<<<<< HEAD
 	private String				mDebugLocation = "--";
 	private Integer				mBusyCount	= 0;
+=======
+	private String				mDebugLocation;
+	private AtomicInteger		mBusyCount	= new AtomicInteger(0);
+>>>>>>> dev
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
 		mContext = context;
@@ -171,16 +175,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 			mActivity.getWindow().setAttributes(params);
 		}
-		
-		mBusyTimeout = new Runnable() {
-
-			@Override
-			public void run() {
-				Logger.d(this, "Busy indicators stopped: timed out");
-				hideBusy(true);
-			}
-		};
-		
 	}
 
 	@Subscribe
@@ -743,7 +737,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 					@Override
 					protected void onPreExecute() {
-						showBusy(R.string.progress_signing_out);
+						showBusy(R.string.progress_signing_out, true);
 					}
 
 					@Override
@@ -775,7 +769,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 						/* Notify interested parties */
 						ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
-						hideBusy(false);
+						hideBusy(true);
 						Intent intent = new Intent(mActivity, SplashForm.class);
 						mActivity.startActivity(intent);
 						mActivity.finish();
@@ -819,23 +813,22 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// UI progress and notifications
 	// --------------------------------------------------------------------------------------------
 
-	public void showBusy() {
+	public void showBusy(Boolean reset) {
 
-		showBusy(null);
+		showBusy(null, reset);
 	}
 
-	public void showBusy(Integer messageResId) {
+	public void showBusy(Integer messageResId, Boolean reset) {
 
-		synchronized (mBusyCount) {
-			mBusyCount++;
-			Logger.v(this, "Busy count: " + String.valueOf(mBusyCount));
+		if (reset) {
+			mBusyCount.set(1);
 		}
-		
-		/* Stop and restart the timeout window */
-		Aircandi.mainThreadHandler.removeCallbacks(mBusyTimeout);
-		Aircandi.mainThreadHandler.postDelayed(mBusyTimeout, PlacesConstants.BUSY_TIMEOUT);
-		
-		if (mBusyCount == 1) {
+		else {
+			mBusyCount.getAndIncrement();
+		}
+		Logger.v(this, "Busy count: " + String.valueOf(mBusyCount.get()));
+
+		if (mBusyCount.get() == 1) {
 			startActionbarBusyIndicator();
 		}
 
@@ -867,13 +860,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 			}
 		}
 
-		synchronized (mBusyCount) {
-			mBusyCount--;
-			Logger.v(this, "Busy count: " + String.valueOf(mBusyCount));
-		}
+		mBusyCount.getAndDecrement();
+		Logger.v(this, "Busy count: " + String.valueOf(mBusyCount.get()));
 
-		if (mBusyCount <= 0 || force) {
-			Aircandi.mainThreadHandler.removeCallbacks(mBusyTimeout);			
+		if (mBusyCount.get() <= 0 || force) {
 			stopActionbarBusyIndicator();
 			stopBusyIndicator();
 		}

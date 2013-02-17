@@ -3,6 +3,7 @@
     package="com.aircandi"
     android:versionCode="1"
     android:versionName="0.7.10" >
+    android:versionName="0.7.11" >
 
     <uses-sdk
         android:minSdkVersion="9"

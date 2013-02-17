@@ -82,7 +82,7 @@ public class CandiUser extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy();
+				mCommon.showBusy(true);
 			}
 
 			@Override
@@ -114,7 +114,7 @@ public class CandiUser extends CandiActivity {
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiUser);
 				}
-				mCommon.hideBusy(false);
+				mCommon.hideBusy(true);
 			}
 
 		}.execute();

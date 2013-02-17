@@ -7,10 +7,10 @@
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/candi_view_image"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="@dimen/image_medium"
+        android:layout_height="@dimen/image_medium"
         aircandi:layout="@layout/widget_webimageview_candi_view"
-        aircandi:sizeHint="100dp"
+        aircandi:sizeHint="@dimen/image_medium"
         android:scaleType="centerCrop" />
 
     <LinearLayout

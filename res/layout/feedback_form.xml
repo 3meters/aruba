@@ -12,14 +12,11 @@
         android:fillViewport="true" >
 
         <LinearLayout
+            style="@style/form_content_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical|top"
-            android:orientation="vertical"
-            android:paddingBottom="5dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingTop="10dp" >
+            android:orientation="vertical" >
 
             <!-- Title and Content -->
 
@@ -27,8 +24,8 @@
                 android:id="@+id/description"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:gravity="top"
                 android:layout_weight="1"
+                android:gravity="top"
                 android:hint="@string/form_feedback_hint"
                 android:inputType="textMultiLine|textAutoCorrect"
                 android:minLines="5" />

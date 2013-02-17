@@ -365,7 +365,7 @@ public class SourcesBuilder extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy();
+				mCommon.showBusy(true);
 			}
 
 			@Override

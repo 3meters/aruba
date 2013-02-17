@@ -7,12 +7,12 @@
 
     <com.aircandi.ui.widgets.WebImageView
         android:id="@+id/image"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="@dimen/image_medium"
+        android:layout_height="@dimen/image_medium"
         android:layout_centerInParent="true"
         aircandi:layout="@layout/widget_webimageview_candi_view"
         aircandi:showBusy="true"
-        aircandi:sizeHint="100dp"
+        aircandi:sizeHint="@dimen/image_medium"
         android:background="@drawable/selector_image"
         android:clickable="true"
         android:onClick="onCandiClick"

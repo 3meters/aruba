@@ -90,6 +90,8 @@ public class ProfileForm extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
 		FontManager.getInstance().setTypefaceDefault(mButtonSave);
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_image));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_password));
 		
 
 		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
@@ -119,7 +121,7 @@ public class ProfileForm extends FormActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy();
+				mCommon.showBusy(true);
 			}
 
 			@Override
@@ -140,7 +142,7 @@ public class ProfileForm extends FormActivity {
 					mUser.session = Aircandi.getInstance().getUser().session;
 					mImageUriOriginal = mUser.getUserPhotoUri();
 
-					mCommon.hideBusy(false);
+					mCommon.hideBusy(true);
 					draw();
 				}
 				else {
@@ -283,7 +285,7 @@ public class ProfileForm extends FormActivity {
 
 				@Override
 				protected void onPreExecute() {
-					mCommon.showBusy(R.string.progress_saving);
+					mCommon.showBusy(R.string.progress_saving, true);
 				}
 
 				@Override
@@ -300,7 +302,7 @@ public class ProfileForm extends FormActivity {
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "Updated user profile: " + mUser.name + " (" + mUser.id + ")");
 						Tracker.sendEvent("ui_action", "update_user", null, 0);
-						mCommon.hideBusy(false);
+						mCommon.hideBusy(true);
 						/*
 						 * We treat updating the profile like a change to an entity in the entity model. This forces
 						 * UI to update itself and pickup the changes like a new profile name, picture, etc.
@@ -342,8 +344,8 @@ public class ProfileForm extends FormActivity {
 						, this
 						, android.R.string.ok
 						, null, null, null);
+				return false;
 			}
-			return false;
 		}
 		return true;
 	}
