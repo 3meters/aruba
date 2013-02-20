@@ -232,6 +232,15 @@ public class CandiRadar extends CandiActivity {
 						return serviceResponse;
 					}
 
+					@Override
+					protected void onPostExecute(Object result) {
+						ServiceResponse serviceResponse = (ServiceResponse) result;
+						if (serviceResponse.responseCode != ResponseCode.Success) {
+							mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
+							mCommon.hideBusy(true);
+						}
+					}
+
 				}.execute();
 			}
 		});
@@ -301,6 +310,15 @@ public class CandiRadar extends CandiActivity {
 								return serviceResponse;
 							}
 
+							@Override
+							protected void onPostExecute(Object result) {
+								ServiceResponse serviceResponse = (ServiceResponse) result;
+								if (serviceResponse.responseCode != ResponseCode.Success) {
+									mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
+									mCommon.hideBusy(true);
+								}
+							}
+
 						}.execute();
 					}
 					else {
@@ -330,6 +348,15 @@ public class CandiRadar extends CandiActivity {
 							ServiceResponse serviceResponse = ProxiManager.getInstance().getPlacesNearLocation(
 									LocationManager.getInstance().getObservationLocked());
 							return serviceResponse;
+						}
+
+						@Override
+						protected void onPostExecute(Object result) {
+							ServiceResponse serviceResponse = (ServiceResponse) result;
+							if (serviceResponse.responseCode != ResponseCode.Success) {
+								mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
+								mCommon.hideBusy(true);
+							}
 						}
 
 					}.execute();

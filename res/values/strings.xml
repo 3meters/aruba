@@ -94,6 +94,7 @@
     <string name="error_service_unauthorized">Unauthorized request</string>
     <string name="error_service_forbidden">Requested operation is not valid</string>
     <string name="error_service_gateway_timeout">Did not receive timely response from service</string>
+    <string name="error_service_unknown">Unknown service error</string>
     <string name="error_signin_invalid_signin">Wrong email and password combination.</string>
     <string name="error_change_password_unauthorized">Old password is invalid.</string>
     <string name="error_invalid_email">Email address is invalid.</string>
@@ -101,10 +102,7 @@
     <string name="error_session_expired">Your login session expired. Please re-sign in.</string>
     <string name="error_session_invalid">Your login session is invalid. Please re-sign in.</string>
     <string name="error_weburi_invalid">Web address isn\'t in a valid format.</string>
-    <string name="error_signup_missmatched_passwords_title">Password</string>
-    <string name="error_signup_missmatched_passwords_message">Passwords do not match</string>
-    <string name="error_signup_email_taken">Email address is already being used.</string>
-    <string name="error_signup_password_weak">Password is too weak. Passwords must be at least 6 characters long, not be part of your user name, and not be certain commmon words.</string>
+    
     <string name="error_missing_fullname">Enter a name.</string>
     <string name="error_missing_email">Enter an email address.</string>
     <string name="error_missing_password">Enter a password.</string>

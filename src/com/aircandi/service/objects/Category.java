@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.aircandi.ProxiConstants;
 import com.aircandi.service.Expose;
 
 /**
@@ -21,8 +22,9 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				id;
 	@Expose
-	public String					icon;
-	@Expose
+	public String				icon;
+	
+	@Expose(serialize = false, deserialize = true)
 	public List<Category>		categories;
 
 	public Category() {}
@@ -60,6 +62,6 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public String iconUri() {
-		return icon;
+		return ProxiConstants.URL_PROXIBASE_SERVICE + icon;
 	}
 }

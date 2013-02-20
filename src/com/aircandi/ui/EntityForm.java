@@ -47,7 +47,7 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Beacon;
-import com.aircandi.service.objects.CategorySimple;
+import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Location;
@@ -491,8 +491,7 @@ public class EntityForm extends FormActivity {
 					Bundle extras = intent.getExtras();
 					String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
 					if (jsonCategory != null) {
-						CategorySimple categoryUpdated = (CategorySimple) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory,
-								ServiceDataType.CategorySimple);
+						Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 						if (categoryUpdated != null) {
 							mDirty = true;
 							mEntityForForm.getPlace().category = categoryUpdated;

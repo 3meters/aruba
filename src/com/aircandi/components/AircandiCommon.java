@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.http.HttpStatus;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -484,6 +486,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		ErrorType errorType = serviceResponse.exception.getErrorType();
 		ErrorCode errorCode = serviceResponse.exception.getErrorCode();
 		String errorMessage = serviceResponse.exception.getMessage();
+		Float statusCode = serviceResponse.exception.getHttpStatusCode();
 
 		/* We always make sure the progress indicator has been stopped */
 		mActivity.runOnUiThread(new Runnable() {
@@ -542,74 +545,89 @@ public class AircandiCommon implements ActionBar.TabListener {
 				}
 			}
 		}
-		else if (errorType == ErrorType.Service && errorCode == ErrorCode.NotFoundException) {
-			/*
-			 * Reached the service but requested something that doesn't exist. This is a bug and
-			 * not something that a user should cause.
-			 */
-			ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_not_found), Toast.LENGTH_SHORT);
-		}
-		else if (errorType == ErrorType.Service && errorCode == ErrorCode.UnauthorizedException) {
-			/* Reached the service but requested something that the user can't access. */
-			ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_unauthorized), Toast.LENGTH_SHORT);
-		}
-		else if (errorType == ErrorType.Service && errorCode == ErrorCode.ForbiddenException) {
-			/* Reached the service but request was invalid per service policy. */
-			ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_forbidden), Toast.LENGTH_SHORT);
-		}
-		else if (errorType == ErrorType.Service && errorCode == ErrorCode.GatewayTimeoutException) {
-			/* Reached the service but request was invalid per service policy. */
-			ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_gateway_timeout), Toast.LENGTH_SHORT);
-		}
 		else if (errorType == ErrorType.Service) {
-			/*
-			 * Reached the service with a good call but failed for a well known reason.
-			 * 
-			 * This could have been caused by any problem while inserting/updating.
-			 * We look first for ones that are known responses from the service.
-			 * 
-			 * - 403.x: password not strong enough
-			 * - 403.x: email not unique
-			 * - 401.2: expired session
-			 * - 401.1: invalid or missing session
-			 */
-			String title = null;
-			String message = null;
-			if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
-				title = mActivity.getString(R.string.error_session_expired_title);
-				message = mActivity.getString(R.string.error_session_expired);
-				/*
-				 * Make sure the user is logged out
-				 */
-				signout();
 
+			if (errorCode == ErrorCode.NotFoundException) {
+				/*
+				 * Reached the service but requested something that doesn't exist. This is a bug and
+				 * not something that a user should cause.
+				 */
+				ImageUtils.showToastNotification(mActivity.getString(R.string.error_client_request_not_found), Toast.LENGTH_SHORT);
 			}
-			else if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
-				message = mActivity.getString(R.string.error_session_invalid);
-				if (serviceOperation == ServiceOperation.PasswordChange) {
-					message = mActivity.getString(R.string.error_change_password_unauthorized);
-				}
-				else if (serviceOperation == ServiceOperation.Signin) {
-					message = mActivity.getString(R.string.error_signin_invalid_signin);
-				}
-				else {
-					signout();
-				}
+			else if (errorCode == ErrorCode.UnauthorizedException) {
+				/* Reached the service but requested something that the user can't access. */
+				ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_unauthorized), Toast.LENGTH_SHORT);
 			}
-			else if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
-				message = mActivity.getString(R.string.error_signup_password_weak);
+			else if (errorCode == ErrorCode.ForbiddenException) {
+				/* Reached the service but request was invalid per service policy. */
+				ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_forbidden), Toast.LENGTH_SHORT);
 			}
-			else if (serviceResponse.exception.getHttpStatusCode() == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
-				message = mActivity.getString(R.string.error_signup_email_taken);
+			else if (errorCode == ErrorCode.GatewayTimeoutException) {
+				/* Reached the service but request was invalid per service policy. */
+				ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_gateway_timeout), Toast.LENGTH_SHORT);
 			}
 			else {
-				ImageUtils.showToastNotification(serviceResponse.exception.getMessage(), Toast.LENGTH_SHORT);
-			}
+				String title = null;
+				String message = null;
+				if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+					/*
+					 * Reached the service with a good call but the service failed for an unknown reason. Examples
+					 * are service bugs like missing indexes causing mongo queries to throw errors.
+					 * 
+					 * - 500: Something bad and unknown has happened in the service.
+					 */
+					ImageUtils.showToastNotification(mActivity.getString(R.string.error_service_unknown), Toast.LENGTH_SHORT);
+				}
+				else {
+					/*
+					 * Reached the service with a good call but failed for a well known reason.
+					 * 
+					 * This could have been caused by any problem while inserting/updating.
+					 * We look first for ones that are known responses from the service.
+					 * 
+					 * - 403.x: password not strong enough
+					 * - 403.x: email not unique
+					 * - 401.2: expired session
+					 * - 401.1: invalid or missing session
+					 */
+					if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED) {
+						title = mActivity.getString(R.string.error_session_expired_title);
+						message = mActivity.getString(R.string.error_session_expired);
+						/*
+						 * Make sure the user is logged out
+						 */
+						signout();
 
-			if (message != null) {
-				showAlertDialogSimple(title, message);
+					}
+					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS) {
+						message = mActivity.getString(R.string.error_session_invalid);
+						if (serviceOperation == ServiceOperation.PasswordChange) {
+							message = mActivity.getString(R.string.error_change_password_unauthorized);
+						}
+						else if (serviceOperation == ServiceOperation.Signin) {
+							message = mActivity.getString(R.string.error_signin_invalid_signin);
+						}
+						else {
+							signout();
+						}
+					}
+					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
+						message = mActivity.getString(R.string.error_signup_password_weak);
+					}
+					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE) {
+						message = mActivity.getString(R.string.error_signup_email_taken);
+					}
+					else {
+						ImageUtils.showToastNotification(serviceResponse.exception.getMessage(), Toast.LENGTH_SHORT);
+					}
+				}
+
+				if (message != null) {
+					showAlertDialogSimple(title, message);
+				}
 			}
 		}
+
 		Logger.w(context, "Service error: " + errorMessage);
 	}
 
@@ -1264,7 +1282,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		PickBookmark,
 		CheckUpdate,
 		Tuning,
-		CandiUser
+		CandiUser, PlaceSearch
 	}
 
 }
