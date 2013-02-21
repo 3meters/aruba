@@ -68,7 +68,6 @@ import com.aircandi.service.ProxibaseServiceException.ErrorType;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
-import com.aircandi.service.objects.CategorySimple;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.GeoLocation;
 import com.aircandi.service.objects.Link;
@@ -746,9 +745,6 @@ public class ProxibaseService {
 			else if (serviceDataType == ServiceDataType.Category) {
 				return Category.setPropertiesFromMap(new Category(), rootMap);
 			}
-			else if (serviceDataType == ServiceDataType.CategorySimple) {
-				return CategorySimple.setPropertiesFromMap(new CategorySimple(), rootMap);
-			}
 			else if (serviceDataType == ServiceDataType.Source) {
 				return Source.setPropertiesFromMap(new Source(), rootMap);
 			}
@@ -850,9 +846,6 @@ public class ProxibaseService {
 						else if (serviceDataType == ServiceDataType.Category) {
 							list.add(Category.setPropertiesFromMap(new Category(), map));
 						}
-						else if (serviceDataType == ServiceDataType.CategorySimple) {
-							list.add(CategorySimple.setPropertiesFromMap(new CategorySimple(), map));
-						}
 					}
 					serviceData.data = list;
 				}
@@ -920,7 +913,7 @@ public class ProxibaseService {
 
 		public void onComplete(Object response) {}
 
-		public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description) {}
+		public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {}
 
 		public void onProgressChanged(int progress) {}
 	}
@@ -941,7 +934,6 @@ public class ProxibaseService {
 		Stat,
 		ServiceEntry,
 		Source,
-		CategorySimple,
 	}
 
 	public static enum RequestType {

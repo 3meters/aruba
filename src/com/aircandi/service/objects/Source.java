@@ -3,7 +3,9 @@ package com.aircandi.service.objects;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Locale;
 
+import com.aircandi.ProxiConstants;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.service.Expose;
 
@@ -42,7 +44,7 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		this.intentSupport = intentSupport;
 		this.installDeclined = installDeclined;
 	}
-	
+
 	public static Source setPropertiesFromMap(Source source, HashMap map) {
 		source.name = (String) map.get("name");
 		source.source = (String) map.get("source");
@@ -55,8 +57,10 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public String getImageUri() {
-		String imageUri = icon;
-		return imageUri;
+		if (icon.toLowerCase(Locale.US).startsWith("resource:")) {
+			return icon;
+		}
+		return ProxiConstants.URL_PROXIBASE_SERVICE + icon;
 	}
 
 	public static class SortSourcesBySourcePosition implements Comparator<Source> {
@@ -72,11 +76,11 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 			return 1;
 		}
 	}
-	
+
 	public Boolean appExists() {
 		return (packageName != null);
 	}
-	
+
 	public Boolean appInstalled() {
 		Boolean exists = AndroidManager.getInstance().doesPackageExist(this.packageName);
 		return exists;

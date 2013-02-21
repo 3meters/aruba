@@ -20,6 +20,10 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	public String				source;
 	@Expose
 	public String				sourceId;
+	@Expose
+	public String				provider;
+	@Expose
+	public String				providerId;
 
 	/* Can come from foursquare or our own custom places */
 
@@ -28,7 +32,7 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public Location				location;
 	@Expose
-	public CategorySimple		category;
+	public Category				category;
 
 	/* Only comes from foursquare */
 
@@ -77,7 +81,7 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		}
 
 		if (map.get("category") != null) {
-			place.category = (CategorySimple) CategorySimple.setPropertiesFromMap(new CategorySimple(), (HashMap<String, Object>) map.get("category"));
+			place.category = (Category) Category.setPropertiesFromMap(new Category(), (HashMap<String, Object>) map.get("category"));
 		}
 
 		return place;
@@ -175,7 +179,7 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		if (semi) {
 			colorResId = R.color.accent_gray_semi;
 		}
-		
+
 		if (categoryName != null) {
 
 			Random rand = new Random(categoryName.hashCode());

@@ -10,17 +10,17 @@ public final class ProxiConstants {
 
 	public static final String	INSERT_USER_SECRET									= "larissa";																																	//$NON-NLS-1$
 
-	public static final String	_URL_PROXIBASE_SERVICE								= "http://ariseditions.com:8080/";																												// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE								= "https://aircandi.com:643/";																													//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE								= "http://ariseditions.com:8080";																												// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$
+	public static final String	_URL_PROXIBASE_SERVICE								= "https://api.aircandi.com";																													//$NON-NLS-1$
 	public static final String	ADMIN_USER_ID										= "0001.000000.00000.000.000000";																												//$NON-NLS-1$
 
-	public static final String	URL_PROXIBASE_SERVICE_REST							= URL_PROXIBASE_SERVICE + "data/";																												//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE_USER							= URL_PROXIBASE_SERVICE + "user/";																												//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE_ADMIN							= URL_PROXIBASE_SERVICE + "admin/";																											//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE_METHOD						= URL_PROXIBASE_SERVICE + "do/";																												//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE_AUTH							= URL_PROXIBASE_SERVICE + "auth/";																												//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS			= URL_PROXIBASE_SERVICE + "img/sources/";																										//$NON-NLS-1$
-	public static final String	URL_PROXIBASE_SERVICE_ASSETS_CATEGORIES				= URL_PROXIBASE_SERVICE + "img/categories/foursquare/";																						//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_REST							= URL_PROXIBASE_SERVICE + "/data/";																												//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_USER							= URL_PROXIBASE_SERVICE + "/user/";																												//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_ADMIN							= URL_PROXIBASE_SERVICE + "/admin/";																											//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_METHOD						= URL_PROXIBASE_SERVICE + "/do/";																												//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_AUTH							= URL_PROXIBASE_SERVICE + "/auth/";																												//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS			= URL_PROXIBASE_SERVICE + "/img/sources/";																										//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_ASSETS_CATEGORIES				= URL_PROXIBASE_SERVICE + "/img/categories/foursquare/";																						//$NON-NLS-1$
 
 	public static final String	URL_PROXIBASE_MEDIA_IMAGES							= "http://aircandi-images.s3.amazonaws.com/";																									//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SEARCH_IMAGES							= "https://api.datamarket.azure.com/Data.ashx/Bing/Search/v1/Image";																			//$NON-NLS-1$

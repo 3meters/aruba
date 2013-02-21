@@ -94,6 +94,8 @@ public class PicturePicker extends FormActivity {
 
 	private static long				PAGE_SIZE		= 30L;
 	private static long				LIST_MAX		= 300L;
+	private static String			QUERY_PREFIX	= "wallpaper";
+	private static String			QUERY_DEFAULT	= "wallpaper unusual places";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -124,16 +126,17 @@ public class PicturePicker extends FormActivity {
 			}
 			mSearch = (EditText) findViewById(R.id.search_text);
 			mSearch.setOnKeyListener(new OnKeyListener() {
-	            @Override
+				@Override
 				public boolean onKey(View view, int keyCode, KeyEvent event) {
-	                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-	                    onSearchClick(view);
-	                    return true;
-	                } else {
-	                    return false;
-	                }
-	            }
-	        });			
+					if (keyCode == KeyEvent.KEYCODE_ENTER) {
+						onSearchClick(view);
+						return true;
+					}
+					else {
+						return false;
+					}
+				}
+			});
 			if (mDefaultSearch != null) {
 				mSearch.setText(mDefaultSearch);
 			}
@@ -152,7 +155,7 @@ public class PicturePicker extends FormActivity {
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		View parentView = findViewById(R.id.grid_gallery);
 		Integer layoutWidthPixels = metrics.widthPixels - (parentView.getPaddingLeft() + parentView.getPaddingRight());
-		
+
 		Integer desiredWidthPixels = (int) (metrics.xdpi * 0.60f);
 		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
 			desiredWidthPixels = (int) (metrics.ydpi * 0.60f);
@@ -361,10 +364,10 @@ public class PicturePicker extends FormActivity {
 			else {
 				String queryDecorated = mQuery;
 				if (queryDecorated == null || queryDecorated.equals("")) {
-					queryDecorated = "trending now site:yahoo.com";
+					queryDecorated = QUERY_DEFAULT;
 				}
 				else {
-					queryDecorated = "wallpaper " + queryDecorated;
+					queryDecorated = QUERY_PREFIX + " " + queryDecorated;
 				}
 
 				serviceResponse = loadSearchImages(queryDecorated, PAGE_SIZE, mOffset);

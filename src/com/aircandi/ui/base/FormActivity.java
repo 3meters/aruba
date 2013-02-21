@@ -122,7 +122,7 @@ public abstract class FormActivity extends SherlockActivity {
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
 				bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(imageUri);
 				if (bitmap != null && mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null);
+					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null, false);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
@@ -131,7 +131,7 @@ public abstract class FormActivity extends SherlockActivity {
 				Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 				if (mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null);
+					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null, false);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
@@ -162,7 +162,8 @@ public abstract class FormActivity extends SherlockActivity {
 															, imageResponse.imageUri
 															, imageResponse.bitmap
 															, imageTitle
-															, imageDescription);
+															, imageDescription
+															, false);
 												}
 											}
 										});
@@ -210,11 +211,13 @@ public abstract class FormActivity extends SherlockActivity {
 											public void run() {
 												if (mImageRequestListener != null) {
 													ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+													/* We don't cache place pictures from foursquare because they wouldn't like that */
 													mImageRequestListener.onComplete(serviceResponse
 															, imageResponse.imageUri
 															, imageResponse.bitmap
 															, null
-															, null);
+															, null
+															, true);
 												}
 											}
 										});
@@ -298,7 +301,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 				/* Used to pass back the bitmap and imageUri (sometimes) for the entity */
 				if (mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse(), user.getUserPhotoUri(), null, null, null);
+					mImageRequestListener.onComplete(new ServiceResponse(), user.getUserPhotoUri(), null, null, null, false);
 				}
 			}
 		});

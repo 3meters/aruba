@@ -31,7 +31,6 @@ import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Category;
-import com.aircandi.service.objects.CategorySimple;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
@@ -45,7 +44,7 @@ public class CategoryBuilder extends FormActivity {
 	private TextView		mTitle;
 	private Integer			mSpinnerItem;
 
-	private CategorySimple	mOriginalCategory;
+	private Category		mOriginalCategory;
 	private Integer			mOriginalCategoryIndex;
 	private Integer			mOriginalSubCategoryIndex;
 	private Integer			mOriginalSubSubCategoryIndex;
@@ -67,7 +66,7 @@ public class CategoryBuilder extends FormActivity {
 		if (extras != null) {
 			String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
 			if (jsonCategory != null) {
-				mOriginalCategory = (CategorySimple) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.CategorySimple);
+				mOriginalCategory = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 			}
 		}
 		mImage = (WebImageView) findViewById(R.id.image);
@@ -148,19 +147,19 @@ public class CategoryBuilder extends FormActivity {
 	private void doSave() {
 		Intent intent = new Intent();
 		if (mSubSubCategory != null) {
-			CategorySimple categorySimple = new CategorySimple();
-			categorySimple.id = mSubSubCategory.id;
-			categorySimple.name = mSubSubCategory.name;
-			categorySimple.icon = mSubSubCategory.iconUri();
-			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(categorySimple, false, true);
+			Category category = new Category();
+			category.id = mSubSubCategory.id;
+			category.name = mSubSubCategory.name;
+			category.icon = mSubSubCategory.iconUri();
+			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(category, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		else if (mSubCategory != null) {
-			CategorySimple categorySimple = new CategorySimple();
-			categorySimple.id = mSubCategory.id;
-			categorySimple.name = mSubCategory.name;
-			categorySimple.icon = mSubCategory.iconUri();
-			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(categorySimple, false, true);
+			Category category = new Category();
+			category.id = mSubCategory.id;
+			category.name = mSubCategory.name;
+			category.icon = mSubCategory.iconUri();
+			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(category, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		setResult(Activity.RESULT_OK, intent);
@@ -252,7 +251,7 @@ public class CategoryBuilder extends FormActivity {
 
 		if (mOriginalCategory != null && mOriginalCategoryIndex != null) {
 			mSpinnerCategory.setSelection(mOriginalCategoryIndex);
-			if (mOriginalSubCategoryIndex == null ) {
+			if (mOriginalSubCategoryIndex == null) {
 				mOriginalCategory = null;
 			}
 		}
@@ -281,20 +280,20 @@ public class CategoryBuilder extends FormActivity {
 			if (mOriginalCategory == null) {
 				mSpinnerSubCategory.setSelection(adapter.getCount());
 			}
-			
+
 			mSpinnerSubCategory.setOnTouchListener(new OnTouchListener() {
 
-					@Override
-					public boolean onTouch(View v, MotionEvent event) {
-	                    if (event.getAction() == MotionEvent.ACTION_UP) {
-	                    	if (mSpinnerSubCategory.getSelectedItemPosition() == adapter.getCount()) {
-	                    		mSpinnerSubCategory.setSelection(0);
-	                    	}
-	                    }
-	                    return false;
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					if (event.getAction() == MotionEvent.ACTION_UP) {
+						if (mSpinnerSubCategory.getSelectedItemPosition() == adapter.getCount()) {
+							mSpinnerSubCategory.setSelection(0);
+						}
 					}
-	            });			
-			
+					return false;
+				}
+			});
+
 			mSpinnerSubCategory.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 				@Override
@@ -320,7 +319,7 @@ public class CategoryBuilder extends FormActivity {
 
 			if (mOriginalCategory != null && mOriginalSubCategoryIndex != null) {
 				mSpinnerSubCategory.setSelection(mOriginalSubCategoryIndex);
-				if (mOriginalSubSubCategoryIndex == null ) {
+				if (mOriginalSubSubCategoryIndex == null) {
 					mOriginalCategory = null;
 				}
 			}
@@ -349,20 +348,20 @@ public class CategoryBuilder extends FormActivity {
 			if (mOriginalCategory == null) {
 				mSpinnerSubSubCategory.setSelection(adapter.getCount());
 			}
-			
+
 			mSpinnerSubSubCategory.setOnTouchListener(new OnTouchListener() {
 
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
-                    	if (mSpinnerSubSubCategory.getSelectedItemPosition() == adapter.getCount()) {
-                    		mSpinnerSubSubCategory.setSelection(0);
-                    	}
-                    }
-                    return false;
+					if (event.getAction() == MotionEvent.ACTION_UP) {
+						if (mSpinnerSubSubCategory.getSelectedItemPosition() == adapter.getCount()) {
+							mSpinnerSubSubCategory.setSelection(0);
+						}
+					}
+					return false;
 				}
-            });
-			
+			});
+
 			mSpinnerSubSubCategory.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 				@Override
