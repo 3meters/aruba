@@ -1,5 +1,6 @@
 package com.aircandi.ui.user;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -258,26 +259,72 @@ public class CandiUser extends CandiActivity {
 		}
 
 		/* All non-source children */
-		List<Entity> entities = mEntities;
-		if (entities.size() > 0) {
-			ViewStub stub = (ViewStub) findViewById(R.id.stub_candi);
+		List<Entity> places = new ArrayList<Entity>();
+		List<Entity> pictures = new ArrayList<Entity>();
+		List<Entity> posts = new ArrayList<Entity>();
+
+		for (Entity entity : mEntities) {
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+				places.add(entity);
+			}
+			else if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
+				pictures.add(entity);
+			}
+			else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+				posts.add(entity);
+			}
+		}
+
+		if (places.size() > 0) {
+			ViewStub stub = (ViewStub) findViewById(R.id.stub_candi_places);
 			if (stub != null) {
-				((ViewStub) findViewById(R.id.stub_candi)).inflate();
+				((ViewStub) findViewById(R.id.stub_candi_places)).inflate();
+			}
+		}
+		if (pictures.size() > 0) {
+			ViewStub stub = (ViewStub) findViewById(R.id.stub_candi_pictures);
+			if (stub != null) {
+				((ViewStub) findViewById(R.id.stub_candi_pictures)).inflate();
+			}
+		}
+		if (posts.size() > 0) {
+			ViewStub stub = (ViewStub) findViewById(R.id.stub_candi_posts);
+			if (stub != null) {
+				((ViewStub) findViewById(R.id.stub_candi_posts)).inflate();
 			}
 		}
 
-		setVisibility(findViewById(R.id.section_candi), View.GONE);
-		if (entities.size() > 0) {
+		setVisibility(findViewById(R.id.section_candi_places), View.GONE);
+		setVisibility(findViewById(R.id.section_candi_pictures), View.GONE);
+		setVisibility(findViewById(R.id.section_candi_posts), View.GONE);
 
-			SectionLayout section = (SectionLayout) findViewById(R.id.section_layout_candi);
+		if (places.size() > 0) {
+			SectionLayout section = (SectionLayout) findViewById(R.id.section_candi_places).findViewById(R.id.section_layout_candi);
 			if (section != null) {
-				section.getTextViewHeader().setText(context.getString(R.string.candi_section_candi));
-				FlowLayout flow = (FlowLayout) findViewById(R.id.flow_candi);
-				drawCandi(context, flow, entities, R.layout.temp_place_candi_item);
-				setVisibility(findViewById(R.id.section_candi), View.VISIBLE);
+				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_places));
+				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_places).findViewById(R.id.flow_candi);
+				drawCandi(context, flow, places, R.layout.temp_place_candi_item);
+				setVisibility(findViewById(R.id.section_candi_places), View.VISIBLE);
 			}
 		}
-
+		if (pictures.size() > 0) {
+			SectionLayout section = (SectionLayout) findViewById(R.id.section_candi_pictures).findViewById(R.id.section_layout_candi);
+			if (section != null) {
+				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_pictures));
+				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_pictures).findViewById(R.id.flow_candi);
+				drawCandi(context, flow, pictures, R.layout.temp_place_candi_item);
+				setVisibility(findViewById(R.id.section_candi_pictures), View.VISIBLE);
+			}
+		}
+		if (posts.size() > 0) {
+			SectionLayout section = (SectionLayout) findViewById(R.id.section_candi_posts).findViewById(R.id.section_layout_candi);
+			if (section != null) {
+				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_posts));
+				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_posts).findViewById(R.id.flow_candi);
+				drawCandi(context, flow, posts, R.layout.temp_place_candi_item);
+				setVisibility(findViewById(R.id.section_candi_posts), View.VISIBLE);
+			}
+		}
 	}
 
 	static private void drawCandi(Context context, FlowLayout layout, List<Entity> entities, Integer viewResId) {

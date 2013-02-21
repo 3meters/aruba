@@ -70,4 +70,21 @@ public class SectionLayout extends LinearLayout {
 	public void setTextViewHeader(TextView textViewHeader) {
 		mTextViewHeader = textViewHeader;
 	}
+
+	public String getHeaderTitle() {
+		return mHeaderTitle;
+	}
+
+	public void setHeaderTitle(String headerTitle) {
+		mHeaderTitle = headerTitle;
+		if (mTextViewHeader != null) {
+			if (mHeaderTitle == null) {
+				mTextViewHeader.setVisibility(View.GONE);
+			}
+			else {
+				mTextViewHeader.setText(mHeaderTitle);
+				mTextViewHeader.setVisibility(View.VISIBLE);
+			}
+		}
+	}
 }

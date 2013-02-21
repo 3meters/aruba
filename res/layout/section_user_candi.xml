@@ -16,7 +16,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        aircandi:headerTitle="@string/candi_section_user_candi"
         aircandi:layoutHeader="@layout/temp_section_header"
         android:orientation="vertical" >
 
