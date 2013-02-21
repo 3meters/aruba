@@ -142,7 +142,7 @@ public class CandiView extends RelativeLayout {
 
 		setVisibility(mSubtitle, View.GONE);
 		if (mSubtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
-			mSubtitle.setText(Html.fromHtml(entity.subtitle));
+			mSubtitle.setText(Html.fromHtml(entity.subtitle.toUpperCase(Locale.US)));
 			setVisibility(mSubtitle, View.VISIBLE);
 		}
 
@@ -154,7 +154,7 @@ public class CandiView extends RelativeLayout {
 			if (mSubtitle != null) {
 				setVisibility(mSubtitle, View.GONE);
 				if (place.category != null) {
-					mSubtitle.setText(Html.fromHtml(place.category.name));
+					mSubtitle.setText(Html.fromHtml(place.category.name.toUpperCase(Locale.US)));
 					setVisibility(mSubtitle, View.VISIBLE);
 				}
 			}
@@ -172,7 +172,7 @@ public class CandiView extends RelativeLayout {
 			}
 
 			if (mSubtitle != null && entity.subtitle != null && !entity.subtitle.equals("")) {
-				mSubtitle.setText(Html.fromHtml(entity.subtitle));
+				mSubtitle.setText(Html.fromHtml(entity.subtitle.toUpperCase(Locale.US)));
 				setVisibility(mSubtitle, View.VISIBLE);
 			}
 

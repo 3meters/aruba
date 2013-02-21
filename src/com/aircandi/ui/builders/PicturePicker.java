@@ -152,9 +152,9 @@ public class PicturePicker extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.message));
 
 		/* Stash some sizing info */
+		mGridView = (GridView) findViewById(R.id.grid_gallery);
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
-		View parentView = findViewById(R.id.grid_gallery);
-		Integer layoutWidthPixels = metrics.widthPixels - (parentView.getPaddingLeft() + parentView.getPaddingRight());
+		Integer layoutWidthPixels = metrics.widthPixels - (mGridView.getPaddingLeft() + mGridView.getPaddingRight());
 
 		Integer desiredWidthPixels = (int) (metrics.xdpi * 0.60f);
 		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -178,7 +178,6 @@ public class PicturePicker extends FormActivity {
 		}
 
 		mMessage = (TextView) findViewById(R.id.message);
-		mGridView = (GridView) findViewById(R.id.grid_gallery);
 		mGridView.setColumnWidth(mImageWidthPixels);
 		mGridView.setOnItemClickListener(new OnItemClickListener() {
 

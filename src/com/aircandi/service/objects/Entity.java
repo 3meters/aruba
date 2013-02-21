@@ -552,26 +552,36 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		Private
 	}
 
-	public static class SortEntitiesByPlaceRankScoreDistance implements Comparator<Entity> {
+	public static class SortEntitiesByProximityAndDistance implements Comparator<Entity> {
 
 		@Override
 		public int compare(Entity entity1, Entity entity2) {
 
-			//			/* synthetics */
-			//			if (!entity1.synthetic && entity2.synthetic) {
-			//				return -1;
-			//			}
-			//			if (entity1.synthetic && !entity2.synthetic) {
-			//				return 1;
-			//			}
-			//			else {
-			//			if (entity1.getPlaceRankImpact() > entity2.getPlaceRankImpact()) {
-			//				return -1;
-			//			}
-			//			if (entity1.getPlaceRankImpact() < entity2.getPlaceRankImpact()) {
-			//				return 1;
-			//			}
-			//			else {
+			if (entity1.hasProximityLink() && !entity2.hasProximityLink()) {
+				return -1;
+			}
+			else if (entity2.hasProximityLink() && !entity1.hasProximityLink()) {
+				return 1;
+			}
+			else {
+				if (entity1.distance < entity2.distance.intValue()) {
+					return -1;
+				}
+				else if (entity1.distance.intValue() > entity2.distance.intValue()) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+			}
+		}
+	}
+
+	public static class SortEntitiesByDistance implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity entity1, Entity entity2) {
+
 			if (entity1.distance < entity2.distance.intValue()) {
 				return -1;
 			}
@@ -581,8 +591,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			else {
 				return 0;
 			}
-			//			}
-			//			}
 		}
 	}
 

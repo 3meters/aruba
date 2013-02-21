@@ -96,7 +96,6 @@
     <string name="error_service_gateway_timeout">Did not receive timely response from service</string>
     <string name="error_service_unknown">Unknown service error</string>
     <string name="error_signin_invalid_signin">Wrong email and password combination.</string>
-    <string name="error_change_password_unauthorized">Old password is invalid.</string>
     <string name="error_invalid_email">Email address is invalid.</string>
     <string name="error_session_expired_title">Session expired</string>
     <string name="error_session_expired">Your login session expired. Please re-sign in.</string>
@@ -156,7 +155,7 @@
 
     <!-- Dialogs -->
 
-    <string name="dialog_info">copyright 3meters LLC 2010-2013</string>
+    <string name="dialog_info">copyright 3meters LLC 2010&#8211;2013</string>
     <string name="dialog_template_picker_title">select candi type</string>
     <string name="dialog_address_builder_title">address</string>
     <string name="dialog_category_builder_title">category</string>
@@ -194,7 +193,6 @@
     <string name="candi_button_edit">edit</string>
     <string name="candi_section_switchboard_place">place info</string>
     <string name="candi_section_candi">candi</string>
-    <string name="candi_label_comments_none">no comments yet</string>
     <string name="candi_label_user_created_by">created</string>
     <string name="candi_label_user_discovered_by">discovered</string>
     <string name="candi_label_user_added_by">added</string>
