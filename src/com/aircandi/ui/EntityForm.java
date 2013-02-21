@@ -155,7 +155,7 @@ public class EntityForm extends FormActivity {
 		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			mPictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
 		}
-		
+
 		if (mCommon.mCommandType == CommandType.New) {
 			mEntityForForm = makeEntity(mCommon.mEntityType);
 		}
@@ -172,7 +172,7 @@ public class EntityForm extends FormActivity {
 				}
 			}
 		}
-		
+
 	}
 
 	private Entity makeEntity(String type) {
@@ -404,7 +404,9 @@ public class EntityForm extends FormActivity {
 					mEntityBitmap = imageBitmap;
 					if (imageUri != null) {
 						mEntityForForm.getPhotoForSet().setImageUri(imageUri);
-						mPictureEntity.getPhotoForSet().setImageUri(imageUri);
+						if (mPictureEntity != null) {
+							mPictureEntity.getPhotoForSet().setImageUri(imageUri);
+						}
 					}
 					drawImage(mEntityForForm);
 				}
@@ -734,10 +736,10 @@ public class EntityForm extends FormActivity {
 			bitmap = null;
 		}
 		result = ProxiManager.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, bitmap, false);
-		
+
 		/* Add picture entity if a new picture has been set for a place */
 		Entity entity = (Entity) result.data;
-		if (mPictureEntity != null && (mPictureEntity.getPhotoForSet().getUri() != null || mEntityBitmap !=null)) {
+		if (mPictureEntity != null && (mPictureEntity.getPhotoForSet().getUri() != null || mEntityBitmap != null)) {
 			mPictureEntity.photo = mEntityForForm.photo;
 			mPictureEntity.parentId = entity.id;
 			result = ProxiManager.getInstance().getEntityModel().insertEntity(mPictureEntity, null, null, null, false);
@@ -752,9 +754,9 @@ public class EntityForm extends FormActivity {
 			bitmap = null;
 		}
 		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, bitmap);
-		
+
 		/* Add picture entity if a new picture has been set for a place */
-		if (mPictureEntity != null && (mPictureEntity.getPhotoForSet().getUri() != null || mEntityBitmap !=null)) {
+		if (mPictureEntity != null && (mPictureEntity.getPhotoForSet().getUri() != null || mEntityBitmap != null)) {
 			mPictureEntity.photo = mEntityForForm.photo;
 			mPictureEntity.parentId = mEntityForForm.id;
 			result = ProxiManager.getInstance().getEntityModel().insertEntity(mPictureEntity, null, null, null, false);
