@@ -70,8 +70,10 @@ public class EntityForm extends FormActivity {
 	private ViewFlipper		mViewFlipper;
 	private WebImageView	mImageViewPicture;
 	private Bitmap			mEntityBitmap;
+	private Boolean			mEntityBitmapLocalOnly	= false;
 	private Entity			mEntityForForm;
-	private Boolean			mDirty	= false;
+	private Entity			mPictureEntity;
+	private Boolean			mDirty					= false;
 	private TextView		mTitle;
 	private TextView		mDescription;
 	private CheckBox		mLocked;
@@ -150,22 +152,12 @@ public class EntityForm extends FormActivity {
 		 * Fill in the system and default properties for the base entity properties. The activities that subclass this
 		 * will set any additional properties beyond the base ones.
 		 */
+		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			mPictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
+		}
+		
 		if (mCommon.mCommandType == CommandType.New) {
-
-			Entity entity = new Entity();
-			entity.signalFence = -100.0f;
-			entity.enabled = true;
-			entity.locked = false;
-			entity.isCollection = (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE));
-			entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);
-			entity.type = mCommon.mEntityType;
-			if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				entity.getPlace().source = "user";
-				entity.getPlace().sourceId = Aircandi.getInstance().getUser().id;
-				entity.locked = false;
-			}
-
-			mEntityForForm = entity;
+			mEntityForForm = makeEntity(mCommon.mEntityType);
 		}
 		else {
 			if (mEntityForForm == null && mCommon.mEntityId != null) {
@@ -180,6 +172,23 @@ public class EntityForm extends FormActivity {
 				}
 			}
 		}
+		
+	}
+
+	private Entity makeEntity(String type) {
+		Entity entity = new Entity();
+		entity.signalFence = -100.0f;
+		entity.enabled = true;
+		entity.locked = false;
+		entity.isCollection = (type.equals(CandiConstants.TYPE_CANDI_PLACE));
+		entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);
+		entity.type = type;
+		if (type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+			entity.getPlace().source = "user";
+			entity.getPlace().sourceId = Aircandi.getInstance().getUser().id;
+			entity.locked = false;
+		}
+		return entity;
 	}
 
 	private void draw() {
@@ -189,7 +198,7 @@ public class EntityForm extends FormActivity {
 			final Entity entity = mEntityForForm;
 
 			/* Color */
-			
+
 			mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others		
 
 			/* Fonts */
@@ -289,10 +298,11 @@ public class EntityForm extends FormActivity {
 						int color = Place.getCategoryColor(entity.place.category != null
 								? entity.place.category.name
 								: null, true, mMuteColor, false);
-						
+
 						mImageViewPicture.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-						mColorResId = Place.getCategoryColorResId((entity.place != null && entity.place.category != null) ? entity.place.category.name : null, true, mMuteColor, false);
-						
+						mColorResId = Place.getCategoryColorResId((entity.place != null && entity.place.category != null) ? entity.place.category.name : null,
+								true, mMuteColor, false);
+
 						if (findViewById(R.id.color_layer) != null) {
 							((View) findViewById(R.id.color_layer)).setBackgroundResource(mColorResId);
 							((View) findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
@@ -303,8 +313,8 @@ public class EntityForm extends FormActivity {
 						}
 					}
 				}
-				
-				String imageUri = entity.getEntityPhotoUri();				
+
+				String imageUri = entity.getEntityPhotoUri();
 				BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mImageViewPicture.getImageView());
 				bitmapRequest.setImageSize(mImageViewPicture.getSizeHint());
 				bitmapRequest.setImageRequestor(mImageViewPicture.getImageView());
@@ -384,15 +394,17 @@ public class EntityForm extends FormActivity {
 		mImageRequestListener = new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description) {
+			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
 
 				ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mDirty = true;
+					mEntityBitmapLocalOnly = bitmapLocalOnly;
 					/* Could get set to null if we are using the default */
 					mEntityBitmap = imageBitmap;
 					if (imageUri != null) {
 						mEntityForForm.getPhotoForSet().setImageUri(imageUri);
+						mPictureEntity.getPhotoForSet().setImageUri(imageUri);
 					}
 					drawImage(mEntityForForm);
 				}
@@ -554,6 +566,7 @@ public class EntityForm extends FormActivity {
 			entity.photo = null;
 		}
 		mEntityBitmap = null;
+		mEntityBitmapLocalOnly = false;
 		drawImage(entity);
 		Tracker.sendEvent("ui_action", "set_entity_picture_to_default", null, 0);
 	}
@@ -716,13 +729,36 @@ public class EntityForm extends FormActivity {
 		}
 
 		Tracker.sendEvent("ui_action", "entity_insert", mEntityForForm.type, 0);
-		result = ProxiManager.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, mEntityBitmap, false);
+		Bitmap bitmap = mEntityBitmap;
+		if (mEntityBitmapLocalOnly) {
+			bitmap = null;
+		}
+		result = ProxiManager.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, bitmap, false);
+		
+		/* Add picture entity if a new picture has been set for a place */
+		Entity entity = (Entity) result.data;
+		if (mPictureEntity != null && (mPictureEntity.getPhotoForSet().getUri() != null || mEntityBitmap !=null)) {
+			mPictureEntity.photo = mEntityForForm.photo;
+			mPictureEntity.parentId = entity.id;
+			result = ProxiManager.getInstance().getEntityModel().insertEntity(mPictureEntity, null, null, null, false);
+		}
 		return result;
 	}
 
 	private ModelResult updateEntityAtService() {
 		Tracker.sendEvent("ui_action", "entity_update", mEntityForForm.type, 0);
-		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, mEntityBitmap);
+		Bitmap bitmap = mEntityBitmap;
+		if (mEntityBitmapLocalOnly) {
+			bitmap = null;
+		}
+		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, bitmap);
+		
+		/* Add picture entity if a new picture has been set for a place */
+		if (mPictureEntity != null && (mPictureEntity.getPhotoForSet().getUri() != null || mEntityBitmap !=null)) {
+			mPictureEntity.photo = mEntityForForm.photo;
+			mPictureEntity.parentId = mEntityForForm.id;
+			result = ProxiManager.getInstance().getEntityModel().insertEntity(mPictureEntity, null, null, null, false);
+		}
 		return result;
 	}
 

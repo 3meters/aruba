@@ -913,7 +913,7 @@ public class ProxibaseService {
 
 		public void onComplete(Object response) {}
 
-		public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description) {}
+		public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {}
 
 		public void onProgressChanged(int progress) {}
 	}
