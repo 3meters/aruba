@@ -94,7 +94,7 @@ public class PicturePicker extends FormActivity {
 
 	private static long				PAGE_SIZE		= 30L;
 	private static long				LIST_MAX		= 300L;
-	private static String			QUERY_PREFIX	= "wallpaper";
+	private static String			QUERY_PREFIX	= "";
 	private static String			QUERY_DEFAULT	= "wallpaper unusual places";
 
 	@Override
