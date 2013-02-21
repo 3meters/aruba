@@ -2,6 +2,7 @@ package com.aircandi.ui.base;
 
 import java.io.File;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -236,6 +237,7 @@ public abstract class FormActivity extends SherlockActivity {
 	// Picker routines
 	// --------------------------------------------------------------------------------------------
 
+	@SuppressLint("InlinedApi")
 	protected void pictureFromGallery() {
 		//		Intent picturePickerIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
 		//		picturePickerIntent.setType("image/*");

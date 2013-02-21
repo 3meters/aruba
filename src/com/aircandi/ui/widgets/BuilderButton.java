@@ -35,6 +35,7 @@ public class BuilderButton extends RelativeLayout {
 		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.BuilderButton, defStyle, 0);
 		mHint = ta.getString(R.styleable.BuilderButton_hint);
 		mLayoutId = ta.getResourceId(R.styleable.BuilderButton_layout, R.layout.widget_builder_button);
+		ta.recycle();
 
 		TypedValue resourceName = new TypedValue();
 		if (context.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {

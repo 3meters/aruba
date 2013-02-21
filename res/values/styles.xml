@@ -210,7 +210,6 @@
 
     <style name="candi_view_subtitle" parent="candi_view_name">
         <item name="android:textAppearance">@style/app_text_appearance_tiny</item>
-        <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">normal</item>
     </style>
 

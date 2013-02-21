@@ -31,6 +31,7 @@ public class HorizontalScrollLayout extends HorizontalScrollView {
 		mContext = context;
 		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.HorizontalScrollLayout, defStyle, 0);
 		mLayoutItemId = ta.getResourceId(R.styleable.HorizontalScrollLayout_layout, R.layout.temp_place_photo_item);
+		ta.recycle();		
 		mInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		initialize();
 	}

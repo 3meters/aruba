@@ -35,6 +35,7 @@ public class ComboButton extends Button {
 
 		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ComboButton, defStyle, 0);
 		mDrawableScale = ta.getFloat(R.styleable.ComboButton_drawableScale, 0.5f);
+		ta.recycle();
 
 		Drawable[] drawables = getCompoundDrawables();
 		for (int i = 0; i < drawables.length; i++) {

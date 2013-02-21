@@ -5,41 +5,55 @@
 
 
     <!-- Replace placeholder ID with your tracking ID -->
-    <string name="ga_trackingId" tools:ignore="UnusedResources">UA-33660954-1</string>
+    <string name="ga_trackingId">UA-33660954-1</string>
 
     <!-- Enable Activity tracking -->
-    <bool name="ga_autoActivityTracking" tools:ignore="UnusedResources">true</bool>
+    <bool name="ga_autoActivityTracking">true</bool>
 
     <!--
     	Set how often auto dispatch gets fired. Should be set to 30 minutes
-    	before app is released.     -->
-    <integer name="ga_dispatchPeriod" tools:ignore="UnusedResources">1</integer>
+    	before app is released.    -->
+    <integer name="ga_dispatchPeriod">1</integer>
 
     <!-- Set how often auto dispatch gets fired -->
-    <integer name="ga_sessionTimeout" tools:ignore="UnusedResources">60</integer>
+    <integer name="ga_sessionTimeout">60</integer>
 
     <!-- Privacy settings that strips the last octet of the IP before storage in service -->
-    <bool name="ga_anonymizeIp" tools:ignore="UnusedResources">false</bool>
+    <bool name="ga_anonymizeIp">false</bool>
 
     <!-- Info on what is being tracked is output to logcat -->
     <bool name="ga_debug">true</bool>
 
     <!-- The screen names that will appear in the reporting -->
-    <string name="com.aircandi.CandiRadar">Radar</string>
-    <string name="com.aircandi.CandiUser">User</string>
-    <string name="com.aircandi.SignInForm">Signin</string>
-    <string name="com.aircandi.SignUpForm">Signup</string>
-    <string name="com.aircandi.ProfileForm">Profile</string>
-    <string name="com.aircandi.PasswordForm">Password</string>
-    <string name="com.aircandi.Preferences">Preferences</string>
-    <string name="com.aircandi.CandiList">CandiList</string>
-    <string name="com.aircandi.CandiForm">CandiForm</string>
-    <string name="com.aircandi.CandiPicker">CandiPicker</string>
-    <string name="com.aircandi.TemplatePicker">TemplatePicker</string>
-    <string name="com.aircandi.PictureSearch">PictureSearch</string>
-    <string name="com.aircandi.PictureBrowse">PictureBrowse</string>
-    <string name="com.aircandi.EntityForm">Entity</string>
-    <string name="com.aircandi.CommentForm">Comment</string>
-    <string name="com.aircandi.CommentList">CommentList</string>
+    
+    <string name="com.aircandi.ui.CandiForm">CandiForm</string>
+    <string name="com.aircandi.ui.CandiList">CandiList</string>
+    <string name="com.aircandi.ui.CandiRadar">CandiRadar</string>
+    <string name="com.aircandi.ui.CommentForm">CommentForm</string>
+    <string name="com.aircandi.ui.CommentList">CommentList</string>
+    <string name="com.aircandi.ui.EntityForm">EntityForm</string>
+    <string name="com.aircandi.ui.FeedbackForm">FeedbackForm</string>
+    <string name="com.aircandi.ui.PictureDetail">PictureDetail</string>
+    <string name="com.aircandi.ui.Preferences">Preferences</string>
+    <string name="com.aircandi.ui.SplashForm">SplashForm</string>
+    
+    <!-- User -->
+    
+    <string name="com.aircandi.ui.user.CandiUser">CandiUser</string>
+    <string name="com.aircandi.ui.user.PasswordForm">PasswordForm</string>
+    <string name="com.aircandi.ui.user.ProfileForm">ProfileForm</string>
+    <string name="com.aircandi.ui.user.RegisterForm">RegisterForm</string>
+    <string name="com.aircandi.ui.user.SignInForm">SigninForm</string>
+    
+    <!-- Builders -->
+    
+    <string name="com.aircandi.ui.builders.AddressBuilder">AddressBuilder</string>
+    <string name="com.aircandi.ui.builders.CategoryBuilder">CategoryBuilder</string>
+    <string name="com.aircandi.ui.builders.LinkPicker">LinkPicker</string>
+    <string name="com.aircandi.ui.builders.PicturePicker">PicturePicker</string>
+    <string name="com.aircandi.ui.builders.PictureSourcePicker">PictureSourcePicker</string>
+    <string name="com.aircandi.ui.builders.SourceBuilder">SourceBuilder</string>
+    <string name="com.aircandi.ui.builders.SourcesBuilder">SourcesBuilder</string>
+    <string name="com.aircandi.ui.builders.TemplatePicker">TemplatePicker</string>
 
 </resources>

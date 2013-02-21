@@ -47,9 +47,10 @@ public class ListPreferenceMultiSelect extends ListPreference {
 	public ListPreferenceMultiSelect(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
-		TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.ListPreferenceMultiSelect);
-		mCheckAllKey = typedArray.getString(R.styleable.ListPreferenceMultiSelect_checkAll);
-		String separator = typedArray.getString(R.styleable.ListPreferenceMultiSelect_separator);
+		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ListPreferenceMultiSelect);
+		mCheckAllKey = ta.getString(R.styleable.ListPreferenceMultiSelect_checkAll);
+		String separator = ta.getString(R.styleable.ListPreferenceMultiSelect_separator);
+		ta.recycle();
 
 		if (separator != null) {
 			mSeparator = separator;

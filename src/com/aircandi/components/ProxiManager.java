@@ -1764,6 +1764,9 @@ public class ProxiManager {
 		// --------------------------------------------------------------------------------------------
 
 		public ModelResult getEntitiesByListType(EntityListType entityListType, Boolean refresh, String collectionId, String userId, Integer limit) {
+			/*
+			 * Used by candi list
+			 */
 			ModelResult result = new ModelResult();
 			if (entityListType == EntityListType.TunedPlaces) {
 				result.data = getAircandiPlaces();
@@ -1831,7 +1834,7 @@ public class ProxiManager {
 					}
 				}
 			}
-			Collections.sort(entities, new Entity.SortEntitiesByPlaceRankScoreDistance());
+			Collections.sort(entities, new Entity.SortEntitiesByProximityAndDistance());
 			return entities;
 		}
 
@@ -1892,7 +1895,7 @@ public class ProxiManager {
 					}
 				}
 			}
-			Collections.sort(entities, new Entity.SortEntitiesByPlaceRankScoreDistance());
+			Collections.sort(entities, new Entity.SortEntitiesByProximityAndDistance());
 			return entities;
 		}
 
@@ -1954,7 +1957,7 @@ public class ProxiManager {
 					}
 				}
 			}
-			Collections.sort(entities, new Entity.SortEntitiesByPlaceRankScoreDistance());
+			Collections.sort(entities, new Entity.SortEntitiesByProximityAndDistance());
 			return entities;
 		}
 
@@ -1986,7 +1989,7 @@ public class ProxiManager {
 					}
 				}
 			}
-			Collections.sort(entities, new Entity.SortEntitiesByPlaceRankScoreDistance());
+			Collections.sort(entities, new Entity.SortEntitiesByProximityAndDistance());
 			return entities;
 		}
 
