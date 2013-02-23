@@ -44,7 +44,7 @@ public class S3 {
 		System.setProperty("org.xml.sax.driver", "org.xmlpull.v1.sax2.Driver");
 		try {
 			@SuppressWarnings("unused")
-			XMLReader reader = XMLReaderFactory.createXMLReader();
+			final XMLReader reader = XMLReaderFactory.createXMLReader(); // $codepro.audit.disable variableUsage
 		}
 		catch (SAXException e) {
 			Log.e("SAXException", e.getMessage());
@@ -62,11 +62,11 @@ public class S3 {
 	/* Jayma: Added routines */
 
 	public static void putImage(String imageKey, Bitmap bitmap, Integer quality) throws ProxibaseServiceException {
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-		byte[] bitmapBytes = outputStream.toByteArray();
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(bitmapBytes);
-		ObjectMetadata metadata = new ObjectMetadata();
+		final byte[] bitmapBytes = outputStream.toByteArray();
+		final ByteArrayInputStream inputStream = new ByteArrayInputStream(bitmapBytes);
+		final ObjectMetadata metadata = new ObjectMetadata();
 		metadata.setContentLength(bitmapBytes.length);
 		metadata.setContentType("image/jpeg");
 
@@ -99,8 +99,8 @@ public class S3 {
 	 * @throws ProxibaseServiceException
 	 */
 	public static void putImageByteArray(String imageKey, byte[] bitmapBytes, String imageFormat) throws ProxibaseServiceException {
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(bitmapBytes);
-		ObjectMetadata metadata = new ObjectMetadata();
+		final ByteArrayInputStream inputStream = new ByteArrayInputStream(bitmapBytes);
+		final ObjectMetadata metadata = new ObjectMetadata();
 		metadata.setContentLength(bitmapBytes.length);
 		metadata.setContentType("image/" + imageFormat);
 

@@ -14,38 +14,34 @@ public class DateUtils {
 	private static final String	AMPM_FORMAT_TIME_SINCE				= "a";
 
 	public static String nowString(String pattern) {
-		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.US);
+		final Calendar cal = Calendar.getInstance();
+		final SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.US);
 		return sdf.format(cal.getTime());
 	}
 
 	public static Date nowDate() {
-		Calendar cal = Calendar.getInstance();
+		final Calendar cal = Calendar.getInstance();
 		return cal.getTime();
 	}
 
 	@SuppressWarnings("deprecation")
 	public static String timeSince(Long dateOldMillis, Long dateNewMillis) {
 
-		Long dateNewLong = dateNewMillis;
-		Long dateOldLong = dateOldMillis;
+		final Long dateNewLong = dateNewMillis;
+		final Long dateOldLong = dateOldMillis;
 
-		Date dateNew = new Date(dateNewLong);
-		Date dateOld = new Date(dateOldLong);
+		final Date dateNew = new Date(dateNewLong);
+		final Date dateOld = new Date(dateOldLong);
 
-		Long diff = dateNew.getTime() - dateOld.getTime();
+		final Long diff = dateNew.getTime() - dateOld.getTime();
 
 		if (diff <= 0) {
 			return "just now";
 		}
-		int seconds = (int) (diff / 1000);
-		int minutes = (int) ((diff / 1000) / 60);
-		int hours = (int) ((diff / 1000) / (60 * 60));
-		int days = (int) ((diff / 1000) / (60 * 60 * 24));
-		@SuppressWarnings("unused")
-		int hoursPart = hours - (days * 24);
-		@SuppressWarnings("unused")
-		int minutesPart = minutes - (hours * 60);
+		final int seconds = (int) (diff / 1000);
+		final int minutes = (int) ((diff / 1000) / 60);
+		final int hours = (int) ((diff / 1000) / (60 * 60));
+		final int days = (int) ((diff / 1000) / (60 * 60 * 24));
 
 		String interval = "just now";
 		if (days >= 1) {
@@ -55,8 +51,8 @@ public class DateUtils {
 				return datePart.format(dateOld.getTime());
 			}
 			else {
-				SimpleDateFormat timePart = new SimpleDateFormat(TIME_FORMAT_TIME_SINCE, Locale.US);
-				SimpleDateFormat ampmPart = new SimpleDateFormat(AMPM_FORMAT_TIME_SINCE, Locale.US);
+				final SimpleDateFormat timePart = new SimpleDateFormat(TIME_FORMAT_TIME_SINCE, Locale.US);
+				final SimpleDateFormat ampmPart = new SimpleDateFormat(AMPM_FORMAT_TIME_SINCE, Locale.US);
 				return datePart.format(dateOld.getTime()) + " at "
 						+ timePart.format(dateOld.getTime())
 						+ ampmPart.format(dateOld.getTime()).toLowerCase(Locale.US);
@@ -90,14 +86,12 @@ public class DateUtils {
 	}
 
 	public static String intervalSince(Date dateOld, Date dateNew) {
-		Long diff = dateNew.getTime() - dateOld.getTime();
-		int seconds = (int) (diff / 1000);
-		int minutes = (int) ((diff / 1000) / 60);
-		int hours = (int) ((diff / 1000) / (60 * 60));
-		int days = (int) ((diff / 1000) / (60 * 60 * 24));
-		int hoursPart = hours - (days * 24);
-		@SuppressWarnings("unused")
-		int minutesPart = minutes - (hours * 60);
+		final Long diff = dateNew.getTime() - dateOld.getTime();
+		final int seconds = (int) (diff / 1000);
+		final int minutes = (int) ((diff / 1000) / 60);
+		final int hours = (int) ((diff / 1000) / (60 * 60));
+		final int days = (int) ((diff / 1000) / (60 * 60 * 24));
+		final int hoursPart = hours - (days * 24);
 
 		String interval = "";
 		if (days >= 2) {
@@ -106,10 +100,12 @@ public class DateUtils {
 		else if (days >= 1) /* x days ago 1 day and x hour ago */
 		{
 			interval += "1 day";
-			if (hoursPart == 1)
+			if (hoursPart == 1) {
 				interval += " " + String.valueOf(hoursPart) + " hour";
-			else if (hoursPart >= 2)
+			}
+			else if (hoursPart >= 2) {
 				interval += " " + String.valueOf(hoursPart) + " hours";
+			}
 			interval += " ago";
 		}
 		else if (hours == 1) /* x hours x minutes ago */

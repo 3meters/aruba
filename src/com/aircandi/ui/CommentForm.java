@@ -130,7 +130,7 @@ public class CommentForm extends FormActivity {
 	}
 
 	private void confirmDirtyExit() {
-		AlertDialog dialog = AircandiCommon.showAlertDialog(null
+		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
 				, getResources().getString(R.string.alert_comment_dirty_exit_title)
 				, getResources().getString(R.string.alert_comment_dirty_exit_message)
 				, null
@@ -178,13 +178,13 @@ public class CommentForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("InsertComment");
-					ModelResult result = ProxiManager.getInstance().getEntityModel().insertComment(mCommon.mParentId, mComment, false);
+					final ModelResult result = ProxiManager.getInstance().getEntityModel().insertComment(mCommon.mParentId, mComment, false);
 					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
-					ModelResult result = (ModelResult) response;
+					final ModelResult result = (ModelResult) response;
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.sendEvent("ui_action", "add_comment", null, 0);

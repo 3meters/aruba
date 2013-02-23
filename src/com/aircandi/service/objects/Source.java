@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import com.aircandi.ProxiConstants;
 import com.aircandi.components.AndroidManager;
@@ -15,28 +16,31 @@ import com.aircandi.service.Expose;
 @SuppressWarnings("ucd")
 public class Source extends ServiceObject implements Cloneable, Serializable {
 
-	private static final long	serialVersionUID	= 4362288672245719448L;
+	private static final long		serialVersionUID	= 4362288672245719448L;
 
 	@Expose
-	public String				name;
+	public String					id;
 	@Expose
-	public String				source;
+	public String					type;
 	@Expose
-	public String				id;
+	public String					name;
 	@Expose
-	public String				url;
+	public String					caption;
 	@Expose
-	public String				icon;
+	public String					url;
 	@Expose
-	public String				packageName;
+	public String					icon;
 	@Expose
-	public String				origin;
+	public String					packageName;
+	@Expose
+	public Map<String,Object>	data;
 
-	public Boolean				checked;
-	public Integer				position;
-	public Boolean				custom;
-	public Boolean				intentSupport;
-	public Boolean				installDeclined;
+	/* Client use only */
+	public Boolean					checked;
+	public Integer					position;
+	public Boolean					custom;
+	public Boolean					intentSupport;
+	public Boolean					installDeclined;
 
 	public Source() {}
 
@@ -45,19 +49,23 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		this.installDeclined = installDeclined;
 	}
 
-	public static Source setPropertiesFromMap(Source source, HashMap map) {
-		source.name = (String) map.get("name");
-		source.source = (String) map.get("source");
+	public static Source setPropertiesFromMap(Source source, Map map) {
 		source.id = (String) map.get("id");
+		source.type = (String) map.get("type");
+		source.name = (String) map.get("name");
+		source.caption = (String) map.get("caption");
 		source.url = (String) map.get("url");
 		source.icon = (String) map.get("icon");
-		source.origin = (String) map.get("origin");
 		source.packageName = (String) map.get("packageName");
+		source.data = (HashMap<String, Object>) map.get("data");
 		return source;
 	}
 
 	public String getImageUri() {
-		if (icon.toLowerCase(Locale.US).startsWith("resource:")) {
+		if (icon == null) {
+			return null;
+		}
+		else if (icon.toLowerCase(Locale.US).startsWith("resource:")) {
 			return icon;
 		}
 		return ProxiConstants.URL_PROXIBASE_SERVICE + icon;
@@ -70,7 +78,7 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 			if (source1.position < source2.position) {
 				return -1;
 			}
-			if (source1.position == source2.position) {
+			if (source1.position.equals(source2.position)) {
 				return 0;
 			}
 			return 1;
@@ -78,11 +86,11 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public Boolean appExists() {
-		return (packageName != null);
+		return packageName != null;
 	}
 
 	public Boolean appInstalled() {
-		Boolean exists = AndroidManager.getInstance().doesPackageExist(this.packageName);
+		final Boolean exists = AndroidManager.getInstance().doesPackageExist(packageName);
 		return exists;
 	}
 }

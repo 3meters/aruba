@@ -1,7 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -52,7 +52,7 @@ public class Location extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public static Location setPropertiesFromMap(Location location, HashMap map) {
+	public static Location setPropertiesFromMap(Location location, Map map) {
 
 		location.address = (String) map.get("address");
 		location.crossStreet = (String) map.get("crossStreet");

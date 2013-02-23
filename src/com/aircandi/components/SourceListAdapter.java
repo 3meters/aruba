@@ -20,9 +20,9 @@ import com.aircandi.ui.widgets.WebImageView;
 
 public class SourceListAdapter extends ArrayAdapter<Source> implements Filterable {
 
-	private LayoutInflater	mInflater;
+	private final LayoutInflater	mInflater;
 	private Integer			mItemLayoutId	= R.layout.temp_listitem_sources_builder;
-	private List<Source>	mListItems;
+	private final List<Source>	mListItems;
 
 	public SourceListAdapter(Context context, List<Source> sources, Integer itemLayoutId) {
 		super(context, 0, sources);
@@ -39,7 +39,7 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
 		final ViewHolder holder;
-		Source itemData = (Source) mListItems.get(position);
+		final Source itemData = mListItems.get(position);
 
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
@@ -53,8 +53,8 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 
 					@Override
 					public void onClick(View view) {
-						CheckBox checkBox = (CheckBox) view;
-						Source source = (Source) checkBox.getTag();
+						final CheckBox checkBox = (CheckBox) view;
+						final Source source = (Source) checkBox.getTag();
 						source.checked = checkBox.isChecked();
 					}
 				});
@@ -69,7 +69,7 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 		}
 
 		if (itemData != null) {
-			Source source = itemData;
+			final Source source = itemData;
 
 			setVisibility(holder.check, View.GONE);
 			if (holder.check != null && source.checked != null) {
@@ -79,8 +79,8 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 			}
 
 			setVisibility(holder.title, View.GONE);
-			if (holder.title != null && source.name != null && source.name.length() > 0) {
-				holder.title.setText(source.name);
+			if (holder.title != null && source.caption != null && source.caption.length() > 0) {
+				holder.title.setText(source.caption);
 				setVisibility(holder.title, View.VISIBLE);
 			}
 
@@ -102,7 +102,7 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 				/* Don't do anything if the image is already set to the one we want */
 				if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {
 
-					BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.image).setImageUri(imageUri);
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.image).setImageUri(imageUri);
 					final BitmapRequest imageRequest = builder.create();
 					holder.image.setBitmapRequest(imageRequest);
 				}

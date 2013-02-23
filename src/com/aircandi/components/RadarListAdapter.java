@@ -14,8 +14,8 @@ import com.aircandi.ui.widgets.CandiView;
 
 public class RadarListAdapter extends ArrayAdapter<Entity> {
 
-	private LayoutInflater	mInflater;
-	private Integer			mItemLayoutId	= R.layout.temp_listitem_radar;
+	private final LayoutInflater	mInflater;
+	private final Integer			mItemLayoutId	= R.layout.temp_listitem_radar;
 	private List<Entity>	mItems;
 
 	public RadarListAdapter(Context context, List<Entity> entities) {
@@ -28,7 +28,7 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
 		final RadarViewHolder holder;
-		Entity itemData = (Entity) mItems.get(position);
+		final Entity itemData = mItems.get(position);
 		Logger.v(this, "getView: position = " + String.valueOf(position) + " name = " + itemData.name);
 
 		if (view == null) {
@@ -44,7 +44,7 @@ public class RadarListAdapter extends ArrayAdapter<Entity> {
 		}
 
 		if (itemData != null) {
-			Entity entity = itemData;
+			final Entity entity = itemData;
 			holder.data = entity;
 			holder.candiView.bindToEntity(entity);
 		}

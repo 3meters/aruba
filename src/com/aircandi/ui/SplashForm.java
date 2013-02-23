@@ -110,12 +110,12 @@ public class SplashForm extends SherlockActivity {
 
 	private void signinAuto() {
 
-		String jsonUser = Aircandi.settings.getString(Preferences.SETTING_USER, null);
-		String jsonSession = Aircandi.settings.getString(Preferences.SETTING_USER_SESSION, null);
+		final String jsonUser = Aircandi.settings.getString(Preferences.SETTING_USER, null);
+		final String jsonSession = Aircandi.settings.getString(Preferences.SETTING_USER_SESSION, null);
 
 		if (jsonUser != null && jsonSession != null) {
 			Logger.i(this, "Auto sign in...");
-			User user = (User) ProxibaseService.convertJsonToObjectInternalSmart(jsonUser, ServiceDataType.User);
+			final User user = (User) ProxibaseService.convertJsonToObjectInternalSmart(jsonUser, ServiceDataType.User);
 			user.session = (Session) ProxibaseService.convertJsonToObjectInternalSmart(jsonSession, ServiceDataType.Session);
 			Tracker.startNewSession();
 			Tracker.sendEvent("action", "signin_auto", null, 0);
@@ -125,7 +125,7 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void startMainApp() {
-		Intent intent = new Intent(this, CandiRadar.class);
+		final Intent intent = new Intent(this, CandiRadar.class);
 		startActivity(intent);
 		finish();
 	}
@@ -147,18 +147,18 @@ public class SplashForm extends SherlockActivity {
 	}
 
 	private void startGetAWSCredentials() {
-		Thread t = new Thread() {
+		final Thread t = new Thread() {
 
 			@Override
 			public void run() {
 				Thread.currentThread().setName("GetAwsCredentials");
 				try {
-					Properties properties = new Properties();
-					InputStream inputStream = getClass().getResourceAsStream("/com/aircandi/aws.properties");
+					final Properties properties = new Properties();
+					final InputStream inputStream = getClass().getResourceAsStream("/com/aircandi/aws.properties");
 					properties.load(inputStream);
 
-					String accessKeyId = properties.getProperty("accessKey");
-					String secretKey = properties.getProperty("secretKey");
+					final String accessKeyId = properties.getProperty("accessKey");
+					final String secretKey = properties.getProperty("secretKey");
 
 					if ((accessKeyId == null) || (accessKeyId.equals(""))
 							|| (accessKeyId.equals("CHANGEME"))
@@ -185,17 +185,17 @@ public class SplashForm extends SherlockActivity {
 
 	@SuppressWarnings("ucd")
 	public void onSigninButtonClick(View view) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
-		Intent intent = intentBuilder.create();
+		final IntentBuilder intentBuilder = new IntentBuilder(this, SignInForm.class);
+		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	@SuppressWarnings("ucd")
 	public void onSignupButtonClick(View view) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, RegisterForm.class);
+		final IntentBuilder intentBuilder = new IntentBuilder(this, RegisterForm.class);
 		intentBuilder.setCommandType(CommandType.New);
-		Intent intent = intentBuilder.create();
+		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SIGNIN);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}

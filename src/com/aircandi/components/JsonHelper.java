@@ -14,15 +14,15 @@ import org.json.JSONObject;
 public class JsonHelper {
 	public static Object toJSON(Object object) throws JSONException {
 		if (object instanceof Map) {
-			JSONObject json = new JSONObject();
-			Map map = (Map) object;
+			final JSONObject json = new JSONObject();
+			final Map map = (Map) object;
 			for (Object key : map.keySet()) {
 				json.put(key.toString(), toJSON(map.get(key)));
 			}
 			return json;
 		}
 		else if (object instanceof Iterable) {
-			JSONArray json = new JSONArray();
+			final JSONArray json = new JSONArray();
 			for (Object value : ((Iterable) object)) {
 				json.put(value);
 			}
@@ -42,8 +42,8 @@ public class JsonHelper {
 	}
 
 	private static Map<String, Object> toMap(JSONObject object) throws JSONException {
-		Map<String, Object> map = new HashMap();
-		Iterator keys = object.keys();
+		final Map<String, Object> map = new HashMap(50);
+		final Iterator keys = object.keys();
 		while (keys.hasNext()) {
 			String key = (String) keys.next();
 			map.put(key, fromJson(object.get(key)));
@@ -52,7 +52,7 @@ public class JsonHelper {
 	}
 
 	public static List toList(JSONArray array) throws JSONException {
-		List list = new ArrayList();
+		final List list = new ArrayList(); // $codepro.audit.disable defineInitialCapacity
 		for (int i = 0; i < array.length(); i++) {
 			list.add(fromJson(array.get(i)));
 		}
@@ -60,7 +60,7 @@ public class JsonHelper {
 	}
 
 	private static Object fromJson(Object json) throws JSONException {
-		if (json == JSONObject.NULL) {
+		if (json.equals(JSONObject.NULL)) {
 			return null;
 		}
 		else if (json instanceof JSONObject) {

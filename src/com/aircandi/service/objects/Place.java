@@ -2,6 +2,7 @@ package com.aircandi.service.objects;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import com.aircandi.Aircandi;
@@ -17,13 +18,9 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	private static final long	serialVersionUID	= -3599862145425838670L;
 
 	@Expose
-	public String				source;
-	@Expose
-	public String				sourceId;
-	@Expose
 	public String				provider;
 	@Expose
-	public String				providerId;
+	public String				id;
 
 	/* Can come from foursquare or our own custom places */
 
@@ -34,27 +31,20 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public Category				category;
 
-	/* Only comes from foursquare */
-
-	@Expose(serialize = false)
-	public String				sourceUri;										// Link to foursquare page
-	@Expose(serialize = false)
-	public String				sourceUriShort;								// Link to foursquare page
-
 	public Place() {}
 
 	@Override
 	public Place clone() {
 		try {
 			final Place place = (Place) super.clone();
-			if (this.location != null) {
-				place.location = this.location.clone();
+			if (location != null) {
+				place.location = location.clone();
 			}
-			if (this.contact != null) {
-				place.contact = this.contact.clone();
+			if (contact != null) {
+				place.contact = contact.clone();
 			}
-			if (this.category != null) {
-				place.category = this.category.clone();
+			if (category != null) {
+				place.category = category.clone();
 			}
 			return place;
 		}
@@ -63,25 +53,23 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public static Place setPropertiesFromMap(Place place, HashMap map) {
+	public static Place setPropertiesFromMap(Place place, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		place.source = (String) map.get("source");
-		place.sourceId = (String) map.get("sourceId");
-		place.sourceUri = (String) map.get("sourceUri");
-		place.sourceUriShort = (String) map.get("sourceUriShort");
+		place.provider = (String) map.get("provider");
+		place.id = (String) map.get("id");
 
 		if (map.get("location") != null) {
-			place.location = (Location) Location.setPropertiesFromMap(new Location(), (HashMap<String, Object>) map.get("location"));
+			place.location = Location.setPropertiesFromMap(new Location(), (HashMap<String, Object>) map.get("location"));
 		}
 
 		if (map.get("contact") != null) {
-			place.contact = (Contact) Contact.setPropertiesFromMap(new Contact(), (HashMap<String, Object>) map.get("contact"));
+			place.contact = Contact.setPropertiesFromMap(new Contact(), (HashMap<String, Object>) map.get("contact"));
 		}
 
 		if (map.get("category") != null) {
-			place.category = (Category) Category.setPropertiesFromMap(new Category(), (HashMap<String, Object>) map.get("category"));
+			place.category = Category.setPropertiesFromMap(new Category(), (HashMap<String, Object>) map.get("category"));
 		}
 
 		return place;
@@ -101,15 +89,15 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		return location;
 	}
 
-	static public Integer getCategoryColorResId(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
+	public static Integer getCategoryColorResId(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
 		int colorResId = R.color.accent_gray;
 		if (semi) {
 			colorResId = R.color.accent_gray_semi;
 		}
 		if (categoryName != null) {
 
-			Random rand = new Random(categoryName.hashCode());
-			int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
+			final Random rand = new Random(categoryName.hashCode());
+			final int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
 			if (colorIndex == 1) {
 				colorResId = R.color.accent_blue;
 				if (dark) {
@@ -174,7 +162,7 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		return colorResId;
 	}
 
-	static public Integer getCategoryColor(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
+	public static Integer getCategoryColor(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
 		int colorResId = R.color.accent_gray;
 		if (semi) {
 			colorResId = R.color.accent_gray_semi;
@@ -182,8 +170,8 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 
 		if (categoryName != null) {
 
-			Random rand = new Random(categoryName.hashCode());
-			int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
+			final Random rand = new Random(categoryName.hashCode());
+			final int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
 			if (colorIndex == 1) {
 				colorResId = R.color.accent_blue;
 				if (dark) {

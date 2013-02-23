@@ -35,7 +35,7 @@ public class Tracker {
 				EasyTracker.getTracker().sendEvent(category, action, target, value);
 			}
 		}
-		catch (Exception exception) {}
+		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
 	}
 
 	public static void sendView(String viewName) {
@@ -47,7 +47,7 @@ public class Tracker {
 				EasyTracker.getTracker().sendView(viewName);
 			}
 		}
-		catch (Exception exception) {}
+		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
 	}
 
 	public static void dispatch() {
@@ -56,7 +56,7 @@ public class Tracker {
 				EasyTracker.getInstance().dispatch();
 			}
 		}
-		catch (Exception exception) {}
+		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
 	}
 
 	public static void stopSession() {
@@ -65,7 +65,7 @@ public class Tracker {
 				EasyTracker.getTracker().setStartSession(false);
 			}
 		}
-		catch (Exception exception) {}
+		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
 	}
 
 	public static void startNewSession() {
@@ -74,7 +74,7 @@ public class Tracker {
 				EasyTracker.getTracker().setStartSession(true);
 			}
 		}
-		catch (Exception exception) {}
+		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
 	}
 
 	public static void activityStart(Activity activity) {
@@ -83,7 +83,7 @@ public class Tracker {
 				EasyTracker.getInstance().activityStart(activity);
 			}
 		}
-		catch (Exception exception) {}
+		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
 	}
 
 	public static void activityStop(Activity activity) {
@@ -92,6 +92,6 @@ public class Tracker {
 				EasyTracker.getInstance().activityStop(activity);
 			}
 		}
-		catch (Exception exception) {}
+		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
 	}
 }

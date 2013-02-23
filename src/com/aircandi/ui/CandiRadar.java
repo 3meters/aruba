@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Properties;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.location.Location;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -98,7 +97,7 @@ import com.squareup.otto.Subscribe;
 
 public class CandiRadar extends CandiActivity {
 
-	private Handler				mHandler			= new Handler();
+	private final Handler				mHandler			= new Handler();
 
 	private Number				mEntityModelRefreshDate;
 	private Number				mEntityModelActivityDate;
@@ -111,7 +110,7 @@ public class CandiRadar extends CandiActivity {
 	private int					mNewCandiSoundId;
 	private Boolean				mInitialized		= false;
 
-	private List<Entity>		mEntities			= new ArrayList<Entity>();
+	private final List<Entity>		mEntities			= new ArrayList<Entity>();
 	private RadarListAdapter	mRadarAdapter;
 	private Boolean				mFreshWindow		= false;
 	private Boolean				mUpdateCheckNeeded	= false;
@@ -228,13 +227,13 @@ public class CandiRadar extends CandiActivity {
 					@Override
 					protected Object doInBackground(Object... params) {
 						Thread.currentThread().setName("GetEntitiesForBeacons");
-						ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForBeacons();
+						final ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForBeacons();
 						return serviceResponse;
 					}
 
 					@Override
 					protected void onPostExecute(Object result) {
-						ServiceResponse serviceResponse = (ServiceResponse) result;
+						final ServiceResponse serviceResponse = (ServiceResponse) result;
 						if (serviceResponse.responseCode != ResponseCode.Success) {
 							mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
 							mCommon.hideBusy(true);
@@ -269,10 +268,10 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 
-				Location locationCandidate = event.location;
+				final Location locationCandidate = event.location;
 				if (locationCandidate != null) {
 
-					Location locationLocked = LocationManager.getInstance().getLocationLocked();
+					final Location locationLocked = LocationManager.getInstance().getLocationLocked();
 
 					if (locationLocked != null) {
 
@@ -283,7 +282,7 @@ public class CandiRadar extends CandiActivity {
 
 						/* If gps provider or same provider then look for improved accuracy */
 						if (locationLocked.getProvider().equals(locationCandidate.getProvider())) {
-							float accuracyImprovement = locationLocked.getAccuracy() / locationCandidate.getAccuracy();
+							final float accuracyImprovement = locationLocked.getAccuracy() / locationCandidate.getAccuracy();
 							boolean isSignificantlyMoreAccurate = (accuracyImprovement >= 1.5);
 							if (!isSignificantlyMoreAccurate) {
 								return;
@@ -306,13 +305,13 @@ public class CandiRadar extends CandiActivity {
 							protected Object doInBackground(Object... params) {
 								Logger.d(CandiRadar.this, "Location changed event: getting entities for location");
 								Thread.currentThread().setName("GetEntitiesForLocation");
-								ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForLocation();
+								final ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForLocation();
 								return serviceResponse;
 							}
 
 							@Override
 							protected void onPostExecute(Object result) {
-								ServiceResponse serviceResponse = (ServiceResponse) result;
+								final ServiceResponse serviceResponse = (ServiceResponse) result;
 								if (serviceResponse.responseCode != ResponseCode.Success) {
 									mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
 									mCommon.hideBusy(true);
@@ -345,14 +344,14 @@ public class CandiRadar extends CandiActivity {
 						protected Object doInBackground(Object... params) {
 							Logger.d(CandiRadar.this, "Location changed event: getting places near location");
 							Thread.currentThread().setName("GetPlacesNearLocation");
-							ServiceResponse serviceResponse = ProxiManager.getInstance().getPlacesNearLocation(
+							final ServiceResponse serviceResponse = ProxiManager.getInstance().getPlacesNearLocation(
 									LocationManager.getInstance().getObservationLocked());
 							return serviceResponse;
 						}
 
 						@Override
 						protected void onPostExecute(Object result) {
-							ServiceResponse serviceResponse = (ServiceResponse) result;
+							final ServiceResponse serviceResponse = (ServiceResponse) result;
 							if (serviceResponse.responseCode != ResponseCode.Success) {
 								mCommon.handleServiceError(serviceResponse, ServiceOperation.PlaceSearch);
 								mCommon.hideBusy(true);
@@ -396,8 +395,8 @@ public class CandiRadar extends CandiActivity {
 				mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
 
 				/* Point radar adapter at the updated entities */
-				int previousCount = mRadarAdapter.getCount();
-				List<Entity> entities = event.entities;
+				final int previousCount = mRadarAdapter.getCount();
+				final List<Entity> entities = event.entities;
 				mRadarAdapter.setItems(entities);
 				mRadarAdapter.notifyDataSetChanged();
 
@@ -428,7 +427,7 @@ public class CandiRadar extends CandiActivity {
 
 			@Override
 			public void run() {
-				Integer wifiState = event.wifiState;
+				final Integer wifiState = event.wifiState;
 				if (wifiState == WifiManager.WIFI_STATE_ENABLED || wifiState == WifiManager.WIFI_STATE_DISABLED) {
 					Logger.d(this, "Wifi state change, starting place search");
 					searchForPlaces();
@@ -489,7 +488,7 @@ public class CandiRadar extends CandiActivity {
 
 	private void showCandiForm(Entity entity, Boolean upsize) {
 
-		IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
+		final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
 				.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
 				.setParentEntityId(entity.parentId)
@@ -499,7 +498,7 @@ public class CandiRadar extends CandiActivity {
 			intentBuilder.setCollectionId(entity.getParent().id);
 		}
 
-		Intent intent = intentBuilder.create();
+		final Intent intent = intentBuilder.create();
 		if (upsize) {
 			intent.putExtra(CandiConstants.EXTRA_UPSIZE_SYNTHETIC, true);
 		}
@@ -522,7 +521,7 @@ public class CandiRadar extends CandiActivity {
 	private Boolean handleUpdateChecks(final RequestListener listener) {
 
 		/* Update check */
-		Boolean updateCheckNeeded = ProxiManager.getInstance().updateCheckNeeded();
+		final Boolean updateCheckNeeded = ProxiManager.getInstance().updateCheckNeeded();
 		if (updateCheckNeeded) {
 
 			new AsyncTask() {
@@ -530,13 +529,13 @@ public class CandiRadar extends CandiActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("CheckForUpdate");
-					ModelResult result = ProxiManager.getInstance().checkForUpdate();
+					final ModelResult result = ProxiManager.getInstance().checkForUpdate();
 					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
-					ModelResult result = (ModelResult) response;
+					final ModelResult result = (ModelResult) response;
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						if (Aircandi.applicationUpdateNeeded) {
 							invalidateOptionsMenu();
@@ -689,7 +688,7 @@ public class CandiRadar extends CandiActivity {
 
 	private void manageData() {
 
-		EntityModel entityModel = ProxiManager.getInstance().getEntityModel();
+		final EntityModel entityModel = ProxiManager.getInstance().getEntityModel();
 		if (mEntityModelRefreshDate == null) {
 			/*
 			 * Get set everytime onEntitiesChanged gets called. Means
@@ -722,7 +721,7 @@ public class CandiRadar extends CandiActivity {
 			Logger.d(this, "Start place search because of staleness or location change");
 			searchForPlaces();
 		}
-		else if (mWifiState != NetworkManager.getInstance().getWifiState()) {
+		else if (!mWifiState.equals(NetworkManager.getInstance().getWifiState())) {
 			/*
 			 * Changes in wifi state have a big effect on what we can show
 			 * for a search.
@@ -742,7 +741,7 @@ public class CandiRadar extends CandiActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("GetEntitiesForBeacons");
-					ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForBeacons();
+					final ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForBeacons();
 					return serviceResponse;
 				}
 
@@ -790,13 +789,8 @@ public class CandiRadar extends CandiActivity {
 			BitmapManager.getInstance().stopBitmapLoaderThread();
 		}
 		catch (Exception exception) {
-			Exceptions.Handle(exception);
+			Exceptions.handle(exception);
 		}
-	}
-
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -833,16 +827,16 @@ public class CandiRadar extends CandiActivity {
 		try {
 			BusProvider.getInstance().unregister(this);
 		}
-		catch (Exception e) {}
+		catch (Exception e) {} // $codepro.audit.disable emptyCatchClause
 	}
 
 	@SuppressWarnings("unused")
 	private String getGoogleAnalyticsId() {
-		Properties properties = new Properties();
+		final Properties properties = new Properties();
 
 		try {
 			properties.load(getClass().getResourceAsStream("/com/aircandi/google_analytics.properties"));
-			String analyticsId = properties.getProperty("analyticsId");
+			final String analyticsId = properties.getProperty("analyticsId");
 			return analyticsId;
 		}
 		catch (IOException exception) {

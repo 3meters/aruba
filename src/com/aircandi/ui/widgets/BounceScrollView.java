@@ -10,7 +10,7 @@ import com.aircandi.CandiConstants;
 public class BounceScrollView extends ScrollView {
 
 
-	private Context	mContext;
+	private final Context	mContext;
 	private int		mMaxYOverscrollDistance;
 
 	public BounceScrollView(Context context) {

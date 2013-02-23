@@ -2,6 +2,7 @@ package com.aircandi.service.objects;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
 import android.graphics.Bitmap;
 
@@ -48,8 +49,8 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		try {
 			final Photo photo = (Photo) super.clone();
 
-			if (this.user != null) {
-				photo.user = this.user.clone();
+			if (user != null) {
+				photo.user = user.clone();
 			}
 
 			return photo;
@@ -61,7 +62,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 	
 
-	public static Photo setPropertiesFromMap(Photo photo, HashMap map) {
+	public static Photo setPropertiesFromMap(Photo photo, Map map) {
 
 		photo.prefix = (String) map.get("prefix");
 		photo.suffix = (String) map.get("suffix");
@@ -71,18 +72,18 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		photo.createdAt = (Number) map.get("createdAt");
 
 		if (map.get("user") != null) {
-			photo.user = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
+			photo.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
 		}
 
 		return photo;
 	}
 	
 	public ImageResult getAsImageResult() {
-		ImageResult imageResult = new ImageResult();
+		final ImageResult imageResult = new ImageResult();
 		imageResult.setWidth(width.longValue());
 		imageResult.setHeight(height.longValue());
 		imageResult.setMediaUrl(getUri());
-		Thumbnail thumbnail = new Thumbnail();
+		final Thumbnail thumbnail = new Thumbnail();
 		thumbnail.setUrl(getSizedUri(100, 100));
 		imageResult.setThumbnail(thumbnail);
 		return imageResult;
@@ -97,9 +98,9 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		this.suffix = suffix;
 		this.width = width;
 		this.height = height;
-		this.sourceName = "aircandi";
+		sourceName = "aircandi";
 		if (prefix.startsWith("http:") || prefix.startsWith("https:")) {
-			this.sourceName = "external";
+			sourceName = "external";
 		}
 	}
 

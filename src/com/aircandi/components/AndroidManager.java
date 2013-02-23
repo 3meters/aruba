@@ -19,6 +19,7 @@ import android.os.BatteryManager;
 import android.os.Environment;
 
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
@@ -42,18 +43,20 @@ public class AndroidManager {
 	public String getPublicName(String packageName) {
 
 		try {
-			ApplicationInfo info = Aircandi.packageManager.getApplicationInfo(packageName, 0);
-			String publicName = (String) info.loadLabel(Aircandi.packageManager);
+			final ApplicationInfo info = Aircandi.packageManager.getApplicationInfo(packageName, 0);
+			final String publicName = (String) info.loadLabel(Aircandi.packageManager);
 			return publicName;
 		}
-		catch (NameNotFoundException exception) {
-			exception.printStackTrace();
+		catch (NameNotFoundException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 			return null;
 		}
 	}
 
 	public boolean doesPackageExist(String targetPackage) {
-		List<ApplicationInfo> packages;
+		final List<ApplicationInfo> packages;
 		packages = Aircandi.packageManager.getInstalledApplications(0);
 		for (ApplicationInfo packageInfo : packages) {
 			if (packageInfo.packageName.equals(targetPackage)) return true;
@@ -64,7 +67,7 @@ public class AndroidManager {
 	public static boolean isIntentAvailable(Context context, String action) {
 		final PackageManager pm = context.getPackageManager();
 		final Intent intent = new Intent(action);
-		List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+		final List<ResolveInfo> list = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
 		return list.size() > 0;
 	}
 
@@ -73,26 +76,26 @@ public class AndroidManager {
 		/*
 		 * Returns battery status. True if less than 15% remaining.
 		 */
-		IntentFilter batIntentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-		Intent battery = Aircandi.applicationContext.registerReceiver(null, batIntentFilter);
-		float pctLevel = (float) battery.getIntExtra(BatteryManager.EXTRA_LEVEL, 1) /
+		final IntentFilter batIntentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+		final Intent battery = Aircandi.applicationContext.registerReceiver(null, batIntentFilter);
+		final float pctLevel = (float) battery.getIntExtra(BatteryManager.EXTRA_LEVEL, 1) /
 				battery.getIntExtra(BatteryManager.EXTRA_SCALE, 1);
 		return pctLevel < 0.15;
 	}
 
 	public void callMapActivity(Context context, String latitude, String longitude, String label) {
-		String uri = "geo:" + latitude + "," + longitude + "?q="
+		final String uri = "geo:" + latitude + "," + longitude + "?q="
 				+ latitude
 				+ "," + longitude
 				+ "(" + label + ")";
-		Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+		final Intent searchAddress = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 		context.startActivity(searchAddress);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callDialerActivity(Context context, String phoneNumber) {
-		String number = "tel:" + phoneNumber.trim();
-		Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(number));
+		final String number = "tel:" + phoneNumber.trim();
+		final Intent callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse(number));
 		context.startActivity(callIntent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
@@ -112,7 +115,7 @@ public class AndroidManager {
 	}
 
 	public void callSendToActivity(Context context, String placeName, String emailAddress, String subject, String body) {
-		StringBuilder uriText = new StringBuilder();
+		final StringBuilder uriText = new StringBuilder(500);
 		uriText.append("mailto:" + Uri.encode(emailAddress));
 		if (subject != null) {
 			uriText.append("?subject=" + subject);
@@ -120,13 +123,13 @@ public class AndroidManager {
 		if (body != null) {
 			uriText.append("&body=" + body);
 		}
-		Intent intent = new Intent(android.content.Intent.ACTION_SENDTO, Uri.parse(uriText.toString()));
+		final Intent intent = new Intent(android.content.Intent.ACTION_SENDTO, Uri.parse(uriText.toString()));
 		context.startActivity(intent);
 	}
 
 	public void callTwitterActivity(Context context, String twitterHandle) {
 
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse("https://www.twitter.com/" + twitterHandle));
 		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
@@ -134,14 +137,14 @@ public class AndroidManager {
 
 	public void callFoursquareActivity(Context context, String venueId) {
 
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse("http://m.foursquare.com/venue/" + venueId));
 		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callOpentableActivity(Context context, String sourceId, String sourceUri) {
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(sourceUri));
 		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
@@ -154,21 +157,21 @@ public class AndroidManager {
 		 * 
 		 * intent.setData(Uri.parse("fb://place/" + facebookId + ""));
 		 */
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse("http://www.facebook.com/" + facebookId));
 		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callYelpActivity(Context context, String sourceId, String sourceUri) {
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(sourceUri));
 		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
 	}
 
 	public void callGenericActivity(Context context, String sourceId) {
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(sourceId));
 		context.startActivity(intent);
 		AnimUtils.doOverridePendingTransition((Activity) context, TransitionType.PageToSource);
@@ -180,13 +183,15 @@ public class AndroidManager {
 				"com.android.chrome",
 				"com.google.android.browser" };
 
-		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+		final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 		final PackageManager packageManager = context.getPackageManager();
-		List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+		final List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
 
+		String p = null;
 		for (int i = 0; i < browserApps.length; i++) {
+			p = null;
 			for (ResolveInfo resolveInfo : list) {
-				String p = resolveInfo.activityInfo.packageName;
+				p = resolveInfo.activityInfo.packageName;
 				if (p != null && p.startsWith(browserApps[i])) {
 					intent.setPackage(p);
 					return intent;
@@ -199,12 +204,7 @@ public class AndroidManager {
 	@SuppressWarnings("ucd")
 	public boolean checkCameraHardware(Context context) {
 		/* Check if this device has a camera */
-		if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
 	}
 
 	@SuppressWarnings("ucd")
@@ -212,7 +212,7 @@ public class AndroidManager {
 		/* Create a file Uri for saving an image or video */
 		return Uri.fromFile(getOutputMediaFile(type));
 	}
-	
+
 	public static File getOutputMediaFile(int type) {
 		/*
 		 * Create a File for saving an image or video
@@ -241,7 +241,7 @@ public class AndroidManager {
 		}
 
 		/* Create a media file name */
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+		final String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
 		File mediaFile;
 		if (type == MEDIA_TYPE_IMAGE) {
 			mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");

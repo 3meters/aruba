@@ -59,7 +59,7 @@ public class PictureDetail extends FormActivity {
 	}
 
 	private void initialize() {
-		Bundle extras = this.getIntent().getExtras();
+		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			mImageUri = extras.getString(CandiConstants.EXTRA_URI);
 			mPagingEnabled = extras.getBoolean(CandiConstants.EXTRA_PAGING_ENABLED, false);
@@ -72,11 +72,11 @@ public class PictureDetail extends FormActivity {
 
 	private void bind() {
 		List<Photo> photos = ProxiManager.getInstance().getEntityModel().getPhotos();
-		Photo photo = ProxiManager.getInstance().getEntityModel().getPhoto(mImageUri);
+		final Photo photo = ProxiManager.getInstance().getEntityModel().getPhoto(mImageUri);
 		if (!mPagingEnabled) {
 			photos = new ArrayList<Photo>();
 			photos.add(photo);
-			View layout = ((ViewStub) findViewById(R.id.stub_picture_detail)).inflate();
+			final View layout = ((ViewStub) findViewById(R.id.stub_picture_detail)).inflate();
 			buildPictureDetail(this, photo, layout);
 		}
 		else {
@@ -130,12 +130,12 @@ public class PictureDetail extends FormActivity {
 		if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
 			imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 		}
-		ViewHolder holder = new ViewHolder();
+		final ViewHolder holder = new ViewHolder();
 		holder.itemImage = image;
 		holder.itemImage.setTag(imageUri);
 		holder.itemImage.setImageBitmap(null);
 
-		BitmapRequest bitmapRequest = new BitmapRequest(imageUri, image);
+		final BitmapRequest bitmapRequest = new BitmapRequest(imageUri, image);
 		bitmapRequest.setImageRequestor(image);
 		bitmapRequest.setImageUri(imageUri);
 		bitmapRequest.setImageView(image);
@@ -231,7 +231,7 @@ public class PictureDetail extends FormActivity {
 			mCommon.doDestroy();
 		}
 		catch (Exception exception) {
-			Exceptions.Handle(exception);
+			Exceptions.handle(exception);
 		}
 		finally {
 			super.onDestroy();

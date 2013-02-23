@@ -1,6 +1,7 @@
 package com.aircandi.ui.builders;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
@@ -41,7 +42,7 @@ public class SourceBuilder extends FormActivity {
 	private TextView		mTitle;
 	private WebImageView	mSourceIcon;
 	private Spinner			mSourceTypePicker;
-	private EditText		mSourceName;
+	private EditText		mSourceCaption;
 	private EditText		mSourceId;
 	private Integer			mSpinnerItem;
 
@@ -57,15 +58,15 @@ public class SourceBuilder extends FormActivity {
 
 	private void initialize() {
 		mTitle = (TextView) findViewById(R.id.title);
-		Bundle extras = this.getIntent().getExtras();
+		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
+			final String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
 			if (jsonSource != null) {
 				mSource = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 				mEditing = true;
 				mTitle.setText(R.string.dialog_source_builder_title_editing);
 			}
-			String entityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
+			final String entityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
 			if (entityId != null) {
 				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(entityId);
 				mEditing = false;
@@ -74,13 +75,13 @@ public class SourceBuilder extends FormActivity {
 		}
 		mSourceIcon = (WebImageView) findViewById(R.id.image);
 		mSourceTypePicker = (Spinner) findViewById(R.id.source_type_picker);
-		mSourceName = (EditText) findViewById(R.id.name);
+		mSourceCaption = (EditText) findViewById(R.id.caption);
 		mSourceId = (EditText) findViewById(R.id.id);
-		
+
 		mSpinnerItem = mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
-		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.name));
+		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.caption));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.id));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
@@ -88,18 +89,18 @@ public class SourceBuilder extends FormActivity {
 
 	private void bind() {
 		if (mEditing) {
-			mSourceName.setText(mSource.name);
+			mSourceCaption.setText(mSource.caption);
 			mSourceId.setText(mSource.id);
 			drawSourceIcon();
 		}
 		else {
 			mSourceTypePicker.setVisibility(View.VISIBLE);
 			mSourceSuggestionStrings = new ArrayList<String>();
-			if (mEntity != null && mEntity.sourceSuggestions != null) {
-				for (Source source : mEntity.sourceSuggestions) {
-					mSourceSuggestionStrings.add(source.source);
-				}
-			}
+			//			if (mEntity != null && mEntity.sourceSuggestions != null) {
+			//				for (Source source : mEntity.sourceSuggestions) {
+			//					mSourceSuggestionStrings.add(source.type);
+			//				}
+			//			}
 			mSourceSuggestionStrings.add("website");
 			mSourceSuggestionStrings.add("facebook");
 			mSourceSuggestionStrings.add("twitter");
@@ -110,28 +111,35 @@ public class SourceBuilder extends FormActivity {
 	}
 
 	private Source buildCustomSource(String sourceType) {
-		Source source = new Source();
-		source.source = sourceType;
-		source.origin = "user";
+		final Source source = new Source();
+
+		source.type = sourceType;
+		if (source.data == null) {
+			source.data = new HashMap<String, Object>();
+		}
+		source.data.put("origin", "user");
+
 		if (sourceType.equals("website")) {
-			source.icon = ProxiConstants.URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "website.png";
+			source.icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "website.png";
 		}
 		else if (sourceType.equals("facebook")) {
-			source.icon = ProxiConstants.URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "facebook.png";
+			source.icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "facebook.png";
+			source.packageName = "com.facebook.katana";
 		}
 		else if (sourceType.equals("twitter")) {
-			source.icon = ProxiConstants.URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "twitter.png";
+			source.icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "twitter.png";
+			source.packageName = "com.twitter.android";
 		}
 		else if (sourceType.equals("email")) {
-			source.icon = ProxiConstants.URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "email.png";
+			source.icon = ProxiConstants.PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS + "email.png";
 		}
 		return source;
 	}
 
 	private void drawSourceIcon() {
-		String imageUri = mSource.getImageUri();
-		BitmapRequestBuilder builder = new BitmapRequestBuilder(mSourceIcon).setImageUri(imageUri);
-		BitmapRequest bitmapRequest = builder.create();
+		final String imageUri = mSource.getImageUri();
+		final BitmapRequestBuilder builder = new BitmapRequestBuilder(mSourceIcon).setImageUri(imageUri);
+		final BitmapRequest bitmapRequest = builder.create();
 		mSourceIcon.setBitmapRequest(bitmapRequest);
 	}
 
@@ -149,14 +157,14 @@ public class SourceBuilder extends FormActivity {
 
 	private void gather() {
 		if (mEditing) {
-			mSource.name = mSourceName.getEditableText().toString();
+			mSource.caption = mSourceCaption.getEditableText().toString();
 			mSource.id = mSourceId.getEditableText().toString();
 		}
 		else {
-			mSource.name = mSourceName.getEditableText().toString();
+			mSource.caption = mSourceCaption.getEditableText().toString();
 			mSource.id = mSourceId.getEditableText().toString();
 		}
-		if (mSource.source.equals("website")) {
+		if (mSource.type.equals("website")) {
 			if (!mSource.id.startsWith("http://") && !mSource.id.startsWith("https://")) {
 				mSource.id = "http://" + mSource.id;
 			}
@@ -173,9 +181,9 @@ public class SourceBuilder extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private void doSave() {
-		Intent intent = new Intent();
+		final Intent intent = new Intent();
 		if (mSource != null) {
-			String jsonSource = ProxibaseService.convertObjectToJsonSmart(mSource, false, true);
+			final String jsonSource = ProxibaseService.convertObjectToJsonSmart(mSource, false, true);
 			intent.putExtra(CandiConstants.EXTRA_SOURCE, jsonSource);
 		}
 		setResult(Activity.RESULT_OK, intent);
@@ -183,7 +191,7 @@ public class SourceBuilder extends FormActivity {
 	}
 
 	private boolean validate() {
-		if (mSourceName.getText().length() == 0) {
+		if (mSourceCaption.getText().length() == 0) {
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
 					, null
 					, getResources().getString(R.string.error_missing_source_name)
@@ -204,7 +212,7 @@ public class SourceBuilder extends FormActivity {
 			return false;
 		}
 
-		String sourceId = mSourceId.getEditableText().toString();
+		final String sourceId = mSourceId.getEditableText().toString();
 		if (sourceId.startsWith("http") || sourceId.startsWith("https")) {
 			if (!MiscUtils.validWebUri(sourceId)) {
 				AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
@@ -226,20 +234,20 @@ public class SourceBuilder extends FormActivity {
 
 	private void initializeSpinner(final List<String> items) {
 
-		ArrayAdapter adapter = new ArrayAdapter(this, mSpinnerItem, items) {
+		final ArrayAdapter adapter = new ArrayAdapter(this, mSpinnerItem, items) {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 
-				View view = super.getView(position, convertView, parent);
-				
-				TextView text = (TextView) view.findViewById(R.id.spinner_name);
+				final View view = super.getView(position, convertView, parent);
+
+				final TextView text = (TextView) view.findViewById(R.id.spinner_name);
 				if (mCommon.mThemeTone.equals("dark")) {
 					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 						text.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_dark));
 					}
 				}
-				
+
 				FontManager.getInstance().setTypefaceDefault((TextView) view.findViewById(R.id.spinner_name));
 
 				if (position == getCount()) {
@@ -255,7 +263,7 @@ public class SourceBuilder extends FormActivity {
 				return super.getCount() - 1; // dont display last item. It is used as hint.
 			}
 		};
-		
+
 		if (mCommon.mThemeTone.equals("dark")) {
 			if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 				adapter.setDropDownViewResource(R.layout.spinner_item_light);
@@ -276,9 +284,9 @@ public class SourceBuilder extends FormActivity {
 				/* Do nothing when the hint item is selected */
 				if (mEntity == null) {
 					if (position == 0) {
-						String sourceType = mSourceSuggestionStrings.get(position);
+						final String sourceType = mSourceSuggestionStrings.get(position);
 						mSource = buildCustomSource(sourceType);
-						mSourceName.setText(mSource.name);
+						mSourceCaption.setText(mSource.caption);
 						mSourceId.setText(mSource.id);
 						mSource.custom = true;
 						drawSourceIcon();
@@ -287,15 +295,15 @@ public class SourceBuilder extends FormActivity {
 				else {
 					if (position != parent.getCount()) {
 						if (mEntity.sourceSuggestions != null && position < mEntity.sourceSuggestions.size()) {
-							mSource = (Source) mEntity.sourceSuggestions.get(position);
-							mSourceName.setText(mSource.name);
+							mSource = mEntity.sourceSuggestions.get(position);
+							mSourceCaption.setText(mSource.caption);
 							mSourceId.setText(mSource.id);
 							drawSourceIcon();
 						}
 						else if (position < mSourceSuggestionStrings.size()) {
-							String sourceType = mSourceSuggestionStrings.get(position);
+							final String sourceType = mSourceSuggestionStrings.get(position);
 							mSource = buildCustomSource(sourceType);
-							mSourceName.setText(mSource.name);
+							mSourceCaption.setText(mSource.caption);
 							mSourceId.setText(mSource.id);
 							mSource.custom = true;
 							drawSourceIcon();
@@ -310,7 +318,7 @@ public class SourceBuilder extends FormActivity {
 	}
 
 	public void updateCustomImage(String uri) {
-		BitmapRequestBuilder builder = new BitmapRequestBuilder(mSourceIcon).setImageUri(uri);
+		final BitmapRequestBuilder builder = new BitmapRequestBuilder(mSourceIcon).setImageUri(uri);
 		final BitmapRequest imageRequest = builder.create();
 		mSourceIcon.setBitmapRequest(imageRequest);
 	}

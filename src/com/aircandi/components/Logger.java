@@ -26,7 +26,7 @@ public class Logger {
 	 * Chatty stuff that is helpful in the logs while developing but will never used in release.
 	 */
 
-	private static boolean	INCLUDE_MODULE	= true;
+	private static final boolean	INCLUDE_MODULE	= true;
 
 	private static enum LogLevel {
 		Error,
@@ -36,11 +36,11 @@ public class Logger {
 		Verbose
 	}
 
-	static private void Log(LogLevel logLevel, Object taskContext, String msgFormat) {
+	private static void Log(LogLevel logLevel, Object taskContext, String msgFormat) {
 		Log(logLevel, taskContext, msgFormat, null);
 	}
 
-	static private void Log(LogLevel logLevel, Object taskContext, String msgFormat, Throwable t) {
+	private static void Log(LogLevel logLevel, Object taskContext, String msgFormat, Throwable t) {
 
 		String task = "";
 		if (INCLUDE_MODULE && taskContext != null) {
@@ -71,13 +71,13 @@ public class Logger {
 	 * Issues that justify some logging at the ERROR level are typically good candidates to be reported to a
 	 * statistics-gathering server.
 	 */
-	static public void e(Object taskContext, String msgFormat) {
+	public static void e(Object taskContext, String msgFormat) {
 		if (CandiConstants.LOG_LEVEL <= Log.ERROR) {
 			Log(LogLevel.Error, taskContext, msgFormat);
 		}
 	}
 
-	static public void e(Object taskContext, String msgFormat, Throwable t) {
+	public static void e(Object taskContext, String msgFormat, Throwable t) {
 		if (CandiConstants.LOG_LEVEL <= Log.ERROR) {
 			Log(LogLevel.Error, taskContext, msgFormat, t);
 		}
@@ -91,13 +91,13 @@ public class Logger {
 	 * rebooting the device. This level is always logged. Issues that justify some logging at the WARNING level might
 	 * also be considered for reporting to a statistics-gathering server.
 	 */
-	static public void w(Object taskContext, String msgFormat) {
+	public static void w(Object taskContext, String msgFormat) {
 		if (CandiConstants.LOG_LEVEL <= Log.WARN) {
 			Log(LogLevel.Warning, taskContext, msgFormat);
 		}
 	}
 
-	static public void w(Object taskContext, String msgFormat, Throwable t) {
+	public static void w(Object taskContext, String msgFormat, Throwable t) {
 		if (CandiConstants.LOG_LEVEL <= Log.WARN) {
 			Log(LogLevel.Warning, taskContext, msgFormat, t);
 		}
@@ -110,13 +110,13 @@ public class Logger {
 	 * condition should only be logged by a module that reasonably believes that it is the most authoritative in that
 	 * domain (to avoid duplicate logging by non-authoritative components). This level is always logged.
 	 */
-	static public void i(Object taskContext, String msgFormat) {
+	public static void i(Object taskContext, String msgFormat) {
 		if (CandiConstants.LOG_LEVEL <= Log.INFO) {
 			Log(LogLevel.Info, taskContext, msgFormat);
 		}
 	}
 
-	static public void i(Object taskContext, String msgFormat, Throwable t) {
+	public static void i(Object taskContext, String msgFormat, Throwable t) {
 		if (CandiConstants.LOG_LEVEL <= Log.INFO) {
 			Log(LogLevel.Info, taskContext, msgFormat, t);
 		}
@@ -129,13 +129,13 @@ public class Logger {
 	 * what is going on about your component. If your debug logs are dominating the log then you probably should be
 	 * using verbose logging.
 	 */
-	static public void d(Object taskContext, String msgFormat) {
+	public static void d(Object taskContext, String msgFormat) {
 		if (CandiConstants.LOG_LEVEL <= Log.DEBUG) {
 			Log(LogLevel.Debug, taskContext, msgFormat);
 		}
 	}
 
-	static public void d(Object taskContext, String msgFormat, Throwable t) {
+	public static void d(Object taskContext, String msgFormat, Throwable t) {
 		if (CandiConstants.LOG_LEVEL <= Log.DEBUG) {
 			Log(LogLevel.Debug, taskContext, msgFormat, t);
 		}
@@ -145,13 +145,13 @@ public class Logger {
 	 * Verbose: Should never compiled into release version
 	 * This level of logging should be used for everything else. This level will only be logged on debug builds.
 	 */
-	static public void v(Object taskContext, String msgFormat) {
+	public static void v(Object taskContext, String msgFormat) {
 		if (CandiConstants.LOG_LEVEL <= Log.VERBOSE) {
 			Log(LogLevel.Verbose, taskContext, msgFormat);
 		}
 	}
 
-	static public void v(Object taskContext, String msgFormat, Throwable t) {
+	public static void v(Object taskContext, String msgFormat, Throwable t) {
 		if (CandiConstants.LOG_LEVEL <= Log.VERBOSE) {
 			Log(LogLevel.Verbose, taskContext, msgFormat, t);
 		}

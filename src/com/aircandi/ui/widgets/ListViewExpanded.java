@@ -30,7 +30,7 @@ public class ListViewExpanded extends LinearLayout {
 	public ListViewExpanded(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ListViewExpanded);
+		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ListViewExpanded);
 
 		mLayoutItemId = ta.getResourceId(R.styleable.ListViewExpanded_layoutItems, 0);
 		mItemMaxCount = ta.getInteger(R.styleable.ListViewExpanded_itemMaxCount, 2);
@@ -44,7 +44,7 @@ public class ListViewExpanded extends LinearLayout {
 	}
 
 	private void initialize() {
-		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (mLayoutItemId != 0) {
 			int itemCount = 0;
 			while (itemCount < mItemMaxCount) {
@@ -62,9 +62,9 @@ public class ListViewExpanded extends LinearLayout {
 
 	public void setAdapter(ListAdapter adapter) {
 		mAdapter = adapter;
-		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		int itemCount = mAdapter.getCount();
+		final int itemCount = mAdapter.getCount();
 		for (int i = 0; i < itemCount; i++) {
 			if (i >= mItemMaxCount) {
 				break;

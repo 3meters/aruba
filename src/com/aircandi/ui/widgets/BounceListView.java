@@ -10,7 +10,7 @@ import com.aircandi.CandiConstants;
 @SuppressWarnings("ucd")
 public class BounceListView extends ListView {
 	
-	private Context	mContext;
+	private final Context	mContext;
 	private int		mMaxYOverscrollDistance;
 
 	public BounceListView(Context context) {

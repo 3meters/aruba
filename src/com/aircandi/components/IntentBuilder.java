@@ -4,7 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.aircandi.CandiConstants;
-import com.aircandi.components.ProxiManager.EntityListType;
+import com.aircandi.components.ProxiManager.ArrayListType;
+
 
 public class IntentBuilder {
 
@@ -18,18 +19,18 @@ public class IntentBuilder {
 	private String			mUserId;
 
 	private String			mMessage;
-	private EntityListType	mEntityListType;
+	private ArrayListType	mArrayListType;
 	private String			mCollectionId;
 
 	public IntentBuilder() {}
 
 	public IntentBuilder(Context context, Class<?> clazz) {
-		this.mContext = context;
-		this.mClass = clazz;
+		mContext = context;
+		mClass = clazz;
 	}
 
 	public Intent create() {
-		Intent intent = new Intent(mContext, mClass);
+		final Intent intent = new Intent(mContext, mClass);
 
 		if (mEntityId != null) {
 			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntityId);
@@ -59,25 +60,25 @@ public class IntentBuilder {
 			intent.putExtra(CandiConstants.EXTRA_COLLECTION_ID, mCollectionId);
 		}
 
-		if (mEntityListType != null) {
-			intent.putExtra(CandiConstants.EXTRA_LIST_TYPE, mEntityListType.name());
+		if (mArrayListType != null) {
+			intent.putExtra(CandiConstants.EXTRA_LIST_TYPE, mArrayListType.name());
 		}
 
 		return intent;
 	}
 
 	public IntentBuilder setParentEntityId(String parentEntityId) {
-		this.mParentEntityId = parentEntityId;
+		mParentEntityId = parentEntityId;
 		return this;
 	}
 
 	public IntentBuilder setEntityType(String entityType) {
-		this.mEntityType = entityType;
+		mEntityType = entityType;
 		return this;
 	}
 
 	public IntentBuilder setEntityId(String entityId) {
-		this.mEntityId = entityId;
+		mEntityId = entityId;
 		return this;
 	}
 
@@ -96,8 +97,9 @@ public class IntentBuilder {
 		return this;
 	}
 
-	public IntentBuilder setEntityListType(EntityListType entityListType) {
-		mEntityListType = entityListType;
+	@SuppressWarnings("ucd")
+	public IntentBuilder setArrayListType(ArrayListType arrayListType) {
+		mArrayListType = arrayListType;
 		return this;
 	}
 }

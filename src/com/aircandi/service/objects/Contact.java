@@ -1,7 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -34,7 +34,7 @@ public class Contact extends ServiceObject implements Cloneable, Serializable {
 		}
 	}	
 
-	public static Contact setPropertiesFromMap(Contact contact, HashMap map) {
+	public static Contact setPropertiesFromMap(Contact contact, Map map) {
 		
 		contact.phone = (String) map.get("phone");
 		contact.formattedPhone = (String) map.get("formattedPhone");

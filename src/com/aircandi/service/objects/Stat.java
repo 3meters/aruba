@@ -1,7 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -31,7 +31,7 @@ public class Stat extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public static Stat setPropertiesFromMap(Stat stat, HashMap map) {
+	public static Stat setPropertiesFromMap(Stat stat, Map map) {
 		stat.type = (String) map.get("type");
 		stat.countBy = (Number) map.get("countBy");
 		return stat;

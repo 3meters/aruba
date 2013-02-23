@@ -45,21 +45,21 @@ import com.commonsware.cwac.adapter.AdapterWrapper;
  * know you are out of data, plus return false from that final
  * call to appendInBackground().
  */
-abstract public class EndlessAdapter extends AdapterWrapper {
+public abstract class EndlessAdapter extends AdapterWrapper {
 
-	abstract protected boolean cacheInBackground() throws Exception;
+	protected abstract boolean cacheInBackground() throws Exception;
 
-	abstract protected void appendCachedData();
+	protected abstract void appendCachedData();
 
 	private View			pendingView		= null;
-	private AtomicBoolean	keepOnAppending	= new AtomicBoolean(true);
+	private final AtomicBoolean	keepOnAppending	= new AtomicBoolean(true);
 	private Context			context;
-	private int				pendingResource	= -1;
+	private final int				pendingResource	= -1;
 
 	/**
 	 * Constructor wrapping a supplied ListAdapter
 	 */
-	public EndlessAdapter(ListAdapter wrapped) {
+	protected EndlessAdapter(ListAdapter wrapped) {
 		super(wrapped);
 	}
 
@@ -70,9 +70,9 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	@Override
 	public int getCount() {
 		if (keepOnAppending.get()) {
-			return (super.getCount() + 1); // one more for "pending"
+			return super.getCount() + 1; // one more for "pending"
 		}
-		return (super.getCount());
+		return super.getCount();
 	}
 
 	/**
@@ -82,9 +82,9 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	@Override
 	public int getItemViewType(int position) {
 		if (position == getWrappedAdapter().getCount()) {
-			return (IGNORE_ITEM_VIEW_TYPE);
+			return IGNORE_ITEM_VIEW_TYPE;
 		}
-		return (super.getItemViewType(position));
+		return super.getItemViewType(position);
 	}
 
 	/**
@@ -95,7 +95,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 */
 	@Override
 	public int getViewTypeCount() {
-		return (super.getViewTypeCount() + 1);
+		return super.getViewTypeCount() + 1;
 	}
 
 	/**
@@ -118,14 +118,14 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 		if (position == super.getCount() && keepOnAppending.get()) {
 			if (pendingView == null) {
 				pendingView = getPendingView(parent);
-				AppendTask task = new AppendTask();
+				final AppendTask task = new AppendTask();
 				task.execute();
 			}
 
-			return (pendingView);
+			return pendingView;
 		}
 
-		return (super.getView(position, convertView, parent));
+		return super.getView(position, convertView, parent);
 	}
 
 	/**
@@ -142,7 +142,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	private boolean onException(View pendingView, Exception e) {
 		Log.e("EndlessAdapter", "Exception in cacheInBackground()", e);
 
-		return (false);
+		return false;
 	}
 
 	/**
@@ -165,7 +165,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 				result = e;
 			}
 
-			return (result);
+			return result;
 		}
 
 		@Override
@@ -190,7 +190,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 */
 	protected View getPendingView(ViewGroup parent) {
 		if (context != null) {
-			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			return inflater.inflate(pendingResource, parent, false);
 		}
 

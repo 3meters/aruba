@@ -124,14 +124,14 @@ public class PasswordForm extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("UpdatePassword");								
-				ModelResult result = ProxiManager.getInstance().getEntityModel()
+				final ModelResult result = ProxiManager.getInstance().getEntityModel()
 						.updatePassword(mUser.id, mTextPasswordOld.getText().toString(), mTextPassword.getText().toString());
 				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
+				final ModelResult result = (ModelResult) response;
 				mCommon.hideBusy(true);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 

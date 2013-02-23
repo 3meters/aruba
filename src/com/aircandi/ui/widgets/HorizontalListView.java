@@ -76,7 +76,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 	private int						mDisplayOffset		= 0;
 	private Scroller				mScroller;
 	private GestureDetector			mGesture;
-	private Queue<View>				mRemovedViewQueue	= new LinkedList<View>();
+	private final Queue<View>				mRemovedViewQueue	= new LinkedList<View>();
 	private OnItemSelectedListener	mOnItemSelected;
 	private OnItemClickListener		mOnItemClicked;
 	private boolean					mDataChanged		= false;
@@ -149,7 +149,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		mOnItemClicked = listener;
 	}
 
-	private DataSetObserver	mDataObserver	= new DataSetObserver() {
+	private final DataSetObserver	mDataObserver	= new DataSetObserver() {
 
 												@Override
 												public void onChanged() {
@@ -215,7 +215,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		}
 
 		if (mDataChanged) {
-			int oldCurrentX = mCurrentX;
+			final int oldCurrentX = mCurrentX;
 			initialize();
 			removeAllViewsInLayout();
 			mNextX = oldCurrentX;
@@ -223,7 +223,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		}
 
 		if (mScroller.computeScrollOffset()) {
-			int scrollx = mScroller.getCurrX();
+			final int scrollx = mScroller.getCurrX();
 			mNextX = scrollx;
 		}
 
@@ -236,7 +236,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 			mScroller.forceFinished(true);
 		}
 
-		int dx = mCurrentX - mNextX;
+		final int dx = mCurrentX - mNextX;
 
 		removeNonVisibleItems(dx);
 		fillList(dx);
@@ -275,8 +275,9 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 			if (mRightViewIndex == mAdapter.getCount() - 1) {
 				mMaxX = mCurrentX + rightEdge - getWidth();
-				if (mMaxX < 0)
+				if (mMaxX < 0){
 					mMaxX = 0;
+				}
 			}
 			mRightViewIndex++;
 		}
@@ -328,12 +329,12 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-		boolean handled = mGesture.onTouchEvent(ev);
+		final boolean handled = mGesture.onTouchEvent(ev);
 		return handled;
 	}
 
 	private View getGestureTarget(MotionEvent e) {
-		Rect viewRect = new Rect();
+		final Rect viewRect = new Rect();
 		for (int i = 0; i < getChildCount(); i++) {
 			View child = getChildAt(i);
 			int left = child.getLeft();
@@ -350,18 +351,18 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 	private Integer getViewPosition(View view) {
 		for (int i = 0; i < getChildCount(); i++) {
-			if (view == getChildAt(i)) {
+			if (view.equals(getChildAt(i))) {
 				return mLeftViewIndex + 1 + i;
 			}
 		}
 		return null;
 	}
 
-	private OnGestureListener	mOnGesture	= new GestureDetector.SimpleOnGestureListener() {
+	private final OnGestureListener	mOnGesture	= new GestureDetector.SimpleOnGestureListener() {
 
 												@Override
 												public void onShowPress(MotionEvent e) {
-													View view = getGestureTarget(e);
+													final View view = getGestureTarget(e);
 													if (view != null) {
 														view.setBackgroundResource(R.drawable.bg_button_pressed);
 													}
@@ -369,7 +370,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 												@Override
 												public boolean onSingleTapUp(MotionEvent e) {
-													View view = getGestureTarget(e);
+													final View view = getGestureTarget(e);
 													if (view != null) {
 														view.setBackgroundResource(android.R.color.transparent);
 													}
@@ -402,9 +403,9 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 												@Override
 												public boolean onSingleTapConfirmed(MotionEvent e) {
-													View view = getGestureTarget(e);
+													final View view = getGestureTarget(e);
 													if (view != null) {
-														Integer position = getViewPosition(view);
+														final Integer position = getViewPosition(view);
 														if (position != null) {
 															if (mOnItemClicked != null) {
 																mOnItemClicked.onItemClick(HorizontalListView.this, view, position, mAdapter

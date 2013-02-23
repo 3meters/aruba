@@ -40,18 +40,18 @@ public class TestUtils {
 
 	public static ServiceResponse getFailureServiceResponse(Float httpStatusCode, Class type) {
 		Exception exception = null;
-		if (type == ClientProtocolException.class) {
+		if (type.equals(ClientProtocolException.class)) {
 			exception = new ClientProtocolException();
 		}
-		else if (type == IOException.class) {
+		else if (type.equals(IOException.class)) {
 			exception = new IOException();
 		}
-		else if (type == ConnectException.class) {
+		else if (type.equals(ConnectException.class)) {
 			exception = new ConnectException();
 		}
 
-		ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(httpStatusCode, exception);
-		ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Failed, null, proxibaseException);
+		final ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(httpStatusCode, exception);
+		final ServiceResponse serviceResponse = new ServiceResponse(ResponseCode.Failed, null, proxibaseException);
 		return serviceResponse;
 	}
 }

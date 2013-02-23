@@ -1,6 +1,7 @@
 package com.aircandi.components.bitmaps;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The Class ImageResult.
@@ -18,7 +19,7 @@ public class ImageResult
 	private String		contentType;
 	private Thumbnail	thumbnail;
 
-	public static ImageResult setPropertiesFromMap(ImageResult imageResult, HashMap map) {
+	public static ImageResult setPropertiesFromMap(ImageResult imageResult, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
@@ -53,7 +54,7 @@ public class ImageResult
 	 *            the new title
 	 */
 	public void setTitle(String value) {
-		this.title = value;
+		title = value;
 	}
 
 	/**
@@ -72,7 +73,7 @@ public class ImageResult
 	 *            the new media url
 	 */
 	public void setMediaUrl(String value) {
-		this.mediaUrl = value;
+		mediaUrl = value;
 	}
 
 	/**
@@ -91,7 +92,7 @@ public class ImageResult
 	 *            the new url
 	 */
 	public void setUrl(String value) {
-		this.url = value;
+		url = value;
 	}
 
 	/**
@@ -110,7 +111,7 @@ public class ImageResult
 	 *            the new display url
 	 */
 	public void setDisplayUrl(String value) {
-		this.displayUrl = value;
+		displayUrl = value;
 	}
 
 	/**
@@ -129,7 +130,7 @@ public class ImageResult
 	 *            the new width
 	 */
 	public void setWidth(Long value) {
-		this.width = value;
+		width = value;
 	}
 
 	/**
@@ -148,7 +149,7 @@ public class ImageResult
 	 *            the new height
 	 */
 	public void setHeight(Long value) {
-		this.height = value;
+		height = value;
 	}
 
 	/**
@@ -167,7 +168,7 @@ public class ImageResult
 	 *            the new file size
 	 */
 	public void setFileSize(Long value) {
-		this.fileSize = value;
+		fileSize = value;
 	}
 
 	/**
@@ -186,7 +187,7 @@ public class ImageResult
 	 *            the new content type
 	 */
 	public void setContentType(String value) {
-		this.contentType = value;
+		contentType = value;
 	}
 
 	/**
@@ -205,7 +206,7 @@ public class ImageResult
 	 *            the new thumbnail
 	 */
 	public void setThumbnail(Thumbnail value) {
-		this.thumbnail = value;
+		thumbnail = value;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -222,7 +223,7 @@ public class ImageResult
 		private Long	fileSize;
 		private Long	runTime;
 
-		private static Thumbnail setPropertiesFromMap(Thumbnail thumbnail, HashMap map) {
+		private static Thumbnail setPropertiesFromMap(Thumbnail thumbnail, Map map) {
 			/*
 			 * Properties involved with editing are copied from one entity to another.
 			 */
@@ -254,7 +255,7 @@ public class ImageResult
 		 *            the new url
 		 */
 		public void setUrl(String value) {
-			this.mediaUrl = value;
+			mediaUrl = value;
 		}
 
 		/**
@@ -273,7 +274,7 @@ public class ImageResult
 		 *            the new content type
 		 */
 		public void setContentType(String value) {
-			this.contentType = value;
+			contentType = value;
 		}
 
 		/**
@@ -292,7 +293,7 @@ public class ImageResult
 		 *            the new width
 		 */
 		public void setWidth(Long value) {
-			this.width = value;
+			width = value;
 		}
 
 		/**
@@ -311,7 +312,7 @@ public class ImageResult
 		 *            the new height
 		 */
 		public void setHeight(Long value) {
-			this.height = value;
+			height = value;
 		}
 
 		/**
@@ -330,7 +331,7 @@ public class ImageResult
 		 *            the new file size
 		 */
 		public void setFileSize(Long value) {
-			this.fileSize = value;
+			fileSize = value;
 		}
 
 		/**
@@ -349,7 +350,7 @@ public class ImageResult
 		 *            the new run time
 		 */
 		public void setRunTime(Long value) {
-			this.runTime = value;
+			runTime = value;
 		}
 	}
 }

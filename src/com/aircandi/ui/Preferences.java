@@ -28,7 +28,7 @@ public class Preferences extends SherlockPreferenceActivity {
 	public static final String	PREF_SHOW_PLACE_RANK_SCORE	= "Pref_Show_Place_Rank_Score";
 	public static final String	PREF_TESTING_BEACONS		= "Pref_Testing_Beacons";
 	public static final String	PREF_TESTING_LOCATION		= "Pref_Testing_Location";
-	public static final String	PREF_TESTING_PLACE_SOURCE	= "Pref_Testing_Place_Source";
+	public static final String	PREF_TESTING_PLACE_PROVIDER	= "Pref_Testing_Place_Provider";
 
 	/* Settings */
 	public static final String	SETTING_USER				= "Setting_User";
@@ -47,7 +47,7 @@ public class Preferences extends SherlockPreferenceActivity {
 		/*
 		 * TODO: Switch over to using the preferenceStyle attribute for the current theme.
 		 */
-		String prefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
+		final String prefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
 		if (prefTheme.equals("aircandi_theme_snow")) {
 			setTheme(R.style.aircandi_theme_light);
 		}
@@ -65,7 +65,7 @@ public class Preferences extends SherlockPreferenceActivity {
 			addPreferencesFromResource(R.xml.preferences);
 		}
 
-		Preference myPref = (Preference) findPreference("Pref_Theme");
+		final Preference myPref = findPreference("Pref_Theme");
 
 		myPref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 
@@ -74,7 +74,7 @@ public class Preferences extends SherlockPreferenceActivity {
 				Aircandi.settingsEditor.putString(Preferences.PREF_THEME, (String) newValue);
 				Aircandi.settingsEditor.commit();
 
-				Intent intent = getIntent();
+				final Intent intent = getIntent();
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				finish();
 				overridePendingTransition(0, 0);

@@ -33,16 +33,18 @@ public class ComboButton extends Button {
 	private void setDrawableSize(Context context, AttributeSet attrs, int defStyle) {
 		FontManager.getInstance().setTypefaceDefault(this);
 
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ComboButton, defStyle, 0);
+		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ComboButton, defStyle, 0);
 		mDrawableScale = ta.getFloat(R.styleable.ComboButton_drawableScale, 0.5f);
 		ta.recycle();
 
-		Drawable[] drawables = getCompoundDrawables();
+		final Drawable[] drawables = getCompoundDrawables();
+		Drawable drawable;
+		ScaleDrawable sd;
 		for (int i = 0; i < drawables.length; i++) {
 			if (drawables[i] != null) {
-				Drawable drawable = drawables[i];
+				drawable = drawables[i];
 				drawable.setBounds(0, 0, (int) (drawable.getIntrinsicWidth() * mDrawableScale), (int) (drawable.getIntrinsicHeight() * mDrawableScale));
-				ScaleDrawable sd = new ScaleDrawable(drawable, 0, 20, 20);
+				sd = new ScaleDrawable(drawable, 0, 20, 20);
 				setCompoundDrawables(sd.getDrawable(), null, null, null); //set drawableLeft for example
 				break;
 			}

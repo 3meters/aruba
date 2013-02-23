@@ -1,5 +1,6 @@
 package com.aircandi.ui.widgets;
 
+import java.util.List;
 import java.util.Locale;
 
 import android.content.Context;
@@ -18,7 +19,6 @@ import android.widget.TextView;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
-import com.aircandi.components.EntityList;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -68,7 +68,7 @@ public class CandiView extends RelativeLayout {
 		super(context, attrs, defStyle);
 
 		if (attrs != null) {
-			TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CandiView, defStyle, 0);
+			final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CandiView, defStyle, 0);
 			mLayoutId = ta.getResourceId(R.styleable.CandiView_layout, R.layout.widget_candi_view);
 			ta.recycle();
 			initialize();
@@ -79,7 +79,7 @@ public class CandiView extends RelativeLayout {
 		mInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mLayout = (ViewGroup) mInflater.inflate(mLayoutId, this, true);
 
-		mCandiViewGroup = (View) mLayout.findViewById(R.id.candi_view_group);
+		mCandiViewGroup = mLayout.findViewById(R.id.candi_view_group);
 		mCandiImage = (WebImageView) mLayout.findViewById(R.id.candi_view_image);
 		mTitle = (TextView) mLayout.findViewById(R.id.candi_view_title);
 		mSubtitle = (TextView) mLayout.findViewById(R.id.candi_view_subtitle);
@@ -121,14 +121,14 @@ public class CandiView extends RelativeLayout {
 		mEntity = entity;
 		mEntityActivityDate = entity.activityDate;
 		mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
-		mColorResId = Place.getCategoryColorResId(mEntity.place.category != null ? mEntity.place.category.name : null, true, mMuteColor, false);
+		mColorResId = Place.getCategoryColorResId((mEntity.place.category != null) ? mEntity.place.category.name : null, true, mMuteColor, false);
 
 		/* Primary candi image */
 
 		drawImage();
 
 		if (mCandiViewGroup != null) {
-			Integer padding = ImageUtils.getRawPixels(this.getContext(), 3);
+			final Integer padding = ImageUtils.getRawPixels(this.getContext(), 3);
 			this.setPadding(padding, padding, padding, padding);
 			this.setBackgroundResource(R.drawable.selector_image);
 			mCandiViewGroup.setBackgroundResource(mColorResId);
@@ -163,7 +163,7 @@ public class CandiView extends RelativeLayout {
 			if (mCategoryImage != null) {
 				if (entity.place.category != null) {
 					mCategoryImage.setTag(entity.place.category.iconUri());
-					BitmapRequest bitmapRequest = new BitmapRequest(entity.place.category.iconUri(), mCategoryImage);
+					final BitmapRequest bitmapRequest = new BitmapRequest(entity.place.category.iconUri(), mCategoryImage);
 					bitmapRequest.setImageRequestor(mCategoryImage);
 					bitmapRequest.setImageSize(ImageUtils.getRawPixels(this.getContext(), 50));
 					BitmapManager.getInstance().masterFetch(bitmapRequest);
@@ -181,15 +181,15 @@ public class CandiView extends RelativeLayout {
 			setVisibility(mCandiSources, View.GONE);
 			if (mCandiSources != null && !entity.synthetic && entity.sources != null && entity.sources.size() > 0) {
 				mCandiSources.removeAllViews();
-				EntityList<Entity> entities = entity.getSourceEntities();
-				int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
-				int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
+				final List<Entity> entities = entity.getSourceEntities();
+				final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
+				final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
 
 				/* We only show the first five */
 				int sourceCount = 0;
 				for (Entity sourceEntity : entities) {
 					if (sourceEntity.source != null
-							&& sourceEntity.source.name.equals("comments")
+							&& sourceEntity.source.type.equals("comments")
 							&& (entity.commentCount == null || entity.commentCount == 0)) {
 						continue;
 					}
@@ -207,13 +207,13 @@ public class CandiView extends RelativeLayout {
 						 * backgrounds
 						 */
 						if (sourceEntity.source != null) {
-							if (sourceEntity.source.source.equals("yelp")) {
+							if (sourceEntity.source.type.equals("yelp")) {
 								imageUri = "resource:ic_yelp_dark";
 							}
-							if (sourceEntity.source.source.equals("twitter")) {
+							if (sourceEntity.source.type.equals("twitter")) {
 								imageUri = "resource:ic_twitter_dark";
 							}
-							if (sourceEntity.source.source.equals("website")) {
+							if (sourceEntity.source.type.equals("website")) {
 								imageUri = "resource:ic_website_dark";
 							}
 						}
@@ -256,7 +256,7 @@ public class CandiView extends RelativeLayout {
 
 			/* Don't use gradient if we are not using a photo */
 			if (mTextGroup != null) {
-				mTextGroup.setBackgroundResource(mEntity.photo != null ? R.drawable.overlay_picture : 0);
+				mTextGroup.setBackgroundResource((mEntity.photo != null) ? R.drawable.overlay_picture : 0);
 			}
 
 			if (mEntity.getPhoto().getBitmap() != null) {
@@ -270,16 +270,16 @@ public class CandiView extends RelativeLayout {
 				/* Remove colored filters */
 				mCandiImage.getImageView().clearColorFilter();
 				mCandiImage.setBackgroundResource(0);
-				((View) mLayout.findViewById(R.id.color_layer)).setVisibility(View.GONE);
-				((View) mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
+				(mLayout.findViewById(R.id.color_layer)).setVisibility(View.GONE);
+				(mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
 
 				/* Go get the image for the entity regardless of type */
-				String imageUri = mEntity.getEntityPhotoUri();
+				final String imageUri = mEntity.getEntityPhotoUri();
 
 				if (imageUri != null) {
 
 					if (imageUri.equals("resource:img_placeholder_logo_bw")) {
-						((View) mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+						(mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
 						mCandiImage.getImageView().setImageDrawable(null);
 					}
 					else {
@@ -288,18 +288,18 @@ public class CandiView extends RelativeLayout {
 						if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 							if (mEntity.photo == null && mEntity.place != null && mEntity.place.category != null) {
 
-								int color = Place.getCategoryColor(mEntity.place.category != null
+								final int color = Place.getCategoryColor((mEntity.place.category != null)
 										? mEntity.place.category.name
 										: null, true, mMuteColor, false);
 
 								mCandiImage.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 								mCandiImage.setBackgroundResource(mColorResId);
-								((View) mLayout.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
-								((View) mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+								(mLayout.findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+								(mLayout.findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
 							}
 						}
 
-						BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mCandiImage.getImageView());
+						final BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mCandiImage.getImageView());
 						bitmapRequest.setImageSize(mCandiImage.getSizeHint());
 						bitmapRequest.setImageRequestor(mCandiImage.getImageView());
 						mCandiImage.getImageView().setTag(imageUri);
@@ -315,19 +315,19 @@ public class CandiView extends RelativeLayout {
 		if (mDistance != null) {
 			String info = "here";
 
-			float distance = entity.getDistance();
-			String target = entity.hasProximityLink() ? "B:" : "L:";
+			final float distance = entity.getDistance();
+			final String target = entity.hasProximityLink() ? "B:" : "L:";
 			/*
 			 * If distance = -1 then we don't have the location info
 			 * yet needed to correctly determine distance.
 			 */
-			if (distance == -1f) {
+			if (distance == -1f) { // $codepro.audit.disable floatComparison
 				info = "--";
 			}
 			else {
-				float miles = distance * MetersToMilesConversion;
-				float feet = distance * MetersToFeetConversion;
-				float yards = distance * MetersToYardsConversion;
+				final float miles = distance * MetersToMilesConversion;
+				final float feet = distance * MetersToFeetConversion;
+				final float yards = distance * MetersToYardsConversion;
 
 				if (feet >= 0) {
 					if (miles >= 0.1) {
@@ -371,13 +371,8 @@ public class CandiView extends RelativeLayout {
 		}
 	}
 
-	@Override
-	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-		super.onLayout(changed, left, top, right, bottom);
-	}
-
 	public void setEntity(Entity entity) {
-		this.mEntity = entity;
+		mEntity = entity;
 	}
 
 	public void setLayoutId(Integer layoutId) {

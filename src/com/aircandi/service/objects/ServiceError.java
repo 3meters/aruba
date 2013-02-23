@@ -1,6 +1,6 @@
 package com.aircandi.service.objects;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -26,7 +26,7 @@ public class ServiceError {
 
 	public ServiceError() {}
 
-	public static ServiceError setPropertiesFromMap(ServiceError serviceError, HashMap map) {
+	public static ServiceError setPropertiesFromMap(ServiceError serviceError, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

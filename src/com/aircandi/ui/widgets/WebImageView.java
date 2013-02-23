@@ -32,7 +32,7 @@ public class WebImageView extends RelativeLayout {
 	private ProgressBar					mProgressBar;
 
 	private String						mImageUri;
-	private Handler						mThreadHandler		= new Handler();
+	private final Handler						mThreadHandler		= new Handler();
 
 	private Integer						mSizeHint;
 
@@ -64,7 +64,7 @@ public class WebImageView extends RelativeLayout {
 	public WebImageView(Context context, AttributeSet attributes, int defStyle) {
 		super(context, attributes, defStyle);
 
-		TypedArray ta = context.obtainStyledAttributes(attributes, R.styleable.WebImageView, defStyle, 0);
+		final TypedArray ta = context.obtainStyledAttributes(attributes, R.styleable.WebImageView, defStyle, 0);
 
 		mSizeHint = ta.getDimensionPixelSize(R.styleable.WebImageView_sizeHint, Integer.MAX_VALUE);
 		mShowBusy = ta.getBoolean(R.styleable.WebImageView_showBusy, true);
@@ -74,7 +74,7 @@ public class WebImageView extends RelativeLayout {
 		ta.recycle();
 
 		if (!isInEditMode()) {
-			int scaleTypeValue = attributes.getAttributeIntValue(androidNamespace, "scaleType", 6);
+			final int scaleTypeValue = attributes.getAttributeIntValue(androidNamespace, "scaleType", 6);
 			if (scaleTypeValue >= 0) {
 				mScaleType = sScaleTypeArray[scaleTypeValue];
 			}
@@ -84,8 +84,8 @@ public class WebImageView extends RelativeLayout {
 	}
 
 	private void initialize(Context context) {
-		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View view = inflater.inflate(mLayoutId, this, true);
+		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final View view = inflater.inflate(mLayoutId, this, true);
 
 		mImageMain = (ImageView) view.findViewById(R.id.image_main);
 
@@ -95,7 +95,7 @@ public class WebImageView extends RelativeLayout {
 		}
 
 		if (mImageMain != null) {
-			mImageMain.setScaleType((ScaleType) mScaleType);
+			mImageMain.setScaleType(mScaleType);
 			mImageMain.invalidate();
 
 			if (isInEditMode()) {
@@ -107,7 +107,7 @@ public class WebImageView extends RelativeLayout {
 			if (!mShowBusy) {
 				mProgressBar.setVisibility(View.GONE);
 			}
-			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(30, 30);
+			final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(30, 30);
 			params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
 			mProgressBar.setLayoutParams(params);
 		}
@@ -155,7 +155,7 @@ public class WebImageView extends RelativeLayout {
 
 			@Override
 			public void onComplete(Object response) {
-				ServiceResponse serviceResponse = (ServiceResponse) response;
+				final ServiceResponse serviceResponse = (ServiceResponse) response;
 
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
@@ -179,7 +179,7 @@ public class WebImageView extends RelativeLayout {
 
 						@Override
 						public void run() {
-							Drawable drawable = WebImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
+							final Drawable drawable = WebImageView.this.getContext().getResources().getDrawable(mBrokenDrawable);
 							ImageUtils.showDrawableInImageView(drawable, mImageMain, true, AnimUtils.fadeInMedium());
 						}
 					});
@@ -226,7 +226,7 @@ public class WebImageView extends RelativeLayout {
 
 			@Override
 			public void run() {
-				Animation animation = AnimUtils.fadeOutMedium();
+				final Animation animation = AnimUtils.fadeOutMedium();
 				mProgressBar.startAnimation(animation);
 			}
 		});

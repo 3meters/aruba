@@ -8,7 +8,7 @@ import java.io.IOException;
 @SuppressWarnings("ucd")
 class IoUtils {
     static void deleteContents(File dir) throws IOException {
-        File[] files = dir.listFiles();
+        final File[] files = dir.listFiles();
         if (files == null) {
             throw new IllegalArgumentException("not a directory: " + dir);
         }
@@ -28,7 +28,7 @@ class IoUtils {
                 closeable.close();
             } catch (RuntimeException rethrown) {
                 throw rethrown;
-            } catch (Exception ignored) {
+            } catch (Exception ignored) { // $codepro.audit.disable emptyCatchClause
             }
         }
     }

@@ -45,7 +45,7 @@ public class CommentList extends CandiActivity {
 	
 	private LayoutInflater	mInflater;
 	private Boolean			mMore			= false;
-	private static long		LIST_MAX		= 300L;
+	private static final long		LIST_MAX		= 300L;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -71,7 +71,7 @@ public class CommentList extends CandiActivity {
 		/*
 		 * Navigation setup for action bar icon and title
 		 */
-		Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+		final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 		mCommon.mActionBar.setTitle(entity.name);
 		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 	}
@@ -91,14 +91,14 @@ public class CommentList extends CandiActivity {
 				/*
 				 * Just get the comments without updating the entity in the cache
 				 */
-				String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
-				ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, jsonEagerLoad, null);
+				final String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, refresh, jsonEagerLoad, null);
 				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object modelResult) {
-				ModelResult result = (ModelResult) modelResult;
+				final ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					if (result.data != null) {
@@ -126,8 +126,8 @@ public class CommentList extends CandiActivity {
 
 	private ModelResult loadComments() {
 
-		String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
-		String jsonOptions = "{\"limit\":"
+		final String jsonEagerLoad = "{\"children\":false,\"parents\":false,\"comments\":true}";
+		final String jsonOptions = "{\"limit\":"
 				+ String.valueOf(ProxiConstants.RADAR_ENTITY_LIMIT)
 				+ ",\"skip\":0"
 				+ ",\"sort\":{\"modifiedDate\":-1} "
@@ -140,7 +140,7 @@ public class CommentList extends CandiActivity {
 				+ ",\"skip\":" + String.valueOf(mComments.size())
 				+ "}}";
 
-		ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, true, jsonEagerLoad, jsonOptions);
+		final ModelResult result = ProxiManager.getInstance().getEntityModel().getEntity(mCommon.mEntityId, true, jsonEagerLoad, jsonOptions);
 		return result;
 	}
 
@@ -156,10 +156,10 @@ public class CommentList extends CandiActivity {
 		 * We assume the new comment button wouldn't be visible if the
 		 * entity is locked.
 		 */
-		IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
+		final IntentBuilder intentBuilder = new IntentBuilder(this, CommentForm.class);
 		intentBuilder.setEntityId(null);
 		intentBuilder.setParentEntityId(mCommon.mEntityId);
-		Intent intent = intentBuilder.create();
+		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_COMMENT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
@@ -196,11 +196,11 @@ public class CommentList extends CandiActivity {
 		protected boolean cacheInBackground() {
 			moreComments.clear();
 			if (mMore) {
-				ModelResult result = loadComments();
+				final ModelResult result = loadComments();
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 					if (result.data != null) {
-						Entity entity = (Entity) result.data;
+						final Entity entity = (Entity) result.data;
 
 						if (entity.comments != null) {
 							moreComments = entity.comments;
@@ -208,7 +208,7 @@ public class CommentList extends CandiActivity {
 						}
 
 						if (mMore) {
-							return ((getWrappedAdapter().getCount() + moreComments.size()) < LIST_MAX);
+							return (getWrappedAdapter().getCount() + moreComments.size()) < LIST_MAX;
 						}
 					}
 				}
@@ -221,7 +221,7 @@ public class CommentList extends CandiActivity {
 
 		@Override
 		protected void appendCachedData() {
-			ArrayAdapter<Comment> list = (ArrayAdapter<Comment>) getWrappedAdapter();
+			final ArrayAdapter<Comment> list = (ArrayAdapter<Comment>) getWrappedAdapter();
 			for (Comment comment : moreComments) {
 				list.add(comment);
 			}
@@ -238,7 +238,7 @@ public class CommentList extends CandiActivity {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view = convertView;
 			final ViewHolder holder;
-			Comment itemData = (Comment) mComments.get(position);
+			final Comment itemData = mComments.get(position);
 
 			if (view == null) {
 				view = getLayoutInflater().inflate(R.layout.temp_listitem_comment, null);
@@ -246,7 +246,7 @@ public class CommentList extends CandiActivity {
 				holder.itemAuthorImage = (WebImageView) view.findViewById(R.id.item_author_image);
 				holder.itemAuthorName = (TextView) view.findViewById(R.id.item_author_name);
 				holder.itemAuthorLocation = (TextView) view.findViewById(R.id.item_author_location);
-				holder.itemAuthorLocationSeparator = (View) view.findViewById(R.id.item_author_location_separator);
+				holder.itemAuthorLocationSeparator = view.findViewById(R.id.item_author_location_separator);
 				holder.itemComment = (TextView) view.findViewById(R.id.item_comment);
 				holder.itemCreatedDate = (TextView) view.findViewById(R.id.item_created_date);
 
@@ -262,7 +262,7 @@ public class CommentList extends CandiActivity {
 			}
 
 			if (itemData != null) {
-				Comment comment = itemData;
+				final Comment comment = itemData;
 				if (holder.itemAuthorName != null) {
 					holder.itemAuthorName.setText(comment.name);
 				}
@@ -297,14 +297,14 @@ public class CommentList extends CandiActivity {
 
 				if (holder.itemAuthorImage != null) {
 
-					String imageUri = comment.imageUri;
-					if (holder.itemAuthorImage.getImageUri() == null || !imageUri.equals((String) holder.itemAuthorImage.getImageUri())) {
+					final String imageUri = comment.imageUri;
+					if (holder.itemAuthorImage.getImageUri() == null || !imageUri.equals(holder.itemAuthorImage.getImageUri())) {
 						/*
 						 * We are aggresive about recycling bitmaps when we can.
 						 */
 						if (comment.imageUri != null && comment.imageUri.length() != 0) {
-							BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemAuthorImage).setFromUri(comment.imageUri);
-							BitmapRequest imageRequest = builder.create();
+							final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemAuthorImage).setFromUri(comment.imageUri);
+							final BitmapRequest imageRequest = builder.create();
 							holder.itemAuthorImage.setBitmapRequest(imageRequest);
 						}
 					}
@@ -334,7 +334,7 @@ public class CommentList extends CandiActivity {
 
 	}
 
-	private class ViewHolder {
+	private static class ViewHolder {
 
 		public WebImageView	itemAuthorImage;
 		public TextView		itemAuthorName;

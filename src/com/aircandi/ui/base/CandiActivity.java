@@ -82,7 +82,7 @@ public abstract class CandiActivity extends SherlockActivity {
 	}
 
 	private void showUpdateNotification() {
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
 		mCommon.showNotification(getString(R.string.alert_upgrade_title)
 				, getString(Aircandi.applicationUpdateRequired ? R.string.alert_upgrade_required_body : R.string.alert_upgrade_needed_body)
@@ -111,7 +111,7 @@ public abstract class CandiActivity extends SherlockActivity {
 								public void onClick(DialogInterface dialog, int which) {
 									if (which == Dialog.BUTTON_POSITIVE) {
 										Logger.d(this, "Update check: navigating to install page");
-										Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+										final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 										intent.setData(Uri.parse(Aircandi.applicationUpdateUri));
 										startActivity(intent);
 										AnimUtils.doOverridePendingTransition(CandiActivity.this, TransitionType.PageToSource);
@@ -210,22 +210,22 @@ public abstract class CandiActivity extends SherlockActivity {
 
 		mPrefChangeRefreshNeeded = false;
 
-		if (mPrefTestingBeacons != Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural")) {
+		if (!mPrefTestingBeacons.equals(Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural"))) {
 			mPrefChangeRefreshNeeded = true;
 			Logger.d(this, "Pref change: testing beacons");
 			mPrefTestingBeacons = Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural");
 		}
 
-		if (mPrefTestingLocation != Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural")) {
+		if (!mPrefTestingLocation.equals(Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural"))) {
 			mPrefChangeRefreshNeeded = true;
 			Logger.d(this, "Pref change: testing location");
 			mPrefTestingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
 		}
 
-		if (mPrefTestingPlaceSource != Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_SOURCE, "foursquare")) {
+		if (!mPrefTestingPlaceSource.equals(Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_PROVIDER, "foursquare"))) {
 			mPrefChangeRefreshNeeded = true;
 			Logger.d(this, "Pref change: place authority");
-			mPrefTestingPlaceSource = Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_SOURCE, "foursquare");
+			mPrefTestingPlaceSource = Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_PROVIDER, "foursquare");
 		}
 
 		if (firstUpdate) {

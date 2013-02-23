@@ -1,3 +1,4 @@
+// $codepro.audit.disable stringConcatenationInLoop
 package com.aircandi.service;
 
 import java.io.BufferedInputStream;
@@ -58,8 +59,8 @@ import org.apache.http.protocol.HTTP;
 
 import android.graphics.Bitmap;
 
+import com.aircandi.BuildConfig;
 import com.aircandi.ProxiConstants;
-import com.aircandi.components.JsonHelper;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.bitmaps.ImageResult;
@@ -112,28 +113,28 @@ import com.amazonaws.AmazonServiceException;
  */
 public class ProxibaseService {
 
-	private static ProxibaseService	singletonObject;
+	private static ProxibaseService			singletonObject;
 
-	private static final int		MAX_BACKOFF_IN_MILLISECONDS		= 5 * 1000;
-	private static final int		MAX_BACKOFF_RETRIES				= 6;
-	private static final int		DEFAULT_MAX_CONNECTIONS			= 50;
-	private static final int		DEFAULT_CONNECTIONS_PER_ROUTE	= 20;
+	private static final int				MAX_BACKOFF_IN_MILLISECONDS		= 5 * 1000;
+	private static final int				MAX_BACKOFF_RETRIES				= 6;
+	private static final int				DEFAULT_MAX_CONNECTIONS			= 50;
+	private static final int				DEFAULT_CONNECTIONS_PER_ROUTE	= 20;
 
-	private DefaultHttpClient		mHttpClient;
-	private final HttpParams		mHttpParams;
+	private final DefaultHttpClient			mHttpClient;
+	private final HttpParams				mHttpParams;
 
-	private static JSONParser		parser							= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
-	private static ContainerFactory	containerFactory				= new ContainerFactory() {
-																		@Override
-																		public Map createObjectContainer() {
-																			return new LinkedHashMap();
-																		}
+	private static final JSONParser			parser							= new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+	private static final ContainerFactory	containerFactory				= new ContainerFactory() {
+																				@Override
+																				public Map createObjectContainer() {
+																					return new LinkedHashMap();
+																				}
 
-																		@Override
-																		public List<Object> createArrayContainer() {
-																			return new ArrayList<Object>();
-																		}
-																	};
+																				@Override
+																				public List<Object> createArrayContainer() {
+																					return new ArrayList<Object>();
+																				}
+																			};
 
 	public static synchronized ProxibaseService getInstance() {
 		if (singletonObject == null) {
@@ -151,7 +152,7 @@ public class ProxibaseService {
 
 		/* Connection settings */
 		mHttpParams = new BasicHttpParams();
-		ConnPerRoute connPerRoute = new ConnPerRoute() {
+		final ConnPerRoute connPerRoute = new ConnPerRoute() {
 
 			@Override
 			public int getMaxForRoute(HttpRoute route) {
@@ -184,7 +185,7 @@ public class ProxibaseService {
 		mHttpParams.setBooleanParameter("http.protocol.expect-continue", false);
 
 		/* Support http and https */
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		final SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
 
@@ -193,7 +194,7 @@ public class ProxibaseService {
 		HttpsURLConnection.setDefaultHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
 
 		/* Create connection manager and http client */
-		ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager(mHttpParams, schemeRegistry);
+		final ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager(mHttpParams, schemeRegistry);
 
 		mHttpClient = new DefaultHttpClient(connectionManager, mHttpParams);
 
@@ -210,11 +211,12 @@ public class ProxibaseService {
 			throws ProxibaseServiceException {
 
 		HttpRequestBase httpRequest = null;
-		String jsonBody = null;
+		StringBuilder jsonBody = new StringBuilder(5000);
 		URI redirectedUri = null;
 		int retryCount = 0;
+		Query query = null;
 		HttpConnectionParams.setSoTimeout(mHttpParams,
-				serviceRequest.getSocketTimeout() == null ? ProxiConstants.TIMEOUT_SOCKET_QUERIES : serviceRequest.getSocketTimeout());
+				(serviceRequest.getSocketTimeout() == null) ? ProxiConstants.TIMEOUT_SOCKET_QUERIES : serviceRequest.getSocketTimeout());
 
 		while (true) {
 
@@ -248,53 +250,52 @@ public class ProxibaseService {
 
 				/* Method parameters */
 				if (serviceRequest.getParameters() != null && serviceRequest.getParameters().size() != 0) {
-					if (jsonBody == null) {
-						jsonBody = "{";
+					if (jsonBody.toString().length() == 0) {
+						jsonBody.append("{");
 
 						for (String key : serviceRequest.getParameters().keySet()) {
 							if (serviceRequest.getParameters().get(key) != null) {
 								if (serviceRequest.getParameters().get(key) instanceof ArrayList<?>) {
 
 									if (key.equals("beaconLevels")) {
-										ArrayList<Integer> items = serviceRequest.getParameters().getIntegerArrayList(key);
-										jsonBody += "\"" + key + "\":[";
+										List<Integer> items = serviceRequest.getParameters().getIntegerArrayList(key);
+										jsonBody.append("\"" + key + "\":[");
 										for (Integer beaconLevel : items) {
-											jsonBody += String.valueOf(beaconLevel) + ",";
+											jsonBody.append(String.valueOf(beaconLevel) + ",");
 										}
-										jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "],";
+										jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "],"); // $codepro.audit.disable stringConcatenationInLoop
 									}
 									else {
-										ArrayList<String> items = serviceRequest.getParameters().getStringArrayList(key);
-										jsonBody += "\"" + key + "\":[";
+										List<String> items = serviceRequest.getParameters().getStringArrayList(key);
+										jsonBody.append("\"" + key + "\":[");
 										for (String itemString : items) {
 											if (itemString.startsWith("object:")) {
-												jsonBody += itemString.substring(7) + ",";
+												jsonBody.append(itemString.substring(7) + ",");
 											}
 											else {
-												jsonBody += "\"" + itemString + "\",";
+												jsonBody.append("\"" + itemString + "\",");
 											}
 										}
-										jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "],";
+										jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "],"); // $codepro.audit.disable stringConcatenationInLoop
 									}
 								}
 								else if (serviceRequest.getParameters().get(key) instanceof String) {
 									String value = serviceRequest.getParameters().get(key).toString();
 									if (value.startsWith("object:")) {
-										jsonBody += "\"" + key + "\":" + serviceRequest.getParameters().get(key).toString().substring(7) + ",";
+										jsonBody.append("\"" + key + "\":" + serviceRequest.getParameters().get(key).toString().substring(7) + ",");
 									}
 									else {
-										jsonBody += "\"" + key + "\":\"" + serviceRequest.getParameters().get(key).toString() + "\",";
+										jsonBody.append("\"" + key + "\":\"" + serviceRequest.getParameters().get(key).toString() + "\",");
 									}
 								}
 								else {
-									jsonBody += "\"" + key + "\":" + serviceRequest.getParameters().get(key).toString() + ",";
+									jsonBody.append("\"" + key + "\":" + serviceRequest.getParameters().get(key).toString() + ",");
 								}
 							}
 						}
-
-						jsonBody = jsonBody.substring(0, jsonBody.length() - 1) + "}";
+						jsonBody = new StringBuilder(jsonBody.substring(0, jsonBody.length() - 1) + "}"); // $codepro.audit.disable stringConcatenationInLoop
 					}
-					addEntity((HttpEntityEnclosingRequestBase) httpRequest, jsonBody);
+					addEntity((HttpEntityEnclosingRequestBase) httpRequest, jsonBody.toString());
 				}
 			}
 
@@ -304,8 +305,8 @@ public class ProxibaseService {
 				httpRequest.setURI(redirectedUri);
 			}
 			else {
-				Query query = serviceRequest.getQuery();
-				String uriString = query == null ? serviceRequest.getUri() : serviceRequest.getUri() + query.queryString();
+				query = serviceRequest.getQuery(); // $codepro.audit.disable variableDeclaredInLoop
+				String uriString = (query == null) ? serviceRequest.getUri() : serviceRequest.getUri() + query.queryString();
 
 				/* Add session info to uri if supplied */
 				String sessionInfo = sessionInfo(serviceRequest);
@@ -334,7 +335,7 @@ public class ProxibaseService {
 				retryCount++;
 				long startTime = System.nanoTime();
 				httpResponse = mHttpClient.execute(httpRequest);
-				long bytesDownloaded = httpResponse.getEntity() != null ? httpResponse.getEntity().getContentLength() : 0;
+				long bytesDownloaded = (httpResponse.getEntity() != null) ? httpResponse.getEntity().getContentLength() : 0;
 				logDownload(startTime, System.nanoTime() - startTime, bytesDownloaded, httpRequest.getURI().toString());
 
 				/* Check the response status code and handle anything that isn't a possible valid success code. */
@@ -407,12 +408,13 @@ public class ProxibaseService {
 
 		/* Looks like success so process the response */
 		InputStream inputStream = null;
+		BufferedInputStream bis = null;
 		if (response.getEntity() != null) {
 
 			try {
 				if (responseFormat == ResponseFormat.Bytes) {
-					BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent());
-					byte[] byteArray = getBytes(bis, response.getEntity().getContentLength(), listener);
+					bis = new BufferedInputStream(response.getEntity().getContent());
+					final byte[] byteArray = getBytes(bis, response.getEntity().getContentLength(), listener);
 					return byteArray;
 				}
 				else {
@@ -425,7 +427,7 @@ public class ProxibaseService {
 							return inputStream;
 						}
 						else {
-							String contentAsString = convertStreamToString(inputStream);
+							final String contentAsString = convertStreamToString(inputStream);
 							return contentAsString;
 						}
 					}
@@ -435,6 +437,9 @@ public class ProxibaseService {
 				response.getEntity().consumeContent();
 				if (inputStream != null) {
 					inputStream.close();
+				}
+				if (bis != null) {
+					bis.close();
 				}
 			}
 		}
@@ -554,12 +559,12 @@ public class ProxibaseService {
 		/*
 		 * Any 2xx code is considered success.
 		 */
-		int status = response.getStatusLine().getStatusCode();
+		final int status = response.getStatusLine().getStatusCode();
 		return status / 100 == HttpStatus.SC_OK / 100;
 	}
 
 	private boolean isTemporaryRedirect(HttpResponse response) {
-		int status = response.getStatusLine().getStatusCode();
+		final int status = response.getStatusLine().getStatusCode();
 		return status == HttpStatus.SC_TEMPORARY_REDIRECT &&
 				response.getHeaders("Location") != null &&
 				response.getHeaders("Location").length > 0;
@@ -572,7 +577,7 @@ public class ProxibaseService {
 		}
 
 		if (httpAction instanceof HttpEntityEnclosingRequest) {
-			HttpEntity entity = ((HttpEntityEnclosingRequest) httpAction).getEntity();
+			final HttpEntity entity = ((HttpEntityEnclosingRequest) httpAction).getEntity();
 			if (entity != null && !entity.isRepeatable()) {
 				return false;
 			}
@@ -595,7 +600,7 @@ public class ProxibaseService {
 		}
 
 		if (exception instanceof ProxibaseServiceException) {
-			ProxibaseServiceException proxibaseException = (ProxibaseServiceException) exception;
+			final ProxibaseServiceException proxibaseException = (ProxibaseServiceException) exception;
 
 			/*
 			 * For 500 internal server errors and 503 service unavailable errors, we want to retry, but we need to use
@@ -618,7 +623,7 @@ public class ProxibaseService {
 		 * Exponential sleep on failed request to avoid flooding a service with retries.
 		 */
 		long delay = 0;
-		long scaleFactor = 100;
+		final long scaleFactor = 100;
 		delay = (long) (Math.pow(2, retries) * scaleFactor);
 		delay = Math.min(delay, MAX_BACKOFF_IN_MILLISECONDS);
 		Logger.d(this, "Retryable error detected, will retry in " + delay + "ms, attempt number: " + retries);
@@ -640,7 +645,7 @@ public class ProxibaseService {
 
 		int len;
 		int size = 1024;
-		byte[] buf;
+		byte[] buf = null;
 		long total = 0;
 
 		if (inputStream instanceof ByteArrayInputStream) {
@@ -649,16 +654,29 @@ public class ProxibaseService {
 			len = inputStream.read(buf, 0, size);
 		}
 		else {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			buf = new byte[size];
-			while ((len = inputStream.read(buf, 0, size)) != -1) {
-				total += len;
-				bos.write(buf, 0, len);
-				if (listener != null) {
-					listener.onProgressChanged(((int) (total * 100 / lengthOfFile)));
+			ByteArrayOutputStream bos = null;
+			try {
+				bos = new ByteArrayOutputStream();
+				buf = new byte[size];
+				while ((len = inputStream.read(buf, 0, size)) != -1) {
+					total += len;
+					bos.write(buf, 0, len);
+					if (listener != null) {
+						listener.onProgressChanged(((int) (total * 100 / lengthOfFile)));
+					}
+				}
+				buf = bos.toByteArray();
+			}
+			catch (Exception e) {
+				if (BuildConfig.DEBUG) {
+					e.printStackTrace();
 				}
 			}
-			buf = bos.toByteArray();
+			finally {
+				if (bos != null) {
+					bos.close();
+				}
+			}
 		}
 		return buf;
 	}
@@ -685,7 +703,7 @@ public class ProxibaseService {
 	}
 
 	private URI uriFromString(String stringUri) throws ProxibaseClientException {
-		URI uri;
+		final URI uri;
 		try {
 			uri = new URI(stringUri);
 		}
@@ -697,19 +715,20 @@ public class ProxibaseService {
 
 	private static String convertStreamToString(InputStream inputStream) throws IOException {
 
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-		StringBuilder stringBuilder = new StringBuilder();
+		final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+		final StringBuilder stringBuilder = new StringBuilder(); // $codepro.audit.disable defineInitialCapacity
 
 		String line = null;
 		while ((line = bufferedReader.readLine()) != null) {
-			stringBuilder.append(line + "\n");
+			stringBuilder.append(line + System.getProperty("line.separator"));
 		}
+		bufferedReader.close();
 		return stringBuilder.toString();
 	}
 
 	private void logDownload(long startTime, long elapsedTime, long bytesDownloaded, String subject) {
-		float downloadTimeMills = elapsedTime / 1000000;
-		float bitspersecond = ((bytesDownloaded * 8) * (1000 / downloadTimeMills)) / 1000;
+		final float downloadTimeMills = elapsedTime / 1000000;
+		final float bitspersecond = ((bytesDownloaded << 3) * (1000 / downloadTimeMills)) / 1000;
 		Logger.v(this, subject + ": Downloaded "
 				+ String.valueOf(bytesDownloaded) + " bytes @ "
 				+ String.valueOf(Math.round(bitspersecond)) + " kbps: "
@@ -732,44 +751,46 @@ public class ProxibaseService {
 	public static Object convertJsonToObjectInternalSmart(String jsonString, ServiceDataType serviceDataType) {
 
 		try {
-			LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
+			final Map<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
 			if (serviceDataType == ServiceDataType.User) {
 				return User.setPropertiesFromMap(new User(), rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.Session) {
-				return Session.setPropertiesFromMap(new Session(), rootMap);
+				return Session.setPropertiesFromMap(new Session(), (HashMap) rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.Location) {
-				return Location.setPropertiesFromMap(new Location(), rootMap);
+				return Location.setPropertiesFromMap(new Location(), (HashMap) rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.Category) {
-				return Category.setPropertiesFromMap(new Category(), rootMap);
+				return Category.setPropertiesFromMap(new Category(), (HashMap) rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.Source) {
-				return Source.setPropertiesFromMap(new Source(), rootMap);
+				return Source.setPropertiesFromMap(new Source(), (HashMap) rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.GeoLocation) {
-				return GeoLocation.setPropertiesFromMap(new GeoLocation(), rootMap);
+				return GeoLocation.setPropertiesFromMap(new GeoLocation(), (HashMap) rootMap);
 			}
 			else if (serviceDataType == ServiceDataType.Entity) {
-				return Entity.setPropertiesFromMap(new Entity(), rootMap);
+				return Entity.setPropertiesFromMap(new Entity(), (HashMap) rootMap);
 			}
 			else {
 				return rootMap;
 			}
 		}
-		catch (ParseException exception) {
-			exception.printStackTrace();
+		catch (ParseException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
 
 	public static ServiceData convertJsonToObjectSmart(String jsonString, ServiceDataType serviceDataType) {
 
-		ServiceData serviceData = convertJsonToObjectsSmart(jsonString, serviceDataType);
+		final ServiceData serviceData = convertJsonToObjectsSmart(jsonString, serviceDataType);
 		if (serviceData.data != null) {
 			if (serviceData.data instanceof List) {
-				List<Object> array = (List<Object>) serviceData.data;
+				final List<Object> array = (List<Object>) serviceData.data;
 				if (array != null && array.size() > 0) {
 					serviceData.data = array.get(0);
 				}
@@ -781,8 +802,8 @@ public class ProxibaseService {
 	public static ServiceData convertJsonToObjectsSmart(String jsonString, ServiceDataType serviceDataType) {
 
 		try {
-			LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
-			ServiceData serviceData = ServiceData.setPropertiesFromMap(new ServiceData(), rootMap);
+			Map<String, Object> rootMap = (LinkedHashMap<String, Object>) parser.parse(jsonString, containerFactory);
+			final ServiceData serviceData = ServiceData.setPropertiesFromMap(new ServiceData(), (HashMap) rootMap);
 
 			/*
 			 * The data property of ServiceData is always an array even
@@ -792,10 +813,10 @@ public class ProxibaseService {
 				/* It's a bing query */
 				rootMap = (LinkedHashMap<String, Object>) serviceData.d;
 				if (serviceDataType == ServiceDataType.ImageResult) {
-					List<LinkedHashMap<String, Object>> maps = (List<LinkedHashMap<String, Object>>) rootMap.get("results");
-					List<Object> list = new ArrayList<Object>();
-					for (LinkedHashMap<String, Object> map : maps) {
-						list.add(ImageResult.setPropertiesFromMap(new ImageResult(), map));
+					final List<LinkedHashMap<String, Object>> maps = (List<LinkedHashMap<String, Object>>) rootMap.get("results");
+					final List<Object> list = new ArrayList<Object>();
+					for (Map<String, Object> map : maps) {
+						list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map));
 					}
 					serviceData.data = list;
 				}
@@ -810,41 +831,41 @@ public class ProxibaseService {
 						maps = (List<LinkedHashMap<String, Object>>) serviceData.data;
 					}
 					else {
-						LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) serviceData.data;
+						final Map<String, Object> map = (LinkedHashMap<String, Object>) serviceData.data;
 						maps = new ArrayList<LinkedHashMap<String, Object>>();
-						maps.add(map);
+						maps.add((LinkedHashMap<String, Object>) map);
 					}
-					List<Object> list = new ArrayList<Object>();
-					for (LinkedHashMap<String, Object> map : maps) {
+					final List<Object> list = new ArrayList<Object>();
+					for (Map<String, Object> map : maps) {
 						if (serviceDataType == ServiceDataType.ServiceEntry) {
-							list.add(ServiceEntry.setPropertiesFromMap(new ServiceEntry(), map));
+							list.add(ServiceEntry.setPropertiesFromMap(new ServiceEntry(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.Entity) {
-							list.add(Entity.setPropertiesFromMap(new Entity(), map));
+							list.add(Entity.setPropertiesFromMap(new Entity(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.Beacon) {
-							list.add(Beacon.setPropertiesFromMap(new Beacon(), map));
+							list.add(Beacon.setPropertiesFromMap(new Beacon(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.Link) {
-							list.add(Link.setPropertiesFromMap(new Link(), map));
+							list.add(Link.setPropertiesFromMap(new Link(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.User) {
-							list.add(User.setPropertiesFromMap(new User(), map));
+							list.add(User.setPropertiesFromMap(new User(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.ImageResult) {
-							list.add(ImageResult.setPropertiesFromMap(new ImageResult(), map));
+							list.add(ImageResult.setPropertiesFromMap(new ImageResult(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.Photo) {
-							list.add(Photo.setPropertiesFromMap(new Photo(), map));
+							list.add(Photo.setPropertiesFromMap(new Photo(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.Stat) {
-							list.add(Stat.setPropertiesFromMap(new Stat(), map));
+							list.add(Stat.setPropertiesFromMap(new Stat(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.Source) {
-							list.add(Source.setPropertiesFromMap(new Source(), map));
+							list.add(Source.setPropertiesFromMap(new Source(), (HashMap) map));
 						}
 						else if (serviceDataType == ServiceDataType.Category) {
-							list.add(Category.setPropertiesFromMap(new Category(), map));
+							list.add(Category.setPropertiesFromMap(new Category(), (HashMap) map));
 						}
 					}
 					serviceData.data = list;
@@ -852,39 +873,10 @@ public class ProxibaseService {
 			}
 			return serviceData;
 		}
-		catch (ParseException exception) {
-			exception.printStackTrace();
-		}
-		return null;
-	}
-
-	@SuppressWarnings("ucd")
-	public static ServiceData convertJsonToObjectNative(String jsonString, ServiceDataType serviceDataType) {
-		try {
-			ServiceData serviceData = new ServiceData();
-			org.json.JSONObject jsonObject = new org.json.JSONObject(jsonString);
-
-			if (serviceDataType == ServiceDataType.Entity || serviceDataType == ServiceDataType.Beacon) {
-				List<HashMap<String, Object>> maps = (List<HashMap<String, Object>>) JsonHelper.toList(jsonObject.getJSONArray("data"));
-				if (serviceDataType == ServiceDataType.Entity) {
-					List<Entity> entities = new ArrayList<Entity>();
-					for (HashMap<String, Object> entityMap : maps) {
-						entities.add(Entity.setPropertiesFromMap(new Entity(), entityMap));
-					}
-					serviceData.data = entities;
-				}
-				else if (serviceDataType == ServiceDataType.Beacon) {
-					List<Beacon> beacons = new ArrayList<Beacon>();
-					for (HashMap<String, Object> beaconMap : maps) {
-						beacons.add(Beacon.setPropertiesFromMap(new Beacon(), beaconMap));
-					}
-					serviceData.data = beacons;
-				}
+		catch (ParseException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
 			}
-			return serviceData;
-		}
-		catch (org.json.JSONException exception) {
-			exception.printStackTrace();
 		}
 		return null;
 	}
@@ -892,11 +884,11 @@ public class ProxibaseService {
 	public static String convertObjectToJsonSmart(Object object, Boolean useAnnotations, Boolean excludeNulls) {
 		String json = null;
 		if (object instanceof ServiceEntryBase) {
-			HashMap map = ((ServiceEntryBase) object).getHashMap(useAnnotations, excludeNulls);
+			final Map map = ((ServiceEntryBase) object).getHashMap(useAnnotations, excludeNulls);
 			json = JSONValue.toJSONString(map);
 		}
 		else if (object instanceof ServiceObject) {
-			HashMap map = ((ServiceObject) object).getHashMap(useAnnotations, excludeNulls);
+			final Map map = ((ServiceObject) object).getHashMap(useAnnotations, excludeNulls);
 			json = JSONValue.toJSONString(map);
 		}
 
@@ -913,7 +905,7 @@ public class ProxibaseService {
 
 		public void onComplete(Object response) {}
 
-		public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {}
+		public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {} // $codepro.audit.disable largeNumberOfParameters
 
 		public void onProgressChanged(int progress) {}
 	}

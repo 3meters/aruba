@@ -17,6 +17,7 @@ import android.widget.EditText;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
@@ -97,7 +98,7 @@ public abstract class FormActivity extends SherlockActivity {
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
-		Logger.d(this, "Configuration changed");
+		mCommon.doConfigurationChanged(newConfig);
 		super.onConfigurationChanged(newConfig);
 	}
 
@@ -117,7 +118,7 @@ public abstract class FormActivity extends SherlockActivity {
 			if (requestCode == CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE) {
 
 				Tracker.sendEvent("ui_action", "select_picture_device", null, 0);
-				Uri imageUri = intent.getData();
+				final Uri imageUri = intent.getData();
 				Bitmap bitmap = null;
 
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
@@ -129,7 +130,7 @@ public abstract class FormActivity extends SherlockActivity {
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
 
 				Tracker.sendEvent("ui_action", "create_picture_camera", null, 0);
-				Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
+				final Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 				if (mImageRequestListener != null) {
 					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null, false);
@@ -139,12 +140,12 @@ public abstract class FormActivity extends SherlockActivity {
 
 				Tracker.sendEvent("ui_action", "select_picture_search", null, 0);
 				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
+					final Bundle extras = intent.getExtras();
 					final String imageUri = extras.getString(CandiConstants.EXTRA_URI);
 					final String imageTitle = extras.getString(CandiConstants.EXTRA_URI_TITLE);
 					final String imageDescription = extras.getString(CandiConstants.EXTRA_URI_DESCRIPTION);
 
-					BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
 							.setFromUri(imageUri)
 							.setRequestListener(new RequestListener() {
 
@@ -158,7 +159,7 @@ public abstract class FormActivity extends SherlockActivity {
 											@Override
 											public void run() {
 												if (mImageRequestListener != null) {
-													ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+													final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 													mImageRequestListener.onComplete(serviceResponse
 															, imageResponse.imageUri
 															, imageResponse.bitmap
@@ -172,18 +173,18 @@ public abstract class FormActivity extends SherlockActivity {
 								}
 							});
 
-					BitmapRequest imageRequest = builder.create();
+					final BitmapRequest imageRequest = builder.create();
 					mImageRequestWebImageView.setBitmapRequest(imageRequest, false);
 
 					if (imageTitle != null && !imageTitle.equals("")) {
-						EditText title = (EditText) findViewById(R.id.text_title);
+						final EditText title = (EditText) findViewById(R.id.text_title);
 						if (title != null && title.getText().toString().equals("")) {
 							title.setText(imageTitle);
 						}
 					}
 
 					if (imageDescription != null && !imageDescription.equals("")) {
-						EditText description = (EditText) findViewById(R.id.description);
+						final EditText description = (EditText) findViewById(R.id.description);
 						if (description != null && description.getText().toString().equals("")) {
 							description.setText(imageDescription);
 						}
@@ -194,10 +195,10 @@ public abstract class FormActivity extends SherlockActivity {
 
 				Tracker.sendEvent("ui_action", "select_picture_place", null, 0);
 				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
+					final Bundle extras = intent.getExtras();
 					final String imageUri = extras.getString(CandiConstants.EXTRA_URI);
 
-					BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
 							.setFromUri(imageUri)
 							.setRequestListener(new RequestListener() {
 
@@ -211,7 +212,7 @@ public abstract class FormActivity extends SherlockActivity {
 											@Override
 											public void run() {
 												if (mImageRequestListener != null) {
-													ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+													final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
 													/* We don't cache place pictures from foursquare because they wouldn't like that */
 													mImageRequestListener.onComplete(serviceResponse
 															, imageResponse.imageUri
@@ -226,7 +227,7 @@ public abstract class FormActivity extends SherlockActivity {
 								}
 							});
 
-					BitmapRequest imageRequest = builder.create();
+					final BitmapRequest imageRequest = builder.create();
 					mImageRequestWebImageView.setBitmapRequest(imageRequest, false);
 				}
 			}
@@ -243,7 +244,7 @@ public abstract class FormActivity extends SherlockActivity {
 		//		picturePickerIntent.setType("image/*");
 		//		startActivityForResult(picturePickerIntent, CandiConstants.ACTIVITY_PICTURE_PICK_DEVICE);
 
-		Intent intent = new Intent();
+		final Intent intent = new Intent();
 		intent.setType("image/*");
 		intent.setAction(Intent.ACTION_GET_CONTENT);
 		/*
@@ -258,7 +259,7 @@ public abstract class FormActivity extends SherlockActivity {
 	}
 
 	protected void pictureFromCamera() {
-		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		mMediaFile = AndroidManager.getOutputMediaFile(AndroidManager.MEDIA_TYPE_IMAGE);
 		if (mMediaFile != null) {
 			mMediaFilePath = mMediaFile.getAbsolutePath();
@@ -270,17 +271,17 @@ public abstract class FormActivity extends SherlockActivity {
 	}
 
 	protected void pictureSearch() {
-		Intent intent = new Intent(this, PicturePicker.class);
+		final Intent intent = new Intent(this, PicturePicker.class);
 		//intent.putExtra(CandiConstants.EXTRA_SEARCH_PHRASE, defaultSearch);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_SEARCH);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
 	protected void pictureFromPlace(String entityId) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, PicturePicker.class)
+		final IntentBuilder intentBuilder = new IntentBuilder(this, PicturePicker.class)
 				.setCommandType(CommandType.View)
 				.setEntityId(entityId);
-		Intent intent = intentBuilder.create();
+		final Intent intent = intentBuilder.create();
 		startActivityForResult(intent, CandiConstants.ACTIVITY_PICTURE_PICK_PLACE);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
@@ -294,7 +295,7 @@ public abstract class FormActivity extends SherlockActivity {
 		user.getPhoto().setImageUri("https://graph.facebook.com/" + user.facebookId + "/picture?type=large");
 		user.getPhoto().setSourceName("external");
 
-		BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView);
+		final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView);
 		builder.setFromUri(user.getPhoto().getUri());
 		builder.setRequestListener(new RequestListener() {
 
@@ -308,7 +309,7 @@ public abstract class FormActivity extends SherlockActivity {
 			}
 		});
 
-		BitmapRequest imageRequest = builder.create();
+		final BitmapRequest imageRequest = builder.create();
 		mImageRequestWebImageView.setBitmapRequest(imageRequest);
 	}
 
@@ -355,8 +356,10 @@ public abstract class FormActivity extends SherlockActivity {
 				mCommon.doDestroy();
 			}
 		}
-		catch (Exception exception) {
-			exception.printStackTrace();
+		catch (Exception e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		finally {
 			super.onDestroy();
@@ -383,7 +386,7 @@ public abstract class FormActivity extends SherlockActivity {
 	// Inner classes and enums
 	// --------------------------------------------------------------------------------------------
 
-	public class SimpleTextWatcher implements TextWatcher {
+	public static class SimpleTextWatcher implements TextWatcher {
 
 		@Override
 		public void afterTextChanged(Editable s) {}

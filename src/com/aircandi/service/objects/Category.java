@@ -2,9 +2,9 @@ package com.aircandi.service.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.aircandi.ProxiConstants;
 import com.aircandi.service.Expose;
@@ -33,8 +33,8 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 	public Category clone() {
 		try {
 			final Category category = (Category) super.clone();
-			if (this.categories != null) {
-				category.categories = (List<Category>) ((ArrayList) this.categories).clone();
+			if (categories != null) {
+				category.categories = (List<Category>) ((ArrayList) categories).clone();
 			}
 			return category;
 		}
@@ -43,17 +43,17 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public static Category setPropertiesFromMap(Category category, HashMap map) {
+	public static Category setPropertiesFromMap(Category category, Map map) {
 
 		category.name = (String) map.get("name");
 		category.id = (String) map.get("id");
 		category.icon = (String) map.get("icon");
 
 		if (map.get("categories") != null) {
-			List<LinkedHashMap<String, Object>> categoryMaps = (List<LinkedHashMap<String, Object>>) map.get("categories");
+			final List<LinkedHashMap<String, Object>> categoryMaps = (List<LinkedHashMap<String, Object>>) map.get("categories");
 
 			category.categories = new ArrayList<Category>();
-			for (LinkedHashMap<String, Object> categoryMap : categoryMaps) {
+			for (Map<String,Object> categoryMap : categoryMaps) {
 				category.categories.add(Category.setPropertiesFromMap(new Category(), categoryMap));
 			}
 		}

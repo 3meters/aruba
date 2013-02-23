@@ -62,6 +62,7 @@ public class AnimUtils {
 		doOverridePendingTransitionDefault(activity, transitionType);
 	}
 
+	@SuppressWarnings("ucd")
 	public static void doOverridePendingTransitionStackTop(Activity activity, TransitionType transitionType) {
 		/*
 		 * Browsing transitions
@@ -96,10 +97,10 @@ public class AnimUtils {
 		}
 	}
 
-	public static void doOverridePendingTransitionDefault(Activity activity, TransitionType transitionType) {
-		return;
-	}
-	
+	@SuppressWarnings("ucd")
+	public static void doOverridePendingTransitionDefault(Activity activity, TransitionType transitionType) {}
+
+	@SuppressWarnings("ucd")
 	public static void doOverridePendingTransitionStackBottom(Activity activity, TransitionType transitionType) {
 		/*
 		 * Browsing transitions
@@ -134,6 +135,7 @@ public class AnimUtils {
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public static void doOverridePendingTransitionOld(Activity activity, TransitionType transitionType) {
 		/*
 		 * Browsing transitions
@@ -185,18 +187,19 @@ public class AnimUtils {
 			return AnimUtils.createAnimationFromXml(Aircandi.applicationContext, parser);
 		}
 		catch (XmlPullParserException ex) {
-			NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(animationResId));
+			final NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(animationResId));
 			rnf.initCause(ex);
 			throw rnf;
 		}
 		catch (IOException ex) {
-			NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(animationResId));
+			final NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" + Integer.toHexString(animationResId));
 			rnf.initCause(ex);
 			throw rnf;
 		}
 		finally {
-			if (parser != null)
+			if (parser != null) {
 				parser.close();
+			}
 		}
 	}
 
@@ -211,7 +214,7 @@ public class AnimUtils {
 
 		/* Make sure we are on a start tag. */
 		int type;
-		int depth = parser.getDepth();
+		final int depth = parser.getDepth();
 
 		while (((type = parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
 

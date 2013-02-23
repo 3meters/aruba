@@ -35,7 +35,7 @@ import com.aircandi.utilities.ImageUtils;
 public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable {
 
 	private final Object	mLock			= new Object();
-	private LayoutInflater	mInflater;
+	private final LayoutInflater	mInflater;
 	private Integer			mItemLayoutId	= R.layout.temp_listitem_candi;
 	private List<Entity>	mListItems;
 	private CandiFilter		mCandiFilter;
@@ -55,7 +55,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
 		final CandiListViewHolder holder;
-		Entity itemData = (Entity) mListItems.get(position);
+		final Entity itemData = mListItems.get(position);
 
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
@@ -74,8 +74,8 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 					@Override
 					public void onClick(View view) {
-						CheckBox checkBox = (CheckBox) view;
-						Entity entity = (Entity) checkBox.getTag();
+						final CheckBox checkBox = (CheckBox) view;
+						final Entity entity = (Entity) checkBox.getTag();
 						entity.checked = checkBox.isChecked();
 					}
 				});
@@ -92,7 +92,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 		}
 
 		if (itemData != null) {
-			Entity entity = itemData;
+			final Entity entity = itemData;
 			Logger.d(this, "Adapter getView: " + itemData.name);
 			holder.data = itemData;
 			holder.position = position;
@@ -142,7 +142,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			/* Comments */
 			setVisibility(holder.comments, View.GONE);
 			if (holder.comments != null && entity.commentCount != null && entity.commentCount > 0) {
-				holder.comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
+				holder.comments.setText(String.valueOf(entity.commentCount) + ((entity.commentCount == 1) ? " Comment" : " Comments"));
 				holder.comments.setTag(entity);
 				setVisibility(holder.comments, View.VISIBLE);
 			}
@@ -169,14 +169,14 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 					/* Don't do anything if the image is already set to the one we want */
 					if (holder.image.getImageUri() == null || !holder.image.getImageUri().equals(imageUri)) {
 
-						BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.image)
+						final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.image)
 								.setImageUri(imageUri);
 
 						final BitmapRequest imageRequest = builder.create();
 
 						holder.imageUri = imageUri;
 						if (entity.synthetic) {
-							int color = Place.getCategoryColor(entity.place.category != null ? entity.place.category.name : null, true, true, false);
+							final int color = Place.getCategoryColor((entity.place.category != null) ? entity.place.category.name : null, true, true, false);
 							holder.image.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 						}
 						else {
@@ -267,7 +267,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 		protected FilterResults performFiltering(CharSequence filterType) {
 
 			/* Initiate our results object */
-			FilterResults results = new FilterResults();
+			final FilterResults results = new FilterResults();
 
 			/* If the adapter array is empty, check the actual items array and use it */
 			if (mListItems == null) {
@@ -285,10 +285,9 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			}
 			else {
 				if (filterType.toString().toLowerCase(Locale.US).equals("candipatches")) {
-					final ArrayList<Entity> filteredEntities = new ArrayList<Entity>(mListItems.size());
+					final List<Entity> filteredEntities = new ArrayList<Entity>(mListItems.size());
 					for (int i = 0; i < mListItems.size(); i++) {
-						@SuppressWarnings("unused")
-						Entity entity = mListItems.get(i);
+						//Entity entity = mListItems.get(i);
 					}
 					results.values = filteredEntities;
 					results.count = filteredEntities.size();

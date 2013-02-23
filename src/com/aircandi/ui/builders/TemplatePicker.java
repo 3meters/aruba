@@ -39,7 +39,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	private void initialize() {
 
 		/* Shown as a dialog so doesn't have an action bar */
-		List<Object> listData = new ArrayList<Object>();
+		final List<Object> listData = new ArrayList<Object>();
 		if (mCommon.mThemeTone.equals("dark")) {
 			listData.add(new Template(R.drawable.ic_action_picture_dark, getString(R.string.name_entity_type_picture), null, CandiConstants.TYPE_CANDI_PICTURE));
 			listData.add(new Template(R.drawable.ic_action_edit_dark, getString(R.string.name_entity_type_post), null, CandiConstants.TYPE_CANDI_POST));
@@ -67,8 +67,8 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		Template template = (Template) view.getTag();
-		Intent intent = new Intent();
+		final Template template = (Template) view.getTag();
+		final Intent intent = new Intent();
 		intent.putExtra(CandiConstants.EXTRA_ENTITY_TYPE, template.type);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
@@ -80,9 +80,9 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 
 	private class ListAdapter extends ArrayAdapter<Object>
 	{
-		private List<Object>	items;
+		private final List<Object>	items;
 
-		public ListAdapter(Context context, List<Object> items) {
+		private ListAdapter(Context context, List<Object> items) {
 			super(context, 0, items);
 			this.items = items;
 		}
@@ -91,10 +91,10 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 		public View getView(int position, View convertView, ViewGroup parent)
 		{
 			View view = convertView;
-			Template itemData = (Template) items.get(position);
+			final Template itemData = (Template) items.get(position);
 
 			if (view == null) {
-				LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				view = inflater.inflate(R.layout.temp_listitem_templates, null);
 			}
 

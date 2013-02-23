@@ -60,10 +60,10 @@
                 android:visibility="gone" />
 
             <EditText
-                android:id="@+id/name"
+                android:id="@+id/caption"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
-                android:hint="@string/form_source_name_hint"
+                android:hint="@string/form_source_caption_hint"
                 android:inputType="textNoSuggestions"
                 android:textAppearance="@style/app_text_appearance_small" />
 

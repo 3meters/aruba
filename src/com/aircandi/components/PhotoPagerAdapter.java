@@ -16,8 +16,8 @@ import com.aircandi.ui.PictureDetail;
 
 public class PhotoPagerAdapter extends PagerAdapter {
 
-	private Context			mContext;
-	private LayoutInflater	mInflater;
+	private final Context			mContext;
+	private final LayoutInflater	mInflater;
 	private List<Photo>		mPhotos;
 
 	public PhotoPagerAdapter(Context context, ViewPager viewPager, List<Photo> photos) {
@@ -37,9 +37,9 @@ public class PhotoPagerAdapter extends PagerAdapter {
 
 	@Override
 	public Object instantiateItem(View collection, int position) {
-		Photo photo = mPhotos.get(position);
-		Integer layoutId = R.layout.temp_photo_detail;
-		View layout = (View) mInflater.inflate(layoutId, null);
+		final Photo photo = mPhotos.get(position);
+		final Integer layoutId = R.layout.temp_photo_detail;
+		View layout = mInflater.inflate(layoutId, null);
 		layout = PictureDetail.buildPictureDetail(mContext, photo, layout);
 		((ViewPager) collection).addView(layout, 0);
 		return layout;
@@ -61,7 +61,7 @@ public class PhotoPagerAdapter extends PagerAdapter {
 
 	@Override
 	public boolean isViewFromObject(View view, Object object) {
-		return view == ((ViewGroup) object);
+		return view.equals(((ViewGroup) object));
 	}
 
 	@Override

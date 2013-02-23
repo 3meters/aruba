@@ -1,6 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -35,24 +36,24 @@ public class ServiceData {
 
 	public ServiceData() {}
 
-	public static ServiceData setPropertiesFromMap(ServiceData serviceData, HashMap map) {
+	public static ServiceData setPropertiesFromMap(ServiceData serviceData, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		serviceData.data = (Object) map.get("data");
-		serviceData.d = (Object) map.get("d");
+		serviceData.data = map.get("data");
+		serviceData.d = map.get("d");
 		serviceData.date = (Number) map.get("date");
 		serviceData.count = (Number) map.get("count");
 		serviceData.more = (Boolean) map.get("more");
 		serviceData.info = (String) map.get("info");
 		if (map.get("user") != null) {
-			serviceData.user = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
+			serviceData.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
 		}
 		if (map.get("error") != null) {
-			serviceData.error = (ServiceError) ServiceError.setPropertiesFromMap(new ServiceError(), (HashMap<String, Object>) map.get("error"));
+			serviceData.error = ServiceError.setPropertiesFromMap(new ServiceError(), (HashMap<String, Object>) map.get("error"));
 		}
 		if (map.get("session") != null) {
-			serviceData.session = (Session) Session.setPropertiesFromMap(new Session(), (HashMap<String, Object>) map.get("session"));
+			serviceData.session = Session.setPropertiesFromMap(new Session(), (HashMap<String, Object>) map.get("session"));
 		}
 		serviceData.time = (Number) map.get("time");
 

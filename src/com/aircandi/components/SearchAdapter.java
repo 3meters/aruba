@@ -20,8 +20,8 @@ import com.aircandi.utilities.ImageUtils;
 
 public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterable {
 
-	private List<SearchItem>	mListItems;
-	private LayoutInflater		mInflater;
+	private final List<SearchItem>	mListItems;
+	private final LayoutInflater		mInflater;
 	private Integer				mItemLayoutId	= R.layout.temp_listitem_search;
 
 	public SearchAdapter(Context context, List<SearchItem> searchItems, Integer itemLayoutId) {
@@ -37,7 +37,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
 		final SearchListViewHolder holder;
-		SearchItem itemData = (SearchItem) mListItems.get(position);
+		final SearchItem itemData = mListItems.get(position);
 
 		if (view == null) {
 			view = mInflater.inflate(mItemLayoutId, null);
@@ -60,7 +60,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 		}
 
 		if (itemData != null) {
-			SearchItem suggestion = itemData;
+			final SearchItem suggestion = itemData;
 			holder.data = itemData;
 			Boolean needSeparator = false;
 			if (position == 0) {
@@ -121,7 +121,7 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 
 					final String imageUri = suggestion.categoryIconUri;
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(holder.itemImage).setImageUri(imageUri);
-					BitmapRequest imageRequest = builder.create();
+					final BitmapRequest imageRequest = builder.create();
 
 					holder.itemImageUri = imageUri;
 					holder.itemImage.setBitmapRequest(imageRequest);

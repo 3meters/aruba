@@ -48,7 +48,7 @@ public class LocationManager {
 		mLocationManager = (android.location.LocationManager) mApplicationContext.getSystemService(Context.LOCATION_SERVICE);
 
 		/* Setup the location update Pending Intents */
-		Intent activeIntentNetwork = new Intent(mApplicationContext, LocationChangedReceiver.class);
+		final Intent activeIntentNetwork = new Intent(mApplicationContext, LocationChangedReceiver.class);
 		mLocationListenerPendingIntent = PendingIntent.getBroadcast(mApplicationContext, 0, activeIntentNetwork, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		/* Timeout handler */
@@ -156,7 +156,7 @@ public class LocationManager {
 				observation.provider = "emulator_lucky";
 			}
 			else {
-				String testingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
+				final String testingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
 				if (ListPreferenceMultiSelect.contains("zoka", testingLocation, null)) {
 					observation = new Observation(47.6686489, -122.3320842); // zoka
 					observation.time = DateUtils.nowDate().getTime();
@@ -216,9 +216,9 @@ public class LocationManager {
 		}
 		else {
 			if (isGoodLocation(location)) {
-				LocationBetterReason reason = isBetterLocation(location, mLocationLatest);
+				final LocationBetterReason reason = isBetterLocation(location, mLocationLatest);
 				if (reason != LocationBetterReason.None) {
-					String message = new String("Location changed:");
+					String message = "Location changed:";
 					message += " provider: " + location.getProvider();
 					message += " accuracy: " + String.valueOf(location.getAccuracy());
 					message += " reason: ** " + reason.name().toLowerCase(Locale.US) + " **";
@@ -274,8 +274,8 @@ public class LocationManager {
 	private static boolean isGoodLocation(Location location) {
 		if (location == null) return false;
 
-		long fixAge = System.currentTimeMillis() - location.getTime();
-		float fixAccuracy = location.getAccuracy();
+		final long fixAge = System.currentTimeMillis() - location.getTime();
+		final float fixAccuracy = location.getAccuracy();
 		if ((fixAge <= PlacesConstants.MAXIMUM_AGE && fixAccuracy <= PlacesConstants.MINIMUM_ACCURACY)) {
 			return true;
 		}
@@ -303,19 +303,19 @@ public class LocationManager {
 		}
 
 		/* Check whether the new location fix is more or less accurate */
-		float accuracyImprovement = currentBestLocation.getAccuracy() / locationToEvaluate.getAccuracy();
+		final float accuracyImprovement = currentBestLocation.getAccuracy() / locationToEvaluate.getAccuracy();
 		boolean isLessAccurate = (accuracyImprovement > 1);
-		boolean isMoreAccurate = (accuracyImprovement < 1);
+		final boolean isMoreAccurate = (accuracyImprovement < 1);
 		boolean isSignificantlyLessAccurate = (accuracyImprovement <= 0.5f);
 
 		/* Check whether the new location fix is newer or older */
-		long timeDelta = locationToEvaluate.getTime() - currentBestLocation.getTime();
-		boolean isSignificantlyNewer = timeDelta > CandiConstants.TIME_TWO_MINUTES;
-		boolean isSignificantlyOlder = timeDelta < -CandiConstants.TIME_TWO_MINUTES;
-		boolean isNewer = timeDelta > 0;
+		final long timeDelta = locationToEvaluate.getTime() - currentBestLocation.getTime();
+		final boolean isSignificantlyNewer = timeDelta > CandiConstants.TIME_TWO_MINUTES;
+		final boolean isSignificantlyOlder = timeDelta < -CandiConstants.TIME_TWO_MINUTES;
+		final boolean isNewer = timeDelta > 0;
 
 		/* Check if the old and new location are from the same provider */
-		boolean isFromSameProvider = LocationManager.isSameProvider(locationToEvaluate.getProvider(), currentBestLocation.getProvider());
+		final boolean isFromSameProvider = LocationManager.isSameProvider(locationToEvaluate.getProvider(), currentBestLocation.getProvider());
 
 		/* Determine location quality using a combination of timeliness and accuracy */
 		if (isMoreAccurate) {
@@ -340,7 +340,7 @@ public class LocationManager {
 		}
 
 		/* Check distance moved and adjust for accuracy */
-		float distance = currentBestLocation.distanceTo(locationToEvaluate);
+		final float distance = currentBestLocation.distanceTo(locationToEvaluate);
 		if (distance - locationToEvaluate.getAccuracy() > PlacesConstants.MIN_DISTANCE_UPDATES) {
 			return LocationBetterReason.Distance;
 		}
@@ -353,7 +353,7 @@ public class LocationManager {
 			return true;
 		}
 		/* Check distance moved and adjust for accuracy */
-		float distance = currentBestLocation.distanceTo(locationToEvaluate);
+		final float distance = currentBestLocation.distanceTo(locationToEvaluate);
 		if (distance >= minDistance) {
 			return true;
 		}
@@ -364,15 +364,15 @@ public class LocationManager {
 	}
 
 	private boolean isProviderEnabled(String provider) {
-		return (mLocationManager.isProviderEnabled(provider));
+		return mLocationManager.isProviderEnabled(provider);
 	}
 
 	public boolean isLocationAccessEnabled() {
-		return (isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) || isProviderEnabled(android.location.LocationManager.GPS_PROVIDER));
+		return isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) || isProviderEnabled(android.location.LocationManager.GPS_PROVIDER);
 	}
 
 	public static float getRadiusForMeters(float meters) {
-		float radius = (float) ((meters / 1000) / RADIUS_EARTH_KILOMETERS);
+		final float radius = (float) ((meters / 1000) / RADIUS_EARTH_KILOMETERS);
 		return radius;
 	}
 

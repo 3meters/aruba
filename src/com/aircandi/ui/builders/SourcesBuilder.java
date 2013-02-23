@@ -48,10 +48,10 @@ public class SourcesBuilder extends FormActivity {
 
 	private BounceListView		mList;
 	private TextView			mMessage;
-	private List<Source>		mSources	= new ArrayList<Source>();
+	private final List<Source>	mSources	= new ArrayList<Source>();
 	private Entity				mEntity;
 	private Source				mSourceEditing;
-	private ArrayList<String>	mJsonSourcesOriginal;
+	private List<String>	mJsonSourcesOriginal;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -79,9 +79,9 @@ public class SourcesBuilder extends FormActivity {
 			mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 		}
 
-		Bundle extras = this.getIntent().getExtras();
+		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			ArrayList<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
+			final List<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
 			if (jsonSources != null) {
 				mJsonSourcesOriginal = jsonSources;
 				for (String jsonSource : jsonSources) {
@@ -113,7 +113,7 @@ public class SourcesBuilder extends FormActivity {
 				position++;
 			}
 		}
-		SourceListAdapter adapter = new SourceListAdapter(this, mSources, R.layout.temp_listitem_sources_builder);
+		final SourceListAdapter adapter = new SourceListAdapter(this, mSources, R.layout.temp_listitem_sources_builder);
 		mList.setAdapter(adapter);
 	}
 
@@ -162,7 +162,7 @@ public class SourcesBuilder extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onAddButtonClick(View view) {
-		Intent intent = new Intent(this, SourceBuilder.class);
+		final Intent intent = new Intent(this, SourceBuilder.class);
 		if (mEntity != null) {
 			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntity.id);
 		}
@@ -204,10 +204,10 @@ public class SourcesBuilder extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {
-		Intent intent = new Intent(this, SourceBuilder.class);
-		CheckBox check = (CheckBox) view.findViewById(R.id.check);
+		final Intent intent = new Intent(this, SourceBuilder.class);
+		final CheckBox check = (CheckBox) view.findViewById(R.id.check);
 		mSourceEditing = (Source) check.getTag();
-		String jsonSource = ProxibaseService.convertObjectToJsonSmart(mSourceEditing, false, true);
+		final String jsonSource = ProxibaseService.convertObjectToJsonSmart(mSourceEditing, false, true);
 		intent.putExtra(CandiConstants.EXTRA_SOURCE, jsonSource);
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCE_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
@@ -219,13 +219,13 @@ public class SourcesBuilder extends FormActivity {
 		if (resultCode == Activity.RESULT_OK) {
 			if (requestCode == CandiConstants.ACTIVITY_SOURCE_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-					String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
+					final Bundle extras = intent.getExtras();
+					final String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
 					if (jsonSource != null) {
-						Source sourceUpdated = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+						final Source sourceUpdated = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 						if (sourceUpdated != null) {
 							/* Copy changes */
-							mSourceEditing.name = sourceUpdated.name;
+							mSourceEditing.caption = sourceUpdated.caption;
 							mSourceEditing.id = sourceUpdated.id;
 							mList.invalidateViews();
 						}
@@ -234,10 +234,10 @@ public class SourcesBuilder extends FormActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_SOURCE_NEW) {
 				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-					String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
+					final Bundle extras = intent.getExtras();
+					final String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
 					if (jsonSource != null) {
-						Source sourceNew = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
+						final Source sourceNew = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 						if (sourceNew != null) {
 							sourceNew.checked = false;
 							mSources.add(sourceNew);
@@ -245,7 +245,7 @@ public class SourcesBuilder extends FormActivity {
 							/* Remove as a suggestion candidate */
 							if (mEntity != null && mEntity.sourceSuggestions != null) {
 								for (int i = mEntity.sourceSuggestions.size() - 1; i >= 0; i--) {
-									if (mEntity.sourceSuggestions.get(i).source.equals(sourceNew.source)) {
+									if (mEntity.sourceSuggestions.get(i).type.equals(sourceNew.type)) {
 										mEntity.sourceSuggestions.remove(i);
 									}
 								}
@@ -282,16 +282,16 @@ public class SourcesBuilder extends FormActivity {
 		}
 
 		final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_delete_sources, null);
-		TextView message = (TextView) customView.findViewById(R.id.message);
-		LinearLayout list = (LinearLayout) customView.findViewById(R.id.list);
+		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_delete_sources, null);
+		final TextView message = (TextView) customView.findViewById(R.id.message);
+		final LinearLayout list = (LinearLayout) customView.findViewById(R.id.list);
 		for (Source source : mSources) {
 			if (source.checked) {
 				View sourceView = inflater.inflate(R.layout.temp_listitem_delete_sources, null);
 				WebImageView image = (WebImageView) sourceView.findViewById(R.id.image);
 				TextView title = (TextView) sourceView.findViewById(R.id.title);
-				if (source.name != null) {
-					title.setText(source.name);
+				if (source.caption != null) {
+					title.setText(source.caption);
 				}
 				image.setTag(source);
 				final String imageUri = source.getImageUri();
@@ -304,11 +304,11 @@ public class SourcesBuilder extends FormActivity {
 			}
 		}
 
-		message.setText(deleteCount == 1
+		message.setText((deleteCount == 1)
 				? R.string.alert_source_delete_message_single
 				: R.string.alert_source_delete_message_multiple);
 
-		AlertDialog dialog = AircandiCommon.showAlertDialog(null
+		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
 				, getResources().getString(R.string.alert_source_delete_title)
 				, null
 				, customView
@@ -338,7 +338,7 @@ public class SourcesBuilder extends FormActivity {
 	}
 
 	private void confirmDirtyExit() {
-		AlertDialog dialog = AircandiCommon.showAlertDialog(null
+		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
 				, getResources().getString(R.string.alert_sources_dirty_exit_title)
 				, getResources().getString(R.string.alert_sources_dirty_exit_message)
 				, null
@@ -371,24 +371,31 @@ public class SourcesBuilder extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadSourceSuggestions");
-				ModelResult result = ProxiManager.getInstance().getEntityModel().getSourceSuggestions(sources);
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().getSourceSuggestions(sources);
 				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
+				final ModelResult result = (ModelResult) response;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					if (entity != null) {
-						List<Source> sourceSuggestions = (List<Source>) result.serviceResponse.data;
+						final List<Source> sourceSuggestions = (List<Source>) result.serviceResponse.data;
 						entity.sourceSuggestions = sourceSuggestions;
 						if (entity.sourceSuggestions == null) {
 							entity.sourceSuggestions = new ArrayList<Source>();
 						}
 						if (autoInsert) {
 							if (sourceSuggestions.size() > 0) {
+
+								/* First make sure they have default captions */
+								for (Source source : sourceSuggestions) {
+									if (source.caption == null) {
+										source.caption = source.type;
+									}
+								}
 								mSources.addAll(sourceSuggestions);
-								ImageUtils.showToastNotification(getResources().getString(sourceSuggestions.size() == 1
+								ImageUtils.showToastNotification(getResources().getString((sourceSuggestions.size() == 1)
 										? R.string.toast_source_linked
 										: R.string.toast_sources_linked), Toast.LENGTH_SHORT);
 							}
@@ -396,7 +403,7 @@ public class SourcesBuilder extends FormActivity {
 						}
 					}
 					else {
-						List<Source> sourceSuggestions = (List<Source>) result.serviceResponse.data;
+						final List<Source> sourceSuggestions = (List<Source>) result.serviceResponse.data;
 						mSources.addAll(sourceSuggestions);
 					}
 				}
@@ -407,8 +414,8 @@ public class SourcesBuilder extends FormActivity {
 	}
 
 	private void gatherAndExit() {
-		Intent intent = new Intent();
-		List<String> sourceStrings = new ArrayList<String>();
+		final Intent intent = new Intent();
+		final List<String> sourceStrings = new ArrayList<String>();
 		for (Source source : mSources) {
 			sourceStrings.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
 		}
@@ -426,7 +433,7 @@ public class SourcesBuilder extends FormActivity {
 	private Boolean isDirty() {
 
 		/* Gather */
-		List<String> jsonSources = new ArrayList<String>();
+		final List<String> jsonSources = new ArrayList<String>();
 		for (Source source : mSources) {
 			jsonSources.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
 		}
@@ -443,7 +450,7 @@ public class SourcesBuilder extends FormActivity {
 
 			int position = 0;
 			for (String jsonSource : jsonSources) {
-				if (!jsonSource.toString().equals(mJsonSourcesOriginal.get(position).toString())) {
+				if (!jsonSource.equals(mJsonSourcesOriginal.get(position))) {
 					return true;
 				}
 				position++;
@@ -480,15 +487,14 @@ public class SourcesBuilder extends FormActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-
-		switch (item.getItemId()) {
-			case R.id.suggest_links:
-				/* Go get source suggestions again */
-				if (mSources.size() > 0) {
-					loadSourceSuggestions(mEntity, mSources, true);
-				}
-				return true;
+		if (item.getItemId() == R.id.suggest_links) {
+			/* Go get source suggestions again */
+			if (mSources.size() > 0) {
+				loadSourceSuggestions(mEntity, mSources, true);
+			}
+			return true;
 		}
+
 		/* In case we add general menu items later */
 		mCommon.doOptionsItemSelected(item);
 		return true;

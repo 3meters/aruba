@@ -5,7 +5,7 @@ public class Stopwatch {
 
 	private long	totalTime;
 	private long	lastThreshold;
-	private String	name;
+	private final String	name;
 
 	public Stopwatch(String name) {
 		this.name = name;
@@ -57,6 +57,6 @@ public class Stopwatch {
 	}
 	
 	public boolean isStarted() {
-		return (lastThreshold > 0);
+		return lastThreshold > 0;
 	}
 }

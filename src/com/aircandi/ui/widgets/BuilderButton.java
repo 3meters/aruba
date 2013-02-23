@@ -32,12 +32,12 @@ public class BuilderButton extends RelativeLayout {
 
 	public BuilderButton(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.BuilderButton, defStyle, 0);
+		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.BuilderButton, defStyle, 0);
 		mHint = ta.getString(R.styleable.BuilderButton_hint);
 		mLayoutId = ta.getResourceId(R.styleable.BuilderButton_layout, R.layout.widget_builder_button);
 		ta.recycle();
 
-		TypedValue resourceName = new TypedValue();
+		final TypedValue resourceName = new TypedValue();
 		if (context.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
 			mThemeTone = (String) resourceName.coerceToString();
 		}
@@ -46,8 +46,8 @@ public class BuilderButton extends RelativeLayout {
 	}
 
 	private void initialize() {
-		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View view = inflater.inflate(mLayoutId, this);
+		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final View view = inflater.inflate(mLayoutId, this);
 
 		mTextView = (TextView) view.findViewById(R.id.builder_text);
 		mViewGroup = (LinearLayout) view.findViewById(R.id.builder_images);
@@ -79,7 +79,7 @@ public class BuilderButton extends RelativeLayout {
 
 	public String getText() {
 		if (mTextView != null) {
-			String text = mTextView.getText().toString();
+			final String text = mTextView.getText().toString();
 			if (!text.equals(mHint)) {
 				return text;
 			}

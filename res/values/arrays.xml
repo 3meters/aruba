@@ -36,12 +36,12 @@
         <item>lucky</item>
     </string-array>
     
-    <string-array name="testing_place_source_entries">
+    <string-array name="testing_place_provider_entries">
         <item>Foursquare</item>
         <item>Factual</item>
         <item>Google</item>
 	</string-array>
-    <string-array name="testing_place_source_values">
+    <string-array name="testing_place_provider_values">
         <item>foursquare</item>
         <item>factual</item>
         <item>google</item>

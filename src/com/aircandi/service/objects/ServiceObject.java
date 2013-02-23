@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.Map;
 
+import com.aircandi.BuildConfig;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
 
-public abstract class ServiceObject implements Cloneable, Serializable {
+public class ServiceObject implements Cloneable, Serializable {
 
 	private static final long	serialVersionUID	= 5341986472204947192L;
 
@@ -20,16 +22,16 @@ public abstract class ServiceObject implements Cloneable, Serializable {
 	 * @SerializedName("_nametoserialize")
 	 */
 
-	public HashMap<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+	public Map<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
+		final Map<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			Class<?> cls = this.getClass();
-			Field fields[] = cls.getDeclaredFields();
+			final Class<?> cls = this.getClass();
+			final Field[] fields = cls.getDeclaredFields();
 			for (Field f : fields) {
 				if (!Modifier.isStatic(f.getModifiers())
 						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
-					
+
 					if (useAnnotations) {
 						if (!f.isAnnotationPresent(Expose.class)) {
 							continue;
@@ -48,11 +50,11 @@ public abstract class ServiceObject implements Cloneable, Serializable {
 							name = annotation.value();
 						}
 					}
-					
+
 					Object value = f.get(this);
-					
+
 					if (value instanceof ServiceObject) {
-						HashMap childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
+						Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
 						map.put(name, childMap);
 					}
 					else {
@@ -63,11 +65,15 @@ public abstract class ServiceObject implements Cloneable, Serializable {
 				}
 			}
 		}
-		catch (IllegalArgumentException exception) {
-			exception.printStackTrace();
+		catch (IllegalArgumentException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
-		catch (IllegalAccessException exception) {
-			exception.printStackTrace();
+		catch (IllegalAccessException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		return map;
 	}

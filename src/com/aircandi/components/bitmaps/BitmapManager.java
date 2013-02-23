@@ -41,11 +41,11 @@ public class BitmapManager {
 	private DiskLruImageCache			mDiskLruCache;
 	private final Object				mDiskCacheLock		= new Object();
 	private boolean						mDiskCacheStarting	= true;
-	private static final int			DISK_CACHE_SIZE		= 1024 * 1024 * 10; // 10MB
+	private static final int			DISK_CACHE_SIZE		= 10 << 10 << 10; // 10MB
 	private static final String			DISK_CACHE_SUBDIR	= "bitmaps";
-	private BitmapLoader				mBitmapLoader;
+	private final BitmapLoader				mBitmapLoader;
 
-	private LruCache<String, Bitmap>	mMemoryCache;
+	private final LruCache<String, Bitmap>	mMemoryCache;
 
 	public static synchronized BitmapManager getInstance() {
 		if (singletonObject == null) {
@@ -64,7 +64,7 @@ public class BitmapManager {
 		Logger.d(this, "Device memory class: " + String.valueOf(memClass));
 
 		/* Use 1/4th of the available memory for this memory cache. */
-		final int cacheSize = (1024 * 1024 * memClass) / 4;
+		final int cacheSize = (memClass << 10 << 10) >> 2;
 		Logger.d(this, "Memory cache size: " + String.valueOf(cacheSize));
 
 		mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
@@ -107,7 +107,7 @@ public class BitmapManager {
 			BitmapManager.getInstance().fetchDrawable(bitmapRequest);
 		}
 		else {
-			ServiceResponse serviceResponse = BitmapManager.getInstance().fetchBitmap(bitmapRequest);
+			final ServiceResponse serviceResponse = BitmapManager.getInstance().fetchBitmap(bitmapRequest);
 			if (serviceResponse.responseCode != ResponseCode.Success) {
 				BitmapManager.getInstance().downloadBitmap(bitmapRequest);
 			}
@@ -116,9 +116,9 @@ public class BitmapManager {
 
 	public synchronized ServiceResponse fetchDrawable(final BitmapRequest bitmapRequest) {
 
-		ServiceResponse serviceResponse = new ServiceResponse();
-		String rawResourceName = bitmapRequest.getImageUri().substring(bitmapRequest.getImageUri().indexOf("resource:") + 9);
-		String resolvedResourceName = resolveResourceName(rawResourceName);
+		final ServiceResponse serviceResponse = new ServiceResponse();
+		final String rawResourceName = bitmapRequest.getImageUri().substring(bitmapRequest.getImageUri().indexOf("resource:") + 9);
+		final String resolvedResourceName = resolveResourceName(rawResourceName);
 		if (resolvedResourceName == null) {
 			serviceResponse.responseCode = ResponseCode.Failed;
 			if (bitmapRequest.getRequestListener() != null) {
@@ -127,12 +127,12 @@ public class BitmapManager {
 			return serviceResponse;
 		}
 
-		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable", "com.aircandi");
+		final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable", "com.aircandi");
 		String memCacheKey = String.valueOf(resourceId);
 		if (bitmapRequest.getImageSize() != null) {
 			memCacheKey += "." + String.valueOf(bitmapRequest.getImageSize());
 		}
-		String memKeyHashed = MiscUtils.md5(memCacheKey);
+		final String memKeyHashed = MiscUtils.md5(memCacheKey);
 		Bitmap bitmap = mMemoryCache.get(memKeyHashed);
 
 		if (bitmap == null) {
@@ -164,8 +164,8 @@ public class BitmapManager {
 
 	public synchronized ServiceResponse fetchBitmap(final BitmapRequest bitmapRequest) {
 		
-		ServiceResponse serviceResponse = new ServiceResponse();
-		Bitmap bitmap = getBitmap(bitmapRequest.getImageUri(), bitmapRequest.getImageSize());
+		final ServiceResponse serviceResponse = new ServiceResponse();
+		final Bitmap bitmap = getBitmap(bitmapRequest.getImageUri(), bitmapRequest.getImageSize());
 
 		if (bitmap != null) {
 			serviceResponse.data = new ImageResponse(bitmap, bitmapRequest.getImageUri());
@@ -203,14 +203,14 @@ public class BitmapManager {
 		 * Our strategy is to push the raw bitmap into the file cache
 		 * and a scaled bitmap into the memory cache.
 		 */
-		String diskCacheKey = key;
-		String diskKeyHashed = MiscUtils.md5(diskCacheKey);
+		final String diskCacheKey = key;
+		final String diskKeyHashed = MiscUtils.md5(diskCacheKey);
 
 		/* First add unscaled version to disk cache */
 		synchronized (mDiskCacheLock) {
 			if (mDiskLruCache != null) {
 				if (!mDiskLruCache.containsKey(diskKeyHashed)) {
-					mDiskLruCache.put(diskKeyHashed, imageBytes);
+					mDiskLruCache.putBytes(diskKeyHashed, imageBytes);
 				}
 			}
 		}
@@ -220,18 +220,18 @@ public class BitmapManager {
 		 * the sized memory cache entry from the disk cache data we
 		 * just pushed
 		 */
-		Bitmap bitmap = getBitmap(key, size);
+		final Bitmap bitmap = getBitmap(key, size);
 		return bitmap;
 	}
 
 	private Bitmap getBitmap(String key, Integer size) {
 		String memCacheKey = key;
-		String diskCacheKey = key;
+		final String diskCacheKey = key;
 		if (size != null) {
 			memCacheKey += "." + String.valueOf(size);
 		}
-		String memKeyHashed = MiscUtils.md5(memCacheKey);
-		String diskKeyHashed = MiscUtils.md5(diskCacheKey);
+		final String memKeyHashed = MiscUtils.md5(memCacheKey);
+		final String diskKeyHashed = MiscUtils.md5(diskCacheKey);
 
 		Bitmap bitmap = mMemoryCache.get(memKeyHashed);
 		if (bitmap != null) {
@@ -245,13 +245,13 @@ public class BitmapManager {
 					try {
 						mDiskCacheLock.wait();
 					}
-					catch (InterruptedException e) {}
+					catch (InterruptedException e) {} // $codepro.audit.disable emptyCatchClause
 				}
 				if (mDiskLruCache != null) {
 					if (mDiskLruCache.containsKey(diskKeyHashed)) {
 
 						/* Push to the mem cache */
-						byte[] imageBytes = mDiskLruCache.getImageBytes(diskKeyHashed);
+						final byte[] imageBytes = mDiskLruCache.getImageBytes(diskKeyHashed);
 
 						/* Scale if needed */
 						bitmap = bitmapForByteArraySampled(imageBytes, size, null);
@@ -276,46 +276,42 @@ public class BitmapManager {
 
 	public Bitmap loadBitmapFromDeviceSampled(final Uri imageUri) {
 
-		String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
-		@SuppressWarnings("unused")
-		String imagePath = "";
+		final String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
 		File imageFile = null;
 		int rotation = 0;
 
-		Cursor cursor = Aircandi.applicationContext.getContentResolver().query(imageUri, projection, null, null, null);
+		final Cursor cursor = Aircandi.applicationContext.getContentResolver().query(imageUri, projection, null, null, null);
 
 		if (cursor != null) {
 
 			/* Means the image is in the media store */
 			String imageData = "";
 			if (cursor.moveToFirst()) {
-				int dataColumn = cursor.getColumnIndex(Images.Media.DATA);
-				int orientationColumn = cursor.getColumnIndex(Images.Media.ORIENTATION);
+				final int dataColumn = cursor.getColumnIndex(Images.Media.DATA);
+				final int orientationColumn = cursor.getColumnIndex(Images.Media.ORIENTATION);
 				imageData = cursor.getString(dataColumn);
 				rotation = cursor.getInt(orientationColumn);
 			}
 
 			imageFile = new File(imageData);
-			imagePath = imageData;
 		}
 		else {
 
 			/* The image is in the local file system */
-			imagePath = imageUri.toString().replace("file://", "");
 			imageFile = new File(imageUri.toString().replace("file://", ""));
 
-			ExifInterface exif;
+			final ExifInterface exif;
 			try {
 				exif = new ExifInterface(imageUri.getPath());
 				rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
 			}
 			catch (IOException exception) {
-				Exceptions.Handle(exception);
+				Exceptions.handle(exception);
 				return null;
 			}
 		}
 
-		byte[] imageBytes = new byte[(int) imageFile.length()];
+		final byte[] imageBytes = new byte[(int) imageFile.length()];
 
 		DataInputStream in = null;
 
@@ -323,38 +319,40 @@ public class BitmapManager {
 			in = new DataInputStream(new FileInputStream(imageFile));
 		}
 		catch (FileNotFoundException exception) {
-			Exceptions.Handle(exception);
+			Exceptions.handle(exception);
 			return null;
 		}
+		
 		try {
 			in.readFully(imageBytes);
 		}
 		catch (IOException exception) {
-			Exceptions.Handle(exception);
+			Exceptions.handle(exception);
 			return null;
 		}
+		
 		try {
 			in.close();
 		}
 		catch (IOException exception) {
-			Exceptions.Handle(exception);
+			Exceptions.handle(exception);
 			return null;
 		}
 
-		Bitmap bitmap = bitmapForByteArraySampled(imageBytes, null, rotation);
+		final Bitmap bitmap = bitmapForByteArraySampled(imageBytes, null, rotation);
 		return bitmap;
 	}
 
 	private Bitmap loadBitmapFromResourcesSampled(final Integer resourceId, Integer size) {
-		BitmapFactory.Options options = new BitmapFactory.Options();
+		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		options.inPurgeable = true;
 		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
 
 		BitmapFactory.decodeResource(Aircandi.applicationContext.getResources(), resourceId, options);
 
-		int width = options.outWidth;
-		int height = options.outHeight;
+		final int width = options.outWidth;
+		final int height = options.outHeight;
 
 		int scale = 1;
 		if (size != null) {
@@ -366,7 +364,7 @@ public class BitmapManager {
 		options.inSampleSize = scale;
 		options.inJustDecodeBounds = false;
 
-		Bitmap bitmap = BitmapFactory.decodeResource(Aircandi.applicationContext.getResources(), resourceId, options);
+		final Bitmap bitmap = BitmapFactory.decodeResource(Aircandi.applicationContext.getResources(), resourceId, options);
 		return bitmap;
 	}
 
@@ -386,7 +384,7 @@ public class BitmapManager {
 	@SuppressWarnings("ucd")
 	public Bitmap bitmapForByteArraySampled(byte[] imageBytes, Integer size, Integer rotation) {
 
-		BitmapFactory.Options options = new BitmapFactory.Options();
+		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		options.inPurgeable = true;
 		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
@@ -394,8 +392,8 @@ public class BitmapManager {
 		/* Initial decode is just to get the bitmap dimensions */
 		BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, options);
 
-		int width = options.outWidth;
-		int height = options.outHeight;
+		final int width = options.outWidth;
+		final int height = options.outHeight;
 
 		int scale = 1;
 		if (size != null) {
@@ -404,7 +402,7 @@ public class BitmapManager {
 			}
 		}
 		else {
-			int imageMemorySize = ImageUtils.getImageMemorySize(height, width, true);
+			final int imageMemorySize = ImageUtils.getImageMemorySize(height, width, true);
 			if (imageMemorySize > CandiConstants.IMAGE_MEMORY_BYTES_MAX) {
 				scale = Math.round(((float) imageMemorySize / (float) CandiConstants.IMAGE_MEMORY_BYTES_MAX) / 2f);
 			}
@@ -417,7 +415,7 @@ public class BitmapManager {
 
 		/* Rotate the image if needed */
 		if (rotation != null && rotation != 0) {
-			Matrix matrix = new Matrix();
+			final Matrix matrix = new Matrix();
 			matrix.postRotate(rotation);
 			bitmapSampled = Bitmap.createBitmap(bitmapSampled, 0, 0, bitmapSampled.getWidth(), bitmapSampled.getHeight(), matrix, true);
 		}
@@ -429,9 +427,9 @@ public class BitmapManager {
 		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "drawable", "com.aircandi");
 		if (resourceId == 0) {
 			resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "attr", "com.aircandi");
-			TypedValue value = new TypedValue();
+			final TypedValue value = new TypedValue();
 			if (Aircandi.applicationContext.getTheme().resolveAttribute(resourceId, value, true)) {
-				String redirectedResourceName = (String) value.coerceToString();
+				final String redirectedResourceName = (String) value.coerceToString();
 				return redirectedResourceName;
 			}
 			else {

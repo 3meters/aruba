@@ -24,17 +24,17 @@ public class BitmapRequest {
 	}
 
 	public String getImageUri() {
-		return this.mImageUri;
+		return mImageUri;
 	}
 
 	public BitmapRequest setImageUri(String imageUri) {
-		this.mImageUri = imageUri;
+		mImageUri = imageUri;
 		return this;
 	}
 
 	public Object getImageRequestor() {
 		if (mImageRequestor != null) {
-			return this.mImageRequestor.get();
+			return mImageRequestor.get();
 		}
 		return null;
 	}
@@ -45,11 +45,11 @@ public class BitmapRequest {
 	}
 
 	public RequestListener getRequestListener() {
-		return this.mRequestListener;
+		return mRequestListener;
 	}
 
 	public void setRequestListener(RequestListener requestListener) {
-		this.mRequestListener = requestListener;
+		mRequestListener = requestListener;
 	}
 
 	public ImageView getImageView() {
