@@ -26,7 +26,7 @@ public class Logger {
 	 * Chatty stuff that is helpful in the logs while developing but will never used in release.
 	 */
 
-	private static boolean	INCLUDE_MODULE	= true;
+	private static final boolean	INCLUDE_MODULE	= true;
 
 	private static enum LogLevel {
 		Error,

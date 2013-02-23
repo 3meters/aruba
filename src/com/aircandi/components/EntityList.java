@@ -24,7 +24,7 @@ public class EntityList<T> extends ArrayList<T> {
 	 */
 	@Override
 	public EntityList<T> clone() {
-		EntityList<T> entityList = (EntityList<T>) super.clone();
+		final EntityList<T> entityList = (EntityList<T>) super.clone();
 		return entityList;
 	}
 }

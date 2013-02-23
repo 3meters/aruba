@@ -24,7 +24,7 @@ import com.aircandi.utilities.ImageUtils;
 @SuppressWarnings("ucd")
 public class BitmapLoader {
 
-	private BitmapQueue			mBitmapQueue		= new BitmapQueue();
+	private final BitmapQueue			mBitmapQueue		= new BitmapQueue();
 	private BitmapLoaderThread	mBitmapLoaderThread	= new BitmapLoaderThread();
 
 	public BitmapLoader() {
@@ -72,20 +72,20 @@ public class BitmapLoader {
 		/*
 		 * We request a byte array for decoding because of a bug in pre 2.3 versions of android.
 		 */
-		ServiceRequest serviceRequest = new ServiceRequest()
+		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(url)
 				.setRequestType(RequestType.Get)
 				.setResponseFormat(ResponseFormat.Bytes)
 				.setRequestListener(listener);
 
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 		if (serviceResponse.responseCode == ResponseCode.Success) {
 
-			byte[] imageBytes = (byte[]) serviceResponse.data;
+			final byte[] imageBytes = (byte[]) serviceResponse.data;
 
 			String extension = "";
-			int i = url.lastIndexOf('.');
+			final int i = url.lastIndexOf('.');
 			if (i > 0) {
 				extension = url.substring(i + 1);
 			}
@@ -96,8 +96,8 @@ public class BitmapLoader {
 				 * Potential memory issue: We don't have the same sampling protection as
 				 * we get when decoding a jpeg or png.
 				 */
-				InputStream inputStream = new ByteArrayInputStream(imageBytes);
-				GifDecoder decoder = new GifDecoder();
+				final InputStream inputStream = new ByteArrayInputStream(imageBytes);
+				final GifDecoder decoder = new GifDecoder();
 				decoder.read(inputStream);
 				bitmap = decoder.getBitmap();
 			}
@@ -124,13 +124,13 @@ public class BitmapLoader {
 		/*
 		 * We request a byte array for decoding because of a bug in pre 2.3 versions of android.
 		 */
-		ServiceRequest serviceRequest = new ServiceRequest()
+		final ServiceRequest serviceRequest = new ServiceRequest()
 				.setUri(url)
 				.setRequestType(RequestType.Get)
 				.setResponseFormat(ResponseFormat.Bytes)
 				.setRequestListener(listener);
 
-		ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+		final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 		return serviceResponse;
 	}
 
@@ -268,6 +268,7 @@ public class BitmapLoader {
 				}
 			}
 			catch (InterruptedException e) {
+				Logger.v(this, "Loader thread interrupted");
 				/* Allow thread to exit */
 			}
 		}
@@ -275,12 +276,12 @@ public class BitmapLoader {
 
 	private class BitmapQueue {
 
-		private LinkedList<BitmapRequest>	mBitmapsToLoad	= new LinkedList<BitmapRequest>();
+		private final LinkedList<BitmapRequest>	mBitmapsToLoad	= new LinkedList<BitmapRequest>();
 
 		/* Removes all instances of imageRequest associated with the imageRequestor */
 		public void clean(Object bitmapRequestor) {
 			for (int j = 0; j < mBitmapsToLoad.size();) {
-				if (mBitmapsToLoad.get(j).getImageRequestor() == bitmapRequestor) {
+				if (mBitmapsToLoad.get(j).getImageRequestor().equals(bitmapRequestor)) {
 					mBitmapsToLoad.remove(j);
 				}
 				else {

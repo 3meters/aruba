@@ -47,9 +47,9 @@ public class ListPreferenceMultiSelect extends ListPreference {
 	public ListPreferenceMultiSelect(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ListPreferenceMultiSelect);
+		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ListPreferenceMultiSelect);
 		mCheckAllKey = ta.getString(R.styleable.ListPreferenceMultiSelect_checkAll);
-		String separator = ta.getString(R.styleable.ListPreferenceMultiSelect_separator);
+		final String separator = ta.getString(R.styleable.ListPreferenceMultiSelect_separator);
 		ta.recycle();
 
 		if (separator != null) {
@@ -57,7 +57,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 		}
 
 		/* Initialize the boolean array to the same size as number of entries */
-		CharSequence[] entries = getEntries();
+		final CharSequence[] entries = getEntries();
 		mClickedDialogEntryIndices = new boolean[(entries != null) ? entries.length : 0];		
 	}
 
@@ -70,8 +70,8 @@ public class ListPreferenceMultiSelect extends ListPreference {
 
 	@Override
 	protected void onPrepareDialogBuilder(Builder builder) {
-		CharSequence[] entries = getEntries();
-		CharSequence[] entryValues = getEntryValues();
+		final CharSequence[] entries = getEntries();
+		final CharSequence[] entryValues = getEntryValues();
 		if (entries == null
 				|| entryValues == null
 				|| entries.length != entryValues.length) {
@@ -84,7 +84,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 				new DialogInterface.OnMultiChoiceClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which, boolean val) {
-						if (isCheckAllValue(which) == true) {
+						if (isCheckAllValue(which)) {
 							checkAll(dialog, val);
 						}
 						mClickedDialogEntryIndices[which] = val;
@@ -101,8 +101,8 @@ public class ListPreferenceMultiSelect extends ListPreference {
 	}
 
 	private void checkAll(DialogInterface dialog, boolean val) {
-		ListView lv = ((AlertDialog) dialog).getListView();
-		int size = lv.getCount();
+		final ListView lv = ((AlertDialog) dialog).getListView();
+		final int size = lv.getCount();
 		for (int i = 0; i < size; i++) {
 			lv.setItemChecked(i, val);
 			mClickedDialogEntryIndices[i] = val;
@@ -119,13 +119,13 @@ public class ListPreferenceMultiSelect extends ListPreference {
 	}
 
 	private void restoreCheckedEntries() {
-		CharSequence[] entryValues = getEntryValues();
+		final CharSequence[] entryValues = getEntryValues();
 
 		// Explode the string read in sharedpreferences
-		String[] vals = parseStoredValue(getValue());
+		final String[] vals = parseStoredValue(getValue());
 
 		if (vals != null) {
-			List<String> valuesList = Arrays.asList(vals);
+			final List<String> valuesList = Arrays.asList(vals);
 			for (int i = 0; i < entryValues.length; i++) {
 				CharSequence entry = entryValues[i];
 				if (valuesList.contains(entry)) {
@@ -137,15 +137,15 @@ public class ListPreferenceMultiSelect extends ListPreference {
 
 	@Override
 	protected void onDialogClosed(boolean positiveResult) {
-		ArrayList<String> values = new ArrayList<String>();
+		final ArrayList<String> values = new ArrayList<String>();
 
-		CharSequence[] entryValues = getEntryValues();
+		final CharSequence[] entryValues = getEntryValues();
 		if (positiveResult && entryValues != null) {
 			for (int i = 0; i < entryValues.length; i++) {
-				if (mClickedDialogEntryIndices[i] == true) {
+				if (mClickedDialogEntryIndices[i]) {
 					// Don't save the state of check all option - if any
 					String val = (String) entryValues[i];
-					if (mCheckAllKey == null || (val.equals(mCheckAllKey) == false)) {
+					if (mCheckAllKey == null || !val.equals(mCheckAllKey)) {
 						values.add(val);
 					}
 				}
@@ -159,11 +159,11 @@ public class ListPreferenceMultiSelect extends ListPreference {
 
 	private static String join(Iterable<? extends Object> pColl, String separator)
 	{
-		Iterator<? extends Object> oIter;
+		final Iterator<? extends Object> oIter;
 		if (pColl == null || (!(oIter = pColl.iterator()).hasNext())) {
 			return "";
 		}
-		StringBuilder stringBuilder = new StringBuilder(String.valueOf(oIter.next()));
+		final StringBuilder stringBuilder = new StringBuilder(String.valueOf(oIter.next()));
 		while (oIter.hasNext()) {
 			stringBuilder.append(separator).append(oIter.next());
 		}
@@ -185,7 +185,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 		if (separator == null) {
 			separator = DEFAULT_SEPARATOR;
 		}
-		String[] vals = haystack.split(separator);
+		final String[] vals = haystack.split(separator);
 		for (int i = 0; i < vals.length; i++) {
 			if (vals[i].equals(straw)) {
 				return true;

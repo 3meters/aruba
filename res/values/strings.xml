@@ -266,7 +266,7 @@
     <!-- Forms.hints -->
 
     <string name="form_source_type_hint">type of link</string>
-    <string name="form_source_name_hint">label</string>
+    <string name="form_source_caption_hint">label</string>
     <string name="form_source_id_hint">web address or id</string>
     <string name="form_title_hint">title</string>
     <string name="form_place_title_hint">name</string>

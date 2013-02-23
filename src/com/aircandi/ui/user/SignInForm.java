@@ -64,7 +64,7 @@ public class SignInForm extends FormActivity {
 		if (mCommon.mMessage != null) {
 			mTextMessage.setText(mCommon.mMessage);
 		}
-		String email = Aircandi.settings.getString(Preferences.SETTING_LAST_EMAIL, null);
+		final String email = Aircandi.settings.getString(Preferences.SETTING_LAST_EMAIL, null);
 		if (email != null) {
 			mTextEmail.setText(email);
 			mTextPassword.requestFocus();
@@ -102,23 +102,23 @@ public class SignInForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("SignIn");				
-					ModelResult result = ProxiManager.getInstance().getEntityModel().signin(email, password);
+					final ModelResult result = ProxiManager.getInstance().getEntityModel().signin(email, password);
 					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
 					
-					ModelResult result = (ModelResult) response;
+					final ModelResult result = (ModelResult) response;
 					mCommon.hideBusy(true);
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 
 						Tracker.startNewSession();
 						Tracker.sendEvent("ui_action", "signin_user", null, 0);
 
-						String jsonResponse = (String) result.serviceResponse.data;
-						ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
-						User user = serviceData.user;
+						final String jsonResponse = (String) result.serviceResponse.data;
+						final ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.None);
+						final User user = serviceData.user;
 						user.session = serviceData.session;
 						Logger.i(this, "User signed in: " + user.name + " (" + user.id + ")");
 
@@ -126,8 +126,8 @@ public class SignInForm extends FormActivity {
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
-						String jsonUser = ProxibaseService.convertObjectToJsonSmart(user, false, true);
-						String jsonSession = ProxibaseService.convertObjectToJsonSmart(user.session, false, true);
+						final String jsonUser = ProxibaseService.convertObjectToJsonSmart(user, false, true);
+						final String jsonSession = ProxibaseService.convertObjectToJsonSmart(user.session, false, true);
 
 						Aircandi.settingsEditor.putString(Preferences.SETTING_USER, jsonUser);
 						Aircandi.settingsEditor.putString(Preferences.SETTING_USER_SESSION, jsonSession);

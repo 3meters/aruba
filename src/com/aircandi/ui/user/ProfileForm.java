@@ -127,15 +127,15 @@ public class ProfileForm extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetUser");
-				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mUser.id);
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mUser.id);
 				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object modelResult) {
-				ModelResult result = (ModelResult) modelResult;
+				final ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					String jsonResponse = (String) result.serviceResponse.data;
+					final String jsonResponse = (String) result.serviceResponse.data;
 					mUser = (User) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User).data;
 
 					/* We got fresh user data but we want to hook up the old session. */
@@ -175,9 +175,9 @@ public class ProfileForm extends FormActivity {
 				mImage.setVisibility(View.VISIBLE);
 			}
 			else {
-				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImage);
+				final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImage);
 				builder.setImageUri(user.getUserPhotoUri());
-				BitmapRequest imageRequest = builder.create();
+				final BitmapRequest imageRequest = builder.create();
 				mImage.setBitmapRequest(imageRequest);
 			}
 		}
@@ -202,7 +202,7 @@ public class ProfileForm extends FormActivity {
 			@Override
 			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
 
-				ServiceResponse serviceResponse = (ServiceResponse) response;
+				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					/* Could get set to null if we are using the default */
 					mBitmap = imageBitmap;
@@ -217,9 +217,9 @@ public class ProfileForm extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onChangePasswordButtonClick(View view) {
-		IntentBuilder intentBuilder = new IntentBuilder(this, PasswordForm.class);
+		final IntentBuilder intentBuilder = new IntentBuilder(this, PasswordForm.class);
 		intentBuilder.setCommandType(CommandType.Edit);
-		Intent intent = intentBuilder.create();
+		final Intent intent = intentBuilder.create();
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
@@ -230,7 +230,7 @@ public class ProfileForm extends FormActivity {
 		if (resultCode == Activity.RESULT_OK) {
 			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
 				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
+					final Bundle extras = intent.getExtras();
 					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 						if (pictureSource.equals("search")) {
@@ -291,13 +291,13 @@ public class ProfileForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("UpdateUser");
-					ModelResult result = ProxiManager.getInstance().getEntityModel().updateUser(mUser, mBitmap, false);
+					final ModelResult result = ProxiManager.getInstance().getEntityModel().updateUser(mUser, mBitmap, false);
 					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
-					ModelResult result = (ModelResult) response;
+					final ModelResult result = (ModelResult) response;
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Logger.i(this, "Updated user profile: " + mUser.name + " (" + mUser.id + ")");
@@ -314,7 +314,7 @@ public class ProfileForm extends FormActivity {
 						/*
 						 * We also need to update the user that has been persisted for auto sign in.
 						 */
-						String jsonUser = ProxibaseService.convertObjectToJsonSmart(mUser, true, false);
+						final String jsonUser = ProxibaseService.convertObjectToJsonSmart(mUser, true, false);
 						Aircandi.settingsEditor.putString(Preferences.SETTING_USER, jsonUser);
 						Aircandi.settingsEditor.commit();
 

@@ -17,13 +17,9 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	private static final long	serialVersionUID	= -3599862145425838670L;
 
 	@Expose
-	public String				source;
-	@Expose
-	public String				sourceId;
-	@Expose
 	public String				provider;
 	@Expose
-	public String				providerId;
+	public String				id;
 
 	/* Can come from foursquare or our own custom places */
 
@@ -33,13 +29,6 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	public Location				location;
 	@Expose
 	public Category				category;
-
-	/* Only comes from foursquare */
-
-	@Expose(serialize = false)
-	public String				sourceUri;										// Link to foursquare page
-	@Expose(serialize = false)
-	public String				sourceUriShort;								// Link to foursquare page
 
 	public Place() {}
 
@@ -67,21 +56,19 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		place.source = (String) map.get("source");
-		place.sourceId = (String) map.get("sourceId");
-		place.sourceUri = (String) map.get("sourceUri");
-		place.sourceUriShort = (String) map.get("sourceUriShort");
+		place.provider = (String) map.get("provider");
+		place.id = (String) map.get("id");
 
 		if (map.get("location") != null) {
-			place.location = (Location) Location.setPropertiesFromMap(new Location(), (HashMap<String, Object>) map.get("location"));
+			place.location = Location.setPropertiesFromMap(new Location(), (HashMap<String, Object>) map.get("location"));
 		}
 
 		if (map.get("contact") != null) {
-			place.contact = (Contact) Contact.setPropertiesFromMap(new Contact(), (HashMap<String, Object>) map.get("contact"));
+			place.contact = Contact.setPropertiesFromMap(new Contact(), (HashMap<String, Object>) map.get("contact"));
 		}
 
 		if (map.get("category") != null) {
-			place.category = (Category) Category.setPropertiesFromMap(new Category(), (HashMap<String, Object>) map.get("category"));
+			place.category = Category.setPropertiesFromMap(new Category(), (HashMap<String, Object>) map.get("category"));
 		}
 
 		return place;
@@ -108,8 +95,8 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		}
 		if (categoryName != null) {
 
-			Random rand = new Random(categoryName.hashCode());
-			int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
+			final Random rand = new Random(categoryName.hashCode());
+			final int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
 			if (colorIndex == 1) {
 				colorResId = R.color.accent_blue;
 				if (dark) {
@@ -182,8 +169,8 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 
 		if (categoryName != null) {
 
-			Random rand = new Random(categoryName.hashCode());
-			int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
+			final Random rand = new Random(categoryName.hashCode());
+			final int colorIndex = rand.nextInt(5 - 1 + 1) + 1;
 			if (colorIndex == 1) {
 				colorResId = R.color.accent_blue;
 				if (dark) {

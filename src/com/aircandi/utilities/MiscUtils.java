@@ -88,8 +88,8 @@ public class MiscUtils {
 			/*
 			 * Write the object out to a byte array
 			 */
-			FastByteArrayOutputStream fbos = new MiscUtils.FastByteArrayOutputStream();
-			ObjectOutputStream out = new ObjectOutputStream(fbos);
+			final FastByteArrayOutputStream fbos = new MiscUtils.FastByteArrayOutputStream();
+			final ObjectOutputStream out = new ObjectOutputStream(fbos);
 			out.writeObject(objectOriginal);
 			out.flush();
 			out.close();
@@ -97,7 +97,7 @@ public class MiscUtils {
 			/*
 			 * Make an input stream from the byte array and read a copy of the object back in.'
 			 */
-			ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
+			final ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
 			objectCopy = in.readObject();
 		}
 		catch (IOException e) {
@@ -112,12 +112,12 @@ public class MiscUtils {
 	public static final String md5(final String s) {
 		try {
 			/* Create MD5 Hash */
-			MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+			final MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
 			digest.update(s.getBytes());
-			byte messageDigest[] = digest.digest();
+			final byte messageDigest[] = digest.digest();
 
 			/* Create Hex String */
-			StringBuffer hexString = new StringBuffer();
+			final StringBuffer hexString = new StringBuffer(500);
 			for (int i = 0; i < messageDigest.length; i++) {
 				String hex = Integer.toHexString(0xFF & messageDigest[i]);
 				while (hex.length() < 2) {
@@ -136,8 +136,8 @@ public class MiscUtils {
 
 	@SuppressWarnings("ucd")
 	public static final int random(int min, int max) {
-		Random random = new Random();
-		int i1 = random.nextInt(max - min + 1) + min;
+		final Random random = new Random();
+		final int i1 = random.nextInt(max - min + 1) + min;
 		return i1;
 	}
 
@@ -254,11 +254,13 @@ public class MiscUtils {
 
 		@Override
 		public final int read(byte[] b, int off, int len) {
-			if (pos >= count)
+			if (pos >= count) {
 				return -1;
+			}
 
-			if ((pos + len) > count)
+			if ((pos + len) > count) {
 				len = (count - pos);
+			}
 
 			System.arraycopy(buf, pos, b, off, len);
 			pos += len;
@@ -267,10 +269,12 @@ public class MiscUtils {
 
 		@Override
 		public final long skip(long n) {
-			if ((pos + n) > count)
+			if ((pos + n) > count) {
 				n = count - pos;
-			if (n < 0)
+			}
+			if (n < 0) {
 				return 0;
+			}
 			pos += n;
 			return n;
 		}

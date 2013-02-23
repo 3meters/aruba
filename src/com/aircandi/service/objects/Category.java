@@ -50,7 +50,7 @@ public class Category extends ServiceObject implements Cloneable, Serializable {
 		category.icon = (String) map.get("icon");
 
 		if (map.get("categories") != null) {
-			List<LinkedHashMap<String, Object>> categoryMaps = (List<LinkedHashMap<String, Object>>) map.get("categories");
+			final List<LinkedHashMap<String, Object>> categoryMaps = (List<LinkedHashMap<String, Object>>) map.get("categories");
 
 			category.categories = new ArrayList<Category>();
 			for (LinkedHashMap<String, Object> categoryMap : categoryMaps) {

@@ -131,7 +131,7 @@ public class FeedbackForm extends FormActivity {
 	}
 
 	private void confirmDirtyExit() {
-		AlertDialog dialog = AircandiCommon.showAlertDialog(null
+		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
 				, getResources().getString(R.string.alert_feedback_dirty_exit_title)
 				, getResources().getString(R.string.alert_feedback_dirty_exit_message)
 				, null
@@ -179,13 +179,13 @@ public class FeedbackForm extends FormActivity {
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("InsertFeedback");
 					mDocument.createdDate = DateUtils.nowDate().getTime();
-					ModelResult result = ProxiManager.getInstance().getEntityModel().insertDocument(mDocument);
+					final ModelResult result = ProxiManager.getInstance().getEntityModel().insertDocument(mDocument);
 					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
-					ModelResult result = (ModelResult) response;
+					final ModelResult result = (ModelResult) response;
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						Tracker.sendEvent("ui_action", "send_feedback", null, 0);

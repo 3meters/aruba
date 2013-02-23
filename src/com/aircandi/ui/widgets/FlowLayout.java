@@ -17,7 +17,7 @@ public class FlowLayout extends ViewGroup
 	private int[]					mRowWidths;
 	private int						mSpacingVertical	= 0;
 	private int						mSpacingHorizontal	= 0;
-	private List<RowMeasurement>	mRows				= new ArrayList<RowMeasurement>();
+	private final List<RowMeasurement>	mRows				= new ArrayList<RowMeasurement>();
 
 	public FlowLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -25,10 +25,10 @@ public class FlowLayout extends ViewGroup
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-		int maxInternalWidth = MeasureSpec.getSize(widthMeasureSpec) - getHorizontalPadding();
-		int maxInternalHeight = MeasureSpec.getSize(heightMeasureSpec) - getVerticalPadding();
+		final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+		final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+		final int maxInternalWidth = MeasureSpec.getSize(widthMeasureSpec) - getHorizontalPadding();
+		final int maxInternalHeight = MeasureSpec.getSize(heightMeasureSpec) - getVerticalPadding();
 
 		mRows.clear();
 
@@ -57,7 +57,7 @@ public class FlowLayout extends ViewGroup
 
 		int longestRowWidth = 0;
 		int totalRowHeight = 0;
-		int rowCount = mRows.size();
+		final int rowCount = mRows.size();
 		this.mRowHeights = new int[rowCount];
 		this.mRowWidths = new int[rowCount];
 
@@ -112,7 +112,7 @@ public class FlowLayout extends ViewGroup
 	@Override
 	protected void onLayout(boolean changed, int leftPosition, int topPosition, int rightPosition, int bottomPosition) {
 
-		int widthOffset = getMeasuredWidth() - getPaddingRight();
+		final int widthOffset = getMeasuredWidth() - getPaddingRight();
 		int childLeft = getPaddingLeft();
 		int childTop = getPaddingTop();
 
@@ -152,12 +152,13 @@ public class FlowLayout extends ViewGroup
 	}
 
 	private Collection<View> getLayoutChildren() {
-		int count = getChildCount();
-		Collection<View> children = new ArrayList<View>(count);
+		final int count = getChildCount();
+		final Collection<View> children = new ArrayList<View>(count);
 		for (int index = 0; index < count; index++) {
 			View child = getChildAt(index);
-			if (child.getVisibility() != View.GONE)
+			if (child.getVisibility() != View.GONE){
 				children.add(child);
+			}
 		}
 		return children;
 	}
@@ -194,7 +195,7 @@ public class FlowLayout extends ViewGroup
 
 		public LayoutParams(Context context, AttributeSet attrs) {
 			super(context, attrs);
-			TypedArray attributes = context.obtainStyledAttributes(attrs, new int[] { android.R.attr.layout_centerVertical });
+			final TypedArray attributes = context.obtainStyledAttributes(attrs, new int[] { android.R.attr.layout_centerVertical });
 			setCenterVertical(attributes.getBoolean(0, false));
 			attributes.recycle();
 		}
@@ -222,8 +223,8 @@ public class FlowLayout extends ViewGroup
 
 	private static class RowMeasurement
 	{
-		private int	maxWidth;
-		private int	widthMode;
+		private final int	maxWidth;
+		private final int	widthMode;
 		private int	width;
 		private int	height;
 

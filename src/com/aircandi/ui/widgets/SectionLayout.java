@@ -26,7 +26,7 @@ public class SectionLayout extends LinearLayout {
 	public SectionLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.SectionLayout);
+		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.SectionLayout);
 
 		mLayoutHeaderId = ta.getResourceId(R.styleable.SectionLayout_layoutHeader, R.layout.temp_section_header);
 		mLayoutFooterId = ta.getResourceId(R.styleable.SectionLayout_layoutFooter, 0);
@@ -38,9 +38,9 @@ public class SectionLayout extends LinearLayout {
 	}
 
 	private void initialize() {
-		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (mLayoutHeaderId != 0) {
-			View view = inflater.inflate(mLayoutHeaderId, null);
+			final View view = inflater.inflate(mLayoutHeaderId, null);
 
 			mTextViewHeader = (TextView) view.findViewById(R.id.title);
 			FontManager.getInstance().setTypefaceDefault(mTextViewHeader);
@@ -58,7 +58,7 @@ public class SectionLayout extends LinearLayout {
 		}
 
 		if (mLayoutFooterId != 0) {
-			View view = inflater.inflate(mLayoutFooterId, null);
+			final View view = inflater.inflate(mLayoutFooterId, null);
 			this.addView(view, this.getChildCount() + 1);
 		}
 	}

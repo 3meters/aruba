@@ -52,9 +52,9 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	abstract protected void appendCachedData();
 
 	private View			pendingView		= null;
-	private AtomicBoolean	keepOnAppending	= new AtomicBoolean(true);
+	private final AtomicBoolean	keepOnAppending	= new AtomicBoolean(true);
 	private Context			context;
-	private int				pendingResource	= -1;
+	private final int				pendingResource	= -1;
 
 	/**
 	 * Constructor wrapping a supplied ListAdapter
@@ -118,7 +118,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 		if (position == super.getCount() && keepOnAppending.get()) {
 			if (pendingView == null) {
 				pendingView = getPendingView(parent);
-				AppendTask task = new AppendTask();
+				final AppendTask task = new AppendTask();
 				task.execute();
 			}
 
@@ -190,7 +190,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 */
 	protected View getPendingView(ViewGroup parent) {
 		if (context != null) {
-			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			return inflater.inflate(pendingResource, parent, false);
 		}
 

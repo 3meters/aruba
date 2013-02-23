@@ -38,15 +38,15 @@ public class SearchManager {
 		List<SearchItem> searchItems = null;
 
 		/* Need to add the created date column to the query */
-		String[] columns = new String[Browser.HISTORY_PROJECTION.length + 1];
+		final String[] columns = new String[Browser.HISTORY_PROJECTION.length + 1];
 		System.arraycopy(Browser.HISTORY_PROJECTION, 0, columns, 0, Browser.HISTORY_PROJECTION.length);
-		int createdColumnIndex = columns.length - 1;
+		final int createdColumnIndex = columns.length - 1;
 		columns[createdColumnIndex] = Browser.BookmarkColumns.CREATED;
 
-		String whereClause = Browser.BookmarkColumns.BOOKMARK + " == 1";
-		String orderBy = Browser.BookmarkColumns.CREATED + " DESC";
-		String[] selectionArgs = null;
-		Cursor cursor = contentResolver.query(
+		final String whereClause = Browser.BookmarkColumns.BOOKMARK + " == 1";
+		final String orderBy = Browser.BookmarkColumns.CREATED + " DESC";
+		final String[] selectionArgs = null;
+		final Cursor cursor = contentResolver.query(
 				Browser.BOOKMARKS_URI,
 				columns,
 				whereClause,
@@ -55,12 +55,13 @@ public class SearchManager {
 
 		searchItems = new ArrayList<SearchItem>();
 		Boolean succeeded = cursor.moveToFirst();
+		byte[] data = null;		
 		while (succeeded) {
 			SearchItem searchItem = new SearchItem();
 			searchItem.type = SearchItemType.Bookmarks;
 			searchItem.name = cursor.getString(Browser.HISTORY_PROJECTION_TITLE_INDEX);
 			searchItem.uri = cursor.getString(Browser.HISTORY_PROJECTION_URL_INDEX);
-			byte[] data = cursor.getBlob(Browser.HISTORY_PROJECTION_FAVICON_INDEX);
+			data = cursor.getBlob(Browser.HISTORY_PROJECTION_FAVICON_INDEX);
 			if (data != null) {
 				searchItem.icon = BitmapFactory.decodeByteArray(data, 0, data.length);
 			}
@@ -76,7 +77,7 @@ public class SearchManager {
 			return;
 		}
 		/* Strip the query. */
-		int query = url.indexOf('?');
+		final int query = url.indexOf('?');
 		String noQuery = url;
 		if (query != -1) {
 			noQuery = url.substring(0, query);

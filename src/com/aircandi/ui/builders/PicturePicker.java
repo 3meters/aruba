@@ -76,7 +76,7 @@ public class PicturePicker extends FormActivity {
 
 	private GridView				mGridView;
 	private EditText				mSearch;
-	private ArrayList<ImageResult>	mImages			= new ArrayList<ImageResult>();
+	private final ArrayList<ImageResult>	mImages			= new ArrayList<ImageResult>();
 	private TextView				mTitle;
 	private TextView				mMessage;
 	private Entity					mEntity;
@@ -87,15 +87,15 @@ public class PicturePicker extends FormActivity {
 	private LayoutInflater			mInflater;
 	private String					mTitleOptional;
 	private Boolean					mPlacePhotoMode	= false;
-	private String					mSource;
-	private String					mSourceId;
+	private String					mProvider;
+	private String					mProviderId;
 	private Integer					mImageWidthPixels;
 	private Integer					mImageMarginPixels;
 
-	private static long				PAGE_SIZE		= 30L;
-	private static long				LIST_MAX		= 300L;
-	private static String			QUERY_PREFIX	= "";
-	private static String			QUERY_DEFAULT	= "wallpaper unusual places";
+	private static final long				PAGE_SIZE		= 30L;
+	private static final long				LIST_MAX		= 300L;
+	private static final String			QUERY_PREFIX	= "";
+	private static final String			QUERY_DEFAULT	= "wallpaper unusual places";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -115,12 +115,12 @@ public class PicturePicker extends FormActivity {
 
 		if (mPlacePhotoMode) {
 			mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
-			mSource = mEntity.place.source;
-			mSourceId = mEntity.place.sourceId;
+			mProvider = mEntity.place.provider;
+			mProviderId = mEntity.place.id;
 			((ViewGroup) findViewById(R.id.search_group)).setVisibility(View.GONE);
 		}
 		else {
-			Bundle extras = this.getIntent().getExtras();
+			final Bundle extras = this.getIntent().getExtras();
 			if (extras != null) {
 				mDefaultSearch = extras.getString(CandiConstants.EXTRA_SEARCH_PHRASE);
 			}
@@ -153,14 +153,14 @@ public class PicturePicker extends FormActivity {
 
 		/* Stash some sizing info */
 		mGridView = (GridView) findViewById(R.id.grid_gallery);
-		DisplayMetrics metrics = getResources().getDisplayMetrics();
-		Integer layoutWidthPixels = metrics.widthPixels - (mGridView.getPaddingLeft() + mGridView.getPaddingRight());
+		final DisplayMetrics metrics = getResources().getDisplayMetrics();
+		final Integer layoutWidthPixels = metrics.widthPixels - (mGridView.getPaddingLeft() + mGridView.getPaddingRight());
 
 		Integer desiredWidthPixels = (int) (metrics.xdpi * 0.60f);
 		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
 			desiredWidthPixels = (int) (metrics.ydpi * 0.60f);
 		}
-		Integer count = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
+		final Integer count = (int) Math.ceil(layoutWidthPixels / desiredWidthPixels);
 		mImageMarginPixels = ImageUtils.getRawPixels(this, 2);
 		mImageWidthPixels = (layoutWidthPixels / count) - (mImageMarginPixels * (count - 1));
 
@@ -184,15 +184,15 @@ public class PicturePicker extends FormActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				if (((EndlessImageAdapter) mGridView.getAdapter()).getItemViewType(position) != Adapter.IGNORE_ITEM_VIEW_TYPE) {
-					String imageUri = mImages.get(position).getMediaUrl();
+					final String imageUri = mImages.get(position).getMediaUrl();
 					if (mPlacePhotoMode) {
-						Intent intent = new Intent();
+						final Intent intent = new Intent();
 						intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
 						setResult(Activity.RESULT_OK, intent);
 						finish();
 					}
 					else {
-						Intent intent = new Intent();
+						final Intent intent = new Intent();
 						intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
 						intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
 						setResult(Activity.RESULT_OK, intent);
@@ -217,29 +217,29 @@ public class PicturePicker extends FormActivity {
 			exception.printStackTrace();
 		}
 
-		String bingUrl = ProxiConstants.URL_PROXIBASE_SEARCH_IMAGES
+		final String bingUrl = ProxiConstants.URL_PROXIBASE_SEARCH_IMAGES
 				+ "?Query=" + query
 				+ "&Market=%27en-US%27&Adult=%27Moderate%27&ImageFilters=%27size%3alarge%27"
 				+ "&$top=" + String.valueOf(count)
 				+ "&$skip=" + String.valueOf(offset)
 				+ "&$format=Json";
 
-		ServiceRequest serviceRequest = new ServiceRequest(bingUrl, RequestType.Get, ResponseFormat.Json);
+		final ServiceRequest serviceRequest = new ServiceRequest(bingUrl, RequestType.Get, ResponseFormat.Json);
 		serviceRequest.setAuthType(AuthType.Basic)
 				.setUserName(null)
 				.setPassword(getBingKey());
 
 		serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
-		ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart((String) serviceResponse.data, ServiceDataType.ImageResult);
-		ArrayList<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
+		final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart((String) serviceResponse.data, ServiceDataType.ImageResult);
+		final ArrayList<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
 		serviceResponse.data = images;
 
 		return serviceResponse;
 	}
 
 	private ServiceResponse loadPlaceImages(long count, long offset) {
-		ModelResult result = ProxiManager.getInstance().getEntityModel().getPlacePhotos(mSource, mSourceId, count, offset);
+		final ModelResult result = ProxiManager.getInstance().getEntityModel().getPlacePhotos(mProvider, mProviderId, count, offset);
 		return result.serviceResponse;
 	}
 
@@ -274,10 +274,10 @@ public class PicturePicker extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private String getBingKey() {
-		Properties properties = new Properties();
+		final Properties properties = new Properties();
 		try {
 			properties.load(getClass().getResourceAsStream("/com/aircandi/bing_api.properties"));
-			String appId = properties.getProperty("appKey");
+			final String appId = properties.getProperty("appKey");
 			return appId;
 		}
 		catch (IOException exception) {
@@ -325,7 +325,7 @@ public class PicturePicker extends FormActivity {
 			if (mPlacePhotoMode) {
 				serviceResponse = loadPlaceImages(PAGE_SIZE, mOffset);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					ArrayList<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
+					final ArrayList<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
 					if (mOffset == 0 && photos.size() == 0) {
 						runOnUiThread(new Runnable() {
 
@@ -405,7 +405,7 @@ public class PicturePicker extends FormActivity {
 
 		@Override
 		protected void appendCachedData() {
-			ArrayAdapter<ImageResult> list = (ArrayAdapter<ImageResult>) getWrappedAdapter();
+			final ArrayAdapter<ImageResult> list = (ArrayAdapter<ImageResult>) getWrappedAdapter();
 			for (ImageResult imageResult : moreImages) {
 				list.add(imageResult);
 			}
@@ -423,13 +423,13 @@ public class PicturePicker extends FormActivity {
 
 			View view = convertView;
 			final ViewHolder holder;
-			ImageResult itemData = (ImageResult) mImages.get(position);
+			final ImageResult itemData = mImages.get(position);
 
 			if (view == null) {
 				view = mInflater.inflate(R.layout.temp_picture_search_item, null);
 				holder = new ViewHolder();
 				holder.itemImage = (ImageView) view.findViewById(R.id.image);
-				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mImageWidthPixels, mImageWidthPixels);
+				final RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mImageWidthPixels, mImageWidthPixels);
 				holder.itemImage.setLayoutParams(params);
 				view.setTag(holder);
 			}
@@ -467,7 +467,7 @@ public class PicturePicker extends FormActivity {
 
 			synchronized (mBitmapCache) {
 				if (mBitmapCache.containsKey(uri) && mBitmapCache.get(uri).get() != null) {
-					BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), mBitmapCache.get(uri).get());
+					final BitmapDrawable bitmapDrawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), mBitmapCache.get(uri).get());
 					ImageUtils.showDrawableInImageView(bitmapDrawable, holder.itemImage, false, AnimUtils.fadeInMedium());
 					return;
 				}
@@ -477,7 +477,7 @@ public class PicturePicker extends FormActivity {
 
 				@Override
 				public void handleMessage(Message message) {
-					DrawableManager drawableManager = getDrawableManager().get();
+					final DrawableManager drawableManager = getDrawableManager().get();
 					if (drawableManager != null) {
 						if (((String) holder.itemImage.getTag()).equals(uri)) {
 							ImageUtils.showDrawableInImageView((Drawable) message.obj, holder.itemImage, true,
@@ -487,13 +487,13 @@ public class PicturePicker extends FormActivity {
 				}
 			};
 
-			Thread thread = new Thread() {
+			final Thread thread = new Thread() {
 
 				@Override
 				public void run() {
 					Thread.currentThread().setName("DrawableManagerFetch");
-					Drawable drawable = fetchDrawable(uri);
-					Message message = handler.obtainMessage(1, drawable);
+					final Drawable drawable = fetchDrawable(uri);
+					final Message message = handler.obtainMessage(1, drawable);
 					handler.sendMessage(message);
 				}
 			};
@@ -502,22 +502,22 @@ public class PicturePicker extends FormActivity {
 
 		private Drawable fetchDrawable(final String uri) {
 
-			ServiceRequest serviceRequest = new ServiceRequest()
+			final ServiceRequest serviceRequest = new ServiceRequest()
 					.setUri(uri)
 					.setRequestType(RequestType.Get)
 					.setResponseFormat(ResponseFormat.Bytes);
 
-			ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
+			final ServiceResponse serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 			if (serviceResponse.responseCode == ResponseCode.Success) {
 
-				byte[] imageBytes = (byte[]) serviceResponse.data;
-				Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+				final byte[] imageBytes = (byte[]) serviceResponse.data;
+				final Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
 
 				if (bitmap == null) {
 					throw new IllegalStateException("Stream could not be decoded to a bitmap: " + uri);
 				}
-				BitmapDrawable drawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
+				final BitmapDrawable drawable = new BitmapDrawable(Aircandi.applicationContext.getResources(), bitmap);
 				mBitmapCache.put(uri, new SoftReference(bitmap));
 				return drawable;
 			}

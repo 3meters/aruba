@@ -11,8 +11,5 @@ public enum CommandType {
 	None,
 	View,
 	Edit,
-	New,
-	Dialog,
-	ChunkEntities,
-	ChunkChildEntities
+	New
 }

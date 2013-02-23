@@ -50,7 +50,7 @@ public class LinkPicker extends FormActivity {
 	private Button				mOkButton;
 	private Button				mTestButton;
 	private Boolean				mVerifyUri		= false;
-	private List<SearchItem>	mSearchItems	= new ArrayList<SearchItem>();
+	private final List<SearchItem>	mSearchItems	= new ArrayList<SearchItem>();
 	private SearchAdapter		mSearchAdapter;
 
 	@Override
@@ -61,7 +61,7 @@ public class LinkPicker extends FormActivity {
 
 	private void initialize() {
 
-		Bundle extras = getIntent().getExtras();
+		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mVerifyUri = extras.getBoolean(CandiConstants.EXTRA_VERIFY_URI, false);
 			mUri = extras.getString(CandiConstants.EXTRA_URI);
@@ -108,7 +108,7 @@ public class LinkPicker extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetBookmarks");				
-				List<SearchItem> bookmarks = SearchManager.getInstance().getBookmarks(getContentResolver());
+				final List<SearchItem> bookmarks = SearchManager.getInstance().getBookmarks(getContentResolver());
 				if (bookmarks != null) {
 					mSearchItems.addAll(bookmarks);
 				}
@@ -127,7 +127,7 @@ public class LinkPicker extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {
-		SearchItem searchItem = (SearchItem) ((SearchListViewHolder) view.getTag()).data;
+		final SearchItem searchItem = (SearchItem) ((SearchListViewHolder) view.getTag()).data;
 		mUri = searchItem.uri;
 		mUriTitle = searchItem.name;
 		mTextUri.setText(mUri);
@@ -145,7 +145,7 @@ public class LinkPicker extends FormActivity {
 			mCommon.showAlertDialogSimple(null, getString(R.string.error_weburi_invalid));
 		}
 		else {
-			Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+			final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 			intent.setData(Uri.parse(linkUri));
 			startActivity(intent);
 			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToSource);
@@ -204,7 +204,7 @@ public class LinkPicker extends FormActivity {
 								linkUri = "http://" + mUri;
 							}
 
-							ServiceRequest serviceRequest = new ServiceRequest()
+							final ServiceRequest serviceRequest = new ServiceRequest()
 									.setUri(linkUri)
 									.setRequestType(RequestType.Get)
 									.setResponseFormat(ResponseFormat.Html)
@@ -218,10 +218,10 @@ public class LinkPicker extends FormActivity {
 
 					@Override
 					protected void onPostExecute(Object response) {
-						ServiceResponse serviceResponse = (ServiceResponse) response;
+						final ServiceResponse serviceResponse = (ServiceResponse) response;
 						if (serviceResponse.responseCode == ResponseCode.Success) {
 
-							Document document = Jsoup.parse((String) serviceResponse.data);
+							final Document document = Jsoup.parse((String) serviceResponse.data);
 							if (mUriTitle == null) {
 								mUriTitle = document.title();
 							}
@@ -250,7 +250,7 @@ public class LinkPicker extends FormActivity {
 							}
 							mCommon.hideBusy(true);
 
-							Intent intent = new Intent();
+							final Intent intent = new Intent();
 							intent.putExtra(CandiConstants.EXTRA_URI, mUri);
 							intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mUriTitle);
 							intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, mUriDescription);
@@ -264,7 +264,7 @@ public class LinkPicker extends FormActivity {
 				}.execute();
 			}
 			else {
-				Intent intent = new Intent();
+				final Intent intent = new Intent();
 				intent.putExtra(CandiConstants.EXTRA_URI, mUri);
 				intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mUriTitle);
 				intent.putExtra(CandiConstants.EXTRA_URI_DESCRIPTION, mUriDescription);
@@ -278,19 +278,9 @@ public class LinkPicker extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	@Override
-	public void onBackPressed() {
-		super.onBackPressed();
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-	}
 
 	@Override
 	protected int getLayoutID() {

@@ -29,8 +29,8 @@ import java.nio.charset.Charset;
  * The default charset is US_ASCII.
  */
 class StrictLineReader implements Closeable {
-    private static final byte CR = (byte)'\r';
-    private static final byte LF = (byte)'\n';
+    private static final byte CR = (byte)'\r'; // $codepro.audit.disable platformSpecificLineSeparator
+    private static final byte LF = (byte)'\n'; // $codepro.audit.disable platformSpecificLineSeparator
 
     private final InputStream in;
     private final Charset charset;
@@ -154,10 +154,10 @@ class StrictLineReader implements Closeable {
             }
 
             // Let's anticipate up to 80 characters on top of those already read.
-            ByteArrayOutputStream out = new ByteArrayOutputStream(end - pos + 80) {
+            final ByteArrayOutputStream out = new ByteArrayOutputStream(end - pos + 80) {
                 @Override
                 public String toString() {
-                    int length = (count > 0 && buf[count - 1] == CR) ? count - 1 : count;
+                    final int length = (count > 0 && buf[count - 1] == CR) ? count - 1 : count;
                     try {
                         return new String(buf, 0, length, charset.name());
                     } catch (UnsupportedEncodingException e) {
@@ -219,7 +219,7 @@ class StrictLineReader implements Closeable {
      * @throws java.io.EOFException for the end of source stream.
      */
     private void fillBuf() throws IOException {
-        int result = in.read(buf, 0, buf.length);
+        final int result = in.read(buf, 0, buf.length);
         if (result == -1) {
             throw new EOFException();
         }

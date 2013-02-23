@@ -29,7 +29,7 @@ public class IntentBuilder {
 	}
 
 	public Intent create() {
-		Intent intent = new Intent(mContext, mClass);
+		final Intent intent = new Intent(mContext, mClass);
 
 		if (mEntityId != null) {
 			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntityId);
@@ -96,6 +96,7 @@ public class IntentBuilder {
 		return this;
 	}
 
+	@SuppressWarnings("ucd")
 	public IntentBuilder setEntityListType(EntityListType entityListType) {
 		mEntityListType = entityListType;
 		return this;

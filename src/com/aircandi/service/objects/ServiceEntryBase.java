@@ -89,9 +89,9 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	public ServiceEntryBase() {}
 
 	public String getEntryUri() {
-		String root = ProxiConstants.URL_PROXIBASE_SERVICE_REST;
-		String entity = this.getCollection();
-		String uri = root + entity + "/" + id;
+		final String root = ProxiConstants.URL_PROXIBASE_SERVICE_REST;
+		final String entity = this.getCollection();
+		final String uri = root + entity + "/" + id;
 		return uri;
 	}
 
@@ -113,13 +113,13 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 		entry.type = (String) map.get("type");
 
 		if (map.get("creator") != null) {
-			entry.creator = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));
+			entry.creator = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("creator"));
 		}
 		if (map.get("owner") != null) {
-			entry.owner = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("owner"));
+			entry.owner = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("owner"));
 		}
 		if (map.get("modifier") != null) {
-			entry.modifier = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("modifier"));
+			entry.modifier = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("modifier"));
 		}
 
 		return entry;
@@ -145,11 +145,11 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	}
 
 	public HashMap<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		final HashMap<String, Object> map = new HashMap<String, Object>();
 
 		try {
 			Class<?> cls = this.getClass();
-			Field fields[] = cls.getDeclaredFields();
+			final Field fields[] = cls.getDeclaredFields();
 			for (Field f : fields) {
 				if (!Modifier.isStatic(f.getModifiers())
 						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
@@ -205,7 +205,7 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 			}
 
 			cls = this.getClass().getSuperclass();
-			Field fieldsSuper[] = cls.getDeclaredFields();
+			final Field fieldsSuper[] = cls.getDeclaredFields();
 			for (Field f : fieldsSuper) {
 				if (!Modifier.isStatic(f.getModifiers())
 						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {

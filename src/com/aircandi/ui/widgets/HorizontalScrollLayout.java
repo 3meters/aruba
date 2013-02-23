@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 
 import com.aircandi.R;
 
+@SuppressWarnings("ucd")
 public class HorizontalScrollLayout extends HorizontalScrollView {
 
 	private LayoutInflater	mInflater;
@@ -29,7 +30,7 @@ public class HorizontalScrollLayout extends HorizontalScrollView {
 	public HorizontalScrollLayout(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		mContext = context;
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.HorizontalScrollLayout, defStyle, 0);
+		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.HorizontalScrollLayout, defStyle, 0);
 		mLayoutItemId = ta.getResourceId(R.styleable.HorizontalScrollLayout_layout, R.layout.temp_place_photo_item);
 		ta.recycle();		
 		mInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -40,7 +41,7 @@ public class HorizontalScrollLayout extends HorizontalScrollView {
 
 		mLayout = new LinearLayout(mContext);
 		mLayout.setOrientation(LinearLayout.HORIZONTAL);
-		FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		this.addView(mLayout, layoutParams);
 
 		/* Show something in design mode */

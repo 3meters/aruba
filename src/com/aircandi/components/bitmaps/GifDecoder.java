@@ -115,12 +115,12 @@ public class GifDecoder {
 	 */
 	protected void setPixels() {
 		// expose destination image's pixels as int array
-		int[] dest = new int[width * height];
+		final int[] dest = new int[width * height];
 		// fill in starting image contents based on last image's dispose code
 		if (lastDispose > 0) {
 			if (lastDispose == 3) {
 				// use image before last
-				int n = frameCount - 2;
+				final int n = frameCount - 2;
 				if (n > 0) {
 					lastBitmap = getFrame(n - 1);
 				}
@@ -204,10 +204,11 @@ public class GifDecoder {
 	 * @return BufferedBitmap representation of frame, or null if n is invalid.
 	 */
 	public Bitmap getFrame(int n) {
-		if (frameCount <= 0)
+		if (frameCount <= 0) {
 			return null;
+		}
 		n = n % frameCount;
-		return ((GifFrame) frames.elementAt(n)).image;
+		return frames.elementAt(n).image;
 	}
 
 	/**
@@ -235,7 +236,7 @@ public class GifDecoder {
 		try {
 			is.close();
 		}
-		catch (Exception e) {}
+		catch (Exception e) {} // $codepro.audit.disable emptyCatchClause
 		return status;
 	}
 
@@ -243,8 +244,8 @@ public class GifDecoder {
 	 * Decodes LZW image data into pixel array. Adapted from John Cristy's BitmapMagick.
 	 */
 	protected void decodeBitmapData() {
-		int nullCode = -1;
-		int npix = iw * ih;
+		final int nullCode = -1;
+		final int npix = iw * ih;
 		int available, clear, code_mask, code_size, end_of_information, in_code, old_code, bits, code, count, i, datum, data_size, first, top, bi, pi;
 		if ((pixels == null) || (pixels.length < npix)) {
 			pixels = new byte[npix]; // allocate new pixel array
@@ -415,9 +416,9 @@ public class GifDecoder {
 	 * @return int array containing 256 colors (packed ARGB with full alpha)
 	 */
 	protected int[] readColorTable(int ncolors) {
-		int nbytes = 3 * ncolors;
+		final int nbytes = 3 * ncolors;
 		int[] tab = null;
-		byte[] c = new byte[nbytes];
+		final byte[] c = new byte[nbytes];
 		int n = 0;
 		try {
 			n = in.read(c);
@@ -498,7 +499,7 @@ public class GifDecoder {
 	 */
 	protected void readGraphicControlExt() {
 		read(); // block size
-		int packed = read(); // packed fields
+		final int packed = read(); // packed fields
 		dispose = (packed & 0x1c) >> 2; // disposal method
 		if (dispose == 0) {
 			dispose = 1; // elect to keep old image if discretionary
@@ -536,7 +537,7 @@ public class GifDecoder {
 		iy = readShort();
 		iw = readShort();
 		ih = readShort();
-		int packed = read();
+		final int packed = read();
 		lctFlag = (packed & 0x80) != 0; // 1 - local color table flag interlace
 		lctSize = (int) Math.pow(2, (packed & 0x07) + 1);
 		// 3 - sort flag
@@ -589,7 +590,7 @@ public class GifDecoder {
 		width = readShort();
 		height = readShort();
 		// packed fields
-		int packed = read();
+		final int packed = read();
 		gctFlag = (packed & 0x80) != 0; // 1 : global color table flag
 		// 2-4 : color resolution
 		// 5 : gct sort flag

@@ -21,16 +21,16 @@ public class ImageUtils {
 
 			@Override
 			public void run() {
-				CharSequence text = message;
-				Toast toast = Toast.makeText(Aircandi.applicationContext, text, duration);
+				final CharSequence text = message;
+				final Toast toast = Toast.makeText(Aircandi.applicationContext, text, duration);
 				toast.show();
 			}
 		});
 	}
 
 	public static int getRawPixels(Context context, int displayPixels) {
-		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-		int pixels = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) displayPixels, metrics);
+		final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+		final int pixels = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) displayPixels, metrics);
 		return pixels;
 	}
 
@@ -40,11 +40,11 @@ public class ImageUtils {
 
 	public static Bitmap ensureBitmapScaleForS3(Bitmap bitmap) {
 		Bitmap bitmapScaled = bitmap;
-		Boolean scalingNeeded = (bitmap.getWidth() > CandiConstants.IMAGE_DIMENSION_MAX && bitmap.getHeight() > CandiConstants.IMAGE_DIMENSION_MAX);
+		final Boolean scalingNeeded = (bitmap.getWidth() > CandiConstants.IMAGE_DIMENSION_MAX && bitmap.getHeight() > CandiConstants.IMAGE_DIMENSION_MAX);
 		if (scalingNeeded) {
 
-			Matrix matrix = new Matrix();
-			float scalingRatio = Math.max((float) CandiConstants.IMAGE_DIMENSION_MAX / (float) bitmap.getWidth(), (float) CandiConstants.IMAGE_DIMENSION_MAX
+			final Matrix matrix = new Matrix();
+			final float scalingRatio = Math.max((float) CandiConstants.IMAGE_DIMENSION_MAX / (float) bitmap.getWidth(), (float) CandiConstants.IMAGE_DIMENSION_MAX
 					/ (float) bitmap.getHeight());
 			matrix.postScale(scalingRatio, scalingRatio);
 			/*

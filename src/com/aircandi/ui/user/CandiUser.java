@@ -78,7 +78,7 @@ public class CandiUser extends CandiActivity {
 				Thread.currentThread().setName("GetUser");
 				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mCommon.mUserId);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					String jsonResponse = (String) result.serviceResponse.data;
+					final String jsonResponse = (String) result.serviceResponse.data;
 					mUser = (User) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User).data;
 
 					result = ProxiManager.getInstance().getEntityModel().getUserEntities(mCommon.mUserId, true, 25);
@@ -92,7 +92,7 @@ public class CandiUser extends CandiActivity {
 
 			@Override
 			protected void onPostExecute(Object modelResult) {
-				ModelResult result = (ModelResult) modelResult;
+				final ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
 					mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
@@ -119,9 +119,9 @@ public class CandiUser extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onCandiClick(View view) {
-		Entity entity = (Entity) view.getTag();
+		final Entity entity = (Entity) view.getTag();
 
-		IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
+		final IntentBuilder intentBuilder = new IntentBuilder(this, CandiForm.class)
 				.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
 				.setParentEntityId(entity.parentId)
@@ -131,7 +131,7 @@ public class CandiUser extends CandiActivity {
 			intentBuilder.setCollectionId(entity.getParent().id);
 		}
 
-		Intent intent = intentBuilder.create();
+		final Intent intent = intentBuilder.create();
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		startActivity(intent);
@@ -141,7 +141,7 @@ public class CandiUser extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onImageClick(View view) {
 		Intent intent = null;
-		Photo photo = mUser.photo;
+		final Photo photo = mUser.photo;
 		photo.setCreatedAt(mUser.photo.getCreatedAt());
 		photo.setTitle(mUser.name);
 		photo.setUser(mUser);
@@ -181,8 +181,8 @@ public class CandiUser extends CandiActivity {
 			}
 
 			if (imageUri != null) {
-				BitmapRequestBuilder builder = new BitmapRequestBuilder(image).setImageUri(imageUri);
-				BitmapRequest imageRequest = builder.create();
+				final BitmapRequestBuilder builder = new BitmapRequestBuilder(image).setImageUri(imageUri);
+				final BitmapRequest imageRequest = builder.create();
 				image.setBitmapRequest(imageRequest);
 			}
 		}

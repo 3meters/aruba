@@ -109,12 +109,12 @@ public class User extends ServiceEntryBase {
 		user.validationDate = (Number) map.get("validationDate");
 		user.validationNotifyDate = (Number) map.get("validationNotifyDate");
 		if (map.get("photo") != null) {
-			user.photo = (Photo) Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
+			user.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
 		}
 
 		if (map.get("stats") != null) {
 			user.stats = new ArrayList<Stat>();
-			List<LinkedHashMap<String, Object>> statMaps = (List<LinkedHashMap<String, Object>>) map.get("stats");
+			final List<LinkedHashMap<String, Object>> statMaps = (List<LinkedHashMap<String, Object>>) map.get("stats");
 			for (LinkedHashMap<String, Object> statMap : statMaps) {
 				user.stats.add(Stat.setPropertiesFromMap(new Stat(), statMap));
 			}

@@ -97,9 +97,9 @@ public class RegisterForm extends FormActivity {
 				mImage.setVisibility(View.VISIBLE);
 			}
 			else {
-				BitmapRequestBuilder builder = new BitmapRequestBuilder(mImage);
+				final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImage);
 				builder.setImageUri(user.getUserPhotoUri());
-				BitmapRequest imageRequest = builder.create();
+				final BitmapRequest imageRequest = builder.create();
 				mImage.setBitmapRequest(imageRequest);
 			}
 		}
@@ -129,7 +129,7 @@ public class RegisterForm extends FormActivity {
 			@Override
 			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
 
-				ServiceResponse serviceResponse = (ServiceResponse) response;
+				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					/* Could get set to null if we are using the default */
 					mBitmap = imageBitmap;
@@ -148,7 +148,7 @@ public class RegisterForm extends FormActivity {
 		if (resultCode == Activity.RESULT_OK) {
 			if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
 				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
+					final Bundle extras = intent.getExtras();
 					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 						if (pictureSource.equals("search")) {
@@ -191,7 +191,7 @@ public class RegisterForm extends FormActivity {
 
 	private void doViewTerms() {
 		Tracker.sendEvent("ui_action", "view_terms", null, 0);
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(CandiConstants.URL_AIRCANDI_TERMS));
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
@@ -288,13 +288,13 @@ public class RegisterForm extends FormActivity {
 				@Override
 				protected Object doInBackground(Object... params) {
 					Thread.currentThread().setName("InsertUser");
-					ModelResult result = ProxiManager.getInstance().getEntityModel().insertUser(mUser, mBitmap);
+					final ModelResult result = ProxiManager.getInstance().getEntityModel().insertUser(mUser, mBitmap);
 					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
-					ModelResult result = (ModelResult) response;
+					final ModelResult result = (ModelResult) response;
 
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						/*
@@ -302,7 +302,7 @@ public class RegisterForm extends FormActivity {
 						 * the service when it was inserted. We now consider the user
 						 * signed in.
 						 */
-						User insertedUser = (User) result.data;
+						final User insertedUser = (User) result.data;
 						Aircandi.getInstance().setUser(insertedUser);
 
 						mCommon.hideBusy(true);
@@ -311,8 +311,8 @@ public class RegisterForm extends FormActivity {
 						ImageUtils.showToastNotification(getResources().getString(R.string.alert_signed_in)
 								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
 
-						String jsonUser = ProxibaseService.convertObjectToJsonSmart(insertedUser, false, true);
-						String jsonSession = ProxibaseService.convertObjectToJsonSmart(insertedUser.session, false, true);
+						final String jsonUser = ProxibaseService.convertObjectToJsonSmart(insertedUser, false, true);
+						final String jsonSession = ProxibaseService.convertObjectToJsonSmart(insertedUser.session, false, true);
 
 						Aircandi.settingsEditor.putString(Preferences.SETTING_USER, jsonUser);
 						Aircandi.settingsEditor.putString(Preferences.SETTING_USER_SESSION, jsonSession);

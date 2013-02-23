@@ -21,11 +21,11 @@ public abstract class ServiceObject implements Cloneable, Serializable {
 	 */
 
 	public HashMap<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		final HashMap<String, Object> map = new HashMap<String, Object>();
 
 		try {
-			Class<?> cls = this.getClass();
-			Field fields[] = cls.getDeclaredFields();
+			final Class<?> cls = this.getClass();
+			final Field fields[] = cls.getDeclaredFields();
 			for (Field f : fields) {
 				if (!Modifier.isStatic(f.getModifiers())
 						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {

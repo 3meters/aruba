@@ -159,8 +159,8 @@ public class ServiceRequest {
 	}
 
 	public String getPasswordBase64() {
-		byte[] accountKeyBytes = Base64.encodeBase64((mPassword + ":" + mPassword).getBytes());
-		String accountKeyEnc = new String(accountKeyBytes);
+		final byte[] accountKeyBytes = Base64.encodeBase64((mPassword + ":" + mPassword).getBytes());
+		final String accountKeyEnc = new String(accountKeyBytes);
 		return accountKeyEnc;
 	}
 

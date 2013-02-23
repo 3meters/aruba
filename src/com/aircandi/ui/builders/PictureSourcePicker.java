@@ -43,13 +43,13 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 	private void initialize() {
 		
-		Bundle extras = getIntent().getExtras();
+		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mEntityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
 		}
 
 		/* Shown as a dialog so doesn't have an action bar */
-		List<Object> listData = new ArrayList<Object>();
+		final List<Object> listData = new ArrayList<Object>();
 		
 		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_search_light : R.drawable.ic_action_search_dark
 				, getString(R.string.dialog_picture_source_search), null, "search"));
@@ -67,8 +67,8 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 		/* Add place photo option if this is a place entity */
 		if (mEntityId != null) {
-			Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && entity.place.source != null && entity.place.source.equals("foursquare")) {
+			final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && entity.place.provider != null && entity.place.provider.equals("foursquare")) {
 				listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
 						, getString(R.string.dialog_picture_source_place), null, "place"));
 			}
@@ -95,8 +95,8 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		Template template = (Template) view.getTag();
-		Intent intent = new Intent();
+		final Template template = (Template) view.getTag();
+		final Intent intent = new Intent();
 		intent.putExtra(CandiConstants.EXTRA_PICTURE_SOURCE, template.type);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
@@ -108,7 +108,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 	private class ListAdapter extends ArrayAdapter<Object>
 	{
-		private List<Object>	items;
+		private final List<Object>	items;
 
 		public ListAdapter(Context context, List<Object> items) {
 			super(context, 0, items);
@@ -119,10 +119,10 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 		public View getView(int position, View convertView, ViewGroup parent)
 		{
 			View view = convertView;
-			Template itemData = (Template) items.get(position);
+			final Template itemData = (Template) items.get(position);
 
 			if (view == null) {
-				LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				view = inflater.inflate(R.layout.temp_listitem_picture_source, null);
 			}
 

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
+import android.content.res.Configuration;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.location.Location;
@@ -29,7 +30,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.FragmentTransaction;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -80,8 +80,8 @@ import com.squareup.otto.Subscribe;
 
 public class AircandiCommon implements ActionBar.TabListener {
 
-	private Context				mContext;
-	private Activity			mActivity;
+	private final Context		mContext;
+	private final Activity		mActivity;
 
 	static NotificationManager	mNotificationManager;
 
@@ -97,7 +97,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	/* Theme */
 	public String				mThemeTone;
-	public Boolean				mIsDialog;
+	private Boolean				mIsDialog;
 
 	/* UI */
 	private TextView			mBeaconIndicator;
@@ -113,10 +113,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private ViewFlipper			mViewFlipper;
 
 	/* Other */
-	private String				mPageName;
+	private final String		mPageName;
 	private String				mDebugWifi;
 	private String				mDebugLocation;
-	private AtomicInteger		mBusyCount	= new AtomicInteger(0);
+	private final AtomicInteger	mBusyCount	= new AtomicInteger(0);
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
 		mContext = context;
@@ -143,11 +143,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mActionBar = ((SherlockActivity) mActivity).getSupportActionBar();
 
 		/* Fonts */
-		Integer titleId = getActionBarTitleId();
+		final Integer titleId = getActionBarTitleId();
 		FontManager.getInstance().setTypefaceDefault((TextView) mActivity.findViewById(titleId));
 
 		/* Theme info */
-		TypedValue resourceName = new TypedValue();
+		final TypedValue resourceName = new TypedValue();
 		if (mActivity.getTheme().resolveAttribute(R.attr.themeTone, resourceName, true)) {
 			mThemeTone = (String) resourceName.coerceToString();
 		}
@@ -157,19 +157,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* Default sizing if this is a dialog */
 		if (mIsDialog) {
-			WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
-			params.height = ImageUtils.getRawPixels(mActivity, 500);
-			DisplayMetrics metrics = mActivity.getResources().getDisplayMetrics();
-			if (metrics != null) {
-				int displayWidth = metrics.widthPixels;
-				int desiredWidth = ImageUtils.getRawPixels(mActivity, 350);
-				params.width = Math.min(desiredWidth, displayWidth);
-			}
-			else {
-				params.width = ImageUtils.getRawPixels(mActivity, 300);
-			}
-
-			mActivity.getWindow().setAttributes(params);
+			setDialogSize(mActivity.getResources().getConfiguration());
 		}
 	}
 
@@ -181,7 +169,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	@Subscribe
 	@SuppressWarnings("ucd")
-	public void onWifiScanReceived(QueryWifiScanReceivedEvent event) {
+	public void onWifiQueryReceived(QueryWifiScanReceivedEvent event) {
 		updateDevIndicator(event.wifiList, null);
 	}
 
@@ -210,7 +198,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void unpackIntent() {
 
-		Bundle extras = mActivity.getIntent().getExtras();
+		final Bundle extras = mActivity.getIntent().getExtras();
 		if (extras != null) {
 
 			mParentId = extras.getString(CandiConstants.EXTRA_PARENT_ENTITY_ID);
@@ -220,7 +208,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			mMessage = extras.getString(CandiConstants.EXTRA_MESSAGE);
 			mCollectionId = extras.getString(CandiConstants.EXTRA_COLLECTION_ID);
 
-			String commandType = extras.getString(CandiConstants.EXTRA_COMMAND_TYPE);
+			final String commandType = extras.getString(CandiConstants.EXTRA_COMMAND_TYPE);
 			if (commandType != null) {
 				mCommandType = CommandType.valueOf(commandType);
 			}
@@ -232,35 +220,35 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 
 	private void doProfileClick() {
-		IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
+		final IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
 		intentBuilder.setCommandType(CommandType.View);
-		Intent intent = intentBuilder.create();
+		final Intent intent = intentBuilder.create();
 		mActivity.startActivity(intent);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
 	public void doEditCandiClick() {
-		IntentBuilder intentBuilder = new IntentBuilder(mActivity, EntityForm.class)
+		final IntentBuilder intentBuilder = new IntentBuilder(mActivity, EntityForm.class)
 				.setCommandType(CommandType.Edit)
 				.setEntityId(((CandiForm) mActivity).getEntity().id)
 				.setParentEntityId(((CandiForm) mActivity).getEntity().parentId)
 				.setEntityType(((CandiForm) mActivity).getEntity().type);
-		Intent intent = intentBuilder.create();
+		final Intent intent = intentBuilder.create();
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_ENTITY_EDIT);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
 	private void doFeedbackClick() {
-		IntentBuilder intentBuilder = new IntentBuilder(mActivity, FeedbackForm.class);
-		Intent intent = intentBuilder.create();
+		final IntentBuilder intentBuilder = new IntentBuilder(mActivity, FeedbackForm.class);
+		final Intent intent = intentBuilder.create();
 		mActivity.startActivity(intent);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
 	private void doInfoClick() {
-		String title = mActivity.getString(R.string.alert_about_title);
-		String message = mActivity.getString(R.string.alert_about_message) + " "
-				+ Aircandi.getVersionName(mContext, CandiRadar.class) + "\n"
+		final String title = mActivity.getString(R.string.alert_about_title);
+		final String message = mActivity.getString(R.string.alert_about_message) + " "
+				+ Aircandi.getVersionName(mContext, CandiRadar.class) + System.getProperty("line.separator")
 				+ mActivity.getString(R.string.dialog_info);
 		AircandiCommon.showAlertDialog(R.drawable.ic_app
 				, title
@@ -275,13 +263,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void doAttachedToWindow() {
-		Window window = mActivity.getWindow();
+		final Window window = mActivity.getWindow();
 		window.setFormat(PixelFormat.RGBA_8888);
 	}
 
 	private void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
-			String beaconMessage = "";
+			final StringBuilder beaconMessage = new StringBuilder();
 			synchronized (ProxiManager.getInstance().mWifiList) {
 				if (Aircandi.getInstance().getUser() != null
 						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
@@ -290,22 +278,22 @@ public class AircandiCommon implements ActionBar.TabListener {
 					if (Aircandi.wifiCount > 0) {
 						for (WifiScanResult wifi : ProxiManager.getInstance().mWifiList) {
 							if (!wifi.SSID.equals("candi_feed")) {
-								beaconMessage += wifi.SSID + ": (" + String.valueOf(wifi.level) + ") " + wifi.BSSID + "\n";
+								beaconMessage.append(wifi.SSID + ": (" + String.valueOf(wifi.level) + ") " + wifi.BSSID + System.getProperty("line.separator"));
 							}
 						}
-						beaconMessage += "\n";
-						beaconMessage += "Wifi fix: " + DateUtils.intervalSince(ProxiManager.getInstance().mLastWifiUpdate, DateUtils.nowDate());
+						beaconMessage.append(System.getProperty("line.separator"));
+						beaconMessage.append("Wifi fix: " + DateUtils.intervalSince(ProxiManager.getInstance().mLastWifiUpdate, DateUtils.nowDate()));
 					}
 
-					Observation observation = LocationManager.getInstance().getObservationLocked();
+					final Observation observation = LocationManager.getInstance().getObservationLocked();
 					if (observation != null) {
-						Date fixDate = new Date(observation.time.longValue());
-						beaconMessage += "\nLocation fix: " + DateUtils.intervalSince(fixDate, DateUtils.nowDate());
-						beaconMessage += "\nLocation accuracy: " + String.valueOf(observation.accuracy);
-						beaconMessage += "\nLocation provider: " + observation.provider;
+						final Date fixDate = new Date(observation.time.longValue());
+						beaconMessage.append(System.getProperty("line.separator") + "Location fix: " + DateUtils.intervalSince(fixDate, DateUtils.nowDate()));
+						beaconMessage.append(System.getProperty("line.separator") + "Location accuracy: " + String.valueOf(observation.accuracy));
+						beaconMessage.append(System.getProperty("line.separator") + "Location provider: " + observation.provider);
 					}
 					else {
-						beaconMessage += "\nLocation fix: none";
+						beaconMessage.append(System.getProperty("line.separator") + "Location fix: none");
 					}
 				}
 				else {
@@ -314,7 +302,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			}
 			AircandiCommon.showAlertDialog(R.drawable.ic_app
 					, mActivity.getString(R.string.alert_beacons_title)
-					, beaconMessage
+					, beaconMessage.toString()
 					, null
 					, mActivity, android.R.string.ok, null, new
 					DialogInterface.OnClickListener() {
@@ -346,6 +334,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
+	public void doConfigurationChanged(Configuration newConfig) {
+		if (mIsDialog) {
+			setDialogSize(newConfig);
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
@@ -358,14 +352,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * manifest in order to get the correct window features. The theme can then be modified by passing the desired
 		 * theme id to the dialog activity.
 		 */
-		Intent intent = new Intent(mActivity, TemplatePicker.class);
+		final Intent intent = new Intent(mActivity, TemplatePicker.class);
 		intent.putExtra(CandiConstants.EXTRA_ENTITY_IS_ROOT, isRoot);
 		mActivity.startActivityForResult(intent, CandiConstants.ACTIVITY_TEMPLATE_PICK);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToForm);
 	}
 
 	public void showPictureSourcePicker(String entityId) {
-		Intent intent = new Intent(mActivity, PictureSourcePicker.class);
+		final Intent intent = new Intent(mActivity, PictureSourcePicker.class);
 		if (entityId != null) {
 			intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, entityId);
 		}
@@ -375,7 +369,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void showCandiFormForEntity(Entity entity, Class<?> clazz) {
 
-		IntentBuilder intentBuilder = new IntentBuilder(mActivity, clazz);
+		final IntentBuilder intentBuilder = new IntentBuilder(mActivity, clazz);
 		intentBuilder.setCommandType(CommandType.View)
 				.setEntityId(entity.id)
 				.setParentEntityId(entity.parentId)
@@ -385,7 +379,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			intentBuilder.setCollectionId(entity.getParent().id);
 		}
 
-		Intent intent = intentBuilder.create();
+		final Intent intent = intentBuilder.create();
 
 		mActivity.startActivity(intent);
 		AnimUtils.doOverridePendingTransition(mActivity, TransitionType.PageToPage);
@@ -419,8 +413,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 					}
 
 					Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
-					int sizePixels = ImageUtils.getRawPixels(mActivity, sizeDip);
-					FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
+					final int sizePixels = ImageUtils.getRawPixels(mActivity, sizeDip);
+					final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
 					mAccuracyIndicator.setLayoutParams(layoutParams);
 					mAccuracyIndicator.setBackgroundResource(R.drawable.bg_accuracy_indicator);
 				}
@@ -483,10 +477,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void handleServiceError(ServiceResponse serviceResponse, ServiceOperation serviceOperation, Context context) {
 
-		ErrorType errorType = serviceResponse.exception.getErrorType();
-		ErrorCode errorCode = serviceResponse.exception.getErrorCode();
-		String errorMessage = serviceResponse.exception.getMessage();
-		Float statusCode = serviceResponse.exception.getHttpStatusCode();
+		final ErrorType errorType = serviceResponse.exception.getErrorType();
+		final ErrorCode errorCode = serviceResponse.exception.getErrorCode();
+		final String errorMessage = serviceResponse.exception.getMessage();
+		final Float statusCode = serviceResponse.exception.getHttpStatusCode();
 
 		/* We always make sure the progress indicator has been stopped */
 		mActivity.runOnUiThread(new Runnable() {
@@ -505,7 +499,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			/*
 			 * We don't have a network connection.
 			 */
-			Intent intent = new Intent(mContext, CandiRadar.class);
+			final Intent intent = new Intent(mContext, CandiRadar.class);
 			showNotification(mActivity.getString(R.string.error_connection_title), mActivity.getString(R.string.error_connection_notification), context,
 					intent, CandiConstants.NOTIFICATION_NETWORK);
 			showAlertDialogSimple(null, mActivity.getString(R.string.error_connection));
@@ -641,7 +635,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			, OnClickListener listenerClick
 			, OnCancelListener listenerCancel) {
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
 		if (iconResource != null) {
 			builder.setIcon(iconResource);
@@ -670,11 +664,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 			builder.setNegativeButton(cancelButtonId, listenerClick);
 		}
 
-		AlertDialog alert = builder.create();
+		final AlertDialog alert = builder.create();
 		alert.show();
 
 		/* Hardcoded size for body text in the alert */
-		TextView textView = (TextView) alert.findViewById(android.R.id.message);
+		final TextView textView = (TextView) alert.findViewById(android.R.id.message);
 		if (textView != null) {
 			textView.setTextSize(14);
 		}
@@ -745,14 +739,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 					@Override
 					protected Object doInBackground(Object... params) {
 						Thread.currentThread().setName("SignOut");
-						ModelResult result = ProxiManager.getInstance().getEntityModel().signout();
+						final ModelResult result = ProxiManager.getInstance().getEntityModel().signout();
 						return result;
 					}
 
 					@SuppressLint("NewApi")
 					@Override
 					protected void onPostExecute(Object response) {
-						ModelResult result = (ModelResult) response;
+						final ModelResult result = (ModelResult) response;
 						/* We continue on even if the service call failed. */
 						if (result.serviceResponse.responseCode == ResponseCode.Success) {
 							Logger.i(this, "User signed out: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
@@ -772,7 +766,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						/* Notify interested parties */
 						ImageUtils.showToastNotification(mActivity.getString(R.string.toast_signed_out), Toast.LENGTH_SHORT);
 						hideBusy(true);
-						Intent intent = new Intent(mActivity, SplashForm.class);
+						final Intent intent = new Intent(mActivity, SplashForm.class);
 						mActivity.startActivity(intent);
 						mActivity.finish();
 						AnimUtils.doOverridePendingTransition(mActivity, TransitionType.FormToPage);
@@ -788,13 +782,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		/* Start first scan right away */
 		Logger.d(this, "Starting wifi scan service");
-		Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
+		final Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
 		mActivity.startService(scanIntent);
 
 		/* Setup a scanning schedule */
 		if (scanInterval > 0) {
-			AlarmManager alarmManager = (AlarmManager) mActivity.getSystemService(Service.ALARM_SERVICE);
-			PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
+			final AlarmManager alarmManager = (AlarmManager) mActivity.getSystemService(Service.ALARM_SERVICE);
+			final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
 			alarmManager.cancel(pendingIntent);
 			alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP
 					, SystemClock.elapsedRealtime() + scanInterval
@@ -804,9 +798,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	@SuppressWarnings("ucd")
 	public void stopScanService() {
-		AlarmManager alarmManager = (AlarmManager) mActivity.getSystemService(Service.ALARM_SERVICE);
-		Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
-		PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
+		final AlarmManager alarmManager = (AlarmManager) mActivity.getSystemService(Service.ALARM_SERVICE);
+		final Intent scanIntent = new Intent(Aircandi.applicationContext, ScanService.class);
+		final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
 		alarmManager.cancel(pendingIntent);
 		Logger.d(this, "Stopped wifi scan service");
 	}
@@ -835,7 +829,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		if (messageResId != null) {
-			ProgressDialog progressDialog = getProgressDialog();
+			final ProgressDialog progressDialog = getProgressDialog();
 			progressDialog.setMessage(mActivity.getString(messageResId));
 			if (!progressDialog.isShowing()) {
 				progressDialog.setCancelable(false);
@@ -848,7 +842,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void hideBusy(Boolean force) {
-		ProgressDialog progressDialog = getProgressDialog();
+		final ProgressDialog progressDialog = getProgressDialog();
 		if (progressDialog.isShowing() && progressDialog.getWindow().getWindowManager() != null) {
 			try {
 				progressDialog.dismiss();
@@ -859,6 +853,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 				 * It could be that the activity is getting destroyed before the dismiss can happen.
 				 * We catch it and move on.
 				 */
+				Logger.v(this, e.getMessage());
 			}
 		}
 
@@ -887,14 +882,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	@SuppressWarnings("unused")
 	private void startBusyIndicator() {
-		View progress = (View) mActivity.findViewById(R.id.progress);
+		final View progress = mActivity.findViewById(R.id.progress);
 		if (progress != null) {
 			progress.setVisibility(View.VISIBLE);
 		}
 	}
 
 	private void stopBusyIndicator() {
-		View progress = (View) mActivity.findViewById(R.id.progress);
+		final View progress = mActivity.findViewById(R.id.progress);
 		if (progress != null) {
 			progress.setVisibility(View.GONE);
 		}
@@ -902,11 +897,11 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void showNotification(String title, String message, Context context, Intent intent, int notificationType) {
 		@SuppressWarnings("deprecation")
-		Notification note = new Notification(R.drawable.ic_app_status_bw
+		final Notification note = new Notification(R.drawable.ic_app_status_bw
 				, title
 				, System.currentTimeMillis());
 
-		RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification);
+		final RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification);
 		contentView.setImageViewResource(R.id.image, R.drawable.ic_app);
 		contentView.setTextViewText(R.id.title, title);
 		contentView.setTextViewText(R.id.text, message);
@@ -914,10 +909,21 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+		final PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 		note.contentIntent = pendingIntent;
 
 		mNotificationManager.notify(notificationType, note);
+	}
+
+	private void setDialogSize(Configuration newConfig) {
+
+		android.view.WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
+		int height = Math.min(newConfig.screenHeightDp, 450);
+		int width = Math.min(newConfig.screenWidthDp, 350);
+		params.height = ImageUtils.getRawPixels(mActivity, height);
+		params.width = ImageUtils.getRawPixels(mActivity, width);
+		mActivity.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -931,7 +937,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * 
 		 * Behavior might be modified because we are using ABS.
 		 */
-		SherlockActivity activity = (SherlockActivity) mActivity;
+		final SherlockActivity activity = (SherlockActivity) mActivity;
 		if (mPageName.equals("CandiRadar")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_primary_radar, menu);
 		}
@@ -1191,7 +1197,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * the front. User also sees forward slide animation and loading just
 		 * like a forward launching sequence.
 		 */
-		Intent intent = mActivity.getIntent();
+		final Intent intent = mActivity.getIntent();
 		mActivity.finish();
 		mActivity.startActivity(intent);
 	}
@@ -1219,7 +1225,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * This gets called from comment, profile and entity forms
 		 */
 		if (mActionBar != null && mActionBar.getTabCount() > 0) {
-			savedInstanceState.putInt("tab_index", mActionBar.getSelectedTab() != null ? mActionBar.getSelectedTab().getPosition() : 0);
+			savedInstanceState.putInt("tab_index", (mActionBar.getSelectedTab() != null) ? mActionBar.getSelectedTab().getPosition() : 0);
 		}
 	}
 

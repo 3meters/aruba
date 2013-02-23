@@ -6,7 +6,7 @@ import com.aircandi.service.ProxibaseService.RequestListener;
 public class BitmapRequestBuilder {
 
 	private String			mImageUri;
-	private Object			mImageRequestor;
+	private final Object			mImageRequestor;
 	private RequestListener	mRequestListener;
 
 	public BitmapRequestBuilder(Object imageRequestor) {
@@ -14,7 +14,7 @@ public class BitmapRequestBuilder {
 	}
 
 	public BitmapRequest create() {
-		BitmapRequest bitmapRequest = new BitmapRequest();
+		final BitmapRequest bitmapRequest = new BitmapRequest();
 
 		if (mImageUri == null) {
 			throw new IllegalStateException("ImageUri must be set on ImageRequest");

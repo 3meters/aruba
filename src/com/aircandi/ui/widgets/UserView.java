@@ -45,9 +45,9 @@ public class UserView extends RelativeLayout {
 	public UserView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.AuthorLayout, defStyle, 0);
-		int layoutId = ta.getResourceId(R.styleable.AuthorLayout_layout, R.layout.widget_user_view);
-		LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.AuthorLayout, defStyle, 0);
+		final int layoutId = ta.getResourceId(R.styleable.AuthorLayout_layout, R.layout.widget_user_view);
+		final LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mBoundView = (ViewGroup) inflater.inflate(layoutId, null);
 
 		ta.recycle();
@@ -110,9 +110,9 @@ public class UserView extends RelativeLayout {
 
 			if (mImageUser != null) {
 				if (mAuthor.getUserPhotoUri() != null && mAuthor.getUserPhotoUri().length() != 0) {
-					BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
 					builder.setFromUri(mAuthor.getUserPhotoUri());
-					BitmapRequest imageRequest = builder.create();
+					final BitmapRequest imageRequest = builder.create();
 					mImageUser.setBitmapRequest(imageRequest);
 				}
 			}
@@ -152,9 +152,9 @@ public class UserView extends RelativeLayout {
 			}
 			if (mImageUser != null) {
 				if (mUser.getUserPhotoUri() != null && mUser.getUserPhotoUri().length() != 0) {
-					BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
+					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageUser);
 					builder.setFromUri(mUser.getUserPhotoUri());
-					BitmapRequest imageRequest = builder.create();
+					final BitmapRequest imageRequest = builder.create();
 					mImageUser.setBitmapRequest(imageRequest);
 				}
 			}
@@ -164,11 +164,6 @@ public class UserView extends RelativeLayout {
 	// --------------------------------------------------------------------------------------------
 	// Pager methods and callbacks
 	// --------------------------------------------------------------------------------------------
-
-	@Override
-	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-		super.onLayout(changed, left, top, right, bottom);
-	}
 
 	public void setAuthor(User author) {
 		this.mAuthor = author;

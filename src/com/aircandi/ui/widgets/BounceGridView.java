@@ -10,7 +10,7 @@ import com.aircandi.CandiConstants;
 @SuppressWarnings("ucd")
 public class BounceGridView extends GridView {
 	
-	private Context	mContext;
+	private final Context	mContext;
 	private int		mMaxYOverscrollDistance;
 
 	public BounceGridView(Context context) {

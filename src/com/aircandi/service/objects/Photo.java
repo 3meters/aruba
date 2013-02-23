@@ -71,18 +71,18 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		photo.createdAt = (Number) map.get("createdAt");
 
 		if (map.get("user") != null) {
-			photo.user = (User) User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
+			photo.user = User.setPropertiesFromMap(new User(), (HashMap<String, Object>) map.get("user"));
 		}
 
 		return photo;
 	}
 	
 	public ImageResult getAsImageResult() {
-		ImageResult imageResult = new ImageResult();
+		final ImageResult imageResult = new ImageResult();
 		imageResult.setWidth(width.longValue());
 		imageResult.setHeight(height.longValue());
 		imageResult.setMediaUrl(getUri());
-		Thumbnail thumbnail = new Thumbnail();
+		final Thumbnail thumbnail = new Thumbnail();
 		thumbnail.setUrl(getSizedUri(100, 100));
 		imageResult.setThumbnail(thumbnail);
 		return imageResult;

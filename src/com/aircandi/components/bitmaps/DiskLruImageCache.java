@@ -75,7 +75,7 @@ public class DiskLruImageCache {
 			}
 		}
 	}
-	
+
 	private File getDiskCacheDir(Context context, String uniqueName) {
 		/*
 		 * Check if media is mounted or storage is built-in, if so, try and use external cache dir
@@ -119,7 +119,7 @@ public class DiskLruImageCache {
 					editor.abort();
 				}
 			}
-			catch (IOException ignored) {}
+			catch (IOException ignored) {} // $codepro.audit.disable emptyCatchClause
 		}
 	}
 
@@ -155,10 +155,10 @@ public class DiskLruImageCache {
 					editor.abort();
 				}
 			}
-			catch (IOException ignored) {}
+			catch (IOException ignored) {} // $codepro.audit.disable emptyCatchClause
 		}
 	}
-	
+
 	public Bitmap getBitmap(String key) {
 
 		Bitmap bitmap = null;
@@ -202,7 +202,7 @@ public class DiskLruImageCache {
 			final InputStream in = snapshot.getInputStream(0);
 			if (in != null) {
 				final BufferedInputStream buffIn = new BufferedInputStream(in, Utils.IO_BUFFER_SIZE);
-				int size = buffIn.available();
+				final int size = buffIn.available();
 				imageBytes = new byte[size];
 				buffIn.read(imageBytes, 0, size);
 			}
@@ -221,7 +221,7 @@ public class DiskLruImageCache {
 		}
 		return imageBytes;
 	}
-	
+
 	public boolean containsKey(String key) {
 
 		boolean contained = false;

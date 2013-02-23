@@ -122,30 +122,42 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 
 		Float distance = 0f;
 
-		if (this.level.intValue() >= -40)
+		if (this.level.intValue() >= -40) {
 			distance = 1f;
-		else if (this.level.intValue() >= -50)
+		}
+		else if (this.level.intValue() >= -50) {
 			distance = 2f;
-		else if (this.level.intValue() >= -55)
+		}
+		else if (this.level.intValue() >= -55) {
 			distance = 3f;
-		else if (this.level.intValue() >= -60)
+		}
+		else if (this.level.intValue() >= -60) {
 			distance = 5f;
-		else if (this.level.intValue() >= -65)
+		}
+		else if (this.level.intValue() >= -65) {
 			distance = 7f;
-		else if (this.level.intValue() >= -70)
+		}
+		else if (this.level.intValue() >= -70) {
 			distance = 10f;
-		else if (this.level.intValue() >= -75)
+		}
+		else if (this.level.intValue() >= -75) {
 			distance = 15f;
-		else if (this.level.intValue() >= -80)
+		}
+		else if (this.level.intValue() >= -80) {
 			distance = 20f;
-		else if (this.level.intValue() >= -85)
+		}
+		else if (this.level.intValue() >= -85) {
 			distance = 30f;
-		else if (this.level.intValue() >= -90)
+		}
+		else if (this.level.intValue() >= -90) {
 			distance = 40f;
-		else if (this.level.intValue() >= -95)
+		}
+		else if (this.level.intValue() >= -95) {
 			distance = 60f;
-		else
+		}
+		else {
 			distance = 80f;
+		}
 
 		return distance;
 	}

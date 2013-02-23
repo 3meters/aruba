@@ -62,9 +62,9 @@ public class CategoryBuilder extends FormActivity {
 	}
 
 	private void initialize() {
-		Bundle extras = this.getIntent().getExtras();
+		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
+			final String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
 			if (jsonCategory != null) {
 				mOriginalCategory = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 			}
@@ -102,13 +102,13 @@ public class CategoryBuilder extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("LoadCategories");
-				ModelResult result = ProxiManager.getInstance().getEntityModel().loadCategories();
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().loadCategories();
 				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
+				final ModelResult result = (ModelResult) response;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					mCategories = ProxiManager.getInstance().getEntityModel().getCategories();
 					if (mCategories != null) {
@@ -145,21 +145,21 @@ public class CategoryBuilder extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private void doSave() {
-		Intent intent = new Intent();
+		final Intent intent = new Intent();
 		if (mSubSubCategory != null) {
-			Category category = new Category();
+			final Category category = new Category();
 			category.id = mSubSubCategory.id;
 			category.name = mSubSubCategory.name;
-			category.icon = mSubSubCategory.iconUri();
-			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(category, false, true);
+			category.icon = mSubSubCategory.icon;
+			final String jsonCategory = ProxibaseService.convertObjectToJsonSmart(category, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		else if (mSubCategory != null) {
-			Category category = new Category();
+			final Category category = new Category();
 			category.id = mSubCategory.id;
 			category.name = mSubCategory.name;
-			category.icon = mSubCategory.iconUri();
-			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(category, false, true);
+			category.icon = mSubCategory.icon;
+			final String jsonCategory = ProxibaseService.convertObjectToJsonSmart(category, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		setResult(Activity.RESULT_OK, intent);
@@ -206,8 +206,8 @@ public class CategoryBuilder extends FormActivity {
 
 	private void initCategorySpinner() {
 
-		List<String> categories = ProxiManager.getInstance().getEntityModel().getCategoriesAsStringArray(mCategories);
-		CategoryAdapter adapter = new CategoryAdapter(CategoryBuilder.this
+		final List<String> categories = ProxiManager.getInstance().getEntityModel().getCategoriesAsStringArray(mCategories);
+		final CategoryAdapter adapter = new CategoryAdapter(CategoryBuilder.this
 				, mSpinnerItem
 				, categories
 				, R.string.form_place_category_hint);
@@ -231,7 +231,7 @@ public class CategoryBuilder extends FormActivity {
 
 				if (position < mCategories.size()) {
 
-					mCategory = (Category) mCategories.get(position);
+					mCategory = mCategories.get(position);
 					if (mCategory.iconUri() != null) {
 						updateCustomImage(mCategory.iconUri(), mCategory);
 					}
@@ -301,7 +301,7 @@ public class CategoryBuilder extends FormActivity {
 
 					/* Do nothing when the hint item is selected */
 					if (position < mCategory.categories.size()) {
-						mSubCategory = (Category) mCategory.categories.get(position);
+						mSubCategory = mCategory.categories.get(position);
 						if (mSubCategory.iconUri() != null) {
 							updateCustomImage(mSubCategory.iconUri(), mSubCategory);
 						}
@@ -328,7 +328,7 @@ public class CategoryBuilder extends FormActivity {
 
 	private void initSubsubcategorySpinner(Integer position) {
 
-		List<String> categories = ProxiManager.getInstance().getEntityModel().getCategoriesAsStringArray(mSubCategory.categories);
+		final List<String> categories = ProxiManager.getInstance().getEntityModel().getCategoriesAsStringArray(mSubCategory.categories);
 		if (categories.size() > 0) {
 
 			final CategoryAdapter adapter = new CategoryAdapter(CategoryBuilder.this
@@ -369,7 +369,7 @@ public class CategoryBuilder extends FormActivity {
 
 					/* Do nothing when the hint item is selected */
 					if (position < mSubCategory.categories.size()) {
-						mSubSubCategory = (Category) mSubCategory.categories.get(position);
+						mSubSubCategory = mSubCategory.categories.get(position);
 						if (mSubSubCategory.iconUri() != null) {
 							updateCustomImage(mSubSubCategory.iconUri(), mSubSubCategory);
 						}
@@ -389,22 +389,22 @@ public class CategoryBuilder extends FormActivity {
 
 	private void updateCustomImage(String uri, Category category) {
 
-		Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
-		int color = Place.getCategoryColor(category.name, true, boostColor, false);
+		final Boolean boostColor = !android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus 4");
+		final int color = Place.getCategoryColor(category.name, true, boostColor, false);
 		mImage.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 
-		int colorResId = Place.getCategoryColorResId(category.name, true, boostColor, false);
+		final int colorResId = Place.getCategoryColorResId(category.name, true, boostColor, false);
 		if (findViewById(R.id.color_layer) != null) {
-			((View) findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
-			((View) findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
-			((View) findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+			(findViewById(R.id.color_layer)).setBackgroundResource(colorResId);
+			(findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+			(findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
 		}
 		else {
 			mImage.getImageView().setBackgroundResource(colorResId);
 		}
 
 		mImage.getImageView().setTag(uri);
-		BitmapRequest bitmapRequest = new BitmapRequest(uri, mImage.getImageView());
+		final BitmapRequest bitmapRequest = new BitmapRequest(uri, mImage.getImageView());
 		bitmapRequest.setBrokenDrawableResId(R.drawable.ic_app);
 		bitmapRequest.setImageSize(mImage.getSizeHint());
 		bitmapRequest.setImageRequestor(mImage.getImageView());
@@ -413,7 +413,7 @@ public class CategoryBuilder extends FormActivity {
 
 	private class CategoryAdapter extends ArrayAdapter {
 
-		private List<String>	mCategories;
+		private final List<String>	mCategories;
 
 		public CategoryAdapter(Context context, int textViewResourceId, List categories, Integer categoryHint) {
 			super(context, textViewResourceId, categories);
@@ -424,9 +424,9 @@ public class CategoryBuilder extends FormActivity {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 
-			View view = super.getView(position, convertView, parent);
+			final View view = super.getView(position, convertView, parent);
 
-			TextView text = (TextView) view.findViewById(R.id.spinner_name);
+			final TextView text = (TextView) view.findViewById(R.id.spinner_name);
 			if (mCommon.mThemeTone.equals("dark")) {
 				if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
 					text.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_dark));

@@ -8,8 +8,8 @@ import java.io.StringWriter;
 class Streams {
     static String readFully(Reader reader) throws IOException {
         try {
-            StringWriter writer = new StringWriter();
-            char[] buffer = new char[1024];
+            final StringWriter writer = new StringWriter();
+            final char[] buffer = new char[1024];
             int count;
             while ((count = reader.read(buffer)) != -1) {
                 writer.write(buffer, 0, count);

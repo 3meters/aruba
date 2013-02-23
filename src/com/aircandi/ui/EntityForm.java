@@ -166,7 +166,7 @@ public class EntityForm extends FormActivity {
 				 * that any changes only show up in the entity model if the changes make it
 				 * to the service.
 				 */
-				Entity entityForModel = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
+				final Entity entityForModel = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
 				if (entityForModel != null) {
 					mEntityForForm = entityForModel.clone();
 				}
@@ -176,7 +176,7 @@ public class EntityForm extends FormActivity {
 	}
 
 	private Entity makeEntity(String type) {
-		Entity entity = new Entity();
+		final Entity entity = new Entity();
 		entity.signalFence = -100.0f;
 		entity.enabled = true;
 		entity.locked = false;
@@ -184,8 +184,8 @@ public class EntityForm extends FormActivity {
 		entity.visibility = Visibility.Public.toString().toLowerCase(Locale.US);
 		entity.type = type;
 		if (type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			entity.getPlace().source = "user";
-			entity.getPlace().sourceId = Aircandi.getInstance().getUser().id;
+			entity.getPlace().provider = "user";
+			entity.getPlace().id = Aircandi.getInstance().getUser().id;
 			entity.locked = false;
 		}
 		return entity;
@@ -240,7 +240,7 @@ public class EntityForm extends FormActivity {
 
 				if (entity.place.location != null) {
 					if (findViewById(R.id.address) != null) {
-						String addressBlock = entity.place.location.getAddressBlock();
+						final String addressBlock = entity.place.location.getAddressBlock();
 						if (!addressBlock.equals("")) {
 							((BuilderButton) findViewById(R.id.address)).setText(entity.place.location.address);
 						}
@@ -281,9 +281,9 @@ public class EntityForm extends FormActivity {
 			mImageViewPicture.getImageView().clearColorFilter();
 			mImageViewPicture.getImageView().setBackgroundResource(0);
 			if (findViewById(R.id.color_layer) != null) {
-				((View) findViewById(R.id.color_layer)).setBackgroundResource(0);
-				((View) findViewById(R.id.color_layer)).setVisibility(View.GONE);
-				((View) findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
+				(findViewById(R.id.color_layer)).setBackgroundResource(0);
+				(findViewById(R.id.color_layer)).setVisibility(View.GONE);
+				(findViewById(R.id.reverse_layer)).setVisibility(View.GONE);
 			}
 
 			if (mEntityBitmap != null) {
@@ -295,7 +295,7 @@ public class EntityForm extends FormActivity {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 					if (entity.photo == null && entity.place != null && entity.place.category != null) {
 
-						int color = Place.getCategoryColor(entity.place.category != null
+						final int color = Place.getCategoryColor(entity.place.category != null
 								? entity.place.category.name
 								: null, true, mMuteColor, false);
 
@@ -304,9 +304,9 @@ public class EntityForm extends FormActivity {
 								true, mMuteColor, false);
 
 						if (findViewById(R.id.color_layer) != null) {
-							((View) findViewById(R.id.color_layer)).setBackgroundResource(mColorResId);
-							((View) findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
-							((View) findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
+							(findViewById(R.id.color_layer)).setBackgroundResource(mColorResId);
+							(findViewById(R.id.color_layer)).setVisibility(View.VISIBLE);
+							(findViewById(R.id.reverse_layer)).setVisibility(View.VISIBLE);
 						}
 						else {
 							mImageViewPicture.getImageView().setBackgroundResource(mColorResId);
@@ -314,8 +314,8 @@ public class EntityForm extends FormActivity {
 					}
 				}
 
-				String imageUri = entity.getEntityPhotoUri();
-				BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mImageViewPicture.getImageView());
+				final String imageUri = entity.getEntityPhotoUri();
+				final BitmapRequest bitmapRequest = new BitmapRequest(imageUri, mImageViewPicture.getImageView());
 				bitmapRequest.setImageSize(mImageViewPicture.getSizeHint());
 				bitmapRequest.setImageRequestor(mImageViewPicture.getImageView());
 				mImageViewPicture.getImageView().setTag(imageUri);
@@ -330,7 +330,7 @@ public class EntityForm extends FormActivity {
 			 * We are expecting a builder button with a viewgroup to
 			 * hold a set of images.
 			 */
-			BuilderButton button = (BuilderButton) findViewById(R.id.sources);
+			final BuilderButton button = (BuilderButton) findViewById(R.id.sources);
 			if (entity.sources == null || entity.sources.size() == 0) {
 				button.getTextView().setVisibility(View.VISIBLE);
 				button.getViewGroup().setVisibility(View.GONE);
@@ -340,8 +340,8 @@ public class EntityForm extends FormActivity {
 				button.getViewGroup().setVisibility(View.VISIBLE);
 				button.getViewGroup().removeAllViews();
 				final LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				int sizePixels = ImageUtils.getRawPixels(this, 30);
-				int marginPixels = ImageUtils.getRawPixels(this, 5);
+				final int sizePixels = ImageUtils.getRawPixels(this, 30);
+				final int marginPixels = ImageUtils.getRawPixels(this, 5);
 
 				/* We only show the first five */
 				int sourceCount = 0;
@@ -396,7 +396,7 @@ public class EntityForm extends FormActivity {
 			@Override
 			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
 
-				ServiceResponse serviceResponse = (ServiceResponse) response;
+				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					mDirty = true;
 					mEntityBitmapLocalOnly = bitmapLocalOnly;
@@ -438,9 +438,9 @@ public class EntityForm extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onAddressBuilderClick(View view) {
-		Intent intent = new Intent(this, AddressBuilder.class);
+		final Intent intent = new Intent(this, AddressBuilder.class);
 		if (mEntityForForm.getPlace().location != null) {
-			String jsonAddress = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.place.location, false, true);
+			final String jsonAddress = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.place.location, false, true);
 			intent.putExtra(CandiConstants.EXTRA_ADDRESS, jsonAddress);
 		}
 		if (mEntityForForm.getPlace().contact != null && mEntityForForm.getPlace().contact.phone != null) {
@@ -452,9 +452,9 @@ public class EntityForm extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onCategoryBuilderClick(View view) {
-		Intent intent = new Intent(this, CategoryBuilder.class);
+		final Intent intent = new Intent(this, CategoryBuilder.class);
 		if (mEntityForForm.getPlace().category != null) {
-			String jsonCategory = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.getPlace().category, false, true);
+			final String jsonCategory = ProxibaseService.convertObjectToJsonSmart(mEntityForForm.getPlace().category, false, true);
 			intent.putExtra(CandiConstants.EXTRA_CATEGORY, jsonCategory);
 		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_CATEGORY_EDIT);
@@ -463,12 +463,12 @@ public class EntityForm extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onSourcesBuilderClick(View view) {
-		Intent intent = new Intent(this, SourcesBuilder.class);
+		final Intent intent = new Intent(this, SourcesBuilder.class);
 		intent.putExtra(CandiConstants.EXTRA_ENTITY_ID, mEntityForForm.id);
 
 		/* Serialize the sources for the current entity */
 		if (mEntityForForm.sources != null && mEntityForForm.sources.size() > 0) {
-			List<String> sourceStrings = new ArrayList<String>();
+			final List<String> sourceStrings = new ArrayList<String>();
 			for (Source source : mEntityForForm.sources) {
 				sourceStrings.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
 			}
@@ -485,16 +485,16 @@ public class EntityForm extends FormActivity {
 			if (requestCode == CandiConstants.ACTIVITY_ADDRESS_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
 					mDirty = true;
-					Bundle extras = intent.getExtras();
+					final Bundle extras = intent.getExtras();
 
 					String phone = extras.getString(CandiConstants.EXTRA_PHONE);
 					phone = phone.replaceAll("[^\\d.]", "");
 					mEntityForForm.getPlace().getContact().phone = phone;
 					mEntityForForm.getPlace().getContact().formattedPhone = PhoneNumberUtils.formatNumber(phone);
 
-					String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
+					final String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
 					if (jsonAddress != null) {
-						Location locationUpdated = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
+						final Location locationUpdated = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
 						mEntityForForm.getPlace().location = locationUpdated;
 						((BuilderButton) findViewById(R.id.address)).setText(mEntityForForm.place.location.address);
 					}
@@ -502,10 +502,10 @@ public class EntityForm extends FormActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_CATEGORY_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-					String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
+					final Bundle extras = intent.getExtras();
+					final String jsonCategory = extras.getString(CandiConstants.EXTRA_CATEGORY);
 					if (jsonCategory != null) {
-						Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
+						final Category categoryUpdated = (Category) ProxibaseService.convertJsonToObjectInternalSmart(jsonCategory, ServiceDataType.Category);
 						if (categoryUpdated != null) {
 							mDirty = true;
 							mEntityForForm.getPlace().category = categoryUpdated;
@@ -517,9 +517,9 @@ public class EntityForm extends FormActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_SOURCES_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
-					ArrayList<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
-					List<Source> sources = new ArrayList<Source>();
+					final Bundle extras = intent.getExtras();
+					final ArrayList<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
+					final List<Source> sources = new ArrayList<Source>();
 					for (String jsonSource : jsonSources) {
 						Source source = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 						sources.add(source);
@@ -531,7 +531,7 @@ public class EntityForm extends FormActivity {
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SOURCE_PICK) {
 				if (intent != null && intent.getExtras() != null) {
-					Bundle extras = intent.getExtras();
+					final Bundle extras = intent.getExtras();
 					final String pictureSource = extras.getString(CandiConstants.EXTRA_PICTURE_SOURCE);
 					if (pictureSource != null && !pictureSource.equals("")) {
 						if (pictureSource.equals("search")) {
@@ -647,7 +647,7 @@ public class EntityForm extends FormActivity {
 
 			@Override
 			protected void onPostExecute(Object response) {
-				ServiceResponse serviceResponse = (ServiceResponse) response;
+				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				mCommon.hideBusy(true);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					finish();
@@ -666,7 +666,7 @@ public class EntityForm extends FormActivity {
 	}
 
 	private void confirmDirtyExit() {
-		AlertDialog dialog = AircandiCommon.showAlertDialog(null
+		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
 				, getResources().getString(R.string.alert_entity_dirty_exit_title)
 				, getResources().getString(R.string.alert_entity_dirty_exit_message)
 				, null
@@ -716,12 +716,12 @@ public class EntityForm extends FormActivity {
 			 * Set location info if this is a place entity
 			 */
 			if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-				mEntityForForm.getPlace().source = "user";
-				mEntityForForm.getPlace().sourceId = Aircandi.getInstance().getUser().id;
+				mEntityForForm.getPlace().provider = "user";
+				mEntityForForm.getPlace().id = Aircandi.getInstance().getUser().id;
 				/*
 				 * We add location info as a consistent feature
 				 */
-				Observation observation = LocationManager.getInstance().getObservationLocked();
+				final Observation observation = LocationManager.getInstance().getObservationLocked();
 				if (observation != null) {
 					mEntityForForm.place.location = new com.aircandi.service.objects.Location();
 					mEntityForForm.place.location.lat = observation.latitude;
@@ -738,7 +738,7 @@ public class EntityForm extends FormActivity {
 		result = ProxiManager.getInstance().getEntityModel().insertEntity(mEntityForForm, beacons, primaryBeacon, bitmap, false);
 
 		/* Add picture entity if a new picture has been set for a place */
-		Entity entity = (Entity) result.data;
+		final Entity entity = (Entity) result.data;
 		if (mPictureEntity != null && (mPictureEntity.getPhotoForSet().getUri() != null || mEntityBitmap != null)) {
 			mPictureEntity.photo = mEntityForForm.photo;
 			mPictureEntity.parentId = entity.id;
@@ -781,13 +781,13 @@ public class EntityForm extends FormActivity {
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("DeleteEntity");
 				Tracker.sendEvent("ui_action", "entity_delete", mEntityForForm.type, 0);
-				ModelResult result = ProxiManager.getInstance().getEntityModel().deleteEntity(mEntityForForm.id, false);
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().deleteEntity(mEntityForForm.id, false);
 				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object response) {
-				ModelResult result = (ModelResult) response;
+				final ModelResult result = (ModelResult) response;
 
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					Logger.i(this, "Deleted entity: " + mEntityForForm.name);
@@ -812,20 +812,6 @@ public class EntityForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Persistence routines
 	// --------------------------------------------------------------------------------------------
-
-	// --------------------------------------------------------------------------------------------
-	// Lifecycle routines
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines

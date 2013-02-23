@@ -151,7 +151,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 		if (map.get("links") != null) {
 			entity.links = new ArrayList<Link>();
-			List<LinkedHashMap<String, Object>> linkMaps = (List<LinkedHashMap<String, Object>>) map.get("links");
+			final List<LinkedHashMap<String, Object>> linkMaps = (List<LinkedHashMap<String, Object>>) map.get("links");
 			for (LinkedHashMap<String, Object> linkMap : linkMaps) {
 				entity.links.add(Link.setPropertiesFromMap(new Link(), linkMap));
 			}
@@ -159,7 +159,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 		if (map.get("sources") != null) {
 			entity.sources = new ArrayList<Source>();
-			List<LinkedHashMap<String, Object>> sourceMaps = (List<LinkedHashMap<String, Object>>) map.get("sources");
+			final List<LinkedHashMap<String, Object>> sourceMaps = (List<LinkedHashMap<String, Object>>) map.get("sources");
 			for (LinkedHashMap<String, Object> sourceMap : sourceMaps) {
 				entity.sources.add(Source.setPropertiesFromMap(new Source(), sourceMap));
 			}
@@ -167,7 +167,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 		if (map.get("comments") != null) {
 			entity.comments = new ArrayList<Comment>();
-			List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
+			final List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
 			for (LinkedHashMap<String, Object> commentMap : commentMaps) {
 				entity.comments.add(Comment.setPropertiesFromMap(new Comment(), commentMap));
 			}
@@ -178,7 +178,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 		entity.children = new EntityList<Entity>();
 		if (map.get("children") != null) {
-			List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
+			final List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
 			for (LinkedHashMap<String, Object> childMap : childMaps) {
 				entity.children.add(Entity.setPropertiesFromMap(new Entity(), childMap));
 			}
@@ -187,11 +187,11 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		entity.childrenMore = (Boolean) map.get("childrenMore");
 
 		if (map.get("place") != null) {
-			entity.place = (Place) Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"));
+			entity.place = Place.setPropertiesFromMap(new Place(), (HashMap<String, Object>) map.get("place"));
 		}
 
 		if (map.get("photo") != null) {
-			entity.photo = (Photo) Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
+			entity.photo = Photo.setPropertiesFromMap(new Photo(), (HashMap<String, Object>) map.get("photo"));
 		}
 
 		entity.parentId = (String) map.get("_parent");
@@ -244,7 +244,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 * serialization/deserialization. All object properties are
 		 * recreated as new instances
 		 */
-		Entity entityCopy = (Entity) MiscUtils.deepCopy(this);
+		final Entity entityCopy = (Entity) MiscUtils.deepCopy(this);
 		return entityCopy;
 	}
 
@@ -260,7 +260,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		 * We make a copy so these changes don't effect the synthetic entity
 		 * in the entity model in case we keep it because of a failure.
 		 */
-		Entity entity = synthetic.clone();
+		final Entity entity = synthetic.clone();
 		entity.id = null;
 		entity.locked = false;
 		if (synthetic.place.category != null) {
@@ -286,12 +286,12 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 	public GeoLocation getLocation() {
 		GeoLocation location = null;
-		Entity parent = getParent();
+		final Entity parent = getParent();
 		if (parent != null) {
 			location = parent.getLocation();
 		}
 		else {
-			Beacon beacon = getActivePrimaryBeacon("proximity");
+			final Beacon beacon = getActivePrimaryBeacon("proximity");
 			if (beacon != null) {
 				location = beacon.getLocation();
 			}
@@ -304,21 +304,21 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 
 	public Float getDistance() {
 		this.distance = -1f;
-		Beacon beacon = getActivePrimaryBeacon("proximity");
+		final Beacon beacon = getActivePrimaryBeacon("proximity");
 		if (beacon != null) {
 			this.distance = beacon.getDistance();
 		}
 		else {
-			GeoLocation location = getLocation();
+			final GeoLocation location = getLocation();
 			if (location != null) {
-				Observation observation = LocationManager.getInstance().getObservationLocked();
+				final Observation observation = LocationManager.getInstance().getObservationLocked();
 				if (observation != null) {
 					Float distanceByLocation = 0f;
-					android.location.Location locationObserved = new android.location.Location(observation.provider);
+					final android.location.Location locationObserved = new android.location.Location(observation.provider);
 					locationObserved.setLatitude(observation.latitude.doubleValue());
 					locationObserved.setLongitude(observation.longitude.doubleValue());
 
-					android.location.Location locationPlace = new android.location.Location("place");
+					final android.location.Location locationPlace = new android.location.Location("place");
 					locationPlace.setLatitude(location.latitude.doubleValue());
 					locationPlace.setLongitude(location.longitude.doubleValue());
 
@@ -351,7 +351,10 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			}
 		}
 		else if (this.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			imageUri = this.source.getImageUri();
+			String sourceImageUri = this.source.getImageUri();
+			if (sourceImageUri != null) {
+				imageUri = this.source.getImageUri();
+			}
 		}
 		else if (this.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 			if (this.photo != null) {
@@ -418,12 +421,12 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public EntityList<Entity> getChildren() {
-		EntityList<Entity> entities = ProxiManager.getInstance().getEntityModel().getChildEntities(this.id);
+		final EntityList<Entity> entities = ProxiManager.getInstance().getEntityModel().getChildEntities(this.id);
 		return entities;
 	}
 
 	public EntityList<Entity> getSourceEntities() {
-		EntityList<Entity> entities = ProxiManager.getInstance().getEntityModel().getSourceEntities(this.id);
+		final EntityList<Entity> entities = ProxiManager.getInstance().getEntityModel().getSourceEntities(this.id);
 		return entities;
 	}
 
@@ -435,14 +438,14 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public Entity getParent() {
-		Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(this.parentId);
+		final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(this.parentId);
 		return entity;
 	}
 
 	public Beacon getActivePrimaryBeacon(String linkType) {
-		Link link = getActiveLink(linkType, true);
+		final Link link = getActiveLink(linkType, true);
 		if (link != null) {
-			Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
+			final Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
 			return beacon;
 		}
 		return null;
@@ -501,14 +504,18 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 							if (beacon != null) {
 								int level = beacon.level.intValue();
 
-								if (level <= -90)
+								if (level <= -90) {
 									placeRankScore += 1;
-								else if (level <= -80)
+								}
+								else if (level <= -80) {
 									placeRankScore += 2;
-								else if (level <= -70)
+								}
+								else if (level <= -70) {
 									placeRankScore += 4;
-								else
+								}
+								else {
 									placeRankScore += 8;
+								}
 							}
 						}
 						else if (link.type.equals("browse")) {
@@ -522,29 +529,29 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public Integer getPlaceRankImpact() {
-		int placeRankScore = getPlaceRankScore();
+		final int placeRankScore = getPlaceRankScore();
 		return placeRankScore >= 5 ? placeRankScore : 0;
 	}
 
 	public String getBeaconId() {
-		Link link = getActiveLink("proximity", true);
+		final Link link = getActiveLink("proximity", true);
 		if (link != null) {
 			return link.toId;
 		}
 		return null;
 	}
 
-	public String getSourcesAsText() {
-		if (sources != null && sources.size() > 0) {
-			String sourcesAsText = "";
-			for (Source source : sources) {
-				sourcesAsText += source.name + ", ";
-			}
-			sourcesAsText = sourcesAsText.substring(0, sourcesAsText.length() - 2);
-			return sourcesAsText;
-		}
-		return null;
-	}
+//	public String getSourcesAsText() {
+//		if (sources != null && sources.size() > 0) {
+//			String sourcesAsText = "";
+//			for (Source source : sources) {
+//				sourcesAsText += source.caption + ", ";
+//			}
+//			sourcesAsText = sourcesAsText.substring(0, sourcesAsText.length() - 2);
+//			return sourcesAsText;
+//		}
+//		return null;
+//	}
 
 	@SuppressWarnings("ucd")
 	public static enum Visibility {
@@ -577,6 +584,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		}
 	}
 
+	@SuppressWarnings("ucd")
 	public static class SortEntitiesByDistance implements Comparator<Entity> {
 
 		@Override
@@ -602,7 +610,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			if (entity1.source.position < entity2.source.position) {
 				return -1;
 			}
-			if (entity1.source.position == entity2.source.position) {
+			if (entity1.source.position.equals(entity2.source.position)) {
 				return 0;
 			}
 			return 1;

@@ -29,7 +29,7 @@ public class NetworkManager {
 	public static int					CONNECT_WAIT				= 500;
 
 	private Context						mApplicationContext;
-	private WifiStateChangedReceiver	mWifiStateChangedReceiver	= new WifiStateChangedReceiver();
+	private final WifiStateChangedReceiver	mWifiStateChangedReceiver	= new WifiStateChangedReceiver();
 	private Integer						mWifiState;
 	private WifiManager					mWifiManager;
 	private ConnectivityManager			mConnectivityManager;
@@ -54,7 +54,7 @@ public class NetworkManager {
 	}
 
 	public ServiceResponse request(ServiceRequest serviceRequest) {
-		ServiceResponse serviceResponse = request(serviceRequest, null);
+		final ServiceResponse serviceResponse = request(serviceRequest, null);
 		return serviceResponse;
 	}
 
@@ -72,8 +72,8 @@ public class NetworkManager {
 
 		/* Make sure we have a network connection */
 		if (!verifyIsConnected()) {
-			Exception exception = new ConnectException();
-			ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
+			final Exception exception = new ConnectException();
+			final ProxibaseServiceException proxibaseException = ProxibaseService.makeProxibaseServiceException(null, exception);
 			serviceResponse = new ServiceResponse(ResponseCode.Failed, null, proxibaseException);
 		}
 		else {
@@ -83,7 +83,7 @@ public class NetworkManager {
 			 */
 			try {
 				/* Could be string, input stream, or array of bytes */
-				Object response = ProxibaseService.getInstance().request(serviceRequest);
+				final Object response = ProxibaseService.getInstance().request(serviceRequest);
 				serviceResponse = new ServiceResponse(ResponseCode.Success, response, null);
 			}
 			catch (ProxibaseServiceException exception) {
@@ -123,7 +123,7 @@ public class NetworkManager {
 	private boolean isConnected() {
 		if (mApplicationContext != null) {
 			if (mConnectivityManager != null) {
-				NetworkInfo[] info = mConnectivityManager.getAllNetworkInfo();
+				final NetworkInfo[] info = mConnectivityManager.getAllNetworkInfo();
 				if (info != null) {
 					for (int i = 0; i < info.length; i++) {
 						if (info[i].getState() == State.CONNECTED) {
@@ -138,9 +138,9 @@ public class NetworkManager {
 
 	@SuppressWarnings("unused")
 	private boolean isConnectedOrConnecting() {
-		ConnectivityManager cm = (ConnectivityManager) mApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+		final ConnectivityManager cm = (ConnectivityManager) mApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		if (cm != null) {
-			NetworkInfo[] info = cm.getAllNetworkInfo();
+			final NetworkInfo[] info = cm.getAllNetworkInfo();
 			if (info != null) {
 				for (int i = 0; i < info.length; i++) {
 					if (info[i].getState() == State.CONNECTED || info[i].getState() == State.CONNECTING) {
@@ -155,8 +155,8 @@ public class NetworkManager {
 	@SuppressWarnings("ucd")
 	protected boolean isMobileNetwork() {
 		/* Check if we're connected to a data network, and if so - if it's a mobile network. */
-		NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
-		Boolean mobileNetwork = activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE;
+		final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+		final Boolean mobileNetwork = activeNetwork != null && activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE;
 		return mobileNetwork;
 	}
 
@@ -174,7 +174,7 @@ public class NetworkManager {
 		 */
 		Boolean isTethered = false;
 		if (mWifiManager != null) {
-			Method[] wmMethods = mWifiManager.getClass().getDeclaredMethods();
+			final Method[] wmMethods = mWifiManager.getClass().getDeclaredMethods();
 			for (Method method : wmMethods) {
 				if (method.getName().equals("isWifiApEnabled")) {
 					try {

@@ -29,10 +29,10 @@ public class AddressBuilder extends FormActivity {
 	}
 
 	private void initialize() {
-		Bundle extras = this.getIntent().getExtras();
+		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			mPhone = extras.getString(CandiConstants.EXTRA_PHONE);
-			String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
+			final String jsonAddress = extras.getString(CandiConstants.EXTRA_ADDRESS);
 			if (jsonAddress != null) {
 				mLocation = (Location) ProxibaseService.convertJsonToObjectInternalSmart(jsonAddress, ServiceDataType.Location);
 			}
@@ -120,10 +120,10 @@ public class AddressBuilder extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	private void doSave() {
-		Intent intent = new Intent();
+		final Intent intent = new Intent();
 		intent.putExtra(CandiConstants.EXTRA_PHONE, mPhone);
 		if (mLocation != null) {
-			String jsonAddress = ProxibaseService.convertObjectToJsonSmart(mLocation, false, true);
+			final String jsonAddress = ProxibaseService.convertObjectToJsonSmart(mLocation, false, true);
 			intent.putExtra(CandiConstants.EXTRA_ADDRESS, jsonAddress);
 		}
 		setResult(Activity.RESULT_OK, intent);

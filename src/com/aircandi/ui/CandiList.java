@@ -53,7 +53,7 @@ public class CandiList extends CandiActivity {
 		 * Navigation setup for action bar icon and title
 		 */
 		if (mEntityListType == EntityListType.InCollection) {
-			Entity collection = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mCollectionId);
+			final Entity collection = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mCollectionId);
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 			mCommon.mActionBar.setTitle(collection.name);
 		}
@@ -81,7 +81,7 @@ public class CandiList extends CandiActivity {
 
 	private void initialize() {
 		mListView = (ListView) findViewById(R.id.list_candi);
-		Bundle extras = getIntent().getExtras();
+		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mEntityListType = EntityListType.valueOf(extras.getString(CandiConstants.EXTRA_LIST_TYPE));
 		}
@@ -99,14 +99,14 @@ public class CandiList extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntities");
-				ModelResult result = ProxiManager.getInstance().getEntityModel()
+				final ModelResult result = ProxiManager.getInstance().getEntityModel()
 						.getEntitiesByListType(mEntityListType, refresh, mCommon.mCollectionId, mCommon.mUserId, ProxiConstants.RADAR_ENTITY_LIMIT);
 				return result;
 			}
 
 			@Override
 			protected void onPostExecute(Object modelResult) {
-				ModelResult result = (ModelResult) modelResult;
+				final ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					/*
 					 * Check to see if we got anything back. If not then we want to move up the tree.
@@ -120,7 +120,7 @@ public class CandiList extends CandiActivity {
 						mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
 						mEntityModelUser = Aircandi.getInstance().getUser();
 
-						CandiListAdapter adapter = new CandiListAdapter(CandiList.this, (EntityList<Entity>) result.data, R.layout.temp_listitem_candi);
+						final CandiListAdapter adapter = new CandiListAdapter(CandiList.this, (EntityList<Entity>) result.data, R.layout.temp_listitem_candi);
 						mListView.setAdapter(adapter);
 					}
 				}
@@ -145,15 +145,15 @@ public class CandiList extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {
 		Logger.v(this, "List item clicked");
-		Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
+		final Entity entity = (Entity) ((CandiListViewHolder) view.getTag()).data;
 		if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
-			if (entity.source.name.equals("twitter")) {
+			if (entity.source.type.equals("twitter")) {
 				AndroidManager.getInstance().callTwitterActivity(this, entity.source.id);
 			}
-			else if (entity.source.name.equals("facebook")) {
+			else if (entity.source.type.equals("facebook")) {
 				AndroidManager.getInstance().callFacebookActivity(this, entity.source.id);
 			}
-			else if (entity.source.name.equals("website")) {
+			else if (entity.source.type.equals("website")) {
 				AndroidManager.getInstance().callBrowserActivity(this, entity.source.id);
 			}
 		}
@@ -164,16 +164,16 @@ public class CandiList extends CandiActivity {
 
 	@SuppressWarnings("ucd")
 	public void onCommentsClick(View view) {
-		Entity entity = (Entity) view.getTag();
+		final Entity entity = (Entity) view.getTag();
 		if (entity.commentCount > 0) {
 
-			IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
+			final IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setEntityId(entity.id)
 					.setParentEntityId(entity.parentId)
 					.setCollectionId(entity.id);
 
-			Intent intent = intentBuilder.create();
+			final Intent intent = intentBuilder.create();
 			startActivity(intent);
 			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 		}

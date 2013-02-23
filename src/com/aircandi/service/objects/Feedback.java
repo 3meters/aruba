@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import com.aircandi.service.Expose;
-import com.aircandi.service.SerializedName;
 
 /**
  * @author Jayma
@@ -16,27 +15,21 @@ public class Feedback extends ServiceEntryBase implements Cloneable, Serializabl
 
 	@Expose
 	public String				message;
-	@Expose
-	@SerializedName("_creator")
-	public String				creatorId;
-	@Expose
-	public Number				createdDate;
 
 	public Feedback() {}
 
-	public static Feedback setPropertiesFromMap(Feedback comment, HashMap map) {
+	public static Feedback setPropertiesFromMap(Feedback feedback, HashMap map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		comment.message = (String) map.get("description");
-		comment.creatorId = (String) map.get("_creator");
-		comment.createdDate = (Number) map.get("createdDate");
-		return comment;
+		feedback = (Feedback) ServiceEntryBase.setPropertiesFromMap(feedback, map);
+		
+		feedback.message = (String) map.get("description");
+		return feedback;
 	}
 
 	@Override
 	public String getCollection() {
-		return "beacons";
+		return "";
 	}
-
 }

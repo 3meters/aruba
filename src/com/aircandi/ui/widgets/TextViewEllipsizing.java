@@ -40,7 +40,7 @@ public class TextViewEllipsizing extends TextView {
 
 	public TextViewEllipsizing(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.TextViewEllipsizing, defStyle, 0);
+		final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.TextViewEllipsizing, defStyle, 0);
 		mMaxLines = ta.getInteger(R.styleable.TextViewEllipsizing_maxLines, -1);
 		ta.recycle();
 	}
@@ -83,13 +83,13 @@ public class TextViewEllipsizing extends TextView {
 
 	private void updateText() {
 
-		int maxLines = mMaxLines;
+		final int maxLines = mMaxLines;
 		String workingText = mFullText;
 		boolean ellipsized = false;
 
 		try {
 			if (maxLines != -1) {
-				Layout layout = createWorkingLayout(workingText);
+				final Layout layout = createWorkingLayout(workingText);
 				if (layout.getLineCount() > maxLines) {
 					workingText = workingText.substring(0, layout.getLineEnd(maxLines - 1)).trim();
 					while (createWorkingLayout(workingText + ELLIPSIS).getLineCount() > maxLines) {
@@ -111,7 +111,7 @@ public class TextViewEllipsizing extends TextView {
 				}
 			}
 		}
-		catch (Exception exception) {
+		catch (Exception exception) { // $codepro.audit.disable emptyCatchClause
 			/*
 			 * Most likely happened because of rebuilding/recycling so we eat it
 			 * i.e. StringIndexOutOfBoundsException
