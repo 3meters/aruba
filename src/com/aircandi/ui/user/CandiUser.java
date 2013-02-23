@@ -235,7 +235,6 @@ public class CandiUser extends CandiActivity {
 		/* Stats */
 
 		setVisibility(findViewById(R.id.section_stats), View.GONE);
-
 		setVisibility(stats, View.GONE);
 		if (stats != null && user.stats != null && user.stats.size() > 0) {
 			final StringBuilder statString = new StringBuilder(500);
@@ -254,18 +253,17 @@ public class CandiUser extends CandiActivity {
 					statString.append("Custom places created: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 				else if (stat.type.equals("insert_entity_post")) {
-					statString += "Posts created: " + String.valueOf(stat.countBy) + "<br/>";
+					statString.append("Posts created: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 				else if (stat.type.equals("insert_entity_place_linked")) {
-					statString += "Places discovered first: " + String.valueOf(stat.countBy) + "<br/>";
+					statString.append("Places discovered first: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 			}
-			stats.setText(Html.fromHtml(statString.toString()));
 			if (tuneCount > 0) {
-				statString += "Tunings: " + String.valueOf(tuneCount) + "<br/>";
+				statString.append("Tunings: " + String.valueOf(tuneCount) + "<br/>");
 			}
 			
-			stats.setText(Html.fromHtml(statString));
+			stats.setText(Html.fromHtml(statString.toString()));
 			setVisibility(stats, View.VISIBLE);
 			setVisibility(findViewById(R.id.section_stats), View.VISIBLE);
 		}
