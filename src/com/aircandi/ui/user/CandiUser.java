@@ -225,22 +225,22 @@ public class CandiUser extends CandiActivity {
 
 		setVisibility(stats, View.GONE);
 		if (stats != null && user.stats != null && user.stats.size() > 0) {
-			String statString = "";
+			final StringBuilder statString = new StringBuilder(500);
 			for (Stat stat : user.stats) {
 				if (stat.type.equals("tune_link_primary")) {
-					statString += "Place tunings: " + String.valueOf(stat.countBy) + "<br/>";
+					statString.append("Place tunings: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 				else if (stat.type.equals("insert_entity")) {
-					statString += "Candi created: " + String.valueOf(stat.countBy) + "<br/>";
+					statString.append("Candi created: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 				else if (stat.type.equals("insert_entity_linked")) {
-					statString += "First to tune: " + String.valueOf(stat.countBy) + "<br/>";
+					statString.append("First to tune: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 				else if (stat.type.equals("insert_entity_custom")) {
-					statString += "Custom places created: " + String.valueOf(stat.countBy) + "<br/>";
+					statString.append("Custom places created: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 			}
-			stats.setText(Html.fromHtml(statString));
+			stats.setText(Html.fromHtml(statString.toString()));
 			setVisibility(stats, View.VISIBLE);
 			setVisibility(findViewById(R.id.section_stats), View.VISIBLE);
 		}

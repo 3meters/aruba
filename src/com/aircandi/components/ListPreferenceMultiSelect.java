@@ -137,7 +137,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
 
 	@Override
 	protected void onDialogClosed(boolean positiveResult) {
-		final ArrayList<String> values = new ArrayList<String>();
+		final List<String> values = new ArrayList<String>();
 
 		final CharSequence[] entryValues = getEntryValues();
 		if (positiveResult && entryValues != null) {

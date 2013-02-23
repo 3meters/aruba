@@ -364,11 +364,11 @@ public class LocationManager {
 	}
 
 	private boolean isProviderEnabled(String provider) {
-		return (mLocationManager.isProviderEnabled(provider));
+		return mLocationManager.isProviderEnabled(provider);
 	}
 
 	public boolean isLocationAccessEnabled() {
-		return (isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) || isProviderEnabled(android.location.LocationManager.GPS_PROVIDER));
+		return isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) || isProviderEnabled(android.location.LocationManager.GPS_PROVIDER);
 	}
 
 	public static float getRadiusForMeters(float meters) {

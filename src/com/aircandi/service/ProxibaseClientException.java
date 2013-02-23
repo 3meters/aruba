@@ -1,3 +1,4 @@
+// $codepro.audit.disable restrictedSuperclasses
 package com.aircandi.service;
 
 /**

@@ -1,7 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
 import android.graphics.Bitmap;
 
@@ -37,7 +37,7 @@ public class Comment extends ServiceObject implements Cloneable, Serializable {
 
 	public Comment() {}
 
-	public static Comment setPropertiesFromMap(Comment comment, HashMap map) {
+	public static Comment setPropertiesFromMap(Comment comment, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

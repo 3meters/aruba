@@ -295,7 +295,7 @@ public class EntityForm extends FormActivity {
 				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 					if (entity.photo == null && entity.place != null && entity.place.category != null) {
 
-						final int color = Place.getCategoryColor(entity.place.category != null
+						final int color = Place.getCategoryColor((entity.place.category != null)
 								? entity.place.category.name
 								: null, true, mMuteColor, false);
 
@@ -518,7 +518,7 @@ public class EntityForm extends FormActivity {
 			else if (requestCode == CandiConstants.ACTIVITY_SOURCES_EDIT) {
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final ArrayList<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
+					final List<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
 					final List<Source> sources = new ArrayList<Source>();
 					for (String jsonSource : jsonSources) {
 						Source source = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
@@ -710,7 +710,7 @@ public class EntityForm extends FormActivity {
 			 * We are linking to a beacon so get the best and alert if none
 			 */
 			beacons = ProxiManager.getInstance().getStrongestBeacons(5);
-			primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
+			primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 
 			/*
 			 * Set location info if this is a place entity

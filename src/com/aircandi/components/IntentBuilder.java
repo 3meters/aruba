@@ -4,7 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.aircandi.CandiConstants;
-import com.aircandi.components.ProxiManager.EntityListType;
+import com.aircandi.components.ProxiManager.ArrayListType;
+
 
 public class IntentBuilder {
 
@@ -18,14 +19,14 @@ public class IntentBuilder {
 	private String			mUserId;
 
 	private String			mMessage;
-	private EntityListType	mEntityListType;
+	private ArrayListType	mArrayListType;
 	private String			mCollectionId;
 
 	public IntentBuilder() {}
 
 	public IntentBuilder(Context context, Class<?> clazz) {
-		this.mContext = context;
-		this.mClass = clazz;
+		mContext = context;
+		mClass = clazz;
 	}
 
 	public Intent create() {
@@ -59,25 +60,25 @@ public class IntentBuilder {
 			intent.putExtra(CandiConstants.EXTRA_COLLECTION_ID, mCollectionId);
 		}
 
-		if (mEntityListType != null) {
-			intent.putExtra(CandiConstants.EXTRA_LIST_TYPE, mEntityListType.name());
+		if (mArrayListType != null) {
+			intent.putExtra(CandiConstants.EXTRA_LIST_TYPE, mArrayListType.name());
 		}
 
 		return intent;
 	}
 
 	public IntentBuilder setParentEntityId(String parentEntityId) {
-		this.mParentEntityId = parentEntityId;
+		mParentEntityId = parentEntityId;
 		return this;
 	}
 
 	public IntentBuilder setEntityType(String entityType) {
-		this.mEntityType = entityType;
+		mEntityType = entityType;
 		return this;
 	}
 
 	public IntentBuilder setEntityId(String entityId) {
-		this.mEntityId = entityId;
+		mEntityId = entityId;
 		return this;
 	}
 
@@ -97,8 +98,8 @@ public class IntentBuilder {
 	}
 
 	@SuppressWarnings("ucd")
-	public IntentBuilder setEntityListType(EntityListType entityListType) {
-		mEntityListType = entityListType;
+	public IntentBuilder setArrayListType(ArrayListType arrayListType) {
+		mArrayListType = arrayListType;
 		return this;
 	}
 }

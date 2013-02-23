@@ -59,13 +59,13 @@ public class ServiceRequest {
 	public ServiceRequest() {}
 
 	public ServiceRequest(String uri, RequestType requestType, ResponseFormat responseFormat) {
-		this.mUri = uri;
-		this.mRequestType = requestType;
-		this.mResponseFormat = responseFormat;
+		mUri = uri;
+		mRequestType = requestType;
+		mResponseFormat = responseFormat;
 	}
 
 	public ServiceRequest setUri(String uri) {
-		this.mUri = uri;
+		mUri = uri;
 		return this;
 	}
 
@@ -74,7 +74,7 @@ public class ServiceRequest {
 	}
 
 	public ServiceRequest setRequestType(RequestType requestType) {
-		this.mRequestType = requestType;
+		mRequestType = requestType;
 		return this;
 	}
 
@@ -83,7 +83,7 @@ public class ServiceRequest {
 	}
 
 	public ServiceRequest setRequestListener(RequestListener requestListener) {
-		this.mRequestListener = requestListener;
+		mRequestListener = requestListener;
 		return this;
 	}
 
@@ -92,7 +92,7 @@ public class ServiceRequest {
 	}
 
 	public ServiceRequest setResponseFormat(ResponseFormat responseFormat) {
-		this.mResponseFormat = responseFormat;
+		mResponseFormat = responseFormat;
 		return this;
 	}
 
@@ -101,7 +101,7 @@ public class ServiceRequest {
 	}
 
 	public ServiceRequest setRequestBody(String requestBody) {
-		this.mRequestBody = requestBody;
+		mRequestBody = requestBody;
 		return this;
 	}
 
@@ -110,7 +110,7 @@ public class ServiceRequest {
 	}
 
 	public ServiceRequest setQuery(Query query) {
-		this.mQuery = query;
+		mQuery = query;
 		return this;
 	}
 
@@ -119,7 +119,7 @@ public class ServiceRequest {
 	}
 
 	public ServiceRequest setParameters(Bundle parameters) {
-		this.mParameters = parameters;
+		mParameters = parameters;
 		return this;
 	}
 
@@ -128,7 +128,7 @@ public class ServiceRequest {
 	}
 
 	public ServiceRequest setSuppressUI(boolean suppressUI) {
-		this.mSuppressUI = suppressUI;
+		mSuppressUI = suppressUI;
 		return this;
 	}
 

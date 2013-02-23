@@ -3,8 +3,8 @@ package com.aircandi.service.objects;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.aircandi.CandiConstants;
 import com.aircandi.components.ProxiManager;
@@ -51,12 +51,12 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 
 	public Beacon() {}
 
-	public Beacon(String bssid, String ssid, String label, int levelDb, Date discoveryTime, Boolean test) {
-		this.id = "0008." + bssid;
+	public Beacon(String bssid, String ssid, String label, int levelDb, Date discoveryTime, Boolean test) { // $codepro.audit.disable largeNumberOfParameters
+		id = "0008." + bssid;
 		this.ssid = ssid;
 		this.bssid = bssid;
 		this.label = label;
-		this.level = levelDb;
+		level = levelDb;
 		this.test = test;
 	}
 
@@ -88,7 +88,7 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 
 	}
 
-	public static Beacon setPropertiesFromMap(Beacon beacon, HashMap map) {
+	public static Beacon setPropertiesFromMap(Beacon beacon, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
@@ -122,37 +122,37 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 
 		Float distance = 0f;
 
-		if (this.level.intValue() >= -40) {
+		if (level.intValue() >= -40) {
 			distance = 1f;
 		}
-		else if (this.level.intValue() >= -50) {
+		else if (level.intValue() >= -50) {
 			distance = 2f;
 		}
-		else if (this.level.intValue() >= -55) {
+		else if (level.intValue() >= -55) {
 			distance = 3f;
 		}
-		else if (this.level.intValue() >= -60) {
+		else if (level.intValue() >= -60) {
 			distance = 5f;
 		}
-		else if (this.level.intValue() >= -65) {
+		else if (level.intValue() >= -65) {
 			distance = 7f;
 		}
-		else if (this.level.intValue() >= -70) {
+		else if (level.intValue() >= -70) {
 			distance = 10f;
 		}
-		else if (this.level.intValue() >= -75) {
+		else if (level.intValue() >= -75) {
 			distance = 15f;
 		}
-		else if (this.level.intValue() >= -80) {
+		else if (level.intValue() >= -80) {
 			distance = 20f;
 		}
-		else if (this.level.intValue() >= -85) {
+		else if (level.intValue() >= -85) {
 			distance = 30f;
 		}
-		else if (this.level.intValue() >= -90) {
+		else if (level.intValue() >= -90) {
 			distance = 40f;
 		}
-		else if (this.level.intValue() >= -95) {
+		else if (level.intValue() >= -95) {
 			distance = 60f;
 		}
 		else {
@@ -168,7 +168,7 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 	}
 
 	public List<Entity> getEntities() {
-		return (ProxiManager.getInstance().getEntityModel().getBeaconEntities(this.id));
+		return ProxiManager.getInstance().getEntityModel().getBeaconEntities(id);
 	}
 
 	public static class SortBeaconsBySignalLevel implements Comparator<Beacon> {

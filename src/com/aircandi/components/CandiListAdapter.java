@@ -142,7 +142,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			/* Comments */
 			setVisibility(holder.comments, View.GONE);
 			if (holder.comments != null && entity.commentCount != null && entity.commentCount > 0) {
-				holder.comments.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
+				holder.comments.setText(String.valueOf(entity.commentCount) + ((entity.commentCount == 1) ? " Comment" : " Comments"));
 				holder.comments.setTag(entity);
 				setVisibility(holder.comments, View.VISIBLE);
 			}
@@ -176,7 +176,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 
 						holder.imageUri = imageUri;
 						if (entity.synthetic) {
-							final int color = Place.getCategoryColor(entity.place.category != null ? entity.place.category.name : null, true, true, false);
+							final int color = Place.getCategoryColor((entity.place.category != null) ? entity.place.category.name : null, true, true, false);
 							holder.image.getImageView().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
 						}
 						else {
@@ -285,7 +285,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			}
 			else {
 				if (filterType.toString().toLowerCase(Locale.US).equals("candipatches")) {
-					final ArrayList<Entity> filteredEntities = new ArrayList<Entity>(mListItems.size());
+					final List<Entity> filteredEntities = new ArrayList<Entity>(mListItems.size());
 					for (int i = 0; i < mListItems.size(); i++) {
 						//Entity entity = mListItems.get(i);
 					}

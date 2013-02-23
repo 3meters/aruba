@@ -7,6 +7,8 @@ import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import android.annotation.SuppressLint;
@@ -38,6 +40,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
@@ -76,7 +79,7 @@ public class PicturePicker extends FormActivity {
 
 	private GridView				mGridView;
 	private EditText				mSearch;
-	private final ArrayList<ImageResult>	mImages			= new ArrayList<ImageResult>();
+	private final List<ImageResult>	mImages			= new ArrayList<ImageResult>();
 	private TextView				mTitle;
 	private TextView				mMessage;
 	private Entity					mEntity;
@@ -92,10 +95,10 @@ public class PicturePicker extends FormActivity {
 	private Integer					mImageWidthPixels;
 	private Integer					mImageMarginPixels;
 
-	private static final long				PAGE_SIZE		= 30L;
-	private static final long				LIST_MAX		= 300L;
-	private static final String			QUERY_PREFIX	= "";
-	private static final String			QUERY_DEFAULT	= "wallpaper unusual places";
+	private static final long		PAGE_SIZE		= 30L;
+	private static final long		LIST_MAX		= 300L;
+	private static final String		QUERY_PREFIX	= "";
+	private static final String		QUERY_DEFAULT	= "wallpaper unusual places";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -213,8 +216,10 @@ public class PicturePicker extends FormActivity {
 		try {
 			query = "%27" + URLEncoder.encode(query, "UTF-8") + "%27";
 		}
-		catch (UnsupportedEncodingException exception) {
-			exception.printStackTrace();
+		catch (UnsupportedEncodingException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 
 		final String bingUrl = ProxiConstants.URL_PROXIBASE_SEARCH_IMAGES
@@ -232,7 +237,7 @@ public class PicturePicker extends FormActivity {
 		serviceResponse = NetworkManager.getInstance().request(serviceRequest);
 
 		final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart((String) serviceResponse.data, ServiceDataType.ImageResult);
-		final ArrayList<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
+		final List<ImageResult> images = (ArrayList<ImageResult>) serviceData.data;
 		serviceResponse.data = images;
 
 		return serviceResponse;
@@ -301,9 +306,9 @@ public class PicturePicker extends FormActivity {
 
 	private class EndlessImageAdapter extends EndlessAdapter {
 
-		private ArrayList<ImageResult>	moreImages	= new ArrayList<ImageResult>();
+		private List<ImageResult>	moreImages	= new ArrayList<ImageResult>();
 
-		private EndlessImageAdapter(ArrayList<ImageResult> list) {
+		private EndlessImageAdapter(List<ImageResult> list) {
 			super(new ListAdapter(list));
 		}
 
@@ -325,7 +330,7 @@ public class PicturePicker extends FormActivity {
 			if (mPlacePhotoMode) {
 				serviceResponse = loadPlaceImages(PAGE_SIZE, mOffset);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					final ArrayList<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
+					final List<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
 					if (mOffset == 0 && photos.size() == 0) {
 						runOnUiThread(new Runnable() {
 
@@ -358,7 +363,7 @@ public class PicturePicker extends FormActivity {
 						mCommon.hideBusy(true);
 					}
 				});
-				return (moreImages.size() >= PAGE_SIZE);
+				return moreImages.size() >= PAGE_SIZE;
 			}
 			else {
 				String queryDecorated = mQuery;
@@ -399,7 +404,7 @@ public class PicturePicker extends FormActivity {
 						mCommon.hideBusy(true);
 					}
 				});
-				return ((getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX);
+				return (getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX;
 			}
 		}
 
@@ -414,7 +419,7 @@ public class PicturePicker extends FormActivity {
 
 	private class ListAdapter extends ArrayAdapter<ImageResult> {
 
-		public ListAdapter(ArrayList<ImageResult> list) {
+		private ListAdapter(List<ImageResult> list) {
 			super(PicturePicker.this, 0, list);
 		}
 
@@ -456,9 +461,9 @@ public class PicturePicker extends FormActivity {
 		 * a soft reference to the bitmap that allows the gc to collect it if memory
 		 * needs to be freed. If collected, we download the bitmap again.
 		 */
-		private final HashMap<String, SoftReference<Bitmap>>	mBitmapCache;
+		private final Map<String, SoftReference<Bitmap>>	mBitmapCache;
 
-		public DrawableManager() {
+		private DrawableManager() {
 			mBitmapCache = new HashMap<String, SoftReference<Bitmap>>();
 		}
 

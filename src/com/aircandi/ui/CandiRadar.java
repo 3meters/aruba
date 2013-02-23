@@ -789,7 +789,7 @@ public class CandiRadar extends CandiActivity {
 			BitmapManager.getInstance().stopBitmapLoaderThread();
 		}
 		catch (Exception exception) {
-			Exceptions.Handle(exception);
+			Exceptions.handle(exception);
 		}
 	}
 

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import com.aircandi.ProxiConstants;
 import com.aircandi.components.AndroidManager;
@@ -32,7 +33,7 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String					packageName;
 	@Expose
-	public HashMap<String, Object>	data;
+	public Map<String,Object>	data;
 
 	/* Client use only */
 	public Boolean					checked;
@@ -48,7 +49,7 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		this.installDeclined = installDeclined;
 	}
 
-	public static Source setPropertiesFromMap(Source source, HashMap map) {
+	public static Source setPropertiesFromMap(Source source, Map map) {
 		source.id = (String) map.get("id");
 		source.type = (String) map.get("type");
 		source.name = (String) map.get("name");
@@ -85,11 +86,11 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	}
 
 	public Boolean appExists() {
-		return (packageName != null);
+		return packageName != null;
 	}
 
 	public Boolean appInstalled() {
-		final Boolean exists = AndroidManager.getInstance().doesPackageExist(this.packageName);
+		final Boolean exists = AndroidManager.getInstance().doesPackageExist(packageName);
 		return exists;
 	}
 }

@@ -47,8 +47,8 @@ public class Observation extends ServiceEntryBase {
 	public Observation() {}
 
 	public Observation(Number pLatitude, Number pLongitude) {
-		this.latitude = pLatitude;
-		this.longitude = pLongitude;
+		latitude = pLatitude;
+		longitude = pLongitude;
 	}
 
 	@Override

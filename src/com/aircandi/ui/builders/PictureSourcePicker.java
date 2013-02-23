@@ -110,7 +110,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 	{
 		private final List<Object>	items;
 
-		public ListAdapter(Context context, List<Object> items) {
+		private ListAdapter(Context context, List<Object> items) {
 			super(context, 0, items);
 			this.items = items;
 		}

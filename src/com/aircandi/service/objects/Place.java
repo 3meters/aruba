@@ -2,6 +2,7 @@ package com.aircandi.service.objects;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import com.aircandi.Aircandi;
@@ -36,14 +37,14 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 	public Place clone() {
 		try {
 			final Place place = (Place) super.clone();
-			if (this.location != null) {
-				place.location = this.location.clone();
+			if (location != null) {
+				place.location = location.clone();
 			}
-			if (this.contact != null) {
-				place.contact = this.contact.clone();
+			if (contact != null) {
+				place.contact = contact.clone();
 			}
-			if (this.category != null) {
-				place.category = this.category.clone();
+			if (category != null) {
+				place.category = category.clone();
 			}
 			return place;
 		}
@@ -52,7 +53,7 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	public static Place setPropertiesFromMap(Place place, HashMap map) {
+	public static Place setPropertiesFromMap(Place place, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
@@ -88,7 +89,7 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		return location;
 	}
 
-	static public Integer getCategoryColorResId(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
+	public static Integer getCategoryColorResId(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
 		int colorResId = R.color.accent_gray;
 		if (semi) {
 			colorResId = R.color.accent_gray_semi;
@@ -161,7 +162,7 @@ public class Place extends ServiceObject implements Cloneable, Serializable {
 		return colorResId;
 	}
 
-	static public Integer getCategoryColor(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
+	public static Integer getCategoryColor(String categoryName, Boolean dark, Boolean mute, Boolean semi) {
 		int colorResId = R.color.accent_gray;
 		if (semi) {
 			colorResId = R.color.accent_gray_semi;

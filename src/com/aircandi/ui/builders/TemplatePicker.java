@@ -82,7 +82,7 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	{
 		private final List<Object>	items;
 
-		public ListAdapter(Context context, List<Object> items) {
+		private ListAdapter(Context context, List<Object> items) {
 			super(context, 0, items);
 			this.items = items;
 		}

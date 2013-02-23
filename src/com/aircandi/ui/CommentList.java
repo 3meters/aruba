@@ -208,7 +208,7 @@ public class CommentList extends CandiActivity {
 						}
 
 						if (mMore) {
-							return ((getWrappedAdapter().getCount() + moreComments.size()) < LIST_MAX);
+							return (getWrappedAdapter().getCount() + moreComments.size()) < LIST_MAX;
 						}
 					}
 				}
@@ -334,7 +334,7 @@ public class CommentList extends CandiActivity {
 
 	}
 
-	private class ViewHolder {
+	private static class ViewHolder {
 
 		public WebImageView	itemAuthorImage;
 		public TextView		itemAuthorName;

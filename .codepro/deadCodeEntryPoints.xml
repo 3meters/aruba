@@ -132,17 +132,17 @@
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.components{LocationReceivedEvent.java[LocationReceivedEvent~LocationReceivedEvent~QLocation;"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{EntityList.java%com.aircandi.components"/>
+				handle="=Aircandi/src&lt;com.aircandi.components{ArrayList.java%com.aircandi.components"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{EntityList.java#"/>
+				handle="=Aircandi/src&lt;com.aircandi.components{ArrayList.java#"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{EntityList.java#java.util.ArrayList"/>
+				handle="=Aircandi/src&lt;com.aircandi.components{ArrayList.java#java.util.ArrayList"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{EntityList.java[EntityList"/>
+				handle="=Aircandi/src&lt;com.aircandi.components{ArrayList.java[ArrayList"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{EntityList.java[EntityList~EntityList"/>
+				handle="=Aircandi/src&lt;com.aircandi.components{ArrayList.java[ArrayList~ArrayList"/>
 		<explicit-entry-point
-				handle="=Aircandi/src&lt;com.aircandi.components{EntityList.java[EntityList~clone"/>
+				handle="=Aircandi/src&lt;com.aircandi.components{ArrayList.java[ArrayList~clone"/>
 		<explicit-entry-point
 				handle="=Aircandi/src&lt;com.aircandi.components{JsonHelper.java[JsonHelper"/>
 		<explicit-entry-point

@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,6 +28,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.PlacesConstants;
 import com.aircandi.ProxiConstants;
@@ -61,24 +63,22 @@ import com.aircandi.utilities.ImageUtils;
 
 public class ProxiManager {
 
-	private static ProxiManager		singletonObject;
-	private Context					mContext;
-	private EntityModel				mEntityModel			= new EntityModel();
+	private static ProxiManager			singletonObject;
+	private Context						mContext;
+	private final EntityModel			mEntityModel			= new EntityModel();
 
-	private AtomicBoolean			mScanRequestActive		= new AtomicBoolean(false);
+	private final AtomicBoolean			mScanRequestActive		= new AtomicBoolean(false);
 
-	@SuppressWarnings("ucd")
-	public List<WifiScanResult>		mWifiList				= new ArrayList<WifiScanResult>();
-	@SuppressWarnings("ucd")
-	public Date						mLastWifiUpdate;
-	private WifiManager				mWifiManager;
-	private boolean					mUsingEmulator			= false;
+	public List<WifiScanResult>			mWifiList				= new ArrayList<WifiScanResult>();
+	public Date							mLastWifiUpdate;
+	private WifiManager					mWifiManager;
+	private boolean						mUsingEmulator			= false;
 
-	private static WifiScanResult	mWifiMassenaUpper		= new WifiScanResult("00:1c:b3:ae:bf:f0", "test_massena_upper", -50, true);
-	private static WifiScanResult	mWifiMassenaLower		= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower", -50, true);
-	private static WifiScanResult	mWifiMassenaLowerStrong	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_strong", -20, true);
-	private static WifiScanResult	mWifiMassenaLowerWeak	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_weak", -100, true);
-	private static WifiScanResult	mWifiEmpty				= new WifiScanResult("aa:aa:bb:bb:cc:cc", "test_empty", -50, true);
+	private static final WifiScanResult	mWifiMassenaUpper		= new WifiScanResult("00:1c:b3:ae:bf:f0", "test_massena_upper", -50, true);
+	private static final WifiScanResult	mWifiMassenaLower		= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower", -50, true);
+	private static final WifiScanResult	mWifiMassenaLowerStrong	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_strong", -20, true);
+	private static final WifiScanResult	mWifiMassenaLowerWeak	= new WifiScanResult("00:1c:b3:ae:bb:57", "test_massena_lower_weak", -100, true);
+	private static final WifiScanResult	mWifiEmpty				= new WifiScanResult("aa:aa:bb:bb:cc:cc", "test_empty", -50, true);
 
 	public static synchronized ProxiManager getInstance() {
 		if (singletonObject == null) {
@@ -112,7 +112,7 @@ public class ProxiManager {
 					@Override
 					public void onReceive(Context context, Intent intent) {
 
-						Logger.v(ProxiManager.this, "Received wifi scan results for " + reason.name().toString());
+						Logger.v(ProxiManager.this, "Received wifi scan results for " + reason.name());
 						mContext.unregisterReceiver(this);
 
 						/* Get the latest scan results */
@@ -205,7 +205,7 @@ public class ProxiManager {
 		 */
 
 		/* Construct string array of the beacon ids */
-		final ArrayList<String> beaconIds = new ArrayList<String>();
+		final List<String> beaconIds = new ArrayList<String>();
 		for (Beacon beacon : mEntityModel.getBeacons()) {
 			beaconIds.add(beacon.id);
 		}
@@ -223,7 +223,7 @@ public class ProxiManager {
 		/* Set method parameters */
 		final Bundle parameters = new Bundle();
 		if (beaconIds.size() > 0) {
-			parameters.putStringArrayList("beaconIdsNew", beaconIds);
+			parameters.putStringArrayList("beaconIdsNew", (ArrayList<String>) beaconIds);
 			final ArrayList<Integer> levels = new ArrayList<Integer>();
 			for (String beaconId : beaconIds) {
 				Beacon beacon = mEntityModel.getBeacon(beaconId);
@@ -322,13 +322,13 @@ public class ProxiManager {
 		}
 
 		/* We don't want to fetch entities we already have via proximity links to local beacons */
-		final ArrayList<String> excludeEntityIds = new ArrayList<String>();
+		final List<String> excludeEntityIds = new ArrayList<String>();
 		for (Entity entity : mEntityModel.getProximityPlaces()) {
 			excludeEntityIds.add(entity.id);
 		}
 
 		if (excludeEntityIds.size() > 0) {
-			parameters.putStringArrayList("excludeEntityIds", excludeEntityIds);
+			parameters.putStringArrayList("excludeEntityIds", (ArrayList<String>) excludeEntityIds);
 		}
 
 		parameters.putString("eagerLoad", "object:{\"children\":true,\"parents\":false,\"comments\":false}");
@@ -409,7 +409,7 @@ public class ProxiManager {
 		 * Note: It is possible for this to get called before places by beacons has
 		 * completed.
 		 */
-		final ArrayList<String> excludePlaceIds = new ArrayList<String>();
+		final List<String> excludePlaceIds = new ArrayList<String>();
 		for (Entity entity : mEntityModel.getAircandiPlaces()) {
 			if (!entity.place.provider.equals("user")) {
 				excludePlaceIds.add(entity.place.id);
@@ -418,7 +418,7 @@ public class ProxiManager {
 
 		final Bundle parameters = new Bundle();
 		if (excludePlaceIds.size() > 0) {
-			parameters.putStringArrayList("excludePlaceIds", excludePlaceIds);
+			parameters.putStringArrayList("excludePlaceIds", (ArrayList<String>) excludePlaceIds);
 		}
 
 		final String placeProvider = Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_PROVIDER, "foursquare");
@@ -632,7 +632,7 @@ public class ProxiManager {
 
 			final String jsonResponse = (String) result.serviceResponse.data;
 			final ServiceEntry serviceEntry = (ServiceEntry) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.ServiceEntry).data;
-			final HashMap<String, Object> map = serviceEntry.data;
+			final Map<String, Object> map = serviceEntry.data;
 			final Boolean enabled = (Boolean) map.get("enabled");
 			final String versionName = (String) map.get("versionName");
 
@@ -645,7 +645,7 @@ public class ProxiManager {
 				final String updateUri = (String) map.get("updateUri");
 				final Boolean updateRequired = (Boolean) map.get("updateRequired");
 
-				Aircandi.applicationUpdateUri = updateUri != null ? updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
+				Aircandi.applicationUpdateUri = (updateUri != null) ? updateUri : CandiConstants.URL_AIRCANDI_UPGRADE;
 				if (updateRequired) {
 					Aircandi.applicationUpdateRequired = true;
 					Logger.i(ProxiManager.this, "Update check: update required");
@@ -678,9 +678,11 @@ public class ProxiManager {
 	}
 
 	private Entity loadEntityFromResources(Integer entityResId) {
+		InputStream inputStream = null;
+		BufferedReader reader = null;
 		try {
-			final InputStream inputStream = mContext.getResources().openRawResource(entityResId);
-			final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+			inputStream = mContext.getResources().openRawResource(entityResId);
+			reader = new BufferedReader(new InputStreamReader(inputStream));
 			final StringBuilder text = new StringBuilder(10000);
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -692,6 +694,17 @@ public class ProxiManager {
 		}
 		catch (IOException exception) {
 			return null;
+		}
+		finally {
+			try {
+				inputStream.close();
+				reader.close();
+			}
+			catch (IOException e) {
+				if (BuildConfig.DEBUG) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -710,7 +723,7 @@ public class ProxiManager {
 		 */
 		try {
 			final String stringDate = DateUtils.nowString(DateUtils.DATE_NOW_FORMAT_FILENAME);
-			final String imageKey = String.valueOf(user != null ? user.id : Aircandi.getInstance().getUser().id) + "_" + stringDate + ".jpg";
+			final String imageKey = String.valueOf((user != null) ? user.id : Aircandi.getInstance().getUser().id) + "_" + stringDate + ".jpg";
 			S3.putImage(imageKey, bitmap, CandiConstants.IMAGE_QUALITY_S3);
 
 			/* Update the photo object for the entity or user */
@@ -733,11 +746,11 @@ public class ProxiManager {
 	// --------------------------------------------------------------------------------------------
 
 	public Context getContext() {
-		return this.mContext;
+		return mContext;
 	}
 
 	public void setContext(Context context) {
-		this.mContext = context;
+		mContext = context;
 	}
 
 	public void setUsingEmulator(boolean usingEmulator) {
@@ -763,15 +776,15 @@ public class ProxiManager {
 
 	public class EntityModel {
 
-		private HashMap<String, Entity>	mEntityCache		= new HashMap<String, Entity>();
-		private List<Beacon>			mBeacons			= new ArrayList<Beacon>();
-		private List<Photo>				mPhotos				= new ArrayList<Photo>();
-		private List<Category>			mCategories			= new ArrayList<Category>();
-		private HashMap<String, Source>	mSourceMeta			= new HashMap<String, Source>();
+		private final Map<String, Entity>	mEntityCache		= new HashMap<String, Entity>();
+		private final List<Beacon>			mBeacons			= new ArrayList<Beacon>();
+		private List<Photo>					mPhotos				= new ArrayList<Photo>();
+		private List<Category>				mCategories			= new ArrayList<Category>();
+		private final Map<String, Source>	mSourceMeta			= new HashMap<String, Source>();
 
-		private Number					mLastActivityDate	= DateUtils.nowDate().getTime();
-		private Number					mLastRefreshDate;
-		private Number					mLastBeaconDate;
+		private Number						mLastActivityDate	= DateUtils.nowDate().getTime();
+		private Number						mLastRefreshDate;
+		private Number						mLastBeaconDate;
 
 		public EntityModel() {}
 
@@ -780,7 +793,7 @@ public class ProxiManager {
 		// --------------------------------------------------------------------------------------------
 
 		public ModelResult getUserEntities(String userId, Boolean refresh, Integer limit) {
-			final EntityList<Entity> entities = new EntityList<Entity>();
+			final List<Entity> entities = new ArrayList<Entity>();
 			final ModelResult result = new ModelResult();
 
 			if (refresh) {
@@ -811,9 +824,7 @@ public class ProxiManager {
 
 					final String jsonResponse = (String) result.serviceResponse.data;
 					final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
-					final List<Entity> entityList = (List<Entity>) serviceData.data;
-					entities.addAll(entityList);
-
+					entities.addAll((List<Entity>) serviceData.data);
 					upsertEntities(entities);
 					result.data = getUserEntities(userId);
 				}
@@ -848,7 +859,7 @@ public class ProxiManager {
 		private ModelResult getEntities(List<String> entityIds, Boolean refresh, String jsonEagerLoad, String jsonOptions) {
 			final ModelResult result = new ModelResult();
 
-			final ArrayList<String> getEntityIds = new ArrayList<String>();
+			final List<String> getEntityIds = new ArrayList<String>();
 
 			for (String entityId : entityIds) {
 				Entity entity = getCacheEntity(entityId);
@@ -875,7 +886,7 @@ public class ProxiManager {
 				}
 
 				final Bundle parameters = new Bundle();
-				parameters.putStringArrayList("entityIds", getEntityIds);
+				parameters.putStringArrayList("entityIds", (ArrayList<String>) getEntityIds);
 				parameters.putString("eagerLoad", "object:" + jsonEagerLoad);
 				parameters.putString("options", "object:" + jsonOptions);
 
@@ -1043,7 +1054,7 @@ public class ProxiManager {
 				link.toId = newParentId;
 				link.fromId = entity.id;
 				parameters.putString("link", "object:" + ProxibaseService.convertObjectToJsonSmart(link, true, true));
-				parameters.putString("originalToId", entity.parentId != null ? entity.parentId : entity.getBeaconId());
+				parameters.putString("originalToId", (entity.parentId != null) ? entity.parentId : entity.getBeaconId());
 
 				if (link.toId == null || link.fromId == null || parameters.getString("originalToId") == null) {
 					throw new IllegalArgumentException("moveEntity: missing id for link update");
@@ -1699,7 +1710,7 @@ public class ProxiManager {
 			/*
 			 * Insert beacons for the latest scan results.
 			 */
-			
+
 			synchronized (mWifiList) {
 				WifiScanResult scanResult = null;
 				for (int i = 0; i < mWifiList.size(); i++) {
@@ -1742,24 +1753,24 @@ public class ProxiManager {
 		// Entity cache fetch routines
 		// --------------------------------------------------------------------------------------------
 
-		public ModelResult getEntitiesByListType(EntityListType entityListType, Boolean refresh, String collectionId, String userId, Integer limit) {
+		public ModelResult getEntitiesByListType(ArrayListType arrayListType, Boolean refresh, String collectionId, String userId, Integer limit) {
 			/*
 			 * Used by candi list
 			 */
 			ModelResult result = new ModelResult();
-			if (entityListType == EntityListType.TunedPlaces) {
+			if (arrayListType == ArrayListType.TunedPlaces) {
 				result.data = getAircandiPlaces();
 			}
-			else if (entityListType == EntityListType.SyntheticPlaces) {
+			else if (arrayListType == ArrayListType.SyntheticPlaces) {
 				result.data = getRadarSynthetics();
 			}
-			else if (entityListType == EntityListType.CreatedByUser) {
+			else if (arrayListType == ArrayListType.CreatedByUser) {
 				result = getUserEntities(userId, refresh, limit);
 			}
-			else if (entityListType == EntityListType.Collections) {
+			else if (arrayListType == ArrayListType.Collections) {
 				result.data = getCollectionEntities();
 			}
-			else if (entityListType == EntityListType.InCollection) {
+			else if (arrayListType == ArrayListType.InCollection) {
 				result.data = getChildEntities(collectionId);
 			}
 			return result;
@@ -1772,12 +1783,12 @@ public class ProxiManager {
 		 * @return
 		 */
 
-		public EntityList<Entity> getAllPlaces(Boolean includeHidden) {
+		public List<Entity> getAllPlaces(Boolean includeHidden) {
 			/*
 			 * This is the one case where refresh scenarios have been
 			 * handled outside of this method.
 			 */
-			final EntityList<Entity> entities = new EntityList<Entity>();
+			final List<Entity> entities = new ArrayList<Entity>();
 			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
 					Aircandi.applicationContext.getString(R.string.search_radius_default)));
 
@@ -1835,12 +1846,12 @@ public class ProxiManager {
 		 * @return
 		 */
 
-		public EntityList<Entity> getAircandiPlaces() {
+		public List<Entity> getAircandiPlaces() {
 			/*
 			 * This is the one case where refresh scenarios have been
 			 * handled outside of this method.
 			 */
-			final EntityList<Entity> entities = new EntityList<Entity>();
+			final List<Entity> entities = new ArrayList<Entity>();
 			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
 					Aircandi.applicationContext.getString(R.string.search_radius_default)));
 
@@ -1878,12 +1889,12 @@ public class ProxiManager {
 			return entities;
 		}
 
-		public EntityList<Entity> getProximityPlaces() {
+		public List<Entity> getProximityPlaces() {
 			/*
 			 * This is the one case where refresh scenarios have been
 			 * handled outside of this method.
 			 */
-			final EntityList<Entity> entities = new EntityList<Entity>();
+			final List<Entity> entities = new ArrayList<Entity>();
 
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
@@ -1899,12 +1910,12 @@ public class ProxiManager {
 			return entities;
 		}
 
-		public EntityList<Entity> getCollectionEntities() {
+		public List<Entity> getCollectionEntities() {
 			/*
 			 * This is the one case where refresh scenarios have been
 			 * handled outside of this method.
 			 */
-			final EntityList<Entity> entities = new EntityList<Entity>();
+			final List<Entity> entities = new ArrayList<Entity>();
 			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
 					Aircandi.applicationContext.getString(R.string.search_radius_default)));
 			synchronized (mEntityCache) {
@@ -1940,12 +1951,12 @@ public class ProxiManager {
 			return entities;
 		}
 
-		public EntityList<Entity> getRadarSynthetics() {
+		public List<Entity> getRadarSynthetics() {
 			/*
 			 * This is the one case where refresh scenarios have been
 			 * handled outside of this method.
 			 */
-			final EntityList<Entity> entities = new EntityList<Entity>();
+			final List<Entity> entities = new ArrayList<Entity>();
 			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
 					Aircandi.applicationContext.getString(R.string.search_radius_default)));
 			synchronized (mEntityCache) {
@@ -1972,8 +1983,8 @@ public class ProxiManager {
 			return entities;
 		}
 
-		private EntityList<Entity> getUserEntities(String userId) {
-			final EntityList<Entity> entities = new EntityList<Entity>();
+		private List<Entity> getUserEntities(String userId) {
+			final List<Entity> entities = new ArrayList<Entity>();
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (entry.getValue().ownerId != null && entry.getValue().ownerId.equals(userId)) {
@@ -1985,8 +1996,8 @@ public class ProxiManager {
 			return entities;
 		}
 
-		public EntityList<Entity> getBeaconEntities(String beaconId) {
-			final EntityList<Entity> entities = new EntityList<Entity>();
+		public List<Entity> getBeaconEntities(String beaconId) {
+			final List<Entity> entities = new ArrayList<Entity>();
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (entry.getValue().getBeaconId() != null && entry.getValue().getBeaconId().equals(beaconId)) {
@@ -2018,8 +2029,8 @@ public class ProxiManager {
 			return entities;
 		}
 
-		public EntityList<Entity> getChildEntities(String entityId) {
-			final EntityList<Entity> entities = new EntityList<Entity>();
+		public List<Entity> getChildEntities(String entityId) {
+			final List<Entity> entities = new ArrayList<Entity>();
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (!entry.getValue().type.equals(CandiConstants.TYPE_CANDI_SOURCE)
@@ -2033,8 +2044,8 @@ public class ProxiManager {
 			return entities;
 		}
 
-		public EntityList<Entity> getSourceEntities(String entityId) {
-			final EntityList<Entity> entities = new EntityList<Entity>();
+		public List<Entity> getSourceEntities(String entityId) {
+			final List<Entity> entities = new ArrayList<Entity>();
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_SOURCE)
@@ -2135,7 +2146,7 @@ public class ProxiManager {
 					 */
 					if (entity.children != null) {
 						/* Removes all children except source entities */
-						final HashMap<String, Entity> removedChildren = removeChildren(entityOriginal.id);
+						final Map<String, Entity> removedChildren = removeChildren(entityOriginal.id);
 						for (Entity childEntity : entity.children) {
 							Entity removedChild = removedChildren.get(childEntity.id);
 							if (removedChild != null) {
@@ -2228,7 +2239,7 @@ public class ProxiManager {
 			source.caption = "comments";
 			source.icon = "resource:img_post";
 			source.type = "comments";
-			source.position = position != null ? position : 0;
+			source.position = (position != null) ? position : 0;
 			source.intentSupport = false;
 			source.installDeclined = false;
 			sourceEntity.source = source;
@@ -2372,12 +2383,12 @@ public class ProxiManager {
 			}
 		}
 
-		private HashMap<String, Entity> removeChildren(String entityId) {
+		private Map<String, Entity> removeChildren(String entityId) {
 			/*
 			 * This will clean all entities that have entityId as parentId. This
 			 * will take care synthesized source entities as well.
 			 */
-			final HashMap<String, Entity> entities = new HashMap<String, Entity>();
+			final Map<String, Entity> entities = new HashMap<String, Entity>();
 			synchronized (mEntityCache) {
 				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
 				Entity entity = null;
@@ -2394,12 +2405,12 @@ public class ProxiManager {
 			return entities;
 		}
 
-		private HashMap<String, Entity> removeSourceEntities(String entityId) {
+		private Map<String, Entity> removeSourceEntities(String entityId) {
 			/*
 			 * This will clean all entities that have entityId as parentId. This
 			 * will take care synthesized source entities as well.
 			 */
-			final HashMap<String, Entity> entities = new HashMap<String, Entity>();
+			final Map<String, Entity> entities = new HashMap<String, Entity>();
 			synchronized (mEntityCache) {
 				final Iterator iter = mEntityModel.mEntityCache.keySet().iterator();
 				Entity entity = null;
@@ -2448,7 +2459,7 @@ public class ProxiManager {
 			return mCategories;
 		}
 
-		public HashMap<String, Source> getSourceMeta() {
+		public Map<String, Source> getSourceMeta() {
 			return mSourceMeta;
 		}
 
@@ -2504,7 +2515,7 @@ public class ProxiManager {
 		}
 	}
 
-	public static enum EntityListType {
+	public static enum ArrayListType {
 		TunedPlaces, SyntheticPlaces, CreatedByUser, Collections, InCollection
 	}
 

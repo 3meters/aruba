@@ -20,8 +20,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
-import android.content.res.Configuration;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.location.Location;
 import android.net.Uri;
@@ -47,6 +47,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
 import com.aircandi.R;
@@ -191,7 +192,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 			}
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		return actionBarTitleId;
 	}
@@ -269,7 +272,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	private void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
-			final StringBuilder beaconMessage = new StringBuilder();
+			final StringBuilder beaconMessage = new StringBuilder(500);
 			synchronized (ProxiManager.getInstance().mWifiList) {
 				if (Aircandi.getInstance().getUser() != null
 						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
@@ -625,7 +628,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Logger.w(context, "Service error: " + errorMessage);
 	}
 
-	public static AlertDialog showAlertDialog(Integer iconResource
+	public static AlertDialog showAlertDialog(Integer iconResource // $codepro.audit.disable largeNumberOfParameters
 			, String titleText
 			, String message
 			, View customView
@@ -711,17 +714,18 @@ public class AircandiCommon implements ActionBar.TabListener {
 		/*
 		 * Need to use application context so our app level themes and attributes are available to actionbarsherlock
 		 */
-		if (themeResId == null) {
-			themeResId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
+		Integer themeId = themeResId;
+		if (themeId == null) {
+			themeId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
 			if (isDialog) {
-				themeResId = R.style.aircandi_theme_dialog_dark;
+				themeId = R.style.aircandi_theme_dialog_dark;
 				if (mPrefTheme.equals("aircandi_theme_snow")) {
-					themeResId = R.style.aircandi_theme_dialog_light;
+					themeId = R.style.aircandi_theme_dialog_light;
 				}
 			}
 		}
 
-		((Activity) mContext).setTheme(themeResId);
+		((Activity) mContext).setTheme(themeId);
 	}
 
 	private void signout() {
@@ -915,15 +919,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 		mNotificationManager.notify(notificationType, note);
 	}
 
+	@SuppressLint("NewApi")
 	private void setDialogSize(Configuration newConfig) {
 
-		android.view.WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
-		int height = Math.min(newConfig.screenHeightDp, 450);
-		int width = Math.min(newConfig.screenWidthDp, 350);
-		params.height = ImageUtils.getRawPixels(mActivity, height);
-		params.width = ImageUtils.getRawPixels(mActivity, width);
-		mActivity.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
-
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB_MR2) {
+			final android.view.WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
+			final int height = Math.min(newConfig.screenHeightDp, 450);
+			final int width = Math.min(newConfig.screenWidthDp, 350);
+			params.height = ImageUtils.getRawPixels(mActivity, height);
+			params.width = ImageUtils.getRawPixels(mActivity, width);
+			mActivity.getWindow().setAttributes(params);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1094,6 +1100,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 				return;
 			case R.id.about:
 				doInfoClick();
+				return;
+			default:
 				return;
 		}
 	}

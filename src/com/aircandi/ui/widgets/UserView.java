@@ -87,7 +87,7 @@ public class UserView extends RelativeLayout {
 			if (mTextName != null) {
 				String authorName = mAuthor.name;
 				if (authorName == null) {
-					authorName = mAuthor.firstName != null ? mAuthor.firstName : "";
+					authorName = (mAuthor.firstName != null) ? mAuthor.firstName : "";
 					if (mAuthor.lastName != null) {
 						authorName += " " + mAuthor.lastName;
 					}
@@ -166,7 +166,7 @@ public class UserView extends RelativeLayout {
 	// --------------------------------------------------------------------------------------------
 
 	public void setAuthor(User author) {
-		this.mAuthor = author;
+		mAuthor = author;
 	}
 
 	public User getAuthor() {
@@ -174,7 +174,7 @@ public class UserView extends RelativeLayout {
 	}
 
 	public void setActivity(Activity activity) {
-		this.mActivity = activity;
+		mActivity = activity;
 	}
 
 	public Activity getActivity() {

@@ -41,7 +41,7 @@ public class BitmapManager {
 	private DiskLruImageCache			mDiskLruCache;
 	private final Object				mDiskCacheLock		= new Object();
 	private boolean						mDiskCacheStarting	= true;
-	private static final int			DISK_CACHE_SIZE		= 1024 * 1024 * 10; // 10MB
+	private static final int			DISK_CACHE_SIZE		= 10 << 10 << 10; // 10MB
 	private static final String			DISK_CACHE_SUBDIR	= "bitmaps";
 	private final BitmapLoader				mBitmapLoader;
 
@@ -64,7 +64,7 @@ public class BitmapManager {
 		Logger.d(this, "Device memory class: " + String.valueOf(memClass));
 
 		/* Use 1/4th of the available memory for this memory cache. */
-		final int cacheSize = (1024 * 1024 * memClass) / 4;
+		final int cacheSize = (memClass << 10 << 10) >> 2;
 		Logger.d(this, "Memory cache size: " + String.valueOf(cacheSize));
 
 		mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
@@ -210,7 +210,7 @@ public class BitmapManager {
 		synchronized (mDiskCacheLock) {
 			if (mDiskLruCache != null) {
 				if (!mDiskLruCache.containsKey(diskKeyHashed)) {
-					mDiskLruCache.put(diskKeyHashed, imageBytes);
+					mDiskLruCache.putBytes(diskKeyHashed, imageBytes);
 				}
 			}
 		}
@@ -306,7 +306,7 @@ public class BitmapManager {
 				rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
 			}
 			catch (IOException exception) {
-				Exceptions.Handle(exception);
+				Exceptions.handle(exception);
 				return null;
 			}
 		}
@@ -319,21 +319,23 @@ public class BitmapManager {
 			in = new DataInputStream(new FileInputStream(imageFile));
 		}
 		catch (FileNotFoundException exception) {
-			Exceptions.Handle(exception);
+			Exceptions.handle(exception);
 			return null;
 		}
+		
 		try {
 			in.readFully(imageBytes);
 		}
 		catch (IOException exception) {
-			Exceptions.Handle(exception);
+			Exceptions.handle(exception);
 			return null;
 		}
+		
 		try {
 			in.close();
 		}
 		catch (IOException exception) {
-			Exceptions.Handle(exception);
+			Exceptions.handle(exception);
 			return null;
 		}
 

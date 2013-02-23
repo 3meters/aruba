@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -71,8 +72,8 @@ public class User extends ServiceEntryBase {
 	public User clone() {
 		try {
 			final User user = (User) super.clone();
-			if (this.stats != null) {
-				user.stats = (List<Stat>) ((ArrayList) this.stats).clone();
+			if (stats != null) {
+				user.stats = (List<Stat>) ((ArrayList) stats).clone();
 			}
 
 			return user;
@@ -82,15 +83,15 @@ public class User extends ServiceEntryBase {
 		}
 	}
 
-	public static User setPropertiesFromMap(User user, HashMap map) {
+	public static User setPropertiesFromMap(User user, Map map) {
 		/*
 		 * These base properties are done here instead of calling ServiceEntry
 		 * because of a recursion problem.
 		 */
-		user.id = (String) (map.get("_id") != null ? map.get("_id") : map.get("id"));
-		user.ownerId = (String) (map.get("_owner") != null ? map.get("_owner") : map.get("ownerId"));
-		user.creatorId = (String) (map.get("_creator") != null ? map.get("_creator") : map.get("creatorId"));
-		user.modifierId = (String) (map.get("_modifier") != null ? map.get("_modifier") : map.get("modifierId"));
+		user.id = (String) ((map.get("_id") != null) ? map.get("_id") : map.get("id"));
+		user.ownerId = (String) ((map.get("_owner") != null) ? map.get("_owner") : map.get("ownerId"));
+		user.creatorId = (String) ((map.get("_creator") != null) ? map.get("_creator") : map.get("creatorId"));
+		user.modifierId = (String) ((map.get("_modifier") != null) ? map.get("_modifier") : map.get("modifierId"));
 
 		user.createdDate = (Number) map.get("createdDate");
 		user.modifiedDate = (Number) map.get("modifiedDate");
@@ -115,7 +116,7 @@ public class User extends ServiceEntryBase {
 		if (map.get("stats") != null) {
 			user.stats = new ArrayList<Stat>();
 			final List<LinkedHashMap<String, Object>> statMaps = (List<LinkedHashMap<String, Object>>) map.get("stats");
-			for (LinkedHashMap<String, Object> statMap : statMaps) {
+			for (Map<String,Object> statMap : statMaps) {
 				user.stats.add(Stat.setPropertiesFromMap(new Stat(), statMap));
 			}
 		}
@@ -124,7 +125,7 @@ public class User extends ServiceEntryBase {
 	}
 
 	public Photo getPhoto() {
-		return photo != null ? photo : new Photo();
+		return (photo != null) ? photo : new Photo();
 	}
 
 	public Photo getPhotoForSet() {
@@ -136,7 +137,7 @@ public class User extends ServiceEntryBase {
 
 	public String getUserPhotoUri() {
 		String imageUri = "resource:img_placeholder_logo_bw";
-		if (this.photo != null) {
+		if (photo != null) {
 			imageUri = photo.getUri();
 		}
 		return imageUri;

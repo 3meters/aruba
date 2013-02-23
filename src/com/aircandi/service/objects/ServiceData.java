@@ -1,6 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -35,7 +36,7 @@ public class ServiceData {
 
 	public ServiceData() {}
 
-	public static ServiceData setPropertiesFromMap(ServiceData serviceData, HashMap map) {
+	public static ServiceData setPropertiesFromMap(ServiceData serviceData, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

@@ -1,6 +1,6 @@
 package com.aircandi.service.objects;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -22,7 +22,7 @@ public class Session extends ServiceEntryBase {
 
 	public Session() {}
 
-	public static Session setPropertiesFromMap(Session session, HashMap map) {
+	public static Session setPropertiesFromMap(Session session, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

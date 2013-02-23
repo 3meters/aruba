@@ -135,7 +135,7 @@ public class TextViewEllipsizing extends TextView {
 	@Override
 	public void setMaxLines(int maxLines) {
 		super.setMaxLines(maxLines);
-		this.mMaxLines = maxLines;
+		mMaxLines = maxLines;
 		mIsStale = true;
 	}
 
@@ -146,8 +146,8 @@ public class TextViewEllipsizing extends TextView {
 
 	@Override
 	public void setLineSpacing(float add, float mult) {
-		this.mLineAdditionalVerticalPadding = add;
-		this.mLineSpacingMultiplier = mult;
+		mLineAdditionalVerticalPadding = add;
+		mLineSpacingMultiplier = mult;
 		super.setLineSpacing(add, mult);
 	}
 
@@ -157,7 +157,7 @@ public class TextViewEllipsizing extends TextView {
 	}
 
 	public void setMirrorText(boolean mirrorText) {
-		this.mMirrorText = mirrorText;
+		mMirrorText = mirrorText;
 	}
 
 	private interface EllipsizeListener {

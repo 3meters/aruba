@@ -57,6 +57,6 @@ public class Stopwatch {
 	}
 	
 	public boolean isStarted() {
-		return (lastThreshold > 0);
+		return lastThreshold > 0;
 	}
 }

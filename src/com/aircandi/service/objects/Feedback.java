@@ -1,7 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -18,7 +18,7 @@ public class Feedback extends ServiceEntryBase implements Cloneable, Serializabl
 
 	public Feedback() {}
 
-	public static Feedback setPropertiesFromMap(Feedback feedback, HashMap map) {
+	public static Feedback setPropertiesFromMap(Feedback feedback, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

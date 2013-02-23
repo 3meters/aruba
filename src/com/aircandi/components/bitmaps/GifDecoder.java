@@ -1,3 +1,4 @@
+// $codepro.audit.disable tooManyViolations
 package com.aircandi.components.bitmaps;
 
 import java.io.InputStream;
@@ -5,6 +6,8 @@ import java.util.Vector;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+
+import com.aircandi.BuildConfig;
 
 @SuppressWarnings("ucd")
 public class GifDecoder {
@@ -59,7 +62,7 @@ public class GifDecoder {
 	protected int				frameCount;
 
 	private static class GifFrame {
-		public GifFrame(Bitmap im, int del) {
+		private GifFrame(Bitmap im, int del) {
 			image = im;
 			delay = del;
 		}
@@ -246,7 +249,10 @@ public class GifDecoder {
 	protected void decodeBitmapData() {
 		final int nullCode = -1;
 		final int npix = iw * ih;
-		int available, clear, code_mask, code_size, end_of_information, in_code, old_code, bits, code, count, i, datum, data_size, first, top, bi, pi;
+		final int clear;
+		final int end_of_information;
+		final int data_size;
+		int available, code_mask, code_size, in_code, old_code, bits, code, count, i, datum, first, top, bi, pi;
 		if ((pixels == null) || (pixels.length < npix)) {
 			pixels = new byte[npix]; // allocate new pixel array
 		}
@@ -257,7 +263,7 @@ public class GifDecoder {
 			suffix = new byte[MAX_STACK_SIZE];
 		}
 		if (pixelStack == null) {
-			pixelStack = new byte[MAX_STACK_SIZE + 1];
+			pixelStack = new byte[MAX_STACK_SIZE + 1]; // $codepro.audit.disable expressionValue
 		}
 		// Initialize GIF data stream decoder.
 		data_size = read();
@@ -272,7 +278,7 @@ public class GifDecoder {
 			suffix[code] = (byte) code;
 		}
 		// Decode GIF pixel stream.
-		datum = bits = count = first = top = pi = bi = 0;
+		datum = bits = count = first = top = pi = bi = 0; // $codepro.audit.disable expressionValue
 		for (i = 0; i < npix;) {
 			if (top == 0) {
 				if (bits < code_size) {
@@ -399,7 +405,9 @@ public class GifDecoder {
 				}
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				if (BuildConfig.DEBUG) {
+					e.printStackTrace();
+				}
 			}
 			if (n < blockSize) {
 				status = STATUS_FORMAT_ERROR;
@@ -424,7 +432,9 @@ public class GifDecoder {
 			n = in.read(c);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		if (n < nbytes) {
 			status = STATUS_FORMAT_ERROR;
@@ -449,6 +459,7 @@ public class GifDecoder {
 	protected void readContents() {
 		// read GIF file content blocks
 		boolean done = false;
+		final StringBuilder app = new StringBuilder(); // $codepro.audit.disable defineInitialCapacity
 		while (!(done || err())) {
 			int code = read();
 			switch (code) {
@@ -463,11 +474,11 @@ public class GifDecoder {
 							break;
 						case 0xff: // application extension
 							readBlock();
-							String app = "";
+							app.setLength(0);
 							for (int i = 0; i < 11; i++) {
-								app += (char) block[i];
+								app.append((char) block[i]);
 							}
-							if (app.equals("NETSCAPE2.0")) {
+							if (app.toString().equals("NETSCAPE2.0")) {
 								readNetscapeExt();
 							}
 							else {
@@ -514,11 +525,11 @@ public class GifDecoder {
 	 * Reads GIF file header information.
 	 */
 	protected void readHeader() {
-		String id = "";
+		final StringBuilder id = new StringBuilder(); // $codepro.audit.disable defineInitialCapacity
 		for (int i = 0; i < 6; i++) {
-			id += (char) read();
+			id.append((char) read());
 		}
-		if (!id.startsWith("GIF")) {
+		if (!id.toString().startsWith("GIF")) {
 			status = STATUS_FORMAT_ERROR;
 			return;
 		}
@@ -539,7 +550,7 @@ public class GifDecoder {
 		ih = readShort();
 		final int packed = read();
 		lctFlag = (packed & 0x80) != 0; // 1 - local color table flag interlace
-		lctSize = (int) Math.pow(2, (packed & 0x07) + 1);
+		lctSize = (int) Math.pow(2, (packed & 0x07) + 1); // $codepro.audit.disable lossOfPrecisionInCast
 		// 3 - sort flag
 		// 4-5 - reserved lctSize = 2 << (packed & 7); // 6-8 - local color
 		// table size

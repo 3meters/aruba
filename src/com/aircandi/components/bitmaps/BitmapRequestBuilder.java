@@ -39,18 +39,18 @@ public class BitmapRequestBuilder {
 			if (!imageUri.startsWith("http:") && !imageUri.startsWith("https:") && !imageUri.startsWith("resource:")) {
 				imageUriFixed = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 			}
-			this.mImageUri = imageUriFixed;
+			mImageUri = imageUriFixed;
 		}
 		return this;
 	}
 
 	public BitmapRequestBuilder setImageUri(String imageUri) {
-		this.mImageUri = imageUri;
+		mImageUri = imageUri;
 		return this;
 	}
 
 	public BitmapRequestBuilder setRequestListener(RequestListener requestListener) {
-		this.mRequestListener = requestListener;
+		mRequestListener = requestListener;
 		return this;
 	}
 }

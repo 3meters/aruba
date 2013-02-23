@@ -17,6 +17,7 @@ import android.widget.EditText;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
@@ -355,8 +356,10 @@ public abstract class FormActivity extends SherlockActivity {
 				mCommon.doDestroy();
 			}
 		}
-		catch (Exception exception) {
-			exception.printStackTrace();
+		catch (Exception e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		finally {
 			super.onDestroy();
@@ -383,7 +386,7 @@ public abstract class FormActivity extends SherlockActivity {
 	// Inner classes and enums
 	// --------------------------------------------------------------------------------------------
 
-	public class SimpleTextWatcher implements TextWatcher {
+	public static class SimpleTextWatcher implements TextWatcher {
 
 		@Override
 		public void afterTextChanged(Editable s) {}

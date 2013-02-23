@@ -5,7 +5,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import com.aircandi.BuildConfig;
 import com.aircandi.ProxiConstants;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
@@ -51,7 +54,7 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	/* Property bag */
 
 	@Expose
-	public HashMap<String, Object>	data;
+	public Map<String,Object>	data;
 
 	/* User ids */
 
@@ -86,7 +89,7 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 	@Expose(serialize = false, deserialize = true)
 	public User						modifier;
 
-	public ServiceEntryBase() {}
+	protected ServiceEntryBase() {}
 
 	public String getEntryUri() {
 		final String root = ProxiConstants.URL_PROXIBASE_SERVICE_REST;
@@ -97,16 +100,16 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 
 	public abstract String getCollection();
 
-	public static ServiceEntryBase setPropertiesFromMap(ServiceEntryBase entry, HashMap map) {
+	public static ServiceEntryBase setPropertiesFromMap(ServiceEntryBase entry, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */
-		entry.id = (String) (map.get("_id") != null ? map.get("_id") : map.get("id"));
+		entry.id = (String) ((map.get("_id") != null) ? map.get("_id") : map.get("id"));
 		entry.data = (HashMap<String, Object>) map.get("data");
 
-		entry.ownerId = (String) (map.get("_owner") != null ? map.get("_owner") : map.get("ownerId"));
-		entry.creatorId = (String) (map.get("_creator") != null ? map.get("_creator") : map.get("creatorId"));
-		entry.modifierId = (String) (map.get("_modifier") != null ? map.get("_modifier") : map.get("modifierId"));
+		entry.ownerId = (String) ((map.get("_owner") != null) ? map.get("_owner") : map.get("ownerId"));
+		entry.creatorId = (String) ((map.get("_creator") != null) ? map.get("_creator") : map.get("creatorId"));
+		entry.modifierId = (String) ((map.get("_modifier") != null) ? map.get("_modifier") : map.get("modifierId"));
 
 		entry.createdDate = (Number) map.get("createdDate");
 		entry.modifiedDate = (Number) map.get("modifiedDate");
@@ -144,12 +147,12 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 		toEntry.createdDate = fromEntry.createdDate;
 	}
 
-	public HashMap<String, Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
-		final HashMap<String, Object> map = new HashMap<String, Object>();
+	public Map<String,Object> getHashMap(Boolean useAnnotations, Boolean excludeNulls) {
+		final Map<String,Object> map = new HashMap<String, Object>();
 
 		try {
 			Class<?> cls = this.getClass();
-			final Field fields[] = cls.getDeclaredFields();
+			final Field[] fields = cls.getDeclaredFields();
 			for (Field f : fields) {
 				if (!Modifier.isStatic(f.getModifiers())
 						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
@@ -175,14 +178,14 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 					Object value = f.get(this);
 
 					if (value instanceof ServiceObject) {
-						HashMap childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
+						Map childMap = ((ServiceObject) value).getHashMap(useAnnotations, excludeNulls);
 						map.put(name, childMap);
 					}
 					else if (value instanceof ArrayList) {
-						ArrayList<Object> list = new ArrayList<Object>();
+						List<Object> list = new ArrayList<Object>();
 						for (Object obj : (ArrayList) value) {
 							if (obj instanceof ServiceObject) {
-								HashMap childMap = ((ServiceObject) obj).getHashMap(useAnnotations, excludeNulls);
+								Map childMap = ((ServiceObject) obj).getHashMap(useAnnotations, excludeNulls);
 								list.add(childMap);
 							}
 							else {
@@ -205,7 +208,7 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 			}
 
 			cls = this.getClass().getSuperclass();
-			final Field fieldsSuper[] = cls.getDeclaredFields();
+			final Field[] fieldsSuper = cls.getDeclaredFields();
 			for (Field f : fieldsSuper) {
 				if (!Modifier.isStatic(f.getModifiers())
 						&& (Modifier.isPublic(f.getModifiers()) || Modifier.isProtected(f.getModifiers()))) {
@@ -234,11 +237,15 @@ public abstract class ServiceEntryBase implements Cloneable, Serializable {
 				}
 			}
 		}
-		catch (IllegalArgumentException exception) {
-			exception.printStackTrace();
+		catch (IllegalArgumentException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
-		catch (IllegalAccessException exception) {
-			exception.printStackTrace();
+		catch (IllegalAccessException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		return map;
 	}

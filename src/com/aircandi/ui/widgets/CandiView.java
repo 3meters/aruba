@@ -1,5 +1,6 @@
 package com.aircandi.ui.widgets;
 
+import java.util.List;
 import java.util.Locale;
 
 import android.content.Context;
@@ -18,7 +19,6 @@ import android.widget.TextView;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
-import com.aircandi.components.EntityList;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
@@ -121,7 +121,7 @@ public class CandiView extends RelativeLayout {
 		mEntity = entity;
 		mEntityActivityDate = entity.activityDate;
 		mMuteColor = android.os.Build.MODEL.toLowerCase(Locale.US).equals("nexus s"); // nexus 4, nexus 7 are others
-		mColorResId = Place.getCategoryColorResId(mEntity.place.category != null ? mEntity.place.category.name : null, true, mMuteColor, false);
+		mColorResId = Place.getCategoryColorResId((mEntity.place.category != null) ? mEntity.place.category.name : null, true, mMuteColor, false);
 
 		/* Primary candi image */
 
@@ -181,7 +181,7 @@ public class CandiView extends RelativeLayout {
 			setVisibility(mCandiSources, View.GONE);
 			if (mCandiSources != null && !entity.synthetic && entity.sources != null && entity.sources.size() > 0) {
 				mCandiSources.removeAllViews();
-				final EntityList<Entity> entities = entity.getSourceEntities();
+				final List<Entity> entities = entity.getSourceEntities();
 				final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
 				final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
 
@@ -256,7 +256,7 @@ public class CandiView extends RelativeLayout {
 
 			/* Don't use gradient if we are not using a photo */
 			if (mTextGroup != null) {
-				mTextGroup.setBackgroundResource(mEntity.photo != null ? R.drawable.overlay_picture : 0);
+				mTextGroup.setBackgroundResource((mEntity.photo != null) ? R.drawable.overlay_picture : 0);
 			}
 
 			if (mEntity.getPhoto().getBitmap() != null) {
@@ -288,7 +288,7 @@ public class CandiView extends RelativeLayout {
 						if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 							if (mEntity.photo == null && mEntity.place != null && mEntity.place.category != null) {
 
-								final int color = Place.getCategoryColor(mEntity.place.category != null
+								final int color = Place.getCategoryColor((mEntity.place.category != null)
 										? mEntity.place.category.name
 										: null, true, mMuteColor, false);
 
@@ -372,7 +372,7 @@ public class CandiView extends RelativeLayout {
 	}
 
 	public void setEntity(Entity entity) {
-		this.mEntity = entity;
+		mEntity = entity;
 	}
 
 	public void setLayoutId(Integer layoutId) {

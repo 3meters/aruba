@@ -76,7 +76,7 @@ class StrictLineReader implements Closeable {
      * @throws NullPointerException if {@code in} or {@code charset} is null.
      * @throws IllegalArgumentException if the specified charset is not supported.
      */
-    public StrictLineReader(InputStream in, Charset charset) {
+    StrictLineReader(InputStream in, Charset charset) {
         this(in, 8192, charset);
     }
 
@@ -144,10 +144,12 @@ class StrictLineReader implements Closeable {
                 fillBuf();
             }
             // Try to find LF in the buffered data and return the line if successful.
+            int lineEnd;
+            String res;
             for (int i = pos; i != end; ++i) {
                 if (buf[i] == LF) {
-                    int lineEnd = (i != pos && buf[i - 1] == CR) ? i - 1 : i;
-                    String res = new String(buf, pos, lineEnd - pos, charset.name());
+                    lineEnd = (i != pos && buf[i - 1] == CR) ? i - 1 : i;
+                    res = new String(buf, pos, lineEnd - pos, charset.name());
                     pos = i + 1;
                     return res;
                 }

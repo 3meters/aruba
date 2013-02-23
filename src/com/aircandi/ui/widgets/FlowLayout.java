@@ -58,15 +58,18 @@ public class FlowLayout extends ViewGroup
 		int longestRowWidth = 0;
 		int totalRowHeight = 0;
 		final int rowCount = mRows.size();
-		this.mRowHeights = new int[rowCount];
-		this.mRowWidths = new int[rowCount];
+		mRowHeights = new int[rowCount];
+		mRowWidths = new int[rowCount];
 
+		RowMeasurement row;
+		int rowHeight;
+		int rowWidth;
 		for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-			RowMeasurement row = mRows.get(rowIndex);
-			int rowHeight = row.getHeight();
-			int rowWidth = row.getWidth();
-			this.mRowHeights[rowIndex] = rowHeight;
-			this.mRowWidths[rowIndex] = rowWidth;
+			row = mRows.get(rowIndex);
+			rowHeight = row.getHeight();
+			rowWidth = row.getWidth();
+			mRowHeights[rowIndex] = rowHeight;
+			mRowWidths[rowIndex] = rowWidth;
 			totalRowHeight = totalRowHeight + rowHeight + mSpacingVertical;
 			longestRowWidth = Math.max(longestRowWidth, row.getWidth());
 		}
@@ -96,7 +99,7 @@ public class FlowLayout extends ViewGroup
 
 	@Override
 	protected boolean checkLayoutParams(ViewGroup.LayoutParams layoutParams) {
-		return (layoutParams instanceof LayoutParams);
+		return layoutParams instanceof LayoutParams;
 	}
 
 	@Override
@@ -125,22 +128,22 @@ public class FlowLayout extends ViewGroup
 			LayoutParams lp = (LayoutParams) child.getLayoutParams();
 			if ((childLeft + lp.leftMargin + childWidth + lp.rightMargin) > widthOffset) {
 				childLeft = getPaddingLeft();
-				childTop = childTop + this.mRowHeights[rowIndex] + mSpacingVertical;
+				childTop = childTop + mRowHeights[rowIndex] + mSpacingVertical;
 				rowIndex = rowIndex + 1;
 			}
 
-			int _y;
+			int _y; // $codepro.audit.disable localVariableNamingConvention
 			if (lp.centerVertical) {
-				_y = childTop + ((this.mRowHeights[rowIndex] - childHeight) / 2);
+				_y = childTop + ((mRowHeights[rowIndex] - childHeight) >> 1);
 			}
 			else {
 				_y = childTop;
 			}
 
-			int _x;
+			int _x; // $codepro.audit.disable localVariableNamingConvention
 			if (lp.centerHorizontal) {
 				childLeft += lp.leftMargin;
-				_x = (((rightPosition - leftPosition) - this.mRowWidths[rowIndex]) / 2) + childLeft;
+				_x = (((rightPosition - leftPosition) - mRowWidths[rowIndex]) >> 1) + childLeft;
 			}
 			else {
 				_x = childLeft += lp.leftMargin;
@@ -154,8 +157,9 @@ public class FlowLayout extends ViewGroup
 	private Collection<View> getLayoutChildren() {
 		final int count = getChildCount();
 		final Collection<View> children = new ArrayList<View>(count);
+		View child;
 		for (int index = 0; index < count; index++) {
-			View child = getChildAt(index);
+			child = getChildAt(index);
 			if (child.getVisibility() != View.GONE){
 				children.add(child);
 			}
@@ -172,11 +176,11 @@ public class FlowLayout extends ViewGroup
 	}
 
 	public void setSpacingVertical(int spacingVertical) {
-		this.mSpacingVertical = spacingVertical;
+		mSpacingVertical = spacingVertical;
 	}
 
 	public void setSpacingHorizontal(int spacingHorizontal) {
-		this.mSpacingHorizontal = spacingHorizontal;
+		mSpacingHorizontal = spacingHorizontal;
 	}
 
 	@SuppressWarnings("ucd")
@@ -234,24 +238,24 @@ public class FlowLayout extends ViewGroup
 		}
 
 		int getWidth() {
-			return this.width;
+			return width;
 		}
 
 		int getHeight() {
-			return this.height;
+			return height;
 		}
 
 		boolean isWouldExceedMax(int childWidth) {
-			return ((this.widthMode != MeasureSpec.UNSPECIFIED) && (getNewWidth(childWidth) > this.maxWidth));
+			return (widthMode != MeasureSpec.UNSPECIFIED) && (getNewWidth(childWidth) > maxWidth);
 		}
 
 		void addChildDimensions(int childWidth, int childHeight) {
-			this.width = getNewWidth(childWidth);
-			this.height = Math.max(this.height, childHeight);
+			width = getNewWidth(childWidth);
+			height = Math.max(height, childHeight);
 		}
 
 		private int getNewWidth(int childWidth) {
-			return ((this.width == 0) ? childWidth : (this.width + childWidth));
+			return (width == 0) ? childWidth : (width + childWidth);
 		}
 	}
 }

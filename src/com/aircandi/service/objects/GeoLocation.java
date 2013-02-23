@@ -1,7 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -26,7 +26,7 @@ public class GeoLocation extends ServiceObject implements Cloneable, Serializabl
 		this.longitude = longitude;
 	}
 
-	public static GeoLocation setPropertiesFromMap(GeoLocation geoLocation, HashMap map) {
+	public static GeoLocation setPropertiesFromMap(GeoLocation geoLocation, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

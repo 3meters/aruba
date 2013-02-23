@@ -1,7 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Jayma
@@ -14,7 +14,7 @@ public class Document extends ServiceEntryBase implements Cloneable, Serializabl
 
 	public Document() {}
 
-	public static Document setPropertiesFromMap(Document document, HashMap map) {
+	public static Document setPropertiesFromMap(Document document, Map map) {
 		/*
 		 * Properties involved with editing are copied from one entity to another.
 		 */

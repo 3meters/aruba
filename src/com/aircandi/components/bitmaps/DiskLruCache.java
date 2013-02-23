@@ -26,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.aircandi.BuildConfig;
+
 /**
  * A cache that uses a bounded amount of space on a filesystem. Each cache
  * entry has a string key and a fixed number of values. Each key must match
@@ -66,16 +68,16 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings("ucd")
 public final class DiskLruCache implements Closeable {
-	static final String							JOURNAL_FILE		= "journal";
-	static final String							JOURNAL_FILE_TMP	= "journal.tmp";
-	static final String							MAGIC				= "libcore.io.DiskLruCache";
-	static final String							VERSION_1			= "1";
-	static final long							ANY_SEQUENCE_NUMBER	= -1;
-	static final Pattern						LEGAL_KEY_PATTERN	= Pattern.compile("[a-z0-9_-]{1,64}");
-	private static final String					CLEAN				= "CLEAN";
-	private static final String					DIRTY				= "DIRTY";
-	private static final String					REMOVE				= "REMOVE";
-	private static final String					READ				= "READ";
+	static final String					JOURNAL_FILE		= "journal";
+	static final String					JOURNAL_FILE_TMP	= "journal.tmp";
+	static final String					MAGIC				= "libcore.io.DiskLruCache";
+	static final String					VERSION_1			= "1";
+	static final long					ANY_SEQUENCE_NUMBER	= -1;
+	static final Pattern				LEGAL_KEY_PATTERN	= Pattern.compile("[a-z0-9_-]{1,64}");
+	private static final String			CLEAN				= "CLEAN";
+	private static final String			DIRTY				= "DIRTY";
+	private static final String			REMOVE				= "REMOVE";
+	private static final String			READ				= "READ";
 
 	/*
 	 * This cache uses a journal file named "journal". A typical journal file
@@ -117,49 +119,49 @@ public final class DiskLruCache implements Closeable {
 	 * it exists when the cache is opened.
 	 */
 
-	private final File							directory;
-	private final File							journalFile;
-	private final File							journalFileTmp;
-	private final int							appVersion;
-	private long								maxSize;
-	private final int							valueCount;
-	private long								size				= 0;
-	private Writer								journalWriter;
-	private final LinkedHashMap<String, Entry>	lruEntries			= new LinkedHashMap<String, Entry>(0, 0.75f, true);
-	private int									redundantOpCount;
+	private final File					directory;
+	private final File					journalFile;
+	private final File					journalFileTmp;
+	private final int					appVersion;
+	private long						maxSize;
+	private final int					valueCount;
+	private long						size				= 0;
+	private Writer						journalWriter;
+	private final Map<String, Entry>	lruEntries			= new LinkedHashMap<String, Entry>(0, 0.75f, true);
+	private int							redundantOpCount;
 
 	/**
 	 * To differentiate between old and current snapshots, each entry is given
 	 * a sequence number each time an edit is committed. A snapshot is stale if
 	 * its sequence number is not equal to its entry's sequence number.
 	 */
-	private long								nextSequenceNumber	= 0;
+	private long						nextSequenceNumber	= 0;
 
 	/** This cache uses a single background thread to evict entries. */
-	final ThreadPoolExecutor					executorService		= new ThreadPoolExecutor(0, 1,
-																			60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-	private final Callable<Void>				cleanupCallable		= new Callable<Void>() {
-																		@Override
-																		public Void call() throws Exception {
-																			synchronized (DiskLruCache.this) {
-																				if (journalWriter == null) {
-																					return null; // closed
-																				}
-																				trimToSize();
-																				if (journalRebuildRequired()) {
-																					rebuildJournal();
-																					redundantOpCount = 0;
-																				}
-																			}
-																			return null;
+	final ThreadPoolExecutor			executorService		= new ThreadPoolExecutor(0, 1,
+																	60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+	private final Callable<Void>		cleanupCallable		= new Callable<Void>() {
+																@Override
+																public Void call() throws Exception {
+																	synchronized (DiskLruCache.this) {
+																		if (journalWriter == null) {
+																			return null; // closed
 																		}
-																	};
+																		trimToSize();
+																		if (journalRebuildRequired()) {
+																			rebuildJournal();
+																			redundantOpCount = 0;
+																		}
+																	}
+																	return null;
+																}
+															};
 
 	private DiskLruCache(File directory, int appVersion, int valueCount, long maxSize) {
 		this.directory = directory;
 		this.appVersion = appVersion;
-		this.journalFile = new File(directory, JOURNAL_FILE);
-		this.journalFileTmp = new File(directory, JOURNAL_FILE_TMP);
+		journalFile = new File(directory, JOURNAL_FILE);
+		journalFileTmp = new File(directory, JOURNAL_FILE_TMP);
 		this.valueCount = valueCount;
 		this.maxSize = maxSize;
 	}
@@ -197,8 +199,10 @@ public final class DiskLruCache implements Closeable {
 				return cache;
 			}
 			catch (IOException journalIsCorrupt) {
-				System.out.println("DiskLruCache " + directory + " is corrupt: "
-						+ journalIsCorrupt.getMessage() + ", removing");
+				if (BuildConfig.DEBUG) {
+					System.out.println("DiskLruCache " + directory + " is corrupt: "
+							+ journalIsCorrupt.getMessage() + ", removing");
+				}
 				cache.delete();
 			}
 		}
@@ -282,8 +286,9 @@ public final class DiskLruCache implements Closeable {
 	 */
 	private void processJournal() throws IOException {
 		deleteIfExists(journalFileTmp);
-		for (Iterator<Entry> i = lruEntries.values().iterator(); i.hasNext();) {
-			Entry entry = i.next();
+		Entry entry = null;
+		for (final Iterator<Entry> i = lruEntries.values().iterator(); i.hasNext();) {
+			entry = i.next();
 			if (entry.currentEditor == null) {
 				for (int t = 0; t < valueCount; t++) {
 					size += entry.lengths[t];
@@ -477,14 +482,18 @@ public final class DiskLruCache implements Closeable {
 			}
 		}
 
+		File dirty = null;
+		File clean = null;
+		long oldLength;
+		long newLength;
 		for (int i = 0; i < valueCount; i++) {
-			File dirty = entry.getDirtyFile(i);
+			dirty = entry.getDirtyFile(i);
 			if (success) {
 				if (dirty.exists()) {
-					File clean = entry.getCleanFile(i);
+					clean = entry.getCleanFile(i);
 					dirty.renameTo(clean);
-					long oldLength = entry.lengths[i];
-					long newLength = clean.length();
+					oldLength = entry.lengths[i];
+					newLength = clean.length();
 					entry.lengths[i] = newLength;
 					size = size - oldLength + newLength;
 				}
@@ -537,8 +546,9 @@ public final class DiskLruCache implements Closeable {
 			return false;
 		}
 
+		File file = null;
 		for (int i = 0; i < valueCount; i++) {
-			File file = entry.getCleanFile(i);
+			file = entry.getCleanFile(i);
 			if (!file.delete()) {
 				throw new IOException("failed to delete " + file);
 			}
@@ -598,8 +608,9 @@ public final class DiskLruCache implements Closeable {
 	}
 
 	private void trimToSize() throws IOException {
+		Map.Entry<String, Entry> toEvict = null;
 		while (size > maxSize) {
-			Map.Entry<String, Entry> toEvict = lruEntries.entrySet().iterator().next();//lruEntries.eldest();
+			toEvict = lruEntries.entrySet().iterator().next();//lruEntries.eldest();
 			remove(toEvict.getKey());
 		}
 	}
@@ -700,7 +711,7 @@ public final class DiskLruCache implements Closeable {
 
 		private Editor(Entry entry) {
 			this.entry = entry;
-			this.written = (entry.readable) ? null : new boolean[valueCount];
+			written = (entry.readable) ? null : new boolean[valueCount];
 		}
 
 		/**
@@ -730,7 +741,7 @@ public final class DiskLruCache implements Closeable {
 		 */
 		public String getString(int index) throws IOException {
 			final InputStream in = newInputStream(index);
-			return in != null ? inputStreamToString(in) : null;
+			return (in != null) ? inputStreamToString(in) : null;
 		}
 
 		/**
@@ -878,7 +889,7 @@ public final class DiskLruCache implements Closeable {
 
 		private Entry(String key) {
 			this.key = key;
-			this.lengths = new long[valueCount];
+			lengths = new long[valueCount];
 		}
 
 		public String getLengths() throws IOException {

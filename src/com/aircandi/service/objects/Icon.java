@@ -1,7 +1,7 @@
 package com.aircandi.service.objects;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -32,7 +32,7 @@ public class Icon extends ServiceObject implements Cloneable, Serializable {
 	}	
 	
 
-	public static Icon setPropertiesFromMap(Icon icon, HashMap map) {
+	public static Icon setPropertiesFromMap(Icon icon, Map map) {
 		icon.prefix = (String) map.get("prefix");
 		icon.suffix = (String) map.get("suffix");
 		return icon;

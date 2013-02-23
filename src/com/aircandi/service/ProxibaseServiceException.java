@@ -35,7 +35,7 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 	}
 
 	public void setErrorCode(ErrorCode errorCode) {
-		this.mErrorCode = errorCode;
+		mErrorCode = errorCode;
 	}
 
 	public ErrorCode getErrorCode() {
@@ -43,7 +43,7 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 	}
 
 	public void setErrorType(ErrorType errorType) {
-		this.mErrorType = errorType;
+		mErrorType = errorType;
 	}
 
 	public ErrorType getErrorType() {
@@ -51,7 +51,7 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 	}
 
 	public void setHttpStatusCode(float httpStatusCode) {
-		this.mHttpStatusCode = httpStatusCode;
+		mHttpStatusCode = httpStatusCode;
 	}
 
 	public float getHttpStatusCode() {
@@ -59,7 +59,7 @@ public class ProxibaseServiceException extends ProxibaseClientException {
 	}
 
 	public void setResponseMessage(String responseMessage) {
-		this.mResponseMessage = responseMessage;
+		mResponseMessage = responseMessage;
 	}
 
 	public String getResponseMessage() {

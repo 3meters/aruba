@@ -13,6 +13,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
 
+import com.aircandi.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
@@ -165,7 +166,7 @@ public class NetworkManager {
 	// --------------------------------------------------------------------------------------------
 
 	public Boolean isWifiEnabled() {
-		return (mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED);
+		return mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED;
 	}
 
 	public boolean isWifiTethered() {
@@ -181,13 +182,19 @@ public class NetworkManager {
 						isTethered = (Boolean) method.invoke(mWifiManager);
 					}
 					catch (IllegalArgumentException e) {
-						e.printStackTrace();
+						if (BuildConfig.DEBUG) {
+							e.printStackTrace();
+						}
 					}
 					catch (IllegalAccessException e) {
-						e.printStackTrace();
+						if (BuildConfig.DEBUG) {
+							e.printStackTrace();
+						}
 					}
 					catch (InvocationTargetException e) {
-						e.printStackTrace();
+						if (BuildConfig.DEBUG) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
@@ -232,6 +239,8 @@ public class NetworkManager {
 					case WifiManager.WIFI_STATE_UNKNOWN:
 						Logger.d(this, "Wifi state unknown");
 						break;
+					default:
+						return;
 				}
 			}
 			BusProvider.getInstance().post(new WifiChangedEvent(getWifiState()));
@@ -249,7 +258,7 @@ public class NetworkManager {
 		public ServiceResponse() {}
 
 		public ServiceResponse(ResponseCode resultCode, Object data, ProxibaseServiceException exception) {
-			this.responseCode = resultCode;
+			responseCode = resultCode;
 			this.data = data;
 			this.exception = exception;
 		}

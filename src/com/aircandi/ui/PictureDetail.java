@@ -231,7 +231,7 @@ public class PictureDetail extends FormActivity {
 			mCommon.doDestroy();
 		}
 		catch (Exception exception) {
-			Exceptions.Handle(exception);
+			Exceptions.handle(exception);
 		}
 		finally {
 			super.onDestroy();

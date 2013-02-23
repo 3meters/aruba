@@ -20,7 +20,7 @@ import com.aircandi.components.Logger;
 @SuppressWarnings("ucd")
 public class DiskLruImageCache {
 
-	private DiskLruCache		mDiskCache;
+	private DiskLruCache		mDiskCache; // $codepro.audit.disable variableShouldBeFinal
 	private CompressFormat		mCompressFormat		= CompressFormat.JPEG;
 	private int					mCompressQuality	= 70;
 	private static final int	APP_VERSION			= 1;
@@ -33,6 +33,7 @@ public class DiskLruImageCache {
 			, int diskCacheSize
 			, CompressFormat compressFormat
 			, int quality) {
+
 		try {
 			final File diskCacheDir = getDiskCacheDir(context, uniqueName);
 			mDiskCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize);
@@ -40,7 +41,9 @@ public class DiskLruImageCache {
 			mCompressQuality = quality;
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -81,13 +84,13 @@ public class DiskLruImageCache {
 		 * Check if media is mounted or storage is built-in, if so, try and use external cache dir
 		 * otherwise use internal cache dir
 		 */
-		final String cachePath = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)
-				|| !Utils.isExternalStorageRemovable() ? Utils.getExternalCacheDir(context).getPath() : context.getCacheDir().getPath();
+		final String cachePath = (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)
+				|| !Utils.isExternalStorageRemovable()) ? Utils.getExternalCacheDir(context).getPath() : context.getCacheDir().getPath();
 
 		return new File(cachePath + File.separator + uniqueName);
 	}
 
-	public void put(String key, Bitmap data) {
+	public void putBitmap(String key, Bitmap data) {
 
 		DiskLruCache.Editor editor = null;
 		try {
@@ -123,7 +126,7 @@ public class DiskLruImageCache {
 		}
 	}
 
-	public void put(String key, byte[] imageBytes) {
+	public void putBytes(String key, byte[] imageBytes) {
 
 		DiskLruCache.Editor editor = null;
 		try {
@@ -176,7 +179,9 @@ public class DiskLruImageCache {
 			}
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		finally {
 			if (snapshot != null) {
@@ -185,7 +190,7 @@ public class DiskLruImageCache {
 		}
 
 		if (BuildConfig.DEBUG) {
-			Logger.d(this, bitmap == null ? "" : "image read from disk " + key);
+			Logger.d(this, (bitmap == null) ? "" : "image read from disk " + key);
 		}
 		return bitmap;
 	}
@@ -208,7 +213,9 @@ public class DiskLruImageCache {
 			}
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		finally {
 			if (snapshot != null) {
@@ -217,7 +224,7 @@ public class DiskLruImageCache {
 		}
 
 		if (BuildConfig.DEBUG) {
-			Logger.d(this, imageBytes.length == 0 ? "" : "image bytes read from disk " + key);
+			Logger.d(this, (imageBytes.length == 0) ? "" : "image bytes read from disk " + key);
 		}
 		return imageBytes;
 	}

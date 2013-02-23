@@ -1,6 +1,6 @@
 package com.aircandi.service.objects;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Jayma
@@ -11,7 +11,7 @@ public class ServiceEntry extends ServiceEntryBase {
 
 	public ServiceEntry() {}
 
-	public static ServiceEntry setPropertiesFromMap(ServiceEntry serviceEntry, HashMap map) {
+	public static ServiceEntry setPropertiesFromMap(ServiceEntry serviceEntry, Map map) {
 
 		serviceEntry = (ServiceEntry) ServiceEntryBase.setPropertiesFromMap(serviceEntry, map);
 		return serviceEntry;

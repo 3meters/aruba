@@ -180,7 +180,7 @@ public class CandiForm extends CandiActivity {
 	private void track() {
 
 		final List<Beacon> beacons = ProxiManager.getInstance().getStrongestBeacons(5);
-		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
+		final Beacon primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 
 		new AsyncTask() {
 
@@ -203,7 +203,7 @@ public class CandiForm extends CandiActivity {
 	private void upsize() {
 
 		final List<Beacon> beacons = ProxiManager.getInstance().getStrongestBeacons(5);
-		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
+		final Beacon primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 
 		new AsyncTask() {
 
@@ -520,7 +520,7 @@ public class CandiForm extends CandiActivity {
 	private void tuneProximity() {
 
 		final List<Beacon> beacons = ProxiManager.getInstance().getStrongestBeacons(5);
-		final Beacon primaryBeacon = beacons.size() > 0 ? beacons.get(0) : null;
+		final Beacon primaryBeacon = (beacons.size() > 0) ? beacons.get(0) : null;
 
 		new AsyncTask() {
 
@@ -552,7 +552,7 @@ public class CandiForm extends CandiActivity {
 		}.execute();
 	}
 
-	static private ViewGroup buildCandiForm(Context context, final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation, boolean refresh) {
+	private static ViewGroup buildCandiForm(Context context, final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation, boolean refresh) { // $codepro.audit.disable largeNumberOfParameters
 		/*
 		 * For now, we assume that the candi form isn't recycled.
 		 * 
@@ -716,7 +716,7 @@ public class CandiForm extends CandiActivity {
 		return layout;
 	}
 
-	static private void drawCandi(Context context, FlowLayout layout, List<Entity> entities, Integer viewResId) {
+	private static void drawCandi(Context context, FlowLayout layout, List<Entity> entities, Integer viewResId) {
 
 		layout.removeAllViews();
 		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -801,7 +801,7 @@ public class CandiForm extends CandiActivity {
 		}
 	}
 
-	static private void buildCandiButtons(Context context, final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation) {
+	private static void buildCandiButtons(Context context, final Entity entity, final ViewGroup layout, Menu menu, GeoLocation mLocation) {
 
 		setVisibility(layout.findViewById(R.id.button_map), View.GONE);
 		setVisibility(layout.findViewById(R.id.button_call), View.GONE);
@@ -853,7 +853,7 @@ public class CandiForm extends CandiActivity {
 		if (entity.commentCount != null && entity.commentCount > 0) {
 			final Button button = (Button) layout.findViewById(R.id.button_comments_browse);
 			if (button != null) {
-				button.setText(String.valueOf(entity.commentCount) + (entity.commentCount == 1 ? " Comment" : " Comments"));
+				button.setText(String.valueOf(entity.commentCount) + ((entity.commentCount == 1) ? " Comment" : " Comments"));
 			}
 		}
 

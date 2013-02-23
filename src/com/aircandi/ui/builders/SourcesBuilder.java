@@ -51,7 +51,7 @@ public class SourcesBuilder extends FormActivity {
 	private final List<Source>	mSources	= new ArrayList<Source>();
 	private Entity				mEntity;
 	private Source				mSourceEditing;
-	private ArrayList<String>	mJsonSourcesOriginal;
+	private List<String>	mJsonSourcesOriginal;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -81,7 +81,7 @@ public class SourcesBuilder extends FormActivity {
 
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
-			final ArrayList<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
+			final List<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
 			if (jsonSources != null) {
 				mJsonSourcesOriginal = jsonSources;
 				for (String jsonSource : jsonSources) {
@@ -304,7 +304,7 @@ public class SourcesBuilder extends FormActivity {
 			}
 		}
 
-		message.setText(deleteCount == 1
+		message.setText((deleteCount == 1)
 				? R.string.alert_source_delete_message_single
 				: R.string.alert_source_delete_message_multiple);
 
@@ -387,7 +387,7 @@ public class SourcesBuilder extends FormActivity {
 						}
 						if (autoInsert) {
 							if (sourceSuggestions.size() > 0) {
-								
+
 								/* First make sure they have default captions */
 								for (Source source : sourceSuggestions) {
 									if (source.caption == null) {
@@ -395,7 +395,7 @@ public class SourcesBuilder extends FormActivity {
 									}
 								}
 								mSources.addAll(sourceSuggestions);
-								ImageUtils.showToastNotification(getResources().getString(sourceSuggestions.size() == 1
+								ImageUtils.showToastNotification(getResources().getString((sourceSuggestions.size() == 1)
 										? R.string.toast_source_linked
 										: R.string.toast_sources_linked), Toast.LENGTH_SHORT);
 							}
@@ -450,7 +450,7 @@ public class SourcesBuilder extends FormActivity {
 
 			int position = 0;
 			for (String jsonSource : jsonSources) {
-				if (!jsonSource.toString().equals(mJsonSourcesOriginal.get(position).toString())) {
+				if (!jsonSource.equals(mJsonSourcesOriginal.get(position))) {
 					return true;
 				}
 				position++;
@@ -487,15 +487,14 @@ public class SourcesBuilder extends FormActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-
-		switch (item.getItemId()) {
-			case R.id.suggest_links:
-				/* Go get source suggestions again */
-				if (mSources.size() > 0) {
-					loadSourceSuggestions(mEntity, mSources, true);
-				}
-				return true;
+		if (item.getItemId() == R.id.suggest_links) {
+			/* Go get source suggestions again */
+			if (mSources.size() > 0) {
+				loadSourceSuggestions(mEntity, mSources, true);
+			}
+			return true;
 		}
+
 		/* In case we add general menu items later */
 		mCommon.doOptionsItemSelected(item);
 		return true;

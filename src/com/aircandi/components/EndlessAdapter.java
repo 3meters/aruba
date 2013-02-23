@@ -45,11 +45,11 @@ import com.commonsware.cwac.adapter.AdapterWrapper;
  * know you are out of data, plus return false from that final
  * call to appendInBackground().
  */
-abstract public class EndlessAdapter extends AdapterWrapper {
+public abstract class EndlessAdapter extends AdapterWrapper {
 
-	abstract protected boolean cacheInBackground() throws Exception;
+	protected abstract boolean cacheInBackground() throws Exception;
 
-	abstract protected void appendCachedData();
+	protected abstract void appendCachedData();
 
 	private View			pendingView		= null;
 	private final AtomicBoolean	keepOnAppending	= new AtomicBoolean(true);
@@ -59,7 +59,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	/**
 	 * Constructor wrapping a supplied ListAdapter
 	 */
-	public EndlessAdapter(ListAdapter wrapped) {
+	protected EndlessAdapter(ListAdapter wrapped) {
 		super(wrapped);
 	}
 
@@ -70,9 +70,9 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	@Override
 	public int getCount() {
 		if (keepOnAppending.get()) {
-			return (super.getCount() + 1); // one more for "pending"
+			return super.getCount() + 1; // one more for "pending"
 		}
-		return (super.getCount());
+		return super.getCount();
 	}
 
 	/**
@@ -82,9 +82,9 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	@Override
 	public int getItemViewType(int position) {
 		if (position == getWrappedAdapter().getCount()) {
-			return (IGNORE_ITEM_VIEW_TYPE);
+			return IGNORE_ITEM_VIEW_TYPE;
 		}
-		return (super.getItemViewType(position));
+		return super.getItemViewType(position);
 	}
 
 	/**
@@ -95,7 +95,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	 */
 	@Override
 	public int getViewTypeCount() {
-		return (super.getViewTypeCount() + 1);
+		return super.getViewTypeCount() + 1;
 	}
 
 	/**
@@ -122,10 +122,10 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 				task.execute();
 			}
 
-			return (pendingView);
+			return pendingView;
 		}
 
-		return (super.getView(position, convertView, parent));
+		return super.getView(position, convertView, parent);
 	}
 
 	/**
@@ -142,7 +142,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 	private boolean onException(View pendingView, Exception e) {
 		Log.e("EndlessAdapter", "Exception in cacheInBackground()", e);
 
-		return (false);
+		return false;
 	}
 
 	/**
@@ -165,7 +165,7 @@ abstract public class EndlessAdapter extends AdapterWrapper {
 				result = e;
 			}
 
-			return (result);
+			return result;
 		}
 
 		@Override

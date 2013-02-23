@@ -19,6 +19,7 @@ import android.os.BatteryManager;
 import android.os.Environment;
 
 import com.aircandi.Aircandi;
+import com.aircandi.BuildConfig;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
@@ -46,8 +47,10 @@ public class AndroidManager {
 			final String publicName = (String) info.loadLabel(Aircandi.packageManager);
 			return publicName;
 		}
-		catch (NameNotFoundException exception) {
-			exception.printStackTrace();
+		catch (NameNotFoundException e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
 			return null;
 		}
 	}
@@ -184,8 +187,9 @@ public class AndroidManager {
 		final PackageManager packageManager = context.getPackageManager();
 		final List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
 
+		String p = null;
 		for (int i = 0; i < browserApps.length; i++) {
-			String p = null;
+			p = null;
 			for (ResolveInfo resolveInfo : list) {
 				p = resolveInfo.activityInfo.packageName;
 				if (p != null && p.startsWith(browserApps[i])) {

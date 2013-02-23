@@ -44,7 +44,7 @@ public class S3 {
 		System.setProperty("org.xml.sax.driver", "org.xmlpull.v1.sax2.Driver");
 		try {
 			@SuppressWarnings("unused")
-			final XMLReader reader = XMLReaderFactory.createXMLReader();
+			final XMLReader reader = XMLReaderFactory.createXMLReader(); // $codepro.audit.disable variableUsage
 		}
 		catch (SAXException e) {
 			Log.e("SAXException", e.getMessage());

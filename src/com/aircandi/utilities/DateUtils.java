@@ -42,10 +42,6 @@ public class DateUtils {
 		final int minutes = (int) ((diff / 1000) / 60);
 		final int hours = (int) ((diff / 1000) / (60 * 60));
 		final int days = (int) ((diff / 1000) / (60 * 60 * 24));
-		@SuppressWarnings("unused")
-		final int hoursPart = hours - (days * 24);
-		@SuppressWarnings("unused")
-		final int minutesPart = minutes - (hours * 60);
 
 		String interval = "just now";
 		if (days >= 1) {
@@ -96,8 +92,6 @@ public class DateUtils {
 		final int hours = (int) ((diff / 1000) / (60 * 60));
 		final int days = (int) ((diff / 1000) / (60 * 60 * 24));
 		final int hoursPart = hours - (days * 24);
-		@SuppressWarnings("unused")
-		final int minutesPart = minutes - (hours * 60);
 
 		String interval = "";
 		if (days >= 2) {

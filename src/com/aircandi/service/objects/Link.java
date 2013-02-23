@@ -1,6 +1,6 @@
 package com.aircandi.service.objects;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
@@ -49,7 +49,7 @@ public class Link extends ServiceEntryBase {
 		}
 	}
 
-	public static Link setPropertiesFromMap(Link link, HashMap map) {
+	public static Link setPropertiesFromMap(Link link, Map map) {
 
 		link = (Link) ServiceEntryBase.setPropertiesFromMap(link, map);
 

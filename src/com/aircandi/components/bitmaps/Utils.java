@@ -9,7 +9,7 @@ import android.os.Environment;
 
 @SuppressWarnings("ucd")
 public class Utils {
-	public static final int	IO_BUFFER_SIZE	= 8 * 1024;
+	public static final int	IO_BUFFER_SIZE	= 8 << 10;
 
 	private Utils() {};
 

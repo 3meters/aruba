@@ -39,15 +39,15 @@ public class Query {
 
 	@SuppressWarnings("deprecation")
 	public String queryString() {
-		String query = this.entityName;
+		String query = entityName;
 		Boolean atRoot = true;
 
-		if (this.filter != null) {
-			query += "?find=" + URLEncoder.encode(this.filter);
+		if (filter != null) {
+			query += "?find=" + URLEncoder.encode(filter);
 			atRoot = false;
 		}
 
-		if (this.lookups) {
+		if (lookups) {
 			if (atRoot) {
 				query += "?lookups=true";
 			}
@@ -57,22 +57,22 @@ public class Query {
 			atRoot = false;
 		}
 
-		if (this.orderBy != null) {
+		if (orderBy != null) {
 			if (atRoot) {
-				query += "?$orderby=" + URLEncoder.encode(this.orderBy);
+				query += "?$orderby=" + URLEncoder.encode(orderBy);
 			}
 			else {
-				query += "&$orderby=" + URLEncoder.encode(this.orderBy);
+				query += "&$orderby=" + URLEncoder.encode(orderBy);
 			}
 			atRoot = false;
 		}
 
-		if (this.topCount != 0) {
+		if (topCount != 0) {
 			if (atRoot) {
-				query += "?$top=" + URLEncoder.encode(this.topCount.toString());
+				query += "?$top=" + URLEncoder.encode(topCount.toString());
 			}
 			else {
-				query += "&$top=" + URLEncoder.encode(this.topCount.toString());
+				query += "&$top=" + URLEncoder.encode(topCount.toString());
 			}
 			atRoot = false;
 		}

@@ -415,7 +415,7 @@ public class CategoryBuilder extends FormActivity {
 
 		private final List<String>	mCategories;
 
-		public CategoryAdapter(Context context, int textViewResourceId, List categories, Integer categoryHint) {
+		private CategoryAdapter(Context context, int textViewResourceId, List categories, Integer categoryHint) {
 			super(context, textViewResourceId, categories);
 			categories.add(getString(categoryHint));
 			mCategories = categories;

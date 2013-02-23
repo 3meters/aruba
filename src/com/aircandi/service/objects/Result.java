@@ -1,6 +1,6 @@
 package com.aircandi.service.objects;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import com.aircandi.service.Expose;
 
@@ -16,7 +16,7 @@ public class Result {
 
 	public Result() {}
 	
-	public static Result setPropertiesFromMap(Result result, HashMap map) {
+	public static Result setPropertiesFromMap(Result result, Map map) {
 		result.id = (String) map.get("_id");
 
 		return result;
