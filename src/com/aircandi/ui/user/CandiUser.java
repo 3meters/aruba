@@ -222,24 +222,36 @@ public class CandiUser extends CandiActivity {
 		/* Stats */
 
 		setVisibility(findViewById(R.id.section_stats), View.GONE);
-
 		setVisibility(stats, View.GONE);
 		if (stats != null && user.stats != null && user.stats.size() > 0) {
 			final StringBuilder statString = new StringBuilder(500);
+
+			int tuneCount = 0;
 			for (Stat stat : user.stats) {
-				if (stat.type.equals("tune_link_primary")) {
-					statString.append("Place tunings: " + String.valueOf(stat.countBy) + "<br/>");
+				if (stat.type.equals("link_proximity")) {
+					tuneCount += stat.countBy.intValue();
 				}
-				else if (stat.type.equals("insert_entity")) {
-					statString.append("Candi created: " + String.valueOf(stat.countBy) + "<br/>");
+				else if (stat.type.equals("entity_proximity")) {
+					tuneCount += stat.countBy.intValue();
 				}
-				else if (stat.type.equals("insert_entity_linked")) {
-					statString.append("First to tune: " + String.valueOf(stat.countBy) + "<br/>");
+				else if (stat.type.equals("insert_entity_place_custom")) {
+					statString.append("Places created: " + String.valueOf(stat.countBy) + "<br/>");
 				}
-				else if (stat.type.equals("insert_entity_custom")) {
-					statString.append("Custom places created: " + String.valueOf(stat.countBy) + "<br/>");
+				else if (stat.type.equals("insert_entity_picture")) {
+					statString.append("Pictures created: " + String.valueOf(stat.countBy) + "<br/>");
+				}
+				else if (stat.type.equals("insert_entity_post")) {
+					statString.append("Posts created: " + String.valueOf(stat.countBy) + "<br/>");
+				}
+				else if (stat.type.equals("insert_entity_place_linked")) {
+					statString.append("Places discovered first: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 			}
+
+			if (tuneCount > 0) {
+				statString.append("Places tuned: " + String.valueOf(tuneCount) + "<br/>");
+			}
+
 			stats.setText(Html.fromHtml(statString.toString()));
 			setVisibility(stats, View.VISIBLE);
 			setVisibility(findViewById(R.id.section_stats), View.VISIBLE);
