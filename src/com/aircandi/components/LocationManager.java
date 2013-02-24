@@ -20,6 +20,10 @@ public class LocationManager {
 	private static LocationManager				singletonObject;
 	public static Double						RADIUS_EARTH_MILES			= 3958.75;
 	public static Double						RADIUS_EARTH_KILOMETERS		= 6371.0;
+	public static final float					MetersToMilesConversion		= 0.000621371192237334f;
+	public static final float					MetersToFeetConversion		= 3.28084f;
+	public static final float					MetersToYardsConversion		= 1.09361f;
+	public static final float					FeetToMetersConversion		= 0.3048f;
 
 	private Context								mApplicationContext;
 	protected android.location.LocationManager	mLocationManager;

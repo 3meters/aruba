@@ -162,43 +162,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
-		updateDevIndicator(event.wifiList, null);
-	}
-
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onWifiQueryReceived(QueryWifiScanReceivedEvent event) {
-		updateDevIndicator(event.wifiList, null);
-	}
-
-	@Subscribe
-	@SuppressWarnings("ucd")
-	public void onLocationReceived(LocationReceivedEvent event) {
-		updateDevIndicator(null, event.location);
-	}
-
-	public int getActionBarTitleId() {
-		Integer actionBarTitleId = null;
-		try {
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-				actionBarTitleId = Class.forName("com.actionbarsherlock.R$id").getField("abs__action_bar_title").getInt(null);
-			}
-			else {
-				// Use reflection to get the actionbar title TextView and set the custom font. May break in updates.
-				actionBarTitleId = Class.forName("com.android.internal.R$id").getField("action_bar_title").getInt(null);
-			}
-		}
-		catch (Exception e) {
-			if (BuildConfig.DEBUG) {
-				e.printStackTrace();
-			}
-		}
-		return actionBarTitleId;
-	}
-
 	public void unpackIntent() {
 
 		final Bundle extras = mActivity.getIntent().getExtras();
@@ -221,6 +184,24 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
+	
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
+		updateDevIndicator(event.wifiList, null);
+	}
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onWifiQueryReceived(QueryWifiScanReceivedEvent event) {
+		updateDevIndicator(event.wifiList, null);
+	}
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onLocationReceived(LocationReceivedEvent event) {
+		updateDevIndicator(null, event.location);
+	}
 
 	private void doProfileClick() {
 		final IntentBuilder intentBuilder = new IntentBuilder(mContext, ProfileForm.class);
@@ -807,6 +788,25 @@ public class AircandiCommon implements ActionBar.TabListener {
 		final PendingIntent pendingIntent = PendingIntent.getService(Aircandi.applicationContext, 0, scanIntent, 0);
 		alarmManager.cancel(pendingIntent);
 		Logger.d(this, "Stopped wifi scan service");
+	}
+
+	public int getActionBarTitleId() {
+		Integer actionBarTitleId = null;
+		try {
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+				actionBarTitleId = Class.forName("com.actionbarsherlock.R$id").getField("abs__action_bar_title").getInt(null);
+			}
+			else {
+				// Use reflection to get the actionbar title TextView and set the custom font. May break in updates.
+				actionBarTitleId = Class.forName("com.android.internal.R$id").getField("action_bar_title").getInt(null);
+			}
+		}
+		catch (Exception e) {
+			if (BuildConfig.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return actionBarTitleId;
 	}
 
 	// --------------------------------------------------------------------------------------------

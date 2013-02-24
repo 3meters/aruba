@@ -20,6 +20,7 @@ import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.FontManager;
+import com.aircandi.components.LocationManager;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.objects.Entity;
@@ -33,9 +34,6 @@ public class CandiView extends RelativeLayout {
 
 	public static final int		HORIZONTAL				= 0;
 	public static final int		VERTICAL				= 1;
-	public static final float	MetersToMilesConversion	= 0.000621371192237334f;
-	public static final float	MetersToFeetConversion	= 3.28084f;
-	public static final float	MetersToYardsConversion	= 1.09361f;
 
 	private Entity				mEntity;
 	private Number				mEntityActivityDate;
@@ -315,7 +313,7 @@ public class CandiView extends RelativeLayout {
 		if (mDistance != null) {
 			String info = "here";
 
-			final float distance = entity.getDistance();
+			final float distance = entity.getDistance(); // In meters
 			final String target = entity.hasProximityLink() ? "B:" : "L:";
 			/*
 			 * If distance = -1 then we don't have the location info
@@ -325,9 +323,9 @@ public class CandiView extends RelativeLayout {
 				info = "--";
 			}
 			else {
-				final float miles = distance * MetersToMilesConversion;
-				final float feet = distance * MetersToFeetConversion;
-				final float yards = distance * MetersToYardsConversion;
+				final float miles = distance * LocationManager.MetersToMilesConversion;
+				final float feet = distance * LocationManager.MetersToFeetConversion;
+				final float yards = distance * LocationManager.MetersToYardsConversion;
 
 				if (feet >= 0) {
 					if (miles >= 0.1) {
