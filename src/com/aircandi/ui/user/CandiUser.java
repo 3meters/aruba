@@ -247,17 +247,6 @@ public class CandiUser extends CandiActivity {
 				}
 				else if (stat.type.equals("entity_proximity")) {
 					tuneCount += stat.countBy.intValue();
-<<<<<<< HEAD
-				}
-				else if (stat.type.equals("insert_entity_place_custom")) {
-					statString.append("Places created: " + String.valueOf(stat.countBy) + "<br/>");
-				}
-				else if (stat.type.equals("insert_entity_picture")) {
-					statString.append("Pictures created: " + String.valueOf(stat.countBy) + "<br/>");
-				}
-				else if (stat.type.equals("insert_entity_post")) {
-					statString.append("Posts created: " + String.valueOf(stat.countBy) + "<br/>");
-=======
 				}
 				else if (stat.type.equals("insert_entity_place_custom")) {
 					statString.append("Places created: " + String.valueOf(stat.countBy) + "<br/>");
@@ -270,10 +259,6 @@ public class CandiUser extends CandiActivity {
 				}
 				else if (stat.type.equals("insert_entity_place_linked")) {
 					statString.append("Places discovered first: " + String.valueOf(stat.countBy) + "<br/>");
->>>>>>> dev
-				}
-				else if (stat.type.equals("insert_entity_place_linked")) {
-					statString.append("Places discovered first: " + String.valueOf(stat.countBy) + "<br/>");
 				}
 			}
 
@@ -281,13 +266,6 @@ public class CandiUser extends CandiActivity {
 				statString.append("Places tuned: " + String.valueOf(tuneCount) + "<br/>");
 			}
 
-<<<<<<< HEAD
-=======
-			if (tuneCount > 0) {
-				statString.append("Places tuned: " + String.valueOf(tuneCount) + "<br/>");
-			}
-
->>>>>>> dev
 			stats.setText(Html.fromHtml(statString.toString()));
 			setVisibility(stats, View.VISIBLE);
 			setVisibility(findViewById(R.id.section_stats), View.VISIBLE);
