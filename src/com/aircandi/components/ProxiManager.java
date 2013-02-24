@@ -274,23 +274,28 @@ public class ProxiManager {
 			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
 
-			final List<Entity> entities = (List<Entity>) serviceData.data;
-			Aircandi.stopwatch1.segmentTime("Entities for beacons: objects deserialized");
+			synchronized (this) {
 
-			/*
-			 * Make sure we don't have duplicates keyed on sourceId because
-			 * getPlacesNearLocation could have already completed.
-			 */
-			for (Entity entity : entities) {
-				if (entity.place != null) {
-					if (mEntityModel.mEntityCache.containsKey(entity.place.id)) {
-						mEntityModel.mEntityCache.remove(entity.place.id);
+				final List<Entity> entities = (List<Entity>) serviceData.data;
+				Aircandi.stopwatch1.segmentTime("Entities for beacons: objects deserialized");
+
+				/*
+				 * Make sure we don't have duplicates keyed on sourceId because
+				 * getPlacesNearLocation could have already completed.
+				 */
+				synchronized (mEntityModel.mEntityCache) {
+					for (Entity entity : entities) {
+						if (entity.place != null) {
+							if (mEntityModel.mEntityCache.containsKey(entity.place.id)) {
+								mEntityModel.mEntityCache.remove(entity.place.id);
+							}
+						}
 					}
 				}
-			}
 
-			/* Merge entities into data model */
-			mEntityModel.upsertEntities(entities);
+				/* Merge entities into data model */
+				mEntityModel.upsertEntities(entities);
+			}
 
 			mEntityModel.setLastBeaconRefreshDate(serviceData.date.longValue());
 			manageEntityVisibility();
@@ -356,41 +361,46 @@ public class ProxiManager {
 			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
 
-			final List<Entity> entities = (List<Entity>) serviceData.data;
-			/*
-			 * Make sure we don't have duplicates keyed on sourceId because
-			 * getPlacesNearLocation could have already completed.
-			 */
-			for (Entity entity : entities) {
-				if (entity.place != null) {
-					if (mEntityModel.mEntityCache.containsKey(entity.place.id)) {
-						mEntityModel.mEntityCache.remove(entity.place.id);
+			synchronized (this) {
+
+				final List<Entity> entities = (List<Entity>) serviceData.data;
+				/*
+				 * Make sure we don't have duplicates keyed on sourceId because
+				 * getPlacesNearLocation could have already completed.
+				 */
+				synchronized (mEntityModel.mEntityCache) {
+					for (Entity entity : entities) {
+						if (entity.place != null) {
+							if (mEntityModel.mEntityCache.containsKey(entity.place.id)) {
+								mEntityModel.mEntityCache.remove(entity.place.id);
+							}
+						}
 					}
 				}
-			}
-			/*
-			 * These were found purely using location but they can still come with
-			 * links to beacons not currently visible. To keep things clean, we
-			 * make sure the links without beacons are stripped.
-			 */
-			for (Entity entity : entities) {
-				if (entity.links != null) {
-					entity.links.clear();
-				}
-			}
-
-			/* Proximity place trumps location place with the same id */
-			final List<Entity> proximityPlaces = mEntityModel.getProximityPlaces();
-			for (int i = entities.size() - 1; i >= 0; i--) {
-				for (Entity entity : proximityPlaces) {
-					if (entity.id.equals(entities.get(i).id)) {
-						entities.remove(i);
+				/*
+				 * These were found purely using location but they can still come with
+				 * links to beacons not currently visible. To keep things clean, we
+				 * make sure the links without beacons are stripped.
+				 */
+				for (Entity entity : entities) {
+					if (entity.links != null) {
+						entity.links.clear();
 					}
 				}
-			}
 
-			/* Merge entities into data model */
-			mEntityModel.upsertEntities(entities);
+				/* Proximity place trumps location place with the same id */
+				final List<Entity> proximityPlaces = mEntityModel.getProximityPlaces();
+				for (int i = entities.size() - 1; i >= 0; i--) {
+					for (Entity entity : proximityPlaces) {
+						if (entity.id.equals(entities.get(i).id)) {
+							entities.remove(i);
+						}
+					}
+				}
+
+				/* Merge entities into data model */
+				mEntityModel.upsertEntities(entities);
+			}
 
 			final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
 
@@ -444,27 +454,30 @@ public class ProxiManager {
 			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
 
-			/* Do a bit of fixup */
-			final List<Entity> entities = (List<Entity>) serviceData.data;
-			for (Entity entity : entities) {
-				entity.modifiedDate = DateUtils.nowDate().getTime();
-				entity.synthetic = true;
-			}
+			synchronized (this) {
 
-			/* Double check to make sure we don't have any duplicates of radar places */
-			final List<Entity> aircandiPlaces = mEntityModel.getAircandiPlaces();
-			for (int i = entities.size() - 1; i >= 0; i--) {
-				for (Entity entity : aircandiPlaces) {
-					if (!entity.place.provider.equals("user")) {
-						if (entity.place.id.equals(entities.get(i).id)) {
-							entities.remove(i);
+				/* Do a bit of fixup */
+				final List<Entity> entities = (List<Entity>) serviceData.data;
+				for (Entity entity : entities) {
+					entity.modifiedDate = DateUtils.nowDate().getTime();
+					entity.synthetic = true;
+				}
+
+				/* Double check to make sure we don't have any duplicates of radar places */
+				final List<Entity> aircandiPlaces = mEntityModel.getAircandiPlaces();
+				for (int i = entities.size() - 1; i >= 0; i--) {
+					for (Entity entity : aircandiPlaces) {
+						if (!entity.place.provider.equals("user")) {
+							if (entity.place.id.equals(entities.get(i).id)) {
+								entities.remove(i);
+							}
 						}
 					}
 				}
-			}
 
-			mEntityModel.removeSyntheticEntities();
-			mEntityModel.upsertEntities(entities);
+				mEntityModel.removeSyntheticEntities();
+				mEntityModel.upsertEntities(entities);
+			}
 
 			final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
 
