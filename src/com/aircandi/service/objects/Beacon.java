@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.aircandi.CandiConstants;
+import com.aircandi.components.LocationManager;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.service.Expose;
 
@@ -159,7 +160,7 @@ public class Beacon extends ServiceEntryBase implements Cloneable, Serializable 
 			distance = 80f;
 		}
 
-		return distance;
+		return distance * LocationManager.FeetToMetersConversion;
 	}
 
 	@Override

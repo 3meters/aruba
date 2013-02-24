@@ -28,12 +28,15 @@ public abstract class CandiActivity extends SherlockActivity {
 	protected AircandiCommon	mCommon;
 	private AlertDialog			mUpdateAlertDialog;
 	private AlertDialog			mWifiAlertDialog;
-	protected Boolean			mPrefChangeRefreshNeeded	= false;
+	protected Boolean			mPrefChangeNewSearchNeeded	= false;
+	protected Boolean			mPrefChangeRefreshUiNeeded	= false;
 
 	public boolean				mPrefSoundEffects			= true;
+	private String				mPrefSearchRadius;
 	private String				mPrefTestingBeacons			= "natural";
 	private String				mPrefTestingLocation		= "natural";
 	private String				mPrefTestingPlaceSource		= "default";
+	private Boolean				mPrefEnableDev				= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -50,6 +53,7 @@ public abstract class CandiActivity extends SherlockActivity {
 			setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
 			mCommon.initialize();
+			mPrefSearchRadius = getString(R.string.search_radius_default);
 		}
 	}
 
@@ -208,28 +212,44 @@ public abstract class CandiActivity extends SherlockActivity {
 			return;
 		}
 
-		mPrefChangeRefreshNeeded = false;
+		mPrefChangeNewSearchNeeded = false;
+		mPrefChangeRefreshUiNeeded = false;
+
+		if (!mPrefSearchRadius.equals(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, getString(R.string.search_radius_default)))) {
+			mPrefChangeNewSearchNeeded = true;
+			Logger.d(this, "Pref change: search radius");
+			mPrefSearchRadius = Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, getString(R.string.search_radius_default));
+		}
+
+		/* Dev prefs */
 
 		if (!mPrefTestingBeacons.equals(Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural"))) {
-			mPrefChangeRefreshNeeded = true;
+			mPrefChangeNewSearchNeeded = true;
 			Logger.d(this, "Pref change: testing beacons");
 			mPrefTestingBeacons = Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural");
 		}
 
 		if (!mPrefTestingLocation.equals(Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural"))) {
-			mPrefChangeRefreshNeeded = true;
+			mPrefChangeNewSearchNeeded = true;
 			Logger.d(this, "Pref change: testing location");
 			mPrefTestingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
 		}
 
 		if (!mPrefTestingPlaceSource.equals(Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_PROVIDER, "foursquare"))) {
-			mPrefChangeRefreshNeeded = true;
-			Logger.d(this, "Pref change: place authority");
+			mPrefChangeNewSearchNeeded = true;
+			Logger.d(this, "Pref change: place provider");
 			mPrefTestingPlaceSource = Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_PROVIDER, "foursquare");
 		}
 
+		if (!mPrefEnableDev.equals(Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, false))) {
+			mPrefChangeRefreshUiNeeded = true;
+			Logger.d(this, "Pref change: dev ui");
+			mPrefEnableDev = Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, false);
+		}
+
 		if (firstUpdate) {
-			mPrefChangeRefreshNeeded = false;
+			mPrefChangeNewSearchNeeded = false;
+			mPrefChangeRefreshUiNeeded = false;
 		}
 
 		mPrefSoundEffects = Aircandi.settings.getBoolean(Preferences.PREF_SOUND_EFFECTS, true);

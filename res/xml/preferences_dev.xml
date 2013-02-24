@@ -40,7 +40,7 @@
         android:title="Development preferences" >
         <CheckBoxPreference
             android:id="@+id/Pref_Enable_Dev"
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="Pref_Enable_Dev"
             android:summary="Enable all developer features"
             android:title="Developer features" />

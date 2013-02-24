@@ -97,7 +97,7 @@ import com.squareup.otto.Subscribe;
 
 public class CandiRadar extends CandiActivity {
 
-	private final Handler				mHandler			= new Handler();
+	private final Handler		mHandler			= new Handler();
 
 	private Number				mEntityModelRefreshDate;
 	private Number				mEntityModelActivityDate;
@@ -110,7 +110,7 @@ public class CandiRadar extends CandiActivity {
 	private int					mNewCandiSoundId;
 	private Boolean				mInitialized		= false;
 
-	private final List<Entity>		mEntities			= new ArrayList<Entity>();
+	private final List<Entity>	mEntities			= new ArrayList<Entity>();
 	private RadarListAdapter	mRadarAdapter;
 	private Boolean				mFreshWindow		= false;
 	private Boolean				mUpdateCheckNeeded	= false;
@@ -697,13 +697,26 @@ public class CandiRadar extends CandiActivity {
 			Logger.d(this, "Start first place search");
 			searchForPlaces();
 		}
-		else if (mPrefChangeRefreshNeeded) {
+		else if (mPrefChangeNewSearchNeeded) {
 			/*
 			 * Gets set based on evaluation of pref changes
 			 */
 			Logger.d(this, "Start place search because of preference change");
-			mPrefChangeRefreshNeeded = false;
+			mPrefChangeNewSearchNeeded = false;
 			searchForPlaces();
+		}
+		else if (mPrefChangeRefreshUiNeeded) {
+			/*
+			 * Gets set based on evaluation of pref changes
+			 */
+			Logger.d(this, "Refresh Ui because of preference change");
+			mPrefChangeRefreshUiNeeded = false;
+			mCommon.showBusy(true);
+			invalidateOptionsMenu();
+			mRadarAdapter.getItems().clear();
+			mRadarAdapter.getItems().addAll(ProxiManager.getInstance().getEntityModel().getAllPlaces(false));
+			mRadarAdapter.notifyDataSetChanged();
+			mCommon.hideBusy(true);
 		}
 		else if (LocationManager.getInstance().getLocationLocked() == null) {
 			/*
