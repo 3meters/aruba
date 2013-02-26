@@ -5,7 +5,7 @@
     <PreferenceCategory android:title="Search preferences" >
         <ListPreference
             android:id="@+id/Pref_Search_Radius"
-            android:defaultValue="@string/search_radius_default"
+            android:defaultValue="aircandi_theme_midnight"
             android:dialogTitle="Select search distance"
             android:entries="@array/search_radius_entries"
             android:entryValues="@array/search_radius_values"
@@ -18,7 +18,7 @@
     <PreferenceCategory android:title="General preferences" >
         <ListPreference
             android:id="@+id/Pref_Theme"
-            android:defaultValue="@string/theme_default"
+            android:defaultValue="aircandi_theme_midnight"
             android:dialogTitle="Select theme"
             android:entries="@array/theme_entries"
             android:entryValues="@array/theme_values"

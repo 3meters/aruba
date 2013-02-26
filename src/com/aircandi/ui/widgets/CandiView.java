@@ -241,7 +241,7 @@ public class CandiView extends RelativeLayout {
 			/* Place rank score - dev only */
 			setVisibility(mPlaceRankScore, View.GONE);
 			if (mPlaceRankScore != null
-					&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+					&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
 					&& Aircandi.settings.getBoolean(Preferences.PREF_SHOW_PLACE_RANK_SCORE, false)) {
 				mPlaceRankScore.setText(String.valueOf(entity.getPlaceRankScore()));
 				setVisibility(mPlaceRankScore, View.VISIBLE);
@@ -340,7 +340,7 @@ public class CandiView extends RelativeLayout {
 				}
 
 				if (Aircandi.getInstance().getUser() != null
-						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
 						&& Aircandi.getInstance().getUser().isDeveloper != null
 						&& Aircandi.getInstance().getUser().isDeveloper) {
 					info = target + info;

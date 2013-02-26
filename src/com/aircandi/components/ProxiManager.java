@@ -322,7 +322,7 @@ public class ProxiManager {
 		if (observation != null) {
 			parameters.putString("observation", "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
 			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-					Aircandi.applicationContext.getString(R.string.search_radius_default)));
+					Preferences.PREF_SEARCH_RADIUS_DEFAULT));
 			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) searchRangeMeters));
 		}
 
@@ -438,7 +438,7 @@ public class ProxiManager {
 		parameters.putFloat("longitude", observation.longitude.floatValue());
 		parameters.putInt("limit", ProxiConstants.RADAR_PLACES_LIMIT);
 		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-				Aircandi.applicationContext.getString(R.string.search_radius_default)));
+				Preferences.PREF_SEARCH_RADIUS_DEFAULT));
 		parameters.putInt("radius", searchRangeMeters);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -563,7 +563,7 @@ public class ProxiManager {
 		}
 
 		/* Hide entities that are not within entity declared virtual range */
-		if (Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+		if (Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
 				&& Aircandi.settings.getBoolean(Preferences.PREF_ENTITY_FENCING, true)
 				&& beacon.level.intValue() < signalThresholdFluid) {
 			entity.hidden = true;
@@ -1358,6 +1358,9 @@ public class ProxiManager {
 								}
 								link.primary = true;
 							}
+							if (entity.links == null) {
+								entity.links = new ArrayList<Link>();
+							}
 							entity.links.add(link);
 						}
 					}
@@ -1803,7 +1806,7 @@ public class ProxiManager {
 			 */
 			final List<Entity> entities = new ArrayList<Entity>();
 			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-					Aircandi.applicationContext.getString(R.string.search_radius_default)));
+					Preferences.PREF_SEARCH_RADIUS_DEFAULT));
 
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
@@ -1866,7 +1869,7 @@ public class ProxiManager {
 			 */
 			final List<Entity> entities = new ArrayList<Entity>();
 			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-					Aircandi.applicationContext.getString(R.string.search_radius_default)));
+					Preferences.PREF_SEARCH_RADIUS_DEFAULT));
 
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
@@ -1930,7 +1933,7 @@ public class ProxiManager {
 			 */
 			final List<Entity> entities = new ArrayList<Entity>();
 			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-					Aircandi.applicationContext.getString(R.string.search_radius_default)));
+					Preferences.PREF_SEARCH_RADIUS_DEFAULT));
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (entry.getValue().isCollection) {
@@ -1971,7 +1974,7 @@ public class ProxiManager {
 			 */
 			final List<Entity> entities = new ArrayList<Entity>();
 			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-					Aircandi.applicationContext.getString(R.string.search_radius_default)));
+					Preferences.PREF_SEARCH_RADIUS_DEFAULT));
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {

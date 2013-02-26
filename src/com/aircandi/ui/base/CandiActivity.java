@@ -53,7 +53,7 @@ public abstract class CandiActivity extends SherlockActivity {
 			setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
 			mCommon.initialize();
-			mPrefSearchRadius = getString(R.string.search_radius_default);
+			mPrefSearchRadius = Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, Preferences.PREF_SEARCH_RADIUS_DEFAULT);			
 		}
 	}
 
@@ -203,9 +203,9 @@ public abstract class CandiActivity extends SherlockActivity {
 
 	public void updatePreferences(Boolean firstUpdate) {
 
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT))) {
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT))) {
 			Logger.d(this, "Pref change: theme, restarting current activity");
-			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
+			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT);
 			if (!firstUpdate) {
 				mCommon.reload();
 			}
@@ -215,10 +215,10 @@ public abstract class CandiActivity extends SherlockActivity {
 		mPrefChangeNewSearchNeeded = false;
 		mPrefChangeRefreshUiNeeded = false;
 
-		if (!mPrefSearchRadius.equals(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, getString(R.string.search_radius_default)))) {
+		if (!mPrefSearchRadius.equals(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, Preferences.PREF_SEARCH_RADIUS_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;
 			Logger.d(this, "Pref change: search radius");
-			mPrefSearchRadius = Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, getString(R.string.search_radius_default));
+			mPrefSearchRadius = Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, Preferences.PREF_SEARCH_RADIUS_DEFAULT);
 		}
 
 		/* Dev prefs */
@@ -241,10 +241,10 @@ public abstract class CandiActivity extends SherlockActivity {
 			mPrefTestingPlaceSource = Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_PROVIDER, "foursquare");
 		}
 
-		if (!mPrefEnableDev.equals(Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, false))) {
+		if (!mPrefEnableDev.equals(Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT))) {
 			mPrefChangeRefreshUiNeeded = true;
 			Logger.d(this, "Pref change: dev ui");
-			mPrefEnableDev = Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, false);
+			mPrefEnableDev = Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT);
 		}
 
 		if (firstUpdate) {

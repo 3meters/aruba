@@ -257,7 +257,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			final StringBuilder beaconMessage = new StringBuilder(500);
 			synchronized (ProxiManager.getInstance().mWifiList) {
 				if (Aircandi.getInstance().getUser() != null
-						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
 						&& Aircandi.getInstance().getUser().isDeveloper != null
 						&& Aircandi.getInstance().getUser().isDeveloper) {
 					if (Aircandi.wifiCount > 0) {
@@ -695,7 +695,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void setTheme(Integer themeResId, Boolean isDialog) {
-		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
+		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT);
 		mIsDialog = isDialog;
 		/*
 		 * ActionBarSherlock takes over the title area if version < 4.0 (Ice Cream Sandwich).
@@ -1004,7 +1004,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (mMenuItemBeacons != null) {
 
 			/* Only show beacon indicator if user is a developer */
-			if (!Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+			if (!Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
 					|| Aircandi.getInstance().getUser() == null
 					|| Aircandi.getInstance().getUser().isDeveloper == null
 					|| !Aircandi.getInstance().getUser().isDeveloper) {

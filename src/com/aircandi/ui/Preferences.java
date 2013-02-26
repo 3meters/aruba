@@ -7,7 +7,6 @@ import android.preference.Preference.OnPreferenceChangeListener;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.aircandi.Aircandi;
-import com.aircandi.CandiConstants;
 import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.utilities.AnimUtils;
@@ -36,6 +35,11 @@ public class Preferences extends SherlockPreferenceActivity {
 	public static final String	SETTING_PICTURE_SEARCH		= "Setting_Picture_Search";
 	public static final String	SETTING_LAST_EMAIL			= "Setting_Last_Email";
 
+	/* Defaults */
+	public static final Boolean	PREF_ENABLE_DEV_DEFAULT		= false;
+	public static final String	PREF_SEARCH_RADIUS_DEFAULT	= "8047";
+	public static final String	PREF_THEME_DEFAULT			= "aircandi_theme_midnight";
+
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +51,7 @@ public class Preferences extends SherlockPreferenceActivity {
 		/*
 		 * TODO: Switch over to using the preferenceStyle attribute for the current theme.
 		 */
-		final String prefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
+		final String prefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT);
 		if (prefTheme.equals("aircandi_theme_snow")) {
 			setTheme(R.style.aircandi_theme_light);
 		}

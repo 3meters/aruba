@@ -621,7 +621,7 @@ public class CandiRadar extends CandiActivity {
 		 */
 
 		if (Aircandi.getInstance().getUser() != null
-				&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+				&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
 				&& Aircandi.getInstance().getUser().isDeveloper != null
 				&& Aircandi.getInstance().getUser().isDeveloper) {
 			mCommon.stopScanService();
@@ -644,7 +644,7 @@ public class CandiRadar extends CandiActivity {
 		mFreshWindow = true;
 
 		if (Aircandi.getInstance().getUser() != null
-				&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, true)
+				&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
 				&& Aircandi.getInstance().getUser().isDeveloper != null
 				&& Aircandi.getInstance().getUser().isDeveloper) {
 			mCommon.startScanService(CandiConstants.INTERVAL_SCAN_WIFI);

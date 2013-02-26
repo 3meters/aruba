@@ -209,11 +209,6 @@
     <string name="candi_button_comment">comment</string>
     <string name="comment_button_comment_first">start the conversation</string>
 
-    <!-- Misc -->
-
-    <string name="theme_default">aircandi_theme_midnight</string>
-    <string name="search_radius_default">457</string>
-
     <!-- Splash -->
 
     <string name="splash_button_signin">sign in</string>

@@ -335,8 +335,8 @@ public abstract class FormActivity extends SherlockActivity {
 	protected void onResume() {
 		super.onResume();
 		mCommon.doResume();
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT))) {
-			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, CandiConstants.THEME_DEFAULT);
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT))) {
+			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT);
 			mCommon.reload();
 		}
 	}
