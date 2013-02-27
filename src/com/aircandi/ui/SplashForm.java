@@ -110,8 +110,8 @@ public class SplashForm extends SherlockActivity {
 
 	private void signinAuto() {
 
-		final String jsonUser = Aircandi.settings.getString(Preferences.SETTING_USER, null);
-		final String jsonSession = Aircandi.settings.getString(Preferences.SETTING_USER_SESSION, null);
+		final String jsonUser = Aircandi.settings.getString(CandiConstants.SETTING_USER, null);
+		final String jsonSession = Aircandi.settings.getString(CandiConstants.SETTING_USER_SESSION, null);
 
 		if (jsonUser != null && jsonSession != null) {
 			Logger.i(this, "Auto sign in...");

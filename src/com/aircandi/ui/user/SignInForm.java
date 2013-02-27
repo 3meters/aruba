@@ -25,7 +25,6 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.Preferences;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
@@ -64,7 +63,7 @@ public class SignInForm extends FormActivity {
 		if (mCommon.mMessage != null) {
 			mTextMessage.setText(mCommon.mMessage);
 		}
-		final String email = Aircandi.settings.getString(Preferences.SETTING_LAST_EMAIL, null);
+		final String email = Aircandi.settings.getString(CandiConstants.SETTING_LAST_EMAIL, null);
 		if (email != null) {
 			mTextEmail.setText(email);
 			mTextPassword.requestFocus();
@@ -129,9 +128,9 @@ public class SignInForm extends FormActivity {
 						final String jsonUser = ProxibaseService.convertObjectToJsonSmart(user, false, true);
 						final String jsonSession = ProxibaseService.convertObjectToJsonSmart(user.session, false, true);
 
-						Aircandi.settingsEditor.putString(Preferences.SETTING_USER, jsonUser);
-						Aircandi.settingsEditor.putString(Preferences.SETTING_USER_SESSION, jsonSession);
-						Aircandi.settingsEditor.putString(Preferences.SETTING_LAST_EMAIL, user.email);
+						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, jsonUser);
+						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER_SESSION, jsonSession);
+						Aircandi.settingsEditor.putString(CandiConstants.SETTING_LAST_EMAIL, user.email);
 						Aircandi.settingsEditor.commit();
 
 						setResult(CandiConstants.RESULT_USER_SIGNED_IN);

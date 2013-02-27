@@ -165,9 +165,6 @@ public class CandiRadar extends CandiActivity {
 		/* Always reset the entity cache */
 		ProxiManager.getInstance().getEntityModel().removeAllEntities();
 
-		/* Initialize preferences */
-		updatePreferences(true);
-
 		/* Other UI references */
 		mList = (ListView) findViewById(R.id.radar_list);
 		mList.setOnItemClickListener(new OnItemClickListener() {
@@ -391,7 +388,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Logger.d(CandiRadar.this, "Entities changed event: updating radar");
-				
+
 				mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
 				mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
 
@@ -403,7 +400,7 @@ public class CandiRadar extends CandiActivity {
 
 				/* Add some sparkle */
 				if (previousCount == 0 && entities.size() > 0) {
-					if (mPrefSoundEffects) {
+					if (Aircandi.settings.getBoolean(CandiConstants.PREF_SOUND_EFFECTS, CandiConstants.PREF_SOUND_EFFECTS_DEFAULT)) {
 						new AsyncTask() {
 
 							@Override
@@ -570,6 +567,14 @@ public class CandiRadar extends CandiActivity {
 		 */
 		Logger.d(this, "CandiRadarActivity starting");
 		super.onStart();
+
+		if (mPrefChangeReloadNeeded) {
+			final Intent intent = getIntent();
+			startActivity(intent);
+			finish();
+			return;
+		}
+
 		if (!mInitialized) return;
 
 		/* Check for location service */
@@ -599,8 +604,15 @@ public class CandiRadar extends CandiActivity {
 		/* Start listening for events */
 		disableEvents();
 
-		/* Stop any location burst that might be active */
-		LocationManager.getInstance().stopLocationBurst();
+		/*
+		 * Stop any location burst that might be active unless
+		 * this activity is being restarted. We do this because there
+		 * is a race condition that can stop location burst after it 
+		 * has been started by the reload. 
+		 */
+		if (!mPrefChangeReloadNeeded) {
+			LocationManager.getInstance().stopLocationBurst();
+		}
 
 		/* Kill busy */
 		mCommon.hideBusy(true);
@@ -622,7 +634,7 @@ public class CandiRadar extends CandiActivity {
 		 */
 
 		if (Aircandi.getInstance().getUser() != null
-				&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
+				&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 				&& Aircandi.getInstance().getUser().isDeveloper != null
 				&& Aircandi.getInstance().getUser().isDeveloper) {
 			mCommon.stopScanService();
@@ -645,7 +657,7 @@ public class CandiRadar extends CandiActivity {
 		mFreshWindow = true;
 
 		if (Aircandi.getInstance().getUser() != null
-				&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
+				&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 				&& Aircandi.getInstance().getUser().isDeveloper != null
 				&& Aircandi.getInstance().getUser().isDeveloper) {
 			mCommon.startScanService(CandiConstants.INTERVAL_SCAN_WIFI);
@@ -743,7 +755,7 @@ public class CandiRadar extends CandiActivity {
 			Logger.d(this, "Start place search because wifi state has changed");
 			searchForPlaces();
 		}
-		else if ((entityModel.getLastBeaconLockedDate() != null &&  mEntityModelBeaconDate != null) 
+		else if ((entityModel.getLastBeaconLockedDate() != null && mEntityModelBeaconDate != null)
 				&& (entityModel.getLastBeaconLockedDate().longValue() > mEntityModelBeaconDate.longValue())) {
 			/*
 			 * The beacons we are locked to have changed so we need to search for new places linked

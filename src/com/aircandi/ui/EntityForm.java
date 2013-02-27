@@ -267,7 +267,7 @@ public class EntityForm extends FormActivity {
 			setVisibility(findViewById(R.id.button_delete), View.GONE);
 			if (entity.ownerId != null
 					&& (entity.ownerId.equals(Aircandi.getInstance().getUser().id)
-					|| (Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
+					|| (Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 							&& Aircandi.getInstance().getUser().isDeveloper != null
 							&& Aircandi.getInstance().getUser().isDeveloper))) {
 				setVisibility(findViewById(R.id.button_delete), View.VISIBLE);

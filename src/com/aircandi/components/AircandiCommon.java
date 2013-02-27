@@ -110,15 +110,14 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private MenuItem			mMenuItemBeacons;
 	public Menu					mMenu;
 	private ProgressDialog		mProgressDialog;
-	public String				mPrefTheme;
 	public ActionBar			mActionBar;
 	private ViewFlipper			mViewFlipper;
 
 	/* Other */
 	private final String		mPageName;
 	private String				mDebugWifi;
-	private String				mDebugLocation	= "--";
-	private final AtomicInteger	mBusyCount		= new AtomicInteger(0);
+	private String				mDebugLocation		= "--";
+	private final AtomicInteger	mBusyCount			= new AtomicInteger(0);
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
 		mContext = context;
@@ -263,7 +262,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 			final StringBuilder beaconMessage = new StringBuilder(500);
 			synchronized (ProxiManager.getInstance().mWifiList) {
 				if (Aircandi.getInstance().getUser() != null
-						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
+						&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 						&& Aircandi.getInstance().getUser().isDeveloper != null
 						&& Aircandi.getInstance().getUser().isDeveloper) {
 					if (Aircandi.wifiCount > 0) {
@@ -716,7 +715,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void setTheme(Integer themeResId, Boolean isDialog) {
-		mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT);
+		String prefTheme = Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT);
 		mIsDialog = isDialog;
 		/*
 		 * ActionBarSherlock takes over the title area if version < 4.0 (Ice Cream Sandwich).
@@ -729,10 +728,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 */
 		Integer themeId = themeResId;
 		if (themeId == null) {
-			themeId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
+			themeId = mContext.getApplicationContext().getResources().getIdentifier(prefTheme, "style", mContext.getPackageName());
 			if (isDialog) {
 				themeId = R.style.aircandi_theme_dialog_dark;
-				if (mPrefTheme.equals("aircandi_theme_snow")) {
+				if (prefTheme.equals("aircandi_theme_snow")) {
 					themeId = R.style.aircandi_theme_dialog_light;
 				}
 			}
@@ -773,8 +772,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 						}
 
 						/* Clear the user and session that is tied into auto-signin */
-						Aircandi.settingsEditor.putString(Preferences.SETTING_USER, null);
-						Aircandi.settingsEditor.putString(Preferences.SETTING_USER_SESSION, null);
+						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, null);
+						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER_SESSION, null);
 						Aircandi.settingsEditor.commit();
 
 						/* Make sure onPrepareOptionsMenu gets called */
@@ -1025,7 +1024,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		if (mMenuItemBeacons != null) {
 
 			/* Only show beacon indicator if user is a developer */
-			if (!Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
+			if (!Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 					|| Aircandi.getInstance().getUser() == null
 					|| Aircandi.getInstance().getUser().isDeveloper == null
 					|| !Aircandi.getInstance().getUser().isDeveloper) {
@@ -1237,9 +1236,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 * the front. User also sees forward slide animation and loading just
 		 * like a forward launching sequence.
 		 */
-		final Intent intent = mActivity.getIntent();
-		mActivity.finish();
-		mActivity.startActivity(intent);
 	}
 
 	public void doDestroy() {}

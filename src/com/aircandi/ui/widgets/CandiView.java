@@ -25,7 +25,6 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Place;
-import com.aircandi.ui.Preferences;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
 
@@ -241,8 +240,8 @@ public class CandiView extends RelativeLayout {
 			/* Place rank score - dev only */
 			setVisibility(mPlaceRankScore, View.GONE);
 			if (mPlaceRankScore != null
-					&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
-					&& Aircandi.settings.getBoolean(Preferences.PREF_SHOW_PLACE_RANK_SCORE, false)) {
+					&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
+					&& Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE, CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT)) {
 				mPlaceRankScore.setText(String.valueOf(entity.getPlaceRankScore()));
 				setVisibility(mPlaceRankScore, View.VISIBLE);
 			}
@@ -340,7 +339,7 @@ public class CandiView extends RelativeLayout {
 				}
 
 				if (Aircandi.getInstance().getUser() != null
-						&& Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
+						&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 						&& Aircandi.getInstance().getUser().isDeveloper != null
 						&& Aircandi.getInstance().getUser().isDeveloper) {
 					info = target + info;

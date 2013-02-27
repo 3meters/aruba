@@ -64,7 +64,6 @@ import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.ServiceData;
-import com.aircandi.ui.Preferences;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.ImageUtils;
@@ -144,7 +143,7 @@ public class PicturePicker extends FormActivity {
 				mSearch.setText(mDefaultSearch);
 			}
 			else {
-				mSearch.setText(Aircandi.settings.getString(Preferences.SETTING_PICTURE_SEARCH, null));
+				mSearch.setText(Aircandi.settings.getString(CandiConstants.SETTING_PICTURE_SEARCH, null));
 			}
 			mQuery = mSearch.getText().toString();
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.search_text));
@@ -256,7 +255,7 @@ public class PicturePicker extends FormActivity {
 	public void onSearchClick(View view) {
 		mQuery = mSearch.getText().toString();
 		mMessage.setVisibility(View.VISIBLE);
-		Aircandi.settingsEditor.putString(Preferences.SETTING_PICTURE_SEARCH, mQuery);
+		Aircandi.settingsEditor.putString(CandiConstants.SETTING_PICTURE_SEARCH, mQuery);
 		Aircandi.settingsEditor.commit();
 		mOffset = 0;
 		mTitleOptional = mQuery;

@@ -31,7 +31,6 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.Preferences;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -314,9 +313,9 @@ public class RegisterForm extends FormActivity {
 						final String jsonUser = ProxibaseService.convertObjectToJsonSmart(insertedUser, false, true);
 						final String jsonSession = ProxibaseService.convertObjectToJsonSmart(insertedUser.session, false, true);
 
-						Aircandi.settingsEditor.putString(Preferences.SETTING_USER, jsonUser);
-						Aircandi.settingsEditor.putString(Preferences.SETTING_USER_SESSION, jsonSession);
-						Aircandi.settingsEditor.putString(Preferences.SETTING_LAST_EMAIL, insertedUser.email);
+						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER, jsonUser);
+						Aircandi.settingsEditor.putString(CandiConstants.SETTING_USER_SESSION, jsonSession);
+						Aircandi.settingsEditor.putString(CandiConstants.SETTING_LAST_EMAIL, insertedUser.email);
 						Aircandi.settingsEditor.commit();
 
 						setResult(CandiConstants.RESULT_USER_SIGNED_IN);

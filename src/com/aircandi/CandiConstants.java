@@ -126,6 +126,37 @@ public final class CandiConstants {
 	public static final boolean	SUPPORTS_HONEYCOMB				= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB;
 	public static final boolean	SUPPORTS_ICE_CREAM_SANDWICH		= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 	public static final boolean	SUPPORTS_JELLY_BEAN				= android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN;
+	
+	/* Prefs - users */
+	public static final String	PREF_THEME							= "Pref_Theme";
+	public static final String	PREF_SEARCH_RADIUS					= "Pref_Search_Radius";
+	public static final String	PREF_SOUND_EFFECTS					= "Pref_Sound_Effects";
+	
+	/* Prefs - dev only */
+	public static final String	PREF_ENABLE_DEV						= "Pref_Enable_Dev";
+	public static final String	PREF_ENTITY_FENCING					= "Pref_Entity_Fencing";
+	public static final String	PREF_SHOW_PLACE_RANK_SCORE			= "Pref_Show_Place_Rank_Score";
+	public static final String	PREF_TESTING_BEACONS				= "Pref_Testing_Beacons";
+	public static final String	PREF_TESTING_LOCATION				= "Pref_Testing_Location";
+	public static final String	PREF_TESTING_PLACE_PROVIDER			= "Pref_Testing_Place_Provider";
+	
+	/* Settings */
+	public static final String	SETTING_USER						= "Setting_User";
+	public static final String	SETTING_USER_SESSION				= "Setting_User_Session";
+	public static final String	SETTING_PICTURE_SEARCH				= "Setting_Picture_Search";
+	public static final String	SETTING_LAST_EMAIL					= "Setting_Last_Email";
+	
+	/* Defaults */
+	public static final String	PREF_THEME_DEFAULT					= "aircandi_theme_midnight";
+	public static final String	PREF_SEARCH_RADIUS_DEFAULT			= "8047";
+	public static final Boolean	PREF_SOUND_EFFECTS_DEFAULT			= true;
+	
+	public static final Boolean	PREF_ENABLE_DEV_DEFAULT				= false;
+	public static final Boolean	PREF_ENTITY_FENCING_DEFAULT			= false;
+	public static final Boolean	PREF_SHOW_PLACE_RANK_SCORE_DEFAULT	= false;
+	public static final String	PREF_TESTING_BEACONS_DEFAULT		= "natural";
+	public static final String	PREF_TESTING_LOCATION_DEFAULT		= "natural";
+	public static final String	PREF_TESTING_PLACE_PROVIDER_DEFAULT	= "foursquare";
 
 	private CandiConstants() {}; // $codepro.audit.disable emptyMethod
 }

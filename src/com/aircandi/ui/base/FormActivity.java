@@ -34,7 +34,6 @@ import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.User;
-import com.aircandi.ui.Preferences;
 import com.aircandi.ui.builders.PicturePicker;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -335,8 +334,10 @@ public abstract class FormActivity extends SherlockActivity {
 	protected void onResume() {
 		super.onResume();
 		mCommon.doResume();
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT))) {
-			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT);
+		
+		if (!Aircandi.getInstance().getPrefTheme().equals(Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT))) {
+			Logger.d(this, "Pref change: theme, restarting current activity");
+			Aircandi.getInstance().snapshotPreferences();
 			mCommon.reload();
 		}
 	}

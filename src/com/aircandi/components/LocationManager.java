@@ -11,7 +11,6 @@ import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.PlacesConstants;
 import com.aircandi.service.objects.Observation;
-import com.aircandi.ui.Preferences;
 import com.aircandi.utilities.DateUtils;
 
 @SuppressWarnings("ucd")
@@ -160,7 +159,7 @@ public class LocationManager {
 				observation.provider = "emulator_lucky";
 			}
 			else {
-				final String testingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, "natural");
+				final String testingLocation = Aircandi.settings.getString(CandiConstants.PREF_TESTING_LOCATION, "natural");
 				if (ListPreferenceMultiSelect.contains("zoka", testingLocation, null)) {
 					observation = new Observation(47.6686489, -122.3320842); // zoka
 					observation.time = DateUtils.nowDate().getTime();

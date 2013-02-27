@@ -107,6 +107,18 @@ public class Aircandi extends Application {
 	private User							mUser;
 	private Boolean							mLaunchedNormally			= false;
 
+	/* Common preferences */
+	private String							mPrefTheme;
+	private String							mPrefSearchRadius;
+
+	/* Dev preferences */
+	private Boolean							mPrefEnableDev;
+	private Boolean							mPrefEntityFencing;
+	private Boolean							mPrefShowPlaceRankScore;
+	private String							mPrefTestingBeacons;
+	private String							mPrefTestingLocation;
+	private String							mPrefTestingPlaceProvider;
+
 	public static Aircandi getInstance() {
 		return singletonObject;
 	}
@@ -134,6 +146,20 @@ public class Aircandi extends Application {
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
+		
+		/* Set prefs so we can tell when a change happens that we need to respond to. Theme is set in setTheme(). */
+		snapshotPreferences();
+	}
+	
+	public void snapshotPreferences() {
+		mPrefTheme = Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT);
+		mPrefSearchRadius = Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS, CandiConstants.PREF_SEARCH_RADIUS_DEFAULT);
+		mPrefEnableDev = Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT);
+		mPrefEntityFencing = Aircandi.settings.getBoolean(CandiConstants.PREF_ENTITY_FENCING, CandiConstants.PREF_ENTITY_FENCING_DEFAULT);
+		mPrefShowPlaceRankScore = Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE, CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT);
+		mPrefTestingBeacons = Aircandi.settings.getString(CandiConstants.PREF_TESTING_BEACONS, CandiConstants.PREF_TESTING_BEACONS_DEFAULT);
+		mPrefTestingLocation = Aircandi.settings.getString(CandiConstants.PREF_TESTING_LOCATION, CandiConstants.PREF_TESTING_LOCATION_DEFAULT);
+		mPrefTestingPlaceProvider = Aircandi.settings.getString(CandiConstants.PREF_TESTING_PLACE_PROVIDER, CandiConstants.PREF_TESTING_PLACE_PROVIDER_DEFAULT);
 	}
 
 	public static String getVersionName(Context context, Class cls) {
@@ -164,4 +190,67 @@ public class Aircandi extends Application {
 		return mLaunchedNormally;
 	}
 
+	public String getPrefTheme() {
+		return mPrefTheme;
+	}
+
+	public void setPrefTheme(String prefTheme) {
+		mPrefTheme = prefTheme;
+	}
+
+	public String getPrefSearchRadius() {
+		return mPrefSearchRadius;
+	}
+
+	public void setPrefSearchRadius(String prefSearchRadius) {
+		mPrefSearchRadius = prefSearchRadius;
+	}
+
+	public Boolean getPrefEnableDev() {
+		return mPrefEnableDev;
+	}
+
+	public void setPrefEnableDev(Boolean prefEnableDev) {
+		mPrefEnableDev = prefEnableDev;
+	}
+
+	public Boolean getPrefEntityFencing() {
+		return mPrefEntityFencing;
+	}
+
+	public void setPrefEntityFencing(Boolean prefEntityFencing) {
+		mPrefEntityFencing = prefEntityFencing;
+	}
+
+	public Boolean getPrefShowPlaceRankScore() {
+		return mPrefShowPlaceRankScore;
+	}
+
+	public void setPrefShowPlaceRankScore(Boolean prefShowPlaceRankScore) {
+		mPrefShowPlaceRankScore = prefShowPlaceRankScore;
+	}
+
+	public String getPrefTestingBeacons() {
+		return mPrefTestingBeacons;
+	}
+
+	public void setPrefTestingBeacons(String prefTestingBeacons) {
+		mPrefTestingBeacons = prefTestingBeacons;
+	}
+
+	public String getPrefTestingLocation() {
+		return mPrefTestingLocation;
+	}
+
+	public void setPrefTestingLocation(String prefTestingLocation) {
+		mPrefTestingLocation = prefTestingLocation;
+	}
+
+	public String getPrefTestingPlaceProvider() {
+		return mPrefTestingPlaceProvider;
+	}
+
+	public void setPrefTestingPlaceProvider(String prefTestingPlaceProvider) {
+		mPrefTestingPlaceProvider = prefTestingPlaceProvider;
+	}
 }

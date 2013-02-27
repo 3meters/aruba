@@ -19,7 +19,6 @@ import com.aircandi.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.Logger;
 import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.ui.Preferences;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 
@@ -30,13 +29,7 @@ public abstract class CandiActivity extends SherlockActivity {
 	private AlertDialog			mWifiAlertDialog;
 	protected Boolean			mPrefChangeNewSearchNeeded	= false;
 	protected Boolean			mPrefChangeRefreshUiNeeded	= false;
-
-	public boolean				mPrefSoundEffects			= true;
-	private String				mPrefSearchRadius;
-	private String				mPrefTestingBeacons;
-	private String				mPrefTestingLocation;
-	private String				mPrefTestingPlaceProvider;
-	private Boolean				mPrefEnableDev;
+	protected Boolean			mPrefChangeReloadNeeded		= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -53,12 +46,6 @@ public abstract class CandiActivity extends SherlockActivity {
 			setContentView(getLayoutId());
 			super.onCreate(savedInstanceState);
 			mCommon.initialize();
-
-			mPrefSearchRadius = Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, Preferences.PREF_SEARCH_RADIUS_DEFAULT);
-			mPrefTestingBeacons = Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, Preferences.PREF_TESTING_BEACONS_DEFAULT);
-			mPrefTestingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, Preferences.PREF_TESTING_LOCATION_DEFAULT);
-			mPrefTestingPlaceProvider = Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_PROVIDER, Preferences.PREF_TESTING_PLACE_PROVIDER_DEFAULT);
-			mPrefEnableDev = Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT);
 		}
 	}
 
@@ -206,59 +193,66 @@ public abstract class CandiActivity extends SherlockActivity {
 		});
 	}
 
-	public void updatePreferences(Boolean firstUpdate) {
-
-		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT))) {
-			Logger.d(this, "Pref change: theme, restarting current activity");
-			mCommon.mPrefTheme = Aircandi.settings.getString(Preferences.PREF_THEME, Preferences.PREF_THEME_DEFAULT);
-			if (!firstUpdate) {
-				mCommon.reload();
-			}
-			return;
-		}
+	public void checkForPreferenceChanges() {
 
 		mPrefChangeNewSearchNeeded = false;
 		mPrefChangeRefreshUiNeeded = false;
+		mPrefChangeReloadNeeded = false;
 
-		if (!mPrefSearchRadius.equals(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, Preferences.PREF_SEARCH_RADIUS_DEFAULT))) {
+		/* Common prefs */
+
+		if (!Aircandi.getInstance().getPrefTheme().equals(Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT))) {
+			Logger.d(this, "Pref change: theme, restarting current activity");
+			mPrefChangeReloadNeeded = true;
+		}
+
+		if (!Aircandi.getInstance().getPrefSearchRadius()
+				.equals(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS, CandiConstants.PREF_SEARCH_RADIUS_DEFAULT))) {
 			mPrefChangeNewSearchNeeded = true;
 			Logger.d(this, "Pref change: search radius");
-			mPrefSearchRadius = Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, Preferences.PREF_SEARCH_RADIUS_DEFAULT);
 		}
 
 		/* Dev prefs */
 
-		if (!mPrefTestingBeacons.equals(Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, Preferences.PREF_TESTING_BEACONS_DEFAULT))) {
-			mPrefChangeNewSearchNeeded = true;
-			Logger.d(this, "Pref change: testing beacons");
-			mPrefTestingBeacons = Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, Preferences.PREF_TESTING_BEACONS_DEFAULT);
-		}
-
-		if (!mPrefTestingLocation.equals(Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, Preferences.PREF_TESTING_LOCATION_DEFAULT))) {
-			mPrefChangeNewSearchNeeded = true;
-			Logger.d(this, "Pref change: testing location");
-			mPrefTestingLocation = Aircandi.settings.getString(Preferences.PREF_TESTING_LOCATION, Preferences.PREF_TESTING_LOCATION_DEFAULT);
-		}
-
-		if (!mPrefTestingPlaceProvider.equals(Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_PROVIDER,
-				Preferences.PREF_TESTING_PLACE_PROVIDER_DEFAULT))) {
-			mPrefChangeNewSearchNeeded = true;
-			Logger.d(this, "Pref change: place provider");
-			mPrefTestingPlaceProvider = Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_PROVIDER, Preferences.PREF_TESTING_PLACE_PROVIDER_DEFAULT);
-		}
-
-		if (!mPrefEnableDev.equals(Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT))) {
+		if (!Aircandi.getInstance().getPrefEnableDev()
+				.equals(Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT))) {
 			mPrefChangeRefreshUiNeeded = true;
 			Logger.d(this, "Pref change: dev ui");
-			mPrefEnableDev = Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT);
 		}
 
-		if (firstUpdate) {
-			mPrefChangeNewSearchNeeded = false;
-			mPrefChangeRefreshUiNeeded = false;
+		if (!Aircandi.getInstance().getPrefEntityFencing()
+				.equals(Aircandi.settings.getBoolean(CandiConstants.PREF_ENTITY_FENCING, CandiConstants.PREF_ENTITY_FENCING_DEFAULT))) {
+			mPrefChangeNewSearchNeeded = true;
+			Logger.d(this, "Pref change: entity fencing");
 		}
 
-		mPrefSoundEffects = Aircandi.settings.getBoolean(Preferences.PREF_SOUND_EFFECTS, true);
+		if (!Aircandi.getInstance().getPrefShowPlaceRankScore().equals(Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE,
+				CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT))) {
+			mPrefChangeRefreshUiNeeded = true;
+			Logger.d(this, "Pref change: place rank score");
+		}
+
+		if (!Aircandi.getInstance().getPrefTestingBeacons()
+				.equals(Aircandi.settings.getString(CandiConstants.PREF_TESTING_BEACONS, CandiConstants.PREF_TESTING_BEACONS_DEFAULT))) {
+			mPrefChangeNewSearchNeeded = true;
+			Logger.d(this, "Pref change: testing beacons");
+		}
+
+		if (!Aircandi.getInstance().getPrefTestingLocation().equals(Aircandi.settings
+				.getString(CandiConstants.PREF_TESTING_LOCATION, CandiConstants.PREF_TESTING_LOCATION_DEFAULT))) {
+			mPrefChangeNewSearchNeeded = true;
+			Logger.d(this, "Pref change: testing location");
+		}
+
+		if (!Aircandi.getInstance().getPrefTestingPlaceProvider().equals(Aircandi.settings.getString(CandiConstants.PREF_TESTING_PLACE_PROVIDER,
+				CandiConstants.PREF_TESTING_PLACE_PROVIDER_DEFAULT))) {
+			mPrefChangeNewSearchNeeded = true;
+			Logger.d(this, "Pref change: place provider");
+		}
+
+		if (mPrefChangeNewSearchNeeded || mPrefChangeRefreshUiNeeded || mPrefChangeReloadNeeded) {
+			Aircandi.getInstance().snapshotPreferences();
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -291,7 +285,7 @@ public abstract class CandiActivity extends SherlockActivity {
 	protected void onRestart() {
 		Logger.d(this, "CandiActivity restarting");
 		super.onRestart();
-		updatePreferences(false);
+		checkForPreferenceChanges();
 	}
 
 	@Override

@@ -57,7 +57,6 @@ import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.CandiRadar;
-import com.aircandi.ui.Preferences;
 import com.aircandi.utilities.DateUtils;
 import com.aircandi.utilities.ImageUtils;
 
@@ -122,7 +121,7 @@ public class ProxiManager {
 							mWifiList.add(new WifiScanResult(scanResult));
 						}
 
-						final String testingBeacons = Aircandi.settings.getString(Preferences.PREF_TESTING_BEACONS, "natural");
+						final String testingBeacons = Aircandi.settings.getString(CandiConstants.PREF_TESTING_BEACONS, "natural");
 
 						if (!ListPreferenceMultiSelect.contains("natural", testingBeacons, null)) {
 							mWifiList.clear();
@@ -321,7 +320,7 @@ public class ProxiManager {
 		final Observation observation = LocationManager.getInstance().getObservationLocked();
 		if (observation != null) {
 			parameters.putString("observation", "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
-			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, Preferences.PREF_SEARCH_RADIUS_DEFAULT));
+			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS, CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
 			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) searchRangeMeters));
 		}
 
@@ -430,14 +429,14 @@ public class ProxiManager {
 			parameters.putStringArrayList("excludePlaceIds", (ArrayList<String>) excludePlaceIds);
 		}
 
-		final String placeProvider = Aircandi.settings.getString(Preferences.PREF_TESTING_PLACE_PROVIDER, "foursquare");
+		final String placeProvider = Aircandi.settings.getString(CandiConstants.PREF_TESTING_PLACE_PROVIDER, "foursquare");
 
 		parameters.putString("provider", placeProvider);
 		parameters.putFloat("latitude", observation.latitude.floatValue());
 		parameters.putFloat("longitude", observation.longitude.floatValue());
 		parameters.putInt("limit", ProxiConstants.RADAR_PLACES_LIMIT);
-		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-				Preferences.PREF_SEARCH_RADIUS_DEFAULT));
+		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
+				CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
 		parameters.putInt("radius", searchRangeMeters);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
@@ -562,8 +561,8 @@ public class ProxiManager {
 		}
 
 		/* Hide entities that are not within entity declared virtual range */
-		if (Aircandi.settings.getBoolean(Preferences.PREF_ENABLE_DEV, Preferences.PREF_ENABLE_DEV_DEFAULT)
-				&& Aircandi.settings.getBoolean(Preferences.PREF_ENTITY_FENCING, true)
+		if (Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
+				&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENTITY_FENCING, CandiConstants.PREF_ENTITY_FENCING_DEFAULT)
 				&& beacon.level.intValue() < signalThresholdFluid) {
 			entity.hidden = true;
 			return;
@@ -1804,8 +1803,8 @@ public class ProxiManager {
 			 * handled outside of this method.
 			 */
 			final List<Entity> entities = new ArrayList<Entity>();
-			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-					Preferences.PREF_SEARCH_RADIUS_DEFAULT));
+			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
+					CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
 
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
@@ -1867,8 +1866,8 @@ public class ProxiManager {
 			 * handled outside of this method.
 			 */
 			final List<Entity> entities = new ArrayList<Entity>();
-			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-					Preferences.PREF_SEARCH_RADIUS_DEFAULT));
+			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
+					CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
 
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
@@ -1931,8 +1930,8 @@ public class ProxiManager {
 			 * handled outside of this method.
 			 */
 			final List<Entity> entities = new ArrayList<Entity>();
-			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-					Preferences.PREF_SEARCH_RADIUS_DEFAULT));
+			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
+					CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (entry.getValue().isCollection) {
@@ -1972,8 +1971,8 @@ public class ProxiManager {
 			 * handled outside of this method.
 			 */
 			final List<Entity> entities = new ArrayList<Entity>();
-			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-					Preferences.PREF_SEARCH_RADIUS_DEFAULT));
+			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
+					CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
 			synchronized (mEntityCache) {
 				for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 					if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
