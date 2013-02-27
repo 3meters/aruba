@@ -207,6 +207,7 @@ public class LocationManager {
 		if (!Aircandi.getInstance().wasLaunchedNormally()) {
 			Logger.d(this, "Aircandi not launched normally, refusing location");
 			this.initialize(Aircandi.getInstance().getApplicationContext());
+			stopLocationBurst();
 			return;
 		}
 		/*

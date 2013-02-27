@@ -71,16 +71,17 @@ import com.squareup.otto.Subscribe;
 
 public class CandiForm extends CandiActivity {
 
-	private ScrollView		mScrollView;
-	private ViewGroup		mContentView;
-	private ViewGroup		mCandiForm;
-	private CandiView		mCandiView;
-	private Entity			mEntity;
-	private Number			mEntityModelRefreshDate;
-	private Number			mEntityModelActivityDate;
-	private Boolean			mUpsize;
-	private Boolean			mTracked			= false;
+	private ScrollView				mScrollView;
+	private ViewGroup				mContentView;
+	private ViewGroup				mCandiForm;
+	private CandiView				mCandiView;
+	private Entity					mEntity;
+	private Number					mEntityModelRefreshDate;
+	private Number					mEntityModelActivityDate;
+	private Boolean					mUpsize;
+	private Boolean					mTracked			= false;
 	private final PackageReceiver	mPackageReceiver	= new PackageReceiver();
+	private Boolean					mTuningInProcess	= false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -256,16 +257,27 @@ public class CandiForm extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onQueryWifiScanReceived(final QueryWifiScanReceivedEvent event) {
 
-		runOnUiThread(new Runnable() {
+		if (mTuningInProcess) {
+			runOnUiThread(new Runnable() {
 
-			@Override
-			public void run() {
-				Logger.d(CandiForm.this, "Query wifi scan received event: locking beacons");
-				if (event.wifiList != null && event.wifiList.size() > 0) {
-					ProxiManager.getInstance().lockBeacons();
+				@Override
+				public void run() {
+					Logger.d(CandiForm.this, "Query wifi scan received event: locking beacons");
+					if (event.wifiList != null && event.wifiList.size() > 0) {
+						ProxiManager.getInstance().lockBeacons();
+					}
+					else {
+						/*
+						 * We fake that the tuning happened because it is simpler than enabling/disabling ui
+						 */
+						setSupportProgressBarIndeterminateVisibility(false);
+						mCommon.hideBusy(true);
+						mTuningInProcess = false;
+						ImageUtils.showToastNotification(getString(R.string.toast_tuned), Toast.LENGTH_SHORT);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	@Subscribe
@@ -317,6 +329,7 @@ public class CandiForm extends CandiActivity {
 	public void onTuneButtonClick(View view) {
 		Tracker.sendEvent("ui_action", "tune_place", null, 0);
 		mCommon.showBusy(R.string.progress_tuning, true);
+		mTuningInProcess = true;
 		if (NetworkManager.getInstance().isWifiEnabled()) {
 			ProxiManager.getInstance().scanForWifi(ScanReason.query);
 		}
@@ -413,7 +426,7 @@ public class CandiForm extends CandiActivity {
 		User user = (User) view.getTag();
 		mCommon.doUserClick(user);
 	}
-	
+
 	@SuppressWarnings("ucd")
 	public void onAddCandiButtonClick(View view) {
 		Tracker.sendEvent("ui_action", "add_candi", null, 0);
@@ -553,6 +566,7 @@ public class CandiForm extends CandiActivity {
 				//doBind(true);
 				setSupportProgressBarIndeterminateVisibility(false);
 				mCommon.hideBusy(true);
+				mTuningInProcess = false;
 				ImageUtils.showToastNotification(getString(R.string.toast_tuned), Toast.LENGTH_SHORT);
 			}
 		}.execute();
@@ -906,8 +920,10 @@ public class CandiForm extends CandiActivity {
 		 */
 		if (!isFinishing() && mEntity != null) {
 			AnimUtils.doOverridePendingTransition(this, TransitionType.PageBack);
-			if (ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
-					|| ProxiManager.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
+			if (ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate() != null
+					&& ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate().longValue() > mEntityModelRefreshDate.longValue()
+					|| ProxiManager.getInstance().getEntityModel().getLastActivityDate() != null
+					&& ProxiManager.getInstance().getEntityModel().getLastActivityDate().longValue() > mEntityModelActivityDate.longValue()) {
 				invalidateOptionsMenu();
 				bind(true);
 			}

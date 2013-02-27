@@ -117,8 +117,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 	/* Other */
 	private final String		mPageName;
 	private String				mDebugWifi;
-	private String				mDebugLocation;
-	private final AtomicInteger	mBusyCount	= new AtomicInteger(0);
+	private String				mDebugLocation	= "--";
+	private final AtomicInteger	mBusyCount		= new AtomicInteger(0);
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
 		mContext = context;
@@ -185,7 +185,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
-	
+
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onWifiScanReceived(MonitoringWifiScanReceivedEvent event) {
@@ -201,6 +201,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onLocationReceived(LocationReceivedEvent event) {
+		//updateDevIndicator(null, event.location);
+	}
+
+	@Subscribe
+	@SuppressWarnings("ucd")
+	public void onLocationLocked(LocationLockedEvent event) {
 		updateDevIndicator(null, event.location);
 	}
 
@@ -405,9 +411,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 						if (location.getAccuracy() <= 30) {
 							sizeDip = 7;
 						}
+						Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
 					}
 
-					Logger.v(this, "Location accuracy: >>> " + String.valueOf(sizeDip));
 					final int sizePixels = ImageUtils.getRawPixels(mActivity, sizeDip);
 					final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(sizePixels, sizePixels, Gravity.CENTER);
 					mAccuracyIndicator.setLayoutParams(layoutParams);
@@ -453,6 +459,21 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		if (location != null) {
+			Location locationLocked = LocationManager.getInstance().getLocationLocked();
+			if (locationLocked != null) {
+				if (location.getProvider().equals(locationLocked.getProvider()) && (int) location.getAccuracy() == (int) locationLocked.getAccuracy()) {
+					mBeaconIndicator.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.accent_blue));
+				}
+				else {
+					if (mThemeTone.equals("dark")) {
+						mBeaconIndicator.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_dark));
+					}
+					else {
+						mBeaconIndicator.setTextColor(Aircandi.getInstance().getResources().getColor(R.color.text_light));
+					}
+				}
+			}
+
 			String debugLocation = location.getProvider().substring(0, 1).toUpperCase(Locale.ROOT);
 			if (location.hasAccuracy()) {
 				debugLocation += String.valueOf((int) location.getAccuracy());
@@ -1018,7 +1039,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 						doBeaconIndicatorClick();
 					}
 				});
-				updateDevIndicator(ProxiManager.getInstance().mWifiList, LocationManager.getInstance().getLocationLocked());
+				//updateDevIndicator(ProxiManager.getInstance().mWifiList, LocationManager.getInstance().getLocationLocked());
 			}
 		}
 

@@ -103,7 +103,7 @@ public class DiskLruImageCache {
 				editor.commit();
 				mDiskCache.flush();
 				if (BuildConfig.DEBUG) {
-					Logger.d(this, "Image put on disk cache: " + String.valueOf(data.getWidth()) + "x" + String.valueOf(data.getHeight()) + " " + key);
+					Logger.v(this, "Image put on disk cache: " + String.valueOf(data.getWidth()) + "x" + String.valueOf(data.getHeight()) + " " + key);
 				}
 			}
 			else {
@@ -139,7 +139,7 @@ public class DiskLruImageCache {
 				editor.commit();
 				mDiskCache.flush();
 				if (BuildConfig.DEBUG) {
-					Logger.d(this, "Image put on disk cache: " + String.valueOf(imageBytes.length) + " " + key);
+					Logger.v(this, "Image put on disk cache: " + String.valueOf(imageBytes.length) + " " + key);
 				}
 			}
 			else {
@@ -190,7 +190,7 @@ public class DiskLruImageCache {
 		}
 
 		if (BuildConfig.DEBUG) {
-			Logger.d(this, (bitmap == null) ? "" : "image read from disk " + key);
+			Logger.v(this, (bitmap == null) ? "" : "image read from disk " + key);
 		}
 		return bitmap;
 	}
@@ -224,7 +224,7 @@ public class DiskLruImageCache {
 		}
 
 		if (BuildConfig.DEBUG) {
-			Logger.d(this, (imageBytes.length == 0) ? "" : "image bytes read from disk " + key);
+			Logger.v(this, (imageBytes.length == 0) ? "" : "image bytes read from disk " + key);
 		}
 		return imageBytes;
 	}

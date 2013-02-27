@@ -321,8 +321,7 @@ public class ProxiManager {
 		final Observation observation = LocationManager.getInstance().getObservationLocked();
 		if (observation != null) {
 			parameters.putString("observation", "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
-			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS,
-					Preferences.PREF_SEARCH_RADIUS_DEFAULT));
+			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(Preferences.PREF_SEARCH_RADIUS, Preferences.PREF_SEARCH_RADIUS_DEFAULT));
 			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) searchRangeMeters));
 		}
 
@@ -797,7 +796,7 @@ public class ProxiManager {
 
 		private Number						mLastActivityDate	= DateUtils.nowDate().getTime();
 		private Number						mLastRefreshDate;
-		private Number						mLastBeaconDate;
+		private Number						mLastBeaconLockedDate;
 
 		public EntityModel() {}
 
@@ -1747,7 +1746,7 @@ public class ProxiManager {
 				Collections.sort(mEntityModel.mBeacons, new Beacon.SortBeaconsBySignalLevel());
 			}
 
-			mLastBeaconDate = DateUtils.nowDate().getTime();
+			mLastBeaconLockedDate = DateUtils.nowDate().getTime();
 
 			BusProvider.getInstance().post(new BeaconsLockedEvent());
 		}
@@ -2479,12 +2478,12 @@ public class ProxiManager {
 			return mSourceMeta;
 		}
 
-		public Number getLastBeaconDate() {
-			return mLastBeaconDate;
+		public Number getLastBeaconLockedDate() {
+			return mLastBeaconLockedDate;
 		}
 
 		public void setLastBeaconDate(Number lastBeaconDate) {
-			mLastBeaconDate = lastBeaconDate;
+			mLastBeaconLockedDate = lastBeaconDate;
 		}
 
 	}

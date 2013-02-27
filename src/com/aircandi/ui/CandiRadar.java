@@ -36,6 +36,7 @@ import com.aircandi.components.EntitiesForLocationFinishedEvent;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.LocationChangedEvent;
+import com.aircandi.components.LocationLockedEvent;
 import com.aircandi.components.LocationManager;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -221,7 +222,7 @@ public class CandiRadar extends CandiActivity {
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Beacons locked event");
 				Logger.d(CandiRadar.this, "Beacons locked event: get entities for beacons");
-				mEntityModelBeaconDate = ProxiManager.getInstance().getEntityModel().getLastBeaconDate();
+				mEntityModelBeaconDate = ProxiManager.getInstance().getEntityModel().getLastBeaconLockedDate();
 				new AsyncTask() {
 
 					@Override
@@ -292,7 +293,7 @@ public class CandiRadar extends CandiActivity {
 
 					LocationManager.getInstance().setLocationLocked(locationCandidate);
 					mCommon.updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());
-					mCommon.updateDevIndicator(null, LocationManager.getInstance().getLocationLocked());
+					BusProvider.getInstance().post(new LocationLockedEvent(LocationManager.getInstance().getLocationLocked()));
 
 					Aircandi.stopwatch2.segmentTime("Location acquired event");
 					if (LocationManager.getInstance().getObservationLocked() != null) {
@@ -390,7 +391,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Logger.d(CandiRadar.this, "Entities changed event: updating radar");
-
+				
 				mEntityModelRefreshDate = ProxiManager.getInstance().getEntityModel().getLastBeaconRefreshDate();
 				mEntityModelActivityDate = ProxiManager.getInstance().getEntityModel().getLastActivityDate();
 
@@ -689,7 +690,7 @@ public class CandiRadar extends CandiActivity {
 	private void manageData() {
 
 		final EntityModel entityModel = ProxiManager.getInstance().getEntityModel();
-		if (mEntityModelRefreshDate == null) {
+		if (mEntityModelActivityDate == null) {
 			/*
 			 * Get set everytime onEntitiesChanged gets called. Means
 			 * we have never completed even the first search for entities.
@@ -742,13 +743,14 @@ public class CandiRadar extends CandiActivity {
 			Logger.d(this, "Start place search because wifi state has changed");
 			searchForPlaces();
 		}
-		else if (entityModel.getLastBeaconDate().longValue() > mEntityModelBeaconDate.longValue()) {
+		else if ((entityModel.getLastBeaconLockedDate() != null &&  mEntityModelBeaconDate != null) 
+				&& (entityModel.getLastBeaconLockedDate().longValue() > mEntityModelBeaconDate.longValue())) {
 			/*
 			 * The beacons we are locked to have changed so we need to search for new places linked
 			 * to beacons.
 			 */
 			Logger.d(this, "Refresh places for beacons because beacon date has changed");
-			mEntityModelBeaconDate = ProxiManager.getInstance().getEntityModel().getLastBeaconDate();
+			mEntityModelBeaconDate = ProxiManager.getInstance().getEntityModel().getLastBeaconLockedDate();
 			new AsyncTask() {
 
 				@Override

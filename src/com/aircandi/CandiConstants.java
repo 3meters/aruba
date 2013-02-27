@@ -81,7 +81,6 @@ public final class CandiConstants {
 	 */
 	public static final int		IMAGE_DIMENSION_MAX				= 960;
 
-	public static final String	THEME_DEFAULT					= "aircandi_theme_midnight";																//$NON-NLS-1$
 	public static final String	URL_AIRCANDI_UPGRADE			= "https://aircandi.com/install";															//$NON-NLS-1$
 	public static final String	URL_AIRCANDI_TERMS				= "https://aircandi.com/pages/terms.html";													//$NON-NLS-1$
 	public static final String	S3_BUCKET_IMAGES				= "aircandi-images";																		// $codepro.audit.disable constantNamingConvention //$NON-NLS-1$

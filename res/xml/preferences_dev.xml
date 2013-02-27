@@ -5,7 +5,7 @@
     <PreferenceCategory android:title="Search preferences" >
         <ListPreference
             android:id="@+id/Pref_Search_Radius"
-            android:defaultValue="aircandi_theme_midnight"
+            android:defaultValue="8047"
             android:dialogTitle="Select search distance"
             android:entries="@array/search_radius_entries"
             android:entryValues="@array/search_radius_values"
