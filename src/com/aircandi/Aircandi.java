@@ -119,6 +119,8 @@ public class Aircandi extends Application {
 	private String							mPrefTestingLocation;
 	private String							mPrefTestingPlaceProvider;
 
+	private boolean							mUsingEmulator				= false;
+
 	public static Aircandi getInstance() {
 		return singletonObject;
 	}
@@ -146,11 +148,11 @@ public class Aircandi extends Application {
 		/* Make settings available app wide */
 		settings = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		settingsEditor = settings.edit();
-		
+
 		/* Set prefs so we can tell when a change happens that we need to respond to. Theme is set in setTheme(). */
 		snapshotPreferences();
 	}
-	
+
 	public void snapshotPreferences() {
 		mPrefTheme = Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT);
 		mPrefSearchRadius = Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS, CandiConstants.PREF_SEARCH_RADIUS_DEFAULT);
@@ -252,5 +254,13 @@ public class Aircandi extends Application {
 
 	public void setPrefTestingPlaceProvider(String prefTestingPlaceProvider) {
 		mPrefTestingPlaceProvider = prefTestingPlaceProvider;
+	}
+
+	public boolean isUsingEmulator() {
+		return mUsingEmulator;
+	}
+
+	public void setUsingEmulator(boolean usingEmulator) {
+		mUsingEmulator = usingEmulator;
 	}
 }

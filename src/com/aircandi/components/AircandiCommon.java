@@ -260,13 +260,13 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private void doBeaconIndicatorClick() {
 		if (mBeaconIndicator != null) {
 			final StringBuilder beaconMessage = new StringBuilder(500);
-			synchronized (ProxiManager.getInstance().mWifiList) {
+			synchronized (ProxiManager.getInstance().getEntityModel().getWifiList()) {
 				if (Aircandi.getInstance().getUser() != null
 						&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
 						&& Aircandi.getInstance().getUser().isDeveloper != null
 						&& Aircandi.getInstance().getUser().isDeveloper) {
 					if (Aircandi.wifiCount > 0) {
-						for (WifiScanResult wifi : ProxiManager.getInstance().mWifiList) {
+						for (WifiScanResult wifi : ProxiManager.getInstance().getEntityModel().getWifiList()) {
 							if (!wifi.SSID.equals("candi_feed")) {
 								beaconMessage.append(wifi.SSID + ": (" + String.valueOf(wifi.level) + ") " + wifi.BSSID + System.getProperty("line.separator"));
 							}

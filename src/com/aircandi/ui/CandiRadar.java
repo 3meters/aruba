@@ -33,6 +33,7 @@ import com.aircandi.components.CommandType;
 import com.aircandi.components.EntitiesChangedEvent;
 import com.aircandi.components.EntitiesForBeaconsFinishedEvent;
 import com.aircandi.components.EntitiesForLocationFinishedEvent;
+import com.aircandi.components.EntityModel;
 import com.aircandi.components.Exceptions;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.LocationChangedEvent;
@@ -44,7 +45,6 @@ import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.PlacesNearLocationFinishedEvent;
 import com.aircandi.components.ProxiManager;
-import com.aircandi.components.ProxiManager.EntityModel;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.ProxiManager.ScanReason;
 import com.aircandi.components.QueryWifiScanReceivedEvent;
@@ -202,7 +202,7 @@ public class CandiRadar extends CandiActivity {
 				Aircandi.stopwatch1.segmentTime("Wifi scan received event");
 				Logger.d(CandiRadar.this, "Query wifi scan received event: locking beacons");
 
-				if (event.wifiList != null && event.wifiList.size() > 0) {
+				if (event.wifiList != null) {
 					ProxiManager.getInstance().lockBeacons();
 				}
 			}
@@ -470,6 +470,7 @@ public class CandiRadar extends CandiActivity {
 		Aircandi.stopwatch1.start("Search for places by beacon");
 		mWifiState = NetworkManager.getInstance().getWifiState();
 		if (NetworkManager.getInstance().isWifiEnabled()) {
+			ProxiManager.getInstance().getEntityModel().clearBeacons();
 			ProxiManager.getInstance().scanForWifi(ScanReason.query);
 		}
 	}

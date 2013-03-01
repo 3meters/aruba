@@ -14,6 +14,7 @@ import com.aircandi.components.LocationManager;
 import com.aircandi.components.ProxiManager;
 import com.aircandi.service.Expose;
 import com.aircandi.service.SerializedName;
+import com.aircandi.service.objects.Link.LinkType;
 
 /**
  * Entity as described by the proxi protocol standards.
@@ -65,7 +66,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	public String				parentId;										/* Used to connect beacon object */
 
 	@Expose(serialize = false, deserialize = true)
-	public List<Entity>	children;
+	public List<Entity>			children;
 
 	@Expose(serialize = false, deserialize = true)
 	public Integer				childCount;
@@ -151,7 +152,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		if (map.get("links") != null) {
 			entity.links = new ArrayList<Link>();
 			final List<LinkedHashMap<String, Object>> linkMaps = (List<LinkedHashMap<String, Object>>) map.get("links");
-			for (Map<String,Object> linkMap : linkMaps) {
+			for (Map<String, Object> linkMap : linkMaps) {
 				entity.links.add(Link.setPropertiesFromMap(new Link(), linkMap));
 			}
 		}
@@ -159,7 +160,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		if (map.get("sources") != null) {
 			entity.sources = new ArrayList<Source>();
 			final List<LinkedHashMap<String, Object>> sourceMaps = (List<LinkedHashMap<String, Object>>) map.get("sources");
-			for (Map<String,Object> sourceMap : sourceMaps) {
+			for (Map<String, Object> sourceMap : sourceMaps) {
 				entity.sources.add(Source.setPropertiesFromMap(new Source(), sourceMap));
 			}
 		}
@@ -167,7 +168,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		if (map.get("comments") != null) {
 			entity.comments = new ArrayList<Comment>();
 			final List<LinkedHashMap<String, Object>> commentMaps = (List<LinkedHashMap<String, Object>>) map.get("comments");
-			for (Map<String,Object> commentMap : commentMaps) {
+			for (Map<String, Object> commentMap : commentMaps) {
 				entity.comments.add(Comment.setPropertiesFromMap(new Comment(), commentMap));
 			}
 		}
@@ -178,7 +179,7 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		entity.children = new ArrayList<Entity>();
 		if (map.get("children") != null) {
 			final List<LinkedHashMap<String, Object>> childMaps = (List<LinkedHashMap<String, Object>>) map.get("children");
-			for (Map<String,Object> childMap : childMaps) {
+			for (Map<String, Object> childMap : childMaps) {
 				entity.children.add(Entity.setPropertiesFromMap(new Entity(), childMap));
 			}
 		}
@@ -448,11 +449,14 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return null;
 	}
 
-	public Boolean hasProximityLink() {
+	public Boolean hasActiveProximityLink() {
 		if (links != null) {
 			for (Link link : links) {
-				if (link.primary && link.type.equals("proximity")) {
-					return true;
+				if (link.primary && link.type.equals(LinkType.proximity.name())) {
+					Beacon beacon = ProxiManager.getInstance().getEntityModel().getBeacon(link.toId);
+					if (beacon != null) {
+						return true;
+					}
 				}
 			}
 		}
@@ -527,18 +531,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		return null;
 	}
 
-	//	public String getSourcesAsText() {
-	//		if (sources != null && sources.size() > 0) {
-	//			String sourcesAsText = "";
-	//			for (Source source : sources) {
-	//				sourcesAsText += source.caption + ", ";
-	//			}
-	//			sourcesAsText = sourcesAsText.substring(0, sourcesAsText.length() - 2);
-	//			return sourcesAsText;
-	//		}
-	//		return null;
-	//	}
-
 	@SuppressWarnings("ucd")
 	public static enum Visibility {
 		Public,
@@ -550,10 +542,10 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 		@Override
 		public int compare(Entity entity1, Entity entity2) {
 
-			if (entity1.hasProximityLink() && !entity2.hasProximityLink()) {
+			if (entity1.hasActiveProximityLink() && !entity2.hasActiveProximityLink()) {
 				return -1;
 			}
-			else if (entity2.hasProximityLink() && !entity1.hasProximityLink()) {
+			else if (entity2.hasActiveProximityLink() && !entity1.hasActiveProximityLink()) {
 				return 1;
 			}
 			else {

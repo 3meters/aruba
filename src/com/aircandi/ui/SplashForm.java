@@ -84,7 +84,7 @@ public class SplashForm extends SherlockActivity {
 
 		/* Proxibase sdk components */
 		ProxiManager.getInstance().setContext(getApplicationContext());
-		ProxiManager.getInstance().setUsingEmulator(Aircandi.usingEmulator);
+		Aircandi.getInstance().setUsingEmulator(Aircandi.usingEmulator);
 		ProxiManager.getInstance().initialize();
 
 		/* Cache categories - we delay until after the initial rush for data */

@@ -313,7 +313,7 @@ public class CandiView extends RelativeLayout {
 			String info = "here";
 
 			final float distance = entity.getDistance(); // In meters
-			final String target = entity.hasProximityLink() ? "B:" : "L:";
+			final String target = entity.hasActiveProximityLink() ? "B:" : "L:";
 			/*
 			 * If distance = -1 then we don't have the location info
 			 * yet needed to correctly determine distance.
