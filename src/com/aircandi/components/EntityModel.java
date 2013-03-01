@@ -1104,7 +1104,7 @@ public class EntityModel {
 		}
 		
 		Collections.sort(entities, new Entity.SortEntitiesByProximityAndDistance());
-		return entities.subList(0, ProxiConstants.RADAR_PLACES_LIMIT - 1);
+		return entities.size() > ProxiConstants.RADAR_PLACES_LIMIT ? entities.subList(0, ProxiConstants.RADAR_PLACES_LIMIT - 1) : entities;
 	}
 
 	public Float getMaxPlaceDistance() {

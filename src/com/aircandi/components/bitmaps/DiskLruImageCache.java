@@ -20,7 +20,7 @@ import com.aircandi.components.Logger;
 @SuppressWarnings("ucd")
 public class DiskLruImageCache {
 
-	private DiskLruCache		mDiskCache; // $codepro.audit.disable variableShouldBeFinal
+	private DiskLruCache		mDiskCache;								// $codepro.audit.disable variableShouldBeFinal
 	private CompressFormat		mCompressFormat		= CompressFormat.JPEG;
 	private int					mCompressQuality	= 70;
 	private static final int	APP_VERSION			= 1;
@@ -35,7 +35,7 @@ public class DiskLruImageCache {
 			, int quality) {
 
 		try {
-			final File diskCacheDir = getDiskCacheDir(context, uniqueName);
+			final File diskCacheDir = getDiskCacheDirExternalPreferred(context, uniqueName);
 			mDiskCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize);
 			mCompressFormat = compressFormat;
 			mCompressQuality = quality;
@@ -79,13 +79,44 @@ public class DiskLruImageCache {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private File getDiskCacheDir(Context context, String uniqueName) {
 		/*
 		 * Check if media is mounted or storage is built-in, if so, try and use external cache dir
 		 * otherwise use internal cache dir
 		 */
-		final String cachePath = (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)
-				|| !Utils.isExternalStorageRemovable()) ? Utils.getExternalCacheDir(context).getPath() : context.getCacheDir().getPath();
+		String cachePath = context.getCacheDir().getPath();
+		return new File(cachePath + File.separator + uniqueName);
+	}
+
+	private File getDiskCacheDirExternalPreferred(Context context, String uniqueName) {
+		/*
+		 * Check if media is mounted or storage is built-in, if so, try and use external cache dir
+		 * otherwise use internal cache dir.
+		 */
+		String cachePath = "";
+
+		boolean externalStorageAvailable = false;
+		boolean externalStorageWriteable = false;
+		String state = Environment.getExternalStorageState();
+
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+			externalStorageAvailable = externalStorageWriteable = true;
+		}
+		else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+			externalStorageAvailable = true;
+			externalStorageWriteable = false;
+		}
+		else {
+			externalStorageAvailable = externalStorageWriteable = false;
+		}
+
+		if (externalStorageAvailable && externalStorageWriteable) {
+			cachePath = Utils.getExternalCacheDir(context).getPath();
+		}
+		else {
+			cachePath = context.getCacheDir().getPath();
+		}
 
 		return new File(cachePath + File.separator + uniqueName);
 	}
