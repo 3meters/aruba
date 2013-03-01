@@ -68,9 +68,7 @@
     			<property file="version.properties" />
 	    		<property name="build.version" value="${build.major.number}.${build.minor.number}.${build.patch.number}" />
 	    		<property name="build.code" value="${build.code}" />
-	    		
                 <property name="out.final.file.versioned" location="${out.absolute.dir}/${ant.project.name}-release-${build.version}.apk" />
-                
                 <property name="out.unaligned.file" location="${out.absolute.dir}/${ant.project.name}-release-unaligned.apk" />
 
                 <!-- Signs the APK -->
@@ -104,5 +102,56 @@
         </do-only-if-not-library>
         <record-build-info />
     </target>
-	
+    
+    <target name="-release-sign-custom" if="has.keystore" >
+        <!-- only create apk if *not* a library project -->
+        <do-only-if-not-library elseText="Library project: do not create apk..." >
+            <sequential>
+                
+                <!-- Add version to final file name -->
+    			<property file="version.properties" />
+	    		<property name="build.version" value="${build.major.number}.${build.minor.number}.${build.patch.number}" />
+	    		<property name="build.code" value="${build.code}" />
+                <property name="out.final.file.versioned" location="${out.absolute.dir}/${ant.project.name}-release-custom-${build.version}.apk" />
+                <property name="out.unaligned.file" location="${out.absolute.dir}/${ant.project.name}-release-custom-unaligned.apk" />
+
+                <!-- Signs the APK -->
+                <echo level="info">Signing final apk...</echo>
+                <signapk
+                        input="${out.packaged.file}"
+                        output="${out.unaligned.file}"
+                        keystore="${key.store}"
+                        storepass="${key.store.password}"
+                        alias="${key.alias}"
+                        keypass="${key.alias.password}"/>
+
+                <!-- Zip aligns the APK -->
+                <zipalign-helper
+                        in.package="${out.unaligned.file}"
+                        out.package="${out.final.file.versioned}" />
+                
+				<copy file="${out.final.file.versioned}" toDir="${web.local.dir}" overwrite="true" />
+				
+                <!-- Extra copy to website                 
+        		<property file="${source.absolute.dir}/com/proxibase/aircandi/aws.properties"/>
+		        <S3Upload verbose="true"
+		                        accessId="${accessId}"
+		                        secretKey="${secretKey}"
+		                        bucket="www.aircandi.com">
+		        	<fileset dir="${out.absolute.dir}" includes="${out.final.file}"/>
+		        </S3Upload>
+		        -->
+				<echo level="info">Custom Release Package: ${out.final.file.versioned}</echo>
+            </sequential>
+        </do-only-if-not-library>
+        <record-build-info />
+    </target>
+    
+    <!-- This runs -package-release and -release-nosign first and then runs
+         only if release-sign is true (set in -release-check, called by -release-no-sign)-->
+    <target name="release-custom"
+                depends="-set-release-mode, -release-obfuscation-check, -package, -post-package, -release-prompt-for-password, -release-nosign, -release-sign-custom, -post-build"
+                description="Builds a custom version of the application in release mode.">
+    </target>
+    	
 </project>
