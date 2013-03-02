@@ -201,11 +201,15 @@ public class ProxibaseService {
 
 	private DefaultHttpClient createHttpClient() {
 
-		/* Support http and https */
+		/*
+		 * AllowAllHostnameVerifier doesn't verify host names contained in SSL certificate. It should not be set in
+		 * production environment. It may allow man in middle attack. Other host name verifiers for specific needs
+		 * are StrictHostnameVerifier and BrowserCompatHostnameVerifier.
+		 */
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-		
+
 		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
-		sslSocketFactory.setHostnameVerifier((X509HostnameVerifier)hostnameVerifier);
+		sslSocketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
 
 		final SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
