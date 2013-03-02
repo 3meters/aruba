@@ -35,6 +35,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.WindowManager.BadTokenException;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -116,8 +117,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 	/* Other */
 	private final String		mPageName;
 	private String				mDebugWifi;
-	private String				mDebugLocation		= "--";
-	private final AtomicInteger	mBusyCount			= new AtomicInteger(0);
+	private String				mDebugLocation	= "--";
+	private final AtomicInteger	mBusyCount		= new AtomicInteger(0);
 
 	public AircandiCommon(Context context, Bundle savedInstanceState) {
 		mContext = context;
@@ -859,20 +860,30 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		Logger.v(this, "Busy count: " + String.valueOf(mBusyCount.get()));
 
-		if (mBusyCount.get() == 1) {
-			startActionbarBusyIndicator();
-		}
+		try {
 
-		if (messageResId != null) {
-			final ProgressDialog progressDialog = getProgressDialog();
-			progressDialog.setMessage(mActivity.getString(messageResId));
-			if (!progressDialog.isShowing()) {
-				progressDialog.setCancelable(false);
-				progressDialog.show();
-				if (Aircandi.displayMetrics != null) {
-					progressDialog.getWindow().setLayout((int) (Aircandi.displayMetrics.widthPixels * 0.7), WindowManager.LayoutParams.WRAP_CONTENT);
+			if (mBusyCount.get() == 1) {
+				startActionbarBusyIndicator();
+			}
+
+			if (messageResId != null) {
+				final ProgressDialog progressDialog = getProgressDialog();
+				progressDialog.setMessage(mActivity.getString(messageResId));
+				if (!progressDialog.isShowing()) {
+					progressDialog.setCancelable(false);
+					progressDialog.show();
+					if (Aircandi.displayMetrics != null) {
+						progressDialog.getWindow().setLayout((int) (Aircandi.displayMetrics.widthPixels * 0.7), WindowManager.LayoutParams.WRAP_CONTENT);
+					}
 				}
 			}
+		}
+		catch (BadTokenException e) {
+			/*
+			 * Sometimes the activity has been destroyed out from under us
+			 * so we trap this and continue.
+			 */
+			e.printStackTrace();
 		}
 	}
 

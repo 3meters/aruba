@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
 import net.minidev.json.JSONValue;
@@ -30,6 +31,9 @@ import net.minidev.json.parser.ParseException;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
@@ -40,6 +44,7 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRoute;
 import org.apache.http.conn.routing.HttpRoute;
@@ -47,6 +52,7 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -56,6 +62,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 
 import android.graphics.Bitmap;
 
@@ -151,7 +158,13 @@ public class ProxibaseService {
 	private ProxibaseService() {
 
 		/* Connection settings */
-		mHttpParams = new BasicHttpParams();
+		mHttpParams = createHttpParams();
+		mHttpClient = createHttpClient();
+	}
+
+	private HttpParams createHttpParams() {
+
+		HttpParams params = new BasicHttpParams();
 		final ConnPerRoute connPerRoute = new ConnPerRoute() {
 
 			@Override
@@ -170,37 +183,111 @@ public class ProxibaseService {
 		 * - setConnectionTimeout: Used trying to establish a connection to the server.
 		 * - setSoTimeout: How long a socket will wait for data before throwing up.
 		 */
-		ConnManagerParams.setMaxTotalConnections(mHttpParams, DEFAULT_MAX_CONNECTIONS);
-		ConnManagerParams.setMaxConnectionsPerRoute(mHttpParams, connPerRoute);
-		ConnManagerParams.setTimeout(mHttpParams, 1000);
-		HttpConnectionParams.setStaleCheckingEnabled(mHttpParams, false);
-		HttpConnectionParams.setConnectionTimeout(mHttpParams, ProxiConstants.TIMEOUT_CONNECTION);
-		HttpConnectionParams.setSoTimeout(mHttpParams, ProxiConstants.TIMEOUT_SOCKET_QUERIES);
-		HttpConnectionParams.setTcpNoDelay(mHttpParams, true);
-		HttpConnectionParams.setSocketBufferSize(mHttpParams, 8192);
-		HttpProtocolParams.setVersion(mHttpParams, HttpVersion.HTTP_1_1);
-		HttpProtocolParams.setContentCharset(mHttpParams, HTTP.UTF_8);
-		HttpProtocolParams.setUserAgent(mHttpParams, ProxiConstants.USER_AGENT_DESKTOP);
+		ConnManagerParams.setMaxTotalConnections(params, DEFAULT_MAX_CONNECTIONS);
+		ConnManagerParams.setMaxConnectionsPerRoute(params, connPerRoute);
+		ConnManagerParams.setTimeout(params, 1000);
+		HttpConnectionParams.setStaleCheckingEnabled(params, false);
+		HttpConnectionParams.setConnectionTimeout(params, ProxiConstants.TIMEOUT_CONNECTION);
+		HttpConnectionParams.setSoTimeout(params, ProxiConstants.TIMEOUT_SOCKET_QUERIES);
+		HttpConnectionParams.setTcpNoDelay(params, true);
+		HttpConnectionParams.setSocketBufferSize(params, 8192);
+		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+		HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
 
-		mHttpParams.setBooleanParameter("http.protocol.expect-continue", false);
+		params.setBooleanParameter("http.protocol.expect-continue", false);
+
+		return params;
+	}
+
+	private DefaultHttpClient createHttpClient() {
 
 		/* Support http and https */
+		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+		
+		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
+		sslSocketFactory.setHostnameVerifier((X509HostnameVerifier)hostnameVerifier);
+
 		final SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
-
-		sslSocketFactory.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER); /* Might not work */
 		schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
+
+		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+
+		/* Create connection manager and http client */
+		final ClientConnectionManager connectionManager = new ThreadSafeClientConnManager(mHttpParams, schemeRegistry);
+		DefaultHttpClient httpClient = new DefaultHttpClient(connectionManager, mHttpParams);
+
+		httpClient.addRequestInterceptor(new HttpRequestInterceptor() {
+			@Override
+			public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
+				request.addHeader("User-Agent", "Mozilla/5.0");
+			}
+		});
+		return httpClient;
+	}
+
+	@SuppressWarnings("unused")
+	private HttpParams createHttpParamsOld() {
+
+		HttpParams params = new BasicHttpParams();
+		final ConnPerRoute connPerRoute = new ConnPerRoute() {
+
+			@Override
+			public int getMaxForRoute(HttpRoute route) {
+				return DEFAULT_CONNECTIONS_PER_ROUTE;
+			}
+		};
+
+		/*
+		 * Turn off stale checking. Our connections break all the time anyway, and
+		 * it's not worth it to pay the penalty of checking every time.
+		 * 
+		 * Timeouts:
+		 * 
+		 * - setTimeout: Used when retrieving a ManagedClientConnection from the ClientConnectionManager.
+		 * - setConnectionTimeout: Used trying to establish a connection to the server.
+		 * - setSoTimeout: How long a socket will wait for data before throwing up.
+		 */
+		ConnManagerParams.setMaxTotalConnections(params, DEFAULT_MAX_CONNECTIONS);
+		ConnManagerParams.setMaxConnectionsPerRoute(params, connPerRoute);
+		ConnManagerParams.setTimeout(params, 1000);
+		HttpConnectionParams.setStaleCheckingEnabled(params, false);
+		HttpConnectionParams.setConnectionTimeout(params, ProxiConstants.TIMEOUT_CONNECTION);
+		HttpConnectionParams.setSoTimeout(params, ProxiConstants.TIMEOUT_SOCKET_QUERIES);
+		HttpConnectionParams.setTcpNoDelay(params, true);
+		HttpConnectionParams.setSocketBufferSize(params, 8192);
+		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+		HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
+		HttpProtocolParams.setUserAgent(params, ProxiConstants.USER_AGENT_DESKTOP);
+
+		params.setBooleanParameter("http.protocol.expect-continue", false);
+
+		return params;
+	}
+
+	@SuppressWarnings("unused")
+	private DefaultHttpClient createHttpClientOld() {
+
+		/* Support http and https */
+
+		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
+		sslSocketFactory.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER); /* Might not work */
+
+		final SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+		schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
+
 		HttpsURLConnection.setDefaultHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
 
 		/* Create connection manager and http client */
 		final ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager(mHttpParams, schemeRegistry);
 
-		mHttpClient = new DefaultHttpClient(connectionManager, mHttpParams);
+		DefaultHttpClient httpClient = new DefaultHttpClient(connectionManager, mHttpParams);
 
 		/* Start a thread to monitor for expired or idle connections */
 		// mIdleConnectionMonitorThread = new IdleConnectionMonitorThread(connectionManager);
 		// mIdleConnectionMonitorThread.start();
+		return httpClient;
 	}
 
 	// ----------------------------------------------------------------------------------------
@@ -216,7 +303,9 @@ public class ProxibaseService {
 		int retryCount = 0;
 		Query query = null;
 		HttpConnectionParams.setSoTimeout(mHttpParams,
-				(serviceRequest.getSocketTimeout() == null) ? ProxiConstants.TIMEOUT_SOCKET_QUERIES : serviceRequest.getSocketTimeout());
+				(serviceRequest.getSocketTimeout() == null)
+						? ProxiConstants.TIMEOUT_SOCKET_QUERIES
+						: serviceRequest.getSocketTimeout());
 
 		while (true) {
 
