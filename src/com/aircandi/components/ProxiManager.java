@@ -23,7 +23,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import com.aircandi.Aircandi;
-import com.aircandi.BuildConfig;
+import com.aircandi.beta.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.PlacesConstants;
 import com.aircandi.ProxiConstants;

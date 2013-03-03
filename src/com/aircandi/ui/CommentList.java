@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EndlessAdapter;
 import com.aircandi.components.FontManager;

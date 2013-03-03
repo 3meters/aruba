@@ -8,7 +8,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.aircandi.CandiConstants;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;

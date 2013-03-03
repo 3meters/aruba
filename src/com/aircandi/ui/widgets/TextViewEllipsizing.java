@@ -13,7 +13,7 @@ import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.aircandi.R;
+import com.aircandi.beta.R;
 
 @SuppressWarnings("ucd")
 public class TextViewEllipsizing extends TextView {

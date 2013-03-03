@@ -17,9 +17,9 @@ import android.widget.EditText;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.aircandi.Aircandi;
-import com.aircandi.BuildConfig;
+import com.aircandi.beta.BuildConfig;
 import com.aircandi.CandiConstants;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.CommandType;

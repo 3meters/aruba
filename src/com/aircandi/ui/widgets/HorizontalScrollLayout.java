@@ -9,7 +9,7 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
-import com.aircandi.R;
+import com.aircandi.beta.R;
 
 @SuppressWarnings("ucd")
 public class HorizontalScrollLayout extends HorizontalScrollView {

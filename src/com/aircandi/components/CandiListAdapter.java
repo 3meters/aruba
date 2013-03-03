@@ -20,7 +20,7 @@ import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.aircandi.CandiConstants;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.objects.Entity;

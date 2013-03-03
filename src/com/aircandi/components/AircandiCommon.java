@@ -48,10 +48,10 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.BuildConfig;
+import com.aircandi.beta.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.ScanService;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
@@ -241,7 +241,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		final String message = mActivity.getString(R.string.alert_about_message) + " "
 				+ Aircandi.getVersionName(mContext, CandiRadar.class) + System.getProperty("line.separator")
 				+ mActivity.getString(R.string.dialog_info);
-		AircandiCommon.showAlertDialog(R.drawable.ic_app
+		AircandiCommon.showAlertDialog(R.drawable.ic_launcher
 				, title
 				, message
 				, null
@@ -291,7 +291,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 					return;
 				}
 			}
-			AircandiCommon.showAlertDialog(R.drawable.ic_app
+			AircandiCommon.showAlertDialog(R.drawable.ic_launcher
 					, mActivity.getString(R.string.alert_beacons_title)
 					, beaconMessage.toString()
 					, null
@@ -701,7 +701,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 				@Override
 				public void run() {
-					AircandiCommon.showAlertDialog(R.drawable.ic_app
+					AircandiCommon.showAlertDialog(R.drawable.ic_launcher
 							, titleText
 							, message
 							, null
@@ -943,12 +943,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 
 	public void showNotification(String title, String message, Context context, Intent intent, int notificationType) {
 		@SuppressWarnings("deprecation")
-		final Notification note = new Notification(R.drawable.ic_app_status_bw
+		final Notification note = new Notification(R.drawable.ic_stat_notification
 				, title
 				, System.currentTimeMillis());
 
 		final RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.custom_notification);
-		contentView.setImageViewResource(R.id.image, R.drawable.ic_app);
+		contentView.setImageViewResource(R.id.image, R.drawable.ic_launcher);
 		contentView.setTextViewText(R.id.title, title);
 		contentView.setTextViewText(R.id.text, message);
 		note.contentView = contentView;

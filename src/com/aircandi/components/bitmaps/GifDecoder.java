@@ -7,7 +7,7 @@ import java.util.Vector;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 
-import com.aircandi.BuildConfig;
+import com.aircandi.beta.BuildConfig;
 
 @SuppressWarnings("ucd")
 public class GifDecoder {

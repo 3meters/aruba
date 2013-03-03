@@ -85,7 +85,7 @@
 
     <!-- Aircandi branding colors HSV: 300,50,60-->
 
-    <color name="brand_pink">#ffA552A5</color>
+    <color name="brand_pink">#ffb45eb4</color>
     <color name="brand_pink_light">#ffBF5FBF</color>
     <color name="brand_pink_lighter">#ffD86CD8</color>
     <color name="brand_pink_lighter_mute">#ffD8ADD8</color>

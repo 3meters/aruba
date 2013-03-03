@@ -8,7 +8,7 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;

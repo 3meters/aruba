@@ -127,7 +127,7 @@ public class BitmapManager {
 			return serviceResponse;
 		}
 
-		final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable", "com.aircandi");
+		final int resourceId = Aircandi.applicationContext.getResources().getIdentifier(resolvedResourceName, "drawable", Aircandi.getInstance().getPackageName());
 		String memCacheKey = String.valueOf(resourceId);
 		if (bitmapRequest.getImageSize() != null) {
 			memCacheKey += "." + String.valueOf(bitmapRequest.getImageSize());
@@ -424,9 +424,9 @@ public class BitmapManager {
 	}
 
 	private String resolveResourceName(String rawResourceName) {
-		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "drawable", "com.aircandi");
+		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "drawable", Aircandi.getInstance().getPackageName());
 		if (resourceId == 0) {
-			resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "attr", "com.aircandi");
+			resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "attr", Aircandi.getInstance().getPackageName());
 			final TypedValue value = new TypedValue();
 			if (Aircandi.applicationContext.getTheme().resolveAttribute(resourceId, value, true)) {
 				final String redirectedResourceName = (String) value.coerceToString();

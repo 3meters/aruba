@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 
-import com.aircandi.R;
+import com.aircandi.beta.R;
 
 @SuppressWarnings("ucd")
 public class ListViewExpanded extends LinearLayout {

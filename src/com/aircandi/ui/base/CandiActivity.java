@@ -15,7 +15,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.Logger;
 import com.aircandi.service.ProxibaseService.RequestListener;
@@ -93,7 +93,7 @@ public abstract class CandiActivity extends SherlockActivity {
 			@Override
 			public void run() {
 				if (mUpdateAlertDialog == null || !mUpdateAlertDialog.isShowing()) {
-					mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.ic_app
+					mUpdateAlertDialog = AircandiCommon.showAlertDialog(R.drawable.ic_launcher
 							, getString(R.string.alert_upgrade_title)
 							, getString(Aircandi.applicationUpdateRequired ? R.string.alert_upgrade_required_body
 									: R.string.alert_upgrade_needed_body)
@@ -153,7 +153,7 @@ public abstract class CandiActivity extends SherlockActivity {
 			@Override
 			public void run() {
 				if (mWifiAlertDialog == null || !mWifiAlertDialog.isShowing()) {
-					mWifiAlertDialog = AircandiCommon.showAlertDialog(R.drawable.ic_app
+					mWifiAlertDialog = AircandiCommon.showAlertDialog(R.drawable.ic_launcher
 							, getString(R.string.alert_wifi_title)
 							, getString(messageResId)
 							, null

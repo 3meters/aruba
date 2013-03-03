@@ -21,7 +21,7 @@ import android.widget.TextView;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiManager;
@@ -405,7 +405,7 @@ public class CategoryBuilder extends FormActivity {
 
 		mImage.getImageView().setTag(uri);
 		final BitmapRequest bitmapRequest = new BitmapRequest(uri, mImage.getImageView());
-		bitmapRequest.setBrokenDrawableResId(R.drawable.ic_app);
+		bitmapRequest.setBrokenDrawableResId(R.drawable.ic_launcher);
 		bitmapRequest.setImageSize(mImage.getSizeHint());
 		bitmapRequest.setImageRequestor(mImage.getImageView());
 		BitmapManager.getInstance().masterFetch(bitmapRequest);

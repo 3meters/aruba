@@ -3,6 +3,7 @@ package com.aircandi;
 
 import android.graphics.Bitmap.Config;
 import android.util.Log;
+import com.aircandi.beta.BuildConfig;
 
 @SuppressWarnings("ucd")
 public final class CandiConstants {

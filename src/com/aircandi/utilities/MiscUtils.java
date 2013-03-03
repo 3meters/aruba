@@ -5,7 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-import com.aircandi.BuildConfig;
+import com.aircandi.beta.BuildConfig;
 
 public class MiscUtils {
 

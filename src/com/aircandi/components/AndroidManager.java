@@ -19,7 +19,7 @@ import android.os.BatteryManager;
 import android.os.Environment;
 
 import com.aircandi.Aircandi;
-import com.aircandi.BuildConfig;
+import com.aircandi.beta.BuildConfig;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
 

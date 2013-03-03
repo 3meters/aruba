@@ -66,7 +66,7 @@ import org.apache.http.protocol.HttpContext;
 
 import android.graphics.Bitmap;
 
-import com.aircandi.BuildConfig;
+import com.aircandi.beta.BuildConfig;
 import com.aircandi.ProxiConstants;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
@@ -214,8 +214,6 @@ public class ProxibaseService {
 		final SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
-
-		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 
 		/* Create connection manager and http client */
 		final ClientConnectionManager connectionManager = new ThreadSafeClientConnManager(mHttpParams, schemeRegistry);

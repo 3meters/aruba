@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.ui.widgets.CandiView;
 

@@ -20,7 +20,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.aircandi.CandiConstants;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.AndroidManager;
 import com.aircandi.components.FontManager;
 import com.aircandi.components.ProxiManager;

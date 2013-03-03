@@ -52,7 +52,7 @@ public class LocationManager {
 
 		/* Setup the location update Pending Intents */
 		final Intent activeIntentNetwork = new Intent(mApplicationContext, LocationChangedReceiver.class);
-		mLocationListenerPendingIntent = PendingIntent.getBroadcast(mApplicationContext, 0, activeIntentNetwork, PendingIntent.FLAG_UPDATE_CURRENT);
+		mLocationListenerPendingIntent = PendingIntent.getBroadcast(mApplicationContext, 0, activeIntentNetwork, PendingIntent.FLAG_CANCEL_CURRENT);
 
 		/* Timeout handler */
 		mBurstTimeout = new Runnable() {
@@ -66,7 +66,6 @@ public class LocationManager {
 				Aircandi.mainThreadHandler.removeCallbacks(mBurstTimeout);
 			}
 		};
-
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 
 @SuppressWarnings("ucd")

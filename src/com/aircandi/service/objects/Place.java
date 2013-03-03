@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.aircandi.Aircandi;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.service.Expose;
 
 /**

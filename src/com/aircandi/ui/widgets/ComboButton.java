@@ -7,7 +7,7 @@ import android.graphics.drawable.ScaleDrawable;
 import android.util.AttributeSet;
 import android.widget.Button;
 
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
 
 public class ComboButton extends Button {

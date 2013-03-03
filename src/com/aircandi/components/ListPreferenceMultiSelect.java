@@ -14,7 +14,7 @@ import android.preference.ListPreference;
 import android.util.AttributeSet;
 import android.widget.ListView;
 
-import com.aircandi.R;
+import com.aircandi.beta.R;
 
 /**
  * 

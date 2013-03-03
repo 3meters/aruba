@@ -67,13 +67,13 @@
         
         <!-- Images and icons -->
         
-        <item name="logo">@drawable/ic_app</item>
+        <item name="logo">@drawable/ic_launcher</item>
         <item name="iconSearch">@drawable/ic_action_search_dark</item>
         <item name="iconForward">@drawable/ic_action_more_arrow_dark</item>
         <item name="iconMore">@drawable/ic_action_more_dark</item>
         <item name="iconLocked">@drawable/ic_action_lock_closed_dark</item>
         <item name="iconNewCandi">@drawable/ic_action_new_candi_dark</item>
-        <item name="iconTune">@drawable/ic_app</item>
+        <item name="iconTune">@drawable/ic_launcher</item>
         <item name="iconDelete">@drawable/ic_action_trash_dark</item>
         <item name="iconAdd">@drawable/ic_action_add_dark</item>
         <item name="iconMoveUp">@drawable/ic_action_arrow_top_dark</item>
@@ -151,13 +151,13 @@
         
         <!-- Images and icons -->
         
-        <item name="logo">@drawable/ic_app</item>
+        <item name="logo">@drawable/ic_launcher</item>
         <item name="iconSearch">@drawable/ic_action_search_light</item>
         <item name="iconForward">@drawable/ic_action_more_arrow_light</item>
         <item name="iconMore">@drawable/ic_action_more_light</item>
         <item name="iconLocked">@drawable/ic_action_lock_closed_light</item>
         <item name="iconNewCandi">@drawable/ic_action_new_candi_light</item>
-        <item name="iconTune">@drawable/ic_app</item>
+        <item name="iconTune">@drawable/ic_launcher</item>
         <item name="iconDelete">@drawable/ic_action_trash_light</item>
         <item name="iconAdd">@drawable/ic_action_add_light</item>
         <item name="iconMoveUp">@drawable/ic_action_arrow_top_light</item>

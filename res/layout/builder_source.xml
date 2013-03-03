@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi"
+    xmlns:aircandi="http://schemas.android.com/apk/res/com.aircandi.beta"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -45,7 +45,7 @@
                 android:layout_gravity="left"
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="10dp"
-                aircandi:brokenDrawable="@drawable/ic_app"
+                aircandi:brokenDrawable="@drawable/ic_launcher"
                 aircandi:layout="@layout/widget_webimageview_candi_view"
                 aircandi:sizeHint="@dimen/image_medium"
                 android:scaleType="centerCrop" />

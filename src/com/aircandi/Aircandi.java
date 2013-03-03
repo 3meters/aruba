@@ -17,6 +17,7 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
+import com.aircandi.beta.R;
 import com.aircandi.components.Logger;
 import com.aircandi.components.Stopwatch;
 import com.aircandi.service.objects.User;

@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
-import com.aircandi.R;
+import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.FontManager;
@@ -75,7 +75,7 @@ public class SignInForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	@SuppressWarnings("ucd")
 	public void onSendPasswordButtonClick(View view) {
-		AircandiCommon.showAlertDialog(R.drawable.ic_app
+		AircandiCommon.showAlertDialog(R.drawable.ic_launcher
 				, getResources().getString(R.string.alert_send_password_title)
 				, getResources().getString(R.string.alert_send_password_message)
 				, null
