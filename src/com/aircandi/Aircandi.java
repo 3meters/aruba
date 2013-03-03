@@ -67,16 +67,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 		resDialogIcon = android.R.drawable.ic_dialog_info,
 		resDialogTitle = R.string.crash_dialog_title,
 		resDialogCommentPrompt = R.string.crash_dialog_comment_prompt,
-		resDialogOkToast = R.string.crash_dialog_ok_toast,
-		logcatArguments = {
-				"-t",
-				"100",
-				"-v",
-				"long",
-				"ActivityManager:I",
-				"Aircandi:D",
-				"Proxibase:D",
-				"*:S" } // Filter format : tag : priority
+		resDialogOkToast = R.string.crash_dialog_ok_toast
 )
 public class Aircandi extends Application {
 

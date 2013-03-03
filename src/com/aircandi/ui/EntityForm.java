@@ -416,7 +416,13 @@ public class EntityForm extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onSaveButtonClick(View view) {
-		doSave();
+		if (isDirty()) {
+			doSave();
+		}
+		else {
+			finish();
+			AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
+		}
 	}
 
 	@Override

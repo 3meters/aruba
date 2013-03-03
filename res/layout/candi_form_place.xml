@@ -93,9 +93,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="2dp"
                     android:layout_weight="1"
+                    aircandi:layout="@layout/widget_user_view_detailed"
                     android:clickable="true"
-                    android:onClick="onUserClick"
-                    aircandi:layout="@layout/widget_user_view_detailed" />
+                    android:onClick="onUserClick" />
 
                 <com.aircandi.ui.widgets.UserView
                     android:id="@+id/created_by"
@@ -103,9 +103,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="2dp"
                     android:layout_weight="1"
+                    aircandi:layout="@layout/widget_user_view_detailed"
                     android:clickable="true"
-                    android:onClick="onUserClick"
-                    aircandi:layout="@layout/widget_user_view_detailed" />
+                    android:onClick="onUserClick" />
             </LinearLayout>
         </RelativeLayout>
     </com.aircandi.ui.widgets.BounceScrollView>

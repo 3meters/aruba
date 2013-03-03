@@ -161,19 +161,24 @@ public class CandiForm extends CandiActivity {
 							mTracked = true;
 							upsize();
 						}
-
-						if (!mTracked) {
-							mTracked = true;
-							if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-								track();
+						else {
+							if (!mTracked) {
+								mTracked = true;
+								if (mEntity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+									track();
+								}
 							}
+							mCommon.hideBusy(true);
 						}
+					}
+					else {
+						mCommon.hideBusy(true);
 					}
 				}
 				else {
 					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.CandiForm);
+					mCommon.hideBusy(true);
 				}
-				mCommon.hideBusy(true);
 			}
 
 		}.execute();
@@ -211,7 +216,8 @@ public class CandiForm extends CandiActivity {
 
 			@Override
 			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_expanding, true);
+				mCommon.showBusy(true);
+				mCommon.startBusyIndicator();
 			}
 
 			@Override

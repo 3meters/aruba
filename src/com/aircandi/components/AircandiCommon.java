@@ -926,8 +926,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private void startBusyIndicator() {
+	public void startBusyIndicator() {
 		final View progress = mActivity.findViewById(R.id.progress);
 		if (progress != null) {
 			progress.setVisibility(View.VISIBLE);

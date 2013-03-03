@@ -345,9 +345,8 @@ public class ProxiManager {
 
 			if (serviceData != null) {
 
-				synchronized (this) {
-
-					final List<Entity> entities = (List<Entity>) serviceData.data;
+				final List<Entity> entities = (List<Entity>) serviceData.data;
+				synchronized (entities) {
 					/*
 					 * Make sure we don't have duplicates keyed on sourceId because
 					 * getPlacesNearLocation could have already completed.
@@ -374,7 +373,8 @@ public class ProxiManager {
 
 					/* Proximity place trumps location place with the same id */
 					final List<Entity> proximityPlaces = mEntityModel.getProximityPlaces();
-					for (int i = entities.size() - 1; i >= 0; i--) {
+					int entityCount = entities.size();
+					for (int i = entityCount - 1; i >= 0; i--) {
 						for (Entity entity : proximityPlaces) {
 							if (entity.id.equals(entities.get(i).id)) {
 								entities.remove(i);

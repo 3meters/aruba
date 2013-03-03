@@ -352,7 +352,7 @@ public class CandiUser extends CandiActivity {
 		Integer bonusPadding = ImageUtils.getRawPixels(context, 20);
 		layoutWidthPixels -= bonusPadding;
 
-		Integer spacing = 3;
+		Integer spacing = 2;
 		Integer spacingHorizontalPixels = ImageUtils.getRawPixels(context, spacing);
 		Integer spacingVerticalPixels = ImageUtils.getRawPixels(context, spacing);
 
@@ -399,7 +399,9 @@ public class CandiUser extends CandiActivity {
 			else {
 				if (entity.name != null && !entity.name.equals("")) {
 					title.setText(entity.name);
-					title.setVisibility(View.VISIBLE);
+				}
+				else {
+					title.setVisibility(View.GONE);
 				}
 			}
 
