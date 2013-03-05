@@ -292,8 +292,51 @@ public class BitmapManager {
 				imageData = cursor.getString(dataColumn);
 				rotation = cursor.getInt(orientationColumn);
 			}
-
+			
 			imageFile = new File(imageData);
+			cursor.close();
+		}
+		else {
+
+			/* The image is in the local file system */
+			imageFile = new File(imageUri.toString().replace("file://", ""));
+
+			final ExifInterface exif;
+			try {
+				exif = new ExifInterface(imageUri.getPath());
+				rotation = (int) exifOrientationToDegrees(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
+			}
+			catch (IOException exception) {
+				Exceptions.handle(exception);
+				return null;
+			}
+		}
+		
+		final Bitmap bitmap = bitmapForImageFileSampled(imageFile, null, rotation);
+		return bitmap;
+	}
+
+	public Bitmap loadBitmapFromDeviceSampledOld(final Uri imageUri) {
+
+		final String[] projection = new String[] { Images.Thumbnails._ID, Images.Thumbnails.DATA, Images.Media.ORIENTATION };
+		File imageFile = null;
+		int rotation = 0;
+
+		final Cursor cursor = Aircandi.applicationContext.getContentResolver().query(imageUri, projection, null, null, null);
+
+		if (cursor != null) {
+
+			/* Means the image is in the media store */
+			String imageData = "";
+			if (cursor.moveToFirst()) {
+				final int dataColumn = cursor.getColumnIndex(Images.Media.DATA);
+				final int orientationColumn = cursor.getColumnIndex(Images.Media.ORIENTATION);
+				imageData = cursor.getString(dataColumn);
+				rotation = cursor.getInt(orientationColumn);
+			}
+			
+			imageFile = new File(imageData);
+			cursor.close();
 		}
 		else {
 
@@ -313,10 +356,10 @@ public class BitmapManager {
 
 		final byte[] imageBytes = new byte[(int) imageFile.length()];
 
-		DataInputStream in = null;
+		DataInputStream inputStream = null;
 
 		try {
-			in = new DataInputStream(new FileInputStream(imageFile));
+			inputStream = new DataInputStream(new FileInputStream(imageFile));
 		}
 		catch (FileNotFoundException exception) {
 			Exceptions.handle(exception);
@@ -324,7 +367,7 @@ public class BitmapManager {
 		}
 		
 		try {
-			in.readFully(imageBytes);
+			inputStream.readFully(imageBytes);
 		}
 		catch (IOException exception) {
 			Exceptions.handle(exception);
@@ -332,7 +375,7 @@ public class BitmapManager {
 		}
 		
 		try {
-			in.close();
+			inputStream.close();
 		}
 		catch (IOException exception) {
 			Exceptions.handle(exception);
@@ -342,7 +385,7 @@ public class BitmapManager {
 		final Bitmap bitmap = bitmapForByteArraySampled(imageBytes, null, rotation);
 		return bitmap;
 	}
-
+	
 	private Bitmap loadBitmapFromResourcesSampled(final Integer resourceId, Integer size) {
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
@@ -423,6 +466,57 @@ public class BitmapManager {
 		return bitmapSampled;
 	}
 
+	/**
+	 * Decode an image file into a bitmap. The image file is sampled if needed to keep the memory size of the bitmap
+	 * approximately less than or equal to IMAGE_MEMORY_BYTES_MAX. If rotation != 0 then the image is rotated after it
+	 * is decoded.
+	 * 
+	 * @param imageFile
+	 * @param rotation
+	 * @return
+	 */
+	@SuppressWarnings("ucd")
+	public Bitmap bitmapForImageFileSampled(File imageFile, Integer size, Integer rotation) {
+
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		options.inPurgeable = true;
+		options.inPreferredConfig = CandiConstants.IMAGE_CONFIG_DEFAULT;
+
+		/* Initial decode is just to get the bitmap dimensions */
+		BitmapFactory.decodeFile(imageFile.getPath(), options);
+
+		final int width = options.outWidth;
+		final int height = options.outHeight;
+
+		int scale = 1;
+		if (size != null) {
+			if (width > size && height > size) {
+				scale = Math.min(width / size, height / size);
+			}
+		}
+		else {
+			final int imageMemorySize = ImageUtils.getImageMemorySize(height, width, true);
+			if (imageMemorySize > CandiConstants.IMAGE_MEMORY_BYTES_MAX) {
+				scale = Math.round(((float) imageMemorySize / (float) CandiConstants.IMAGE_MEMORY_BYTES_MAX) / 2f);
+			}
+		}
+
+		options.inSampleSize = scale;
+		options.inJustDecodeBounds = false;
+
+		Bitmap bitmapSampled = BitmapFactory.decodeFile(imageFile.getPath(), options);
+
+		/* Rotate the image if needed */
+		if (rotation != null && rotation != 0) {
+			final Matrix matrix = new Matrix();
+			matrix.postRotate(rotation);
+			bitmapSampled = Bitmap.createBitmap(bitmapSampled, 0, 0, bitmapSampled.getWidth(), bitmapSampled.getHeight(), matrix, true);
+		}
+
+		return bitmapSampled;
+	}
+	
 	private String resolveResourceName(String rawResourceName) {
 		int resourceId = Aircandi.applicationContext.getResources().getIdentifier(rawResourceName, "drawable", Aircandi.getInstance().getPackageName());
 		if (resourceId == 0) {
