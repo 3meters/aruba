@@ -83,6 +83,8 @@
     <string name="error_signup_email_taken">Email address is already being used.</string>
     <string name="error_signup_password_weak">Password is too weak. Passwords must be at least 6 characters long, not be part of your user name, and not be certain commmon words.</string>
     <string name="error_change_password_unauthorized">Old password is invalid.</string>
+    <string name="error_whitelist_unauthorized">This is an invitation-only beta. Only invited users are able to register user accounts.</string>
+    <string name="error_unverified_unauthorized">The email address for the account has not been verified.</string>
     <string name="error_connection_title">Aircandi disconnected</string>
     <string name="error_connection">Check network connection and retry</string>
     <string name="error_connection_notification">Touch to retry network connection</string>

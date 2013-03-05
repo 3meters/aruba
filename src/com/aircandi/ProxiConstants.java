@@ -40,10 +40,11 @@ public final class ProxiConstants {
 
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_CREDENTIALS			= 401.1f;
 	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_SESSION_EXPIRED		= 401.2f;																																		// $codepro.audit.disable questionableName
+	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST				= 401.4f;																																		// $codepro.audit.disable questionableName
+	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED			= 401.5f;																																		// $codepro.audit.disable questionableName
+	
 	public static final float	HTTP_STATUS_CODE_FORBIDDEN_USER_EMAIL_NOT_UNIQUE	= 403.1f;																																		// $codepro.audit.disable questionableName
 	public static final float	HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK		= 403.21f;																																		// $codepro.audit.disable questionableName
-	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST				= 403.21f;																																		// $codepro.audit.disable questionableName
-	public static final float	HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED			= 403.21f;																																		// $codepro.audit.disable questionableName
 
 	private ProxiConstants() {}; // $codepro.audit.disable emptyMethod
 }

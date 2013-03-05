@@ -621,6 +621,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 							signout();
 						}
 					}
+					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
+						message = mActivity.getString(R.string.error_whitelist_unauthorized);
+					}
+					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
+						message = mActivity.getString(R.string.error_unverified_unauthorized);
+					}
 					else if (statusCode == ProxiConstants.HTTP_STATUS_CODE_FORBIDDEN_USER_PASSWORD_WEAK) {
 						message = mActivity.getString(R.string.error_signup_password_weak);
 					}

@@ -604,6 +604,16 @@ public class ProxibaseService {
 				proxibaseException.setErrorType(ErrorType.Service);
 				proxibaseException.setErrorCode(ErrorCode.SessionException);
 			}
+			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_WHITELIST) {
+				proxibaseException = new ProxibaseServiceException("Unauthorized whitelist");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.UnauthorizedException);
+			}
+			else if (httpStatusCode == ProxiConstants.HTTP_STATUS_CODE_UNAUTHORIZED_UNVERIFIED) {
+				proxibaseException = new ProxibaseServiceException("Unauthorized unverified");
+				proxibaseException.setErrorType(ErrorType.Service);
+				proxibaseException.setErrorCode(ErrorCode.UnauthorizedException);
+			}
 			else if (httpStatusCode == HttpStatus.SC_FORBIDDEN) {
 				/* weak password, duplicate email */
 				proxibaseException = new ProxibaseServiceException("Forbidden");
