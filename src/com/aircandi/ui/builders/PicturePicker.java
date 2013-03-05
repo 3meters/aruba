@@ -102,8 +102,10 @@ public class PicturePicker extends FormActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initialize();
-		bind();
+		if (!isFinishing()) {
+			initialize();
+			bind();
+		}
 	}
 
 	private void initialize() {

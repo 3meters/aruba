@@ -59,8 +59,10 @@ public class ProfileForm extends FormActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		initialize();
-		bind();
+		if (!isFinishing()) {
+			initialize();
+			bind();
+		}
 	}
 
 	private void initialize() {
@@ -91,7 +93,6 @@ public class ProfileForm extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_image));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_password));
-		
 
 		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -166,7 +167,7 @@ public class ProfileForm extends FormActivity {
 	}
 
 	private void drawImage(User user) {
-		
+
 		if (mImage != null) {
 			if (mBitmap != null) {
 				mImage.hideLoading();

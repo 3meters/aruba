@@ -291,9 +291,10 @@ public class BitmapLoader {
 
 		/* Removes all instances of imageRequest associated with the imageRequestor */
 		public void clean(Object bitmapRequestor) {
-			if (mBitmapsToLoad.size() > 0) {
+			if (bitmapRequestor != null && mBitmapsToLoad.size() > 0) {
 				for (int j = 0; j < mBitmapsToLoad.size();) {
-					if (mBitmapsToLoad.get(j).getImageRequestor().equals(bitmapRequestor)) {
+					Object imageRequestor = mBitmapsToLoad.get(j).getImageRequestor();
+					if (imageRequestor != null && imageRequestor.equals(bitmapRequestor)) {
 						mBitmapsToLoad.remove(j);
 					}
 					else {

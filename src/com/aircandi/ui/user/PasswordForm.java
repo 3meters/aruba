@@ -36,7 +36,9 @@ public class PasswordForm extends FormActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		initialize();
+		if (!isFinishing()) {
+			initialize();
+		}
 	}
 
 	private void initialize() {
@@ -54,7 +56,6 @@ public class PasswordForm extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_label_password_old));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_label_password));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_label_password_confirm));
-		
 
 		mTextPasswordOld.addTextChangedListener(new SimpleTextWatcher() {
 
@@ -123,7 +124,7 @@ public class PasswordForm extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("UpdatePassword");								
+				Thread.currentThread().setName("UpdatePassword");
 				final ModelResult result = ProxiManager.getInstance().getEntityModel()
 						.updatePassword(mUser.id, mTextPasswordOld.getText().toString(), mTextPassword.getText().toString());
 				return result;

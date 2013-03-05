@@ -293,7 +293,7 @@ public class ProxiManager {
 		return serviceResponse;
 	}
 
-	public ServiceResponse getEntitiesForLocation() {
+	public synchronized ServiceResponse getEntitiesForLocation() {
 
 		ServiceResponse serviceResponse = new ServiceResponse();
 
@@ -346,45 +346,42 @@ public class ProxiManager {
 			if (serviceData != null) {
 
 				final List<Entity> entities = (List<Entity>) serviceData.data;
-				synchronized (entities) {
-					/*
-					 * Make sure we don't have duplicates keyed on sourceId because
-					 * getPlacesNearLocation could have already completed.
-					 */
-					synchronized (mEntityModel.mEntityCache) {
-						for (Entity entity : entities) {
-							if (entity.place != null) {
-								if (mEntityModel.mEntityCache.containsKey(entity.place.id)) {
-									mEntityModel.mEntityCache.remove(entity.place.id);
-								}
-							}
-						}
-					}
-					/*
-					 * These were found purely using location but they can still come with
-					 * links to beacons not currently visible. To keep things clean, we
-					 * make sure the links without beacons are stripped.
-					 */
+				/*
+				 * Make sure we don't have duplicates keyed on sourceId because
+				 * getPlacesNearLocation could have already completed.
+				 */
+				synchronized (mEntityModel.mEntityCache) {
 					for (Entity entity : entities) {
-						if (entity.links != null) {
-							entity.links.clear();
-						}
-					}
-
-					/* Proximity place trumps location place with the same id */
-					final List<Entity> proximityPlaces = mEntityModel.getProximityPlaces();
-					int entityCount = entities.size();
-					for (int i = entityCount - 1; i >= 0; i--) {
-						for (Entity entity : proximityPlaces) {
-							if (entity.id.equals(entities.get(i).id)) {
-								entities.remove(i);
+						if (entity.place != null) {
+							if (mEntityModel.mEntityCache.containsKey(entity.place.id)) {
+								mEntityModel.mEntityCache.remove(entity.place.id);
 							}
 						}
 					}
-
-					/* Merge entities into data model */
-					mEntityModel.upsertEntities(entities);
 				}
+				/*
+				 * These were found purely using location but they can still come with
+				 * links to beacons not currently visible. To keep things clean, we
+				 * make sure the links without beacons are stripped.
+				 */
+				for (Entity entity : entities) {
+					if (entity.links != null) {
+						entity.links.clear();
+					}
+				}
+
+				/* Proximity place trumps location place with the same id */
+				for (Entity proximityEntity : mEntityModel.getProximityPlaces()) {
+					for (Entity entity : entities) {
+						if (entity.id.equals(proximityEntity.id)) {
+							entities.remove(entity);
+							break;
+						}
+					}
+				}
+
+				/* Merge entities into data model */
+				mEntityModel.upsertEntities(entities);
 			}
 
 			final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
@@ -395,7 +392,7 @@ public class ProxiManager {
 		return serviceResponse;
 	}
 
-	public ServiceResponse getPlacesNearLocation(Observation observation) {
+	public synchronized ServiceResponse getPlacesNearLocation(Observation observation) {
 		ServiceResponse serviceResponse = new ServiceResponse();
 		/*
 		 * Make a list of places that should be excluded because

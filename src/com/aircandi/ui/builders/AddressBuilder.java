@@ -24,8 +24,10 @@ public class AddressBuilder extends FormActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initialize();
-		draw();
+		if (!isFinishing()) {
+			initialize();
+			draw();
+		}
 	}
 
 	private void initialize() {

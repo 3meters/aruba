@@ -53,9 +53,11 @@ public class RegisterForm extends FormActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		initialize();
-		bind();
-		draw();
+		if (!isFinishing()) {
+			initialize();
+			bind();
+			draw();
+		}
 	}
 
 	private void initialize() {

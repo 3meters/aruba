@@ -41,22 +41,24 @@ import com.aircandi.utilities.MiscUtils;
 @SuppressWarnings("ucd")
 public class LinkPicker extends FormActivity {
 
-	private TextView			mTitle;
-	private ListView			mListView;
-	private EditText			mTextUri;
-	private String				mUri;
-	private String				mUriTitle;
-	private String				mUriDescription;
-	private Button				mOkButton;
-	private Button				mTestButton;
-	private Boolean				mVerifyUri		= false;
+	private TextView				mTitle;
+	private ListView				mListView;
+	private EditText				mTextUri;
+	private String					mUri;
+	private String					mUriTitle;
+	private String					mUriDescription;
+	private Button					mOkButton;
+	private Button					mTestButton;
+	private Boolean					mVerifyUri		= false;
 	private final List<SearchItem>	mSearchItems	= new ArrayList<SearchItem>();
-	private SearchAdapter		mSearchAdapter;
+	private SearchAdapter			mSearchAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initialize();
+		if (!isFinishing()) {
+			initialize();
+		}
 	}
 
 	private void initialize() {
@@ -107,7 +109,7 @@ public class LinkPicker extends FormActivity {
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("GetBookmarks");				
+				Thread.currentThread().setName("GetBookmarks");
 				final List<SearchItem> bookmarks = SearchManager.getInstance().getBookmarks(getContentResolver());
 				if (bookmarks != null) {
 					mSearchItems.addAll(bookmarks);
@@ -191,7 +193,7 @@ public class LinkPicker extends FormActivity {
 
 					@Override
 					protected Object doInBackground(Object... params) {
-						Thread.currentThread().setName("GetHtml");				
+						Thread.currentThread().setName("GetHtml");
 						ServiceResponse serviceResponse = new ServiceResponse();
 						/*
 						 * If using uri then we have already checked to see if it is a well formed

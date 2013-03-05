@@ -38,11 +38,13 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initialize();
+		if (!isFinishing()) {
+			initialize();
+		}
 	}
 
 	private void initialize() {
-		
+
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mEntityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
@@ -50,10 +52,10 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 
 		/* Shown as a dialog so doesn't have an action bar */
 		final List<Object> listData = new ArrayList<Object>();
-		
+
 		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_search_light : R.drawable.ic_action_search_dark
 				, getString(R.string.dialog_picture_source_search), null, "search"));
-		
+
 		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_tiles_large_light : R.drawable.ic_action_tiles_large_dark
 				, getString(R.string.dialog_picture_source_gallery), null, "gallery"));
 
@@ -73,7 +75,7 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 						, getString(R.string.dialog_picture_source_place), null, "place"));
 			}
 		}
-		
+
 		listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_picture_light : R.drawable.ic_action_picture_dark
 				, getString(R.string.dialog_picture_source_default), null, "default"));
 

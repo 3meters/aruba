@@ -41,8 +41,10 @@ public class SignInForm extends FormActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initialize();
-		draw();
+		if (!isFinishing()) {
+			initialize();
+			draw();
+		}
 	}
 
 	private void initialize() {
@@ -50,7 +52,7 @@ public class SignInForm extends FormActivity {
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextMessage = (TextView) findViewById(R.id.form_message);
 		mButtonSignIn = (Button) findViewById(R.id.btn_signin);
-		
+
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
 		FontManager.getInstance().setTypefaceDefault(mTextPassword);
 		FontManager.getInstance().setTypefaceDefault(mTextMessage);
@@ -100,14 +102,14 @@ public class SignInForm extends FormActivity {
 
 				@Override
 				protected Object doInBackground(Object... params) {
-					Thread.currentThread().setName("SignIn");				
+					Thread.currentThread().setName("SignIn");
 					final ModelResult result = ProxiManager.getInstance().getEntityModel().signin(email, password);
 					return result;
 				}
 
 				@Override
 				protected void onPostExecute(Object response) {
-					
+
 					final ModelResult result = (ModelResult) response;
 					mCommon.hideBusy(true);
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {

@@ -33,7 +33,9 @@ public class TemplatePicker extends FormActivity implements OnItemClickListener 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		initialize();
+		if (!isFinishing()) {
+			initialize();
+		}
 	}
 
 	private void initialize() {

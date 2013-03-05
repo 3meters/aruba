@@ -58,7 +58,9 @@ public class CategoryBuilder extends FormActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		initialize();
+		if (!isFinishing()) {
+			initialize();
+		}
 	}
 
 	private void initialize() {
