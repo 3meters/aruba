@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.Preference.OnPreferenceClickListener;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.aircandi.Aircandi;
@@ -48,23 +49,60 @@ public class Preferences extends SherlockPreferenceActivity {
 			addPreferencesFromResource(R.xml.preferences);
 		}
 
+		initialize();
+	}
+
+	@SuppressWarnings("deprecation")
+	private void initialize() {
 		/* Listen for theme change */
-		final Preference myPref = findPreference("Pref_Theme");
-		myPref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+		Preference pref = findPreference("Pref_Theme");
+		if (pref != null) {
+			pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 
-			@Override
-			public boolean onPreferenceChange(Preference preference, Object newValue) {
-				Aircandi.settingsEditor.putString(CandiConstants.PREF_THEME, (String) newValue);
-				Aircandi.settingsEditor.commit();
+				@Override
+				public boolean onPreferenceChange(Preference preference, Object newValue) {
+					Aircandi.settingsEditor.putString(CandiConstants.PREF_THEME, (String) newValue);
+					Aircandi.settingsEditor.commit();
 
-				final Intent intent = getIntent();
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
-				finish();
-				overridePendingTransition(0, 0);
-				startActivity(intent);
-				return false;
-			}
-		});
+					final Intent intent = getIntent();
+					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+					finish();
+					overridePendingTransition(0, 0);
+					startActivity(intent);
+					return false;
+				}
+			});
+		}
+
+		/* Listen for privacy change */
+		pref = findPreference("Pref_Browse_In_Private");
+		if (pref != null) {
+			pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+
+				@Override
+				public boolean onPreferenceChange(Preference preference, Object newValue) {
+					/*
+					 * Update user property and push update to service
+					 */
+					return true; // we handled it
+				}
+			});
+		}
+
+		/* Listen for clear history click */
+		pref = findPreference("Pref_Button_Clear_History");
+		if (pref != null) {
+			pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+
+				@Override
+				public boolean onPreferenceClick(Preference preference) {
+					/*
+					 * Alert and then clear browse history
+					 */
+					return true; // we handled it
+				}
+			});
+		}
 	}
 
 	@Override

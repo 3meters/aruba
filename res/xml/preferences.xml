@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="Search preferences" >
+    <PreferenceCategory android:title="@string/pref_search_category_title" >
         <ListPreference
             android:id="@+id/Pref_Search_Radius"
             android:defaultValue="8047"
-            android:dialogTitle="Select search distance"
+            android:dialogTitle="@string/pref_search_radius_dialog_title"
             android:entries="@array/search_radius_entries"
             android:entryValues="@array/search_radius_values"
             android:key="Pref_Search_Radius"
-            android:negativeButtonText="Cancel"
-            android:positiveButtonText="OK"
-            android:summary="Search distance"
-            android:title="Search" />
+            android:negativeButtonText="@string/pref_dialog_cancel"
+            android:positiveButtonText="@string/pref_dialog_ok"
+            android:summary="@string/pref_search_radius_summary"
+            android:title="@string/pref_search_radius_title" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="General preferences" >
+    <PreferenceCategory android:title="@string/pref_general_category_title" >
         <ListPreference
             android:id="@+id/Pref_Theme"
             android:defaultValue="aircandi_theme_midnight"
-            android:dialogTitle="Select theme"
+            android:dialogTitle="@string/pref_theme_dialog_title"
             android:entries="@array/theme_entries"
             android:entryValues="@array/theme_values"
             android:key="Pref_Theme"
-            android:negativeButtonText="Cancel"
-            android:positiveButtonText="OK"
-            android:summary="Choose a theme"
-            android:title="Themes" />
+            android:negativeButtonText="@string/pref_dialog_cancel"
+            android:positiveButtonText="@string/pref_dialog_ok"
+            android:summary="@string/pref_theme_summary"
+            android:title="@string/pref_theme_title" />
 
         <CheckBoxPreference
             android:id="@+id/Pref_Sound_Effects"
             android:defaultValue="true"
             android:key="Pref_Sound_Effects"
-            android:summary="Play sound notifications and effects"
-            android:title="Sounds" />
+            android:summary="@string/pref_sound_effects_summary"
+            android:title="@string/pref_sound_effects_title" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Error reporting" >
+    <PreferenceCategory android:title="@string/pref_reporting_category_title" >
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="acra.enable"

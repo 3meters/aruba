@@ -93,6 +93,7 @@ public class ProfileForm extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_image));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_password));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_clear_browse_history));
 
 		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
 

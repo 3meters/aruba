@@ -22,6 +22,22 @@
     <string name="menu_about_item">About</string>
     <string name="menu_suggest_links_item">Suggest links</string>
 
+    <!-- Preferences -->
+
+    <string name="pref_dialog_ok">OK</string>
+    <string name="pref_dialog_cancel">Cancel</string>
+    <string name="pref_search_category_title">Search settings</string>
+    <string name="pref_general_category_title">General settings</string>
+    <string name="pref_reporting_category_title">Reporting settings</string>
+    <string name="pref_search_radius_title">Search</string>
+    <string name="pref_search_radius_summary">Search distance</string>
+    <string name="pref_search_radius_dialog_title">Select search distance</string>
+    <string name="pref_theme_title">Themes</string>
+    <string name="pref_theme_summary">Choose a theme</string>
+    <string name="pref_theme_dialog_title">Select theme</string>
+    <string name="pref_sound_effects_summary">Play sound notifications and effects</string>
+    <string name="pref_sound_effects_title">Sounds</string>
+    
     <!-- Testing (used for view previews) -->
 
     <string name="dummy_title">Zoka Coffee Roaster &amp; Tea Company</string>
@@ -251,6 +267,7 @@
     <string name="form_button_cancel" tools:ignore="ButtonCase">cancel</string>
     <string name="form_button_terms">terms</string>
     <string name="form_button_send_password">forgot password?</string>
+    <string name="form_button_clear_browse_history">clear browse history</string>
     
     <!-- Forms.labels -->
 
@@ -264,7 +281,8 @@
     <string name="form_label_password_old">old password</string>
     <string name="form_label_email">email</string>
     <string name="form_label_locked">locked</string>
-
+    <string name="form_label_do_not_track">browse in private</string>
+    
     <!-- Forms.hints -->
 
     <string name="form_source_type_hint">type of link</string>

@@ -205,6 +205,9 @@ public class CandiRadar extends CandiActivity {
 				if (event.wifiList != null) {
 					ProxiManager.getInstance().lockBeacons();
 				}
+				else {
+					BusProvider.getInstance().post(new EntitiesForBeaconsFinishedEvent());
+				}
 			}
 		});
 	}
@@ -252,6 +255,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.stop("Search for places by beacon complete");
+				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTime(), "entities_for_beacons", null);
 				Logger.d(CandiRadar.this, "Entities for beacons finished event: ** done **");
 			}
 		});
@@ -292,7 +296,11 @@ public class CandiRadar extends CandiActivity {
 					mCommon.updateAccuracyIndicator(LocationManager.getInstance().getLocationLocked());
 					BusProvider.getInstance().post(new LocationLockedEvent(LocationManager.getInstance().getLocationLocked()));
 
-					Aircandi.stopwatch2.segmentTime("Location acquired event");
+					if (Aircandi.stopwatch2.isStarted()) {
+						Aircandi.stopwatch2.stop("Location acquired");
+						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTime(), "location_acquired", null);
+					}
+
 					if (LocationManager.getInstance().getObservationLocked() != null) {
 
 						mCommon.showBusy(true);
@@ -303,6 +311,7 @@ public class CandiRadar extends CandiActivity {
 							protected Object doInBackground(Object... params) {
 								Logger.d(CandiRadar.this, "Location changed event: getting entities for location");
 								Thread.currentThread().setName("GetEntitiesForLocation");
+								Aircandi.stopwatch2.start("Get entities for location");
 								final ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForLocation();
 								return serviceResponse;
 							}
@@ -329,7 +338,8 @@ public class CandiRadar extends CandiActivity {
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onEntitiesForLocationFinished(EntitiesForLocationFinishedEvent event) {
-		Aircandi.stopwatch2.segmentTime("Entities for location complete");
+		Aircandi.stopwatch2.stop("Entities for location complete");
+		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTime(), "entities_for_location", null);
 		mHandler.post(new Runnable() {
 
 			@Override
@@ -342,6 +352,7 @@ public class CandiRadar extends CandiActivity {
 						protected Object doInBackground(Object... params) {
 							Logger.d(CandiRadar.this, "Location changed event: getting places near location");
 							Thread.currentThread().setName("GetPlacesNearLocation");
+							Aircandi.stopwatch2.start("Get places near location");
 							final ServiceResponse serviceResponse = ProxiManager.getInstance().getPlacesNearLocation(
 									LocationManager.getInstance().getObservationLocked());
 							return serviceResponse;
@@ -368,7 +379,8 @@ public class CandiRadar extends CandiActivity {
 	@Subscribe
 	@SuppressWarnings("ucd")
 	public void onPlacesNearLocationFinished(PlacesNearLocationFinishedEvent event) {
-		Aircandi.stopwatch2.segmentTime("Places near location complete");
+		Aircandi.stopwatch2.stop("Places near location complete");
+		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTime(), "places_near_location", null);
 		mHandler.post(new Runnable() {
 
 			@Override
@@ -476,7 +488,7 @@ public class CandiRadar extends CandiActivity {
 	}
 
 	private void searchForPlacesByLocation() {
-		Aircandi.stopwatch2.start("Search for places by location");
+		Aircandi.stopwatch2.start("Lock location");
 		LocationManager.getInstance().setLocationLocked(null);
 		LocationManager.getInstance().lockLocationBurst();
 	}
@@ -608,8 +620,8 @@ public class CandiRadar extends CandiActivity {
 		/*
 		 * Stop any location burst that might be active unless
 		 * this activity is being restarted. We do this because there
-		 * is a race condition that can stop location burst after it 
-		 * has been started by the reload. 
+		 * is a race condition that can stop location burst after it
+		 * has been started by the reload.
 		 */
 		if (!mPrefChangeReloadNeeded) {
 			LocationManager.getInstance().stopLocationBurst();

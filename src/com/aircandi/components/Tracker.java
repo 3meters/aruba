@@ -50,6 +50,18 @@ public class Tracker {
 		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
 	}
 
+	public static void sendTiming(String category, Long timing, String name, String label) {
+		/*
+		 * Arguments should be free of whitespace.
+		 */
+		try {
+			if (CandiConstants.TRACKING_ENABLED) {
+				EasyTracker.getTracker().sendTiming(category, timing, name, label);
+			}
+		}
+		catch (Exception exception) {} // $codepro.audit.disable emptyCatchClause
+	}
+
 	public static void dispatch() {
 		try {
 			if (CandiConstants.TRACKING_ENABLED) {

@@ -16,31 +16,35 @@ import com.aircandi.service.Expose;
 @SuppressWarnings("ucd")
 public class Source extends ServiceObject implements Cloneable, Serializable {
 
-	private static final long		serialVersionUID	= 4362288672245719448L;
+	private static final long	serialVersionUID	= 4362288672245719448L;
 
 	@Expose
-	public String					id;
+	public String				id;
 	@Expose
-	public String					type;
+	public String				type;
 	@Expose
-	public String					name;
+	public String				name;
 	@Expose
-	public String					caption;
+	public String				caption;									// remove after switch to label
 	@Expose
-	public String					url;
+	public String				label;
 	@Expose
-	public String					icon;
+	public String				url;
 	@Expose
-	public String					packageName;
+	public String				icon;
 	@Expose
-	public Map<String,Object>	data;
+	public String				packageName;
+	@Expose
+	public Map<String, Object>	data; // origin
+	@Expose
+	public Boolean				hidden;
 
 	/* Client use only */
-	public Boolean					checked;
-	public Integer					position;
-	public Boolean					custom;
-	public Boolean					intentSupport;
-	public Boolean					installDeclined;
+	public Boolean				checked;
+	public Integer				position;
+	public Boolean				custom;
+	public Boolean				intentSupport;
+	public Boolean				installDeclined;
 
 	public Source() {}
 
@@ -54,6 +58,8 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		source.type = (String) map.get("type");
 		source.name = (String) map.get("name");
 		source.caption = (String) map.get("caption");
+		source.label = (String) map.get("label");
+		source.hidden = (Boolean) map.get("hidden");
 		source.url = (String) map.get("url");
 		source.icon = (String) map.get("icon");
 		source.packageName = (String) map.get("packageName");

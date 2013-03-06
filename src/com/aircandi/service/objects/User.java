@@ -31,6 +31,8 @@ public class User extends ServiceEntryBase {
 	@Expose
 	public Boolean				isDeveloper;
 	@Expose
+	public Boolean				doNotTrack;
+	@Expose
 	public Photo				photo;
 	@Expose
 	public String				password;
@@ -105,6 +107,7 @@ public class User extends ServiceEntryBase {
 		user.bio = (String) map.get("bio");
 		user.webUri = (String) map.get("webUri");
 		user.isDeveloper = (Boolean) map.get("isDeveloper");
+		user.doNotTrack = (Boolean) map.get("doNotTrack");
 		user.password = (String) map.get("password");
 		user.lastSignedInDate = (Number) map.get("lastSignedInDate");
 		user.validationDate = (Number) map.get("validationDate");
