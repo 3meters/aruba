@@ -23,6 +23,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -45,6 +46,7 @@ import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ArrayListType;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.ProxiManager.ScanReason;
 import com.aircandi.components.QueryWifiScanReceivedEvent;
@@ -59,6 +61,7 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.CandiActivity;
+import com.aircandi.ui.builders.PicturePicker;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
@@ -350,6 +353,29 @@ public class CandiForm extends CandiActivity {
 		AndroidManager.getInstance().callDialerActivity(this, mEntity.place.contact.phone);
 	}
 
+	public void onMoreButtonClick(View view) {
+		String target = (String) view.getTag();
+		if (target.equals("photos")) {
+			IntentBuilder intentBuilder = new IntentBuilder(this, PicturePicker.class);
+			intentBuilder.setCommandType(CommandType.View)
+					.setEntityId(mEntity.id);
+
+			Intent intent = intentBuilder.create();
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
+		}
+		else if (target.equals("candi")) {
+			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
+			intentBuilder.setCommandType(CommandType.View)
+					.setArrayListType(ArrayListType.InCollection)
+					.setCollectionId(mEntity.id);
+
+			Intent intent = intentBuilder.create();
+			startActivity(intent);
+			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
+		}
+	}
+
 	@SuppressWarnings("ucd")
 	public void onListItemClick(View view) {}
 
@@ -588,6 +614,8 @@ public class CandiForm extends CandiActivity {
 		 * - WebImageView child views are gone by default
 		 * - Header views are visible by default
 		 */
+		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 		final CandiView candiView = (CandiView) layout.findViewById(R.id.candi_view);
 		final WebImageView image = (WebImageView) layout.findViewById(R.id.candi_form_image);
 		final TextView title = (TextView) layout.findViewById(R.id.candi_form_title);
@@ -680,6 +708,16 @@ public class CandiForm extends CandiActivity {
 				section.getTextViewHeader().setText(context.getString(R.string.candi_section_candi));
 				final FlowLayout flow = (FlowLayout) layout.findViewById(R.id.flow_candi);
 				drawCandi(context, flow, entities, R.layout.temp_place_candi_item);
+
+				if (entities.size() > 0) {
+					View footer = inflater.inflate(R.layout.temp_section_footer, null);
+					Button button = (Button) footer.findViewById(R.id.button_more);
+					FontManager.getInstance().setTypefaceDefault(button);
+					button.setText(R.string.candi_section_candi_more);
+					button.setTag("candi");
+					section.addView(footer);
+				}
+
 				setVisibility(layout.findViewById(R.id.section_candi), View.VISIBLE);
 			}
 		}
@@ -781,18 +819,29 @@ public class CandiForm extends CandiActivity {
 
 			TextView title = (TextView) view.findViewById(R.id.title);
 			TextView badge = (TextView) view.findViewById(R.id.badge);
+			ImageView indicator = (ImageView) view.findViewById(R.id.indicator);
 
 			FontManager.getInstance().setTypefaceDefault(title);
 			FontManager.getInstance().setTypefaceDefault(badge);
 
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_SOURCE)) {
+				indicator.setVisibility(View.GONE);
+				badge.setVisibility(View.GONE);
 				if (entity.source.type.equals("comments")) {
 					if (entity.commentCount != null && entity.commentCount > 0) {
 						badge.setText(String.valueOf(entity.commentCount));
 						badge.setVisibility(View.VISIBLE);
 					}
-					else {
-						badge.setVisibility(View.GONE);
+				}
+				else {
+					/* Show hint if source has app that hasn't been installed */
+					final Source meta = ProxiManager.getInstance().getEntityModel().getSourceMeta().get(entity.source.type);
+					if (meta != null && !meta.installDeclined
+							&& meta.intentSupport
+							&& entity.source.appExists()
+							&& !entity.source.appInstalled()) {
+						/* Show hint */
+						indicator.setVisibility(View.VISIBLE);
 					}
 				}
 				title.setText(entity.name);

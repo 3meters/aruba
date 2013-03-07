@@ -200,6 +200,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.segmentTime("Wifi scan received event");
+				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "wifi_scan_received", null);
 				Logger.d(CandiRadar.this, "Query wifi scan received event: locking beacons");
 
 				if (event.wifiList != null) {
@@ -255,7 +256,7 @@ public class CandiRadar extends CandiActivity {
 			@Override
 			public void run() {
 				Aircandi.stopwatch1.stop("Search for places by beacon complete");
-				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTime(), "entities_for_beacons", null);
+				Tracker.sendTiming("radar", Aircandi.stopwatch1.getTotalTimeMills(), "entities_for_beacons", null);
 				Logger.d(CandiRadar.this, "Entities for beacons finished event: ** done **");
 			}
 		});
@@ -298,7 +299,7 @@ public class CandiRadar extends CandiActivity {
 
 					if (Aircandi.stopwatch2.isStarted()) {
 						Aircandi.stopwatch2.stop("Location acquired");
-						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTime(), "location_acquired", null);
+						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTimeMills(), "location_acquired", null);
 					}
 
 					if (LocationManager.getInstance().getObservationLocked() != null) {
@@ -339,7 +340,7 @@ public class CandiRadar extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onEntitiesForLocationFinished(EntitiesForLocationFinishedEvent event) {
 		Aircandi.stopwatch2.stop("Entities for location complete");
-		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTime(), "entities_for_location", null);
+		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "entities_for_location", null);
 		mHandler.post(new Runnable() {
 
 			@Override
@@ -380,7 +381,7 @@ public class CandiRadar extends CandiActivity {
 	@SuppressWarnings("ucd")
 	public void onPlacesNearLocationFinished(PlacesNearLocationFinishedEvent event) {
 		Aircandi.stopwatch2.stop("Places near location complete");
-		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTime(), "places_near_location", null);
+		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "places_near_location", null);
 		mHandler.post(new Runnable() {
 
 			@Override

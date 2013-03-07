@@ -90,6 +90,7 @@
         <item name="iconEdit">@drawable/ic_action_edit_dark</item>
         <item name="iconLocation">@drawable/ic_action_location_dark</item>
         <item name="iconGallery">@drawable/ic_action_tiles_large_dark</item>
+        <item name="iconAndroid">@drawable/ic_action_android_dark</item>
         <item name="iconZoom">@drawable/ic_action_zoom</item>
 
         <!-- Actionbar Sherlock -->
@@ -175,7 +176,8 @@
         <item name="iconLocation">@drawable/ic_action_location_light</item>
         <item name="iconGallery">@drawable/ic_action_tiles_large_light</item>
         <item name="iconZoom">@drawable/ic_action_zoom</item>
-
+        <item name="iconAndroid">@drawable/ic_action_android_light</item>
+        
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_light</item>

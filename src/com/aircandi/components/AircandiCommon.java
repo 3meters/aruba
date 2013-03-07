@@ -99,6 +99,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	public String				mCollectionId;
 
 	/* Theme */
+	public String				mPrefTheme;
 	public String				mThemeTone;
 	private Boolean				mIsDialog;
 
@@ -722,7 +723,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 	}
 
 	public void setTheme(Integer themeResId, Boolean isDialog) {
-		String prefTheme = Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT);
+		mPrefTheme = Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT);
 		mIsDialog = isDialog;
 		/*
 		 * ActionBarSherlock takes over the title area if version < 4.0 (Ice Cream Sandwich).
@@ -735,10 +736,10 @@ public class AircandiCommon implements ActionBar.TabListener {
 		 */
 		Integer themeId = themeResId;
 		if (themeId == null) {
-			themeId = mContext.getApplicationContext().getResources().getIdentifier(prefTheme, "style", mContext.getPackageName());
+			themeId = mContext.getApplicationContext().getResources().getIdentifier(mPrefTheme, "style", mContext.getPackageName());
 			if (isDialog) {
 				themeId = R.style.aircandi_theme_dialog_dark;
-				if (prefTheme.equals("aircandi_theme_snow")) {
+				if (mPrefTheme.equals("aircandi_theme_snow")) {
 					themeId = R.style.aircandi_theme_dialog_light;
 				}
 			}
@@ -1164,12 +1165,17 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		else if (mPageName.equals("EntityForm")) {
 			if (mEntityId != null) {
+				/* Editing */
 				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
 				if (mEntity != null) {
 					if (mEntity.ownerId != null && (mEntity.ownerId.equals(Aircandi.getInstance().getUser().id))) {
 						addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
 					}
 				}
+			}
+			else {
+				/* Making something new */
+				addTabsToActionBar(this, CandiConstants.TABS_ENTITY_FORM_ID);
 			}
 		}
 	}

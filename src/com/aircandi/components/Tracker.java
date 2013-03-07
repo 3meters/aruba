@@ -2,6 +2,7 @@ package com.aircandi.components;
 
 import android.app.Activity;
 
+import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.google.analytics.tracking.android.EasyTracker;
 
@@ -31,7 +32,7 @@ public class Tracker {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (CandiConstants.TRACKING_ENABLED) {
+			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
 				EasyTracker.getTracker().sendEvent(category, action, target, value);
 			}
 		}
@@ -43,7 +44,7 @@ public class Tracker {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (CandiConstants.TRACKING_ENABLED) {
+			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
 				EasyTracker.getTracker().sendView(viewName);
 			}
 		}
@@ -55,7 +56,7 @@ public class Tracker {
 		 * Arguments should be free of whitespace.
 		 */
 		try {
-			if (CandiConstants.TRACKING_ENABLED) {
+			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
 				EasyTracker.getTracker().sendTiming(category, timing, name, label);
 			}
 		}
@@ -64,7 +65,7 @@ public class Tracker {
 
 	public static void dispatch() {
 		try {
-			if (CandiConstants.TRACKING_ENABLED) {
+			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
 				EasyTracker.getInstance().dispatch();
 			}
 		}
@@ -73,7 +74,7 @@ public class Tracker {
 
 	public static void stopSession() {
 		try {
-			if (CandiConstants.TRACKING_ENABLED) {
+			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
 				EasyTracker.getTracker().setStartSession(false);
 			}
 		}
@@ -82,7 +83,7 @@ public class Tracker {
 
 	public static void startNewSession() {
 		try {
-			if (CandiConstants.TRACKING_ENABLED) {
+			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
 				EasyTracker.getTracker().setStartSession(true);
 			}
 		}
@@ -91,7 +92,7 @@ public class Tracker {
 
 	public static void activityStart(Activity activity) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED) {
+			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
 				EasyTracker.getInstance().activityStart(activity);
 			}
 		}
@@ -100,7 +101,7 @@ public class Tracker {
 
 	public static void activityStop(Activity activity) {
 		try {
-			if (CandiConstants.TRACKING_ENABLED) {
+			if (CandiConstants.TRACKING_ENABLED && !Aircandi.getInstance().getUser().isDeveloper) {
 				EasyTracker.getInstance().activityStop(activity);
 			}
 		}

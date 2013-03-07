@@ -202,7 +202,7 @@ public class ProxibaseService {
 	private DefaultHttpClient createHttpClient() {
 
 		/*
-		 * AllowAllHostnameVerifier doesn't verify host names contained in SSL certificate. It should not be set in
+		 * FIXME: AllowAllHostnameVerifier doesn't verify host names contained in SSL certificate. It should not be set in
 		 * production environment. It may allow man in middle attack. Other host name verifiers for specific needs
 		 * are StrictHostnameVerifier and BrowserCompatHostnameVerifier.
 		 */

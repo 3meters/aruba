@@ -201,7 +201,7 @@ public abstract class CandiActivity extends SherlockActivity {
 
 		/* Common prefs */
 
-		if (!Aircandi.getInstance().getPrefTheme().equals(Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT))) {
+		if (!mCommon.mPrefTheme.equals(Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT))) {
 			Logger.d(this, "Pref change: theme, restarting current activity");
 			mPrefChangeReloadNeeded = true;
 		}
@@ -304,6 +304,12 @@ public abstract class CandiActivity extends SherlockActivity {
 	protected void onStart() {
 		super.onStart();
 		mCommon.doStart();
+		if (mPrefChangeReloadNeeded) {
+			final Intent intent = getIntent();
+			startActivity(intent);
+			finish();
+			return;
+		}
 	}
 
 	@Override

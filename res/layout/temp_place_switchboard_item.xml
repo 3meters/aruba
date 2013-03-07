@@ -20,15 +20,27 @@
 
     <TextView
         android:id="@+id/badge"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
         android:gravity="top|right"
         android:text="@string/dummy_number"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/accent_blue"
         android:visibility="gone" />
 
+    <ImageView
+        android:id="@+id/indicator"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_margin="6dp"
+        android:src="@drawable/img_play_store_arrow"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:visibility="visible" />
+    
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"

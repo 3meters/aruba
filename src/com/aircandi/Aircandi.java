@@ -47,8 +47,6 @@ import com.amazonaws.auth.BasicAWSCredentials;
 		ReportField.USER_APP_START_DATE,
 		ReportField.USER_CRASH_DATE,
 		ReportField.DUMPSYS_MEMINFO,
-		ReportField.DROPBOX,
-		ReportField.LOGCAT,
 		ReportField.RADIOLOG,
 		ReportField.DEVICE_ID,
 		ReportField.INSTALLATION_ID,
@@ -188,64 +186,32 @@ public class Aircandi extends Application {
 		return mPrefTheme;
 	}
 
-	public void setPrefTheme(String prefTheme) {
-		mPrefTheme = prefTheme;
-	}
-
 	public String getPrefSearchRadius() {
 		return mPrefSearchRadius;
-	}
-
-	public void setPrefSearchRadius(String prefSearchRadius) {
-		mPrefSearchRadius = prefSearchRadius;
 	}
 
 	public Boolean getPrefEnableDev() {
 		return mPrefEnableDev;
 	}
 
-	public void setPrefEnableDev(Boolean prefEnableDev) {
-		mPrefEnableDev = prefEnableDev;
-	}
-
 	public Boolean getPrefEntityFencing() {
 		return mPrefEntityFencing;
-	}
-
-	public void setPrefEntityFencing(Boolean prefEntityFencing) {
-		mPrefEntityFencing = prefEntityFencing;
 	}
 
 	public Boolean getPrefShowPlaceRankScore() {
 		return mPrefShowPlaceRankScore;
 	}
 
-	public void setPrefShowPlaceRankScore(Boolean prefShowPlaceRankScore) {
-		mPrefShowPlaceRankScore = prefShowPlaceRankScore;
-	}
-
 	public String getPrefTestingBeacons() {
 		return mPrefTestingBeacons;
-	}
-
-	public void setPrefTestingBeacons(String prefTestingBeacons) {
-		mPrefTestingBeacons = prefTestingBeacons;
 	}
 
 	public String getPrefTestingLocation() {
 		return mPrefTestingLocation;
 	}
 
-	public void setPrefTestingLocation(String prefTestingLocation) {
-		mPrefTestingLocation = prefTestingLocation;
-	}
-
 	public String getPrefTestingPlaceProvider() {
 		return mPrefTestingPlaceProvider;
-	}
-
-	public void setPrefTestingPlaceProvider(String prefTestingPlaceProvider) {
-		mPrefTestingPlaceProvider = prefTestingPlaceProvider;
 	}
 
 	public boolean isUsingEmulator() {

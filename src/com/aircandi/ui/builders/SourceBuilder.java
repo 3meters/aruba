@@ -41,7 +41,7 @@ public class SourceBuilder extends FormActivity {
 
 	private TextView		mTitle;
 	private WebImageView	mSourceIcon;
-	private Spinner			mSourceTypePicker;
+	private Spinner		mSourceTypePicker;
 	private EditText		mSourceCaption;
 	private EditText		mSourceId;
 	private Integer			mSpinnerItem;
@@ -283,6 +283,12 @@ public class SourceBuilder extends FormActivity {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
+				if (mCommon.mThemeTone.equals("dark")) {
+					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+						((TextView)parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));			
+					}
+				}
+				
 				/* Do nothing when the hint item is selected */
 				if (mEntity == null) {
 					if (position == 0) {
@@ -316,6 +322,7 @@ public class SourceBuilder extends FormActivity {
 
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {}
+
 		});
 	}
 

@@ -7,36 +7,22 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <!-- 
+        <!--
         <Spinner
             android:id="@+id/cbo_visibility"
             android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:drawSelectorOnTop="true"
             android:entries="@array/form_visibility_values_list"
-            android:prompt="@string/form_label_visibility" />
- 		-->
+            android:prompt="@string/form_label_visibility" />        -->
+
         <CheckBox
             android:id="@+id/chk_locked"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:text="@string/form_label_locked" />
-        
-        <CheckBox
-            android:id="@+id/chk_html_zoom"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:text="@string/web_label_html_zoom" />
-        
-        <CheckBox
-            android:id="@+id/chk_html_javascript"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:text="@string/web_label_javascript" />
-        
-        </LinearLayout>
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/form_field_height"
+            android:text="@string/form_label_locked"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
 </merge>

@@ -188,30 +188,33 @@ public class ProxiManager {
 
 		/* Construct string array of the beacon ids */
 		final List<String> beaconIds = new ArrayList<String>();
-		for (Beacon beacon : mEntityModel.getBeacons()) {
-			beaconIds.add(beacon.id);
-		}
-
+		final Bundle parameters = new Bundle();
 		ServiceResponse serviceResponse = new ServiceResponse();
 
-		if (beaconIds.size() == 0) {
-			mEntityModel.removeBeaconEntities();
-			mEntityModel.setLastBeaconRefreshDate(DateUtils.nowDate().getTime());
-			final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
-			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
-			return serviceResponse;
-		}
+		synchronized (mEntityModel.getBeacons()) {
 
-		/* Set method parameters */
-		final Bundle parameters = new Bundle();
-		if (beaconIds.size() > 0) {
-			parameters.putStringArrayList("beaconIdsNew", (ArrayList<String>) beaconIds);
-			final ArrayList<Integer> levels = new ArrayList<Integer>();
-			for (String beaconId : beaconIds) {
-				Beacon beacon = mEntityModel.getBeacon(beaconId);
-				levels.add(beacon.level.intValue());
+			for (Beacon beacon : mEntityModel.getBeacons()) {
+				beaconIds.add(beacon.id);
 			}
-			parameters.putIntegerArrayList("beaconLevels", levels);
+
+			if (beaconIds.size() == 0) {
+				mEntityModel.removeBeaconEntities();
+				mEntityModel.setLastBeaconRefreshDate(DateUtils.nowDate().getTime());
+				final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
+				BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
+				return serviceResponse;
+			}
+
+			/* Set method parameters */
+			if (beaconIds.size() > 0) {
+				parameters.putStringArrayList("beaconIdsNew", (ArrayList<String>) beaconIds);
+				final ArrayList<Integer> levels = new ArrayList<Integer>();
+				for (String beaconId : beaconIds) {
+					Beacon beacon = mEntityModel.getBeacon(beaconId);
+					levels.add(beacon.level.intValue());
+				}
+				parameters.putIntegerArrayList("beaconLevels", levels);
+			}
 		}
 
 		/* Only entities linked by proximity */
@@ -496,8 +499,14 @@ public class ProxiManager {
 			 */
 			if (primaryBeacon != null) {
 				if (mEntityModel.getBeacon(primaryBeacon.id) == null) {
+					/*
+					 * Insert beacon in service. Could fail because it
+					 * is already in the beacons collection.
+					 */
 					result = mEntityModel.insertBeacon(primaryBeacon);
-					mEntityModel.upsertBeacon((Beacon) result.data);
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+						mEntityModel.upsertBeacon((Beacon) result.data);
+					}
 				}
 			}
 		}

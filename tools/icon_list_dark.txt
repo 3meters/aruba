@@ -1,3 +1,4 @@
+ic_action_android_dark.png
 ic_action_add_dark.png
 ic_action_arrow_bottom_dark.png
 ic_action_arrow_top_dark.png

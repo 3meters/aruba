@@ -75,6 +75,7 @@ public class CategoryBuilder extends FormActivity {
 		mSpinnerCategory = (Spinner) findViewById(R.id.category);
 		mSpinnerSubCategory = (Spinner) findViewById(R.id.sub_category);
 		mSpinnerSubSubCategory = (Spinner) findViewById(R.id.sub_sub_category);
+		
 		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText(R.string.dialog_category_builder_title);
 
@@ -230,6 +231,12 @@ public class CategoryBuilder extends FormActivity {
 
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				
+				if (mCommon.mThemeTone.equals("dark")) {
+					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+						((TextView)parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));   				
+					}
+				}
 
 				if (position < mCategories.size()) {
 
@@ -301,6 +308,12 @@ public class CategoryBuilder extends FormActivity {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
+					if (mCommon.mThemeTone.equals("dark")) {
+						if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+							((TextView)parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));   				
+						}
+					}
+					
 					/* Do nothing when the hint item is selected */
 					if (position < mCategory.categories.size()) {
 						mSubCategory = mCategory.categories.get(position);
@@ -369,6 +382,12 @@ public class CategoryBuilder extends FormActivity {
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
+					if (mCommon.mThemeTone.equals("dark")) {
+						if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+							((TextView)parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));   				
+						}
+					}
+					
 					/* Do nothing when the hint item is selected */
 					if (position < mSubCategory.categories.size()) {
 						mSubSubCategory = mSubCategory.categories.get(position);

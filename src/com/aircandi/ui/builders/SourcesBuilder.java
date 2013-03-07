@@ -95,6 +95,7 @@ public class SourcesBuilder extends FormActivity {
 		mList = (BounceListView) findViewById(R.id.list);
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.message));
 	}
 
 	private void bind() {

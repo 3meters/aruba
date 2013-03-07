@@ -196,9 +196,6 @@
     <string name="dialog_install_cancel">no thanks</string>
     <string name="dialog_install_toast_package_installed">has been installed. Tap the link to launch.</string>
         
-    <!-- Help -->
-
-
     <!-- CandiList -->
 
     <string name="name_entity_list_type_collection">collections</string>
@@ -206,6 +203,10 @@
     <!-- CandiForm -->
 
     <string name="candi_button_map">map</string>
+    <string name="candi_button_more">more</string>
+    <string name="candi_section_photos_more">view all photos</string>
+    <string name="candi_section_posts_more">view all posts</string>
+    <string name="candi_section_candi_more">view all candi</string>    
     <string name="candi_button_tune">i\'m here</string>
     <string name="candi_button_call">call</string>
     <string name="candi_button_new">add candi</string>

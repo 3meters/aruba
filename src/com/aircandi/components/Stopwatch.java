@@ -15,6 +15,10 @@ public class Stopwatch {
 		return totalTime;
 	}
 
+	public long getTotalTimeMills() {
+		return totalTime / 1000000;
+	}
+	
 	/**
 	 * Returns last lap time, process statistic.
 	 */

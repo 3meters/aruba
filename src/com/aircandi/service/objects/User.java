@@ -30,7 +30,7 @@ public class User extends ServiceEntryBase {
 	public String				webUri;
 	@Expose
 	public Boolean				isDeveloper;
-	@Expose
+	@Expose(serialize = false, deserialize = true)
 	public Boolean				doNotTrack;
 	@Expose
 	public Photo				photo;

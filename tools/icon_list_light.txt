@@ -1,4 +1,5 @@
 ic_action_add_light.png
+ic_action_android_light.png
 ic_action_arrow_bottom_light.png
 ic_action_arrow_top_light.png
 ic_action_camera_light.png

@@ -22,7 +22,7 @@
     <bool name="ga_anonymizeIp">false</bool>
 
     <!-- Info on what is being tracked is output to logcat -->
-    <bool name="ga_debug">true</bool>
+    <bool name="ga_debug">false</bool>
 
     <!-- The screen names that will appear in the reporting -->
     
