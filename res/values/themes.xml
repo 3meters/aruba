@@ -92,7 +92,12 @@
         <item name="iconGallery">@drawable/ic_action_tiles_large_dark</item>
         <item name="iconAndroid">@drawable/ic_action_android_dark</item>
         <item name="iconZoom">@drawable/ic_action_zoom</item>
-
+        <item name="iconSend">@drawable/ic_action_send_dark</item>
+        <item name="iconSave">@drawable/ic_action_save_dark</item>
+        <item name="iconAccept">@drawable/ic_action_tick_dark</item>
+        <item name="iconCancel">@drawable/ic_action_cancel_dark</item>
+        <item name="iconSuggest">@drawable/ic_action_bulb_dark</item>
+        
         <!-- Actionbar Sherlock -->
 
         <item name="actionBarStyle">@style/actionbar_dark</item>
@@ -177,6 +182,11 @@
         <item name="iconGallery">@drawable/ic_action_tiles_large_light</item>
         <item name="iconZoom">@drawable/ic_action_zoom</item>
         <item name="iconAndroid">@drawable/ic_action_android_light</item>
+        <item name="iconSend">@drawable/ic_action_send_light</item>
+        <item name="iconSave">@drawable/ic_action_save_light</item>
+        <item name="iconAccept">@drawable/ic_action_tick_light</item>
+        <item name="iconCancel">@drawable/ic_action_cancel_light</item>
+        <item name="iconSuggest">@drawable/ic_action_bulb_light</item>
         
         <!-- Actionbar Sherlock -->
 

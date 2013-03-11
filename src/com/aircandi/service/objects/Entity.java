@@ -89,9 +89,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 	public Boolean				synthetic			= false;
 	public Boolean				checked				= false;
 
-	/* Stash for place entities */
-	public List<Source>			sourceSuggestions;
-
 	/* Used when this is a source entity */
 	public Source				source;
 
@@ -257,13 +254,6 @@ public class Entity extends ServiceEntryBase implements Cloneable, Serializable 
 			entity.subtitle = synthetic.place.category.name;
 		}
 		return entity;
-	}
-
-	public Photo getPhotoForSet() {
-		if (photo == null) {
-			photo = new Photo();
-		}
-		return photo;
 	}
 
 	public Photo getPhoto() {

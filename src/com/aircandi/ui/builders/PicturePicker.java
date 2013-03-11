@@ -40,9 +40,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aircandi.Aircandi;
-import com.aircandi.beta.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.beta.BuildConfig;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.EndlessAdapter;
@@ -63,6 +63,7 @@ import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ServiceRequest.AuthType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.utilities.AnimUtils;
@@ -152,7 +153,6 @@ public class PicturePicker extends FormActivity {
 		}
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.message));
 
 		/* Stash some sizing info */
@@ -188,26 +188,41 @@ public class PicturePicker extends FormActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				if (((EndlessImageAdapter) mGridView.getAdapter()).getItemViewType(position) != Adapter.IGNORE_ITEM_VIEW_TYPE) {
-					final String imageUri = mImages.get(position).getMediaUrl();
-					if (mPlacePhotoMode) {
-						final Intent intent = new Intent();
-						intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
-						setResult(Activity.RESULT_OK, intent);
-						finish();
+
+					ImageResult imageResult = mImages.get(position);
+					Photo photo = imageResult.getPhoto();
+					if (photo == null) {
+						photo = new Photo(imageResult.getMediaUrl(), null, null, null, PhotoSource.external);
 					}
-					else {
-						final Intent intent = new Intent();
-						intent.putExtra(CandiConstants.EXTRA_URI, imageUri);
-						intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
-						setResult(Activity.RESULT_OK, intent);
-						finish();
-					}
+
+					final Intent intent = new Intent();
+					intent.putExtra(CandiConstants.EXTRA_URI_TITLE, mTitleOptional);
+					final String jsonPhoto = ProxibaseService.convertObjectToJsonSmart(photo, false, true);
+					intent.putExtra(CandiConstants.EXTRA_PHOTO, jsonPhoto);
+					setResult(Activity.RESULT_OK, intent);
+					finish();
 				}
 			}
 		});
 	}
 
 	private void bind() {
+		/*
+		 * First check to see if there are any candi picture children.
+		 */
+		if (mPlacePhotoMode && mEntity != null) {
+			List<Entity> entities = mEntity.getChildren();
+			for (Entity entity : entities) {
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE) && entity.photo != null) {
+					if (!entity.photo.getSourceName().equals(PhotoSource.foursquare)) {
+						ImageResult imageResult = entity.photo.getAsImageResult();
+						imageResult.setPhoto(entity.photo);
+						mImages.add(imageResult);
+					}
+				}
+			}
+		}
+
 		mGridView.setAdapter(new EndlessImageAdapter(mImages));
 	}
 
@@ -307,7 +322,7 @@ public class PicturePicker extends FormActivity {
 
 	private class EndlessImageAdapter extends EndlessAdapter {
 
-		private List<ImageResult>	moreImages	= new ArrayList<ImageResult>();
+		private List<ImageResult>	mMoreImages	= new ArrayList<ImageResult>();
 
 		private EndlessImageAdapter(List<ImageResult> list) {
 			super(new ListAdapter(list));
@@ -326,45 +341,59 @@ public class PicturePicker extends FormActivity {
 			/*
 			 * This is called on background thread from an AsyncTask started by EndlessAdapter
 			 */
-			moreImages.clear();
+			mMoreImages.clear();
 			ServiceResponse serviceResponse = new ServiceResponse();
 			if (mPlacePhotoMode) {
-				serviceResponse = loadPlaceImages(PAGE_SIZE, mOffset);
-				if (serviceResponse.responseCode == ResponseCode.Success) {
-					final List<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
-					if (mOffset == 0 && photos.size() == 0) {
-						runOnUiThread(new Runnable() {
 
-							@Override
-							public void run() {
-								mMessage.setText(getString(R.string.picture_picker_places_empty) + " " + mEntity.name);
-								mMessage.setVisibility(View.VISIBLE);
+				if (mEntity.place.provider != null && mEntity.place.provider.equals("foursquare")) {
+					serviceResponse = loadPlaceImages(PAGE_SIZE, mOffset);
+					if (serviceResponse.responseCode == ResponseCode.Success) {
+						final List<Photo> photos = (ArrayList<Photo>) serviceResponse.data;
+						if (mOffset == 0 && photos.size() == 0) {
+							runOnUiThread(new Runnable() {
 
+								@Override
+								public void run() {
+									mMessage.setText(getString(R.string.picture_picker_places_empty) + " " + mEntity.name);
+									mMessage.setVisibility(View.VISIBLE);
+
+								}
+							});
+						}
+						else {
+							mMoreImages = new ArrayList<ImageResult>();
+							for (Photo photo : photos) {
+								ImageResult imageResult = photo.getAsImageResult();
+								imageResult.setPhoto(photo);
+								imageResult.getThumbnail().setUrl(photo.getSizedUri(100, 100));
+								mMoreImages.add(imageResult);
 							}
-						});
-					}
-					else {
-						moreImages = new ArrayList<ImageResult>();
-						for (Photo photo : photos) {
-							ImageResult imageResult = photo.getAsImageResult();
-							imageResult.getThumbnail().setUrl(photo.getSizedUri(100, 100));
-							moreImages.add(imageResult);
 						}
 					}
+					else {
+						mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
+						return false;
+					}
+					mOffset += PAGE_SIZE;
+					runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							mCommon.hideBusy(true);
+						}
+					});
+					return mMoreImages.size() >= PAGE_SIZE;
 				}
 				else {
-					mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
+					runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							mCommon.hideBusy(true);
+						}
+					});
 					return false;
 				}
-				mOffset += PAGE_SIZE;
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						mCommon.hideBusy(true);
-					}
-				});
-				return moreImages.size() >= PAGE_SIZE;
 			}
 			else {
 				String queryDecorated = mQuery;
@@ -377,8 +406,8 @@ public class PicturePicker extends FormActivity {
 
 				serviceResponse = loadSearchImages(queryDecorated, PAGE_SIZE, mOffset);
 				if (serviceResponse.responseCode == ResponseCode.Success) {
-					moreImages = (ArrayList<ImageResult>) serviceResponse.data;
-					if (mOffset == 0 && moreImages.size() == 0) {
+					mMoreImages = (ArrayList<ImageResult>) serviceResponse.data;
+					if (mOffset == 0 && mMoreImages.size() == 0) {
 						runOnUiThread(new Runnable() {
 
 							@Override
@@ -391,7 +420,7 @@ public class PicturePicker extends FormActivity {
 					}
 					Logger.d(this, "Query Bing for more images: start = " + String.valueOf(mOffset)
 							+ " new total = "
-							+ String.valueOf(getWrappedAdapter().getCount() + moreImages.size()));
+							+ String.valueOf(getWrappedAdapter().getCount() + mMoreImages.size()));
 				}
 				else {
 					mCommon.handleServiceError(serviceResponse, ServiceOperation.PictureSearch);
@@ -405,16 +434,17 @@ public class PicturePicker extends FormActivity {
 						mCommon.hideBusy(true);
 					}
 				});
-				return (getWrappedAdapter().getCount() + moreImages.size()) < LIST_MAX;
+				return (getWrappedAdapter().getCount() + mMoreImages.size()) < LIST_MAX;
 			}
 		}
 
 		@Override
 		protected void appendCachedData() {
 			final ArrayAdapter<ImageResult> list = (ArrayAdapter<ImageResult>) getWrappedAdapter();
-			for (ImageResult imageResult : moreImages) {
+			for (ImageResult imageResult : mMoreImages) {
 				list.add(imageResult);
 			}
+			notifyDataSetChanged();
 		}
 	}
 

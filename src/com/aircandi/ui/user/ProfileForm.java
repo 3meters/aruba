@@ -1,6 +1,9 @@
 package com.aircandi.ui.user;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -8,12 +11,15 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
@@ -32,8 +38,9 @@ import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.User;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -47,13 +54,14 @@ public class ProfileForm extends FormActivity {
 	private ViewFlipper		mViewFlipper;
 	private WebImageView	mImage;
 	private EditText		mTextFullname;
+	private CheckBox		mCheckBrowseInPrivate;
 	private EditText		mTextBio;
 	private EditText		mTextLink;
 	private EditText		mTextLocation;
 	private EditText		mTextEmail;
-	private Button			mButtonSave;
 	private User			mUser;
 	private Bitmap			mBitmap;
+	private Boolean			mDirty	= false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +75,7 @@ public class ProfileForm extends FormActivity {
 
 	private void initialize() {
 
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		mUser = Aircandi.getInstance().getUser();
 
 		if (mUser == null) {
@@ -82,34 +91,83 @@ public class ProfileForm extends FormActivity {
 		mTextLink = (EditText) findViewById(R.id.text_link);
 		mTextLocation = (EditText) findViewById(R.id.text_location);
 		mTextEmail = (EditText) findViewById(R.id.text_email);
-		mButtonSave = (Button) findViewById(R.id.button_save);
+		mCheckBrowseInPrivate = (CheckBox) findViewById(R.id.chk_do_not_track);
 
 		FontManager.getInstance().setTypefaceDefault(mTextFullname);
 		FontManager.getInstance().setTypefaceDefault(mTextBio);
 		FontManager.getInstance().setTypefaceDefault(mTextLink);
 		FontManager.getInstance().setTypefaceDefault(mTextLocation);
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
-		FontManager.getInstance().setTypefaceDefault(mButtonSave);
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_image));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_password));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_clear_browse_history));
 
-		mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
+		if (mTextFullname != null) {
+			mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
 
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(enableSave());
-			}
-		});
+				@Override
+				public void afterTextChanged(Editable s) {
+					if (!s.toString().equals(mUser.name)) {
+						mDirty = true;
+					}
+				}
+			});
+		}
+		if (mTextBio != null) {
+			mTextBio.addTextChangedListener(new SimpleTextWatcher() {
 
-		mTextEmail.addTextChangedListener(new SimpleTextWatcher() {
+				@Override
+				public void afterTextChanged(Editable s) {
+					if (!s.toString().equals(mUser.bio)) {
+						mDirty = true;
+					}
+				}
+			});
+		}
+		if (mTextLink != null) {
+			mTextLink.addTextChangedListener(new SimpleTextWatcher() {
 
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(enableSave());
-			}
-		});
+				@Override
+				public void afterTextChanged(Editable s) {
+					if (!s.toString().equals(mUser.webUri)) {
+						mDirty = true;
+					}
+				}
+			});
+		}
+		if (mTextLocation != null) {
+			mTextLocation.addTextChangedListener(new SimpleTextWatcher() {
+
+				@Override
+				public void afterTextChanged(Editable s) {
+					if (!s.toString().equals(mUser.location)) {
+						mDirty = true;
+					}
+				}
+			});
+		}
+		if (mTextEmail != null) {
+			mTextEmail.addTextChangedListener(new SimpleTextWatcher() {
+
+				@Override
+				public void afterTextChanged(Editable s) {
+					if (!s.toString().equals(mUser.email)) {
+						mDirty = true;
+					}
+				}
+			});
+		}
+		if (mCheckBrowseInPrivate != null) {
+			mCheckBrowseInPrivate.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					if (mUser.doNotTrack != isChecked) {
+						mDirty = true;
+					}
+				}
+			});
+		}
 
 	}
 
@@ -128,7 +186,7 @@ public class ProfileForm extends FormActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetUser");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mUser.id);
+				final ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mUser.id, true);
 				return result;
 			}
 
@@ -136,8 +194,7 @@ public class ProfileForm extends FormActivity {
 			protected void onPostExecute(Object modelResult) {
 				final ModelResult result = (ModelResult) modelResult;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					final String jsonResponse = (String) result.serviceResponse.data;
-					mUser = (User) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User).data;
+					mUser = (User) result.serviceResponse.data;
 
 					/* We got fresh user data but we want to hook up the old session. */
 					mUser.session = Aircandi.getInstance().getUser().session;
@@ -162,6 +219,7 @@ public class ProfileForm extends FormActivity {
 		mTextLink.setText(mUser.webUri);
 		mTextLocation.setText(mUser.location);
 		mTextEmail.setText(mUser.email);
+		mCheckBrowseInPrivate.setChecked(mUser.doNotTrack);
 
 		((ViewGroup) findViewById(R.id.flipper_form)).setVisibility(View.VISIBLE);
 
@@ -187,10 +245,16 @@ public class ProfileForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
-
-	@SuppressWarnings("ucd")
-	public void onSaveButtonClick(View view) {
-		updateProfile();
+	@Override
+	public void onBackPressed() {
+		if (isDirty()) {
+			confirmDirtyExit();
+		}
+		else {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(ProfileForm.this, TransitionType.FormToPage);
+		}
 	}
 
 	@SuppressWarnings("ucd")
@@ -201,14 +265,18 @@ public class ProfileForm extends FormActivity {
 		mImageRequestListener = new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
+			public void onComplete(Object response, Photo photo, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
 
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
 					/* Could get set to null if we are using the default */
+					mDirty = true;
 					mBitmap = imageBitmap;
-					if (imageUri != null) {
-						mUser.getPhotoForSet().setImageUri(imageUri);
+					if (photo != null) {
+						mUser.photo = photo;
+					}
+					else if (imageUri != null) {
+						mUser.photo = new Photo(imageUri, null, null, null, PhotoSource.aircandi);
 					}
 					drawImage(mUser);
 				}
@@ -223,6 +291,11 @@ public class ProfileForm extends FormActivity {
 		final Intent intent = intentBuilder.create();
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+	}
+
+	@SuppressWarnings("ucd")
+	public void onClearBrowseHistoryButtonClick(View view) {
+		confirmClearBrowseHistory();
 	}
 
 	@Override
@@ -259,6 +332,7 @@ public class ProfileForm extends FormActivity {
 		/*
 		 * Setting the photo to null will trigger correct default handling.
 		 */
+		mDirty = true;
 		if (user.photo != null) {
 			user.photo.setBitmap(null);
 			user.photo = null;
@@ -268,9 +342,57 @@ public class ProfileForm extends FormActivity {
 		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0);
 	}
 
+	private void confirmClearBrowseHistory() {
+		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
+				, getResources().getString(R.string.alert_clear_browse_history_title)
+				, getResources().getString(R.string.alert_clear_browse_history_message)
+				, null
+				, this
+				, R.string.alert_clear_browse_history_ok
+				, android.R.string.cancel
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							ImageUtils.showToastNotification("Still working on this feature!", Toast.LENGTH_SHORT);
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
+	}
+
+	private void confirmDirtyExit() {
+		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
+				, getResources().getString(R.string.alert_entity_dirty_exit_title)
+				, getResources().getString(R.string.alert_entity_dirty_exit_message)
+				, null
+				, this
+				, android.R.string.ok
+				, android.R.string.cancel
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							setResult(Activity.RESULT_CANCELED);
+							finish();
+							AnimUtils.doOverridePendingTransition(ProfileForm.this, TransitionType.FormToPage);
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Service routines
 	// --------------------------------------------------------------------------------------------
+
+	private Boolean isDirty() {
+		return mDirty;
+	}
 
 	private void updateProfile() {
 
@@ -281,6 +403,7 @@ public class ProfileForm extends FormActivity {
 			mUser.bio = mTextBio.getText().toString().trim();
 			mUser.location = mTextLocation.getText().toString().trim();
 			mUser.webUri = mTextLink.getText().toString().trim();
+			mUser.doNotTrack = mCheckBrowseInPrivate.isChecked();
 
 			new AsyncTask() {
 
@@ -351,19 +474,21 @@ public class ProfileForm extends FormActivity {
 		return true;
 	}
 
-	private boolean enableSave() {
-		if (mTextFullname.getText().length() == 0) {
-			return false;
+	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.save) {
+			updateProfile();
+			return true;
 		}
-		if (mTextEmail.getText().length() == 0) {
-			return false;
-		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
 		return true;
 	}
-
-	// --------------------------------------------------------------------------------------------
-	// Lifecycle events
-	// --------------------------------------------------------------------------------------------
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines

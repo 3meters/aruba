@@ -21,7 +21,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
@@ -48,10 +47,12 @@ public class SourcesBuilder extends FormActivity {
 
 	private BounceListView		mList;
 	private TextView			mMessage;
-	private final List<Source>	mSources	= new ArrayList<Source>();
+	private final List<Source>	mSystemSources	= new ArrayList<Source>();
+	private final List<Source>	mHiddenSources	= new ArrayList<Source>();
+	private final List<Source>	mActiveSources	= new ArrayList<Source>();
 	private Entity				mEntity;
 	private Source				mSourceEditing;
-	private List<String>	mJsonSourcesOriginal;
+	private List<String>		mJsonSourcesOriginal;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -60,20 +61,16 @@ public class SourcesBuilder extends FormActivity {
 
 		if (!isFinishing()) {
 			initialize();
-			if (mEntity != null
-					&& mEntity.sourceSuggestions == null
-					&& mEntity.sources != null
-					&& mEntity.sources.size() > 0) {
-				loadSourceSuggestions(mEntity, mEntity.sources, false);
-			}
-			else {
-				bind();
-				mCommon.hideBusy(true);
-			}
+			bind();
+			mCommon.hideBusy(true);
 		}
 	}
 
 	private void initialize() {
+
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+		mCommon.mActionBar.setTitle(R.string.form_title_links);
+
 		/* We use this to access the source suggestions */
 		if (mCommon.mEntityId != null) {
 			mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mCommon.mEntityId);
@@ -84,23 +81,23 @@ public class SourcesBuilder extends FormActivity {
 			final List<String> jsonSources = extras.getStringArrayList(CandiConstants.EXTRA_SOURCES);
 			if (jsonSources != null) {
 				mJsonSourcesOriginal = jsonSources;
+				List<Source> sources = new ArrayList<Source>();
 				for (String jsonSource : jsonSources) {
 					Source source = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
-					mSources.add(source);
+					sources.add(source);
 				}
+				splitSources(sources);
 			}
 		}
 
 		mMessage = (TextView) findViewById(R.id.message);
 		mList = (BounceListView) findViewById(R.id.list);
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.message));
 	}
 
 	private void bind() {
 
-		if (mSources.size() == 0) {
+		if (mActiveSources.size() == 0) {
 			mCommon.hideBusy(true);
 			mMessage.setText(R.string.sources_builder_empty);
 			mMessage.setVisibility(View.VISIBLE);
@@ -108,13 +105,13 @@ public class SourcesBuilder extends FormActivity {
 		else {
 			mMessage.setVisibility(View.GONE);
 			Integer position = 0;
-			for (Source source : mSources) {
+			for (Source source : mActiveSources) {
 				source.checked = false;
 				source.position = position;
 				position++;
 			}
 		}
-		final SourceListAdapter adapter = new SourceListAdapter(this, mSources, R.layout.temp_listitem_sources_builder);
+		final SourceListAdapter adapter = new SourceListAdapter(this, mActiveSources, R.layout.temp_listitem_sources_builder);
 		mList.setAdapter(adapter);
 	}
 
@@ -135,26 +132,18 @@ public class SourcesBuilder extends FormActivity {
 	}
 
 	@SuppressWarnings("ucd")
-	public void onSaveButtonClick(View view) {
-		gatherAndExit();
-	}
-
-	@Override
-	public void onCancelButtonClick(View view) {
-		if (isDirty()) {
-			confirmDirtyExit();
-		}
-		else {
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-			AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToPage);
+	public void onSuggestLinksButtonClick(View view) {
+		/* Go get source suggestions again */
+		List<Source> sources = mergeSources();
+		if (sources.size() > 0) {
+			loadSourceSuggestions(mEntity, sources, true);
 		}
 	}
 
 	@SuppressWarnings("ucd")
 	public void onDeleteButtonClick(View view) {
-		for (int i = mSources.size() - 1; i >= 0; i--) {
-			if (mSources.get(i).checked) {
+		for (int i = mActiveSources.size() - 1; i >= 0; i--) {
+			if (mActiveSources.get(i).checked) {
 				confirmSourceDelete();
 				return;
 			}
@@ -173,14 +162,14 @@ public class SourcesBuilder extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onMoveUpButtonClick(View view) {
-		for (int i = mSources.size() - 1; i >= 0; i--) {
-			if (mSources.get(i).checked) {
-				mSources.get(i).position -= 2;
+		for (int i = mActiveSources.size() - 1; i >= 0; i--) {
+			if (mActiveSources.get(i).checked) {
+				mActiveSources.get(i).position -= 2;
 			}
 		}
-		Collections.sort(mSources, new Source.SortSourcesBySourcePosition());
+		Collections.sort(mActiveSources, new Source.SortSourcesBySourcePosition());
 		Integer position = 0;
-		for (Source source : mSources) {
+		for (Source source : mActiveSources) {
 			source.position = position;
 			position++;
 		}
@@ -189,14 +178,14 @@ public class SourcesBuilder extends FormActivity {
 
 	@SuppressWarnings("ucd")
 	public void onMoveDownButtonClick(View view) {
-		for (int i = mSources.size() - 1; i >= 0; i--) {
-			if (mSources.get(i).checked) {
-				mSources.get(i).position += 2;
+		for (int i = mActiveSources.size() - 1; i >= 0; i--) {
+			if (mActiveSources.get(i).checked) {
+				mActiveSources.get(i).position += 2;
 			}
 		}
-		Collections.sort(mSources, new Source.SortSourcesBySourcePosition());
+		Collections.sort(mActiveSources, new Source.SortSourcesBySourcePosition());
 		Integer position = 0;
-		for (Source source : mSources) {
+		for (Source source : mActiveSources) {
 			source.position = position;
 			position++;
 		}
@@ -226,7 +215,7 @@ public class SourcesBuilder extends FormActivity {
 						final Source sourceUpdated = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 						if (sourceUpdated != null) {
 							/* Copy changes */
-							mSourceEditing.caption = sourceUpdated.caption;
+							mSourceEditing.label = sourceUpdated.label;
 							mSourceEditing.id = sourceUpdated.id;
 							mList.invalidateViews();
 						}
@@ -241,20 +230,11 @@ public class SourcesBuilder extends FormActivity {
 						final Source sourceNew = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 						if (sourceNew != null) {
 							sourceNew.checked = false;
-							mSources.add(sourceNew);
-
-							/* Remove as a suggestion candidate */
-							if (mEntity != null && mEntity.sourceSuggestions != null) {
-								for (int i = mEntity.sourceSuggestions.size() - 1; i >= 0; i--) {
-									if (mEntity.sourceSuggestions.get(i).type.equals(sourceNew.type)) {
-										mEntity.sourceSuggestions.remove(i);
-									}
-								}
-							}
+							mActiveSources.add(sourceNew);
 
 							/* Rebuild the position numbering */
 							Integer position = 0;
-							for (Source source : mSources) {
+							for (Source source : mActiveSources) {
 								source.position = position;
 								position++;
 							}
@@ -272,12 +252,38 @@ public class SourcesBuilder extends FormActivity {
 	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
 
+	private void splitSources(List<Source> sources) {
+		mActiveSources.clear();
+		mHiddenSources.clear();
+		mSystemSources.clear();
+
+		for (Source source : sources) {
+			if (source.system != null && source.system) {
+				mSystemSources.add(source);
+			}
+			else if (source.hidden != null && source.hidden) {
+				mHiddenSources.add(source);
+			}
+			else {
+				mActiveSources.add(source);
+			}
+		}
+	}
+
+	private List<Source> mergeSources() {
+		List<Source> sources = new ArrayList<Source>();
+		sources.addAll(mSystemSources);
+		sources.addAll(mActiveSources);
+		sources.addAll(mHiddenSources);
+		return sources;
+	}
+
 	private void confirmSourceDelete() {
 
 		/* How many are we deleting? */
 		Integer deleteCount = 0;
-		for (int i = mSources.size() - 1; i >= 0; i--) {
-			if (mSources.get(i).checked) {
+		for (int i = mActiveSources.size() - 1; i >= 0; i--) {
+			if (mActiveSources.get(i).checked) {
 				deleteCount++;
 			}
 		}
@@ -286,13 +292,13 @@ public class SourcesBuilder extends FormActivity {
 		final ViewGroup customView = (ViewGroup) inflater.inflate(R.layout.temp_delete_sources, null);
 		final TextView message = (TextView) customView.findViewById(R.id.message);
 		final LinearLayout list = (LinearLayout) customView.findViewById(R.id.list);
-		for (Source source : mSources) {
+		for (Source source : mActiveSources) {
 			if (source.checked) {
 				View sourceView = inflater.inflate(R.layout.temp_listitem_delete_sources, null);
 				WebImageView image = (WebImageView) sourceView.findViewById(R.id.image);
 				TextView title = (TextView) sourceView.findViewById(R.id.title);
-				if (source.caption != null) {
-					title.setText(source.caption);
+				if (source.label != null) {
+					title.setText(source.label);
 				}
 				image.setTag(source);
 				final String imageUri = source.getImageUri();
@@ -321,17 +327,17 @@ public class SourcesBuilder extends FormActivity {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
-							for (int i = mSources.size() - 1; i >= 0; i--) {
-								if (mSources.get(i).checked) {
-									Source source = mSources.remove(i);
-									if (source.custom == null || !source.custom) {
-										mEntity.sourceSuggestions.add(0, source);
+							for (int i = mActiveSources.size() - 1; i >= 0; i--) {
+								if (mActiveSources.get(i).checked) {
+									Source source = mActiveSources.remove(i);
+									source.hidden = true;
+									if (!source.data.containsKey("origin") || !((String)source.data.get("origin")).equals("user")) {
+										mHiddenSources.add(source);
 									}
 								}
 							}
 							mList.invalidateViews();
 						}
-
 					}
 				}
 				, null);
@@ -367,6 +373,7 @@ public class SourcesBuilder extends FormActivity {
 			@Override
 			protected void onPreExecute() {
 				mCommon.showBusy(true);
+				mCommon.startBusyIndicator();
 			}
 
 			@Override
@@ -381,31 +388,33 @@ public class SourcesBuilder extends FormActivity {
 				final ModelResult result = (ModelResult) response;
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
 					if (entity != null) {
-						final List<Source> sourceSuggestions = (List<Source>) result.serviceResponse.data;
-						entity.sourceSuggestions = sourceSuggestions;
-						if (entity.sourceSuggestions == null) {
-							entity.sourceSuggestions = new ArrayList<Source>();
-						}
+						final List<Source> sourcesProcessed = (List<Source>) result.serviceResponse.data;
 						if (autoInsert) {
-							if (sourceSuggestions.size() > 0) {
+							if (sourcesProcessed.size() > 0) {
 
 								/* First make sure they have default captions */
-								for (Source source : sourceSuggestions) {
-									if (source.caption == null) {
-										source.caption = source.type;
+								for (Source source : sourcesProcessed) {
+									if (source.label == null) {
+										source.label = source.type;
+									}
+									if (source.hidden != null) {
+										source.hidden = false;
 									}
 								}
-								mSources.addAll(sourceSuggestions);
-								ImageUtils.showToastNotification(getResources().getString((sourceSuggestions.size() == 1)
-										? R.string.toast_source_linked
-										: R.string.toast_sources_linked), Toast.LENGTH_SHORT);
+								int activeCountOld = mActiveSources.size();
+								splitSources(sourcesProcessed);
+								int activeCountNew = mActiveSources.size();
+								if (activeCountNew == activeCountOld) {
+									ImageUtils.showToastNotification(getResources().getString(R.string.toast_source_no_links), Toast.LENGTH_SHORT);
+								}
+								else {
+									ImageUtils.showToastNotification(getResources().getString((sourcesProcessed.size() == 1)
+											? R.string.toast_source_linked
+											: R.string.toast_sources_linked), Toast.LENGTH_SHORT);
+								}
 							}
 
 						}
-					}
-					else {
-						final List<Source> sourceSuggestions = (List<Source>) result.serviceResponse.data;
-						mSources.addAll(sourceSuggestions);
 					}
 				}
 				bind();
@@ -417,9 +426,12 @@ public class SourcesBuilder extends FormActivity {
 	private void gatherAndExit() {
 		final Intent intent = new Intent();
 		final List<String> sourceStrings = new ArrayList<String>();
-		for (Source source : mSources) {
+		List<Source> sources = mergeSources();
+
+		for (Source source : sources) {
 			sourceStrings.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
 		}
+
 		intent.putStringArrayListExtra(CandiConstants.EXTRA_SOURCES, (ArrayList<String>) sourceStrings);
 		setResult(Activity.RESULT_OK, intent);
 		finish();
@@ -434,10 +446,13 @@ public class SourcesBuilder extends FormActivity {
 	private Boolean isDirty() {
 
 		/* Gather */
+		List<Source> sources = mergeSources();
+
 		final List<String> jsonSources = new ArrayList<String>();
-		for (Source source : mSources) {
+		for (Source source : sources) {
 			jsonSources.add(ProxibaseService.convertObjectToJsonSmart(source, true, true));
 		}
+
 		if (mJsonSourcesOriginal == null) {
 			if (jsonSources.size() > 0) {
 				return true;
@@ -475,23 +490,19 @@ public class SourcesBuilder extends FormActivity {
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		mCommon.doCreateOptionsMenu(menu);
-		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		mCommon.doPrepareOptionsMenu(menu);
-		return true;
-	}
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.suggest_links) {
-			/* Go get source suggestions again */
-			if (mSources.size() > 0) {
-				loadSourceSuggestions(mEntity, mSources, true);
+		if (item.getItemId() == R.id.accept) {
+			gatherAndExit();
+			return true;
+		}
+		if (item.getItemId() == R.id.cancel) {
+			if (isDirty()) {
+				confirmDirtyExit();
+			}
+			else {
+				setResult(Activity.RESULT_CANCELED);
+				finish();
+				AnimUtils.doOverridePendingTransition(SourcesBuilder.this, TransitionType.FormToPage);
 			}
 			return true;
 		}

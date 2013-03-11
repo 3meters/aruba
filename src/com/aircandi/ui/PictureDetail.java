@@ -67,7 +67,7 @@ public class PictureDetail extends FormActivity {
 
 		setSupportProgressBarIndeterminateVisibility(true);
 		mCommon.mActionBar.setSubtitle("double-tap to zoom");
-
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
 	private void bind() {

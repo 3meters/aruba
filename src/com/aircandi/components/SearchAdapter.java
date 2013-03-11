@@ -21,8 +21,8 @@ import com.aircandi.utilities.ImageUtils;
 public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterable {
 
 	private final List<SearchItem>	mListItems;
-	private final LayoutInflater		mInflater;
-	private Integer				mItemLayoutId	= R.layout.temp_listitem_search;
+	private final LayoutInflater	mInflater;
+	private Integer					mItemLayoutId	= R.layout.temp_listitem_search;
 
 	public SearchAdapter(Context context, List<SearchItem> searchItems, Integer itemLayoutId) {
 		super(context, 0, searchItems);
@@ -133,10 +133,6 @@ public class SearchAdapter extends ArrayAdapter<SearchItem> implements Filterabl
 		}
 		return view;
 	}
-
-	
-
-	
 
 	@Override
 	public SearchItem getItem(int position) {

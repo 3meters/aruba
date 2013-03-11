@@ -10,6 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
+        android:divider="?attr/ruleColor"
+        android:dividerHeight="1px"
         android:background="?attr/backgroundCandi"
         android:cacheColorHint="#00000000"
         android:listSelector="#00000000" />

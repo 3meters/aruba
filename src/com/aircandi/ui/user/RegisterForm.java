@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
@@ -30,7 +31,9 @@ import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
+import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.User;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -45,7 +48,6 @@ public class RegisterForm extends FormActivity {
 	private EditText		mTextPassword;
 	private EditText		mTextPasswordConfirm;
 	private WebImageView	mImage;
-	private Button			mButtonSignUp;
 	private User			mUser;
 	private Bitmap			mBitmap;
 
@@ -66,19 +68,15 @@ public class RegisterForm extends FormActivity {
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
-		mButtonSignUp = (Button) findViewById(R.id.button_register);
-		mButtonSignUp.setEnabled(true);
 
 		FontManager.getInstance().setTypefaceDefault(mTextFullname);
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
 		FontManager.getInstance().setTypefaceDefault(mTextPassword);
 		FontManager.getInstance().setTypefaceDefault(mTextPasswordConfirm);
-		FontManager.getInstance().setTypefaceDefault(mButtonSignUp);
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.terms));
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_change_image));
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_view_terms));
-		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_cancel));
 
 	}
 
@@ -111,11 +109,6 @@ public class RegisterForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 
 	@SuppressWarnings("ucd")
-	public void onSignUpButtonClick(View view) {
-		doSave();
-	}
-
-	@SuppressWarnings("ucd")
 	public void onViewTermsButtonClick(View view) {
 		doViewTerms();
 	}
@@ -128,14 +121,18 @@ public class RegisterForm extends FormActivity {
 		mImageRequestListener = new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
+			public void onComplete(Object response, Photo photo, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
 
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+					
 					/* Could get set to null if we are using the default */
 					mBitmap = imageBitmap;
-					if (imageUri != null) {
-						mUser.getPhotoForSet().setImageUri(imageUri);
+					if (photo != null) {
+						mUser.photo = photo;
+					}
+					else if (imageUri != null) {
+						mUser.photo = new Photo(imageUri, null, null, null, PhotoSource.aircandi);
 					}
 					drawImage(mUser);
 				}
@@ -197,10 +194,6 @@ public class RegisterForm extends FormActivity {
 		startActivity(intent);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 
-	}
-
-	private void doSave() {
-		insert();
 	}
 
 	private boolean validate() {
@@ -268,7 +261,7 @@ public class RegisterForm extends FormActivity {
 		return true;
 	}
 
-	private void insert() {
+	private void doSave() {
 
 		if (validate()) {
 
@@ -339,8 +332,20 @@ public class RegisterForm extends FormActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Lifecycle events
+	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.save) {
+			doSave();
+			return true;
+		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
+		return true;
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines

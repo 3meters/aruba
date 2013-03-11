@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
@@ -31,6 +32,8 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 import com.aircandi.utilities.MiscUtils;
 
 @SuppressWarnings("ucd")
@@ -39,9 +42,8 @@ public class SourceBuilder extends FormActivity {
 	private Source			mSource;
 	private Boolean			mEditing	= false;
 
-	private TextView		mTitle;
 	private WebImageView	mSourceIcon;
-	private Spinner		mSourceTypePicker;
+	private Spinner			mSourceTypePicker;
 	private EditText		mSourceCaption;
 	private EditText		mSourceId;
 	private Integer			mSpinnerItem;
@@ -59,20 +61,20 @@ public class SourceBuilder extends FormActivity {
 	}
 
 	private void initialize() {
-		mTitle = (TextView) findViewById(R.id.title);
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
 		final Bundle extras = this.getIntent().getExtras();
 		if (extras != null) {
 			final String jsonSource = extras.getString(CandiConstants.EXTRA_SOURCE);
 			if (jsonSource != null) {
 				mSource = (Source) ProxibaseService.convertJsonToObjectInternalSmart(jsonSource, ServiceDataType.Source);
 				mEditing = true;
-				mTitle.setText(R.string.dialog_source_builder_title_editing);
+				mCommon.mActionBar.setTitle(R.string.dialog_source_builder_title_editing);
 			}
 			final String entityId = extras.getString(CandiConstants.EXTRA_ENTITY_ID);
 			if (entityId != null) {
 				mEntity = ProxiManager.getInstance().getEntityModel().getCacheEntity(entityId);
 				mEditing = false;
-				mTitle.setText(R.string.dialog_source_builder_title_new);
+				mCommon.mActionBar.setTitle(R.string.dialog_source_builder_title_new);
 			}
 		}
 		mSourceIcon = (WebImageView) findViewById(R.id.image);
@@ -85,13 +87,11 @@ public class SourceBuilder extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.caption));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.id));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 	}
 
 	private void bind() {
 		if (mEditing) {
-			mSourceCaption.setText(mSource.caption);
+			mSourceCaption.setText(mSource.label);
 			mSourceId.setText(mSource.id);
 			drawSourceIcon();
 		}
@@ -159,11 +159,11 @@ public class SourceBuilder extends FormActivity {
 
 	private void gather() {
 		if (mEditing) {
-			mSource.caption = mSourceCaption.getEditableText().toString();
+			mSource.label = mSourceCaption.getEditableText().toString();
 			mSource.id = mSourceId.getEditableText().toString();
 		}
 		else {
-			mSource.caption = mSourceCaption.getEditableText().toString();
+			mSource.label = mSourceCaption.getEditableText().toString();
 			mSource.id = mSourceId.getEditableText().toString();
 		}
 		if (mSource.type.equals("website")) {
@@ -175,7 +175,7 @@ public class SourceBuilder extends FormActivity {
 
 	@Override
 	protected Boolean isDialog() {
-		return true;
+		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -227,6 +227,31 @@ public class SourceBuilder extends FormActivity {
 				return false;
 			}
 		}
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.accept) {
+			if (validate()) {
+				gather();
+				doSave();
+			}
+			return true;
+		}
+		if (item.getItemId() == R.id.cancel) {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+			return true;
+		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
 		return true;
 	}
 
@@ -285,16 +310,16 @@ public class SourceBuilder extends FormActivity {
 
 				if (mCommon.mThemeTone.equals("dark")) {
 					if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
-						((TextView)parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));			
+						((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.text_light));
 					}
 				}
-				
+
 				/* Do nothing when the hint item is selected */
 				if (mEntity == null) {
 					if (position == 0) {
 						final String sourceType = mSourceSuggestionStrings.get(position);
 						mSource = buildCustomSource(sourceType);
-						mSourceCaption.setText(mSource.caption);
+						mSourceCaption.setText(mSource.label);
 						mSourceId.setText(mSource.id);
 						mSource.custom = true;
 						drawSourceIcon();
@@ -302,16 +327,16 @@ public class SourceBuilder extends FormActivity {
 				}
 				else {
 					if (position != parent.getCount()) {
-						if (mEntity.sourceSuggestions != null && position < mEntity.sourceSuggestions.size()) {
-							mSource = mEntity.sourceSuggestions.get(position);
-							mSourceCaption.setText(mSource.caption);
-							mSourceId.setText(mSource.id);
-							drawSourceIcon();
-						}
-						else if (position < mSourceSuggestionStrings.size()) {
+//						if (mEntity.sourceSuggestions != null && position < mEntity.sourceSuggestions.size()) {
+//							mSource = mEntity.sourceSuggestions.get(position);
+//							mSourceCaption.setText(mSource.label);
+//							mSourceId.setText(mSource.id);
+//							drawSourceIcon();
+//						}
+						if (position < mSourceSuggestionStrings.size()) {
 							final String sourceType = mSourceSuggestionStrings.get(position);
 							mSource = buildCustomSource(sourceType);
-							mSourceCaption.setText(mSource.caption);
+							mSourceCaption.setText(mSource.label);
 							mSourceId.setText(mSource.id);
 							mSource.custom = true;
 							drawSourceIcon();

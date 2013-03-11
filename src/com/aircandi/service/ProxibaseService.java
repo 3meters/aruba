@@ -66,8 +66,8 @@ import org.apache.http.protocol.HttpContext;
 
 import android.graphics.Bitmap;
 
-import com.aircandi.beta.BuildConfig;
 import com.aircandi.ProxiConstants;
+import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.Logger;
 import com.aircandi.components.NetworkManager;
 import com.aircandi.components.bitmaps.ImageResult;
@@ -868,6 +868,9 @@ public class ProxibaseService {
 			else if (serviceDataType == ServiceDataType.Source) {
 				return Source.setPropertiesFromMap(new Source(), (HashMap) rootMap);
 			}
+			else if (serviceDataType == ServiceDataType.Photo) {
+				return Photo.setPropertiesFromMap(new Photo(), (HashMap) rootMap);
+			}
 			else if (serviceDataType == ServiceDataType.GeoLocation) {
 				return GeoLocation.setPropertiesFromMap(new GeoLocation(), (HashMap) rootMap);
 			}
@@ -1006,7 +1009,7 @@ public class ProxibaseService {
 
 		public void onComplete(Object response) {}
 
-		public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {} // $codepro.audit.disable largeNumberOfParameters
+		public void onComplete(Object response, Photo photo, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {} // $codepro.audit.disable largeNumberOfParameters
 
 		public void onProgressChanged(int progress) {}
 	}

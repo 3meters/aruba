@@ -31,27 +31,27 @@ import com.aircandi.utilities.ImageUtils;
 @SuppressWarnings("ucd")
 public class CandiView extends RelativeLayout {
 
-	public static final int		HORIZONTAL				= 0;
-	public static final int		VERTICAL				= 1;
+	public static final int	HORIZONTAL	= 0;
+	public static final int	VERTICAL	= 1;
 
-	private Entity				mEntity;
-	private Number				mEntityActivityDate;
-	private Integer				mLayoutId;
-	private ViewGroup			mLayout;
+	private Entity			mEntity;
+	private Number			mEntityActivityDate;
+	private Integer			mLayoutId;
+	private ViewGroup		mLayout;
 
-	private WebImageView		mCandiImage;
-	private ImageView			mCategoryImage;
-	private TextView			mTitle;
-	private TextView			mSubtitle;
-	private TextView			mDistance;
-	private TextView			mPlaceRankScore;
-	private View				mCandiViewGroup;
-	private LinearLayout		mCandiSources;
-	private LinearLayout		mTextGroup;
+	private WebImageView	mCandiImage;
+	private ImageView		mCategoryImage;
+	private TextView		mTitle;
+	private TextView		mSubtitle;
+	private TextView		mDistance;
+	private TextView		mPlaceRankScore;
+	private View			mCandiViewGroup;
+	private LinearLayout	mCandiSources;
+	private LinearLayout	mTextGroup;
 
-	private Integer				mColorResId;
-	private Boolean				mMuteColor;
-	private LayoutInflater		mInflater;
+	private Integer			mColorResId;
+	private Boolean			mMuteColor;
+	private LayoutInflater	mInflater;
 
 	public CandiView(Context context) {
 		this(context, null);
@@ -176,74 +176,84 @@ public class CandiView extends RelativeLayout {
 			/* Sources */
 
 			setVisibility(mCandiSources, View.GONE);
-			if (mCandiSources != null && !entity.synthetic && entity.sources != null && entity.sources.size() > 0) {
-				mCandiSources.removeAllViews();
+			if (mCandiSources != null && !entity.synthetic) {
+
 				final List<Entity> entities = entity.getSourceEntities();
-				final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
-				final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
+				if (entities.size() > 0) {
 
-				/* We only show the first five */
-				int sourceCount = 0;
-				for (Entity sourceEntity : entities) {
-					if (sourceEntity.source != null
-							&& sourceEntity.source.type.equals("comments")
-							&& (entity.commentCount == null || entity.commentCount == 0)) {
-						continue;
-					}
-					if (sourceCount >= 5) {
-						break;
-					}
-					View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
-					WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
-					webImageView.setSizeHint(sizePixels);
+					mCandiSources.removeAllViews();
+					final int sizePixels = ImageUtils.getRawPixels(this.getContext(), 20);
+					final int marginPixels = ImageUtils.getRawPixels(this.getContext(), 3);
 
-					String imageUri = sourceEntity.getEntityPhotoUri();
-					if (!imageUri.equals("resource:img_placeholder_logo_bw")) {
-						/*
-						 * TODO: temp fixup until I figure out what to do with icons that look bad against color
-						 * backgrounds
-						 */
-						if (sourceEntity.source != null) {
-							if (sourceEntity.source.type.equals("yelp")) {
-								imageUri = "resource:ic_yelp_dark";
-							}
-							if (sourceEntity.source.type.equals("twitter")) {
-								imageUri = "resource:ic_twitter_dark";
-							}
-							if (sourceEntity.source.type.equals("website")) {
-								imageUri = "resource:ic_website_dark";
-							}
+					/* We only show the first five */
+					int sourceCount = 0;
+					for (Entity sourceEntity : entities) {
+						if (sourceEntity.source != null
+								&& sourceEntity.source.type.equals("comments")
+								&& (entity.commentCount == null || entity.commentCount == 0)) {
+							continue;
 						}
-						webImageView.getImageView().setTag(imageUri);
-						BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
-						bitmapRequest.setImageSize(mCandiImage.getSizeHint());
-						bitmapRequest.setImageRequestor(webImageView.getImageView());
+						if (sourceCount >= 5) {
+							break;
+						}
+						View view = mInflater.inflate(R.layout.temp_radar_candi_item, null);
+						WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
+						webImageView.setSizeHint(sizePixels);
 
-						BitmapManager.getInstance().masterFetch(bitmapRequest);
+						String imageUri = sourceEntity.getEntityPhotoUri();
+						if (!imageUri.equals("resource:img_placeholder_logo_bw")) {
+							/*
+							 * TODO: temp fixup until I figure out what to do with icons that look bad against color
+							 * backgrounds
+							 */
+							if (sourceEntity.source != null) {
+								if (sourceEntity.source.type.equals("yelp")) {
+									imageUri = "resource:ic_yelp_holo_dark";
+								}
+								if (sourceEntity.source.type.equals("facebook")) {
+									imageUri = "resource:ic_facebook_dark";
+								}
+								if (sourceEntity.source.type.equals("comments")) {
+									imageUri = "resource:ic_comments_ii_dark";
+								}
+								if (sourceEntity.source.type.equals("twitter")) {
+									imageUri = "resource:ic_twitter_dark";
+								}
+								if (sourceEntity.source.type.equals("website")) {
+									imageUri = "resource:ic_website_holo_dark";
+								}
+							}
+							webImageView.getImageView().setTag(imageUri);
+							BitmapRequest bitmapRequest = new BitmapRequest(imageUri, webImageView.getImageView());
+							bitmapRequest.setImageSize(mCandiImage.getSizeHint());
+							bitmapRequest.setImageRequestor(webImageView.getImageView());
 
-						LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
-						params.setMargins(marginPixels
-								, marginPixels
-								, marginPixels
-								, marginPixels);
-						view.setLayoutParams(params);
-						mCandiSources.addView(view);
-						sourceCount++;
+							BitmapManager.getInstance().masterFetch(bitmapRequest);
+
+							LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePixels, sizePixels);
+							params.setMargins(marginPixels
+									, marginPixels
+									, marginPixels
+									, marginPixels);
+							view.setLayoutParams(params);
+							mCandiSources.addView(view);
+							sourceCount++;
+						}
 					}
+					setVisibility(mCandiSources, View.VISIBLE);
 				}
-				setVisibility(mCandiSources, View.VISIBLE);
-			}
 
-			/* Distance */
-			showDistance(entity);
+				/* Distance */
+				showDistance(entity);
 
-			/* Place rank score - dev only */
-			setVisibility(mPlaceRankScore, View.GONE);
-			if (mPlaceRankScore != null
-					&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
-					&& Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE, CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT)) {
-				mPlaceRankScore.setText(String.valueOf(entity.getPlaceRankScore()));
-				setVisibility(mPlaceRankScore, View.VISIBLE);
+				/* Place rank score - dev only */
+				setVisibility(mPlaceRankScore, View.GONE);
+				if (mPlaceRankScore != null
+						&& Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
+						&& Aircandi.settings.getBoolean(CandiConstants.PREF_SHOW_PLACE_RANK_SCORE, CandiConstants.PREF_SHOW_PLACE_RANK_SCORE_DEFAULT)) {
+					mPlaceRankScore.setText(String.valueOf(entity.getPlaceRankScore()));
+					setVisibility(mPlaceRankScore, View.VISIBLE);
+				}
 			}
 		}
 	}

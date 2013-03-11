@@ -82,7 +82,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			}
 			view.setTag(holder);
 
-			FontManager.getInstance().setTypefaceDefault(holder.title);
+			FontManager.getInstance().setTypefaceBoldDefault(holder.title);
 			FontManager.getInstance().setTypefaceDefault(holder.subtitle);
 			FontManager.getInstance().setTypefaceDefault(holder.description);
 			FontManager.getInstance().setTypefaceDefault(holder.comments);

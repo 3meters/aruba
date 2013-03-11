@@ -16,10 +16,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
 import com.aircandi.components.CommandType;
@@ -27,17 +29,17 @@ import com.aircandi.components.FontManager;
 import com.aircandi.components.IntentBuilder;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.ProxiManager;
+import com.aircandi.components.ProxiManager.ArrayListType;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
-import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Stat;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.CandiForm;
+import com.aircandi.ui.CandiList;
 import com.aircandi.ui.PictureDetail;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.ui.widgets.FlowLayout;
@@ -89,12 +91,11 @@ public class CandiUser extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetUser");
-				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mCommon.mUserId);
+				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mCommon.mUserId, true);
 				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-					final String jsonResponse = (String) result.serviceResponse.data;
-					mUser = (User) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User).data;
+					mUser = (User) result.serviceResponse.data;
 
-					result = ProxiManager.getInstance().getEntityModel().getUserEntities(mCommon.mUserId, true, 25);
+					result = ProxiManager.getInstance().getEntityModel().getUserEntities(mCommon.mUserId, true, ProxiConstants.USER_ENTITY_LIMIT);
 					if (result.serviceResponse.responseCode == ResponseCode.Success) {
 						mEntities = (List<Entity>) result.data;
 					}
@@ -167,11 +168,45 @@ public class CandiUser extends CandiActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
 	}
 
+	public void onMoreButtonClick(View view) {
+
+		String target = (String) view.getTag();
+		IntentBuilder intentBuilder = null;
+
+		if (target.equals("places")) {
+			intentBuilder = new IntentBuilder(this, CandiList.class);
+			intentBuilder.setCommandType(CommandType.View)
+					.setArrayListType(ArrayListType.OwnedByUser)
+					.setEntityType(CandiConstants.TYPE_CANDI_PLACE)
+					.setUserId(mCommon.mUserId);
+		}
+		else if (target.equals("posts")) {
+			intentBuilder = new IntentBuilder(this, CandiList.class);
+			intentBuilder.setCommandType(CommandType.View)
+					.setArrayListType(ArrayListType.OwnedByUser)
+					.setEntityType(CandiConstants.TYPE_CANDI_POST)
+					.setUserId(mCommon.mUserId);
+		}
+		else if (target.equals("pictures")) {
+			intentBuilder = new IntentBuilder(this, CandiList.class);
+			intentBuilder.setCommandType(CommandType.View)
+					.setArrayListType(ArrayListType.OwnedByUser)
+					.setEntityType(CandiConstants.TYPE_CANDI_PICTURE)
+					.setUserId(mCommon.mUserId);
+		}
+
+		Intent intent = intentBuilder.create();
+		startActivity(intent);
+		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
 
 	private void buildCandiUser(Context context, final User user) {
+
+		final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		final WebImageView image = (WebImageView) findViewById(R.id.image);
 		final TextView name = (TextView) findViewById(R.id.name);
@@ -233,8 +268,7 @@ public class CandiUser extends CandiActivity {
 		}
 
 		/* Stats */
-		
-		
+
 		setVisibility(findViewById(R.id.section_stats), View.GONE);
 		setVisibility(stats, View.GONE);
 		if (stats != null && user.stats != null && user.stats.size() > 0) {
@@ -315,8 +349,21 @@ public class CandiUser extends CandiActivity {
 			SectionLayout section = (SectionLayout) findViewById(R.id.section_candi_places).findViewById(R.id.section_layout_candi);
 			if (section != null) {
 				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_places));
+
+				if (places.size() > CandiConstants.CANDI_FLOW_LIMIT) {
+					View footer = inflater.inflate(R.layout.temp_section_footer, null);
+					Button button = (Button) footer.findViewById(R.id.button_more);
+					FontManager.getInstance().setTypefaceDefault(button);
+					button.setText(R.string.candi_section_places_more);
+					button.setTag("places");
+					section.setFooter(footer); // Replaces if there already is one.
+				}
+
 				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_places).findViewById(R.id.flow_candi);
-				drawCandi(context, flow, places, R.layout.temp_place_candi_item);
+				drawCandi(context, flow, places.size() > CandiConstants.CANDI_FLOW_LIMIT
+						? places.subList(0, CandiConstants.CANDI_FLOW_LIMIT)
+						: places, R.layout.temp_place_candi_item);
+
 				setVisibility(findViewById(R.id.section_candi_places), View.VISIBLE);
 			}
 		}
@@ -324,8 +371,21 @@ public class CandiUser extends CandiActivity {
 			SectionLayout section = (SectionLayout) findViewById(R.id.section_candi_pictures).findViewById(R.id.section_layout_candi);
 			if (section != null) {
 				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_pictures));
+
+				if (pictures.size() > CandiConstants.CANDI_FLOW_LIMIT) {
+					View footer = inflater.inflate(R.layout.temp_section_footer, null);
+					Button button = (Button) footer.findViewById(R.id.button_more);
+					FontManager.getInstance().setTypefaceDefault(button);
+					button.setText(R.string.candi_section_photos_more);
+					button.setTag("pictures");
+					section.setFooter(footer); // Replaces if there already is one.
+				}
+
 				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_pictures).findViewById(R.id.flow_candi);
-				drawCandi(context, flow, pictures, R.layout.temp_place_candi_item);
+				drawCandi(context, flow, pictures.size() > CandiConstants.CANDI_FLOW_LIMIT
+						? pictures.subList(0, CandiConstants.CANDI_FLOW_LIMIT)
+						: pictures, R.layout.temp_place_candi_item);
+
 				setVisibility(findViewById(R.id.section_candi_pictures), View.VISIBLE);
 			}
 		}
@@ -333,8 +393,21 @@ public class CandiUser extends CandiActivity {
 			SectionLayout section = (SectionLayout) findViewById(R.id.section_candi_posts).findViewById(R.id.section_layout_candi);
 			if (section != null) {
 				section.setHeaderTitle(context.getString(R.string.candi_section_user_candi_posts));
+
+				if (posts.size() > CandiConstants.CANDI_FLOW_LIMIT) {
+					View footer = inflater.inflate(R.layout.temp_section_footer, null);
+					Button button = (Button) footer.findViewById(R.id.button_more);
+					FontManager.getInstance().setTypefaceDefault(button);
+					button.setText(R.string.candi_section_posts_more);
+					button.setTag("posts");
+					section.setFooter(footer); // Replaces if there already is one.
+				}
+
 				FlowLayout flow = (FlowLayout) findViewById(R.id.section_candi_posts).findViewById(R.id.flow_candi);
-				drawCandi(context, flow, posts, R.layout.temp_place_candi_item);
+				drawCandi(context, flow, posts.size() > CandiConstants.CANDI_FLOW_LIMIT
+						? posts.subList(0, CandiConstants.CANDI_FLOW_LIMIT)
+						: posts, R.layout.temp_place_candi_item);
+
 				setVisibility(findViewById(R.id.section_candi_posts), View.VISIBLE);
 			}
 		}

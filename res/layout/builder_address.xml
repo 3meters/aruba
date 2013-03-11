@@ -3,29 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:padding="15sp"
-        android:textAppearance="@style/app_text_appearance_large"
-        android:textColor="@color/accent_blue" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@+id/title"
-        android:background="@color/accent_blue" />
-    
     <com.aircandi.ui.widgets.BounceScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/form_footer"
-        android:layout_below="@+id/title"
-        android:fillViewport="true"
-        android:focusable="true"
-        android:focusableInTouchMode="true" >
+        android:fillViewport="true" >
 
         <LinearLayout
             style="@style/dialog_content_layout"
@@ -56,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/form_field_height"
                 android:hint="@string/form_city_hint"
-                android:inputType="textCapWords"
+                android:inputType="textCapWords|textNoSuggestions"
                 android:nextFocusDown="@+id/state"
                 android:textAppearance="@style/app_text_appearance_small" />
 
@@ -71,7 +52,7 @@
                     android:layout_height="@dimen/form_field_height"
                     android:layout_weight="1"
                     android:hint="@string/form_state_hint"
-                    android:inputType="textCapCharacters"
+                    android:inputType="textCapCharacters|textNoSuggestions"
                     android:nextFocusDown="@+id/zip_code"
                     android:textAppearance="@style/app_text_appearance_small" />
 
@@ -95,40 +76,5 @@
                 android:textAppearance="@style/app_text_appearance_small" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
-
-    <!-- Footer -->
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_above="@+id/form_footer"
-        android:background="?attr/ruleColor" />
-
-    <LinearLayout
-        android:id="@+id/form_footer"
-        style="?attr/buttonBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal" >
-
-        <Button
-            android:id="@+id/button_cancel"
-            style="@style/form_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onCancelButtonClick"
-            android:text="@string/form_button_cancel" />
-
-        <Button
-            android:id="@+id/button_save"
-            style="@style/form_button_borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onSaveButtonClick"
-            android:text="@string/form_button_ok" />
-    </LinearLayout>
 
 </RelativeLayout>

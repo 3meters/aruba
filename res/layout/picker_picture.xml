@@ -44,7 +44,6 @@
         android:id="@+id/grid_gallery"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/form_footer"
         android:layout_below="@+id/search_group"
         android:layout_marginTop="2dp"
         android:gravity="center"
@@ -76,30 +75,5 @@
             android:layout_height="40dp"
             android:layout_centerInParent="true" />
     </RelativeLayout>
-
-    <!-- Footer -->
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_above="@+id/form_footer"
-        android:background="?attr/ruleColor" />
-    
-    <LinearLayout
-        android:id="@+id/form_footer"
-        style="?attr/buttonBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal" >
-
-        <Button
-            android:id="@+id/button_cancel"
-            style="@style/form_button_borderless"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="onCancelButtonClick"
-            android:text="@string/form_button_cancel" />
-    </LinearLayout>
 
 </RelativeLayout>

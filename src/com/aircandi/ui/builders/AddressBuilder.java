@@ -3,10 +3,13 @@ package com.aircandi.ui.builders;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.FontManager;
@@ -14,12 +17,13 @@ import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Location;
 import com.aircandi.ui.base.FormActivity;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class AddressBuilder extends FormActivity {
 
 	private Location	mLocation;
 	private String		mPhone;
-	private TextView	mTitle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +48,22 @@ public class AddressBuilder extends FormActivity {
 			mLocation = new Location();
 		}
 
-		mTitle = (TextView) findViewById(R.id.title);
-		mTitle.setText(R.string.dialog_address_builder_title);
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+		mCommon.mActionBar.setTitle(R.string.dialog_address_builder_title);
+
+		((EditText) findViewById(R.id.phone)).setImeOptions(EditorInfo.IME_ACTION_DONE);
+		((EditText) findViewById(R.id.phone)).setOnEditorActionListener(new OnEditorActionListener() {
+
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_DONE) {
+					gather();
+					doSave();
+					return true;
+				}
+				return false;
+			}
+		});
 
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.phone));
@@ -54,8 +72,6 @@ public class AddressBuilder extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.city));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.state));
 		FontManager.getInstance().setTypefaceDefault((EditText) findViewById(R.id.zip_code));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 	}
 
 	private void draw() {
@@ -83,12 +99,6 @@ public class AddressBuilder extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
-
-	@SuppressWarnings("ucd")
-	public void onSaveButtonClick(View view) {
-		gather();
-		doSave();
-	}
 
 	private void gather() {
 		mPhone = ((EditText) findViewById(R.id.phone)).getEditableText().toString();
@@ -133,12 +143,35 @@ public class AddressBuilder extends FormActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.accept) {
+			gather();
+			doSave();
+			return true;
+		}
+		if (item.getItemId() == R.id.cancel) {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+			return true;
+		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// Misc routines
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	protected Boolean isDialog() {
-		return true;
+		return false;
 	}
 
 	@Override

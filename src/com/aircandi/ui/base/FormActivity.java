@@ -16,9 +16,11 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.beta.BuildConfig;
 import com.aircandi.CandiConstants;
+import com.aircandi.beta.BuildConfig;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AndroidManager;
@@ -32,8 +34,10 @@ import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequest.ImageResponse;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
+import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
-import com.aircandi.service.objects.User;
+import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.objects.Photo;
 import com.aircandi.ui.builders.PicturePicker;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -123,7 +127,13 @@ public abstract class FormActivity extends SherlockActivity {
 				/* Bitmap size is trimmed if necessary to fit our max in memory image size. */
 				bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(imageUri);
 				if (bitmap != null && mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null, false);
+					mImageRequestListener.onComplete(new ServiceResponse()
+							, null
+							, null
+							, bitmap
+							, null
+							, null
+							, false);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_MAKE) {
@@ -132,7 +142,13 @@ public abstract class FormActivity extends SherlockActivity {
 				final Bitmap bitmap = BitmapManager.getInstance().loadBitmapFromDeviceSampled(mMediaFileUri);
 				sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mMediaFileUri));
 				if (mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse(), null, bitmap, null, null, false);
+					mImageRequestListener.onComplete(new ServiceResponse()
+							, null
+							, null
+							, bitmap
+							, null
+							, null
+							, false);
 				}
 			}
 			else if (requestCode == CandiConstants.ACTIVITY_PICTURE_SEARCH) {
@@ -140,12 +156,13 @@ public abstract class FormActivity extends SherlockActivity {
 				Tracker.sendEvent("ui_action", "select_picture_search", null, 0);
 				if (intent != null && intent.getExtras() != null) {
 					final Bundle extras = intent.getExtras();
-					final String imageUri = extras.getString(CandiConstants.EXTRA_URI);
 					final String imageTitle = extras.getString(CandiConstants.EXTRA_URI_TITLE);
 					final String imageDescription = extras.getString(CandiConstants.EXTRA_URI_DESCRIPTION);
+					final String jsonPhoto = extras.getString(CandiConstants.EXTRA_PHOTO);
+					final Photo photo = (Photo) ProxibaseService.convertJsonToObjectInternalSmart(jsonPhoto, ServiceDataType.Photo);
 
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
-							.setFromUri(imageUri)
+							.setFromUri(photo.getUri())
 							.setRequestListener(new RequestListener() {
 
 								@Override
@@ -159,8 +176,15 @@ public abstract class FormActivity extends SherlockActivity {
 											public void run() {
 												if (mImageRequestListener != null) {
 													final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
+													/*
+													 * We cache search pictures to aircandi storage because it give us
+													 * a chance to pre-process them to be a more standardized blob size
+													 * and dimensions. We also can serve them up with more predictable
+													 * performance.
+													 */
 													mImageRequestListener.onComplete(serviceResponse
-															, imageResponse.imageUri
+															, photo
+															, null
 															, imageResponse.bitmap
 															, imageTitle
 															, imageDescription
@@ -194,11 +218,13 @@ public abstract class FormActivity extends SherlockActivity {
 
 				Tracker.sendEvent("ui_action", "select_picture_place", null, 0);
 				if (intent != null && intent.getExtras() != null) {
+
 					final Bundle extras = intent.getExtras();
-					final String imageUri = extras.getString(CandiConstants.EXTRA_URI);
+					final String jsonPhoto = extras.getString(CandiConstants.EXTRA_PHOTO);
+					final Photo photo = (Photo) ProxibaseService.convertJsonToObjectInternalSmart(jsonPhoto, ServiceDataType.Photo);
 
 					final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView)
-							.setFromUri(imageUri)
+							.setFromUri(photo.getUri())
 							.setRequestListener(new RequestListener() {
 
 								@Override
@@ -212,8 +238,14 @@ public abstract class FormActivity extends SherlockActivity {
 											public void run() {
 												if (mImageRequestListener != null) {
 													final ImageResponse imageResponse = (ImageResponse) serviceResponse.data;
-													/* We don't cache place pictures from foursquare because they wouldn't like that */
+													/*
+													 * We don't cache place pictures from foursquare because they
+													 * wouldn't like that. Plus they serve them up in a more consistent
+													 * way than
+													 * something like search pictures (which we do cache).
+													 */
 													mImageRequestListener.onComplete(serviceResponse
+															, photo
 															, imageResponse.imageUri
 															, imageResponse.bitmap
 															, null
@@ -285,33 +317,6 @@ public abstract class FormActivity extends SherlockActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
-	@SuppressWarnings("ucd")
-	protected void useFacebook() {
-		/*
-		 * Only used for user pictures
-		 */
-		final User user = Aircandi.getInstance().getUser();
-		user.getPhoto().setImageUri("https://graph.facebook.com/" + user.facebookId + "/picture?type=large");
-		user.getPhoto().setSourceName("external");
-
-		final BitmapRequestBuilder builder = new BitmapRequestBuilder(mImageRequestWebImageView);
-		builder.setFromUri(user.getPhoto().getUri());
-		builder.setRequestListener(new RequestListener() {
-
-			@Override
-			public void onComplete(Object response) {
-
-				/* Used to pass back the bitmap and imageUri (sometimes) for the entity */
-				if (mImageRequestListener != null) {
-					mImageRequestListener.onComplete(new ServiceResponse(), user.getUserPhotoUri(), null, null, null, false);
-				}
-			}
-		});
-
-		final BitmapRequest imageRequest = builder.create();
-		mImageRequestWebImageView.setBitmapRequest(imageRequest);
-	}
-
 	// --------------------------------------------------------------------------------------------
 	// UI routines
 	// --------------------------------------------------------------------------------------------
@@ -327,6 +332,28 @@ public abstract class FormActivity extends SherlockActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		mCommon.doCreateOptionsMenu(menu);
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		mCommon.doPrepareOptionsMenu(menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		mCommon.doOptionsItemSelected(item);
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------
 	// Lifecycle routines
 	// --------------------------------------------------------------------------------------------
 
@@ -334,7 +361,7 @@ public abstract class FormActivity extends SherlockActivity {
 	protected void onResume() {
 		super.onResume();
 		mCommon.doResume();
-		
+
 		if (!Aircandi.getInstance().getPrefTheme().equals(Aircandi.settings.getString(CandiConstants.PREF_THEME, CandiConstants.PREF_THEME_DEFAULT))) {
 			Logger.d(this, "Pref change: theme, restarting current activity");
 			Aircandi.getInstance().snapshotPreferences();

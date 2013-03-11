@@ -85,12 +85,12 @@ public class SplashForm extends SherlockActivity {
 		ProxiManager.getInstance().initialize();
 
 		/* Cache categories - we delay until after the initial rush for data */
-//		Aircandi.mainThreadHandler.postDelayed(new Runnable() {
-//			@Override
-//			public void run() {
-//				loadCategories();
-//			}
-//		}, 60000);
+		Aircandi.mainThreadHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				loadCategories();
+			}
+		}, 60000);
 
 		Aircandi.firstStartApp = false;
 	}
@@ -126,7 +126,6 @@ public class SplashForm extends SherlockActivity {
 		finish();
 	}
 
-	@SuppressWarnings("unused")
 	private void loadCategories() {
 		new AsyncTask() {
 

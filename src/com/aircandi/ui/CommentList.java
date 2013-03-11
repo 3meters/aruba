@@ -225,6 +225,7 @@ public class CommentList extends CandiActivity {
 			for (Comment comment : moreComments) {
 				list.add(comment);
 			}
+			notifyDataSetChanged();
 		}
 	}
 

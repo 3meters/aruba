@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aircandi.beta"
-    android:versionCode="9"
-    android:versionName="0.8.8" 
+    android:versionCode="12"
+    android:versionName="0.8.11" 
     android:installLocation="auto">
 
     <uses-sdk
@@ -171,7 +171,7 @@
             android:name="com.aircandi.ui.builders.AddressBuilder"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/aircandi_theme_dialog_dark"
-            android:windowSoftInputMode="stateHidden" >
+            android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
             android:name="com.aircandi.ui.builders.CategoryBuilder"

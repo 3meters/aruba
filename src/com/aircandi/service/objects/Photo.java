@@ -40,9 +40,19 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 	/* client only */
 	private String				title;
+	@SuppressWarnings("unused")
+	private String				description;
 	private Bitmap				bitmap;
 
 	public Photo() {}
+
+	public Photo(String prefix, String suffix, Number width, Number height, String sourceName) {
+		this.prefix = prefix;
+		this.suffix = suffix;
+		this.width = width;
+		this.height = height;
+		this.sourceName = sourceName;
+	}
 
 	@Override
 	public Photo clone() {
@@ -60,8 +70,6 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 		}
 	}
 
-	
-
 	public static Photo setPropertiesFromMap(Photo photo, Map map) {
 
 		photo.prefix = (String) map.get("prefix");
@@ -77,31 +85,20 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 		return photo;
 	}
-	
+
 	public ImageResult getAsImageResult() {
 		final ImageResult imageResult = new ImageResult();
-		imageResult.setWidth(width.longValue());
-		imageResult.setHeight(height.longValue());
+		if (width != null) {
+			imageResult.setWidth(width.longValue());
+		}
+		if (height != null) {
+			imageResult.setHeight(height.longValue());
+		}
 		imageResult.setMediaUrl(getUri());
 		final Thumbnail thumbnail = new Thumbnail();
 		thumbnail.setUrl(getSizedUri(100, 100));
 		imageResult.setThumbnail(thumbnail);
 		return imageResult;
-	}
-
-	public void setImageUri(String imageUri) {
-		setImageUri(imageUri, null, null, null);
-	}
-
-	public void setImageUri(String prefix, String suffix, Number width, Number height) {
-		this.prefix = prefix;
-		this.suffix = suffix;
-		this.width = width;
-		this.height = height;
-		sourceName = "aircandi";
-		if (prefix.startsWith("http:") || prefix.startsWith("https:")) {
-			sourceName = "external";
-		}
 	}
 
 	public String getUri() {
@@ -115,7 +112,7 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 			}
 		}
 		if (imageUri != null && !imageUri.startsWith("resource:")) {
-			if (sourceName.equals("aircandi")) {
+			if (sourceName.equals(PhotoSource.aircandi)) {
 				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 			}
 		}
@@ -128,19 +125,11 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 			imageUri = prefix + String.valueOf(pWidth) + "x" + String.valueOf(pHeight) + suffix;
 		}
 		if (imageUri != null && !imageUri.startsWith("resource:") && sourceName != null) {
-			if (sourceName.equals("aircandi")) {
+			if (sourceName.equals(PhotoSource.aircandi)) {
 				imageUri = ProxiConstants.URL_PROXIBASE_MEDIA_IMAGES + imageUri;
 			}
 		}
 		return imageUri;
-	}
-
-	public String getSourceName() {
-		return sourceName;
-	}
-
-	public void setSourceName(String sourceName) {
-		this.sourceName = sourceName;
 	}
 
 	public Number getCreatedAt() {
@@ -173,5 +162,19 @@ public class Photo extends ServiceObject implements Cloneable, Serializable {
 
 	public void setBitmap(Bitmap bitmap) {
 		this.bitmap = bitmap;
+	}
+
+	public String getSourceName() {
+		return sourceName;
+	}
+
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
+	}
+
+	public static class PhotoSource {
+		public static String	external	= "external";
+		public static String	aircandi	= "aircandi";
+		public static String	foursquare	= "foursquare";
 	}
 }

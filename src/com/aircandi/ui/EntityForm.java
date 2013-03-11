@@ -18,6 +18,7 @@ import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -26,6 +27,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
@@ -52,6 +55,8 @@ import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.Observation;
+import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Source;
 import com.aircandi.ui.base.FormActivity;
@@ -72,7 +77,6 @@ public class EntityForm extends FormActivity {
 	private Bitmap			mEntityBitmap;
 	private Boolean			mEntityBitmapLocalOnly	= false;
 	private Entity			mEntityForForm;
-	private Entity			mPictureEntity;
 	private Boolean			mDirty					= false;
 	private TextView		mTitle;
 	private TextView		mDescription;
@@ -83,6 +87,7 @@ public class EntityForm extends FormActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		if (!isFinishing()) {
 			initialize();
 			bind();
@@ -152,9 +157,8 @@ public class EntityForm extends FormActivity {
 		 * Fill in the system and default properties for the base entity properties. The activities that subclass this
 		 * will set any additional properties beyond the base ones.
 		 */
-		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {
-			mPictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
-		}
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+		if (mCommon.mEntityType.equals(CandiConstants.TYPE_CANDI_PLACE)) {}
 
 		if (mCommon.mCommandType == CommandType.New) {
 			mEntityForForm = makeEntity(mCommon.mEntityType);
@@ -172,6 +176,8 @@ public class EntityForm extends FormActivity {
 				}
 			}
 		}
+		@SuppressWarnings("unused")
+		List<Entity> entities = mEntityForForm.getChildren();		
 
 	}
 
@@ -203,9 +209,6 @@ public class EntityForm extends FormActivity {
 
 			/* Fonts */
 
-			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
-			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_delete));
-			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_image));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.uri));
 			FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_title));
@@ -349,6 +352,12 @@ public class EntityForm extends FormActivity {
 					if (sourceCount >= 5) {
 						break;
 					}
+					if (source.system != null && source.system) {
+						continue;
+					}
+					if (source.hidden != null && source.hidden) {
+						continue;
+					}
 					View view = inflater.inflate(R.layout.temp_radar_candi_item, null);
 					WebImageView webImageView = (WebImageView) view.findViewById(R.id.image);
 					webImageView.setSizeHint(sizePixels);
@@ -394,52 +403,25 @@ public class EntityForm extends FormActivity {
 		mImageRequestListener = new RequestListener() {
 
 			@Override
-			public void onComplete(Object response, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
+			public void onComplete(Object response, Photo photo, String imageUri, Bitmap imageBitmap, String title, String description, Boolean bitmapLocalOnly) {
 
 				final ServiceResponse serviceResponse = (ServiceResponse) response;
 				if (serviceResponse.responseCode == ResponseCode.Success) {
+
 					mDirty = true;
 					mEntityBitmapLocalOnly = bitmapLocalOnly;
 					/* Could get set to null if we are using the default */
 					mEntityBitmap = imageBitmap;
-					if (imageUri != null) {
-						mEntityForForm.getPhotoForSet().setImageUri(imageUri);
-						if (mPictureEntity != null) {
-							mPictureEntity.getPhotoForSet().setImageUri(imageUri);
-						}
+					if (photo != null) {
+						mEntityForForm.photo = photo;
+					}
+					else if (imageUri != null) {
+						mEntityForForm.photo = new Photo(imageUri, null, null, null, PhotoSource.aircandi);
 					}
 					drawImage(mEntityForForm);
 				}
 			}
 		};
-	}
-
-	@SuppressWarnings("ucd")
-	public void onSaveButtonClick(View view) {
-		if (isDirty()) {
-			doSave();
-		}
-		else {
-			finish();
-			AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
-		}
-	}
-
-	@Override
-	public void onCancelButtonClick(View view) {
-		if (isDirty()) {
-			confirmDirtyExit();
-		}
-		else {
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-			AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
-		}
-	}
-
-	@SuppressWarnings("ucd")
-	public void onDeleteButtonClick(View view) {
-		deleteEntityAtService();
 	}
 
 	@SuppressWarnings("ucd")
@@ -611,41 +593,38 @@ public class EntityForm extends FormActivity {
 				Thread.currentThread().setName("InsertUpdateEntity");
 				ModelResult result = new ModelResult();
 
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				runOnUiThread(new Runnable() {
 
-					runOnUiThread(new Runnable() {
-
-						@Override
-						public void run() {
-							mCommon.showBusy(R.string.progress_saving, true);
-						}
-					});
-
-					if (mCommon.mCommandType == CommandType.New) {
-						/*
-						 * Pull all the control values back into the entity object
-						 */
-						gather(mEntityForForm);
-						result = insertEntityAtService();
-
-						if (result.serviceResponse.responseCode == ResponseCode.Success) {
-							ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
-							setResult(CandiConstants.RESULT_ENTITY_INSERTED);
-						}
+					@Override
+					public void run() {
+						mCommon.showBusy(R.string.progress_saving, true);
 					}
-					else if (mCommon.mCommandType == CommandType.Edit) {
-						/*
-						 * Pull all the control values back into the entity object being used to
-						 * update the service. Because the entity reference comes from an entity model
-						 * collection, that entity gets updated.
-						 */
-						gather(mEntityForForm);
-						result = updateEntityAtService();
+				});
 
-						if (result.serviceResponse.responseCode == ResponseCode.Success) {
-							ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
-							setResult(CandiConstants.RESULT_ENTITY_UPDATED);
-						}
+				if (mCommon.mCommandType == CommandType.New) {
+					/*
+					 * Pull all the control values back into the entity object
+					 */
+					gather(mEntityForForm);
+					result = insertEntityAtService();
+
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+						ImageUtils.showToastNotification(getString(R.string.alert_inserted), Toast.LENGTH_SHORT);
+						setResult(CandiConstants.RESULT_ENTITY_INSERTED);
+					}
+				}
+				else if (mCommon.mCommandType == CommandType.Edit) {
+					/*
+					 * Pull all the control values back into the entity object being used to
+					 * update the service. Because the entity reference comes from an entity model
+					 * collection, that entity gets updated.
+					 */
+					gather(mEntityForForm);
+					result = updateEntityAtService();
+
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+						ImageUtils.showToastNotification(getString(R.string.alert_updated), Toast.LENGTH_SHORT);
+						setResult(CandiConstants.RESULT_ENTITY_UPDATED);
 					}
 				}
 				return result.serviceResponse;
@@ -687,6 +666,29 @@ public class EntityForm extends FormActivity {
 							setResult(Activity.RESULT_CANCELED);
 							finish();
 							AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
+						}
+					}
+				}
+				, null);
+		dialog.setCanceledOnTouchOutside(false);
+	}
+
+	private void confirmDelete() {
+		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
+				, getResources().getString(R.string.alert_entity_delete_title)
+				, mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE)
+						? getResources().getString(R.string.alert_place_delete_message_single)
+						: getResources().getString(R.string.alert_candi_delete_message_single)
+				, null
+				, this
+				, android.R.string.ok
+				, android.R.string.cancel
+				, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (which == Dialog.BUTTON_POSITIVE) {
+							deleteEntityAtService();
 						}
 					}
 				}
@@ -745,10 +747,11 @@ public class EntityForm extends FormActivity {
 
 		/* Add picture entity if a new picture has been set for a place */
 		final Entity entity = (Entity) result.data;
-		if (mPictureEntity != null && (mPictureEntity.getPhotoForSet().getUri() != null || mEntityBitmap != null)) {
-			mPictureEntity.photo = mEntityForForm.photo;
-			mPictureEntity.parentId = entity.id;
-			result = ProxiManager.getInstance().getEntityModel().insertEntity(mPictureEntity, null, null, null, false);
+		if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
+			Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
+			pictureEntity.photo = entity.photo.clone();
+			pictureEntity.parentId = entity.id;
+			result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false);
 		}
 		return result;
 	}
@@ -759,14 +762,33 @@ public class EntityForm extends FormActivity {
 		if (mEntityBitmapLocalOnly) {
 			bitmap = null;
 		}
+
+		List<Entity> entities = mEntityForForm.getChildren();
+
+		/* Something in the call caused us to lose the most recent picture. */
 		ModelResult result = ProxiManager.getInstance().getEntityModel().updateEntity(mEntityForForm, bitmap);
 
-		/* Add picture entity if a new picture has been set for a place */
-		if (mPictureEntity != null && (mPictureEntity.getPhotoForSet().getUri() != null || mEntityBitmap != null)) {
-			mPictureEntity.photo = mEntityForForm.photo;
-			mPictureEntity.parentId = mEntityForForm.id;
-			result = ProxiManager.getInstance().getEntityModel().insertEntity(mPictureEntity, null, null, null, false);
+		if (mEntityForForm.type.equals(CandiConstants.TYPE_CANDI_PLACE) && mEntityForForm.photo != null) {
+
+			entities = mEntityForForm.getChildren();
+			Boolean candiMatch = false;
+			for (Entity entity : entities) {
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_PICTURE)) {
+					if (entity.getPhoto().getUri().equals(mEntityForForm.getPhoto().getUri())) {
+						candiMatch = true;
+						break;
+					}
+				}
+			}
+			
+			if (!candiMatch) {
+				Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
+				pictureEntity.photo = mEntityForForm.photo.clone();
+				pictureEntity.parentId = mEntityForForm.id;
+				result = ProxiManager.getInstance().getEntityModel().insertEntity(pictureEntity, null, null, null, false);
+			}
 		}
+
 		return result;
 	}
 
@@ -816,8 +838,47 @@ public class EntityForm extends FormActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Persistence routines
+	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		mCommon.doCreateOptionsMenu(menu);
+		if (mEntityForForm != null) {
+
+			if (mEntityForForm.ownerId != null
+					&& (mEntityForForm.ownerId.equals(Aircandi.getInstance().getUser().id)
+					|| (Aircandi.settings.getBoolean(CandiConstants.PREF_ENABLE_DEV, CandiConstants.PREF_ENABLE_DEV_DEFAULT)
+							&& Aircandi.getInstance().getUser().isDeveloper != null
+							&& Aircandi.getInstance().getUser().isDeveloper))) {
+				MenuItem menuItem = menu.findItem(R.id.delete);
+				menuItem.setVisible(true);
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.save) {
+			if (isDirty()) {
+				doSave();
+			}
+			else {
+				finish();
+				AnimUtils.doOverridePendingTransition(EntityForm.this, TransitionType.FormToPage);
+			}
+			return true;
+		}
+		else if (item.getItemId() == R.id.delete) {
+			confirmDelete();
+			return true;
+		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
+		return true;
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// Misc routines

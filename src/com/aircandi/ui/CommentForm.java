@@ -6,13 +6,14 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Editable;
-import android.view.View;
-import android.widget.Button;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TextView.OnEditorActionListener;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
@@ -34,7 +35,6 @@ import com.aircandi.utilities.ImageUtils;
 public class CommentForm extends FormActivity {
 
 	private EditText	mContent;
-	private Button		mButtonSave;
 	private Comment		mComment;
 
 	@Override
@@ -49,21 +49,21 @@ public class CommentForm extends FormActivity {
 
 	private void initialize() {
 		mContent = (EditText) findViewById(R.id.description);
-
-		mButtonSave = (Button) findViewById(R.id.button_save);
-		mButtonSave.setEnabled(false);
-
 		FontManager.getInstance().setTypefaceDefault(mContent);
-		FontManager.getInstance().setTypefaceDefault(mButtonSave);
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
-
-		mContent.addTextChangedListener(new SimpleTextWatcher() {
+		
+		mContent.setImeOptions(EditorInfo.IME_ACTION_SEND);
+		mContent.setOnEditorActionListener(new OnEditorActionListener() {
 
 			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(enableSave());
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_SEND) {
+					insertComment();
+					return true;
+				}
+				return false;
 			}
 		});
+		
 	}
 
 	private void bind() {
@@ -85,25 +85,9 @@ public class CommentForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
+
 	@Override
 	public void onBackPressed() {
-		if (isDirty()) {
-			confirmDirtyExit();
-		}
-		else {
-			setResult(Activity.RESULT_CANCELED);
-			finish();
-			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
-		}
-	}
-
-	@SuppressWarnings("ucd")
-	public void onSaveButtonClick(View view) {
-		doSave();
-	}
-
-	@Override
-	public void onCancelButtonClick(View view) {
 		if (isDirty()) {
 			confirmDirtyExit();
 		}
@@ -153,9 +137,16 @@ public class CommentForm extends FormActivity {
 	}
 
 	private boolean validate() {
-		/*
-		 * This is where we would do any heavier validation before saving.
-		 */
+		if (mContent.getText().length() == 0) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_message)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
 		return true;
 	}
 
@@ -201,11 +192,20 @@ public class CommentForm extends FormActivity {
 		}
 	}
 
-	private boolean enableSave() {
-		if (mContent.getText().toString().length() > 0) {
+	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.save) {
+			doSave();
 			return true;
 		}
-		return false;
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------

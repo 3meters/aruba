@@ -70,9 +70,21 @@ public class PictureSourcePicker extends FormActivity implements OnItemClickList
 		/* Add place photo option if this is a place entity */
 		if (mEntityId != null) {
 			final Entity entity = ProxiManager.getInstance().getEntityModel().getCacheEntity(mEntityId);
-			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE) && entity.place.provider != null && entity.place.provider.equals("foursquare")) {
-				listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
-						, getString(R.string.dialog_picture_source_place), null, "place"));
+			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+				if (entity.place.provider != null && entity.place.provider.equals("foursquare")) {
+					listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
+							, getString(R.string.dialog_picture_source_place), null, "place"));
+				}
+				else {
+					List<Entity> entities = entity.getChildren();
+					for (Entity child : entities) {
+						if (child.type.equals(CandiConstants.TYPE_CANDI_PICTURE) && child.photo != null) {
+							listData.add(new Template(mCommon.mThemeTone.equals("light") ? R.drawable.ic_action_location_light : R.drawable.ic_action_location_dark
+									, getString(R.string.dialog_picture_source_place), null, "place"));
+							break;
+						}
+					}
+				}
 			}
 		}
 

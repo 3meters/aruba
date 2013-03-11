@@ -56,7 +56,12 @@
         <attr name="iconLocation" format="reference" />
         <attr name="iconGallery" format="reference" />
         <attr name="iconZoom" format="reference" />
-        </declare-styleable>
+        <attr name="iconSend" format="reference" />
+        <attr name="iconSave" format="reference" />
+        <attr name="iconAccept" format="reference" />
+		<attr name="iconCancel" format="reference" />
+		<attr name="iconSuggest" format="reference" />
+	</declare-styleable>
     <declare-styleable name="CandiView">
         <attr name="layout" />
     </declare-styleable>

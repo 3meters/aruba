@@ -25,8 +25,6 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				name;
 	@Expose
-	public String				caption;									// remove after switch to label
-	@Expose
 	public String				label;
 	@Expose
 	public String				url;
@@ -35,7 +33,9 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 	@Expose
 	public String				packageName;
 	@Expose
-	public Map<String, Object>	data; // origin
+	public Map<String, Object>	data; // treat as opaque but roundtrip
+	@Expose
+	public Boolean				system;
 	@Expose
 	public Boolean				hidden;
 
@@ -57,8 +57,8 @@ public class Source extends ServiceObject implements Cloneable, Serializable {
 		source.id = (String) map.get("id");
 		source.type = (String) map.get("type");
 		source.name = (String) map.get("name");
-		source.caption = (String) map.get("caption");
 		source.label = (String) map.get("label");
+		source.system = (Boolean) map.get("system");
 		source.hidden = (Boolean) map.get("hidden");
 		source.url = (String) map.get("url");
 		source.icon = (String) map.get("icon");

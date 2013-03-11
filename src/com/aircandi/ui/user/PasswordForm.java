@@ -2,13 +2,11 @@ package com.aircandi.ui.user;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Editable;
-import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
@@ -29,7 +27,6 @@ public class PasswordForm extends FormActivity {
 	private EditText	mTextPasswordOld;
 	private EditText	mTextPassword;
 	private EditText	mTextPasswordConfirm;
-	private Button		mButtonSave;
 	private User		mUser;
 
 	@Override
@@ -42,58 +39,107 @@ public class PasswordForm extends FormActivity {
 	}
 
 	private void initialize() {
+		
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+
 		mUser = Aircandi.getInstance().getUser();
 		mTextPasswordOld = (EditText) findViewById(R.id.text_password_old);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextPasswordConfirm = (EditText) findViewById(R.id.text_password_confirm);
-		mButtonSave = (Button) findViewById(R.id.button_save);
 
 		FontManager.getInstance().setTypefaceDefault(mTextPasswordOld);
 		FontManager.getInstance().setTypefaceDefault(mTextPassword);
 		FontManager.getInstance().setTypefaceDefault(mTextPasswordConfirm);
-		FontManager.getInstance().setTypefaceDefault(mButtonSave);
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_label_password_old));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_label_password));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.text_label_password_confirm));
-
-		mTextPasswordOld.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(isValid());
-			}
-		});
-
-		mTextPassword.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(isValid());
-			}
-		});
-
-		mTextPasswordConfirm.addTextChangedListener(new SimpleTextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				mButtonSave.setEnabled(isValid());
-			}
-		});
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Event routines
+	// Service routines
 	// --------------------------------------------------------------------------------------------
 
-	@SuppressWarnings("ucd")
-	public void onSaveButtonClick(View view) {
+	protected void doSave() {
+
 		if (validate()) {
-			doSave();
+
+			new AsyncTask() {
+
+				@Override
+				protected void onPreExecute() {
+					mCommon.showBusy(R.string.progress_changing_password, true);
+				}
+
+				@Override
+				protected Object doInBackground(Object... params) {
+					Thread.currentThread().setName("UpdatePassword");
+					final ModelResult result = ProxiManager.getInstance().getEntityModel()
+							.updatePassword(mUser.id, mTextPasswordOld.getText().toString(), mTextPassword.getText().toString());
+					return result;
+				}
+
+				@Override
+				protected void onPostExecute(Object response) {
+					final ModelResult result = (ModelResult) response;
+					mCommon.hideBusy(true);
+					if (result.serviceResponse.responseCode == ResponseCode.Success) {
+
+						Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
+						Tracker.sendEvent("ui_action", "change_password", null, 0);
+						ImageUtils.showToastNotification(getResources().getString(R.string.alert_password_changed)
+								+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
+						finish();
+					}
+					else {
+						mTextPassword.setText("");
+						mCommon.handleServiceError(result.serviceResponse, ServiceOperation.PasswordChange);
+					}
+				}
+			}.execute();
 		}
 	}
 
 	private boolean validate() {
+		if (mTextPasswordOld.getText().length() == 0) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_password_new)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
+		if (mTextPassword.getText().length() == 0) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_password_new)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
+		if (mTextPasswordConfirm.getText().length() == 0) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_password_confirmation)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
+		if (mTextPassword.getText().length() < 6 || mTextPasswordConfirm.getText().length() < 6) {
+			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
+					, null
+					, getResources().getString(R.string.error_missing_password_weak)
+					, null
+					, this
+					, android.R.string.ok
+					, null, null, null);
+			return false;
+		}
 		if (!mTextPassword.getText().toString().equals(mTextPasswordConfirm.getText().toString())) {
 
 			AircandiCommon.showAlertDialog(android.R.drawable.ic_dialog_alert
@@ -110,56 +156,18 @@ public class PasswordForm extends FormActivity {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Service routines
+	// Application menu routines (settings)
 	// --------------------------------------------------------------------------------------------
 
-	protected void doSave() {
-
-		new AsyncTask() {
-
-			@Override
-			protected void onPreExecute() {
-				mCommon.showBusy(R.string.progress_changing_password, true);
-			}
-
-			@Override
-			protected Object doInBackground(Object... params) {
-				Thread.currentThread().setName("UpdatePassword");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel()
-						.updatePassword(mUser.id, mTextPasswordOld.getText().toString(), mTextPassword.getText().toString());
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(Object response) {
-				final ModelResult result = (ModelResult) response;
-				mCommon.hideBusy(true);
-				if (result.serviceResponse.responseCode == ResponseCode.Success) {
-
-					Logger.i(this, "User changed password: " + Aircandi.getInstance().getUser().name + " (" + Aircandi.getInstance().getUser().id + ")");
-					Tracker.sendEvent("ui_action", "change_password", null, 0);
-					ImageUtils.showToastNotification(getResources().getString(R.string.alert_password_changed)
-							+ " " + Aircandi.getInstance().getUser().name, Toast.LENGTH_SHORT);
-					finish();
-				}
-				else {
-					mTextPassword.setText("");
-					mCommon.handleServiceError(result.serviceResponse, ServiceOperation.PasswordChange);
-				}
-			}
-		}.execute();
-	}
-
-	private boolean isValid() {
-		if (mTextPasswordOld.getText().length() < 6) {
-			return false;
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.save) {
+			doSave();
+			return true;
 		}
-		if (mTextPassword.getText().length() < 6) {
-			return false;
-		}
-		if (mTextPasswordConfirm.getText().length() < 6) {
-			return false;
-		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
 		return true;
 	}
 

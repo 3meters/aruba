@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
@@ -34,6 +35,8 @@ import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Place;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
+import com.aircandi.utilities.AnimUtils;
+import com.aircandi.utilities.AnimUtils.TransitionType;
 
 public class CategoryBuilder extends FormActivity {
 
@@ -41,7 +44,6 @@ public class CategoryBuilder extends FormActivity {
 	private Spinner			mSpinnerCategory;
 	private Spinner			mSpinnerSubCategory;
 	private Spinner			mSpinnerSubSubCategory;
-	private TextView		mTitle;
 	private Integer			mSpinnerItem;
 
 	private Category		mOriginalCategory;
@@ -76,14 +78,10 @@ public class CategoryBuilder extends FormActivity {
 		mSpinnerSubCategory = (Spinner) findViewById(R.id.sub_category);
 		mSpinnerSubSubCategory = (Spinner) findViewById(R.id.sub_sub_category);
 		
-		mTitle = (TextView) findViewById(R.id.title);
-		mTitle.setText(R.string.dialog_category_builder_title);
-
 		mSpinnerItem = mCommon.mThemeTone.equals("dark") ? R.layout.spinner_item_dark : R.layout.spinner_item_light;
-
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.title));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_save));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_cancel));
+		
+		mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);		
+		mCommon.mActionBar.setTitle(R.string.dialog_category_builder_title);
 
 		if (ProxiManager.getInstance().getEntityModel().getCategories().size() == 0) {
 			loadCategories();
@@ -130,17 +128,11 @@ public class CategoryBuilder extends FormActivity {
 	// Event routines
 	// --------------------------------------------------------------------------------------------
 
-	@SuppressWarnings("ucd")
-	public void onSaveButtonClick(View view) {
-		gather();
-		doSave();
-	}
-
 	private void gather() {}
 
 	@Override
 	protected Boolean isDialog() {
-		return true;
+		return false;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -167,6 +159,29 @@ public class CategoryBuilder extends FormActivity {
 		}
 		setResult(Activity.RESULT_OK, intent);
 		finish();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.accept) {
+			gather();
+			doSave();
+			return true;
+		}
+		if (item.getItemId() == R.id.cancel) {
+			setResult(Activity.RESULT_CANCELED);
+			finish();
+			AnimUtils.doOverridePendingTransition(this, TransitionType.FormToPage);
+			return true;
+		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------

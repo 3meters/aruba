@@ -30,7 +30,7 @@ public class User extends ServiceEntryBase {
 	public String				webUri;
 	@Expose
 	public Boolean				isDeveloper;
-	@Expose(serialize = false, deserialize = true)
+	@Expose
 	public Boolean				doNotTrack;
 	@Expose
 	public Photo				photo;
@@ -43,10 +43,10 @@ public class User extends ServiceEntryBase {
 	public String				twitterId;
 	@Expose(serialize = false, deserialize = true)
 	public String				googleId;
-	@Expose(serialize = false, deserialize = true)
-	public Number				lastSignedInDate;
+	
 	@Expose(serialize = false, deserialize = true)
 	public String				authSource;
+	
 	@Expose(serialize = false, deserialize = true)
 	public String				oauthId;
 	@Expose(serialize = false, deserialize = true)
@@ -55,6 +55,9 @@ public class User extends ServiceEntryBase {
 	public String				oauthSecret;
 	@Expose(serialize = false, deserialize = true)
 	public String				oauthData;
+	
+	@Expose(serialize = false, deserialize = true)
+	public Number				lastSignedInDate;
 	@Expose(serialize = false, deserialize = true)
 	public Number				validationDate;
 	@Expose(serialize = false, deserialize = true)
@@ -62,7 +65,6 @@ public class User extends ServiceEntryBase {
 
 	@Expose(serialize = false, deserialize = true)
 	public List<Stat>			stats;
-
 	
 	public Session				session;
 	public String				firstName;

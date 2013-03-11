@@ -13,8 +13,8 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
 
-import com.aircandi.beta.BuildConfig;
 import com.aircandi.CandiConstants;
+import com.aircandi.beta.BuildConfig;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseServiceException;
 import com.aircandi.service.ServiceRequest;

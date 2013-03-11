@@ -48,11 +48,11 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
-import com.aircandi.beta.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.ProxiConstants;
-import com.aircandi.beta.R;
 import com.aircandi.ScanService;
+import com.aircandi.beta.BuildConfig;
+import com.aircandi.beta.R;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.components.ProxiManager.ModelResult;
@@ -971,12 +971,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private void setDialogSize(Configuration newConfig) {
 
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB_MR2) {
-			final android.view.WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
-			final int height = Math.min(newConfig.screenHeightDp, 450);
-			final int width = Math.min(newConfig.screenWidthDp, 350);
-			params.height = ImageUtils.getRawPixels(mActivity, height);
-			params.width = ImageUtils.getRawPixels(mActivity, width);
-			mActivity.getWindow().setAttributes(params);
+//			final android.view.WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
+//			final int height = Math.min(newConfig.screenHeightDp, 450);
+//			final int width = Math.min(newConfig.screenWidthDp, 350);
+//			params.height = ImageUtils.getRawPixels(mActivity, height);
+//			params.width = ImageUtils.getRawPixels(mActivity, width);
+//			mActivity.getWindow().setAttributes(params);
 		}
 	}
 
@@ -1004,11 +1004,41 @@ public class AircandiCommon implements ActionBar.TabListener {
 				menuItem.setVisible(false);
 			}
 		}
+		else if (mPageName.equals("EntityForm")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_entity, menu);
+		}
 		else if (mPageName.equals("CommentList")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_comment, menu);
 		}
+		else if (mPageName.equals("FeedbackForm")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_send, menu);
+		}
+		else if (mPageName.equals("CommentForm")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_post, menu);
+		}
+		else if (mPageName.equals("ProfileForm")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_save, menu);
+		}
+		else if (mPageName.equals("PasswordForm")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_save, menu);
+		}
+		else if (mPageName.equals("RegisterForm")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_register, menu);
+		}
+		else if (mPageName.equals("SignInForm")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_sign_in, menu);
+		}
+		else if (mPageName.equals("AddressBuilder")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
+		}
+		else if (mPageName.equals("CategoryBuilder")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
+		}
+		else if (mPageName.equals("SourceBuilder")) {
+			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
+		}
 		else if (mPageName.equals("SourcesBuilder")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_sources_builder, menu);
+			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);
 		}
 		else {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_primary, menu);

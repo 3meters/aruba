@@ -71,6 +71,18 @@ public class SectionLayout extends LinearLayout {
 		mTextViewHeader = textViewHeader;
 	}
 
+	public void setFooter(View view) {
+		int childCount = this.getChildCount();
+		for (int i = 0; i < childCount; i++) {
+			if (this.getChildAt(i).getTag() != null && this.getChildAt(i).getTag().equals("footer")) {
+				this.removeViewAt(i);
+				break;
+			}
+		}
+		view.setTag("footer");
+		this.addView(view);
+	}
+
 	public String getHeaderTitle() {
 		return mHeaderTitle;
 	}

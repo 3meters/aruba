@@ -3,6 +3,8 @@ package com.aircandi.components.bitmaps;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.aircandi.service.objects.Photo;
+
 /**
  * The Class ImageResult.
  * Used for bing image searches.
@@ -18,6 +20,9 @@ public class ImageResult
 	private Long		fileSize;
 	private String		contentType;
 	private Thumbnail	thumbnail;
+	
+	/* Client only */
+	private Photo		photo;
 
 	public static ImageResult setPropertiesFromMap(ImageResult imageResult, Map map) {
 		/*
@@ -212,6 +217,14 @@ public class ImageResult
 	// --------------------------------------------------------------------------------------------
 	// Inner classes
 	// --------------------------------------------------------------------------------------------
+
+	public Photo getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(Photo photo) {
+		this.photo = photo;
+	}
 
 	public static class Thumbnail
 	{

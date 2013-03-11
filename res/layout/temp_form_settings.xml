@@ -14,7 +14,8 @@
             android:layout_height="wrap_content"
             android:drawSelectorOnTop="true"
             android:entries="@array/form_visibility_values_list"
-            android:prompt="@string/form_label_visibility" />        -->
+            android:prompt="@string/form_label_visibility" />
+        -->
 
         <CheckBox
             android:id="@+id/chk_locked"

@@ -22,29 +22,31 @@ import com.aircandi.components.ProxiManager.ArrayListType;
 import com.aircandi.components.ProxiManager.ModelResult;
 import com.aircandi.components.ProxiManager.WifiScanResult;
 import com.aircandi.service.ProxibaseService;
-import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.ProxibaseService.RequestType;
 import com.aircandi.service.ProxibaseService.ResponseFormat;
 import com.aircandi.service.ProxibaseService.ServiceDataType;
+import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
+import com.aircandi.service.objects.Beacon.BeaconType;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Comment;
 import com.aircandi.service.objects.Document;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link;
+import com.aircandi.service.objects.Link.LinkType;
 import com.aircandi.service.objects.Observation;
 import com.aircandi.service.objects.Photo;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.User;
-import com.aircandi.service.objects.Beacon.BeaconType;
-import com.aircandi.service.objects.Link.LinkType;
 import com.aircandi.utilities.DateUtils;
 
 public class EntityModel {
 
 	private final ProxiManager			mEntityModel;
 	final Map<String, Entity>			mEntityCache		= new HashMap<String, Entity>();
+	final Map<String, User>				mUserCache			= new HashMap<String, User>();
 	private final List<Beacon>			mBeacons			= new ArrayList<Beacon>();
 	private List<Photo>					mPhotos				= new ArrayList<Photo>();
 	private List<Category>				mCategories			= new ArrayList<Category>();
@@ -97,11 +99,11 @@ public class EntityModel {
 				final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 				entities.addAll((List<Entity>) serviceData.data);
 				upsertEntities(entities);
-				result.data = getUserEntities(userId);
+				result.data = getCacheUserEntities(userId);
 			}
 		}
 		else {
-			result.data = getUserEntities(userId);
+			result.data = getCacheUserEntities(userId);
 		}
 		return result;
 	}
@@ -203,21 +205,30 @@ public class EntityModel {
 		return result;
 	}
 
-	public ModelResult getUser(String userId) {
+	public ModelResult getUser(String userId, Boolean refresh) {
 		final ModelResult result = new ProxiManager.ModelResult();
 
-		final Bundle parameters = new Bundle();
-		parameters.putString("userId", userId);
+		if (refresh) {
 
-		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getUser")
-				.setRequestType(RequestType.Method)
-				.setParameters(parameters)
-				.setResponseFormat(ResponseFormat.Json)
-				.setSession(Aircandi.getInstance().getUser().session);
+			final Bundle parameters = new Bundle();
+			parameters.putString("userId", userId);
 
-		result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+			final ServiceRequest serviceRequest = new ServiceRequest()
+					.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "getUser")
+					.setRequestType(RequestType.Method)
+					.setParameters(parameters)
+					.setResponseFormat(ResponseFormat.Json)
+					.setSession(Aircandi.getInstance().getUser().session);
 
+			result.serviceResponse = mEntityModel.dispatch(serviceRequest);
+			if (result.serviceResponse.responseCode == ResponseCode.Success) {
+				final String jsonResponse = (String) result.serviceResponse.data;
+				User user = (User) ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.User).data;
+				mUserCache.put(userId, user);
+			}
+		}
+
+		result.serviceResponse.data = mUserCache.get(userId);
 		return result;
 	}
 
@@ -239,10 +250,8 @@ public class EntityModel {
 		if (result.serviceResponse.responseCode == ResponseCode.Success) {
 			final String jsonResponse = (String) result.serviceResponse.data;
 			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Category);
-			synchronized (mCategories) {
-				mCategories = (List<Category>) serviceData.data;
-				result.serviceResponse.data = mCategories;
-			}
+			mCategories = (List<Category>) serviceData.data;
+			result.serviceResponse.data = mCategories;
 		}
 		return result;
 	}
@@ -265,7 +274,7 @@ public class EntityModel {
 		parameters.putStringArrayList("sources", (ArrayList<String>) sourceStrings);
 
 		final ServiceRequest serviceRequest = new ServiceRequest()
-				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_METHOD + "suggestSources")
+				.setUri(ProxiConstants.URL_PROXIBASE_SERVICE_SOURCES + "suggest")
 				.setRequestType(RequestType.Method)
 				.setParameters(parameters)
 				.setResponseFormat(ResponseFormat.Json);
@@ -499,6 +508,12 @@ public class EntityModel {
 				final ServiceData serviceData = ProxibaseService.convertJsonToObjectSmart(jsonResponse, ServiceDataType.Entity);
 
 				final Entity insertedEntity = (Entity) serviceData.data;
+
+				/* We want to retain the parent relationship */
+				if (entity.parentId != null) {
+					insertedEntity.parentId = entity.parentId;
+				}
+
 				upsertEntity(insertedEntity);
 				result.data = insertedEntity;
 			}
@@ -1042,7 +1057,7 @@ public class EntityModel {
 		else if (arrayListType == ArrayListType.SyntheticPlaces) {
 			result.data = getRadarSynthetics();
 		}
-		else if (arrayListType == ArrayListType.CreatedByUser) {
+		else if (arrayListType == ArrayListType.OwnedByUser) {
 			result = getUserEntities(userId, refresh, limit);
 		}
 		else if (arrayListType == ArrayListType.Collections) {
@@ -1102,9 +1117,9 @@ public class EntityModel {
 				}
 			}
 		}
-		
+
 		Collections.sort(entities, new Entity.SortEntitiesByProximityAndDistance());
-		return entities.size() > ProxiConstants.RADAR_PLACES_LIMIT ? entities.subList(0, ProxiConstants.RADAR_PLACES_LIMIT - 1) : entities;
+		return entities.size() > ProxiConstants.RADAR_PLACES_LIMIT ? entities.subList(0, ProxiConstants.RADAR_PLACES_LIMIT) : entities;
 	}
 
 	public Float getMaxPlaceDistance() {
@@ -1262,12 +1277,27 @@ public class EntityModel {
 		return entities;
 	}
 
-	private List<Entity> getUserEntities(String userId) {
+	public List<Entity> getCacheUserEntities(String userId) {
 		final List<Entity> entities = new ArrayList<Entity>();
 		synchronized (mEntityCache) {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().ownerId != null && entry.getValue().ownerId.equals(userId)) {
 					entities.add(entry.getValue());
+				}
+			}
+		}
+		Collections.sort(entities, new Entity.SortEntitiesByModifiedDate());
+		return entities;
+	}
+
+	public List<Entity> getCacheUserEntities(String userId, String type) {
+		final List<Entity> entities = new ArrayList<Entity>();
+		synchronized (mEntityCache) {
+			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
+				if (entry.getValue().ownerId != null && entry.getValue().ownerId.equals(userId)) {
+					if (entry.getValue().type.equals(type)) {
+						entities.add(entry.getValue());
+					}
 				}
 			}
 		}
@@ -1328,6 +1358,7 @@ public class EntityModel {
 		synchronized (mEntityCache) {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().type.equals(CandiConstants.TYPE_CANDI_SOURCE)
+						&& (entry.getValue().source.system == null || !entry.getValue().source.system)
 						&& entry.getValue().parentId != null
 						&& entry.getValue().parentId.equals(entityId)) {
 					entities.add(entry.getValue());
@@ -1424,16 +1455,32 @@ public class EntityModel {
 				 * We only do children work if the new entity has them.
 				 */
 				if (entity.children != null) {
-					/* Removes all children except source entities */
-					final Map<String, Entity> removedChildren = removeChildren(entityOriginal.id);
-					for (Entity childEntity : entity.children) {
-						Entity removedChild = removedChildren.get(childEntity.id);
-						if (removedChild != null) {
-							childEntity.hidden = removedChild.hidden;
+					/*
+					 * If entity and entityOriginal are the same object then there isn't
+					 * anything to do since the cache by definition is up-to-date.
+					 */
+					if (!entity.children.equals(entityOriginal.children)) {
+
+						/* Removes all children except source entities */
+						final Map<String, Entity> removedChildren = removeChildren(entityOriginal.id);
+						entityOriginal.children.clear();
+
+						for (Entity childEntity : entity.children) {
+
+							Entity removedChild = removedChildren.get(childEntity.id);
+							if (removedChild != null) {
+								Entity.copyProperties(childEntity, removedChild);
+								mEntityCache.put(childEntity.id, removedChild);
+								entityOriginal.children.add(removedChild);
+							}
+							else {
+								mEntityCache.put(childEntity.id, childEntity);
+								entityOriginal.children.add(childEntity);
+							}
+
+							removeSourceEntities(childEntity.id);
+							addCommentSource(childEntity, null);
 						}
-						mEntityCache.put(childEntity.id, childEntity);
-						removeSourceEntities(childEntity.id);
-						addCommentSource(childEntity, null);
 					}
 				}
 			}
@@ -1460,39 +1507,41 @@ public class EntityModel {
 			/* Add the current stuff */
 			if (entity.sources != null) {
 				for (Source source : entity.sources) {
-					source.intentSupport = true;
-					if (source.type.equals("facebook")
-							|| source.type.equals("yahoolocal")
-							|| source.type.equals("citysearch")
-							|| source.type.equals("citygrid")
-							|| source.type.equals("urbanspoon")
-							|| source.type.equals("opentable")
-							|| source.type.equals("openmenu")) {
-						source.intentSupport = false;
-					}
-
-					if (source.caption == null) {
-						source.caption = source.type;
-					}
-
-					if (!mEntityModel.mEntityModel.mSourceMeta.containsKey(source.type)) {
-						mEntityModel.mEntityModel.mSourceMeta.put(source.type, new Source(source.intentSupport, false));
-					}
-
-					/* We are getting duplicates which will have to be addressed on the service side */
-					Entity sourceEntity = mEntityModel.loadEntityFromResources(R.raw.source_entity);
-					if (sourceEntity != null) {
-						/* Transfers from source item */
-						sourceEntity.id = entity.id + "." + source.type + "." + String.valueOf(DateUtils.nowDate().getTime());
-						sourceEntity.name = source.caption;
-						if (source.icon != null) {
-							sourceEntity.getPhotoForSet().setImageUri(source.icon, null, null, null);
+					if ((source.system == null || !source.system) && (source.hidden == null || !source.hidden)) {
+						source.intentSupport = true;
+						if (source.type.equals("facebook")
+								|| source.type.equals("yahoolocal")
+								|| source.type.equals("citysearch")
+								|| source.type.equals("citygrid")
+								|| source.type.equals("urbanspoon")
+								|| source.type.equals("opentable")
+								|| source.type.equals("openmenu")) {
+							source.intentSupport = false;
 						}
-						source.position = position;
-						sourceEntity.source = source;
-						sourceEntity.parentId = entity.id;
-						upsertEntity(sourceEntity);
-						position++;
+
+						if (source.label == null) {
+							source.label = source.type;
+						}
+
+						if (!mEntityModel.mEntityModel.mSourceMeta.containsKey(source.type)) {
+							mEntityModel.mEntityModel.mSourceMeta.put(source.type, new Source(source.intentSupport, false));
+						}
+
+						/* We are getting duplicates which will have to be addressed on the service side */
+						Entity sourceEntity = mEntityModel.loadEntityFromResources(R.raw.source_entity);
+						if (sourceEntity != null) {
+							/* Transfers from source item */
+							sourceEntity.id = entity.id + "." + source.type + "." + String.valueOf(DateUtils.nowDate().getTime());
+							sourceEntity.name = source.label;
+							if (source.icon != null) {
+								sourceEntity.photo = new Photo(source.icon, null, null, null, PhotoSource.external);
+							}
+							source.position = position;
+							sourceEntity.source = source;
+							sourceEntity.parentId = entity.id;
+							upsertEntity(sourceEntity);
+							position++;
+						}
 					}
 				}
 			}
@@ -1515,7 +1564,7 @@ public class EntityModel {
 		sourceEntity.id = entity.id + ".comments";
 		sourceEntity.name = "comments";
 		final Source source = new Source();
-		source.caption = "comments";
+		source.label = "comments";
 		source.icon = "resource:img_post";
 		source.type = "comments";
 		source.position = (position != null) ? position : 0;
@@ -1533,21 +1582,21 @@ public class EntityModel {
 			for (Entry<String, Entity> entry : mEntityCache.entrySet()) {
 				if (entry.getValue().creatorId != null && entry.getValue().creatorId.equals(user.id)) {
 					if (entry.getValue().creator != null) {
-						entry.getValue().creator.getPhotoForSet().setImageUri(user.photo.getUri());
+						entry.getValue().creator.photo = user.photo.clone();
 						entry.getValue().creator.location = user.location;
 						entry.getValue().creator.name = user.name;
 					}
 				}
 				if (entry.getValue().ownerId != null && entry.getValue().ownerId.equals(user.id)) {
 					if (entry.getValue().owner != null) {
-						entry.getValue().owner.getPhotoForSet().setImageUri(user.photo.getUri());
+						entry.getValue().owner.photo = user.photo.clone();
 						entry.getValue().owner.location = user.location;
 						entry.getValue().owner.name = user.name;
 					}
 				}
 				if (entry.getValue().modifierId != null && entry.getValue().modifierId.equals(user.id)) {
 					if (entry.getValue().modifier != null) {
-						entry.getValue().modifier.getPhotoForSet().setImageUri(user.photo.getUri());
+						entry.getValue().modifier.photo = user.photo.clone();
 						entry.getValue().modifier.location = user.location;
 						entry.getValue().modifier.name = user.name;
 					}

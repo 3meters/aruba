@@ -54,6 +54,7 @@ import com.aircandi.components.WifiChangedEvent;
 import com.aircandi.components.bitmaps.BitmapManager;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.Observation;
 import com.aircandi.ui.base.CandiActivity;
 import com.aircandi.utilities.AnimUtils;
 import com.aircandi.utilities.AnimUtils.TransitionType;
@@ -302,7 +303,8 @@ public class CandiRadar extends CandiActivity {
 						Tracker.sendTiming("location", Aircandi.stopwatch2.getTotalTimeMills(), "location_acquired", null);
 					}
 
-					if (LocationManager.getInstance().getObservationLocked() != null) {
+					final Observation observation = LocationManager.getInstance().getObservationLocked();
+					if (observation != null) {
 
 						mCommon.showBusy(true);
 
@@ -310,10 +312,12 @@ public class CandiRadar extends CandiActivity {
 
 							@Override
 							protected Object doInBackground(Object... params) {
-								Logger.d(CandiRadar.this, "Location changed event: getting entities for location");
-								Thread.currentThread().setName("GetEntitiesForLocation");
-								Aircandi.stopwatch2.start("Get entities for location");
-								final ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForLocation();
+								
+								Logger.d(CandiRadar.this, "Location changed event: getting places near location");
+								Thread.currentThread().setName("GetPlacesNearLocation");
+								Aircandi.stopwatch2.start("Get places near location");
+								
+								final ServiceResponse serviceResponse = ProxiManager.getInstance().getPlacesNearLocation(observation);
 								return serviceResponse;
 							}
 
@@ -338,9 +342,10 @@ public class CandiRadar extends CandiActivity {
 
 	@Subscribe
 	@SuppressWarnings("ucd")
-	public void onEntitiesForLocationFinished(EntitiesForLocationFinishedEvent event) {
-		Aircandi.stopwatch2.stop("Entities for location complete");
-		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "entities_for_location", null);
+	public void onPlacesNearLocationFinished(final PlacesNearLocationFinishedEvent event) {
+		Aircandi.stopwatch2.stop("Places near location complete");
+		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "places_near_location", null);
+		
 		mHandler.post(new Runnable() {
 
 			@Override
@@ -351,11 +356,11 @@ public class CandiRadar extends CandiActivity {
 
 						@Override
 						protected Object doInBackground(Object... params) {
-							Logger.d(CandiRadar.this, "Location changed event: getting places near location");
-							Thread.currentThread().setName("GetPlacesNearLocation");
-							Aircandi.stopwatch2.start("Get places near location");
-							final ServiceResponse serviceResponse = ProxiManager.getInstance().getPlacesNearLocation(
-									LocationManager.getInstance().getObservationLocked());
+							
+							Logger.d(CandiRadar.this, "Location changed event: getting entities for location");
+							Thread.currentThread().setName("GetEntitiesForLocation");
+							Aircandi.stopwatch2.start("Get entities for location");
+							final ServiceResponse serviceResponse = ProxiManager.getInstance().getEntitiesForLocation((int) event.maxDistance);
 							return serviceResponse;
 						}
 
@@ -376,12 +381,12 @@ public class CandiRadar extends CandiActivity {
 			}
 		});
 	}
-
+	
 	@Subscribe
 	@SuppressWarnings("ucd")
-	public void onPlacesNearLocationFinished(PlacesNearLocationFinishedEvent event) {
-		Aircandi.stopwatch2.stop("Places near location complete");
-		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "places_near_location", null);
+	public void onEntitiesForLocationFinished(EntitiesForLocationFinishedEvent event) {
+		Aircandi.stopwatch2.stop("Entities for location complete");
+		Tracker.sendTiming("radar", Aircandi.stopwatch2.getTotalTimeMills(), "entities_for_location", null);
 		mHandler.post(new Runnable() {
 
 			@Override
@@ -475,7 +480,7 @@ public class CandiRadar extends CandiActivity {
 				public void run() {
 					searchForPlacesByLocation();
 				}
-			}, 100);
+			}, 500);
 		}
 	}
 

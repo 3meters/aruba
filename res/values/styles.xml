@@ -266,6 +266,7 @@
 
     <style name="candi_list_title">
         <item name="android:textAppearance">@style/app_text_appearance_title2</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="candi_list_subtitle">

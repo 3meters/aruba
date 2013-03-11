@@ -21,6 +21,7 @@ public final class ProxiConstants {
 	public static final String	URL_PROXIBASE_SERVICE_USER							= URL_PROXIBASE_SERVICE + "/user/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ADMIN							= URL_PROXIBASE_SERVICE + "/admin/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_METHOD						= URL_PROXIBASE_SERVICE + "/do/";																												//$NON-NLS-1$
+	public static final String	URL_PROXIBASE_SERVICE_SOURCES						= URL_PROXIBASE_SERVICE + "/sources/";																												//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_AUTH							= URL_PROXIBASE_SERVICE + "/auth/";																											//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS			= URL_PROXIBASE_SERVICE + PATH_PROXIBASE_SERVICE_ASSETS_SOURCE_ICONS;																			//$NON-NLS-1$
 	public static final String	URL_PROXIBASE_SERVICE_ASSETS_CATEGORIES				= URL_PROXIBASE_SERVICE + PATH_PROXIBASE_SERVICE_ASSETS_CATEGORIES;																			//$NON-NLS-1$
@@ -32,6 +33,7 @@ public final class ProxiConstants {
 	public static final String	USER_AGENT_DESKTOP									= "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16";					//$NON-NLS-1$
 	public static final String	USER_AGENT_NEXUS_S									= "Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";	//$NON-NLS-1$
 
+	public static final int		USER_ENTITY_LIMIT									= 25;
 	public static final int		RADAR_ENTITY_LIMIT									= 50;
 	public static final int		RADAR_PLACES_LIMIT									= 50;
 	public static final int		RADAR_CHILDENTITY_LIMIT								= 20;

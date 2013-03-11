@@ -23,10 +23,10 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import com.aircandi.Aircandi;
-import com.aircandi.beta.BuildConfig;
 import com.aircandi.CandiConstants;
 import com.aircandi.PlacesConstants;
 import com.aircandi.ProxiConstants;
+import com.aircandi.beta.BuildConfig;
 import com.aircandi.components.NetworkManager.ResponseCode;
 import com.aircandi.components.NetworkManager.ServiceResponse;
 import com.aircandi.service.ProxibaseService;
@@ -39,7 +39,9 @@ import com.aircandi.service.ServiceRequest;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Entity;
 import com.aircandi.service.objects.Link.LinkType;
+import com.aircandi.service.objects.Photo.PhotoSource;
 import com.aircandi.service.objects.Observation;
+import com.aircandi.service.objects.Photo;
 import com.aircandi.service.objects.ServiceData;
 import com.aircandi.service.objects.ServiceEntry;
 import com.aircandi.service.objects.User;
@@ -296,7 +298,7 @@ public class ProxiManager {
 		return serviceResponse;
 	}
 
-	public synchronized ServiceResponse getEntitiesForLocation() {
+	public synchronized ServiceResponse getEntitiesForLocation(Integer maxDistance) {
 
 		ServiceResponse serviceResponse = new ServiceResponse();
 
@@ -306,9 +308,9 @@ public class ProxiManager {
 		final Observation observation = LocationManager.getInstance().getObservationLocked();
 		if (observation != null) {
 			parameters.putString("observation", "object:" + ProxibaseService.convertObjectToJsonSmart(observation, true, true));
-			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
-					CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
-			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) searchRangeMeters));
+//			final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
+//					CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
+			parameters.putFloat("radius", LocationManager.getRadiusForMeters((float) maxDistance));
 		}
 
 		/* We don't want to fetch entities we already have via proximity links to local beacons */
@@ -396,6 +398,7 @@ public class ProxiManager {
 	}
 
 	public synchronized ServiceResponse getPlacesNearLocation(Observation observation) {
+		
 		ServiceResponse serviceResponse = new ServiceResponse();
 		/*
 		 * Make a list of places that should be excluded because
@@ -422,6 +425,7 @@ public class ProxiManager {
 		parameters.putFloat("latitude", observation.latitude.floatValue());
 		parameters.putFloat("longitude", observation.longitude.floatValue());
 		parameters.putInt("limit", ProxiConstants.RADAR_PLACES_LIMIT);
+		
 		final Integer searchRangeMeters = Integer.parseInt(Aircandi.settings.getString(CandiConstants.PREF_SEARCH_RADIUS,
 				CandiConstants.PREF_SEARCH_RADIUS_DEFAULT));
 		parameters.putInt("radius", searchRangeMeters);
@@ -438,6 +442,7 @@ public class ProxiManager {
 			final String jsonResponse = (String) serviceResponse.data;
 			final ServiceData serviceData = ProxibaseService.convertJsonToObjectsSmart(jsonResponse, ServiceDataType.Entity);
 			serviceResponse.data = serviceData;
+			Float maxDistance = 0f;
 
 			synchronized (this) {
 
@@ -459,6 +464,14 @@ public class ProxiManager {
 						}
 					}
 				}
+				
+				/* Find the place with the maximum distance */
+				for (Entity entity : entities) {
+					float distance = entity.getDistance(); // In meters
+					if (distance > maxDistance) {
+						maxDistance = distance;
+					}
+				}
 
 				mEntityModel.removeSyntheticEntities();
 				mEntityModel.upsertEntities(entities);
@@ -466,7 +479,7 @@ public class ProxiManager {
 
 			final List<Entity> entitiesForEvent = ProxiManager.getInstance().getEntityModel().getAllPlaces(false);
 
-			BusProvider.getInstance().post(new PlacesNearLocationFinishedEvent());
+			BusProvider.getInstance().post(new PlacesNearLocationFinishedEvent(maxDistance));
 			BusProvider.getInstance().post(new EntitiesChangedEvent(entitiesForEvent));
 		}
 		return serviceResponse;
@@ -732,10 +745,10 @@ public class ProxiManager {
 
 			/* Update the photo object for the entity or user */
 			if (entity != null) {
-				entity.getPhotoForSet().setImageUri(imageKey, null, bitmap.getWidth(), bitmap.getHeight());
+				entity.photo = new Photo(imageKey, null, bitmap.getWidth(), bitmap.getHeight(), PhotoSource.aircandi);
 			}
 			else if (user != null) {
-				user.getPhotoForSet().setImageUri(imageKey, null, bitmap.getWidth(), bitmap.getHeight());
+				user.photo = new Photo(imageKey, null, bitmap.getWidth(), bitmap.getHeight(), PhotoSource.aircandi);
 			}
 		}
 		catch (ProxibaseServiceException exception) {
@@ -813,7 +826,7 @@ public class ProxiManager {
 	}
 
 	public static enum ArrayListType {
-		TunedPlaces, SyntheticPlaces, CreatedByUser, Collections, InCollection
+		TunedPlaces, SyntheticPlaces, OwnedByUser, Collections, InCollection
 	}
 
 	public static enum ScanReason {

@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
@@ -36,7 +37,6 @@ public class SignInForm extends FormActivity {
 	private EditText	mTextEmail;
 	private EditText	mTextPassword;
 	private TextView	mTextMessage;
-	private Button		mButtonSignIn;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -51,14 +51,11 @@ public class SignInForm extends FormActivity {
 		mTextEmail = (EditText) findViewById(R.id.text_email);
 		mTextPassword = (EditText) findViewById(R.id.text_password);
 		mTextMessage = (TextView) findViewById(R.id.form_message);
-		mButtonSignIn = (Button) findViewById(R.id.btn_signin);
 
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
 		FontManager.getInstance().setTypefaceDefault(mTextPassword);
 		FontManager.getInstance().setTypefaceDefault(mTextMessage);
-		FontManager.getInstance().setTypefaceDefault(mButtonSignIn);
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_send_password));
-		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_cancel));
 	}
 
 	private void draw() {
@@ -75,6 +72,7 @@ public class SignInForm extends FormActivity {
 	// --------------------------------------------------------------------------------------------
 	// Event routines
 	// --------------------------------------------------------------------------------------------
+
 	@SuppressWarnings("ucd")
 	public void onSendPasswordButtonClick(View view) {
 		AircandiCommon.showAlertDialog(R.drawable.ic_launcher
@@ -85,9 +83,7 @@ public class SignInForm extends FormActivity {
 		Tracker.sendEvent("ui_action", "recover_password", null, 0);
 	}
 
-	@SuppressWarnings("ucd")
-	public void onSignInButtonClick(View view) {
-
+	private void doSignIn() {
 		if (validate()) {
 
 			final String email = mTextEmail.getText().toString().toLowerCase(Locale.US);
@@ -169,6 +165,22 @@ public class SignInForm extends FormActivity {
 					, null, null, null);
 			return false;
 		}
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Application menu routines (settings)
+	// --------------------------------------------------------------------------------------------
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.save) {
+			doSignIn();
+			return true;
+		}
+
+		/* In case we add general menu items later */
+		mCommon.doOptionsItemSelected(item);
 		return true;
 	}
 

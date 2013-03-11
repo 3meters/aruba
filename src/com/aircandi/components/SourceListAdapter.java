@@ -21,12 +21,12 @@ import com.aircandi.ui.widgets.WebImageView;
 public class SourceListAdapter extends ArrayAdapter<Source> implements Filterable {
 
 	private final LayoutInflater	mInflater;
-	private Integer			mItemLayoutId	= R.layout.temp_listitem_sources_builder;
-	private final List<Source>	mListItems;
+	private Integer					mItemLayoutId	= R.layout.temp_listitem_sources_builder;
+	private final List<Source>		mListItems;
 
 	public SourceListAdapter(Context context, List<Source> sources, Integer itemLayoutId) {
 		super(context, 0, sources);
-		
+
 		mListItems = sources;
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -79,8 +79,8 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 			}
 
 			setVisibility(holder.title, View.GONE);
-			if (holder.title != null && source.caption != null && source.caption.length() > 0) {
-				holder.title.setText(source.caption);
+			if (holder.title != null && source.label != null && source.label.length() > 0) {
+				holder.title.setText(source.label);
 				setVisibility(holder.title, View.VISIBLE);
 			}
 
@@ -89,7 +89,7 @@ public class SourceListAdapter extends ArrayAdapter<Source> implements Filterabl
 				holder.subtitle.setText(source.id);
 				setVisibility(holder.subtitle, View.VISIBLE);
 			}
-			
+
 			if (holder.image != null) {
 				holder.image.setTag(source);
 				/*

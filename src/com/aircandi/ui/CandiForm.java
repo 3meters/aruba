@@ -61,7 +61,6 @@ import com.aircandi.service.objects.Place;
 import com.aircandi.service.objects.Source;
 import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.CandiActivity;
-import com.aircandi.ui.builders.PicturePicker;
 import com.aircandi.ui.widgets.CandiView;
 import com.aircandi.ui.widgets.FlowLayout;
 import com.aircandi.ui.widgets.SectionLayout;
@@ -355,16 +354,7 @@ public class CandiForm extends CandiActivity {
 
 	public void onMoreButtonClick(View view) {
 		String target = (String) view.getTag();
-		if (target.equals("photos")) {
-			IntentBuilder intentBuilder = new IntentBuilder(this, PicturePicker.class);
-			intentBuilder.setCommandType(CommandType.View)
-					.setEntityId(mEntity.id);
-
-			Intent intent = intentBuilder.create();
-			startActivity(intent);
-			AnimUtils.doOverridePendingTransition(this, TransitionType.PageToPage);
-		}
-		else if (target.equals("candi")) {
+		if (target.equals("candi")) {
 			IntentBuilder intentBuilder = new IntentBuilder(this, CandiList.class);
 			intentBuilder.setCommandType(CommandType.View)
 					.setArrayListType(ArrayListType.InCollection)
@@ -415,7 +405,7 @@ public class CandiForm extends CandiActivity {
 					AndroidManager.getInstance().callBrowserActivity(this, (entity.source.id != null) ? entity.source.id : entity.source.url);
 				}
 				else if (entity.source.type.equals("email")) {
-					AndroidManager.getInstance().callSendToActivity(this, entity.source.caption, entity.source.id, null, null);
+					AndroidManager.getInstance().callSendToActivity(this, entity.source.label, entity.source.id, null, null);
 				}
 				else if (entity.source.type.equals("comments")) {
 					final IntentBuilder intentBuilder = new IntentBuilder(this, CommentList.class);
@@ -706,17 +696,20 @@ public class CandiForm extends CandiActivity {
 			final SectionLayout section = (SectionLayout) layout.findViewById(R.id.section_layout_candi);
 			if (section != null) {
 				section.getTextViewHeader().setText(context.getString(R.string.candi_section_candi));
-				final FlowLayout flow = (FlowLayout) layout.findViewById(R.id.flow_candi);
-				drawCandi(context, flow, entities, R.layout.temp_place_candi_item);
 
-				if (entities.size() > 0) {
+				if (entities.size() > CandiConstants.CANDI_FLOW_LIMIT) {
 					View footer = inflater.inflate(R.layout.temp_section_footer, null);
 					Button button = (Button) footer.findViewById(R.id.button_more);
 					FontManager.getInstance().setTypefaceDefault(button);
 					button.setText(R.string.candi_section_candi_more);
 					button.setTag("candi");
-					section.addView(footer);
+					section.setFooter(footer); // Replaces if there already is one.
 				}
+
+				final FlowLayout flow = (FlowLayout) layout.findViewById(R.id.flow_candi);
+				drawCandi(context, flow, entities.size() > CandiConstants.CANDI_FLOW_LIMIT
+						? entities.subList(0, CandiConstants.CANDI_FLOW_LIMIT)
+						: entities, R.layout.temp_place_candi_item);
 
 				setVisibility(layout.findViewById(R.id.section_candi), View.VISIBLE);
 			}
@@ -743,7 +736,7 @@ public class CandiForm extends CandiActivity {
 		/* Creator block */
 
 		setVisibility(creator, View.GONE);
-		if (creator != null && entity.creator != null) {
+		if (creator != null && entity.creator != null && !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 			if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
 				if (entity.place.provider.equals("user")) {
 					creator.setLabel(context.getString(R.string.candi_label_user_created_by));
@@ -768,10 +761,12 @@ public class CandiForm extends CandiActivity {
 		/* Editor block */
 
 		setVisibility(editor, View.GONE);
-		if (editor != null && entity.modifier != null) {
-			editor.setLabel(context.getString(R.string.candi_label_user_edited_by));
-			editor.bindToAuthor(entity.modifier, entity.modifiedDate.longValue(), null);
-			setVisibility(editor, View.VISIBLE);
+		if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+			if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
+				editor.setLabel(context.getString(R.string.candi_label_user_edited_by));
+				editor.bindToAuthor(entity.modifier, entity.modifiedDate.longValue(), null);
+				setVisibility(editor, View.VISIBLE);
+			}
 		}
 
 		/* Buttons */

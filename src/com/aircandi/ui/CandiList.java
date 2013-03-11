@@ -63,10 +63,14 @@ public class CandiList extends CandiActivity {
 			mCommon.mActionBar.setHomeButtonEnabled(false);
 			mCommon.mActionBar.setTitle(getString(R.string.name_entity_list_type_collection));
 		}
-		else if (mArrayListType == ArrayListType.CreatedByUser) {
-			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
-			mCommon.mActionBar.setHomeButtonEnabled(false);
-			mCommon.mActionBar.setTitle(Aircandi.getInstance().getUser().name);
+		else if (mArrayListType == ArrayListType.OwnedByUser) {
+			mCommon.mActionBar.setDisplayHomeAsUpEnabled(true);
+			mCommon.mActionBar.setHomeButtonEnabled(true);
+			if (mCommon.mUserId != null) {
+				ModelResult result = ProxiManager.getInstance().getEntityModel().getUser(mCommon.mUserId, false);
+				User user = (User) result.serviceResponse.data;
+				mCommon.mActionBar.setTitle(user.name);
+			}
 		}
 		else if (mArrayListType == ArrayListType.TunedPlaces) {
 			mCommon.mActionBar.setDisplayHomeAsUpEnabled(false);
@@ -86,6 +90,8 @@ public class CandiList extends CandiActivity {
 		if (extras != null) {
 			mArrayListType = ArrayListType.valueOf(extras.getString(CandiConstants.EXTRA_LIST_TYPE));
 		}
+		
+		
 	}
 
 	private void bind(final Boolean refresh) {
@@ -100,8 +106,17 @@ public class CandiList extends CandiActivity {
 			@Override
 			protected Object doInBackground(Object... params) {
 				Thread.currentThread().setName("GetEntities");
-				final ModelResult result = ProxiManager.getInstance().getEntityModel()
-						.getEntitiesByListType(mArrayListType, refresh, mCommon.mCollectionId, mCommon.mUserId, ProxiConstants.RADAR_ENTITY_LIMIT);
+				ModelResult result = new ModelResult();
+				if (mCommon.mEntityType != null && mCommon.mUserId != null) {
+					result.data = ProxiManager.getInstance().getEntityModel().getCacheUserEntities(mCommon.mUserId, mCommon.mEntityType);
+				}
+				else {
+					result = ProxiManager.getInstance().getEntityModel().getEntitiesByListType(mArrayListType
+							, refresh
+							, mCommon.mCollectionId
+							, mCommon.mUserId
+							, ProxiConstants.RADAR_ENTITY_LIMIT);
+				}
 				return result;
 			}
 
