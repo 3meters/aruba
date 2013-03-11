@@ -31,6 +31,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.AircandiCommon;
 import com.aircandi.components.AircandiCommon.ServiceOperation;
@@ -177,7 +178,7 @@ public class EntityForm extends FormActivity {
 			}
 		}
 		@SuppressWarnings("unused")
-		List<Entity> entities = mEntityForForm.getChildren();		
+		List<Entity> entities = mEntityForForm.getChildren();
 
 	}
 
@@ -258,9 +259,10 @@ public class EntityForm extends FormActivity {
 
 			/* Author */
 
-			if (entity != null && entity.creator != null) {
-				((UserView) findViewById(R.id.author)).bindToAuthor(entity.creator,
-						entity.modifiedDate.longValue(), entity.locked);
+			if (entity != null && entity.creator != null && !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+				((UserView) findViewById(R.id.author)).bindToAuthor(entity.creator
+						, entity.modifiedDate.longValue()
+						, entity.locked);
 			}
 			else {
 				((UserView) findViewById(R.id.author)).setVisibility(View.GONE);
@@ -780,7 +782,7 @@ public class EntityForm extends FormActivity {
 					}
 				}
 			}
-			
+
 			if (!candiMatch) {
 				Entity pictureEntity = makeEntity(CandiConstants.TYPE_CANDI_PICTURE);
 				pictureEntity.photo = mEntityForForm.photo.clone();

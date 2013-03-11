@@ -20,6 +20,7 @@ import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.aircandi.CandiConstants;
+import com.aircandi.ProxiConstants;
 import com.aircandi.beta.R;
 import com.aircandi.components.bitmaps.BitmapRequest;
 import com.aircandi.components.bitmaps.BitmapRequestBuilder;
@@ -148,7 +149,7 @@ public class CandiListAdapter extends ArrayAdapter<Entity> implements Filterable
 			}
 
 			setVisibility(holder.user, View.GONE);
-			if (holder.user != null && entity.creator != null) {
+			if (holder.user != null && entity.creator != null && !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
 				holder.user.bindToAuthor(entity.creator, entity.modifiedDate.longValue(), entity.locked);
 				setVisibility(holder.user, View.VISIBLE);
 			}
