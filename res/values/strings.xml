@@ -24,8 +24,6 @@
     <string name="menu_send_item">Send</string>
     <string name="menu_save_item">Save</string>
     <string name="menu_post_item">Post</string>
-    <string name="menu_register_item">Register</string>
-    <string name="menu_sign_in_item">Sign in</string>
     <string name="menu_delete_item">Delete</string>
     <string name="menu_accept_item">Accept</string>
     <string name="menu_cancel_item">Cancel</string>
@@ -286,6 +284,8 @@
     <string name="form_button_save">save</string>
     <string name="form_button_post">post</string>
     <string name="form_button_delete">delete</string>
+    <string name="form_button_sign_in">sign in</string>
+    <string name="form_button_register">register</string>
     <string name="form_button_send">send</string>
     <string name="form_button_ok" tools:ignore="ButtonCase,Typos">ok</string>
     <string name="form_button_cancel" tools:ignore="ButtonCase">cancel</string>
@@ -328,7 +328,9 @@
     <string name="form_feedback_hint">feedback</string>
     <string name="form_uri_hint">web address</string>
     <string name="picture_search_query_hint">search</string>
-
+    <string name="form_do_not_track_on_hint">All browsing activity is anonymous but editing, creating and commenting are public.</string>
+    <string name="form_do_not_track_off_hint">All browsing, editing, creating and commenting activities are public.</string>
+    
     <!-- Forms.messages -->
 
     <string name="signin_message_general">Sign in to create and share candi with other Aircandi users!</string>

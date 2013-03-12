@@ -214,7 +214,7 @@ public class CandiView extends RelativeLayout {
 									imageUri = "resource:ic_facebook_dark";
 								}
 								if (sourceEntity.source.type.equals("comments")) {
-									imageUri = "resource:ic_comments_ii_dark";
+									imageUri = "resource:ic_comments_dark";
 								}
 								if (sourceEntity.source.type.equals("twitter")) {
 									imageUri = "resource:ic_twitter_dark";

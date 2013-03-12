@@ -4,14 +4,4 @@
 
     <solid android:color="@color/image_pressed" />
 
-    <stroke
-        android:width="3dp"
-        android:color="@color/image_pressed" />
-
-    <padding
-        android:bottom="3dp"
-        android:left="3dp"
-        android:right="3dp"
-        android:top="3dp" />
-
 </shape>

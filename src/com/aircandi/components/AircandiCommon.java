@@ -697,7 +697,8 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		/* Prevent dimming the background */
-		alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		//alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+		alert.getWindow().setDimAmount(CandiConstants.DIALOGS_DIM_AMOUNT);
 
 		return alert;
 	}
@@ -1021,12 +1022,6 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 		else if (mPageName.equals("PasswordForm")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_save, menu);
-		}
-		else if (mPageName.equals("RegisterForm")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_register, menu);
-		}
-		else if (mPageName.equals("SignInForm")) {
-			activity.getSupportMenuInflater().inflate(R.menu.menu_sign_in, menu);
 		}
 		else if (mPageName.equals("AddressBuilder")) {
 			activity.getSupportMenuInflater().inflate(R.menu.menu_builder, menu);

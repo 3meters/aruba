@@ -135,8 +135,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1px"
-                    android:layout_marginTop="15dp"
                     android:layout_marginBottom="15dp"
+                    android:layout_marginTop="15dp"
                     android:background="?attr/ruleColor" />
 
                 <CheckBox
@@ -145,14 +145,13 @@
                     android:layout_height="@dimen/form_field_height"
                     android:text="@string/form_label_do_not_track" />
 
-                <Button
-                    android:id="@+id/button_clear_browse_history"
-                    style="@style/form_button"
-                    android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/do_not_track_hint"
+                    style="@style/form_label"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minWidth="200dp"
-                    android:onClick="onClearBrowseHistoryButtonClick"
-                    android:text="@string/form_button_clear_browse_history" />
+                    android:textColor="@color/edit_hint" />
+
             </LinearLayout>
         </ViewFlipper>
     </com.aircandi.ui.widgets.BounceScrollView>

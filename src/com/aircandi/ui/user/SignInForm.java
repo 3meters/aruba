@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
@@ -56,6 +55,7 @@ public class SignInForm extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault(mTextPassword);
 		FontManager.getInstance().setTypefaceDefault(mTextMessage);
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_send_password));
+		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_sign_in));
 	}
 
 	private void draw() {
@@ -81,6 +81,11 @@ public class SignInForm extends FormActivity {
 				, null
 				, SignInForm.this, android.R.string.ok, null, null, null);
 		Tracker.sendEvent("ui_action", "recover_password", null, 0);
+	}
+	
+	@SuppressWarnings("ucd")
+	public void onSignInButtonClick(View view) {
+		doSignIn();
 	}
 
 	private void doSignIn() {
@@ -165,22 +170,6 @@ public class SignInForm extends FormActivity {
 					, null, null, null);
 			return false;
 		}
-		return true;
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.save) {
-			doSignIn();
-			return true;
-		}
-
-		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
 		return true;
 	}
 

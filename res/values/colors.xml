@@ -38,6 +38,13 @@
     <color name="accuracy_halo">#9933b5e5</color>
     <color name="accuracy_center">#ff33b5e5</color>
 
+    <!-- Buttons -->
+
+    <color name="background_button_dark">@color/background_buttonbar_dark</color>
+    <color name="background_button_light">@color/background_actionbar_light</color>
+    <color name="stroke_button_dark">#44ffffff</color>
+    <color name="stroke_button_light">#00cccccc</color>
+    
     <!-- Backgrounds -->
 
     <color name="background_dark">@android:color/black</color>
@@ -45,8 +52,6 @@
     <color name="background_gray_light">#55333333</color>
     <color name="background_gray_dark">#ff555555</color>
     <color name="background_picture_detail">#ff282828</color>
-    <color name="background_button_dark">@color/background_buttonbar_dark</color>
-    <color name="background_button_light">@color/background_buttonbar_light</color>
     <color name="background_progress_dark">#99000000</color>
     <color name="background_progress_light">#ccffffff</color>
     <color name="button_pressed">#ff33b5e5</color>

@@ -48,11 +48,13 @@
                 android:layout_marginBottom="10dp"
                 android:hint="@string/form_label_password"
                 android:inputType="textPassword"
+                android:imeOptions="actionGo"
                 android:textSize="16sp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal" >
 
@@ -65,6 +67,17 @@
                     android:onClick="onSendPasswordButtonClick"
                     android:text="@string/form_button_send_password" />
             </LinearLayout>
+
+            <Button
+                android:id="@+id/button_sign_in"
+                style="@style/form_button"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:minWidth="200dp"
+                android:onClick="onSignInButtonClick"
+                android:text="@string/form_button_sign_in" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 

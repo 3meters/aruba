@@ -14,7 +14,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.MenuItem;
 import com.aircandi.Aircandi;
 import com.aircandi.CandiConstants;
 import com.aircandi.beta.R;
@@ -32,8 +31,8 @@ import com.aircandi.components.bitmaps.BitmapRequestBuilder;
 import com.aircandi.service.ProxibaseService;
 import com.aircandi.service.ProxibaseService.RequestListener;
 import com.aircandi.service.objects.Photo;
-import com.aircandi.service.objects.User;
 import com.aircandi.service.objects.Photo.PhotoSource;
+import com.aircandi.service.objects.User;
 import com.aircandi.ui.base.FormActivity;
 import com.aircandi.ui.widgets.WebImageView;
 import com.aircandi.utilities.AnimUtils;
@@ -77,6 +76,7 @@ public class RegisterForm extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.terms));
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_change_image));
 		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_view_terms));
+		FontManager.getInstance().setTypefaceDefault((Button) findViewById(R.id.button_register));
 
 	}
 
@@ -140,6 +140,11 @@ public class RegisterForm extends FormActivity {
 		};
 	}
 
+	@SuppressWarnings("ucd")
+	public void onRegisterButtonClick(View view) {
+		doSave();
+	}
+	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
@@ -329,22 +334,6 @@ public class RegisterForm extends FormActivity {
 				}
 			}.execute();
 		}
-	}
-
-	// --------------------------------------------------------------------------------------------
-	// Application menu routines (settings)
-	// --------------------------------------------------------------------------------------------
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.save) {
-			doSave();
-			return true;
-		}
-
-		/* In case we add general menu items later */
-		mCommon.doOptionsItemSelected(item);
-		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------

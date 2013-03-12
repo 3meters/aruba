@@ -4,4 +4,16 @@
 
     <solid android:color="@color/background_button_dark" />
 
+    <corners android:radius="@dimen/form_button_corner_radius" />
+
+    <stroke
+        android:width="@dimen/form_button_stroke_width"
+        android:color="@color/stroke_button_dark" />
+
+    <padding
+        android:bottom="@dimen/form_button_padding"
+        android:left="@dimen/form_button_padding"
+        android:right="@dimen/form_button_padding"
+        android:top="@dimen/form_button_padding" />
+
 </shape>

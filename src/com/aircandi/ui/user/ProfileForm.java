@@ -100,7 +100,7 @@ public class ProfileForm extends FormActivity {
 		FontManager.getInstance().setTypefaceDefault(mTextEmail);
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_image));
 		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_change_password));
-		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.button_clear_browse_history));
+		FontManager.getInstance().setTypefaceDefault((TextView) findViewById(R.id.do_not_track_hint));
 
 		if (mTextFullname != null) {
 			mTextFullname.addTextChangedListener(new SimpleTextWatcher() {
@@ -165,6 +165,13 @@ public class ProfileForm extends FormActivity {
 					if (mUser.doNotTrack != isChecked) {
 						mDirty = true;
 					}
+
+					if (isChecked) {
+						((TextView) findViewById(R.id.do_not_track_hint)).setText(R.string.form_do_not_track_on_hint);
+					}
+					else {
+						((TextView) findViewById(R.id.do_not_track_hint)).setText(R.string.form_do_not_track_off_hint);
+					}
 				}
 			});
 		}
@@ -220,6 +227,12 @@ public class ProfileForm extends FormActivity {
 		mTextLocation.setText(mUser.location);
 		mTextEmail.setText(mUser.email);
 		mCheckBrowseInPrivate.setChecked(mUser.doNotTrack);
+		if (mUser.doNotTrack) {
+			((TextView) findViewById(R.id.do_not_track_hint)).setText(R.string.form_do_not_track_on_hint);
+		}
+		else {
+			((TextView) findViewById(R.id.do_not_track_hint)).setText(R.string.form_do_not_track_off_hint);
+		}
 
 		((ViewGroup) findViewById(R.id.flipper_form)).setVisibility(View.VISIBLE);
 
@@ -293,11 +306,6 @@ public class ProfileForm extends FormActivity {
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
 	}
 
-	@SuppressWarnings("ucd")
-	public void onClearBrowseHistoryButtonClick(View view) {
-		confirmClearBrowseHistory();
-	}
-
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
@@ -340,27 +348,6 @@ public class ProfileForm extends FormActivity {
 		mBitmap = null;
 		drawImage(user);
 		Tracker.sendEvent("ui_action", "set_user_picture_to_default", null, 0);
-	}
-
-	private void confirmClearBrowseHistory() {
-		final AlertDialog dialog = AircandiCommon.showAlertDialog(null
-				, getResources().getString(R.string.alert_clear_browse_history_title)
-				, getResources().getString(R.string.alert_clear_browse_history_message)
-				, null
-				, this
-				, R.string.alert_clear_browse_history_ok
-				, android.R.string.cancel
-				, new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (which == Dialog.BUTTON_POSITIVE) {
-							ImageUtils.showToastNotification("Still working on this feature!", Toast.LENGTH_SHORT);
-						}
-					}
-				}
-				, null);
-		dialog.setCanceledOnTouchOutside(false);
 	}
 
 	private void confirmDirtyExit() {

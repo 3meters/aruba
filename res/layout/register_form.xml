@@ -94,6 +94,7 @@
                 android:layout_marginBottom="10dp"
                 android:hint="@string/form_label_password_confirm"
                 android:inputType="textPassword"
+                android:imeOptions="actionGo"
                 android:textSize="16sp" />
 
             <LinearLayout
@@ -101,6 +102,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
+                android:layout_marginBottom="10dp"
                 android:orientation="horizontal" >
 
                 <TextView
@@ -126,6 +128,14 @@
                     android:onClick="onViewTermsButtonClick"
                     android:text="@string/form_button_terms" />
             </LinearLayout>
+
+            <Button
+                android:id="@+id/button_register"
+                style="@style/form_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onRegisterButtonClick"
+                android:text="@string/form_button_register" />
         </LinearLayout>
     </com.aircandi.ui.widgets.BounceScrollView>
 

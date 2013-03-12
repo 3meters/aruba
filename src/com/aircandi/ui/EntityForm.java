@@ -53,6 +53,7 @@ import com.aircandi.service.ProxibaseService.ServiceDataType;
 import com.aircandi.service.objects.Beacon;
 import com.aircandi.service.objects.Category;
 import com.aircandi.service.objects.Entity;
+import com.aircandi.service.objects.User;
 import com.aircandi.service.objects.Entity.Visibility;
 import com.aircandi.service.objects.Location;
 import com.aircandi.service.objects.Observation;
@@ -257,15 +258,42 @@ public class EntityForm extends FormActivity {
 				}
 			}
 
-			/* Author */
+			/* Creator block */
+			final UserView creator = (UserView) findViewById(R.id.created_by);
+			final UserView editor = (UserView) findViewById(R.id.edited_by);
 
-			if (entity != null && entity.creator != null && !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
-				((UserView) findViewById(R.id.author)).bindToAuthor(entity.creator
-						, entity.modifiedDate.longValue()
-						, entity.locked);
+			setVisibility(creator, View.GONE);
+			if (creator != null
+					&& entity.creator != null
+					&& !entity.creator.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+
+				if (entity.type.equals(CandiConstants.TYPE_CANDI_PLACE)) {
+					if (entity.place.provider.equals("user")) {
+						creator.setLabel(getString(R.string.candi_label_user_created_by));
+					}
+					else {
+						creator.setLabel(getString(R.string.candi_label_user_discovered_by));
+					}
+				}
+				else if (entity.type.equals(CandiConstants.TYPE_CANDI_POST)) {
+					creator.setLabel(getString(R.string.candi_label_user_posted_by));
+				}
+				else {
+					creator.setLabel(getString(R.string.candi_label_user_created_by));
+				}
+				creator.bindToAuthor(entity.creator, entity.createdDate.longValue(), entity.locked);
+				setVisibility(creator, View.VISIBLE);
 			}
-			else {
-				((UserView) findViewById(R.id.author)).setVisibility(View.GONE);
+
+			/* Editor block */
+
+			setVisibility(editor, View.GONE);
+			if (editor != null && entity.modifier != null && !entity.modifier.id.equals(ProxiConstants.ADMIN_USER_ID)) {
+				if (entity.createdDate.longValue() != entity.modifiedDate.longValue()) {
+					editor.setLabel(getString(R.string.candi_label_user_edited_by));
+					editor.bindToAuthor(entity.modifier, entity.modifiedDate.longValue(), null);
+					setVisibility(editor, View.VISIBLE);
+				}
 			}
 
 			/* Configure UI */
@@ -466,6 +494,11 @@ public class EntityForm extends FormActivity {
 		}
 		startActivityForResult(intent, CandiConstants.ACTIVITY_SOURCES_EDIT);
 		AnimUtils.doOverridePendingTransition(this, TransitionType.PageToForm);
+	}
+
+	public void onUserClick(View view) {
+		User user = (User) view.getTag();
+		mCommon.doUserClick(user);
 	}
 
 	@Override

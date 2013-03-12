@@ -64,6 +64,7 @@ public final class CandiConstants {
 	public static final int		TABS_PROFILE_FORM_ID				= 2;
 	public static final int		TABS_ENTITY_FORM_ID					= 3;
 	public static final int		TABS_CANDI_PICKER_ID				= 4;
+	public static final float	DIALOGS_DIM_AMOUNT					= 0.5f;
 
 	public static final int		RADAR_BEACON_SIGNAL_BUCKET_SIZE		= 1;
 	public static final int		RADAR_BEACON_INDICATOR_CAUTION		= -80;
