@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.http.HttpStatus;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -648,6 +649,7 @@ public class AircandiCommon implements ActionBar.TabListener {
 		Logger.w(context, "Service error: " + errorMessage);
 	}
 
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	public static AlertDialog showAlertDialog(Integer iconResource // $codepro.audit.disable largeNumberOfParameters
 			, String titleText
 			, String message
@@ -697,8 +699,9 @@ public class AircandiCommon implements ActionBar.TabListener {
 		}
 
 		/* Prevent dimming the background */
-		//alert.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-		alert.getWindow().setDimAmount(CandiConstants.DIALOGS_DIM_AMOUNT);
+		if (CandiConstants.SUPPORTS_ICE_CREAM_SANDWICH) {
+			alert.getWindow().setDimAmount(CandiConstants.DIALOGS_DIM_AMOUNT);
+		}
 
 		return alert;
 	}
@@ -972,12 +975,12 @@ public class AircandiCommon implements ActionBar.TabListener {
 	private void setDialogSize(Configuration newConfig) {
 
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB_MR2) {
-//			final android.view.WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
-//			final int height = Math.min(newConfig.screenHeightDp, 450);
-//			final int width = Math.min(newConfig.screenWidthDp, 350);
-//			params.height = ImageUtils.getRawPixels(mActivity, height);
-//			params.width = ImageUtils.getRawPixels(mActivity, width);
-//			mActivity.getWindow().setAttributes(params);
+			//			final android.view.WindowManager.LayoutParams params = mActivity.getWindow().getAttributes();
+			//			final int height = Math.min(newConfig.screenHeightDp, 450);
+			//			final int width = Math.min(newConfig.screenWidthDp, 350);
+			//			params.height = ImageUtils.getRawPixels(mActivity, height);
+			//			params.width = ImageUtils.getRawPixels(mActivity, width);
+			//			mActivity.getWindow().setAttributes(params);
 		}
 	}
 

@@ -64,7 +64,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/form_source_url_hint"
-                android:inputType="textMultiLine|textNoSuggestions"
+                android:inputType="textMultiLine|textNoSuggestions|textUri"
                 android:maxLines="5"
                 android:minHeight="@dimen/form_field_height"
                 android:minLines="1"

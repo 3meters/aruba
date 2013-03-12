@@ -125,5 +125,4 @@
             android:text="@string/candi_button_edit" />
     </LinearLayout>
 
->>>>>>> dev
 </RelativeLayout>
